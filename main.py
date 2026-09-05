@@ -920,7 +920,7 @@ class NikkePlugin(Star):
         qq_id = self._qq_id(event)
         game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
         account_key = f"{qq_id}:{game_uid}"
-        batch_res = await self.cdk_service.redeem_batch(account, codes, account_key=account_key)
+        batch_res = await self.cdk_service.redeem_batch(account, codes, account_key=account_key, store=self.store, qq_id=qq_id)
         lines = [f"【CDK 批量兑换结果】共 {len(batch_res.results)} 项："]
         for res in batch_res.results:
             masked = self._mask_cdk(res.code)

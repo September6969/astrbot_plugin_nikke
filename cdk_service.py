@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import re
 from typing import Any
@@ -88,7 +89,7 @@ class CdkService:
         except CookieExpired:
             raise
         except (BlaBlaTimeoutError, httpx.TimeoutException, BlaBlaNetworkError, httpx.NetworkError) as exc:
-            logger.warning("CDK 兑换网络超时/异常 [%s]: %s", code, exc)
+            logger.warning("CDK 兑换网络异常: %s", type(exc).__name__)
             return CdkRedeemResult(
                 code=code,
                 success=False,
@@ -132,7 +133,7 @@ class CdkService:
                 terminal=False,
             )
         except Exception as exc:
-            logger.error("CDK 兑换异常 [%s]: %s", code, exc)
+            logger.error("CDK 兑换异常: %s", type(exc).__name__)
             return CdkRedeemResult(
                 code=code,
                 success=False,
@@ -157,6 +158,8 @@ class CdkService:
         codes: list[str],
         account_key: str = "",
         delay: float = 0.5,
+        store=None,
+        qq_id: str = "",
     ) -> CdkBatchResult:
         """批量串行兑换 CDK，遇登录失效或限流安全中止。与单条兑换共享同账号互斥锁。"""
         lock = await self._get_account_lock(account_key or str(account.get("game_uid", "default")))
@@ -165,7 +168,7 @@ class CdkService:
         async with lock:
             for index, code in enumerate(codes):
                 try:
-                    res = await self._redeem_single_core(account, code)
+                    res = await self._redeem_persistently(account, code, store, qq_id) if store is not None else await self._redeem_single_core(account, code)
                     batch_res.results.append(res)
                     if res.is_rate_limited or "请求过频" in (res.message or ""):
                         batch_res.stopped_by_rate_limit = True
@@ -183,4 +186,32 @@ class CdkService:
                     await asyncio.sleep(delay)
 
         return batch_res
+
+    async def _redeem_persistently(self, account, code, store, qq_id):
+        """批量使用单条命令相同的持久键与原子 claim/retry，锁由调用者持有。"""
+        game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
+        digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
+        key = f"cdk:{qq_id}:{game_uid}:{digest}"
+        existing = store.get_run(key)
+        # 批量重放不能隐式重试未知写结果，需用户先确认官方记录。
+        if existing and existing["status"] in {"success", "terminal", "unknown"}:
+            status = existing["status"]
+            return CdkRedeemResult(code, status == "success", "此码已有处理记录，请核对官方兑换历史",
+                                   is_unknown=status == "unknown", terminal=status != "unknown")
+        claimed = store.retry_run(key, {"failed", "expired"}, stale_after=120) if existing else store.claim_run(key, qq_id, "cdk")
+        if not claimed:
+            return CdkRedeemResult(code, False, "此码正在处理，请稍后查询", is_unknown=True, terminal=False)
+        try:
+            result = await self._redeem_single_core(account, code)
+        except CookieExpired:
+            store.finish_run(key, "expired", "登录状态已失效")
+            raise
+        except asyncio.CancelledError:
+            store.finish_run(key, "unknown", "兑换中断，结果未确认")
+            raise
+        status = "success" if result.success else "unknown" if result.is_unknown else "failed" if not result.terminal else "terminal"
+        # 不将可能含兑换码的上游消息持久化。
+        detail = {"success": "兑换成功", "unknown": "结果未确认，请核对官方历史", "failed": "请求失败，可稍后重试", "terminal": "官方已拒绝此码"}[status]
+        store.finish_run(key, status, detail)
+        return result
 
