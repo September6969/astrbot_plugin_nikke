@@ -7,6 +7,21 @@ from dataclasses import dataclass
 
 
 @dataclass(slots=True)
+class RecycleResearchData:
+    tid: str | None
+    level: int | None
+    exp: int | None
+    display_name: str | None = None
+    category: str | None = None
+
+
+@dataclass(slots=True)
+class MemorialCountData:
+    category: str | None
+    count: int | None
+
+
+@dataclass(slots=True)
 class ProfileDashboardData:
     commander_name: str
     area_id: str
@@ -31,3 +46,5 @@ class ProfileDashboardData:
     jukebox_count: str | None = None
     recycle_room_summary: str | None = None
     memorial_summary: str | None = None
+    recycle_room_researches: list[RecycleResearchData] | None = None
+    memorial_counts: list[MemorialCountData] | None = None
