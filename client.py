@@ -337,6 +337,21 @@ class BlaBlaClient:
         response = await self.get_union_raid_overview(account, attacks=True)
         return response["level_info"]
 
+    async def get_union_raid_season(self, account: dict[str, Any], *, guild_id: str, season_id: str, levels: bool = False) -> dict[str, Any]:
+        """官方公开前端已观察到的历史读取合同；不自动发现或猜测 season_id。"""
+        if not guild_id or not season_id:
+            raise ValueError("历史突袭需要明确的联盟和赛季")
+        endpoint = "/api/game/proxy/Game/" + (
+            "GetUnionRaidLevelDataOfGuildSeason" if levels else "GetUnionRaidDataOfGuildSeason"
+        )
+        response = await self._post(endpoint, account["cookie"], {
+            "area_id": int(account["area_id"]), "guild_id": str(guild_id), "season_id": str(season_id),
+        })
+        data = response.get("data")
+        if not isinstance(data, dict):
+            raise BlaBlaError("历史突袭返回格式异常", endpoint=endpoint)
+        return data
+
     async def get_roster(self, account: dict[str, Any], include_details: bool = True) -> list[dict[str, Any]]:
         area_id = int(account["area_id"])
         openid = account.get("game_openid", "")
