@@ -366,5 +366,119 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(client.redeem_cdk.call_count, 2)
 
 
+class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        class Event:
+            def get_sender_id(self):
+                return "10001"
+
+            def plain_result(self, text):
+                return text
+
+        class Store:
+            def get_account(self, qq_id):
+                return {"qq_id": qq_id, "game_uid": "uid1", "cookie": "cookie"}
+
+        self.event = Event()
+        self.plugin = NikkePlugin.__new__(NikkePlugin)
+        self.plugin.config = {"enable_cdk_redemption": True}
+        self.plugin.store = Store()
+        self.client = AsyncMock(spec=BlaBlaClient)
+        self.plugin.client = self.client
+
+    async def test_cdk_available_identifies_real_cdk_field(self):
+        self.client.get_cdk_redemption.return_value = [
+            {"cdk": "TESTAVAILABLE", "status": 0}
+        ]
+        results = [item async for item in self.plugin.cdk_available(self.event)]
+        self.assertEqual(len(results), 1)
+        text = results[0]
+        self.assertIn("TESTAVAILABLE", text)
+        self.assertNotIn("未知", text)
+
+    async def test_cdk_available_filters_status_not_zero(self):
+        self.client.get_cdk_redemption.return_value = [
+            {"cdk": "AVAILABLE1", "status": 0},
+            {"cdk": "USED1", "status": 1},
+        ]
+        results = [item async for item in self.plugin.cdk_available(self.event)]
+        self.assertEqual(len(results), 1)
+        text = results[0]
+        self.assertIn("AVAILABLE1", text)
+        self.assertNotIn("USED1", text)
+
+    async def test_cdk_available_supports_string_status(self):
+        self.client.get_cdk_redemption.return_value = [
+            {"cdk": "AVAILABLE_STRING", "status": "0"},
+            {"cdk": "USED_STRING", "status": "1"},
+        ]
+        results = [item async for item in self.plugin.cdk_available(self.event)]
+        self.assertEqual(len(results), 1)
+        text = results[0]
+        self.assertIn("AVAILABLE_STRING", text)
+        self.assertNotIn("USED_STRING", text)
+
+    async def test_cdk_available_filters_before_limiting_to_15(self):
+        items = [{"cdk": f"USED_{i}", "status": 1} for i in range(5)]
+        items += [{"cdk": f"VALID_{i}", "status": 0} for i in range(18)]
+        self.client.get_cdk_redemption.return_value = items
+
+        results = [item async for item in self.plugin.cdk_available(self.event)]
+        self.assertEqual(len(results), 1)
+        text = results[0]
+        for i in range(15):
+            self.assertIn(f"VALID_{i}", text)
+        self.assertNotIn("VALID_15", text)
+        self.assertNotIn("USED_", text)
+
+    async def test_cdk_history_identifies_real_cdk_field(self):
+        self.client.get_cdk_redemption_history.return_value = [
+            {"cdk": "HISTORYCODE", "status": 1}
+        ]
+        results = [item async for item in self.plugin.cdk_history(self.event)]
+        self.assertEqual(len(results), 1)
+        text = results[0]
+        expected_mask = self.plugin._mask_cdk("HISTORYCODE")
+        self.assertEqual(expected_mask, "HI***DE")
+        self.assertIn(expected_mask, text)
+        self.assertNotIn("• ***:", text)
+        self.assertNotIn("未知", text)
+
+    async def test_cdk_compatibility_fields(self):
+        self.client.get_cdk_redemption.return_value = [
+            {"cdkey": "LEGACY_KEY", "status": 0},
+            {"code": "LEGACY_CODE", "status": 0},
+            {"title": "LEGACY_TITLE", "status": 0},
+            {"cdk": "NONE_STATUS", "status": None},
+        ]
+        results_avail = [item async for item in self.plugin.cdk_available(self.event)]
+        self.assertEqual(len(results_avail), 1)
+        text_avail = results_avail[0]
+        self.assertIn("LEGACY_KEY", text_avail)
+        self.assertIn("LEGACY_CODE", text_avail)
+        self.assertIn("LEGACY_TITLE", text_avail)
+        self.assertIn("NONE_STATUS", text_avail)
+
+        self.client.get_cdk_redemption_history.return_value = [
+            {"cdkey": "HISTKEY123", "status": "已兑换"},
+            {"code": "HISTCODE456", "status": "已兑换"},
+        ]
+        results_hist = [item async for item in self.plugin.cdk_history(self.event)]
+        self.assertEqual(len(results_hist), 1)
+        text_hist = results_hist[0]
+        self.assertIn(self.plugin._mask_cdk("HISTKEY123"), text_hist)
+        self.assertIn(self.plugin._mask_cdk("HISTCODE456"), text_hist)
+
+    async def test_cdk_available_empty_after_filter(self):
+        self.client.get_cdk_redemption.return_value = [
+            {"cdk": "USED_ALL", "status": 1}
+        ]
+        results = [item async for item in self.plugin.cdk_available(self.event)]
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0], "官方暂无可查询的可用 CDK 列表。")
+
+
 if __name__ == "__main__":
     unittest.main()

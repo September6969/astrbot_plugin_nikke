@@ -902,9 +902,26 @@ class NikkePlugin(Star):
             if not items:
                 yield event.plain_result("官方暂无可查询的可用 CDK 列表。")
                 return
+
+            available_items = [
+                item
+                for item in items
+                if isinstance(item, dict)
+                and item.get("status") in (None, 0, "0")
+            ]
+            if not available_items:
+                yield event.plain_result("官方暂无可查询的可用 CDK 列表。")
+                return
+
             lines = ["【官方可用 CDK 列表】"]
-            for item in items[:15]:
-                code = str(item.get("cdkey") or item.get("code") or item.get("title") or "未知")
+            for item in available_items[:15]:
+                code = str(
+                    item.get("cdk")
+                    or item.get("cdkey")
+                    or item.get("code")
+                    or item.get("title")
+                    or "未知"
+                )
                 desc = str(item.get("desc") or item.get("reward") or "").strip()
                 expire = str(item.get("expire_time") or item.get("end_time") or "").strip()
                 extra = f" ({desc})" if desc else ""
@@ -927,7 +944,12 @@ class NikkePlugin(Star):
                 return
             lines = ["【CDK 兑换历史记录】"]
             for item in items[:15]:
-                code = str(item.get("cdkey") or item.get("code") or "未知")
+                code = str(
+                    item.get("cdk")
+                    or item.get("cdkey")
+                    or item.get("code")
+                    or "未知"
+                )
                 masked = self._mask_cdk(code)
                 status = str(item.get("status") or item.get("result") or item.get("msg") or "已兑换")
                 time_str = str(item.get("redeemed_at") or item.get("created_at") or item.get("time") or "").strip()
