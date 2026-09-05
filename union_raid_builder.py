@@ -82,15 +82,6 @@ class UnionRaidBuilder:
                 "monster_model_id": str(raw.get("monster_model_id")) if raw.get("monster_model_id") not in (None, "") else None,
             })
 
-        # Determine status according to state machine sequence
-        current_idx = None
-        for i, item in enumerate(boss_items):
-            cur = item["current_hp"]
-            mx = item["max_hp"]
-            if cur is not None and mx is not None and cur > 0 and mx > 0:
-                current_idx = i
-                break
-
         parsed_bosses: list[RaidBossData] = []
         for i, item in enumerate(boss_items):
             max_hp = item["max_hp"]
@@ -105,12 +96,6 @@ class UnionRaidBuilder:
                 cleared_percent = max(0.0, min(1.0, 1.0 - hp_percent))
                 if current_hp == 0:
                     status = BossStatus.DEFEATED
-                elif current_idx is not None and i == current_idx:
-                    status = BossStatus.CURRENT
-                elif current_idx is not None and i == current_idx + 1:
-                    status = BossStatus.NEXT
-                elif current_idx is not None and i > current_idx + 1:
-                    status = BossStatus.LOCKED
                 else:
                     status = BossStatus.UNKNOWN
 

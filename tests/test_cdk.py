@@ -140,6 +140,7 @@ class CdkServiceTests(unittest.IsolatedAsyncioTestCase):
 
 class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
     async def test_client_get_cdk_redemption_unpacks_nested_data(self):
+        from astrbot_plugin_nikke.client import GET_CDK_REDEMPTION
         client = BlaBlaClient()
         account = {"cookie": "game_uid=1", "game_openid": "openid"}
 
@@ -150,6 +151,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         items = await client.get_cdk_redemption(account)
         self.assertEqual(len(items), 2)
         self.assertEqual(items[0]["cdkey"], "CODE1")
+        client._community_request.assert_called_with("POST", GET_CDK_REDEMPTION, account, payload={})
 
         # 2. data -> direct list
         client._community_request = AsyncMock(return_value={
@@ -158,6 +160,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         items = await client.get_cdk_redemption(account)
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["cdkey"], "DIRECT1")
+        client._community_request.assert_called_with("POST", GET_CDK_REDEMPTION, account, payload={})
 
         # 3. data -> cdk_list
         client._community_request = AsyncMock(return_value={
@@ -168,6 +171,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(items[0]["cdkey"], "ALT1")
 
     async def test_client_get_cdk_redemption_history_unpacks_nested_data(self):
+        from astrbot_plugin_nikke.client import GET_CDK_REDEMPTION_HISTORY
         client = BlaBlaClient()
         account = {"cookie": "game_uid=1", "game_openid": "openid"}
 
@@ -177,6 +181,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         items = await client.get_cdk_redemption_history(account)
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["cdkey"], "HIST1")
+        client._community_request.assert_called_with("POST", GET_CDK_REDEMPTION_HISTORY, account, payload={})
 
     async def test_client_get_cdk_redemption_raises_on_error(self):
         client = BlaBlaClient()

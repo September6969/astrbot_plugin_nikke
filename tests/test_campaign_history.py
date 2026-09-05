@@ -117,6 +117,66 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         self.assertEqual(record.status, ClearLineupStatus.UNAVAILABLE)
         self.assertEqual(record.status_message, "该关卡暂无可查询的历史阵容")
 
+    def test_strict_lineup_validation_4_members(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 120000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+        ]
+        payload = {"code": 0, "msg": "ok", "data": {"list": raw_list}}
+        record = self.builder.build(self.stage, payload)
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
+    def test_strict_lineup_validation_6_members(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 12000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 11500, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 11800, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 9500, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 10200, "slot": 5},
+            {"tid": 106, "lv": 400, "combat": 10200, "slot": 6},
+        ]
+        payload = {"code": 0, "msg": "ok", "data": {"list": raw_list}}
+        record = self.builder.build(self.stage, payload)
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
+    def test_strict_lineup_validation_duplicate_slots(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 12000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 11500, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 11800, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 9500, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 10200, "slot": 4},
+        ]
+        payload = {"code": 0, "msg": "ok", "data": {"list": raw_list}}
+        record = self.builder.build(self.stage, payload)
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
+    def test_strict_lineup_validation_missing_slots(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 12000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 11500, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 11800, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 9500, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 10200, "slot": 6},
+        ]
+        payload = {"code": 0, "msg": "ok", "data": {"list": raw_list}}
+        record = self.builder.build(self.stage, payload)
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
+    def test_strict_lineup_validation_filtered_item(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 12000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 11500, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 11800, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 9500, "slot": 4},
+            {"tid": "invalid", "lv": 400, "combat": 10200, "slot": 5},
+        ]
+        payload = {"code": 0, "msg": "ok", "data": {"list": raw_list}}
+        record = self.builder.build(self.stage, payload)
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
 
 class CampaignHistoryRendererTests(unittest.TestCase):
     def test_renderer_generates_1400px_card(self):

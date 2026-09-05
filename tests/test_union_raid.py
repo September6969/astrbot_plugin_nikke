@@ -43,21 +43,22 @@ class UnionRaidBuilderTests(unittest.TestCase):
         self.assertEqual(data.level, 3)
         self.assertEqual(len(data.bosses), 4)
 
-        # Status progression: DEFEATED -> CURRENT -> NEXT -> LOCKED
+        # Status progression: DEFEATED for HP=0, UNKNOWN for HP>0 (without verified status field)
         b1, b2, b3, b4 = data.bosses
         self.assertEqual(b1.status, BossStatus.DEFEATED)
+        self.assertEqual(b2.status, BossStatus.UNKNOWN)
+        self.assertEqual(b3.status, BossStatus.UNKNOWN)
+        self.assertEqual(b4.status, BossStatus.UNKNOWN)
+
         self.assertEqual(b1.hp_percent, 0.0)
         self.assertEqual(b1.cleared_percent, 1.0)
 
-        self.assertEqual(b2.status, BossStatus.CURRENT)
         self.assertEqual(b2.hp_percent, 0.5)
         self.assertEqual(b2.cleared_percent, 0.5)
 
-        self.assertEqual(b3.status, BossStatus.NEXT)
         self.assertEqual(b3.hp_percent, 1.0)
         self.assertEqual(b3.cleared_percent, 0.0)
 
-        self.assertEqual(b4.status, BossStatus.LOCKED)
         self.assertEqual(b4.hp_percent, 1.0)
         self.assertEqual(b4.cleared_percent, 0.0)
 
@@ -350,3 +351,34 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+from astrbot_plugin_nikke.client import BlaBlaClient, MY_GUILD_INFO, UNION_RAID_LEVEL_INFO
+from unittest.mock import AsyncMock
+
+class UnionRaidClientTests(unittest.IsolatedAsyncioTestCase):
+    async def test_get_union_raid_overview_payload_contracts(self):
+        client = BlaBlaClient()
+        account = {"cookie": "dummy", "area_id": "81", "game_openid": "abc-def-ghi"}
+        
+        client._post = AsyncMock()
+        # Mock responses
+        def post_side_effect(endpoint, cookie, payload):
+            if endpoint == MY_GUILD_INFO:
+                return {"data": {"guild_id": "test_guild_123", "guild_name": "TestGuild"}}
+            elif endpoint == UNION_RAID_LEVEL_INFO:
+                return {"data": [{"boss_info": []}]}
+            return {}
+        client._post.side_effect = post_side_effect
+        
+        await client.get_union_raid_overview(account)
+        
+        # Verify MY_GUILD_INFO call
+        client._post.assert_any_call(MY_GUILD_INFO, "dummy", {"ignore_toast": True})
+        
+        # Verify UNION_RAID_LEVEL_INFO call
+        # intl_open_id must be the intact full string abc-def-ghi
+        client._post.assert_any_call(UNION_RAID_LEVEL_INFO, "dummy", {
+            "guild_id": "test_guild_123",
+            "nikke_area_id": 81,
+            "intl_open_id": "abc-def-ghi"
+        })

@@ -130,6 +130,19 @@ class CampaignHistoryBuilder:
 
         members.sort(key=lambda m: m.slot)
 
+        if len(members) != 5 or set(m.slot for m in members) != {1, 2, 3, 4, 5}:
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
+
         return StageClearRecord(
             mode=stage.mode,
             chapter=stage.chapter,

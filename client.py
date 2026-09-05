@@ -278,18 +278,13 @@ class BlaBlaClient:
 
     async def get_union_raid_overview(self, account: dict[str, Any]) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))
-        openid = str(account.get("game_openid", ""))
-        if not area_id:
+        openid = str(account.get("game_openid", "")).strip()
+        if not area_id or not openid:
             validated = await self.validate_cookie(account["cookie"])
-            area_id = validated.area_id
-            if not openid:
-                openid = validated.game_openid
-        game_openid = openid.split("-")[-1] if openid else ""
+            area_id = area_id or validated.area_id
+            openid = openid or validated.game_openid
 
-        guild_payload = {"nikke_area_id": int(area_id)}
-        if game_openid:
-            guild_payload["intl_open_id"] = game_openid
-
+        guild_payload = {"ignore_toast": True}
         guild_resp = await self._post(MY_GUILD_INFO, account["cookie"], guild_payload)
         guild_data = guild_resp.get("data", {}) if isinstance(guild_resp, dict) else {}
 
@@ -319,9 +314,9 @@ class BlaBlaClient:
         )
 
         raid_payload = {
-            "guild_id": guild_id,
+            "guild_id": str(guild_id),
             "nikke_area_id": int(area_id),
-            "intl_open_id": game_openid,
+            "intl_open_id": openid,
         }
         level_resp = await self._post(UNION_RAID_LEVEL_INFO, account["cookie"], raid_payload)
         level_data = level_resp.get("data", {}) if isinstance(level_resp, dict) else {}
@@ -619,7 +614,7 @@ class BlaBlaClient:
         """获取官方可用 CDK 列表。
         先取响应 data，再按已确认字段拆包；接口异常抛出受控异常。
         """
-        res = await self._community_request("GET", GET_CDK_REDEMPTION, account)
+        res = await self._community_request("POST", GET_CDK_REDEMPTION, account, payload={})
         data = res.get("data") if isinstance(res, dict) else res
         if isinstance(data, list):
             return data
@@ -633,7 +628,7 @@ class BlaBlaClient:
         """获取官方 CDK 历史兑换记录。
         先取响应 data，再按已确认字段拆包；接口异常抛出受控异常。
         """
-        res = await self._community_request("GET", GET_CDK_REDEMPTION_HISTORY, account)
+        res = await self._community_request("POST", GET_CDK_REDEMPTION_HISTORY, account, payload={})
         data = res.get("data") if isinstance(res, dict) else res
         if isinstance(data, list):
             return data
