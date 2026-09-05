@@ -311,8 +311,14 @@ class AnnouncementService:
                 raise RuntimeError("官方公告 list 字段非列表格式")
             records = []
             for it in items:
+                if not isinstance(it, dict):
+                    continue
+                content_id = it.get("content_id") or it.get("id")
+                if not isinstance(content_id, (str, int)) or isinstance(content_id, bool) or not str(content_id).strip():
+                    logger.warning("跳过缺少稳定 ID 的公告")
+                    continue
                 rec = AnnouncementRecord(
-                    content_id=str(it.get("content_id") or it.get("id")),
+                    content_id=str(content_id),
                     title=str(it.get("title", "")),
                     body=str(it.get("content", "") or it.get("body", "")),
                     published_at=str(it.get("publish_time", "")),
@@ -328,6 +334,8 @@ class AnnouncementService:
         """添加或更新公告。
         返回 (is_new, is_updated)。
         """
+        if not record.content_id or record.content_id.strip() in {"", "None"}:
+            raise ValueError("公告缺少稳定 ID")
         existing = self._records.get(record.content_id)
         if not existing:
             self._records[record.content_id] = record
@@ -335,16 +343,21 @@ class AnnouncementService:
                 record.title, record.body, record.content_id, record.category
             )
             for dl in parsed:
+                dl.deadline_version = record.deadline_version
                 self._deadlines[dl.event_id] = dl
             self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
             self.save_cache()
             return True, False
 
         # 变更检测：检查 body_hash
-        if existing.body_hash != record.body_hash:
+        if (existing.body_hash, existing.title, existing.category) != (record.body_hash, record.title, record.category):
             new_version = existing.content_version + 1
             record.content_version = new_version
             self._records[record.content_id] = record
+            previous = sorted(
+                (dl.event_id, dl.start_at, dl.end_at) for dl in self._deadlines.values()
+                if dl.source_content_id == record.content_id
+            )
             # 重新解析 deadline 前，先清理该公告旧版本产生的旧日程
             self._deadlines = {
                 k: v for k, v in self._deadlines.items() if v.source_content_id != record.content_id
@@ -352,8 +365,10 @@ class AnnouncementService:
             parsed = DeadlineParser.parse_deadlines(
                 record.title, record.body, record.content_id, record.category
             )
+            current = sorted((dl.event_id, dl.start_at, dl.end_at) for dl in parsed)
+            record.deadline_version = existing.deadline_version + int(previous != current)
             for dl in parsed:
-                dl.deadline_version = existing.deadline_version + 1
+                dl.deadline_version = record.deadline_version
                 self._deadlines[dl.event_id] = dl
             self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
             self.save_cache()
