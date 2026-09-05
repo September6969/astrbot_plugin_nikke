@@ -19,9 +19,12 @@ from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.message_components import Image
 from astrbot.api.star import Context, Star, register
 
+from ._version import PLUGIN_VERSION
 from .card_builder import CharacterCardBuilder
 from .asset_manager import AssetManager
 from .character_card_renderer import CharacterCardRenderer
+from .profile_builder import ProfileBuilder
+from .profile_card_renderer import ProfileCardRenderer
 from .client import BlaBlaClient, BlaBlaError, CookieExpired
 from .renderer import CardRenderer
 from .storage import NikkeStore
@@ -32,7 +35,7 @@ from .web_service import BindingWebService
     "astrbot_plugin_nikke",
     "September",
     "NIKKE BlaBlaLink 账号练度、资料查询与每日汇总",
-    "0.1.8",
+    PLUGIN_VERSION,
     "https://github.com/September6969/astrbot_plugin_nikke",
 )
 class NikkePlugin(Star):
@@ -56,6 +59,8 @@ class NikkePlugin(Star):
             self.plugin_dir / "fonts",
             AssetManager(self.data_dir / "cache", self.plugin_dir / "assets", remote=True),
         )
+        self.profile_builder = ProfileBuilder()
+        self.profile_renderer = ProfileCardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.web = BindingWebService(
             self.store,
             self.client,
@@ -209,7 +214,7 @@ class NikkePlugin(Star):
         if include_admin:
             visible.append(sections["管理"])
         return (
-            "NIKKE 综合助手 0.1.8\n\n"
+            f"NIKKE 综合助手 {PLUGIN_VERSION}\n\n"
             "六个入口：帮助｜账号｜我的｜查询｜签到｜兑换\n\n"
             + "\n\n".join(visible)
             + "\n\n分类帮助：/妮姬 帮助 账号|查询|日常"
@@ -391,10 +396,16 @@ class NikkePlugin(Star):
         """生成个人账号概览卡。"""
         try:
             account = self._account_or_error(event)
-            data = await self.client.get_profile(account)
-            basic, outpost = data["basic"], data["outpost"]
-            rows = self._profile_rows(account, basic, outpost)
-            path = self.renderer.render("指挥官档案", "BlaBlaLink 私人数据", rows)
+            data = await self.client.get_profile_dashboard(account)
+            dashboard = self.profile_builder.build(
+                account=account,
+                basic=data["basic"],
+                outpost=data["outpost"],
+                roster=data["roster"],
+                fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
+                plugin_version=PLUGIN_VERSION,
+            )
+            path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -469,13 +480,20 @@ class NikkePlugin(Star):
                 return
             target = matches[0]
             code = str(target.get("name_code", ""))
+            roster = await self.client.get_roster(account, include_details=False)
+            held_codes = {str(c.get("name_code", "")) for c in roster}
+            if code and code not in held_codes:
+                yield event.plain_result(
+                    f"你未持有该妮姬：{target.get('name_cn') or target.get('name_en') or code}"
+                )
+                return
             payload = await self.client.get_character_detail(account, code)
             card = self.character_builder.build(
                 account=account,
                 directory=target,
                 payload=payload,
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-                plugin_version="0.1.8",
+                plugin_version=PLUGIN_VERSION,
             )
             path = await asyncio.to_thread(self.character_renderer.render_character, card)
             yield event.image_result(path)
@@ -768,7 +786,7 @@ class NikkePlugin(Star):
             return
         accounts = self.store.list_accounts(with_cookie=False)
         yield event.plain_result(
-            f"NIKKE插件 0.1.8\n账号：{len(accounts)}\n目录：{len(self._directory)}\n"
+            f"NIKKE插件 {PLUGIN_VERSION}\n账号：{len(accounts)}\n目录：{len(self._directory)}\n"
             f"绑定服务：{self.web_host}:{self.web_port}\n"
             f"自动签到：{'启用' if self.config.get('enable_daily_actions', False) else '关闭'}\n"
             f"CDK兑换：{'启用' if self.config.get('enable_cdk_redemption', False) else '关闭'}"

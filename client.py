@@ -226,6 +226,34 @@ class BlaBlaClient:
             "outpost": outpost.get("data", {}).get("outpost_info", {}),
         }
 
+    async def get_profile_dashboard(self, account: dict[str, Any]) -> dict[str, Any]:
+        area_id = str(account.get("area_id", ""))
+        if not area_id:
+            validated = await self.validate_cookie(account["cookie"])
+            area_id = validated.area_id
+        payload = {"nikke_area_id": int(area_id)}
+        if account.get("game_openid"):
+            payload["intl_open_id"] = account["game_openid"]
+        roster_payload = {"intl_open_id": account.get("game_openid", ""), "nikke_area_id": int(area_id)}
+        basic_resp, outpost_resp, roster_resp = await asyncio.gather(
+            self._post(PROFILE, account["cookie"], payload),
+            self._post(OUTPOST, account["cookie"], {"nikke_area_id": int(area_id)}),
+            self._post(CHARACTERS, account["cookie"], roster_payload),
+            return_exceptions=True,
+        )
+        # PROFILE is required.
+        if isinstance(basic_resp, BaseException):
+            raise basic_resp
+        basic = basic_resp.get("data", {}).get("basic_info", {})
+        outpost = {}
+        if not isinstance(outpost_resp, BaseException):
+            outpost = outpost_resp.get("data", {}).get("outpost_info", {})
+        roster: list[dict[str, Any]] = []
+        if not isinstance(roster_resp, BaseException):
+            data = roster_resp.get("data", {})
+            roster = data.get("characters", data.get("user_characters", [])) or []
+        return {"basic": basic, "outpost": outpost, "roster": roster}
+
     async def get_roster(self, account: dict[str, Any], include_details: bool = True) -> list[dict[str, Any]]:
         area_id = int(account["area_id"])
         openid = account.get("game_openid", "")

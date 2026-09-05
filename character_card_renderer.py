@@ -88,7 +88,7 @@ class CharacterCardRenderer(CardRenderer):
         self._text(draw, (1410, 35), f"Lv.{data.level:,}", 54, theme.text, width=345, bold=True)
         self._text(draw, (1412, 105), "PERSONAL BUILD / 个人练度", 18, theme.muted, width=345)
 
-    def draw_character_area(self, canvas, data, theme):
+    def draw_character_area(self, canvas, data, theme, portrait=None):
         area = Image.new("RGBA", (600, 740), theme.background)
         draw = ImageDraw.Draw(area)
         base, accent = ImageColor.getrgb(theme.background), ImageColor.getrgb(theme.primary)
@@ -99,7 +99,8 @@ class CharacterCardRenderer(CardRenderer):
         draw.ellipse((15, 75, 585, 645), outline=(*accent, 90), width=2)
         draw.ellipse((65, 125, 535, 595), outline=(*accent, 70), width=1)
         self._text(draw, (22, 48), data.name_en.upper() or "NIKKE", 105, "#42404C", width=555, bold=True)
-        portrait = self.assets.get_character_portrait(data.name_code, data.resource_id)
+        if portrait is None:
+            portrait = self.assets.get_character_portrait(data.name_code, data.resource_id)
         bounds = portrait.getbbox()
         if bounds:
             portrait = portrait.crop(bounds)
@@ -201,10 +202,11 @@ class CharacterCardRenderer(CardRenderer):
         self._text(draw, (1490, 949), "NIKKE / BUILD ARCHIVE", 18, theme.primary, width=270)
 
     def render_character(self, data: CharacterCardData) -> str:
-        theme = character_theme(data.name_code, data.resource_id)
+        portrait = self.assets.get_character_portrait(data.name_code, data.resource_id)
+        theme = character_theme(data.corporation, data.element, portrait)
         canvas = Image.new("RGBA", (self.WIDTH, self.HEIGHT), theme.background)
         self.draw_background(canvas, theme)
-        self.draw_character_area(canvas, data, theme)
+        self.draw_character_area(canvas, data, theme, portrait)
         self.draw_header(canvas, data, theme)
         self.draw_combat_panel(canvas, data, theme)
         self.draw_growth_panel(canvas, data, theme)

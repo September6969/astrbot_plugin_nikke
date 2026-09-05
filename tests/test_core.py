@@ -633,6 +633,35 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("找到多个角色", result[0])
         self.assertIn("爱丽丝：仙境兔女郎", result[0])
 
+    async def test_character_query_rejects_unowned_character(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        class Event:
+            def get_sender_id(self):
+                return "10001"
+
+            def plain_result(self, text):
+                return text
+
+        class Store:
+            def get_account(self, qq_id):
+                return {"qq_id": qq_id, "cookie": VALID_COOKIE}
+
+        class FakeClient:
+            async def get_roster(self, account, include_details=True):
+                return [{"name_code": 999, "lv": 1}]
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.store = Store()
+        plugin.client = FakeClient()
+        plugin._directory = [
+            {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
+        ]
+        result = [item async for item in plugin.character(Event(), "爱丽丝")]
+        self.assertEqual(len(result), 1)
+        self.assertIn("未持有", result[0])
+        self.assertIn("爱丽丝", result[0])
+
     async def test_group_cdk_is_idempotent_and_never_persists_plaintext(self):
         from astrbot_plugin_nikke.main import NikkePlugin
 

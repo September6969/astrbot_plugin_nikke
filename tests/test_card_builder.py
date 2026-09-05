@@ -10,6 +10,7 @@ from PIL import Image
 from astrbot_plugin_nikke.card_builder import CharacterCardBuilder
 from astrbot_plugin_nikke.character_card_renderer import CharacterCardRenderer
 from astrbot_plugin_nikke.client import BlaBlaClient, CHARACTER_DETAILS
+from astrbot_plugin_nikke._version import PLUGIN_VERSION
 
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "character_details_sanitized.json"
@@ -31,7 +32,7 @@ def build_card():
         directory=fixture["directory"],
         payload=payload,
         fetched_at="2026-09-05 05:30",
-        plugin_version="0.1.8",
+        plugin_version=PLUGIN_VERSION,
     )
 
 
@@ -62,14 +63,37 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertAlmostEqual(totals[("优越代码伤害增加", "percent")], 0.6365)
 
     def test_unknown_options_are_visible_but_not_summed(self):
-        card = build_card()
+        fixture = load_fixture()
+        detail = fixture["character_details"][0]
+        detail["arm_equip_option3_id"] = 9999999
+        fixture["state_effects"].append({
+            "id": "9999999",
+            "function_details": [{
+                "function_type": "StatUnknownFake",
+                "function_value": 500,
+                "function_value_type": "Percent",
+                "level": 1,
+            }],
+        })
+        payload = {
+            "roster_item": fixture["roster_item"],
+            "detail": detail,
+            "state_effects": fixture["state_effects"],
+        }
+        card = CharacterCardBuilder().build(
+            account={"nickname": "测试指挥官"},
+            directory=fixture["directory"],
+            payload=payload,
+            fetched_at="2026-09-05 05:30",
+            plugin_version=PLUGIN_VERSION,
+        )
         unknown = [
             option
             for equipment in card.equipment.values()
             for option in equipment.options
             if option.unit == "unknown"
         ]
-        self.assertTrue(any(item.raw_type == "StatChargeDamage" for item in unknown))
+        self.assertTrue(any(item.raw_type == "StatUnknownFake" for item in unknown))
         self.assertTrue(all(item.display_name == "未识别词条" for item in unknown))
         self.assertNotIn("未识别词条", {item.display_name for item in card.option_totals})
 
@@ -78,6 +102,15 @@ class CharacterCardBuilderTests(unittest.TestCase):
         totals = {item.display_name: item.value for item in card.option_totals}
         self.assertAlmostEqual(totals["最大装弹数增加"], 2.0679)
         self.assertAlmostEqual(totals["蓄力速度增加"], 0.0228)
+        self.assertNotIn("蓄力伤害增加", totals)
+        charge_damage_unknown = [
+            option
+            for equipment in card.equipment.values()
+            for option in equipment.options
+            if option.raw_type == "StatChargeDamage"
+        ]
+        self.assertTrue(len(charge_damage_unknown) > 0)
+        self.assertTrue(all(item.display_name == "未识别词条" for item in charge_damage_unknown))
         option = CharacterCardBuilder._option_from_function({
             "function_type": "StatCriticalDamage", "function_value": 688,
             "function_value_type": "Percent",

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from .card_models import (
@@ -22,7 +23,17 @@ OPTION_NAMES = {
     "statammoload": ("最大装弹数增加", "percent"),
     "statcriticaldamage": ("暴击伤害增加", "percent"),
     "statchargetime": ("蓄力速度增加", "percent"),
+    "stathitrate": ("命中率增加", "percent"),
+    "stataccuracy": ("命中率增加", "percent"),
+    "statchargedamage": ("蓄力伤害增加", "percent"),
+    "chargedamage": ("蓄力伤害增加", "percent"),
+    "statcritical": ("暴击率增加", "percent"),
+    "statcriticalrate": ("暴击率增加", "percent"),
+    "statdef": ("防御力增加", "percent"),
+    "statdefense": ("防御力增加", "percent"),
 }
+
+logger = logging.getLogger(__name__)
 
 
 def _optional_int(value: Any) -> int | None:
@@ -52,9 +63,19 @@ class CharacterCardBuilder:
         raw_type = str(function.get("function_type", "") or "Unknown")
         mapping = OPTION_NAMES.get(raw_type.casefold())
         raw_value = float(function.get("function_value", 0) or 0)
+        value_type = str(function.get("function_value_type", "") or "").casefold()
         if mapping:
             display_name, unit = mapping
-            value = abs(raw_value) / 10000 if unit == "percent" else abs(raw_value)
+            if value_type and value_type != unit:
+                logger.warning(
+                    "function_value_type mismatch: type=%s value_type=%s expected=%s, treating as unknown",
+                    raw_type, value_type, unit,
+                )
+                display_name = "未识别词条"
+                unit = "unknown"
+                value = abs(raw_value)
+            else:
+                value = abs(raw_value) / 10000 if unit == "percent" else abs(raw_value)
         else:
             display_name = "未识别词条"
             unit = "unknown"
