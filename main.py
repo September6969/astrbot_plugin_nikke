@@ -380,6 +380,10 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"突袭", "联盟突袭", "raid", "union_raid"}:
+            if arg1 in {"排名", "ranking"}:
+                async for result in self.union_raid_ranking(event):
+                    yield result
+                return
             async for result in self.union_raid(event):
                 yield result
             return
@@ -579,6 +583,19 @@ class NikkePlugin(Star):
                 yield result
             return
         yield event.plain_result("用法：/妮姬 查询 练度 [角色名]、/妮姬 查询 资料 <角色名>、/妮姬 查询 战役 <关卡> 或 /妮姬 攻略")
+
+    async def union_raid_ranking(self, event: AstrMessageEvent):
+        """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""
+        from .raid_participants import build_ranking, format_ranking
+        try:
+            account = self._account_or_error(event)
+            payload = await self.client.get_union_raid_data(account)
+            yield event.plain_result(format_ranking(build_ranking(payload)))
+        except CookieExpired:
+            self.store.mark_cookie_invalid(self._qq_id(event))
+            yield event.plain_result("登录状态已失效，请重新绑定。")
+        except (BlaBlaError, ValueError):
+            yield event.plain_result("突袭排名暂不可用：数据不完整或请求失败，请稍后重试。")
 
     async def union_raid(self, event: AstrMessageEvent):
         """查询当前账号所属联盟的联盟突袭战况。"""

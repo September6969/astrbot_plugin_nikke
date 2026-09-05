@@ -280,7 +280,7 @@ class BlaBlaClient:
             roster = data.get("characters", data.get("user_characters", [])) or []
         return {"basic": basic, "outpost": outpost, "roster": roster}
 
-    async def get_union_raid_overview(self, account: dict[str, Any]) -> dict[str, Any]:
+    async def get_union_raid_overview(self, account: dict[str, Any], *, attacks: bool = False) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))
         openid = str(account.get("game_openid", "")).strip()
         if not area_id or not openid:
@@ -322,7 +322,8 @@ class BlaBlaClient:
             "nikke_area_id": int(area_id),
             "intl_open_id": openid,
         }
-        level_resp = await self._post(UNION_RAID_LEVEL_INFO, account["cookie"], raid_payload)
+        endpoint = UNION_RAID_DATA if attacks else UNION_RAID_LEVEL_INFO
+        level_resp = await self._post(endpoint, account["cookie"], raid_payload)
         level_data = level_resp.get("data", {}) if isinstance(level_resp, dict) else {}
 
         return {
@@ -330,6 +331,11 @@ class BlaBlaClient:
             "guild_name": guild_name,
             "level_info": level_data,
         }
+
+    async def get_union_raid_data(self, account: dict[str, Any]) -> dict[str, Any]:
+        """复用联盟上下文，仅请求已确认的攻击列表接口。"""
+        response = await self.get_union_raid_overview(account, attacks=True)
+        return response["level_info"]
 
     async def get_roster(self, account: dict[str, Any], include_details: bool = True) -> list[dict[str, Any]]:
         area_id = int(account["area_id"])
