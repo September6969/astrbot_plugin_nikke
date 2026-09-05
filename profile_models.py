@@ -14,14 +14,13 @@ class ProfileDashboardData:
     outpost_battle_level: int | None
     normal_campaign: str | None
     hard_campaign: str | None
-    character_count: int
-    max_level: int
-    max_combat: int
+    character_count: int | None
+    max_level: int | None
+    max_combat: int | None
     fetched_at: str
     plugin_version: str
     commander_level: int | None = None
     team_combat: int | None = None
-    icon_id: str | None = None
     created_at: str | None = None
     character_costume_count: int | None = None
     progress_tribe_tower: str | None = None

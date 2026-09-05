@@ -10,7 +10,7 @@ from pathlib import Path
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 
 from .asset_manager import AssetManager
-from .card_models import CharacterCardData, EquipmentData
+from .card_models import CharacterCardAssets, CharacterCardData, EquipmentData
 from .card_theme import character_theme
 from .renderer import CardRenderer
 
@@ -136,7 +136,7 @@ class CharacterCardRenderer(CardRenderer):
             self._text(draw, (x, 357), label, 18, theme.muted)
             self._text(draw, (x, 388), self._number(value), 28, theme.text, width=184, bold=True)
 
-    def draw_growth_panel(self, canvas, data, theme):
+    def draw_growth_panel(self, canvas, data, theme, favorite_icon=None, cube_icon=None):
         draw = ImageDraw.Draw(canvas)
         self._panel(draw, (660, 450, 1310, 707), "DEVELOPMENT / 养成", theme)
         cells = [("SKILL / 技能", f"{data.skill1_level} / {data.skill2_level} / {data.burst_skill_level}"),
@@ -147,24 +147,28 @@ class CharacterCardRenderer(CardRenderer):
             x, y = 682 + index % 3 * 209, 501 + index // 3 * 99
             self._text(draw, (x, y), label, 17, theme.muted, width=193)
             self._text(draw, (x, y + 32), value, 31, theme.primary if index == 1 else theme.text, width=193, bold=True)
-        for index, (label, item, getter) in enumerate([
-            ("FAVORITE / 收藏品", data.favorite_item, self.assets.get_favorite_item_icon),
-            ("CUBE / 魔方", data.cube, self.assets.get_cube_icon),
-        ]):
+        items = [
+            ("FAVORITE / 收藏品", data.favorite_item, favorite_icon if favorite_icon is not None else self.assets.get_favorite_item_icon(data.favorite_item.tid if data.favorite_item else None)),
+            ("CUBE / 魔方", data.cube, cube_icon if cube_icon is not None else self.assets.get_cube_icon(data.cube.tid if data.cube else None)),
+        ]
+        for index, (label, item, icon) in enumerate(items):
             x, y = 891 + index * 209, 600
             self._text(draw, (x, y), label, 17, theme.muted, width=193)
-            self._paste(canvas, getter(item.tid if item else None), (x, y + 28, 45, 50))
+            self._paste(canvas, icon, (x, y + 28, 45, 50))
             self._text(draw, (x + 52, y + 30), (item.display_name or "已装备") if item else "未装备", 21, theme.text, width=138)
             self._text(draw, (x + 52, y + 59), f"Lv.{item.level}" if item and item.level is not None else "—", 18, theme.primary)
 
-    def draw_equipment_column(self, canvas, data, theme):
+    def draw_equipment_column(self, canvas, data, theme, equipment_icons=None):
         for index, slot in enumerate(self.SLOT_NAMES):
             item = data.equipment.get(slot, EquipmentData(slot))
             x, y = 1330, 165 + index * 189
             draw = ImageDraw.Draw(canvas)
             draw.rounded_rectangle((x, y, 1760, y + 173), 14, fill=theme.panel, outline="#343B46")
             draw.rounded_rectangle((x + 14, y + 13, x + 76, y + 75), 8, fill="#282E3A")
-            self._paste(canvas, self.assets.get_equipment_icon(slot, item.equipment_id if item.equipped else None), (x + 17, y + 16, 56, 56))
+            icon = equipment_icons.get(slot) if equipment_icons and slot in equipment_icons else None
+            if icon is None:
+                icon = self.assets.get_equipment_icon(slot, item.equipment_id if item.equipped else None)
+            self._paste(canvas, icon, (x + 17, y + 16, 56, 56))
             self._text(draw, (x + 90, y + 17), self.SLOT_NAMES[slot], 24, theme.text, width=317, bold=True)
             status = f"Lv.{item.level}" if item.equipped and item.level is not None else ("已装备" if item.equipped else "未装备")
             self._text(draw, (x + 90, y + 51), status, 22, theme.primary if item.equipped else theme.muted)
@@ -201,20 +205,26 @@ class CharacterCardRenderer(CardRenderer):
         self._text(draw, (40, 948), footer, 21, theme.muted, width=1325)
         self._text(draw, (1490, 949), "NIKKE / BUILD ARCHIVE", 18, theme.primary, width=270)
 
-    def render_character(self, data: CharacterCardData) -> str:
-        portrait = self.assets.get_character_portrait(data.name_code, data.resource_id)
+    def render_character(
+        self, data: CharacterCardData, card_assets: CharacterCardAssets | None = None
+    ) -> str:
+        if card_assets is None:
+            card_assets = self.assets.resolve_character_assets(data)
+
+        portrait = card_assets.portrait
         theme = character_theme(data.corporation, data.element, portrait)
         canvas = Image.new("RGBA", (self.WIDTH, self.HEIGHT), theme.background)
         self.draw_background(canvas, theme)
         self.draw_character_area(canvas, data, theme, portrait)
         self.draw_header(canvas, data, theme)
         self.draw_combat_panel(canvas, data, theme)
-        self.draw_growth_panel(canvas, data, theme)
-        self.draw_equipment_column(canvas, data, theme)
+        self.draw_growth_panel(
+            canvas, data, theme, favorite_icon=card_assets.favorite_item, cube_icon=card_assets.cube
+        )
+        self.draw_equipment_column(canvas, data, theme, equipment_icons=card_assets.equipment)
         self.draw_option_summary(canvas, data, theme)
         for index, icon in enumerate([
-            self.assets.get_corporation_icon(data.corporation), self.assets.get_element_icon(data.element),
-            self.assets.get_weapon_icon(data.weapon), self.assets.get_burst_icon(data.burst),
+            card_assets.corporation, card_assets.element, card_assets.weapon, card_assets.burst,
         ]):
             self._paste(canvas, icon, (67 + index * 67, 717, 48, 48))
         self._text(ImageDraw.Draw(canvas), (67, 768), self._label(data.corporation, self.CORPORATION_NAMES), 18, theme.secondary, width=535)
@@ -222,3 +232,4 @@ class CharacterCardRenderer(CardRenderer):
         path = self.output_dir / f"character-{uuid.uuid4().hex}.png"
         canvas.convert("RGB").save(path, "PNG", optimize=True)
         return str(path)
+

@@ -27,7 +27,7 @@ class ProfileBuilder:
         account: dict[str, Any],
         basic: dict[str, Any],
         outpost: dict[str, Any],
-        roster: list[dict[str, Any]],
+        roster: list[dict[str, Any]] | None,
         fetched_at: str,
         plugin_version: str,
     ) -> ProfileDashboardData:
@@ -57,19 +57,24 @@ class ProfileBuilder:
             or ""
         ).strip() or None
 
-        if roster:
+        basic_count = _optional_int(basic.get("character_count"))
+        if basic_count is not None:
+            character_count = basic_count
+        elif roster is not None:
             character_count = len(roster)
+        else:
+            character_count = None
+
+        if roster:
             max_level = max(int(c.get("lv", 0) or 0) for c in roster)
             max_combat = max(int(c.get("combat", 0) or 0) for c in roster)
         else:
-            character_count = 0
-            max_level = 0
-            max_combat = 0
+            max_level = None
+            max_combat = None
 
         commander_level = _optional_int(basic.get("lv"))
         team_combat_raw = basic.get("team_combat")
         team_combat = int(team_combat_raw) if team_combat_raw not in (None, "") else None
-        icon_id = _optional_str(basic.get("icon_id"))
         created_at = _optional_str(basic.get("created_at"))
         character_costume_count = _optional_int(basic.get("character_costume_count"))
         progress_tribe_tower = _optional_str(basic.get("progress_tribe_tower"))
@@ -116,7 +121,6 @@ class ProfileBuilder:
             plugin_version=plugin_version,
             commander_level=commander_level,
             team_combat=team_combat,
-            icon_id=icon_id,
             created_at=created_at,
             character_costume_count=character_costume_count,
             progress_tribe_tower=progress_tribe_tower,

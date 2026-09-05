@@ -27,6 +27,12 @@ CHARACTER_DETAILS = "/api/game/proxy/Game/GetUserCharacterDetails"
 TASK_LIST = "/api/lip/proxy/lipass/Points/GetTaskListWithStatusV2"
 DAILY_CHECK_IN = "/api/lip/proxy/lipass/Points/DailyCheckIn"
 CDK_REDEEM = "/api/game/proxy/Game/RecordCdkRedemption"
+MY_GUILD_INFO = "/api/game/proxy/Game/GetMyGuildInfo"
+UNION_RAID_LEVEL_INFO = "/api/game/proxy/Game/GetUnionRaidLevelInfo"
+UNION_RAID_DATA = "/api/game/proxy/Game/GetUnionRaidData"
+MAIN_QUEST_CLEAR_LINEUP = "/api/game/proxy/Game/GetMainQuestClearLineup"
+GET_CDK_REDEMPTION = "/api/game/proxy/Game/GetCdkRedemption"
+GET_CDK_REDEMPTION_HISTORY = "/api/game/proxy/Game/GetCdkRedemptionHistory"
 
 NIKKE_DIRECTORY_ZH = "https://sg-tools-cdn.blablalink.com/jz-26/ww-14/c4619ec83335bcfd7b23e43600520dc7.json"
 NIKKE_DIRECTORY_EN = "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json"
@@ -37,6 +43,16 @@ class BlaBlaError(RuntimeError):
         super().__init__(message)
         self.code = str(code)
         self.endpoint = endpoint
+
+
+class BlaBlaTimeoutError(BlaBlaError):
+    """网络或请求传输超时，结果未确认。"""
+    pass
+
+
+class BlaBlaNetworkError(BlaBlaError):
+    """网络连接异常。"""
+    pass
 
 
 class CookieExpired(BlaBlaError):
@@ -102,6 +118,12 @@ class BlaBlaClient:
                 response = await client.post(API_BASE + path, json=payload, headers=headers)
             response.raise_for_status()
             data = response.json()
+        except httpx.TimeoutException as exc:
+            self._diagnose(f"{endpoint} 请求超时")
+            raise BlaBlaTimeoutError(f"{endpoint} 请求超时", endpoint=endpoint) from exc
+        except httpx.NetworkError as exc:
+            self._diagnose(f"{endpoint} 网络异常")
+            raise BlaBlaNetworkError(f"{endpoint} 网络连接异常", endpoint=endpoint) from exc
         except httpx.HTTPStatusError as exc:
             self._diagnose(f"{endpoint} HTTP失败；status={exc.response.status_code}")
             raise BlaBlaError(f"{endpoint} HTTP {exc.response.status_code}", str(exc.response.status_code), endpoint) from exc
@@ -248,11 +270,67 @@ class BlaBlaClient:
         outpost = {}
         if not isinstance(outpost_resp, BaseException):
             outpost = outpost_resp.get("data", {}).get("outpost_info", {})
-        roster: list[dict[str, Any]] = []
+        roster: list[dict[str, Any]] | None = None
         if not isinstance(roster_resp, BaseException):
             data = roster_resp.get("data", {})
             roster = data.get("characters", data.get("user_characters", [])) or []
         return {"basic": basic, "outpost": outpost, "roster": roster}
+
+    async def get_union_raid_overview(self, account: dict[str, Any]) -> dict[str, Any]:
+        area_id = str(account.get("area_id", ""))
+        openid = str(account.get("game_openid", ""))
+        if not area_id:
+            validated = await self.validate_cookie(account["cookie"])
+            area_id = validated.area_id
+            if not openid:
+                openid = validated.game_openid
+        game_openid = openid.split("-")[-1] if openid else ""
+
+        guild_payload = {"nikke_area_id": int(area_id)}
+        if game_openid:
+            guild_payload["intl_open_id"] = game_openid
+
+        guild_resp = await self._post(MY_GUILD_INFO, account["cookie"], guild_payload)
+        guild_data = guild_resp.get("data", {}) if isinstance(guild_resp, dict) else {}
+
+        def _find_first(value: Any, key: str) -> Any:
+            if isinstance(value, dict):
+                if value.get(key) not in (None, ""):
+                    return value[key]
+                for item in value.values():
+                    found = _find_first(item, key)
+                    if found not in (None, ""):
+                        return found
+            elif isinstance(value, list):
+                for item in value:
+                    found = _find_first(item, key)
+                    if found not in (None, ""):
+                        return found
+            return None
+
+        guild_id = _find_first(guild_data, "guild_id")
+        if not guild_id:
+            raise BlaBlaError("未查询到联盟信息，请确认您已加入联盟。", endpoint="GetMyGuildInfo")
+
+        guild_name = str(
+            _find_first(guild_data, "guild_name")
+            or _find_first(guild_data, "name")
+            or "联盟"
+        )
+
+        raid_payload = {
+            "guild_id": guild_id,
+            "nikke_area_id": int(area_id),
+            "intl_open_id": game_openid,
+        }
+        level_resp = await self._post(UNION_RAID_LEVEL_INFO, account["cookie"], raid_payload)
+        level_data = level_resp.get("data", {}) if isinstance(level_resp, dict) else {}
+
+        return {
+            "guild_id": guild_id,
+            "guild_name": guild_name,
+            "level_info": level_data,
+        }
 
     async def get_roster(self, account: dict[str, Any], include_details: bool = True) -> list[dict[str, Any]]:
         area_id = int(account["area_id"])
@@ -421,6 +499,15 @@ class BlaBlaClient:
                 )
             response.raise_for_status()
             data = response.json()
+        except httpx.TimeoutException as exc:
+            self._diagnose(f"{endpoint} 社区请求超时")
+            raise BlaBlaTimeoutError(f"{endpoint} 请求超时", endpoint=endpoint) from exc
+        except httpx.NetworkError as exc:
+            self._diagnose(f"{endpoint} 社区网络异常")
+            raise BlaBlaNetworkError(f"{endpoint} 网络连接异常", endpoint=endpoint) from exc
+        except httpx.HTTPStatusError as exc:
+            self._diagnose(f"{endpoint} 社区HTTP失败；status={exc.response.status_code}")
+            raise BlaBlaError(f"{endpoint} HTTP {exc.response.status_code}", str(exc.response.status_code), endpoint) from exc
         except (httpx.HTTPError, ValueError) as exc:
             self._diagnose(f"{endpoint} 社区请求异常；type={type(exc).__name__}")
             raise BlaBlaError(f"{endpoint} 请求失败：{type(exc).__name__}", endpoint=endpoint) from exc
@@ -429,6 +516,8 @@ class BlaBlaClient:
         keys = sorted(response_data)[:20] if isinstance(response_data, dict) else []
         self._diagnose(f"{endpoint} 社区响应；code={code or 'missing'}；data_keys={keys}")
         if code not in ("", "0") or str(data.get("msg", "ok")).lower() not in {"", "ok", "success"}:
+            if code in {"1000002", "1000003", "1001001", "300001", "401", "403"}:
+                raise CookieExpired("登录状态已失效，请重新绑定", code, endpoint)
             raise BlaBlaError(str(data.get("msg", data.get("message", "社区接口失败"))), code, endpoint)
         return data
 
@@ -504,6 +593,55 @@ class BlaBlaClient:
                 return CdkRedemptionResult(False, True, error_messages[exc.code], exc.code)
             raise
         return CdkRedemptionResult(True, True, "兑换成功", "0")
+
+    async def get_main_quest_clear_lineup(self, account: dict[str, Any], stage_id: int, area_id: int | str) -> dict[str, Any]:
+        """查询个人主线战役历史通关阵容。
+        根据 contracts/campaign_history.md，业务错误码 1300017 及 212000 均作为受控响应字典返回。
+        """
+        try:
+            res = await self._community_request(
+                "POST",
+                MAIN_QUEST_CLEAR_LINEUP,
+                account,
+                payload={"stage_id": int(stage_id), "area_id": int(area_id)},
+            )
+            return res
+        except BlaBlaError as exc:
+            if exc.code == "1300017":
+                return {"code": 1300017, "data": None, "msg": "暂无可查询的历史阵容"}
+            if exc.code == "212000":
+                return {"code": 212000, "data": None, "msg": "请求过频"}
+            if exc.code == "300001":
+                raise CookieExpired("登录状态已失效，请重新绑定", exc.code, exc.endpoint) from exc
+            return {"code": int(exc.code) if exc.code.isdigit() else -1, "data": None, "msg": str(exc)}
+
+    async def get_cdk_redemption(self, account: dict[str, Any]) -> list[dict]:
+        """获取官方可用 CDK 列表。
+        先取响应 data，再按已确认字段拆包；接口异常抛出受控异常。
+        """
+        res = await self._community_request("GET", GET_CDK_REDEMPTION, account)
+        data = res.get("data") if isinstance(res, dict) else res
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            for key in ("list", "cdk_list", "cdk_redemption_list", "redemption_list", "items", "records"):
+                if isinstance(data.get(key), list):
+                    return data[key]
+        return []
+
+    async def get_cdk_redemption_history(self, account: dict[str, Any]) -> list[dict]:
+        """获取官方 CDK 历史兑换记录。
+        先取响应 data，再按已确认字段拆包；接口异常抛出受控异常。
+        """
+        res = await self._community_request("GET", GET_CDK_REDEMPTION_HISTORY, account)
+        data = res.get("data") if isinstance(res, dict) else res
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            for key in ("list", "history_list", "history", "records", "items"):
+                if isinstance(data.get(key), list):
+                    return data[key]
+        return []
 
     @staticmethod
     def calculate_ael(character: dict[str, Any]) -> float:

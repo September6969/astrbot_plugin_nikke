@@ -10,24 +10,35 @@ import os
 import random
 import re
 import secrets
+import time
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
-from astrbot.api.message_components import Image
+from astrbot.api.message_components import Image, Plain
 from astrbot.api.star import Context, Star, register
 
 from ._version import PLUGIN_VERSION
-from .card_builder import CharacterCardBuilder
+from .announcement_service import AnnouncementService
 from .asset_manager import AssetManager
+from .campaign_history_builder import CampaignHistoryBuilder
+from .campaign_history_models import ClearLineupStatus
+from .campaign_history_renderer import CampaignHistoryRenderer
+from .campaign_stage_resolver import CampaignStageResolver
+from .card_builder import CharacterCardBuilder
+from .cdk_service import CdkInputParser, CdkService
 from .character_card_renderer import CharacterCardRenderer
+from .client import BlaBlaClient, BlaBlaError, CookieExpired
+from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
-from .client import BlaBlaClient, BlaBlaError, CookieExpired
 from .renderer import CardRenderer
 from .storage import NikkeStore
+from .union_raid_builder import UnionRaidBuilder
+from .union_raid_renderer import UnionRaidRenderer
+from .voice_feedback import VoiceResolver
 from .web_service import BindingWebService
 
 
@@ -54,13 +65,23 @@ class NikkePlugin(Star):
         )
         self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.character_builder = CharacterCardBuilder()
+        self.asset_manager = AssetManager(self.data_dir / "cache", self.plugin_dir / "assets", remote=True)
         self.character_renderer = CharacterCardRenderer(
             self.data_dir / "cards",
             self.plugin_dir / "fonts",
-            AssetManager(self.data_dir / "cache", self.plugin_dir / "assets", remote=True),
+            self.asset_manager,
         )
         self.profile_builder = ProfileBuilder()
         self.profile_renderer = ProfileCardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
+        self.raid_builder = UnionRaidBuilder()
+        self.raid_renderer = UnionRaidRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
+        self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
+        self.campaign_builder = CampaignHistoryBuilder()
+        self.campaign_renderer = CampaignHistoryRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
+        self.cdk_service = CdkService(self.client)
+        self.feedback_manager = DelayedFeedbackManager(1.5)
+        self.voice_resolver = VoiceResolver()
+        self.announcements = AnnouncementService(self.data_dir / "announcements")
         self.web = BindingWebService(
             self.store,
             self.client,
@@ -78,6 +99,16 @@ class NikkePlugin(Star):
         self._closing = False
         self._pack_extension()
         self._background_tasks.append(asyncio.create_task(self._start_services()))
+
+    @property
+    def cdk_service(self) -> CdkService:
+        if getattr(self, "_cdk_service_inst", None) is None:
+            self._cdk_service_inst = CdkService(getattr(self, "client", None))
+        return self._cdk_service_inst
+
+    @cdk_service.setter
+    def cdk_service(self, value: CdkService) -> None:
+        self._cdk_service_inst = value
 
     def _pack_extension(self) -> None:
         extension_dir = self.plugin_dir / "extension"
@@ -101,14 +132,30 @@ class NikkePlugin(Star):
             logger.error(f"[NIKKE] 绑定服务启动失败: {exc}")
         try:
             self._directory = await self.client.get_directory()
+            self.campaign_builder.update_directory(self._directory)
             logger.info(f"[NIKKE] 已载入 {len(self._directory)} 条妮姬目录")
         except Exception as exc:
             logger.warning(f"[NIKKE] 妮姬目录载入失败: {exc}")
+        self._background_tasks.append(asyncio.create_task(self._sync_announcements_background()))
         await self._scheduler_loop()
+
+    async def _sync_announcements_background(self) -> None:
+        try:
+            await self.announcements.sync_from_source()
+        except Exception as exc:
+            logger.debug(f"[NIKKE] 后台公告同步跳过: {exc}")
+
+    async def _send_delayed_notice(self, event: AstrMessageEvent, text: str) -> None:
+        try:
+            if hasattr(self, "context") and hasattr(self.context, "send_message") and hasattr(event, "unified_msg_origin"):
+                await self.context.send_message(event.unified_msg_origin, MessageChain([Plain(text)]))
+        except Exception as exc:
+            logger.debug(f"[NIKKE] 延迟提示发送跳过: {exc}")
 
     async def _scheduler_loop(self) -> None:
         last_daily = ""
         last_summary = ""
+        last_announcement_sync = 0.0
         while not self._closing:
             now = datetime.now(timezone(timedelta(hours=8)))
             today = now.strftime("%Y-%m-%d")
@@ -122,6 +169,9 @@ class NikkePlugin(Star):
             if (now.hour, now.minute) == (summary_h, summary_m) and last_summary != today:
                 last_summary = today
                 asyncio.create_task(self._send_summary(today))
+            if time.time() - last_announcement_sync > 3600:
+                last_announcement_sync = time.time()
+                asyncio.create_task(self._sync_announcements_background())
             await asyncio.sleep(20)
 
     @staticmethod
@@ -181,13 +231,21 @@ class NikkePlugin(Star):
                 "【查询】\n"
                 "/妮姬 我的　(/nikke me)\n"
                 "/妮姬 查询 练度 [角色名]　(/nikke roster、/nikke character)\n"
-                "/妮姬 查询 资料 <角色名>　(/nikke info)"
+                "/妮姬 查询 资料 <角色名>　(/nikke info)\n"
+                "/妮姬 战役 <关卡>　(/nikke campaign [普通/困难] 46-40)\n"
+                "/妮姬 联盟突袭　(/nikke raid)\n"
+                "/妮姬 日程　(/nikke schedule)\n"
+                "/妮姬 公告　(/nikke news)\n"
+                "/妮姬 攻略 [分类]　(/nikke guide)"
             ),
             "日常": (
                 "【日常】\n"
                 "/妮姬 签到　(/nikke daily、/nikke claim)\n"
                 "/妮姬 签到 状态 — 只查询、不提交\n"
                 "/妮姬 兑换 <CDK>　(/nikke cdk)\n"
+                "/妮姬 兑换 批量 <CDK1> <CDK2>...\n"
+                "/妮姬 兑换 可用|历史\n"
+                "/妮姬 戳一戳 [角色名]　(/nikke poke) — 互动台词（文本展示）\n"
                 "注意：群聊发送兑换命令会公开兑换码。"
             ),
             "管理": (
@@ -202,7 +260,10 @@ class NikkePlugin(Star):
         aliases = {
             "account": "账号", "bind": "账号",
             "query": "查询", "roster": "查询", "info": "查询", "data": "查询",
-            "daily": "日常", "push": "日常",
+            "raid": "查询", "突袭": "查询", "campaign": "查询", "stage": "查询", "战役": "查询",
+            "schedule": "查询", "日程": "查询", "news": "查询", "公告": "查询",
+            "guide": "查询", "攻略": "查询",
+            "daily": "日常", "push": "日常", "poke": "日常", "戳": "日常", "戳一戳": "日常",
             "admin": "管理",
         }
         selected = aliases.get(category.strip().lower(), category.strip())
@@ -253,10 +314,58 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"兑换", "cdk"}:
+            sub = arg1.strip().casefold()
+            if sub in {"批量", "batch"}:
+                if not arg2:
+                    yield event.plain_result("用法：/妮姬 兑换 批量 <CDK1> <CDK2> ...")
+                    return
+                async for result in self.cdk_batch(event, arg2):
+                    yield result
+                return
+            if sub in {"可用", "available"}:
+                async for result in self.cdk_available(event):
+                    yield result
+                return
+            if sub in {"历史", "history"}:
+                async for result in self.cdk_history(event):
+                    yield result
+                return
             if not arg1:
-                yield event.plain_result("用法：/妮姬 兑换 <CDK>")
+                yield event.plain_result("用法：/妮姬 兑换 <CDK> 或 /妮姬 兑换 批量 <CDK...> 或 /妮姬 兑换 可用|历史")
                 return
             async for result in self.cdk(event, arg1):
+                yield result
+            return
+        if command_key in {"战役", "campaign", "关卡", "stage"}:
+            async for result in self.campaign(event, arg1, arg2):
+                yield result
+            return
+        if command_key in {"戳一戳", "戳", "poke"}:
+            async for result in self.poke(event, arg1):
+                yield result
+            return
+        if command_key in {"日程"}:
+            async for result in self.event_schedule(event):
+                yield result
+            return
+        if command_key in {"schedule"}:
+            if ":" in arg1 and self._is_admin(event):
+                async for result in self.schedule(event, arg1):
+                    yield result
+                return
+            async for result in self.event_schedule(event):
+                yield result
+            return
+        if command_key in {"公告", "news", "announcement"}:
+            async for result in self.announcements_view(event):
+                yield result
+            return
+        if command_key in {"攻略", "guide", "guides"}:
+            async for result in self.guide(event, arg1):
+                yield result
+            return
+        if command_key in {"突袭", "联盟突袭", "raid", "union_raid"}:
+            async for result in self.union_raid(event):
                 yield result
             return
         if command_key in {"管理", "admin"}:
@@ -272,6 +381,12 @@ class NikkePlugin(Star):
             "roster": (self.roster, (event,)),
             "character": (self.character, (event, arg1)),
             "info": (self.info, (event, arg1)),
+            "campaign": (self.campaign, (event, arg1, arg2)),
+            "raid": (self.union_raid, (event,)),
+            "union_raid": (self.union_raid, (event,)),
+            "poke": (self.poke, (event, arg1)),
+            "news": (self.announcements_view, (event,)),
+            "guide": (self.guide, (event, arg1)),
             "push": (self.push, (event, arg1)),
             "group": (self.group_set, (event, arg1)),
             "schedule": (self.schedule, (event, arg1)),
@@ -358,7 +473,6 @@ class NikkePlugin(Star):
         optional = (
             ("lv", "指挥官等级"),
             ("team_combat", "部队总战力"),
-            ("icon_id", "头像 ID"),
             ("created_at", "注册时间"),
             ("character_count", "持有妮姬"),
             ("character_costume_count", "时装数量"),
@@ -394,6 +508,9 @@ class NikkePlugin(Star):
 
     async def me(self, event: AstrMessageEvent):
         """生成个人账号概览卡。"""
+        handle = self.feedback_manager.start_delayed_feedback(
+            lambda: self._send_delayed_notice(event, "正在生成个人账号概览...")
+        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
             account = self._account_or_error(event)
             data = await self.client.get_profile_dashboard(account)
@@ -412,6 +529,9 @@ class NikkePlugin(Star):
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except (BlaBlaError, ValueError, RuntimeError) as exc:
             yield event.plain_result(f"查询失败：{exc}")
+        finally:
+            if handle:
+                await handle.cancel()
 
     async def query(self, event: AstrMessageEvent, kind: str = "", name: str = ""):
         """查询个人练度或公开角色资料。"""
@@ -431,7 +551,47 @@ class NikkePlugin(Star):
             async for result in self.info(event, name):
                 yield result
             return
-        yield event.plain_result("用法：/妮姬 查询 练度 [角色名] 或 /妮姬 查询 资料 <角色名>")
+        if kind_key in {"战役", "关卡", "campaign", "stage"}:
+            async for result in self.campaign(event, name, ""):
+                yield result
+            return
+        if kind_key in {"攻略", "guide"}:
+            async for result in self.guide(event, name):
+                yield result
+            return
+        if kind_key in {"突袭", "联盟突袭", "raid", "union_raid"}:
+            async for result in self.union_raid(event):
+                yield result
+            return
+        yield event.plain_result("用法：/妮姬 查询 练度 [角色名]、/妮姬 查询 资料 <角色名>、/妮姬 查询 战役 <关卡> 或 /妮姬 攻略")
+
+    async def union_raid(self, event: AstrMessageEvent):
+        """查询当前账号所属联盟的联盟突袭战况。"""
+        handle = self.feedback_manager.start_delayed_feedback(
+            lambda: self._send_delayed_notice(event, "正在查询联盟突袭战况...")
+        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
+        try:
+            account = self._account_or_error(event)
+            raw = await self.client.get_union_raid_overview(account)
+            data = self.raid_builder.build(
+                guild_name=raw["guild_name"],
+                level_info_payload=raw["level_info"],
+                fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
+                plugin_version=PLUGIN_VERSION,
+            )
+            path = await asyncio.to_thread(self.raid_renderer.render_raid_overview, data)
+            yield event.image_result(path)
+        except CookieExpired:
+            self.store.mark_cookie_invalid(self._qq_id(event))
+            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except (BlaBlaError, ValueError, RuntimeError) as exc:
+            yield event.plain_result(f"突袭查询失败：{exc}")
+        except Exception as exc:
+            logger.exception("[NIKKE] 联盟突袭查询异常")
+            yield event.plain_result(f"突袭查询异常：{exc}")
+        finally:
+            if handle:
+                await handle.cancel()
 
     async def roster(self, event: AstrMessageEvent):
         """生成自己的妮姬练度表。"""
@@ -461,6 +621,9 @@ class NikkePlugin(Star):
         if not name.strip():
             yield event.plain_result("用法：/妮姬 查询 练度 <角色名>")
             return
+        handle = self.feedback_manager.start_delayed_feedback(
+            lambda: self._send_delayed_notice(event, "正在查询与渲染角色卡片...")
+        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
             account = self._account_or_error(event)
             matches = self._find_directory(name)
@@ -480,14 +643,15 @@ class NikkePlugin(Star):
                 return
             target = matches[0]
             code = str(target.get("name_code", ""))
-            roster = await self.client.get_roster(account, include_details=False)
-            held_codes = {str(c.get("name_code", "")) for c in roster}
-            if code and code not in held_codes:
-                yield event.plain_result(
-                    f"你未持有该妮姬：{target.get('name_cn') or target.get('name_en') or code}"
-                )
-                return
-            payload = await self.client.get_character_detail(account, code)
+            try:
+                payload = await self.client.get_character_detail(account, code)
+            except ValueError as exc:
+                if "未持有" in str(exc):
+                    yield event.plain_result(
+                        f"你未持有该妮姬：{target.get('name_cn') or target.get('name_en') or code}"
+                    )
+                    return
+                raise
             card = self.character_builder.build(
                 account=account,
                 directory=target,
@@ -502,6 +666,9 @@ class NikkePlugin(Star):
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except Exception as exc:
             yield event.plain_result(f"查询失败：{exc}")
+        finally:
+            if handle:
+                await handle.cancel()
 
     async def info(self, event: AstrMessageEvent, name: str):
         """查询妮姬基础资料。"""
@@ -654,8 +821,10 @@ class NikkePlugin(Star):
         except ValueError as exc:
             yield event.plain_result(str(exc))
             return
+        game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
+        account_key = f"{qq_id}:{game_uid}"
         digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
-        run_key = f"cdk:{qq_id}:{digest}"
+        run_key = f"cdk:{qq_id}:{game_uid}:{digest}"
         retryable = {"failed", "unknown", "expired"}
         existing = self.store.get_run(run_key)
         if existing and existing["status"] not in retryable:
@@ -674,9 +843,17 @@ class NikkePlugin(Star):
             yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
             return
         try:
-            result = await self.client.redeem_cdk(account, normalized)
+            result = await self.cdk_service.redeem_single(account, normalized, account_key=account_key)
             detail = f"兑换码 {masked}：{result.message}"
-            self.store.finish_run(run_key, "success" if result.success else ("terminal" if result.terminal else "unknown"), detail)
+            if result.success:
+                status = "success"
+            elif result.is_unknown:
+                status = "unknown"
+            elif result.is_rate_limited or not getattr(result, "terminal", True):
+                status = "failed"
+            else:
+                status = "terminal"
+            self.store.finish_run(run_key, status, detail)
             yield event.plain_result(detail)
         except CookieExpired:
             self.store.mark_cookie_invalid(qq_id)
@@ -686,6 +863,218 @@ class NikkePlugin(Star):
             self.store.finish_run(run_key, "failed", f"兑换码 {masked}：请求失败，可稍后重试")
             logger.warning(f"[NIKKE] CDK兑换失败: {type(exc).__name__}")
             yield event.plain_result(f"兑换码 {masked}：请求失败，可稍后重试。")
+
+    async def cdk_batch(self, event: AstrMessageEvent, raw_codes: str):
+        """批量兑换多个 CDK。"""
+        if not bool(self.config.get("enable_cdk_redemption", False)):
+            yield event.plain_result("CDK真实兑换当前由管理员关闭。")
+            return
+        codes = CdkInputParser.parse(raw_codes, max_items=10)
+        if not codes:
+            yield event.plain_result("未检测到有效的兑换码。支持空格/换行/逗号分隔，单次最多10个。")
+            return
+        try:
+            account = self._account_or_error(event)
+        except ValueError as exc:
+            yield event.plain_result(str(exc))
+            return
+        qq_id = self._qq_id(event)
+        game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
+        account_key = f"{qq_id}:{game_uid}"
+        batch_res = await self.cdk_service.redeem_batch(account, codes, account_key=account_key)
+        lines = [f"【CDK 批量兑换结果】共 {len(batch_res.results)} 项："]
+        for res in batch_res.results:
+            masked = self._mask_cdk(res.code)
+            icon = "✓" if res.success else ("?" if res.is_unknown else "✗")
+            lines.append(f"{icon} {masked}：{res.message}")
+        if batch_res.stopped_by_cookie:
+            self.store.mark_cookie_invalid(qq_id)
+            lines.append("\n⚠️ 登录状态已失效，已中止剩余兑换。请重新绑定。")
+        elif batch_res.stopped_by_rate_limit:
+            lines.append("\n⚠️ 遇到官方频控限制，已中止剩余兑换，请稍后再试。")
+        yield event.plain_result("\n".join(lines))
+
+    async def cdk_available(self, event: AstrMessageEvent):
+        """查询官方可用 CDK 列表。"""
+        try:
+            account = self._account_or_error(event)
+            items = await self.client.get_cdk_redemption(account)
+            if not items:
+                yield event.plain_result("官方暂无可查询的可用 CDK 列表。")
+                return
+            lines = ["【官方可用 CDK 列表】"]
+            for item in items[:15]:
+                code = str(item.get("cdkey") or item.get("code") or item.get("title") or "未知")
+                desc = str(item.get("desc") or item.get("reward") or "").strip()
+                expire = str(item.get("expire_time") or item.get("end_time") or "").strip()
+                extra = f" ({desc})" if desc else ""
+                exp_str = f" [截止: {expire}]" if expire else ""
+                lines.append(f"• {code}{extra}{exp_str}")
+            yield event.plain_result("\n".join(lines))
+        except CookieExpired:
+            self.store.mark_cookie_invalid(self._qq_id(event))
+            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except Exception as exc:
+            yield event.plain_result(f"获取可用 CDK 失败：{exc}")
+
+    async def cdk_history(self, event: AstrMessageEvent):
+        """查询官方 CDK 历史兑换记录。"""
+        try:
+            account = self._account_or_error(event)
+            items = await self.client.get_cdk_redemption_history(account)
+            if not items:
+                yield event.plain_result("官方暂无 CDK 兑换历史记录。")
+                return
+            lines = ["【CDK 兑换历史记录】"]
+            for item in items[:15]:
+                code = str(item.get("cdkey") or item.get("code") or "未知")
+                masked = self._mask_cdk(code)
+                status = str(item.get("status") or item.get("result") or item.get("msg") or "已兑换")
+                time_str = str(item.get("redeemed_at") or item.get("created_at") or item.get("time") or "").strip()
+                t = f" [{time_str}]" if time_str else ""
+                lines.append(f"• {masked}: {status}{t}")
+            yield event.plain_result("\n".join(lines))
+        except CookieExpired:
+            self.store.mark_cookie_invalid(self._qq_id(event))
+            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except Exception as exc:
+            yield event.plain_result(f"获取 CDK 历史失败：{exc}")
+
+    async def campaign(self, event: AstrMessageEvent, stage_str: str = "", mode_str: str = ""):
+        """查询主线战役关卡的历史通关阵容。"""
+        query = f"{stage_str} {mode_str}".strip()
+        if not query:
+            yield event.plain_result("用法：/妮姬 战役 [普通/困难] <关卡名>（例如：46-40、困难 35-36）")
+            return
+        stage = self.campaign_resolver.resolve_query(query)
+        if not stage:
+            yield event.plain_result(f"未找到关卡：{query}。目前仅支持已收录关卡（如普通46章、困难35章）。")
+            return
+        handle = self.feedback_manager.start_delayed_feedback(
+            lambda: self._send_delayed_notice(event, "正在查询战役通关阵容...")
+        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
+        try:
+            account = self._account_or_error(event)
+            raw = await self.client.get_main_quest_clear_lineup(
+                account, stage_id=stage.stage_id, area_id=account.get("area_id", 0)
+            )
+            if self._directory and not self.campaign_builder._directory_by_tid:
+                self.campaign_builder.update_directory(self._directory)
+            record = self.campaign_builder.build(
+                stage=stage,
+                response=raw,
+                commander_name=account.get("nickname") or account.get("role_name") or "指挥官",
+                fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
+                plugin_version=PLUGIN_VERSION,
+            )
+            if record.status == ClearLineupStatus.RATE_LIMITED:
+                yield event.plain_result(record.status_message)
+                return
+            if record.status == ClearLineupStatus.ERROR:
+                yield event.plain_result(record.status_message)
+                return
+            path = await asyncio.to_thread(self.campaign_renderer.render_campaign_history, record)
+            yield event.image_result(path)
+        except CookieExpired:
+            self.store.mark_cookie_invalid(self._qq_id(event))
+            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except (BlaBlaError, ValueError, RuntimeError) as exc:
+            yield event.plain_result(f"战役查询失败：{exc}")
+        except Exception as exc:
+            logger.exception("[NIKKE] 战役查询异常")
+            yield event.plain_result(f"战役查询异常：{exc}")
+        finally:
+            if handle:
+                await handle.cancel()
+
+    async def poke(self, event: AstrMessageEvent, character_name: str = ""):
+        """戳一戳互动语音与台词。"""
+        char_key = character_name.strip().lower() if character_name else "alice"
+        aliases = {
+            "爱丽丝": "alice",
+            "小红帽": "red_hood",
+            "阿尼斯": "anis",
+            "拉毗": "rapi",
+            "红莲": "scarlet",
+            "桃乐丝": "dorothy",
+        }
+        key = aliases.get(char_key, char_key)
+        line = self.voice_resolver.resolve_poke_line(key, locale="zh-cn")
+        yield event.plain_result(line)
+
+    async def event_schedule(self, event: AstrMessageEvent):
+        """查询进行中与即将截止的官方活动日程。"""
+        fallback_error = ""
+        if self.announcements.record_count() == 0:
+            try:
+                success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
+                if not success:
+                    fallback_error = msg
+            except asyncio.TimeoutError:
+                fallback_error = "同步公告超时"
+            except Exception as e:
+                fallback_error = f"同步异常: {e}"
+        text = self.announcements.format_schedule_text(fallback_error=fallback_error)
+        yield event.plain_result(text)
+
+    async def announcements_view(self, event: AstrMessageEvent):
+        """查看官方最新公告列表。"""
+        fallback_error = ""
+        if self.announcements.record_count() == 0:
+            try:
+                success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
+                if not success:
+                    fallback_error = msg
+            except asyncio.TimeoutError:
+                fallback_error = "同步公告超时"
+            except Exception as e:
+                fallback_error = f"同步异常: {e}"
+        text = self.announcements.format_announcements_text(5, fallback_error=fallback_error)
+        yield event.plain_result(text)
+
+    async def guide(self, event: AstrMessageEvent, category: str = ""):
+        """查看或发送常用攻略图。"""
+        cat_key = category.strip().lower()
+        mapping = {
+            "练度": "progression",
+            "progression": "progression",
+            "红球": "red_orb",
+            "red_orb": "red_orb",
+            "珍藏品": "favorite_item",
+            "favorite": "favorite_item",
+            "favorite_item": "favorite_item",
+            "充能": "arena_charge",
+            "竞技场": "arena_charge",
+            "竞技场充能": "arena_charge",
+            "arena_charge": "arena_charge",
+        }
+        if not cat_key or cat_key not in mapping:
+            yield event.plain_result(
+                "【NIKKE 常用攻略一图流】\n\n"
+                "支持查看以下分类攻略图：\n"
+                "• /妮姬 攻略 练度 — 角色培养与技能升级一图流\n"
+                "• /妮姬 攻略 红球 — 同步器等级与红球消耗一览表\n"
+                "• /妮姬 攻略 珍藏品 — 珍藏品养成与材料汇总\n"
+                "• /妮姬 攻略 充能 — 竞技场爆裂充能速查表\n\n"
+                "（提示：可在 assets/guides/<分类>/ 目录中放入对应图片即可直接发送）"
+            )
+            return
+
+        folder_name = mapping[cat_key]
+        guide_dir = self.plugin_dir / "assets" / "guides" / folder_name
+        images = []
+        if guide_dir.is_dir():
+            images = [
+                p for p in guide_dir.iterdir()
+                if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
+            ]
+        if images:
+            yield event.image_result(str(images[0]))
+        else:
+            yield event.plain_result(
+                f"暂未收录【{category}】攻略图。可将对应图片放置于插件目录下的 "
+                f"assets/guides/{folder_name}/ 中直接发送。"
+            )
 
     async def push(self, event: AstrMessageEvent, state: str):
         """开启或关闭每日群汇总。"""
@@ -794,8 +1183,18 @@ class NikkePlugin(Star):
 
     async def terminate(self):
         self._closing = True
+        if hasattr(self, "feedback_manager") and self.feedback_manager:
+            await self.feedback_manager.close()
+        if hasattr(self, "asset_manager") and self.asset_manager:
+            try:
+                self.asset_manager.close()
+            except Exception as exc:
+                logger.debug(f"[NIKKE] 素材管理器回收跳过: {exc}")
         await self.web.stop()
         for task in self._background_tasks:
             task.cancel()
         await asyncio.gather(*self._background_tasks, return_exceptions=True)
         logger.info("[NIKKE] 插件已停止")
+
+    async def close(self):
+        await self.terminate()
