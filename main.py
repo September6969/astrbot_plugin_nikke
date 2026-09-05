@@ -1122,6 +1122,18 @@ class NikkePlugin(Star):
             return
 
         folder_name = mapping[cat_key]
+        from .guide_registry import GuideRegistry
+        try:
+            entries = GuideRegistry(self.plugin_dir / "assets" / "guides").page(folder_name)
+        except (ValueError, OSError):
+            yield event.plain_result("攻略索引暂不可用，请管理员核对授权和文件配置。")
+            return
+        if entries:
+            for entry in entries:
+                yield event.plain_result(entry.caption())
+                for image in entry.files[:10]:
+                    yield event.image_result(str(image))
+            return
         guide_dir = self.plugin_dir / "assets" / "guides" / folder_name
         images = []
         if guide_dir.is_dir():
