@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 import io
 import hashlib
 import json
+import logging
 import re
 import time
 import uuid
@@ -13,6 +15,12 @@ from pathlib import Path
 
 import httpx
 from PIL import Image, ImageDraw
+
+from .card_models import CharacterCardAssets, CharacterCardData
+from .nikke_db_provider import NikkeDbProvider
+from .spine_prerenderer import SpineJob, SpinePreRenderer
+
+logger = logging.getLogger("nikke.asset_manager")
 
 
 class AssetManager:
@@ -25,6 +33,9 @@ class AssetManager:
         self.asset_dir = Path(asset_dir)
         self.remote = remote
         self._failed: dict[str, float] = {}
+        self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
+        self.spine = SpinePreRenderer(self.cache_dir)
+        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
         try:
             self.sources = json.loads((self.asset_dir / "sources.json").read_text(encoding="utf-8"))
         except (OSError, ValueError):
@@ -37,6 +48,18 @@ class AssetManager:
             self.equipment_map = {}
         if not isinstance(self.equipment_map, dict):
             self.equipment_map = {}
+        try:
+            self.favorite_items_map = json.loads((self.asset_dir / "favorite_items.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            self.favorite_items_map = {}
+        if not isinstance(self.favorite_items_map, dict):
+            self.favorite_items_map = {}
+        try:
+            self.cubes_map = json.loads((self.asset_dir / "cubes.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            self.cubes_map = {}
+        if not isinstance(self.cubes_map, dict):
+            self.cubes_map = {}
 
     @staticmethod
     def game_resource_url(path: str) -> str:
@@ -127,6 +150,7 @@ class AssetManager:
             "arm": [(31, 28), (53, 25), (63, 67), (80, 53), (98, 65), (78, 99), (44, 101)],
             "leg": [(36, 23), (88, 23), (96, 99), (72, 99), (62, 55), (54, 99), (30, 99)],
             "cube": [(64, 20), (108, 44), (108, 87), (64, 110), (20, 87), (20, 44)],
+            "favorite": [(64, 18), (77, 44), (107, 48), (85, 70), (90, 100), (64, 85), (38, 100), (43, 70), (21, 48), (51, 44)],
         }
         draw.polygon(shapes.get(kind, [(64, 18), (107, 64), (64, 110), (21, 64)]), outline=color, width=5)
         if kind == "cube":
@@ -134,13 +158,33 @@ class AssetManager:
             draw.line([(64, 67), (64, 110)], fill=color, width=4)
         return image
 
-    def get_character_portrait(self, name_code, resource_id) -> Image.Image:
-        # 项目可用name_code补充特例，通用远端则使用明确的resource_id。
+    def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None, allow_spine_enqueue: bool = False) -> Image.Image:
+        # 1. 项目本地 override：优先检查 name_code，其次 resource_id
         image = self._load("portraits", str(name_code))
-        if image is None:
-            rid = self._key(resource_id)
-            url = f"{self.CDN}/FB/c{rid.zfill(3)}_00.png" if rid.isdigit() else ""
-            image = self._load("portraits", rid, url)
+        if image is None and resource_id:
+            image = self._load("portraits", self._key(resource_id))
+
+        # 2. 版本化预渲染缓存 / Nikke-DB 规范名缓存 (cXXX / cXXX_01)
+        char_id = self.nikke_db.resolve_character_id(resource_id, costume_id) if resource_id else ""
+        if image is None and char_id and char_id != "missing":
+            image = self._load("portraits", char_id)
+
+        # 3. 远端 Nikke-DB 静态 Full Body CDN
+        if image is None and char_id and char_id != "missing":
+            url = self.nikke_db.get_full_body_url(resource_id, costume_id)
+            key = self._key(resource_id) if str(resource_id).isdigit() else char_id
+            image = self._load("portraits", key, url)
+
+        # 4. Spine 处于实验阶段，生产出卡路径默认不投递后台预渲染任务
+        if allow_spine_enqueue and char_id and char_id != "missing" and self.spine.is_available():
+            cache_key = self.nikke_db.compute_cache_key(char_id, costume_id)
+            prerender_path = self.spine.prerender_dir / f"{cache_key}.png"
+            if not prerender_path.is_file():
+                version = self.nikke_db.resolve_spine_version(char_id)
+                self.spine.queue.enqueue(
+                    SpineJob(cache_key=cache_key, character_id=char_id, runtime_version=version)
+                )
+
         return image if image is not None else self.fallback("portrait")
 
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
@@ -155,11 +199,33 @@ class AssetManager:
         image = self._load(kind, self._key(key), url)
         return image if image is not None else self.fallback(fallback)
 
-    def get_favorite_item_icon(self, tid):
-        return self._icon("favorite", tid, "favorite")
+    def get_favorite_item_icon(self, tid) -> Image.Image:
+        if not tid:
+            return self.fallback("favorite")
+        resource = self.favorite_items_map.get(str(tid), "")
+        url = ""
+        if resource:
+            if resource.startswith("http://") or resource.startswith("https://"):
+                url = resource
+            elif "/" in resource:
+                url = self.game_resource_url(resource)
+            else:
+                url = self.game_resource_url(f"icon/favorite/{resource}.webp")
+        return self._icon("favorite", tid, "favorite", url)
 
-    def get_cube_icon(self, tid):
-        return self._icon("cube", tid, "cube")
+    def get_cube_icon(self, tid) -> Image.Image:
+        if not tid:
+            return self.fallback("cube")
+        resource = self.cubes_map.get(str(tid), "")
+        url = ""
+        if resource:
+            if resource.startswith("http://") or resource.startswith("https://"):
+                url = resource
+            elif "/" in resource:
+                url = self.game_resource_url(resource)
+            else:
+                url = self.game_resource_url(f"icon/cube/{resource}.webp")
+        return self._icon("cube", tid, "cube", url)
 
     def get_element_icon(self, element):
         key = self._key(element)
@@ -183,3 +249,117 @@ class AssetManager:
         resource = "icn_burst_all" if key == "allstep" else (f"icn_burst_0{key[-1]}" if key in {"step1", "step2", "step3"} else "")
         url = self.game_resource_url(f"icon/atlas_common_class/{resource}.webp") if resource else ""
         return self._icon("burst", key, "burst", url)
+
+    def resolve_character_assets(
+        self, data: CharacterCardData, timeout: float = 6.0
+    ) -> CharacterCardAssets:
+        """并发预取角色卡所需的所有素材，实施 5~8 秒硬预算兜底。
+        超时或加载失败单素材立即降级为对应 fallback 占位图，确保 Renderer 绝不阻塞。
+        """
+        head_item = data.equipment.get("head")
+        torso_item = data.equipment.get("torso")
+        arm_item = data.equipment.get("arm")
+        leg_item = data.equipment.get("leg")
+
+        tasks = {
+            "portrait": (
+                lambda: self.get_character_portrait(data.name_code, data.resource_id),
+                lambda: self.fallback("portrait"),
+            ),
+            "head": (
+                lambda: self.get_equipment_icon("head", head_item.equipment_id if head_item and head_item.equipped else None),
+                lambda: self.fallback("head"),
+            ),
+            "torso": (
+                lambda: self.get_equipment_icon("torso", torso_item.equipment_id if torso_item and torso_item.equipped else None),
+                lambda: self.fallback("torso"),
+            ),
+            "arm": (
+                lambda: self.get_equipment_icon("arm", arm_item.equipment_id if arm_item and arm_item.equipped else None),
+                lambda: self.fallback("arm"),
+            ),
+            "leg": (
+                lambda: self.get_equipment_icon("leg", leg_item.equipment_id if leg_item and leg_item.equipped else None),
+                lambda: self.fallback("leg"),
+            ),
+            "favorite_item": (
+                lambda: self.get_favorite_item_icon(data.favorite_item.tid if data.favorite_item else None),
+                lambda: self.fallback("favorite"),
+            ),
+            "cube": (
+                lambda: self.get_cube_icon(data.cube.tid if data.cube else None),
+                lambda: self.fallback("cube"),
+            ),
+            "element": (
+                lambda: self.get_element_icon(data.element),
+                lambda: self.fallback("element"),
+            ),
+            "corporation": (
+                lambda: self.get_corporation_icon(data.corporation),
+                lambda: self.fallback("corporation"),
+            ),
+            "weapon": (
+                lambda: self.get_weapon_icon(data.weapon),
+                lambda: self.fallback("weapon"),
+            ),
+            "burst": (
+                lambda: self.get_burst_icon(data.burst),
+                lambda: self.fallback("burst"),
+            ),
+        }
+
+        results: dict[str, Image.Image] = {}
+        future_map: dict[concurrent.futures.Future, str] = {}
+
+        for key, (func, _) in tasks.items():
+            try:
+                fut = self._executor.submit(func)
+                future_map[fut] = key
+            except Exception as exc:
+                logger.warning("提交素材获取任务失败 [%s]: %s", key, exc)
+                results[key] = tasks[key][1]()
+
+        if future_map:
+            done, not_done = concurrent.futures.wait(future_map.keys(), timeout=timeout)
+            for fut in done:
+                key = future_map[fut]
+                try:
+                    res = fut.result()
+                    results[key] = res if res is not None else tasks[key][1]()
+                except Exception as exc:
+                    logger.warning("素材获取执行异常 [%s]: %s", key, exc)
+                    results[key] = tasks[key][1]()
+
+            for fut in not_done:
+                key = future_map[fut]
+                logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，使用降级 fallback", timeout, key)
+                results[key] = tasks[key][1]()
+
+        return CharacterCardAssets(
+            portrait=results.get("portrait") or tasks["portrait"][1](),
+            equipment={
+                "head": results.get("head") or tasks["head"][1](),
+                "torso": results.get("torso") or tasks["torso"][1](),
+                "arm": results.get("arm") or tasks["arm"][1](),
+                "leg": results.get("leg") or tasks["leg"][1](),
+            },
+            favorite_item=results.get("favorite_item") or tasks["favorite_item"][1](),
+            cube=results.get("cube") or tasks["cube"][1](),
+            element=results.get("element") or tasks["element"][1](),
+            corporation=results.get("corporation") or tasks["corporation"][1](),
+            weapon=results.get("weapon") or tasks["weapon"][1](),
+            burst=results.get("burst") or tasks["burst"][1](),
+        )
+
+    def close(self) -> None:
+        try:
+            self._executor.shutdown(wait=False, cancel_futures=True)
+        except TypeError:
+            self._executor.shutdown(wait=False)
+        except Exception:
+            pass
+        try:
+            self.spine.queue.stop(wait=False)
+        except Exception:
+            pass
+

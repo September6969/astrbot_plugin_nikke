@@ -583,6 +583,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(rows["部队总战力"], "1,234,567")
         self.assertEqual(rows["回收室研究"], "2 项 · 等级合计 30")
         self.assertEqual(rows["收藏记录"], "10")
+        self.assertNotIn("头像 ID", rows)
 
     async def test_chinese_and_legacy_commands_share_one_root_router(self):
         from astrbot_plugin_nikke.main import NikkePlugin
@@ -607,6 +608,85 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(chinese, ["账号结果"])
         self.assertEqual(legacy, ["练度结果"])
         self.assertEqual(calls, [("account", "绑定", ""), ("roster",)])
+
+    async def test_m5_command_routing(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        calls = []
+
+        async def campaign(event, arg1="", arg2=""):
+            calls.append(("campaign", arg1, arg2))
+            yield "战役结果"
+
+        async def cdk_batch(event, raw_codes=""):
+            calls.append(("cdk_batch", raw_codes))
+            yield "批量CDK结果"
+
+        async def cdk_available(event):
+            calls.append(("cdk_available",))
+            yield "可用CDK结果"
+
+        async def cdk_history(event):
+            calls.append(("cdk_history",))
+            yield "CDK历史结果"
+
+        async def poke(event, char=""):
+            calls.append(("poke", char))
+            yield "戳一戳结果"
+
+        async def event_schedule(event):
+            calls.append(("event_schedule",))
+            yield "日程结果"
+
+        async def announcements_view(event):
+            calls.append(("announcements_view",))
+            yield "公告结果"
+
+        async def guide(event, category=""):
+            calls.append(("guide", category))
+            yield "攻略结果"
+
+        plugin.campaign = campaign
+        plugin.cdk_batch = cdk_batch
+        plugin.cdk_available = cdk_available
+        plugin.cdk_history = cdk_history
+        plugin.poke = poke
+        plugin.event_schedule = event_schedule
+        plugin.announcements_view = announcements_view
+        plugin.guide = guide
+        event = object()
+
+        r1 = [item async for item in plugin.nikke(event, "战役", "46-40", "")]
+        r2 = [item async for item in plugin.nikke(event, "cdk", "批量", "CODE1 CODE2")]
+        r3 = [item async for item in plugin.nikke(event, "cdk", "可用", "")]
+        r4 = [item async for item in plugin.nikke(event, "cdk", "历史", "")]
+        r5 = [item async for item in plugin.nikke(event, "戳一戳", "爱丽丝", "")]
+        r6 = [item async for item in plugin.nikke(event, "日程", "", "")]
+        r7 = [item async for item in plugin.nikke(event, "公告", "", "")]
+        r8 = [item async for item in plugin.nikke(event, "攻略", "练度", "")]
+
+        self.assertEqual(r1, ["战役结果"])
+        self.assertEqual(r2, ["批量CDK结果"])
+        self.assertEqual(r3, ["可用CDK结果"])
+        self.assertEqual(r4, ["CDK历史结果"])
+        self.assertEqual(r5, ["戳一戳结果"])
+        self.assertEqual(r6, ["日程结果"])
+        self.assertEqual(r7, ["公告结果"])
+        self.assertEqual(r8, ["攻略结果"])
+        self.assertEqual(
+            calls,
+            [
+                ("campaign", "46-40", ""),
+                ("cdk_batch", "CODE1 CODE2"),
+                ("cdk_available",),
+                ("cdk_history",),
+                ("poke", "爱丽丝"),
+                ("event_schedule",),
+                ("announcements_view",),
+                ("guide", "练度"),
+            ],
+        )
 
     async def test_character_query_requires_unique_match(self):
         from astrbot_plugin_nikke.main import NikkePlugin
@@ -648,8 +728,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 return {"qq_id": qq_id, "cookie": VALID_COOKIE}
 
         class FakeClient:
-            async def get_roster(self, account, include_details=True):
-                return [{"name_code": 999, "lv": 1}]
+            async def get_character_detail(self, account, code):
+                raise ValueError("该账号未持有这名妮姬")
 
         plugin = NikkePlugin.__new__(NikkePlugin)
         plugin.store = Store()
@@ -717,6 +797,64 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first, second)
         self.assertNotIn(code, persisted)
         self.assertNotIn(code, "".join(first))
+
+    async def test_character_query_does_not_call_get_roster(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        class Event:
+            def get_sender_id(self):
+                return "10001"
+            def plain_result(self, text):
+                return text
+
+        class Store:
+            def get_account(self, qq_id):
+                return {"qq_id": qq_id, "cookie": VALID_COOKIE}
+
+        class TrackingClient:
+            def __init__(self):
+                self.roster_called = False
+                self.detail_called = False
+
+            async def get_roster(self, account, include_details=True):
+                self.roster_called = True
+                return [{"name_code": 1, "lv": 200}]
+
+            async def get_character_detail(self, account, code):
+                self.detail_called = True
+                raise ValueError("该账号未持有这名妮姬")
+
+        client = TrackingClient()
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.store = Store()
+        plugin.client = client
+        plugin._directory = [
+            {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
+        ]
+        results = [item async for item in plugin.character(Event(), "爱丽丝")]
+        self.assertEqual(len(results), 1)
+        self.assertIn("未持有", results[0])
+        # 验证 main.character() 不再主动调用 client.get_roster()
+        self.assertFalse(client.roster_called)
+        self.assertTrue(client.detail_called)
+
+    async def test_terminate_reclaims_asset_manager(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+        from unittest.mock import AsyncMock, MagicMock
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._closing = False
+        plugin._background_tasks = []
+        plugin.feedback_manager = AsyncMock()
+        mock_web = AsyncMock()
+        plugin.web = mock_web
+        mock_asset_manager = MagicMock()
+        plugin.asset_manager = mock_asset_manager
+
+        await plugin.terminate()
+        self.assertTrue(plugin._closing)
+        mock_asset_manager.close.assert_called_once()
+        mock_web.stop.assert_awaited_once()
 
 
 if __name__ == "__main__":

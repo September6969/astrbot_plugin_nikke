@@ -122,8 +122,29 @@ class ProfileBuilderTests(unittest.TestCase):
             plugin_version="test",
         )
         self.assertEqual(result.character_count, 0)
-        self.assertEqual(result.max_level, 0)
-        self.assertEqual(result.max_combat, 0)
+        self.assertIsNone(result.max_level)
+        self.assertIsNone(result.max_combat)
+
+    def test_roster_failure_preserves_basic_character_and_costume_count_and_sets_maxes_none(self):
+        # 120 名角色 + 15 套时装 + roster failure
+        basic = {
+            "nickname": "指挥官",
+            "character_count": 120,
+            "character_costume_count": 15,
+            "icon_id": "secret_icon_999",
+        }
+        result = self.builder.build(
+            account={"area_id": "1"},
+            basic=basic,
+            outpost={},
+            roster=None,
+            fetched_at="test",
+            plugin_version="test",
+        )
+        self.assertEqual(result.character_count, 120)
+        self.assertEqual(result.character_costume_count, 15)
+        self.assertIsNone(result.max_level)
+        self.assertIsNone(result.max_combat)
 
     def test_none_synchro_level_becomes_none(self):
         result = self.builder.build(
@@ -205,17 +226,17 @@ class ProfileEmptyStateTests(unittest.TestCase):
 
     def test_empty_profile_renders_with_fallback_message(self):
         data = ProfileDashboardData(
-            commander_name="\u6307\u6325\u5b98",
+            commander_name="指挥官",
             area_id="",
             synchro_level=None,
             outpost_battle_level=None,
             normal_campaign=None,
             hard_campaign=None,
             character_count=0,
-            max_level=0,
-            max_combat=0,
+            max_level=None,
+            max_combat=None,
             fetched_at="2026-09-05 12:00",
-            plugin_version="0.1.7",
+            plugin_version="0.1.8",
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             renderer = self._renderer(tmpdir)
@@ -235,10 +256,10 @@ class ProfileEmptyStateTests(unittest.TestCase):
             normal_campaign=None,
             hard_campaign=None,
             character_count=0,
-            max_level=0,
-            max_combat=0,
+            max_level=None,
+            max_combat=None,
             fetched_at="2026-09-05 12:00",
-            plugin_version="0.1.7",
+            plugin_version="0.1.8",
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             renderer = self._renderer(tmpdir)
@@ -246,6 +267,100 @@ class ProfileEmptyStateTests(unittest.TestCase):
             img = Image.open(path)
             self.assertGreater(img.size[1], 200)
             img.close()
+
+    def test_roster_failure_renders_with_placeholder_and_no_icon_id(self):
+        data = ProfileDashboardData(
+            commander_name="指挥官",
+            area_id="1",
+            synchro_level=None,
+            outpost_battle_level=None,
+            normal_campaign=None,
+            hard_campaign=None,
+            character_count=120,
+            max_level=None,
+            max_combat=None,
+            character_costume_count=15,
+            created_at="2024-01-01",
+            fetched_at="2026-09-05 12:00",
+            plugin_version="0.1.8",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            renderer = self._renderer(tmpdir)
+            path = renderer.render_profile(data)
+            self.assertTrue(path.endswith(".png"))
+            with Image.open(path) as img:
+                self.assertEqual(img.size[0], 1200)
+                self.assertGreater(img.size[1], 200)
+            items = ProfileCardRenderer._extra_items(data)
+            joined_labels = " ".join(k for k, _ in items)
+            self.assertNotIn("头像 ID", joined_labels)
+            self.assertNotIn("icon_id", joined_labels)
+
+    def test_profile_all_roster_stats_unknown_does_not_crash(self):
+        data = ProfileDashboardData(
+            commander_name="未知指挥官",
+            area_id="1",
+            synchro_level=None,
+            outpost_battle_level=None,
+            normal_campaign=None,
+            hard_campaign=None,
+            character_count=None,
+            max_level=None,
+            max_combat=None,
+            character_costume_count=None,
+            fetched_at="2026-09-05 12:00",
+            plugin_version="0.1.8",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            renderer = self._renderer(tmpdir)
+            path = renderer.render_profile(data)
+            self.assertTrue(path.endswith(".png"))
+            with Image.open(path) as img:
+                self.assertEqual(img.size[0], 1200)
+
+    def test_profile_only_costume_count_renders_gracefully(self):
+        data = ProfileDashboardData(
+            commander_name="时装党",
+            area_id="1",
+            synchro_level=None,
+            outpost_battle_level=None,
+            normal_campaign=None,
+            hard_campaign=None,
+            character_count=None,
+            max_level=None,
+            max_combat=None,
+            character_costume_count=42,
+            fetched_at="2026-09-05 12:00",
+            plugin_version="0.1.8",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            renderer = self._renderer(tmpdir)
+            path = renderer.render_profile(data)
+            self.assertTrue(path.endswith(".png"))
+            with Image.open(path) as img:
+                self.assertEqual(img.size[0], 1200)
+
+    def test_profile_character_count_zero_renders_gracefully(self):
+        data = ProfileDashboardData(
+            commander_name="新兵",
+            area_id="1",
+            synchro_level=None,
+            outpost_battle_level=None,
+            normal_campaign=None,
+            hard_campaign=None,
+            character_count=0,
+            max_level=None,
+            max_combat=None,
+            character_costume_count=None,
+            fetched_at="2026-09-05 12:00",
+            plugin_version="0.1.8",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            renderer = self._renderer(tmpdir)
+            path = renderer.render_profile(data)
+            self.assertTrue(path.endswith(".png"))
+            with Image.open(path) as img:
+                self.assertEqual(img.size[0], 1200)
 
 
 if __name__ == "__main__":

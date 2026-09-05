@@ -4,6 +4,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
+
+from PIL import Image
 
 
 @dataclass(slots=True)
@@ -80,3 +83,17 @@ class CharacterCardData:
     cube: CubeData | None
     equipment: dict[str, EquipmentData]
     option_totals: list[OptionSummary]
+
+
+@dataclass(slots=True)
+class CharacterCardAssets:
+    portrait: Image.Image
+    equipment: dict[str, Image.Image]
+    favorite_item: Image.Image
+    cube: Image.Image
+    element: Image.Image
+    corporation: Image.Image
+    weapon: Image.Image
+    burst: Image.Image
+
+

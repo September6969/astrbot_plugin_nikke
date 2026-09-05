@@ -119,7 +119,7 @@ class ProfileCardRenderer(CardRenderer):
             sections.append(self._basic_info_section(data))
         if data.synchro_level is not None or data.outpost_battle_level is not None or data.infra_core_level or data.tactic_academy_class or data.tactic_academy_lesson or data.jukebox_count or data.recycle_room_summary or data.memorial_summary:
             sections.append(self._outpost_section(data))
-        if data.character_count > 0:
+        if any(v is not None for v in [data.character_count, data.max_level, data.max_combat, data.character_costume_count]):
             sections.append(self._roster_stats_section(data))
         extra = self._extra_items(data)
         if extra:
@@ -195,11 +195,13 @@ class ProfileCardRenderer(CardRenderer):
         def draw_section(draw, box, fill):
             self._section_panel(draw, box, "ROSTER / \u59ae\u59ec\u7edf\u8ba1", fill=fill)
             x, y = box[0] + 30, box[1] + 55
-            items = [
-                ("\u89d2\u8272\u6570\u91cf", str(data.character_count)),
-                ("\u6700\u9ad8\u7b49\u7ea7", f"Lv.{data.max_level}"),
-                ("\u6700\u9ad8\u5355\u4f53\u6218\u529b", f"{data.max_combat:,}"),
-            ]
+            items = []
+            if data.character_count is not None:
+                items.append(("\u89d2\u8272\u6570\u91cf", str(data.character_count)))
+            if data.max_level is not None:
+                items.append(("\u6700\u9ad8\u7b49\u7ea7", f"Lv.{data.max_level}"))
+            if data.max_combat is not None:
+                items.append(("\u6700\u9ad8\u5355\u4f53\u6218\u529b", f"{data.max_combat:,}"))
             if data.character_costume_count is not None:
                 items.append(("\u65f6\u88c5\u6570\u91cf", str(data.character_costume_count)))
             for idx, (label, value) in enumerate(items):
@@ -208,7 +210,16 @@ class ProfileCardRenderer(CardRenderer):
                 self._text(draw, (col_x, col_y), label, 18, PROFILE_THEME["muted"])
                 self._text(draw, (col_x, col_y + 28), value, 36, PROFILE_THEME["primary"], width=340, bold=True)
 
-        item_count = 3 + (1 if data.character_costume_count is not None else 0)
+        item_count = sum(
+            1
+            for v in [
+                data.character_count,
+                data.max_level,
+                data.max_combat,
+                data.character_costume_count,
+            ]
+            if v is not None
+        )
         rows = (item_count + 2) // 3
         height = 55 + rows * 70 + 20
         return draw_section, height
@@ -216,10 +227,8 @@ class ProfileCardRenderer(CardRenderer):
     @staticmethod
     def _extra_items(data) -> list[tuple[str, str]]:
         items: list[tuple[str, str]] = []
-        if data.icon_id:
-            items.append(("\u5934\u50cf ID", str(data.icon_id)))
         if data.created_at:
-            items.append(("\u6ce8\u518c\u65f6\u95f4", str(data.created_at)))
+            items.append(("注册时间", str(data.created_at)))
         if data.progress_tribe_tower:
             items.append(("\u90e8\u843d\u5854\u8fdb\u5ea6", str(data.progress_tribe_tower)))
         if data.sim_room_overclock_score:
