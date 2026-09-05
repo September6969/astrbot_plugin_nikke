@@ -30,7 +30,7 @@ from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from .character_card_renderer import CharacterCardRenderer
-from .client import BlaBlaClient, BlaBlaError, CookieExpired
+from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
 from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
@@ -709,6 +709,9 @@ class NikkePlugin(Star):
                     try:
                         detail = "登录有效；" + await self.client.perform_daily_signin(account)
                         self.store.finish_run(signin_key, "success", detail)
+                    except UnknownAfterAction:
+                        self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
+                        raise
                     except Exception as exc:
                         self.store.finish_run(signin_key, "failed", type(exc).__name__)
                         raise
@@ -728,6 +731,10 @@ class NikkePlugin(Star):
             self.store.finish_run(run_key, "expired", "Cookie失效")
             return account.get("nickname") or qq_id, "Cookie失效，请重新绑定"
         except Exception as exc:
+            if isinstance(exc, UnknownAfterAction):
+                detail = "签到结果未确认，请稍后查询状态；未自动重发"
+                self.store.finish_run(run_key, "unknown", detail)
+                return account.get("nickname") or qq_id, detail
             detail = f"失败：{type(exc).__name__}"
             self.store.finish_run(run_key, "failed", detail)
             return account.get("nickname") or qq_id, detail

@@ -59,6 +59,10 @@ class CookieExpired(BlaBlaError):
     pass
 
 
+class UnknownAfterAction(BlaBlaError):
+    """写请求已尝试，后续只读验证仍无法确认结果，禁止自动重发。"""
+
+
 @dataclass(slots=True)
 class ValidationResult:
     valid: bool
@@ -547,24 +551,23 @@ class BlaBlaClient:
         if not status["task_id"]:
             raise BlaBlaError("签到任务缺少task_id", endpoint="GetTaskListWithStatusV2")
         last_error: BlaBlaError | None = None
-        for attempt in range(3):
-            if attempt:
-                await asyncio.sleep((2 ** attempt) + random.uniform(0, 1))
-            try:
-                await self._community_request(
-                    "POST",
-                    DAILY_CHECK_IN,
-                    account,
-                    payload={"task_id": status["task_id"]},
-                )
-            except BlaBlaError as exc:
-                last_error = exc
+        try:
+            await self._community_request(
+                "POST", DAILY_CHECK_IN, account, payload={"task_id": status["task_id"]},
+            )
+        except CookieExpired:
+            raise
+        except BlaBlaError as exc:
+            last_error = exc
+        try:
             verified = await self.get_daily_signin(account)
             if verified["completed"]:
                 return "签到成功"
-        if last_error:
+        except BlaBlaError as exc:
+            raise UnknownAfterAction("签到结果未确认，请稍后查询状态，未自动重发", "UNKNOWN_AFTER_ACTION", DAILY_CHECK_IN) from exc
+        if last_error and not isinstance(last_error, (BlaBlaTimeoutError, BlaBlaNetworkError)):
             raise last_error
-        raise BlaBlaError("签到后状态未完成", endpoint="DailyCheckIn")
+        raise UnknownAfterAction("签到结果未确认，请稍后查询状态，未自动重发", "UNKNOWN_AFTER_ACTION", DAILY_CHECK_IN)
 
     async def redeem_cdk(self, account: dict[str, Any], code: str) -> CdkRedemptionResult:
         """使用已绑定账号兑换国际服CDK，不对写请求自动重试。"""
