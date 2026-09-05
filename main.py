@@ -98,7 +98,22 @@ class NikkePlugin(Star):
         self._background_tasks: list[asyncio.Task] = []
         self._closing = False
         self._pack_extension()
-        self._background_tasks.append(asyncio.create_task(self._start_services()))
+        self._spawn_background_task(self._start_services())
+
+    def _spawn_background_task(self, coro):
+        """统一登记任务，关闭期间拒绝新任务并释放尚未启动的协程。"""
+        if getattr(self, "_closing", False):
+            coro.close()
+            return None
+        task = asyncio.create_task(coro)
+        self._background_tasks.append(task)
+        def done(completed):
+            if completed in self._background_tasks:
+                self._background_tasks.remove(completed)
+            if not completed.cancelled() and completed.exception() is not None:
+                logger.warning("[NIKKE] 后台任务失败: %s", type(completed.exception()).__name__)
+        task.add_done_callback(done)
+        return task
 
     @property
     def cdk_service(self) -> CdkService:
@@ -136,7 +151,7 @@ class NikkePlugin(Star):
             logger.info(f"[NIKKE] 已载入 {len(self._directory)} 条妮姬目录")
         except Exception as exc:
             logger.warning(f"[NIKKE] 妮姬目录载入失败: {exc}")
-        self._background_tasks.append(asyncio.create_task(self._sync_announcements_background()))
+        self._spawn_background_task(self._sync_announcements_background())
         await self._scheduler_loop()
 
     async def _sync_announcements_background(self) -> None:
@@ -165,13 +180,13 @@ class NikkePlugin(Star):
             summary_m = int(self.store.get_setting("summary_minute", self.config.get("summary_minute", 30)))
             if (now.hour, now.minute) == (daily_h, daily_m) and last_daily != today:
                 last_daily = today
-                asyncio.create_task(self._run_all_daily(today, stagger=True))
+                self._spawn_background_task(self._run_all_daily(today, stagger=True))
             if (now.hour, now.minute) == (summary_h, summary_m) and last_summary != today:
                 last_summary = today
-                asyncio.create_task(self._send_summary(today))
+                self._spawn_background_task(self._send_summary(today))
             if time.time() - last_announcement_sync > 3600:
                 last_announcement_sync = time.time()
-                asyncio.create_task(self._sync_announcements_background())
+                self._spawn_background_task(self._sync_announcements_background())
             await asyncio.sleep(20)
 
     @staticmethod
@@ -1212,6 +1227,11 @@ class NikkePlugin(Star):
 
     async def terminate(self):
         self._closing = True
+        # 先停止生产任务，再关闭它们依赖的资源。
+        tasks = list(self._background_tasks)
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
         if hasattr(self, "feedback_manager") and self.feedback_manager:
             await self.feedback_manager.close()
         if hasattr(self, "asset_manager") and self.asset_manager:
@@ -1220,9 +1240,6 @@ class NikkePlugin(Star):
             except Exception as exc:
                 logger.debug(f"[NIKKE] 素材管理器回收跳过: {exc}")
         await self.web.stop()
-        for task in self._background_tasks:
-            task.cancel()
-        await asyncio.gather(*self._background_tasks, return_exceptions=True)
         logger.info("[NIKKE] 插件已停止")
 
     async def close(self):
