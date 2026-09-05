@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 
 from astrbot_plugin_nikke.cdk_models import CdkBatchResult, CdkRedeemResult
-from astrbot_plugin_nikke.cdk_service import CdkInputParser, CdkService
+from astrbot_plugin_nikke.cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from astrbot_plugin_nikke.client import BlaBlaClient, BlaBlaError, CdkRedemptionResult, CookieExpired
 
 
@@ -33,6 +33,49 @@ class CdkInputParserTests(unittest.TestCase):
         text = "ab   valid_cdk_123   " + "x" * 70 + "   another_cdk"
         codes = CdkInputParser.parse(text)
         self.assertEqual(codes, ["valid_cdk_123", "another_cdk"])
+
+    def test_parser_rejects_3_char_cdk(self):
+        text = "abc GOOD1234"
+        codes = CdkInputParser.parse(text)
+        self.assertEqual(codes, ["GOOD1234"])
+
+    def test_parser_rejects_invalid_symbols(self):
+        text = "ABC!!! test@code foo/bar GOOD_123 GOOD-456"
+        codes = CdkInputParser.parse(text)
+        self.assertEqual(codes, ["GOOD_123", "GOOD-456"])
+
+    def test_parser_rejects_chinese_chars(self):
+        text = "中文CDK VALID1234"
+        codes = CdkInputParser.parse(text)
+        self.assertEqual(codes, ["VALID1234"])
+
+    def test_parser_boundary_lengths(self):
+        valid_4 = "AB12"
+        valid_64 = "A" * 64
+        invalid_65 = "A" * 65
+        text = f"{valid_4} {valid_64} {invalid_65}"
+        codes = CdkInputParser.parse(text)
+        self.assertEqual(codes, [valid_4, valid_64])
+
+    def test_parser_preserves_case_distinctness(self):
+        text = "AliceCode aliceCode"
+        codes = CdkInputParser.parse(text)
+        self.assertEqual(codes, ["AliceCode", "aliceCode"])
+
+    def test_parser_separators_support(self):
+        text = "CODE1,CODE2；CODE3\nCODE4"
+        codes = CdkInputParser.parse(text)
+        self.assertEqual(codes, ["CODE1", "CODE2", "CODE3", "CODE4"])
+
+    def test_shared_cdk_pattern_consistency(self):
+        import astrbot_plugin_nikke.main as main_mod
+
+        self.assertIs(main_mod.CDK_PATTERN, CDK_PATTERN)
+        self.assertEqual(CDK_PATTERN.pattern, r"[A-Za-z0-9_-]{4,64}")
+        self.assertFalse(CDK_PATTERN.fullmatch("abc"))
+        self.assertTrue(CDK_PATTERN.fullmatch("abcd"))
+        self.assertTrue(CDK_PATTERN.fullmatch("A" * 64))
+        self.assertFalse(CDK_PATTERN.fullmatch("A" * 65))
 
 
 class CdkServiceTests(unittest.IsolatedAsyncioTestCase):

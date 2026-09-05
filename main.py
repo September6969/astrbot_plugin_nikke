@@ -28,7 +28,7 @@ from .campaign_history_models import ClearLineupStatus
 from .campaign_history_renderer import CampaignHistoryRenderer
 from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
-from .cdk_service import CdkInputParser, CdkService
+from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from .character_card_renderer import CharacterCardRenderer
 from .client import BlaBlaClient, BlaBlaError, CookieExpired
 from .processing_feedback import DelayedFeedbackManager
@@ -811,7 +811,7 @@ class NikkePlugin(Star):
             yield event.plain_result("CDK真实兑换当前由管理员关闭。")
             return
         normalized = code.strip()
-        if not re.fullmatch(r"[A-Za-z0-9_-]{4,64}", normalized):
+        if not CDK_PATTERN.fullmatch(normalized):
             yield event.plain_result("兑换码格式无效：仅支持4至64位字母、数字、下划线或连字符。")
             return
         qq_id = self._qq_id(event)

@@ -29,6 +29,8 @@ from .client import (
 
 logger = logging.getLogger("nikke.cdk")
 
+CDK_PATTERN: re.Pattern[str] = re.compile(r"[A-Za-z0-9_-]{4,64}")
+
 
 class CdkInputParser:
     @staticmethod
@@ -47,8 +49,7 @@ class CdkInputParser:
 
         for token in tokens:
             cleaned = token.strip().strip("\"'[]()")
-            # 过滤过短或非合法字符
-            if not cleaned or len(cleaned) < 3 or len(cleaned) > 64:
+            if not CDK_PATTERN.fullmatch(cleaned):
                 continue
             if cleaned not in seen:
                 seen.add(cleaned)
