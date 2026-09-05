@@ -608,7 +608,7 @@ class BlaBlaClient:
                 return {"code": 212000, "data": None, "msg": "请求过频"}
             if exc.code == "300001":
                 raise CookieExpired("登录状态已失效，请重新绑定", exc.code, exc.endpoint) from exc
-            return {"code": int(exc.code) if exc.code.isdigit() else -1, "data": None, "msg": str(exc)}
+            raise
 
     async def get_cdk_redemption(self, account: dict[str, Any]) -> list[dict]:
         """获取官方可用 CDK 列表。

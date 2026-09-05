@@ -92,6 +92,8 @@ class UnionRaidBuilder:
                 hp_percent = None
                 cleared_percent = None
             else:
+                # DTO、文本及加权汇总统一使用有效血量范围。
+                current_hp = min(current_hp, max_hp)
                 hp_percent = current_hp / max_hp
                 cleared_percent = max(0.0, min(1.0, 1.0 - hp_percent))
                 if current_hp == 0:

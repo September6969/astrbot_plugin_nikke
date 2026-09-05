@@ -77,10 +77,10 @@ async def capture(data_dir: Path, output_dir: Path) -> None:
     openid = str(account.get("game_openid") or "")
     if not area_id or not openid:
         raise RuntimeError("授权账号缺少游戏上下文")
-    game_openid = openid.split("-")[-1]
+    game_openid = openid
 
     async with httpx.AsyncClient(timeout=20, follow_redirects=False) as client:
-        guild = await post(client, account, MY_GUILD, {"nikke_area_id": area_id, "intl_open_id": game_openid})
+        guild = await post(client, account, MY_GUILD, {"ignore_toast": True})
         if str(guild.get("code", "")) not in {"", "0"}:
             raise RuntimeError(f"GetMyGuildInfo 返回业务码 {guild.get('code')}")
         guild_id = find_first(guild.get("data", {}), "guild_id")
