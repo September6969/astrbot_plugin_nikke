@@ -100,15 +100,23 @@ class CampaignHistoryBuilder:
             )
 
         members: list[StageClearMember] = []
+        malformed = False
+        required = {"tid", "lv", "combat", "slot"}
+
         for item in raw_list:
             if not isinstance(item, dict):
+                malformed = True
+                continue
+            if not required.issubset(item):
+                malformed = True
                 continue
             try:
-                tid = int(item.get("tid", 0))
-                level = int(item.get("lv", 0))
-                combat = int(item.get("combat", 0))
-                slot = int(item.get("slot", 0))
+                tid = int(item["tid"])
+                level = int(item["lv"])
+                combat = int(item["combat"])
+                slot = int(item["slot"])
             except (ValueError, TypeError):
+                malformed = True
                 continue
 
             info = self._directory_by_tid.get(tid, {})
@@ -130,7 +138,11 @@ class CampaignHistoryBuilder:
 
         members.sort(key=lambda m: m.slot)
 
-        if len(members) != 5 or set(m.slot for m in members) != {1, 2, 3, 4, 5}:
+        if (
+            malformed
+            or len(members) != 5
+            or set(m.slot for m in members) != {1, 2, 3, 4, 5}
+        ):
             return StageClearRecord(
                 mode=stage.mode,
                 chapter=stage.chapter,

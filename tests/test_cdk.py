@@ -181,7 +181,50 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         items = await client.get_cdk_redemption_history(account)
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["cdkey"], "HIST1")
-        client._community_request.assert_called_with("POST", GET_CDK_REDEMPTION_HISTORY, account, payload={})
+        client._community_request.assert_called_with(
+            "POST",
+            GET_CDK_REDEMPTION_HISTORY,
+            account,
+            payload={
+                "page_num": 1,
+                "page_size": 20,
+            },
+        )
+
+    async def test_client_get_cdk_redemption_history_unpacks_cdk_redemption_list(self):
+        from astrbot_plugin_nikke.client import GET_CDK_REDEMPTION_HISTORY
+        client = BlaBlaClient()
+        account = {"cookie": "game_uid=1", "game_openid": "openid"}
+
+        client._community_request = AsyncMock(return_value={
+            "code": 0,
+            "msg": "ok",
+            "data": {
+                "cdk_redemption_list": [
+                    {
+                        "cdk": "TESTCODE1",
+                        "status": 1,
+                    },
+                    {
+                        "cdk": "TESTCODE2",
+                        "status": 1,
+                    },
+                ]
+            },
+        })
+        items = await client.get_cdk_redemption_history(account)
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0]["cdk"], "TESTCODE1")
+        self.assertEqual(items[1]["cdk"], "TESTCODE2")
+        client._community_request.assert_called_with(
+            "POST",
+            GET_CDK_REDEMPTION_HISTORY,
+            account,
+            payload={
+                "page_num": 1,
+                "page_size": 20,
+            },
+        )
 
     async def test_client_get_cdk_redemption_raises_on_error(self):
         client = BlaBlaClient()

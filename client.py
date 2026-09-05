@@ -628,12 +628,27 @@ class BlaBlaClient:
         """获取官方 CDK 历史兑换记录。
         先取响应 data，再按已确认字段拆包；接口异常抛出受控异常。
         """
-        res = await self._community_request("POST", GET_CDK_REDEMPTION_HISTORY, account, payload={})
+        res = await self._community_request(
+            "POST",
+            GET_CDK_REDEMPTION_HISTORY,
+            account,
+            payload={
+                "page_num": 1,
+                "page_size": 20,
+            },
+        )
         data = res.get("data") if isinstance(res, dict) else res
         if isinstance(data, list):
             return data
         if isinstance(data, dict):
-            for key in ("list", "history_list", "history", "records", "items"):
+            for key in (
+                "cdk_redemption_list",
+                "list",
+                "history_list",
+                "history",
+                "records",
+                "items",
+            ):
                 if isinstance(data.get(key), list):
                     return data[key]
         return []
