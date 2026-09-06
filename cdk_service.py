@@ -157,11 +157,14 @@ class CdkService:
         account: dict[str, Any],
         codes: list[str],
         account_key: str = "",
-        delay: float = 0.5,
+        delay: float = 1.0,
         store=None,
         qq_id: str = "",
     ) -> CdkBatchResult:
         """批量串行兑换 CDK，遇登录失效或限流安全中止。与单条兑换共享同账号互斥锁。"""
+        if len(codes) > 10:
+            raise ValueError("单次最多兑换 10 个码")
+        delay = max(1.0, delay)
         lock = await self._get_account_lock(account_key or str(account.get("game_uid", "default")))
         batch_res = CdkBatchResult()
 

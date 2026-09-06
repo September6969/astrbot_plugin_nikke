@@ -3,12 +3,24 @@ import tempfile
 import hashlib
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
+from unittest.mock import patch
 from astrbot_plugin_nikke.storage import NikkeStore
 from astrbot_plugin_nikke.client import CdkRedemptionResult, BlaBlaTimeoutError
 from astrbot_plugin_nikke.cdk_service import CdkService
 
 
 class PersistenceTests(IsolatedAsyncioTestCase):
+    async def test_service_batch_limits_and_minimum_delay(self):
+        client = AsyncMock()
+        client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "ok")
+        service = CdkService(client)
+        with self.assertRaises(ValueError):
+            await service.redeem_batch({}, ["FAKE"] * 11)
+        client.redeem_cdk.assert_not_awaited()
+        with patch("astrbot_plugin_nikke.cdk_service.asyncio.sleep", new_callable=AsyncMock) as sleep:
+            await service.redeem_batch({}, ["FAKE-1", "FAKE-2"], delay=0)
+            sleep.assert_awaited_once_with(1.0)
+
     async def test_batch_restart_reuses_single_namespace(self):
         with tempfile.TemporaryDirectory() as directory:
             store = NikkeStore(directory)
