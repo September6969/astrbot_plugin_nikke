@@ -308,6 +308,10 @@ class NikkePlugin(Star):
     ):
         """NIKKE 中文精简指令入口。"""
         command_key = command.strip().casefold()
+        if command_key in {"语音", "voice"}:
+            async for result in self.voice_settings(event, arg1, arg2):
+                yield result
+            return
         if command_key in {"", "帮助", "help"}:
             async for result in self.nikke_help(event, arg1):
                 yield result
@@ -583,6 +587,50 @@ class NikkePlugin(Star):
                 yield result
             return
         yield event.plain_result("用法：/妮姬 查询 练度 [角色名]、/妮姬 查询 资料 <角色名>、/妮姬 查询 战役 <关卡> 或 /妮姬 攻略")
+
+    async def voice_settings(self, event: AstrMessageEvent, action: str = "", value: str = ""):
+        """保存明确的语音偏好，音频需管理员在本地登记授权来源。"""
+        from .voice_audio import VoicePreference
+        key = f"{event.get_platform_name()}:{self._qq_id(event)}"
+        preference = VoicePreference.load(self.store, key)
+        if action in {"开", "关"}:
+            preference.enabled = action == "开"
+        elif action == "语言" and value in {"zh-cn", "en", "ja", "ko"}:
+            preference.locale = value
+        elif action == "角色" and value in VoiceResolver.CHARACTER_LINES:
+            preference.character = value
+        elif action:
+            yield event.plain_result("用法：/妮姬 语音 开|关，语音 语言 zh-cn|en|ja|ko，语音 角色 rapi|alice|anis|red_hood|scarlet|dorothy")
+            return
+        preference.save(self.store, key)
+        yield event.plain_result(f"互动语音：{'开启' if preference.enabled else '关闭'} · {preference.character} · {preference.locale}。缺少已登记音频时使用文本。")
+
+    @filter.event_message_type(filter.EventMessageType.ALL)
+    async def on_nikke_poke(self, event: AstrMessageEvent):
+        """仅对戳向本 Bot 的通知响应；默认关闭，不发送未经登记的音频。"""
+        from .voice_audio import VoicePreference, VoiceAudioCache, is_self_poke
+        raw = getattr(event.message_obj, "raw_message", None)
+        if event.get_platform_name() != "aiocqhttp" or not is_self_poke(raw):
+            return
+        preference = VoicePreference.load(self.store, f"{event.get_platform_name()}:{self._qq_id(event)}")
+        if not preference.enabled or getattr(self, "_closing", False):
+            return
+        now = time.monotonic()
+        if now - getattr(self, "_last_voice_poke", 0) < 10:
+            return
+        self._last_voice_poke = now
+        text = VoiceResolver.resolve_poke_line(preference.character, preference.locale)
+        if not hasattr(self, "_voice_audio"):
+            self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.plugin_dir / "data" / "voice_cache")
+        try:
+            audio = await self._voice_audio.resolve(preference)
+        except (OSError, ValueError, asyncio.TimeoutError):
+            audio = None
+        if audio:
+            from astrbot.api.message_components import Record
+            yield event.chain_result([Record.fromFileSystem(str(audio))])
+        else:
+            yield event.plain_result(text)
 
     async def union_raid_ranking(self, event: AstrMessageEvent):
         """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""

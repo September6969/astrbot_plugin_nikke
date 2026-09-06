@@ -1,5 +1,6 @@
 """仅保留已知结构的突袭证据转换，不读取账号、不发起网络请求。"""
-from fractions import Fraction
+from functools import reduce
+from math import gcd
 from typing import Any
 
 
@@ -20,7 +21,7 @@ def semantic_sanitize(value: Any) -> Any:
                 collect(child)
 
     collect(value)
-    maximum = max(damages, default=0)
+    divisor = reduce(gcd, damages, 0) or 1
 
     def convert(item, key=""):
         if isinstance(item, dict):
@@ -34,8 +35,8 @@ def semantic_sanitize(value: Any) -> Any:
         if isinstance(item, list):
             return [convert(child, key) for child in item]
         if key == "total_damage" and str(item).isdigit():
-            # 同一正比例变换保留逐刀及聚合的相等/大小关系，以分数避免浮点误差。
-            return str(Fraction(int(item), maximum or 1) * 1_000_000)
+            # 按公约数归一到构造单位，保留整数合同及逐刀/聚合的大小关系。
+            return str(int(item) // divisor * 1000)
         if key in {"slot", "day", "level", "difficulty", "step"} and type(item) is int:
             return item
         if key == "is_final_hit" and type(item) is bool:
