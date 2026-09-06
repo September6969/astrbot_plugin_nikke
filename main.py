@@ -573,6 +573,8 @@ class NikkePlugin(Star):
                 basic=data["basic"],
                 outpost=data["outpost"],
                 roster=data["roster"],
+                outpost_available=data.get("outpost_available"),
+                roster_available=data.get("roster_available"),
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )
