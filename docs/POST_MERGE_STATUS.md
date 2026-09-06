@@ -15,7 +15,7 @@
 | 合并状态 | `MERGED`；合并提交的树与 PR head 一致 |
 | 旧 overnight 分支 | `feat/overnight-backlog` 已合并，仅作历史恢复点，不是当前开发分支 |
 
-PR #5 的合并后 CI run 为 [34049251965](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34049251965)，以下 job 均为 `SUCCESS`：
+PR #5 合并前最终 PR CI run 为 [34049251965](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34049251965)，`event = pull_request`、`head = 9a3db964d05ccbed1053ad35a6670cebe572a6c2`；以下 job 均为 `SUCCESS`：
 
 - `Test (Python 3.10)`
 - `Test (Python 3.11)`
@@ -59,4 +59,4 @@ PYTHONPATH=E:/DevCache/nikke-post-merge python -m pytest -q
 
 实际结果（Python 3.10.11，2026-09-06）：`248 passed, 2 warnings, 43 subtests passed`。这是合并后基线回归，不是 Profile V2 的验收结果；A 文档变更后的复核结果写入本分支交接记录。
 
-下一步先提交并审阅 A 的 Draft PR；B 必须重新从届时最新 `origin/main` 创建 `feat/profile-v2`，不继承 A 的未合并提交。
+当前 A 已形成 [PR #6](https://github.com/September6969/astrbot_plugin_nikke/pull/6)。下一步：修正文档状态 → CI → 合并 PR #6 → Profile V2 更新到最新 `origin/main`。不自动合并；PR #6 合并后再同步 `feat/profile-v2`。
