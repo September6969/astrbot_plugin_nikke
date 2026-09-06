@@ -1,11 +1,14 @@
-# NIKKE BlaBlaLink 插件 — 审核修复、最大自治执行与后续开发总文档
+# NIKKE BlaBlaLink 插件 — 审核修复、最大自治执行与后续开发总文档（历史规则）
 
 > 仓库：`September6969/astrbot_plugin_nikke`  
-> 当前主分支基线：`main@deeef6277f09a42918d71b44f49170398a05558b`  
-> 当前工作分支：`feat/overnight-backlog`  
+> 本文是 overnight 阶段的执行规则和历史快照；不是当前状态入口。当前主分支基线、PR #5 和工作区以 [POST_MERGE_STATUS.md](POST_MERGE_STATUS.md) 为准。
+> 本文快照中的主分支基线：`main@deeef6277f09a42918d71b44f49170398a05558b`
+> 本文快照中的工作分支：`feat/overnight-backlog`，已由 PR #5 合并，不是当前开发分支。
 > 当前 HEAD 与提交数量以 `git rev-parse HEAD`、`git rev-list --count origin/main..HEAD` 为准，避免固定计数过期。
 > 本文目的：统一此前讨论中的 **审核修复、Agent 最大自治、Guide/Spine/Voice 资源策略、人工边界、后续开发顺序和执行 Prompt**。  
 > 本文优先于此前较保守的“人工任务”说明。
+
+新的阶段任务入口为 [POST_MERGE_PHASE2_PLAN.md](POST_MERGE_PHASE2_PLAN.md)；其 A/B 顺序和边界优先于本文中针对 overnight 阶段的当前性描述。
 
 ---
 
