@@ -62,6 +62,15 @@ class GameDeadline:
 
 
 class DeadlineParser:
+    MONTHS = {name.lower(): index for index, name in enumerate(
+        ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"), 1)}
+
+    @classmethod
+    def _normalize_english_dates(cls, body):
+        """只转换带明确年份和时间的英文月份日期，不补猜年份。"""
+        pattern = re.compile(r"\b(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})\s+(?:at\s+)?(?=\d{1,2}:\d{2})", re.IGNORECASE)
+        return pattern.sub(lambda match: f"{match[3]}-{cls.MONTHS[match[1].lower()]:02d}-{int(match[2]):02d} ", body)
+
     # 匹配类似 2026.09.15 04:59 或 2026-09-15 05:00 或 2026/09/15 23:59 的时间
     DATETIME_PATTERN = re.compile(
         r"(\d{4})[./-](\d{1,2})[./-](\d{1,2})\s+(\d{1,2}):(\d{2})"
@@ -110,15 +119,22 @@ class DeadlineParser:
         content_id: str = "",
         category: str = "event",
     ) -> list[GameDeadline]:
+        body = cls._normalize_english_dates(body)
         matches = list(cls.DATETIME_PATTERN.finditer(body))
         if not matches:
             return []
 
         deadlines: list[GameDeadline] = []
         # 如果找到至少两个时间点（通常为 开始 ~ 结束）
-        if len(matches) >= 2:
+        if len(matches) > 2:
+            # 多事件正文尚无可靠分段合同，保守拒绝把前两个日期拼成活动。
+            return []
+        if len(matches) == 2:
             try:
                 m_start, m_end = matches[0], matches[1]
+                between = body[m_start.end():m_end.start()]
+                if len(between) > 120 or not re.search(r"[~～–—]|(?<!\w)-(?!\w)|至|到|结束|\b(?:to|until|ends?|ending)\b", between, re.IGNORECASE):
+                    return []
                 start_tz = cls._extract_timezone(body[m_start.end() : m_start.end() + 30], body)
                 start_dt = datetime(
                     int(m_start.group(1)),
@@ -139,6 +155,8 @@ class DeadlineParser:
                     tzinfo=end_tz,
                 ).astimezone(timezone.utc)
 
+                if end_dt <= start_dt:
+                    return []
                 deadlines.append(
                     GameDeadline(
                         event_id=f"{content_id or hashlib.md5(title.encode()).hexdigest()[:8]}_0",
