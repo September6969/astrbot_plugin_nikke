@@ -66,6 +66,14 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
             event = SimpleNamespace(message_obj=SimpleNamespace(raw_message=raw), get_platform_name=lambda: "aiocqhttp",
                 get_sender_id=lambda: "fake-user", plain_result=lambda x: x, chain_result=Mock(side_effect=lambda x: x))
             self.assertEqual([x async for x in plugin.on_nikke_poke(event)], [])
+            event.get_sender_id = lambda: "other-user"
+            raw["user_id"] = "other-user"
+            VoicePreference(True).save(plugin.store, "aiocqhttp:other-user")
+            plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "fake.wav"))
+            self.assertEqual(len([x async for x in plugin.on_nikke_poke(event)]), 1)
+            event.get_sender_id = lambda: "fake-user"
+            raw["user_id"] = "fake-user"
+            event.chain_result.reset_mock()
             VoicePreference(True).save(plugin.store, "aiocqhttp:fake-user")
             plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "fake.wav"))
             self.assertEqual(len([x async for x in plugin.on_nikke_poke(event)]), 1)

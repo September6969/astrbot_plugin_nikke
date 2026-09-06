@@ -8,6 +8,17 @@ from astrbot_plugin_nikke.main import NikkePlugin
 
 
 class GuidePaginationTests(IsolatedAsyncioTestCase):
+    async def test_unregistered_directory_is_not_sent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            plugin = NikkePlugin.__new__(NikkePlugin)
+            plugin.plugin_dir = Path(directory)
+            root = plugin.plugin_dir / "assets/guides/progression"
+            root.mkdir(parents=True)
+            (root / "unregistered.png").write_bytes(b"synthetic")
+            event = SimpleNamespace(plain_result=lambda x: x, image_result=lambda x: self.fail("不得发送裸目录素材"))
+            result = [x async for x in plugin.guide(event, "练度")]
+            self.assertIn("占位", result[0])
+
     async def test_command_second_page_and_invalid_page(self):
         with tempfile.TemporaryDirectory() as directory:
             plugin = NikkePlugin.__new__(NikkePlugin)

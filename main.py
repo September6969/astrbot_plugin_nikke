@@ -647,9 +647,12 @@ class NikkePlugin(Star):
         if not preference.enabled or getattr(self, "_closing", False):
             return
         now = time.monotonic()
-        if now - getattr(self, "_last_voice_poke", 0) < 10:
+        cooldowns = getattr(self, "_voice_poke_cooldowns", {})
+        cooldown_key = (event.get_platform_name(), event.get_sender_id(), getattr(event, "unified_msg_origin", ""))
+        if now - cooldowns.get(cooldown_key, float("-inf")) < 10:
             return
-        self._last_voice_poke = now
+        self._voice_poke_cooldowns = {key: stamp for key, stamp in cooldowns.items() if now - stamp < 10}
+        self._voice_poke_cooldowns[cooldown_key] = now
         text = VoiceResolver.resolve_poke_line(preference.character, preference.locale)
         if not hasattr(self, "_voice_audio"):
             self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
@@ -943,7 +946,7 @@ class NikkePlugin(Star):
         account_key = f"{qq_id}:{game_uid}"
         digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
         run_key = f"cdk:{qq_id}:{game_uid}:{digest}"
-        retryable = {"failed", "unknown", "expired"}
+        retryable = {"failed", "expired"}
         existing = self.store.get_run(run_key)
         if existing and existing["status"] not in retryable:
             if existing["status"] == "running":
@@ -977,6 +980,9 @@ class NikkePlugin(Star):
             self.store.mark_cookie_invalid(qq_id)
             self.store.finish_run(run_key, "expired", "登录状态已失效")
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except asyncio.CancelledError:
+            self.store.finish_run(run_key, "unknown", "兑换中断，结果未确认，请先检查官方历史")
+            raise
         except Exception as exc:
             self.store.finish_run(run_key, "failed", f"兑换码 {masked}：请求失败，可稍后重试")
             logger.warning(f"[NIKKE] CDK兑换失败: {type(exc).__name__}")
@@ -1213,7 +1219,7 @@ class NikkePlugin(Star):
                 "• /妮姬 攻略 红球 — 同步器等级与红球消耗一览表\n"
                 "• /妮姬 攻略 珍藏品 — 珍藏品养成与材料汇总\n"
                 "• /妮姬 攻略 充能 — 竞技场爆裂充能速查表\n\n"
-                "（提示：可在 assets/guides/<分类>/ 目录中放入对应图片即可直接发送）"
+                "（当前保留占位，仅发送 registry 中已登记的素材）"
             )
             return
 
@@ -1240,20 +1246,7 @@ class NikkePlugin(Star):
         if page_number > 1 or any(entry.category == folder_name for entry in registry.entries):
             yield event.plain_result("该攻略页不存在。")
             return
-        guide_dir = self.plugin_dir / "assets" / "guides" / folder_name
-        images = []
-        if guide_dir.is_dir():
-            images = [
-                p for p in guide_dir.iterdir()
-                if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
-            ]
-        if images:
-            yield event.image_result(str(images[0]))
-        else:
-            yield event.plain_result(
-                f"暂未收录【{category}】攻略图。可将对应图片放置于插件目录下的 "
-                f"assets/guides/{folder_name}/ 中直接发送。"
-            )
+        yield event.plain_result(f"暂未收录【{category}】攻略图，当前保留占位，等待后续登记素材。")
 
     async def push(self, event: AstrMessageEvent, state: str):
         """开启或关闭每日群汇总。"""

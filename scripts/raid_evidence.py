@@ -1,11 +1,9 @@
 """仅保留已知结构的突袭证据转换，不读取账号、不发起网络请求。"""
-from functools import reduce
-from math import gcd
 from typing import Any
 
 
 def semantic_sanitize(value: Any) -> Any:
-    """保留同人关系和伤害比例；伪值不能作为真实数值或身份映射证据。"""
+    """只保留序关系，禁止发布伤害数值或精确比例。"""
     identities: dict[str, str] = {}
     damages: list[int] = []
 
@@ -21,7 +19,7 @@ def semantic_sanitize(value: Any) -> Any:
                 collect(child)
 
     collect(value)
-    divisor = reduce(gcd, damages, 0) or 1
+    ordered_damage = sorted(set(damages), reverse=True)
 
     def convert(item, key=""):
         if isinstance(item, dict):
@@ -33,10 +31,22 @@ def semantic_sanitize(value: Any) -> Any:
                     result["nickname"] = token.replace("user_", "member_")
             return result
         if isinstance(item, list):
-            return [convert(child, key) for child in item]
+            totals = {}
+            for row in item:
+                if isinstance(row, dict) and row.get("openid") and str(row.get("total_damage", "")).isdigit():
+                    who = str(row["openid"])
+                    totals[who] = totals.get(who, 0) + int(row["total_damage"])
+            ordered_totals = sorted(set(totals.values()), reverse=True)
+            result = []
+            for row in item:
+                converted = convert(row, key)
+                if isinstance(row, dict) and str(row.get("openid")) in totals:
+                    converted["participant_total_order"] = ordered_totals.index(totals[str(row["openid"])]) + 1
+                result.append(converted)
+            return result
         if key == "total_damage" and str(item).isdigit():
-            # 按公约数归一到构造单位，保留整数合同及逐刀/聚合的大小关系。
-            return str(int(item) // divisor * 1000)
+            # 明确的顺序标签不是可送入 Builder 的数值。
+            return f"ordinal_{ordered_damage.index(int(item)) + 1}"
         if key in {"slot", "day", "level", "difficulty", "step"} and type(item) is int:
             return item
         if key == "is_final_hit" and type(item) is bool:

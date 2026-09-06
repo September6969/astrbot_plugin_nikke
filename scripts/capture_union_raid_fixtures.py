@@ -135,7 +135,7 @@ async def capture(data_dir: Path, output_dir: Path) -> None:
     # 对整组响应统一转换，保证 ranking/my 两份证据中的匿名关系一致。
     semantic = semantic_sanitize({name: data for name, (_, _, data) in responses.items()})
     (output_dir / "union_raid_semantic.json").write_text(
-        json.dumps({"kind": "synthetic_proportional", "data": semantic}, ensure_ascii=False, indent=2) + "\n",
+        json.dumps({"kind": "ordinal_relations_only", "builder_compatible": False, "data": semantic}, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     for name, (endpoint, response, data) in responses.items():

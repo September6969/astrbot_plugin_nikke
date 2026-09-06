@@ -1,3 +1,27 @@
+# 当前执行状态（2026-09-06）
+
+本表是当前状态入口；下方旧计划保留为历史规格，其中 TODO/BLOCKED 不再作为当前进度判断。
+最新执行规则见 [审核与自治计划](EXECUTION_AUTONOMY_PLAN.md)，优先于历史资源策略。
+
+| 范围 | 当前状态 | 已完成与剩余 |
+| --- | --- | --- |
+| 审核修复 | DONE（本地待最终回归确认） | 序关系脱敏、Guide registry 强制入口、单条取消 unknown、用户隔离 cooldown、移除临时 CI trigger |
+| 公告来源/缓存/订阅/调度 | PARTIAL | 正式 CMS、退避、独立版本、默认关闭调度已实现；深度重扫与状态清理待做 |
+| Campaign | PARTIAL | 3572 关卡映射、严格阵容与异常合同；更丰富渲染待做 |
+| Tower | DONE | 7350 层公开静态查询，不代表账号进度 |
+| Profile | PARTIAL | 结构化研究与收藏、名称映射；完整分区继续完善 |
+| Raid | PARTIAL / NEEDS_LIVE_EVIDENCE | 当前响应排名、历史客户端、诊断已实现；身份、多轮、范围仍待证据 |
+| Daily | PARTIAL / NEEDS_LIVE_EVIDENCE | 单次写后只读验证；Like/Browse 未证明状态变化 |
+| CDK | PARTIAL | 串行批量持久化与取消保护；统一编排仍可改进 |
+| Voice | PARTIAL | 本地音频、偏好、发送器与隔离 cooldown；动态源/两级缓存继续开发 |
+| Spine | PARTIAL | 队列与无运行时预检查；真实运行时和 Linux 渲染基准待做 |
+| Guide | DEFERRED | 保留框架/分页/占位，不生成、不抓取、不添加素材；当前不需要用户行动 |
+| 许可证最终采用 | NEEDS_HUMAN_DECISION | 仅生产采用具体 runtime 时确认，不阻止先研究与工程验证 |
+| 静态装备/魔方/珍藏品/技能 | PARTIAL | 已找到公共数据源，完整 registry 与数值验证待做 |
+| HARD_BLOCKED | 无确认项 | 不将尚未研究完的事项视为永久阻塞 |
+
+## 历史规格归档（以下状态仅描述撰写时情况）
+
 # NIKKE BlaBlaLink 插件 — 主开发文档（仓库扫描修订版）
 
 > 仓库：`September6969/astrbot_plugin_nikke`  
