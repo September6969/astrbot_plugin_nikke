@@ -3,7 +3,7 @@
 > 仓库：`September6969/astrbot_plugin_nikke`  
 > 当前主分支基线：`main@deeef6277f09a42918d71b44f49170398a05558b`  
 > 当前工作分支：`feat/overnight-backlog`  
-> 当前工作分支已比 main 前进 27 个 commit。  
+> 当前 HEAD 与提交数量以 `git rev-parse HEAD`、`git rev-list --count origin/main..HEAD` 为准，避免固定计数过期。
 > 本文目的：统一此前讨论中的 **审核修复、Agent 最大自治、Guide/Spine/Voice 资源策略、人工边界、后续开发顺序和执行 Prompt**。  
 > 本文优先于此前较保守的“人工任务”说明。
 

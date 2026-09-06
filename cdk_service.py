@@ -201,7 +201,14 @@ class CdkService:
             status = existing["status"]
             return CdkRedeemResult(code, status == "success", "此码已有处理记录，请核对官方兑换历史",
                                    is_unknown=status == "unknown", terminal=status != "unknown")
-        claimed = store.retry_run(key, {"failed", "expired"}, stale_after=120) if existing else store.claim_run(key, qq_id, "cdk")
+        if existing and existing["status"] == "running":
+            changed = store.mark_stale_running_unknown(
+                key, stale_after=120, detail="兑换结果未确认，请先检查官方兑换历史。")
+            current = store.get_run(key)
+            unknown = changed or (current and current["status"] == "unknown")
+            message = "兑换结果未确认，请先检查官方兑换历史" if unknown else "此码正在处理，请稍后查询"
+            return CdkRedeemResult(code, False, message, is_unknown=True, terminal=False)
+        claimed = store.retry_run(key, {"failed", "expired"}) if existing else store.claim_run(key, qq_id, "cdk")
         if not claimed:
             return CdkRedeemResult(code, False, "此码正在处理，请稍后查询", is_unknown=True, terminal=False)
         try:

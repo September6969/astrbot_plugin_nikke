@@ -1,3 +1,26 @@
+# 第二轮合并审查修复（2026-09-06）
+
+起始 main：`deeef6277f09a42918d71b44f49170398a05558b`。
+本轮起始 HEAD：`470f16cfd4cc0a0a25456729187c3348c3cec273`。
+
+- 单条与批量 CDK 不再重新领取 stale running；数据库条件更新将其原子转为 unknown，要求核对官方历史。
+- fresh running 不发送；success/terminal/unknown 不重放；只有 failed/expired 可原子重领。
+- 两个数据库实例并发转换只有一个成功；批量中旧请求跳过，新兑换码继续。
+- 单条持久化也使用固定说明，防止上游响应回显完整兑换码。
+- 保留 CancelledError 回归；新测试覆盖单条并发、批量继续处理、跨实例原子性和状态矩阵。
+- 工作分支仍为 feat/overnight-backlog；不修改 main，不合并，不创建 PR。
+
+本轮本地验证：243 passed、2 warnings、43 subtests；compileall 与 Node 3 项通过。完整 SHA/Actions URL 在本轮最终交付记录中给出；本文件提交后的 HEAD 用 `git rev-parse HEAD` 核对。
+完整工作提交用 `git log --reverse --format="%H %s" origin/main..HEAD` 获取。
+
+后续状态保持：动态剧情语音不冒充互动语音；角色/皮肤、实际播放、Raid 多轮与 Daily 状态变化仍需证据。
+公开资源访问不视为再分发许可，许可研究仍可继续；最终采用具体运行时才需人工决策。
+没有新增 HARD_BLOCKED。公告 baseline 容量整理保留后续阶段，避免为清理引入历史重放。
+
+---
+
+## 前轮报告（历史验收记录）
+
 # 审核修复与动态资源阶段报告（2026-09-06）
 
 起始 main：deeef6277f09a42918d71b44f49170398a05558b。

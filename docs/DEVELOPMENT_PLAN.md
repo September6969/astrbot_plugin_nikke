@@ -12,7 +12,7 @@
 | Profile | PARTIAL | 结构化研究与收藏、名称映射；完整分区继续完善 |
 | Raid | PARTIAL / NEEDS_LIVE_EVIDENCE | 当前响应排名、历史客户端、诊断已实现；身份、多轮、范围仍待证据 |
 | Daily | PARTIAL / NEEDS_LIVE_EVIDENCE | 单次写后只读验证；Like/Browse 未证明状态变化 |
-| CDK | PARTIAL | 串行批量持久化与取消保护；统一编排仍可改进 |
+| CDK | PARTIAL | 串行批量持久化、取消及硬崩溃保护；过期 running 原子转 unknown，禁止重放；统一编排仍可改进 |
 | Voice | PARTIAL | 本地音频、偏好、发送器与隔离 cooldown；动态源与两级缓存已实现并匿名验证；角色/皮肤映射与动态 Poke 接线待做 |
 | Spine | PARTIAL | 队列与无运行时预检查；真实运行时和 Linux 渲染基准待做 |
 | Guide | DEFERRED | 保留框架/分页/占位，不生成、不抓取、不添加素材；当前不需要用户行动 |

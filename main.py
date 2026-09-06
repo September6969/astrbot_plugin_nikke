@@ -950,14 +950,19 @@ class NikkePlugin(Star):
         existing = self.store.get_run(run_key)
         if existing and existing["status"] not in retryable:
             if existing["status"] == "running":
-                if not self.store.retry_run(run_key, retryable, stale_after=120):
+                changed = self.store.mark_stale_running_unknown(
+                    run_key, stale_after=120, detail="兑换结果未确认，请先检查官方兑换历史。")
+                current = self.store.get_run(run_key)
+                if changed or (current and current["status"] == "unknown"):
+                    yield event.plain_result("兑换结果未确认，请先检查官方兑换历史，勿重复提交。")
+                else:
                     yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
-                    return
+                return
             else:
                 yield event.plain_result(existing["detail"] or f"兑换码 {masked} 已处理。")
                 return
         elif existing:
-            if not self.store.retry_run(run_key, retryable, stale_after=120):
+            if not self.store.retry_run(run_key, retryable):
                 yield event.plain_result(f"兑换码 {masked} 正在处理，请稍后再试。")
                 return
         elif not self.store.claim_run(run_key, qq_id, "cdk"):
@@ -974,7 +979,10 @@ class NikkePlugin(Star):
                 status = "failed"
             else:
                 status = "terminal"
-            self.store.finish_run(run_key, status, detail)
+            # 上游消息可能回显完整兑换码，仅持久化固定状态说明。
+            stored_detail = {"success": "兑换成功", "unknown": "结果未确认，请核对官方历史",
+                             "failed": "请求失败，可稍后重试", "terminal": "官方已拒绝此码"}[status]
+            self.store.finish_run(run_key, status, f"兑换码 {masked}：{stored_detail}")
             yield event.plain_result(detail)
         except CookieExpired:
             self.store.mark_cookie_invalid(qq_id)
