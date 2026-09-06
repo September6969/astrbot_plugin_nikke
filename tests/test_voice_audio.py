@@ -8,6 +8,23 @@ from astrbot_plugin_nikke.storage import NikkeStore
 
 
 class VoiceAudioTests(IsolatedAsyncioTestCase):
+    async def test_invalid_and_overlong_wav_are_not_cached(self):
+        import wave
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            row = dict(character="rapi", locale="zh-cn", file="test.wav", source="synthetic", license="self")
+            (root / "registry.json").write_text(json.dumps([row]), encoding="utf-8")
+            (root / "test.wav").write_bytes(b"RIFF0000WAVEbroken")
+            cache = VoiceAudioCache(root, root / "cache")
+            self.assertIsNone(await cache.resolve(VoicePreference(True)))
+            with wave.open(str(root / "test.wav"), "wb") as audio:
+                audio.setnchannels(1)
+                audio.setsampwidth(1)
+                audio.setframerate(8000)
+                audio.writeframes(b"\0" * (8000 * 31))
+            self.assertIsNone(await cache.resolve(VoicePreference(True)))
+            self.assertFalse(list((root / "cache").glob("*.wav")))
+
     async def test_cache_and_preferences(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

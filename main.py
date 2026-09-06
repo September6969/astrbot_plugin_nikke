@@ -621,7 +621,7 @@ class NikkePlugin(Star):
         self._last_voice_poke = now
         text = VoiceResolver.resolve_poke_line(preference.character, preference.locale)
         if not hasattr(self, "_voice_audio"):
-            self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.plugin_dir / "data" / "voice_cache")
+            self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
         try:
             audio = await self._voice_audio.resolve(preference)
         except (OSError, ValueError, asyncio.TimeoutError):

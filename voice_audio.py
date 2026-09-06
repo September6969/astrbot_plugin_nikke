@@ -3,6 +3,9 @@ import asyncio
 import hashlib
 import json
 import shutil
+import io
+import uuid
+import wave
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
@@ -63,22 +66,37 @@ class VoiceAudioCache:
             if target.is_file():
                 return target
             if source.suffix.lower() == ".wav":
-                target.write_bytes(content)
+                try:
+                    with wave.open(io.BytesIO(content)) as audio:
+                        if audio.getframerate() <= 0 or audio.getnframes() / audio.getframerate() > 30:
+                            return None
+                        if len(audio.readframes(audio.getnframes())) != audio.getnframes() * audio.getnchannels() * audio.getsampwidth():
+                            return None
+                except (wave.Error, EOFError):
+                    return None
+                temporary = target.with_name(uuid.uuid4().hex + ".tmp")
+                try:
+                    temporary.write_bytes(content)
+                    temporary.replace(target)
+                finally:
+                    temporary.unlink(missing_ok=True)
                 return target
             ffmpeg = shutil.which("ffmpeg")
             if not ffmpeg:
                 return None
+            temporary = target.with_name(uuid.uuid4().hex + ".wav")
             process = await asyncio.create_subprocess_exec(ffmpeg, "-nostdin", "-y", "-i", str(source),
-                "-t", "30", "-ac", "1", "-ar", "24000", str(target), stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+                "-t", "30", "-ac", "1", "-ar", "24000", str(temporary), stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
             try:
                 await asyncio.wait_for(process.wait(), 15)
             except (asyncio.TimeoutError, asyncio.CancelledError):
                 process.kill()
                 await process.wait()
-                target.unlink(missing_ok=True)
+                temporary.unlink(missing_ok=True)
                 raise
             if process.returncode != 0:
-                target.unlink(missing_ok=True)
+                temporary.unlink(missing_ok=True)
                 return None
+            temporary.replace(target)
             return target
         return None
