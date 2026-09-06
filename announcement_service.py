@@ -278,7 +278,7 @@ class AnnouncementService:
     async def sync_from_source(self, fetcher: Any = None) -> tuple[bool, str]:
         """尝试同步官方数据；若失败则保持当前本地缓存并返回降级说明。"""
         try:
-            fetch_func = fetcher if fetcher is not None else self.fetch_official
+            fetch_func = fetcher if fetcher is not None else self.fetch_primary
             records = await fetch_func()
             for r in records:
                 self.add_or_update(r)
@@ -288,6 +288,15 @@ class AnnouncementService:
         except Exception as exc:
             logger.warning("官方公告同步失败，降级读取本地缓存: %s", exc)
             return False, f"官方数据同步失败（{exc}），已降级读取本地缓存"
+
+    @staticmethod
+    async def fetch_primary() -> list[AnnouncementRecord]:
+        from .announcement_sources import InformationFeedsSource
+        try:
+            return await InformationFeedsSource().fetch()
+        except Exception:
+            # 主源失败继续尝试原有 MVP；两者失败由同步层保留磁盘缓存。
+            return await AnnouncementService.fetch_official()
 
     @staticmethod
     async def fetch_official() -> list[AnnouncementRecord]:
