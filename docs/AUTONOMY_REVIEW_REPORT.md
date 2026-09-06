@@ -1,4 +1,6 @@
-# 第二轮合并审查修复（2026-09-06）
+# 第二轮合并审查修复（历史记录，2026-09-06）
+
+> 本文记录合并前 overnight 工作分支上的审查修复，不是当前开发状态入口。PR #5 已将该分支合并到 `main`；当前远端基线、CI 和剩余能力见 [POST_MERGE_STATUS.md](POST_MERGE_STATUS.md)，下一阶段见 [POST_MERGE_PHASE2_PLAN.md](POST_MERGE_PHASE2_PLAN.md)。
 
 起始 main：`deeef6277f09a42918d71b44f49170398a05558b`。
 本轮起始 HEAD：`470f16cfd4cc0a0a25456729187c3348c3cec273`。
@@ -8,7 +10,7 @@
 - 两个数据库实例并发转换只有一个成功；批量中旧请求跳过，新兑换码继续。
 - 单条持久化也使用固定说明，防止上游响应回显完整兑换码。
 - 保留 CancelledError 回归；新测试覆盖单条并发、批量继续处理、跨实例原子性和状态矩阵。
-- 工作分支仍为 feat/overnight-backlog；不修改 main，不合并，不创建 PR。
+- 当时工作分支为 `feat/overnight-backlog`；该分支随后由 PR #5 合并，不应作为本阶段开发分支。
 
 本轮本地验证：243 passed、2 warnings、43 subtests；compileall 与 Node 3 项通过。完整 SHA/Actions URL 在本轮最终交付记录中给出；本文件提交后的 HEAD 用 `git rev-parse HEAD` 核对。
 完整工作提交用 `git log --reverse --format="%H %s" origin/main..HEAD` 获取。
