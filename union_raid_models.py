@@ -15,6 +15,15 @@ class BossStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class RaidResponseCoverage(str, Enum):
+    """区分请求上下文与当前响应实际覆盖的记录范围。"""
+
+    CURRENT_RESPONSE = "CURRENT_RESPONSE"
+    PARTIAL_RANGE = "PARTIAL_RANGE"
+    CONFIRMED_COMPLETE_RANGE = "CONFIRMED_COMPLETE_RANGE"
+    UNKNOWN_COVERAGE = "UNKNOWN_COVERAGE"
+
+
 @dataclass(slots=True)
 class RaidBossData:
     boss_id: str
@@ -32,8 +41,8 @@ class RaidBossData:
 @dataclass(slots=True)
 class UnionRaidOverviewData:
     guild_name: str
-    difficulty: int
-    level: int
+    difficulty: int | None
+    level: int | None
     total_progress: float | None
     total_current_hp: int | None
     total_max_hp: int | None
@@ -42,3 +51,5 @@ class UnionRaidOverviewData:
     fetched_at: str
     plugin_version: str
     season_start: str | None = None
+    response_coverage: RaidResponseCoverage = RaidResponseCoverage.UNKNOWN_COVERAGE
+    partial_boss_records: bool = False
