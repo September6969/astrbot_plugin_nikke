@@ -27,6 +27,7 @@ class VoiceResourceProvider:
         if locale not in {"en", "ja", "ko"} or not all(isinstance(x, str) and re.fullmatch(r"[a-z0-9_]{1,100}", x) for x in (map_key, speech_id)):
             raise ValueError("语音语言或资源标识无效")
         key = hashlib.sha256(json.dumps([map_key, speech_id, locale]).encode()).hexdigest()
+        self._failed = {item: until for item, until in self._failed.items() if until > time.monotonic()}
         if self._failed.get(key, 0) > time.monotonic():
             return None
         task = self._tasks.get(key)
@@ -51,7 +52,7 @@ class VoiceResourceProvider:
             self.cache.mkdir(parents=True, exist_ok=True)
             target = self.cache / f"{key}.mp3"
             manifest = self.cache / f"{key}.json"
-            if target.is_file() and manifest.is_file() and target.stat().st_size <= self.MAX_BYTES:
+            if target.is_file() and manifest.is_file() and time.time() - manifest.stat().st_mtime < 86400 and target.stat().st_size <= self.MAX_BYTES:
                 raw = target.read_bytes()
                 try:
                     saved = json.loads(manifest.read_text(encoding="utf-8"))

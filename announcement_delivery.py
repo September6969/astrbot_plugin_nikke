@@ -64,6 +64,30 @@ class AnnouncementDelivery:
             state["targets"][target]["enabled"] = False
             self.store.set_setting(self.SETTING, state)
 
+    def cleanup(self, *, now=None, retention_days=90):
+        """旧成功记录压缩到版本水位，不能因清理而重新投递旧公告。"""
+        if retention_days < 14:
+            raise ValueError("投递保留期不能短于重扫窗口")
+        current = aware(now or datetime.now(timezone.utc))
+        cutoff = current - timedelta(days=retention_days)
+        state = self._state()
+        removed = 0
+        for key, record in list(state["delivered"].items()):
+            if aware(record["pushed_at"]) >= cutoff:
+                continue
+            target = state["targets"].get(record["target"])
+            if target is not None and record["push_type"] == "announcement":
+                baseline = target["baseline"]
+                entity = record["entity_id"]
+                baseline[entity] = max(baseline.get(entity, 0), record["version"])
+            del state["delivered"][key]
+            removed += 1
+        retries = state.get("retry_after", {})
+        state["retry_after"] = {key: deadline for key, deadline in retries.items() if aware(deadline) > current}
+        if removed or len(retries) != len(state["retry_after"]):
+            self.store.set_setting(self.SETTING, state)
+        return removed
+
     def plan(self, records, deadlines=(), *, now=None):
         now = aware(now or datetime.now(timezone.utc))
         state = self._state()
@@ -109,6 +133,7 @@ class AnnouncementDelivery:
             raise ValueError("单轮投递数量超限")
         async with self._dispatch_lock:
             current = aware(now or datetime.now(timezone.utc))
+            self.cleanup(now=current)
             succeeded = failed = 0
             attempted = 0
             for push in self.plan(records, deadlines, now=current):

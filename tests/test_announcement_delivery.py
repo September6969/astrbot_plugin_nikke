@@ -11,6 +11,19 @@ from astrbot_plugin_nikke.storage import NikkeStore
 
 
 class DeliveryTests(IsolatedAsyncioTestCase):
+    async def test_cleanup_preserves_version_watermark(self):
+        self.service.subscribe("fake", [], now=self.now)
+        await self.service.dispatch([self.record()], [], AsyncMock(return_value=True), now=self.now)
+        state = self.store.get_setting(self.service.SETTING)
+        for record in state["delivered"].values():
+            record["pushed_at"] = (self.now-timedelta(days=100)).isoformat()
+        state["retry_after"] = {"expired": (self.now-timedelta(minutes=1)).isoformat()}
+        self.store.set_setting(self.service.SETTING, state)
+        self.assertEqual(self.service.cleanup(now=self.now), 1)
+        self.assertEqual(self.service.plan([self.record()], now=self.now), [])
+        self.assertEqual(len(self.service.plan([self.record(version=2)], now=self.now)), 1)
+        self.assertEqual(self.store.get_setting(self.service.SETTING)["retry_after"], {})
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
