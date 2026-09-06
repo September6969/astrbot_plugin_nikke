@@ -13,6 +13,7 @@ import httpx
 
 from astrbot_plugin_nikke.client import API_BASE
 from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.scripts.raid_evidence import semantic_sanitize
 
 
 MY_GUILD = "/api/game/proxy/Game/GetMyGuildInfo"
@@ -70,17 +71,17 @@ async def post(client: httpx.AsyncClient, account: dict[str, Any], path: str, pa
 
 async def capture(data_dir: Path, output_dir: Path) -> None:
     accounts = NikkeStore(data_dir).list_accounts(with_cookie=True)
-    if not accounts:
-        raise RuntimeError("没有可用的授权绑定账号")
+    if len(accounts) != 1:
+        raise RuntimeError("需要恰好一个授权绑定账号，避免隐式选择其它账号")
     account = accounts[0]
     area_id = int(account.get("area_id") or 0)
     openid = str(account.get("game_openid") or "")
     if not area_id or not openid:
         raise RuntimeError("授权账号缺少游戏上下文")
-    game_openid = openid.split("-")[-1]
+    game_openid = openid
 
     async with httpx.AsyncClient(timeout=20, follow_redirects=False) as client:
-        guild = await post(client, account, MY_GUILD, {"nikke_area_id": area_id, "intl_open_id": game_openid})
+        guild = await post(client, account, MY_GUILD, {"ignore_toast": True})
         if str(guild.get("code", "")) not in {"", "0"}:
             raise RuntimeError(f"GetMyGuildInfo 返回业务码 {guild.get('code')}")
         guild_id = find_first(guild.get("data", {}), "guild_id")
@@ -90,6 +91,10 @@ async def capture(data_dir: Path, output_dir: Path) -> None:
         payload = {"guild_id": guild_id, "nikke_area_id": area_id, "intl_open_id": game_openid}
         level_response = await post(client, account, CURRENT_RAID_LEVEL, payload)
         raid_response = await post(client, account, CURRENT_RAID, payload)
+
+    for response in (level_response, raid_response):
+        if str(response.get("code")) != "0" or not isinstance(response.get("data"), dict):
+            raise RuntimeError("突袭读取失败，不生成成功 fixture")
 
     level_data = level_response.get("data", {})
     raid_data = raid_response.get("data", {})
@@ -127,6 +132,12 @@ async def capture(data_dir: Path, output_dir: Path) -> None:
     }
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    # 对整组响应统一转换，保证 ranking/my 两份证据中的匿名关系一致。
+    semantic = semantic_sanitize({name: data for name, (_, _, data) in responses.items()})
+    (output_dir / "union_raid_semantic.json").write_text(
+        json.dumps({"kind": "ordinal_relations_only", "builder_compatible": False, "data": semantic}, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     for name, (endpoint, response, data) in responses.items():
         content = {
             "endpoint": endpoint,

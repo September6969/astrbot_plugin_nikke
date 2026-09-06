@@ -59,6 +59,11 @@
     "type": "bool",
     "default": false
   },
+  "enable_announcement_push": {
+    "description": "启用已由机器人管理员订阅的会话公告与截止提醒；默认关闭",
+    "type": "bool",
+    "default": false
+  },
   "enable_cdk_redemption": {
     "description": "启用国际服CDK真实兑换；群聊命令会公开兑换码",
     "type": "bool",

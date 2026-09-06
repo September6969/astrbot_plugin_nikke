@@ -22,6 +22,7 @@ from astrbot.api.star import Context, Star, register
 
 from ._version import PLUGIN_VERSION
 from .announcement_service import AnnouncementService
+from .announcement_delivery import AnnouncementDelivery
 from .asset_manager import AssetManager
 from .campaign_history_builder import CampaignHistoryBuilder
 from .campaign_history_models import ClearLineupStatus
@@ -30,7 +31,7 @@ from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from .character_card_renderer import CharacterCardRenderer
-from .client import BlaBlaClient, BlaBlaError, CookieExpired
+from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
 from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
@@ -82,6 +83,7 @@ class NikkePlugin(Star):
         self.feedback_manager = DelayedFeedbackManager(1.5)
         self.voice_resolver = VoiceResolver()
         self.announcements = AnnouncementService(self.data_dir / "announcements")
+        self.announcement_delivery = AnnouncementDelivery(self.store)
         self.web = BindingWebService(
             self.store,
             self.client,
@@ -98,7 +100,22 @@ class NikkePlugin(Star):
         self._background_tasks: list[asyncio.Task] = []
         self._closing = False
         self._pack_extension()
-        self._background_tasks.append(asyncio.create_task(self._start_services()))
+        self._spawn_background_task(self._start_services())
+
+    def _spawn_background_task(self, coro):
+        """统一登记任务，关闭期间拒绝新任务并释放尚未启动的协程。"""
+        if getattr(self, "_closing", False):
+            coro.close()
+            return None
+        task = asyncio.create_task(coro)
+        self._background_tasks.append(task)
+        def done(completed):
+            if completed in self._background_tasks:
+                self._background_tasks.remove(completed)
+            if not completed.cancelled() and completed.exception() is not None:
+                logger.warning("[NIKKE] 后台任务失败: %s", type(completed.exception()).__name__)
+        task.add_done_callback(done)
+        return task
 
     @property
     def cdk_service(self) -> CdkService:
@@ -136,7 +153,7 @@ class NikkePlugin(Star):
             logger.info(f"[NIKKE] 已载入 {len(self._directory)} 条妮姬目录")
         except Exception as exc:
             logger.warning(f"[NIKKE] 妮姬目录载入失败: {exc}")
-        self._background_tasks.append(asyncio.create_task(self._sync_announcements_background()))
+        self._spawn_background_task(self._sync_announcements_background())
         await self._scheduler_loop()
 
     async def _sync_announcements_background(self) -> None:
@@ -165,14 +182,29 @@ class NikkePlugin(Star):
             summary_m = int(self.store.get_setting("summary_minute", self.config.get("summary_minute", 30)))
             if (now.hour, now.minute) == (daily_h, daily_m) and last_daily != today:
                 last_daily = today
-                asyncio.create_task(self._run_all_daily(today, stagger=True))
+                self._spawn_background_task(self._run_all_daily(today, stagger=True))
             if (now.hour, now.minute) == (summary_h, summary_m) and last_summary != today:
                 last_summary = today
-                asyncio.create_task(self._send_summary(today))
+                self._spawn_background_task(self._send_summary(today))
             if time.time() - last_announcement_sync > 3600:
                 last_announcement_sync = time.time()
-                asyncio.create_task(self._sync_announcements_background())
+                self._spawn_background_task(self._sync_announcements_background())
+            if self.config.get("enable_announcement_push", False):
+                task = getattr(self, "_announcement_push_task", None)
+                if task is None or task.done():
+                    self._announcement_push_task = self._spawn_background_task(self._dispatch_announcements())
             await asyncio.sleep(20)
+
+    async def _dispatch_announcements(self):
+        """默认关闭，只有管理员启用且目标显式订阅后才由调度调用。"""
+        if not self.config.get("enable_announcement_push", False):
+            return
+        async def sender(target, text):
+            await asyncio.wait_for(self.context.send_message(target, MessageChain([Plain(text)])), timeout=10)
+            return True
+        await self.announcement_delivery.dispatch(
+            self.announcements.list_announcements(limit=10000),
+            self.announcements.list_active_deadlines(), sender)
 
     @staticmethod
     def _qq_id(event: AstrMessageEvent) -> str:
@@ -234,6 +266,8 @@ class NikkePlugin(Star):
                 "/妮姬 查询 资料 <角色名>　(/nikke info)\n"
                 "/妮姬 战役 <关卡>　(/nikke campaign [普通/困难] 46-40)\n"
                 "/妮姬 联盟突袭　(/nikke raid)\n"
+                "/妮姬 联盟突袭 排名 — 当前响应范围\n"
+                "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
                 "/妮姬 日程　(/nikke schedule)\n"
                 "/妮姬 公告　(/nikke news)\n"
                 "/妮姬 攻略 [分类]　(/nikke guide)"
@@ -293,6 +327,18 @@ class NikkePlugin(Star):
     ):
         """NIKKE 中文精简指令入口。"""
         command_key = command.strip().casefold()
+        if command_key in {"塔层", "tower"}:
+            from .tower_registry import TowerRegistry
+            try:
+                result = TowerRegistry(self.plugin_dir / "assets" / "tower_floors.json").describe(arg1, arg2)
+            except (OSError, ValueError, KeyError, TypeError):
+                result = "塔层静态资料暂不可用。"
+            yield event.plain_result(result)
+            return
+        if command_key in {"语音", "voice"}:
+            async for result in self.voice_settings(event, arg1, arg2):
+                yield result
+            return
         if command_key in {"", "帮助", "help"}:
             async for result in self.nikke_help(event, arg1):
                 yield result
@@ -357,14 +403,22 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"公告", "news", "announcement"}:
+            if arg1 in {"订阅", "取消订阅"}:
+                async for result in self.announcement_subscription(event, arg1):
+                    yield result
+                return
             async for result in self.announcements_view(event):
                 yield result
             return
         if command_key in {"攻略", "guide", "guides"}:
-            async for result in self.guide(event, arg1):
+            async for result in self.guide(event, arg1, arg2 or "1"):
                 yield result
             return
         if command_key in {"突袭", "联盟突袭", "raid", "union_raid"}:
+            if arg1 in {"排名", "ranking"}:
+                async for result in self.union_raid_ranking(event):
+                    yield result
+                return
             async for result in self.union_raid(event):
                 yield result
             return
@@ -565,6 +619,66 @@ class NikkePlugin(Star):
             return
         yield event.plain_result("用法：/妮姬 查询 练度 [角色名]、/妮姬 查询 资料 <角色名>、/妮姬 查询 战役 <关卡> 或 /妮姬 攻略")
 
+    async def voice_settings(self, event: AstrMessageEvent, action: str = "", value: str = ""):
+        """保存明确的语音偏好，音频需管理员在本地登记授权来源。"""
+        from .voice_audio import VoicePreference
+        key = f"{event.get_platform_name()}:{self._qq_id(event)}"
+        preference = VoicePreference.load(self.store, key)
+        if action in {"开", "关"}:
+            preference.enabled = action == "开"
+        elif action == "语言" and value in {"zh-cn", "en", "ja", "ko"}:
+            preference.locale = value
+        elif action == "角色" and value in VoiceResolver.CHARACTER_LINES:
+            preference.character = value
+        elif action:
+            yield event.plain_result("用法：/妮姬 语音 开|关，语音 语言 zh-cn|en|ja|ko，语音 角色 rapi|alice|anis|red_hood|scarlet|dorothy")
+            return
+        preference.save(self.store, key)
+        yield event.plain_result(f"互动语音：{'开启' if preference.enabled else '关闭'} · {preference.character} · {preference.locale}。缺少已登记音频时使用文本。")
+
+    @filter.event_message_type(filter.EventMessageType.ALL)
+    async def on_nikke_poke(self, event: AstrMessageEvent):
+        """仅对戳向本 Bot 的通知响应；默认关闭，不发送未经登记的音频。"""
+        from .voice_audio import VoicePreference, VoiceAudioCache, is_self_poke
+        raw = getattr(event.message_obj, "raw_message", None)
+        if event.get_platform_name() != "aiocqhttp" or not is_self_poke(raw):
+            return
+        preference = VoicePreference.load(self.store, f"{event.get_platform_name()}:{self._qq_id(event)}")
+        if not preference.enabled or getattr(self, "_closing", False):
+            return
+        now = time.monotonic()
+        cooldowns = getattr(self, "_voice_poke_cooldowns", {})
+        cooldown_key = (event.get_platform_name(), event.get_sender_id(), getattr(event, "unified_msg_origin", ""))
+        if now - cooldowns.get(cooldown_key, float("-inf")) < 10:
+            return
+        self._voice_poke_cooldowns = {key: stamp for key, stamp in cooldowns.items() if now - stamp < 10}
+        self._voice_poke_cooldowns[cooldown_key] = now
+        text = VoiceResolver.resolve_poke_line(preference.character, preference.locale)
+        if not hasattr(self, "_voice_audio"):
+            self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
+        try:
+            audio = await self._voice_audio.resolve(preference)
+        except (OSError, ValueError, asyncio.TimeoutError):
+            audio = None
+        if audio:
+            from astrbot.api.message_components import Record
+            yield event.chain_result([Record.fromFileSystem(str(audio))])
+        else:
+            yield event.plain_result(text)
+
+    async def union_raid_ranking(self, event: AstrMessageEvent):
+        """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""
+        from .raid_participants import build_ranking, format_ranking
+        try:
+            account = self._account_or_error(event)
+            payload = await self.client.get_union_raid_data(account)
+            yield event.plain_result(format_ranking(build_ranking(payload)))
+        except CookieExpired:
+            self.store.mark_cookie_invalid(self._qq_id(event))
+            yield event.plain_result("登录状态已失效，请重新绑定。")
+        except (BlaBlaError, ValueError):
+            yield event.plain_result("突袭排名暂不可用：数据不完整或请求失败，请稍后重试。")
+
     async def union_raid(self, event: AstrMessageEvent):
         """查询当前账号所属联盟的联盟突袭战况。"""
         handle = self.feedback_manager.start_delayed_feedback(
@@ -709,6 +823,9 @@ class NikkePlugin(Star):
                     try:
                         detail = "登录有效；" + await self.client.perform_daily_signin(account)
                         self.store.finish_run(signin_key, "success", detail)
+                    except UnknownAfterAction:
+                        self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
+                        raise
                     except Exception as exc:
                         self.store.finish_run(signin_key, "failed", type(exc).__name__)
                         raise
@@ -728,6 +845,10 @@ class NikkePlugin(Star):
             self.store.finish_run(run_key, "expired", "Cookie失效")
             return account.get("nickname") or qq_id, "Cookie失效，请重新绑定"
         except Exception as exc:
+            if isinstance(exc, UnknownAfterAction):
+                detail = "签到结果未确认，请稍后查询状态；未自动重发"
+                self.store.finish_run(run_key, "unknown", detail)
+                return account.get("nickname") or qq_id, detail
             detail = f"失败：{type(exc).__name__}"
             self.store.finish_run(run_key, "failed", detail)
             return account.get("nickname") or qq_id, detail
@@ -825,18 +946,23 @@ class NikkePlugin(Star):
         account_key = f"{qq_id}:{game_uid}"
         digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
         run_key = f"cdk:{qq_id}:{game_uid}:{digest}"
-        retryable = {"failed", "unknown", "expired"}
+        retryable = {"failed", "expired"}
         existing = self.store.get_run(run_key)
         if existing and existing["status"] not in retryable:
             if existing["status"] == "running":
-                if not self.store.retry_run(run_key, retryable, stale_after=120):
+                changed = self.store.mark_stale_running_unknown(
+                    run_key, stale_after=120, detail="兑换结果未确认，请先检查官方兑换历史。")
+                current = self.store.get_run(run_key)
+                if changed or (current and current["status"] == "unknown"):
+                    yield event.plain_result("兑换结果未确认，请先检查官方兑换历史，勿重复提交。")
+                else:
                     yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
-                    return
+                return
             else:
                 yield event.plain_result(existing["detail"] or f"兑换码 {masked} 已处理。")
                 return
         elif existing:
-            if not self.store.retry_run(run_key, retryable, stale_after=120):
+            if not self.store.retry_run(run_key, retryable):
                 yield event.plain_result(f"兑换码 {masked} 正在处理，请稍后再试。")
                 return
         elif not self.store.claim_run(run_key, qq_id, "cdk"):
@@ -853,12 +979,18 @@ class NikkePlugin(Star):
                 status = "failed"
             else:
                 status = "terminal"
-            self.store.finish_run(run_key, status, detail)
+            # 上游消息可能回显完整兑换码，仅持久化固定状态说明。
+            stored_detail = {"success": "兑换成功", "unknown": "结果未确认，请核对官方历史",
+                             "failed": "请求失败，可稍后重试", "terminal": "官方已拒绝此码"}[status]
+            self.store.finish_run(run_key, status, f"兑换码 {masked}：{stored_detail}")
             yield event.plain_result(detail)
         except CookieExpired:
             self.store.mark_cookie_invalid(qq_id)
             self.store.finish_run(run_key, "expired", "登录状态已失效")
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except asyncio.CancelledError:
+            self.store.finish_run(run_key, "unknown", "兑换中断，结果未确认，请先检查官方历史")
+            raise
         except Exception as exc:
             self.store.finish_run(run_key, "failed", f"兑换码 {masked}：请求失败，可稍后重试")
             logger.warning(f"[NIKKE] CDK兑换失败: {type(exc).__name__}")
@@ -881,7 +1013,7 @@ class NikkePlugin(Star):
         qq_id = self._qq_id(event)
         game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
         account_key = f"{qq_id}:{game_uid}"
-        batch_res = await self.cdk_service.redeem_batch(account, codes, account_key=account_key)
+        batch_res = await self.cdk_service.redeem_batch(account, codes, account_key=account_key, store=self.store, qq_id=qq_id)
         lines = [f"【CDK 批量兑换结果】共 {len(batch_res.results)} 项："]
         for res in batch_res.results:
             masked = self._mask_cdk(res.code)
@@ -1054,7 +1186,24 @@ class NikkePlugin(Star):
         text = self.announcements.format_announcements_text(5, fallback_error=fallback_error)
         yield event.plain_result(text)
 
-    async def guide(self, event: AstrMessageEvent, category: str = ""):
+    async def announcement_subscription(self, event: AstrMessageEvent, action: str):
+        """目标只取当前会话，禁止通过命令替其它会话订阅。"""
+        if not self._is_admin(event):
+            yield event.plain_result("仅机器人管理员可管理公告订阅。")
+            return
+        target = getattr(event, "unified_msg_origin", "")
+        if not target:
+            yield event.plain_result("当前适配器未提供可持久化会话目标。")
+            return
+        if action == "取消订阅":
+            self.announcement_delivery.unsubscribe(target)
+            yield event.plain_result("已取消当前会话的公告订阅。")
+            return
+        self.announcement_delivery.subscribe(target, self.announcements.list_announcements(limit=10000))
+        suffix = "" if self.config.get("enable_announcement_push", False) else " 全局推送开关当前关闭，不会自动发送。"
+        yield event.plain_result("已订阅当前会话；不补发已有公告，截止提醒为 24/6/1 小时。" + suffix)
+
+    async def guide(self, event: AstrMessageEvent, category: str = "", page: str = "1"):
         """查看或发送常用攻略图。"""
         cat_key = category.strip().lower()
         mapping = {
@@ -1078,25 +1227,34 @@ class NikkePlugin(Star):
                 "• /妮姬 攻略 红球 — 同步器等级与红球消耗一览表\n"
                 "• /妮姬 攻略 珍藏品 — 珍藏品养成与材料汇总\n"
                 "• /妮姬 攻略 充能 — 竞技场爆裂充能速查表\n\n"
-                "（提示：可在 assets/guides/<分类>/ 目录中放入对应图片即可直接发送）"
+                "（当前保留占位，仅发送 registry 中已登记的素材）"
             )
             return
 
         folder_name = mapping[cat_key]
-        guide_dir = self.plugin_dir / "assets" / "guides" / folder_name
-        images = []
-        if guide_dir.is_dir():
-            images = [
-                p for p in guide_dir.iterdir()
-                if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
-            ]
-        if images:
-            yield event.image_result(str(images[0]))
-        else:
-            yield event.plain_result(
-                f"暂未收录【{category}】攻略图。可将对应图片放置于插件目录下的 "
-                f"assets/guides/{folder_name}/ 中直接发送。"
-            )
+        if not page.isascii() or not page.isdigit() or not 1 <= int(page) <= 10000:
+            yield event.plain_result("页码应为正整数，例如：/妮姬 攻略 练度 2")
+            return
+        page_number = int(page)
+        from .guide_registry import GuideRegistry
+        try:
+            registry = GuideRegistry(self.plugin_dir / "assets" / "guides")
+            entries = registry.page(folder_name, page=page_number)
+        except (ValueError, OSError):
+            yield event.plain_result("攻略索引暂不可用，请管理员核对授权和文件配置。")
+            return
+        if entries:
+            total = sum(entry.category == folder_name for entry in registry.entries)
+            yield event.plain_result(f"【{category}】第 {page_number}/{(total + 2)//3} 页；使用 /妮姬 攻略 {category} <页码> 翻页。")
+            for entry in entries:
+                yield event.plain_result(entry.caption())
+                for image in entry.files[:10]:
+                    yield event.image_result(str(image))
+            return
+        if page_number > 1 or any(entry.category == folder_name for entry in registry.entries):
+            yield event.plain_result("该攻略页不存在。")
+            return
+        yield event.plain_result(f"暂未收录【{category}】攻略图，当前保留占位，等待后续登记素材。")
 
     async def push(self, event: AstrMessageEvent, state: str):
         """开启或关闭每日群汇总。"""
@@ -1205,6 +1363,11 @@ class NikkePlugin(Star):
 
     async def terminate(self):
         self._closing = True
+        # 先停止生产任务，再关闭它们依赖的资源。
+        tasks = list(self._background_tasks)
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
         if hasattr(self, "feedback_manager") and self.feedback_manager:
             await self.feedback_manager.close()
         if hasattr(self, "asset_manager") and self.asset_manager:
@@ -1213,9 +1376,6 @@ class NikkePlugin(Star):
             except Exception as exc:
                 logger.debug(f"[NIKKE] 素材管理器回收跳过: {exc}")
         await self.web.stop()
-        for task in self._background_tasks:
-            task.cancel()
-        await asyncio.gather(*self._background_tasks, return_exceptions=True)
         logger.info("[NIKKE] 插件已停止")
 
     async def close(self):

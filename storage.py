@@ -284,6 +284,16 @@ class NikkeStore:
             )
         return cursor.rowcount == 1
 
+    def mark_stale_running_unknown(self, run_key: str, *, stale_after: int, detail: str) -> bool:
+        """原子隔离过期写请求，不能将结果不明的任务重新领取。"""
+        with self._lock, self._connect() as conn:
+            cursor = conn.execute(
+                "UPDATE action_runs SET status='unknown', detail=? "
+                "WHERE run_key=? AND status='running' AND created_at<=?",
+                (detail[:500], run_key, int(time.time()) - stale_after),
+            )
+        return cursor.rowcount == 1
+
     def finish_run(self, run_key: str, status: str, detail: str = "") -> None:
         with self._lock, self._connect() as conn:
             conn.execute(

@@ -59,6 +59,10 @@ class CookieExpired(BlaBlaError):
     pass
 
 
+class UnknownAfterAction(BlaBlaError):
+    """写请求已尝试，后续只读验证仍无法确认结果，禁止自动重发。"""
+
+
 @dataclass(slots=True)
 class ValidationResult:
     valid: bool
@@ -276,7 +280,7 @@ class BlaBlaClient:
             roster = data.get("characters", data.get("user_characters", [])) or []
         return {"basic": basic, "outpost": outpost, "roster": roster}
 
-    async def get_union_raid_overview(self, account: dict[str, Any]) -> dict[str, Any]:
+    async def get_union_raid_overview(self, account: dict[str, Any], *, attacks: bool = False) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))
         openid = str(account.get("game_openid", "")).strip()
         if not area_id or not openid:
@@ -318,7 +322,8 @@ class BlaBlaClient:
             "nikke_area_id": int(area_id),
             "intl_open_id": openid,
         }
-        level_resp = await self._post(UNION_RAID_LEVEL_INFO, account["cookie"], raid_payload)
+        endpoint = UNION_RAID_DATA if attacks else UNION_RAID_LEVEL_INFO
+        level_resp = await self._post(endpoint, account["cookie"], raid_payload)
         level_data = level_resp.get("data", {}) if isinstance(level_resp, dict) else {}
 
         return {
@@ -326,6 +331,26 @@ class BlaBlaClient:
             "guild_name": guild_name,
             "level_info": level_data,
         }
+
+    async def get_union_raid_data(self, account: dict[str, Any]) -> dict[str, Any]:
+        """复用联盟上下文，仅请求已确认的攻击列表接口。"""
+        response = await self.get_union_raid_overview(account, attacks=True)
+        return response["level_info"]
+
+    async def get_union_raid_season(self, account: dict[str, Any], *, guild_id: str, season_id: str, levels: bool = False) -> dict[str, Any]:
+        """官方公开前端已观察到的历史读取合同；不自动发现或猜测 season_id。"""
+        if not guild_id or not season_id:
+            raise ValueError("历史突袭需要明确的联盟和赛季")
+        endpoint = "/api/game/proxy/Game/" + (
+            "GetUnionRaidLevelDataOfGuildSeason" if levels else "GetUnionRaidDataOfGuildSeason"
+        )
+        response = await self._post(endpoint, account["cookie"], {
+            "area_id": int(account["area_id"]), "guild_id": str(guild_id), "season_id": str(season_id),
+        })
+        data = response.get("data")
+        if not isinstance(data, dict):
+            raise BlaBlaError("历史突袭返回格式异常", endpoint=endpoint)
+        return data
 
     async def get_roster(self, account: dict[str, Any], include_details: bool = True) -> list[dict[str, Any]]:
         area_id = int(account["area_id"])
@@ -547,24 +572,23 @@ class BlaBlaClient:
         if not status["task_id"]:
             raise BlaBlaError("签到任务缺少task_id", endpoint="GetTaskListWithStatusV2")
         last_error: BlaBlaError | None = None
-        for attempt in range(3):
-            if attempt:
-                await asyncio.sleep((2 ** attempt) + random.uniform(0, 1))
-            try:
-                await self._community_request(
-                    "POST",
-                    DAILY_CHECK_IN,
-                    account,
-                    payload={"task_id": status["task_id"]},
-                )
-            except BlaBlaError as exc:
-                last_error = exc
+        try:
+            await self._community_request(
+                "POST", DAILY_CHECK_IN, account, payload={"task_id": status["task_id"]},
+            )
+        except CookieExpired:
+            raise
+        except BlaBlaError as exc:
+            last_error = exc
+        try:
             verified = await self.get_daily_signin(account)
             if verified["completed"]:
                 return "签到成功"
-        if last_error:
+        except BlaBlaError as exc:
+            raise UnknownAfterAction("签到结果未确认，请稍后查询状态，未自动重发", "UNKNOWN_AFTER_ACTION", DAILY_CHECK_IN) from exc
+        if last_error and not isinstance(last_error, (BlaBlaTimeoutError, BlaBlaNetworkError)):
             raise last_error
-        raise BlaBlaError("签到后状态未完成", endpoint="DailyCheckIn")
+        raise UnknownAfterAction("签到结果未确认，请稍后查询状态，未自动重发", "UNKNOWN_AFTER_ACTION", DAILY_CHECK_IN)
 
     async def redeem_cdk(self, account: dict[str, Any], code: str) -> CdkRedemptionResult:
         """使用已绑定账号兑换国际服CDK，不对写请求自动重试。"""
@@ -608,7 +632,7 @@ class BlaBlaClient:
                 return {"code": 212000, "data": None, "msg": "请求过频"}
             if exc.code == "300001":
                 raise CookieExpired("登录状态已失效，请重新绑定", exc.code, exc.endpoint) from exc
-            return {"code": int(exc.code) if exc.code.isdigit() else -1, "data": None, "msg": str(exc)}
+            raise
 
     async def get_cdk_redemption(self, account: dict[str, Any]) -> list[dict]:
         """获取官方可用 CDK 列表。

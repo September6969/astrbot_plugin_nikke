@@ -62,6 +62,15 @@ class GameDeadline:
 
 
 class DeadlineParser:
+    MONTHS = {name.lower(): index for index, name in enumerate(
+        ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"), 1)}
+
+    @classmethod
+    def _normalize_english_dates(cls, body):
+        """只转换带明确年份和时间的英文月份日期，不补猜年份。"""
+        pattern = re.compile(r"\b(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})\s+(?:at\s+)?(?=\d{1,2}:\d{2})", re.IGNORECASE)
+        return pattern.sub(lambda match: f"{match[3]}-{cls.MONTHS[match[1].lower()]:02d}-{int(match[2]):02d} ", body)
+
     # 匹配类似 2026.09.15 04:59 或 2026-09-15 05:00 或 2026/09/15 23:59 的时间
     DATETIME_PATTERN = re.compile(
         r"(\d{4})[./-](\d{1,2})[./-](\d{1,2})\s+(\d{1,2}):(\d{2})"
@@ -110,15 +119,22 @@ class DeadlineParser:
         content_id: str = "",
         category: str = "event",
     ) -> list[GameDeadline]:
+        body = cls._normalize_english_dates(body)
         matches = list(cls.DATETIME_PATTERN.finditer(body))
         if not matches:
             return []
 
         deadlines: list[GameDeadline] = []
         # 如果找到至少两个时间点（通常为 开始 ~ 结束）
-        if len(matches) >= 2:
+        if len(matches) > 2:
+            # 多事件正文尚无可靠分段合同，保守拒绝把前两个日期拼成活动。
+            return []
+        if len(matches) == 2:
             try:
                 m_start, m_end = matches[0], matches[1]
+                between = body[m_start.end():m_end.start()]
+                if len(between) > 120 or not re.search(r"[~～–—]|(?<!\w)-(?!\w)|至|到|结束|\b(?:to|until|ends?|ending)\b", between, re.IGNORECASE):
+                    return []
                 start_tz = cls._extract_timezone(body[m_start.end() : m_start.end() + 30], body)
                 start_dt = datetime(
                     int(m_start.group(1)),
@@ -139,6 +155,8 @@ class DeadlineParser:
                     tzinfo=end_tz,
                 ).astimezone(timezone.utc)
 
+                if end_dt <= start_dt:
+                    return []
                 deadlines.append(
                     GameDeadline(
                         event_id=f"{content_id or hashlib.md5(title.encode()).hexdigest()[:8]}_0",
@@ -278,7 +296,7 @@ class AnnouncementService:
     async def sync_from_source(self, fetcher: Any = None) -> tuple[bool, str]:
         """尝试同步官方数据；若失败则保持当前本地缓存并返回降级说明。"""
         try:
-            fetch_func = fetcher if fetcher is not None else self.fetch_official
+            fetch_func = fetcher if fetcher is not None else self.fetch_primary
             records = await fetch_func()
             for r in records:
                 self.add_or_update(r)
@@ -288,6 +306,15 @@ class AnnouncementService:
         except Exception as exc:
             logger.warning("官方公告同步失败，降级读取本地缓存: %s", exc)
             return False, f"官方数据同步失败（{exc}），已降级读取本地缓存"
+
+    @staticmethod
+    async def fetch_primary() -> list[AnnouncementRecord]:
+        from .announcement_sources import InformationFeedsSource
+        try:
+            return await InformationFeedsSource().fetch()
+        except Exception:
+            # 主源失败继续尝试原有 MVP；两者失败由同步层保留磁盘缓存。
+            return await AnnouncementService.fetch_official()
 
     @staticmethod
     async def fetch_official() -> list[AnnouncementRecord]:
@@ -311,8 +338,14 @@ class AnnouncementService:
                 raise RuntimeError("官方公告 list 字段非列表格式")
             records = []
             for it in items:
+                if not isinstance(it, dict):
+                    continue
+                content_id = it.get("content_id") or it.get("id")
+                if not isinstance(content_id, (str, int)) or isinstance(content_id, bool) or not str(content_id).strip():
+                    logger.warning("跳过缺少稳定 ID 的公告")
+                    continue
                 rec = AnnouncementRecord(
-                    content_id=str(it.get("content_id") or it.get("id")),
+                    content_id=str(content_id),
                     title=str(it.get("title", "")),
                     body=str(it.get("content", "") or it.get("body", "")),
                     published_at=str(it.get("publish_time", "")),
@@ -328,6 +361,8 @@ class AnnouncementService:
         """添加或更新公告。
         返回 (is_new, is_updated)。
         """
+        if not record.content_id or record.content_id.strip() in {"", "None"}:
+            raise ValueError("公告缺少稳定 ID")
         existing = self._records.get(record.content_id)
         if not existing:
             self._records[record.content_id] = record
@@ -335,16 +370,21 @@ class AnnouncementService:
                 record.title, record.body, record.content_id, record.category
             )
             for dl in parsed:
+                dl.deadline_version = record.deadline_version
                 self._deadlines[dl.event_id] = dl
             self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
             self.save_cache()
             return True, False
 
         # 变更检测：检查 body_hash
-        if existing.body_hash != record.body_hash:
+        if (existing.body_hash, existing.title, existing.category) != (record.body_hash, record.title, record.category):
             new_version = existing.content_version + 1
             record.content_version = new_version
             self._records[record.content_id] = record
+            previous = sorted(
+                (dl.event_id, dl.start_at, dl.end_at) for dl in self._deadlines.values()
+                if dl.source_content_id == record.content_id
+            )
             # 重新解析 deadline 前，先清理该公告旧版本产生的旧日程
             self._deadlines = {
                 k: v for k, v in self._deadlines.items() if v.source_content_id != record.content_id
@@ -352,8 +392,10 @@ class AnnouncementService:
             parsed = DeadlineParser.parse_deadlines(
                 record.title, record.body, record.content_id, record.category
             )
+            current = sorted((dl.event_id, dl.start_at, dl.end_at) for dl in parsed)
+            record.deadline_version = existing.deadline_version + int(previous != current)
             for dl in parsed:
-                dl.deadline_version = existing.deadline_version + 1
+                dl.deadline_version = record.deadline_version
                 self._deadlines[dl.event_id] = dl
             self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
             self.save_cache()

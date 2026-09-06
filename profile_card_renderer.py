@@ -122,9 +122,32 @@ class ProfileCardRenderer(CardRenderer):
         if any(v is not None for v in [data.character_count, data.max_level, data.max_combat, data.character_costume_count]):
             sections.append(self._roster_stats_section(data))
         extra = self._extra_items(data)
+        if data.recycle_room_researches is not None:
+            sections.append(self._structured_section("RESEARCH / 研究", [
+                (item.display_name or f"研究项目 {i+1}", f"Lv.{self._number(item.level)} · EXP {self._number(item.exp)}")
+                for i, item in enumerate(data.recycle_room_researches)
+            ]))
+        if data.memorial_counts is not None:
+            sections.append(self._structured_section("COLLECTION / 收藏", [
+                (f"收藏分类 {i+1}", self._number(item.count))
+                for i, item in enumerate(data.memorial_counts)
+            ]))
         if extra:
             sections.append(self._extra_section(extra))
         return sections
+
+    def _structured_section(self, title, items):
+        # 展示序号而非未确认的内部标识；限制单卡长度以适配 QQ。
+        visible = items[:30] or [("暂无记录", "—")]
+        if len(items) > 30:
+            visible.append(("其余项目", f"{len(items)-30} 项"))
+        def draw_section(draw, box, fill):
+            self._section_panel(draw, box, title, fill=fill)
+            for i, (label, value) in enumerate(visible):
+                x, y = box[0] + 30, box[1] + 55 + i * 38
+                self._text(draw, (x, y), label, 20, PROFILE_THEME["muted"], width=450)
+                self._text(draw, (x + 480, y), value, 20, PROFILE_THEME["text"], width=520)
+        return draw_section, 75 + len(visible) * 38
 
     def _basic_info_section(self, data):
         def draw_section(draw, box, fill):

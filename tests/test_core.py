@@ -643,7 +643,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             calls.append(("announcements_view",))
             yield "公告结果"
 
-        async def guide(event, category=""):
+        async def guide(event, category="", page="1"):
             calls.append(("guide", category))
             yield "攻略结果"
 

@@ -5,13 +5,17 @@ from __future__ import annotations
 
 from typing import Any
 
-from .profile_models import ProfileDashboardData
+from .profile_models import ProfileDashboardData, RecycleResearchData, MemorialCountData
+from .research_registry import research_labels
 
 
 def _optional_int(value) -> int | None:
     if value in (None, ""):
         return None
-    return int(value)
+    try:
+        return int(value) if not isinstance(value, bool) else None
+    except (ValueError, TypeError, OverflowError):
+        return None
 
 
 def _optional_str(value) -> str | None:
@@ -88,23 +92,27 @@ class ProfileBuilder:
         jukebox_count = _optional_str(outpost.get("jukebox_count"))
 
         recycle_room_summary = None
+        research_data = None
         researches = outpost.get("recycle_room_researches")
         if isinstance(researches, list):
-            levels = [
-                int(item.get("lv", 0) or 0)
+            research_data = [
+                RecycleResearchData(_optional_str(item.get("tid")), _optional_int(item.get("lv")), _optional_int(item.get("exp")), *research_labels(item.get("tid")))
                 for item in researches
                 if isinstance(item, dict)
             ]
-            recycle_room_summary = f"{len(levels)} 项 · 等级合计 {sum(levels)}"
+            levels = [item.level for item in research_data if item.level is not None]
+            recycle_room_summary = f"{len(research_data)} 项 · 等级合计 {sum(levels)}"
 
         memorial_summary = None
+        memorial_data = None
         memorials = outpost.get("memorial_counts")
         if isinstance(memorials, list):
-            count = sum(
-                int(item.get("count", 0) or 0)
+            memorial_data = [
+                MemorialCountData(_optional_str(item.get("category")), _optional_int(item.get("count")))
                 for item in memorials
                 if isinstance(item, dict)
-            )
+            ]
+            count = sum(item.count for item in memorial_data if item.count is not None)
             memorial_summary = str(count)
 
         return ProfileDashboardData(
@@ -131,4 +139,6 @@ class ProfileBuilder:
             jukebox_count=jukebox_count,
             recycle_room_summary=recycle_room_summary,
             memorial_summary=memorial_summary,
+            recycle_room_researches=research_data,
+            memorial_counts=memorial_data,
         )
