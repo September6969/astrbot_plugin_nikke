@@ -6,6 +6,7 @@ import httpx
 from .announcement_models import AnnouncementRecord
 
 BASE = "https://na-community.playerinfinite.com/api/gpts.information_feeds_svr.InformationFeedsSvr/"
+HOSTS = {"en": "nikke-en.com", "ja": "nikke-jp.com", "ko": "nikke-kr.com", "th": "nikke-sea.com", "de": "nikke-de.com", "fr": "nikke-fr.com"}
 
 
 class PlainBody(HTMLParser):
@@ -87,6 +88,6 @@ class InformationFeedsSource:
                 return AnnouncementRecord(
                     f"informationfeeds:{self.locale}:{identifier}", str(data.get("title", "")),
                     "".join(body.parts), datetime.fromtimestamp(int(data["pub_timestamp"]), timezone.utc).isoformat(),
-                    source_url=f"https://nikke-en.com/newsdetail.html?content_id={identifier}",
+                    source_url=f"https://{HOSTS[self.locale]}/newsdetail.html?content_id={identifier}",
                 )
             return await asyncio.gather(*(detail(identifier) for identifier in items))

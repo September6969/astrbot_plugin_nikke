@@ -1,11 +1,22 @@
 """以真实公开响应的结构构造离线样例，不复制公告正文。"""
 import json
+from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 import httpx
 from astrbot_plugin_nikke.announcement_sources import InformationFeedsSource
 
 
 class InformationFeedsTests(IsolatedAsyncioTestCase):
+    async def test_public_shape_fixture_and_language_link(self):
+        root = Path(__file__).parent / "fixtures/informationfeeds"
+        names = {"GetLabelList": "labels.json", "GetContentByLabel": "list.json", "GetContentInfoById": "detail.json"}
+        def handle(request):
+            name = names[request.url.path.rsplit("/", 1)[-1]]
+            return httpx.Response(200, json=json.loads((root / name).read_text(encoding="utf-8")))
+        result = await InformationFeedsSource("ja", max_pages=1, transport=httpx.MockTransport(handle)).fetch()
+        self.assertEqual(result[0].body, "\nFixture body")
+        self.assertTrue(result[0].source_url.startswith("https://nikke-jp.com/"))
+
     async def test_locale_pagination_detail(self):
         offsets = []
         def handle(request):

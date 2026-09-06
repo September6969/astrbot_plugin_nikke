@@ -1,0 +1,14 @@
+{
+  "code": 0,
+  "data": {
+    "result": 0,
+    "next_offset": 2,
+    "total_num": 76,
+    "info_content": [
+      {
+        "content_id": "public-fixture",
+        "title": "Synthetic notice"
+      }
+    ]
+  }
+}

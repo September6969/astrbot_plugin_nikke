@@ -1,0 +1,10 @@
+{
+  "code": 0,
+  "data": {
+    "result": 0,
+    "content_id": "public-fixture",
+    "title": "Synthetic notice",
+    "content": "<p>Fixture body</p>",
+    "pub_timestamp": "1788354000"
+  }
+}

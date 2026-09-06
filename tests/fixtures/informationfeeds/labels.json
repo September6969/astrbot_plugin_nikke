@@ -1,0 +1,13 @@
+{
+  "code": 0,
+  "data": {
+    "result": 0,
+    "primary_label_list": [
+      {
+        "raw_label_name": "official_news",
+        "label_id": 309,
+        "default_secondary_label_id": 496
+      }
+    ]
+  }
+}
