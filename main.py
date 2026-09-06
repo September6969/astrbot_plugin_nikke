@@ -411,7 +411,7 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"攻略", "guide", "guides"}:
-            async for result in self.guide(event, arg1):
+            async for result in self.guide(event, arg1, arg2 or "1"):
                 yield result
             return
         if command_key in {"突袭", "联盟突袭", "raid", "union_raid"}:
@@ -1189,7 +1189,7 @@ class NikkePlugin(Star):
         suffix = "" if self.config.get("enable_announcement_push", False) else " 全局推送开关当前关闭，不会自动发送。"
         yield event.plain_result("已订阅当前会话；不补发已有公告，截止提醒为 24/6/1 小时。" + suffix)
 
-    async def guide(self, event: AstrMessageEvent, category: str = ""):
+    async def guide(self, event: AstrMessageEvent, category: str = "", page: str = "1"):
         """查看或发送常用攻略图。"""
         cat_key = category.strip().lower()
         mapping = {
@@ -1218,17 +1218,27 @@ class NikkePlugin(Star):
             return
 
         folder_name = mapping[cat_key]
+        if not page.isascii() or not page.isdigit() or not 1 <= int(page) <= 10000:
+            yield event.plain_result("页码应为正整数，例如：/妮姬 攻略 练度 2")
+            return
+        page_number = int(page)
         from .guide_registry import GuideRegistry
         try:
-            entries = GuideRegistry(self.plugin_dir / "assets" / "guides").page(folder_name)
+            registry = GuideRegistry(self.plugin_dir / "assets" / "guides")
+            entries = registry.page(folder_name, page=page_number)
         except (ValueError, OSError):
             yield event.plain_result("攻略索引暂不可用，请管理员核对授权和文件配置。")
             return
         if entries:
+            total = sum(entry.category == folder_name for entry in registry.entries)
+            yield event.plain_result(f"【{category}】第 {page_number}/{(total + 2)//3} 页；使用 /妮姬 攻略 {category} <页码> 翻页。")
             for entry in entries:
                 yield event.plain_result(entry.caption())
                 for image in entry.files[:10]:
                     yield event.image_result(str(image))
+            return
+        if page_number > 1 or any(entry.category == folder_name for entry in registry.entries):
+            yield event.plain_result("该攻略页不存在。")
             return
         guide_dir = self.plugin_dir / "assets" / "guides" / folder_name
         images = []
