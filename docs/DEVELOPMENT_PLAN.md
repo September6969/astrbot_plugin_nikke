@@ -5,15 +5,15 @@
 
 | 范围 | 当前状态 | 已完成与剩余 |
 | --- | --- | --- |
-| 审核修复 | DONE（本地待最终回归确认） | 序关系脱敏、Guide registry 强制入口、单条取消 unknown、用户隔离 cooldown、移除临时 CI trigger |
-| 公告来源/缓存/订阅/调度 | PARTIAL | 正式 CMS、退避、独立版本、默认关闭调度已实现；深度重扫与状态清理待做 |
+| 审核修复 | DONE | 序关系脱敏、Guide registry 强制入口、单条取消 unknown、用户隔离 cooldown、移除临时 CI trigger |
+| 公告来源/缓存/订阅/调度 | PARTIAL | 正式 CMS、退避、独立版本、默认关闭调度已实现；状态清理已实现，深度重扫待做 |
 | Campaign | PARTIAL | 3572 关卡映射、严格阵容与异常合同；更丰富渲染待做 |
 | Tower | DONE | 7350 层公开静态查询，不代表账号进度 |
 | Profile | PARTIAL | 结构化研究与收藏、名称映射；完整分区继续完善 |
 | Raid | PARTIAL / NEEDS_LIVE_EVIDENCE | 当前响应排名、历史客户端、诊断已实现；身份、多轮、范围仍待证据 |
 | Daily | PARTIAL / NEEDS_LIVE_EVIDENCE | 单次写后只读验证；Like/Browse 未证明状态变化 |
 | CDK | PARTIAL | 串行批量持久化与取消保护；统一编排仍可改进 |
-| Voice | PARTIAL | 本地音频、偏好、发送器与隔离 cooldown；动态源/两级缓存继续开发 |
+| Voice | PARTIAL | 本地音频、偏好、发送器与隔离 cooldown；动态源与两级缓存已实现并匿名验证；角色/皮肤映射与动态 Poke 接线待做 |
 | Spine | PARTIAL | 队列与无运行时预检查；真实运行时和 Linux 渲染基准待做 |
 | Guide | DEFERRED | 保留框架/分页/占位，不生成、不抓取、不添加素材；当前不需要用户行动 |
 | 许可证最终采用 | NEEDS_HUMAN_DECISION | 仅生产采用具体 runtime 时确认，不阻止先研究与工程验证 |

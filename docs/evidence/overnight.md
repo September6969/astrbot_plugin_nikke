@@ -61,7 +61,7 @@ GetUnionRaidDataOfGuildSeason、GetUnionRaidLevelDataOfGuildSeason，
 不能仅凭前端截断代码宣称玩家身份匹配已解决。
 
 排名范围明确为 CURRENT_RESPONSE，当前按产品要求按总伤害并列排名；不是官网赛季排名的完全复刻。
-匿名语义 fixture 保留身份相等关系、day/level/step/slot、伤害比例，不保留真实数值与身份。
+匿名语义 fixture 现仅保留身份相等关系、day/level/step/slot、伤害排序与聚合并列关系。旧比例方案已撤回，不保留数值或精确比例；新格式不是 Builder 输入。
 
 ## 公共静态数据：已验证可读取
 
