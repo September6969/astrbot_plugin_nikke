@@ -35,8 +35,8 @@ SDK 默认 v1 为无需签名的只读链路；未调用 ReportUserAction、Like
 
 限制：默认英文、NEWS 栏目最多两页共 10 条，不代表完整公告历史或全部 NOTICE 栏目。
 其他语言未逐站联调。主源失败尝试旧 GetAnnouncements，再失败保留缓存。
-Deadline 仍为启发式 MVP，当前仅识别数字年月日时间，不保证解析英文自然日期。
-未接自动群推送；查询、同步、缓存、版本和去重 API 已具备。
+Deadline 仍为启发式 MVP，支持数字日期和带完整年份的英文月份日期；多事件正文保守不建日程。
+已接默认关闭的订阅/调度，失败不记 PushRecord 并退避 5 分钟；没有执行真实群发。
 
 ## BlaBlaLink 前端及 Raid
 
@@ -107,6 +107,8 @@ Spine 官方许可：<https://en.esotericsoftware.com/spine-runtimes-license>、
 <https://us.esotericsoftware.com/spine-editor-license>。
 公开资源可见不等于具备运行时集成授权。有效 Editor 许可决定运行时集成权利，trial 不等同运行时授权。
 本次未下载运行时、未进行真实 PNG spike 或 Linux 性能基准。NEEDS_HUMAN_DECISION：运行时许可与部署预算。
+已增加 `scripts/inspect_spine_bundle.py` 无运行时预检查，依据官方 [atlas 格式](https://us.esotericsoftware.com/spine-atlas-format)。
+仅检查页路径、声明尺寸、文件存在和 JSON major.minor；二进制版本保持 UNKNOWN，估算不是实测内存，检查通过不代表可渲染。
 
 语音过滤依据：<https://github.com/botuniverse/onebot-11/blob/master/event/notice.md>，
 AstrBot 文档：<https://docs.astrbot.app/dev/star/resources/astr_message_event.html>，

@@ -26,6 +26,8 @@
 12. Tower：7350 层静态 registry 和免绑定查询命令。
 13. 单次只读诊断：默认离线；显式开启才读账号，只输出固定状态、布尔值和计数。
 14. 工程：README/帮助同步，CI 增加独立 Node 扩展测试和工作分支 push 触发。
+15. 继续阶段：公告目标订阅、当前会话管理员命令、默认关闭的调度、24/6/1 小时提醒、失败退避及 PushRecord 成功持久化。
+16. 继续阶段：攻略命令分页；Spine 无运行时 atlas/JSON 预检查；英文月份日期和明确日期范围校验。
 
 ## 新解除的 BLOCKED
 
@@ -48,13 +50,14 @@
 - Daily 真实状态语义；只读诊断不能证明点赞/浏览写入后的完成条件。
 - QQ/NapCat 实际语音播放；目前只有 mock sender，没有实际发送。
 - CMS 非英文站与更多栏目尚未联调；英文 NEWS 已匿名验证，不能再整体标记为源不可用。
-- Linux/Python 3.11/3.12 需以远端 Actions 结果为准，本地只验证 Python 3.10。
+- 真实公告发送尚未验收；当前发送器仅 mock，API 返回与最终平台送达仍需区分。
+- 092b88f 的远端 Actions 已验证 Linux Python 3.10/3.11/3.12 和 Node 全绿；后续提交以对应 Actions 为准。
 
 ## NEEDS_HUMAN_DECISION
 
 - Spine 有效运行时许可及 Linux 部署资源预算；未安装运行时或进行真实 PNG spike。
 - 有权使用的语音和攻略素材。索引默认为空，未复制攻略站正文或下载游戏音频。
-- 公告目标语言/栏目和自动推送启用策略（当前默认英文查询，不自动群发）。
+- 公告目标语言/栏目和自动推送启用策略（当前英文查询，推送开关默认关闭）。
 
 ## HARD_BLOCKED
 
@@ -62,16 +65,16 @@
 
 ## 仍可继续的离线工作（不伪装成 live blocker）
 
-- 公告订阅/自动投递调度、提醒时窗、多日期与英文自然日期解析；目前仅查询+同步+缓存+去重 API。
+- 公告最近 14 天深度重扫、栏目筛选、多事件分段解析。订阅/调度/时窗已实现；发送成功后进程崩溃而尚未持久化的窗口仍可能重复，不能宣称 exactly-once。
 - Advise/Cube/Collection/Skill 完整静态 registry、具体查询服务和数据更新工具；已有可达性研究未等同产品完成。
-- Guide 完整命令分页/目录交互、过期版本治理；目前命令显示有限条目。
+- Guide 目录交互、过期版本治理；命令分页已实现。
 - CDK 单条与批量的持久化编排仍可进一步抽取共同入口，现有 store key 和互斥范围已经统一。
-- Spine 无运行时依赖的 atlas/version 预检查、真实渲染 spike 和 Linux 性能基准尚未实现。
+- Spine 二进制版本解析、真实渲染 spike 和 Linux 性能基准尚未实现；atlas/JSON 无运行时预检查已实现。
 - 诊断目前不抓成员列表/历史赛季；不能一次性填满所有身份、分页与写后状态证据。
 
 ## 测试
 
-本地 Python 3.10：214 passed、2 warnings、31 subtests passed；Node：3 passed。
+本地 Python 3.10：228 passed、2 warnings、31 subtests passed；Node：3 passed。
 两个警告来自 faiss 的 NumPy 私有命名空间和 AstrBot register 装饰器弃用。
 每个功能阶段执行全量回归后单独提交。公开 CMS 匿名实测独立于 mock 测试。
 
@@ -123,6 +126,13 @@ fe0cea0 feat: resolve profile research types from official static keys
 d8c4f30 test: preserve public CMS evidence and locale contracts
 692b690 feat: expose public tower floor reference without account access
 26e9e10 test: enforce safe raid capture contracts and failure handling
+092b88f docs: record overnight delivery and extend branch CI coverage
+104238e feat: persist announcement subscriptions and delivery planning
+9b618c4 feat: wire opt-in announcement subscriptions and scheduler
+a6f0265 feat: expose bounded guide pagination in commands
+5ed857a feat: add runtime-free Spine bundle preflight inspection
+2404fd6 fix: validate deadline ranges and support explicit English dates
+73440dd fix: persist announcement delivery retry backoff
 ```
 
 最后的报告/README/CI 提交包含本文自身；完整含 SHA 的列表：
