@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any
 
 from .profile_models import ProfileDashboardData, RecycleResearchData, MemorialCountData
+from .research_registry import research_labels
 
 
 def _optional_int(value) -> int | None:
@@ -95,7 +96,7 @@ class ProfileBuilder:
         researches = outpost.get("recycle_room_researches")
         if isinstance(researches, list):
             research_data = [
-                RecycleResearchData(_optional_str(item.get("tid")), _optional_int(item.get("lv")), _optional_int(item.get("exp")))
+                RecycleResearchData(_optional_str(item.get("tid")), _optional_int(item.get("lv")), _optional_int(item.get("exp")), *research_labels(item.get("tid")))
                 for item in researches
                 if isinstance(item, dict)
             ]

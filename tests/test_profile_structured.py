@@ -8,6 +8,12 @@ from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
 
 
 class StructuredProfileTests(TestCase):
+    def test_verified_research_labels_do_not_guess_unknown_ids(self):
+        data = self.build({"recycle_room_researches": [{"tid": 1101, "lv": 5}, {"tid": 99999, "lv": 1}]})
+        self.assertEqual(data.recycle_room_researches[0].display_name, "Attacker")
+        self.assertEqual(data.recycle_room_researches[0].category, "Class")
+        self.assertIsNone(data.recycle_room_researches[1].display_name)
+
     def build(self, outpost):
         return ProfileBuilder().build(account={}, basic={}, outpost=outpost,
             roster=None, fetched_at="", plugin_version="test")
