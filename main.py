@@ -249,6 +249,8 @@ class NikkePlugin(Star):
                 "/妮姬 查询 资料 <角色名>　(/nikke info)\n"
                 "/妮姬 战役 <关卡>　(/nikke campaign [普通/困难] 46-40)\n"
                 "/妮姬 联盟突袭　(/nikke raid)\n"
+                "/妮姬 联盟突袭 排名 — 当前响应范围\n"
+                "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
                 "/妮姬 日程　(/nikke schedule)\n"
                 "/妮姬 公告　(/nikke news)\n"
                 "/妮姬 攻略 [分类]　(/nikke guide)"

@@ -88,7 +88,8 @@ GetUnionRaidDataOfGuildSeason、GetUnionRaidLevelDataOfGuildSeason，
 确认 Personal=1001、Attacker/Defender/Supporter=1101/1102/1103、厂商=1201..1205。
 前端明确按 researches.tid 匹配这些 QueryKeys，故本次可以接线；未知 tid 名称仍为 None。
 
-Advise/Tower/Cube/Collection/Skill 的数据可达性不再是整体 BLOCKED，
+Tower 已增加 7350 层本地 registry 和命令，不访问账号。
+Advise/Cube/Collection/Skill 的数据可达性不再是整体 BLOCKED，
 但完整产品服务、问答索引、技能数值解释、完整魔方表仍未实现，状态为 DEFERRED（后续离线开发），不是伪装成需要用户抓包。
 前端还声明 /roledata/{id}-v2-{locale}.json 与 /attractscene/{scene_id}-{locale}.json，
 本次未把不完整路径实例化为接口合同，也未复制未授权问答/攻略正文。
