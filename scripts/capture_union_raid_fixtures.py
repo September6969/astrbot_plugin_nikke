@@ -71,8 +71,8 @@ async def post(client: httpx.AsyncClient, account: dict[str, Any], path: str, pa
 
 async def capture(data_dir: Path, output_dir: Path) -> None:
     accounts = NikkeStore(data_dir).list_accounts(with_cookie=True)
-    if not accounts:
-        raise RuntimeError("没有可用的授权绑定账号")
+    if len(accounts) != 1:
+        raise RuntimeError("需要恰好一个授权绑定账号，避免隐式选择其它账号")
     account = accounts[0]
     area_id = int(account.get("area_id") or 0)
     openid = str(account.get("game_openid") or "")
@@ -91,6 +91,10 @@ async def capture(data_dir: Path, output_dir: Path) -> None:
         payload = {"guild_id": guild_id, "nikke_area_id": area_id, "intl_open_id": game_openid}
         level_response = await post(client, account, CURRENT_RAID_LEVEL, payload)
         raid_response = await post(client, account, CURRENT_RAID, payload)
+
+    for response in (level_response, raid_response):
+        if str(response.get("code")) != "0" or not isinstance(response.get("data"), dict):
+            raise RuntimeError("突袭读取失败，不生成成功 fixture")
 
     level_data = level_response.get("data", {})
     raid_data = raid_response.get("data", {})
