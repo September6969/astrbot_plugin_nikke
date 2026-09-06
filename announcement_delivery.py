@@ -108,16 +108,27 @@ class AnnouncementDelivery:
         if not 1 <= limit <= 100:
             raise ValueError("单轮投递数量超限")
         async with self._dispatch_lock:
+            current = aware(now or datetime.now(timezone.utc))
             succeeded = failed = 0
-            for push in self.plan(records, deadlines, now=now)[:limit]:
+            attempted = 0
+            for push in self.plan(records, deadlines, now=current):
+                if attempted >= limit:
+                    break
+                retry_after = self._state().get("retry_after", {}).get(push.key)
+                if retry_after and aware(retry_after) > current:
+                    continue
                 if not self._state()["targets"].get(push.target, {}).get("enabled"):
                     continue
+                attempted += 1
                 try:
                     accepted = await sender(push.target, push.text)
                 except Exception:
-                    failed += 1
-                    continue
+                    accepted = False
                 if accepted is not True:
+                    # 失败不是 PushRecord，单独持久化退避，避免重启后立刻重复尝试。
+                    state = self._state()
+                    state.setdefault("retry_after", {})[push.key] = (current + timedelta(minutes=5)).isoformat()
+                    self.store.set_setting(self.SETTING, state)
                     failed += 1
                     continue
                 state = self._state()
@@ -125,6 +136,7 @@ class AnnouncementDelivery:
                 record.pop("text")
                 record["pushed_at"] = datetime.now(timezone.utc).isoformat()
                 state["delivered"][push.key] = record
+                state.setdefault("retry_after", {}).pop(push.key, None)
                 self.store.set_setting(self.SETTING, state)
                 succeeded += 1
             return {"succeeded": succeeded, "failed": failed}

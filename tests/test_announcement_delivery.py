@@ -52,7 +52,7 @@ class DeliveryTests(IsolatedAsyncioTestCase):
         failed = AsyncMock(side_effect=RuntimeError("synthetic"))
         await self.service.dispatch([], [deadline], failed, now=self.now)
         self.assertEqual(self.store.get_setting(self.service.SETTING)["delivered"], {})
-        await self.service.dispatch([], [deadline], AsyncMock(return_value=True), now=self.now)
+        await self.service.dispatch([], [deadline], AsyncMock(return_value=True), now=self.now+timedelta(minutes=5))
         self.assertEqual(self.service.plan([], [deadline], now=self.now), [])
         deadline.deadline_version = 2
         self.assertEqual(len(self.service.plan([], [deadline], now=self.now)), 1)
@@ -61,3 +61,17 @@ class DeliveryTests(IsolatedAsyncioTestCase):
         self.service.subscribe("fake", [], now=self.now)
         deadline = GameDeadline("event", "合成活动", "event", self.now+timedelta(minutes=59))
         self.assertEqual(self.service.plan([], [deadline], now=self.now), [])
+
+    async def test_failure_backoff_survives_restart_without_blocking_other_target(self):
+        for target in ("failed-target", "other-target"):
+            self.service.subscribe(target, [], now=self.now)
+        await self.service.dispatch([self.record()], [], AsyncMock(return_value=False), now=self.now, limit=1)
+        restarted = AnnouncementDelivery(self.store)
+        sender = AsyncMock(return_value=True)
+        await restarted.dispatch([self.record()], [], sender, now=self.now, limit=1)
+        self.assertEqual(sender.call_args.args[0], "other-target")
+        sender.reset_mock()
+        await restarted.dispatch([self.record()], [], sender, now=self.now)
+        sender.assert_not_awaited()
+        await restarted.dispatch([self.record()], [], sender, now=self.now+timedelta(minutes=5))
+        sender.assert_awaited_once()
