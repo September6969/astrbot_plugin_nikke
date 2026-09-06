@@ -19,6 +19,12 @@
 
 ---
 
+## 后续自治推进
+
+CDK 修复提交 `61e16d59b433bcea62918b3030b3f052ca285043` 的 [Actions](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34047280265) 已通过 Python 3.10/3.11/3.12 和 Node。
+
+语音增加独立的下载/编码管线，统一请求预算、共享任务和关闭回收；未接入真实发送。官方二创指引与 Spine 许可研究见 [证据记录](evidence/voice_licensing_and_pipeline.md)，没有将公开访问当作再分发授权。
+
 ## 前轮报告（历史验收记录）
 
 # 审核修复与动态资源阶段报告（2026-09-06）
