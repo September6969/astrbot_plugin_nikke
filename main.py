@@ -308,6 +308,14 @@ class NikkePlugin(Star):
     ):
         """NIKKE 中文精简指令入口。"""
         command_key = command.strip().casefold()
+        if command_key in {"塔层", "tower"}:
+            from .tower_registry import TowerRegistry
+            try:
+                result = TowerRegistry(self.plugin_dir / "assets" / "tower_floors.json").describe(arg1, arg2)
+            except (OSError, ValueError, KeyError, TypeError):
+                result = "塔层静态资料暂不可用。"
+            yield event.plain_result(result)
+            return
         if command_key in {"语音", "voice"}:
             async for result in self.voice_settings(event, arg1, arg2):
                 yield result
