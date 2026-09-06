@@ -22,6 +22,7 @@ from astrbot.api.star import Context, Star, register
 
 from ._version import PLUGIN_VERSION
 from .announcement_service import AnnouncementService
+from .announcement_delivery import AnnouncementDelivery
 from .asset_manager import AssetManager
 from .campaign_history_builder import CampaignHistoryBuilder
 from .campaign_history_models import ClearLineupStatus
@@ -82,6 +83,7 @@ class NikkePlugin(Star):
         self.feedback_manager = DelayedFeedbackManager(1.5)
         self.voice_resolver = VoiceResolver()
         self.announcements = AnnouncementService(self.data_dir / "announcements")
+        self.announcement_delivery = AnnouncementDelivery(self.store)
         self.web = BindingWebService(
             self.store,
             self.client,
@@ -187,7 +189,22 @@ class NikkePlugin(Star):
             if time.time() - last_announcement_sync > 3600:
                 last_announcement_sync = time.time()
                 self._spawn_background_task(self._sync_announcements_background())
+            if self.config.get("enable_announcement_push", False):
+                task = getattr(self, "_announcement_push_task", None)
+                if task is None or task.done():
+                    self._announcement_push_task = self._spawn_background_task(self._dispatch_announcements())
             await asyncio.sleep(20)
+
+    async def _dispatch_announcements(self):
+        """默认关闭，只有管理员启用且目标显式订阅后才由调度调用。"""
+        if not self.config.get("enable_announcement_push", False):
+            return
+        async def sender(target, text):
+            await asyncio.wait_for(self.context.send_message(target, MessageChain([Plain(text)])), timeout=10)
+            return True
+        await self.announcement_delivery.dispatch(
+            self.announcements.list_announcements(limit=10000),
+            self.announcements.list_active_deadlines(), sender)
 
     @staticmethod
     def _qq_id(event: AstrMessageEvent) -> str:
@@ -386,6 +403,10 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"公告", "news", "announcement"}:
+            if arg1 in {"订阅", "取消订阅"}:
+                async for result in self.announcement_subscription(event, arg1):
+                    yield result
+                return
             async for result in self.announcements_view(event):
                 yield result
             return
@@ -1150,6 +1171,23 @@ class NikkePlugin(Star):
                 fallback_error = f"同步异常: {e}"
         text = self.announcements.format_announcements_text(5, fallback_error=fallback_error)
         yield event.plain_result(text)
+
+    async def announcement_subscription(self, event: AstrMessageEvent, action: str):
+        """目标只取当前会话，禁止通过命令替其它会话订阅。"""
+        if not self._is_admin(event):
+            yield event.plain_result("仅机器人管理员可管理公告订阅。")
+            return
+        target = getattr(event, "unified_msg_origin", "")
+        if not target:
+            yield event.plain_result("当前适配器未提供可持久化会话目标。")
+            return
+        if action == "取消订阅":
+            self.announcement_delivery.unsubscribe(target)
+            yield event.plain_result("已取消当前会话的公告订阅。")
+            return
+        self.announcement_delivery.subscribe(target, self.announcements.list_announcements(limit=10000))
+        suffix = "" if self.config.get("enable_announcement_push", False) else " 全局推送开关当前关闭，不会自动发送。"
+        yield event.plain_result("已订阅当前会话；不补发已有公告，截止提醒为 24/6/1 小时。" + suffix)
 
     async def guide(self, event: AstrMessageEvent, category: str = ""):
         """查看或发送常用攻略图。"""
