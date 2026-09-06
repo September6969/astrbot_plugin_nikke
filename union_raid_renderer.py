@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from .renderer import CardRenderer
-from .union_raid_models import BossStatus, UnionRaidOverviewData
+from .union_raid_models import BossStatus, RaidResponseCoverage, UnionRaidOverviewData
 
 RAID_THEME = {
     "background": "#0A1017",
@@ -33,6 +33,16 @@ RAID_THEME = {
 
 class UnionRaidRenderer(CardRenderer):
     WIDTH = 1600
+
+    @staticmethod
+    def _coverage_text(coverage: RaidResponseCoverage) -> str:
+        labels = {
+            RaidResponseCoverage.CURRENT_RESPONSE: "本次响应范围（非完整赛季）",
+            RaidResponseCoverage.PARTIAL_RANGE: "已知部分范围",
+            RaidResponseCoverage.CONFIRMED_COMPLETE_RANGE: "已确认完整范围",
+            RaidResponseCoverage.UNKNOWN_COVERAGE: "返回覆盖未知",
+        }
+        return labels.get(coverage, "返回覆盖未知")
 
     def _text(self, draw: ImageDraw.ImageDraw, xy, text, size, color, *, width=None, bold=False):
         text = str(text).replace("\n", " ")
@@ -60,6 +70,9 @@ class UnionRaidRenderer(CardRenderer):
 
     def render_raid_overview(self, data: UnionRaidOverviewData) -> str:
         """Render Union Raid Overview card (1600px width with dynamic height)."""
+        coverage_text = self._coverage_text(data.response_coverage)
+        difficulty_text = f"Difficulty {data.difficulty}" if data.difficulty is not None else "Difficulty —"
+        level_text = f"Level {data.level}" if data.level is not None else "Level —"
         boss_count = max(1, len(data.bosses))
         boss_panel_height = 125
         boss_gap = 16
@@ -86,15 +99,15 @@ class UnionRaidRenderer(CardRenderer):
         draw.rounded_rectangle(header_box, 16, fill=RAID_THEME["header"], outline=RAID_THEME["border"], width=1)
         # Decorative tactical line
         draw.line((padding + 30, padding + 36, padding + 70, padding + 36), fill=RAID_THEME["current_accent"], width=4)
-        self._text(draw, (padding + 85, padding + 24), "UNION RAID / 联盟突袭战况总览", 24, RAID_THEME["current_accent"], bold=True)
+        self._text(draw, (padding + 85, padding + 24), "UNION RAID / 联盟突袭响应总览", 24, RAID_THEME["current_accent"], bold=True)
         self._text(draw, (padding + 30, padding + 68), data.guild_name, 38, RAID_THEME["text"], bold=True, width=700)
-        self._text(draw, (padding + 30, padding + 118), f"难度等级: Difficulty {data.difficulty} · Level {data.level}", 20, RAID_THEME["muted"])
+        self._text(draw, (padding + 30, padding + 118), f"难度等级: {difficulty_text} · {level_text}", 20, RAID_THEME["muted"])
 
         # Right side of header
         if data.season_end:
             self._text_right(draw, (self.WIDTH - padding - 30, padding + 32), f"赛季截止: {data.season_end}", 18, RAID_THEME["muted"])
-        self._text_right(draw, (self.WIDTH - padding - 30, padding + 75), f"DIFFICULTY {data.difficulty}", 32, RAID_THEME["current_accent"], bold=True)
-        self._text_right(draw, (self.WIDTH - padding - 30, padding + 118), f"STAGE LEVEL {data.level}", 20, RAID_THEME["muted"])
+        self._text_right(draw, (self.WIDTH - padding - 30, padding + 75), difficulty_text.upper(), 32, RAID_THEME["current_accent"], bold=True)
+        self._text_right(draw, (self.WIDTH - padding - 30, padding + 118), f"STAGE {level_text}".upper(), 20, RAID_THEME["muted"])
 
         # 2. Weighted Overall Progress Box
         prog_y = padding + header_height + 20
@@ -102,9 +115,10 @@ class UnionRaidRenderer(CardRenderer):
         draw.rounded_rectangle(prog_box, 14, fill=RAID_THEME["panel"], outline=RAID_THEME["border"], width=1)
 
         draw.line((padding + 25, prog_y + 26, padding + 55, prog_y + 26), fill=RAID_THEME["current_accent"], width=3)
-        self._text(draw, (padding + 65, prog_y + 16), "TOTAL STAGE PROGRESS / 本阶段加权推进总进度", 20, RAID_THEME["muted"], bold=True)
+        self._text(draw, (padding + 65, prog_y + 16), "RETURNED BOSS PROGRESS / 已返回 Boss 加权进度", 20, RAID_THEME["muted"], bold=True)
+        self._text_right(draw, (self.WIDTH - padding - 30, prog_y + 48), coverage_text, 16, RAID_THEME["dim"])
 
-        if data.total_progress is not None:
+        if data.total_progress is not None and data.response_coverage == RaidResponseCoverage.CURRENT_RESPONSE:
             pct_str = f"{data.total_progress * 100:.1f}%"
             self._text_right(draw, (self.WIDTH - padding - 30, prog_y + 16), f"已击破 {pct_str}", 26, RAID_THEME["current_accent"], bold=True)
             if data.total_current_hp is not None and data.total_max_hp is not None:
@@ -120,10 +134,21 @@ class UnionRaidRenderer(CardRenderer):
             if fill_w > 0:
                 draw.rounded_rectangle((bar_x, bar_y, bar_x + fill_w, bar_y + bar_h), 12, fill=RAID_THEME["current_accent"])
         else:
-            self._text(draw, (padding + 30, prog_y + 70), "Boss 数据不完整，加权总进度暂不可用", 22, RAID_THEME["dim"])
+            unavailable = (
+                "响应范围或记录完整性无法确认，不显示聚合进度"
+                if data.response_coverage != RaidResponseCoverage.CURRENT_RESPONSE
+                else "Boss 数据不完整，已返回 Boss 的加权进度暂不可用"
+            )
+            self._text(draw, (padding + 30, prog_y + 82), unavailable, 22, RAID_THEME["dim"])
 
         # 3. Boss Panels
         boss_start_y = prog_y + progress_height + 25
+        if not data.bosses:
+            by = boss_start_y
+            bbox = (padding, by, self.WIDTH - padding, by + boss_panel_height)
+            draw.rounded_rectangle(bbox, 14, fill=RAID_THEME["panel"], outline=RAID_THEME["border"], width=1)
+            self._text(draw, (padding + 25, by + 42), "未获得可安全展示的 Boss 记录", 24, RAID_THEME["dim"], bold=True)
+
         for i, boss in enumerate(data.bosses):
             by = boss_start_y + i * (boss_panel_height + boss_gap)
             bbox = (padding, by, self.WIDTH - padding, by + boss_panel_height)
@@ -193,7 +218,7 @@ class UnionRaidRenderer(CardRenderer):
 
         # 4. Footer
         foot_y = total_height - footer_height
-        footer_text = f"NIKKE BlaBlaLink · Union Raid MVP · v{data.plugin_version} · 数据获取时间: {data.fetched_at}"
+        footer_text = f"NIKKE BlaBlaLink · Union Raid · {coverage_text} · v{data.plugin_version} · 数据获取时间: {data.fetched_at}"
         self._text(draw, (padding, foot_y + 15), footer_text, 16, RAID_THEME["dim"])
 
         # Save to output file

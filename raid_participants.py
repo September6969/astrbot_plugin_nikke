@@ -84,10 +84,13 @@ def build_ranking(payload: dict) -> RaidRankingData:
 
 
 def format_ranking(data: RaidRankingData) -> str:
-    lines = ["【联盟突袭 · 当前数据范围排名】", "按总伤害排序；同伤害同名次。"]
+    lines = [
+        "【联盟突袭 · 当前响应范围排名】",
+        "按已返回记录的伤害字段汇总；不代表完整赛季或实际攻击次数。",
+    ]
     for item in data.participants[:50]:
         name = " ".join(item.nickname.split())[:40]
-        lines.append(f"{item.rank}. {name}：{item.total_damage:,} · {len(item.attacks)} 刀")
+        lines.append(f"{item.rank}. {name}：{item.total_damage:,} · {len(item.attacks)} 条返回记录")
     if not data.participants:
         lines.append("当前响应没有攻击记录。")
     if len(data.participants) > 50:
