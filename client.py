@@ -270,15 +270,47 @@ class BlaBlaClient:
         # PROFILE is required.
         if isinstance(basic_resp, BaseException):
             raise basic_resp
-        basic = basic_resp.get("data", {}).get("basic_info", {})
-        outpost = {}
-        if not isinstance(outpost_resp, BaseException):
-            outpost = outpost_resp.get("data", {}).get("outpost_info", {})
-        roster: list[dict[str, Any]] | None = None
-        if not isinstance(roster_resp, BaseException):
-            data = roster_resp.get("data", {})
-            roster = data.get("characters", data.get("user_characters", [])) or []
-        return {"basic": basic, "outpost": outpost, "roster": roster}
+        basic_data = basic_resp.get("data") if isinstance(basic_resp, dict) else None
+        basic = basic_data.get("basic_info") if isinstance(basic_data, dict) else None
+        if not isinstance(basic, dict):
+            raise BlaBlaError("个人基础资料格式异常", endpoint="GetUserProfileBasicInfo")
+
+        outpost: dict[str, Any] = {}
+        outpost_available = False
+        if isinstance(outpost_resp, BaseException):
+            if isinstance(outpost_resp, (asyncio.CancelledError, CookieExpired)):
+                raise outpost_resp
+        else:
+            outpost_data = outpost_resp.get("data") if isinstance(outpost_resp, dict) else None
+            outpost_value = outpost_data.get("outpost_info") if isinstance(outpost_data, dict) else None
+            if isinstance(outpost_value, dict):
+                outpost = outpost_value
+                outpost_available = True
+
+        roster: list[Any] | None = None
+        roster_available = False
+        if isinstance(roster_resp, BaseException):
+            if isinstance(roster_resp, (asyncio.CancelledError, CookieExpired)):
+                raise roster_resp
+        else:
+            roster_data = roster_resp.get("data") if isinstance(roster_resp, dict) else None
+            if isinstance(roster_data, dict):
+                if "characters" in roster_data:
+                    roster_value = roster_data["characters"]
+                elif "user_characters" in roster_data:
+                    roster_value = roster_data["user_characters"]
+                else:
+                    roster_value = None
+                if isinstance(roster_value, list):
+                    roster = roster_value
+                    roster_available = True
+        return {
+            "basic": basic,
+            "outpost": outpost,
+            "roster": roster,
+            "outpost_available": outpost_available,
+            "roster_available": roster_available,
+        }
 
     async def get_union_raid_overview(self, account: dict[str, Any], *, attacks: bool = False) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))

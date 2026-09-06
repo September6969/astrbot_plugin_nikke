@@ -48,3 +48,9 @@ class ProfileDashboardData:
     memorial_summary: str | None = None
     recycle_room_researches: list[RecycleResearchData] | None = None
     memorial_counts: list[MemorialCountData] | None = None
+    # None 表示调用方没有提供可选接口状态；False 表示请求或响应不可用。
+    outpost_available: bool | None = None
+    roster_available: bool | None = None
+    roster_partial: bool = False
+    research_partial: bool = False
+    memorial_partial: bool = False
