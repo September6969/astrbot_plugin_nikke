@@ -22,3 +22,9 @@
 这是独立、可注入测试的准备层，未宣称插件生产生命周期已经接入，也没有改变语音类型或角色/皮肤语义。已知剧情记录继续保留 story/skin=None，未冒充互动语音。
 
 后续：确认互动映射及适用资源权限后再接入 Poke；OneBot 最终播放仍需 NEEDS_LIVE_EVIDENCE。当前没有触发真实消息发送或真实账号写操作。
+
+## AstrBot / OneBot 序列化证据
+
+本地已安装 AstrBot 的 `Record.fromFileSystem()` 创建本地文件组件；`AiocqhttpMessageEvent._from_segment_to_dict()` 对 Record 调用 `convert_to_base64()`，生成 `type=record`、`data.file=base64://...`。该转换本身没有进行音频转码。
+
+新增 `tests/test_voice_adapter.py` 用合成的 24kHz 单声道 WAV 调用真实转换方法，验证解码字节完全一致且协议载荷不包含本地路径；未调用任何发送接口。这解除该版本适配器需要 NapCat 与 AstrBot 共享音频文件路径的假设，但不能证明远端实际播放，也不证明所有版本相同行为。

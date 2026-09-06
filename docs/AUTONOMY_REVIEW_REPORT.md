@@ -25,6 +25,12 @@ CDK 修复提交 `61e16d59b433bcea62918b3030b3f052ca285043` 的 [Actions](https:
 
 语音增加独立的下载/编码管线，统一请求预算、共享任务和关闭回收；未接入真实发送。官方二创指引与 Spine 许可研究见 [证据记录](evidence/voice_licensing_and_pipeline.md)，没有将公开访问当作再分发授权。
 
+语音管线提交 `9ba66d954d23669e66b093a75ec231f29fa3ee2e` 的 [Actions](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34047412675) 已全绿。
+
+追加真实 AstrBot Record 序列化测试，合成 WAV 转 Base64 字节不变，不包含本地路径，不发送消息。
+最终本地验证：248 passed、2 warnings、43 subtests；Node 3 项、compileall 和 diff-check 通过。
+最终提交与 Actions 精确记录在工作区外的 `E:/DevCache/nikke-second-review-final.md`，避免追记当前文件导致 HEAD 自引用失效。
+
 ## 前轮报告（历史验收记录）
 
 # 审核修复与动态资源阶段报告（2026-09-06）
