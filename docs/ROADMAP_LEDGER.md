@@ -15,7 +15,7 @@
 | PR | 分支 | 主题 | 当前状态 |
 | --- | --- | --- | --- |
 | #8 | `feat/union-raid-v2` | Union Raid Increment A | OPEN / Draft / CI green |
-| #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `ce3591f`；CI `34095787305` |
+| #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `fc1c6db`；CI `34097200948` |
 | #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green |
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green |
@@ -30,7 +30,7 @@
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
 | Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步 |
-| Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；`last_changed_at`、自动清理、旧缓存安全迁移；head `ce3591f`；CI `34095787305` 与 headSha 一致；新增 10 项生命周期行为测试 |
+| Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；`last_changed_at`、自动清理、旧缓存安全迁移；head `fc1c6db`；CI `34097200948` 与 headSha 一致；新增 10 项生命周期行为测试 |
 | Campaign History numeric contract | `feat/campaign-history-contract-v2` | `bada0b3` | Draft PR #15；严格数值/槽位合同，26 个主题测试、合成图片预览和 CI 已验证 |
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager，wiring 测试和 CI 已验证 |
 | AssetManager request dedup | `feat/asset-request-dedup-v2` | `bada0b3` | Draft PR #17；同一缓存键 5 个并发调用只发 1 次模拟请求；head `8c293d1`；CI `34096785354` 全绿；不宣称全局 N+1、真实资源或账号证据 |
