@@ -25,9 +25,11 @@ pytest -q tests/test_background_lifecycle.py
 
 ```text
 pytest -q -W error::RuntimeWarning tests/test_background_lifecycle.py
-4 passed
+5 passed
 ```
 
-专项回归、完整 pytest、`compileall`、Node 扩展测试和最终 CI 结果将在 Draft PR 创建后按最终 head 记录；Windows 上若出现临时 SQLite 文件锁，按独立 PR #19 的已知基线问题记录，不将其归因于本主题。
+关闭反馈、素材或 Web 资源时即使某一项抛出异常，也会继续尝试后续资源，并重新抛出首个异常；只有全部资源回收成功才设置完成标记，允许后续重试。
+
+专项回归、完整 pytest、`compileall`、Node 扩展测试和最终 CI 结果将在本次最终 head 确认后记录；Windows 上若出现临时 SQLite 文件锁，按独立 PR #19 的已知基线问题记录，不将其归因于本主题。
 
 本主题不修改 UI 或渲染路径，无合成预览要求；未访问真实账号、未发送消息、未部署。

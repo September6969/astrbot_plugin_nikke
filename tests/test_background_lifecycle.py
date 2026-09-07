@@ -65,3 +65,20 @@ class LifecycleTests(IsolatedAsyncioTestCase):
         plugin.feedback_manager.close.assert_awaited_once()
         plugin.asset_manager.close.assert_called_once()
         plugin.web.stop.assert_awaited_once()
+
+    async def test_cleanup_failure_keeps_shutdown_retryable(self):
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._closing = False
+        plugin._background_tasks = []
+        plugin.feedback_manager = AsyncMock()
+        plugin.web = AsyncMock()
+        plugin.asset_manager = MagicMock()
+        plugin.asset_manager.close.side_effect = [RuntimeError("synthetic close failure"), None]
+
+        with self.assertRaisesRegex(RuntimeError, "synthetic close failure"):
+            await plugin.terminate()
+        self.assertFalse(getattr(plugin, "_terminated", False))
+
+        await plugin.terminate()
+        self.assertTrue(plugin._terminated)
+        self.assertEqual(plugin.asset_manager.close.call_count, 2)
