@@ -22,7 +22,7 @@
 | `E:\_codex_work\live-evidence-register-v1-worktree\astrbot_plugin_nikke` | `docs/live-evidence-register-v1` | Authorized live-evidence register | Draft PR #39；head `9877fc9`；CI `34142711091` 四项全绿；只记录现场证据最小动作，不执行账号/消息/部署操作；工作树 clean |
 | `E:\_codex_work\astrbot-registration-api-v1\astrbot_plugin_nikke` | `feat/astrbot-registration-api-v1` | AstrBot registration API migration | Draft PR #40；head `311a41e`；CI `34144460942` 四项全绿；移除废弃注册装饰器并保留自动发现；工作树 clean |
 | `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `b7b19f3`；CI `34118342055` 全绿；工作树 clean |
-| `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | Draft PR #19；head `0e9d323`；CI `34119004278` 全绿；工作树 clean |
+| `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle + Python 3.13 compatibility evidence | Draft PR #19；head `ffd96a5`；CI `34145647733` 五项全绿（Node、Python 3.10–3.13）；本地 Windows Python 3.13 全量 258 passed；工作树 clean |
 | `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `375498c`；CI `34102399018`；工作树 clean |
 | `E:\_codex_work\shutdown-lifecycle\astrbot_plugin_nikke` | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | Draft PR #21；head `a9ccb48`；CI `34102939859`；工作树 clean |
 | `E:\_codex_work\data-backup-hardening\astrbot_plugin_nikke` | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | Draft PR #22；head `6943e12`；CI `34104071393`；工作树 clean |
