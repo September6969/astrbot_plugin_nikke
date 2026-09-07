@@ -14,6 +14,7 @@
 | `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | Spine technical spike | Draft PR #12 |
 | `E:\DevCache\nikke-voice-mapping-v2\astrbot_plugin_nikke` | `feat/voice-mapping-v2` | Voice 映射研究 | Draft PR #13，CI 全绿 |
 | `E:\_codex_work\nikke-roadmap-ledger-v3` | `feat/roadmap-ledger-v3` | 路线图合同债状态核验 | Draft PR #14，CI 已验证 |
+| `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15，CI 已验证 |
 
 ## 协作规则
 
