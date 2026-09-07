@@ -68,6 +68,26 @@ class HealthzReadinessTests(IsolatedAsyncioTestCase):
             self.assertEqual(status, 503)
             self.assertFalse(body["ok"])
 
+    async def test_healthz_does_not_follow_symlinked_storage_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "target"
+            target.mkdir()
+            (target / "nikke.sqlite3").write_bytes(b"synthetic-db")
+            (target / "secret.key").write_bytes(b"synthetic-key")
+            database = root / "nikke.sqlite3"
+            secret_key = root / "secret.key"
+            try:
+                database.symlink_to(target / "nikke.sqlite3")
+                secret_key.symlink_to(target / "secret.key")
+            except (NotImplementedError, OSError) as error:
+                self.skipTest(f"当前平台不支持文件符号链接：{error}")
+
+            status, body = await self._request_health(SimpleNamespace(db_path=database, key_path=secret_key))
+
+            self.assertEqual(status, 503)
+            self.assertFalse(body["ok"])
+
 
 if __name__ == "__main__":
     unittest.main()

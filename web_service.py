@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import secrets
+import stat
 import time
 from collections import defaultdict, deque
 from pathlib import Path
@@ -27,6 +29,16 @@ MAX_COOKIE_COUNT = 100
 MAX_COOKIE_HEADER_LENGTH = 32 * 1024
 EXTENSION_ORIGIN_RE = re.compile(r"^(?:chrome-extension|extension)://[a-z0-9]{16,64}$")
 SITE_ORIGIN = "https://nikke.irises777.xyz"
+
+
+def _is_regular_file(path: object) -> bool:
+    """以一次 lstat 判断普通文件，避免 readiness 检查跟随符号链接或产生检查间隙。"""
+    if not isinstance(path, Path):
+        return False
+    try:
+        return stat.S_ISREG(os.lstat(path).st_mode)
+    except (OSError, ValueError):
+        return False
 
 
 def public_error(exc: Exception) -> str:
@@ -115,12 +127,7 @@ class BindingWebService:
         """只检查本地存储文件是否存在，不读取密钥内容或数据库内容。"""
         database = getattr(self.store, "db_path", None)
         secret_key = getattr(self.store, "key_path", None)
-        return all(
-            isinstance(path, Path)
-            and path.is_file()
-            and not path.is_symlink()
-            for path in (database, secret_key)
-        )
+        return all(_is_regular_file(path) for path in (database, secret_key))
 
     async def health(self, _: web.Request) -> web.Response:
         ready = self._storage_ready()
