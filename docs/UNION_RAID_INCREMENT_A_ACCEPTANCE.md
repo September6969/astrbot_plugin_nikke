@@ -20,7 +20,7 @@
 | Boss ID | 保留返回顺序；空 ID、重复 ID 或坏条目使覆盖未知并隐藏聚合，不任意删除记录或假装完整。 |
 | HP | 仅接受 `int` 或十进制整数字符串；`bool`、浮点、坏字符串、容器值为未知。既有负整数归零 clamp 语义保留。 |
 | 聚合 | 仅对一个无部分记录且 HP 完整的响应计算“已返回 Boss 加权进度”；从不称完整赛季或当前阶段总进度。 |
-| 排名 | 按当前响应内已返回记录的伤害字段聚合；显示“条返回记录”，不称真实攻击次数或“刀数”。 |
+| 排名 | 按当前响应内已返回记录的伤害字段聚合；显示“条返回记录”，不称真实攻击次数或“刀数”；空白身份、空/非标 Boss ID 或角色 ID 拒绝聚合。 |
 
 ## 实际接线
 
@@ -32,7 +32,7 @@
 
 ## 本地验收与预览
 
-- 基线定向回归：`21 passed, 2 warnings, 3 subtests passed`。
+- 基线定向回归：`22 passed, 2 warnings, 3 subtests passed`。
 - 额度重置前的同一源码全量回归：`python -m pytest -q` → `265 passed, 2 warnings, 50 subtests passed in 16.77s`。
 - 本次恢复后的静态/扩展回归：`python -m compileall -q .` → exit 0；`node --test tests/extension.test.cjs` → 3 passed；`git diff --check` → exit 0。
 - 本次恢复后的 PATH Python 为 `C:\Python314\python.exe`，不含 `pytest`；这是临时测试运行器缺少 CI 依赖，不等同于产品测试失败。PR 的 Python 3.10/3.11/3.12 CI 是最终独立验证。
