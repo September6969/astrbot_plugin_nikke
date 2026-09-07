@@ -4,12 +4,12 @@
 
 ## 当前验证检查点
 
-- 本地 Python 3.10.11：`python -m pytest -q` → 264 passed、2 warnings、50 subtests passed。
-- Campaign History 定向测试：`tests/test_campaign_history.py` → 29 passed、7 subtests passed。
+- 本地 Python 3.10.11：主题相关 unittest 30 项通过；当前环境未安装 pytest，因此不把本地 unittest 冒充 pytest 结果。
+- 最终 CI run `34170824855`（head `480cc9f`）：全量 Python `265 passed`、`3 warnings`、`53 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。
 - `tid`、`lv`、`combat`、`slot` 的字符串值现在只接受 ASCII 十进制数字；首尾空白和显式正负号均返回结构错误。
 - 响应 `code` 必须是非布尔 JSON 整数；`False`、浮点和数字字符串不会与 `code=0` 混淆。
 - `node --test tests\\extension.test.cjs` → 3 passed；`compileall -q .` 与 `git diff --check` 通过。
-- 本次代码修订前检查点为 `6a6a641`，对应 CI run `34134245113`；文档提交后的最终 head 与 CI 必须重新查询，不能在此处自引用未来提交。
+- 本次最终 head 与 CI 已重新核验；不把旧 head 或旧 CI 当作最终证据。
 
 ## 本次变更
 
@@ -23,7 +23,7 @@
 
 ## 验证
 
-- `tests/test_campaign_history.py`：29 passed、7 subtests passed。
+- `tests/test_campaign_history.py`：本地 unittest 30 项通过；最终 CI 全量 `265 passed`、`53 subtests passed`。
 - 已实际生成并查看合成 NORMAL 46-40 卡片：1400×820；五个槽位、等级、单体战力、总战力和缺图占位均可见。当前预览文件为 `E:/DevCache/nikke-campaign-preview-20260907-v2/campaign-0bbcc10f83b54396b231d5c418ae38ec.png`。
 - 预览使用合成数据和本地占位素材，不访问真实账号、不下载真实账号数据、不执行账号写操作。
 
