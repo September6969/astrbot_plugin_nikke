@@ -5,10 +5,10 @@
 - 起始 base：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`
 - 工作树：`E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke`
 - 分支：`feat/union-raid-v2`
-- 实现提交：`f93b5410bff6ec3e2e874b1b51c40806ddc1e585`（`fix: reject invalid raid ranking identifiers`）。
+- 实现提交：`f0d1cfa634ce0253d6d89cf84c082d16433b812e`（`fix: reject malformed raid boss identifiers`）。
 - PR：[#8 Feat: harden Union Raid response semantics](https://github.com/September6969/astrbot_plugin_nikke/pull/8)（`OPEN` / `DRAFT`，不自动合并）。
-- 已核验 branch checkpoint：`f93b5410bff6ec3e2e874b1b51c40806ddc1e585`。
-- 已核验 CI：[34113574455](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34113574455) `SUCCESS`，其 `headSha = f93b5410bff6ec3e2e874b1b51c40806ddc1e585`，与 checkpoint 相同。
+- 已核验 branch checkpoint：`f0d1cfa634ce0253d6d89cf84c082d16433b812e`。
+- 已核验 CI：[34119802991](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34119802991) `SUCCESS`，其 `headSha = f0d1cfa634ce0253d6d89cf84c082d16433b812e`，与 checkpoint 相同。
 
 本增量只加固已有 `/妮姬 联盟突袭` overview 和 `/妮姬 联盟突袭 排名` 的当前响应语义；不接线历史赛季或“我的战斗”，不访问真实账号，也不新增网络 endpoint。
 
