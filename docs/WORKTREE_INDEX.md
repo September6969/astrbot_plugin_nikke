@@ -38,7 +38,7 @@
 | `E:\_codex_work\tower-snapshot-contract-v1\astrbot_plugin_nikke` | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | Draft PR #32；head `eede5ab`；CI `34127584276` 全绿；工作树 clean |
 | `E:\_codex_work\profile-post-merge-v1\astrbot_plugin_nikke` | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | Draft PR #33；head `8bb9cd5`；CI `34143501124` 四项全绿；同步运行时状态入口并新增文档回归测试；工作树 clean |
 | `E:\_codex_work\cdk-batch-contract-v1\astrbot_plugin_nikke` | `feat/cdk-batch-contract-v1` | CDK batch idempotency contract reconciliation | Draft PR #34；head `c0f1e65`；CI `34135996980` 四项全绿；工作树 clean |
-| `E:\_codex_work\daily-result-contract-v1\astrbot_plugin_nikke` | `feat/daily-result-contract-v1` | Structured DailyTaskResult status contract | Draft PR #35；head `5c7505d`；CI `34168254224` 四项全绿；本地专项 8 passed、全量 pytest 264 passed；工作树 clean |
+| `E:\_codex_work\daily-result-contract-v1\astrbot_plugin_nikke` | `feat/daily-result-contract-v1` | Structured DailyTaskResult status contract | Draft PR #35；head `0117651`；CI `34168517929` 四项全绿；本地专项 8 passed、全量 pytest 264 passed；工作树 clean |
 | `E:\_codex_work\daily-auto-per-account-v1\astrbot_plugin_nikke` | `feat/daily-auto-per-account-v1` | Per-account daily automation preference | Draft PR #36；head `0ba8b5d`；CI `34138915642` 四项全绿；工作树 clean |
 
 ## 协作规则
