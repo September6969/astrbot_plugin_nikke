@@ -32,6 +32,13 @@ class FakeStore:
     def get_run(self, run_key):
         return self.runs.get(run_key)
 
+    def retry_run(self, run_key, statuses):
+        current = self.runs.get(run_key)
+        if current and current["status"] in statuses:
+            self.runs[run_key] = {"status": "running", "detail": ""}
+            return True
+        return False
+
     def mark_cookie_invalid(self, qq_id):
         self.invalidated.append(qq_id)
 
@@ -63,7 +70,7 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
         result = await plugin._run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.UNAVAILABLE)
-        self.assertEqual(plugin.store.finished[-1][1], "success")
+        self.assertEqual(plugin.store.finished[-1][1], "unavailable")
 
     async def test_existing_unknown_daily_run_is_not_reported_as_done(self):
         plugin = self._plugin()
@@ -82,6 +89,33 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
 
         self.assertEqual(result.status, DailyTaskStatus.PENDING)
         plugin.client.perform_daily_signin.assert_not_awaited()
+
+    async def test_pending_result_is_rechecked_when_actions_become_enabled(self):
+        plugin = self._plugin(enabled=False)
+
+        first = await plugin._run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
+        self.assertEqual(first.status, DailyTaskStatus.PENDING)
+        self.assertEqual(plugin.store.finished[-1][1], "pending")
+
+        plugin.config["enable_daily_actions"] = True
+        second = await plugin._run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
+
+        self.assertEqual(second.status, DailyTaskStatus.SUCCESS)
+        plugin.client.perform_daily_signin.assert_awaited_once()
+
+    async def test_unavailable_result_is_rechecked_when_task_appears(self):
+        plugin = self._plugin(enabled=False)
+        plugin.client.get_daily_signin.return_value = {"found": False, "completed": False, "task_id": ""}
+
+        first = await plugin._run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
+        self.assertEqual(first.status, DailyTaskStatus.UNAVAILABLE)
+        self.assertEqual(plugin.store.finished[-1][1], "unavailable")
+
+        plugin.client.get_daily_signin.return_value = {"found": True, "completed": True, "task_id": "task"}
+        second = await plugin._run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
+
+        self.assertEqual(second.status, DailyTaskStatus.ALREADY_DONE)
+        self.assertEqual(plugin.client.get_daily_signin.await_count, 2)
 
     async def test_unknown_after_action_is_not_failed_or_replayed(self):
         plugin = self._plugin()

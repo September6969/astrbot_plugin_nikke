@@ -21,14 +21,14 @@
 | `UNKNOWN_AFTER_ACTION` | 写操作结果未确认；不自动再次写入 |
 | `UNAVAILABLE` | 当前响应没有可用签到任务 |
 
-每日汇总持久化为 JSON-safe 的 `account_name/status/detail` 记录；旧的 tuple 或损坏记录不会被静默当作成功，而会触发重新读取。同日已有 `running/unknown/failed` 记录时，命令不会把它报告为“今日已执行”或自动重写。
+每日汇总持久化为 JSON-safe 的 `account_name/status/detail` 记录；旧的 tuple 或损坏记录不会被静默当作成功，而会触发重新读取。同日已有 `running/unknown/failed` 记录时，命令不会把它报告为“今日已执行”或自动重写；`pending/unavailable` 只表示读取未完成或任务暂缺，下一次调用可原子重检，不会伪装成成功。
 
 ## 离线证据
 
 基于 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`：
 
 - `tests/test_daily_result_contract.py`、`tests/test_daily_safety.py` 与 Daily 相关 core 回归：10 passed、2 warnings。
-- 覆盖严格存储 round-trip、损坏记录拒绝、pending/unavailable、unknown-after-action、rate-limited、CookieExpired 和不重复调用写接口。
+- 覆盖严格存储 round-trip、损坏记录拒绝、pending/unavailable 的状态保存与重检、unknown-after-action、rate-limited、CookieExpired 和不重复调用写接口。
 - 完整 Python：262 passed、43 subtests、2 warnings；Node extension：3 passed；compileall 和 `git diff --check`：通过。
 
 ## 证据边界

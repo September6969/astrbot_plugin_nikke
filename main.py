@@ -836,7 +836,15 @@ class NikkePlugin(Star):
                     DailyTaskStatus.FAILED,
                     "今日签到已有失败记录，未自动重发",
                 )
-            return DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "今日已执行")
+            if existing_status in {"pending", "unavailable"}:
+                if not self.store.retry_run(run_key, {"pending", "unavailable"}):
+                    return DailyTaskResult(
+                        account_name,
+                        DailyTaskStatus.UNKNOWN_AFTER_ACTION,
+                        "今日签到正在重新检查，请稍后查询；未自动重发",
+                    )
+            else:
+                return DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "今日已执行")
         result: DailyTaskResult
         try:
             await self.client.get_profile(account)

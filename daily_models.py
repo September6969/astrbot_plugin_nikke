@@ -37,6 +37,10 @@ class DailyTaskResult:
             return "expired"
         if self.status in {DailyTaskStatus.FAILED, DailyTaskStatus.RATE_LIMITED}:
             return "failed"
+        if self.status is DailyTaskStatus.PENDING:
+            return "pending"
+        if self.status is DailyTaskStatus.UNAVAILABLE:
+            return "unavailable"
         return "success"
 
     def to_storage(self) -> dict[str, str]:
