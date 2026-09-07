@@ -19,7 +19,7 @@
 | `path` | 只允许指向预期的同目录 JSON |
 | `source` / `source_ref` | 必填 provenance；当前明确为仓库维护的资源标识映射 |
 | `checked_at` | 人工核验日期 |
-| `sha256` | 对 JSON 原始 UTF-8 字节做 SHA-256 |
+| `sha256` | 对 JSON UTF-8 字节先将 CRLF 规范化为 LF，再做 SHA-256；避免跨平台 checkout 产生假损坏 |
 | `license_boundary` | 只记录标识元数据，不表示游戏素材再分发授权 |
 
 映射字段合同：

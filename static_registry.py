@@ -92,7 +92,9 @@ class StaticDataRegistry:
                 if not path.is_relative_to(self.asset_dir):
                     raise RegistryValidationError(f"{kind} path 越界")
                 content = path.read_bytes()
-                digest = hashlib.sha256(content).hexdigest()
+                # Git 在不同平台可能检出 CRLF；hash 合同统一使用 LF canonical bytes。
+                canonical_content = content.replace(b"\r\n", b"\n")
+                digest = hashlib.sha256(canonical_content).hexdigest()
                 if digest != metadata.sha256:
                     raise RegistryValidationError(f"{kind} sha256 不匹配")
                 data = json.loads(content.decode("utf-8"))
