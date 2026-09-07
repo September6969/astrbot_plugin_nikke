@@ -17,6 +17,21 @@ from .campaign_history_models import ClearLineupStatus, StageClearMember, StageC
 from .campaign_stage_resolver import CampaignStage
 
 
+def _strict_non_negative_int(value: Any) -> int:
+    """只接受 JSON 整数或十进制整数字符串，拒绝布尔、小数和负数。"""
+    if isinstance(value, bool):
+        raise ValueError("布尔值不是数值字段")
+    if isinstance(value, int):
+        parsed = value
+    elif isinstance(value, str) and value.strip().isdigit():
+        parsed = int(value.strip())
+    else:
+        raise ValueError("数值字段必须是整数")
+    if parsed < 0:
+        raise ValueError("数值字段不能为负数")
+    return parsed
+
+
 class CampaignHistoryBuilder:
     def __init__(self, directory: list[dict] | None = None):
         self._directory_by_tid: dict[int, dict] = {}
@@ -111,10 +126,12 @@ class CampaignHistoryBuilder:
                 malformed = True
                 continue
             try:
-                tid = int(item["tid"])
-                level = int(item["lv"])
-                combat = int(item["combat"])
-                slot = int(item["slot"])
+                tid = _strict_non_negative_int(item["tid"])
+                level = _strict_non_negative_int(item["lv"])
+                combat = _strict_non_negative_int(item["combat"])
+                slot = _strict_non_negative_int(item["slot"])
+                if tid == 0 or slot not in {1, 2, 3, 4, 5}:
+                    raise ValueError("tid 或 slot 超出合同")
             except (ValueError, TypeError):
                 malformed = True
                 continue
