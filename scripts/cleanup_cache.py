@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -60,11 +61,31 @@ def _is_protected(relative_path: Path) -> bool:
     )
 
 
+def _is_allowed_target(relative_path: Path) -> bool:
+    """只允许白名单缓存目录中的文件或两个公告缓存文件。"""
+    if relative_path.is_absolute() or any(part in {"", ".", ".."} for part in relative_path.parts):
+        return False
+    if relative_path in {ANNOUNCEMENT_CACHE, ANNOUNCEMENT_TEMP}:
+        return True
+    return len(relative_path.parts) >= 2 and relative_path.parts[0] in CACHE_DIRECTORIES
+
+
+def _finite_nonnegative(value: object, label: str) -> float:
+    """校验保留时长等数值，拒绝负数、NaN 和无穷大。"""
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{label}必须是有限非负数") from exc
+    if not math.isfinite(number) or number < 0:
+        raise ValueError(f"{label}必须是有限非负数")
+    return number
+
+
 def _candidate(path: Path, data_dir: Path, cutoff: float, reason: str) -> CacheCandidate | None:
     if path.is_symlink() or not path.is_file():
         return None
     relative = path.relative_to(data_dir)
-    if _is_protected(relative) or not _resolved_inside(path, data_dir):
+    if not _is_allowed_target(relative) or _is_protected(relative) or not _resolved_inside(path, data_dir):
         return None
     try:
         stat = path.stat()
@@ -84,12 +105,14 @@ def build_cleanup_plan(
 ) -> CleanupPlan:
     """扫描白名单缓存，返回只读清理计划。"""
 
-    if older_than_hours < 0 or temp_older_than_hours < 0:
-        raise ValueError("缓存保留时长不能为负数")
-    base = Path(data_dir).expanduser().resolve(strict=False)
-    current = time.time() if now is None else float(now)
-    cache_cutoff = current - older_than_hours * 3600
-    temp_cutoff = current - temp_older_than_hours * 3600
+    cache_hours = _finite_nonnegative(older_than_hours, "普通缓存保留时长")
+    temp_hours = _finite_nonnegative(temp_older_than_hours, "临时文件保留时长")
+    base = Path(data_dir).expanduser()
+    if base.is_symlink():
+        return CleanupPlan(base, (), skipped_symlinks=1)
+    current = time.time() if now is None else _finite_nonnegative(now, "当前时间")
+    cache_cutoff = current - cache_hours * 3600
+    temp_cutoff = current - temp_hours * 3600
     candidates: list[CacheCandidate] = []
     skipped_symlinks = 0
 
@@ -130,8 +153,24 @@ def apply_cleanup(plan: CleanupPlan) -> dict:
     removed: list[str] = []
     skipped: list[str] = []
     errors: list[dict[str, str]] = []
+    if plan.data_dir.is_symlink():
+        skipped.extend(item.relative_path for item in plan.candidates)
+        return {
+            "mode": "APPLY",
+            "data_dir": str(plan.data_dir),
+            "planned_count": len(plan.candidates),
+            "planned_bytes": sum(item.size for item in plan.candidates),
+            "removed_count": 0,
+            "removed_bytes": 0,
+            "skipped": skipped,
+            "errors": errors,
+        }
     for item in plan.candidates:
-        path = plan.data_dir / Path(item.relative_path)
+        relative = Path(item.relative_path)
+        if not _is_allowed_target(relative) or _is_protected(relative):
+            skipped.append(item.relative_path)
+            continue
+        path = plan.data_dir / relative
         if path.is_symlink() or not path.is_file() or not _resolved_inside(path, plan.data_dir):
             skipped.append(item.relative_path)
             continue
