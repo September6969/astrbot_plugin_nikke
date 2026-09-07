@@ -33,6 +33,7 @@
 
 - 缺少稳定 `content_id` 的记录拒绝入库；不得以 `"None"` 或内容猜 ID。
 - `content_version` 比较 title、正文、category、locale 的内容指纹；日程变化单独决定 `deadline_version`。
+- `content_version` 与 `deadline_version` 必须是正整数；只允许规范十进制字符串作为旧缓存迁移输入，布尔值、浮点数、零和负数拒绝入库，不能用 `int(...)` 静默截断。
 - InformationFeeds 已确认 `pub_timestamp`，但未确认公告修改时间或单调 revision。它只能表达发布时间，不能作为更新顺序。
 - 每个公告保留最多 8 个已见内容指纹。已见的旧指纹在更新后再次出现时视为乱序回放并忽略，不回滚版本或日程。
 - 从未见过的不同指纹按成功扫描到达顺序成为新版本，diagnostic 必须标记 `source_order: unknown`。这不是对官网修改时序的声明。

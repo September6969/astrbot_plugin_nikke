@@ -21,22 +21,21 @@
 - 内容指纹覆盖 title、正文、category、locale；已见旧指纹重放不会回滚新版本或日程。未见新指纹仅按到达顺序升级，并把来源顺序标记为 unknown。
 - 修复既有 BlaBlaLink 回退循环缩进：多条公开记录不再只保留最后一条。
 - 深度读取辅助函数不再回退到旧源；稳定 ID、标题、正文和发布时间的非文本/空值会被拒绝入库。
+- 内容版本与日程版本收紧为正整数；缓存或入口中的布尔值、浮点数、零和负数不会被 `int(...)` 静默截断，损坏缓存记录会被跳过。
 
 ## 测试与预览
 
 本轮在隔离 Python 3.12 环境执行了主题回归：
 
 ```text
+pytest tests/test_announcement_cache_lifecycle.py tests/test_announcement_v2.py tests/test_announcement_versions.py tests/test_announcements.py
+                                                                 39 passed, 2 warnings, 42 subtests
 python -m compileall -q .                                      PASS
-pytest tests/test_announcement_cache_lifecycle.py              10 passed
-pytest tests/test_announcement_v2.py (核心回归)                 18 passed, 2 deselected
-pytest tests/test_announcements.py                              15 passed, 24 subtests
-pytest tests/test_announcement_versions.py                       2 passed
 node --test tests/extension.test.cjs                            3 passed
 git diff --check                                                PASS
 ```
 
-当前同一源码全量回归：`276 passed, 2 warnings, 49 subtests`；`compileall` 通过。
+当前同一源码全量回归：`278 passed, 2 warnings, 61 subtests`；`compileall` 通过。
 
 新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放和新指纹刷新（10 项行为测试）。
 

@@ -311,6 +311,19 @@ class AnnouncementService:
     def record_count(self) -> int:
         return len(self._records)
 
+    @staticmethod
+    def _normalize_version(value: Any, field_name: str) -> int:
+        """只接受正整数版本，避免把布尔值或浮点数静默截断。"""
+        if type(value) is int:
+            version = value
+        elif isinstance(value, str) and re.fullmatch(r"[1-9]\d*", value.strip()):
+            version = int(value.strip())
+        else:
+            raise ValueError(f"{field_name}必须是正整数")
+        if version < 1:
+            raise ValueError(f"{field_name}必须是正整数")
+        return version
+
     def load_cache(self) -> None:
         """从本地磁盘缓存加载公告与日程数据。"""
         if not self.cache_file or not self.cache_file.is_file():
@@ -351,10 +364,14 @@ class AnnouncementService:
                         body=body,
                         published_at=published_at,
                         source_url=str(item.get("source_url", "")),
-                        content_version=int(item.get("content_version", 1)),
+                        content_version=self._normalize_version(
+                            item.get("content_version", 1), "公告内容版本"
+                        ),
                         category=str(item.get("category", "general")),
                         deadline_at=item.get("deadline_at"),
-                        deadline_version=int(item.get("deadline_version", 1)),
+                        deadline_version=self._normalize_version(
+                            item.get("deadline_version", 1), "公告日程版本"
+                        ),
                         locale=locale,
                     )
                 except (TypeError, ValueError) as exc:
@@ -566,6 +583,8 @@ class AnnouncementService:
             raise ValueError("公告标题和正文必须是文本")
         if not isinstance(record.published_at, str):
             raise ValueError("公告发布时间必须是文本")
+        record.content_version = self._normalize_version(record.content_version, "公告内容版本")
+        record.deadline_version = self._normalize_version(record.deadline_version, "公告日程版本")
         record.locale = self.normalize_locale(record.locale, allow_und=True)
         existing = self._records.get(record.content_id)
         fingerprint = record.content_fingerprint

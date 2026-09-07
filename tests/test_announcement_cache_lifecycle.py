@@ -40,6 +40,48 @@ def record(
 
 
 class AnnouncementCacheLifecycleTests(IsolatedAsyncioTestCase):
+    def test_version_contract_rejects_silent_numeric_coercion(self) -> None:
+        service = AnnouncementService(clock=lambda: NOW)
+        for field in ("content_version", "deadline_version"):
+            for value in (True, False, 1.5, "2.5", 0, -1):
+                with self.subTest(field=field, value=value):
+                    item = record(f"{field}-{value!s}")
+                    setattr(item, field, value)
+                    with self.assertRaises(ValueError):
+                        service.add_or_update(item)
+
+    def test_corrupt_cached_versions_are_skipped_without_truncation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            cache_file = Path(directory) / "announcements_cache.json"
+            cache_file.write_text(
+                json.dumps(
+                    {
+                        "records": [
+                            {
+                                "content_id": "float-version",
+                                "title": "损坏内容版本",
+                                "body": "正文",
+                                "published_at": NOW.isoformat(),
+                                "content_version": 1.5,
+                            },
+                            {
+                                "content_id": "bool-version",
+                                "title": "损坏日程版本",
+                                "body": "正文",
+                                "published_at": NOW.isoformat(),
+                                "deadline_version": True,
+                            },
+                        ]
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            service = AnnouncementService(Path(directory), clock=lambda: NOW)
+
+            self.assertEqual(service.record_count(), 0)
+
     def test_long_unchanged_record_is_pruned_without_active_deadline(self) -> None:
         clock = MutableClock(NOW - timedelta(days=120))
         service = AnnouncementService(clock=clock)
