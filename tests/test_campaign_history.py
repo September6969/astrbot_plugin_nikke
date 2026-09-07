@@ -117,6 +117,18 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         self.assertEqual(record.status, ClearLineupStatus.UNAVAILABLE)
         self.assertEqual(record.status_message, "该关卡暂无可查询的历史阵容")
 
+    def test_non_mapping_response_is_structurally_invalid(self):
+        record = self.builder.build(self.stage, None)
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+        self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
+
+    def test_non_list_data_is_structurally_invalid(self):
+        for data in (None, {}, {"list": {"tid": 101}}):
+            with self.subTest(data=data):
+                record = self.builder.build(self.stage, {"code": 0, "data": data})
+                self.assertEqual(record.status, ClearLineupStatus.ERROR)
+                self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
+
     def test_negative_combat_is_structurally_invalid(self):
         raw_list = [
             {"tid": 101, "lv": 400, "combat": -1, "slot": 1},

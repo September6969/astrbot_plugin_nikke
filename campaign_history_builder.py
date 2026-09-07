@@ -56,6 +56,19 @@ class CampaignHistoryBuilder:
         fetched_at: str = "",
         plugin_version: str = "",
     ) -> StageClearRecord:
+        if not isinstance(response, dict):
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
+
         code = response.get("code")
         msg = str(response.get("msg") or "")
 
@@ -101,7 +114,20 @@ class CampaignHistoryBuilder:
         data = response.get("data")
         raw_list = data.get("list") if isinstance(data, dict) else None
 
-        if not isinstance(raw_list, list) or len(raw_list) == 0:
+        if not isinstance(data, dict) or not isinstance(raw_list, list):
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
+
+        if len(raw_list) == 0:
             return StageClearRecord(
                 mode=stage.mode,
                 chapter=stage.chapter,
@@ -109,6 +135,19 @@ class CampaignHistoryBuilder:
                 stage_id=stage.stage_id,
                 status=ClearLineupStatus.UNAVAILABLE,
                 status_message="该关卡暂无可查询的历史阵容",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
+
+        if len(raw_list) != 5:
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
                 commander_name=commander_name,
                 fetched_at=fetched_at,
                 plugin_version=plugin_version,
