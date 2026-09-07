@@ -16,7 +16,7 @@
 | --- | --- | --- | --- |
 | #8 | `feat/union-raid-v2` | Union Raid Increment A | OPEN / Draft / CI green；head `c4a6fe4`；CI `34120205125` |
 | #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `6cb544b`；CI `34147704300` |
-| #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green；head `afc06d0`；CI `34123169902` |
+| #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green；head `528fcdf`；CI `34148538180` |
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green；head `2e77ad2`；CI `34124685883` |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green；head `137b931`；CI `34115112516` |
 | #13 | `feat/voice-mapping-v2` | Voice mapping public research | OPEN / Draft / CI green；head `68138bc`；CI `34115632353` |
@@ -83,7 +83,7 @@
 | Character Data V2 registry and cache identity boundary | `feat/character-data-v2` | `bada0b3` | Draft PR #11；静态 Equipment/Cube/Favorite Item registry 保持精确 ID 与 hash 校验；运行时拒绝布尔、浮点、空白和带符号 ID，未知 ID 不会通过 `sources.json`、同名本地缓存或远程请求显示资源；预览脚本可从仓库根目录直接运行并回收资源，已实际查看离线 fallback 合成卡；本地定向 26 passed、6 subtests，全量 pytest 261 passed、49 subtests、Node 3 passed、compileall/diff check 通过；head `2e77ad2`；CI `34124685883` 全绿；仍不宣称完整角色数值、真实账号字段、远程素材授权或产品合成联调 |
 | Spine queue contract boundary | `feat/spine-spike-v2` | `bada0b3` | Draft PR #12；队列入口拒绝布尔/非整数容量、空白任务标识、路径型 `cache_key` 和异常预算/runtime 类型；本地 pytest 265 passed、专项 28 passed、Node 3 passed、compileall/diff check 通过；head `137b931`；CI `34115112516` 全绿；仍不宣称 runtime、许可、Linux headless、真实渲染或生产接线 |
 | Voice mapping duplicate-evidence boundary | `feat/voice-mapping-v2` | `bada0b3` | Draft PR #13；story 审计显式记录 duplicate map/detail ID，重复 detail 行不再因集合去重而报告完整覆盖；本地 pytest 259 passed、专项 10 passed、Node 3 passed、compileall/diff check 通过；head `68138bc`；CI `34115632353` 全绿；仍不宣称 Poke 映射、QQ 播放、音频授权或真实账号操作 |
-| Dynamic voice cache and lifecycle boundary | `feat/dynamic-voice-v2` | `bada0b3` | Draft PR #10；pipeline/provider 拒绝布尔、字符串、NaN、无穷和非正预算，pipeline 也拒绝非法 pending 容量；source cache 只有请求 `map_key`、`source_path`、SHA-256、MP3 头和非未来 24 小时有效期均匹配时才命中，关闭会取消在途共享下载并释放任务索引；本地 Voice 专项 21 passed、12 subtests，全量 pytest 262 passed、55 subtests、Node 3 passed、compileall/diff check 通过；head `afc06d0`；CI `34123169902` 全绿；仍不宣称真实 Poke 映射、OneBot 播放、资源授权或账号联调 |
+| Dynamic voice cache and lifecycle boundary | `feat/dynamic-voice-v2` | `bada0b3` | Draft PR #10；pipeline/provider 拒绝布尔、字符串、NaN、无穷和非正预算，pipeline 也拒绝非法 pending 容量；source cache 只有请求 `map_key`、`source_path`、SHA-256、MP3 头和非未来 24 小时有效期均匹配时才命中，关闭会取消在途共享下载并释放任务索引；本地 Python 3.10.11 Voice 专项 21 passed、12 subtests，全量 pytest 262 passed、55 subtests、Node 3 passed、compileall/diff check 通过；head `528fcdf`；CI `34148538180` 全绿；仍不宣称真实 Poke 映射、OneBot 播放、资源授权或账号联调 |
 | Union Raid Increment A identifier boundary | `feat/union-raid-v2` | `bada0b3` | Draft PR #8；范围/HP/重复记录语义保持保守；overview 仅接受非空文本/明确整数 Boss ID，坏标识保留记录但标记未知覆盖并隐藏聚合；排名拒绝空白身份、空/非标 Boss ID 与角色 ID；head `c4a6fe4`；本地定向 24 passed、16 subtests，全量 pytest 267 passed、59 subtests、Node 3 passed、compileall/diff check 通过；CI `34120205125` 全绿；分页完整性、canonical identity、历史赛季和“我的战斗”仍未宣称完成 |
 | Announcement V2 source/record boundary | `feat/announcement-v2` | `bada0b3` | Draft PR #9；深度读取不回退旧源；稳定 ID 与核心文本字段严格校验；版本字段严格为正整数，损坏缓存不静默截断；head `6cb544b`；本地主题回归 39 passed、42 subtests，全量 pytest 278 passed、61 subtests、Node 3 passed、compileall/diff check 通过；CI `34147704300` 全绿；未访问真实 CMS、账号或发送消息 |
 
