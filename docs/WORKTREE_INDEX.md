@@ -27,6 +27,7 @@
 | `E:\_codex_work\healthz-readiness-v1\astrbot_plugin_nikke` | `feat/healthz-readiness-v1` | Healthz storage readiness contract | Draft PR #25；head `7e5e928`；CI `34106867556`；工作树 clean |
 | `E:\_codex_work\log-privacy-v1-wt\astrbot_plugin_nikke` | `feat/log-privacy-v1` | Plugin log privacy hardening | Draft PR #26；head `87e63e4`；CI `34108218451`；工作树 clean |
 | `E:\_codex_work\cache-cleanup-v1-wt\astrbot_plugin_nikke` | `feat/cache-cleanup-v1` | Safe offline cache cleanup | Draft PR #27；head `bb94d18`；CI `34108821103`；工作树 clean |
+| `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1f379d6`；CI `34109454981`；工作树 clean |
 
 ## 协作规则
 
