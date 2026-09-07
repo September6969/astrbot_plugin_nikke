@@ -5,7 +5,7 @@ import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import httpx
 from PIL import Image
@@ -125,6 +125,42 @@ class AssetManagerTests(unittest.TestCase):
 
                     self.assertEqual(stream.call_count, 1)
                     self.assertTrue(all(image.size == (30, 50) for image in images))
+            finally:
+                manager.close()
+
+    def test_concurrent_distinct_asset_keys_keep_separate_requests(self):
+        with tempfile.TemporaryDirectory() as td:
+            responses = []
+            for color in ("red", "blue"):
+                buffer = io.BytesIO()
+                Image.new("RGBA", (30, 50), color).save(buffer, "PNG")
+                responses.append(
+                    httpx.Response(
+                        200,
+                        content=buffer.getvalue(),
+                        request=httpx.Request("GET", "https://example.com"),
+                    )
+                )
+            barrier = threading.Barrier(2)
+            manager = AssetManager(td, td, remote=True)
+
+            def open_stream(*args, **kwargs):
+                barrier.wait(2.0)
+                context = MagicMock()
+                context.__enter__.return_value = responses.pop()
+                return context
+
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=open_stream) as stream:
+                    with ThreadPoolExecutor(max_workers=2) as executor:
+                        futures = [
+                            executor.submit(manager.get_element_icon, element)
+                            for element in ("fire", "water")
+                        ]
+                        images = [future.result(timeout=3.0) for future in futures]
+
+                    self.assertEqual(stream.call_count, 2)
+                    self.assertEqual({image.getpixel((0, 0))[:3] for image in images}, {(255, 0, 0), (0, 0, 255)})
             finally:
                 manager.close()
 
