@@ -4,7 +4,7 @@
 
 - 分支：`feat/daily-evidence-p1`
 - 基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`
-- 实现提交：`920f938`；当前验收 head：`71ff061`（Draft PR #18）
+- 实现提交：`920f938`；本次文档更新前的验收 head：`b7b19f3`（Draft PR #18）
 - 本增量只加固现有每日签到路径的状态闭环，不猜测 Like/Browse 的未核实端点、字段或任务完成语义。
 
 ## 行为合同
@@ -28,9 +28,11 @@ pytest tests/test_daily_recovery.py tests/test_daily_safety.py \
 
 新增 5 个恢复/顺序行为测试覆盖：intent 先于读取、running daily 只读恢复、running signin 未确认时进入 unknown、Cookie 失效收敛、取消收敛为 unknown 并继续传播。另有 `compileall`、Node extension contract tests（3 passed）和 `git diff --check` 通过。
 
-GitHub Actions final-head CI：run `34118173358`，headSha=`71ff0615917c6a24b43694ac4ba530ccc059e8eb`；Node、Python 3.10、3.11、3.12 全部通过。
+本次文档更新前已重新核验 GitHub Actions final-head CI：run `34118342055`，`headSha=b7b19f389696e94c3493349ed276172238b916dc` 与 PR #18 head 一致；Node、Python 3.10、3.11、3.12 全部通过。
 
-本机全量 pytest 结果为 `261 passed, 2 warnings`；专项签到与恢复测试均通过。最终全量回归仍以 Draft PR 的隔离 CI 为准。
+本机 Python 3.10.11 全量 pytest 结果为 `261 passed, 2 warnings, 43 subtests`；专项签到与恢复测试为 `10 passed, 2 warnings`。本次 docs-only push 后不复用上述旧 head 的绿灯，最终全量回归仍以 Draft PR 的新 head 对应 CI 为准。
+
+本文件不预写本次 docs-only 提交产生的新 SHA；push 后以 PR #18 的实时 `headSha` 与对应 CI 检查作为最终交接证据。
 
 ## 未覆盖与证据边界
 
