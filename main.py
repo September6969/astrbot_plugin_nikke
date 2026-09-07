@@ -702,10 +702,10 @@ class NikkePlugin(Star):
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except (BlaBlaError, ValueError, RuntimeError) as exc:
-            yield event.plain_result(f"突袭查询失败：{exc}")
+            yield event.plain_result(f"突袭查询失败：{safe_exception_message(exc)}")
         except Exception as exc:
             logger.error("[NIKKE] 联盟突袭查询异常: %s", safe_exception_message(exc))
-            yield event.plain_result(f"突袭查询异常：{exc}")
+            yield event.plain_result(f"突袭查询异常：{safe_exception_message(exc)}")
         finally:
             if handle:
                 await handle.cancel()
@@ -726,7 +726,7 @@ class NikkePlugin(Star):
             yield event.plain_result("登录状态已失效，请重新绑定。")
         except Exception as exc:
             logger.warning("[NIKKE] roster 查询失败: %s", safe_exception_message(exc))
-            yield event.plain_result(f"练度查询失败：{exc}")
+            yield event.plain_result(f"练度查询失败：{safe_exception_message(exc)}")
 
     async def progress(self, event: AstrMessageEvent):
         """查看同步器、前哨和主线进度。"""
@@ -1136,10 +1136,10 @@ class NikkePlugin(Star):
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except (BlaBlaError, ValueError, RuntimeError) as exc:
-            yield event.plain_result(f"战役查询失败：{exc}")
+            yield event.plain_result(f"战役查询失败：{safe_exception_message(exc)}")
         except Exception as exc:
             logger.error("[NIKKE] 战役查询异常: %s", safe_exception_message(exc))
-            yield event.plain_result(f"战役查询异常：{exc}")
+            yield event.plain_result(f"战役查询异常：{safe_exception_message(exc)}")
         finally:
             if handle:
                 await handle.cancel()

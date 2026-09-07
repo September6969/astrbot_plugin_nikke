@@ -21,8 +21,9 @@ _SENSITIVE_KEYS = (
     r"authorization|proxy-authorization|password|passwd|secret|api[_-]?key|"
     r"x-api-key|openid|game[_-]?uid|game[_-]?openid|qq[_-]?id|user[_-]?id"
 )
-_QUOTED_KV_RE = re.compile(
-    rf"(?i)([\"'](?:{_SENSITIVE_KEYS})[\"']\s*:\s*[\"'])(.*?)([\"'])"
+_JSON_SCALAR_KV_RE = re.compile(
+    rf"(?i)([\"'](?:{_SENSITIVE_KEYS})[\"']\s*:\s*)"
+    r"(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|[^\s,}\]]+)"
 )
 _UNQUOTED_KV_RE = re.compile(
     rf"(?i)(\b(?:{_SENSITIVE_KEYS})\s*[:=]\s*)[^\s,;}}]+"
@@ -40,7 +41,7 @@ def sanitize_log_text(value: Any, *, max_length: int = 240) -> str:
     text = str(value).replace("\r", " ").replace("\n", " ")
     text = _AUTH_RE.sub(rf"\1{_MASK}", text)
     text = _QUERY_RE.sub(rf"\1{_MASK}", text)
-    text = _QUOTED_KV_RE.sub(rf"\1{_MASK}\3", text)
+    text = _JSON_SCALAR_KV_RE.sub(rf"\1{_MASK}", text)
     text = _UNQUOTED_KV_RE.sub(rf"\1{_MASK}", text)
     text = _COOKIE_PAIR_RE.sub(rf"\1{_MASK}", text)
     text = _EMAIL_RE.sub("[邮箱已遮盖]", text)
