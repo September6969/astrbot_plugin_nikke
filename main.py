@@ -32,6 +32,7 @@ from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from .character_card_renderer import CharacterCardRenderer
 from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
+from .log_privacy import safe_exception_message
 from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
@@ -146,13 +147,13 @@ class NikkePlugin(Star):
             await self.web.start(self.web_host, self.web_port)
             logger.info(f"[NIKKE] 绑定服务已监听 {self.web_host}:{self.web_port}")
         except Exception as exc:
-            logger.error(f"[NIKKE] 绑定服务启动失败: {exc}")
+            logger.error("[NIKKE] 绑定服务启动失败: %s", safe_exception_message(exc))
         try:
             self._directory = await self.client.get_directory()
             self.campaign_builder.update_directory(self._directory)
             logger.info(f"[NIKKE] 已载入 {len(self._directory)} 条妮姬目录")
         except Exception as exc:
-            logger.warning(f"[NIKKE] 妮姬目录载入失败: {exc}")
+            logger.warning("[NIKKE] 妮姬目录载入失败: %s", safe_exception_message(exc))
         self._spawn_background_task(self._sync_announcements_background())
         await self._scheduler_loop()
 
@@ -160,14 +161,14 @@ class NikkePlugin(Star):
         try:
             await self.announcements.sync_from_source()
         except Exception as exc:
-            logger.debug(f"[NIKKE] 后台公告同步跳过: {exc}")
+            logger.debug("[NIKKE] 后台公告同步跳过: %s", safe_exception_message(exc))
 
     async def _send_delayed_notice(self, event: AstrMessageEvent, text: str) -> None:
         try:
             if hasattr(self, "context") and hasattr(self.context, "send_message") and hasattr(event, "unified_msg_origin"):
                 await self.context.send_message(event.unified_msg_origin, MessageChain([Plain(text)]))
         except Exception as exc:
-            logger.debug(f"[NIKKE] 延迟提示发送跳过: {exc}")
+            logger.debug("[NIKKE] 延迟提示发送跳过: %s", safe_exception_message(exc))
 
     async def _scheduler_loop(self) -> None:
         last_daily = ""
@@ -703,7 +704,7 @@ class NikkePlugin(Star):
         except (BlaBlaError, ValueError, RuntimeError) as exc:
             yield event.plain_result(f"突袭查询失败：{exc}")
         except Exception as exc:
-            logger.exception("[NIKKE] 联盟突袭查询异常")
+            logger.error("[NIKKE] 联盟突袭查询异常: %s", safe_exception_message(exc))
             yield event.plain_result(f"突袭查询异常：{exc}")
         finally:
             if handle:
@@ -724,7 +725,7 @@ class NikkePlugin(Star):
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
         except Exception as exc:
-            logger.warning(f"[NIKKE] roster 查询失败: {type(exc).__name__}: {exc}")
+            logger.warning("[NIKKE] roster 查询失败: %s", safe_exception_message(exc))
             yield event.plain_result(f"练度查询失败：{exc}")
 
     async def progress(self, event: AstrMessageEvent):
@@ -1137,7 +1138,7 @@ class NikkePlugin(Star):
         except (BlaBlaError, ValueError, RuntimeError) as exc:
             yield event.plain_result(f"战役查询失败：{exc}")
         except Exception as exc:
-            logger.exception("[NIKKE] 战役查询异常")
+            logger.error("[NIKKE] 战役查询异常: %s", safe_exception_message(exc))
             yield event.plain_result(f"战役查询异常：{exc}")
         finally:
             if handle:
@@ -1376,7 +1377,7 @@ class NikkePlugin(Star):
             try:
                 self.asset_manager.close()
             except Exception as exc:
-                logger.debug(f"[NIKKE] 素材管理器回收跳过: {exc}")
+                logger.debug("[NIKKE] 素材管理器回收跳过: %s", safe_exception_message(exc))
         await self.web.stop()
         logger.info("[NIKKE] 插件已停止")
 

@@ -14,6 +14,7 @@ from .card_models import (
     FavoriteItemData,
     OptionSummary,
 )
+from .log_privacy import sanitize_log_text
 
 
 SLOTS = ("head", "torso", "arm", "leg")
@@ -69,7 +70,9 @@ class CharacterCardBuilder:
             if value_type and value_type != unit:
                 logger.warning(
                     "function_value_type mismatch: type=%s value_type=%s expected=%s, treating as unknown",
-                    raw_type, value_type, unit,
+                    sanitize_log_text(raw_type, max_length=80),
+                    sanitize_log_text(value_type, max_length=80),
+                    sanitize_log_text(unit, max_length=80),
                 )
                 display_name = "未识别词条"
                 unit = "unknown"

@@ -17,6 +17,7 @@ import httpx
 from PIL import Image, ImageDraw
 
 from .card_models import CharacterCardAssets, CharacterCardData
+from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
 from .spine_prerenderer import SpineJob, SpinePreRenderer
 
@@ -316,7 +317,11 @@ class AssetManager:
                 fut = self._executor.submit(func)
                 future_map[fut] = key
             except Exception as exc:
-                logger.warning("提交素材获取任务失败 [%s]: %s", key, exc)
+                logger.warning(
+                    "提交素材获取任务失败 [%s]: %s",
+                    sanitize_log_text(key, max_length=120),
+                    safe_exception_message(exc),
+                )
                 results[key] = tasks[key][1]()
 
         if future_map:
@@ -327,12 +332,20 @@ class AssetManager:
                     res = fut.result()
                     results[key] = res if res is not None else tasks[key][1]()
                 except Exception as exc:
-                    logger.warning("素材获取执行异常 [%s]: %s", key, exc)
+                    logger.warning(
+                        "素材获取执行异常 [%s]: %s",
+                        sanitize_log_text(key, max_length=120),
+                        safe_exception_message(exc),
+                    )
                     results[key] = tasks[key][1]()
 
             for fut in not_done:
                 key = future_map[fut]
-                logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，使用降级 fallback", timeout, key)
+                logger.warning(
+                    "素材获取超时 (硬预算 %.1fs) [%s]，使用降级 fallback",
+                    timeout,
+                    sanitize_log_text(key, max_length=120),
+                )
                 results[key] = tasks[key][1]()
 
         return CharacterCardAssets(
