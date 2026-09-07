@@ -7,6 +7,7 @@ from .announcement_models import AnnouncementRecord
 
 BASE = "https://na-community.playerinfinite.com/api/gpts.information_feeds_svr.InformationFeedsSvr/"
 HOSTS = {"en": "nikke-en.com", "ja": "nikke-jp.com", "ko": "nikke-kr.com", "th": "nikke-sea.com", "de": "nikke-de.com", "fr": "nikke-fr.com"}
+SUPPORTED_LOCALES = frozenset(HOSTS)
 
 
 class PlainBody(HTMLParser):
@@ -32,12 +33,13 @@ class PlainBody(HTMLParser):
 
 class InformationFeedsSource:
     def __init__(self, locale="en", *, max_pages=2, page_size=5, transport=None):
-        if locale not in {"en", "ja", "ko", "th", "de", "fr"}:
+        if locale not in SUPPORTED_LOCALES:
             raise ValueError("官网尚未验证此语言")
         if not 1 <= max_pages <= 5 or not 1 <= page_size <= 20:
             raise ValueError("公告扫描范围超限")
         self.locale, self.max_pages, self.page_size = locale, max_pages, page_size
         self.transport = transport
+        self.last_scan = None
 
     async def fetch(self):
         headers = {"X-GameId": "16", "X-AreaId": "na", "X-Source": "pc_web", "X-Language": self.locale}
@@ -56,7 +58,8 @@ class InformationFeedsSource:
             news = next((x for x in columns.get("primary_label_list", []) if isinstance(x, dict) and x.get("raw_label_name") == "official_news"), None)
             if not news:
                 raise ValueError("CMS 官方新闻栏目不存在")
-            offset, seen, items = 0, set(), []
+            offset, seen, items, pages_scanned = 0, set(), [], 0
+            finished = False
             for _ in range(self.max_pages):
                 page = await post("GetContentByLabel", {
                     "language": [self.locale], "gameid": "16", "offset": offset, "get_num": self.page_size,
@@ -66,6 +69,7 @@ class InformationFeedsSource:
                 rows = page.get("info_content")
                 if not isinstance(rows, list):
                     raise ValueError("CMS 公告列表格式无效")
+                pages_scanned += 1
                 for row in rows:
                     if not isinstance(row, dict) or not row.get("content_id"):
                         raise ValueError("CMS 公告缺少 ID")
@@ -75,6 +79,7 @@ class InformationFeedsSource:
                         items.append(identifier)
                 next_offset = page.get("next_offset")
                 if not rows or page.get("is_finish") or not isinstance(next_offset, int) or next_offset <= offset or next_offset >= page.get("total_num", next_offset + 1):
+                    finished = True
                     break
                 offset = next_offset
             limit = asyncio.Semaphore(3)
@@ -89,5 +94,14 @@ class InformationFeedsSource:
                     f"informationfeeds:{self.locale}:{identifier}", str(data.get("title", "")),
                     "".join(body.parts), datetime.fromtimestamp(int(data["pub_timestamp"]), timezone.utc).isoformat(),
                     source_url=f"https://{HOSTS[self.locale]}/newsdetail.html?content_id={identifier}",
+                    locale=self.locale,
                 )
-            return await asyncio.gather(*(detail(identifier) for identifier in items))
+            records = await asyncio.gather(*(detail(identifier) for identifier in items))
+            self.last_scan = {
+                "pages_scanned": pages_scanned,
+                "requested_pages": self.max_pages,
+                "page_size": self.page_size,
+                "finished": finished,
+                "unique_records": len(records),
+            }
+            return records

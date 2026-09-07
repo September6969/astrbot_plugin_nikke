@@ -269,7 +269,7 @@ class NikkePlugin(Star):
                 "/妮姬 联盟突袭 排名 — 当前响应范围\n"
                 "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
                 "/妮姬 日程　(/nikke schedule)\n"
-                "/妮姬 公告　(/nikke news)\n"
+                "/妮姬 公告 [语言|分类|搜索|诊断]　(/nikke news)\n"
                 "/妮姬 攻略 [分类]　(/nikke guide)"
             ),
             "日常": (
@@ -403,8 +403,44 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"公告", "news", "announcement"}:
+            announcement_action = arg1.strip().casefold()
             if arg1 in {"订阅", "取消订阅"}:
                 async for result in self.announcement_subscription(event, arg1):
+                    yield result
+                return
+            if announcement_action in {"帮助", "help"}:
+                yield event.plain_result(
+                    "用法：/妮姬 公告；公告 语言 <en|ja|ko|th|de|fr>；"
+                    "公告 分类 <本地分类（如 活动、维护）>；公告 搜索 <关键词>；公告 诊断；"
+                    "公告 深度刷新 [语言]（仅管理员，公开只读）。"
+                )
+                return
+            if announcement_action in {"语言", "locale"}:
+                if not arg2:
+                    yield event.plain_result("用法：/妮姬 公告 语言 <en|ja|ko|th|de|fr>")
+                    return
+                async for result in self.announcements_view(event, locale=arg2):
+                    yield result
+                return
+            if announcement_action in {"分类", "category"}:
+                if not arg2:
+                    yield event.plain_result("用法：/妮姬 公告 分类 <本地分类>")
+                    return
+                async for result in self.announcements_view(event, category=arg2):
+                    yield result
+                return
+            if announcement_action in {"搜索", "search"}:
+                if not arg2:
+                    yield event.plain_result("用法：/妮姬 公告 搜索 <关键词>")
+                    return
+                async for result in self.announcements_view(event, query=arg2):
+                    yield result
+                return
+            if announcement_action in {"诊断", "diagnostic"}:
+                yield event.plain_result(self.announcements.format_diagnostic_text())
+                return
+            if announcement_action in {"深度刷新", "deep", "rescan"}:
+                async for result in self.announcement_deep_rescan(event, arg2 or "en"):
                     yield result
                 return
             async for result in self.announcements_view(event):
@@ -1173,8 +1209,15 @@ class NikkePlugin(Star):
         text = self.announcements.format_schedule_text(fallback_error=fallback_error)
         yield event.plain_result(text)
 
-    async def announcements_view(self, event: AstrMessageEvent):
-        """查看官方最新公告列表。"""
+    async def announcements_view(
+        self,
+        event: AstrMessageEvent,
+        *,
+        locale: str | None = None,
+        category: str | None = None,
+        query: str | None = None,
+    ):
+        """查看本地缓存中的公告，可按已知 locale/category/关键词过滤。"""
         fallback_error = ""
         if self.announcements.record_count() == 0:
             try:
@@ -1185,8 +1228,43 @@ class NikkePlugin(Star):
                 fallback_error = "同步公告超时"
             except Exception as e:
                 fallback_error = f"同步异常: {e}"
-        text = self.announcements.format_announcements_text(5, fallback_error=fallback_error)
+        try:
+            text = self.announcements.format_announcements_text(
+                5,
+                fallback_error=fallback_error,
+                locale=locale,
+                category=category,
+                query=query,
+            )
+        except ValueError as exc:
+            text = f"公告查询参数无效：{exc}"
         yield event.plain_result(text)
+
+    async def announcement_deep_rescan(self, event: AstrMessageEvent, locale: str = "en"):
+        """管理员受限的公开只读深度公告重扫，不发送消息。"""
+        if not self._is_admin(event):
+            yield event.plain_result("仅机器人管理员可执行公告深度刷新。")
+            return
+        try:
+            selected_locale = self.announcements.normalize_locale(locale)
+        except ValueError as exc:
+            yield event.plain_result(f"公告语言无效：{exc}")
+            return
+        try:
+            success, message = await asyncio.wait_for(
+                self.announcements.sync_from_source(locale=selected_locale, deep=True),
+                timeout=40.0,
+            )
+        except asyncio.TimeoutError:
+            yield event.plain_result("公告深度刷新超时，已保留原有缓存。")
+            return
+        except Exception as exc:
+            yield event.plain_result(f"公告深度刷新异常：{exc}")
+            return
+        if not success:
+            yield event.plain_result(message)
+            return
+        yield event.plain_result(message + " 仅执行公开只读同步，未发送消息。")
 
     async def announcement_subscription(self, event: AstrMessageEvent, action: str):
         """目标只取当前会话，禁止通过命令替其它会话订阅。"""

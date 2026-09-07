@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """官方公告、活动日程与推送管理服务。
 
-遵循 contracts/announcements.md：
+遵循 docs/ANNOUNCEMENT_V2_CONTRACT.md：
 1. AnnouncementRecord 包含 content_id, body_hash, content_version, published_at, source_url；
 2. 内容实体不保存全局 pushed: bool；
 3. 投递去重键：target_id + content_id + content_version + push_type；
@@ -16,6 +16,7 @@ import hashlib
 import json
 import logging
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -219,15 +220,71 @@ class DeadlineParser:
 
 
 class AnnouncementService:
+    SUPPORTED_LOCALES = frozenset({"en", "ja", "ko", "th", "de", "fr"})
+    CACHE_LOCALES = SUPPORTED_LOCALES | {"und"}
+    NORMAL_MAX_PAGES = 2
+    NORMAL_PAGE_SIZE = 5
+    DEEP_MAX_PAGES = 5
+    DEEP_PAGE_SIZE = 20
+    CACHE_RETENTION_DAYS = 90
+    REVISION_HISTORY_LIMIT = 8
+    CATEGORY_ALIASES = {
+        "公告": "general",
+        "综合": "general",
+        "维护": "maintenance",
+        "活动": "event",
+        "更新": "update",
+        "版本更新": "update",
+        "开发者笔记": "dev_note",
+        "招募": "recruit",
+        "联盟突袭": "union_raid",
+    }
+
     def __init__(self, data_dir: Path | None = None):
         self.data_dir = Path(data_dir) if data_dir else None
         self._records: dict[str, AnnouncementRecord] = {}
         self._deadlines: dict[str, GameDeadline] = {}
+        self._revision_history: dict[str, list[str]] = {}
         self._delivery_log: set[str] = set()
         self.last_updated_at: str | None = None
+        self.last_sync_report: dict[str, Any] | None = None
         self.cache_file = (self.data_dir / "announcements_cache.json") if self.data_dir else None
         if self.cache_file and self.cache_file.is_file():
             self.load_cache()
+
+    @classmethod
+    def normalize_locale(cls, value: str | None, *, allow_und: bool = False) -> str:
+        """只允许已验证的官网语言及缓存迁移值。"""
+        locale = (value or "en").strip().casefold()
+        supported = cls.CACHE_LOCALES if allow_und else cls.SUPPORTED_LOCALES
+        if locale not in supported:
+            raise ValueError("公告语言仅支持 en、ja、ko、th、de、fr")
+        return locale
+
+    @staticmethod
+    def _locale_from_content_id(content_id: str) -> str:
+        parts = content_id.split(":", 2)
+        if len(parts) == 3 and parts[0] == "informationfeeds" and parts[1] in AnnouncementService.SUPPORTED_LOCALES:
+            return parts[1]
+        return "und"
+
+    @classmethod
+    def _normalize_category(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        category = cls.CATEGORY_ALIASES.get(value.strip().casefold(), value.strip().casefold())
+        if len(category) > 32 or not re.fullmatch(r"[a-z0-9_-]+", category):
+            raise ValueError("公告分类仅支持本地分类标识或预设中文别名")
+        return category
+
+    @staticmethod
+    def _normalize_query(value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        query = " ".join(value.split())
+        if len(query) > 80:
+            raise ValueError("公告搜索词不能超过 80 个字符")
+        return query.casefold()
 
     def record_count(self) -> int:
         return len(self._records)
@@ -240,19 +297,50 @@ class AnnouncementService:
             with open(self.cache_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
             self.last_updated_at = data.get("last_updated_at")
+            report = data.get("last_sync_report")
+            self.last_sync_report = report if isinstance(report, dict) else None
+            histories = data.get("revision_history")
+            if isinstance(histories, dict):
+                for content_id, fingerprints in histories.items():
+                    if not isinstance(content_id, str) or not isinstance(fingerprints, list):
+                        continue
+                    self._revision_history[content_id] = [
+                        value for value in fingerprints[-self.REVISION_HISTORY_LIMIT:]
+                        if isinstance(value, str) and value
+                    ]
             for item in data.get("records", []):
-                rec = AnnouncementRecord(
-                    content_id=str(item["content_id"]),
-                    title=str(item["title"]),
-                    body=str(item["body"]),
-                    published_at=str(item["published_at"]),
-                    source_url=str(item.get("source_url", "")),
-                    content_version=int(item.get("content_version", 1)),
-                    category=str(item.get("category", "general")),
-                    deadline_at=item.get("deadline_at"),
-                    deadline_version=int(item.get("deadline_version", 1)),
-                )
+                if not isinstance(item, dict):
+                    continue
+                try:
+                    content_id = str(item.get("content_id") or "").strip()
+                    title = item.get("title")
+                    body = item.get("body")
+                    published_at = item.get("published_at")
+                    if not content_id or not isinstance(title, str) or not isinstance(body, str) or not isinstance(published_at, str):
+                        raise ValueError("缺少公告必要字段")
+                    locale = str(item.get("locale") or self._locale_from_content_id(content_id))
+                    if locale not in self.CACHE_LOCALES:
+                        locale = "und"
+                    rec = AnnouncementRecord(
+                        content_id=content_id,
+                        title=title,
+                        body=body,
+                        published_at=published_at,
+                        source_url=str(item.get("source_url", "")),
+                        content_version=int(item.get("content_version", 1)),
+                        category=str(item.get("category", "general")),
+                        deadline_at=item.get("deadline_at"),
+                        deadline_version=int(item.get("deadline_version", 1)),
+                        locale=locale,
+                    )
+                except (TypeError, ValueError) as exc:
+                    logger.warning("跳过损坏的公告缓存记录: %s", exc)
+                    continue
                 self._records[rec.content_id] = rec
+                history = self._revision_history.setdefault(rec.content_id, [])
+                if rec.content_fingerprint not in history:
+                    history.append(rec.content_fingerprint)
+                    self._revision_history[rec.content_id] = history[-self.REVISION_HISTORY_LIMIT:]
                 for dl in DeadlineParser.parse_deadlines(rec.title, rec.body, rec.content_id, rec.category):
                     dl.deadline_version = rec.deadline_version
                     self._deadlines[dl.event_id] = dl
@@ -280,10 +368,13 @@ class AnnouncementService:
                     "category": rec.category,
                     "deadline_at": rec.deadline_at,
                     "deadline_version": rec.deadline_version,
+                    "locale": rec.locale,
                 })
             payload = {
                 "last_updated_at": self.last_updated_at,
                 "records": records_data,
+                "revision_history": self._revision_history,
+                "last_sync_report": self.last_sync_report,
                 "delivery_log": sorted(self._delivery_log),
             }
             tmp_file = self.cache_file.with_suffix(".tmp")
@@ -293,25 +384,90 @@ class AnnouncementService:
         except Exception as exc:
             logger.error("保存公告本地缓存失败: %s", exc)
 
-    async def sync_from_source(self, fetcher: Any = None) -> tuple[bool, str]:
-        """尝试同步官方数据；若失败则保持当前本地缓存并返回降级说明。"""
+    async def sync_from_source(
+        self,
+        fetcher: Any = None,
+        *,
+        locale: str = "en",
+        deep: bool = False,
+    ) -> tuple[bool, str]:
+        """同步公开数据；深度扫描受限且不会触发任何投递。"""
+        selected_locale = self.normalize_locale(locale)
         try:
-            fetch_func = fetcher if fetcher is not None else self.fetch_primary
-            records = await fetch_func()
+            source_name = "injected"
+            scan = None
+            if fetcher is not None:
+                records = await fetcher()
+            else:
+                from .announcement_sources import InformationFeedsSource
+
+                source = InformationFeedsSource(
+                    selected_locale,
+                    max_pages=self.DEEP_MAX_PAGES if deep else self.NORMAL_MAX_PAGES,
+                    page_size=self.DEEP_PAGE_SIZE if deep else self.NORMAL_PAGE_SIZE,
+                )
+                try:
+                    records = await source.fetch()
+                    source_name = "informationfeeds"
+                    scan = source.last_scan
+                except Exception:
+                    # 深度重扫必须能够确认完整的 InformationFeeds 扫描范围；
+                    # 不以旧 MVP 回退结果冒充已完成的深度扫描。
+                    if deep:
+                        raise
+                    records = await self.fetch_official()
+                    source_name = "blablalink-fallback"
+                    scan = {"fallback": True, "requested_pages": self.NORMAL_MAX_PAGES, "page_size": self.NORMAL_PAGE_SIZE}
+            if not isinstance(records, list):
+                raise ValueError("公告来源未返回列表")
+
+            counts = Counter()
             for r in records:
-                self.add_or_update(r)
+                if not isinstance(r, AnnouncementRecord):
+                    counts["invalid"] += 1
+                    continue
+                try:
+                    is_new, is_updated = self.add_or_update(r, persist=False)
+                except ValueError:
+                    counts["invalid"] += 1
+                    continue
+                if is_new:
+                    counts["new"] += 1
+                elif is_updated:
+                    counts["updated"] += 1
+                else:
+                    counts[self._last_update_outcome] += 1
             self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
+            self.last_sync_report = {
+                "source": source_name,
+                "locale": selected_locale,
+                "deep": bool(deep),
+                "received": len(records),
+                "new": counts["new"],
+                "updated": counts["updated"],
+                "unchanged": counts["unchanged"],
+                "stale": counts["stale"],
+                "invalid": counts["invalid"],
+                "scan": scan,
+                "source_order": "unknown",
+            }
             self.save_cache()
-            return True, "同步成功"
+            scope = "深度重扫" if deep else "常规同步"
+            return True, f"{scope}成功：收到 {len(records)} 条，新增 {counts['new']} 条，更新 {counts['updated']} 条。"
         except Exception as exc:
             logger.warning("官方公告同步失败，降级读取本地缓存: %s", exc)
             return False, f"官方数据同步失败（{exc}），已降级读取本地缓存"
 
     @staticmethod
-    async def fetch_primary() -> list[AnnouncementRecord]:
+    async def fetch_primary(*, locale: str = "en", deep: bool = False) -> list[AnnouncementRecord]:
         from .announcement_sources import InformationFeedsSource
         try:
-            return await InformationFeedsSource().fetch()
+            selected_locale = AnnouncementService.normalize_locale(locale)
+            return await InformationFeedsSource(
+                selected_locale,
+                max_pages=(AnnouncementService.DEEP_MAX_PAGES if deep else AnnouncementService.NORMAL_MAX_PAGES),
+                page_size=(AnnouncementService.DEEP_PAGE_SIZE if deep else AnnouncementService.NORMAL_PAGE_SIZE),
+            ).fetch()
         except Exception:
             # 主源失败继续尝试原有 MVP；两者失败由同步层保留磁盘缓存。
             return await AnnouncementService.fetch_official()
@@ -350,22 +506,32 @@ class AnnouncementService:
                     body=str(it.get("content", "") or it.get("body", "")),
                     published_at=str(it.get("publish_time", "")),
                     source_url=str(it.get("url", "")),
+                    locale="und",
                 )
                 records.append(rec)
-            return records
+        return records
 
     def add_or_update(
         self,
         record: AnnouncementRecord,
+        *,
+        persist: bool = True,
     ) -> tuple[bool, bool]:
         """添加或更新公告。
         返回 (is_new, is_updated)。
         """
         if not record.content_id or record.content_id.strip() in {"", "None"}:
             raise ValueError("公告缺少稳定 ID")
+        record.locale = self.normalize_locale(record.locale, allow_und=True)
         existing = self._records.get(record.content_id)
+        fingerprint = record.content_fingerprint
+        history = self._revision_history.setdefault(record.content_id, [])
+        self._last_update_outcome = "unchanged"
         if not existing:
             self._records[record.content_id] = record
+            if fingerprint not in history:
+                history.append(fingerprint)
+                self._revision_history[record.content_id] = history[-self.REVISION_HISTORY_LIMIT:]
             parsed = DeadlineParser.parse_deadlines(
                 record.title, record.body, record.content_id, record.category
             )
@@ -373,11 +539,24 @@ class AnnouncementService:
                 dl.deadline_version = record.deadline_version
                 self._deadlines[dl.event_id] = dl
             self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
-            self.save_cache()
+            self._last_update_outcome = "new"
+            if persist:
+                self.save_cache()
             return True, False
 
-        # 变更检测：检查 body_hash
-        if (existing.body_hash, existing.title, existing.category) != (record.body_hash, record.title, record.category):
+        if fingerprint == existing.content_fingerprint:
+            if fingerprint not in history:
+                history.append(fingerprint)
+                self._revision_history[record.content_id] = history[-self.REVISION_HISTORY_LIMIT:]
+            return False, False
+
+        # 已知旧指纹再次出现时按乱序回放处理，绝不回滚已显示版本或日程。
+        if fingerprint in history:
+            self._last_update_outcome = "stale"
+            return False, False
+
+        # 未知的新指纹按成功扫描到达顺序升级；diagnostic 会明确来源顺序尚未证实。
+        if fingerprint != existing.content_fingerprint:
             new_version = existing.content_version + 1
             record.content_version = new_version
             self._records[record.content_id] = record
@@ -397,16 +576,111 @@ class AnnouncementService:
             for dl in parsed:
                 dl.deadline_version = record.deadline_version
                 self._deadlines[dl.event_id] = dl
+            history.append(fingerprint)
+            self._revision_history[record.content_id] = history[-self.REVISION_HISTORY_LIMIT:]
             self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
-            self.save_cache()
+            self._last_update_outcome = "updated"
+            if persist:
+                self.save_cache()
             return False, True
 
         return False, False
 
-    def list_announcements(self, limit: int = 10) -> list[AnnouncementRecord]:
+    @staticmethod
+    def _parse_aware_timestamp(value: str) -> datetime | None:
+        if not isinstance(value, str) or not value.strip():
+            return None
+        try:
+            parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        if parsed.tzinfo is None:
+            return None
+        return parsed.astimezone(timezone.utc)
+
+    def prune_cache(self, *, now: datetime | None = None, retention_days: int | None = None) -> int:
+        """删除可证明过期且没有进行中日程的缓存公告。"""
+        days = self.CACHE_RETENTION_DAYS if retention_days is None else retention_days
+        if type(days) is not int or days < 14:
+            raise ValueError("公告缓存保留期不能短于 14 天")
+        current = now or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            raise ValueError("清理时间必须包含时区")
+        current = current.astimezone(timezone.utc)
+        cutoff = current - timedelta(days=days)
+        removed = 0
+        for content_id, rec in list(self._records.items()):
+            published = self._parse_aware_timestamp(rec.published_at)
+            if published is None or published >= cutoff:
+                continue
+            related = [deadline for deadline in self._deadlines.values() if deadline.source_content_id == content_id]
+            if any(deadline.end_at >= current for deadline in related):
+                continue
+            self._records.pop(content_id, None)
+            self._revision_history.pop(content_id, None)
+            self._deadlines = {
+                event_id: deadline
+                for event_id, deadline in self._deadlines.items()
+                if deadline.source_content_id != content_id
+            }
+            removed += 1
+        if removed:
+            self.save_cache()
+        return removed
+
+    def list_announcements(
+        self,
+        limit: int = 10,
+        *,
+        locale: str | None = None,
+        category: str | None = None,
+        query: str | None = None,
+    ) -> list[AnnouncementRecord]:
+        if type(limit) is not int or not 1 <= limit <= 10000:
+            raise ValueError("公告查询数量超出范围")
+        selected_locale = self.normalize_locale(locale, allow_und=True) if locale else None
+        selected_category = self._normalize_category(category)
+        selected_query = self._normalize_query(query)
         items = list(self._records.values())
+        if selected_locale:
+            items = [record for record in items if record.locale == selected_locale]
+        if selected_category:
+            items = [record for record in items if record.category.casefold() == selected_category]
+        if selected_query:
+            items = [
+                record for record in items
+                if selected_query in f"{record.title}\n{record.body}".casefold()
+            ]
         items.sort(key=lambda r: r.published_at, reverse=True)
         return items[:limit]
+
+    def format_diagnostic_text(self) -> str:
+        """返回不含正文、订阅 target 或凭据的本地只读诊断。"""
+        locale_counts = Counter(record.locale for record in self._records.values())
+        category_counts = Counter(record.category for record in self._records.values())
+        lines = ["【公告诊断（公开只读）】", f"缓存公告: {len(self._records)} 条"]
+        if self.last_updated_at:
+            lines.append(f"最近同步: {self.last_updated_at}")
+        if self.last_sync_report:
+            report = self.last_sync_report
+            scope = "深度重扫" if report.get("deep") else "常规同步"
+            lines.append(
+                f"最近范围: {scope} · locale={report.get('locale', 'unknown')} · "
+                f"收到 {report.get('received', 0)} / 新增 {report.get('new', 0)} / "
+                f"更新 {report.get('updated', 0)} / 乱序回放忽略 {report.get('stale', 0)}"
+            )
+            lines.append(f"来源顺序: {report.get('source_order', 'unknown')}（未宣称官方修改时序）")
+        else:
+            lines.append("最近范围: 尚未同步")
+        locales = ", ".join(f"{name}: {count}" for name, count in sorted(locale_counts.items())) or "无"
+        categories = ", ".join(f"{name}: {count}" for name, count in sorted(category_counts.items())) or "无"
+        lines.append(f"locale: {locales}")
+        lines.append(f"category: {categories}")
+        lines.append(
+            f"缓存保留: {self.CACHE_RETENTION_DAYS} 天；已见内容指纹最多 {self.REVISION_HISTORY_LIMIT} 个/公告。"
+        )
+        lines.append("本诊断不发起网络请求、不发送消息，也不输出订阅目标或凭据。")
+        return "\n".join(lines)
 
     def list_active_deadlines(self, now: datetime | None = None) -> list[GameDeadline]:
         current = now or datetime.now(timezone.utc)
@@ -423,13 +697,47 @@ class AnnouncementService:
         self._delivery_log.add(push_key)
         self.save_cache()
 
-    def format_announcements_text(self, limit: int = 5, fallback_error: str = "") -> str:
-        records = self.list_announcements(limit)
+    def format_announcements_text(
+        self,
+        limit: int = 5,
+        fallback_error: str = "",
+        *,
+        locale: str | None = None,
+        category: str | None = None,
+        query: str | None = None,
+    ) -> str:
+        selected_locale = self.normalize_locale(locale, allow_und=True) if locale else None
+        selected_category = self._normalize_category(category)
+        selected_query = self._normalize_query(query)
+        records = self.list_announcements(
+            limit,
+            locale=selected_locale,
+            category=selected_category,
+            query=selected_query,
+        )
         if not records:
+            if self._records:
+                filters = []
+                if selected_locale:
+                    filters.append(f"语言={selected_locale}")
+                if selected_category:
+                    filters.append(f"分类={selected_category}")
+                if selected_query:
+                    filters.append("关键词")
+                return f"没有匹配的缓存公告（{'、'.join(filters) or '当前筛选'}）。"
             if fallback_error:
                 return f"暂时无法获取官方公告：{fallback_error}。当前没有可用缓存，请稍后重试。"
             return "功能尚未就绪，正在同步官方数据，请稍候。"
         lines = ["【NIKKE 官方最新公告】"]
+        filters = []
+        if selected_locale:
+            filters.append(f"语言={selected_locale}")
+        if selected_category:
+            filters.append(f"分类={selected_category}")
+        if selected_query:
+            filters.append("关键词匹配")
+        if filters:
+            lines.append(f"（筛选: {' · '.join(filters)}）")
         if self.last_updated_at:
             lines.append(f"（最近更新时间: {self.last_updated_at}）")
         if fallback_error:
@@ -442,6 +750,7 @@ class AnnouncementService:
             "recruit": "招募",
             "union_raid": "突袭",
             "dev_note": "笔记",
+            "general": "公告",
         }
         for index, r in enumerate(records, 1):
             tag = category_map.get(r.category, "公告")
