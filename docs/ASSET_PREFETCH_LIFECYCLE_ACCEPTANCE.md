@@ -11,7 +11,12 @@
 
 - 人为占满全部槽位后，整张卡不调用 executor 的 `submit`，且生成完整 fallback 资源集合。
 - 单 worker 阻塞 portrait 后触发 0.05 秒预算，随后释放 worker；已排队的 equipment 任务没有开始执行。
+- 正常预取任务完成后会归还槽位，后续任务仍可提交，不发生长期配额泄漏。
 - 全部验证使用合成图片、临时目录和 mock，不访问远端资源、账号或消息通道。
+
+当前本机 Python 3.10.11：`tests/test_asset_manager.py` 13 passed；全量 pytest 259 passed、43 subtests、2 warnings；Node 扩展测试 3 passed，compileall 与 `git diff --check` 通过。
+
+使用 `remote=False` 的脱敏 fixture 生成并实际查看了角色卡合成预览：`E:\DevCache\nikke-asset-prefetch-preview-20260907-v2\alice.png`、`fallback.png`。这只验证离线出图与 fallback，不代表真实资源联调。
 
 ## 未覆盖的边界
 

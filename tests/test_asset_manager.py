@@ -180,6 +180,17 @@ class AssetManagerTests(unittest.TestCase):
                     manager._prefetch_slots.release()
                 manager.close()
 
+    def test_prefetch_slot_returns_after_task_completion(self):
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            try:
+                future = manager._submit_prefetch(lambda: "done")
+                self.assertEqual(future.result(timeout=1.0), "done")
+                self.assertTrue(manager._prefetch_slots.acquire(blocking=False))
+                manager._prefetch_slots.release()
+            finally:
+                manager.close()
+
     def test_prefetch_timeout_cancels_queued_tasks(self):
         from astrbot_plugin_nikke.tests.test_card_builder import build_card
 
