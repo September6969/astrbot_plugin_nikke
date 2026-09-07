@@ -1,0 +1,28 @@
+# AssetManager 素材请求去重验收
+
+## 范围
+
+- 分支：`feat/asset-request-dedup-v2`
+- 基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`
+- 用户可见目标：同一素材首次缓存未命中时，并发卡片渲染不会为同一个缓存键重复发起网络请求。
+
+## 实现合同
+
+- `AssetManager` 以 `kind/key.png` 为 single-flight 键；首个调用负责下载，其余调用等待同一完成事件后重新读取缓存。
+- 等待者不自行重试或发起第二个请求；下载失败仍沿用原有 300 秒失败冷却和占位图 fallback。
+- 保留原有 HTTPS、大小、像素、总时限和原子缓存写入限制。
+- 该增量只证明同一缓存键的并发请求去重，不把合成 HTTP 测试冒充公开资源现场访问、真实账号联调、资源授权或所有产品路径的全局 N+1 证明。
+
+## 行为验证
+
+```text
+pytest tests/test_asset_manager.py tests/test_character_card_renderer.py tests/test_campaign_history.py
+34 passed
+```
+
+新增行为测试使用模拟响应和 5 个并发调用，断言 `httpx.stream` 只调用 1 次，并且所有调用均拿到同一图片尺寸。未访问真实账号、未发送消息、未下载公开资源。
+
+## 未完成/交接
+
+- 仍需执行全量 Python/Node 回归、创建 Draft PR 并等待 final-head CI。
+- 不包含 Spine production runtime、真实资源许可或部署变更。

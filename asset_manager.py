@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 import re
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -33,6 +34,8 @@ class AssetManager:
         self.asset_dir = Path(asset_dir)
         self.remote = remote
         self._failed: dict[str, float] = {}
+        self._inflight_lock = threading.Lock()
+        self._inflight: dict[str, threading.Event] = {}
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
         self.spine = SpinePreRenderer(self.cache_dir)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
@@ -89,8 +92,7 @@ class AssetManager:
             image.load()
             return image.convert("RGBA")
 
-    def _load(self, kind: str, key: str, remote_url: str = "") -> Image.Image | None:
-        relative = f"{kind}/{self._key(key)}.png"
+    def _load_cached(self, relative: str) -> Image.Image | None:
         for base in (self.cache_dir, self.asset_dir):
             try:
                 path = base / relative
@@ -98,12 +100,37 @@ class AssetManager:
                     return self._decode(path.read_bytes())
             except (OSError, ValueError, Image.DecompressionBombError):
                 pass
+        return None
+
+    def _load(self, kind: str, key: str, remote_url: str = "") -> Image.Image | None:
+        relative = f"{kind}/{self._key(key)}.png"
+        image = self._load_cached(relative)
+        if image is not None:
+            return image
+
         url = self.sources.get(relative, remote_url)
         if not self.remote or not isinstance(url, str) or not url.startswith("https://"):
             return None
-        if self._failed.get(relative, 0) > time.monotonic():
-            return None
+
+        with self._inflight_lock:
+            event = self._inflight.get(relative)
+            owner = event is None
+            if owner:
+                event = threading.Event()
+                self._inflight[relative] = event
+
+        if not owner:
+            # 同一素材已有下载者；不重复发请求，完成后只重新读取缓存。
+            event.wait(timeout=7.0)
+            return self._load_cached(relative)
+
         try:
+            # 注册 single-flight 后再次检查，覆盖刚刚由其它路径写入缓存的竞态。
+            image = self._load_cached(relative)
+            if image is not None:
+                return image
+            if self._failed.get(relative, 0) > time.monotonic():
+                return None
             # 公共素材请求不携带账号Cookie；限制总下载时长和响应大小。
             started = time.monotonic()
             content = bytearray()
@@ -129,6 +156,11 @@ class AssetManager:
         except (httpx.HTTPError, OSError, ValueError, Image.DecompressionBombError):
             self._failed[relative] = time.monotonic() + 300
             return None
+        finally:
+            with self._inflight_lock:
+                current = self._inflight.pop(relative, None)
+                if current is not None:
+                    current.set()
 
     @staticmethod
     def fallback(kind: str) -> Image.Image:

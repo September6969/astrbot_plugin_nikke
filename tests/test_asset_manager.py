@@ -1,6 +1,9 @@
 import io
 import tempfile
+import threading
+import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
@@ -51,6 +54,42 @@ class AssetManagerTests(unittest.TestCase):
                 self.assertEqual(manager.get_character_portrait("5004", "191").size, (30, 50))
                 manager.get_character_portrait("5004", "191")
                 self.assertEqual(stream.call_count, 1)
+
+    def test_concurrent_same_remote_asset_uses_single_flight_request(self):
+        with tempfile.TemporaryDirectory() as td:
+            buffer = io.BytesIO()
+            Image.new("RGBA", (30, 50), "green").save(buffer, "PNG")
+            response = httpx.Response(
+                200,
+                content=buffer.getvalue(),
+                request=httpx.Request("GET", "https://example.com"),
+            )
+            manager = AssetManager(td, td, remote=True)
+            entered = threading.Event()
+            release = threading.Event()
+
+            def enter_stream():
+                entered.set()
+                self.assertTrue(release.wait(2.0))
+                return response
+
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    stream.return_value.__enter__.side_effect = enter_stream
+                    with ThreadPoolExecutor(max_workers=5) as executor:
+                        futures = [
+                            executor.submit(manager.get_character_portrait, "5004", "191")
+                            for _ in range(5)
+                        ]
+                        self.assertTrue(entered.wait(2.0))
+                        time.sleep(0.05)
+                        release.set()
+                        images = [future.result(timeout=3.0) for future in futures]
+
+                    self.assertEqual(stream.call_count, 1)
+                    self.assertTrue(all(image.size == (30, 50) for image in images))
+            finally:
+                manager.close()
 
     def test_all_icon_fallbacks_and_invalid_sources(self):
         with tempfile.TemporaryDirectory() as td:
