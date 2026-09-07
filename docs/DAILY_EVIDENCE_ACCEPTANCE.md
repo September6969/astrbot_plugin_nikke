@@ -4,7 +4,7 @@
 
 - 分支：`feat/daily-evidence-p1`
 - 基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`
-- 实现提交：`920f938`（Draft PR #18）
+- 实现提交：`920f938`；当前验收 head：`37cab4c`（Draft PR #18）
 - 本增量只加固现有每日签到路径的状态闭环，不猜测 Like/Browse 的未核实端点、字段或任务完成语义。
 
 ## 行为合同
