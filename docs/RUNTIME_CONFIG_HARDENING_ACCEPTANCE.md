@@ -36,12 +36,11 @@ pytest -q tests/test_runtime_config.py
 2 passed, 2 warnings
 ```
 
-## 远端最终验收
+## 远端验收证据
 
-- Draft PR：#20
-- 最终 head：`e0ac0c823c9b10274ee91edecfe22cf01ff33178`
-- CI run：`34101656392`
-- `Extension (Node)`、`Test (Python 3.10)`、`Test (Python 3.11)`、`Test (Python 3.12)`：全部 `SUCCESS`
+- 功能实现提交 `e0ac0c823c9b10274ee91edecfe22cf01ff33178` 的 CI run `34101656392`：四个 job 全部 `SUCCESS`。
+- 后续验收记录提交 `639aa38102a8ca43fc9f1b68d9a6736f94ce65b5` 的 CI run `34102014940`：四个 job 全部 `SUCCESS`。
+- 当前分支最终 head、对应 CI run 和 Draft PR 状态以 `docs/ROADMAP_LEDGER.md` 与 PR #20 checks 为权威来源，避免在本记录中复制会过期的快照。
 
 专项回归结果为 `14 passed, 3 failed`；3 个失败均在测试清理 `NikkeStore` 临时目录时触发 Windows `WinError 32`，属于基线 SQLite 文件句柄问题（该问题由独立 PR #19 修复，本分支未吸收未合并提交），不是本主题配置行为失败。Linux CI 将作为最终跨版本证据。
 
