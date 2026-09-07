@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.runtime_config import normalize_runtime_config
+from astrbot_plugin_nikke.runtime_config import normalize_runtime_config, read_schedule_clock
 
 
 class RuntimeConfigTests(unittest.TestCase):
@@ -51,6 +51,25 @@ class RuntimeConfigTests(unittest.TestCase):
             asyncio.run(plugin._scheduler_loop())
 
         self.assertTrue(plugin._closing)
+
+    def test_malformed_persisted_json_is_scoped_to_one_clock_field(self) -> None:
+        """持久化层解析异常只影响对应字段，另一字段仍按实际值读取。"""
+        def read_setting(key: str, default=None):
+            if key == "daily_hour":
+                raise ValueError("invalid persisted JSON")
+            if key == "daily_minute":
+                return 42
+            return default
+
+        self.assertEqual(
+            read_schedule_clock(
+                read_setting,
+                "daily",
+                default_hour=8,
+                default_minute=10,
+            ),
+            (8, 42),
+        )
 
 
 if __name__ == "__main__":

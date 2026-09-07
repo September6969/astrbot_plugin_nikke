@@ -58,14 +58,22 @@ def read_schedule_clock(
     default_minute: int,
 ) -> tuple[int, int]:
     """读取持久化时间；单个损坏字段只回退该字段，不让调度循环退出。"""
+
+    def read_field(key: str, default: int) -> Any:
+        """把损坏的持久化值隔离在字段边界内。"""
+        try:
+            return read_setting(key, default)
+        except (TypeError, ValueError):
+            return default
+
     hour = bounded_int(
-        read_setting(f"{prefix}_hour", default_hour),
+        read_field(f"{prefix}_hour", default_hour),
         default=default_hour,
         minimum=0,
         maximum=23,
     )
     minute = bounded_int(
-        read_setting(f"{prefix}_minute", default_minute),
+        read_field(f"{prefix}_minute", default_minute),
         default=default_minute,
         minimum=0,
         maximum=59,

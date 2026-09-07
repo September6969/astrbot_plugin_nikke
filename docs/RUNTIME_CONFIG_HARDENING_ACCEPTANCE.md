@@ -33,8 +33,12 @@ pytest -q tests/test_runtime_config.py
 
 ```text
 pytest -q tests/test_runtime_config.py
-2 passed, 2 warnings
+3 passed, 2 warnings
 ```
+
+持久化字段读取本身抛出 `TypeError` / `ValueError`（例如损坏 JSON）时，配置边界层只回退该字段；同一时钟的另一个字段仍按其独立合同解析。
+
+本轮针对最终 head 的本地回归：Python 3.10.11 专项 `3 passed`、全量 `259 passed`、43 subtests、2 warnings；Python 3.13.13 专项 `3 passed`、1 warning。Python 3.13 全量仍会触发既有的 33 个 Windows `WinError 32` 临时 SQLite 清理失败（PR #19 尚未合并），不属于本主题配置行为失败。
 
 ## 远端验收证据
 
