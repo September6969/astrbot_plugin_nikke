@@ -37,13 +37,13 @@ git diff --check                                                PASS
 
 当前同一源码全量回归：`278 passed, 2 warnings, 61 subtests`；`compileall` 通过。
 
-新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放和新指纹刷新（10 项行为测试）。
+新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放、新指纹刷新和版本数值合同（12 项行为测试）。
 
 实际查看的合成文本预览（未网络请求）显示：语言和分类筛选会显示 `（筛选: 语言=ja · 分类=maintenance）` 与唯一的维护公告；诊断只显示缓存数量、范围、locale/category 聚合和 90 天保留策略，无正文/target/凭据。
 
 ## 当前交接状态
 
-- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前 head 为 `c12199aa9ad8341174dd3de516af451d87f8aaa4`。
-- 当前 [CI run 34114239332](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34114239332) 的 headSha 与 PR 当前 head 一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。
+- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前 head 为 `437b6405c910806447c2fecc418cce53995af425`。
+- 当前 [CI run 34120799701](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34120799701) 的 headSha 与 PR 当前 head 一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。
 - `NEEDS_LIVE_EVIDENCE`：获授权时才可验证公开 CMS 当前响应和真实 AstrBot 运行环境；本次不执行。
 - `HARD_BLOCKED`：无。
