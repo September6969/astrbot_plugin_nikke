@@ -31,6 +31,7 @@
 | #22 | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | OPEN / Draft / CI green；head `6943e12`；CI `34104071393` |
 | #23 | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | OPEN / Draft / CI green；head `4a7190b`；CI `34105103222` |
 | #24 | `feat/storage-migration-v1` | Transactional SQLite schema migration | OPEN / Draft / CI green；head `16c9ac5`；CI `34106285962` |
+| #25 | `feat/healthz-readiness-v1` | Healthz storage readiness contract | OPEN / Draft / CI green；head `7e5e928`；CI `34106867556` |
 
 ## 当前推进
 
@@ -48,12 +49,13 @@
 | Data backup hardening | `feat/data-backup-hardening` | `bada0b3` | Draft PR #22；离线备份 `nikke.sqlite3` 与 `secret.key`，SQLite integrity_check、SHA-256 manifest、临时目录落盘和禁止覆盖；head `6943e12`；CI `34104071393` 全绿；仅合成数据，无真实恢复/部署声明 |
 | Runtime health diagnostics | `feat/health-diagnostics-v1` | `bada0b3` | Draft PR #23；`/妮姬 管理 健康` 接入只读数据/缓存/临时文件/磁盘摘要，不删除缓存、不输出路径或凭据；head `4a7190b`；CI `34105103222` 全绿；仅合成数据，无现场/部署声明 |
 | Storage migration hardening | `feat/storage-migration-v1` | `bada0b3` | Draft PR #24；schema_meta 版本化、显式事务/rollback、旧 accounts 字段兼容、未来 schema 拒绝降级；head `16c9ac5`；CI `34106285962` 全绿；仅临时 SQLite，无生产 migration 声明 |
+| Healthz readiness | `feat/healthz-readiness-v1` | `bada0b3` | Draft PR #25；`/healthz` 仅在 SQLite 与密钥均为普通文件时返回 200/ready，否则 503/unavailable；head `7e5e928`；CI `34106867556` 全绿；仅合成文件，无部署声明 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
 
 ## 任务池
 
-- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；其余已创建 Draft PR。
+- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；其余已创建 Draft PR。
 - `READY`：在不依赖上述未合并分支的前提下，继续做可离线验证的独立主题。
 - `WAITING_DEPENDENCY`：Raid Increment B/C 等待相关基线进入 `main`；不从旧 overnight 分支继续开发。
 - `NEEDS_LIVE_EVIDENCE`：真实 Profile、Raid canonical identity、Daily Like/Browse 写入、Voice QQ 实际播放、Spine 生产许可/运行时。

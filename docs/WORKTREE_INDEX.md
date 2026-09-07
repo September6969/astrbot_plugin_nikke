@@ -24,6 +24,7 @@
 | `E:\_codex_work\data-backup-hardening\astrbot_plugin_nikke` | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | Draft PR #22；head `6943e12`；CI `34104071393`；工作树 clean |
 | `E:\_codex_work\health-diagnostics-v1\astrbot_plugin_nikke` | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | Draft PR #23；head `4a7190b`；CI `34105103222`；工作树 clean |
 | `E:\_codex_work\storage-migration-v1\astrbot_plugin_nikke` | `feat/storage-migration-v1` | Transactional SQLite schema migration | Draft PR #24；head `16c9ac5`；CI `34106285962`；工作树 clean |
+| `E:\_codex_work\healthz-readiness-v1\astrbot_plugin_nikke` | `feat/healthz-readiness-v1` | Healthz storage readiness contract | Draft PR #25；head `7e5e928`；CI `34106867556`；工作树 clean |
 
 ## 协作规则
 
