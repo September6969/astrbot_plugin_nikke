@@ -4,6 +4,7 @@
 
 - 分支：`feat/asset-request-dedup-v2`
 - 基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`
+- 实现提交：`b8a44b9`（Draft PR #17）
 - 用户可见目标：同一素材首次缓存未命中时，并发卡片渲染不会为同一个缓存键重复发起网络请求。
 
 ## 实现合同
@@ -22,7 +23,9 @@ pytest tests/test_asset_manager.py tests/test_character_card_renderer.py tests/t
 
 新增行为测试使用模拟响应和 5 个并发调用，断言 `httpx.stream` 只调用 1 次，并且所有调用均拿到同一图片尺寸。未访问真实账号、未发送消息、未下载公开资源。
 
-## 未完成/交接
+GitHub Actions final-head CI：run `34096636216`，Node、Python 3.10、3.11、3.12 全部通过。Windows 本机全量 pytest 曾得到 `238 passed, 31 failed`；失败集中在既有 AstrBot/SQLite 临时目录清理的 `WinError 32` 文件占用，未出现在本增量的目标测试中，因此以隔离环境 CI 作为全量回归证据。
 
-- 仍需执行全量 Python/Node 回归、创建 Draft PR 并等待 final-head CI。
+## 未覆盖/交接
+
+- 仍只证明同一缓存键的并发请求去重，不证明所有产品路径的全局 N+1 消除。
 - 不包含 Spine production runtime、真实资源许可或部署变更。
