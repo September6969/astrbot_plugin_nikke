@@ -89,6 +89,30 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
         self.assertIn("ja: 2", diagnostic)
         self.assertNotIn("正文", diagnostic)
 
+    async def test_failed_sync_replaces_stale_success_report_safely(self) -> None:
+        service = AnnouncementService()
+        service.add_or_update(record("cached"))
+
+        async def failing_fetcher() -> list[AnnouncementRecord]:
+            raise RuntimeError("synthetic failure with hidden detail")
+
+        success, message = await service.sync_from_source(
+            failing_fetcher,
+            locale="ja",
+            deep=True,
+        )
+
+        self.assertFalse(success)
+        self.assertIn("已降级读取本地缓存", message)
+        self.assertEqual(service.last_sync_report["success"], False)
+        self.assertEqual(service.last_sync_report["source"], "failure")
+        self.assertEqual(service.last_sync_report["error_type"], "RuntimeError")
+        diagnostic = service.format_diagnostic_text()
+        self.assertIn("最近同步: 深度重扫失败", diagnostic)
+        self.assertIn("错误类型=RuntimeError", diagnostic)
+        self.assertNotIn("hidden detail", diagnostic)
+        self.assertEqual(service.record_count(), 1)
+
     async def test_source_bounds_and_legacy_fallback_keep_all_records(self) -> None:
         source = InformationFeedsSource("ja", max_pages=5, page_size=20)
         self.assertEqual((source.max_pages, source.page_size), (5, 20))

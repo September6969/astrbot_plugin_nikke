@@ -490,6 +490,7 @@ class AnnouncementService:
             self.prune_cache(now=self._now_utc())
             self.last_updated_at = self._now_utc().astimezone(CST).strftime("%Y-%m-%d %H:%M:%S")
             self.last_sync_report = {
+                "success": True,
                 "source": source_name,
                 "locale": selected_locale,
                 "deep": bool(deep),
@@ -506,6 +507,16 @@ class AnnouncementService:
             scope = "深度重扫" if deep else "常规同步"
             return True, f"{scope}成功：收到 {len(records)} 条，新增 {counts['new']} 条，更新 {counts['updated']} 条。"
         except Exception as exc:
+            # 失败时覆盖旧的成功范围，避免诊断把过期报告冒充最近同步结果。
+            self.last_sync_report = {
+                "success": False,
+                "source": "failure",
+                "locale": selected_locale,
+                "deep": bool(deep),
+                "error_type": type(exc).__name__,
+                "source_order": "unknown",
+            }
+            self.save_cache()
             logger.warning("官方公告同步失败，降级读取本地缓存: %s", exc)
             return False, f"官方数据同步失败（{exc}），已降级读取本地缓存"
 
@@ -730,12 +741,19 @@ class AnnouncementService:
             lines.append(f"最近同步: {self.last_updated_at}")
         if self.last_sync_report:
             report = self.last_sync_report
-            scope = "深度重扫" if report.get("deep") else "常规同步"
-            lines.append(
-                f"最近范围: {scope} · locale={report.get('locale', 'unknown')} · "
-                f"收到 {report.get('received', 0)} / 新增 {report.get('new', 0)} / "
-                f"更新 {report.get('updated', 0)} / 乱序回放忽略 {report.get('stale', 0)}"
-            )
+            if report.get("success") is False:
+                scope = "深度重扫" if report.get("deep") else "常规同步"
+                lines.append(
+                    f"最近同步: {scope}失败 · locale={report.get('locale', 'unknown')} · "
+                    f"错误类型={report.get('error_type', 'UnknownError')}"
+                )
+            else:
+                scope = "深度重扫" if report.get("deep") else "常规同步"
+                lines.append(
+                    f"最近范围: {scope} · locale={report.get('locale', 'unknown')} · "
+                    f"收到 {report.get('received', 0)} / 新增 {report.get('new', 0)} / "
+                    f"更新 {report.get('updated', 0)} / 乱序回放忽略 {report.get('stale', 0)}"
+                )
             lines.append(f"来源顺序: {report.get('source_order', 'unknown')}（未宣称官方修改时序）")
         else:
             lines.append("最近范围: 尚未同步")
