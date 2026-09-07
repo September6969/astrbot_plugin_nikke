@@ -17,7 +17,7 @@
 ## 验证
 
 ```text
-pytest tests/test_storage_lifecycle.py                         1 passed
+pytest tests/test_storage_lifecycle.py                         2 passed
 pytest tests/test_core.py::StoreTests tests/test_cdk_persistence.py \
   tests/test_cdk_stale_runs.py tests/test_announcement_delivery.py \
   tests/test_announcement_push_wiring.py tests/test_review_cancellation.py \
@@ -28,7 +28,7 @@ node --test tests/extension.test.cjs                             3 passed
 git diff --check                                                 PASS
 ```
 
-新增行为测试先在未修复代码上复现 Windows `PermissionError: [WinError 32]`，修复后通过；本机完整回归不再出现临时 SQLite 清理失败。没有合成图片预览需求，因为本主题不改变用户界面或渲染输出。
+新增行为测试先在未修复代码上复现 Windows `PermissionError: [WinError 32]`，修复后通过；同时验证异常事务回滚、原异常传播和连接关闭。本机完整回归不再出现临时 SQLite 清理失败。没有合成图片预览需求，因为本主题不改变用户界面或渲染输出。
 
 ## 证据边界
 
