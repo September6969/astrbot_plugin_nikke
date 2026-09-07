@@ -20,7 +20,7 @@
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green |
 | #13 | `feat/voice-mapping-v2` | Voice mapping public research | OPEN / Draft / CI green |
-| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft / CI green |
+| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft / CI green；head `dd58a89`；CI `34105339675` |
 | #15 | `feat/campaign-history-contract-v2` | Campaign History numeric contract | OPEN / Draft / CI green |
 | #16 | `feat/campaign-resource-lifecycle-v2` | Campaign renderer asset lifecycle | OPEN / Draft / CI green |
 | #17 | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | OPEN / Draft / CI green；head `8c293d1`；CI `34096785354` |
@@ -35,7 +35,7 @@
 
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
-| Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步 |
+| Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；head `dd58a89`；CI `34105339675` 全绿 |
 | Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；`last_changed_at`、自动清理、旧缓存安全迁移；head `fc1c6db`；CI `34097200948` 与 headSha 一致；新增 10 项生命周期行为测试 |
 | Campaign History numeric contract | `feat/campaign-history-contract-v2` | `bada0b3` | Draft PR #15；严格数值/槽位合同，26 个主题测试、合成图片预览和 CI 已验证 |
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager，wiring 测试和 CI 已验证 |
