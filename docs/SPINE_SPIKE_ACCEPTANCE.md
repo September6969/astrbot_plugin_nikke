@@ -2,6 +2,14 @@
 
 基线：`origin/main` `bada0b3aafcd7127d07ca40f554808b0433540f8`。
 
+## 当前验证
+
+- 本地 Python 3.10.11：`python -m pytest -q` → 265 passed，2 warnings，53 subtests passed。
+- Spine 专项：`python -m pytest tests/test_spine_spike.py` → 9 passed。
+- 扩展行为：`node --test tests\\extension.test.cjs` → 3 passed。
+- `python -m compileall -q .` 与 `git diff --check` 通过。
+- 本次文档修订前的代码检查点为 `137b931`，对应 CI run `34115112516`；文档提交后的最终 head 与 CI 必须重新查询，不能在此处自引用未来提交。
+
 ## 本次已完成
 
 - [x] 新增独立 `SpineEvidenceReport`，把预检查和真实运行结果分开。
