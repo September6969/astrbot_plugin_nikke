@@ -1,5 +1,6 @@
 """只用合成 MP3 头与 mock 网络，验证映射、并发、缓存和失败降级。"""
 import asyncio
+import json
 import tempfile
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
@@ -23,6 +24,11 @@ class VoiceResourceTests(IsolatedAsyncioTestCase):
             results = await asyncio.gather(*(provider.resolve("fixture", "synthetic_line", "en") for _ in range(5)))
             self.assertEqual(len(calls), 2)
             self.assertTrue(all(path == results[0] for path in results))
+            self.assertIsNotNone(results[0])
+            manifest = next(Path(directory, "source").glob("*.json"))
+            saved = json.loads(manifest.read_text(encoding="utf-8"))
+            self.assertEqual(saved["map_key"], "fixture")
+            self.assertEqual(saved["source_path"], "/voice/en/synthetic_line.mp3")
             await provider.close()
             restarted = VoiceResourceProvider(Path(directory), transport=httpx.MockTransport(handle))
             self.assertEqual(await restarted.resolve("fixture", "synthetic_line", "en"), results[0])

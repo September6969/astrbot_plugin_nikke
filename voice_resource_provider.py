@@ -69,15 +69,18 @@ class VoiceResourceProvider:
                 content = await self._read(client, f"/voice/{locale}/{speech_id}.mp3", self.MAX_BYTES)
             if not self.is_mp3(content):
                 raise ValueError("响应不是 MP3 音频")
-            temporary = target.with_name(uuid.uuid4().hex + ".tmp")
+            content_temporary = target.with_name(uuid.uuid4().hex + ".tmp")
+            manifest_temporary = manifest.with_name(uuid.uuid4().hex + ".tmp")
             try:
-                temporary.write_bytes(content)
-                temporary.replace(target)
-                temporary.write_text(json.dumps({"sha256": hashlib.sha256(content).hexdigest(),
+                # 内容与清单分别原子替换，避免内容替换后临时路径消失导致清单写入失败。
+                content_temporary.write_bytes(content)
+                content_temporary.replace(target)
+                manifest_temporary.write_text(json.dumps({"sha256": hashlib.sha256(content).hexdigest(),
                     "source_path": f"/voice/{locale}/{speech_id}.mp3", "map_key": map_key}), encoding="utf-8")
-                temporary.replace(manifest)
+                manifest_temporary.replace(manifest)
             finally:
-                temporary.unlink(missing_ok=True)
+                content_temporary.unlink(missing_ok=True)
+                manifest_temporary.unlink(missing_ok=True)
             return target
 
     @staticmethod
