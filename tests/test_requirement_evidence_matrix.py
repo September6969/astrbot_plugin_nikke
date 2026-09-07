@@ -55,3 +55,16 @@ def test_matrix_explicitly_preserves_evidence_boundaries() -> None:
     assert "不视为已进入主线" in text
     assert "没有执行真实账号读取" in text
     assert "不能替代真实账号响应" in text
+
+
+def test_each_requirement_row_has_all_evidence_columns() -> None:
+    path = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    rows = [line for line in path.read_text(encoding="utf-8").splitlines() if line.startswith("| REQ-")]
+
+    assert len(rows) == len(REQUIRED_IDS)
+    for row in rows:
+        cells = row[1:-1].split(" | ")
+        assert len(cells) == 7
+        requirement_id, *evidence_columns = [cell.strip() for cell in cells]
+        assert requirement_id in REQUIRED_IDS
+        assert all(evidence_columns)

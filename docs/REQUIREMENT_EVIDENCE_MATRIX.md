@@ -11,6 +11,7 @@
 - `SYNTHETIC_VERIFIED`：有离线合成响应、行为测试或渲染检查。
 - `READY_OFFLINE`：当前离线合同和测试达到本阶段可交付边界。
 - `DRAFT_PENDING_REVIEW`：证据只存在于独立 Draft PR，不能写入主线完成度。
+- `PARTIAL`：主线只有部分字段、映射或框架，不能视为完整需求合同。
 - `NEEDS_LIVE_EVIDENCE`：需要授权现场数据、真实账号、真实送达或真实状态变化。
 - `NEEDS_HUMAN_DECISION`：需要人工决定许可、生产迁移、部署或有价值数据消费。
 - `DEFERRED_BY_USER`：路线图明确暂缓，不作为当前 release 阻塞项。
