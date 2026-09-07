@@ -44,6 +44,7 @@
 | #35 | `feat/daily-result-contract-v1` | Structured DailyTaskResult status contract | OPEN / Draft / CI green；head `df7fa7f`；CI `34137301772` |
 | #36 | `feat/daily-auto-per-account-v1` | Per-account daily automation preference | OPEN / Draft / CI green；head `0ba8b5d`；CI `34138915642` |
 | #37 | `feat/asset-global-concurrency-v1` | AssetManager global remote-download limit | OPEN / Draft / CI green；head `244ba06`；CI `34140238453` |
+| #38 | `feat/asset-prefetch-lifecycle-v1` | AssetManager bounded prefetch lifecycle | OPEN / Draft / CI running；head `85d1b85`；CI `34141290303` |
 
 ## 当前推进
 
@@ -59,6 +60,7 @@
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager；同一张卡片内相同 `(tid, resource_id)` 的 portrait 只解析一次；本地 pytest 258 passed、专项 33 passed、Node 3 passed、compileall/diff check 通过；已实际查看 1400×820 合成 Campaign 预览；head `a09493b`；CI `34116765420` 全绿；不宣称全局 N+1 已消除或真实资源联调 |
 | AssetManager request dedup | `feat/asset-request-dedup-v2` | `bada0b3` | Draft PR #17；同一缓存键 5 个并发调用只发 1 次模拟请求；下载成功但原子缓存写入失败时，等待者复用同一内存图片；本地 pytest 258 passed、专项 35 passed、Node 3 passed、compileall/diff check 通过；head `e2d709f`；CI `34117403120` 全绿；仍不宣称全局 N+1、真实资源或账号证据 |
 | AssetManager global remote-download limit | `feat/asset-global-concurrency-v1` | `bada0b3` | Draft PR #37；公共 HTTPS 素材下载跨 `AssetManager` 实例共享四槽非阻塞限额，缓存命中不占槽；满额立即走既有 fallback，且不写入失败冷却；离线专项 12 passed、全量 pytest 258 passed、43 subtests、2 warnings、compileall/diff check 通过；当前 main 无可运行 Node 测试文件；head `244ba06`；CI `34140238453` 四项全绿；与 PR #17 同属资源子系统但不替代其同键 single-flight，合并时需协调 `asset_manager.py`；未访问远端素材、账号或消息，也未宣称 Pillow/Spine/生产多群负载证据 |
+| AssetManager bounded prefetch lifecycle | `feat/asset-prefetch-lifecycle-v1` | `bada0b3` | Draft PR #38；角色卡预取在每个 `AssetManager` 限为 16 项，满额不提交任务而直接 fallback；预算到期取消尚未启动的 future，已运行线程只能保留底层 I/O timeout 边界；离线专项 12 passed、全量 pytest 258 passed、43 subtests、2 warnings、compileall/diff check 通过；当前 main 无可运行 Node 测试文件；head `85d1b85`；CI `34141290303` 运行中；与 PR #17/#37 均修改 `asset_manager.py`，合并时需协调；未访问远端素材、账号或消息，也未宣称已强杀运行中线程、Pillow/Spine 或真实多群负载证据 |
 | Daily Evidence sign-in recovery | `feat/daily-evidence-p1` | `bada0b3` | Draft PR #18；intent 先于读取，running/unknown 只读恢复，未确认进入 unknown、Cookie 失效进入 expired；执行中取消也将已持有 daily/signin intent 收敛为 unknown 后继续传播取消；本地专项 10 passed、全量 pytest 261 passed、Node 3 passed、compileall/diff check 通过；head `b7b19f3`；CI `34118342055` 全绿；不宣称 Like/Browse 或真实账号证据 |
 | SQLite connection lifecycle | `feat/storage-connection-lifecycle` | `bada0b3` | Draft PR #19；每次存储操作成功提交、异常回滚并明确关闭连接；新增异常回滚/原异常传播/连接关闭行为测试；本地专项 28 passed、全量 pytest 258 passed、Node 3 passed、compileall/diff check 通过；head `0e9d323`；CI `34119004278` 全绿 |
 | Runtime config hardening | `feat/runtime-config-hardening` | `bada0b3` | Draft PR #20；非法数值配置和损坏持久化调度字段按合同回退，不让调度循环退出；head `375498c`；CI `34102399018` 全绿 |
