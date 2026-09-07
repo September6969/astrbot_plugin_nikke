@@ -35,6 +35,7 @@
 | #26 | `feat/log-privacy-v1` | Plugin log privacy hardening | OPEN / Draft / CI green；head `87e63e4`；CI `34108218451` |
 | #27 | `feat/cache-cleanup-v1` | Safe offline cache cleanup | OPEN / Draft / CI green；head `bb94d18`；CI `34108821103` |
 | #28 | `feat/release-metadata-v1` | Release metadata and configuration contract | OPEN / Draft / CI green；head `1f379d6`；CI `34109454981` |
+| #29 | `feat/caddy-hardening-v1` | Caddy example privacy hardening | OPEN / Draft / CI green；head `160cb25`；CI `34110061494` |
 
 ## 当前推进
 
@@ -56,12 +57,13 @@
 | Plugin log privacy | `feat/log-privacy-v1` | `bada0b3` | Draft PR #26；统一异常/动态日志文本脱敏，覆盖主流程、公告、素材、卡片、Spine、反馈与绑定错误摘要；head `87e63e4`；CI `34108218451` 全绿；本地专项测试与静态审计通过，完整本地矩阵缺少 `astrbot` 依赖；无真实账号/部署声明 |
 | Safe offline cache cleanup | `feat/cache-cleanup-v1` | `bada0b3` | Draft PR #27；默认只读计划，显式 `--apply` 仅清理白名单缓存和公告缓存，保护 cards/SQLite/secret.key/扩展 ZIP 并跳过符号链接；head `bb94d18`；CI `34108821103` 全绿；本地 pytest 259 passed、Node 3 passed；未在真实 data/nikke 应用清理 |
 | Release metadata and configuration | `feat/release-metadata-v1` | `bada0b3` | Draft PR #28；新增当前 main 基线 `0.1.8` CHANGELOG、14 项配置合同及版本/schema/文档一致性测试；head `1f379d6`；CI `34109454981` 全绿；本地 pytest 259 passed、57 subtests、Node 3 passed；未创建发行包或部署 |
+| Caddy example privacy | `feat/caddy-hardening-v1` | `bada0b3` | Draft PR #29；关闭示例 access log，避免 `/bind/{token}` 令牌进入反代日志；静态验证安全头、只读挂载、外部网络及无 6210 宿主机映射；head `160cb25`；CI `34110061494` 全绿；本地 pytest 258 passed、48 subtests、Node 3 passed；未部署 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
 
 ## 任务池
 
-- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；Safe offline cache cleanup / PR #27；Release metadata and configuration / PR #28；其余已创建 Draft PR。
+- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；Safe offline cache cleanup / PR #27；Release metadata and configuration / PR #28；Caddy example privacy / PR #29；其余已创建 Draft PR。
 - `READY`：在不依赖上述未合并分支的前提下，继续做可离线验证的独立主题。
 - `WAITING_DEPENDENCY`：Raid Increment B/C 等待相关基线进入 `main`；不从旧 overnight 分支继续开发。
 - `NEEDS_LIVE_EVIDENCE`：真实 Profile、Raid canonical identity、Daily Like/Browse 写入、Voice QQ 实际播放、Spine 生产许可/运行时。

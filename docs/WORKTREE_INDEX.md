@@ -28,6 +28,7 @@
 | `E:\_codex_work\log-privacy-v1-wt\astrbot_plugin_nikke` | `feat/log-privacy-v1` | Plugin log privacy hardening | Draft PR #26；head `87e63e4`；CI `34108218451`；工作树 clean |
 | `E:\_codex_work\cache-cleanup-v1-wt\astrbot_plugin_nikke` | `feat/cache-cleanup-v1` | Safe offline cache cleanup | Draft PR #27；head `bb94d18`；CI `34108821103`；工作树 clean |
 | `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1f379d6`；CI `34109454981`；工作树 clean |
+| `E:\_codex_work\caddy-hardening-v1-wt\astrbot_plugin_nikke` | `feat/caddy-hardening-v1` | Caddy example privacy hardening | Draft PR #29；head `160cb25`；CI `34110061494`；工作树 clean |
 
 ## 协作规则
 
