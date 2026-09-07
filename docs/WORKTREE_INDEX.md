@@ -29,7 +29,7 @@
 | `E:\_codex_work\cache-cleanup-v1-wt\astrbot_plugin_nikke` | `feat/cache-cleanup-v1` | Safe offline cache cleanup | Draft PR #27；head `bb94d18`；CI `34108821103`；工作树 clean |
 | `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1f379d6`；CI `34109454981`；工作树 clean |
 | `E:\_codex_work\caddy-hardening-v1-wt\astrbot_plugin_nikke` | `feat/caddy-hardening-v1` | Caddy example privacy hardening | Draft PR #29；head `160cb25`；CI `34110061494`；工作树 clean |
-| `E:\_codex_work\upgrade-preflight-v1-wt\astrbot_plugin_nikke` | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | Draft PR #30；head `e9bf5eb`；CI `34110890912` 待定；工作树 clean |
+| `E:\_codex_work\upgrade-preflight-v1-wt\astrbot_plugin_nikke` | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | Draft PR #30；head `e9bf5eb`；CI `34110890912` 全绿；工作树 clean |
 
 ## 协作规则
 

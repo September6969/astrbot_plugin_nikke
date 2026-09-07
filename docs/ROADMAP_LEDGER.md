@@ -36,7 +36,7 @@
 | #27 | `feat/cache-cleanup-v1` | Safe offline cache cleanup | OPEN / Draft / CI green；head `bb94d18`；CI `34108821103` |
 | #28 | `feat/release-metadata-v1` | Release metadata and configuration contract | OPEN / Draft / CI green；head `1f379d6`；CI `34109454981` |
 | #29 | `feat/caddy-hardening-v1` | Caddy example privacy hardening | OPEN / Draft / CI green；head `160cb25`；CI `34110061494` |
-| #30 | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | OPEN / Draft / CI pending；head `e9bf5eb`；CI `34110890912` |
+| #30 | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | OPEN / Draft / CI green；head `e9bf5eb`；CI `34110890912` |
 
 ## 当前推进
 
@@ -59,7 +59,7 @@
 | Safe offline cache cleanup | `feat/cache-cleanup-v1` | `bada0b3` | Draft PR #27；默认只读计划，显式 `--apply` 仅清理白名单缓存和公告缓存，保护 cards/SQLite/secret.key/扩展 ZIP 并跳过符号链接；head `bb94d18`；CI `34108821103` 全绿；本地 pytest 259 passed、Node 3 passed；未在真实 data/nikke 应用清理 |
 | Release metadata and configuration | `feat/release-metadata-v1` | `bada0b3` | Draft PR #28；新增当前 main 基线 `0.1.8` CHANGELOG、14 项配置合同及版本/schema/文档一致性测试；head `1f379d6`；CI `34109454981` 全绿；本地 pytest 259 passed、57 subtests、Node 3 passed；未创建发行包或部署 |
 | Caddy example privacy | `feat/caddy-hardening-v1` | `bada0b3` | Draft PR #29；关闭示例 access log，避免 `/bind/{token}` 令牌进入反代日志；静态验证安全头、只读挂载、外部网络及无 6210 宿主机映射；head `160cb25`；CI `34110061494` 全绿；本地 pytest 258 passed、48 subtests、Node 3 passed；未部署 |
-| Upgrade/rollback preflight | `feat/upgrade-preflight-v1` | `bada0b3` | Draft PR #30；只读检查 SQLite integrity/schema、数据库与 `secret.key` 成对存在、可选备份集和磁盘余量，输出 READY/MIGRATION_REQUIRED/BLOCKED；head `e9bf5eb`；CI `34110890912` 待定；本地 pytest 263 passed、43 subtests、Node 3 passed；不执行迁移/回滚/复制/删除/生产写入 |
+| Upgrade/rollback preflight | `feat/upgrade-preflight-v1` | `bada0b3` | Draft PR #30；只读检查 SQLite integrity/schema、数据库与 `secret.key` 成对存在、可选备份集和磁盘余量，输出 READY/MIGRATION_REQUIRED/BLOCKED；head `e9bf5eb`；CI `34110890912` 全绿；本地 pytest 263 passed、43 subtests、Node 3 passed；不执行迁移/回滚/复制/删除/生产写入 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
 
