@@ -52,6 +52,8 @@
 6. **不要**把 `6210`、AstrBot 后台或 NapCat 后台直接映射到公网。
 7. 在 QQ 中发送 `/妮姬 帮助`，再私聊发送 `/妮姬 账号 绑定` 完成绑定。
 
+启动时会在本地 SQLite 事务中执行兼容 schema migration；检测到更高版本 schema 会拒绝启动，不会自动降级或覆盖数据。真实生产数据库迁移仍需人工授权和备份。
+
 若绑定域名在本地代理下出现 `SSL_connect error 5`，可从 [GitHub Releases](https://github.com/September6969/astrbot_plugin_nikke/releases) 下载同一扩展包；不要关闭浏览器证书校验。
 
 仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。
