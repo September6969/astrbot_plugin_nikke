@@ -32,6 +32,7 @@ from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from .character_card_renderer import CharacterCardRenderer
 from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
+from .daily_models import DailyTaskResult, DailyTaskStatus
 from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
@@ -807,55 +808,85 @@ class NikkePlugin(Star):
         path = self.renderer.render(item.get("name_cn") or item.get("name_en") or name, "妮姬基础资料", rows)
         yield event.image_result(path)
 
-    async def _run_daily_for_account(self, account: dict, day: str) -> tuple[str, str]:
+    @staticmethod
+    def _daily_error_result(account_name: str, prefix: str, exc: Exception) -> DailyTaskResult:
+        """把异常映射到保守状态，避免所有异常都显示为泛化失败。"""
+        message = str(exc)
+        code = str(getattr(exc, "code", ""))
+        if code in {"212000", "429"} or "请求过频" in message or "限流" in message:
+            return DailyTaskResult(account_name, DailyTaskStatus.RATE_LIMITED, f"{prefix}请求受到频控，请稍后再试")
+        return DailyTaskResult(account_name, DailyTaskStatus.FAILED, f"{prefix}失败：{type(exc).__name__}")
+
+    async def _run_daily_for_account(self, account: dict, day: str) -> DailyTaskResult:
         qq_id = str(account["qq_id"])
+        account_name = str(account.get("nickname") or qq_id)
         run_key = f"{day}:{qq_id}:daily"
         if not self.store.claim_run(run_key, qq_id, "daily"):
-            return account.get("nickname") or qq_id, "今日已执行"
+            existing = self.store.get_run(run_key)
+            existing_status = str(existing.get("status", "")) if existing else ""
+            if existing_status in {"running", "unknown"}:
+                return DailyTaskResult(
+                    account_name,
+                    DailyTaskStatus.UNKNOWN_AFTER_ACTION,
+                    "今日签到结果未确认，请先查询状态；未自动重发",
+                )
+            if existing_status in {"failed", "expired"}:
+                return DailyTaskResult(
+                    account_name,
+                    DailyTaskStatus.FAILED,
+                    "今日签到已有失败记录，未自动重发",
+                )
+            return DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "今日已执行")
+        result: DailyTaskResult
         try:
             await self.client.get_profile(account)
-            if bool(self.config.get("enable_daily_actions", False)):
+            status = await self.client.get_daily_signin(account)
+            if not status["found"]:
+                result = DailyTaskResult(account_name, DailyTaskStatus.UNAVAILABLE, "登录有效；未找到签到任务")
+            elif status["completed"]:
+                result = DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "登录有效；今日已经签到")
+            elif not bool(self.config.get("enable_daily_actions", False)):
+                result = DailyTaskResult(
+                    account_name,
+                    DailyTaskStatus.PENDING,
+                    "登录有效；自动签到未启用；当前今日待签到",
+                )
+            else:
                 signin_key = f"{day}:{qq_id}:signin"
-                status = await self.client.get_daily_signin(account)
-                if not status["found"]:
-                    detail = "登录有效；未找到签到任务"
-                elif status["completed"]:
-                    detail = "登录有效；今日已经签到"
-                elif self.store.claim_run(signin_key, qq_id, "signin"):
+                if not self.store.claim_run(signin_key, qq_id, "signin"):
+                    result = DailyTaskResult(
+                        account_name,
+                        DailyTaskStatus.UNKNOWN_AFTER_ACTION,
+                        "登录有效；签到已执行或正在执行，结果未确认",
+                    )
+                else:
                     try:
                         detail = "登录有效；" + await self.client.perform_daily_signin(account)
                         self.store.finish_run(signin_key, "success", detail)
+                        result = DailyTaskResult(account_name, DailyTaskStatus.SUCCESS, detail)
                     except UnknownAfterAction:
                         self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
+                        result = DailyTaskResult(
+                            account_name,
+                            DailyTaskStatus.UNKNOWN_AFTER_ACTION,
+                            "签到结果未确认，请稍后查询状态；未自动重发",
+                        )
+                    except CookieExpired:
+                        self.store.finish_run(signin_key, "expired", "登录状态已失效")
                         raise
                     except Exception as exc:
-                        self.store.finish_run(signin_key, "failed", type(exc).__name__)
-                        raise
-                else:
-                    detail = "登录有效；签到已执行或正在执行"
-            else:
-                try:
-                    status = await self.client.get_daily_signin(account)
-                    signin = "已签到" if status["completed"] else "待签到" if status["found"] else "未找到签到任务"
-                    detail = f"登录有效；自动签到未启用；当前{signin}"
-                except BlaBlaError as exc:
-                    detail = f"登录有效；自动签到未启用；{exc}"
-            self.store.finish_run(run_key, "success", detail)
-            return account.get("nickname") or qq_id, detail
+                        mapped = self._daily_error_result(account_name, "登录有效；签到", exc)
+                        self.store.finish_run(signin_key, mapped.run_status, mapped.detail)
+                        result = mapped
         except CookieExpired:
             self.store.mark_cookie_invalid(qq_id)
-            self.store.finish_run(run_key, "expired", "Cookie失效")
-            return account.get("nickname") or qq_id, "Cookie失效，请重新绑定"
+            result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
         except Exception as exc:
-            if isinstance(exc, UnknownAfterAction):
-                detail = "签到结果未确认，请稍后查询状态；未自动重发"
-                self.store.finish_run(run_key, "unknown", detail)
-                return account.get("nickname") or qq_id, detail
-            detail = f"失败：{type(exc).__name__}"
-            self.store.finish_run(run_key, "failed", detail)
-            return account.get("nickname") or qq_id, detail
+            result = self._daily_error_result(account_name, "登录状态检查", exc)
+        self.store.finish_run(run_key, result.run_status, result.detail)
+        return result
 
-    async def _run_all_daily(self, day: str, stagger: bool = False) -> list[tuple[str, str]]:
+    async def _run_all_daily(self, day: str, stagger: bool = False) -> list[DailyTaskResult]:
         accounts = self.store.list_accounts(push_only=True, with_cookie=True)
         semaphore = asyncio.Semaphore(max(1, int(self.config.get("max_concurrency", 2))))
 
@@ -866,7 +897,7 @@ class NikkePlugin(Star):
                 return await self._run_daily_for_account(account, day)
 
         results = await asyncio.gather(*(run(account) for account in accounts))
-        self.store.set_setting(f"daily_results:{day}", results)
+        self.store.set_setting(f"daily_results:{day}", [result.to_storage() for result in results])
         return results
 
     async def _send_summary(self, day: str) -> None:
@@ -874,10 +905,11 @@ class NikkePlugin(Star):
         if not group_umo:
             logger.warning("[NIKKE] 尚未配置每日汇总群")
             return
-        results = self.store.get_setting(f"daily_results:{day}", [])
-        if not results:
+        stored = self.store.get_setting(f"daily_results:{day}", [])
+        results = [DailyTaskResult.from_storage(item) for item in stored] if isinstance(stored, list) else []
+        if not results or any(result is None for result in results):
             results = await self._run_all_daily(day)
-        path = self.renderer.render_summary([(str(a), str(b)) for a, b in results])
+        path = self.renderer.render_summary([result.summary_row() for result in results])
         await self.context.send_message(group_umo, MessageChain([Image.fromFileSystem(path)]))
 
     async def _daily_status(self, event: AstrMessageEvent):
@@ -887,12 +919,12 @@ class NikkePlugin(Star):
             await self.client.get_profile(account)
             status = await self.client.get_daily_signin(account)
             if not status["found"]:
-                detail = "未找到签到任务"
+                result = DailyTaskResult("", DailyTaskStatus.UNAVAILABLE, "未找到签到任务")
             elif status["completed"]:
-                detail = "今日已签到"
+                result = DailyTaskResult("", DailyTaskStatus.ALREADY_DONE, "今日已签到")
             else:
-                detail = "今日待签到"
-            yield event.plain_result(detail)
+                result = DailyTaskResult("", DailyTaskStatus.PENDING, "今日待签到")
+            yield event.plain_result(result.detail)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
@@ -914,8 +946,8 @@ class NikkePlugin(Star):
             return
         try:
             account = self._account_or_error(event)
-            name, detail = await self._run_daily_for_account(account, datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d"))
-            yield event.plain_result(f"{name}：{detail}")
+            result = await self._run_daily_for_account(account, datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d"))
+            yield event.plain_result(f"{result.account_name}：{result.detail}")
         except Exception as exc:
             yield event.plain_result(f"签到失败：{exc}")
 

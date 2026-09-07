@@ -331,7 +331,7 @@ evidence/
 | CDK 批量 | `PARTIAL` | 串行/账号锁已有；未复用 action_runs 持久幂等 |
 | 公告/日程查询 | `PARTIAL + DEBT` | 缓存/解析/查询可用；正式源和版本逻辑有债 |
 | 公告自动推送 | `TODO` | 去重基础有，目标订阅/调度发送未完成 |
-| 社区签到 | `PARTIAL + SAFETY DEBT` | 写接口与写后查询已有；模糊超时后可能再次提交 |
+| 社区签到 | `PARTIAL / READY_OFFLINE` | `DailyTaskResult` 状态合同、写后未知不重放和 Cookie/限流/不可用语义已有离线证据；真实账号与 Like/Browse 仍待现场证据 |
 | 点赞/浏览日常 | `TODO` | 未实现 |
 | AssetManager | `PARTIAL` | 静态资源链完整度较高，资源映射仍不全 |
 | Spine | `SPIKE` | 队列/版本/cache 骨架有，真实 render 仍返回 None |
@@ -3200,7 +3200,7 @@ RESULT_UNKNOWN
 
 ### A-DAILY-01：统一 DailyTaskResult 状态机
 
-状态：`TODO`
+状态：`IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / NEEDS_LIVE_EVIDENCE`
 
 至少：
 
@@ -3213,6 +3213,8 @@ COOKIE_EXPIRED
 UNKNOWN_AFTER_ACTION
 UNAVAILABLE
 ```
+
+当前签到主链已将上述状态及 `PENDING` 映射到 `DailyTaskResult`；结果汇总使用 JSON-safe 记录，损坏或旧格式记录不会静默冒充成功。真实账号响应和 Like/Browse 仍不在本合同范围内。
 
 ### A-DAILY-02：签到模糊写结果安全化
 
