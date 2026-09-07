@@ -18,7 +18,7 @@ from pathlib import Path
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.message_components import Image, Plain
-from astrbot.api.star import Context, Star, register
+from astrbot.api.star import Context, Star
 
 from ._version import PLUGIN_VERSION
 from .announcement_service import AnnouncementService
@@ -43,13 +43,6 @@ from .voice_feedback import VoiceResolver
 from .web_service import BindingWebService
 
 
-@register(
-    "astrbot_plugin_nikke",
-    "September",
-    "NIKKE BlaBlaLink 账号练度、资料查询与每日汇总",
-    PLUGIN_VERSION,
-    "https://github.com/September6969/astrbot_plugin_nikke",
-)
 class NikkePlugin(Star):
     def __init__(self, context: Context, config=None):
         super().__init__(context)
