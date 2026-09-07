@@ -20,6 +20,7 @@
 - `sync_from_source()` 成功完成后自动执行有界缓存清理；旧缓存缺少 `last_changed_at` 时从迁移时刻安全初始化并落盘，无法解析的时间仍保留，不作危险删除。
 - 内容指纹覆盖 title、正文、category、locale；已见旧指纹重放不会回滚新版本或日程。未见新指纹仅按到达顺序升级，并把来源顺序标记为 unknown。
 - 修复既有 BlaBlaLink 回退循环缩进：多条公开记录不再只保留最后一条。
+- 深度读取辅助函数不再回退到旧源；稳定 ID、标题、正文和发布时间的非文本/空值会被拒绝入库。
 
 ## 测试与预览
 
@@ -28,11 +29,14 @@
 ```text
 python -m compileall -q .                                      PASS
 pytest tests/test_announcement_cache_lifecycle.py              10 passed
-pytest tests/test_announcement_v2.py (核心回归)                 16 passed, 2 deselected
+pytest tests/test_announcement_v2.py (核心回归)                 18 passed, 2 deselected
 pytest tests/test_announcements.py                              15 passed, 24 subtests
+pytest tests/test_announcement_versions.py                       2 passed
 node --test tests/extension.test.cjs                            3 passed
 git diff --check                                                PASS
 ```
+
+当前同一源码全量回归：`276 passed, 2 warnings, 49 subtests`；`compileall` 通过。
 
 新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放和新指纹刷新（10 项行为测试）。
 
@@ -40,7 +44,7 @@ git diff --check                                                PASS
 
 ## 当前交接状态
 
-- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前 head 为包含验收记录的 `ce3591f383aff8892f0ce1f6ca6463372388a6f5`；核心实现提交为其父提交 `ea66f16a79d2538556355c6317f1fa67a2151585`。
-- 当前 [CI run 34095787305](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34095787305) 的 headSha 与 PR 当前 head 一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。后续再提交文档时必须重新等待新 head 的 CI。
+- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前 head 为 `c12199aa9ad8341174dd3de516af451d87f8aaa4`。
+- 当前 [CI run 34114239332](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34114239332) 的 headSha 与 PR 当前 head 一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。
 - `NEEDS_LIVE_EVIDENCE`：获授权时才可验证公开 CMS 当前响应和真实 AstrBot 运行环境；本次不执行。
 - `HARD_BLOCKED`：无。
