@@ -122,6 +122,20 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         self.assertEqual(record.status, ClearLineupStatus.ERROR)
         self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
 
+    def test_response_code_must_be_a_non_boolean_integer(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 120000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+        ]
+        for code in (False, 0.0, "0"):
+            with self.subTest(code=code):
+                record = self.builder.build(self.stage, {"code": code, "data": {"list": raw_list}})
+                self.assertEqual(record.status, ClearLineupStatus.ERROR)
+                self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
+
     def test_non_list_data_is_structurally_invalid(self):
         for data in (None, {}, {"list": {"tid": 101}}):
             with self.subTest(data=data):
