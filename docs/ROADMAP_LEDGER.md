@@ -40,6 +40,7 @@
 | #31 | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | OPEN / Draft / CI green；head `369cc98`；CI `34112221252` |
 | #32 | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | OPEN / Draft / CI green；head `eede5ab`；CI `34127584276` |
 | #33 | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | OPEN / Draft / CI green；head `d3e6eda`；CI `34135057986` |
+| #34 | `feat/cdk-batch-contract-v1` | CDK batch idempotency contract reconciliation | OPEN / Draft / CI green；head `c0f1e65`；CI `34135996980` |
 
 ## 当前推进
 
@@ -47,6 +48,7 @@
 | --- | --- | --- | --- |
 | Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；当前 head 与 CI 以 PR #14 检查为权威 |
 | Post-Profile V2 status reconciliation | `feat/profile-post-merge-v1` | `bada0b3` | Draft PR #33；仅同步 `PROFILE_V2_ACCEPTANCE.md`：记录 PR #7 已合并到当前 main，更新当前基线与重跑证据，删除未来 Draft PR 交接文字；本地定向 35 passed、全量 pytest 256 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；CI `34135057986` 四项全绿；不访问真实账号、不部署 |
+| CDK batch idempotency contract reconciliation | `feat/cdk-batch-contract-v1` | `bada0b3` | Draft PR #34；确认主命令逐码复用 `action_runs`，run key 为 `cdk:{qq_id}:{game_uid}:{SHA256(code)}`，unknown/终态不自动重放，失败/过期可原子重领；更新 README/DEVELOPMENT_PLAN 并新增验收记录；本地专项 42 passed、12 subtests，全量 pytest 256 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；CI `34135996980` 四项全绿；未访问真实账号、未执行兑换或部署 |
 | Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；有界深度重扫、locale/category/query、旧文版本/乱序、`last_changed_at` 自动清理与安全迁移；版本字段严格为正整数，损坏缓存不静默截断；head `84f5032`；本地主题回归 39 passed、42 subtests，全量 pytest 278 passed、61 subtests、Node 3 passed、compileall/diff check 通过；CI `34120996910` 全绿；未访问真实 CMS、账号或发送消息 |
 | Campaign History numeric contract | `feat/campaign-history-contract-v2` | `bada0b3` | Draft PR #15；严格 tid/lv/combat/slot 数值与槽位合同；非映射响应、缺失/非列表 `data.list`、非五人列表返回 ERROR，明确空列表保持 UNAVAILABLE，并对超长列表提前失败；本地定向 28 passed、3 subtests，全量 pytest 263 passed、46 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；已实际查看 1400×820 合成 NORMAL 46-40 预览；head `6a6a641`；CI `34134245113` 四项全绿；不访问真实账号或宣称真实联调/资源授权 |
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager；同一张卡片内相同 `(tid, resource_id)` 的 portrait 只解析一次；本地 pytest 258 passed、专项 33 passed、Node 3 passed、compileall/diff check 通过；已实际查看 1400×820 合成 Campaign 预览；head `a09493b`；CI `34116765420` 全绿；不宣称全局 N+1 已消除或真实资源联调 |
@@ -77,7 +79,7 @@
 
 ## 任务池
 
-- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；Safe offline cache cleanup / PR #27；Release metadata and configuration / PR #28；Caddy example privacy / PR #29；Upgrade/rollback preflight / PR #30；Tower snapshot contract / PR #32；Post-Profile V2 status reconciliation / PR #33；其余已创建 Draft PR。
+- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；Safe offline cache cleanup / PR #27；Release metadata and configuration / PR #28；Caddy example privacy / PR #29；Upgrade/rollback preflight / PR #30；Tower snapshot contract / PR #32；Post-Profile V2 status reconciliation / PR #33；CDK batch idempotency contract reconciliation / PR #34；其余已创建 Draft PR。
 - `READY`：在不依赖上述未合并分支的前提下，继续做可离线验证的独立主题。
 - `WAITING_DEPENDENCY`：Raid Increment B/C 等待相关基线进入 `main`；不从旧 overnight 分支继续开发。
 - `NEEDS_LIVE_EVIDENCE`：真实 Profile、Raid canonical identity、Daily Like/Browse 写入、Voice QQ 实际播放、Spine 生产许可/运行时。

@@ -33,6 +33,7 @@
 | `E:\_codex_work\requirement-evidence-matrix-v1-wt\astrbot_plugin_nikke` | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | Draft PR #31；head `369cc98`；CI `34112221252` 全绿；工作树 clean |
 | `E:\_codex_work\tower-snapshot-contract-v1\astrbot_plugin_nikke` | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | Draft PR #32；head `eede5ab`；CI `34127584276` 全绿；工作树 clean |
 | `E:\_codex_work\profile-post-merge-v1\astrbot_plugin_nikke` | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | Draft PR #33；head `d3e6eda`；CI `34135057986` 四项全绿；工作树 clean |
+| `E:\_codex_work\cdk-batch-contract-v1\astrbot_plugin_nikke` | `feat/cdk-batch-contract-v1` | CDK batch idempotency contract reconciliation | Draft PR #34；head `c0f1e65`；CI `34135996980` 四项全绿；工作树 clean |
 
 ## 协作规则
 
