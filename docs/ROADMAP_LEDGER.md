@@ -27,3 +27,15 @@
 ## 后续选择规则
 
 Announcement V2 本地验收后应创建 Draft PR 并等待最终 head 对应的 CI。PR #8 和本主题独立推进；任何一个等待审阅或缺少 live evidence 都不阻塞另一个已获授权主题。下一主题仅在两项验收状态写清后再选，不自动合并、部署、改 ruleset 或删除分支。
+
+## Task pool（本检查点后的选择）
+
+| 主题 | 状态 / 最小前置条件 | 当前动作 |
+| --- | --- | --- |
+| Announcement V2 Increment A | PR #9 Draft，最终 head CI 已绿 | 等待人工审阅；不自动 merge |
+| Union Raid Increment A | PR #8 Draft，最终 head CI 已绿 | 等待人工审阅；不重写其功能代码 |
+| Union Raid B：历史赛季 | 只有 PR #8 合并后，才从当时最新 `origin/main` 独立创建；不依赖 identity | 条件未满足，不创建分支 |
+| Union Raid C：canonical identity | 需要授权的真实响应证据 | NEEDS_LIVE_EVIDENCE |
+| Profile / Announcement 真实联调 | 需要明确授权的真实账号或公开源读取范围 | NEEDS_LIVE_EVIDENCE；本次不执行 |
+
+当前没有被自动选定的下一个实现主题：两个已获授权的独立增量都已形成 Draft PR，后续选择应基于审阅/合并结果和用户授权，而不是把等待状态伪装成完成或擅自扩大范围。
