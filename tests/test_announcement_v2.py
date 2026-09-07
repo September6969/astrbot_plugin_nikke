@@ -42,6 +42,34 @@ def record(
 
 
 class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
+    def test_record_contract_rejects_non_text_core_fields(self) -> None:
+        service = AnnouncementService()
+        invalid_records = [
+            AnnouncementRecord(None, "标题", "正文", NOW.isoformat()),
+            AnnouncementRecord("   ", "标题", "正文", NOW.isoformat()),
+            AnnouncementRecord("none", "标题", "正文", NOW.isoformat()),
+            AnnouncementRecord("valid", None, "正文", NOW.isoformat()),
+            AnnouncementRecord("valid", "标题", None, NOW.isoformat()),
+            AnnouncementRecord("valid", "标题", "正文", None),
+        ]
+        for invalid in invalid_records:
+            with self.subTest(record=invalid):
+                with self.assertRaises(ValueError):
+                    service.add_or_update(invalid)
+
+    async def test_deep_fetch_primary_does_not_use_legacy_fallback(self) -> None:
+        with patch(
+            "astrbot_plugin_nikke.announcement_sources.InformationFeedsSource.fetch",
+            new=AsyncMock(side_effect=RuntimeError("主源不可用")),
+        ), patch.object(
+            AnnouncementService,
+            "fetch_official",
+            new=AsyncMock(return_value=[]),
+        ) as legacy:
+            with self.assertRaises(RuntimeError):
+                await AnnouncementService.fetch_primary(locale="ja", deep=True)
+            legacy.assert_not_awaited()
+
     async def test_deep_rescan_reports_bounded_scope_and_locale(self) -> None:
         service = AnnouncementService()
 

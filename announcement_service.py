@@ -267,6 +267,8 @@ class AnnouncementService:
     @classmethod
     def normalize_locale(cls, value: str | None, *, allow_und: bool = False) -> str:
         """只允许已验证的官网语言及缓存迁移值。"""
+        if value is not None and not isinstance(value, str):
+            raise ValueError("公告语言必须是文本")
         locale = (value or "en").strip().casefold()
         supported = cls.CACHE_LOCALES if allow_und else cls.SUPPORTED_LOCALES
         if locale not in supported:
@@ -282,7 +284,11 @@ class AnnouncementService:
 
     @classmethod
     def _normalize_category(cls, value: str | None) -> str | None:
-        if value is None or not value.strip():
+        if not isinstance(value, str):
+            if value is None:
+                return None
+            raise ValueError("公告分类必须是文本")
+        if not value.strip():
             return None
         category = cls.CATEGORY_ALIASES.get(value.strip().casefold(), value.strip().casefold())
         if len(category) > 32 or not re.fullmatch(r"[a-z0-9_-]+", category):
@@ -291,7 +297,11 @@ class AnnouncementService:
 
     @staticmethod
     def _normalize_query(value: str | None) -> str | None:
-        if value is None or not value.strip():
+        if not isinstance(value, str):
+            if value is None:
+                return None
+            raise ValueError("公告搜索词必须是文本")
+        if not value.strip():
             return None
         query = " ".join(value.split())
         if len(query) > 80:
@@ -493,6 +503,9 @@ class AnnouncementService:
                 page_size=(AnnouncementService.DEEP_PAGE_SIZE if deep else AnnouncementService.NORMAL_PAGE_SIZE),
             ).fetch()
         except Exception:
+            if deep:
+                # 深度范围必须由主 InformationFeeds 源确认，不能用旧回退源冒充完成。
+                raise
             # 主源失败继续尝试原有 MVP；两者失败由同步层保留磁盘缓存。
             return await AnnouncementService.fetch_official()
 
@@ -544,8 +557,15 @@ class AnnouncementService:
         """添加或更新公告。
         返回 (is_new, is_updated)。
         """
-        if not record.content_id or record.content_id.strip() in {"", "None"}:
+        if not isinstance(record.content_id, str):
+            raise ValueError("公告稳定 ID 必须是文本")
+        record.content_id = record.content_id.strip()
+        if not record.content_id or record.content_id.casefold() == "none":
             raise ValueError("公告缺少稳定 ID")
+        if not isinstance(record.title, str) or not isinstance(record.body, str):
+            raise ValueError("公告标题和正文必须是文本")
+        if not isinstance(record.published_at, str):
+            raise ValueError("公告发布时间必须是文本")
         record.locale = self.normalize_locale(record.locale, allow_und=True)
         existing = self._records.get(record.content_id)
         fingerprint = record.content_fingerprint
