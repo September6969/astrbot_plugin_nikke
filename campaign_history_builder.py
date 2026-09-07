@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .campaign_history_models import ClearLineupStatus, StageClearMember, StageClearRecord
@@ -23,8 +24,8 @@ def _strict_non_negative_int(value: Any) -> int:
         raise ValueError("布尔值不是数值字段")
     if isinstance(value, int):
         parsed = value
-    elif isinstance(value, str) and value.strip().isdigit():
-        parsed = int(value.strip())
+    elif isinstance(value, str) and re.fullmatch(r"[0-9]+", value, flags=re.ASCII):
+        parsed = int(value)
     else:
         raise ValueError("数值字段必须是整数")
     if parsed < 0:

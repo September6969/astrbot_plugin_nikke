@@ -2,6 +2,14 @@
 
 基线：`origin/main` `bada0b3aafcd7127d07ca40f554808b0433540f8`。
 
+## 当前验证检查点
+
+- 本地 Python 3.10.11：`python -m pytest -q` → 264 passed、2 warnings、50 subtests passed。
+- Campaign History 定向测试：`tests/test_campaign_history.py` → 29 passed、7 subtests passed。
+- `tid`、`lv`、`combat`、`slot` 的字符串值现在只接受 ASCII 十进制数字；首尾空白和显式正负号均返回结构错误。
+- `node --test tests\\extension.test.cjs` → 3 passed；`compileall -q .` 与 `git diff --check` 通过。
+- 本次代码修订前检查点为 `6a6a641`，对应 CI run `34134245113`；文档提交后的最终 head 与 CI 必须重新查询，不能在此处自引用未来提交。
+
 ## 本次变更
 
 - `tid`、`lv`、`combat`、`slot` 只接受 JSON 整数或十进制整数字符串。
@@ -13,8 +21,8 @@
 
 ## 验证
 
-- `tests/test_campaign_history.py`：28 passed。
-- 已实际生成并查看合成 NORMAL 46-40 卡片：1400×820；五个槽位、等级、单体战力、总战力和缺图占位均可见。
+- `tests/test_campaign_history.py`：29 passed、7 subtests passed。
+- 已实际生成并查看合成 NORMAL 46-40 卡片：1400×820；五个槽位、等级、单体战力、总战力和缺图占位均可见。当前预览文件为 `E:/DevCache/nikke-campaign-preview-20260907-v2/campaign-0bbcc10f83b54396b231d5c418ae38ec.png`。
 - 预览使用合成数据和本地占位素材，不访问真实账号、不下载真实账号数据、不执行账号写操作。
 
 ## 未宣称

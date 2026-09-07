@@ -175,6 +175,25 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         self.assertEqual(record.status, ClearLineupStatus.AVAILABLE)
         self.assertEqual(record.total_combat, 550000)
 
+    def test_whitespace_and_signed_numeric_strings_are_structurally_invalid(self):
+        for field, value in {
+            "tid": " 101",
+            "lv": "400 ",
+            "combat": "+120000",
+            "slot": "-1",
+        }.items():
+            with self.subTest(field=field):
+                raw_list = [
+                    {"tid": 101, "lv": 400, "combat": 120000, "slot": 1},
+                    {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+                    {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+                    {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+                    {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+                ]
+                raw_list[0][field] = value
+                record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+                self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
     def test_zero_tid_or_out_of_range_slot_is_structurally_invalid(self):
         raw_list = [
             {"tid": 0, "lv": 400, "combat": 120000, "slot": 1},
