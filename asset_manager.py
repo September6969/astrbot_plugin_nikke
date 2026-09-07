@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 import re
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -27,6 +28,9 @@ class AssetManager:
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
     CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images"
+    # 跨实例限制不同缓存键的远端下载；缓存命中不占用名额。
+    REMOTE_DOWNLOAD_LIMIT = 4
+    _remote_download_slots = threading.BoundedSemaphore(REMOTE_DOWNLOAD_LIMIT)
 
     def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
         self.cache_dir = Path(cache_dir)
@@ -103,6 +107,11 @@ class AssetManager:
             return None
         if self._failed.get(relative, 0) > time.monotonic():
             return None
+        # 多群同时出卡时，远端素材可能是不同键，single-flight 不能抑制这类压力。
+        # 不等待名额，直接让当前素材降级，避免把请求堆积在后台线程中。
+        if not self._remote_download_slots.acquire(blocking=False):
+            logger.warning("远端素材并发已满，使用占位素材: %s", relative)
+            return None
         try:
             # 公共素材请求不携带账号Cookie；限制总下载时长和响应大小。
             started = time.monotonic()
@@ -129,6 +138,8 @@ class AssetManager:
         except (httpx.HTTPError, OSError, ValueError, Image.DecompressionBombError):
             self._failed[relative] = time.monotonic() + 300
             return None
+        finally:
+            self._remote_download_slots.release()
 
     @staticmethod
     def fallback(kind: str) -> Image.Image:
