@@ -27,6 +27,7 @@
 | #18 | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | OPEN / Draft / CI green；head `3686968`；CI `34099070943` |
 | #19 | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | OPEN / Draft / CI green；head `808417e`；CI `34100353287` |
 | #20 | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | OPEN / Draft / CI green；head `375498c`；CI `34102399018` |
+| #21 | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | OPEN / Draft / CI green；head `a9ccb48`；CI `34102939859` |
 
 ## 当前推进
 
@@ -40,12 +41,13 @@
 | Daily Evidence sign-in recovery | `feat/daily-evidence-p1` | `bada0b3` | Draft PR #18；intent 先于读取，running/unknown 只读恢复，未确认进入 unknown、Cookie 失效进入 expired；head `3686968`；CI `34099070943` 全绿；不宣称 Like/Browse 或真实账号证据 |
 | SQLite connection lifecycle | `feat/storage-connection-lifecycle` | `bada0b3` | Draft PR #19；每次存储操作成功提交/异常回滚并明确关闭连接；Windows 临时目录生命周期回归通过；head `808417e`；CI `34100353287` 全绿 |
 | Runtime config hardening | `feat/runtime-config-hardening` | `bada0b3` | Draft PR #20；非法数值配置和损坏持久化调度字段按合同回退，不让调度循环退出；head `375498c`；CI `34102399018` 全绿 |
+| Plugin shutdown lifecycle | `feat/plugin-shutdown-lifecycle` | `bada0b3` | Draft PR #21；顺序/并发 terminate 只回收一次资源；head `a9ccb48`；CI `34102939859` 全绿 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
 
 ## 任务池
 
-- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；其余已创建 Draft PR。
+- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；其余已创建 Draft PR。
 - `READY`：在不依赖上述未合并分支的前提下，继续做可离线验证的独立主题。
 - `WAITING_DEPENDENCY`：Raid Increment B/C 等待相关基线进入 `main`；不从旧 overnight 分支继续开发。
 - `NEEDS_LIVE_EVIDENCE`：真实 Profile、Raid canonical identity、Daily Like/Browse 写入、Voice QQ 实际播放、Spine 生产许可/运行时。
