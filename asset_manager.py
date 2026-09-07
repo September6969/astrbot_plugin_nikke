@@ -12,6 +12,7 @@ import re
 import threading
 import time
 import uuid
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import httpx
@@ -22,6 +23,14 @@ from .nikke_db_provider import NikkeDbProvider
 from .spine_prerenderer import SpineJob, SpinePreRenderer
 
 logger = logging.getLogger("nikke.asset_manager")
+
+
+@dataclass
+class _InflightAsset:
+    """同一缓存键的共享下载状态；缓存写入失败时仍保留内存结果。"""
+
+    event: threading.Event = field(default_factory=threading.Event)
+    result: Image.Image | None = None
 
 
 class AssetManager:
@@ -35,7 +44,7 @@ class AssetManager:
         self.remote = remote
         self._failed: dict[str, float] = {}
         self._inflight_lock = threading.Lock()
-        self._inflight: dict[str, threading.Event] = {}
+        self._inflight: dict[str, _InflightAsset] = {}
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
         self.spine = SpinePreRenderer(self.cache_dir)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
@@ -113,15 +122,17 @@ class AssetManager:
             return None
 
         with self._inflight_lock:
-            event = self._inflight.get(relative)
-            owner = event is None
+            state = self._inflight.get(relative)
+            owner = state is None
             if owner:
-                event = threading.Event()
-                self._inflight[relative] = event
+                state = _InflightAsset()
+                self._inflight[relative] = state
 
         if not owner:
-            # 同一素材已有下载者；不重复发请求，完成后只重新读取缓存。
-            event.wait(timeout=7.0)
+            # 同一素材已有下载者；不重复发请求，优先复用其内存结果，再读取缓存。
+            state.event.wait(timeout=7.0)
+            if state.result is not None:
+                return state.result
             return self._load_cached(relative)
 
         try:
@@ -160,7 +171,9 @@ class AssetManager:
             with self._inflight_lock:
                 current = self._inflight.pop(relative, None)
                 if current is not None:
-                    current.set()
+                    if image is not None:
+                        current.result = image
+                    current.event.set()
 
     @staticmethod
     def fallback(kind: str) -> Image.Image:
