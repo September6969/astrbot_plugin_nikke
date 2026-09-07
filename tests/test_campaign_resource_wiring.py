@@ -26,6 +26,20 @@ class CampaignResourceWiringTests(unittest.TestCase):
             sentinel.shared_assets,
         )
 
+    def test_campaign_renderer_keeps_falsey_shared_asset_manager(self):
+        class FalseyAssets:
+            def __bool__(self):
+                return False
+
+        assets = FalseyAssets()
+        renderer = CampaignHistoryRenderer(
+            Path("data/nikke/cards"),
+            Path(__file__).resolve().parents[1] / "fonts",
+            assets,
+        )
+
+        self.assertIs(renderer.assets, assets)
+
     def test_campaign_renderer_reuses_same_portrait_key_within_one_card(self):
         with tempfile.TemporaryDirectory() as directory:
             output_dir = Path(directory) / "cards"

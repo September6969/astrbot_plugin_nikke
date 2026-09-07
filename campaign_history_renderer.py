@@ -29,7 +29,10 @@ class CampaignHistoryRenderer(CardRenderer):
 
     def __init__(self, output_dir: str | Path, font_dir: str | Path, assets: AssetManager | None = None):
         super().__init__(output_dir, font_dir)
-        self.assets = assets or AssetManager(Path(output_dir) / "cache", Path(__file__).parent / "assets")
+        # 显式区分“未提供”与 falsey 的共享管理器，确保依赖注入不会被绕过。
+        self.assets = assets if assets is not None else AssetManager(
+            Path(output_dir) / "cache", Path(__file__).parent / "assets"
+        )
 
     def _text(self, draw, xy, text, size, color, *, width=None, bold=False):
         text = str(text).replace("\n", " ")
