@@ -114,6 +114,27 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         self.assertNotIn("signin-write", store.events)
         self.assertEqual(store.finished[signin_key][0], "unknown")
 
+    async def test_terminal_success_signin_is_preserved_without_recovery_read(self):
+        store = FakeDailyStore()
+        signin_key = "2026-09-07:10001:signin"
+        store.runs[signin_key] = {"status": "success", "detail": "登录有效；签到成功"}
+        client = FakeDailyClient(store.events, completed=False)
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.store = store
+        plugin.client = client
+        plugin.config = {"enable_daily_actions": True}
+        account = {"qq_id": "10001", "nickname": "测试指挥官"}
+
+        name, detail = await plugin._run_daily_for_account(account, "2026-09-07")
+
+        self.assertEqual(name, "测试指挥官")
+        self.assertEqual(detail, "登录有效；签到成功")
+        self.assertEqual(store.runs[signin_key]["status"], "success")
+        self.assertEqual(store.runs[signin_key]["detail"], "登录有效；签到成功")
+        self.assertEqual(store.finished["2026-09-07:10001:daily"][0], "success")
+        self.assertEqual(store.events, ["claim:daily", "claim:signin", "finish:success"])
+        self.assertNotIn("signin-read", store.events)
+
     async def test_cookie_expiry_closes_existing_signin_intent(self):
         store = FakeDailyStore()
         signin_key = "2026-09-07:10001:signin"

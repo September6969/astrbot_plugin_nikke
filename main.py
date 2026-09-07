@@ -841,9 +841,21 @@ class NikkePlugin(Star):
         try:
             if bool(self.config.get("enable_daily_actions", False)):
                 if not self.store.claim_run(signin_key, qq_id, "signin"):
-                    state, detail = await self._read_only_daily_recovery(account)
-                    self.store.finish_run(signin_key, state, detail)
-                    self.store.finish_run(run_key, state, detail)
+                    existing_signin = self.store.get_run(signin_key) or {}
+                    if existing_signin.get("status") in {"running", "unknown"}:
+                        state, detail = await self._read_only_daily_recovery(account)
+                        self.store.finish_run(signin_key, state, detail)
+                        self.store.finish_run(run_key, state, detail)
+                        return name, detail
+                    if existing_signin.get("status") == "success":
+                        detail = existing_signin.get("detail") or "登录有效；今日已经签到"
+                        self.store.finish_run(run_key, "success", detail)
+                        return name, detail
+                    if existing_signin.get("status") == "expired":
+                        self.store.finish_run(run_key, "expired", "Cookie失效")
+                        return name, "Cookie失效，请重新绑定"
+                    detail = existing_signin.get("detail") or "登录有效；签到已执行或正在执行"
+                    self.store.finish_run(run_key, existing_signin.get("status") or "unknown", detail)
                     return name, detail
                 signin_owned = True
             await self.client.get_profile(account)
