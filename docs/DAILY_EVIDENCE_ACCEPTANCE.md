@@ -13,6 +13,7 @@
 - 新的签到 action 仍由客户端执行“写前读取 → 单次 POST → 写后读取”；异常结果不自动重发。
 - 重启后遇到 `daily` 或 `signin` 的 `running`/`unknown` 记录，只允许只读核验：已完成则收敛为 `success`，仍未完成则收敛为 `unknown`。
 - 只读核验遇到 Cookie 失效时，相关 intent 收敛为 `expired`；不遗留可被误认为可重放的 `running`。
+- 执行中的 `CancelledError` 将已持有的 `daily`/`signin` intent 收敛为 `unknown` 后继续传播取消信号；不会把取消当作成功，也不会在重启后自动重发。
 - 该增量不改变 CDK 的显式重试合同，也没有访问真实账号或执行真实写操作。
 
 ## 行为验证
@@ -22,14 +23,14 @@ pytest tests/test_daily_recovery.py tests/test_daily_safety.py \
   tests/test_core.py::ClientTests::test_daily_signin_checks_before_and_after_write \
   tests/test_core.py::ClientTests::test_daily_signin_skips_completed_task \
   tests/test_core.py::ClientTests::test_1300015_retries_are_bounded
-9 passed
+10 passed
 ```
 
-新增 4 个恢复/顺序行为测试覆盖：intent 先于读取、running daily 只读恢复、running signin 未确认时进入 unknown、Cookie 失效收敛。另有 `compileall`、Node extension contract tests（3 passed）和 `git diff --check` 通过。
+新增 5 个恢复/顺序行为测试覆盖：intent 先于读取、running daily 只读恢复、running signin 未确认时进入 unknown、Cookie 失效收敛、取消收敛为 unknown 并继续传播。另有 `compileall`、Node extension contract tests（3 passed）和 `git diff --check` 通过。
 
 GitHub Actions final-head CI：run `34098738387`，Node、Python 3.10、3.11、3.12 全部通过。
 
-本机全量 pytest 结果为 `240 passed, 32 failed, 31 subtests passed`；失败均集中在 Windows `TemporaryDirectory` 清理 `nikke.sqlite3` 时的 `WinError 32` 文件占用，目标增量测试和相关签到测试均通过。最终全量回归仍以 Draft PR 的隔离 CI 为准。
+本机全量 pytest 结果为 `261 passed, 2 warnings`；专项签到与恢复测试均通过。最终全量回归仍以 Draft PR 的隔离 CI 为准。
 
 ## 未覆盖与证据边界
 

@@ -867,6 +867,13 @@ class NikkePlugin(Star):
                 self.store.finish_run(signin_key, "expired", "Cookie失效")
             self.store.finish_run(run_key, "expired", "Cookie失效")
             return name, "Cookie失效，请重新绑定"
+        except asyncio.CancelledError:
+            # 取消不代表写入未发生；持久化 unknown 并继续传播取消信号，禁止重启后重放。
+            existing_signin = self.store.get_run(signin_key) or {}
+            if signin_owned or existing_signin.get("status") in {"running", "unknown"}:
+                self.store.finish_run(signin_key, "unknown", "签到已取消，结果未确认，未自动重发")
+            self.store.finish_run(run_key, "unknown", "日常任务已取消，结果未确认，未自动重发")
+            raise
         except Exception as exc:
             if isinstance(exc, UnknownAfterAction):
                 detail = "签到结果未确认，请稍后查询状态；未自动重发"

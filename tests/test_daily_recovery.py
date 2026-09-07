@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from unittest import IsolatedAsyncioTestCase
 
 from astrbot_plugin_nikke.client import CookieExpired
@@ -53,6 +54,11 @@ class FakeDailyClient:
 class ExpiredDailyClient(FakeDailyClient):
     async def get_profile(self, account):
         raise CookieExpired("登录状态已失效", "401", "GetUserProfileBasicInfo")
+
+
+class CancelledDailyClient(FakeDailyClient):
+    async def get_profile(self, account):
+        raise asyncio.CancelledError()
 
 
 class DailyRecoveryTests(IsolatedAsyncioTestCase):
@@ -127,3 +133,22 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         self.assertEqual(store.invalid, ["10001"])
         self.assertEqual(store.finished[signin_key][0], "expired")
         self.assertEqual(store.finished[run_key][0], "expired")
+
+    async def test_cancellation_marks_owned_intents_unknown_and_is_rethrown(self):
+        store = FakeDailyStore()
+        client = CancelledDailyClient(store.events)
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.store = store
+        plugin.client = client
+        plugin.config = {"enable_daily_actions": True}
+        account = {"qq_id": "10001", "nickname": "测试指挥官"}
+        run_key = "2026-09-07:10001:daily"
+        signin_key = "2026-09-07:10001:signin"
+
+        with self.assertRaises(asyncio.CancelledError):
+            await plugin._run_daily_for_account(account, "2026-09-07")
+
+        self.assertEqual(store.finished[signin_key][0], "unknown")
+        self.assertEqual(store.finished[run_key][0], "unknown")
+        self.assertIn("未自动重发", store.finished[signin_key][1])
+        self.assertIn("未自动重发", store.finished[run_key][1])
