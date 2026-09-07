@@ -10,7 +10,7 @@
 | `E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke` | `feat/union-raid-v2` | Union Raid Increment A | Draft PR #8；head `c4a6fe4`；CI `34120205125` 全绿；工作树 clean |
 | `E:\DevCache\nikke-announcement-v2\astrbot_plugin_nikke` | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | Draft PR #9；head `3765448`；CI `34169661389` 四项全绿；本地 compileall/diff check 通过；工作树 clean |
 | `E:\DevCache\nikke-dynamic-voice-v2\astrbot_plugin_nikke` | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | Draft PR #10；head `528fcdf`；CI `34148538180` 全绿；工作树 clean |
-| `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11；head `80f3087`；CI `34149471006` 四项全绿；工作树 clean；仅静态 registry/fallback，未宣称完整 Character Data V2 |
+| `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11；head `57d292d`；CI `34170484699` 四项全绿；工作树 clean；新增重复 JSON 键拒绝；仅静态 registry/fallback，未宣称完整 Character Data V2 |
 | `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | Spine technical spike | Draft PR #12；head `e5b9efc`；CI `34149003554` 四项全绿；工作树 clean；仍仅为 runtime-free synthetic spike |
 | `E:\DevCache\nikke-voice-mapping-v2\astrbot_plugin_nikke` | `feat/voice-mapping-v2` | Voice 映射研究 | Draft PR #13；head `68138bc`；CI `34115632353` 全绿；工作树 clean |
 | `E:\_codex_work\nikke-roadmap-ledger-v3` | `feat/roadmap-ledger-v3` | 路线图合同债状态核验 | Draft PR #14；当前 head 与 CI 以 PR 检查为权威；工作树 clean |
