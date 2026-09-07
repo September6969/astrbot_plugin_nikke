@@ -39,7 +39,7 @@
 | #30 | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | OPEN / Draft / CI green；head `e9bf5eb`；CI `34110890912` |
 | #31 | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | OPEN / Draft / CI green；head `369cc98`；CI `34112221252` |
 | #32 | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | OPEN / Draft / CI green；head `eede5ab`；CI `34127584276` |
-| #33 | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | OPEN / Draft / CI green；head `d3e6eda`；CI `34135057986` |
+| #33 | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | OPEN / Draft / CI running；head `8bb9cd5`；CI `34143501124` |
 | #34 | `feat/cdk-batch-contract-v1` | CDK batch idempotency contract reconciliation | OPEN / Draft / CI green；head `c0f1e65`；CI `34135996980` |
 | #35 | `feat/daily-result-contract-v1` | Structured DailyTaskResult status contract | OPEN / Draft / CI green；head `df7fa7f`；CI `34137301772` |
 | #36 | `feat/daily-auto-per-account-v1` | Per-account daily automation preference | OPEN / Draft / CI green；head `0ba8b5d`；CI `34138915642` |
@@ -52,7 +52,7 @@
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
 | Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；当前 head 与 CI 以 PR #14 检查为权威 |
-| Post-Profile V2 status reconciliation | `feat/profile-post-merge-v1` | `bada0b3` | Draft PR #33；仅同步 `PROFILE_V2_ACCEPTANCE.md`：记录 PR #7 已合并到当前 main，更新当前基线与重跑证据，删除未来 Draft PR 交接文字；本地定向 35 passed、全量 pytest 256 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；CI `34135057986` 四项全绿；不访问真实账号、不部署 |
+| Post-Profile V2 status reconciliation | `feat/profile-post-merge-v1` | `bada0b3` | Draft PR #33；在既有 `PROFILE_V2_ACCEPTANCE.md` 合并状态记录之外，同步 `POST_MERGE_STATUS.md` 与 `POST_MERGE_PHASE2_PLAN.md`：当前入口明确 PR #6/#7 已合并、Profile 为 `READY_OFFLINE` 且现场证据仍独立；新增状态入口回归测试；本地专项 1 passed、全量 pytest 257 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `8bb9cd5`；CI `34143501124` 运行中；不访问真实账号、不部署 |
 | CDK batch idempotency contract reconciliation | `feat/cdk-batch-contract-v1` | `bada0b3` | Draft PR #34；确认主命令逐码复用 `action_runs`，run key 为 `cdk:{qq_id}:{game_uid}:{SHA256(code)}`，unknown/终态不自动重放，失败/过期可原子重领；更新 README/DEVELOPMENT_PLAN 并新增验收记录；本地专项 42 passed、12 subtests，全量 pytest 256 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；CI `34135996980` 四项全绿；未访问真实账号、未执行兑换或部署 |
 | Structured DailyTaskResult status contract | `feat/daily-result-contract-v1` | `bada0b3` | Draft PR #35；签到主链统一 `SUCCESS`、`ALREADY_DONE`、`PENDING`、`FAILED`、`RATE_LIMITED`、`COOKIE_EXPIRED`、`UNKNOWN_AFTER_ACTION`、`UNAVAILABLE`，持久化改为严格 JSON-safe 记录，旧/损坏记录不静默冒充成功；本地定向 10 passed、全量 pytest 262 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `df7fa7f`；CI `34137301772` 四项全绿；不访问真实账号、不执行签到、不发送消息、不部署，Like/Browse 与现场证据仍未完成 |
 | Per-account daily automation preference | `feat/daily-auto-per-account-v1` | `bada0b3` | Draft PR #36；新增默认关闭的 `accounts.auto_daily_enabled` 与 `/妮姬 日常 自动 开|关`；定时签到和汇总补跑同时筛选 `push_enabled=1` 与自动偏好，手动签到和管理员显式执行保持原选择语义；本地定向 48 passed、4 subtests，全量 pytest 263 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `0ba8b5d`；CI `34138915642` 四项全绿；不访问真实账号、不执行签到、不发送消息、不部署，Like/Browse 与现场调度证据仍未完成 |
