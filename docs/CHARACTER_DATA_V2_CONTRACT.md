@@ -24,7 +24,7 @@
 
 映射字段合同：
 
-- 映射文件中的 ID 必须是十进制字符串；运行时查询只接受精确整数或无空白、无符号的十进制字符串，拒绝布尔、浮点、前导/尾随空白和符号。不做前导零补齐、模糊匹配或连续 ID 猜测。
+- 映射文件中的 ID 必须是十进制字符串；JSON 对象出现重复键时整个对应 registry 无效。运行时查询只接受精确整数或无空白、无符号的十进制字符串，拒绝布尔、浮点、前导/尾随空白和符号。不做前导零补齐、模糊匹配或连续 ID 猜测。
 - Equipment resource 必须符合 `icn_equipment_<head|body|arm|leg>_<attacker|defender|supporter>_t...`。
 - Cube resource 必须符合 `harmony_cube_<id>`。
 - Favorite Item resource 必须符合 `favorite_item_<id>`。

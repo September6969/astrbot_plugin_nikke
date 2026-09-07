@@ -73,10 +73,23 @@ class StaticDataRegistry:
             return None
         return self._maps.get(kind, {}).get(key)
 
+    @staticmethod
+    def _reject_duplicate_keys(pairs):
+        """拒绝 JSON 重复键，避免歧义映射被静默覆盖。"""
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise RegistryValidationError(f"JSON 对象包含重复键: {key!r}")
+            result[key] = value
+        return result
+
     def _load(self) -> None:
         try:
             manifest_bytes = (self.asset_dir / self.MANIFEST).read_bytes()
-            manifest = json.loads(manifest_bytes.decode("utf-8"))
+            manifest = json.loads(
+                manifest_bytes.decode("utf-8"),
+                object_pairs_hook=self._reject_duplicate_keys,
+            )
             if not isinstance(manifest, dict) or manifest.get("schema_version") != 1:
                 raise RegistryValidationError("registry manifest schema_version 无效")
             rows = manifest.get("registries")
@@ -99,7 +112,10 @@ class StaticDataRegistry:
                 digest = hashlib.sha256(canonical_content).hexdigest()
                 if digest != metadata.sha256:
                     raise RegistryValidationError(f"{kind} sha256 不匹配")
-                data = json.loads(content.decode("utf-8"))
+                data = json.loads(
+                    content.decode("utf-8"),
+                    object_pairs_hook=self._reject_duplicate_keys,
+                )
                 self._maps[kind] = self._parse_mapping(kind, data)
                 self._metadata[kind] = metadata
             except (KeyError, OSError, UnicodeError, json.JSONDecodeError, RegistryValidationError) as exc:

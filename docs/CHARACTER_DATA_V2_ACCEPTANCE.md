@@ -20,9 +20,9 @@ python -m pytest -q tests/test_static_registry.py tests/test_asset_manager.py te
 
 覆盖点：
 
-- 三类 registry 的 metadata、精确 ID 查找与资源标识合同；
+- 三类 registry 的 metadata、精确 ID 查找、重复键拒绝与资源标识合同；
 - 未知 ID 不归一化、不猜测；布尔、浮点、带空白或符号的 ID 被拒绝；
-- 单个 JSON hash 损坏时只禁用对应 registry，其余 registry 仍可用；
+- 单个 JSON hash 损坏或存在重复键时只禁用对应 registry，其余 registry 仍可用；
 - AssetManager 使用 registry，并在未知/缺失资源时继续返回占位图，即使同名本地缓存或 `sources.json` 项存在也不显示或请求它；
 - 角色卡四个装备槽、词条单位、缺失数值和合成卡渲染原有行为保持通过。
 

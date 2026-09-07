@@ -1,4 +1,5 @@
 import json
+import hashlib
 import shutil
 import tempfile
 import unittest
@@ -46,6 +47,27 @@ class StaticDataRegistryTests(unittest.TestCase):
             self.assertFalse(registry.is_valid)
             self.assertTrue(any("equipment sha256" in error for error in registry.errors))
             self.assertEqual(registry.mapping("equipment"), {})
+            self.assertEqual(registry.resolve("cube", "1000304"), "harmony_cube_1000304")
+
+    def test_duplicate_mapping_keys_disable_only_ambiguous_registry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json"):
+                shutil.copy2(self.assets / name, target / name)
+
+            # 更新 manifest hash，确保本测试验证的是重复键合同，而不是 hash 失败。
+            duplicate = b'{"3100901":"icn_equipment_head_attacker_t9_3","3100901":"icn_equipment_head_attacker_t9_1"}'
+            (target / "equipment.json").write_bytes(duplicate)
+            manifest = json.loads((target / "registry_manifest.json").read_text(encoding="utf-8"))
+            manifest["registries"]["equipment"]["sha256"] = hashlib.sha256(duplicate).hexdigest()
+            (target / "registry_manifest.json").write_text(
+                json.dumps(manifest, ensure_ascii=False), encoding="utf-8"
+            )
+
+            registry = StaticDataRegistry(target)
+
+            self.assertEqual(registry.mapping("equipment"), {})
+            self.assertTrue(any("重复键" in error for error in registry.errors))
             self.assertEqual(registry.resolve("cube", "1000304"), "harmony_cube_1000304")
 
     def test_manifest_is_json_and_declares_all_supported_maps(self):
