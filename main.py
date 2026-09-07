@@ -36,6 +36,7 @@ from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
 from .renderer import CardRenderer
+from .runtime_config import normalize_runtime_config, read_schedule_clock
 from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
@@ -54,7 +55,7 @@ class NikkePlugin(Star):
     def __init__(self, context: Context, config=None):
         super().__init__(context)
         self.context = context
-        self.config = config or {}
+        self.config = normalize_runtime_config(config)
         self.plugin_dir = Path(__file__).resolve().parent
         self.data_dir = Path("data") / "nikke"
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -176,10 +177,18 @@ class NikkePlugin(Star):
         while not self._closing:
             now = datetime.now(timezone(timedelta(hours=8)))
             today = now.strftime("%Y-%m-%d")
-            daily_h = int(self.store.get_setting("daily_hour", self.config.get("daily_hour", 8)))
-            daily_m = int(self.store.get_setting("daily_minute", self.config.get("daily_minute", 10)))
-            summary_h = int(self.store.get_setting("summary_hour", self.config.get("summary_hour", 8)))
-            summary_m = int(self.store.get_setting("summary_minute", self.config.get("summary_minute", 30)))
+            daily_h, daily_m = read_schedule_clock(
+                self.store.get_setting,
+                "daily",
+                default_hour=self.config["daily_hour"],
+                default_minute=self.config["daily_minute"],
+            )
+            summary_h, summary_m = read_schedule_clock(
+                self.store.get_setting,
+                "summary",
+                default_hour=self.config["summary_hour"],
+                default_minute=self.config["summary_minute"],
+            )
             if (now.hour, now.minute) == (daily_h, daily_m) and last_daily != today:
                 last_daily = today
                 self._spawn_background_task(self._run_all_daily(today, stagger=True))
@@ -857,7 +866,7 @@ class NikkePlugin(Star):
 
     async def _run_all_daily(self, day: str, stagger: bool = False) -> list[tuple[str, str]]:
         accounts = self.store.list_accounts(push_only=True, with_cookie=True)
-        semaphore = asyncio.Semaphore(max(1, int(self.config.get("max_concurrency", 2))))
+        semaphore = asyncio.Semaphore(self.config["max_concurrency"])
 
         async def run(account):
             if stagger:
