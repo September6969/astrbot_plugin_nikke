@@ -39,10 +39,30 @@ class SpineJob:
     enqueued_at: float = field(default_factory=time.monotonic, init=False)
 
     def __post_init__(self) -> None:
-        if self.budget_seconds is not None and (
-            not math.isfinite(self.budget_seconds) or self.budget_seconds <= 0
-        ):
-            raise ValueError("Spine 总预算必须是正数")
+        if not isinstance(self.cache_key, str) or not self.cache_key.strip():
+            raise ValueError("Spine cache_key 必须是非空文本")
+        if any(char in self.cache_key for char in ("/", "\\", ":", "\x00")):
+            raise ValueError("Spine cache_key 不能包含路径分隔符")
+        if self.cache_key in {".", ".."}:
+            raise ValueError("Spine cache_key 不能是路径占位符")
+        if not isinstance(self.character_id, str) or not self.character_id.strip():
+            raise ValueError("Spine character_id 必须是非空文本")
+        if self.runtime_version is not None:
+            if isinstance(self.runtime_version, bool):
+                raise ValueError("Spine runtime_version 不能是布尔值")
+            if isinstance(self.runtime_version, str) and not self.runtime_version.strip():
+                raise ValueError("Spine runtime_version 不能是空白文本")
+            if isinstance(self.runtime_version, (int, float)) and (
+                not math.isfinite(float(self.runtime_version)) or self.runtime_version <= 0
+            ):
+                raise ValueError("Spine runtime_version 数值必须是正数")
+            if not isinstance(self.runtime_version, (str, int, float)):
+                raise ValueError("Spine runtime_version 类型无效")
+        if self.budget_seconds is not None:
+            if isinstance(self.budget_seconds, bool) or not isinstance(self.budget_seconds, (int, float)):
+                raise ValueError("Spine 总预算必须是正数")
+            if not math.isfinite(float(self.budget_seconds)) or self.budget_seconds <= 0:
+                raise ValueError("Spine 总预算必须是正数")
 
     def is_expired(self, now: float | None = None) -> bool:
         """判断任务是否已在队列或执行前耗尽总预算。"""
@@ -101,8 +121,12 @@ class SpineTaskQueue:
     """受控后台预渲染任务队列。"""
 
     def __init__(self, max_workers: int = 2, max_queue_size: int = 20):
+        if isinstance(max_workers, bool) or not isinstance(max_workers, int):
+            raise ValueError("Spine worker 数必须是整数")
         if max_workers < 1 or max_workers > 2:
             raise ValueError("Spine worker 数必须在 1 到 2 之间")
+        if isinstance(max_queue_size, bool) or not isinstance(max_queue_size, int):
+            raise ValueError("Spine 队列容量必须是整数")
         if max_queue_size < 1:
             raise ValueError("Spine 队列容量必须为正数")
         self.max_workers = max_workers

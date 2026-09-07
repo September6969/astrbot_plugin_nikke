@@ -85,6 +85,31 @@ class SpineTaskQueueTests(TestCase):
     def test_rejects_invalid_budget(self):
         with self.assertRaises(ValueError):
             SpineJob("bad", "c101", "4.1", budget_seconds=0)
+        with self.assertRaises(ValueError):
+            SpineJob("bad", "c101", "4.1", budget_seconds=True)
+        with self.assertRaises(ValueError):
+            SpineJob("bad", "c101", "4.1", budget_seconds="1")
+
+    def test_rejects_invalid_job_identity_and_cache_path(self):
+        for cache_key in ("", "  ", "../escape", "nested/key", "nested\\key", "C:escape"):
+            with self.subTest(cache_key=cache_key):
+                with self.assertRaises(ValueError):
+                    SpineJob(cache_key, "c101", "4.1")
+        with self.assertRaises(ValueError):
+            SpineJob("safe", "", "4.1")
+        with self.assertRaises(ValueError):
+            SpineJob("safe", "c101", True)
+
+    def test_rejects_non_integer_queue_limits(self):
+        for kwargs in (
+            {"max_workers": True},
+            {"max_workers": 1.5},
+            {"max_queue_size": False},
+            {"max_queue_size": 2.5},
+        ):
+            with self.subTest(kwargs=kwargs):
+                with self.assertRaises(ValueError):
+                    SpineTaskQueue(**kwargs)
 
 
 class SpineEvidenceTests(TestCase):
