@@ -17,7 +17,7 @@
 | #8 | `feat/union-raid-v2` | Union Raid Increment A | OPEN / Draft / CI green |
 | #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `fc1c6db`；CI `34097200948` |
 | #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green |
-| #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green |
+| #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green；head `1853b62`；CI `34112908150` |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green |
 | #13 | `feat/voice-mapping-v2` | Voice mapping public research | OPEN / Draft / CI green |
 | #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；当前 head 与 CI 以 PR #14 检查为权威 |
@@ -62,6 +62,7 @@
 | Caddy example privacy | `feat/caddy-hardening-v1` | `bada0b3` | Draft PR #29；关闭示例 access log，避免 `/bind/{token}` 令牌进入反代日志；静态验证安全头、只读挂载、外部网络及无 6210 宿主机映射；head `160cb25`；CI `34110061494` 全绿；本地 pytest 258 passed、48 subtests、Node 3 passed；未部署 |
 | Upgrade/rollback preflight | `feat/upgrade-preflight-v1` | `bada0b3` | Draft PR #30；只读检查 SQLite integrity/schema、数据库与 `secret.key` 成对存在、可选备份集和磁盘余量，输出 READY/MIGRATION_REQUIRED/BLOCKED；head `e9bf5eb`；CI `34110890912` 全绿；本地 pytest 263 passed、43 subtests、Node 3 passed；不执行迁移/回滚/复制/删除/生产写入 |
 | Final product review evidence matrix | `feat/requirement-evidence-matrix-v1` | `bada0b3` | Draft PR #31；覆盖路线图 27 个 `REQ-*`，区分主线代码/接线、Draft PR、离线测试、现场证据和人工授权；head `369cc98`；CI `34112221252` 全绿；本地 pytest 258 passed、43 subtests、Node 3 passed；不执行真实账号/消息/部署/生产 migration/rollback |
+| Character Data V2 registry boundary | `feat/character-data-v2` | `bada0b3` | Draft PR #11；静态 Equipment/Cube/Favorite Item registry 保持精确 ID 与 hash 校验；未知 ID 不再通过通用 `sources.json` 触发远程请求；head `1853b62`；本地 pytest 261 passed、43 subtests、Node 3 passed、compileall/diff check 通过；CI `34112908150` 全绿；仍不宣称完整角色数值、真实账号字段、远程素材授权或产品合成联调 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
 
