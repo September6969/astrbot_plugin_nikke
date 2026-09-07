@@ -5,7 +5,7 @@
 ## 当前验证检查点
 
 - 本地 Python 3.10.11：主题相关 unittest 30 项通过；当前环境未安装 pytest，因此不把本地 unittest 冒充 pytest 结果。
-- 最终 CI run `34170824855`（head `480cc9f`）：全量 Python `265 passed`、`3 warnings`、`53 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。
+- 最终 CI run `34170933004`（head `825ecea`）：全量 Python `265 passed`、`3 warnings`、`53 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。
 - `tid`、`lv`、`combat`、`slot` 的字符串值现在只接受 ASCII 十进制数字；首尾空白和显式正负号均返回结构错误。
 - 响应 `code` 必须是非布尔 JSON 整数；`False`、浮点和数字字符串不会与 `code=0` 混淆。
 - `node --test tests\\extension.test.cjs` → 3 passed；`compileall -q .` 与 `git diff --check` 通过。
