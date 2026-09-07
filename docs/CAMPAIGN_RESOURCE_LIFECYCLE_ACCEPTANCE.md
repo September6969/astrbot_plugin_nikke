@@ -4,11 +4,11 @@
 
 ## 当前验证检查点
 
-- 本地 Python 3.10.11：全量 `pytest -q` → 259 passed、2 warnings、43 subtests passed。
-- 资源生命周期与 Campaign 定向测试 → 24 passed、2 warnings。
+- 既有本地 Python 3.10.11 基线：全量 `pytest -q` → 259 passed、2 warnings、43 subtests passed；资源生命周期与 Campaign 定向测试 → 24 passed、2 warnings。
+- 本次补丁的本地可运行检查：Campaign History 21 项 unittest、falsey manager 身份检查、`compileall -q .` 与 `git diff --check` 通过；完整 wiring 测试因当前环境缺少 `astrbot` 依赖未在本地执行。
 - `node --test tests\\extension.test.cjs` → 3 passed；`compileall -q .` 与 `git diff --check` 通过。
 - 合成共享 AssetManager 预览已实际查看：`E:/DevCache/nikke-campaign-lifecycle-preview-20260907-v2/campaign-ddb348a54ded4ce5ac3d9e468838b25b.png`。
-- 本次文档修订前代码检查点为 `a09493b`，对应 CI run `34116765420`；文档提交后的最终 head 与 CI 必须重新查询，不能在此处自引用未来提交。
+- 本次代码提交 `e70803a` 对应 CI run `34171398784`：Python 3.10 为 260 passed、3 warnings、43 subtests passed，Python 3.11/3.12 与 Node 3 项均通过；本验收文档提交后仍需重新查询最终 head 与 CI。
 
 ## 本次变更
 
