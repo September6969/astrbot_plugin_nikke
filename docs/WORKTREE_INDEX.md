@@ -11,7 +11,7 @@
 | `E:\DevCache\nikke-announcement-v2\astrbot_plugin_nikke` | `feat/announcement-v2` | Announcement Increment A | Draft PR #9 |
 | `E:\DevCache\nikke-dynamic-voice-v2\astrbot_plugin_nikke` | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | Draft PR #10 |
 | `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11 |
-| `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | 当前 Spine 技术预研 | Draft PR #12，初始提交 CI 全绿 |
+| `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | 当前 Spine 技术预研 | Draft PR #12，当前 head CI 全绿 |
 
 ## 协作规则
 
