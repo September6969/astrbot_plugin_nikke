@@ -13,6 +13,7 @@
 | PR #8 | OPEN / Draft，`feat/union-raid-v2@d98cce4c8b898e1ba3aeca3d4234ea2d780cb803`；CI `34083806757` 全绿 |
 | PR #9 | OPEN / Draft，`feat/announcement-v2@47fd311490e7fd607f5144738e2822f3c97e17e9`；CI `34086582482` 全绿 |
 | PR #10 | OPEN / Draft，`feat/dynamic-voice-v2@162d9d74812622a506bbd48d19b35b8f20eca638`；CI `34088342539` 全绿 |
+| PR #11 | OPEN / Draft，`feat/character-data-v2@e9d496e2e2110e1e38c0b0629fcd1178dd2c36d4`；修复后的 CI `34089178903` 全绿；旧 head `5d880ed` 的失败已定位为 CRLF/LF hash 差异 |
 
 ## 当前独立主题：Character Data V2 Increment A
 
@@ -23,7 +24,7 @@
 | 代码 | 三类静态映射纳入 `StaticDataRegistry`，含来源 metadata、SHA-256、严格 parser 与未知 fallback |
 | 合同 / 验收 | [Character Data V2 合同](CHARACTER_DATA_V2_CONTRACT.md)；[验收记录](CHARACTER_DATA_V2_ACCEPTANCE.md) |
 | 本地验证 | 定向测试 `23 passed`；全量 Python `260 passed, 2 warnings, 43 subtests passed`，Node `3 passed`，compileall/diff-check 通过；合成预览已生成并实际查看 |
-| PR / CI | 尚未创建；完成全量验证和预览后创建 Draft PR，不自动合并 |
+| PR / CI | [PR #11](https://github.com/September6969/astrbot_plugin_nikke/pull/11) 为 Draft；最终代码 head `e9d496e` 对应 CI `34089178903` 全绿；本次台账更新会产生新的 docs-only head，必须对新 SHA 单独核验 |
 | 证据边界 | 不访问真实账号，不推导角色属性/技能/OL/Costume，不宣称远程素材授权 |
 
 ## 后续选择规则

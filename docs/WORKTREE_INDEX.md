@@ -11,7 +11,7 @@
 | `E:/DevCache/nikke-union-raid-v2/astrbot_plugin_nikke` | `feat/union-raid-v2@d98cce4` | PR #8 OPEN / Draft；不修改其功能代码 |
 | `E:/DevCache/nikke-announcement-v2/astrbot_plugin_nikke` | `feat/announcement-v2@47fd311` | PR #9 OPEN / Draft；不修改其功能代码 |
 | `E:/DevCache/nikke-dynamic-voice-v2/astrbot_plugin_nikke` | `feat/dynamic-voice-v2@162d9d7` | PR #10 OPEN / Draft；不修改其功能代码 |
-| `E:/DevCache/nikke-character-data-v2/astrbot_plugin_nikke` | `feat/character-data-v2` | 当前主题；从 `origin/main@bada0b3` 独立创建 |
+| `E:/DevCache/nikke-character-data-v2/astrbot_plugin_nikke` | `feat/character-data-v2@e9d496e` | 当前主题；从 `origin/main@bada0b3` 独立创建；PR #11 Draft，CI `34089178903` 全绿 |
 | `E:/DevCache/nikke-pr3-review/astrbot_plugin_nikke` | detached `3414c70` | 旧审阅检查点；不用于开发 |
 | `E:/DevCache/nikke-pr3-review-v2/astrbot_plugin_nikke` | `fix/review-followups@87c1034` | 旧审阅修复分支；不用于当前主题 |
 
