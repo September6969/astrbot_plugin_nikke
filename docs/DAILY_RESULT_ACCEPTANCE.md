@@ -29,7 +29,7 @@
 
 - `tests/test_daily_result_contract.py`、`tests/test_daily_safety.py` 与 Daily 相关 core 回归：10 passed、2 warnings。
 - 覆盖严格存储 round-trip、损坏记录拒绝、pending/unavailable 的状态保存与重检、unknown-after-action、rate-limited、CookieExpired 和不重复调用写接口。
-- 完整 Python：262 passed、43 subtests、2 warnings；Node extension：3 passed；compileall 和 `git diff --check`：通过。
+- 完整 Python：264 passed、43 subtests、2 warnings；Node extension：3 passed；compileall 和 `git diff --check`：通过。
 
 ## 证据边界
 
