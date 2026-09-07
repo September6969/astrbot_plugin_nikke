@@ -70,36 +70,54 @@ def _measure_tree(root: Path) -> tuple[int, int, int]:
     return file_count, total_bytes, temporary_count
 
 
+def _read_disk_usage(root: Path) -> tuple[int | None, int | None]:
+    """读取并校验磁盘容量，拒绝负数、零总量和 free 大于 total 的异常值。"""
+    try:
+        usage = shutil.disk_usage(root)
+    except OSError:
+        return None, None
+
+    free = usage.free
+    total = usage.total
+    if (
+        isinstance(free, bool)
+        or isinstance(total, bool)
+        or not isinstance(free, int)
+        or not isinstance(total, int)
+        or free < 0
+        or total <= 0
+        or free > total
+    ):
+        return None, None
+    return free, total
+
+
 def collect_runtime_health(
     data_dir: str | Path,
     *,
     min_free_bytes: int = DEFAULT_MIN_FREE_BYTES,
 ) -> RuntimeHealth:
     """收集本地目录、缓存和磁盘容量状态；此函数不写入或删除任何文件。"""
-    root = Path(data_dir).expanduser().resolve()
+    root = Path(data_dir).expanduser()
+    # 保留原始目录边界；先 resolve 会把数据目录自身的符号链接变成真实目录。
     data_dir_exists = root.is_dir() and not root.is_symlink()
     database = root / "nikke.sqlite3"
     secret_key = root / "secret.key"
-    database_present = database.is_file() and not database.is_symlink()
-    secret_key_present = secret_key.is_file() and not secret_key.is_symlink()
+    database_present = data_dir_exists and database.is_file() and not database.is_symlink()
+    secret_key_present = data_dir_exists and secret_key.is_file() and not secret_key.is_symlink()
 
     cache_file_count = 0
     cache_bytes = 0
     temporary_file_count = 0
-    for directory_name in CACHE_DIRECTORY_NAMES:
-        count, size, temporary = _measure_tree(root / directory_name)
-        cache_file_count += count
-        cache_bytes += size
-        temporary_file_count += temporary
+    if data_dir_exists:
+        for directory_name in CACHE_DIRECTORY_NAMES:
+            count, size, temporary = _measure_tree(root / directory_name)
+            cache_file_count += count
+            cache_bytes += size
+            temporary_file_count += temporary
 
     usage_root = root if data_dir_exists else root.parent
-    try:
-        usage = shutil.disk_usage(usage_root)
-        disk_free_bytes = usage.free
-        disk_total_bytes = usage.total
-    except OSError:
-        disk_free_bytes = None
-        disk_total_bytes = None
+    disk_free_bytes, disk_total_bytes = _read_disk_usage(usage_root)
 
     issues: list[str] = []
     if not data_dir_exists:
@@ -110,7 +128,9 @@ def collect_runtime_health(
         issues.append("密钥缺失")
     if temporary_file_count:
         issues.append("存在未清理临时缓存")
-    if disk_free_bytes is not None and disk_free_bytes < max(0, min_free_bytes):
+    if disk_free_bytes is None or disk_total_bytes is None:
+        issues.append("磁盘容量不可用")
+    elif disk_free_bytes < max(0, min_free_bytes):
         issues.append("磁盘可用空间偏低")
 
     return RuntimeHealth(
@@ -129,8 +149,10 @@ def collect_runtime_health(
 def _format_bytes(value: int | None) -> str:
     if value is None:
         return "未知"
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return "未知"
     units = ("B", "KiB", "MiB", "GiB", "TiB")
-    amount = float(max(0, value))
+    amount = float(value)
     for unit in units:
         if amount < 1024 or unit == units[-1]:
             break

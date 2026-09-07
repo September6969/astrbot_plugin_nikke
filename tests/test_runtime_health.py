@@ -51,6 +51,41 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             self.assertIn("数据目录缺失", format_runtime_health(snapshot))
             self.assertFalse(root.exists())
 
+    def test_root_symlink_is_not_followed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            target = base / "target"
+            target.mkdir()
+            (target / "cache").mkdir()
+            (target / "cache" / "outside.txt").write_bytes(b"must not count")
+            link = base / "data-link"
+            try:
+                link.symlink_to(target, target_is_directory=True)
+            except (NotImplementedError, OSError) as error:
+                self.skipTest(f"当前平台不支持目录符号链接：{error}")
+
+            snapshot = collect_runtime_health(link, min_free_bytes=0)
+
+            self.assertFalse(snapshot.data_dir_exists)
+            self.assertFalse(snapshot.database_present)
+            self.assertEqual(snapshot.cache_file_count, 0)
+            self.assertEqual(snapshot.cache_bytes, 0)
+
+    def test_invalid_disk_usage_is_unknown_and_attention(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "nikke.sqlite3").write_bytes(b"synthetic-db")
+            (root / "secret.key").write_bytes(b"synthetic-key")
+            with patch("astrbot_plugin_nikke.runtime_health.shutil.disk_usage") as disk_usage:
+                disk_usage.return_value = SimpleNamespace(free=-1, total=1024)
+
+                snapshot = collect_runtime_health(root, min_free_bytes=0)
+
+            self.assertIsNone(snapshot.disk_free_bytes)
+            self.assertIsNone(snapshot.disk_total_bytes)
+            self.assertIn("磁盘容量不可用", format_runtime_health(snapshot))
+            self.assertEqual(snapshot.status, "需关注")
+
     async def test_admin_health_command_includes_readonly_diagnostics(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
