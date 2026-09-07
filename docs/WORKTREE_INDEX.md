@@ -13,7 +13,7 @@
 | `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11 |
 | `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | Spine technical spike | Draft PR #12 |
 | `E:\DevCache\nikke-voice-mapping-v2\astrbot_plugin_nikke` | `feat/voice-mapping-v2` | Voice 映射研究 | Draft PR #13，CI 全绿 |
-| `E:\_codex_work\nikke-roadmap-ledger-v3` | `feat/roadmap-ledger-v3` | 路线图合同债状态核验 | Draft PR #14；head `dd58a89`；CI `34105339675`；工作树 clean |
+| `E:\_codex_work\nikke-roadmap-ledger-v3` | `feat/roadmap-ledger-v3` | 路线图合同债状态核验 | Draft PR #14；当前 head 与 CI 以 PR 检查为权威；工作树 clean |
 | `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15，CI 已验证 |
 | `E:\_codex_work\campaign-resource-lifecycle-v2\astrbot_plugin_nikke` | `feat/campaign-resource-lifecycle-v2` | Campaign renderer 资源生命周期 | Draft PR #16，CI 已验证 |
 | `E:\_codex_work\asset-request-dedup-v2-worktree\astrbot_plugin_nikke` | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | Draft PR #17；head `8c293d1`；CI `34096785354`；工作树 clean |
