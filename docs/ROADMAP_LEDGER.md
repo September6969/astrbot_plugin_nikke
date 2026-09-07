@@ -15,7 +15,7 @@
 | PR | 分支 | 主题 | 当前状态 |
 | --- | --- | --- | --- |
 | #8 | `feat/union-raid-v2` | Union Raid Increment A | OPEN / Draft / CI green；head `c4a6fe4`；CI `34120205125` |
-| #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `65bfc2d`；CI `34114427757` |
+| #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `84f5032`；CI `34120996910` |
 | #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green；head `5187f67`；CI `34116145650` |
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green；head `1853b62`；CI `34112908150` |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green；head `137b931`；CI `34115112516` |
@@ -44,7 +44,7 @@
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
 | Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；当前 head 与 CI 以 PR #14 检查为权威 |
-| Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；`last_changed_at`、自动清理、旧缓存安全迁移；head `fc1c6db`；CI `34097200948` 与 headSha 一致；新增 10 项生命周期行为测试 |
+| Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；有界深度重扫、locale/category/query、旧文版本/乱序、`last_changed_at` 自动清理与安全迁移；版本字段严格为正整数，损坏缓存不静默截断；head `84f5032`；本地主题回归 39 passed、42 subtests，全量 pytest 278 passed、61 subtests、Node 3 passed、compileall/diff check 通过；CI `34120996910` 全绿；未访问真实 CMS、账号或发送消息 |
 | Campaign History numeric contract | `feat/campaign-history-contract-v2` | `bada0b3` | Draft PR #15；严格数值/槽位合同，26 个主题测试、合成图片预览和 CI 已验证 |
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager；同一张卡片内相同 `(tid, resource_id)` 的 portrait 只解析一次；本地 pytest 258 passed、专项 33 passed、Node 3 passed、compileall/diff check 通过；已实际查看 1400×820 合成 Campaign 预览；head `a09493b`；CI `34116765420` 全绿；不宣称全局 N+1 已消除或真实资源联调 |
 | AssetManager request dedup | `feat/asset-request-dedup-v2` | `bada0b3` | Draft PR #17；同一缓存键 5 个并发调用只发 1 次模拟请求；下载成功但原子缓存写入失败时，等待者复用同一内存图片；本地 pytest 258 passed、专项 35 passed、Node 3 passed、compileall/diff check 通过；head `e2d709f`；CI `34117403120` 全绿；仍不宣称全局 N+1、真实资源或账号证据 |
