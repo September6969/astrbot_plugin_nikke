@@ -20,7 +20,7 @@
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green；head `2e77ad2`；CI `34124685883` |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green；head `137b931`；CI `34115112516` |
 | #13 | `feat/voice-mapping-v2` | Voice mapping public research | OPEN / Draft / CI green；head `68138bc`；CI `34115632353` |
-| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；head `966cbb4`；CI `34146571044` 四项全绿 |
+| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；台账与工作树索引已同步；当前 head 与 CI 以 PR #14 最新检查为权威 |
 | #15 | `feat/campaign-history-contract-v2` | Campaign History numeric contract | OPEN / Draft / CI green；head `6a6a641`；CI `34134245113` |
 | #16 | `feat/campaign-resource-lifecycle-v2` | Campaign renderer asset lifecycle | OPEN / Draft / CI green；head `a09493b`；CI `34116765420` |
 | #17 | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | OPEN / Draft / CI green；head `e2d709f`；CI `34117403120` |
@@ -52,7 +52,7 @@
 
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
-| Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；本轮补充 PR #19 的 Python 3.13 证据及 PR #26 的 AstrBot 本地矩阵证据；head `966cbb4`；CI `34146571044` 四项全绿 |
+| Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；本轮补充 PR #19 的 Python 3.13 证据及 PR #26 的 AstrBot 本地矩阵证据；当前 head 与 CI 以 PR #14 最新检查为权威 |
 | Post-Profile V2 status reconciliation | `feat/profile-post-merge-v1` | `bada0b3` | Draft PR #33；在既有 `PROFILE_V2_ACCEPTANCE.md` 合并状态记录之外，同步 `POST_MERGE_STATUS.md` 与 `POST_MERGE_PHASE2_PLAN.md`：当前入口明确 PR #6/#7 已合并、Profile 为 `READY_OFFLINE` 且现场证据仍独立；新增状态入口回归测试；本地专项 1 passed、全量 pytest 257 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `8bb9cd5`；CI `34143501124` 四项全绿；不访问真实账号、不部署 |
 | CDK batch idempotency contract reconciliation | `feat/cdk-batch-contract-v1` | `bada0b3` | Draft PR #34；确认主命令逐码复用 `action_runs`，run key 为 `cdk:{qq_id}:{game_uid}:{SHA256(code)}`，unknown/终态不自动重放，失败/过期可原子重领；更新 README/DEVELOPMENT_PLAN 并新增验收记录；本地专项 42 passed、12 subtests，全量 pytest 256 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；CI `34135996980` 四项全绿；未访问真实账号、未执行兑换或部署 |
 | Structured DailyTaskResult status contract | `feat/daily-result-contract-v1` | `bada0b3` | Draft PR #35；签到主链统一 `SUCCESS`、`ALREADY_DONE`、`PENDING`、`FAILED`、`RATE_LIMITED`、`COOKIE_EXPIRED`、`UNKNOWN_AFTER_ACTION`、`UNAVAILABLE`，持久化改为严格 JSON-safe 记录，旧/损坏记录不静默冒充成功；本地定向 10 passed、全量 pytest 262 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `df7fa7f`；CI `34137301772` 四项全绿；不访问真实账号、不执行签到、不发送消息、不部署，Like/Browse 与现场证据仍未完成 |
