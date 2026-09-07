@@ -1364,21 +1364,29 @@ class NikkePlugin(Star):
         )
 
     async def terminate(self):
-        self._closing = True
-        # 先停止生产任务，再关闭它们依赖的资源。
-        tasks = list(self._background_tasks)
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        if hasattr(self, "feedback_manager") and self.feedback_manager:
-            await self.feedback_manager.close()
-        if hasattr(self, "asset_manager") and self.asset_manager:
-            try:
-                self.asset_manager.close()
-            except Exception as exc:
-                logger.debug(f"[NIKKE] 素材管理器回收跳过: {exc}")
-        await self.web.stop()
-        logger.info("[NIKKE] 插件已停止")
+        lock = getattr(self, "_termination_lock", None)
+        if lock is None:
+            lock = asyncio.Lock()
+            self._termination_lock = lock
+        async with lock:
+            if getattr(self, "_terminated", False):
+                return
+            self._closing = True
+            # 先停止生产任务，再关闭它们依赖的资源。
+            tasks = list(self._background_tasks)
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            if hasattr(self, "feedback_manager") and self.feedback_manager:
+                await self.feedback_manager.close()
+            if hasattr(self, "asset_manager") and self.asset_manager:
+                try:
+                    self.asset_manager.close()
+                except Exception as exc:
+                    logger.debug(f"[NIKKE] 素材管理器回收跳过: {exc}")
+            await self.web.stop()
+            self._terminated = True
+            logger.info("[NIKKE] 插件已停止")
 
     async def close(self):
         await self.terminate()

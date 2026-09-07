@@ -1,7 +1,7 @@
 """后台任务完成、取消及关闭期间的登记行为。"""
 import asyncio
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from types import SimpleNamespace
 from astrbot_plugin_nikke.main import NikkePlugin
 
@@ -31,3 +31,37 @@ class LifecycleTests(IsolatedAsyncioTestCase):
         await task
         await asyncio.sleep(0)
         self.assertEqual(plugin._background_tasks, [])
+
+    async def test_shutdown_is_idempotent(self):
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._closing = False
+        plugin._background_tasks = []
+        plugin.feedback_manager = AsyncMock()
+        plugin.web = AsyncMock()
+        plugin.asset_manager = MagicMock()
+
+        await plugin.terminate()
+        await plugin.terminate()
+
+        plugin.feedback_manager.close.assert_awaited_once()
+        plugin.asset_manager.close.assert_called_once()
+        plugin.web.stop.assert_awaited_once()
+
+    async def test_concurrent_shutdown_waits_for_the_first_cleanup(self):
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._closing = False
+        plugin._background_tasks = []
+        plugin.feedback_manager = AsyncMock()
+        plugin.web = AsyncMock()
+
+        async def delayed_stop():
+            await asyncio.sleep(0)
+
+        plugin.web.stop.side_effect = delayed_stop
+        plugin.asset_manager = MagicMock()
+
+        await asyncio.gather(plugin.terminate(), plugin.terminate())
+
+        plugin.feedback_manager.close.assert_awaited_once()
+        plugin.asset_manager.close.assert_called_once()
+        plugin.web.stop.assert_awaited_once()
