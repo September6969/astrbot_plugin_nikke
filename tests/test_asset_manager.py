@@ -5,7 +5,7 @@ import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import httpx
 from PIL import Image
@@ -111,6 +111,33 @@ class AssetManagerTests(unittest.TestCase):
                         stream.assert_not_called()
                     finally:
                         slots.release()
+            finally:
+                manager.close()
+
+    def test_failed_remote_download_releases_global_slot(self):
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(Path(td), Path(td) / "assets", remote=True)
+            payload = io.BytesIO()
+            Image.new("RGBA", (20, 20), "green").save(payload, "PNG")
+            response = httpx.Response(
+                200,
+                content=payload.getvalue(),
+                request=httpx.Request("GET", "https://example.com/second"),
+            )
+            success_context = MagicMock()
+            success_context.__enter__.return_value = response
+
+            try:
+                with patch.object(AssetManager, "_remote_download_slots", threading.BoundedSemaphore(1)):
+                    with patch(
+                        "astrbot_plugin_nikke.asset_manager.httpx.stream",
+                        side_effect=[httpx.ConnectError("offline"), success_context],
+                    ) as stream:
+                        self.assertIsNone(manager._load("portraits", "failed", "https://example.com/failed"))
+                        image = manager._load("portraits", "second", "https://example.com/second")
+
+                    self.assertEqual(image.size, (20, 20))
+                    self.assertEqual(stream.call_count, 2)
             finally:
                 manager.close()
 
