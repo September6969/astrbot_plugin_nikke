@@ -103,18 +103,26 @@ class AssetManagerTests(unittest.TestCase):
     def test_registry_unknown_ids_do_not_use_generic_sources(self):
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
         with tempfile.TemporaryDirectory() as td:
-            manager = AssetManager(Path(td), assets_dir, remote=True)
+            cache_dir = Path(td) / "cache"
+            for kind, identifier in (("equipment", "999999"), ("favorite", "999999"), ("cube", "999999")):
+                path = cache_dir / kind / f"{identifier}.png"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                Image.new("RGBA", (17, 19), "red").save(path)
+            manager = AssetManager(cache_dir, assets_dir, remote=True)
             try:
-                # 通用来源清单不能把未知 registry ID 变成可请求的远程素材。
+                # 未知 registry ID 既不能远程请求，也不能命中残留的本地同名缓存。
                 manager.sources.update({
                     "equipment/999999.png": "https://example.com/equipment.png",
                     "favorite/999999.png": "https://example.com/favorite.png",
                     "cube/999999.png": "https://example.com/cube.png",
                 })
                 with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
-                    self.assertIsNotNone(manager.get_equipment_icon("head", 999999).getbbox())
-                    self.assertIsNotNone(manager.get_favorite_item_icon(999999).getbbox())
-                    self.assertIsNotNone(manager.get_cube_icon(999999).getbbox())
+                    equipment = manager.get_equipment_icon("head", 999999)
+                    favorite = manager.get_favorite_item_icon(999999)
+                    cube = manager.get_cube_icon(999999)
+                    self.assertNotEqual(equipment.size, (17, 19))
+                    self.assertNotEqual(favorite.size, (17, 19))
+                    self.assertNotEqual(cube.size, (17, 19))
                     stream.assert_not_called()
             finally:
                 manager.close()

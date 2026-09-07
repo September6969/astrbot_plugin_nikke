@@ -29,6 +29,9 @@ class StaticDataRegistryTests(unittest.TestCase):
         self.assertIsNone(registry.resolve("equipment", "310090"))
         self.assertIsNone(registry.resolve("equipment", "../3100901"))
         self.assertIsNone(registry.resolve("unknown", "3100901"))
+        for resource_id in (True, False, 1000304.0, " 1000304", "1000304 ", "+1000304"):
+            with self.subTest(resource_id=resource_id):
+                self.assertIsNone(registry.resolve("cube", resource_id))
 
     def test_hash_mismatch_disables_only_tampered_registry(self):
         with tempfile.TemporaryDirectory() as directory:

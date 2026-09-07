@@ -66,7 +66,9 @@ class StaticDataRegistry:
 
     def resolve(self, kind: str, resource_id: str | int | None) -> str | None:
         """按精确 ID 查找资源，未知 ID 返回 None。"""
-        key = str(resource_id or "").strip()
+        if isinstance(resource_id, bool) or not isinstance(resource_id, (str, int)):
+            return None
+        key = str(resource_id)
         if not self.ID_PATTERN.fullmatch(key):
             return None
         return self._maps.get(kind, {}).get(key)

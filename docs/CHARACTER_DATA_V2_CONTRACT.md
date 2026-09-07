@@ -24,14 +24,14 @@
 
 映射字段合同：
 
-- ID 必须是十进制字符串；不做前导零补齐、模糊匹配或连续 ID 猜测。
+- 映射文件中的 ID 必须是十进制字符串；运行时查询只接受精确整数或无空白、无符号的十进制字符串，拒绝布尔、浮点、前导/尾随空白和符号。不做前导零补齐、模糊匹配或连续 ID 猜测。
 - Equipment resource 必须符合 `icn_equipment_<head|body|arm|leg>_<attacker|defender|supporter>_t...`。
 - Cube resource 必须符合 `harmony_cube_<id>`。
 - Favorite Item resource 必须符合 `favorite_item_<id>`。
 
 ## 失败与 fallback
 
-manifest 缺失、hash 不匹配、JSON 结构异常或资源标识非法时，该 registry 为空并记录校验错误；AssetManager 继续使用对应抽象占位图。未知 ID 返回 `None`，不将相近 ID 或远程 URL 当作已确认映射。
+manifest 缺失、hash 不匹配、JSON 结构异常或资源标识非法时，该 registry 为空并记录校验错误；AssetManager 继续使用对应抽象占位图。未知 ID 返回 `None`，不将相近 ID、远程 URL 或同名本地缓存当作已确认映射；只有 registry 已解析的精确 ID 才能读取其命名空间的本地/远程图标。
 
 ## 证据边界
 

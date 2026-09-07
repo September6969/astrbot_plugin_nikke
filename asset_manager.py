@@ -185,9 +185,12 @@ class AssetManager:
         return image if image is not None else self.fallback("portrait")
 
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
-        resource = self.equipment_map.get(str(equipment_id), "")
-        url = self.game_resource_url(f"icon/equip/{resource}.webp") if resource and self._key(resource) != "missing" else ""
-        image = self._load("equipment", str(equipment_id), url, allow_source=False) if equipment_id else None
+        resource = self.registry.resolve("equipment", equipment_id)
+        if resource is None:
+            image = self._load("slots", slot)
+            return image if image is not None else self.fallback(slot)
+        url = self.game_resource_url(f"icon/equip/{resource}.webp")
+        image = self._load("equipment", str(equipment_id), url, allow_source=False)
         if image is None:
             image = self._load("slots", slot)
         return image if image is not None else self.fallback(slot)
@@ -197,31 +200,17 @@ class AssetManager:
         return image if image is not None else self.fallback(fallback)
 
     def get_favorite_item_icon(self, tid) -> Image.Image:
-        if not tid:
+        resource = self.registry.resolve("favorite_item", tid)
+        if resource is None:
             return self.fallback("favorite")
-        resource = self.favorite_items_map.get(str(tid), "")
-        url = ""
-        if resource:
-            if resource.startswith("http://") or resource.startswith("https://"):
-                url = resource
-            elif "/" in resource:
-                url = self.game_resource_url(resource)
-            else:
-                url = self.game_resource_url(f"icon/favorite/{resource}.webp")
+        url = self.game_resource_url(f"icon/favorite/{resource}.webp")
         return self._icon("favorite", tid, "favorite", url, allow_source=False)
 
     def get_cube_icon(self, tid) -> Image.Image:
-        if not tid:
+        resource = self.registry.resolve("cube", tid)
+        if resource is None:
             return self.fallback("cube")
-        resource = self.cubes_map.get(str(tid), "")
-        url = ""
-        if resource:
-            if resource.startswith("http://") or resource.startswith("https://"):
-                url = resource
-            elif "/" in resource:
-                url = self.game_resource_url(resource)
-            else:
-                url = self.game_resource_url(f"icon/cube/{resource}.webp")
+        url = self.game_resource_url(f"icon/cube/{resource}.webp")
         return self._icon("cube", tid, "cube", url, allow_source=False)
 
     def get_element_icon(self, element):
