@@ -105,7 +105,7 @@ nikke.example.com {
 
 - 确认 DNS 指向服务器，云安全组开放 TCP 80/443。
 - 确认 Caddy 与 AstrBot 位于同一 Docker 网络。
-- 访问 `https://你的域名/healthz`，应返回 `ok: true`。
+- 访问 `https://你的域名/healthz`；只有 SQLite 数据库和 `secret.key` 同时存在时才返回 `200` 与 `ok: true`，否则返回 `503`，不输出路径或密钥内容。
 - 扩展跨域请求只允许来自 Chrome/Edge 扩展页，不再使用 `Access-Control-Allow-Origin: *`。
 
 ### 容器迁移后无法解密

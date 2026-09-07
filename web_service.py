@@ -111,8 +111,28 @@ class BindingWebService:
     async def options(self, _: web.Request) -> web.Response:
         return web.Response(status=204)
 
+    def _storage_ready(self) -> bool:
+        """只检查本地存储文件是否存在，不读取密钥内容或数据库内容。"""
+        database = getattr(self.store, "db_path", None)
+        secret_key = getattr(self.store, "key_path", None)
+        return all(
+            isinstance(path, Path)
+            and path.is_file()
+            and not path.is_symlink()
+            for path in (database, secret_key)
+        )
+
     async def health(self, _: web.Request) -> web.Response:
-        return web.json_response({"ok": True, "service": "nikke-binding", "version": PLUGIN_VERSION})
+        ready = self._storage_ready()
+        return web.json_response(
+            {
+                "ok": ready,
+                "service": "nikke-binding",
+                "version": PLUGIN_VERSION,
+                "storage": "ready" if ready else "unavailable",
+            },
+            status=200 if ready else 503,
+        )
 
     async def create_session(self, request: web.Request) -> web.Response:
         """供受信任的机器人进程创建绑定会话，公网匿名请求不能调用。"""
