@@ -25,7 +25,7 @@
 
 ## 测试与预览
 
-本轮在隔离 Python 3.12 环境执行了主题回归：
+本轮在隔离 Python 3.10.11 环境执行了主题回归：
 
 ```text
 pytest tests/test_announcement_cache_lifecycle.py tests/test_announcement_v2.py tests/test_announcement_versions.py tests/test_announcements.py
@@ -35,7 +35,7 @@ node --test tests/extension.test.cjs                            3 passed
 git diff --check                                                PASS
 ```
 
-当前同一源码全量回归：`278 passed, 2 warnings, 61 subtests`；`compileall` 通过。
+当前同一源码全量回归：`278 passed, 2 warnings, 61 subtests`；`compileall`、Node 扩展测试和 `git diff --check` 均通过。另以合成记录实际查看了语言/分类筛选文本与只读诊断输出：筛选只显示唯一维护公告；诊断只显示数量、范围、locale/category 统计和保留策略，不含正文、订阅目标或凭据。
 
 新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放、新指纹刷新和版本数值合同（12 项行为测试）。
 
@@ -43,7 +43,7 @@ git diff --check                                                PASS
 
 ## 当前交接状态
 
-- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前 head 为 `437b6405c910806447c2fecc418cce53995af425`。
-- 当前 [CI run 34120799701](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34120799701) 的 headSha 与 PR 当前 head 一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。
+- 本次文档更新前已重新核验 [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 为 Draft，head `84f5032693e9c0c1a7e395bc284f6cbf41e2e4cc`；对应 [CI run 34120996910](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34120996910) 的 `headSha` 一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。
+- 本文件不预写本次 docs-only 提交产生的新 SHA；push 后以 PR #9 的实时 `headSha` 与对应 CI 检查作为最终交接证据，避免把前一提交的绿灯冒充最终 head。
 - `NEEDS_LIVE_EVIDENCE`：获授权时才可验证公开 CMS 当前响应和真实 AstrBot 运行环境；本次不执行。
 - `HARD_BLOCKED`：无。
