@@ -17,6 +17,7 @@
 | `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15，CI 已验证 |
 | `E:\_codex_work\campaign-resource-lifecycle-v2\astrbot_plugin_nikke` | `feat/campaign-resource-lifecycle-v2` | Campaign renderer 资源生命周期 | Draft PR #16，CI 已验证 |
 | `E:\_codex_work\asset-request-dedup-v2-worktree\astrbot_plugin_nikke` | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | Draft PR #17；head `8c293d1`；CI `34096785354`；工作树 clean |
+| `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `d8fd215`；CI `34098738387`；工作树 clean |
 
 ## 协作规则
 
