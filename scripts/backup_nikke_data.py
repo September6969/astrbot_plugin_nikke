@@ -44,26 +44,32 @@ def _backup_label(label: str | None) -> str:
 
 
 def _copy_database(source: Path, target: Path) -> None:
-    source_connection = sqlite3.connect(source)
-    target_connection = sqlite3.connect(target)
+    source_connection = None
+    target_connection = None
     try:
+        source_connection = sqlite3.connect(source)
+        target_connection = sqlite3.connect(target)
         source_connection.backup(target_connection)
         target_connection.commit()
-    except sqlite3.Error as exc:
+    except (OSError, sqlite3.Error) as exc:
         raise BackupError("SQLite 备份失败") from exc
     finally:
-        target_connection.close()
-        source_connection.close()
+        if target_connection is not None:
+            target_connection.close()
+        if source_connection is not None:
+            source_connection.close()
 
 
 def _verify_database(path: Path) -> None:
-    connection = sqlite3.connect(path)
+    connection = None
     try:
+        connection = sqlite3.connect(path)
         row = connection.execute("PRAGMA integrity_check").fetchone()
-    except sqlite3.Error as exc:
+    except (OSError, sqlite3.Error) as exc:
         raise BackupError("备份数据库完整性检查失败") from exc
     finally:
-        connection.close()
+        if connection is not None:
+            connection.close()
     if not row or row[0] != "ok":
         raise BackupError("备份数据库完整性检查未通过")
 
@@ -88,9 +94,14 @@ def create_backup(
         raise BackupError("源目录必须同时包含 nikke.sqlite3 和 secret.key")
 
     backup_name = _backup_label(label)
-    destination_root.mkdir(parents=True, exist_ok=True)
+    try:
+        destination_root.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise BackupError("备份输出目录不可用") from exc
+    if not destination_root.is_dir():
+        raise BackupError("备份输出目录不可用")
     final_dir = destination_root / backup_name
-    if final_dir.exists():
+    if final_dir.exists() or final_dir.is_symlink():
         raise BackupError("目标备份已存在，不会覆盖")
 
     staging_dir = Path(tempfile.mkdtemp(prefix=f".{backup_name}-", dir=destination_root))
@@ -98,7 +109,9 @@ def create_backup(
         backup_database = staging_dir / "nikke.sqlite3"
         _copy_database(database, backup_database)
         _verify_database(backup_database)
-        shutil.copyfile(secret_key, staging_dir / "secret.key")
+        backup_key = staging_dir / "secret.key"
+        shutil.copyfile(secret_key, backup_key)
+        backup_key.chmod(0o600)
 
         manifest = {
             "schema_version": 1,
@@ -113,6 +126,8 @@ def create_backup(
             json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
+        if final_dir.exists() or final_dir.is_symlink():
+            raise BackupError("目标备份已存在，不会覆盖")
         staging_dir.replace(final_dir)
         return final_dir
     except OSError as exc:

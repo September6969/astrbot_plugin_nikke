@@ -60,6 +60,23 @@ class DataBackupTests(unittest.TestCase):
             with self.assertRaises(BackupError):
                 create_backup(data_dir, destination, label="stable")
 
+    def test_backup_reports_unusable_destination_and_corrupt_database(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            data_dir = root / "data"
+            data_dir.mkdir()
+            sqlite3.connect(data_dir / "nikke.sqlite3").close()
+            (data_dir / "secret.key").write_bytes(b"key")
+
+            destination_file = root / "destination-file"
+            destination_file.write_bytes(b"not a directory")
+            with self.assertRaisesRegex(BackupError, "备份输出目录不可用"):
+                create_backup(data_dir, destination_file, label="file")
+
+            (data_dir / "nikke.sqlite3").write_bytes(b"not sqlite")
+            with self.assertRaisesRegex(BackupError, "SQLite 备份失败"):
+                create_backup(data_dir, root / "backups", label="corrupt")
+
 
 if __name__ == "__main__":
     unittest.main()

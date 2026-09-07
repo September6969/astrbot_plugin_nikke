@@ -23,7 +23,7 @@ python -m astrbot_plugin_nikke.scripts.backup_nikke_data \
 
 ```text
 pytest -q tests/test_data_backup.py
-2 passed
+3 passed
 ```
 
-测试覆盖数据库内容可恢复、密钥字节保持一致、manifest 文件合同、禁止源目录内备份和禁止同名覆盖。测试只使用临时合成 SQLite 与合成密钥；未读取或写入真实 `data/nikke`，没有现场证据或部署声明。
+测试覆盖数据库内容可恢复、密钥字节保持一致、manifest 文件合同、禁止源目录内备份、禁止同名覆盖、不可用输出目录和损坏 SQLite 的统一错误语义。备份密钥文件会明确收紧为 `600`（在 Windows 上仅作平台允许的权限映射）。测试只使用临时合成 SQLite 与合成密钥；未读取或写入真实 `data/nikke`，没有现场证据或部署声明。
