@@ -33,7 +33,7 @@
 | `E:\_codex_work\cache-cleanup-v1-wt\astrbot_plugin_nikke` | `feat/cache-cleanup-v1` | Safe offline cache cleanup | Draft PR #27；head `577f328`；CI `34167069222` 四项全绿；本地专项 6 passed、全量 pytest 262 passed；工作树 clean |
 | `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1f379d6`；CI `34109454981`；工作树 clean |
 | `E:\_codex_work\caddy-hardening-v1-wt\astrbot_plugin_nikke` | `feat/caddy-hardening-v1` | Caddy example privacy hardening | Draft PR #29；head `160cb25`；CI `34110061494`；工作树 clean |
-| `E:\_codex_work\upgrade-preflight-v1-wt\astrbot_plugin_nikke` | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | Draft PR #30；head `e9bf5eb`；CI `34110890912` 全绿；工作树 clean |
+| `E:\_codex_work\upgrade-preflight-v1-wt\astrbot_plugin_nikke` | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | Draft PR #30；head `a1191d8`；CI `34167575507` 四项全绿；本地专项 8 passed、全量 pytest 264 passed；工作树 clean |
 | `E:\_codex_work\requirement-evidence-matrix-v1-wt\astrbot_plugin_nikke` | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | Draft PR #31；head `369cc98`；CI `34112221252` 全绿；工作树 clean |
 | `E:\_codex_work\tower-snapshot-contract-v1\astrbot_plugin_nikke` | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | Draft PR #32；head `eede5ab`；CI `34127584276` 全绿；工作树 clean |
 | `E:\_codex_work\profile-post-merge-v1\astrbot_plugin_nikke` | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | Draft PR #33；head `8bb9cd5`；CI `34143501124` 四项全绿；同步运行时状态入口并新增文档回归测试；工作树 clean |
