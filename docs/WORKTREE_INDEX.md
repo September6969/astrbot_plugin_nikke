@@ -31,6 +31,7 @@
 | `E:\_codex_work\caddy-hardening-v1-wt\astrbot_plugin_nikke` | `feat/caddy-hardening-v1` | Caddy example privacy hardening | Draft PR #29；head `160cb25`；CI `34110061494`；工作树 clean |
 | `E:\_codex_work\upgrade-preflight-v1-wt\astrbot_plugin_nikke` | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | Draft PR #30；head `e9bf5eb`；CI `34110890912` 全绿；工作树 clean |
 | `E:\_codex_work\requirement-evidence-matrix-v1-wt\astrbot_plugin_nikke` | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | Draft PR #31；head `369cc98`；CI `34112221252` 全绿；工作树 clean |
+| `E:\_codex_work\tower-snapshot-contract-v1\astrbot_plugin_nikke` | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | Draft PR #32；head `eede5ab`；CI `34127584276` 全绿；工作树 clean |
 
 ## 协作规则
 

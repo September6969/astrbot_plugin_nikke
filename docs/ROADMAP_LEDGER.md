@@ -38,6 +38,7 @@
 | #29 | `feat/caddy-hardening-v1` | Caddy example privacy hardening | OPEN / Draft / CI green；head `160cb25`；CI `34110061494` |
 | #30 | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | OPEN / Draft / CI green；head `e9bf5eb`；CI `34110890912` |
 | #31 | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | OPEN / Draft / CI green；head `369cc98`；CI `34112221252` |
+| #32 | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | OPEN / Draft / CI green；head `eede5ab`；CI `34127584276` |
 
 ## 当前推进
 
@@ -62,6 +63,7 @@
 | Caddy example privacy | `feat/caddy-hardening-v1` | `bada0b3` | Draft PR #29；关闭示例 access log，避免 `/bind/{token}` 令牌进入反代日志；静态验证安全头、只读挂载、外部网络及无 6210 宿主机映射；head `160cb25`；CI `34110061494` 全绿；本地 pytest 258 passed、48 subtests、Node 3 passed；未部署 |
 | Upgrade/rollback preflight | `feat/upgrade-preflight-v1` | `bada0b3` | Draft PR #30；只读检查 SQLite integrity/schema、数据库与 `secret.key` 成对存在、可选备份集和磁盘余量，输出 READY/MIGRATION_REQUIRED/BLOCKED；head `e9bf5eb`；CI `34110890912` 全绿；本地 pytest 263 passed、43 subtests、Node 3 passed；不执行迁移/回滚/复制/删除/生产写入 |
 | Final product review evidence matrix | `feat/requirement-evidence-matrix-v1` | `bada0b3` | Draft PR #31；覆盖路线图 27 个 `REQ-*`，区分主线代码/接线、Draft PR、离线测试、现场证据和人工授权；head `369cc98`；CI `34112221252` 全绿；本地 pytest 258 passed、43 subtests、Node 3 passed；不执行真实账号/消息/部署/生产 migration/rollback |
+| Tower static snapshot contract | `feat/tower-snapshot-contract-v1` | `bada0b3` | Draft PR #32；静态塔层快照在加载时校验来源标识、严格日期、来源 hash 文本、塔层键、正整数 `stage_id`/战力和唯一 stage ID；损坏快照安全失败，未知层明确未收录，异常或非规范输入不被静默归一化；已实际查看内置“极乐净土 1”文本输出；本地定向 pytest 5 passed、11 subtests，全量 pytest 259 passed、54 subtests、Node 3 passed、compileall/diff check 通过；head `eede5ab`；CI `34127584276` 全绿；未更新数据、访问来源、读取账号或宣称来源新鲜度/授权/玩家进度 |
 | Character Data V2 registry and cache identity boundary | `feat/character-data-v2` | `bada0b3` | Draft PR #11；静态 Equipment/Cube/Favorite Item registry 保持精确 ID 与 hash 校验；运行时拒绝布尔、浮点、空白和带符号 ID，未知 ID 不会通过 `sources.json`、同名本地缓存或远程请求显示资源；预览脚本可从仓库根目录直接运行并回收资源，已实际查看离线 fallback 合成卡；本地定向 26 passed、6 subtests，全量 pytest 261 passed、49 subtests、Node 3 passed、compileall/diff check 通过；head `2e77ad2`；CI `34124685883` 全绿；仍不宣称完整角色数值、真实账号字段、远程素材授权或产品合成联调 |
 | Spine queue contract boundary | `feat/spine-spike-v2` | `bada0b3` | Draft PR #12；队列入口拒绝布尔/非整数容量、空白任务标识、路径型 `cache_key` 和异常预算/runtime 类型；本地 pytest 265 passed、专项 28 passed、Node 3 passed、compileall/diff check 通过；head `137b931`；CI `34115112516` 全绿；仍不宣称 runtime、许可、Linux headless、真实渲染或生产接线 |
 | Voice mapping duplicate-evidence boundary | `feat/voice-mapping-v2` | `bada0b3` | Draft PR #13；story 审计显式记录 duplicate map/detail ID，重复 detail 行不再因集合去重而报告完整覆盖；本地 pytest 259 passed、专项 10 passed、Node 3 passed、compileall/diff check 通过；head `68138bc`；CI `34115632353` 全绿；仍不宣称 Poke 映射、QQ 播放、音频授权或真实账号操作 |
@@ -73,7 +75,7 @@
 
 ## 任务池
 
-- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；Safe offline cache cleanup / PR #27；Release metadata and configuration / PR #28；Caddy example privacy / PR #29；Upgrade/rollback preflight / PR #30；其余已创建 Draft PR。
+- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；Safe offline cache cleanup / PR #27；Release metadata and configuration / PR #28；Caddy example privacy / PR #29；Upgrade/rollback preflight / PR #30；Tower snapshot contract / PR #32；其余已创建 Draft PR。
 - `READY`：在不依赖上述未合并分支的前提下，继续做可离线验证的独立主题。
 - `WAITING_DEPENDENCY`：Raid Increment B/C 等待相关基线进入 `main`；不从旧 overnight 分支继续开发。
 - `NEEDS_LIVE_EVIDENCE`：真实 Profile、Raid canonical identity、Daily Like/Browse 写入、Voice QQ 实际播放、Spine 生产许可/运行时。
