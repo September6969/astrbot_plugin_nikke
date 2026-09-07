@@ -25,7 +25,7 @@
 | #16 | `feat/campaign-resource-lifecycle-v2` | Campaign renderer asset lifecycle | OPEN / Draft / CI green；head `a09493b`；CI `34116765420` |
 | #17 | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | OPEN / Draft / CI green；head `e2d709f`；CI `34117403120` |
 | #18 | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | OPEN / Draft / CI green；head `b7b19f3`；CI `34118342055` |
-| #19 | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | OPEN / Draft / CI green；head `0e9d323`；CI `34119004278` |
+| #19 | `feat/storage-connection-lifecycle` | SQLite connection lifecycle + Python 3.13 evidence | OPEN / Draft / CI green；head `ffd96a5`；CI `34145647733` 五项全绿（Node、Python 3.10–3.13） |
 | #20 | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | OPEN / Draft / CI green；head `375498c`；CI `34102399018` |
 | #21 | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | OPEN / Draft / CI green；head `a9ccb48`；CI `34102939859` |
 | #22 | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | OPEN / Draft / CI green；head `6943e12`；CI `34104071393` |
