@@ -15,7 +15,7 @@
 | PR | 分支 | 主题 | 当前状态 |
 | --- | --- | --- | --- |
 | #8 | `feat/union-raid-v2` | Union Raid Increment A | OPEN / Draft / CI green；head `aab6d2b`；CI `34113768058` |
-| #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `fc1c6db`；CI `34097200948` |
+| #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `65bfc2d`；CI `34114427757` |
 | #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green |
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green；head `1853b62`；CI `34112908150` |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green |
@@ -64,6 +64,7 @@
 | Final product review evidence matrix | `feat/requirement-evidence-matrix-v1` | `bada0b3` | Draft PR #31；覆盖路线图 27 个 `REQ-*`，区分主线代码/接线、Draft PR、离线测试、现场证据和人工授权；head `369cc98`；CI `34112221252` 全绿；本地 pytest 258 passed、43 subtests、Node 3 passed；不执行真实账号/消息/部署/生产 migration/rollback |
 | Character Data V2 registry boundary | `feat/character-data-v2` | `bada0b3` | Draft PR #11；静态 Equipment/Cube/Favorite Item registry 保持精确 ID 与 hash 校验；未知 ID 不再通过通用 `sources.json` 触发远程请求；head `1853b62`；本地 pytest 261 passed、43 subtests、Node 3 passed、compileall/diff check 通过；CI `34112908150` 全绿；仍不宣称完整角色数值、真实账号字段、远程素材授权或产品合成联调 |
 | Union Raid Increment A identifier boundary | `feat/union-raid-v2` | `bada0b3` | Draft PR #8；范围/HP/重复记录语义保持保守；排名拒绝空白身份、空/非标 Boss ID 与角色 ID；head `aab6d2b`；本地 pytest 266 passed、54 subtests、Node 3 passed、compileall/diff check 通过；CI `34113768058` 全绿；分页完整性、canonical identity、历史赛季和“我的战斗”仍未宣称完成 |
+| Announcement V2 source/record boundary | `feat/announcement-v2` | `bada0b3` | Draft PR #9；深度读取不回退旧源；稳定 ID 与核心文本字段严格校验；head `65bfc2d`；本地 pytest 276 passed、49 subtests、Node 3 passed、compileall/diff check 通过；CI `34114427757` 全绿；未访问真实 CMS、账号或发送消息 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
 
