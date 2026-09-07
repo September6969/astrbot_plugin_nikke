@@ -22,6 +22,7 @@
 | `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `375498c`；CI `34102399018`；工作树 clean |
 | `E:\_codex_work\shutdown-lifecycle\astrbot_plugin_nikke` | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | Draft PR #21；head `a9ccb48`；CI `34102939859`；工作树 clean |
 | `E:\_codex_work\data-backup-hardening\astrbot_plugin_nikke` | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | Draft PR #22；head `6943e12`；CI `34104071393`；工作树 clean |
+| `E:\_codex_work\health-diagnostics-v1\astrbot_plugin_nikke` | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | Draft PR #23；head `4a7190b`；CI `34105103222`；工作树 clean |
 
 ## 协作规则
 
