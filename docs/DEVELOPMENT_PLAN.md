@@ -328,7 +328,7 @@ evidence/
 | Union Raid Overview | `MVP + DEBT` | Boss HP 总览可用；多轮选择和 HP clamp 有债 |
 | Union Raid Ranking/My | `TODO`，已有结构 fixture | GetUnionRaidData fixture 已有，但未建模型/命令 |
 | CDK 单条 | `DONE` | 幂等、超时 unknown、业务错误、真实字段合同较完整 |
-| CDK 批量 | `PARTIAL` | 串行/账号锁已有；未复用 action_runs 持久幂等 |
+| CDK 批量 | `READY_OFFLINE / NEEDS_LIVE_EVIDENCE` | 串行/账号锁和逐码 action_runs 持久幂等已有；真实兑换响应、生产频控与错误分布仍待授权现场证据 |
 | 公告/日程查询 | `PARTIAL + DEBT` | 缓存/解析/查询可用；正式源和版本逻辑有债 |
 | 公告自动推送 | `TODO` | 去重基础有，目标订阅/调度发送未完成 |
 | 社区签到 | `PARTIAL + SAFETY DEBT` | 写接口与写后查询已有；模糊超时后可能再次提交 |
@@ -1526,7 +1526,7 @@ total_damage DESC
 
 # 15. CDK
 
-状态：`单条 DONE / 批量 PARTIAL`
+状态：`单条 DONE / 批量 READY_OFFLINE；真实兑换仍 NEEDS_LIVE_EVIDENCE`
 
 ## 15.1 API
 
@@ -1603,43 +1603,40 @@ RESULT_UNKNOWN 语义
 
 ```text
 max_items = 10
-default delay = 0.5s
+default delay = 1.0s（服务层将更小值钳制为 1.0）
 同账号 async lock
 串行
 rate limit stop
 CookieExpired stop
 ```
 
-但批量路径：
+批量路径在主命令中传入同一个 `NikkeStore`，每个 code 使用与单条一致的持久 run key：
 
 ```text
 CdkService.redeem_batch()
 ↓
+_redeem_persistently()
+↓
 _redeem_single_core()
 ```
 
-没有复用 main 单条的：
+run key：
 
 ```text
-action_runs persistent idempotency
+cdk:{qq_id}:{game_uid}:{SHA256(code)}
 ```
 
-因此：
+已验证的离线语义：
 
 ```text
-用户重复执行同一批 batch
-会再次向官方接口提交这些 code
+success / terminal / unknown：不自动再次提交
+failed / expired：允许一次原子重领
+running：新请求不抢占；超过 120 秒先隔离为 unknown
+CookieExpired / rate limit：中止剩余批量
+取消：保存 unknown 后继续传播取消
 ```
 
-虽然已兑换码可能由官方返回 terminal error，但这仍是额外写请求。
-
-如果要把批量标为 `DONE`，建议补：
-
-```text
-per-code persistent run key
-或
-批量命令复用单条 idempotent execution primitive
-```
+因此批量持久幂等已达到 `READY_OFFLINE`；仍不能据此宣称真实账号兑换、生产参数校准或真实错误分布已验收。
 
 ## 15.5 Batch 参数
 
@@ -1647,7 +1644,7 @@ per-code persistent run key
 
 ```text
 最多 10
-0.5 秒间隔
+1.0 秒间隔
 ```
 
 旧文档出现过：
@@ -3111,21 +3108,23 @@ slot
 
 ### A-CDK-01：批量持久幂等
 
-状态：`TODO`
+状态：`IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / NEEDS_LIVE_EVIDENCE`
 
-当前 batch 没有完全复用：
+当前 batch 已复用：
 
 ```text
 action_runs
 ```
 
-目标是每个 CDK 都使用与单条一致的：
+每个 CDK 使用与单条一致的：
 
 ```text
 qq_id + game_uid + SHA256(code)
 ```
 
 执行语义。
+
+`success`、`terminal`、`unknown` 不自动重放；`failed`、`expired` 原子重领；过期 `running` 先隔离为 `unknown`。这些是离线合同证据，不等于真实账号兑换验收。
 
 ### A-CDK-02：批量参数生产校准
 
@@ -3135,7 +3134,7 @@ qq_id + game_uid + SHA256(code)
 
 ```text
 max_items = 10
-delay = 0.5s
+delay = 1.0s（服务层最小值）
 ```
 
 需要通过真实生产观察决定：
