@@ -36,6 +36,7 @@ git diff --check                           PASS
 
 ## 当前交接状态
 
-- 本文档所在提交尚未创建 PR；提交、push、Draft PR 和最终 head SHA/CI 将在下一检查点写入 [路线图台账](ROADMAP_LEDGER.md)。
+- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 已创建为 Draft，实施提交为 `16662a58028d9329fe6c548f704b2c74f4ef07db`。
+- 实施提交的 [CI run 34086167762](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34086167762) 已成功：Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。本文档状态提交会形成新的 docs-only head，必须单独等待其对应 CI；不把前一 SHA 的成功冒充为新 head 的结果。
 - `NEEDS_LIVE_EVIDENCE`：获授权时才可验证公开 CMS 当前响应和真实 AstrBot 运行环境；本次不执行。
 - `HARD_BLOCKED`：无。

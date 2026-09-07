@@ -9,7 +9,7 @@
 | `E:/DevCache/nikke-post-merge/astrbot_plugin_nikke` | `chore/post-merge-sync@588fc47` | PR #6 已合并的文档检查点 |
 | `E:/DevCache/nikke-profile-v2/astrbot_plugin_nikke` | `feat/profile-v2@7df799a` | PR #7 已合并的验收分支 |
 | `E:/DevCache/nikke-union-raid-v2/astrbot_plugin_nikke` | `feat/union-raid-v2@d98cce4` | PR #8 OPEN / Draft，CI 已绿 |
-| `E:/DevCache/nikke-announcement-v2/astrbot_plugin_nikke` | `feat/announcement-v2@bada0b3` | 当前独立 Announcement V2 Increment A；本表提交前尚未 push/PR |
+| `E:/DevCache/nikke-announcement-v2/astrbot_plugin_nikke` | `feat/announcement-v2@16662a5` | 当前独立 Announcement V2 Increment A；[PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) OPEN / Draft，实施 SHA 的 CI 已绿；本状态提交将形成新的 docs-only head |
 | `E:/DevCache/nikke-pr3-review/astrbot_plugin_nikke` | detached `3414c70` | 旧审阅检查点；不用于开发 |
 | `E:/DevCache/nikke-pr3-review-v2/astrbot_plugin_nikke` | `fix/review-followups@87c1034` | 旧审阅修复分支；不用于当前主题 |
 

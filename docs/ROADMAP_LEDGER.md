@@ -11,6 +11,7 @@
 | PR #6 | MERGED，Post-Merge Sync |
 | PR #7 | MERGED，Profile V2 |
 | PR #8 | OPEN / Draft，`feat/union-raid-v2@d98cce4c8b898e1ba3aeca3d4234ea2d780cb803`；CI run `34083806757` 的 Node 与 Python 3.10/3.11/3.12 均 SUCCESS |
+| PR #9 | OPEN / Draft，`feat/announcement-v2@16662a58028d9329fe6c548f704b2c74f4ef07db`；CI run `34086167762` 的 Node 与 Python 3.10/3.11/3.12 均 SUCCESS |
 
 ## 当前独立主题：Announcement V2 Increment A
 
@@ -20,7 +21,7 @@
 | 代码与合同 | 已完成本地实现，见 [Announcement V2 合同](ANNOUNCEMENT_V2_CONTRACT.md) 与 [验收记录](ANNOUNCEMENT_V2_ACCEPTANCE.md) |
 | 本地验证 | Python `264 passed, 2 warnings, 43 subtests passed`；Node `3 passed`；`compileall` 与 `git diff --check` 通过 |
 | 合成预览 | 已实际查看筛选公告及只读诊断文本；不是图片卡、真实账号、真实 CMS 或消息发送证据 |
-| PR / CI | 尚待本分支首个提交、push、Draft PR 及最终 SHA 对应 CI |
+| PR / CI | [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 为 Draft；实施提交 `16662a5` 的 CI run `34086167762` 全绿。此状态提交会产生新的 docs-only head，须单独等待其 CI，不能把实施 SHA 的结果冒充为后续 SHA 的结果。 |
 | 证据缺口 | 未经授权，不访问真实账号、不做写操作、不发送消息；公开 CMS 未在本次执行中读取 |
 
 ## 后续选择规则
