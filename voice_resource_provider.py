@@ -60,14 +60,9 @@ class VoiceResourceProvider:
             self.cache.mkdir(parents=True, exist_ok=True)
             target = self.cache / f"{key}.mp3"
             manifest = self.cache / f"{key}.json"
-            if target.is_file() and manifest.is_file() and time.time() - manifest.stat().st_mtime < 86400 and target.stat().st_size <= self.MAX_BYTES:
-                raw = target.read_bytes()
-                try:
-                    saved = json.loads(manifest.read_text(encoding="utf-8"))
-                    if saved.get("sha256") == hashlib.sha256(raw).hexdigest() and self.is_mp3(raw):
-                        return target
-                except (ValueError, AttributeError):
-                    pass
+            cached = self._cached_source(target, manifest, map_key, speech_id, locale)
+            if cached is not None:
+                return cached
             async with httpx.AsyncClient(timeout=10, transport=self.transport, follow_redirects=False) as client:
                 mapping = await self._read(client, f"/scene/voice_map/{map_key}.json", 1024 * 1024)
                 identifiers = json.loads(mapping)
@@ -91,6 +86,27 @@ class VoiceResourceProvider:
                 manifest_temporary.unlink(missing_ok=True)
             return target
 
+    def _cached_source(self, target, manifest, map_key, speech_id, locale):
+        """只接受与当前请求身份、完整性和有效期都一致的本地缓存。"""
+        try:
+            age = time.time() - manifest.stat().st_mtime
+            if not target.is_file() or not manifest.is_file() or not 0 <= age < 86400 or target.stat().st_size > self.MAX_BYTES:
+                return None
+            raw = target.read_bytes()
+            saved = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            return None
+        expected_source_path = f"/voice/{locale}/{speech_id}.mp3"
+        if (
+            not isinstance(saved, dict)
+            or saved.get("sha256") != hashlib.sha256(raw).hexdigest()
+            or saved.get("source_path") != expected_source_path
+            or saved.get("map_key") != map_key
+            or not self.is_mp3(raw)
+        ):
+            return None
+        return target
+
     @staticmethod
     def is_mp3(content):
         return len(content) >= 4 and (content.startswith(b"ID3") or content[0] == 255 and content[1] & 224 == 224)
@@ -112,3 +128,4 @@ class VoiceResourceProvider:
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
+        self._tasks.clear()
