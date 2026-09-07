@@ -18,7 +18,7 @@
 
 ```text
 pytest -q tests/test_storage_migration.py
-4 passed
+5 passed
 ```
 
-测试使用合成密钥和临时 SQLite，验证旧行保留、字段补齐、版本写入、重复初始化、迁移失败回滚和未来版本保护。
+测试使用合成密钥和临时 SQLite，验证旧行保留、字段补齐、版本写入、重复初始化、迁移失败回滚、未来版本保护，以及负数/小数/非数字 schema 版本拒绝且原值不被规范化覆盖。

@@ -151,6 +151,40 @@ class StorageMigrationTests(unittest.TestCase):
                 connection.close()
             self.assertEqual(version, SCHEMA_VERSION + 1)
 
+    def test_invalid_schema_version_is_rejected_without_normalizing(self) -> None:
+        invalid_versions = (
+            ("negative", -1),
+            ("fractional", 1.5),
+            ("text", "not-a-number"),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            for name, invalid_version in invalid_versions:
+                with self.subTest(name=name):
+                    root = Path(directory) / name
+                    NikkeStore(root)
+                    connection = sqlite3.connect(root / "nikke.sqlite3")
+                    try:
+                        connection.execute(
+                            "UPDATE schema_meta SET schema_version=? WHERE schema_name=?",
+                            (invalid_version, SCHEMA_NAME),
+                        )
+                        connection.commit()
+                    finally:
+                        connection.close()
+
+                    with self.assertRaisesRegex(RuntimeError, "版本无效"):
+                        NikkeStore(root)
+
+                    connection = sqlite3.connect(root / "nikke.sqlite3")
+                    try:
+                        version = connection.execute(
+                            "SELECT schema_version FROM schema_meta WHERE schema_name=?",
+                            (SCHEMA_NAME,),
+                        ).fetchone()[0]
+                    finally:
+                        connection.close()
+                    self.assertEqual(version, invalid_version)
+
 
 if __name__ == "__main__":
     unittest.main()

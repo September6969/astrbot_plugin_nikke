@@ -135,10 +135,18 @@ class NikkeStore:
         if row is None:
             current_version = None
         else:
+            raw_version = row[0]
             try:
-                current_version = int(row[0])
-            except (TypeError, ValueError) as exc:
+                current_version = int(raw_version)
+            except (TypeError, ValueError, OverflowError) as exc:
                 raise RuntimeError("数据库 schema 版本无效") from exc
+            if (
+                isinstance(raw_version, bool)
+                or not isinstance(raw_version, int)
+                or raw_version < 0
+                or current_version != raw_version
+            ):
+                raise RuntimeError("数据库 schema 版本无效")
             if current_version > SCHEMA_VERSION:
                 raise RuntimeError("数据库 schema 高于当前插件，请先升级插件")
 
