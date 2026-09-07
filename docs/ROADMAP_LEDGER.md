@@ -33,6 +33,7 @@
 | #24 | `feat/storage-migration-v1` | Transactional SQLite schema migration | OPEN / Draft / CI green；head `16c9ac5`；CI `34106285962` |
 | #25 | `feat/healthz-readiness-v1` | Healthz storage readiness contract | OPEN / Draft / CI green；head `7e5e928`；CI `34106867556` |
 | #26 | `feat/log-privacy-v1` | Plugin log privacy hardening | OPEN / Draft / CI green；head `87e63e4`；CI `34108218451` |
+| #27 | `feat/cache-cleanup-v1` | Safe offline cache cleanup | OPEN / Draft / CI green；head `bb94d18`；CI `34108821103` |
 
 ## 当前推进
 
@@ -52,12 +53,13 @@
 | Storage migration hardening | `feat/storage-migration-v1` | `bada0b3` | Draft PR #24；schema_meta 版本化、显式事务/rollback、旧 accounts 字段兼容、未来 schema 拒绝降级；head `16c9ac5`；CI `34106285962` 全绿；仅临时 SQLite，无生产 migration 声明 |
 | Healthz readiness | `feat/healthz-readiness-v1` | `bada0b3` | Draft PR #25；`/healthz` 仅在 SQLite 与密钥均为普通文件时返回 200/ready，否则 503/unavailable；head `7e5e928`；CI `34106867556` 全绿；仅合成文件，无部署声明 |
 | Plugin log privacy | `feat/log-privacy-v1` | `bada0b3` | Draft PR #26；统一异常/动态日志文本脱敏，覆盖主流程、公告、素材、卡片、Spine、反馈与绑定错误摘要；head `87e63e4`；CI `34108218451` 全绿；本地专项测试与静态审计通过，完整本地矩阵缺少 `astrbot` 依赖；无真实账号/部署声明 |
+| Safe offline cache cleanup | `feat/cache-cleanup-v1` | `bada0b3` | Draft PR #27；默认只读计划，显式 `--apply` 仅清理白名单缓存和公告缓存，保护 cards/SQLite/secret.key/扩展 ZIP 并跳过符号链接；head `bb94d18`；CI `34108821103` 全绿；本地 pytest 259 passed、Node 3 passed；未在真实 data/nikke 应用清理 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
 
 ## 任务池
 
-- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；其余已创建 Draft PR。
+- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；AssetManager request dedup / PR #17；Daily Evidence / PR #18；SQLite connection lifecycle / PR #19；Runtime config hardening / PR #20；Plugin shutdown lifecycle / PR #21；Data backup hardening / PR #22；Runtime health diagnostics / PR #23；Storage migration hardening / PR #24；Healthz readiness / PR #25；Plugin log privacy / PR #26；Safe offline cache cleanup / PR #27；其余已创建 Draft PR。
 - `READY`：在不依赖上述未合并分支的前提下，继续做可离线验证的独立主题。
 - `WAITING_DEPENDENCY`：Raid Increment B/C 等待相关基线进入 `main`；不从旧 overnight 分支继续开发。
 - `NEEDS_LIVE_EVIDENCE`：真实 Profile、Raid canonical identity、Daily Like/Browse 写入、Voice QQ 实际播放、Spine 生产许可/运行时。
