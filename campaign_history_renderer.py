@@ -94,6 +94,8 @@ class CampaignHistoryRenderer(CardRenderer):
             card_width = (self.WIDTH - padding * 2 - 4 * 16) // 5
             card_height = 550
             card_y = 150
+            # 同一张卡片内复用相同资源键，避免重复触发资源解析或远程缓存检查。
+            portrait_cache = {}
 
             for index, member in enumerate(record.members[:5]):
                 card_x = padding + index * (card_width + 16)
@@ -118,7 +120,12 @@ class CampaignHistoryRenderer(CardRenderer):
                 )
 
                 # 角色立绘区域
-                portrait = self.assets.get_character_portrait(member.tid, member.resource_id)
+                portrait_key = (str(member.tid), str(member.resource_id))
+                if portrait_key not in portrait_cache:
+                    portrait_cache[portrait_key] = self.assets.get_character_portrait(
+                        member.tid, member.resource_id
+                    )
+                portrait = portrait_cache[portrait_key]
                 portrait_box = (card_x + 14, card_y + 48, card_width - 28, 330)
                 # 浅灰底衬
                 draw.rounded_rectangle(
