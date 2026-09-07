@@ -54,7 +54,7 @@
 
 若绑定域名在本地代理下出现 `SSL_connect error 5`，可从 [GitHub Releases](https://github.com/September6969/astrbot_plugin_nikke/releases) 下载同一扩展包；不要关闭浏览器证书校验。
 
-仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。
+仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。示例默认关闭 Caddy access log，因为绑定 URL 路径包含一次性令牌；反代配置边界见 [Caddy 验收记录](docs/CADDY_ACCEPTANCE.md)。
 
 最小 Caddy 配置：
 
