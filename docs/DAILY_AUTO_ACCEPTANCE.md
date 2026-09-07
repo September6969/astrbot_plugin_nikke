@@ -20,8 +20,8 @@
 
 ## 证据边界
 
-- 定向回归：`tests/test_daily_auto.py`、`tests/test_daily_safety.py` 与 `tests/test_core.py` 为 48 passed、4 subtests、2 warnings。
-- 完整 Python：263 passed、43 subtests、2 warnings；Node extension：3 passed；compileall 与 `git diff --check`：通过。
+- 定向回归：`tests/test_daily_auto.py`、`tests/test_daily_safety.py` 与 `tests/test_core.py` 为 49 passed、4 subtests、2 warnings。
+- 完整 Python：264 passed、43 subtests、2 warnings；Node extension：3 passed；compileall 与 `git diff --check`：通过。
 - `SYNTHETIC_VERIFIED`：SQLite 升级默认值、账号筛选、命令路由、全局关闭时的无提交提示、定时与汇总筛选。
 - `NEEDS_LIVE_EVIDENCE`：授权账号在真实调度时间下的可见行为与真实签到响应；本主题没有访问账号、执行签到、发送消息或部署。
 - Like/Browse 没有接入，也不因该偏好字段宣称可自动执行。
