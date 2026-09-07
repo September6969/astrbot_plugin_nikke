@@ -1,6 +1,14 @@
-# Post-Merge 状态（2026-09-06）
+# Post-Merge 状态
 
-这是合并后的运行时状态入口。本文记录本次从远端重新核验的事实；旧的 overnight 报告仍是历史验收记录，不代表当前开发分支或当前未合并工作。
+这是合并后的运行时状态入口。本文保留 2026-09-06 的 A/B 交接事实，并在 2026-09-07 重新核验合并状态；旧的 overnight 报告仍是历史验收记录，不代表当前开发分支或当前未合并工作。
+
+## 当前快照（2026-09-07）
+
+- 当前远端基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。
+- PR #6（Post-Merge Sync）和 PR #7（Profile V2）均已合并；旧 `feat/overnight-backlog` 仅作历史恢复点。
+- `/妮姬 我的` 已完成命令→三请求 Dashboard→Builder→Renderer→PNG 的离线闭环；字段语义、分区去重、无 `CharacterDetails` N+1、行为测试和合成预览见 [Profile V2 验收](PROFILE_V2_ACCEPTANCE.md)。
+- 上述 Profile 状态是 `READY_OFFLINE`，不是对真实账号、真实网络或部署环境的验收声明。
+- 后续主题必须从最新 `origin/main` 建立独立 worktree/branch/Draft PR；不直接改 main、不自动 merge、不访问未授权账号或执行账号写入/消息发送。
 
 ## 基线与 PR #5
 
@@ -8,7 +16,7 @@
 | --- | --- |
 | 仓库 | `September6969/astrbot_plugin_nikke` |
 | 默认分支 | `main` |
-| 当前远端基线 | `origin/main@a812b7247e997e87886d9c076459bb2463123b15` |
+| 当前远端基线 | `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8` |
 | PR | [#5 Feat/overnight backlog](https://github.com/September6969/astrbot_plugin_nikke/pull/5) |
 | PR head | `9a3db964d05ccbed1053ad35a6670cebe572a6c2` |
 | 合并时间 | `2026-09-06T17:41:35Z` |
@@ -30,7 +38,7 @@ PR #5 合并前最终 PR CI run 为 [34049251965](https://github.com/September69
 
 | 能力 | 模块/结构 | 命令接线 | 真实环境证据 |
 | --- | --- | --- | --- |
-| `/妮姬 我的` Profile | 已有 client、model、builder、renderer 与结构化测试 | 已接线，Profile V2 继续完善 | 未使用真实账号；仅离线合成与合成响应测试 |
+| `/妮姬 我的` Profile | 已合并 Profile V2 的 client、model、builder、renderer 与结构化测试 | 已接线；三请求 Dashboard、分区与 PNG 闭环已离线验收 | 未使用真实账号；仅离线合成与合成响应测试 |
 | Campaign | 已有 stage resolver/history builder/renderer | 已有查询路径 | 未宣称完整账号联调 |
 | Union Raid | 已有 client、builder、renderer、fixtures 与诊断 | 部分查询路径已接线 | 身份、多轮和范围仍需证据 |
 | Daily | 已有只读状态与受控写入框架 | 默认关闭 | 未宣称真实写后状态变化已验收 |
@@ -43,13 +51,13 @@ PR #5 已收口的审核修复包括 CDK stale-running 防重放、取消传播�
 
 当前没有已确认的永久技术阻塞。仍未完成的事项必须按证据状态处理，不能由合成数据、未接线模块或公开资源访问替代真实联调/资源授权：
 
-- Profile V2：字段合同、缺失/异常值语义、分区去重、请求预算、行为测试和视觉预览；见 [POST_MERGE_PHASE2_PLAN.md](POST_MERGE_PHASE2_PLAN.md)。
+- Profile V2：真实账号字段兼容、真实 `/妮姬 我的` 与部署环境图片仍需授权现场证据；离线验收见 [Profile V2 验收](PROFILE_V2_ACCEPTANCE.md)。
 - Raid 身份关联、多轮范围和剩余次数语义。
 - Daily 写入后的真实状态变化。
 - Voice 角色/皮肤映射、动态 Poke 接线和实际播放送达。
 - Spine 可授权 runtime、真实 server-side render 与 benchmark。
 
-## 本次状态入口验证
+## 历史 A 阶段基线验证（2026-09-06）
 
 A 的文档工作树从上述 `origin/main` 创建，分支名为 `chore/post-merge-sync`。新树的基线回归命令为：
 
@@ -59,4 +67,4 @@ PYTHONPATH=E:/DevCache/nikke-post-merge python -m pytest -q
 
 实际结果（Python 3.10.11，2026-09-06）：`248 passed, 2 warnings, 43 subtests passed`。这是合并后基线回归，不是 Profile V2 的验收结果；A 文档变更后的复核结果写入本分支交接记录。
 
-当前 A 已形成 [PR #6](https://github.com/September6969/astrbot_plugin_nikke/pull/6)。下一步：修正文档状态 → CI → 合并 PR #6 → Profile V2 更新到最新 `origin/main`。不自动合并；PR #6 合并后再同步 `feat/profile-v2`。
+该命令和结果仅记录 A 阶段当时的基线回归。PR #6 随后已合并，PR #7 也已合并；当前动作以本文开头的“当前快照”及当前远端核验为准，不能再把这段历史文字当作待办。
