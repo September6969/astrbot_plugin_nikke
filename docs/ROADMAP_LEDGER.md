@@ -29,7 +29,7 @@
 | #20 | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | OPEN / Draft / CI green；head `6e00c5a`；CI `34163558500` |
 | #21 | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | OPEN / Draft / CI green；head `f21cdb1`；CI `34163964573` |
 | #22 | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | OPEN / Draft / CI green；head `69fb952`；CI `34164382428` |
-| #23 | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | OPEN / Draft / CI green；head `4a7190b`；CI `34105103222` |
+| #23 | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | OPEN / Draft / CI green；head `79340a9`；CI `34164857009` |
 | #24 | `feat/storage-migration-v1` | Transactional SQLite schema migration | OPEN / Draft / CI green；head `16c9ac5`；CI `34106285962` |
 | #25 | `feat/healthz-readiness-v1` | Healthz storage readiness contract | OPEN / Draft / CI green；head `7e5e928`；CI `34106867556` |
 | #26 | `feat/log-privacy-v1` | Plugin log privacy hardening | OPEN / Draft / CI green；head `b1f17a2`；CI `34146296068` 四项全绿（Node、Python 3.10–3.12） |
@@ -70,7 +70,7 @@
 | Runtime config hardening | `feat/runtime-config-hardening` | `bada0b3` | Draft PR #20；非法数值配置和损坏持久化调度字段按合同回退，不让调度循环退出；新增持久化读取 `TypeError`/`ValueError` 按字段隔离回退，避免损坏 JSON 退出调度；本地 Python 3.10.11 专项 3 passed、全量 259 passed、43 subtests、2 warnings，Python 3.13.13 专项 3 passed、1 warning，Node 3 passed、compileall/diff check 通过；head `6e00c5a`；CI `34163558500` 四项全绿；Python 3.13 全量仍受未合并 PR #19 的 WinError 32 句柄问题限制，不宣称 3.13 全量兼容 |
 | Plugin shutdown lifecycle | `feat/plugin-shutdown-lifecycle` | `bada0b3` | Draft PR #21；顺序/并发 terminate 只回收一次资源；反馈、素材或 Web 回收异常时仍继续尝试后续资源，重新抛出首个异常且不设置完成标记，后续可重试；本地 Python 3.10.11 专项 5 passed、全量 259 passed、43 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；head `f21cdb1`；CI `34163964573` 四项全绿；无 UI/渲染变化，不宣称现场或生产证据 |
 | Data backup hardening | `feat/data-backup-hardening` | `bada0b3` | Draft PR #22；离线备份 `nikke.sqlite3` 与 `secret.key`，SQLite integrity_check、SHA-256 manifest、临时目录落盘和禁止覆盖；输出目录占用、损坏 SQLite 等异常统一为 `BackupError`，备份密钥收紧为 `600`；本地 Python 3.10.11 专项 3 passed、全量 259 passed、43 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；head `69fb952`；CI `34164382428` 四项全绿；仅合成数据，无真实恢复/部署声明 |
-| Runtime health diagnostics | `feat/health-diagnostics-v1` | `bada0b3` | Draft PR #23；`/妮姬 管理 健康` 接入只读数据/缓存/临时文件/磁盘摘要，不删除缓存、不输出路径或凭据；head `4a7190b`；CI `34105103222` 全绿；仅合成数据，无现场/部署声明 |
+| Runtime health diagnostics | `feat/health-diagnostics-v1` | `bada0b3` | Draft PR #23；`/妮姬 管理 健康` 接入只读数据/缓存/临时文件/磁盘摘要，拒绝跟随数据根目录符号链接并将异常磁盘容量降级为未知，不删除缓存、不输出路径或凭据；head `79340a9`；CI `34164857009` 全绿；仅合成数据，无现场/部署声明 |
 | Storage migration hardening | `feat/storage-migration-v1` | `bada0b3` | Draft PR #24；schema_meta 版本化、显式事务/rollback、旧 accounts 字段兼容、未来 schema 拒绝降级；head `16c9ac5`；CI `34106285962` 全绿；仅临时 SQLite，无生产 migration 声明 |
 | Healthz readiness | `feat/healthz-readiness-v1` | `bada0b3` | Draft PR #25；`/healthz` 仅在 SQLite 与密钥均为普通文件时返回 200/ready，否则 503/unavailable；head `7e5e928`；CI `34106867556` 全绿；仅合成文件，无部署声明 |
 | Plugin log privacy | `feat/log-privacy-v1` | `bada0b3` | Draft PR #26；统一异常/动态日志文本脱敏，覆盖主流程、公告、素材、卡片、Spine、反馈与绑定错误摘要；补充 Python 3.10.11 + AstrBot 4.14.6 本地完整矩阵 `260 passed`、43 subtests、2 warnings；head `b1f17a2`；CI `34146296068` 四项全绿；warning 为 FAISS/NumPy 与基线注册 API 弃用提示；无真实账号/线上日志/部署声明 |
