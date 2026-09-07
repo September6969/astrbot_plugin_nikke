@@ -36,6 +36,7 @@ from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
 from .renderer import CardRenderer
+from .runtime_health import collect_runtime_health, format_runtime_health
 from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
@@ -1351,16 +1352,18 @@ class NikkePlugin(Star):
         yield event.image_result(path)
 
     async def health(self, event: AstrMessageEvent):
-        """管理员查看插件健康状态。"""
+        """管理员查看插件健康状态；诊断只读，不执行缓存清理。"""
         if not self._is_admin(event):
             yield event.plain_result("仅管理员可查看。")
             return
         accounts = self.store.list_accounts(with_cookie=False)
+        diagnostics = format_runtime_health(collect_runtime_health(self.data_dir))
         yield event.plain_result(
             f"NIKKE插件 {PLUGIN_VERSION}\n账号：{len(accounts)}\n目录：{len(self._directory)}\n"
             f"绑定服务：{self.web_host}:{self.web_port}\n"
             f"自动签到：{'启用' if self.config.get('enable_daily_actions', False) else '关闭'}\n"
-            f"CDK兑换：{'启用' if self.config.get('enable_cdk_redemption', False) else '关闭'}"
+            f"CDK兑换：{'启用' if self.config.get('enable_cdk_redemption', False) else '关闭'}\n"
+            f"{diagnostics}"
         )
 
     async def terminate(self):
