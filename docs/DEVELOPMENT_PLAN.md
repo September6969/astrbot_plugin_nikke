@@ -4,7 +4,7 @@
 下一阶段入口见 [Post-Merge Phase 2 计划](POST_MERGE_PHASE2_PLAN.md)。下方旧计划保留为历史规格，其中 TODO/BLOCKED 不再作为当前进度判断。
 历史自治规则见 [审核与自治计划](EXECUTION_AUTONOMY_PLAN.md)，不覆盖新的状态入口。
 
-当前有效基线是 `origin/main@a812b7247e997e87886d9c076459bb2463123b15`。旧 `feat/overnight-backlog` 已通过 PR #5 合并，不是当前开发分支。
+当前有效基线是 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。旧 `feat/overnight-backlog` 已通过 PR #5 合并，不是当前开发分支；实时分支、PR 与证据以 [路线图台账](ROADMAP_LEDGER.md) 为准。
 
 | 范围 | 当前状态 | 已完成与剩余 |
 | --- | --- | --- |

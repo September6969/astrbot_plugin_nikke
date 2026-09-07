@@ -19,6 +19,7 @@ from PIL import Image, ImageDraw
 from .card_models import CharacterCardAssets, CharacterCardData
 from .nikke_db_provider import NikkeDbProvider
 from .spine_prerenderer import SpineJob, SpinePreRenderer
+from .static_registry import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
 
@@ -42,24 +43,12 @@ class AssetManager:
             self.sources = {}
         if not isinstance(self.sources, dict):
             self.sources = {}
-        try:
-            self.equipment_map = json.loads((self.asset_dir / "equipment.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.equipment_map = {}
-        if not isinstance(self.equipment_map, dict):
-            self.equipment_map = {}
-        try:
-            self.favorite_items_map = json.loads((self.asset_dir / "favorite_items.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.favorite_items_map = {}
-        if not isinstance(self.favorite_items_map, dict):
-            self.favorite_items_map = {}
-        try:
-            self.cubes_map = json.loads((self.asset_dir / "cubes.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.cubes_map = {}
-        if not isinstance(self.cubes_map, dict):
-            self.cubes_map = {}
+        self.registry = StaticDataRegistry(self.asset_dir)
+        for error in self.registry.errors:
+            logger.warning("静态 registry 校验失败：%s", error)
+        self.equipment_map = self.registry.mapping("equipment")
+        self.favorite_items_map = self.registry.mapping("favorite_item")
+        self.cubes_map = self.registry.mapping("cube")
 
     @staticmethod
     def game_resource_url(path: str) -> str:
