@@ -140,6 +140,35 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
             plugin.store.calls,
             [{"push_only": True, "with_cookie": True, "auto_daily_only": False}],
         )
+        self.assertEqual(
+            plugin.store.saved,
+            [("daily_results:2026-09-07:manual", [])],
+        )
+
+    async def test_manual_results_are_not_reused_by_automatic_summary(self):
+        class Store:
+            @staticmethod
+            def get_setting(key, default=None):
+                if key == "summary_group_umo":
+                    return "synthetic-group"
+                if key == "daily_results:2026-09-07:manual":
+                    return [("manual-account", "已执行")]
+                return default
+
+        class Renderer:
+            @staticmethod
+            def render_summary(results):
+                return "synthetic-summary.png"
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.store = Store()
+        plugin.renderer = Renderer()
+        plugin.context = type("Context", (), {"send_message": AsyncMock()})()
+        plugin._run_all_daily = AsyncMock(return_value=[("automatic-account", "已执行")])
+
+        await plugin._send_summary("2026-09-07")
+
+        plugin._run_all_daily.assert_awaited_once_with("2026-09-07", automatic=True)
 
     async def test_summary_fallback_stays_in_automatic_scope(self):
         class Store:

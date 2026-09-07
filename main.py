@@ -877,7 +877,9 @@ class NikkePlugin(Star):
                 return await self._run_daily_for_account(account, day)
 
         results = await asyncio.gather(*(run(account) for account in accounts))
-        self.store.set_setting(f"daily_results:{day}", results)
+        # 管理员手动批次不能污染自动汇总的数据源，避免绕过账号自动签到偏好。
+        scope = "automatic" if automatic else "manual"
+        self.store.set_setting(f"daily_results:{day}:{scope}", results)
         return results
 
     async def _send_summary(self, day: str) -> None:
@@ -885,7 +887,8 @@ class NikkePlugin(Star):
         if not group_umo:
             logger.warning("[NIKKE] 尚未配置每日汇总群")
             return
-        results = self.store.get_setting(f"daily_results:{day}", [])
+        # 只读取自动批次结果；旧的无 scope 键和管理员手动结果都不作为自动汇总来源。
+        results = self.store.get_setting(f"daily_results:{day}:automatic", [])
         if not results:
             results = await self._run_all_daily(day, automatic=True)
         path = self.renderer.render_summary([(str(a), str(b)) for a, b in results])

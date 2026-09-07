@@ -16,6 +16,8 @@
 | 汇总补跑 | 使用与定时签到相同的自动筛选，不能绕过账号偏好 |
 | 手动签到/管理员执行 | 不由自动偏好阻止；仍受既有全局写开关、幂等和安全合同约束 |
 
+自动批次与管理员手动批次使用不同的结果存储键；旧的无 scope 结果以及手动批次结果不会被自动汇总直接复用。
+
 ## 证据边界
 
 - 定向回归：`tests/test_daily_auto.py`、`tests/test_daily_safety.py` 与 `tests/test_core.py` 为 48 passed、4 subtests、2 warnings。
