@@ -33,7 +33,7 @@
 | #24 | `feat/storage-migration-v1` | Transactional SQLite schema migration | OPEN / Draft / CI green；head `7a9602b`；CI `34165229014` |
 | #25 | `feat/healthz-readiness-v1` | Healthz storage readiness contract | OPEN / Draft / CI green；head `1d3abc2`；CI `34165779139` |
 | #26 | `feat/log-privacy-v1` | Plugin log privacy hardening | OPEN / Draft / CI green；head `d1c60cd`；CI `34166397758` 四项全绿（Node、Python 3.10–3.12） |
-| #27 | `feat/cache-cleanup-v1` | Safe offline cache cleanup | OPEN / Draft / CI green；head `bb94d18`；CI `34108821103` |
+| #27 | `feat/cache-cleanup-v1` | Safe offline cache cleanup | OPEN / Draft / CI green；head `577f328`；CI `34167069222` 四项全绿（Node、Python 3.10–3.12） |
 | #28 | `feat/release-metadata-v1` | Release metadata and configuration contract | OPEN / Draft / CI green；head `1f379d6`；CI `34109454981` |
 | #29 | `feat/caddy-hardening-v1` | Caddy example privacy hardening | OPEN / Draft / CI green；head `160cb25`；CI `34110061494` |
 | #30 | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | OPEN / Draft / CI green；head `e9bf5eb`；CI `34110890912` |
@@ -74,7 +74,7 @@
 | Storage migration hardening | `feat/storage-migration-v1` | `bada0b3` | Draft PR #24；schema_meta 版本化、显式事务/rollback、旧 accounts 字段兼容；负数/小数/布尔/非数字版本拒绝且不规范化覆盖，未来 schema 拒绝降级；head `7a9602b`；CI `34165229014` 全绿；仅临时 SQLite，无生产 migration 声明 |
 | Healthz readiness | `feat/healthz-readiness-v1` | `bada0b3` | Draft PR #25；`/healthz` 仅在 SQLite 与密钥均为 lstat 普通文件时返回 200/ready，目录或符号链接返回 503/unavailable；head `1d3abc2`；CI `34165779139` 全绿；仅合成文件，无部署声明 |
 | Plugin log privacy | `feat/log-privacy-v1` | `bada0b3` | Draft PR #26；统一异常/动态日志文本脱敏，覆盖主流程、公告、素材、卡片、Spine、反馈与绑定错误摘要；JSON 字符串/数字标量敏感值及用户错误回复均不回显；本地 Python 3.10.11 + AstrBot 4.14.6 完整矩阵 `262 passed`、43 subtests、2 warnings；head `d1c60cd`；CI `34166397758` 四项全绿；warning 为 FAISS/NumPy 与基线注册 API 弃用提示；无真实账号/线上日志/部署声明 |
-| Safe offline cache cleanup | `feat/cache-cleanup-v1` | `bada0b3` | Draft PR #27；默认只读计划，显式 `--apply` 仅清理白名单缓存和公告缓存，保护 cards/SQLite/secret.key/扩展 ZIP 并跳过符号链接；head `bb94d18`；CI `34108821103` 全绿；本地 pytest 259 passed、Node 3 passed；未在真实 data/nikke 应用清理 |
+| Safe offline cache cleanup | `feat/cache-cleanup-v1` | `bada0b3` | Draft PR #27；默认只读计划，显式 `--apply` 仅清理白名单缓存和公告缓存，保护 cards/SQLite/secret.key/扩展 ZIP；数据根目录、缓存目录和条目跳过符号链接，应用阶段复核根目录、白名单与保护路径，拒绝负数/NaN/无穷保留时长和当前时间；head `577f328`；CI `34167069222` 四项全绿；本地专项 6 passed、4 subtests，全量 pytest 262 passed、47 subtests、2 warnings，compileall、Node 2 文件语法检查和 diff check 通过；未在真实 data/nikke 应用清理 |
 | Release metadata and configuration | `feat/release-metadata-v1` | `bada0b3` | Draft PR #28；新增当前 main 基线 `0.1.8` CHANGELOG、14 项配置合同及版本/schema/文档一致性测试；head `1f379d6`；CI `34109454981` 全绿；本地 pytest 259 passed、57 subtests、Node 3 passed；未创建发行包或部署 |
 | Caddy example privacy | `feat/caddy-hardening-v1` | `bada0b3` | Draft PR #29；关闭示例 access log，避免 `/bind/{token}` 令牌进入反代日志；静态验证安全头、只读挂载、外部网络及无 6210 宿主机映射；head `160cb25`；CI `34110061494` 全绿；本地 pytest 258 passed、48 subtests、Node 3 passed；未部署 |
 | Upgrade/rollback preflight | `feat/upgrade-preflight-v1` | `bada0b3` | Draft PR #30；只读检查 SQLite integrity/schema、数据库与 `secret.key` 成对存在、可选备份集和磁盘余量，输出 READY/MIGRATION_REQUIRED/BLOCKED；head `e9bf5eb`；CI `34110890912` 全绿；本地 pytest 263 passed、43 subtests、Node 3 passed；不执行迁移/回滚/复制/删除/生产写入 |
