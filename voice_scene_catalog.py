@@ -22,6 +22,7 @@ class StoryVoiceMappingAudit:
     detail_only_ids: tuple[str, ...]
     duplicate_map_ids: tuple[str, ...]
     speakers: tuple[str, ...]
+    duplicate_detail_ids: tuple[str, ...] = ()
     map_scope: str = "SCENE_GROUP_PREFIX"
     scope: str = "STORY_SCENE"
     interaction_type_evidence: str = "NOT_OBSERVED"
@@ -30,7 +31,12 @@ class StoryVoiceMappingAudit:
     @property
     def coverage_complete(self) -> bool:
         """只有两侧 ID 集合完全相同，才称为该场景的完整交叉覆盖。"""
-        return not self.map_only_ids and not self.detail_only_ids and not self.duplicate_map_ids
+        return (
+            not self.map_only_ids
+            and not self.detail_only_ids
+            and not self.duplicate_map_ids
+            and not self.duplicate_detail_ids
+        )
 
 
 def _records(detail):
@@ -100,6 +106,9 @@ def audit_story_voice_mapping(scene_group_id, detail, voice_map) -> StoryVoiceMa
             speakers.add(speaker)
 
     detail_id_set = set(detail_ids)
+    duplicate_detail_ids = tuple(
+        sorted(identifier for identifier in detail_id_set if detail_ids.count(identifier) > 1)
+    )
     return StoryVoiceMappingAudit(
         scene_group_id=scene_group_id,
         map_count=len(unique_map_ids),
@@ -109,6 +118,7 @@ def audit_story_voice_mapping(scene_group_id, detail, voice_map) -> StoryVoiceMa
         detail_only_ids=tuple(sorted(detail_id_set - unique_map_ids)),
         duplicate_map_ids=tuple(sorted(identifier for identifier in unique_map_ids if map_ids.count(identifier) > 1)),
         speakers=tuple(sorted(speakers)),
+        duplicate_detail_ids=duplicate_detail_ids,
         map_scope="SCENE_GROUP_PREFIX",
         scope="STORY_SCENE",
         interaction_type_evidence="NOT_OBSERVED",

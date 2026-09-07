@@ -41,14 +41,13 @@
 `audit_story_voice_mapping()` 生成 `StoryVoiceMappingAudit`：
 
 - `scope=STORY_SCENE`；
-- 显式区分 `matched_ids`、`map_only_ids`、`detail_only_ids` 和重复 map ID；
+- 显式区分 `matched_ids`、`map_only_ids`、`detail_only_ids`、重复 map ID 和重复 detail ID；
 - `interaction_type_evidence=NOT_OBSERVED`；
 - `skin_evidence=NOT_OBSERVED`；
-- 只有 ID 集合完整一致且无重复时才报告 `coverage_complete=True`。
+- 只有 ID 集合完整一致且 map/detail 两侧均无重复时才报告 `coverage_complete=True`；重复 detail 行不会因集合去重而被误报为完整覆盖。
 
 因此 story `speaker` 不能被提升为角色/皮肤/互动语音映射；缺失项保持可见，不用角色经验或 ID 连续性补齐。
 
 ## 授权边界和后续条件
 
 官方社区规范要求尊重版权，禁止未经同意分享/模仿他人作品，也禁止发布未官方提供或解包得到的内容。公开可读不等于插件可以再分发音频。后续若要做 Poke，至少还需要独立的 interaction mapping 证据、适用资源授权、用户偏好和 OneBot 实际发送/播放证据；本增量不执行这些动作。
-
