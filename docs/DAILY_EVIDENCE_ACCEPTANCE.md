@@ -4,7 +4,7 @@
 
 - 分支：`feat/daily-evidence-p1`
 - 基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`
-- 实现提交：`920f938`；当前验收 head：`37cab4c`（Draft PR #18）
+- 实现提交：`920f938`；当前验收 head：`d8fd215`（Draft PR #18）
 - 本增量只加固现有每日签到路径的状态闭环，不猜测 Like/Browse 的未核实端点、字段或任务完成语义。
 
 ## 行为合同
@@ -27,7 +27,7 @@ pytest tests/test_daily_recovery.py tests/test_daily_safety.py \
 
 新增 4 个恢复/顺序行为测试覆盖：intent 先于读取、running daily 只读恢复、running signin 未确认时进入 unknown、Cookie 失效收敛。另有 `compileall`、Node extension contract tests（3 passed）和 `git diff --check` 通过。
 
-GitHub Actions final-head CI：run `34098386067`，Node、Python 3.10、3.11、3.12 全部通过。
+GitHub Actions final-head CI：run `34098738387`，Node、Python 3.10、3.11、3.12 全部通过。
 
 本机全量 pytest 结果为 `240 passed, 32 failed, 31 subtests passed`；失败均集中在 Windows `TemporaryDirectory` 清理 `nikke.sqlite3` 时的 `WinError 32` 文件占用，目标增量测试和相关签到测试均通过。最终全量回归仍以 Draft PR 的隔离 CI 为准。
 
