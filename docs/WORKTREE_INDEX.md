@@ -11,7 +11,7 @@
 | `E:\DevCache\nikke-announcement-v2\astrbot_plugin_nikke` | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | Draft PR #9；head `6cb544b`；CI `34147704300` 全绿；工作树 clean |
 | `E:\DevCache\nikke-dynamic-voice-v2\astrbot_plugin_nikke` | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | Draft PR #10；head `528fcdf`；CI `34148538180` 全绿；工作树 clean |
 | `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11；head `2e77ad2`；CI `34124685883` 全绿；工作树 clean |
-| `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | Spine technical spike | Draft PR #12；head `137b931`；CI `34115112516` 全绿；工作树 clean |
+| `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | Spine technical spike | Draft PR #12；head `e5b9efc`；CI `34149003554` 四项全绿；工作树 clean；仍仅为 runtime-free synthetic spike |
 | `E:\DevCache\nikke-voice-mapping-v2\astrbot_plugin_nikke` | `feat/voice-mapping-v2` | Voice 映射研究 | Draft PR #13；head `68138bc`；CI `34115632353` 全绿；工作树 clean |
 | `E:\_codex_work\nikke-roadmap-ledger-v3` | `feat/roadmap-ledger-v3` | 路线图合同债状态核验 | Draft PR #14；当前 head 与 CI 以 PR 检查为权威；工作树 clean |
 | `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15；head `6a6a641`；CI `34134245113` 四项全绿；工作树 clean |
