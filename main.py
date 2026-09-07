@@ -182,7 +182,7 @@ class NikkePlugin(Star):
             summary_m = int(self.store.get_setting("summary_minute", self.config.get("summary_minute", 30)))
             if (now.hour, now.minute) == (daily_h, daily_m) and last_daily != today:
                 last_daily = today
-                self._spawn_background_task(self._run_all_daily(today, stagger=True))
+                self._spawn_background_task(self._run_all_daily(today, stagger=True, automatic=True))
             if (now.hour, now.minute) == (summary_h, summary_m) and last_summary != today:
                 last_summary = today
                 self._spawn_background_task(self._send_summary(today))
@@ -276,6 +276,7 @@ class NikkePlugin(Star):
                 "【日常】\n"
                 "/妮姬 签到　(/nikke daily、/nikke claim)\n"
                 "/妮姬 签到 状态 — 只查询、不提交\n"
+                "/妮姬 日常 自动 开|关 — 仅控制自己的定时签到\n"
                 "/妮姬 兑换 <CDK>　(/nikke cdk)\n"
                 "/妮姬 兑换 批量 <CDK1> <CDK2>...\n"
                 "/妮姬 兑换 可用|历史\n"
@@ -297,7 +298,7 @@ class NikkePlugin(Star):
             "raid": "查询", "突袭": "查询", "campaign": "查询", "stage": "查询", "战役": "查询",
             "schedule": "查询", "日程": "查询", "news": "查询", "公告": "查询",
             "guide": "查询", "攻略": "查询",
-            "daily": "日常", "push": "日常", "poke": "日常", "戳": "日常", "戳一戳": "日常",
+            "daily": "日常", "routine": "日常", "日常": "日常", "push": "日常", "poke": "日常", "戳": "日常", "戳一戳": "日常",
             "admin": "管理",
         }
         selected = aliases.get(category.strip().lower(), category.strip())
@@ -355,8 +356,8 @@ class NikkePlugin(Star):
             async for result in self.query(event, arg1, arg2):
                 yield result
             return
-        if command_key in {"签到", "daily", "claim"}:
-            async for result in self.daily(event, arg1):
+        if command_key in {"签到", "daily", "claim", "日常", "routine"}:
+            async for result in self.daily(event, arg1, arg2):
                 yield result
             return
         if command_key in {"兑换", "cdk"}:
@@ -509,7 +510,8 @@ class NikkePlugin(Star):
         yield event.plain_result(
             f"已绑定：{account['nickname'] or account['role_name'] or '未命名指挥官'}\n"
             f"区服ID：{account['area_id'] or '待识别'}\nCookie：{state}\n"
-            f"每日汇总：{'开启' if account['push_enabled'] else '关闭'}"
+            f"每日汇总：{'开启' if account['push_enabled'] else '关闭'}\n"
+            f"自动签到：{'开启' if account.get('auto_daily_enabled') else '关闭'}"
         )
 
     @staticmethod
@@ -855,8 +857,17 @@ class NikkePlugin(Star):
             self.store.finish_run(run_key, "failed", detail)
             return account.get("nickname") or qq_id, detail
 
-    async def _run_all_daily(self, day: str, stagger: bool = False) -> list[tuple[str, str]]:
-        accounts = self.store.list_accounts(push_only=True, with_cookie=True)
+    async def _run_all_daily(
+        self,
+        day: str,
+        stagger: bool = False,
+        automatic: bool = False,
+    ) -> list[tuple[str, str]]:
+        accounts = self.store.list_accounts(
+            push_only=True,
+            with_cookie=True,
+            auto_daily_only=automatic,
+        )
         semaphore = asyncio.Semaphore(max(1, int(self.config.get("max_concurrency", 2))))
 
         async def run(account):
@@ -876,7 +887,7 @@ class NikkePlugin(Star):
             return
         results = self.store.get_setting(f"daily_results:{day}", [])
         if not results:
-            results = await self._run_all_daily(day)
+            results = await self._run_all_daily(day, automatic=True)
         path = self.renderer.render_summary([(str(a), str(b)) for a, b in results])
         await self.context.send_message(group_umo, MessageChain([Image.fromFileSystem(path)]))
 
@@ -899,15 +910,34 @@ class NikkePlugin(Star):
         except Exception as exc:
             yield event.plain_result(f"查询失败：{exc}")
 
-    async def daily(self, event: AstrMessageEvent, action: str = ""):
-        """直接签到，或只读查询签到状态。"""
+    async def daily(self, event: AstrMessageEvent, action: str = "", value: str = ""):
+        """直接签到、只读查询，或设置自己的定时签到偏好。"""
         action_key = action.strip().casefold()
         if action_key in {"状态", "status"}:
             async for result in self._daily_status(event):
                 yield result
             return
+        if action_key in {"自动", "auto"}:
+            value_key = value.strip().casefold()
+            if value_key not in {"开", "on", "1", "关", "off", "0"}:
+                yield event.plain_result("用法：/妮姬 日常 自动 开|关")
+                return
+            try:
+                account = self._account_or_error(event)
+            except ValueError as exc:
+                yield event.plain_result(str(exc))
+                return
+            enabled = value_key in {"开", "on", "1"}
+            self.store.set_auto_daily(account["qq_id"], enabled)
+            global_state = "全局签到写操作当前关闭；设置已保存，暂不会提交。" if not bool(
+                self.config.get("enable_daily_actions", False)
+            ) else "仍需保持每日汇总开启，定时任务才会处理此账号。"
+            yield event.plain_result(
+                f"自动签到已{'开启' if enabled else '关闭'}。{global_state}"
+            )
+            return
         if action_key:
-            yield event.plain_result("用法：/妮姬 签到 或 /妮姬 签到 状态")
+            yield event.plain_result("用法：/妮姬 签到 [状态] 或 /妮姬 日常 自动 开|关")
             return
         if not bool(self.config.get("enable_daily_actions", False)):
             yield event.plain_result("签到写操作当前由管理员关闭；可使用 /妮姬 签到 状态 只读查询。")

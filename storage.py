@@ -65,6 +65,7 @@ class NikkeStore:
                     role_name TEXT NOT NULL DEFAULT '',
                     area_id TEXT NOT NULL DEFAULT '',
                     push_enabled INTEGER NOT NULL DEFAULT 1,
+                    auto_daily_enabled INTEGER NOT NULL DEFAULT 0,
                     cookie_valid INTEGER NOT NULL DEFAULT 1,
                     updated_at INTEGER NOT NULL
                 );
@@ -89,6 +90,9 @@ class NikkeStore:
                 conn.execute("ALTER TABLE accounts ADD COLUMN xcommon_cipher BLOB NOT NULL DEFAULT X''")
             if "user_agent" not in columns:
                 conn.execute("ALTER TABLE accounts ADD COLUMN user_agent TEXT NOT NULL DEFAULT ''")
+            if "auto_daily_enabled" not in columns:
+                # 旧账号默认不自动执行任何写操作，必须由账号所有者显式开启。
+                conn.execute("ALTER TABLE accounts ADD COLUMN auto_daily_enabled INTEGER NOT NULL DEFAULT 0")
 
     @staticmethod
     def token_hash(token: str) -> str:
@@ -199,10 +203,20 @@ class NikkeStore:
             account.pop("xcommon_cipher", None)
         return account
 
-    def list_accounts(self, push_only: bool = False, with_cookie: bool = True) -> list[dict[str, Any]]:
+    def list_accounts(
+        self,
+        push_only: bool = False,
+        with_cookie: bool = True,
+        auto_daily_only: bool = False,
+    ) -> list[dict[str, Any]]:
         query = "SELECT qq_id FROM accounts"
+        conditions: list[str] = []
         if push_only:
-            query += " WHERE push_enabled=1"
+            conditions.append("push_enabled=1")
+        if auto_daily_only:
+            conditions.append("auto_daily_enabled=1")
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         with self._lock, self._connect() as conn:
             ids = [r[0] for r in conn.execute(query).fetchall()]
         return [a for qq_id in ids if (a := self.get_account(qq_id, with_cookie))]
@@ -216,6 +230,15 @@ class NikkeStore:
         with self._lock, self._connect() as conn:
             cur = conn.execute(
                 "UPDATE accounts SET push_enabled=? WHERE qq_id=?",
+                (1 if enabled else 0, str(qq_id)),
+            )
+        return cur.rowcount > 0
+
+    def set_auto_daily(self, qq_id: str, enabled: bool) -> bool:
+        """记录账号所有者对定时签到的显式同意，不触发任何签到请求。"""
+        with self._lock, self._connect() as conn:
+            cur = conn.execute(
+                "UPDATE accounts SET auto_daily_enabled=? WHERE qq_id=?",
                 (1 if enabled else 0, str(qq_id)),
             )
         return cur.rowcount > 0
