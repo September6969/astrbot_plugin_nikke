@@ -23,7 +23,7 @@
 | `E:\_codex_work\astrbot-registration-api-v1\astrbot_plugin_nikke` | `feat/astrbot-registration-api-v1` | AstrBot registration API migration | Draft PR #40；head `311a41e`；CI `34144460942` 四项全绿；移除废弃注册装饰器并保留自动发现；工作树 clean |
 | `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `a3de03d`；CI `34162799034` 四项全绿；终态不被恢复读取改写；工作树 clean |
 | `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle + Python 3.13 compatibility evidence | Draft PR #19；head `ffd96a5`；CI `34145647733` 五项全绿（Node、Python 3.10–3.13）；本地 Windows Python 3.13 全量 258 passed；工作树 clean |
-| `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `375498c`；CI `34102399018`；工作树 clean |
+| `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `6e00c5a`；CI `34163558500`；工作树 clean |
 | `E:\_codex_work\shutdown-lifecycle\astrbot_plugin_nikke` | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | Draft PR #21；head `a9ccb48`；CI `34102939859`；工作树 clean |
 | `E:\_codex_work\data-backup-hardening\astrbot_plugin_nikke` | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | Draft PR #22；head `6943e12`；CI `34104071393`；工作树 clean |
 | `E:\_codex_work\health-diagnostics-v1\astrbot_plugin_nikke` | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | Draft PR #23；head `4a7190b`；CI `34105103222`；工作树 clean |
