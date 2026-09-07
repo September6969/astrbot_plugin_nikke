@@ -17,12 +17,13 @@
 | #9 | `feat/announcement-v2` | Announcement Increment A | OPEN / Draft / CI green |
 | #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green |
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / latest CI green |
+| #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI run `34090149337` green |
 
 ## 当前推进
 
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
-| Spine technical spike | `feat/spine-spike-v2` | `bada0b3` | 本地实现与测试完成，待提交、CI 和 Draft PR |
+| Spine technical spike | `feat/spine-spike-v2` | `bada0b3` | Draft PR #12；提交 `4bfe556` 的 CI 已全绿 |
 
 当前增量只覆盖无运行时预检查、证据契约、队列生命周期和总预算截止语义。Spine runtime、许可、Linux headless、真实 render 和 benchmark 仍保持未完成，不因合成测试而提前验收。
 
@@ -31,4 +32,3 @@
 - Raid canonical identity、真实 Profile、Daily Like/Browse、Voice QQ playback：需要现场证据。
 - Spine production runtime/license：需要明确人工许可与产品决策。
 - 真实生产 DB migration、ruleset、部署和真实账号写操作：不在本路线自动执行范围内。
-

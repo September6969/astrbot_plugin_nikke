@@ -11,11 +11,10 @@
 | `E:\DevCache\nikke-announcement-v2\astrbot_plugin_nikke` | `feat/announcement-v2` | Announcement Increment A | Draft PR #9 |
 | `E:\DevCache\nikke-dynamic-voice-v2\astrbot_plugin_nikke` | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | Draft PR #10 |
 | `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11 |
-| `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | 当前 Spine 技术预研 | 当前工作树 |
+| `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | 当前 Spine 技术预研 | Draft PR #12，初始提交 CI 全绿 |
 
 ## 协作规则
 
 - 新主题从实时 `origin/main` 建立独立分支/工作树。
 - 不直接修改 `main`，不 force push，不自动 merge，不删除分支，不改 ruleset，不部署。
 - 每个主题独立提交、测试、CI 和 Draft PR；不能把另一个主题的未合并改动当作当前基线。
-
