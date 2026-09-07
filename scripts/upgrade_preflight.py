@@ -32,10 +32,18 @@ def _ordinary_file(path: Path) -> bool:
     return path.is_file() and not path.is_symlink()
 
 
+def _ordinary_directory(path: Path) -> bool:
+    """只接受普通目录，避免通过数据根目录符号链接读取外部目标。"""
+
+    return path.is_dir() and not path.is_symlink()
+
+
 def inspect_pair(data_dir: str | Path, label: str = "storage") -> dict[str, str]:
     """检查 SQLite 与密钥是否作为非空普通文件成对存在。"""
 
     root = Path(data_dir)
+    if not _ordinary_directory(root):
+        return _check("BLOCKED", f"{label}_directory_missing_or_non_regular")
     database = root / "nikke.sqlite3"
     key = root / "secret.key"
     if not _ordinary_file(database) or not _ordinary_file(key):
@@ -98,8 +106,11 @@ def inspect_disk_capacity(
 
     if min_free_bytes < 0 or not 0 <= min_free_percent <= 100:
         return _check("BLOCKED", "disk_threshold_invalid")
+    root = Path(data_dir)
+    if not _ordinary_directory(root):
+        return _check("BLOCKED", "disk_data_dir_missing_or_non_regular")
     try:
-        usage = shutil.disk_usage(Path(data_dir))
+        usage = shutil.disk_usage(root)
     except OSError:
         return _check("BLOCKED", "disk_capacity_unavailable")
     if usage.total <= 0:
@@ -120,7 +131,11 @@ def build_preflight(
 
     root = Path(data_dir)
     storage_pair = inspect_pair(root, "storage")
-    database = inspect_database(root / "nikke.sqlite3")
+    database = (
+        inspect_database(root / "nikke.sqlite3")
+        if _ordinary_directory(root)
+        else _check("BLOCKED", "database_root_missing_or_non_regular")
+    )
 
     backup_pair: dict[str, str]
     backup_database: dict[str, str]
@@ -130,7 +145,11 @@ def build_preflight(
     else:
         backup_root = Path(backup_dir)
         backup_pair = inspect_pair(backup_root, "backup")
-        backup_database = inspect_database(backup_root / "nikke.sqlite3")
+        backup_database = (
+            inspect_database(backup_root / "nikke.sqlite3")
+            if _ordinary_directory(backup_root)
+            else _check("BLOCKED", "backup_database_root_missing_or_non_regular")
+        )
 
     disk_capacity = inspect_disk_capacity(root, min_free_bytes, min_free_percent)
     checks = {

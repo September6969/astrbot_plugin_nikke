@@ -5,6 +5,8 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from scripts.upgrade_preflight import build_preflight, inspect_database, main
 
 
@@ -127,3 +129,26 @@ def test_database_inspection_does_not_open_writable_store(tmp_path: Path) -> Non
 
     assert inspect_database(database)["status"] == "PASS"
     assert database.stat().st_mtime_ns == before
+
+
+def test_symlinked_data_and_backup_roots_are_not_followed(tmp_path: Path) -> None:
+    data_target = tmp_path / "data-target"
+    backup_target = tmp_path / "backup-target"
+    _make_store(data_target)
+    _make_store(backup_target)
+    data_link = tmp_path / "data-link"
+    backup_link = tmp_path / "backup-link"
+    try:
+        data_link.symlink_to(data_target, target_is_directory=True)
+        backup_link.symlink_to(backup_target, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("当前 Windows 环境不允许创建目录符号链接")
+
+    result = build_preflight(data_link, backup_link, min_free_bytes=0, min_free_percent=0)
+
+    assert result["overall"] == "BLOCKED"
+    assert result["checks"]["storage_pair"]["reason"] == "storage_directory_missing_or_non_regular"
+    assert result["checks"]["database"]["reason"] == "database_root_missing_or_non_regular"
+    assert result["checks"]["backup_pair"]["reason"] == "backup_directory_missing_or_non_regular"
+    assert result["checks"]["backup_database"]["reason"] == "backup_database_root_missing_or_non_regular"
+    assert result["checks"]["disk_capacity"]["reason"] == "disk_data_dir_missing_or_non_regular"

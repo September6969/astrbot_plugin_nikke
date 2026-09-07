@@ -4,16 +4,17 @@
 
 ## 检查内容
 
-- `storage_pair`：检查 `nikke.sqlite3` 与 `secret.key` 是否同时为非空普通文件。
+- `storage_pair`：检查数据根目录不是符号链接且 `nikke.sqlite3` 与 `secret.key` 同时为非空普通文件；备份根目录同样拒绝符号链接。
 - `database`：使用 SQLite `mode=ro` URI 执行 `integrity_check`，并检查当前主线所需表和 `accounts` 字段。
 - `backup_pair` / `backup_database`：只有传入 `--backup-dir` 时检查备份集；不会复制、覆盖或删除备份。
-- `disk_capacity`：检查数据目录所在文件系统是否达到余量阈值；结果不输出路径、容量细节、账号标识或凭据。
+- `disk_capacity`：仅在数据根目录为普通目录时检查其所在文件系统余量；结果不输出路径、容量细节、账号标识或凭据。
 
 ## 状态语义
 
 - `READY`：存储成对存在、SQLite 完整性和字段合同通过、磁盘余量达标。
 - `MIGRATION_REQUIRED`：SQLite 可读且基础表存在，但仍缺少当前版本的可迁移字段；本命令不会执行迁移。
 - `BLOCKED`：缺少或不是普通文件、SQLite 损坏/不可读、表合同不支持、备份集缺失或磁盘余量不足。
+- 数据根目录或备份根目录为符号链接时不读取其目标内容，直接返回 `BLOCKED`。
 
 ## 使用
 
