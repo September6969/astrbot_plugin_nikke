@@ -83,6 +83,26 @@ class RaidIncrementATests(unittest.TestCase):
         self.assertEqual(len(data.bosses), 2)
         self.assertIsNone(data.total_progress)
 
+    def test_malformed_boss_identifiers_mark_coverage_unknown(self) -> None:
+        for value in (True, 2.5, [], {"id": "boss"}, "   "):
+            with self.subTest(value=value):
+                data = self.builder.build(
+                    guild_name="合成联盟",
+                    level_info_payload={
+                        "level_info": [
+                            _level({"boss_id": value, "current_hp": 50, "max_hp": 100})
+                        ]
+                    },
+                    fetched_at="2026-09-06 13:30",
+                    plugin_version="test",
+                )
+
+                self.assertEqual(data.response_coverage, RaidResponseCoverage.UNKNOWN_COVERAGE)
+                self.assertTrue(data.partial_boss_records)
+                self.assertEqual(len(data.bosses), 1)
+                self.assertEqual(data.bosses[0].boss_id, "")
+                self.assertIsNone(data.total_progress)
+
     def test_bool_float_and_bad_numeric_do_not_become_hp(self) -> None:
         invalid_values = (True, 2.5, "2.5", "bad", [])
         for value in invalid_values:

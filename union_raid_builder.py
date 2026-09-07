@@ -10,6 +10,15 @@ from .union_raid_models import BossStatus, RaidBossData, RaidResponseCoverage, U
 
 class UnionRaidBuilder:
     @staticmethod
+    def _identifier(value: Any) -> str:
+        """只接受非空文本或明确的整数标识，不把容器转成伪 ID。"""
+        if isinstance(value, str):
+            return value.strip()
+        if type(value) is int:
+            return str(value)
+        return ""
+
+    @staticmethod
     def _optional_integer(value: Any, *, clamp_negative: bool = False) -> int | None:
         """只接受明确的整型值；仅 HP 调用方保留负数归零边界。"""
         parsed: int | None = None
@@ -63,10 +72,13 @@ class UnionRaidBuilder:
                 partial_boss_records = True
                 continue
             raw_boss_id = raw.get("boss_id")
-            boss_id = str(raw_boss_id) if raw_boss_id not in (None, "") else ""
-            if not boss_id or boss_id in seen_boss_ids:
+            boss_id = self._identifier(raw_boss_id)
+            if not boss_id:
                 partial_boss_records = True
-            seen_boss_ids.add(boss_id)
+            elif boss_id in seen_boss_ids:
+                partial_boss_records = True
+            else:
+                seen_boss_ids.add(boss_id)
 
             current_hp = self._optional_integer(raw.get("current_hp"), clamp_negative=True)
             max_hp = self._optional_integer(raw.get("max_hp"))
