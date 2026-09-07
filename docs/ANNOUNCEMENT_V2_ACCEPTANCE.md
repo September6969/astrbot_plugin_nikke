@@ -40,7 +40,7 @@ git diff --check                                                PASS
 
 ## 当前交接状态
 
-- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前实施提交为 `ea66f16a79d2538556355c6317f1fa67a2151585`。
-- 当前 [CI run 34095605055](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34095605055) 的 headSha 与该提交一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。后续再提交文档时必须重新等待新 head 的 CI。
+- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前 head 为包含验收记录的 `ce3591f383aff8892f0ce1f6ca6463372388a6f5`；核心实现提交为其父提交 `ea66f16a79d2538556355c6317f1fa67a2151585`。
+- 当前 [CI run 34095787305](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34095787305) 的 headSha 与 PR 当前 head 一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。后续再提交文档时必须重新等待新 head 的 CI。
 - `NEEDS_LIVE_EVIDENCE`：获授权时才可验证公开 CMS 当前响应和真实 AstrBot 运行环境；本次不执行。
 - `HARD_BLOCKED`：无。
