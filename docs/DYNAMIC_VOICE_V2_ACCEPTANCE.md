@@ -10,7 +10,7 @@ python -m pytest -q tests/test_voice_resource_provider.py tests/test_voice_pipel
 
 结果：`21 passed`、`12 subtests passed`。
 
-同一工作树的最终本地回归：`python -m pytest -q` 为 `262 passed`、`55 subtests passed`；`node --test tests/extension.test.cjs` 为 3/3 通过。`python -m compileall -q .` 和 `git diff --check` 通过。全量 pytest 在此 Windows 依赖环境中会打印既有 native-trace，但退出码为 0；本增量的 Voice 专项回归不出现该输出。
+同一工作树的最终本地回归：`python -m pytest -q` 为 `262 passed, 2 warnings, 55 subtests passed`；`node --test tests/extension.test.cjs` 为 3/3 通过。`python -m compileall -q .` 和 `git diff --check` 通过。全量 pytest 在此 Windows 依赖环境中会打印既有 native-trace，但退出码为 0；本增量的 Voice 专项回归不出现该输出。
 
 覆盖点：
 
@@ -28,7 +28,7 @@ python -m pytest -q tests/test_voice_resource_provider.py tests/test_voice_pipel
 | 维度 | 状态 |
 | --- | --- |
 | 代码状态 | DONE：缓存临时文件复用错误已修复；未知角色语义已显式降级 |
-| 测试状态 | DONE：定向与全量本地行为测试、Node 测试、compileall 与 diff check 通过；待 push 后由最终 head 对应 CI 再核验 |
+| 测试状态 | DONE：Python 3.10.11 定向与全量本地行为测试、Node 测试、compileall 与 diff check 通过；最终 head 对应 CI 已核验 |
 | 合成预览 | 不适用：本增量没有图片卡或音频播放预览；仅使用合成 MP3 头 |
 | 现场证据 | NEEDS_LIVE_EVIDENCE：角色/皮肤互动映射、远程资源授权、OneBot 实际播放 |
 | 产品状态 | PARTIAL：未接入动态 Poke 互动映射，不宣称真实联调或资源授权 |
@@ -36,3 +36,8 @@ python -m pytest -q tests/test_voice_resource_provider.py tests/test_voice_pipel
 ## 最小现场动作
 
 若未来获得明确授权，最小动作是读取一个公开、只读且允许使用的 voice map 与对应语音响应，记录字段合同和许可来源；不得登录真实账号、写入账号状态或发送消息。本增量不执行该动作。
+
+## 交接 checkpoint
+
+- 本次文档更新前已核验 [PR #10](https://github.com/September6969/astrbot_plugin_nikke/pull/10) 为 Draft，head `afc06d064708dfb073d8c5ef7dd6e1d2e354d1f0`；对应 [CI run 34123169902](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34123169902) 的 `headSha` 一致，Node 与 Python 3.10/3.11/3.12 均 SUCCESS。
+- 本文件不预写本次 docs-only 提交产生的新 SHA；push 后以 PR #10 的实时 `headSha` 与对应 CI 检查作为最终交接证据。
