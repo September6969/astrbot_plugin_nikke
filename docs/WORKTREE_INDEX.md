@@ -14,7 +14,7 @@
 | `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | Spine technical spike | Draft PR #12；head `e5b9efc`；CI `34149003554` 四项全绿；工作树 clean；仍仅为 runtime-free synthetic spike |
 | `E:\DevCache\nikke-voice-mapping-v2\astrbot_plugin_nikke` | `feat/voice-mapping-v2` | Voice 映射研究 | Draft PR #13；head `68138bc`；CI `34115632353` 全绿；工作树 clean |
 | `E:\_codex_work\nikke-roadmap-ledger-v3` | `feat/roadmap-ledger-v3` | 路线图合同债状态核验 | Draft PR #14；当前 head 与 CI 以 PR 检查为权威；工作树 clean |
-| `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15；head `bd7c4dc`；CI `34149977507` 四项全绿；工作树 clean；严格拒绝非规范数字字符串 |
+| `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15；head `fe86c12`；CI `34171036388` 四项全绿；工作树 clean；严格拒绝非规范数字字符串及非整数响应 code |
 | `E:\_codex_work\campaign-resource-lifecycle-v2\astrbot_plugin_nikke` | `feat/campaign-resource-lifecycle-v2` | Campaign renderer 资源生命周期 | Draft PR #16；head `1a70d7d`；CI `34150449419` 四项全绿；工作树 clean；仅同卡片资源键复用，不宣称全局 N+1 已消除 |
 | `E:\_codex_work\asset-request-dedup-v2-worktree\astrbot_plugin_nikke` | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | Draft PR #17；head `28b8dfb`；CI `34156636777` 四项全绿；工作树 clean；仅同键并发去重与不同键隔离，不宣称全局 N+1 |
 | `E:\_codex_work\asset-global-concurrency-v1-worktree\astrbot_plugin_nikke` | `feat/asset-global-concurrency-v1` | AssetManager global remote-download limit | Draft PR #37；head `43df09a`；CI `34157041468` 四项全绿；与 PR #17/#38 均修改 `asset_manager.py`，需合并时协调；工作树 clean |
