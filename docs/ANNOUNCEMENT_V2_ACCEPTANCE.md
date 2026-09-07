@@ -30,13 +30,13 @@
 
 ```text
 pytest tests/test_announcement_cache_lifecycle.py tests/test_announcement_v2.py tests/test_announcement_versions.py tests/test_announcements.py
-                                                                 39 passed, 2 warnings, 42 subtests
+                                                                 40 passed, 2 warnings, 42 subtests
 python -m compileall -q .                                      PASS
 node --test tests/extension.test.cjs                            3 passed
 git diff --check                                                PASS
 ```
 
-当前同一源码全量回归：`278 passed, 2 warnings, 61 subtests`；`compileall`、Node 扩展测试和 `git diff --check` 均通过。另以合成记录实际查看了语言/分类筛选文本与只读诊断输出：筛选只显示唯一维护公告；诊断只显示数量、范围、locale/category 统计和保留策略，不含正文、订阅目标或凭据。
+当前同一源码全量回归：`279 passed, 2 warnings, 61 subtests`；`compileall`、Node 扩展测试和 `git diff --check` 均通过。另以合成记录实际查看了语言/分类筛选文本与只读诊断输出：筛选只显示唯一维护公告；诊断只显示数量、范围、locale/category 统计和保留策略，不含正文、订阅目标或凭据。
 
 新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放、新指纹刷新和版本数值合同（12 项行为测试）。
 
