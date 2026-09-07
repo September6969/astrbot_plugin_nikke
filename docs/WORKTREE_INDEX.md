@@ -20,6 +20,7 @@
 | `E:\_codex_work\asset-global-concurrency-v1-worktree\astrbot_plugin_nikke` | `feat/asset-global-concurrency-v1` | AssetManager global remote-download limit | Draft PR #37；head `244ba06`；CI `34140238453` 四项全绿；与 PR #17 均修改 `asset_manager.py`，需合并时协调；工作树 clean |
 | `E:\_codex_work\asset-prefetch-lifecycle-v1-worktree\astrbot_plugin_nikke` | `feat/asset-prefetch-lifecycle-v1` | AssetManager bounded prefetch lifecycle | Draft PR #38；head `85d1b85`；CI `34141290303` 四项全绿；与 PR #17/#37 均修改 `asset_manager.py`，需合并时协调；工作树 clean |
 | `E:\_codex_work\live-evidence-register-v1-worktree\astrbot_plugin_nikke` | `docs/live-evidence-register-v1` | Authorized live-evidence register | Draft PR #39；head `9877fc9`；CI `34142711091` 四项全绿；只记录现场证据最小动作，不执行账号/消息/部署操作；工作树 clean |
+| `E:\_codex_work\astrbot-registration-api-v1\astrbot_plugin_nikke` | `feat/astrbot-registration-api-v1` | AstrBot registration API migration | Draft PR #40；head `311a41e`；CI `34144460942` 四项全绿；移除废弃注册装饰器并保留自动发现；工作树 clean |
 | `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `b7b19f3`；CI `34118342055` 全绿；工作树 clean |
 | `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | Draft PR #19；head `0e9d323`；CI `34119004278` 全绿；工作树 clean |
 | `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `375498c`；CI `34102399018`；工作树 clean |
