@@ -2,11 +2,9 @@
 
 ## 当前验证检查点
 
-- 本地 Python 3.10.11：全量 `pytest -q` → 261 passed、2 warnings、49 subtests passed。
-- Character Data V2 定向测试 → 26 passed、6 subtests passed。
-- `node --test tests\\extension.test.cjs` → 3 passed；`compileall -q .` 与 `git diff --check` 通过。
-- 本次文档修订前代码检查点为 `2e77ad2`，对应 CI run `34124685883`；文档提交后的最终 head 与 CI 必须重新查询，不能在此处自引用未来提交。
-- 本次重新生成并实际查看的合成预览：`E:/DevCache/nikke-character-preview-20260907-cd11-v2/red-hood.png`、`alice.png`、`fallback.png`；未读取真实账号或远端资源。
+- 本地 Python 3.10.11：主题相关 unittest 27 passed；当前环境未安装 pytest，因此不把本地 unittest 冒充 pytest 结果。
+- 最终 CI run `34170205709`（head `bb724b5`）：全量 Python `262 passed`、`3 warnings`、`49 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。
+- 本次重新生成并实际查看的合成预览：`E:/DevCache/nikke-character-preview-20260907-dupkey-01/red-hood.png`、`alice.png`、`fallback.png`；未读取真实账号或远端资源。
 
 ## 本地行为验证
 
@@ -16,7 +14,7 @@
 python -m pytest -q tests/test_static_registry.py tests/test_asset_manager.py tests/test_card_builder.py tests/test_character_card_renderer.py
 ```
 
-结果：`26 passed`、`6 subtests passed`。
+结果：本地 unittest 主题相关 27 passed；最终 CI 全量 `262 passed`、`49 subtests passed`。
 
 覆盖点：
 
@@ -31,8 +29,8 @@ python -m pytest -q tests/test_static_registry.py tests/test_asset_manager.py te
 | 维度 | 状态 |
 | --- | --- |
 | 代码状态 | DONE：三类静态标识纳入 manifest + hash + strict parser |
-| 测试状态 | DONE：全量 Python `261 passed, 2 warnings, 49 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。当前 Windows 依赖环境会在 pytest 输出中打印 native-trace，但进程退出码为 0，不能以该输出替代行为测试证据 |
-| 合成预览 | DONE_FOR_OFFLINE：预览脚本现可从仓库根目录直接执行；已生成并实际查看 `E:/DevCache/nikke-character-preview-19c087983ff44e7d940fdc50fe4dcb2b/red-hood.png`、`alice.png`、`fallback.png`，不读取真实账号或远端资源 |
+| 测试状态 | DONE：最终 CI 全量 Python `262 passed, 3 warnings, 49 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。本地 Python 3.10.11 主题相关 unittest `27 passed`；本地缺少 pytest，未将 unittest 结果冒充 pytest |
+| 合成预览 | DONE_FOR_OFFLINE：预览脚本现可从仓库根目录直接执行；已生成并实际查看 `E:/DevCache/nikke-character-preview-20260907-dupkey-01/red-hood.png`、`alice.png`、`fallback.png`，不读取真实账号或远端资源 |
 | 现场证据 | NEEDS_LIVE_EVIDENCE：真实账号字段、最新官方数据、远程资源许可 |
 | 产品状态 | PARTIAL：不是完整 Character Data V2，不添加动态角色属性/技能/OL/Costume 映射 |
 
