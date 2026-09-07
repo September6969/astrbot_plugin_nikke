@@ -16,6 +16,7 @@
 | `map_key` | `[a-z0-9_]{1,100}` | 公开 voice map 的逻辑键 |
 | `speech_id` | `[a-z0-9_]{1,100}` | 仅可使用 voice map 明确列出的 ID |
 | `locale` | `en` / `ja` / `ko` | 远程资源语言；不把 `zh-cn` 当作已存在的 MP3 源 |
+| `budget` | 有限正数；拒绝布尔、字符串、NaN、无穷和非正数 | 当前请求等待预算；异常值在创建下载任务前受控拒绝 |
 | manifest `sha256` | 内容 SHA-256 | 内容完整性校验 |
 | manifest `source_path` | 由已确认 locale 与 speech ID 组成 | 记录来源路径，不代表取得再分发授权 |
 

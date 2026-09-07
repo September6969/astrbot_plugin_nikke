@@ -8,13 +8,14 @@
 python -m pytest -q tests/test_voice_resource_provider.py tests/test_feedback_and_voice.py
 ```
 
-结果：`8 passed`。
+结果：`9 passed`。
 
 覆盖点：
 
 - 五个并发请求共享一次 voice map 与一次 MP3 请求；
 - manifest 与 MP3 成功落盘，provider 重启后命中持久缓存；
 - 未确认的 speech ID 不下载音频，失败结果短时复用；
+- provider 与 pipeline 拒绝布尔、字符串、NaN、无穷和非正预算/容量；
 - 路径逃逸被拒绝；
 - 未登记角色不会回退到 Alice；
 - 已登记角色与既有 locale 行为保持兼容。

@@ -10,6 +10,22 @@ from astrbot_plugin_nikke.asset_manager import AssetManager
 
 
 class VoiceResourceTests(IsolatedAsyncioTestCase):
+    async def test_invalid_budget_is_rejected_before_fetch(self):
+        calls = []
+
+        def handle(request):
+            calls.append(request)
+            return httpx.Response(200, json=["synthetic_line"])
+
+        with tempfile.TemporaryDirectory() as directory:
+            provider = VoiceResourceProvider(Path(directory), transport=httpx.MockTransport(handle))
+            for budget in (True, "4", 0, -1, float("nan"), float("inf")):
+                with self.subTest(budget=budget):
+                    with self.assertRaises(ValueError):
+                        await provider.resolve("fixture", "synthetic_line", "en", budget=budget)
+            self.assertEqual(calls, [])
+            await provider.close()
+
     async def test_singleflight_and_persistent_source_cache(self):
         calls = []
         async def handle(request):

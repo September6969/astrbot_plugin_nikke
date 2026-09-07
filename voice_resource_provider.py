@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import json
+import math
 import re
 import time
 import uuid
@@ -24,6 +25,13 @@ class VoiceResourceProvider:
     async def resolve(self, map_key, speech_id, locale, *, budget=4):
         if self._closed:
             return None
+        if (
+            isinstance(budget, bool)
+            or not isinstance(budget, (int, float))
+            or not math.isfinite(float(budget))
+            or budget <= 0
+        ):
+            raise ValueError("语音资源预算必须是正数")
         if locale not in {"en", "ja", "ko"} or not all(isinstance(x, str) and re.fullmatch(r"[a-z0-9_]{1,100}", x) for x in (map_key, speech_id)):
             raise ValueError("语音语言或资源标识无效")
         key = hashlib.sha256(json.dumps([map_key, speech_id, locale]).encode()).hexdigest()
