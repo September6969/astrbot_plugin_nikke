@@ -1,5 +1,13 @@
 # Character Data V2 Increment A 验收
 
+## 当前验证检查点
+
+- 本地 Python 3.10.11：全量 `pytest -q` → 261 passed、2 warnings、49 subtests passed。
+- Character Data V2 定向测试 → 26 passed、6 subtests passed。
+- `node --test tests\\extension.test.cjs` → 3 passed；`compileall -q .` 与 `git diff --check` 通过。
+- 本次文档修订前代码检查点为 `2e77ad2`，对应 CI run `34124685883`；文档提交后的最终 head 与 CI 必须重新查询，不能在此处自引用未来提交。
+- 本次重新生成并实际查看的合成预览：`E:/DevCache/nikke-character-preview-20260907-cd11-v2/red-hood.png`、`alice.png`、`fallback.png`；未读取真实账号或远端资源。
+
 ## 本地行为验证
 
 定向测试：
