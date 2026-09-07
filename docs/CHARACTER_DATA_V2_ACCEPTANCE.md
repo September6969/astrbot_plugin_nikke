@@ -3,7 +3,7 @@
 ## 当前验证检查点
 
 - 本地 Python 3.10.11：主题相关 unittest 27 passed；当前环境未安装 pytest，因此不把本地 unittest 冒充 pytest 结果。
-- 最终 CI run `34170205709`（head `bb724b5`）：全量 Python `262 passed`、`3 warnings`、`49 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。
+- 最终 CI run `34170378622`（head `db6c4d9`）：全量 Python `262 passed`、`3 warnings`、`49 subtests passed`；Node `3 passed`；compileall 与 diff-check 通过。
 - 本次重新生成并实际查看的合成预览：`E:/DevCache/nikke-character-preview-20260907-dupkey-01/red-hood.png`、`alice.png`、`fallback.png`；未读取真实账号或远端资源。
 
 ## 本地行为验证
