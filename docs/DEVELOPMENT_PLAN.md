@@ -3529,18 +3529,17 @@ global render/resource concurrency limit
 
 ### A-ASSET-08：超时线程长期运行治理
 
-状态：`DEBT`
+状态：`PARTIAL / READY_OFFLINE`
 
-用户出卡可 6 秒 fallback，但后台 thread 可能继续运行。
+用户出卡可在预算到期后 fallback。当前预取队列已限制为每个 `AssetManager` 16 项：满额不提交新任务；预算到期会取消仍未启动的 future，避免多卡请求无限积压。单卡的 11 项预取仍可完整提交。
 
-未来需要：
+仍需要：
 
 ```text
 更细粒度 HTTP timeout
-有界队列
-任务 dedup
-冷却
-避免线程池长期被超时任务占满
+已运行线程的协作式取消或可中断 I/O
+与同键 dedup、跨实例下载限额合并后的集成验收
+真实多群负载证据
 ```
 
 ---
