@@ -15,8 +15,9 @@
 | 分支 | `feat/union-raid-v2` |
 | base SHA | `bada0b3aafcd7127d07ca40f554808b0433540f8` |
 | 实现提交 | `665cfeab6e5b7c1946282dd46fdef5e5f114953d`（`feat: harden union raid response semantics`） |
-| PR | 尚未创建；交接记录提交并普通 push 后创建 Draft PR |
-| CI run / headSha | 尚无已推送主题 HEAD；创建 PR 后必须核对 run 的 `headSha` 与最终分支 HEAD 一致 |
+| PR | [#8 Feat: harden Union Raid response semantics](https://github.com/September6969/astrbot_plugin_nikke/pull/8)，`OPEN` / `DRAFT`，等待人工审核；不自动合并 |
+| 已核验 HEAD | `00f95363dbb8799abc9e2d280ea53645ddc8056e`（本次文档同步前的分支 checkpoint；本次提交会产生新的最终 HEAD） |
+| CI run / headSha | [34063656074](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34063656074) `SUCCESS`；其 `headSha = 00f95363dbb8799abc9e2d280ea53645ddc8056e`，与上述 checkpoint 一致。文档同步 push 后必须重验新最终 HEAD CI。 |
 | 行为测试 | 多 `level_info` 不取首项；重复 Boss 不聚合；坏数值不静默转换；负 HP 保留既有归零；排名仅称返回记录 |
 | 合成预览 | `E:\DevCache\nikke-card-preview\raid-increment-a-20260906\`，完整/多阶段项/重复 Boss 均已实际查看 |
 | 当前阻塞 | `GetUnionRaidLevelInfo` 的多项排序、分页和完整范围没有可验证的公开合同 |
@@ -24,5 +25,14 @@
 | 最小现场动作 | 仅在明确授权后，用一个真实账号执行一次只读响应采样并脱敏比较；本阶段未执行 |
 | N+1 审计 | 本增量只改 builder、renderer 与既有排名格式化；未加入 client 调用、循环内请求或新 endpoint |
 | 本地证据 | 额度重置前，同一源码 `python -m pytest -q`：`265 passed, 2 warnings, 50 subtests`；本次恢复后 `python -m compileall -q .`、`node --test tests/extension.test.cjs`（3 passed）和 `git diff --check` 均通过。恢复后的 PATH Python 缺少 `pytest`，故最终 Python 结论以 PR 矩阵 CI 为准。 |
-| 下一步 | 提交本交接记录、普通 push、创建 Draft PR，并核验最终 HEAD CI；不自动合并。 |
-| 未提交文件 | 本台账、工作树索引与验收记录 |
+| 下一步 | 完成本次文档 checkpoint 同步、普通 push 和新最终 HEAD CI 核验；#8 保持 Draft。随后从最新 `origin/main` 独立启动 Announcement V2，不继承本 PR。 |
+| 未提交文件 | 本次同步开始时无未提交文件；此行仅说明核验快照，不能替代后续 `git status`。 |
+
+## TASK-ANNOUNCEMENT-A
+
+| 字段 | 当前记录 |
+| --- | --- |
+| 主题 | Announcement V2：deep rescan、locale、category、query UX 与 diagnostic |
+| 状态 | `READY`，尚未创建工作树或分支；必须从当时最新 `origin/main` 独立开始，不继承 RAID-A。 |
+| 先决语义 | 在 baseline cleanup 前先明确旧文更新、retention、resubscribe replay、version 与 out-of-order 行为；不把这些隐含成缓存副作用。 |
+| 下一步 | 建立 `feat/announcement-v2` 独立 worktree，完成合同、行为测试、全量回归、预览与 Draft PR/最终 HEAD CI。 |

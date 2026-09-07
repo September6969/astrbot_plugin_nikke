@@ -6,7 +6,9 @@
 - 工作树：`E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke`
 - 分支：`feat/union-raid-v2`
 - 实现提交：`665cfeab6e5b7c1946282dd46fdef5e5f114953d`（`feat: harden union raid response semantics`）。
-- PR / 最终 HEAD / CI：交接记录提交并 push 后创建 Draft PR；必须以外部 run 的 `headSha` 与最终分支 HEAD 一致为验收条件，不能用本节的预期值冒充已完成证据。
+- PR：[#8 Feat: harden Union Raid response semantics](https://github.com/September6969/astrbot_plugin_nikke/pull/8)（`OPEN` / `DRAFT`，不自动合并）。
+- 已核验 branch checkpoint：`00f95363dbb8799abc9e2d280ea53645ddc8056e`。
+- 已核验 CI：[34063656074](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34063656074) `SUCCESS`，其 `headSha = 00f95363dbb8799abc9e2d280ea53645ddc8056e`，与 checkpoint 相同。本次文档同步会产生新 HEAD，push 后必须重新以外部 run 的 `headSha` 与最新 HEAD 一致为验收条件。
 
 本增量只加固已有 `/妮姬 联盟突袭` overview 和 `/妮姬 联盟突袭 排名` 的当前响应语义；不接线历史赛季或“我的战斗”，不访问真实账号，也不新增网络 endpoint。
 
@@ -46,3 +48,4 @@
 - `GetUnionRaidLevelInfo` 的多项排序、分页、重复原因与完整范围尚未由授权现场响应证实。
 - 历史赛季与 canonical identity 属于后续独立增量，不能由本次离线语义推断。
 - 最小现场动作是一次明确授权的真实账号只读采样、脱敏后与本合同比较；未执行。
+- 下一独立主题：Announcement V2；从最新 `origin/main` 创建工作树，不把其提交接到本 PR 上。
