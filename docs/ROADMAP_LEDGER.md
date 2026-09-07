@@ -1,6 +1,6 @@
 # NIKKE 长期路线台账
 
-更新时间：2026-09-06。当前基线：`origin/main` `bada0b3aafcd7127d07ca40f554808b0433540f8`。
+更新时间：2026-09-07。当前基线：`origin/main` `bada0b3aafcd7127d07ca40f554808b0433540f8`。
 
 ## 已合并
 
@@ -15,7 +15,7 @@
 | PR | 分支 | 主题 | 当前状态 |
 | --- | --- | --- | --- |
 | #8 | `feat/union-raid-v2` | Union Raid Increment A | OPEN / Draft / CI green |
-| #9 | `feat/announcement-v2` | Announcement Increment A | OPEN / Draft / CI green |
+| #9 | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | OPEN / Draft / CI green；head `ce3591f`；CI `34095787305` |
 | #10 | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | OPEN / Draft / CI green |
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green |
@@ -29,10 +29,19 @@
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
 | Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步 |
+| Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；`last_changed_at`、自动清理、旧缓存安全迁移；head `ce3591f`；CI `34095787305` 与 headSha 一致；新增 10 项生命周期行为测试 |
 | Campaign History numeric contract | `feat/campaign-history-contract-v2` | `bada0b3` | Draft PR #15；严格数值/槽位合同，26 个主题测试、合成图片预览和 CI 已验证 |
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager，wiring 测试和 CI 已验证 |
 
 本轮核验确认：D-01/D-02 已在当前 main，不再重复开实现 PR；D-03、D-04、D-07 也有现行代码和测试证据。
+
+## 任务池
+
+- `WAITING_REVIEW`：Announcement V2 / PR #9；Union Raid A / PR #8；Campaign History / PR #15；Campaign renderer lifecycle / PR #16；其余已创建 Draft PR。
+- `READY`：在不依赖上述未合并分支的前提下，继续做可离线验证的独立主题。
+- `WAITING_DEPENDENCY`：Raid Increment B/C 等待相关基线进入 `main`；不从旧 overnight 分支继续开发。
+- `NEEDS_LIVE_EVIDENCE`：真实 Profile、Raid canonical identity、Daily Like/Browse 写入、Voice QQ 实际播放、Spine 生产许可/运行时。
+- `NEEDS_HUMAN_DECISION`：自动 merge、ruleset、部署、真实生产 migration、价值 CDK 消费。
 
 ## 依赖与暂缓
 
