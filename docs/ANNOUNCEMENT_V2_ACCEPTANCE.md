@@ -23,13 +23,15 @@
 
 ## 测试与预览
 
-在隔离 Python 3.10 环境（AstrBot 4.14.6、pytest 9.1.1）执行：
+本轮在隔离 Python 3.12 环境执行了主题回归：
 
 ```text
-python -m compileall -q .                  PASS
-python -m pytest -v                       264 passed, 2 warnings, 43 subtests passed
-node --test tests/extension.test.cjs       3 passed
-git diff --check                           PASS
+python -m compileall -q .                                      PASS
+pytest tests/test_announcement_cache_lifecycle.py              10 passed
+pytest tests/test_announcement_v2.py (核心回归)                 16 passed, 2 deselected
+pytest tests/test_announcements.py                              15 passed, 24 subtests
+node --test tests/extension.test.cjs                            3 passed
+git diff --check                                                PASS
 ```
 
 新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放和新指纹刷新（10 项行为测试）。
@@ -38,7 +40,7 @@ git diff --check                           PASS
 
 ## 当前交接状态
 
-- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 已创建为 Draft，实施提交为 `16662a58028d9329fe6c548f704b2c74f4ef07db`。
-- 实施提交的 [CI run 34086167762](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34086167762) 已成功：Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。本文档状态提交会形成新的 docs-only head，必须单独等待其对应 CI；不把前一 SHA 的成功冒充为新 head 的结果。
+- [PR #9](https://github.com/September6969/astrbot_plugin_nikke/pull/9) 仍为 Draft，当前实施提交为 `ea66f16a79d2538556355c6317f1fa67a2151585`。
+- 当前 [CI run 34095605055](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34095605055) 的 headSha 与该提交一致，Extension (Node) 及 Python 3.10/3.11/3.12 均 SUCCESS。后续再提交文档时必须重新等待新 head 的 CI。
 - `NEEDS_LIVE_EVIDENCE`：获授权时才可验证公开 CMS 当前响应和真实 AstrBot 运行环境；本次不执行。
 - `HARD_BLOCKED`：无。
