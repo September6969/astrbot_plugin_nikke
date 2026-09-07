@@ -79,6 +79,8 @@ nikke.example.com {
 
 研究来源和限制见 [证据记录](docs/evidence/overnight.md)，阶段结果与诊断方式见 [夜间开发报告](docs/OVERNIGHT_REPORT.md)。
 
+版本记录见 [CHANGELOG.md](CHANGELOG.md)，配置键、默认值和安全边界见 [配置合同](docs/CONFIGURATION_ACCEPTANCE.md)。
+
 - `/妮姬 帮助 [账号|查询|日常]`：查看精简菜单。
 - `/妮姬 账号 [绑定|状态|解绑|汇总 开|关]`：管理自己的账号。
 - `/妮姬 我的`：查看指挥官资料、同步器、前哨和主线进度。
