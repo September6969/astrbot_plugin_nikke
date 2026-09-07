@@ -240,17 +240,29 @@ class AnnouncementService:
         "联盟突袭": "union_raid",
     }
 
-    def __init__(self, data_dir: Path | None = None):
+    def __init__(self, data_dir: Path | None = None, *, clock: Any = None):
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self.data_dir = Path(data_dir) if data_dir else None
         self._records: dict[str, AnnouncementRecord] = {}
         self._deadlines: dict[str, GameDeadline] = {}
         self._revision_history: dict[str, list[str]] = {}
+        self._last_changed_at: dict[str, str] = {}
         self._delivery_log: set[str] = set()
         self.last_updated_at: str | None = None
         self.last_sync_report: dict[str, Any] | None = None
         self.cache_file = (self.data_dir / "announcements_cache.json") if self.data_dir else None
         if self.cache_file and self.cache_file.is_file():
             self.load_cache()
+
+    def _now_utc(self) -> datetime:
+        """返回带时区的 UTC 当前时间，便于缓存生命周期保持可比较。"""
+        current = self._clock()
+        if not isinstance(current, datetime) or current.tzinfo is None:
+            raise ValueError("公告时钟必须返回带时区的 datetime")
+        return current.astimezone(timezone.utc)
+
+    def _now_timestamp(self) -> str:
+        return self._now_utc().isoformat()
 
     @classmethod
     def normalize_locale(cls, value: str | None, *, allow_und: bool = False) -> str:
@@ -308,6 +320,8 @@ class AnnouncementService:
                         value for value in fingerprints[-self.REVISION_HISTORY_LIMIT:]
                         if isinstance(value, str) and value
                     ]
+            migration_timestamp = self._now_timestamp()
+            migrated_legacy_timestamp = False
             for item in data.get("records", []):
                 if not isinstance(item, dict):
                     continue
@@ -337,6 +351,12 @@ class AnnouncementService:
                     logger.warning("跳过损坏的公告缓存记录: %s", exc)
                     continue
                 self._records[rec.content_id] = rec
+                if "last_changed_at" not in item or item.get("last_changed_at") in (None, ""):
+                    # 旧缓存没有本地维护时间时，从迁移时刻起安全保留，避免按发布时间立即误删。
+                    self._last_changed_at[rec.content_id] = migration_timestamp
+                    migrated_legacy_timestamp = True
+                else:
+                    self._last_changed_at[rec.content_id] = str(item["last_changed_at"])
                 history = self._revision_history.setdefault(rec.content_id, [])
                 if rec.content_fingerprint not in history:
                     history.append(rec.content_fingerprint)
@@ -346,6 +366,8 @@ class AnnouncementService:
                     self._deadlines[dl.event_id] = dl
             for key in data.get("delivery_log", []):
                 self._delivery_log.add(str(key))
+            if migrated_legacy_timestamp:
+                self.save_cache()
             logger.info("已成功从本地磁盘缓存加载 %d 条公告数据", len(self._records))
         except Exception as exc:
             logger.error("加载公告本地缓存失败: %s", exc)
@@ -369,6 +391,7 @@ class AnnouncementService:
                     "deadline_at": rec.deadline_at,
                     "deadline_version": rec.deadline_version,
                     "locale": rec.locale,
+                    "last_changed_at": self._last_changed_at.get(rec.content_id),
                 })
             payload = {
                 "last_updated_at": self.last_updated_at,
@@ -437,7 +460,8 @@ class AnnouncementService:
                     counts["updated"] += 1
                 else:
                     counts[self._last_update_outcome] += 1
-            self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
+            self.prune_cache(now=self._now_utc())
+            self.last_updated_at = self._now_utc().astimezone(CST).strftime("%Y-%m-%d %H:%M:%S")
             self.last_sync_report = {
                 "source": source_name,
                 "locale": selected_locale,
@@ -529,6 +553,7 @@ class AnnouncementService:
         self._last_update_outcome = "unchanged"
         if not existing:
             self._records[record.content_id] = record
+            self._last_changed_at[record.content_id] = self._now_timestamp()
             if fingerprint not in history:
                 history.append(fingerprint)
                 self._revision_history[record.content_id] = history[-self.REVISION_HISTORY_LIMIT:]
@@ -538,7 +563,7 @@ class AnnouncementService:
             for dl in parsed:
                 dl.deadline_version = record.deadline_version
                 self._deadlines[dl.event_id] = dl
-            self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
+            self.last_updated_at = self._now_utc().astimezone(CST).strftime("%Y-%m-%d %H:%M:%S")
             self._last_update_outcome = "new"
             if persist:
                 self.save_cache()
@@ -578,7 +603,8 @@ class AnnouncementService:
                 self._deadlines[dl.event_id] = dl
             history.append(fingerprint)
             self._revision_history[record.content_id] = history[-self.REVISION_HISTORY_LIMIT:]
-            self.last_updated_at = datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S")
+            self._last_changed_at[record.content_id] = self._now_timestamp()
+            self.last_updated_at = self._now_utc().astimezone(CST).strftime("%Y-%m-%d %H:%M:%S")
             self._last_update_outcome = "updated"
             if persist:
                 self.save_cache()
@@ -603,7 +629,7 @@ class AnnouncementService:
         days = self.CACHE_RETENTION_DAYS if retention_days is None else retention_days
         if type(days) is not int or days < 14:
             raise ValueError("公告缓存保留期不能短于 14 天")
-        current = now or datetime.now(timezone.utc)
+        current = now or self._now_utc()
         if current.tzinfo is None:
             raise ValueError("清理时间必须包含时区")
         current = current.astimezone(timezone.utc)
@@ -611,12 +637,14 @@ class AnnouncementService:
         removed = 0
         for content_id, rec in list(self._records.items()):
             published = self._parse_aware_timestamp(rec.published_at)
-            if published is None or published >= cutoff:
+            changed = self._parse_aware_timestamp(self._last_changed_at.get(content_id))
+            if published is None or changed is None or published >= cutoff or changed >= cutoff:
                 continue
             related = [deadline for deadline in self._deadlines.values() if deadline.source_content_id == content_id]
             if any(deadline.end_at >= current for deadline in related):
                 continue
             self._records.pop(content_id, None)
+            self._last_changed_at.pop(content_id, None)
             self._revision_history.pop(content_id, None)
             self._deadlines = {
                 event_id: deadline

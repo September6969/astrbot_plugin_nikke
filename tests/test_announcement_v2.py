@@ -111,7 +111,7 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
         self.assertEqual(service.last_sync_report["stale"], 2)
 
     async def test_cleanup_then_rescan_restores_cache_without_implying_delivery(self) -> None:
-        service = AnnouncementService()
+        service = AnnouncementService(clock=lambda: NOW - timedelta(days=120))
         old = record("old", body="旧公告", published_at=NOW - timedelta(days=120))
         service.add_or_update(old)
         self.assertEqual(service.prune_cache(now=NOW), 1)
@@ -127,7 +127,8 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
 
     def test_revision_history_survives_restart_and_cache_cleanup_is_bounded(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            service = AnnouncementService(Path(directory))
+            old_clock = lambda: NOW - timedelta(days=120)
+            service = AnnouncementService(Path(directory), clock=old_clock)
             old = record("same", body="版本 A", published_at=NOW - timedelta(days=120))
             current = record("same", body="版本 B", published_at=NOW - timedelta(days=120))
             active = record(
@@ -138,7 +139,7 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
             service.add_or_update(old)
             service.add_or_update(current)
             service.add_or_update(active)
-            service = AnnouncementService(Path(directory))
+            service = AnnouncementService(Path(directory), clock=old_clock)
 
             self.assertEqual(service.add_or_update(old), (False, False))
             restored = next(item for item in service.list_announcements(limit=10) if item.content_id == "same")

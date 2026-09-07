@@ -16,6 +16,8 @@
 - 支持 `en`、`ja`、`ko`、`th`、`de`、`fr`，缓存迁移值为 `und`；分类只在本地精确过滤，`活动`、`维护` 等中文别名映射为既有本地标识。
 - 查询、分类、语言过滤与诊断均只读本地缓存，不发网络请求；诊断不含正文、订阅 target 或凭据。
 - 缓存只清理可证明过期且不含进行中日程的公告；投递基线保留旧版本水位，重订阅不回放，旧文新版本仍可投递。
+- 缓存记录新增本地维护时间 `last_changed_at`：首次入库和新内容指纹写入当前 UTC 时间；重复 fetch 与已见旧指纹回放都不刷新。清理同时要求 `published_at` 与 `last_changed_at` 都超过 90 天，且没有活动日程；因此发布时间很早但刚更新的旧公告不会被立即删除。
+- `sync_from_source()` 成功完成后自动执行有界缓存清理；旧缓存缺少 `last_changed_at` 时从迁移时刻安全初始化并落盘，无法解析的时间仍保留，不作危险删除。
 - 内容指纹覆盖 title、正文、category、locale；已见旧指纹重放不会回滚新版本或日程。未见新指纹仅按到达顺序升级，并把来源顺序标记为 unknown。
 - 修复既有 BlaBlaLink 回退循环缩进：多条公开记录不再只保留最后一条。
 
@@ -30,7 +32,7 @@ node --test tests/extension.test.cjs       3 passed
 git diff --check                           PASS
 ```
 
-新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理。
+新增 `tests/test_announcement_v2.py` 覆盖：深度范围/语言、来源上限、回退多条记录、重复 fetch、旧指纹乱序、清理后重扫、重启、locale/category/query/diagnostic、管理员鉴权、重订阅基线及投递清理；新增 `tests/test_announcement_cache_lifecycle.py` 覆盖自动清理、旧文新版本、活动日程保护、异常时间、旧缓存迁移、重启保持、重复 fetch、旧指纹回放和新指纹刷新（10 项行为测试）。
 
 实际查看的合成文本预览（未网络请求）显示：语言和分类筛选会显示 `（筛选: 语言=ja · 分类=maintenance）` 与唯一的维护公告；诊断只显示缓存数量、范围、locale/category 聚合和 90 天保留策略，无正文/target/凭据。
 
