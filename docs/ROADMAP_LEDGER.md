@@ -21,7 +21,7 @@
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green；head `137b931`；CI `34115112516` |
 | #13 | `feat/voice-mapping-v2` | Voice mapping public research | OPEN / Draft / CI green；head `68138bc`；CI `34115632353` |
 | #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；当前 head 与 CI 以 PR #14 检查为权威 |
-| #15 | `feat/campaign-history-contract-v2` | Campaign History numeric contract | OPEN / Draft / CI green |
+| #15 | `feat/campaign-history-contract-v2` | Campaign History numeric contract | OPEN / Draft / CI green；head `6a6a641`；CI `34134245113` |
 | #16 | `feat/campaign-resource-lifecycle-v2` | Campaign renderer asset lifecycle | OPEN / Draft / CI green；head `a09493b`；CI `34116765420` |
 | #17 | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | OPEN / Draft / CI green；head `e2d709f`；CI `34117403120` |
 | #18 | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | OPEN / Draft / CI green；head `b7b19f3`；CI `34118342055` |
@@ -46,7 +46,7 @@
 | --- | --- | --- | --- |
 | Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；当前 head 与 CI 以 PR #14 检查为权威 |
 | Announcement cache lifecycle P1 | `feat/announcement-v2` | `bada0b3` | Draft PR #9；有界深度重扫、locale/category/query、旧文版本/乱序、`last_changed_at` 自动清理与安全迁移；版本字段严格为正整数，损坏缓存不静默截断；head `84f5032`；本地主题回归 39 passed、42 subtests，全量 pytest 278 passed、61 subtests、Node 3 passed、compileall/diff check 通过；CI `34120996910` 全绿；未访问真实 CMS、账号或发送消息 |
-| Campaign History numeric contract | `feat/campaign-history-contract-v2` | `bada0b3` | Draft PR #15；严格数值/槽位合同，26 个主题测试、合成图片预览和 CI 已验证 |
+| Campaign History numeric contract | `feat/campaign-history-contract-v2` | `bada0b3` | Draft PR #15；严格 tid/lv/combat/slot 数值与槽位合同；非映射响应、缺失/非列表 `data.list`、非五人列表返回 ERROR，明确空列表保持 UNAVAILABLE，并对超长列表提前失败；本地定向 28 passed、3 subtests，全量 pytest 263 passed、46 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；已实际查看 1400×820 合成 NORMAL 46-40 预览；head `6a6a641`；CI `34134245113` 四项全绿；不访问真实账号或宣称真实联调/资源授权 |
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager；同一张卡片内相同 `(tid, resource_id)` 的 portrait 只解析一次；本地 pytest 258 passed、专项 33 passed、Node 3 passed、compileall/diff check 通过；已实际查看 1400×820 合成 Campaign 预览；head `a09493b`；CI `34116765420` 全绿；不宣称全局 N+1 已消除或真实资源联调 |
 | AssetManager request dedup | `feat/asset-request-dedup-v2` | `bada0b3` | Draft PR #17；同一缓存键 5 个并发调用只发 1 次模拟请求；下载成功但原子缓存写入失败时，等待者复用同一内存图片；本地 pytest 258 passed、专项 35 passed、Node 3 passed、compileall/diff check 通过；head `e2d709f`；CI `34117403120` 全绿；仍不宣称全局 N+1、真实资源或账号证据 |
 | Daily Evidence sign-in recovery | `feat/daily-evidence-p1` | `bada0b3` | Draft PR #18；intent 先于读取，running/unknown 只读恢复，未确认进入 unknown、Cookie 失效进入 expired；执行中取消也将已持有 daily/signin intent 收敛为 unknown 后继续传播取消；本地专项 10 passed、全量 pytest 261 passed、Node 3 passed、compileall/diff check 通过；head `b7b19f3`；CI `34118342055` 全绿；不宣称 Like/Browse 或真实账号证据 |
