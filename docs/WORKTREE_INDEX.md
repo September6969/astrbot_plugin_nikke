@@ -19,6 +19,7 @@
 | `E:\_codex_work\asset-request-dedup-v2-worktree\astrbot_plugin_nikke` | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | Draft PR #17；head `8c293d1`；CI `34096785354`；工作树 clean |
 | `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `3686968`；CI `34099070943`；工作树 clean |
 | `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | Draft PR #19；head `808417e`；CI `34100353287`；工作树 clean |
+| `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `e0ac0c8`；CI `34101656392`；工作树 clean |
 
 ## 协作规则
 
