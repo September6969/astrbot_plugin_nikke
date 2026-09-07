@@ -100,6 +100,25 @@ class AssetManagerTests(unittest.TestCase):
             finally:
                 manager.close()
 
+    def test_registry_unknown_ids_do_not_use_generic_sources(self):
+        assets_dir = Path(__file__).resolve().parents[1] / "assets"
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(Path(td), assets_dir, remote=True)
+            try:
+                # 通用来源清单不能把未知 registry ID 变成可请求的远程素材。
+                manager.sources.update({
+                    "equipment/999999.png": "https://example.com/equipment.png",
+                    "favorite/999999.png": "https://example.com/favorite.png",
+                    "cube/999999.png": "https://example.com/cube.png",
+                })
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    self.assertIsNotNone(manager.get_equipment_icon("head", 999999).getbbox())
+                    self.assertIsNotNone(manager.get_favorite_item_icon(999999).getbbox())
+                    self.assertIsNotNone(manager.get_cube_icon(999999).getbbox())
+                    stream.assert_not_called()
+            finally:
+                manager.close()
+
     def test_resolve_character_assets_concurrent_prefetch(self):
         from astrbot_plugin_nikke.tests.test_card_builder import build_card
 

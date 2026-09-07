@@ -78,7 +78,14 @@ class AssetManager:
             image.load()
             return image.convert("RGBA")
 
-    def _load(self, kind: str, key: str, remote_url: str = "") -> Image.Image | None:
+    def _load(
+        self,
+        kind: str,
+        key: str,
+        remote_url: str = "",
+        *,
+        allow_source: bool = True,
+    ) -> Image.Image | None:
         relative = f"{kind}/{self._key(key)}.png"
         for base in (self.cache_dir, self.asset_dir):
             try:
@@ -87,7 +94,8 @@ class AssetManager:
                     return self._decode(path.read_bytes())
             except (OSError, ValueError, Image.DecompressionBombError):
                 pass
-        url = self.sources.get(relative, remote_url)
+        # 静态 registry 素材必须只使用已确认映射生成的 URL，不能被通用来源清单绕过。
+        url = self.sources.get(relative, remote_url) if allow_source else remote_url
         if not self.remote or not isinstance(url, str) or not url.startswith("https://"):
             return None
         if self._failed.get(relative, 0) > time.monotonic():
@@ -179,13 +187,13 @@ class AssetManager:
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
         resource = self.equipment_map.get(str(equipment_id), "")
         url = self.game_resource_url(f"icon/equip/{resource}.webp") if resource and self._key(resource) != "missing" else ""
-        image = self._load("equipment", str(equipment_id), url) if equipment_id else None
+        image = self._load("equipment", str(equipment_id), url, allow_source=False) if equipment_id else None
         if image is None:
             image = self._load("slots", slot)
         return image if image is not None else self.fallback(slot)
 
-    def _icon(self, kind, key, fallback, url="") -> Image.Image:
-        image = self._load(kind, self._key(key), url)
+    def _icon(self, kind, key, fallback, url="", *, allow_source=True) -> Image.Image:
+        image = self._load(kind, self._key(key), url, allow_source=allow_source)
         return image if image is not None else self.fallback(fallback)
 
     def get_favorite_item_icon(self, tid) -> Image.Image:
@@ -200,7 +208,7 @@ class AssetManager:
                 url = self.game_resource_url(resource)
             else:
                 url = self.game_resource_url(f"icon/favorite/{resource}.webp")
-        return self._icon("favorite", tid, "favorite", url)
+        return self._icon("favorite", tid, "favorite", url, allow_source=False)
 
     def get_cube_icon(self, tid) -> Image.Image:
         if not tid:
@@ -214,7 +222,7 @@ class AssetManager:
                 url = self.game_resource_url(resource)
             else:
                 url = self.game_resource_url(f"icon/cube/{resource}.webp")
-        return self._icon("cube", tid, "cube", url)
+        return self._icon("cube", tid, "cube", url, allow_source=False)
 
     def get_element_icon(self, element):
         key = self._key(element)
