@@ -22,7 +22,7 @@ pytest tests/test_core.py::StoreTests tests/test_cdk_persistence.py \
   tests/test_cdk_stale_runs.py tests/test_announcement_delivery.py \
   tests/test_announcement_push_wiring.py tests/test_review_cancellation.py \
   tests/test_voice_audio.py                                    26 passed, 12 subtests
-pytest -q                                                       257 passed, 43 subtests
+pytest -q                                                       258 passed, 43 subtests
 compileall -q .                                                 PASS
 node --test tests/extension.test.cjs                             3 passed
 git diff --check                                                 PASS
