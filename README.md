@@ -52,6 +52,16 @@
 6. **不要**把 `6210`、AstrBot 后台或 NapCat 后台直接映射到公网。
 7. 在 QQ 中发送 `/妮姬 帮助`，再私聊发送 `/妮姬 账号 绑定` 完成绑定。
 
+离线备份可在插件父目录执行：
+
+```bash
+python -m astrbot_plugin_nikke.scripts.backup_nikke_data \
+  --data-dir AstrBot/data/nikke \
+  --destination /安全的备份目录
+```
+
+该命令只读取数据库和密钥，不连接网络；备份目录不能位于源目录内，已有同名备份不会覆盖。恢复前请人工确认目标环境和文件权限。
+
 若绑定域名在本地代理下出现 `SSL_connect error 5`，可从 [GitHub Releases](https://github.com/September6969/astrbot_plugin_nikke/releases) 下载同一扩展包；不要关闭浏览器证书校验。
 
 仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。
