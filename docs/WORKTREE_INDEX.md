@@ -17,7 +17,7 @@
 | `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15，CI 已验证 |
 | `E:\_codex_work\campaign-resource-lifecycle-v2\astrbot_plugin_nikke` | `feat/campaign-resource-lifecycle-v2` | Campaign renderer 资源生命周期 | Draft PR #16；head `a09493b`；CI `34116765420` 全绿；工作树 clean |
 | `E:\_codex_work\asset-request-dedup-v2-worktree\astrbot_plugin_nikke` | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | Draft PR #17；head `e2d709f`；CI `34117403120` 全绿；工作树 clean |
-| `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `3686968`；CI `34099070943`；工作树 clean |
+| `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `b7b19f3`；CI `34118342055` 全绿；工作树 clean |
 | `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | Draft PR #19；head `808417e`；CI `34100353287`；工作树 clean |
 | `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `375498c`；CI `34102399018`；工作树 clean |
 | `E:\_codex_work\shutdown-lifecycle\astrbot_plugin_nikke` | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | Draft PR #21；head `a9ccb48`；CI `34102939859`；工作树 clean |
