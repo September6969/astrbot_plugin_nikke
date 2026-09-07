@@ -25,7 +25,7 @@
 | #16 | `feat/campaign-resource-lifecycle-v2` | Campaign renderer asset lifecycle | OPEN / Draft / CI green；head `a09493b`；CI `34116765420` |
 | #17 | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | OPEN / Draft / CI green；head `e2d709f`；CI `34117403120` |
 | #18 | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | OPEN / Draft / CI green；head `b7b19f3`；CI `34118342055` |
-| #19 | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | OPEN / Draft / CI green；head `808417e`；CI `34100353287` |
+| #19 | `feat/storage-connection-lifecycle` | SQLite connection lifecycle hardening | OPEN / Draft / CI green；head `0e9d323`；CI `34119004278` |
 | #20 | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | OPEN / Draft / CI green；head `375498c`；CI `34102399018` |
 | #21 | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | OPEN / Draft / CI green；head `a9ccb48`；CI `34102939859` |
 | #22 | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | OPEN / Draft / CI green；head `6943e12`；CI `34104071393` |
@@ -49,7 +49,7 @@
 | Campaign renderer asset lifecycle | `feat/campaign-resource-lifecycle-v2` | `bada0b3` | Draft PR #16；复用共享 AssetManager；同一张卡片内相同 `(tid, resource_id)` 的 portrait 只解析一次；本地 pytest 258 passed、专项 33 passed、Node 3 passed、compileall/diff check 通过；已实际查看 1400×820 合成 Campaign 预览；head `a09493b`；CI `34116765420` 全绿；不宣称全局 N+1 已消除或真实资源联调 |
 | AssetManager request dedup | `feat/asset-request-dedup-v2` | `bada0b3` | Draft PR #17；同一缓存键 5 个并发调用只发 1 次模拟请求；下载成功但原子缓存写入失败时，等待者复用同一内存图片；本地 pytest 258 passed、专项 35 passed、Node 3 passed、compileall/diff check 通过；head `e2d709f`；CI `34117403120` 全绿；仍不宣称全局 N+1、真实资源或账号证据 |
 | Daily Evidence sign-in recovery | `feat/daily-evidence-p1` | `bada0b3` | Draft PR #18；intent 先于读取，running/unknown 只读恢复，未确认进入 unknown、Cookie 失效进入 expired；执行中取消也将已持有 daily/signin intent 收敛为 unknown 后继续传播取消；本地专项 10 passed、全量 pytest 261 passed、Node 3 passed、compileall/diff check 通过；head `b7b19f3`；CI `34118342055` 全绿；不宣称 Like/Browse 或真实账号证据 |
-| SQLite connection lifecycle | `feat/storage-connection-lifecycle` | `bada0b3` | Draft PR #19；每次存储操作成功提交/异常回滚并明确关闭连接；Windows 临时目录生命周期回归通过；head `808417e`；CI `34100353287` 全绿 |
+| SQLite connection lifecycle | `feat/storage-connection-lifecycle` | `bada0b3` | Draft PR #19；每次存储操作成功提交、异常回滚并明确关闭连接；新增异常回滚/原异常传播/连接关闭行为测试；本地专项 28 passed、全量 pytest 258 passed、Node 3 passed、compileall/diff check 通过；head `0e9d323`；CI `34119004278` 全绿 |
 | Runtime config hardening | `feat/runtime-config-hardening` | `bada0b3` | Draft PR #20；非法数值配置和损坏持久化调度字段按合同回退，不让调度循环退出；head `375498c`；CI `34102399018` 全绿 |
 | Plugin shutdown lifecycle | `feat/plugin-shutdown-lifecycle` | `bada0b3` | Draft PR #21；顺序/并发 terminate 只回收一次资源；head `a9ccb48`；CI `34102939859` 全绿 |
 | Data backup hardening | `feat/data-backup-hardening` | `bada0b3` | Draft PR #22；离线备份 `nikke.sqlite3` 与 `secret.key`，SQLite integrity_check、SHA-256 manifest、临时目录落盘和禁止覆盖；head `6943e12`；CI `34104071393` 全绿；仅合成数据，无真实恢复/部署声明 |
