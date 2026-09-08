@@ -117,6 +117,8 @@ nikke.example.com {
 
 必须同时迁移 `data/nikke/nikke.sqlite3` 和 `data/nikke/secret.key`。密钥应保持 `600` 权限，丢失后旧 Cookie 无法恢复，只能让用户重新绑定。
 
+升级或回滚前可运行只读前置检查：`python scripts/upgrade_preflight.py --data-dir data/nikke`。它只检查存储成对存在、SQLite 完整性、字段合同、可选备份集和磁盘余量，不执行迁移、复制、删除、覆盖或生产写入。验收边界见 [`docs/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md`](docs/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md)。
+
 ## 测试
 
 ```bash
