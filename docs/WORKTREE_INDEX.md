@@ -25,8 +25,8 @@
 | `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle + Python 3.13 compatibility evidence | Draft PR #19；head `ffd96a5`；CI `34145647733` 五项全绿（Node、Python 3.10–3.13）；本地 Windows Python 3.13 全量 258 passed；工作树 clean |
 | `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `6e00c5a`；CI `34163558500`；工作树 clean |
 | `E:\_codex_work\shutdown-lifecycle\astrbot_plugin_nikke` | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | Draft PR #21；head `080ea94`；CI `34172309963`；工作树 clean；部分初始化和 falsey 资源清理边界已覆盖 |
-| `E:\_codex_work\data-backup-hardening\astrbot_plugin_nikke` | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | Draft PR #22；head `69fb952`；CI `34164382428`；工作树 clean |
-| `E:\_codex_work\health-diagnostics-v1\astrbot_plugin_nikke` | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | Draft PR #23；head `79340a9`；CI `34164857009`；工作树 clean |
+| `E:\_codex_work\data-backup-hardening\astrbot_plugin_nikke` | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | Draft PR #22；head `bc839c4`；CI `34186296724`；工作树 clean；拒绝源/输出路径符号链接，专项 4 passed |
+| `E:\_codex_work\health-diagnostics-v1\astrbot_plugin_nikke` | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | Draft PR #23；head `f64d3e7`；CI `34186653879`；工作树 clean；父级路径链接和不可表示磁盘值边界已覆盖 |
 | `E:\_codex_work\storage-migration-v1\astrbot_plugin_nikke` | `feat/storage-migration-v1` | Transactional SQLite schema migration | Draft PR #24；head `7a9602b`；CI `34165229014`；工作树 clean |
 | `E:\_codex_work\healthz-readiness-v1\astrbot_plugin_nikke` | `feat/healthz-readiness-v1` | Healthz storage readiness contract | Draft PR #25；head `1d3abc2`；CI `34165779139`；工作树 clean |
 | `E:\_codex_work\log-privacy-v1-wt\astrbot_plugin_nikke` | `feat/log-privacy-v1` | Plugin log privacy hardening | Draft PR #26；head `d1c60cd`；CI `34166397758` 四项全绿；本地 Python 3.10 + AstrBot 完整测试 262 passed；工作树 clean |
