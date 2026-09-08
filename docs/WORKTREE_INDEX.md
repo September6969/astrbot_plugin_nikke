@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-08。当前核验的远端基线为 `origin/main@7b1b07cd89b1b5dbac20bf03f2f162b0b22b65c1`；下表是本轮收口时的索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-08。当前核验的远端基线为 `origin/main@c4f1755a50903f7d47ac8904715b61c880c4605b`；下表是本轮收口时的索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -28,4 +28,8 @@
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
-| P0 静态 FB / Costume | 开发中 | `E:\_codex_work\nikke-fb-static-v1` / `feat/fb-static-mainline-v1`；基线 `origin/main@c4f1755a`，普通出卡不进入 Spine |
+| P0 静态 FB / Costume | Draft PR #47，CI 全绿 | `E:\_codex_work\nikke-fb-static-v1` / `feat/fb-static-mainline-v1`；基线 `origin/main@c4f1755a`，普通出卡不进入 Spine |
+| P1 角色卡最终版 | Draft PR #48，CI 全绿 | `E:\_codex_work\nikke-character-card-final-v1` / `feat/character-card-final-v1`；依赖评审顺序 #47 → #48 |
+| P1 Item/Cube 完整性 | Draft PR #49，CI 全绿 | `E:\_codex_work\nikke-item-resource-integrity-v1` / `test/item-resource-integrity-v1`；仅补行为矩阵，不制造资源映射 |
+| P2 Guide/Help 素材 | Draft PR #50，CI 全绿 | `E:\_codex_work\nikke-guide-assets-v1` / `feat/guide-assets-v1`；原件保留在 `E:\walkthrough` |
+| P4 Spine 隔离 | Draft PR #51，CI 全绿 | `E:\_codex_work\nikke-spine-isolation-v1` / `feat/spine-experimental-isolation`；普通路径无 Spine 引用，实验入口保留兼容 shim |

@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序将已授权的待合并 PR 收口到 `main`。本次核验时 `origin/main` 为 `7b1b07cd89b1b5dbac20bf03f2f162b0b22b65c1`（`Merge pull request #45`）；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `c4f1755a50903f7d47ac8904715b61c880c4605b`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -29,7 +29,7 @@
 - `NEEDS_LIVE_EVIDENCE` 仍包括真实账号 Profile/Raid 字段兼容、Daily 写入后的真实状态、Voice 实际播放送达、Spine 生产运行时/许可、真实远端素材负载和部署环境图片。
 - Raid “我的”目前只证明了离线的精确 `game_openid` 筛选和当前响应文案；尚未证明响应 `openid` 与绑定身份的现场 canonical 关联，也不把返回条数当作真实出刀次数。
 - 未接线模块、mock/fixture、合成 PNG、公开只读访问和静态代码检查不得冒充产品完成、真实联调、消息发送或资源授权。
-- 本轮没有访问真实账号、执行账号写入、发送消息、部署、修改 main 工作树、force push、删除分支或修改 ruleset。
+- 本轮没有访问真实账号、执行账号写入、发送消息、部署、修改 main 工作树、删除分支或修改 ruleset。P4 分支曾因修正已推送提交的 EOF 使用一次 `--force-with-lease`，未触及 main 或其他分支；随后已改为普通提交并保持线性历史。
 
 ## 后续工作
 
@@ -37,6 +37,8 @@
 
 ## FB 静态立绘路线（进行中）
 
-- P0 静态 FB / Costume 主链：`feat/fb-static-mainline-v1`，从 `origin/main@c4f1755a50903f7d47ac8904715b61c880c4605b` 建立；已补 costume 字段贯通、严格空映射清单和普通路径零 Spine 合同，状态 `READY_OFFLINE`，等待 Draft PR CI。
+- P0 静态 FB / Costume 主链：`feat/fb-static-mainline-v1`，从 `origin/main@c4f1755a50903f7d47ac8904715b61c880c4605b` 建立；已补 costume 字段贯通、严格空映射清单和普通路径零 Spine 合同，状态 `READY_OFFLINE`，PR #47 CI 全绿。
 - Costume 实际映射及完整角色目录覆盖：`NEEDS_LIVE_EVIDENCE`；没有制造映射，也没有把可构造 URL 当作远端存在性证据。
-- 后续 P1–P4 继续按依赖拆分；真实账号、QQ 发送与部署保持未授权/未执行。
+- P1 卡片视觉：PR #48 CI 全绿；P1 Item/Cube 完整性：PR #49 CI 全绿；P2 Guide/Help 素材：PR #50 CI 全绿；P4 Spine 隔离：PR #51 CI 全绿；均保持 Draft、以 `main` 为基线，按 #47 → #48 → #49/#50 → #51 评审/合并。
+- Raid / Campaign / Tower 既有离线主题已在当前 main 基线中具备合同、fixture 和行为测试；真实 canonical identity、赛季范围和账号进度仍标为 `NEEDS_LIVE_EVIDENCE`，本轮未重复制造现场证据。
+- 真实账号、QQ 发送与部署保持未授权/未执行。
