@@ -22,6 +22,18 @@ class VoiceResourceProvider:
         self._slots = asyncio.Semaphore(2)
         self._closed = False
 
+    def _cache_path_is_safe(self) -> bool:
+        """缓存路径任一现有层级为符号链接时拒绝读写，避免越出数据目录。"""
+        current = self.cache
+        while current != current.parent:
+            try:
+                if current.is_symlink():
+                    return False
+            except OSError:
+                return False
+            current = current.parent
+        return True
+
     async def resolve(self, map_key, speech_id, locale, *, budget=4):
         if self._closed:
             return None
@@ -57,7 +69,11 @@ class VoiceResourceProvider:
 
     async def _fetch(self, map_key, speech_id, locale, key):
         async with self._slots:
+            if not self._cache_path_is_safe():
+                raise OSError("语音缓存路径不安全")
             self.cache.mkdir(parents=True, exist_ok=True)
+            if not self._cache_path_is_safe():
+                raise OSError("语音缓存路径不安全")
             target = self.cache / f"{key}.mp3"
             manifest = self.cache / f"{key}.json"
             cached = self._cached_source(target, manifest, map_key, speech_id, locale)
@@ -89,6 +105,8 @@ class VoiceResourceProvider:
     def _cached_source(self, target, manifest, map_key, speech_id, locale):
         """只接受与当前请求身份、完整性和有效期都一致的本地缓存。"""
         try:
+            if not self._cache_path_is_safe() or target.is_symlink() or manifest.is_symlink():
+                return None
             age = time.time() - manifest.stat().st_mtime
             if not target.is_file() or not manifest.is_file() or not 0 <= age < 86400 or target.stat().st_size > self.MAX_BYTES:
                 return None

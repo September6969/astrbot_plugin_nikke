@@ -8,14 +8,15 @@
 python -m pytest -q tests/test_voice_resource_provider.py tests/test_voice_pipeline.py tests/test_feedback_and_voice.py tests/test_voice_audio.py
 ```
 
-结果：`21 passed`、`12 subtests passed`。
+结果：`22 passed`、`12 subtests passed`。
 
-同一工作树的最终本地回归：`python -m pytest -q` 为 `262 passed, 2 warnings, 55 subtests passed`；`node --test tests/extension.test.cjs` 为 3/3 通过。`python -m compileall -q .` 和 `git diff --check` 通过。全量 pytest 在此 Windows 依赖环境中会打印既有 native-trace，但退出码为 0；本增量的 Voice 专项回归不出现该输出。
+同一工作树的最终本地回归：`python -m pytest -q` 为 `263 passed, 2 warnings, 55 subtests passed`；`node --test tests/extension.test.cjs` 为 3/3 通过。`python -m compileall -q .` 和 `git diff --check` 通过。全量 pytest 在此 Windows 依赖环境中会打印既有 native-trace，但退出码为 0；本增量的 Voice 专项回归不出现该输出。
 
 覆盖点：
 
 - 五个并发请求共享一次 voice map 与一次 MP3 请求；
 - manifest 与 MP3 成功落盘，provider 重启后命中持久缓存；篡改身份字段或将 manifest 时间戳置为未来时会重新读取；
+- 缓存根目录或缓存文件为符号链接时拒绝读写，不发起网络请求，也不向链接目标写入；
 - 未确认的 speech ID 不下载音频，失败结果短时复用；
 - provider 与 pipeline 拒绝布尔、字符串、NaN、无穷和非正预算/容量；
 - 路径逃逸被拒绝；

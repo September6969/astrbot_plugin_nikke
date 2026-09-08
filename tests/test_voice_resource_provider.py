@@ -13,6 +13,23 @@ from astrbot_plugin_nikke.asset_manager import AssetManager
 
 
 class VoiceResourceTests(IsolatedAsyncioTestCase):
+    async def test_symlinked_cache_root_is_rejected_without_network_or_external_write(self):
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as external:
+            cache = Path(directory, "cache")
+            cache.mkdir()
+            os.symlink(Path(external), cache / "source", target_is_directory=True)
+            calls = []
+
+            def handle(request):
+                calls.append(request)
+                return httpx.Response(200, content=b"ID3unexpected")
+
+            provider = VoiceResourceProvider(cache, transport=httpx.MockTransport(handle))
+            self.assertIsNone(await provider.resolve("fixture", "synthetic_line", "en"))
+            self.assertEqual(calls, [])
+            self.assertEqual(list(Path(external).iterdir()), [])
+            await provider.close()
+
     async def test_invalid_budget_is_rejected_before_fetch(self):
         calls = []
 
