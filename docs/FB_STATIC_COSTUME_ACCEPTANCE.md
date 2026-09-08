@@ -12,7 +12,7 @@
 
 ## 普通出卡边界
 
-普通 `get_character_portrait()` 和 `resolve_character_assets()` 不导入、不构造、不探测 Spine，也不下载 skel/atlas 或投递队列。Spine 仅保留为显式 `enqueue_experimental_spine()` 实验入口，等待 P4 隔离。
+普通 `get_character_portrait()` 和 `resolve_character_assets()` 使用正式 `SpinePreRenderer` 编排器，但不在热路径刷新 L2D 索引、不同步等待 runtime，也不因 Spine 失败阻断出卡。只有已有索引、明确匹配的注入 runtime 且缓存未命中时，才投递受预算约束的后台 bundle 任务；当前请求继续静态 FB/几何 fallback。
 
 同一静态缓存键继续使用 single-flight；角色卡预取固定为一项 portrait 任务，不按角色字段循环请求。
 
@@ -31,7 +31,7 @@
 ## 验证
 
 - `tests/test_nikke_db_provider.py`：ID 规范化、严格 costume 文件、四状态隔离、静态 FB URL。
-- `tests/test_asset_manager.py`：known costume 独立缓存、unknown/invalid fallback、single-flight、请求上限、普通路径零 Spine、costume 字段传递。
+- `tests/test_asset_manager.py`：known costume 独立缓存、unknown/invalid fallback、single-flight、请求上限、正式 Spine 编排器的非阻塞角色卡路径、costume 字段传递。
 - `tests/test_card_builder.py`：`costume_id` 字段不丢失。
 
 现场最小动作：只读获取当前角色目录并保存来源、时间与哈希；不需要玩家 Cookie，也不得把 URL 可构造等同于资源存在或授权。

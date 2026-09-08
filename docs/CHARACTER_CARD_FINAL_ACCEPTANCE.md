@@ -25,7 +25,7 @@
 
 ## 请求预算与证据缺口
 
-角色卡由 `resolve_character_assets()` 固定提交一项 portrait 与十项独立图标任务；没有按装备词条循环发网络请求，同键下载保持 single-flight，普通路径无 Spine 请求。
+角色卡由 `resolve_character_assets()` 固定提交一项 portrait 与十项独立图标任务；没有按装备词条循环发网络请求，同键下载保持 single-flight。Spine 只消费已有 L2D 索引，命中版本化 PNG 时可作为 portrait 来源；未命中时只在明确匹配 runtime 的后台队列预热，当前请求继续静态 FB/占位回退，不同步等待。
 
 `NEEDS_LIVE_EVIDENCE`：当前真实 CharacterDetails 是否在所有区域返回 HP/ATK/DEF、实际 costume ID 对照、真实 QQ 发送尺寸/清晰度。最小现场动作是一次获准的只读角色详情抓取与一次人工触发的测试群发送；本 PR 不执行。
 
