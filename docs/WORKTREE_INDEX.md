@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-08。当前核验的远端基线为 `origin/main@09821816f7489885f4fb33045fd56fe39adda1d3`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-08。当前核验的远端基线为 `origin/main@2f969756b18ad7e28c41564b07ba0aa60b0dc59d`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -36,4 +36,5 @@
 | Spine 正式后端 | PR #52 已合并 | `E:\_codex_work\nikke-spine-formal-v1` / `feat/spine-formal-backend-v1`；历史分支保留，HEAD 不代表当前 main |
 | Spine 4.1 runtime / Costume | PR #53 已合并 | `E:\_codex_work\nikke-spine-runtime-v1` / `feat/spine-runtime-costume-v1`；历史分支保留，官方 Linux 构建、合法 bundle 和现场渲染仍待证据 |
 | Resource Registry V2 | PR #54 已合并 | `E:\_codex_work\nikke-resource-registry-v2` / `feat/resource-registry-v2`；历史分支保留，costume 映射保持空表 |
-| Voice Pipeline V2 | 当前独立 Draft PR 主题 | `E:\_codex_work\nikke-voice-pipeline-v2` / `feat/voice-pipeline-v2`；从 `origin/main@09821816f7489885f4fb33045fd56fe39adda1d3` 建立，Poke 动态映射保持空表 |
+| Voice Pipeline V2 | PR #55 已合并 | `E:\_codex_work\nikke-voice-pipeline-v2` / `feat/voice-pipeline-v2`；历史分支保留，Poke 动态映射保持空表 |
+| Final acceptance / release prep | 当前独立 Draft PR 主题 | `E:\_codex_work\nikke-final-acceptance-v1` / `feat/final-acceptance-v1`；从 `origin/main@2f969756b18ad7e28c41564b07ba0aa60b0dc59d` 建立，收口清单与现场阻塞登记 |
