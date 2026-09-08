@@ -24,6 +24,14 @@
       "checked_at": "2026-09-06",
       "sha256": "df89ab0a9e421a98e248aad2760dcef07518d6ba817cf4d64536d32617561b30",
       "license_boundary": "identifier metadata only; not game asset redistribution"
+    },
+    "costume": {
+      "path": "costumes.json",
+      "source": "repository-maintained verified costume identifier mapping",
+      "source_ref": "assets/README.md",
+      "checked_at": "2026-09-08",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "license_boundary": "identifier metadata only; empty until API costume to Nikke-DB asset evidence is verified"
     }
   }
 }

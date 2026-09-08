@@ -79,6 +79,7 @@ class AssetManager:
         self.equipment_map = self.registry.mapping("equipment")
         self.favorite_items_map = self.registry.mapping("favorite_item")
         self.cubes_map = self.registry.mapping("cube")
+        self.costumes_map = self.registry.mapping("costume")
 
     @staticmethod
     def game_resource_url(path: str) -> str:

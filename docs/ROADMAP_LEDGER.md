@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `44266cad2cbc31f95b46ee7fb342c9c19c231f89`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -23,6 +23,7 @@
 | v4 F6 recoverable backup | 已合并 PR #44，merge `9d35655f9f73ba3517d0c9e9a20ac5128794b504`；只读密钥/数据库校验、SQLite backup API、隔离暂存、完整性与加密字段恢复验证已由 CI 覆盖 |
 | Offline Raid “我的” | 已合并 PR #45，merge `7b1b07cd89b1b5dbac20bf03f2f162b0b22b65c1`；使用绑定 `game_openid` 精确筛选当前响应、无 N+1、保留完整赛季与 canonical identity 现场缺口 |
 | Spine 正式编排基础 | 已合并 PR #52，merge `44266cad2cbc31f95b46ee7fb342c9c19c231f89`；正式 runtime 注入、bundle 白名单/缓存、严格版本匹配、队列和 PNG 回退进入主线 |
+| Spine 4.1 headless worker / Costume | 已合并 PR #53，merge `7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195`；官方 4.1 源码固定提交、Linux Docker 构建、SDL dummy/software worker、RGBA CLI adapter 和 Costume 空映射合同进入主线 |
 
 ## 证据边界
 
@@ -58,10 +59,17 @@
 - 编排层与合成 adapter 测试状态 `READY_OFFLINE`；具体 runtime、真实 bundle/素材许可、Linux headless 和 benchmark 状态为 `NEEDS_LIVE_EVIDENCE`，不因缺少现场证据阻塞离线开发。
 - 角色卡热路径只消费已有 L2D 索引，不为每个角色单独刷新索引；Spine cache miss 不同步等待，当前请求继续静态 FB/几何 fallback。
 
-## Spine 4.1 headless worker / Costume（当前独立主题）
+## Spine 4.1 headless worker / Costume（已合并）
 
-- `feat/spine-runtime-costume-v1` 从合并后的 `origin/main@44266cad2cbc31f95b46ee7fb342c9c19c231f89` 建立；没有复用旧 formal worktree。
+- `feat/spine-runtime-costume-v1` 从合并后的 `origin/main@44266cad2cbc31f95b46ee7fb342c9c19c231f89` 建立，PR #53 已合并；没有复用旧 formal worktree。
 - 新增 `runtime/spine_worker` 的 C++/SDL worker、Docker 构建文件和 Python 受限 CLI adapter。构建默认锁定官方 `spine-runtimes` 4.1 commit `77a5db0ec6d16331f5efbaa7662bba9355bd3424`；官方源码与二进制不入库。
 - AstrBot 主入口已支持通过 `spine_worker_path`、`spine_runtime_version`、`spine_worker_timeout` 可选接线；配置为空或 worker 不存在时保持静态 FB/占位回退。共享 `data/nikke/cache/spine-bundles`，worker 无账号 header、仅 dummy/software SDL。
 - `assets/costumes.json` 当前仍为空；没有可核验的 API costume ID → Nikke-DB asset ID 证据，因此不制造映射。default/known/unknown/invalid 状态隔离由现有 provider 与行为测试覆盖。
 - Python adapter 离线测试已通过 12 项（worker RGBA 协议、路径越界、坏输出、超时、配置接线及 formal backend）；官方 Linux 编译、合法 bundle 实渲染、benchmark 和服务器恢复后的现场证据仍为 `NEEDS_LIVE_EVIDENCE`，不可由合成测试替代。
+
+## 资源 Registry V2（当前独立主题）
+
+- `feat/resource-registry-v2` 从已合并的 `origin/main@7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195` 独立建立；新增 `costumes.json` registry 合同、manifest 来源/hash/许可边界和 AssetManager 暴露字段。
+- `costumes.json` 当前保持空对象。没有 API costume ID → Nikke-DB asset ID 的来源证据时不制造映射；unknown/invalid 不推导相邻 ID，也不回退默认服装。
+- `tests/test_static_registry.py` 覆盖空表、显式 costume ID/value、hash mismatch、重复键、目录穿越和 bool ID；状态目标为 `READY_OFFLINE`。
+- CDN 完整覆盖、实际资源存在性、游戏美术授权和服务器现场渲染仍为 `NEEDS_LIVE_EVIDENCE` / `NEEDS_HUMAN_DECISION`，不可由可构造 URL、fixture 或绿色 CI 替代。
