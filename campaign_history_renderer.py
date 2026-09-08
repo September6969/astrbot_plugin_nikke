@@ -123,10 +123,10 @@ class CampaignHistoryRenderer(CardRenderer):
                 )
 
                 # 角色立绘区域
-                portrait_key = (str(member.tid), str(member.resource_id))
+                portrait_key = (str(member.tid), str(member.resource_id), str(member.costume_id))
                 if portrait_key not in portrait_cache:
                     portrait_cache[portrait_key] = self.assets.get_character_portrait(
-                        member.tid, member.resource_id
+                        member.tid, member.resource_id, member.costume_id
                     )
                 portrait = portrait_cache[portrait_key]
                 portrait_box = (card_x + 14, card_y + 48, card_width - 28, 330)

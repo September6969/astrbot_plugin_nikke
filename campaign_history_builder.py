@@ -33,6 +33,21 @@ def _strict_non_negative_int(value: Any) -> int:
     return parsed
 
 
+def _strict_costume_id(value: Any) -> int | str:
+    """只保留可进入皮肤映射合同的标量，不把异常值当默认服装。"""
+    if isinstance(value, bool):
+        raise ValueError("布尔值不是皮肤字段")
+    if type(value) is int:
+        if value < 0:
+            raise ValueError("皮肤字段不能为负数")
+        return value
+    if isinstance(value, str):
+        candidate = value.strip()
+        if candidate and re.fullmatch(r"[A-Za-z0-9_-]+", candidate, flags=re.ASCII):
+            return candidate
+    raise ValueError("皮肤字段格式异常")
+
+
 class CampaignHistoryBuilder:
     def __init__(self, directory: list[dict] | None = None):
         self._directory_by_tid: dict[int, dict] = {}
@@ -182,6 +197,7 @@ class CampaignHistoryBuilder:
                 level = _strict_non_negative_int(item["lv"])
                 combat = _strict_non_negative_int(item["combat"])
                 slot = _strict_non_negative_int(item["slot"])
+                costume_id = _strict_costume_id(item["costume_id"]) if "costume_id" in item else None
                 if tid == 0 or slot not in {1, 2, 3, 4, 5}:
                     raise ValueError("tid 或 slot 超出合同")
             except (ValueError, TypeError):
@@ -202,6 +218,7 @@ class CampaignHistoryBuilder:
                     name_cn=name_cn,
                     name_en=name_en,
                     resource_id=resource_id,
+                    costume_id=costume_id,
                 )
             )
 
