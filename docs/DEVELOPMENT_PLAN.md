@@ -1,18 +1,19 @@
 # 当前执行状态入口（2026-09-06）
 
-本表是能力状态摘要；当前远端、PR、CI 和工作树的可追溯快照以 [路线图台账](ROADMAP_LEDGER.md) 与 [工作树索引](WORKTREE_INDEX.md) 为准。下方旧计划保留为历史规格，其中 TODO/BLOCKED 不再作为当前进度判断。
+本表是能力状态摘要；合并后的远端事实、PR、CI 和工作区边界以 [Post-Merge 状态](POST_MERGE_STATUS.md) 为准。
+下一阶段入口见 [Post-Merge Phase 2 计划](POST_MERGE_PHASE2_PLAN.md)。下方旧计划保留为历史规格，其中 TODO/BLOCKED 不再作为当前进度判断。
 历史自治规则见 [审核与自治计划](EXECUTION_AUTONOMY_PLAN.md)，不覆盖新的状态入口。
 
-当前有效基线是 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`（PR #7 已合并）。旧 `feat/overnight-backlog` 已通过 PR #5 合并，仅为历史恢复点，不是当前开发分支。
+当前有效基线是 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。PR #6 与 PR #7 已合并；PR #8（Raid Increment A）是独立 Draft，不能作为后续主题的隐式 base。旧 `feat/overnight-backlog` 已通过 PR #5 合并，不是当前开发分支。
 
 | 范围 | 当前状态 | 已完成与剩余 |
 | --- | --- | --- |
 | 审核修复 | DONE | 序关系脱敏、Guide registry 强制入口、单条取消 unknown、用户隔离 cooldown、移除临时 CI trigger |
-| 公告来源/缓存/订阅/调度 | PARTIAL / IN_REVIEW | Increment A 已在独立 `feat/announcement-v2` 完成：有界重扫、locale/category/query、诊断、缓存/投递基线与乱序语义；仍待 Draft PR 与 CI，不宣称真实公开源联调 |
+| 公告来源/缓存/订阅/调度 | READY / PARTIAL | 下一独立主题为 Announcement V2：先定义旧文更新、retention、resubscribe replay、version、out-of-order 语义，再完成 deep rescan、locale、category、query UX 与 diagnostic；不继承 PR #8 |
 | Campaign | PARTIAL | 3572 关卡映射、严格阵容与异常合同；更丰富渲染待做 |
 | Tower | DONE | 7350 层公开静态查询，不代表账号进度 |
-| Profile | READY（离线） | PR #7 已合并；字段合同、异常语义、分区去重、三请求预算和合成 PNG 预览已验收，真实账号联调仍需授权 |
-| Raid | PARTIAL / IN_REVIEW / NEEDS_LIVE_EVIDENCE | PR #8 为 Draft；当前响应排名、历史客户端、诊断已实现，身份、多轮、范围仍待证据 |
+| Profile | READY / NEEDS_LIVE_EVIDENCE | PR #7 已合并：离线命令到 PNG、字段语义、分区去重与三请求预算已验证；真实账号/部署兼容性仍待证据 |
+| Raid | DRAFT / NEEDS_LIVE_EVIDENCE | PR #8 的 Increment A 已全绿：当前响应范围、重复/异常 HP、ranking 文案与预览已加固；身份、多轮、分页与完整赛季范围仍待证据 |
 | Daily | PARTIAL / NEEDS_LIVE_EVIDENCE | 单次写后只读验证；Like/Browse 未证明状态变化 |
 | CDK | PARTIAL | 串行批量持久化、取消及硬崩溃保护；过期 running 原子转 unknown，禁止重放；统一编排仍可改进 |
 | Voice | PARTIAL | 本地音频、偏好、发送器与隔离 cooldown；动态源与两级缓存已实现并匿名验证；共享总预算与管线回收已实现；角色/皮肤映射与动态 Poke 接线待做 |

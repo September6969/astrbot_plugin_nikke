@@ -11,7 +11,8 @@
 - 工作树：`E:/DevCache/nikke-profile-v2/astrbot_plugin_nikke`
 - 分支：`feat/profile-v2`
 - 实现提交：`59f0f59 feat: harden profile v2 dashboard semantics`
-- 本记录和当前最终 HEAD 由交接时的 Git 状态补充确认；不在文档中预写未来 SHA。
+- 最终 PR head：`7df799a40c8fdbb12bd71a6775940219760e3b0a`。
+- [PR #7](https://github.com/September6969/astrbot_plugin_nikke/pull/7) 已于 `2026-09-06T19:46:41Z` 合并，merge commit `bada0b3aafcd7127d07ca40f554808b0433540f8`；[CI 34053952299](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34053952299) 成功。Profile V2 不是当前未合并工作。
 
 ## 用户可见变化
 
@@ -84,4 +85,4 @@ node --test tests/extension.test.cjs          3 passed
 
 ## 交接
 
-本分支基于最新 `origin/main` 独立开发，不包含 A 的未合并提交。后续动作是补充实际最终 HEAD、push `feat/profile-v2` 并创建 base=`main` 的 Draft PR；PR 描述应保留上述离线验证与真实证据缺口的区分。
+PR #7 已独立交付并合并。后续不重做 Profile V2；若继续该能力，只能以新主题从当时最新 `origin/main` 开始，并保留上述离线验证与真实证据缺口的区分。
