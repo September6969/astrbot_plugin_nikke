@@ -1374,27 +1374,31 @@ class NikkePlugin(Star):
             self._closing = True
             cleanup_errors = []
             # 先停止生产任务，再关闭它们依赖的资源。
-            tasks = list(self._background_tasks)
+            tasks = list(getattr(self, "_background_tasks", ()))
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
-            if hasattr(self, "feedback_manager") and self.feedback_manager:
+            feedback_manager = getattr(self, "feedback_manager", None)
+            if feedback_manager is not None:
                 try:
-                    await self.feedback_manager.close()
+                    await feedback_manager.close()
                 except Exception as exc:
                     cleanup_errors.append(exc)
                     logger.debug(f"[NIKKE] 反馈管理器回收失败：{exc}")
-            if hasattr(self, "asset_manager") and self.asset_manager:
+            asset_manager = getattr(self, "asset_manager", None)
+            if asset_manager is not None:
                 try:
-                    self.asset_manager.close()
+                    asset_manager.close()
                 except Exception as exc:
                     cleanup_errors.append(exc)
                     logger.debug(f"[NIKKE] 素材管理器回收失败：{exc}")
-            try:
-                await self.web.stop()
-            except Exception as exc:
-                cleanup_errors.append(exc)
-                logger.debug(f"[NIKKE] 绑定服务回收失败：{exc}")
+            web = getattr(self, "web", None)
+            if web is not None:
+                try:
+                    await web.stop()
+                except Exception as exc:
+                    cleanup_errors.append(exc)
+                    logger.debug(f"[NIKKE] 绑定服务回收失败：{exc}")
             if cleanup_errors:
                 raise cleanup_errors[0]
             self._terminated = True

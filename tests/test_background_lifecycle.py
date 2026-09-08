@@ -82,3 +82,39 @@ class LifecycleTests(IsolatedAsyncioTestCase):
         await plugin.terminate()
         self.assertTrue(plugin._terminated)
         self.assertEqual(plugin.asset_manager.close.call_count, 2)
+
+    async def test_shutdown_handles_partial_initialization_without_web(self):
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._closing = False
+
+        await plugin.terminate()
+
+        self.assertTrue(plugin._terminated)
+
+    async def test_shutdown_closes_falsey_injected_resources(self):
+        class FalseyFeedback:
+            def __bool__(self):
+                return False
+
+            async def close(self):
+                self.closed = True
+
+        class FalseyAssets:
+            def __bool__(self):
+                return False
+
+            def close(self):
+                self.closed = True
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._closing = False
+        plugin._background_tasks = []
+        plugin.feedback_manager = FalseyFeedback()
+        plugin.asset_manager = FalseyAssets()
+        plugin.web = AsyncMock()
+
+        await plugin.terminate()
+
+        self.assertTrue(plugin.feedback_manager.closed)
+        self.assertTrue(plugin.asset_manager.closed)
+        plugin.web.stop.assert_awaited_once()
