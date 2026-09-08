@@ -8,6 +8,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  spine-runtime-build:
+    name: Spine 4.1 headless worker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build pinned official runtime worker
+        run: |
+          docker build \
+            --file runtime/spine_worker/Dockerfile \
+            --tag nikke-spine-worker:ci \
+            runtime/spine_worker
+
   extension:
     name: Extension (Node)
     runs-on: ubuntu-latest

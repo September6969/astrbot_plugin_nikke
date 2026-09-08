@@ -54,6 +54,21 @@
     "type": "int",
     "default": 2
   },
+  "spine_worker_path": {
+    "description": "可选的官方 Spine 4.1 headless worker 绝对路径；留空时只使用静态 FB 回退",
+    "type": "string",
+    "default": ""
+  },
+  "spine_runtime_version": {
+    "description": "Spine worker 的严格 major.minor 版本；不得用默认值猜测不匹配 bundle",
+    "type": "string",
+    "default": "4.1"
+  },
+  "spine_worker_timeout": {
+    "description": "Spine 单次 headless worker 最大秒数（最多 5 秒）",
+    "type": "int",
+    "default": 4
+  },
   "enable_daily_actions": {
     "description": "启用已验证的社区签到与领奖接口",
     "type": "bool",

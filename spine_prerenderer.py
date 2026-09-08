@@ -569,7 +569,9 @@ class SpinePreRenderer:
             from .scripts.inspect_spine_bundle import inspect
 
             inspection = inspect(bundle.atlas, bundle.skeleton, expected_version)
-            if inspection.get("status") in {"INSPECTION_FAILED", "VERSION_MISMATCH"}:
+            # 二进制 skeleton 的版本无法由无 runtime 预检查确认；未知版本不能猜测
+            # 4.1/4.2，只有明确得到 VERSION_MATCH 才允许调用实际 runtime。
+            if inspection.get("status") != "VERSION_MATCH":
                 raise SpineRenderError(f"Spine bundle 预检查失败: {inspection.get('status')}")
             if int(inspection.get("missing_pages", 0)) != 0:
                 raise SpineRenderError("Spine bundle 缺少纹理页")

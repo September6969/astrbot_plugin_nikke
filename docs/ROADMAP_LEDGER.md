@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `492e1f56a759ef7d57bbb72d5a8a9d40a0e5a421`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `44266cad2cbc31f95b46ee7fb342c9c19c231f89`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -22,6 +22,7 @@
 | v4 F5 costume-aware cache | 已合并 PR #43，merge `d35bbef94e8c955011608509f17586c185ec3fd0`；default/known/unknown/invalid 分离，远端与本地缓存键保持 costume 语义；未验证真实资源负载 |
 | v4 F6 recoverable backup | 已合并 PR #44，merge `9d35655f9f73ba3517d0c9e9a20ac5128794b504`；只读密钥/数据库校验、SQLite backup API、隔离暂存、完整性与加密字段恢复验证已由 CI 覆盖 |
 | Offline Raid “我的” | 已合并 PR #45，merge `7b1b07cd89b1b5dbac20bf03f2f162b0b22b65c1`；使用绑定 `game_openid` 精确筛选当前响应、无 N+1、保留完整赛季与 canonical identity 现场缺口 |
+| Spine 正式编排基础 | 已合并 PR #52，merge `44266cad2cbc31f95b46ee7fb342c9c19c231f89`；正式 runtime 注入、bundle 白名单/缓存、严格版本匹配、队列和 PNG 回退进入主线 |
 
 ## 证据边界
 
@@ -56,3 +57,11 @@
 - `feat/spine-formal-backend-v1` 从 `origin/main@492e1f56` 独立建立；根目录实现正式依赖注入、版本匹配、bundle 白名单缓存、后台队列、版本化 PNG 与 FB/占位回退，`experimental/` 仅保留兼容导出层。
 - 编排层与合成 adapter 测试状态 `READY_OFFLINE`；具体 runtime、真实 bundle/素材许可、Linux headless 和 benchmark 状态为 `NEEDS_LIVE_EVIDENCE`，不因缺少现场证据阻塞离线开发。
 - 角色卡热路径只消费已有 L2D 索引，不为每个角色单独刷新索引；Spine cache miss 不同步等待，当前请求继续静态 FB/几何 fallback。
+
+## Spine 4.1 headless worker / Costume（当前独立主题）
+
+- `feat/spine-runtime-costume-v1` 从合并后的 `origin/main@44266cad2cbc31f95b46ee7fb342c9c19c231f89` 建立；没有复用旧 formal worktree。
+- 新增 `runtime/spine_worker` 的 C++/SDL worker、Docker 构建文件和 Python 受限 CLI adapter。构建默认锁定官方 `spine-runtimes` 4.1 commit `77a5db0ec6d16331f5efbaa7662bba9355bd3424`；官方源码与二进制不入库。
+- AstrBot 主入口已支持通过 `spine_worker_path`、`spine_runtime_version`、`spine_worker_timeout` 可选接线；配置为空或 worker 不存在时保持静态 FB/占位回退。共享 `data/nikke/cache/spine-bundles`，worker 无账号 header、仅 dummy/software SDL。
+- `assets/costumes.json` 当前仍为空；没有可核验的 API costume ID → Nikke-DB asset ID 证据，因此不制造映射。default/known/unknown/invalid 状态隔离由现有 provider 与行为测试覆盖。
+- Python adapter 离线测试已通过 12 项（worker RGBA 协议、路径越界、坏输出、超时、配置接线及 formal backend）；官方 Linux 编译、合法 bundle 实渲染、benchmark 和服务器恢复后的现场证据仍为 `NEEDS_LIVE_EVIDENCE`，不可由合成测试替代。

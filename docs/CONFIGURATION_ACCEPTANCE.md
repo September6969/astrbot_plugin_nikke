@@ -14,6 +14,9 @@
 | `summary_hour` | `8` | 北京时间每日汇总小时。 |
 | `summary_minute` | `30` | 每日汇总分钟。 |
 | `request_timeout` | `20` | BlaBlaLink 请求超时秒数。 |
+| `spine_worker_path` | 空字符串 | 可选的官方 Spine 4.1 headless worker 绝对路径；为空时只使用静态 FB 回退。 |
+| `spine_runtime_version` | `4.1` | worker 严格匹配的 Spine major.minor；未知或不匹配 bundle 不执行。 |
+| `spine_worker_timeout` | `4` | 单次 worker 最大秒数，配置范围 1–5。 |
 | `max_concurrency` | `2` | 每日账号任务最大并发数；应按上游频控和部署容量调整。 |
 | `enable_daily_actions` | `false` | 社区签到/领奖写操作开关；未完成真实授权验收前保持关闭。 |
 | `enable_announcement_push` | `false` | 公告推送总开关；开启也不代表已完成真实消息发送验收。 |

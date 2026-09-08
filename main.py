@@ -40,6 +40,7 @@ from .profile_card_renderer import ProfileCardRenderer
 from .renderer import CardRenderer
 from .runtime_health import collect_runtime_health, format_runtime_health
 from .runtime_config import normalize_runtime_config, read_schedule_clock
+from .spine_runtime_config import build_spine_renderer
 from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
@@ -63,7 +64,12 @@ class NikkePlugin(Star):
         )
         self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.character_builder = CharacterCardBuilder()
-        self.asset_manager = AssetManager(self.data_dir / "cache", self.plugin_dir / "assets", remote=True)
+        self.asset_manager = AssetManager(
+            self.data_dir / "cache",
+            self.plugin_dir / "assets",
+            remote=True,
+            spine_renderer=build_spine_renderer(self.data_dir / "cache", self.config),
+        )
         self.character_renderer = CharacterCardRenderer(
             self.data_dir / "cards",
             self.plugin_dir / "fonts",

@@ -78,6 +78,17 @@ class SpineFormalBackendTests(TestCase):
             self.assertEqual(runtime.calls, [])
             self.assertIsNone(SpinePreRenderer(root / "none").render_full_body(bundle, "4.1"))
 
+    def test_binary_bundle_with_unknown_version_does_not_guess_runtime(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = make_bundle(root)
+            unknown_skeleton = root / "unknown.skel"
+            unknown_skeleton.write_bytes(b"binary without inspected version")
+            bundle = SpineBundle(unknown_skeleton, source.atlas, source.textures)
+            runtime = FakeRuntime()
+            self.assertIsNone(SpinePreRenderer(root / "unknown", runtime=runtime).render_full_body(bundle, "4.1"))
+            self.assertEqual(runtime.calls, [])
+
     def test_handle_job_writes_versioned_png_cache(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
