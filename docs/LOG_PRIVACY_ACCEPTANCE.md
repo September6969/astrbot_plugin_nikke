@@ -24,12 +24,11 @@
 - `tests/test_log_privacy.py` 验证普通键值、JSON 字符串/数字标量、查询参数、邮箱、异常长度上限、联盟突袭用户错误摘要，以及公告同步实际 logger 输出均不包含敏感值。
 - 专项日志隐私测试：7 passed；公告服务回归：15 passed、24 subtests；JSON 形式的 `game_token`、`game_gameid` 与 `x-common-params` 也会遮盖。
 - 仅使用合成异常和本地日志捕获；没有真实账号、真实 Cookie、公开资源授权或部署证据。
-- 现有 PR CI run `34146296068` 已完成 Python 3.10/3.11/3.12 与 Node 检查，四项均为 SUCCESS。
+- 当前实现 head 的 CI run `34187135739` 已完成 Python 3.10/3.11/3.12 与 Node 检查，四项均为 SUCCESS；Python 3.12 全量 `263 passed、43 subtests、2 warnings`。
 
 ## 当前补充验证（2026-09-07）
 
-- 工作分支：`feat/log-privacy-v1`；基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`；Draft PR：#26；当前 head：`bc426ac`。
-- 在本地 Python 3.10.11 + AstrBot 4.14.6 环境运行 `pytest -q`：`262 passed, 43 subtests passed, 2 warnings`。
-- 同一环境的 `python -m compileall -q .`、`node --test tests/extension.test.cjs`（3 passed）和 `git diff --check` 均通过。
-- 两个 warning 分别来自 FAISS/NumPy 依赖和当前基线仍使用的 `register_star` 弃用提示；没有日志隐私断言失败。
+- 工作分支：`feat/log-privacy-v1`；基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`；Draft PR：#26；当前实现 head：`7c17750`。
+- 当前本机缺少 AstrBot 包，未将完整本地 pytest 冒充为通过；直接 JSON 脱敏回归、`python -m compileall -q .` 和 `git diff --check` 已通过，Node 扩展检查由 CI 验证。
+- CI warning 仅为现有依赖/运行时提示；没有日志隐私断言失败。
 - 证据仍仅限本地合成异常/日志捕获和 CI，不包含真实账号、真实线上日志、消息发送、部署或生产迁移。
