@@ -38,6 +38,9 @@ class AssetManager:
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
     CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images"
+    # 跨实例限制不同缓存键的远端下载；缓存命中不占用名额。
+    REMOTE_DOWNLOAD_LIMIT = 4
+    _remote_download_slots = threading.BoundedSemaphore(REMOTE_DOWNLOAD_LIMIT)
 
     def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
         self.cache_dir = Path(cache_dir)
@@ -117,7 +120,6 @@ class AssetManager:
         url = self.sources.get(relative, remote_url) if allow_source else remote_url
         if not self.remote or not isinstance(url, str) or not url.startswith("https://"):
             return None
-
         with self._inflight_lock:
             state = self._inflight.get(relative)
             owner = state is None
@@ -131,13 +133,18 @@ class AssetManager:
             if state.result is not None:
                 return state.result
             return self._load_cached(relative)
-
+        slot_acquired = False
         try:
             # 注册 single-flight 后再次检查，覆盖刚刚由其它路径写入缓存的竞态。
             image = self._load_cached(relative)
             if image is not None:
                 return image
             if self._failed.get(relative, 0) > time.monotonic():
+                return None
+            # 不同键的远端请求共用全局限额；满额立即降级，不能阻塞在线程队列中。
+            slot_acquired = self._remote_download_slots.acquire(blocking=False)
+            if not slot_acquired:
+                logger.warning("远端素材并发已满，使用占位素材: %s", relative)
                 return None
             # 公共素材请求不携带账号Cookie；限制总下载时长和响应大小。
             started = time.monotonic()
@@ -171,6 +178,8 @@ class AssetManager:
                     if image is not None:
                         current.result = image
                     current.event.set()
+            if slot_acquired:
+                self._remote_download_slots.release()
 
     @staticmethod
     def fallback(kind: str) -> Image.Image:

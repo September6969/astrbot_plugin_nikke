@@ -3524,12 +3524,15 @@ license/rights note
 
 ### A-ASSET-07：并发资源全局限流
 
-状态：`DEFERRED`
+状态：`PARTIAL / READY_OFFLINE`
 
-单卡已有约 4 worker，但多个群同时刷卡仍应有：
+单卡已有约 4 worker。当前已为不同 `AssetManager` 实例的公共 HTTPS 素材下载加入全局四槽、非阻塞限额：缓存命中不受影响；满额立即使用调用方 fallback，且不写入失败冷却。离线模拟覆盖跨实例不同键、满额降级和缓存旁路。
+
+仍需要：
 
 ```text
-global render/resource concurrency limit
+生产多群负载证据
+Pillow/Spine 等其它资源的独立并发治理
 ```
 
 ### A-ASSET-08：超时线程长期运行治理
