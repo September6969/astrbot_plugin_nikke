@@ -36,6 +36,18 @@ REQUIRED_IDS = {
     "REQ-RELEASE-001",
 }
 
+ALLOWED_STATUS_TOKENS = {
+    "IMPLEMENTED",
+    "WIRED",
+    "SYNTHETIC_VERIFIED",
+    "READY_OFFLINE",
+    "DRAFT_PENDING_REVIEW",
+    "PARTIAL",
+    "NEEDS_LIVE_EVIDENCE",
+    "NEEDS_HUMAN_DECISION",
+    "DEFERRED_BY_USER",
+}
+
 
 def test_requirement_matrix_contains_unique_complete_requirement_set() -> None:
     path = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
@@ -68,3 +80,14 @@ def test_each_requirement_row_has_all_evidence_columns() -> None:
         requirement_id, *evidence_columns = [cell.strip() for cell in cells]
         assert requirement_id in REQUIRED_IDS
         assert all(evidence_columns)
+
+
+def test_each_requirement_row_uses_declared_product_status_tokens() -> None:
+    path = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    rows = [line for line in path.read_text(encoding="utf-8").splitlines() if line.startswith("| REQ-")]
+
+    for row in rows:
+        cells = [cell.strip() for cell in row[1:-1].split(" | ")]
+        status_tokens = set(re.findall(r"\b[A-Z][A-Z_]+\b", cells[5]))
+        assert status_tokens
+        assert status_tokens <= ALLOWED_STATUS_TOKENS
