@@ -84,7 +84,7 @@ class AssetManagerTests(unittest.TestCase):
     def test_unknown_or_invalid_costume_never_reuses_default_portrait(self):
         with tempfile.TemporaryDirectory() as td:
             manager = AssetManager(td, td, remote=True)
-            (Path(td) / "portraits").mkdir(parents=True)
+            (Path(td) / "portraits").mkdir(parents=True, exist_ok=True)
             Image.new("RGBA", (20, 20), "green").save(Path(td) / "portraits/191.png")
             try:
                 with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
