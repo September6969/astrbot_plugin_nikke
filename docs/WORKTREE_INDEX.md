@@ -1,17 +1,7 @@
-# NIKKE 工作树索引
+# WORKTREE INDEX
 
-最后核验：2026-09-06。本索引记录定位与开发边界，不授权删除、重写、force push、合并或部署。
+> 本表只登记由长期路线图台账拥有的活动主题。每次恢复前仍须运行 `git worktree list` 和逐树状态检查，不能假设这里的路径或 HEAD 永远最新。
 
-| 工作树 | 分支 / 状态 | 用途 |
-| --- | --- | --- |
-| `E:/DevTools/astrbot_plugin_nikke` | `master@25b2116` | 历史本地 checkout；不是当前开发基线 |
-| `E:/DevCache/nikke-overnight/astrbot_plugin_nikke` | `feat/overnight-backlog@9a3db96` | PR #5 历史恢复点；不用于开发 |
-| `E:/DevCache/nikke-post-merge/astrbot_plugin_nikke` | `chore/post-merge-sync@588fc47` | PR #6 已合并检查点 |
-| `E:/DevCache/nikke-profile-v2/astrbot_plugin_nikke` | `feat/profile-v2@7df799a` | PR #7 已合并验收分支 |
-| `E:/DevCache/nikke-union-raid-v2/astrbot_plugin_nikke` | `feat/union-raid-v2@d98cce4` | PR #8 OPEN / Draft；不修改其功能代码 |
-| `E:/DevCache/nikke-announcement-v2/astrbot_plugin_nikke` | `feat/announcement-v2@47fd311` | PR #9 OPEN / Draft；不修改其功能代码 |
-| `E:/DevCache/nikke-dynamic-voice-v2/astrbot_plugin_nikke` | `feat/dynamic-voice-v2@afc06d0（本次文档更新前）` | 当前主题；从 `origin/main@bada0b3` 独立创建；PR #10 Draft，重验前 head 对应 CI `34123169902` 全绿，更新后以 PR 实时 `headSha`/CI 为准 |
-| `E:/DevCache/nikke-pr3-review/astrbot_plugin_nikke` | detached `3414c70` | 旧审阅检查点；不用于开发 |
-| `E:/DevCache/nikke-pr3-review-v2/astrbot_plugin_nikke` | `fix/review-followups@87c1034` | 旧审阅修复分支；不用于当前主题 |
-
-当前主题未宣称真实账号访问、动态资源授权、真实消息播放或产品联调。完成提交、push、Draft PR 和 CI 后应把本索引中的 head 与 PR/CI 更新为实际值。
+| task | worktree | branch | base | head | PR | status |
+| --- | --- | --- | --- | --- | --- | --- |
+| RAID-A | `E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke` | `feat/union-raid-v2` | `bada0b3aafcd7127d07ca40f554808b0433540f8` | `00f95363dbb8799abc9e2d280ea53645ddc8056e`（本次文档同步前 checkpoint） | [#8 Draft](https://github.com/September6969/astrbot_plugin_nikke/pull/8) | awaiting-review; new docs HEAD CI pending |

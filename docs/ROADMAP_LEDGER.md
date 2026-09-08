@@ -1,35 +1,38 @@
-# NIKKE 路线图台账
+# ROADMAP LEDGER
 
-最后核验：2026-09-06（本次续跑重新 `git fetch origin --prune`、核对 PR、CI 与工作树）。本台账只记录本分支检查点的当前事实；路线图文档是启动提示，不替代实时核验。
+> 此台账从长期路线图 v2 的 Union Raid Increment A 开始维护。历史工作树与已合并 PR 不会因本表出现而被重新归属；每次恢复均以实时 GitHub、`origin/main` 和工作树核验为准。
 
-## 远端与 PR
+## TASK-RAID-A
 
-| 项目 | 已核验状态 |
+| 字段 | 当前记录 |
 | --- | --- |
-| `origin/main` | `bada0b3aafcd7127d07ca40f554808b0433540f8`，PR #7 合并提交 |
-| PR #5 | MERGED，旧 `feat/overnight-backlog` 仅为历史恢复点 |
-| PR #6 | MERGED，Post-Merge Sync |
-| PR #7 | MERGED，Profile V2 |
-| PR #8 | OPEN / Draft，`feat/union-raid-v2@d98cce4c8b898e1ba3aeca3d4234ea2d780cb803`；CI `34083806757` 全绿 |
-| PR #9 | OPEN / Draft，`feat/announcement-v2@47fd311490e7fd607f5144738e2822f3c97e17e9`；CI `34086582482` 全绿 |
-| PR #10 | OPEN / Draft，`feat/dynamic-voice-v2@265ad13b182e59710a684b05f4fae39a5b83763d`；CI `34088210654` 的 Node 与 Python 3.10/3.11/3.12 均 SUCCESS |
+| 用户能力 | 联盟突袭 overview 与排名的响应范围、解析和展示语义 |
+| requirement_id | `REQ-RAID-001` / `REQ-RAID-002` |
+| 代码状态 | `IMPLEMENTED` / `WIRED` 的既有链路上进行 Increment A 加固 |
+| 证据状态 | 已有脱敏 fixture 与合成行为测试；真实范围完整性仍为 `NEEDS_LIVE_EVIDENCE` |
+| 产品状态 | 当前响应范围可离线验证；不宣称完整赛季、当前轮次或真实攻击次数 |
+| 工作树 | `E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke` |
+| 分支 | `feat/union-raid-v2` |
+| base SHA | `bada0b3aafcd7127d07ca40f554808b0433540f8` |
+| 实现提交 | `665cfeab6e5b7c1946282dd46fdef5e5f114953d`（`feat: harden union raid response semantics`） |
+| PR | [#8 Feat: harden Union Raid response semantics](https://github.com/September6969/astrbot_plugin_nikke/pull/8)，`OPEN` / `DRAFT`，等待人工审核；不自动合并 |
+| 已核验 HEAD | `00f95363dbb8799abc9e2d280ea53645ddc8056e`（本次文档同步前的分支 checkpoint；本次提交会产生新的最终 HEAD） |
+| CI run / headSha | [34063656074](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34063656074) `SUCCESS`；其 `headSha = 00f95363dbb8799abc9e2d280ea53645ddc8056e`，与上述 checkpoint 一致。文档同步 push 后必须重验新最终 HEAD CI。 |
+| 行为测试 | 多 `level_info` 不取首项；重复 Boss 不聚合；坏数值不静默转换；负 HP 保留既有归零；排名仅称返回记录 |
+| 合成预览 | `E:\DevCache\nikke-card-preview\raid-increment-a-20260906\`，完整/多阶段项/重复 Boss 均已实际查看 |
+| 当前阻塞 | `GetUnionRaidLevelInfo` 的多项排序、分页和完整范围没有可验证的公开合同 |
+| 已查来源 | 现有 client、builder、历史提交、脱敏 fixture、公开检索；第三方实现未作为合同依据 |
+| 最小现场动作 | 仅在明确授权后，用一个真实账号执行一次只读响应采样并脱敏比较；本阶段未执行 |
+| N+1 审计 | 本增量只改 builder、renderer 与既有排名格式化；未加入 client 调用、循环内请求或新 endpoint |
+| 本地证据 | 额度重置前，同一源码 `python -m pytest -q`：`265 passed, 2 warnings, 50 subtests`；本次恢复后 `python -m compileall -q .`、`node --test tests/extension.test.cjs`（3 passed）和 `git diff --check` 均通过。恢复后的 PATH Python 缺少 `pytest`，故最终 Python 结论以 PR 矩阵 CI 为准。 |
+| 下一步 | 完成本次文档 checkpoint 同步、普通 push 和新最终 HEAD CI 核验；#8 保持 Draft。随后从最新 `origin/main` 独立启动 Announcement V2，不继承本 PR。 |
+| 未提交文件 | 本次同步开始时无未提交文件；此行仅说明核验快照，不能替代后续 `git status`。 |
 
-## 当前独立主题：Dynamic Voice V2 Increment A
+## TASK-ANNOUNCEMENT-A
 
-| 项目 | 状态 |
+| 字段 | 当前记录 |
 | --- | --- |
-| 分支 / base | `feat/dynamic-voice-v2`，从最新 `origin/main@bada0b3` 独立创建；未继承 PR #8/#9 |
-| 工作树 | `E:/DevCache/nikke-dynamic-voice-v2/astrbot_plugin_nikke` |
-| 代码 | 缓存内容与 manifest 分离原子落盘；未知角色不再静默回退 Alice |
-| 合同 / 验收 | [Dynamic Voice V2 合同](DYNAMIC_VOICE_V2_CONTRACT.md)；[验收记录](DYNAMIC_VOICE_V2_ACCEPTANCE.md) |
-| 本地验证 | 定向 Python `8 passed`；full suite 与最终 head CI 待本轮后续完成 |
-| PR / CI | [PR #10](https://github.com/September6969/astrbot_plugin_nikke/pull/10) 为 Draft；实现 head `265ad13` 对应 CI `34088210654` 全绿。本次台账更新会产生新的 docs-only head，必须对新 SHA 单独核验 |
-| 证据边界 | 无真实账号、无真实消息、无动态资源授权；公开角色/皮肤互动映射仍需现场证据 |
-
-## 后续选择规则
-
-PR #8、#9 与本主题保持独立。不得把等待审阅、缺少 live evidence 或本地合成测试写成产品完成。Raid B 仍需 PR #8 合并后从当时最新 main 独立创建；Raid C、真实 Voice 播放与资源授权继续标记 NEEDS_LIVE_EVIDENCE / NEEDS_HUMAN_DECISION。
-
-## 本检查点后
-
-完成本主题的 full suite、最终 head CI 与 Draft PR 记录后，下一独立主题应重新读取路线图并实时核验依赖；不自动选择或启动依赖 PR #8 合并的工作。
+| 主题 | Announcement V2：deep rescan、locale、category、query UX 与 diagnostic |
+| 状态 | `READY`，尚未创建工作树或分支；必须从当时最新 `origin/main` 独立开始，不继承 RAID-A。 |
+| 先决语义 | 在 baseline cleanup 前先明确旧文更新、retention、resubscribe replay、version 与 out-of-order 行为；不把这些隐含成缓存副作用。 |
+| 下一步 | 建立 `feat/announcement-v2` 独立 worktree，完成合同、行为测试、全量回归、预览与 Draft PR/最终 HEAD CI。 |
