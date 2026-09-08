@@ -242,7 +242,7 @@ class AssetManager:
 
     def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
         """显式实验入口；普通角色卡不会导入、构造或探测 Spine。"""
-        from .spine_prerenderer import SpineJob, SpinePreRenderer
+        from .experimental.spine_prerenderer import SpineJob, SpinePreRenderer
 
         char_id = self.nikke_db.resolve_character_id(resource_id, costume_id)
         if char_id == "missing":
