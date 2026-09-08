@@ -43,3 +43,7 @@
 - P1 卡片视觉：PR #48 CI 全绿；P1 Item/Cube 完整性：PR #49 CI 全绿；P2 Guide/Help 素材：PR #50 CI 全绿；P4 Spine 隔离：PR #51 CI 全绿；均保持 Draft、以 `main` 为基线，按 #47 → #48 → #49/#50 → #51 评审/合并。
 - Raid / Campaign / Tower 既有离线主题已在当前 main 基线中具备合同、fixture 和行为测试；真实 canonical identity、赛季范围和账号进度仍标为 `NEEDS_LIVE_EVIDENCE`，本轮未重复制造现场证据。
 - 真实账号、QQ 发送与部署保持未授权/未执行。
+## Favorite Item / Cube 完整性（进行中）
+
+- `test/item-resource-integrity-v1` 从 `origin/main@c4f1755a` 独立建立；补齐未登记、404、超时、损坏缓存与解码失败行为证据，状态 `READY_OFFLINE`，PR #49 CI 全绿。
+- 未发现带来源证据的新映射，故没有扩充当前 4 个 Favorite Item / 8 个 Cube 清单；完整覆盖仍为 `NEEDS_LIVE_EVIDENCE`。
