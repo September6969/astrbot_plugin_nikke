@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "registries": {
+    "equipment": {
+      "path": "equipment.json",
+      "source": "repository-maintained verified resource identifier mapping",
+      "source_ref": "assets/README.md",
+      "checked_at": "2026-09-06",
+      "sha256": "e267d3c7f7fab5d1bc27966dffc5ae49571cccc459b42f8db351c395ac1bb891",
+      "license_boundary": "identifier metadata only; not game asset redistribution"
+    },
+    "cube": {
+      "path": "cubes.json",
+      "source": "repository-maintained verified resource identifier mapping",
+      "source_ref": "assets/README.md",
+      "checked_at": "2026-09-06",
+      "sha256": "1268ed2fa6b0272817c3d422f86a32bf90b8f3ce0806e3d14745edb6994fbc94",
+      "license_boundary": "identifier metadata only; not game asset redistribution"
+    },
+    "favorite_item": {
+      "path": "favorite_items.json",
+      "source": "repository-maintained verified resource identifier mapping",
+      "source_ref": "assets/README.md",
+      "checked_at": "2026-09-06",
+      "sha256": "df89ab0a9e421a98e248aad2760dcef07518d6ba817cf4d64536d32617561b30",
+      "license_boundary": "identifier metadata only; not game asset redistribution"
+    }
+  }
+}

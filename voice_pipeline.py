@@ -5,7 +5,7 @@ import math
 
 class VoicePipeline:
     def __init__(self, provider, encoder, *, max_pending=20):
-        if not 1 <= max_pending <= 20:
+        if isinstance(max_pending, bool) or not isinstance(max_pending, int) or not 1 <= max_pending <= 20:
             raise ValueError("语音任务数量超限")
         self.provider, self.encoder = provider, encoder
         self.max_pending = max_pending
@@ -15,7 +15,12 @@ class VoicePipeline:
     async def resolve(self, map_key, speech_id, locale, *, adapter="aiocqhttp", budget=4):
         if self._closed or adapter != "aiocqhttp":
             return None
-        if not math.isfinite(budget) or not 0 < budget <= 5:
+        if (
+            isinstance(budget, bool)
+            or not isinstance(budget, (int, float))
+            or not math.isfinite(float(budget))
+            or not 0 < budget <= 5
+        ):
             raise ValueError("语音响应预算必须在 0 到 5 秒之间")
         key = (map_key, speech_id, locale, adapter)
         task = self._tasks.get(key)
