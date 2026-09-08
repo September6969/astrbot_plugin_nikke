@@ -21,7 +21,6 @@ from PIL import Image, ImageDraw
 from .card_models import CharacterCardAssets, CharacterCardData
 from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
-from .spine_prerenderer import SpineJob, SpinePreRenderer
 from .static_registry import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
@@ -53,8 +52,8 @@ class AssetManager:
         self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._inflight_lock = threading.Lock()
         self._inflight: dict[str, _InflightAsset] = {}
+        self._experimental_spine = None
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
-        self.spine = SpinePreRenderer(self.cache_dir)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
         try:
             self.sources = json.loads((self.asset_dir / "sources.json").read_text(encoding="utf-8"))
@@ -213,7 +212,7 @@ class AssetManager:
             draw.line([(64, 67), (64, 110)], fill=color, width=4)
         return image
 
-    def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None, allow_spine_enqueue: bool = False) -> Image.Image:
+    def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
         costume_state, _ = self.nikke_db.costume_cache_token(costume_id)
         # 默认服装可以使用历史本地 override；非默认服装禁止命中无皮肤维度的旧缓存。
         image = None
@@ -239,17 +238,28 @@ class AssetManager:
                 scoped_key = "costume-" + hashlib.sha256(cache_contract.encode("utf-8")).hexdigest()[:24]
                 image = self._load("portraits", scoped_key, url, allow_source=False)
 
-        # 4. Spine 处于实验阶段，生产出卡路径默认不投递后台预渲染任务
-        if allow_spine_enqueue and char_id and char_id != "missing" and self.spine.is_available():
-            cache_key = self.nikke_db.compute_cache_key(char_id, costume_id)
-            prerender_path = self.spine.prerender_dir / f"{cache_key}.png"
-            if not prerender_path.is_file():
-                version = self.nikke_db.resolve_spine_version(char_id)
-                self.spine.queue.enqueue(
-                    SpineJob(cache_key=cache_key, character_id=char_id, runtime_version=version)
-                )
-
         return image if image is not None else self.fallback("portrait")
+
+    def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
+        """显式实验入口；普通角色卡不会导入、构造或探测 Spine。"""
+        from .spine_prerenderer import SpineJob, SpinePreRenderer
+
+        char_id = self.nikke_db.resolve_character_id(resource_id, costume_id)
+        if char_id == "missing":
+            return False
+        spine = SpinePreRenderer(self.cache_dir)
+        self._experimental_spine = spine
+        if not spine.is_available():
+            spine.queue.stop(wait=False)
+            return False
+        cache_key = self.nikke_db.compute_cache_key(char_id, costume_id)
+        prerender_path = spine.prerender_dir / f"{cache_key}.png"
+        if prerender_path.is_file():
+            spine.queue.stop(wait=False)
+            return False
+        version = self.nikke_db.resolve_spine_version(char_id)
+        spine.queue.enqueue(SpineJob(cache_key=cache_key, character_id=char_id, runtime_version=version))
+        return True
 
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
         resource = self.registry.resolve("equipment", equipment_id)
@@ -328,7 +338,7 @@ class AssetManager:
 
         tasks = {
             "portrait": (
-                lambda: self.get_character_portrait(data.name_code, data.resource_id),
+                lambda: self.get_character_portrait(data.name_code, data.resource_id, data.costume_id),
                 lambda: self.fallback("portrait"),
             ),
             "head": (
@@ -439,8 +449,10 @@ class AssetManager:
             self._executor.shutdown(wait=False)
         except Exception:
             pass
-        try:
-            self.spine.queue.stop(wait=False)
-        except Exception:
-            pass
+        spine = self._experimental_spine
+        if spine is not None:
+            try:
+                spine.queue.stop(wait=False)
+            except Exception:
+                pass
 

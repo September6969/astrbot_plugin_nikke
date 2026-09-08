@@ -9,6 +9,14 @@ from astrbot_plugin_nikke.nikke_db_provider import NikkeDbProvider
 
 
 class NikkeDbProviderTests(unittest.TestCase):
+    def test_costume_file_accepts_only_strict_verified_shape(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "costumes.json"
+            path.write_text(json.dumps({"skin_01": "c191_01", "default": "c191", "bad": "../c1"}), encoding="utf-8")
+            provider = NikkeDbProvider(td, td)
+            self.assertEqual(provider.costume_map, {"skin_01": "c191_01"})
+            self.assertEqual(len(provider.costume_errors), 2)
+
     def test_id_normalization_and_overrides(self):
         with tempfile.TemporaryDirectory() as td:
             provider = NikkeDbProvider(td, td)
