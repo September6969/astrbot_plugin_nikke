@@ -13,3 +13,6 @@ target_include_directories(nikke-spine-worker PRIVATE
 )
 target_link_libraries(nikke-spine-worker PRIVATE spine-sdl-cpp SDL2-static spine-cpp)
 set_target_properties(nikke-spine-worker PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+if(NOT MSVC)
+    target_compile_options(nikke-spine-worker PRIVATE -fno-exceptions -fno-rtti)
+endif()
