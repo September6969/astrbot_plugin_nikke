@@ -725,7 +725,13 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         class Store:
             def get_account(self, qq_id):
-                return {"qq_id": qq_id, "cookie": VALID_COOKIE}
+                return {
+                    "qq_id": qq_id,
+                    "cookie": VALID_COOKIE,
+                    "game_uid": "game-10001",
+                    "area_id": "global",
+                    "platform": "global",
+                }
 
         plugin = NikkePlugin.__new__(NikkePlugin)
         plugin.store = Store()
