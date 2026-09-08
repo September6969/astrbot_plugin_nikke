@@ -117,6 +117,108 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         self.assertEqual(record.status, ClearLineupStatus.UNAVAILABLE)
         self.assertEqual(record.status_message, "该关卡暂无可查询的历史阵容")
 
+    def test_non_mapping_response_is_structurally_invalid(self):
+        record = self.builder.build(self.stage, None)
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+        self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
+
+    def test_response_code_must_be_a_non_boolean_integer(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 120000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+        ]
+        for code in (False, 0.0, "0"):
+            with self.subTest(code=code):
+                record = self.builder.build(self.stage, {"code": code, "data": {"list": raw_list}})
+                self.assertEqual(record.status, ClearLineupStatus.ERROR)
+                self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
+
+    def test_non_list_data_is_structurally_invalid(self):
+        for data in (None, {}, {"list": {"tid": 101}}):
+            with self.subTest(data=data):
+                record = self.builder.build(self.stage, {"code": 0, "data": data})
+                self.assertEqual(record.status, ClearLineupStatus.ERROR)
+                self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
+
+    def test_negative_combat_is_structurally_invalid(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": -1, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+        ]
+        record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+        self.assertEqual(record.status_message, "历史阵容数据结构异常，请稍后重试")
+
+    def test_boolean_numeric_field_is_structurally_invalid(self):
+        raw_list = [
+            {"tid": 101, "lv": True, "combat": 120000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+        ]
+        record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
+    def test_fractional_numeric_field_is_structurally_invalid(self):
+        raw_list = [
+            {"tid": 101, "lv": 400.5, "combat": 120000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+        ]
+        record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
+    def test_decimal_numeric_strings_remain_supported(self):
+        raw_list = [
+            {"tid": "101", "lv": "400", "combat": "120000", "slot": "1"},
+            {"tid": "102", "lv": "400", "combat": "115000", "slot": "2"},
+            {"tid": "103", "lv": "400", "combat": "118000", "slot": "3"},
+            {"tid": "104", "lv": "400", "combat": "95000", "slot": "4"},
+            {"tid": "105", "lv": "400", "combat": "102000", "slot": "5"},
+        ]
+        record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+        self.assertEqual(record.status, ClearLineupStatus.AVAILABLE)
+        self.assertEqual(record.total_combat, 550000)
+
+    def test_whitespace_and_signed_numeric_strings_are_structurally_invalid(self):
+        for field, value in {
+            "tid": " 101",
+            "lv": "400 ",
+            "combat": "+120000",
+            "slot": "-1",
+        }.items():
+            with self.subTest(field=field):
+                raw_list = [
+                    {"tid": 101, "lv": 400, "combat": 120000, "slot": 1},
+                    {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+                    {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+                    {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+                    {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+                ]
+                raw_list[0][field] = value
+                record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+                self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
+    def test_zero_tid_or_out_of_range_slot_is_structurally_invalid(self):
+        raw_list = [
+            {"tid": 0, "lv": 400, "combat": 120000, "slot": 1},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 6},
+        ]
+        record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
     def test_strict_lineup_validation_4_members(self):
         raw_list = [
             {"tid": 101, "lv": 400, "combat": 120000, "slot": 1},

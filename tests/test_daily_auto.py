@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock
 
 from astrbot_plugin_nikke.main import NikkePlugin
+from astrbot_plugin_nikke.daily_models import DailyTaskResult, DailyTaskStatus
 from astrbot_plugin_nikke.storage import NikkeStore
 
 
@@ -164,7 +165,9 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
         plugin.store = Store()
         plugin.renderer = Renderer()
         plugin.context = type("Context", (), {"send_message": AsyncMock()})()
-        plugin._run_all_daily = AsyncMock(return_value=[("automatic-account", "已执行")])
+        plugin._run_all_daily = AsyncMock(
+            return_value=[DailyTaskResult("automatic-account", DailyTaskStatus.SUCCESS, "已执行")]
+        )
 
         await plugin._send_summary("2026-09-07")
 

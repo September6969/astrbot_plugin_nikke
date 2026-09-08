@@ -3,6 +3,7 @@ display_name: NIKKE 综合助手
 desc: 基于 BlaBlaLink 的账号练度、妮姬资料与每日汇总插件。
 author: September
 version: 0.1.8
+repo: https://github.com/September6969/astrbot_plugin_nikke
 astrbot_version: ">=4.24,<5"
 support_platforms:
   - aiocqhttp
