@@ -158,6 +158,7 @@ def test_symlinked_parent_components_are_not_followed(tmp_path: Path) -> None:
     parent_target = tmp_path / "parent-target"
     data_dir = parent_target / "data"
     backup_dir = parent_target / "backup"
+    parent_target.mkdir()
     _make_store(data_dir)
     _make_store(backup_dir)
     parent_link = tmp_path / "parent-link"
