@@ -42,6 +42,43 @@ def record(
 
 
 class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
+    def test_information_source_rejects_boolean_scan_bounds(self) -> None:
+        for kwargs in ({"max_pages": True}, {"page_size": False}):
+            with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
+                InformationFeedsSource("en", **kwargs)
+
+    def test_information_source_timestamp_contract(self) -> None:
+        parse = InformationFeedsSource._timestamp
+        self.assertEqual(parse(1_700_000_000), 1_700_000_000)
+        self.assertEqual(parse("1700000000"), 1_700_000_000)
+        for value in (True, 1.5, "1.5", "+1", "-1", "", None):
+            with self.subTest(value=value):
+                self.assertIsNone(parse(value))
+
+    async def test_information_source_rejects_boolean_protocol_fields(self) -> None:
+        def response(data: dict, *, code=0) -> httpx.Response:
+            return httpx.Response(200, json={"code": code, "data": {"result": 0, **data}})
+
+        for case in ("outer_code", "content_id", "timestamp"):
+            def handler(request: httpx.Request, current=case) -> httpx.Response:
+                endpoint = request.url.path.rsplit("/", 1)[-1]
+                if endpoint == "GetLabelList":
+                    if current == "outer_code":
+                        return response({}, code=False)
+                    return response({"primary_label_list": [{
+                        "raw_label_name": "official_news", "label_id": "news", "default_secondary_label_id": "all"
+                    }]})
+                if endpoint == "GetContentByLabel":
+                    identifier = True if current == "content_id" else "item-1"
+                    return response({"info_content": [{"content_id": identifier}], "is_finish": True})
+                return response({
+                    "content_id": "item-1", "title": "合成公告", "content": "正文",
+                    "pub_timestamp": True if current == "timestamp" else 1_700_000_000,
+                })
+
+            with self.subTest(case=case), self.assertRaises(ValueError):
+                await InformationFeedsSource("en", transport=httpx.MockTransport(handler)).fetch()
+
     def test_record_contract_rejects_non_text_core_fields(self) -> None:
         service = AnnouncementService()
         invalid_records = [

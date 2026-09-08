@@ -32,10 +32,21 @@ class PlainBody(HTMLParser):
 
 
 class InformationFeedsSource:
+    @staticmethod
+    def _timestamp(value):
+        """CMS 实际结构允许非负整数及规范十进制字符串，拒绝布尔和隐式截断。"""
+        if type(value) is int:
+            return value if value >= 0 else None
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized and normalized.isascii() and normalized.isdecimal():
+                return int(normalized)
+        return None
+
     def __init__(self, locale="en", *, max_pages=2, page_size=5, transport=None):
         if locale not in SUPPORTED_LOCALES:
             raise ValueError("官网尚未验证此语言")
-        if not 1 <= max_pages <= 5 or not 1 <= page_size <= 20:
+        if type(max_pages) is not int or type(page_size) is not int or not 1 <= max_pages <= 5 or not 1 <= page_size <= 20:
             raise ValueError("公告扫描范围超限")
         self.locale, self.max_pages, self.page_size = locale, max_pages, page_size
         self.transport = transport
@@ -48,10 +59,10 @@ class InformationFeedsSource:
                 response = await client.post(BASE + name, json=payload)
                 response.raise_for_status()
                 result = response.json()
-                if not isinstance(result, dict) or result.get("code") != 0:
+                if not isinstance(result, dict) or type(result.get("code")) is not int or result["code"] != 0:
                     raise ValueError("CMS 请求失败")
                 data = result.get("data")
-                if not isinstance(data, dict) or data.get("result") != 0:
+                if not isinstance(data, dict) or type(data.get("result")) is not int or data["result"] != 0:
                     raise ValueError("CMS 业务响应失败")
                 return data
             columns = await post("GetLabelList", {})
@@ -71,14 +82,15 @@ class InformationFeedsSource:
                     raise ValueError("CMS 公告列表格式无效")
                 pages_scanned += 1
                 for row in rows:
-                    if not isinstance(row, dict) or not row.get("content_id"):
+                    if not isinstance(row, dict) or type(row.get("content_id")) not in {str, int} or not str(row["content_id"]).strip():
                         raise ValueError("CMS 公告缺少 ID")
-                    identifier = str(row["content_id"])
+                    identifier = str(row["content_id"]).strip()
                     if identifier not in seen:
                         seen.add(identifier)
                         items.append(identifier)
                 next_offset = page.get("next_offset")
-                if not rows or page.get("is_finish") or not isinstance(next_offset, int) or next_offset <= offset or next_offset >= page.get("total_num", next_offset + 1):
+                total_num = page.get("total_num")
+                if not rows or page.get("is_finish") is True or type(next_offset) is not int or type(total_num) is not int or next_offset <= offset or next_offset >= total_num:
                     finished = True
                     break
                 offset = next_offset
@@ -86,13 +98,21 @@ class InformationFeedsSource:
             async def detail(identifier):
                 async with limit:
                     data = await post("GetContentInfoById", {"content_id": identifier})
-                if str(data.get("content_id")) != identifier or not isinstance(data.get("content"), str):
+                if type(data.get("content_id")) not in {str, int} or str(data["content_id"]).strip() != identifier or not isinstance(data.get("content"), str):
                     raise ValueError("CMS 公告全文格式无效")
+                title = data.get("title")
+                timestamp = self._timestamp(data.get("pub_timestamp"))
+                if not isinstance(title, str) or not title.strip() or timestamp is None:
+                    raise ValueError("CMS 公告元数据格式无效")
                 body = PlainBody()
                 body.feed(data["content"])
+                try:
+                    published_at = datetime.fromtimestamp(timestamp, timezone.utc).isoformat()
+                except (OverflowError, OSError, ValueError) as exc:
+                    raise ValueError("CMS 公告发布时间无效") from exc
                 return AnnouncementRecord(
-                    f"informationfeeds:{self.locale}:{identifier}", str(data.get("title", "")),
-                    "".join(body.parts), datetime.fromtimestamp(int(data["pub_timestamp"]), timezone.utc).isoformat(),
+                    f"informationfeeds:{self.locale}:{identifier}", title.strip(),
+                    "".join(body.parts), published_at,
                     source_url=f"https://{HOSTS[self.locale]}/newsdetail.html?content_id={identifier}",
                     locale=self.locale,
                 )
