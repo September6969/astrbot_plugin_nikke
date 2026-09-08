@@ -79,6 +79,7 @@ class CdkRedemptionResult:
     terminal: bool
     message: str
     code: str = ""
+    is_unknown: bool = False
 
 
 class BlaBlaClient:
@@ -631,7 +632,7 @@ class BlaBlaClient:
             "1302017": "兑换码全服可用次数已耗尽",
         }
         try:
-            await self._community_request(
+            response = await self._community_request(
                 "POST",
                 CDK_REDEEM,
                 account,
@@ -643,7 +644,45 @@ class BlaBlaClient:
             if exc.code in error_messages:
                 return CdkRedemptionResult(False, True, error_messages[exc.code], exc.code)
             raise
+        if not self._has_explicit_cdk_success(response):
+            # HTTP 200 与默认的 code/msg 只能证明请求被接收，不能证明兑换成功。
+            # 写请求已经发生，必须进入未知态，后续不得自动重发。
+            return CdkRedemptionResult(
+                False,
+                False,
+                "兑换请求已发送，但官方响应缺少明确成功字段；请核对官方兑换记录，未自动重发",
+                "UNKNOWN_AFTER_ACTION",
+                True,
+            )
         return CdkRedemptionResult(True, True, "兑换成功", "0")
+
+    @staticmethod
+    def _has_explicit_cdk_success(response: Any) -> bool:
+        """只接受 CDK 端点的明确成功字段，不把空响应当成成功。
+
+        ``_community_request`` 为兼容历史读接口保留了宽松的公共包络解析；
+        CDK 写端点在这里再次收紧合同。字段必须位于 data 中，且值必须是
+        明确的布尔成功标记或已完成状态字符串；布尔值不会被当作数字 code。
+        """
+        if not isinstance(response, dict) or type(response.get("code")) is not int:
+            return False
+        if response.get("code") != 0:
+            return False
+        payload = response.get("data")
+        if not isinstance(payload, dict) or not payload:
+            return False
+        for key in ("success", "redeemed", "redeem_success"):
+            if type(payload.get(key)) is bool and payload[key] is True:
+                return True
+        status = payload.get("status")
+        if isinstance(status, str) and status.strip().casefold() in {
+            "success",
+            "succeeded",
+            "redeemed",
+            "completed",
+        }:
+            return True
+        return False
 
     async def get_main_quest_clear_lineup(self, account: dict[str, Any], stage_id: int, area_id: int | str) -> dict[str, Any]:
         """查询个人主线战役历史通关阵容。

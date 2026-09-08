@@ -84,6 +84,7 @@ class CdkService:
                     code=code,
                     success=False,
                     message=f"{res.message or '兑换失败'}（若持续失败请前往 BlaBlaLink 手动填写）",
+                    is_unknown=getattr(res, "is_unknown", False),
                     terminal=getattr(res, "terminal", True),
                 )
         except CookieExpired:
@@ -146,10 +147,14 @@ class CdkService:
         account: dict[str, Any],
         code: str,
         account_key: str = "",
+        store=None,
+        qq_id: str = "",
     ) -> CdkRedeemResult:
-        """单条 CDK 兑换，使用账号锁互斥。"""
+        """单条 CDK 兑换，使用账号锁互斥与可选持久执行记录。"""
         lock = await self._get_account_lock(account_key or str(account.get("game_uid", "default")))
         async with lock:
+            if store is not None:
+                return await self._redeem_persistently(account, code, store, qq_id)
             return await self._redeem_single_core(account, code)
 
     async def redeem_batch(
@@ -192,7 +197,15 @@ class CdkService:
 
     async def _redeem_persistently(self, account, code, store, qq_id):
         """批量使用单条命令相同的持久键与原子 claim/retry，锁由调用者持有。"""
-        game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
+        game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
+        if not game_uid:
+            return CdkRedeemResult(
+                code,
+                False,
+                "账号缺少稳定游戏身份，未执行兑换",
+                is_unknown=True,
+                terminal=False,
+            )
         digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
         key = f"cdk:{qq_id}:{game_uid}:{digest}"
         existing = store.get_run(key)

@@ -1190,7 +1190,10 @@ class NikkePlugin(Star):
         except ValueError as exc:
             yield event.plain_result(str(exc))
             return
-        game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
+        game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
+        if not game_uid:
+            yield event.plain_result("账号缺少稳定游戏身份，未执行兑换。")
+            return
         account_key = f"{qq_id}:{game_uid}"
         digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
         run_key = f"cdk:{qq_id}:{game_uid}:{digest}"
@@ -1206,10 +1209,9 @@ class NikkePlugin(Star):
                 else:
                     yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
                 return
-            else:
-                yield event.plain_result(existing["detail"] or f"兑换码 {masked} 已处理。")
-                return
-        elif existing:
+            yield event.plain_result(existing["detail"] or f"兑换码 {masked} 已处理。")
+            return
+        if existing:
             if not self.store.retry_run(run_key, retryable):
                 yield event.plain_result(f"兑换码 {masked} 正在处理，请稍后再试。")
                 return

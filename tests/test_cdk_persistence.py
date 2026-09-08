@@ -79,3 +79,27 @@ class PersistenceTests(IsolatedAsyncioTestCase):
                 result = await service.redeem_batch({"game_uid": "fake"}, ["TEST-CODE"], store=store, qq_id="fake", delay=0)
                 self.assertTrue(result.results[0].is_unknown)
             self.assertEqual(client.redeem_cdk.await_count, 1)
+
+    async def test_single_and_batch_share_persistent_primitive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = NikkeStore(directory)
+            client = AsyncMock()
+            client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "ok", "0")
+            service = CdkService(client)
+            first = await service.redeem_single(
+                {"game_uid": "fake-game"},
+                "TEST-CODE",
+                account_key="fake-account",
+                store=store,
+                qq_id="fake-qq",
+            )
+            second = await service.redeem_single(
+                {"game_uid": "fake-game"},
+                "TEST-CODE",
+                account_key="fake-account",
+                store=store,
+                qq_id="fake-qq",
+            )
+            self.assertTrue(first.success)
+            self.assertTrue(second.success)
+            self.assertEqual(client.redeem_cdk.await_count, 1)
