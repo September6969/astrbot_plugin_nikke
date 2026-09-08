@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import os
 import random
@@ -1128,57 +1127,27 @@ class NikkePlugin(Star):
         except ValueError as exc:
             yield event.plain_result(str(exc))
             return
-        game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
-        account_key = f"{qq_id}:{game_uid}"
-        digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
-        run_key = f"cdk:{qq_id}:{game_uid}:{digest}"
-        retryable = {"failed", "expired"}
-        existing = self.store.get_run(run_key)
-        if existing and existing["status"] not in retryable:
-            if existing["status"] == "running":
-                changed = self.store.mark_stale_running_unknown(
-                    run_key, stale_after=120, detail="兑换结果未确认，请先检查官方兑换历史。")
-                current = self.store.get_run(run_key)
-                if changed or (current and current["status"] == "unknown"):
-                    yield event.plain_result("兑换结果未确认，请先检查官方兑换历史，勿重复提交。")
-                else:
-                    yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
-                return
-            else:
-                yield event.plain_result(existing["detail"] or f"兑换码 {masked} 已处理。")
-                return
-        elif existing:
-            if not self.store.retry_run(run_key, retryable):
-                yield event.plain_result(f"兑换码 {masked} 正在处理，请稍后再试。")
-                return
-        elif not self.store.claim_run(run_key, qq_id, "cdk"):
-            yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
+        game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
+        if not game_uid:
+            yield event.plain_result("账号缺少稳定游戏身份，未执行兑换。")
             return
+        account_key = f"{qq_id}:{game_uid}"
         try:
-            result = await self.cdk_service.redeem_single(account, normalized, account_key=account_key)
+            result = await self.cdk_service.redeem_single(
+                account,
+                normalized,
+                account_key=account_key,
+                store=self.store,
+                qq_id=qq_id,
+            )
             detail = f"兑换码 {masked}：{result.message}"
-            if result.success:
-                status = "success"
-            elif result.is_unknown:
-                status = "unknown"
-            elif result.is_rate_limited or not getattr(result, "terminal", True):
-                status = "failed"
-            else:
-                status = "terminal"
-            # 上游消息可能回显完整兑换码，仅持久化固定状态说明。
-            stored_detail = {"success": "兑换成功", "unknown": "结果未确认，请核对官方历史",
-                             "failed": "请求失败，可稍后重试", "terminal": "官方已拒绝此码"}[status]
-            self.store.finish_run(run_key, status, f"兑换码 {masked}：{stored_detail}")
             yield event.plain_result(detail)
         except CookieExpired:
             self.store.mark_cookie_invalid(qq_id)
-            self.store.finish_run(run_key, "expired", "登录状态已失效")
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except asyncio.CancelledError:
-            self.store.finish_run(run_key, "unknown", "兑换中断，结果未确认，请先检查官方历史")
             raise
         except Exception as exc:
-            self.store.finish_run(run_key, "failed", f"兑换码 {masked}：请求失败，可稍后重试")
             logger.warning(f"[NIKKE] CDK兑换失败: {type(exc).__name__}")
             yield event.plain_result(f"兑换码 {masked}：请求失败，可稍后重试。")
 

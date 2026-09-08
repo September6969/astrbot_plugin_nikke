@@ -215,7 +215,7 @@ class CdkClient(BlaBlaClient):
         self.calls.append((method, path, payload))
         if isinstance(self.result, Exception):
             raise self.result
-        return self.result or {"code": 0, "msg": "ok", "data": {}}
+        return self.result if self.result is not None else {"code": 0, "msg": "ok", "data": {"success": True}}
 
 
 class StoreTests(unittest.TestCase):
@@ -313,6 +313,31 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         client = CdkClient(BlaBlaError("expired", "300001", "RecordCdkRedemption"))
         with self.assertRaises(CookieExpired):
             await client.redeem_cdk(self._community_account(), "TESTCODE")
+
+    async def test_cdk_empty_or_default_success_envelope_is_unknown(self):
+        for response in ({}, {"code": 0, "msg": "ok"}, {"code": 0, "msg": "ok", "data": {}}):
+            with self.subTest(response=response):
+                client = CdkClient(response)
+                result = await client.redeem_cdk(self._community_account(), "TESTCODE")
+                self.assertFalse(result.success)
+                self.assertTrue(result.is_unknown)
+                self.assertFalse(result.terminal)
+                self.assertEqual(result.code, "UNKNOWN_AFTER_ACTION")
+
+    async def test_cdk_success_requires_integer_code_and_explicit_marker(self):
+        for response in (
+            {"code": True, "msg": "ok", "data": {"success": True}},
+            {"code": "0", "msg": "ok", "data": {"success": True}},
+            {"code": 0, "msg": "ok", "data": {"success": False}},
+        ):
+            with self.subTest(response=response):
+                client = CdkClient(response)
+                result = await client.redeem_cdk(self._community_account(), "TESTCODE")
+                self.assertTrue(result.is_unknown)
+                self.assertFalse(result.success)
+        client = CdkClient({"code": 0, "msg": "ok", "data": {"redeemed": True}})
+        result = await client.redeem_cdk(self._community_account(), "TESTCODE")
+        self.assertTrue(result.success)
 
     async def test_cookie_expired_is_preserved(self):
         class ExpiredClient(BlaBlaClient):
