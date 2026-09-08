@@ -34,3 +34,9 @@
 ## 后续工作
 
 下一主题必须从届时最新 `origin/main` 建立独立 worktree、branch 和 Draft PR，并先写清字段合同、请求预算、异常语义、测试和证据缺口。已合并主题不得通过旧 overnight 分支恢复；需要现场动作时，只记录最小授权动作并等待明确授权。当前 v4 离线主题已收口，后续先重新核验状态再选择下一个独立主题。
+
+## FB 静态立绘路线（进行中）
+
+- P0 静态 FB / Costume 主链：`feat/fb-static-mainline-v1`，从 `origin/main@c4f1755a50903f7d47ac8904715b61c880c4605b` 建立；已补 costume 字段贯通、严格空映射清单和普通路径零 Spine 合同，状态 `READY_OFFLINE`，等待 Draft PR CI。
+- Costume 实际映射及完整角色目录覆盖：`NEEDS_LIVE_EVIDENCE`；没有制造映射，也没有把可构造 URL 当作远端存在性证据。
+- 后续 P1–P4 继续按依赖拆分；真实账号、QQ 发送与部署保持未授权/未执行。

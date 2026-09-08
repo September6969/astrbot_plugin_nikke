@@ -23,3 +23,9 @@
 - 不把旧 overnight 分支、历史文档 SHA 或未合并分支当作当前开发基线。
 - 只把实际运行的测试、CI、合成预览和已查来源写入台账；缺少 live evidence 时明确标为缺口。
 - 本轮未启用真实账号读写、QQ 发送、部署或资源授权；GitHub 仓库未开放 Auto-Merge，因此未修改设置，所有合并均在 required checks 全绿后完成并保留远端分支。
+
+## 当前新增工作树
+
+| 范围 | 状态 | 备注 |
+| --- | --- | --- |
+| P0 静态 FB / Costume | 开发中 | `E:\_codex_work\nikke-fb-static-v1` / `feat/fb-static-mainline-v1`；基线 `origin/main@c4f1755a`，普通出卡不进入 Spine |
