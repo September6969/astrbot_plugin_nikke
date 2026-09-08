@@ -9,3 +9,5 @@
 - 未来 GIF/WebP/动态页面应以新 feature 独立评估，不回绑静态角色卡。
 
 证据：`tests/test_asset_manager.py` 验证普通路径没有 Spine 模块导入；`tests/test_spine_spike.py` 与 `tests/test_spine_inspection.py` 仅验证队列/本地预检查。真实 runtime 兼容性、Linux headless、合法测试素材和 benchmark 均为 `NOT_EXECUTED`。
+
+本 PR 的提交历史保持线性；后续修正只追加普通提交，不重写远端历史。
