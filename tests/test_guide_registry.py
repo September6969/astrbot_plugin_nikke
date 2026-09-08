@@ -28,3 +28,26 @@ class GuideTests(TestCase):
     def test_empty_fallback(self):
         with tempfile.TemporaryDirectory() as directory:
             self.assertEqual(GuideRegistry(Path(directory)).page("training"), [])
+
+    def test_link_only_entry_and_https_whitelist(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = dict(id="red", category="red_orbs", title="红球", files=[],
+                        source="user", credit="未署名", license="授权", updated_at="2026-09-08", game_version="snapshot")
+            base["links"] = ["https://nikkeoutpost.netlify.app/"]
+            (root / "registry.json").write_text(json.dumps([base]), encoding="utf-8")
+            self.assertEqual(GuideRegistry(root).entries[0].links, ("https://nikkeoutpost.netlify.app/",))
+            for bad in ("http://nikkeoutpost.netlify.app/", "https://evil.example/", "https://user:pass@nikkeoutpost.netlify.app/"):
+                base["links"] = [bad]
+                (root / "registry.json").write_text(json.dumps([base]), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    GuideRegistry(root)
+
+    def test_entry_rejects_when_both_files_and_links_are_empty(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            row = dict(id="empty", category="test", title="空", files=[], links=[], source="user",
+                       credit="未署名", license="授权", updated_at="2026-09-08", game_version="snapshot")
+            (root / "registry.json").write_text(json.dumps([row]), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                GuideRegistry(root)

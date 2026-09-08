@@ -1,0 +1,227 @@
+{
+  "registered_at": "2026-09-08",
+  "authorization": "用户确认允许公开仓库收录及机器人发送",
+  "assets": [
+    {
+      "category": "progression",
+      "source_file": "养成一图流.png",
+      "source_sha256": "5366388669790680ce7c52c13de8caf3e853a9f07a4992ca89ddfbcf9efac8b7",
+      "source_bytes": 16829943,
+      "credit": "屑芙蒂（原图可见署名）",
+      "outputs": [
+        {
+          "path": "progression/part-01.png",
+          "crop": [
+            0,
+            0,
+            2036,
+            2800
+          ],
+          "sha256": "2a986cab5b376df658b434106cfb880ead8fb7ec127733de995f8fe9049849ea",
+          "bytes": 3600159
+        },
+        {
+          "path": "progression/part-02.png",
+          "crop": [
+            0,
+            2680,
+            2036,
+            5480
+          ],
+          "sha256": "5dcbd44e3a03c0ebe53a7343b44725ab12595636c8c1c24252c84bdbffc6ec09",
+          "bytes": 2963115
+        },
+        {
+          "path": "progression/part-03.png",
+          "crop": [
+            0,
+            5360,
+            2036,
+            8160
+          ],
+          "sha256": "52f5dc1c8093cfabc1049c828c47a9bd2ac924013120e1522d4ec8e47f93c7d5",
+          "bytes": 3359263
+        },
+        {
+          "path": "progression/part-04.png",
+          "crop": [
+            0,
+            8040,
+            2036,
+            10840
+          ],
+          "sha256": "35de640e18aa42294effff0fa8c7334689ad78ad90ffb80996137f08b82017fd",
+          "bytes": 3251928
+        },
+        {
+          "path": "progression/part-05.png",
+          "crop": [
+            0,
+            10720,
+            2036,
+            13520
+          ],
+          "sha256": "427b1f274b846cb6ad74d511e00466245fe14695d03b6a9665727f862d43dbad",
+          "bytes": 2972993
+        },
+        {
+          "path": "progression/part-06.png",
+          "crop": [
+            0,
+            13400,
+            2036,
+            14998
+          ],
+          "sha256": "195be4beb6501cf47f4e0f56a1b76b07425b74973bb64693889119da5288a703",
+          "bytes": 1045139
+        }
+      ]
+    },
+    {
+      "category": "favorite",
+      "source_file": "珍藏品养成.jpg",
+      "source_sha256": "07032bff9cc87fc6cb70a5f6edb291479a7d3ed7cba05d80bcad5ec0fea3eb97",
+      "source_bytes": 172599,
+      "credit": "迪恩deen33（原图可见署名）",
+      "outputs": [
+        {
+          "path": "favorite/original.jpg",
+          "crop": [
+            0,
+            0,
+            1920,
+            1005
+          ],
+          "sha256": "07032bff9cc87fc6cb70a5f6edb291479a7d3ed7cba05d80bcad5ec0fea3eb97",
+          "bytes": 172599
+        }
+      ]
+    },
+    {
+      "category": "arena_charge",
+      "source_file": "充能表查询.png",
+      "source_sha256": "aaa31909abb531e99e09288695d8ab0b1f0c9454818fb58125c7f833c1e62949",
+      "source_bytes": 7737196,
+      "credit": "迪恩deen33（原图可见署名）",
+      "outputs": [
+        {
+          "path": "arena_charge/part-01.png",
+          "crop": [
+            0,
+            0,
+            4000,
+            3000
+          ],
+          "sha256": "b3afc417a6167c1b66954b9477fbcfe690e01a43d03d84a2f2671fdcf744802c",
+          "bytes": 1636807
+        },
+        {
+          "path": "arena_charge/part-02.png",
+          "crop": [
+            0,
+            2880,
+            4000,
+            5880
+          ],
+          "sha256": "62d21fc8024c918fc47914938faee16e5efc9999092d8125936a4bca9af5558a",
+          "bytes": 2780771
+        },
+        {
+          "path": "arena_charge/part-03.png",
+          "crop": [
+            0,
+            5760,
+            4000,
+            7498
+          ],
+          "sha256": "95a9b6dbf99f94bb6cadd39eab57cab1984a8a6511c4e2de41b0592850a0f577",
+          "bytes": 2695318
+        }
+      ]
+    },
+    {
+      "category": "overload",
+      "source_file": "洗词条教学.png",
+      "source_sha256": "3e963cd17c66f1b1528ff49077120ff47e38593a991b2f102aa8f8696215b9e9",
+      "source_bytes": 6557678,
+      "credit": "用户授权提供，原图未署名",
+      "outputs": [
+        {
+          "path": "overload/part-01.png",
+          "crop": [
+            0,
+            0,
+            4000,
+            3000
+          ],
+          "sha256": "73a9c934d6b76ea3f2a021449d34ed9a15775312fa487f0dc09a8eb27b71db38",
+          "bytes": 1386002
+        },
+        {
+          "path": "overload/part-02.png",
+          "crop": [
+            0,
+            2880,
+            4000,
+            5880
+          ],
+          "sha256": "22a8429fbb2a2bb1f39e2a40a0b356a30c82485cf56b5edf9b19b53b117ae75c",
+          "bytes": 1312796
+        },
+        {
+          "path": "overload/part-03.png",
+          "crop": [
+            0,
+            5760,
+            4000,
+            8760
+          ],
+          "sha256": "4d3ca50a83df62310f0d140f4291c080e3246729d1b2b3af78690de55dfeed14",
+          "bytes": 1025072
+        },
+        {
+          "path": "overload/part-04.png",
+          "crop": [
+            0,
+            8640,
+            4000,
+            11640
+          ],
+          "sha256": "5bea278dbbff4f3ebf00cd0503c51c7d4985da08619b1bacd83669e99004b707",
+          "bytes": 1451088
+        },
+        {
+          "path": "overload/part-05.png",
+          "crop": [
+            0,
+            11520,
+            4000,
+            14493
+          ],
+          "sha256": "9a952fe68d71dfff199a4f83ec5d652bad6e3a48e9c75bd9065425cc5389716b",
+          "bytes": 1414344
+        }
+      ]
+    },
+    {
+      "category": "pvp",
+      "source_file": "PVP配队.png",
+      "source_sha256": "976d1ad3d998f7238dc2f4d4af785ae7579570330ede45185d7ce5961df9ee63",
+      "source_bytes": 1928506,
+      "credit": "迪恩deen33（原图可见署名）",
+      "outputs": [
+        {
+          "path": "pvp/original.png",
+          "crop": [
+            0,
+            0,
+            2722,
+            1282
+          ],
+          "sha256": "976d1ad3d998f7238dc2f4d4af785ae7579570330ede45185d7ce5961df9ee63",
+          "bytes": 1928506
+        }
+      ]
+    }
+  ]
+}

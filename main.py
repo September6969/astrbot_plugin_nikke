@@ -1523,15 +1523,25 @@ class NikkePlugin(Star):
         mapping = {
             "练度": "progression",
             "progression": "progression",
-            "红球": "red_orb",
-            "red_orb": "red_orb",
-            "珍藏品": "favorite_item",
-            "favorite": "favorite_item",
-            "favorite_item": "favorite_item",
+            "红球": "red_orbs",
+            "red球": "red_orbs",
+            "red_orb": "red_orbs",
+            "red_orbs": "red_orbs",
+            "珍藏品": "favorite",
+            "收藏品": "favorite",
+            "favorite": "favorite",
+            "favorite_item": "favorite",
             "充能": "arena_charge",
             "竞技场": "arena_charge",
             "竞技场充能": "arena_charge",
             "arena_charge": "arena_charge",
+            "洗词条": "overload",
+            "词条": "overload",
+            "overload": "overload",
+            "pvp": "pvp",
+            "配队": "pvp",
+            "pvp配队": "pvp",
+            "竞技场配队": "pvp",
         }
         if not cat_key or cat_key not in mapping:
             yield event.plain_result(
@@ -1541,7 +1551,9 @@ class NikkePlugin(Star):
                 "• /妮姬 攻略 红球 — 同步器等级与红球消耗一览表\n"
                 "• /妮姬 攻略 珍藏品 — 珍藏品养成与材料汇总\n"
                 "• /妮姬 攻略 充能 — 竞技场爆裂充能速查表\n\n"
-                "（当前保留占位，仅发送 registry 中已登记的素材）"
+                "• /妮姬 攻略 洗词条 — Overload 词条教学\n"
+                "• /妮姬 攻略 PVP — 竞技场配队参考\n\n"
+                "仅发送 registry 中已登记的授权素材或白名单 HTTPS 链接。"
             )
             return
 
@@ -1564,6 +1576,8 @@ class NikkePlugin(Star):
                 yield event.plain_result(entry.caption())
                 for image in entry.files[:10]:
                     yield event.image_result(str(image))
+                for link in entry.links:
+                    yield event.plain_result(link)
             return
         if page_number > 1 or any(entry.category == folder_name for entry in registry.entries):
             yield event.plain_result("该攻略页不存在。")
