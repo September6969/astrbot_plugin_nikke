@@ -1,38 +1,30 @@
-# ROADMAP LEDGER
+# NIKKE 长期路线台账
 
-> 此台账从长期路线图 v2 的 Union Raid Increment A 开始维护。历史工作树与已合并 PR 不会因本表出现而被重新归属；每次恢复均以实时 GitHub、`origin/main` 和工作树核验为准。
+更新时间：2026-09-08。本文件是路线图状态摘要，不是运行时状态源；每次恢复前仍须重新 fetch、核验 GitHub PR/CI、工作树和未提交状态。
 
-## TASK-RAID-A
+## 当前基线
 
-| 字段 | 当前记录 |
+本轮按依赖顺序将已授权的待合并 PR 收口到 `main`。当前最终 SHA、PR 状态与 CI 以 GitHub 实时查询为准；本文件中的 SHA 仅是本次提交生成前的记录，不得替代下一次核验。
+
+## 本轮已合并主题
+
+| 主题 | 结果 |
 | --- | --- |
-| 用户能力 | 联盟突袭 overview 与排名的响应范围、解析和展示语义 |
-| requirement_id | `REQ-RAID-001` / `REQ-RAID-002` |
-| 代码状态 | `IMPLEMENTED` / `WIRED` 的既有链路上进行 Increment A 加固 |
-| 证据状态 | 已有脱敏 fixture 与合成行为测试；真实范围完整性仍为 `NEEDS_LIVE_EVIDENCE` |
-| 产品状态 | 当前响应范围可离线验证；不宣称完整赛季、当前轮次或真实攻击次数 |
-| 工作树 | `E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke` |
-| 分支 | `feat/union-raid-v2` |
-| base SHA | `bada0b3aafcd7127d07ca40f554808b0433540f8` |
-| 实现提交 | `665cfeab6e5b7c1946282dd46fdef5e5f114953d`（`feat: harden union raid response semantics`） |
-| PR | [#8 Feat: harden Union Raid response semantics](https://github.com/September6969/astrbot_plugin_nikke/pull/8)，`OPEN` / `DRAFT`，等待人工审核；不自动合并 |
-| 已核验 HEAD | `00f95363dbb8799abc9e2d280ea53645ddc8056e`（本次文档同步前的分支 checkpoint；本次提交会产生新的最终 HEAD） |
-| CI run / headSha | [34063656074](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34063656074) `SUCCESS`；其 `headSha = 00f95363dbb8799abc9e2d280ea53645ddc8056e`，与上述 checkpoint 一致。文档同步 push 后必须重验新最终 HEAD CI。 |
-| 行为测试 | 多 `level_info` 不取首项；重复 Boss 不聚合；坏数值不静默转换；负 HP 保留既有归零；排名仅称返回记录 |
-| 合成预览 | `E:\DevCache\nikke-card-preview\raid-increment-a-20260906\`，完整/多阶段项/重复 Boss 均已实际查看 |
-| 当前阻塞 | `GetUnionRaidLevelInfo` 的多项排序、分页和完整范围没有可验证的公开合同 |
-| 已查来源 | 现有 client、builder、历史提交、脱敏 fixture、公开检索；第三方实现未作为合同依据 |
-| 最小现场动作 | 仅在明确授权后，用一个真实账号执行一次只读响应采样并脱敏比较；本阶段未执行 |
-| N+1 审计 | 本增量只改 builder、renderer 与既有排名格式化；未加入 client 调用、循环内请求或新 endpoint |
-| 本地证据 | 额度重置前，同一源码 `python -m pytest -q`：`265 passed, 2 warnings, 50 subtests`；本次恢复后 `python -m compileall -q .`、`node --test tests/extension.test.cjs`（3 passed）和 `git diff --check` 均通过。恢复后的 PATH Python 缺少 `pytest`，故最终 Python 结论以 PR 矩阵 CI 为准。 |
-| 下一步 | 完成本次文档 checkpoint 同步、普通 push 和新最终 HEAD CI 核验；#8 保持 Draft。随后从最新 `origin/main` 独立启动 Announcement V2，不继承本 PR。 |
-| 未提交文件 | 本次同步开始时无未提交文件；此行仅说明核验快照，不能替代后续 `git status`。 |
+| Post-Merge Sync / Profile V2 | 已合并；Profile 命令离线闭环、字段语义、分区去重和合成预览均有记录；真实账号与部署证据仍未执行 |
+| Registration / storage / migration / runtime / shutdown | 已合并；注册 API、连接生命周期、事务迁移、配置边界和幂等回收按依赖顺序落地 |
+| Health / backup / cache / deployment preflight | 已合并；健康诊断、备份、清理、Caddy 示例、升级前置检查与发布元数据保持只读/离线边界 |
+| Raid / campaign / tower / CDK | 已合并；数值与响应合同、快照和批次幂等语义有行为测试；不宣称真实账号联调 |
+| Announcement / daily / voice / character / spine | 已合并；字段合同、状态语义、动态资源边界与日志证据已进入主线；公开资源和合成数据不等于授权或生产证据 |
+| Asset lifecycle | 已合并；同键 single-flight、跨实例远端下载槽位、有限预取和 campaign 共享 manager 已组合验证，未宣称真实远端负载或全链路生产 N+1 证据 |
+| Log privacy / evidence docs | 已合并；异常、Cookie 上下文和动态日志净化，并保留现场证据登记、需求矩阵与 Profile 状态边界 |
 
-## TASK-ANNOUNCEMENT-A
+## 证据边界
 
-| 字段 | 当前记录 |
-| --- | --- |
-| 主题 | Announcement V2：deep rescan、locale、category、query UX 与 diagnostic |
-| 状态 | `READY`，尚未创建工作树或分支；必须从当时最新 `origin/main` 独立开始，不继承 RAID-A。 |
-| 先决语义 | 在 baseline cleanup 前先明确旧文更新、retention、resubscribe replay、version 与 out-of-order 行为；不把这些隐含成缓存副作用。 |
-| 下一步 | 建立 `feat/announcement-v2` 独立 worktree，完成合同、行为测试、全量回归、预览与 Draft PR/最终 HEAD CI。 |
+- `READY_OFFLINE` 只表示本地合同、行为测试、合成输出或离线预览已验证。
+- `NEEDS_LIVE_EVIDENCE` 仍包括真实账号 Profile/Raid 字段兼容、Daily 写入后的真实状态、Voice 实际播放送达、Spine 生产运行时/许可、真实远端素材负载和部署环境图片。
+- 未接线模块、mock/fixture、合成 PNG、公开只读访问和静态代码检查不得冒充产品完成、真实联调、消息发送或资源授权。
+- 本轮没有访问真实账号、执行账号写入、发送消息、部署、修改 main 工作树、force push、删除分支或修改 ruleset。
+
+## 后续工作
+
+下一主题必须从届时最新 `origin/main` 建立独立 worktree、branch 和 Draft PR，并先写清字段合同、请求预算、异常语义、测试和证据缺口。已合并主题不得通过旧 overnight 分支恢复；需要现场动作时，只记录最小授权动作并等待明确授权。

@@ -4320,14 +4320,14 @@ help
 
 ## PR #5 — Contract & Evidence Hardening
 
-- [ ] 修 Raid capture script。
-- [ ] 删除 openid split。
-- [ ] GetMyGuildInfo payload 对齐生产 client。
-- [ ] relationship-preserving sanitizer。
-- [ ] semantic Raid fixture。
-- [ ] Raid HP clamp。
-- [ ] Campaign unknown error rethrow。
-- [ ] Node extension test 进 CI。
+- [x] 修 Raid capture script。
+- [x] 删除 openid split。
+- [x] GetMyGuildInfo payload 对齐生产 client。
+- [x] relationship-preserving sanitizer。
+- [x] semantic Raid fixture。
+- [x] Raid HP clamp。
+- [x] Campaign unknown error rethrow。
+- [x] Node extension test 进 CI。
 - [ ] README 与当前 main 同步。
 
 ## PR #6 — Profile Research / Collection
@@ -6817,7 +6817,11 @@ Guide 图片授权
 
 ## P0 — 在继续 Raid 抓包前必须修
 
+> 状态核验（2026-09-06，`origin/main`=`bada0b3aafcd7127d07ca40f554808b0433540f8`）：D-01/D-02 已由 `8afacc4`、`b964f18`、`26e9e10` 落地，并由 `tests/test_capture_contract.py` 与 `tests/test_raid_evidence.py` 覆盖。以下两节保留为问题背景；当前状态以代码、测试和 `docs/ROADMAP_LEDGER.md` 为准。
+
 ### D-01 capture_union_raid_fixtures.py 请求合同过期
+
+状态：DONE（已使用 `GetMyGuildInfo({"ignore_toast": true})`，并透传完整 `game_openid`）。
 
 当前脚本：
 
@@ -6834,6 +6838,8 @@ GetMyGuildInfo {"ignore_toast": true}
 ```
 
 ### D-02 Raid sanitizer 不保留关系
+
+状态：DONE（已生成 `union_raid_semantic.json`，并保持同一 `openid` 的匿名关系；不保留原始身份或精确伤害值）。
 
 Phase 2 需要 relationship-preserving fixture。
 
