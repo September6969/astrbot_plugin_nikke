@@ -11,6 +11,10 @@
 
 边界：不修改 `main`，不自动 merge，不 force push，不删除分支，不改 ruleset，不部署，不访问未明确授权的真实账号，不执行账号写操作或消息发送。未接线模块、合成测试和公开资源访问不能被描述为产品完成、真实联调或资源授权。
 
+## 完成快照（2026-09-07）
+
+A 已通过 PR #6 合并，B 已通过 PR #7 合并到 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。本计划的 A/B 段保留为实施合同和验收依据，不再表示当前待办；Profile 离线闭环的最终记录见 [Profile V2 验收](PROFILE_V2_ACCEPTANCE.md)，真实账号/部署证据仍须单独授权。
+
 ## A：Post-Merge Sync
 
 分支：`chore/post-merge-sync`，基于开始执行时重新 fetch 得到的最新 `origin/main`。
