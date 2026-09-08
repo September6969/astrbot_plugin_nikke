@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import json
+import math
 import re
 import time
 import uuid
@@ -21,9 +22,28 @@ class VoiceResourceProvider:
         self._slots = asyncio.Semaphore(2)
         self._closed = False
 
+    def _cache_path_is_safe(self) -> bool:
+        """缓存路径任一现有层级为符号链接时拒绝读写，避免越出数据目录。"""
+        current = self.cache
+        while current != current.parent:
+            try:
+                if current.is_symlink():
+                    return False
+            except OSError:
+                return False
+            current = current.parent
+        return True
+
     async def resolve(self, map_key, speech_id, locale, *, budget=4):
         if self._closed:
             return None
+        if (
+            isinstance(budget, bool)
+            or not isinstance(budget, (int, float))
+            or not math.isfinite(float(budget))
+            or budget <= 0
+        ):
+            raise ValueError("语音资源预算必须是正数")
         if locale not in {"en", "ja", "ko"} or not all(isinstance(x, str) and re.fullmatch(r"[a-z0-9_]{1,100}", x) for x in (map_key, speech_id)):
             raise ValueError("语音语言或资源标识无效")
         key = hashlib.sha256(json.dumps([map_key, speech_id, locale]).encode()).hexdigest()
@@ -49,17 +69,16 @@ class VoiceResourceProvider:
 
     async def _fetch(self, map_key, speech_id, locale, key):
         async with self._slots:
+            if not self._cache_path_is_safe():
+                raise OSError("语音缓存路径不安全")
             self.cache.mkdir(parents=True, exist_ok=True)
+            if not self._cache_path_is_safe():
+                raise OSError("语音缓存路径不安全")
             target = self.cache / f"{key}.mp3"
             manifest = self.cache / f"{key}.json"
-            if target.is_file() and manifest.is_file() and time.time() - manifest.stat().st_mtime < 86400 and target.stat().st_size <= self.MAX_BYTES:
-                raw = target.read_bytes()
-                try:
-                    saved = json.loads(manifest.read_text(encoding="utf-8"))
-                    if saved.get("sha256") == hashlib.sha256(raw).hexdigest() and self.is_mp3(raw):
-                        return target
-                except (ValueError, AttributeError):
-                    pass
+            cached = self._cached_source(target, manifest, map_key, speech_id, locale)
+            if cached is not None:
+                return cached
             async with httpx.AsyncClient(timeout=10, transport=self.transport, follow_redirects=False) as client:
                 mapping = await self._read(client, f"/scene/voice_map/{map_key}.json", 1024 * 1024)
                 identifiers = json.loads(mapping)
@@ -69,16 +88,42 @@ class VoiceResourceProvider:
                 content = await self._read(client, f"/voice/{locale}/{speech_id}.mp3", self.MAX_BYTES)
             if not self.is_mp3(content):
                 raise ValueError("响应不是 MP3 音频")
-            temporary = target.with_name(uuid.uuid4().hex + ".tmp")
+            content_temporary = target.with_name(uuid.uuid4().hex + ".tmp")
+            manifest_temporary = manifest.with_name(uuid.uuid4().hex + ".tmp")
             try:
-                temporary.write_bytes(content)
-                temporary.replace(target)
-                temporary.write_text(json.dumps({"sha256": hashlib.sha256(content).hexdigest(),
+                # 内容与清单分别原子替换，避免内容替换后临时路径消失导致清单写入失败。
+                content_temporary.write_bytes(content)
+                content_temporary.replace(target)
+                manifest_temporary.write_text(json.dumps({"sha256": hashlib.sha256(content).hexdigest(),
                     "source_path": f"/voice/{locale}/{speech_id}.mp3", "map_key": map_key}), encoding="utf-8")
-                temporary.replace(manifest)
+                manifest_temporary.replace(manifest)
             finally:
-                temporary.unlink(missing_ok=True)
+                content_temporary.unlink(missing_ok=True)
+                manifest_temporary.unlink(missing_ok=True)
             return target
+
+    def _cached_source(self, target, manifest, map_key, speech_id, locale):
+        """只接受与当前请求身份、完整性和有效期都一致的本地缓存。"""
+        try:
+            if not self._cache_path_is_safe() or target.is_symlink() or manifest.is_symlink():
+                return None
+            age = time.time() - manifest.stat().st_mtime
+            if not target.is_file() or not manifest.is_file() or not 0 <= age < 86400 or target.stat().st_size > self.MAX_BYTES:
+                return None
+            raw = target.read_bytes()
+            saved = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            return None
+        expected_source_path = f"/voice/{locale}/{speech_id}.mp3"
+        if (
+            not isinstance(saved, dict)
+            or saved.get("sha256") != hashlib.sha256(raw).hexdigest()
+            or saved.get("source_path") != expected_source_path
+            or saved.get("map_key") != map_key
+            or not self.is_mp3(raw)
+        ):
+            return None
+        return target
 
     @staticmethod
     def is_mp3(content):
@@ -101,3 +146,4 @@ class VoiceResourceProvider:
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
+        self._tasks.clear()

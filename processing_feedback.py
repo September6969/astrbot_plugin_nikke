@@ -16,6 +16,8 @@ import time
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
+from .log_privacy import safe_exception_message
+
 logger = logging.getLogger("nikke.feedback")
 
 
@@ -64,7 +66,7 @@ class DelayedFeedbackManager:
             except asyncio.CancelledError:
                 pass
             except Exception as exc:
-                logger.warning("延迟处理提示发送异常: %s", exc)
+                logger.warning("延迟处理提示发送异常: %s", safe_exception_message(exc))
             finally:
                 self._active_handles.discard(handle)
 

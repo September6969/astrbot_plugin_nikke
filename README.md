@@ -13,11 +13,12 @@
 - NIKKE 风格图片卡、每日账号健康检查与群汇总框架。
 - 中文精简指令、英文旧指令兼容，以及受独立开关保护的国际服 CDK 兑换。
 - 单角色练度使用 1800×1000 横版角色海报，展示立绘、核心属性、模块化养成、四件装备卡和完整词条汇总；只请求目标角色详情。
-- 公告/日程查询接入官网 InformationFeeds（默认英文 NEWS 最近 10 条），支持全文读取、磁盘缓存降级和独立内容/日程版本；日期解析仍为启发式。
+- 公告/日程查询接入官网 InformationFeeds：常规扫描最多 2 页×5 条，管理员深度重扫最多 5 页×20 条；支持 en/ja/ko/th/de/fr 本地过滤、全文读取、磁盘缓存降级和独立内容/日程版本。日期解析仍为启发式。
 - 联盟突袭总览及当前响应内伤害排名；主线通关史查询使用官网静态关卡 ID，覆盖 3,572 项普通/困难关卡。
 - 无需绑定账号的塔层静态速查，覆盖 7,350 个公开塔层；不是玩家进度或通关保证。
 - 批量 CDK 逐码持久化、同账号互斥和不确定结果保护；动态后台任务在关闭时统一回收。
 - 本地授权攻略索引，以及默认关闭的 OneBot 戳一戳语音框架（实际 QQ 播放尚待验收）。
+- 离线缓存清理工具默认只生成计划；仅对已知缓存路径显式传入 `--apply` 才会删除陈旧缓存，不触碰数据库、密钥或出图目录。
 
 尚未完成或默认禁用：
 
@@ -33,11 +34,11 @@
 - 插件和扩展不保存账号密码。
 - 扩展仅能访问 `*.blablalink.com` 与配置的绑定域名。
 - 服务端只接受 BlaBlaLink 域 Cookie，并限制名称、数量、单项和总长度。
-- 诊断日志只记录 Cookie 名称、接口名、业务码和响应字段，不记录 Cookie 值。
+- 诊断日志只记录接口名、请求/响应字段名和业务码，不记录 Cookie 值；异常日志会保留异常类型和截断后的脱敏摘要，不记录 Cookie、令牌、授权头、邮箱或账号标识值。
 - 默认只能在私聊中生成绑定链接，避免群成员抢先使用链接提交账号。
 - 自动点赞、关注、浏览和资料修改均未实现。
 - 社区签到和领奖属于写操作，默认关闭；在真实账号契约测试完成前只检查登录状态。
-- CDK 不写入日志或数据库；仅保存不可逆摘要和脱敏结果。群聊发送兑换命令仍会向群成员公开原始兑换码。
+- CDK 不将明文兑换码写入日志或数据库；`action_runs` 仅保存不可逆摘要、状态和脱敏结果。群聊发送兑换命令仍会向群成员公开原始兑换码。
 
 ## 最小部署
 
@@ -52,9 +53,23 @@
 6. **不要**把 `6210`、AstrBot 后台或 NapCat 后台直接映射到公网。
 7. 在 QQ 中发送 `/妮姬 帮助`，再私聊发送 `/妮姬 账号 绑定` 完成绑定。
 
+离线备份可在插件父目录执行：
+
+```bash
+python -m astrbot_plugin_nikke.scripts.backup_nikke_data \
+  --data-dir AstrBot/data/nikke \
+  --destination /安全的备份目录
+```
+
+该命令只读取数据库和密钥，不连接网络；源数据目录、两个源文件和备份输出目录不能是符号链接，备份目录不能位于源目录内，已有同名备份不会覆盖。恢复前请人工确认目标环境和文件权限。
+
+管理员可发送 `/妮姬 管理 健康` 查看本地数据、缓存临时文件和磁盘容量摘要。健康诊断只读，不会自动删除缓存，不显示绝对路径、Cookie 或账号标识。
+
+启动时会在本地 SQLite 事务中执行兼容 schema migration；检测到更高版本 schema 会拒绝启动，不会自动降级或覆盖数据。真实生产数据库迁移仍需人工授权和备份。
+
 若绑定域名在本地代理下出现 `SSL_connect error 5`，可从 [GitHub Releases](https://github.com/September6969/astrbot_plugin_nikke/releases) 下载同一扩展包；不要关闭浏览器证书校验。
 
-仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。
+仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。示例默认关闭 Caddy access log，因为绑定 URL 路径包含一次性令牌；反代配置边界见 [Caddy 验收记录](docs/CADDY_ACCEPTANCE.md)。
 
 最小 Caddy 配置：
 
@@ -68,7 +83,7 @@ nikke.example.com {
 
 夜间开发新增入口：
 
-- `/妮姬 公告`、`/妮姬 日程`：公开公告及可解析日程。
+- `/妮姬 公告`、`/妮姬 日程`：公开公告及可解析日程；公告还支持 `语言 <en|ja|ko|th|de|fr>`、`分类 <活动|维护|本地标识>`、`搜索 <关键词>`、`诊断`，以及仅管理员可用的 `深度刷新 [语言]`。查询、诊断和重扫均不发送消息；深度重扫只读取公开 CMS。
 - `/妮姬 公告 订阅`、`/妮姬 公告 取消订阅`：仅机器人管理员管理当前会话。需另外开启 `enable_announcement_push`，默认不会发送；失败退避 5 分钟，截止提醒为 24/6/1 小时。
 - `/妮姬 攻略 练度 2`：按本地授权索引分页，每页最多 3 项。
 - `/妮姬 联盟突袭 排名`：当前响应范围内排名。
@@ -79,17 +94,21 @@ nikke.example.com {
 
 研究来源和限制见 [证据记录](docs/evidence/overnight.md)，阶段结果与诊断方式见 [夜间开发报告](docs/OVERNIGHT_REPORT.md)。
 
+版本记录见 [CHANGELOG.md](CHANGELOG.md)，配置键、默认值和安全边界见 [配置合同](docs/CONFIGURATION_ACCEPTANCE.md)。
+
+缓存清理的边界与验收见 [缓存清理验收记录](docs/CACHE_CLEANUP_ACCEPTANCE.md)。
+
 - `/妮姬 帮助 [账号|查询|日常]`：查看精简菜单。
 - `/妮姬 账号 [绑定|状态|解绑|汇总 开|关]`：管理自己的账号。
 - `/妮姬 我的`：查看指挥官资料、同步器、前哨和主线进度。
 - `/妮姬 查询 练度 [角色名]`：查看练度总表或单个角色练度。
 - `/妮姬 查询 资料 <角色名>`：查看角色基础资料。
-- `/妮姬 签到`：执行签到；`/妮姬 签到 状态` 只读查询。
+- `/妮姬 签到`：执行签到；`/妮姬 签到 状态` 只读查询；`/妮姬 日常 自动 开|关` 仅设置自己的定时签到偏好。
 - `/妮姬 兑换 <CDK>`：使用当前绑定账号真实兑换国际服 CDK。
 
 旧版 `/nikke bind`、`status`、`me`、`roster`、`character`、`info`、`daily`、`claim`、`cdk`、`push` 和管理员指令继续兼容。管理员中文入口为 `/妮姬 管理`。
 
-签到由 `enable_daily_actions` 控制，CDK 兑换由独立的 `enable_cdk_redemption` 控制；两项公开默认值均为 `false`。
+签到由全局 `enable_daily_actions` 与每账号的 `auto_daily_enabled` 共同控制：后者默认关闭，只影响定时批处理，手动签到不受影响。CDK 兑换由独立的 `enable_cdk_redemption` 控制；两项真实写操作公开默认值均为 `false`。
 
 如确实需要在可信群中生成链接，可将 `allow_group_bind` 设为 `true`；不建议对公开群开启。
 
@@ -105,12 +124,14 @@ nikke.example.com {
 
 - 确认 DNS 指向服务器，云安全组开放 TCP 80/443。
 - 确认 Caddy 与 AstrBot 位于同一 Docker 网络。
-- 访问 `https://你的域名/healthz`，应返回 `ok: true`。
+- 访问 `https://你的域名/healthz`；只有 SQLite 数据库和 `secret.key` 同时存在时才返回 `200` 与 `ok: true`，否则返回 `503`，不输出路径或密钥内容。
 - 扩展跨域请求只允许来自 Chrome/Edge 扩展页，不再使用 `Access-Control-Allow-Origin: *`。
 
 ### 容器迁移后无法解密
 
 必须同时迁移 `data/nikke/nikke.sqlite3` 和 `data/nikke/secret.key`。密钥应保持 `600` 权限，丢失后旧 Cookie 无法恢复，只能让用户重新绑定。
+
+升级或回滚前可运行只读前置检查：`python scripts/upgrade_preflight.py --data-dir data/nikke`。它只检查存储成对存在、SQLite 完整性、字段合同、可选备份集和磁盘余量，不执行迁移、复制、删除、覆盖或生产写入。验收边界见 [`docs/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md`](docs/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md)。
 
 ## 测试
 
@@ -118,7 +139,7 @@ nikke.example.com {
 python -m unittest discover -s tests -v
 ```
 
-测试覆盖令牌超时与单次消费、Cookie 加密、来源过滤、跨站 CORS、账号隔离基础行为、`game_openid`/正式 `intl_openid` 恢复、AEL 计算、单角色定向查询、四槽装备词条解析、1800×1000 单角色卡、资源缓存和缺图回退，以及 25 人汇总卡。模拟测试不能替代授权账号的真实端到端验收。
+测试覆盖令牌超时与单次消费、Cookie 加密、来源过滤、跨站 CORS、账号隔离基础行为、`game_openid`/正式 `intl_openid` 恢复、AEL 计算、单角色定向查询、四槽装备词条解析、1800×1000 单角色卡、资源缓存和缺图回退、日志异常文本脱敏，以及 25 人汇总卡。模拟测试不能替代授权账号的真实端到端验收。
 
 单角色卡的图片缓存位于 `data/nikke/cache/`，自定义图片与来源配置见 [素材说明](assets/README.md)。首次查询可能需要下载立绘；下载失败仍生成占位卡。总览与“我的”卡片沿用原模板。
 
