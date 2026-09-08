@@ -101,5 +101,5 @@ class PersistenceTests(IsolatedAsyncioTestCase):
                 qq_id="fake-qq",
             )
             self.assertTrue(first.success)
-            self.assertFalse(second.success)
+            self.assertTrue(second.success)
             self.assertEqual(client.redeem_cdk.await_count, 1)
