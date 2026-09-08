@@ -118,25 +118,31 @@ def _choose_text_colors(background: str) -> tuple[str, str]:
     return "#F4F6FA", "#919BAB"
 
 
-def _extract_portrait_colors(portrait: Any) -> tuple[str | None, bool]:
-    """Return (dominant_hex, is_saturated) from the portrait's centre region."""
+def _extract_portrait_palette(portrait: Any) -> tuple[str | None, str | None, str | None, bool]:
+    """从非透明像素提取主色、次色和暗色。"""
     if portrait is None:
-        return None, False
+        return None, None, None, False
     try:
         width: int = portrait.width
         height: int = portrait.height
         if width <= 4 or height <= 4:
-            return None, False
+            return None, None, None, False
         left = width // 4
         top = height // 4
         right = width * 3 // 4
         bottom = height * 3 // 4
-        cropped = portrait.crop((left, top, right, bottom)).convert("RGB")
+        cropped = portrait.crop((left, top, right, bottom)).convert("RGBA")
         small = cropped.resize((8, 8), Image.Resampling.LANCZOS)
-        raw = small.tobytes()
-        pixels = [(raw[i], raw[i + 1], raw[i + 2]) for i in range(0, len(raw), 3)]
+        access = small.load()
+        pixels = [
+            (r, g, b)
+            for y in range(small.height)
+            for x in range(small.width)
+            for r, g, b, alpha in (access[x, y],)
+            if alpha >= 32
+        ]
     except Exception:
-        return None, False
+        return None, None, None, False
 
     quantized: list[tuple[int, int, int]] = []
     for r, g, b in pixels:
@@ -145,14 +151,22 @@ def _extract_portrait_colors(portrait: Any) -> tuple[str | None, bool]:
         quantized.append((r >> 4 << 4, g >> 4 << 4, b >> 4 << 4))
 
     if not quantized:
-        return None, False
+        return None, None, None, False
 
-    most_common_rgb = Counter(quantized).most_common(1)[0][0]
-    r, g, b = most_common_rgb
+    ranked = [item[0] for item in Counter(quantized).most_common()]
+    r, g, b = ranked[0]
     dominant = _to_hex(r, g, b)
+    secondary_rgb = next((color for color in ranked[1:] if sum(abs(a - b) for a, b in zip(color, ranked[0])) >= 72), ranked[min(1, len(ranked) - 1)])
+    dark_rgb = min(quantized, key=lambda color: sum(color))
 
     h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
     saturated = s > 0.22
+    return dominant, _to_hex(*secondary_rgb), _to_hex(*dark_rgb), saturated
+
+
+def _extract_portrait_colors(portrait: Any) -> tuple[str | None, bool]:
+    """兼容旧测试与扩展调用的主色提取接口。"""
+    dominant, _, _, saturated = _extract_portrait_palette(portrait)
     return dominant, saturated
 
 
@@ -202,19 +216,23 @@ def character_theme(
     base_accent = corp_colors["accent"]
     accent = base_accent
 
-    portrait_dominant, portrait_saturated = _extract_portrait_colors(portrait)
+    portrait_dominant, portrait_secondary, portrait_dark, portrait_saturated = _extract_portrait_palette(portrait)
     if portrait_dominant and portrait_saturated:
-        accent = _shift_toward(base_accent, portrait_dominant, hue_shift=0.30)
+        # 立绘承担主要视觉权重，企业色只做弱混合。
+        accent = _shift_toward(portrait_dominant, base_accent, hue_shift=0.20)
 
     element_tint = ELEMENT_TINTS.get(elem_key)
     if element_tint:
-        accent = _shift_toward(accent, element_tint, hue_shift=0.20, sat_boost=0.05)
+        accent = _shift_toward(accent, element_tint, hue_shift=0.05, sat_boost=0.02)
 
     primary = _lighten(accent, 0.22)
     primary = _saturate(primary, 0.08)
-    secondary = _lighten(accent, 0.42)
+    secondary = _lighten(portrait_secondary or accent, 0.35)
 
-    background = _darken(accent, 0.78)
+    background = _darken(portrait_dark or accent, 0.70)
+    if corp_key == "abnormal":
+        background = _mix(_parse(background), _parse("#120D18"), 0.62)
+        background = _to_hex(*background)
     panel = _lighten(background, 0.10)
     text, muted = _choose_text_colors(background)
 

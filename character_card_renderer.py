@@ -100,7 +100,7 @@ class CharacterCardRenderer(CardRenderer):
         draw.ellipse((65, 125, 535, 595), outline=(*accent, 70), width=1)
         self._text(draw, (22, 48), data.name_en.upper() or "NIKKE", 105, "#42404C", width=555, bold=True)
         if portrait is None:
-            portrait = self.assets.get_character_portrait(data.name_code, data.resource_id)
+            portrait = self.assets.get_character_portrait(data.name_code, data.resource_id, data.costume_id)
         bounds = portrait.getbbox()
         if bounds:
             portrait = portrait.crop(bounds)
@@ -136,9 +136,11 @@ class CharacterCardRenderer(CardRenderer):
             self._text(draw, (x, 357), label, 18, theme.muted)
             self._text(draw, (x, 388), self._number(value), 28, theme.text, width=184, bold=True)
 
-    def draw_growth_panel(self, canvas, data, theme, favorite_icon=None, cube_icon=None):
+    def draw_growth_panel(self, canvas, data, theme, favorite_icon=None, cube_icon=None, corporation_icon=None):
         draw = ImageDraw.Draw(canvas)
         self._panel(draw, (660, 450, 1310, 707), "DEVELOPMENT / 养成", theme)
+        if corporation_icon is not None:
+            self.draw_corporation_watermark(canvas, data, corporation_icon)
         cells = [("SKILL / 技能", f"{data.skill1_level} / {data.skill2_level} / {data.burst_skill_level}"),
                  ("LIMIT BREAK / 突破", "★" * min(3, max(0, data.grade)) or "未突破"),
                  ("CORE / 核心", f"+{data.core}"),
@@ -164,14 +166,14 @@ class CharacterCardRenderer(CardRenderer):
             x, y = 1330, 165 + index * 189
             draw = ImageDraw.Draw(canvas)
             draw.rounded_rectangle((x, y, 1760, y + 173), 14, fill=theme.panel, outline="#343B46")
-            draw.rounded_rectangle((x + 14, y + 13, x + 76, y + 75), 8, fill="#282E3A")
+            draw.rounded_rectangle((x + 12, y + 11, x + 92, y + 91), 8, fill="#282E3A")
             icon = equipment_icons.get(slot) if equipment_icons and slot in equipment_icons else None
             if icon is None:
                 icon = self.assets.get_equipment_icon(slot, item.equipment_id if item.equipped else None)
-            self._paste(canvas, icon, (x + 17, y + 16, 56, 56))
-            self._text(draw, (x + 90, y + 17), self.SLOT_NAMES[slot], 24, theme.text, width=317, bold=True)
+            self._paste(canvas, icon, (x + 16, y + 15, 72, 72))
+            self._text(draw, (x + 103, y + 17), self.SLOT_NAMES[slot], 24, theme.text, width=304, bold=True)
             status = f"Lv.{item.level}" if item.equipped and item.level is not None else ("已装备" if item.equipped else "未装备")
-            self._text(draw, (x + 90, y + 51), status, 22, theme.primary if item.equipped else theme.muted)
+            self._text(draw, (x + 103, y + 51), status, 22, theme.primary if item.equipped else theme.muted)
             options = item.options if item.equipped else []
             if not options:
                 self._text(draw, (x + 20, y + 112), "暂无装备词条" if item.equipped else "未装备", 21, theme.muted)
@@ -205,6 +207,14 @@ class CharacterCardRenderer(CardRenderer):
         self._text(draw, (40, 948), footer, 21, theme.muted, width=1325)
         self._text(draw, (1490, 949), "NIKKE / BUILD ARCHIVE", 18, theme.primary, width=270)
 
+    def draw_corporation_watermark(self, canvas, data, icon):
+        """企业标识只作低透明度背景水印，不与立绘争夺主体。"""
+        watermark = ImageOps.contain(icon.convert("RGBA"), (300, 300), Image.Resampling.LANCZOS)
+        alpha = watermark.getchannel("A").point(lambda value: round(value * 0.07))
+        watermark.putalpha(alpha)
+        x = 995 if str(data.corporation or "").casefold() != "abnormal" else 1030
+        canvas.alpha_composite(watermark, (x, 445))
+
     def render_character(
         self, data: CharacterCardData, card_assets: CharacterCardAssets | None = None
     ) -> str:
@@ -219,7 +229,8 @@ class CharacterCardRenderer(CardRenderer):
         self.draw_header(canvas, data, theme)
         self.draw_combat_panel(canvas, data, theme)
         self.draw_growth_panel(
-            canvas, data, theme, favorite_icon=card_assets.favorite_item, cube_icon=card_assets.cube
+            canvas, data, theme, favorite_icon=card_assets.favorite_item,
+            cube_icon=card_assets.cube, corporation_icon=card_assets.corporation,
         )
         self.draw_equipment_column(canvas, data, theme, equipment_icons=card_assets.equipment)
         self.draw_option_summary(canvas, data, theme)

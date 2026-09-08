@@ -40,3 +40,4 @@
 - P0 静态 FB / Costume 主链：`feat/fb-static-mainline-v1`，从 `origin/main@c4f1755a50903f7d47ac8904715b61c880c4605b` 建立；已补 costume 字段贯通、严格空映射清单和普通路径零 Spine 合同，状态 `READY_OFFLINE`，等待 Draft PR CI。
 - Costume 实际映射及完整角色目录覆盖：`NEEDS_LIVE_EVIDENCE`；没有制造映射，也没有把可构造 URL 当作远端存在性证据。
 - 后续 P1–P4 继续按依赖拆分；真实账号、QQ 发送与部署保持未授权/未执行。
+- P1 单角色练度卡最终版：stacked 分支 `feat/character-card-final-v1`；完成非透明像素三色主题、企业低透明水印、属性弱 accent、Abnormal 深紫黑、装备图标放大和六张合成预览，状态 `READY_OFFLINE`。

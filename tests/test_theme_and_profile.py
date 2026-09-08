@@ -6,6 +6,7 @@ from astrbot_plugin_nikke.card_theme import (
     CharacterTheme,
     character_theme,
     _extract_portrait_colors,
+    _extract_portrait_palette,
     _darken,
     _lighten,
 )
@@ -55,6 +56,23 @@ class AutoThemeTests(unittest.TestCase):
         img = Image.new("RGB", (32, 32), (50, 200, 50))
         with_portrait = character_theme("TETRA", "Fire", img)
         self.assertNotEqual(plain.accent, with_portrait.accent)
+
+    def test_transparent_pixels_do_not_pollute_portrait_palette(self):
+        img = Image.new("RGBA", (32, 32), (255, 0, 0, 0))
+        for x in range(8, 24):
+            for y in range(8, 24):
+                img.putpixel((x, y), (20, 180, 80, 255))
+        dominant, secondary, dark, saturated = _extract_portrait_palette(img)
+        self.assertTrue(saturated)
+        self.assertIsNotNone(dominant)
+        self.assertIsNotNone(secondary)
+        self.assertIsNotNone(dark)
+
+    def test_abnormal_uses_deep_purple_black_background(self):
+        theme = character_theme("ABNORMAL", "Iron", Image.new("RGB", (32, 32), (160, 40, 180)))
+        red, green, blue = tuple(int(theme.background[index:index + 2], 16) for index in (1, 3, 5))
+        self.assertLess(max(red, green, blue), 70)
+        self.assertGreaterEqual(blue, green)
 
     def test_darken_and_lighten_round_trip(self):
         original = "#808080"
