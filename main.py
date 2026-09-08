@@ -879,10 +879,48 @@ class NikkePlugin(Star):
             "登录有效；签到结果未确认，未自动重发",
         )
 
+    @staticmethod
+    def _daily_identity(account: dict) -> str:
+        """构造不依赖 QQ 的稳定游戏账号作用域。"""
+        game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
+        area_id = str(account.get("area_id") or "").strip()
+        platform = str(account.get("platform") or "global").strip().casefold()
+        if not game_uid or not area_id or not platform:
+            return ""
+        return f"{platform}:{area_id}:{game_uid}"
+
+    @classmethod
+    def _daily_run_key(cls, day: str, account: dict, action: str) -> str:
+        identity = cls._daily_identity(account)
+        digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
+        return f"{day}:game:{digest}:{action}"
+
+    def _legacy_daily_guard(self, day: str, qq_id: str, action: str, account_name: str) -> DailyTaskResult | None:
+        """发现旧 QQ 作用域记录时显式阻断，不把它静默当成新账号结果。"""
+        legacy_key = f"{day}:{qq_id}:{action}"
+        legacy = self.store.get_run(legacy_key)
+        if not legacy:
+            return None
+        status = str(legacy.get("status", ""))
+        return DailyTaskResult(
+            account_name,
+            DailyTaskStatus.UNKNOWN_AFTER_ACTION if status in {"running", "unknown"} else DailyTaskStatus.UNAVAILABLE,
+            "发现旧版 QQ 作用域记录，未据此判定今日结果，也未执行写操作；请先完成账号作用域迁移",
+        )
+
     async def _run_daily_for_account(self, account: dict, day: str) -> DailyTaskResult:
         qq_id = str(account["qq_id"])
         account_name = str(account.get("nickname") or qq_id)
-        run_key = f"{day}:{qq_id}:daily"
+        if not self._daily_identity(account):
+            return DailyTaskResult(
+                account_name,
+                DailyTaskStatus.UNAVAILABLE,
+                "账号缺少稳定游戏 UID、区服或平台身份，未执行日常写操作",
+            )
+        legacy_daily = self._legacy_daily_guard(day, qq_id, "daily", account_name)
+        if legacy_daily:
+            return legacy_daily
+        run_key = self._daily_run_key(day, account, "daily")
         if not self.store.claim_run(run_key, qq_id, "daily"):
             existing = self.store.get_run(run_key)
             existing_status = str(existing.get("status", "")) if existing else ""
@@ -900,8 +938,9 @@ class NikkePlugin(Star):
                         DailyTaskStatus.UNKNOWN_AFTER_ACTION,
                         "今日签到结果未确认，请先查询状态；未自动重发",
                     )
-                self.store.finish_run(run_key, result.run_status, result.detail)
-                return result
+                if not signin_owned:
+                    self.store.finish_run(run_key, result.run_status, result.detail)
+                    return result
             if existing_status in {"failed", "expired"}:
                 return DailyTaskResult(
                     account_name,
@@ -917,14 +956,29 @@ class NikkePlugin(Star):
                     )
             else:
                 return DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "今日已执行")
-        signin_key = f"{day}:{qq_id}:signin"
+        legacy_signin = self._legacy_daily_guard(day, qq_id, "signin", account_name)
+        if legacy_signin:
+            self.store.finish_run(run_key, legacy_signin.run_status, legacy_signin.detail)
+            return legacy_signin
+        signin_key = self._daily_run_key(day, account, "signin")
         signin_owned = False
+        signin_finished = False
         if bool(self.config.get("enable_daily_actions", False)):
             signin_owned = self.store.claim_run(signin_key, qq_id, "signin")
             if not signin_owned:
                 existing_signin = self.store.get_run(signin_key) or {}
                 signin_status = str(existing_signin.get("status", ""))
-                if signin_status == "success":
+                if signin_status in {"pending", "unavailable"}:
+                    signin_owned = self.store.retry_run(signin_key, {"pending", "unavailable"})
+                    if not signin_owned:
+                        result = DailyTaskResult(
+                            account_name,
+                            DailyTaskStatus.UNAVAILABLE,
+                            "签到任务仍在重新检查，未执行写操作",
+                        )
+                        self.store.finish_run(run_key, result.run_status, result.detail)
+                        return result
+                elif signin_status == "success":
                     result = DailyTaskResult(
                         account_name,
                         DailyTaskStatus.ALREADY_DONE,
@@ -945,6 +999,7 @@ class NikkePlugin(Star):
                             "登录有效；签到结果未确认，未自动重发",
                         )
                     self.store.finish_run(signin_key, result.run_status, result.detail)
+                    signin_finished = True
                 elif signin_status == "expired":
                     result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
                 elif signin_status == "failed":
@@ -975,9 +1030,11 @@ class NikkePlugin(Star):
                 try:
                     detail = "登录有效；" + await self.client.perform_daily_signin(account)
                     self.store.finish_run(signin_key, "success", detail)
+                    signin_finished = True
                     result = DailyTaskResult(account_name, DailyTaskStatus.SUCCESS, detail)
                 except UnknownAfterAction:
                     self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
+                    signin_finished = True
                     result = DailyTaskResult(
                         account_name,
                         DailyTaskStatus.UNKNOWN_AFTER_ACTION,
@@ -985,10 +1042,12 @@ class NikkePlugin(Star):
                     )
                 except CookieExpired:
                     self.store.finish_run(signin_key, "expired", "登录状态已失效")
+                    signin_finished = True
                     raise
                 except Exception as exc:
                     mapped = self._daily_error_result(account_name, "登录有效；签到", exc)
                     self.store.finish_run(signin_key, mapped.run_status, mapped.detail)
+                    signin_finished = True
                     result = mapped
         except asyncio.CancelledError:
             existing_signin = self.store.get_run(signin_key) or {}
@@ -1001,9 +1060,12 @@ class NikkePlugin(Star):
             existing_signin = self.store.get_run(signin_key) or {}
             if str(existing_signin.get("status", "")) in {"running", "unknown"}:
                 self.store.finish_run(signin_key, "expired", "登录状态已失效")
+                signin_finished = True
             result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
         except Exception as exc:
             result = self._daily_error_result(account_name, "登录状态检查", exc)
+        if signin_owned and not signin_finished:
+            self.store.finish_run(signin_key, result.run_status, result.detail)
         self.store.finish_run(run_key, result.run_status, result.detail)
         return result
 
