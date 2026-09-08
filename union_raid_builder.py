@@ -5,10 +5,41 @@ from __future__ import annotations
 
 from typing import Any
 
-from .union_raid_models import BossStatus, RaidBossData, UnionRaidOverviewData
+from .union_raid_models import BossStatus, RaidBossData, RaidResponseCoverage, UnionRaidOverviewData
 
 
 class UnionRaidBuilder:
+    @staticmethod
+    def _identifier(value: Any) -> str:
+        """只接受非空文本或明确的整数标识，不把容器转成伪 ID。"""
+        if isinstance(value, str):
+            return value.strip()
+        if type(value) is int:
+            return str(value)
+        return ""
+
+    @staticmethod
+    def _optional_text(value: Any) -> str:
+        """展示文本只接受去除首尾空白后的字符串，拒绝容器和隐式数值转换。"""
+        return value.strip() if isinstance(value, str) else ""
+
+    @staticmethod
+    def _optional_integer(value: Any, *, clamp_negative: bool = False) -> int | None:
+        """只接受明确的整型值；仅 HP 调用方保留负数归零边界。"""
+        parsed: int | None = None
+        if type(value) is int:
+            parsed = value
+        elif isinstance(value, str):
+            normalized = value.strip()
+            digits = normalized[1:] if normalized[:1] in {"+", "-"} else normalized
+            if digits and digits.isascii() and digits.isdecimal():
+                parsed = int(normalized)
+        if parsed is None:
+            return None
+        if parsed < 0:
+            return 0 if clamp_negative else None
+        return parsed
+
     def build(
         self,
         *,
@@ -18,59 +49,57 @@ class UnionRaidBuilder:
         plugin_version: str,
     ) -> UnionRaidOverviewData:
         """Parse raw GetUnionRaidLevelInfo response into UnionRaidOverviewData."""
-        levels = level_info_payload.get("level_info", [])
-        manager = level_info_payload.get("manager_info", {})
+        payload = level_info_payload if isinstance(level_info_payload, dict) else {}
+        raw_levels = payload.get("level_info")
+        manager = payload.get("manager_info")
+        manager = manager if isinstance(manager, dict) else {}
 
-        current_level_obj: dict[str, Any] = {}
-        for lvl in levels:
-            if isinstance(lvl, dict):
-                current_level_obj = lvl
-                break
+        # level_info 的排序及多项语义尚未确认，绝不把首项猜成当前阶段。
+        if isinstance(raw_levels, list) and len(raw_levels) == 1 and isinstance(raw_levels[0], dict):
+            level_obj: dict[str, Any] | None = raw_levels[0]
+            response_coverage = RaidResponseCoverage.CURRENT_RESPONSE
+        else:
+            level_obj = None
+            response_coverage = RaidResponseCoverage.UNKNOWN_COVERAGE
 
-        difficulty = int(current_level_obj.get("difficulty", 1) or 1)
-        level = int(current_level_obj.get("level", 1) or 1)
-        raw_bosses = current_level_obj.get("boss_info", [])
+        difficulty = self._optional_integer(level_obj.get("difficulty")) if level_obj else None
+        level = self._optional_integer(level_obj.get("level")) if level_obj else None
+        raw_bosses = level_obj.get("boss_info") if level_obj else []
+        partial_boss_records = not isinstance(raw_bosses, list)
+        if not isinstance(raw_bosses, list):
+            raw_bosses = []
 
         # Parse raw bosses
         boss_items: list[dict[str, Any]] = []
+        seen_boss_ids: set[str] = set()
         for raw in raw_bosses:
             if not isinstance(raw, dict):
+                partial_boss_records = True
                 continue
-            boss_id = str(raw.get("boss_id", ""))
-            current_hp_raw = raw.get("current_hp")
-            max_hp_raw = raw.get("max_hp")
+            raw_boss_id = raw.get("boss_id")
+            boss_id = self._identifier(raw_boss_id)
+            if not boss_id:
+                partial_boss_records = True
+            elif boss_id in seen_boss_ids:
+                partial_boss_records = True
+            else:
+                seen_boss_ids.add(boss_id)
 
-            current_hp = None
-            if current_hp_raw not in (None, ""):
-                try:
-                    current_hp = max(0, int(current_hp_raw))
-                except (ValueError, TypeError):
-                    current_hp = None
-
-            max_hp = None
-            if max_hp_raw not in (None, ""):
-                try:
-                    max_hp = int(max_hp_raw)
-                except (ValueError, TypeError):
-                    max_hp = None
+            current_hp = self._optional_integer(raw.get("current_hp"), clamp_negative=True)
+            max_hp = self._optional_integer(raw.get("max_hp"))
 
             names = raw.get("name_localvalues", {})
             name = ""
             if isinstance(names, dict):
-                name = (
-                    names.get("zh-cn")
-                    or names.get("zh-tw")
-                    or names.get("zh_tw")
-                    or names.get("en")
-                    or names.get("ja")
-                    or names.get("ko")
-                    or ""
-                )
+                for locale in ("zh-cn", "zh-tw", "zh_tw", "en", "ja", "ko"):
+                    name = self._optional_text(names.get(locale))
+                    if name:
+                        break
             if not name:
-                name = str(raw.get("name_localkey") or f"Boss {boss_id}")
+                name = self._optional_text(raw.get("name_localkey")) or f"Boss {boss_id or '?'}"
 
             elements = raw.get("element_id", [])
-            element_list = [str(e) for e in elements if e not in (None, "")] if isinstance(elements, list) else []
+            element_list = [identifier for value in elements if (identifier := self._identifier(value))] if isinstance(elements, list) else []
 
             boss_items.append({
                 "boss_id": boss_id,
@@ -78,9 +107,12 @@ class UnionRaidBuilder:
                 "current_hp": current_hp,
                 "max_hp": max_hp,
                 "elements": element_list,
-                "icon_id": str(raw.get("icon_id")) if raw.get("icon_id") not in (None, "") else None,
-                "monster_model_id": str(raw.get("monster_model_id")) if raw.get("monster_model_id") not in (None, "") else None,
+                "icon_id": self._identifier(raw.get("icon_id")) or None,
+                "monster_model_id": self._identifier(raw.get("monster_model_id")) or None,
             })
+
+        if partial_boss_records:
+            response_coverage = RaidResponseCoverage.UNKNOWN_COVERAGE
 
         parsed_bosses: list[RaidBossData] = []
         for i, item in enumerate(boss_items):
@@ -116,9 +148,8 @@ class UnionRaidBuilder:
                 )
             )
 
-        # Weighted total progress calculation: 1 - sum(current_hp) / sum(max_hp)
-        # If any boss has missing/invalid HP or boss list is empty, hide total progress
-        if not parsed_bosses or any(
+        # 仅在单个、未发现部分记录的响应内做已返回 Boss 的加权汇总。
+        if response_coverage != RaidResponseCoverage.CURRENT_RESPONSE or not parsed_bosses or any(
             b.current_hp is None or b.max_hp is None or b.max_hp <= 0 for b in parsed_bosses
         ):
             total_progress = None
@@ -144,4 +175,6 @@ class UnionRaidBuilder:
             season_start=str(season_start) if season_start else None,
             fetched_at=fetched_at,
             plugin_version=plugin_version,
+            response_coverage=response_coverage,
+            partial_boss_records=partial_boss_records,
         )
