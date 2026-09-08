@@ -60,18 +60,13 @@ class NikkeStore:
 
     def _init_db(self) -> None:
         """在一个显式事务中创建基础表并执行可重复的 schema migration。"""
-        with self._lock:
-            conn = self._connect()
+        with self._lock, self._connect() as conn:
             try:
                 conn.execute("BEGIN IMMEDIATE")
                 self._create_base_schema(conn)
                 self._apply_schema_migrations(conn)
-                conn.commit()
             except Exception:
-                conn.rollback()
                 raise
-            finally:
-                conn.close()
 
     @staticmethod
     def _create_base_schema(conn: sqlite3.Connection) -> None:
