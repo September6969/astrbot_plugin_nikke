@@ -3,8 +3,9 @@
 本表是能力状态摘要；合并后的远端事实、PR、CI 和工作区边界以 [Post-Merge 状态](POST_MERGE_STATUS.md) 为准。
 下一阶段入口见 [Post-Merge Phase 2 计划](POST_MERGE_PHASE2_PLAN.md)。下方旧计划保留为历史规格，其中 TODO/BLOCKED 不再作为当前进度判断。
 历史自治规则见 [审核与自治计划](EXECUTION_AUTONOMY_PLAN.md)，不覆盖新的状态入口。
+需要授权现场证据的能力以 [现场证据登记](LIVE_EVIDENCE_REGISTER.md) 的未决问题、已查来源和最小动作作为当前执行边界。
 
-当前有效基线是 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。PR #6 与 PR #7 已合并；PR #8（Raid Increment A）是独立 Draft，不能作为后续主题的隐式 base。旧 `feat/overnight-backlog` 已通过 PR #5 合并，不是当前开发分支。
+当前有效基线是 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。旧 `feat/overnight-backlog` 已通过 PR #5 合并，不是当前开发分支；后续 PR 和 CI 状态以实时核验为准。
 
 | 范围 | 当前状态 | 已完成与剩余 |
 | --- | --- | --- |
