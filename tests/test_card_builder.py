@@ -37,6 +37,16 @@ def build_card():
 
 
 class CharacterCardBuilderTests(unittest.TestCase):
+    def test_costume_id_is_preserved_for_static_portrait_resolution(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = "skin_01"
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.costume_id, "skin_01")
+
     def test_real_sanitized_fixture_preserves_four_equipment_slots(self):
         card = build_card()
         self.assertEqual(set(card.equipment), {"head", "torso", "arm", "leg"})

@@ -165,6 +165,7 @@ class CharacterCardBuilder:
                 if directory.get("resource_id") not in (None, "")
                 else None
             ),
+            costume_id=roster.get("costume_id", detail.get("costume_id")),
             rarity=directory.get("rare"),
             element=directory.get("element"),
             weapon=directory.get("weapon"),
