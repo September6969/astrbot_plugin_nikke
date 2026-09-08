@@ -28,3 +28,5 @@
 角色卡由 `resolve_character_assets()` 固定提交一项 portrait 与十项独立图标任务；没有按装备词条循环发网络请求，同键下载保持 single-flight，普通路径无 Spine 请求。
 
 `NEEDS_LIVE_EVIDENCE`：当前真实 CharacterDetails 是否在所有区域返回 HP/ATK/DEF、实际 costume ID 对照、真实 QQ 发送尺寸/清晰度。最小现场动作是一次获准的只读角色详情抓取与一次人工触发的测试群发送；本 PR 不执行。
+
+CI 说明：本分支为 stacked branch，必须在 PR #47 合并后保留本 PR 的卡片提交；当前 Draft PR 目标为 `main` 以触发仓库 Python/Node CI，合并顺序仍为 #47 → #48。
