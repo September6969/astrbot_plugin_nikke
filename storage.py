@@ -16,6 +16,10 @@ from typing import Any, Iterator
 from cryptography.fernet import Fernet, InvalidToken
 
 
+SCHEMA_NAME = "nikke"
+SCHEMA_VERSION = 2
+
+
 class NikkeStore:
     def __init__(self, data_dir: str | Path):
         self.data_dir = Path(data_dir)
@@ -55,51 +59,119 @@ class NikkeStore:
             conn.close()
 
     def _init_db(self) -> None:
-        with self._lock, self._connect() as conn:
-            conn.executescript(
-                """
-                CREATE TABLE IF NOT EXISTS bind_sessions (
-                    token_hash TEXT PRIMARY KEY,
-                    qq_id TEXT NOT NULL,
-                    created_at INTEGER NOT NULL,
-                    expires_at INTEGER NOT NULL,
-                    used_at INTEGER,
-                    status TEXT NOT NULL DEFAULT 'pending',
-                    error TEXT NOT NULL DEFAULT ''
-                );
-                CREATE TABLE IF NOT EXISTS accounts (
-                    qq_id TEXT PRIMARY KEY,
-                    cookie_cipher BLOB NOT NULL,
-                    game_uid TEXT NOT NULL,
-                    game_openid TEXT NOT NULL DEFAULT '',
-                    nickname TEXT NOT NULL DEFAULT '',
-                    role_name TEXT NOT NULL DEFAULT '',
-                    area_id TEXT NOT NULL DEFAULT '',
-                    push_enabled INTEGER NOT NULL DEFAULT 1,
-                    cookie_valid INTEGER NOT NULL DEFAULT 1,
-                    updated_at INTEGER NOT NULL
-                );
-                CREATE TABLE IF NOT EXISTS settings (
-                    key TEXT PRIMARY KEY,
-                    value TEXT NOT NULL
-                );
-                CREATE TABLE IF NOT EXISTS action_runs (
-                    run_key TEXT PRIMARY KEY,
-                    qq_id TEXT NOT NULL,
-                    action TEXT NOT NULL,
-                    status TEXT NOT NULL,
-                    detail TEXT NOT NULL DEFAULT '',
-                    created_at INTEGER NOT NULL
-                );
-                CREATE INDEX IF NOT EXISTS idx_bind_expiry ON bind_sessions(expires_at);
-                CREATE INDEX IF NOT EXISTS idx_run_created ON action_runs(created_at);
-                """
+        """在一个显式事务中创建基础表并执行可重复的 schema migration。"""
+        with self._lock:
+            conn = self._connect()
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                self._create_base_schema(conn)
+                self._apply_schema_migrations(conn)
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                conn.close()
+
+    @staticmethod
+    def _create_base_schema(conn: sqlite3.Connection) -> None:
+        """逐条执行 DDL，避免 executescript 隐式提交破坏回滚。"""
+        statements = (
+            """
+            CREATE TABLE IF NOT EXISTS bind_sessions (
+                token_hash TEXT PRIMARY KEY,
+                qq_id TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                expires_at INTEGER NOT NULL,
+                used_at INTEGER,
+                status TEXT NOT NULL DEFAULT 'pending',
+                error TEXT NOT NULL DEFAULT ''
             )
-            columns = {row[1] for row in conn.execute("PRAGMA table_info(accounts)")}
-            if "xcommon_cipher" not in columns:
-                conn.execute("ALTER TABLE accounts ADD COLUMN xcommon_cipher BLOB NOT NULL DEFAULT X''")
-            if "user_agent" not in columns:
-                conn.execute("ALTER TABLE accounts ADD COLUMN user_agent TEXT NOT NULL DEFAULT ''")
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS accounts (
+                qq_id TEXT PRIMARY KEY,
+                cookie_cipher BLOB NOT NULL,
+                game_uid TEXT NOT NULL,
+                game_openid TEXT NOT NULL DEFAULT '',
+                nickname TEXT NOT NULL DEFAULT '',
+                role_name TEXT NOT NULL DEFAULT '',
+                area_id TEXT NOT NULL DEFAULT '',
+                push_enabled INTEGER NOT NULL DEFAULT 1,
+                cookie_valid INTEGER NOT NULL DEFAULT 1,
+                updated_at INTEGER NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS action_runs (
+                run_key TEXT PRIMARY KEY,
+                qq_id TEXT NOT NULL,
+                action TEXT NOT NULL,
+                status TEXT NOT NULL,
+                detail TEXT NOT NULL DEFAULT '',
+                created_at INTEGER NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS schema_meta (
+                schema_name TEXT PRIMARY KEY,
+                schema_version INTEGER NOT NULL
+            )
+            """,
+            "CREATE INDEX IF NOT EXISTS idx_bind_expiry ON bind_sessions(expires_at)",
+            "CREATE INDEX IF NOT EXISTS idx_run_created ON action_runs(created_at)",
+        )
+        for statement in statements:
+            conn.execute(statement)
+
+    def _apply_account_migrations(self, conn: sqlite3.Connection) -> None:
+        """把旧账号表补齐到当前字段合同；只添加兼容字段，不丢失旧数据。"""
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(accounts)")}
+        if "xcommon_cipher" not in columns:
+            conn.execute("ALTER TABLE accounts ADD COLUMN xcommon_cipher BLOB NOT NULL DEFAULT X''")
+        if "user_agent" not in columns:
+            conn.execute("ALTER TABLE accounts ADD COLUMN user_agent TEXT NOT NULL DEFAULT ''")
+
+    def _apply_schema_migrations(self, conn: sqlite3.Connection) -> None:
+        row = conn.execute(
+            "SELECT schema_version FROM schema_meta WHERE schema_name=?",
+            (SCHEMA_NAME,),
+        ).fetchone()
+        if row is None:
+            current_version = None
+        else:
+            raw_version = row[0]
+            try:
+                current_version = int(raw_version)
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise RuntimeError("数据库 schema 版本无效") from exc
+            if (
+                isinstance(raw_version, bool)
+                or not isinstance(raw_version, int)
+                or raw_version < 0
+                or current_version != raw_version
+            ):
+                raise RuntimeError("数据库 schema 版本无效")
+            if current_version > SCHEMA_VERSION:
+                raise RuntimeError("数据库 schema 高于当前插件，请先升级插件")
+
+        self._apply_account_migrations(conn)
+        if current_version is None:
+            conn.execute(
+                "INSERT INTO schema_meta(schema_name,schema_version) VALUES(?,?)",
+                (SCHEMA_NAME, SCHEMA_VERSION),
+            )
+        elif current_version < SCHEMA_VERSION:
+            conn.execute(
+                "UPDATE schema_meta SET schema_version=? WHERE schema_name=?",
+                (SCHEMA_VERSION, SCHEMA_NAME),
+            )
 
     @staticmethod
     def token_hash(token: str) -> str:
