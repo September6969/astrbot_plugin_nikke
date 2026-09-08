@@ -94,6 +94,7 @@ nikke.example.com {
 
 研究来源和限制见 [证据记录](docs/evidence/overnight.md)，阶段结果与诊断方式见 [夜间开发报告](docs/OVERNIGHT_REPORT.md)。
 
+ 完整需求、命令接线、离线测试、现场证据和授权边界见 [需求证据矩阵](docs/REQUIREMENT_EVIDENCE_MATRIX.md)。矩阵严格区分当前 `main`、独立 Draft PR 和真实环境未验收项。
 版本记录见 [CHANGELOG.md](CHANGELOG.md)，配置键、默认值和安全边界见 [配置合同](docs/CONFIGURATION_ACCEPTANCE.md)。
 
 缓存清理的边界与验收见 [缓存清理验收记录](docs/CACHE_CLEANUP_ACCEPTANCE.md)。
