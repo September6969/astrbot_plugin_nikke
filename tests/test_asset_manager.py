@@ -530,20 +530,29 @@ class AssetManagerTests(unittest.TestCase):
                 release.set()
                 manager.close()
 
-    def test_spine_stays_experimental_production_does_not_queue_spine(self):
+    def test_production_portrait_path_does_not_import_or_queue_spine(self):
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
         with tempfile.TemporaryDirectory() as td:
             manager = AssetManager(Path(td), assets_dir, remote=False)
             try:
-                with patch.object(manager.spine, "is_available", return_value=True):
-                    with patch.object(manager.spine.queue, "enqueue") as mock_enqueue:
-                        # 生产出卡路径默认不投递
-                        manager.get_character_portrait("101", "c101", allow_spine_enqueue=False)
-                        mock_enqueue.assert_not_called()
+                with patch("builtins.__import__", wraps=__import__) as imported:
+                    manager.get_character_portrait("101", "c101")
+                self.assertFalse(any(call.args[0].endswith("spine_prerenderer") for call in imported.call_args_list))
+                self.assertFalse(hasattr(manager, "spine"))
+            finally:
+                manager.close()
 
-                        # 显式允许时投递
-                        manager.get_character_portrait("101", "c101", allow_spine_enqueue=True)
-                        mock_enqueue.assert_called_once()
+    def test_resolve_character_assets_forwards_costume_identity(self):
+        from astrbot_plugin_nikke.tests.test_card_builder import build_card
+
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            try:
+                card = build_card()
+                card.costume_id = "skin_01"
+                with patch.object(manager, "get_character_portrait", return_value=manager.fallback("portrait")) as portrait:
+                    manager.resolve_character_assets(card)
+                portrait.assert_called_once_with(card.name_code, card.resource_id, "skin_01")
             finally:
                 manager.close()
 

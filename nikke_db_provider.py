@@ -43,12 +43,33 @@ class NikkeDbProvider:
         self._index: dict[str, dict] | None = None
         self._index_loaded_at: float = 0
 
+        self.costume_errors: list[str] = []
+        self.costume_map = self._load_costume_map()
+
+    def _load_costume_map(self) -> dict[str, str]:
+        """读取严格的已核验皮肤映射；坏条目不能进入运行时合同。"""
+        path = self.asset_dir / "costumes.json"
         try:
-            self.costume_map = json.loads((self.asset_dir / "costumes.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.costume_map = {}
-        if not isinstance(self.costume_map, dict):
-            self.costume_map = {}
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            self.costume_errors.append("costumes.json 不存在")
+            return {}
+        except (OSError, ValueError) as exc:
+            self.costume_errors.append(f"costumes.json 无法读取: {type(exc).__name__}")
+            return {}
+        if not isinstance(raw, dict):
+            self.costume_errors.append("costumes.json 顶层必须是对象")
+            return {}
+
+        verified: dict[str, str] = {}
+        for api_id, asset_id in raw.items():
+            key = self._normalize_id_component(api_id)
+            value = self._normalize_id_component(asset_id)
+            if not key or key in {"0", "default"} or not value or not value.startswith("c"):
+                self.costume_errors.append(f"非法皮肤映射: {api_id!r}")
+                continue
+            verified[key] = value
+        return verified
 
     def get_character_lock(self, character_id: str) -> threading.Lock:
         with self._global_lock:

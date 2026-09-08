@@ -58,6 +58,7 @@ class CharacterCardData:
     name_cn: str
     name_en: str
     resource_id: str | None
+    costume_id: int | str | None
 
     rarity: str | None
     element: str | None
