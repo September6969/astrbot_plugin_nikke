@@ -357,10 +357,14 @@ class AssetManagerTests(unittest.TestCase):
             manager = AssetManager(td, assets_dir)
             try:
                 card = build_card()
+                finished = threading.Event()
 
                 def slow_favorite(tid):
-                    time.sleep(1.0)
-                    return Image.new("RGBA", (10, 10), "red")
+                    try:
+                        time.sleep(1.0)
+                        return Image.new("RGBA", (10, 10), "red")
+                    finally:
+                        finished.set()
 
                 with patch.object(manager, "get_favorite_item_icon", side_effect=slow_favorite):
                     start = time.monotonic()
@@ -373,7 +377,69 @@ class AssetManagerTests(unittest.TestCase):
                     # 超时素材降级为 fallback
                     self.assertIsNotNone(card_assets.favorite_item.getbbox())
                     self.assertEqual(card_assets.favorite_item.size, (128, 128))
+                    # 已运行的 Python 线程不能安全强杀；在退出 mock 前等待其自然结束。
+                    self.assertTrue(finished.wait(2.0))
             finally:
+                manager.close()
+
+    def test_prefetch_queue_saturation_falls_back_without_submitting(self):
+        from astrbot_plugin_nikke.tests.test_card_builder import build_card
+
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            slots = []
+            try:
+                for _ in range(manager.MAX_PREFETCH_TASKS):
+                    self.assertTrue(manager._prefetch_slots.acquire(blocking=False))
+                    slots.append(True)
+                with patch.object(manager._executor, "submit") as submit:
+                    assets = manager.resolve_character_assets(build_card(), timeout=0.1)
+                submit.assert_not_called()
+                self.assertEqual(assets.portrait.size, (600, 900))
+                self.assertEqual(assets.equipment["head"].size, (128, 128))
+            finally:
+                while slots:
+                    slots.pop()
+                    manager._prefetch_slots.release()
+                manager.close()
+
+    def test_prefetch_slot_returns_after_task_completion(self):
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            try:
+                future = manager._submit_prefetch(lambda: "done")
+                self.assertEqual(future.result(timeout=1.0), "done")
+                self.assertTrue(manager._prefetch_slots.acquire(blocking=False))
+                manager._prefetch_slots.release()
+            finally:
+                manager.close()
+
+    def test_prefetch_timeout_cancels_queued_tasks(self):
+        from astrbot_plugin_nikke.tests.test_card_builder import build_card
+
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            manager._executor.shutdown(wait=False, cancel_futures=True)
+            manager._executor = ThreadPoolExecutor(max_workers=1)
+            started = threading.Event()
+            release = threading.Event()
+            try:
+                def slow_portrait(*_):
+                    started.set()
+                    self.assertTrue(release.wait(2.0))
+                    return manager.fallback("portrait")
+
+                with patch.object(manager, "get_character_portrait", side_effect=slow_portrait):
+                    with patch.object(manager, "get_equipment_icon") as equipment:
+                        assets = manager.resolve_character_assets(build_card(), timeout=0.05)
+                        self.assertTrue(started.is_set())
+                        self.assertEqual(assets.portrait.size, (600, 900))
+                        release.set()
+                        # 若 queued future 没有被取消，单 worker 释放后会继续调用装备读取。
+                        manager._executor.submit(lambda: None).result(timeout=1.0)
+                        equipment.assert_not_called()
+            finally:
+                release.set()
                 manager.close()
 
     def test_spine_stays_experimental_production_does_not_queue_spine(self):

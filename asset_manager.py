@@ -37,6 +37,8 @@ class _InflightAsset:
 class AssetManager:
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
+    # 单张角色卡最多预取 11 项；保留少量余量，但禁止多张卡无限堆积在线程池队列。
+    MAX_PREFETCH_TASKS = 16
     CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images"
     # 跨实例限制不同缓存键的远端下载；缓存命中不占用名额。
     REMOTE_DOWNLOAD_LIMIT = 4
@@ -47,6 +49,7 @@ class AssetManager:
         self.asset_dir = Path(asset_dir)
         self.remote = remote
         self._failed: dict[str, float] = {}
+        self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._inflight_lock = threading.Lock()
         self._inflight: dict[str, _InflightAsset] = {}
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
@@ -290,6 +293,18 @@ class AssetManager:
         url = self.game_resource_url(f"icon/atlas_common_class/{resource}.webp") if resource else ""
         return self._icon("burst", key, "burst", url)
 
+    def _submit_prefetch(self, func) -> concurrent.futures.Future | None:
+        """有界地提交出卡预取任务，避免超时请求留下无限队列。"""
+        if not self._prefetch_slots.acquire(blocking=False):
+            return None
+        try:
+            future = self._executor.submit(func)
+        except Exception:
+            self._prefetch_slots.release()
+            raise
+        future.add_done_callback(lambda _: self._prefetch_slots.release())
+        return future
+
     def resolve_character_assets(
         self, data: CharacterCardData, timeout: float = 6.0
     ) -> CharacterCardAssets:
@@ -353,8 +368,12 @@ class AssetManager:
 
         for key, (func, _) in tasks.items():
             try:
-                fut = self._executor.submit(func)
-                future_map[fut] = key
+                fut = self._submit_prefetch(func)
+                if fut is None:
+                    logger.warning("素材预取队列已满 [%s]，使用降级 fallback", key)
+                    results[key] = tasks[key][1]()
+                else:
+                    future_map[fut] = key
             except Exception as exc:
                 logger.warning("提交素材获取任务失败 [%s]: %s", key, exc)
                 results[key] = tasks[key][1]()
@@ -372,7 +391,10 @@ class AssetManager:
 
             for fut in not_done:
                 key = future_map[fut]
-                logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，使用降级 fallback", timeout, key)
+                if fut.cancel():
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，已取消未启动任务并使用 fallback", timeout, key)
+                else:
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，任务已运行并使用 fallback", timeout, key)
                 results[key] = tasks[key][1]()
 
         return CharacterCardAssets(
