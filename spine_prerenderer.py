@@ -22,6 +22,8 @@ from typing import Callable, Mapping
 
 from PIL import Image
 
+from .log_privacy import safe_exception_message, sanitize_log_text
+
 logger = logging.getLogger("nikke.spine")
 
 
@@ -186,7 +188,11 @@ class SpineTaskQueue:
                 # Per-key 去重
                 return False
             if self._queue.qsize() >= self.max_queue_size:
-                logger.warning("Spine 预渲染队列已满 (%d)，丢弃任务: %s", self.max_queue_size, job.cache_key)
+                logger.warning(
+                    "Spine 预渲染队列已满 (%d)，丢弃任务: %s",
+                    self.max_queue_size,
+                    sanitize_log_text(job.cache_key, max_length=120),
+                )
                 return False
             self._pending_keys.add(job.cache_key)
 
@@ -208,15 +214,26 @@ class SpineTaskQueue:
                         break
                     continue
 
+                if job is None:
+                    self._queue.task_done()
+                    break
+
                 try:
                     if job.is_expired():
-                        logger.warning("Spine 任务 [%s] 在队列中耗尽总预算", job.cache_key)
+                        logger.warning(
+                            "Spine 任务 [%s] 在队列中耗尽总预算",
+                            sanitize_log_text(job.cache_key, max_length=120),
+                        )
                         if job.callback:
                             job.callback(None)
                         continue
                     runner(job)
                 except Exception as exc:
-                    logger.error("Spine 预渲染任务执行异常 [%s]: %s", job.cache_key, exc)
+                    logger.error(
+                        "Spine 预渲染任务执行异常 [%s]: %s",
+                        sanitize_log_text(job.cache_key, max_length=120),
+                        safe_exception_message(exc),
+                    )
                 finally:
                     with self._lock:
                         self._pending_keys.discard(job.cache_key)
@@ -320,7 +337,10 @@ class SpinePreRenderer:
     def handle_job(self, job: SpineJob) -> None:
         """队列工作线程执行回调。"""
         if job.runtime_version is None or job.runtime_version == SPINE_VERSION_UNKNOWN:
-            logger.info("Spine 任务 [%s] 版本未知，标记跳过", job.cache_key)
+            logger.info(
+                "Spine 任务 [%s] 版本未知，标记跳过",
+                sanitize_log_text(job.cache_key, max_length=120),
+            )
             if job.callback:
                 job.callback(None)
             return
@@ -346,7 +366,7 @@ class SpinePreRenderer:
             try:
                 cropped.save(output_path, format="PNG")
             except OSError as exc:
-                logger.error("保存 Spine 预渲染缓存失败: %s", exc)
+                logger.error("保存 Spine 预渲染缓存失败: %s", safe_exception_message(exc))
 
         if job.callback:
             job.callback(result)

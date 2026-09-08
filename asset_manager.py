@@ -19,6 +19,7 @@ import httpx
 from PIL import Image, ImageDraw
 
 from .card_models import CharacterCardAssets, CharacterCardData
+from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
 from .spine_prerenderer import SpineJob, SpinePreRenderer
 from .static_registry import StaticDataRegistry
@@ -375,7 +376,11 @@ class AssetManager:
                 else:
                     future_map[fut] = key
             except Exception as exc:
-                logger.warning("提交素材获取任务失败 [%s]: %s", key, exc)
+                logger.warning(
+                    "提交素材获取任务失败 [%s]: %s",
+                    sanitize_log_text(key, max_length=120),
+                    safe_exception_message(exc),
+                )
                 results[key] = tasks[key][1]()
 
         if future_map:
@@ -386,15 +391,20 @@ class AssetManager:
                     res = fut.result()
                     results[key] = res if res is not None else tasks[key][1]()
                 except Exception as exc:
-                    logger.warning("素材获取执行异常 [%s]: %s", key, exc)
+                    logger.warning(
+                        "素材获取执行异常 [%s]: %s",
+                        sanitize_log_text(key, max_length=120),
+                        safe_exception_message(exc),
+                    )
                     results[key] = tasks[key][1]()
 
             for fut in not_done:
                 key = future_map[fut]
+                safe_key = sanitize_log_text(key, max_length=120)
                 if fut.cancel():
-                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，已取消未启动任务并使用 fallback", timeout, key)
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，已取消未启动任务并使用 fallback", timeout, safe_key)
                 else:
-                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，任务已运行并使用 fallback", timeout, key)
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，任务已运行并使用 fallback", timeout, safe_key)
                 results[key] = tasks[key][1]()
 
         return CharacterCardAssets(

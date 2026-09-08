@@ -19,6 +19,7 @@ from aiohttp import web
 from ._version import PLUGIN_VERSION
 
 from .client import BlaBlaClient, BlaBlaError
+from .log_privacy import sanitize_log_text
 from .storage import NikkeStore
 
 
@@ -43,9 +44,7 @@ def _is_regular_file(path: object) -> bool:
 
 def public_error(exc: Exception) -> str:
     """生成可供用户和日志关联的脱敏错误，不回显凭据或邮箱。"""
-    text = str(exc).replace("\r", " ").replace("\n", " ")
-    text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+", "[邮箱已遮盖]", text)
-    text = re.sub(r"(?i)((?:token|cookie|authorization)\s*[:=]\s*)[^\s,;]+", r"\1[已遮盖]", text)
+    text = sanitize_log_text(exc)
     prefix = ""
     if isinstance(exc, BlaBlaError):
         location = "/".join(item for item in (exc.endpoint, exc.code) if item)

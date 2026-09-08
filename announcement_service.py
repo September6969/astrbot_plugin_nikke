@@ -25,6 +25,7 @@ from typing import Any
 import httpx
 
 from .announcement_models import AnnouncementRecord
+from .log_privacy import safe_exception_message
 
 logger = logging.getLogger("nikke.announcements")
 CST = timezone(timedelta(hours=8))
@@ -397,7 +398,7 @@ class AnnouncementService:
                 self.save_cache()
             logger.info("已成功从本地磁盘缓存加载 %d 条公告数据", len(self._records))
         except Exception as exc:
-            logger.error("加载公告本地缓存失败: %s", exc)
+            logger.error("加载公告本地缓存失败: %s", safe_exception_message(exc))
 
     def save_cache(self) -> None:
         """保存公告与日程数据至本地磁盘缓存。"""
@@ -432,7 +433,7 @@ class AnnouncementService:
                 json.dump(payload, f, ensure_ascii=False, indent=2)
             tmp_file.replace(self.cache_file)
         except Exception as exc:
-            logger.error("保存公告本地缓存失败: %s", exc)
+            logger.error("保存公告本地缓存失败: %s", safe_exception_message(exc))
 
     async def sync_from_source(
         self,
@@ -517,8 +518,9 @@ class AnnouncementService:
                 "source_order": "unknown",
             }
             self.save_cache()
-            logger.warning("官方公告同步失败，降级读取本地缓存: %s", exc)
-            return False, f"官方数据同步失败（{exc}），已降级读取本地缓存"
+            safe_message = safe_exception_message(exc)
+            logger.warning("官方公告同步失败，降级读取本地缓存: %s", safe_message)
+            return False, f"官方数据同步失败（{safe_message}），已降级读取本地缓存"
 
     @staticmethod
     async def fetch_primary(*, locale: str = "en", deep: bool = False) -> list[AnnouncementRecord]:
