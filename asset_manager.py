@@ -19,6 +19,7 @@ from PIL import Image, ImageDraw
 from .card_models import CharacterCardAssets, CharacterCardData
 from .nikke_db_provider import NikkeDbProvider
 from .spine_prerenderer import SpineJob, SpinePreRenderer
+from .static_registry import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
 
@@ -42,24 +43,12 @@ class AssetManager:
             self.sources = {}
         if not isinstance(self.sources, dict):
             self.sources = {}
-        try:
-            self.equipment_map = json.loads((self.asset_dir / "equipment.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.equipment_map = {}
-        if not isinstance(self.equipment_map, dict):
-            self.equipment_map = {}
-        try:
-            self.favorite_items_map = json.loads((self.asset_dir / "favorite_items.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.favorite_items_map = {}
-        if not isinstance(self.favorite_items_map, dict):
-            self.favorite_items_map = {}
-        try:
-            self.cubes_map = json.loads((self.asset_dir / "cubes.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.cubes_map = {}
-        if not isinstance(self.cubes_map, dict):
-            self.cubes_map = {}
+        self.registry = StaticDataRegistry(self.asset_dir)
+        for error in self.registry.errors:
+            logger.warning("静态 registry 校验失败：%s", error)
+        self.equipment_map = self.registry.mapping("equipment")
+        self.favorite_items_map = self.registry.mapping("favorite_item")
+        self.cubes_map = self.registry.mapping("cube")
 
     @staticmethod
     def game_resource_url(path: str) -> str:
@@ -89,7 +78,14 @@ class AssetManager:
             image.load()
             return image.convert("RGBA")
 
-    def _load(self, kind: str, key: str, remote_url: str = "") -> Image.Image | None:
+    def _load(
+        self,
+        kind: str,
+        key: str,
+        remote_url: str = "",
+        *,
+        allow_source: bool = True,
+    ) -> Image.Image | None:
         relative = f"{kind}/{self._key(key)}.png"
         for base in (self.cache_dir, self.asset_dir):
             try:
@@ -98,7 +94,8 @@ class AssetManager:
                     return self._decode(path.read_bytes())
             except (OSError, ValueError, Image.DecompressionBombError):
                 pass
-        url = self.sources.get(relative, remote_url)
+        # 静态 registry 素材必须只使用已确认映射生成的 URL，不能被通用来源清单绕过。
+        url = self.sources.get(relative, remote_url) if allow_source else remote_url
         if not self.remote or not isinstance(url, str) or not url.startswith("https://"):
             return None
         if self._failed.get(relative, 0) > time.monotonic():
@@ -188,44 +185,33 @@ class AssetManager:
         return image if image is not None else self.fallback("portrait")
 
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
-        resource = self.equipment_map.get(str(equipment_id), "")
-        url = self.game_resource_url(f"icon/equip/{resource}.webp") if resource and self._key(resource) != "missing" else ""
-        image = self._load("equipment", str(equipment_id), url) if equipment_id else None
+        resource = self.registry.resolve("equipment", equipment_id)
+        if resource is None:
+            image = self._load("slots", slot)
+            return image if image is not None else self.fallback(slot)
+        url = self.game_resource_url(f"icon/equip/{resource}.webp")
+        image = self._load("equipment", str(equipment_id), url, allow_source=False)
         if image is None:
             image = self._load("slots", slot)
         return image if image is not None else self.fallback(slot)
 
-    def _icon(self, kind, key, fallback, url="") -> Image.Image:
-        image = self._load(kind, self._key(key), url)
+    def _icon(self, kind, key, fallback, url="", *, allow_source=True) -> Image.Image:
+        image = self._load(kind, self._key(key), url, allow_source=allow_source)
         return image if image is not None else self.fallback(fallback)
 
     def get_favorite_item_icon(self, tid) -> Image.Image:
-        if not tid:
+        resource = self.registry.resolve("favorite_item", tid)
+        if resource is None:
             return self.fallback("favorite")
-        resource = self.favorite_items_map.get(str(tid), "")
-        url = ""
-        if resource:
-            if resource.startswith("http://") or resource.startswith("https://"):
-                url = resource
-            elif "/" in resource:
-                url = self.game_resource_url(resource)
-            else:
-                url = self.game_resource_url(f"icon/favorite/{resource}.webp")
-        return self._icon("favorite", tid, "favorite", url)
+        url = self.game_resource_url(f"icon/favorite/{resource}.webp")
+        return self._icon("favorite", tid, "favorite", url, allow_source=False)
 
     def get_cube_icon(self, tid) -> Image.Image:
-        if not tid:
+        resource = self.registry.resolve("cube", tid)
+        if resource is None:
             return self.fallback("cube")
-        resource = self.cubes_map.get(str(tid), "")
-        url = ""
-        if resource:
-            if resource.startswith("http://") or resource.startswith("https://"):
-                url = resource
-            elif "/" in resource:
-                url = self.game_resource_url(resource)
-            else:
-                url = self.game_resource_url(f"icon/cube/{resource}.webp")
-        return self._icon("cube", tid, "cube", url)
+        url = self.game_resource_url(f"icon/cube/{resource}.webp")
+        return self._icon("cube", tid, "cube", url, allow_source=False)
 
     def get_element_icon(self, element):
         key = self._key(element)
