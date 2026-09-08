@@ -80,7 +80,8 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
         result = await plugin._run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.UNKNOWN_AFTER_ACTION)
-        plugin.client.get_profile.assert_not_awaited()
+        plugin.client.get_profile.assert_awaited_once()
+        plugin.client.perform_daily_signin.assert_not_awaited()
 
     async def test_disabled_pending_task_is_explicit(self):
         plugin = self._plugin(enabled=False)
