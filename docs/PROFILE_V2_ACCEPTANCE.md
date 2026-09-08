@@ -9,8 +9,8 @@
 - 实现提交：`59f0f59 feat: harden profile v2 dashboard semantics`
 - 验收记录提交：`7df799a docs: record profile v2 acceptance`
 - PR：[#7](https://github.com/September6969/astrbot_plugin_nikke/pull/7)，已合并。
-- 当前 main：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`（包含 PR #7 的合并提交）。
-- 本次合并后核验工作树：`E:/_codex_work/profile-post-merge-v1/astrbot_plugin_nikke`，基于上述当前 main。
+- 2026-09-07 合并后核验基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`（包含 PR #7 的合并提交）；这是验收快照，不是后续 session 的实时 main。
+- 本次合并后核验工作树：`E:/_codex_work/profile-post-merge-v1/astrbot_plugin_nikke`，基于上述日期化基线。
 
 ## 用户可见变化
 
@@ -50,7 +50,7 @@
 
 ## 测试结果
 
-在 Python 3.10.11、复用 `E:/DevCache/nikke-test-venv` 环境，于当前 `origin/main@bada0b3` 重跑：
+在 Python 3.10.11、复用 `E:/DevCache/nikke-test-venv` 环境，于 2026-09-07 核验的 `origin/main@bada0b3` 重跑：
 
 ```text
 python -m compileall -q .                    PASS
