@@ -28,8 +28,8 @@
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
-| P0 静态 FB / Costume | Draft PR #47，CI 全绿 | `E:\_codex_work\nikke-fb-static-v1` / `feat/fb-static-mainline-v1`；基线 `origin/main@c4f1755a`，普通出卡不进入 Spine |
-| P1 角色卡最终版 | Draft PR #48，CI 全绿 | `E:\_codex_work\nikke-character-card-final-v1` / `feat/character-card-final-v1`；依赖评审顺序 #47 → #48 |
-| P1 Item/Cube 完整性 | Draft PR #49，CI 全绿 | `E:\_codex_work\nikke-item-resource-integrity-v1` / `test/item-resource-integrity-v1`；仅补行为矩阵，不制造资源映射 |
-| P2 Guide/Help 素材 | Draft PR #50，CI 全绿 | `E:\_codex_work\nikke-guide-assets-v1` / `feat/guide-assets-v1`；原件保留在 `E:\walkthrough` |
+| P0 静态 FB / Costume | PR #47 已合并 | `E:\_codex_work\nikke-fb-static-v1` / `feat/fb-static-mainline-v1`；普通出卡不进入 Spine |
+| P1 角色卡最终版 | PR #48 已合并 | `E:\_codex_work\nikke-character-card-final-v1` / `feat/character-card-final-v1`；依赖 #47 |
+| P1 Item/Cube 完整性 | PR #49 已合并 | `E:\_codex_work\nikke-item-resource-integrity-v1` / `test/item-resource-integrity-v1`；仅补行为矩阵，不制造资源映射 |
+| P2 Guide/Help 素材 | PR #50 ready，CI 全绿 | `E:\_codex_work\nikke-guide-assets-v1` / `feat/guide-assets-v1`；原件保留在 `E:\walkthrough` |
 | P4 Spine 隔离 | Draft PR #51，CI 全绿 | `E:\_codex_work\nikke-spine-isolation-v1` / `feat/spine-experimental-isolation`；普通路径无 Spine 引用，实验入口保留兼容 shim |
