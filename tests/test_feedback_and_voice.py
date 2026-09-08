@@ -83,6 +83,12 @@ class VoiceResolverTests(unittest.TestCase):
             self.assertIsInstance(line, str)
             self.assertTrue(len(line) > 0)
 
+    def test_unknown_character_does_not_borrow_alice_line(self):
+        self.assertIsNone(VoiceResolver.resolve_character_key("not_registered"))
+        line = VoiceResolver.resolve_poke_line("not_registered", "zh-cn")
+        self.assertEqual(line, "指挥官，当前角色暂无已验证的互动台词。")
+        self.assertNotIn("爱丽丝", line)
+
 
 if __name__ == "__main__":
     unittest.main()
