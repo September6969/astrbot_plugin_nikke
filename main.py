@@ -18,7 +18,7 @@ from pathlib import Path
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.message_components import Image, Plain
-from astrbot.api.star import Context, Star, register
+from astrbot.api.star import Context, Star
 
 from ._version import PLUGIN_VERSION
 from .announcement_service import AnnouncementService
@@ -37,6 +37,7 @@ from .profile_builder import ProfileBuilder
 from .profile_card_renderer import ProfileCardRenderer
 from .renderer import CardRenderer
 from .runtime_health import collect_runtime_health, format_runtime_health
+from .runtime_config import normalize_runtime_config, read_schedule_clock
 from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
@@ -44,18 +45,11 @@ from .voice_feedback import VoiceResolver
 from .web_service import BindingWebService
 
 
-@register(
-    "astrbot_plugin_nikke",
-    "September",
-    "NIKKE BlaBlaLink 账号练度、资料查询与每日汇总",
-    PLUGIN_VERSION,
-    "https://github.com/September6969/astrbot_plugin_nikke",
-)
 class NikkePlugin(Star):
     def __init__(self, context: Context, config=None):
         super().__init__(context)
         self.context = context
-        self.config = config or {}
+        self.config = normalize_runtime_config(config)
         self.plugin_dir = Path(__file__).resolve().parent
         self.data_dir = Path("data") / "nikke"
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -177,10 +171,18 @@ class NikkePlugin(Star):
         while not self._closing:
             now = datetime.now(timezone(timedelta(hours=8)))
             today = now.strftime("%Y-%m-%d")
-            daily_h = int(self.store.get_setting("daily_hour", self.config.get("daily_hour", 8)))
-            daily_m = int(self.store.get_setting("daily_minute", self.config.get("daily_minute", 10)))
-            summary_h = int(self.store.get_setting("summary_hour", self.config.get("summary_hour", 8)))
-            summary_m = int(self.store.get_setting("summary_minute", self.config.get("summary_minute", 30)))
+            daily_h, daily_m = read_schedule_clock(
+                self.store.get_setting,
+                "daily",
+                default_hour=self.config["daily_hour"],
+                default_minute=self.config["daily_minute"],
+            )
+            summary_h, summary_m = read_schedule_clock(
+                self.store.get_setting,
+                "summary",
+                default_hour=self.config["summary_hour"],
+                default_minute=self.config["summary_minute"],
+            )
             if (now.hour, now.minute) == (daily_h, daily_m) and last_daily != today:
                 last_daily = today
                 self._spawn_background_task(self._run_all_daily(today, stagger=True))
@@ -808,32 +810,62 @@ class NikkePlugin(Star):
         path = self.renderer.render(item.get("name_cn") or item.get("name_en") or name, "妮姬基础资料", rows)
         yield event.image_result(path)
 
-    async def _run_daily_for_account(self, account: dict, day: str) -> tuple[str, str]:
-        qq_id = str(account["qq_id"])
-        run_key = f"{day}:{qq_id}:daily"
-        if not self.store.claim_run(run_key, qq_id, "daily"):
-            return account.get("nickname") or qq_id, "今日已执行"
+    async def _read_only_daily_recovery(self, account: dict) -> tuple[str, str]:
+        """恢复 running/unknown 日常任务时只读核验，绝不重新执行写操作。"""
         try:
             await self.client.get_profile(account)
+            status = await self.client.get_daily_signin(account)
+        except CookieExpired:
+            raise
+        except Exception:
+            return "unknown", "签到结果未确认，请稍后查询状态；未自动重发"
+        if status.get("completed"):
+            return "success", "登录有效；今日已经签到（恢复核验）"
+        return "unknown", "登录有效；签到结果未确认，未自动重发"
+
+    async def _run_daily_for_account(self, account: dict, day: str) -> tuple[str, str]:
+        qq_id = str(account["qq_id"])
+        name = account.get("nickname") or qq_id
+        run_key = f"{day}:{qq_id}:daily"
+        if not self.store.claim_run(run_key, qq_id, "daily"):
+            existing = self.store.get_run(run_key) or {}
+            if existing.get("status") in {"running", "unknown"}:
+                try:
+                    state, detail = await self._read_only_daily_recovery(account)
+                except CookieExpired:
+                    self.store.mark_cookie_invalid(qq_id)
+                    self.store.finish_run(run_key, "expired", "Cookie失效")
+                    return name, "Cookie失效，请重新绑定"
+                self.store.finish_run(run_key, state, detail)
+                return name, detail
+            return name, "今日已执行"
+        signin_key = f"{day}:{qq_id}:signin"
+        signin_owned = False
+        try:
             if bool(self.config.get("enable_daily_actions", False)):
-                signin_key = f"{day}:{qq_id}:signin"
-                status = await self.client.get_daily_signin(account)
-                if not status["found"]:
-                    detail = "登录有效；未找到签到任务"
-                elif status["completed"]:
-                    detail = "登录有效；今日已经签到"
-                elif self.store.claim_run(signin_key, qq_id, "signin"):
-                    try:
-                        detail = "登录有效；" + await self.client.perform_daily_signin(account)
-                        self.store.finish_run(signin_key, "success", detail)
-                    except UnknownAfterAction:
-                        self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
-                        raise
-                    except Exception as exc:
-                        self.store.finish_run(signin_key, "failed", type(exc).__name__)
-                        raise
-                else:
-                    detail = "登录有效；签到已执行或正在执行"
+                if not self.store.claim_run(signin_key, qq_id, "signin"):
+                    existing_signin = self.store.get_run(signin_key) or {}
+                    if existing_signin.get("status") in {"running", "unknown"}:
+                        state, detail = await self._read_only_daily_recovery(account)
+                        self.store.finish_run(signin_key, state, detail)
+                        self.store.finish_run(run_key, state, detail)
+                        return name, detail
+                    if existing_signin.get("status") == "success":
+                        detail = existing_signin.get("detail") or "登录有效；今日已经签到"
+                        self.store.finish_run(run_key, "success", detail)
+                        return name, detail
+                    if existing_signin.get("status") == "expired":
+                        self.store.finish_run(run_key, "expired", "Cookie失效")
+                        return name, "Cookie失效，请重新绑定"
+                    detail = existing_signin.get("detail") or "登录有效；签到已执行或正在执行"
+                    self.store.finish_run(run_key, existing_signin.get("status") or "unknown", detail)
+                    return name, detail
+                signin_owned = True
+            await self.client.get_profile(account)
+            if bool(self.config.get("enable_daily_actions", False)):
+                detail = "登录有效；" + await self.client.perform_daily_signin(account)
+                self.store.finish_run(signin_key, "success", detail)
+                signin_owned = False
             else:
                 try:
                     status = await self.client.get_daily_signin(account)
@@ -845,20 +877,34 @@ class NikkePlugin(Star):
             return account.get("nickname") or qq_id, detail
         except CookieExpired:
             self.store.mark_cookie_invalid(qq_id)
+            existing_signin = self.store.get_run(signin_key) or {}
+            if signin_owned or existing_signin.get("status") in {"running", "unknown"}:
+                self.store.finish_run(signin_key, "expired", "Cookie失效")
             self.store.finish_run(run_key, "expired", "Cookie失效")
-            return account.get("nickname") or qq_id, "Cookie失效，请重新绑定"
+            return name, "Cookie失效，请重新绑定"
+        except asyncio.CancelledError:
+            # 取消不代表写入未发生；持久化 unknown 并继续传播取消信号，禁止重启后重放。
+            existing_signin = self.store.get_run(signin_key) or {}
+            if signin_owned or existing_signin.get("status") in {"running", "unknown"}:
+                self.store.finish_run(signin_key, "unknown", "签到已取消，结果未确认，未自动重发")
+            self.store.finish_run(run_key, "unknown", "日常任务已取消，结果未确认，未自动重发")
+            raise
         except Exception as exc:
             if isinstance(exc, UnknownAfterAction):
                 detail = "签到结果未确认，请稍后查询状态；未自动重发"
+                if signin_owned:
+                    self.store.finish_run(signin_key, "unknown", detail)
                 self.store.finish_run(run_key, "unknown", detail)
-                return account.get("nickname") or qq_id, detail
+                return name, detail
+            if signin_owned:
+                self.store.finish_run(signin_key, "failed", type(exc).__name__)
             detail = f"失败：{type(exc).__name__}"
             self.store.finish_run(run_key, "failed", detail)
-            return account.get("nickname") or qq_id, detail
+            return name, detail
 
     async def _run_all_daily(self, day: str, stagger: bool = False) -> list[tuple[str, str]]:
         accounts = self.store.list_accounts(push_only=True, with_cookie=True)
-        semaphore = asyncio.Semaphore(max(1, int(self.config.get("max_concurrency", 2))))
+        semaphore = asyncio.Semaphore(self.config["max_concurrency"])
 
         async def run(account):
             if stagger:
@@ -1367,21 +1413,45 @@ class NikkePlugin(Star):
         )
 
     async def terminate(self):
-        self._closing = True
-        # 先停止生产任务，再关闭它们依赖的资源。
-        tasks = list(self._background_tasks)
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        if hasattr(self, "feedback_manager") and self.feedback_manager:
-            await self.feedback_manager.close()
-        if hasattr(self, "asset_manager") and self.asset_manager:
-            try:
-                self.asset_manager.close()
-            except Exception as exc:
-                logger.debug(f"[NIKKE] 素材管理器回收跳过: {exc}")
-        await self.web.stop()
-        logger.info("[NIKKE] 插件已停止")
+        lock = getattr(self, "_termination_lock", None)
+        if lock is None:
+            lock = asyncio.Lock()
+            self._termination_lock = lock
+        async with lock:
+            if getattr(self, "_terminated", False):
+                return
+            self._closing = True
+            cleanup_errors = []
+            # 先停止生产任务，再关闭它们依赖的资源。
+            tasks = list(getattr(self, "_background_tasks", ()))
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            feedback_manager = getattr(self, "feedback_manager", None)
+            if feedback_manager is not None:
+                try:
+                    await feedback_manager.close()
+                except Exception as exc:
+                    cleanup_errors.append(exc)
+                    logger.debug(f"[NIKKE] 反馈管理器回收失败：{exc}")
+            asset_manager = getattr(self, "asset_manager", None)
+            if asset_manager is not None:
+                try:
+                    asset_manager.close()
+                except Exception as exc:
+                    cleanup_errors.append(exc)
+                    logger.debug(f"[NIKKE] 素材管理器回收失败：{exc}")
+            web = getattr(self, "web", None)
+            if web is not None:
+                try:
+                    await web.stop()
+                except Exception as exc:
+                    cleanup_errors.append(exc)
+                    logger.debug(f"[NIKKE] 绑定服务回收失败：{exc}")
+            if cleanup_errors:
+                raise cleanup_errors[0]
+            self._terminated = True
+            logger.info("[NIKKE] 插件已停止")
 
     async def close(self):
         await self.terminate()
