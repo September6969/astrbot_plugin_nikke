@@ -26,6 +26,17 @@ class BackupError(RuntimeError):
 _LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 
 
+def _contains_symlink_component(path: Path) -> bool:
+    """检查输入路径的每个已存在部分，避免通过父级链接越界。"""
+    absolute = path.absolute()
+    current = Path(absolute.anchor)
+    for part in absolute.parts[1:]:
+        current /= part
+        if current.is_symlink():
+            return True
+    return False
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -81,8 +92,15 @@ def create_backup(
     label: str | None = None,
 ) -> Path:
     """创建数据库与密钥的不可覆盖备份，并返回备份目录。"""
-    source_dir = Path(data_dir).resolve()
-    destination_root = Path(destination_dir).resolve()
+    source_input = Path(data_dir).expanduser()
+    destination_input = Path(destination_dir).expanduser()
+    if _contains_symlink_component(source_input):
+        raise BackupError("源数据目录不能是符号链接")
+    if _contains_symlink_component(destination_input):
+        raise BackupError("备份输出目录不能是符号链接")
+
+    source_dir = source_input.resolve()
+    destination_root = destination_input.resolve()
     if not source_dir.is_dir():
         raise BackupError("源数据目录不存在")
     if destination_root == source_dir or destination_root.is_relative_to(source_dir):
@@ -90,6 +108,8 @@ def create_backup(
 
     database = source_dir / "nikke.sqlite3"
     secret_key = source_dir / "secret.key"
+    if database.is_symlink() or secret_key.is_symlink():
+        raise BackupError("源目录文件不能是符号链接")
     if not database.is_file() or not secret_key.is_file():
         raise BackupError("源目录必须同时包含 nikke.sqlite3 和 secret.key")
 

@@ -77,6 +77,49 @@ class DataBackupTests(unittest.TestCase):
             with self.assertRaisesRegex(BackupError, "SQLite 备份失败"):
                 create_backup(data_dir, root / "backups", label="corrupt")
 
+    def test_backup_refuses_symlinked_roots_and_source_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_target = root / "source-target"
+            source_target.mkdir()
+            connection = sqlite3.connect(source_target / "nikke.sqlite3")
+            connection.close()
+            (source_target / "secret.key").write_bytes(b"key")
+            destination = root / "backups"
+
+            source_link = root / "source-link"
+            try:
+                source_link.symlink_to(source_target, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("当前 Windows 环境不允许创建目录符号链接")
+
+            with self.assertRaisesRegex(BackupError, "源数据目录不能是符号链接"):
+                create_backup(source_link, destination, label="source-link")
+
+            destination_target = root / "destination-target"
+            destination_target.mkdir()
+            destination_link = root / "destination-link"
+            destination_link.symlink_to(destination_target, target_is_directory=True)
+            with self.assertRaisesRegex(BackupError, "备份输出目录不能是符号链接"):
+                create_backup(source_target, destination_link, label="destination-link")
+
+            external_database = root / "external.sqlite3"
+            external_database.write_bytes((source_target / "nikke.sqlite3").read_bytes())
+            (source_target / "nikke.sqlite3").unlink()
+            (source_target / "nikke.sqlite3").symlink_to(external_database)
+            with self.assertRaisesRegex(BackupError, "源目录文件不能是符号链接"):
+                create_backup(source_target, destination, label="database-link")
+
+            (source_target / "nikke.sqlite3").unlink()
+            connection = sqlite3.connect(source_target / "nikke.sqlite3")
+            connection.close()
+            external_key = root / "external.key"
+            external_key.write_bytes(b"external-key")
+            (source_target / "secret.key").unlink()
+            (source_target / "secret.key").symlink_to(external_key)
+            with self.assertRaisesRegex(BackupError, "源目录文件不能是符号链接"):
+                create_backup(source_target, destination, label="key-link")
+
 
 if __name__ == "__main__":
     unittest.main()
