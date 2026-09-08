@@ -339,6 +339,53 @@ class AssetManagerTests(unittest.TestCase):
             finally:
                 manager.close()
 
+    def test_favorite_and_cube_fault_matrix_keeps_card_renderable(self):
+        assets_dir = Path(__file__).resolve().parents[1] / "assets"
+        cases = [
+            ("favorite", 100602, "get_favorite_item_icon"),
+            ("cube", 1000304, "get_cube_icon"),
+        ]
+        for kind, tid, method_name in cases:
+            for failure in ("404", "timeout", "decode"):
+                with self.subTest(kind=kind, failure=failure), tempfile.TemporaryDirectory() as td:
+                    manager = AssetManager(td, assets_dir, remote=True)
+                    method = getattr(manager, method_name)
+                    try:
+                        if failure == "404":
+                            response = httpx.Response(404, request=httpx.Request("GET", "https://example.com/missing"))
+                            context = MagicMock()
+                            context.__enter__.return_value = response
+                            effect = context
+                        elif failure == "timeout":
+                            effect = httpx.ReadTimeout("synthetic timeout")
+                        else:
+                            response = httpx.Response(200, content=b"not-an-image", request=httpx.Request("GET", "https://example.com/bad"))
+                            context = MagicMock()
+                            context.__enter__.return_value = response
+                            effect = context
+                        with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=[effect] if failure != "timeout" else effect):
+                            image = method(tid)
+                        self.assertEqual(image.mode, "RGBA")
+                        self.assertEqual(image.size, (128, 128))
+                        self.assertIsNotNone(image.getbbox())
+                    finally:
+                        manager.close()
+
+    def test_corrupt_favorite_and_cube_cache_falls_back_without_crashing(self):
+        assets_dir = Path(__file__).resolve().parents[1] / "assets"
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            for kind, tid in (("favorite", 100602), ("cube", 1000304)):
+                path = cache / kind / f"{tid}.png"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"corrupt-cache")
+            manager = AssetManager(cache, assets_dir, remote=False)
+            try:
+                self.assertEqual(manager.get_favorite_item_icon(100602).size, (128, 128))
+                self.assertEqual(manager.get_cube_icon(1000304).size, (128, 128))
+            finally:
+                manager.close()
+
     def test_registry_unknown_ids_do_not_use_generic_sources(self):
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
         with tempfile.TemporaryDirectory() as td:

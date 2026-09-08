@@ -1,1 +1,97 @@
-[]
+[
+  {
+    "id": "progression-20260908",
+    "category": "progression",
+    "title": "NIKKE 养成一图流",
+    "files": [
+      "progression/part-01.png",
+      "progression/part-02.png",
+      "progression/part-03.png",
+      "progression/part-04.png",
+      "progression/part-05.png",
+      "progression/part-06.png"
+    ],
+    "links": [],
+    "source": "用户授权提供的攻略原图",
+    "credit": "屑芙蒂（原图可见署名）",
+    "license": "用户确认授权公开收录及机器人发送",
+    "updated_at": "2026-09-08",
+    "game_version": "2026-09-08 快照"
+  },
+  {
+    "id": "red-orbs-link-20260908",
+    "category": "red_orbs",
+    "title": "红球查询",
+    "files": [],
+    "links": [
+      "https://nikkeoutpost.netlify.app/"
+    ],
+    "source": "用户提供的外部链接",
+    "credit": "站点作者",
+    "license": "仅提供外部链接，不抓取或复制站点内容",
+    "updated_at": "2026-09-08",
+    "game_version": "外部站点"
+  },
+  {
+    "id": "favorite-20260908",
+    "category": "favorite",
+    "title": "珍藏品养成",
+    "files": [
+      "favorite/original.jpg"
+    ],
+    "links": [],
+    "source": "用户授权提供的攻略原图",
+    "credit": "迪恩deen33（原图可见署名）",
+    "license": "用户确认授权公开收录及机器人发送",
+    "updated_at": "2026-02-14",
+    "game_version": "2026-09-08 快照"
+  },
+  {
+    "id": "arena_charge-20260908",
+    "category": "arena_charge",
+    "title": "竞技场充能表",
+    "files": [
+      "arena_charge/part-01.png",
+      "arena_charge/part-02.png",
+      "arena_charge/part-03.png"
+    ],
+    "links": [],
+    "source": "用户授权提供的攻略原图",
+    "credit": "迪恩deen33（原图可见署名）",
+    "license": "用户确认授权公开收录及机器人发送",
+    "updated_at": "2026-09-06",
+    "game_version": "2026-09-08 快照"
+  },
+  {
+    "id": "overload-20260908",
+    "category": "overload",
+    "title": "洗词条教学",
+    "files": [
+      "overload/part-01.png",
+      "overload/part-02.png",
+      "overload/part-03.png",
+      "overload/part-04.png",
+      "overload/part-05.png"
+    ],
+    "links": [],
+    "source": "用户授权提供的攻略原图",
+    "credit": "用户授权提供，原图未署名",
+    "license": "用户确认授权公开收录及机器人发送",
+    "updated_at": "2026-09-08",
+    "game_version": "2026-09-08 快照"
+  },
+  {
+    "id": "pvp-20260908",
+    "category": "pvp",
+    "title": "PVP 配队参考",
+    "files": [
+      "pvp/original.png"
+    ],
+    "links": [],
+    "source": "用户授权提供的攻略原图",
+    "credit": "迪恩deen33（原图可见署名）",
+    "license": "用户确认授权公开收录及机器人发送",
+    "updated_at": "2026-08-24",
+    "game_version": "2026-09-08 快照"
+  }
+]

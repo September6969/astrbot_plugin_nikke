@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 @dataclass(frozen=True)
@@ -11,6 +12,7 @@ class GuideEntry:
     category: str
     title: str
     files: tuple[Path, ...]
+    links: tuple[str, ...]
     source: str
     credit: str
     license: str
@@ -23,6 +25,8 @@ class GuideEntry:
 
 
 class GuideRegistry:
+    LINK_HOSTS = {"nikkeoutpost.netlify.app"}
+
     def __init__(self, root: Path):
         self.root = root.resolve()
         path = self.root / "registry.json"
@@ -41,10 +45,12 @@ class GuideRegistry:
                 raise ValueError("攻略 ID 重复")
             identifiers.add(row["id"])
             date.fromisoformat(row["updated_at"])
-            if not isinstance(row.get("files"), list) or not row["files"]:
-                raise ValueError("攻略没有图片")
+            raw_files = row.get("files", [])
+            raw_links = row.get("links", [])
+            if not isinstance(raw_files, list) or not isinstance(raw_links, list) or not (raw_files or raw_links):
+                raise ValueError("攻略必须包含图片或链接")
             files = []
-            for relative in row["files"]:
+            for relative in raw_files:
                 if not isinstance(relative, str):
                     raise ValueError("图片路径无效")
                 image = (self.root / relative).resolve()
@@ -53,7 +59,15 @@ class GuideRegistry:
                 if image.stat().st_size > 12 * 1024 * 1024:
                     raise ValueError("攻略图片过大")
                 files.append(image)
-            self.entries.append(GuideEntry(**{k: row[k] for k in fields}, files=tuple(files)))
+            links = []
+            for link in raw_links:
+                if not isinstance(link, str):
+                    raise ValueError("攻略链接无效")
+                parsed = urlsplit(link)
+                if parsed.scheme != "https" or parsed.hostname not in self.LINK_HOSTS or parsed.username or parsed.password:
+                    raise ValueError("攻略链接协议、凭据或域名不受信任")
+                links.append(link)
+            self.entries.append(GuideEntry(**{k: row[k] for k in fields}, files=tuple(files), links=tuple(links)))
 
     def page(self, category: str, page: int = 1, size: int = 3):
         if page < 1 or not 1 <= size <= 10:
