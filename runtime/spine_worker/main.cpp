@@ -168,7 +168,8 @@ int render(const Options &options) {
 						print_error("skeleton bounds 无效");
 					} else {
 						const float scale = std::min(usable_width / bounds_width, usable_height / bounds_height);
-						drawable.skeleton->setScale(scale);
+						drawable.skeleton->setScaleX(scale);
+						drawable.skeleton->setScaleY(scale);
 						drawable.skeleton->getBounds(bounds_x, bounds_y, bounds_width, bounds_height, vertices);
 						drawable.skeleton->setPosition((static_cast<float>(options.width) - bounds_width) / 2.0f - bounds_x,
 													(static_cast<float>(options.height) - bounds_height) / 2.0f - bounds_y);
