@@ -63,8 +63,14 @@ class VoicePipelineTests(IsolatedAsyncioTestCase):
     async def test_unsupported_adapter_and_invalid_budget_do_not_fetch(self):
         pipeline = self.pipeline()
         self.assertIsNone(await pipeline.resolve('map', 'id', 'en', adapter='unknown'))
-        for budget in (0, -1, 6, float('nan'), float('inf')):
+        for budget in (True, "4", 0, -1, 6, float('nan'), float('inf')):
             with self.assertRaises(ValueError):
                 await pipeline.resolve('map', 'id', 'en', budget=budget)
         pipeline.provider.resolve.assert_not_awaited()
         await pipeline.close()
+
+    async def test_invalid_pending_limit_is_rejected(self):
+        for max_pending in (True, 1.5, 0, 21):
+            with self.subTest(max_pending=max_pending):
+                with self.assertRaises(ValueError):
+                    self.pipeline(max_pending=max_pending)

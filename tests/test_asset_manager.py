@@ -1,8 +1,11 @@
 import io
 import tempfile
+import threading
+import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import httpx
 from PIL import Image
@@ -52,6 +55,201 @@ class AssetManagerTests(unittest.TestCase):
                 manager.get_character_portrait("5004", "191")
                 self.assertEqual(stream.call_count, 1)
 
+    def test_global_remote_download_limit_returns_fallback_without_cooldown(self):
+        """不同实例、不同键共用限额；压力降级不能被写成五分钟失败。"""
+        with tempfile.TemporaryDirectory() as td:
+            first = AssetManager(Path(td) / "first", Path(td) / "assets", remote=True)
+            second = AssetManager(Path(td) / "second", Path(td) / "assets", remote=True)
+            entered = threading.Event()
+            release = threading.Event()
+            payload = io.BytesIO()
+            Image.new("RGBA", (20, 20), "green").save(payload, "PNG")
+            response = httpx.Response(200, content=payload.getvalue(), request=httpx.Request("GET", "https://example.com"))
+            case = self
+
+            class BlockingStream:
+                def __enter__(self):
+                    entered.set()
+                    case.assertTrue(release.wait(2.0))
+                    return response
+
+                def __exit__(self, *_):
+                    return False
+
+            try:
+                with patch.object(AssetManager, "_remote_download_slots", threading.BoundedSemaphore(1)):
+                    with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=lambda *_args, **_kwargs: BlockingStream()) as stream:
+                        with ThreadPoolExecutor(max_workers=1) as executor:
+                            future = executor.submit(first._load, "portraits", "first", "https://example.com/first")
+                            self.assertTrue(entered.wait(2.0))
+                            started = time.monotonic()
+                            self.assertIsNone(second._load("portraits", "second", "https://example.com/second"))
+                            self.assertLess(time.monotonic() - started, 0.2)
+                            self.assertNotIn("portraits/second.png", second._failed)
+                            release.set()
+                            self.assertEqual(future.result(timeout=3.0).size, (20, 20))
+
+                        self.assertEqual(stream.call_count, 1)
+            finally:
+                release.set()
+                first.close()
+                second.close()
+
+    def test_cached_asset_bypasses_global_remote_download_limit(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td) / "cache"
+            (cache / "portraits").mkdir(parents=True)
+            Image.new("RGBA", (20, 20), "blue").save(cache / "portraits/cached.png")
+            manager = AssetManager(cache, Path(td) / "assets", remote=True)
+            try:
+                with patch.object(AssetManager, "_remote_download_slots", threading.BoundedSemaphore(1)) as slots:
+                    self.assertTrue(slots.acquire(blocking=False))
+                    try:
+                        with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                            image = manager._load("portraits", "cached", "https://example.com/cached")
+                        self.assertEqual(image.getpixel((0, 0)), (0, 0, 255, 255))
+                        stream.assert_not_called()
+                    finally:
+                        slots.release()
+            finally:
+                manager.close()
+
+    def test_failed_remote_download_releases_global_slot(self):
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(Path(td), Path(td) / "assets", remote=True)
+            payload = io.BytesIO()
+            Image.new("RGBA", (20, 20), "green").save(payload, "PNG")
+            response = httpx.Response(
+                200,
+                content=payload.getvalue(),
+                request=httpx.Request("GET", "https://example.com/second"),
+            )
+            success_context = MagicMock()
+            success_context.__enter__.return_value = response
+
+            try:
+                with patch.object(AssetManager, "_remote_download_slots", threading.BoundedSemaphore(1)):
+                    with patch(
+                        "astrbot_plugin_nikke.asset_manager.httpx.stream",
+                        side_effect=[httpx.ConnectError("offline"), success_context],
+                    ) as stream:
+                        self.assertIsNone(manager._load("portraits", "failed", "https://example.com/failed"))
+                        image = manager._load("portraits", "second", "https://example.com/second")
+
+                    self.assertEqual(image.size, (20, 20))
+                    self.assertEqual(stream.call_count, 2)
+            finally:
+                manager.close()
+
+    def test_concurrent_same_remote_asset_uses_single_flight_request(self):
+        with tempfile.TemporaryDirectory() as td:
+            buffer = io.BytesIO()
+            Image.new("RGBA", (30, 50), "green").save(buffer, "PNG")
+            response = httpx.Response(
+                200,
+                content=buffer.getvalue(),
+                request=httpx.Request("GET", "https://example.com"),
+            )
+            manager = AssetManager(td, td, remote=True)
+            entered = threading.Event()
+            release = threading.Event()
+
+            def enter_stream():
+                entered.set()
+                self.assertTrue(release.wait(2.0))
+                return response
+
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    stream.return_value.__enter__.side_effect = enter_stream
+                    with ThreadPoolExecutor(max_workers=5) as executor:
+                        futures = [
+                            executor.submit(manager.get_character_portrait, "5004", "191")
+                            for _ in range(5)
+                        ]
+                        self.assertTrue(entered.wait(2.0))
+                        time.sleep(0.05)
+                        release.set()
+                        images = [future.result(timeout=3.0) for future in futures]
+
+                    self.assertEqual(stream.call_count, 1)
+                    self.assertTrue(all(image.size == (30, 50) for image in images))
+            finally:
+                manager.close()
+
+    def test_waiters_reuse_memory_result_when_cache_write_fails(self):
+        with tempfile.TemporaryDirectory() as td:
+            buffer = io.BytesIO()
+            Image.new("RGBA", (30, 50), "green").save(buffer, "PNG")
+            response = httpx.Response(
+                200,
+                content=buffer.getvalue(),
+                request=httpx.Request("GET", "https://example.com"),
+            )
+            manager = AssetManager(td, td, remote=True)
+            entered = threading.Event()
+            release = threading.Event()
+
+            def enter_stream():
+                entered.set()
+                self.assertTrue(release.wait(2.0))
+                return response
+
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    stream.return_value.__enter__.side_effect = enter_stream
+                    with patch("PIL.Image.Image.save", side_effect=OSError("synthetic disk full")):
+                        with ThreadPoolExecutor(max_workers=5) as executor:
+                            futures = [
+                                executor.submit(manager.get_character_portrait, "5004", "191")
+                                for _ in range(5)
+                            ]
+                            self.assertTrue(entered.wait(2.0))
+                            time.sleep(0.05)
+                            release.set()
+                            images = [future.result(timeout=3.0) for future in futures]
+
+                    self.assertEqual(stream.call_count, 1)
+                    self.assertTrue(all(image.size == (30, 50) for image in images))
+            finally:
+                manager.close()
+
+    def test_concurrent_distinct_asset_keys_keep_separate_requests(self):
+        with tempfile.TemporaryDirectory() as td:
+            responses = []
+            for color in ("red", "blue"):
+                buffer = io.BytesIO()
+                Image.new("RGBA", (30, 50), color).save(buffer, "PNG")
+                responses.append(
+                    httpx.Response(
+                        200,
+                        content=buffer.getvalue(),
+                        request=httpx.Request("GET", "https://example.com"),
+                    )
+                )
+            barrier = threading.Barrier(2)
+            manager = AssetManager(td, td, remote=True)
+
+            def open_stream(*args, **kwargs):
+                barrier.wait(2.0)
+                context = MagicMock()
+                context.__enter__.return_value = responses.pop()
+                return context
+
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=open_stream) as stream:
+                    with ThreadPoolExecutor(max_workers=2) as executor:
+                        futures = [
+                            executor.submit(manager.get_element_icon, element)
+                            for element in ("fire", "water")
+                        ]
+                        images = [future.result(timeout=3.0) for future in futures]
+
+                    self.assertEqual(stream.call_count, 2)
+                    self.assertEqual({image.getpixel((0, 0))[:3] for image in images}, {(255, 0, 0), (0, 0, 255)})
+            finally:
+                manager.close()
+
     def test_all_icon_fallbacks_and_invalid_sources(self):
         with tempfile.TemporaryDirectory() as td:
             manager = AssetManager(td, td)
@@ -100,6 +298,33 @@ class AssetManagerTests(unittest.TestCase):
             finally:
                 manager.close()
 
+    def test_registry_unknown_ids_do_not_use_generic_sources(self):
+        assets_dir = Path(__file__).resolve().parents[1] / "assets"
+        with tempfile.TemporaryDirectory() as td:
+            cache_dir = Path(td) / "cache"
+            for kind, identifier in (("equipment", "999999"), ("favorite", "999999"), ("cube", "999999")):
+                path = cache_dir / kind / f"{identifier}.png"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                Image.new("RGBA", (17, 19), "red").save(path)
+            manager = AssetManager(cache_dir, assets_dir, remote=True)
+            try:
+                # 未知 registry ID 既不能远程请求，也不能命中残留的本地同名缓存。
+                manager.sources.update({
+                    "equipment/999999.png": "https://example.com/equipment.png",
+                    "favorite/999999.png": "https://example.com/favorite.png",
+                    "cube/999999.png": "https://example.com/cube.png",
+                })
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    equipment = manager.get_equipment_icon("head", 999999)
+                    favorite = manager.get_favorite_item_icon(999999)
+                    cube = manager.get_cube_icon(999999)
+                    self.assertNotEqual(equipment.size, (17, 19))
+                    self.assertNotEqual(favorite.size, (17, 19))
+                    self.assertNotEqual(cube.size, (17, 19))
+                    stream.assert_not_called()
+            finally:
+                manager.close()
+
     def test_resolve_character_assets_concurrent_prefetch(self):
         from astrbot_plugin_nikke.tests.test_card_builder import build_card
 
@@ -132,10 +357,14 @@ class AssetManagerTests(unittest.TestCase):
             manager = AssetManager(td, assets_dir)
             try:
                 card = build_card()
+                finished = threading.Event()
 
                 def slow_favorite(tid):
-                    time.sleep(1.0)
-                    return Image.new("RGBA", (10, 10), "red")
+                    try:
+                        time.sleep(1.0)
+                        return Image.new("RGBA", (10, 10), "red")
+                    finally:
+                        finished.set()
 
                 with patch.object(manager, "get_favorite_item_icon", side_effect=slow_favorite):
                     start = time.monotonic()
@@ -148,7 +377,69 @@ class AssetManagerTests(unittest.TestCase):
                     # 超时素材降级为 fallback
                     self.assertIsNotNone(card_assets.favorite_item.getbbox())
                     self.assertEqual(card_assets.favorite_item.size, (128, 128))
+                    # 已运行的 Python 线程不能安全强杀；在退出 mock 前等待其自然结束。
+                    self.assertTrue(finished.wait(2.0))
             finally:
+                manager.close()
+
+    def test_prefetch_queue_saturation_falls_back_without_submitting(self):
+        from astrbot_plugin_nikke.tests.test_card_builder import build_card
+
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            slots = []
+            try:
+                for _ in range(manager.MAX_PREFETCH_TASKS):
+                    self.assertTrue(manager._prefetch_slots.acquire(blocking=False))
+                    slots.append(True)
+                with patch.object(manager._executor, "submit") as submit:
+                    assets = manager.resolve_character_assets(build_card(), timeout=0.1)
+                submit.assert_not_called()
+                self.assertEqual(assets.portrait.size, (600, 900))
+                self.assertEqual(assets.equipment["head"].size, (128, 128))
+            finally:
+                while slots:
+                    slots.pop()
+                    manager._prefetch_slots.release()
+                manager.close()
+
+    def test_prefetch_slot_returns_after_task_completion(self):
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            try:
+                future = manager._submit_prefetch(lambda: "done")
+                self.assertEqual(future.result(timeout=1.0), "done")
+                self.assertTrue(manager._prefetch_slots.acquire(blocking=False))
+                manager._prefetch_slots.release()
+            finally:
+                manager.close()
+
+    def test_prefetch_timeout_cancels_queued_tasks(self):
+        from astrbot_plugin_nikke.tests.test_card_builder import build_card
+
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td)
+            manager._executor.shutdown(wait=False, cancel_futures=True)
+            manager._executor = ThreadPoolExecutor(max_workers=1)
+            started = threading.Event()
+            release = threading.Event()
+            try:
+                def slow_portrait(*_):
+                    started.set()
+                    self.assertTrue(release.wait(2.0))
+                    return manager.fallback("portrait")
+
+                with patch.object(manager, "get_character_portrait", side_effect=slow_portrait):
+                    with patch.object(manager, "get_equipment_icon") as equipment:
+                        assets = manager.resolve_character_assets(build_card(), timeout=0.05)
+                        self.assertTrue(started.is_set())
+                        self.assertEqual(assets.portrait.size, (600, 900))
+                        release.set()
+                        # 若 queued future 没有被取消，单 worker 释放后会继续调用装备读取。
+                        manager._executor.submit(lambda: None).result(timeout=1.0)
+                        equipment.assert_not_called()
+            finally:
+                release.set()
                 manager.close()
 
     def test_spine_stays_experimental_production_does_not_queue_spine(self):

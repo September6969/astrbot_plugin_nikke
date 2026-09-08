@@ -80,9 +80,20 @@ class VoiceResolver:
     # 已验证支持原生语音发送的 Adapter 矩阵（未验证 adapter 一律降级文本）
     SUPPORTED_VOICE_ADAPTERS = {"aiocqhttp", "onebot_v11"}
 
+    GENERIC_LINES: dict[str, list[str]] = {
+        "zh-cn": ["指挥官，当前角色暂无已验证的互动台词。"],
+        "en": ["Commander, no verified interaction line is available for this character."],
+    }
+
     @classmethod
     def is_voice_supported(cls, adapter_name: str) -> bool:
         return str(adapter_name or "").lower() in cls.SUPPORTED_VOICE_ADAPTERS
+
+    @classmethod
+    def resolve_character_key(cls, character_key: str | None) -> str | None:
+        """只返回已登记角色，未知 ID 不得静默借用其他角色的台词。"""
+        normalized = str(character_key or "").strip().lower()
+        return normalized if normalized in cls.CHARACTER_LINES else None
 
     @classmethod
     def resolve_poke_line(
@@ -91,10 +102,15 @@ class VoiceResolver:
         locale: str = "zh-cn",
     ) -> str:
         """解析戳一戳台词。"""
-        char_key = str(character_key or "alice").lower()
+        raw_key = str(character_key or "").strip().lower()
+        char_key = raw_key or "alice"
         loc = str(locale or "zh-cn").lower()
 
-        char_dict = cls.CHARACTER_LINES.get(char_key) or cls.CHARACTER_LINES["alice"]
-        lines = char_dict.get(loc) or char_dict.get("zh-cn") or ["指挥官，有什么吩咐吗？"]
+        char_dict = cls.CHARACTER_LINES.get(char_key)
+        if char_dict is None:
+            # 未知角色使用中性提示，不把台词错误标记为 Alice。
+            lines = cls.GENERIC_LINES.get(loc) or cls.GENERIC_LINES["zh-cn"]
+        else:
+            lines = char_dict.get(loc) or char_dict.get("zh-cn") or ["指挥官，有什么吩咐吗？"]
         return random.choice(lines)
 

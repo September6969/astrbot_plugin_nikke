@@ -13,6 +13,14 @@ def integer(value):
     return result
 
 
+def identifier(value, *, field: str, allow_integer: bool = False) -> str:
+    """只保留有明确文本意义的身份字段，不把空值或任意对象转成假 ID。"""
+    valid_type = isinstance(value, str) or (allow_integer and type(value) is int)
+    if not valid_type or not str(value).strip():
+        raise ValueError(f"{field}缺少有效标识")
+    return str(value)
+
+
 @dataclass(slots=True)
 class RaidSquadMember:
     tid: str
@@ -54,17 +62,18 @@ def build_ranking(payload: dict) -> RaidRankingData:
         raise ValueError("突袭响应缺少攻击列表")
     groups = {}
     for row in rows:
-        if not isinstance(row, dict) or not isinstance(row.get("openid"), str) or not row["openid"]:
+        if not isinstance(row, dict) or not isinstance(row.get("openid"), str) or not row["openid"].strip():
             raise ValueError("攻击记录缺少有效身份，不能安全聚合")
         try:
-            squad = [RaidSquadMember(str(m["tid"]), integer(m["lv"]), integer(m["combat"]),
+            boss_id = identifier(row.get("boss_id"), field="Boss ID", allow_integer=True)
+            squad = [RaidSquadMember(identifier(m["tid"], field="角色 ID", allow_integer=True), integer(m["lv"]), integer(m["combat"]),
                       integer(m["slot"]), str(m["costume_id"]) if m.get("costume_id") is not None else None)
                      for m in row["squad"]]
             if len(squad) != 5 or {m.slot for m in squad} != {1, 2, 3, 4, 5}:
                 raise ValueError("历史队伍不完整")
             if type(row["is_final_hit"]) is not bool:
                 raise ValueError("尾刀标志无效")
-            attack = RaidAttackData(str(row["boss_id"]), integer(row["day"]), integer(row["difficulty"]),
+            attack = RaidAttackData(boss_id, integer(row["day"]), integer(row["difficulty"]),
                 integer(row["level"]), integer(row["step"]), integer(row["total_damage"]), row["is_final_hit"], squad)
         except (KeyError, TypeError, AttributeError) as exc:
             raise ValueError("攻击记录格式异常，不能生成完整排名") from exc
@@ -84,10 +93,13 @@ def build_ranking(payload: dict) -> RaidRankingData:
 
 
 def format_ranking(data: RaidRankingData) -> str:
-    lines = ["【联盟突袭 · 当前数据范围排名】", "按总伤害排序；同伤害同名次。"]
+    lines = [
+        "【联盟突袭 · 当前响应范围排名】",
+        "按已返回记录的伤害字段汇总；不代表完整赛季或实际攻击次数。",
+    ]
     for item in data.participants[:50]:
         name = " ".join(item.nickname.split())[:40]
-        lines.append(f"{item.rank}. {name}：{item.total_damage:,} · {len(item.attacks)} 刀")
+        lines.append(f"{item.rank}. {name}：{item.total_damage:,} · {len(item.attacks)} 条返回记录")
     if not data.participants:
         lines.append("当前响应没有攻击记录。")
     if len(data.participants) > 50:
