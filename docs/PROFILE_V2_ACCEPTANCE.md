@@ -3,11 +3,14 @@
 ## 主题与目标命令
 
 - 用户能力：`/妮姬 我的`
-- 起始 base：`origin/main@a812b7247e997e87886d9c076459bb2463123b15`
-- 工作树：`E:/DevCache/nikke-profile-v2/astrbot_plugin_nikke`
-- 分支：`feat/profile-v2`
+- 历史开发 base：`origin/main@a812b7247e997e87886d9c076459bb2463123b15`
+- 历史开发工作树：`E:/DevCache/nikke-profile-v2/astrbot_plugin_nikke`
+- 历史分支：`feat/profile-v2`
 - 实现提交：`59f0f59 feat: harden profile v2 dashboard semantics`
-- 本记录和当前最终 HEAD 由交接时的 Git 状态补充确认；不在文档中预写未来 SHA。
+- 验收记录提交：`7df799a docs: record profile v2 acceptance`
+- PR：[#7](https://github.com/September6969/astrbot_plugin_nikke/pull/7)，已合并。
+- 2026-09-07 合并后核验基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`（包含 PR #7 的合并提交）；这是验收快照，不是后续 session 的实时 main。
+- 本次合并后核验工作树：`E:/_codex_work/profile-post-merge-v1/astrbot_plugin_nikke`，基于上述日期化基线。
 
 ## 用户可见变化
 
@@ -47,14 +50,16 @@
 
 ## 测试结果
 
-在 Python 3.10.11、复用 `E:/DevCache/nikke-test-venv` 环境执行：
+在 Python 3.10.11、复用 `E:/DevCache/nikke-test-venv` 环境，于 2026-09-07 核验的 `origin/main@bada0b3` 重跑：
 
 ```text
 python -m compileall -q .                    PASS
-PYTHONPATH=E:/DevCache/nikke-profile-v2 python -m pytest -q
+python -m pytest -q
 256 passed, 2 warnings, 43 subtests passed
 node --test tests/extension.test.cjs          3 passed
 ```
+
+Profile 定向回归（`tests/test_profile_v2.py`、`tests/test_profile_structured.py`、`tests/test_theme_and_profile.py`）为 35 passed、2 warnings；定向 compileall、Node 扩展测试和 `git diff --check` 均通过。
 
 新增 synthetic 行为测试覆盖：坏数值、`bool`/浮点/NaN、合法零值、空数组、坏列表和局部统计、未知研究/收藏类别、optional endpoint 失败与 CookieExpired、真实 Builder/Renderer 出图、真实 `me` 命令链和请求次数。
 
@@ -78,6 +83,8 @@ node --test tests/extension.test.cjs          3 passed
 - **NEEDS_HUMAN_DECISION**：无；本 PR 不涉及许可采用、部署或消息发送。
 - **HARD_BLOCKED**：无已确认永久技术阻塞。
 
-## 交接
+## 合并后状态核验
 
-本分支基于最新 `origin/main` 独立开发，不包含 A 的未合并提交。后续动作是补充实际最终 HEAD、push `feat/profile-v2` 并创建 base=`main` 的 Draft PR；PR 描述应保留上述离线验证与真实证据缺口的区分。
+PR #7 已于 2026-09-06 合并，当前 `origin/main` 已包含 Profile V2 实现与本验收记录；本主题不再有“未来 push / 创建 Draft PR”的待办。
+
+后续若扩展 Profile，应从最新 `origin/main` 创建新的独立 worktree、分支和 Draft PR，不把本历史分支或旧 overnight 分支当作当前开发基线。本文记录的 READY_OFFLINE 仅表示离线命令到 PNG 闭环已验证，不等同于真实账号联调或部署完成。

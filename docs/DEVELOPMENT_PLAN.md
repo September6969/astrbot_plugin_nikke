@@ -1,19 +1,19 @@
 # 当前执行状态入口（2026-09-06）
 
-本表是能力状态摘要；合并后的远端事实、PR #5、CI 和工作区边界以 [Post-Merge 状态](POST_MERGE_STATUS.md) 为准。
+本表是能力状态摘要；合并后的远端事实、PR、CI 和工作区边界以 [Post-Merge 状态](POST_MERGE_STATUS.md) 为准。
 下一阶段入口见 [Post-Merge Phase 2 计划](POST_MERGE_PHASE2_PLAN.md)。下方旧计划保留为历史规格，其中 TODO/BLOCKED 不再作为当前进度判断。
 历史自治规则见 [审核与自治计划](EXECUTION_AUTONOMY_PLAN.md)，不覆盖新的状态入口。
 
-当前有效基线是 `origin/main@a812b7247e997e87886d9c076459bb2463123b15`。旧 `feat/overnight-backlog` 已通过 PR #5 合并，不是当前开发分支。
+当前有效基线是 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。PR #6 与 PR #7 已合并；PR #8（Raid Increment A）是独立 Draft，不能作为后续主题的隐式 base。旧 `feat/overnight-backlog` 已通过 PR #5 合并，不是当前开发分支。
 
 | 范围 | 当前状态 | 已完成与剩余 |
 | --- | --- | --- |
 | 审核修复 | DONE | 序关系脱敏、Guide registry 强制入口、单条取消 unknown、用户隔离 cooldown、移除临时 CI trigger |
-| 公告来源/缓存/订阅/调度 | PARTIAL | 正式 CMS、退避、独立版本、默认关闭调度已实现；状态清理已实现，深度重扫待做 |
+| 公告来源/缓存/订阅/调度 | READY / PARTIAL | 下一独立主题为 Announcement V2：先定义旧文更新、retention、resubscribe replay、version、out-of-order 语义，再完成 deep rescan、locale、category、query UX 与 diagnostic；不继承 PR #8 |
 | Campaign | PARTIAL | 3572 关卡映射、严格阵容与异常合同；更丰富渲染待做 |
 | Tower | DONE | 7350 层公开静态查询，不代表账号进度 |
-| Profile | PARTIAL | 结构化研究与收藏、名称映射；完整分区继续完善 |
-| Raid | PARTIAL / NEEDS_LIVE_EVIDENCE | 当前响应排名、历史客户端、诊断已实现；身份、多轮、范围仍待证据 |
+| Profile | READY / NEEDS_LIVE_EVIDENCE | PR #7 已合并：离线命令到 PNG、字段语义、分区去重与三请求预算已验证；真实账号/部署兼容性仍待证据 |
+| Raid | DRAFT / NEEDS_LIVE_EVIDENCE | PR #8 的 Increment A 已全绿：当前响应范围、重复/异常 HP、ranking 文案与预览已加固；身份、多轮、分页与完整赛季范围仍待证据 |
 | Daily | PARTIAL / NEEDS_LIVE_EVIDENCE | 单次写后只读验证；Like/Browse 未证明状态变化 |
 | CDK | PARTIAL | 串行批量持久化、取消及硬崩溃保护；过期 running 原子转 unknown，禁止重放；统一编排仍可改进 |
 | Voice | PARTIAL | 本地音频、偏好、发送器与隔离 cooldown；动态源与两级缓存已实现并匿名验证；共享总预算与管线回收已实现；角色/皮肤映射与动态 Poke 接线待做 |
@@ -328,10 +328,10 @@ evidence/
 | Union Raid Overview | `MVP + DEBT` | Boss HP 总览可用；多轮选择和 HP clamp 有债 |
 | Union Raid Ranking/My | `TODO`，已有结构 fixture | GetUnionRaidData fixture 已有，但未建模型/命令 |
 | CDK 单条 | `DONE` | 幂等、超时 unknown、业务错误、真实字段合同较完整 |
-| CDK 批量 | `PARTIAL` | 串行/账号锁已有；未复用 action_runs 持久幂等 |
+| CDK 批量 | `READY_OFFLINE / NEEDS_LIVE_EVIDENCE` | 串行/账号锁和逐码 action_runs 持久幂等已有；真实兑换响应、生产频控与错误分布仍待授权现场证据 |
 | 公告/日程查询 | `PARTIAL + DEBT` | 缓存/解析/查询可用；正式源和版本逻辑有债 |
 | 公告自动推送 | `TODO` | 去重基础有，目标订阅/调度发送未完成 |
-| 社区签到 | `PARTIAL + SAFETY DEBT` | 写接口与写后查询已有；模糊超时后可能再次提交 |
+| 社区签到 | `PARTIAL / READY_OFFLINE` | `DailyTaskResult` 状态合同、写后未知不重放和 Cookie/限流/不可用语义已有离线证据；真实账号与 Like/Browse 仍待现场证据 |
 | 点赞/浏览日常 | `TODO` | 未实现 |
 | AssetManager | `PARTIAL` | 静态资源链完整度较高，资源映射仍不全 |
 | Spine | `SPIKE` | 队列/版本/cache 骨架有，真实 render 仍返回 None |
@@ -1526,7 +1526,7 @@ total_damage DESC
 
 # 15. CDK
 
-状态：`单条 DONE / 批量 PARTIAL`
+状态：`单条 DONE / 批量 READY_OFFLINE；真实兑换仍 NEEDS_LIVE_EVIDENCE`
 
 ## 15.1 API
 
@@ -1603,43 +1603,40 @@ RESULT_UNKNOWN 语义
 
 ```text
 max_items = 10
-default delay = 0.5s
+default delay = 1.0s（服务层将更小值钳制为 1.0）
 同账号 async lock
 串行
 rate limit stop
 CookieExpired stop
 ```
 
-但批量路径：
+批量路径在主命令中传入同一个 `NikkeStore`，每个 code 使用与单条一致的持久 run key：
 
 ```text
 CdkService.redeem_batch()
 ↓
+_redeem_persistently()
+↓
 _redeem_single_core()
 ```
 
-没有复用 main 单条的：
+run key：
 
 ```text
-action_runs persistent idempotency
+cdk:{qq_id}:{game_uid}:{SHA256(code)}
 ```
 
-因此：
+已验证的离线语义：
 
 ```text
-用户重复执行同一批 batch
-会再次向官方接口提交这些 code
+success / terminal / unknown：不自动再次提交
+failed / expired：允许一次原子重领
+running：新请求不抢占；超过 120 秒先隔离为 unknown
+CookieExpired / rate limit：中止剩余批量
+取消：保存 unknown 后继续传播取消
 ```
 
-虽然已兑换码可能由官方返回 terminal error，但这仍是额外写请求。
-
-如果要把批量标为 `DONE`，建议补：
-
-```text
-per-code persistent run key
-或
-批量命令复用单条 idempotent execution primitive
-```
+因此批量持久幂等已达到 `READY_OFFLINE`；仍不能据此宣称真实账号兑换、生产参数校准或真实错误分布已验收。
 
 ## 15.5 Batch 参数
 
@@ -1647,7 +1644,7 @@ per-code persistent run key
 
 ```text
 最多 10
-0.5 秒间隔
+1.0 秒间隔
 ```
 
 旧文档出现过：
@@ -3111,21 +3108,23 @@ slot
 
 ### A-CDK-01：批量持久幂等
 
-状态：`TODO`
+状态：`IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / NEEDS_LIVE_EVIDENCE`
 
-当前 batch 没有完全复用：
+当前 batch 已复用：
 
 ```text
 action_runs
 ```
 
-目标是每个 CDK 都使用与单条一致的：
+每个 CDK 使用与单条一致的：
 
 ```text
 qq_id + game_uid + SHA256(code)
 ```
 
 执行语义。
+
+`success`、`terminal`、`unknown` 不自动重放；`failed`、`expired` 原子重领；过期 `running` 先隔离为 `unknown`。这些是离线合同证据，不等于真实账号兑换验收。
 
 ### A-CDK-02：批量参数生产校准
 
@@ -3135,7 +3134,7 @@ qq_id + game_uid + SHA256(code)
 
 ```text
 max_items = 10
-delay = 0.5s
+delay = 1.0s（服务层最小值）
 ```
 
 需要通过真实生产观察决定：
@@ -3200,7 +3199,7 @@ RESULT_UNKNOWN
 
 ### A-DAILY-01：统一 DailyTaskResult 状态机
 
-状态：`TODO`
+状态：`IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / NEEDS_LIVE_EVIDENCE`
 
 至少：
 
@@ -3213,6 +3212,8 @@ COOKIE_EXPIRED
 UNKNOWN_AFTER_ACTION
 UNAVAILABLE
 ```
+
+当前签到主链已将上述状态及 `PENDING` 映射到 `DailyTaskResult`；结果汇总使用 JSON-safe 记录，损坏或旧格式记录不会静默冒充成功。真实账号响应和 Like/Browse 仍不在本合同范围内。
 
 ### A-DAILY-02：签到模糊写结果安全化
 
@@ -3258,7 +3259,7 @@ timeout/network interruption：
 
 ### A-DAILY-06：统一命令
 
-状态：`TODO`
+状态：`PARTIAL / READY_OFFLINE`
 
 目标命令：
 
@@ -3272,9 +3273,11 @@ timeout/network interruption：
 
 当前 `/妮姬 签到` 可继续保留兼容。
 
+当前已提供 `/妮姬 日常 自动 开|关`；签到与状态入口保持兼容。Like/Browse 仍没有经过确认的接口合同。
+
 ### A-DAILY-07：每账号自动开关
 
-状态：`TODO`
+状态：`IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / NEEDS_LIVE_EVIDENCE`
 
 不是只有全局：
 
@@ -3287,6 +3290,8 @@ enable_daily_actions
 ```text
 auto_daily_enabled
 ```
+
+`accounts.auto_daily_enabled` 默认 `0`。仅定时批处理和汇总补跑会同时筛选 `push_enabled=1` 与该字段为 `1` 的账号；管理员显式执行与用户手动签到不受此偏好拦截。设置命令只写本地 SQLite，不会触发网络请求或签到。
 
 ### A-DAILY-08：失败通知与汇总
 
@@ -3519,28 +3524,30 @@ license/rights note
 
 ### A-ASSET-07：并发资源全局限流
 
-状态：`DEFERRED`
+状态：`PARTIAL / READY_OFFLINE`
 
-单卡已有约 4 worker，但多个群同时刷卡仍应有：
+单卡已有约 4 worker。当前已为不同 `AssetManager` 实例的公共 HTTPS 素材下载加入全局四槽、非阻塞限额：缓存命中不受影响；满额立即使用调用方 fallback，且不写入失败冷却。离线模拟覆盖跨实例不同键、满额降级和缓存旁路。
+
+仍需要：
 
 ```text
-global render/resource concurrency limit
+生产多群负载证据
+Pillow/Spine 等其它资源的独立并发治理
 ```
 
 ### A-ASSET-08：超时线程长期运行治理
 
-状态：`DEBT`
+状态：`PARTIAL / READY_OFFLINE`
 
-用户出卡可 6 秒 fallback，但后台 thread 可能继续运行。
+用户出卡可在预算到期后 fallback。当前预取队列已限制为每个 `AssetManager` 16 项：满额不提交新任务；预算到期会取消仍未启动的 future，避免多卡请求无限积压。单卡的 11 项预取仍可完整提交。
 
-未来需要：
+仍需要：
 
 ```text
 更细粒度 HTTP timeout
-有界队列
-任务 dedup
-冷却
-避免线程池长期被超时任务占满
+已运行线程的协作式取消或可中断 I/O
+与同键 dedup、跨实例下载限额合并后的集成验收
+真实多群负载证据
 ```
 
 ---
