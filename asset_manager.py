@@ -9,8 +9,10 @@ import hashlib
 import json
 import logging
 import re
+import threading
 import time
 import uuid
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import httpx
@@ -24,6 +26,14 @@ from .static_registry import StaticDataRegistry
 logger = logging.getLogger("nikke.asset_manager")
 
 
+@dataclass
+class _InflightAsset:
+    """同一缓存键的共享下载状态；缓存写入失败时仍保留内存结果。"""
+
+    event: threading.Event = field(default_factory=threading.Event)
+    result: Image.Image | None = None
+
+
 class AssetManager:
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
@@ -34,6 +44,8 @@ class AssetManager:
         self.asset_dir = Path(asset_dir)
         self.remote = remote
         self._failed: dict[str, float] = {}
+        self._inflight_lock = threading.Lock()
+        self._inflight: dict[str, _InflightAsset] = {}
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
         self.spine = SpinePreRenderer(self.cache_dir)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
@@ -78,6 +90,16 @@ class AssetManager:
             image.load()
             return image.convert("RGBA")
 
+    def _load_cached(self, relative: str) -> Image.Image | None:
+        for base in (self.cache_dir, self.asset_dir):
+            try:
+                path = base / relative
+                if path.stat().st_size <= self.MAX_BYTES:
+                    return self._decode(path.read_bytes())
+            except (OSError, ValueError, Image.DecompressionBombError):
+                pass
+        return None
+
     def _load(
         self,
         kind: str,
@@ -87,20 +109,36 @@ class AssetManager:
         allow_source: bool = True,
     ) -> Image.Image | None:
         relative = f"{kind}/{self._key(key)}.png"
-        for base in (self.cache_dir, self.asset_dir):
-            try:
-                path = base / relative
-                if path.stat().st_size <= self.MAX_BYTES:
-                    return self._decode(path.read_bytes())
-            except (OSError, ValueError, Image.DecompressionBombError):
-                pass
+        image = self._load_cached(relative)
+        if image is not None:
+            return image
+
         # 静态 registry 素材必须只使用已确认映射生成的 URL，不能被通用来源清单绕过。
         url = self.sources.get(relative, remote_url) if allow_source else remote_url
         if not self.remote or not isinstance(url, str) or not url.startswith("https://"):
             return None
-        if self._failed.get(relative, 0) > time.monotonic():
-            return None
+
+        with self._inflight_lock:
+            state = self._inflight.get(relative)
+            owner = state is None
+            if owner:
+                state = _InflightAsset()
+                self._inflight[relative] = state
+
+        if not owner:
+            # 同一素材已有下载者；不重复发请求，优先复用其内存结果，再读取缓存。
+            state.event.wait(timeout=7.0)
+            if state.result is not None:
+                return state.result
+            return self._load_cached(relative)
+
         try:
+            # 注册 single-flight 后再次检查，覆盖刚刚由其它路径写入缓存的竞态。
+            image = self._load_cached(relative)
+            if image is not None:
+                return image
+            if self._failed.get(relative, 0) > time.monotonic():
+                return None
             # 公共素材请求不携带账号Cookie；限制总下载时长和响应大小。
             started = time.monotonic()
             content = bytearray()
@@ -126,6 +164,13 @@ class AssetManager:
         except (httpx.HTTPError, OSError, ValueError, Image.DecompressionBombError):
             self._failed[relative] = time.monotonic() + 300
             return None
+        finally:
+            with self._inflight_lock:
+                current = self._inflight.pop(relative, None)
+                if current is not None:
+                    if image is not None:
+                        current.result = image
+                    current.event.set()
 
     @staticmethod
     def fallback(kind: str) -> Image.Image:
