@@ -20,7 +20,7 @@
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green；head `57d292d`；CI `34170484699` 四项全绿（Node、Python 3.10–3.12） |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green；head `e5b9efc`；CI `34149003554` |
 | #13 | `feat/voice-mapping-v2` | Voice mapping public research | OPEN / Draft / CI green；head `68138bc`；CI `34115632353` |
-| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；台账与工作树索引已同步；当前 head `53e76c6`；CI `34187474543` 四项全绿 |
+| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；台账与工作树索引已同步；更新前 head `2c681b5`；CI `34188985221` 四项全绿 |
 | #15 | `feat/campaign-history-contract-v2` | Campaign History numeric contract | OPEN / Draft / CI green；head `fe86c12`；CI `34171036388` 四项全绿（Node、Python 3.10–3.12） |
 | #16 | `feat/campaign-resource-lifecycle-v2` | Campaign renderer asset lifecycle | OPEN / Draft / CI green；head `d7f7d88`；CI `34171514608` |
 | #17 | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | OPEN / Draft / CI green；head `28b8dfb`；CI `34156636777` |
@@ -39,7 +39,7 @@
 | #30 | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | OPEN / Draft / CI green；head `e36d7b0`；CI `34188160651` 四项全绿（Node、Python 3.10–3.12） |
 | #31 | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | OPEN / Draft / CI green；head `3ce033a`；CI `34188464410` 四项全绿（Node、Python 3.10–3.12） |
 | #32 | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | OPEN / Draft / CI green；head `f513b42`；CI `34188833142` 四项全绿（Node、Python 3.10–3.12） |
-| #33 | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | OPEN / Draft / CI green；head `8bb9cd5`；CI `34143501124` |
+| #33 | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | OPEN / Draft / CI green；head `ab9aeee`；CI `34189505761` 四项全绿（Node、Python 3.10–3.12） |
 | #34 | `feat/cdk-batch-contract-v1` | CDK batch idempotency contract reconciliation | OPEN / Draft / CI green；head `c0f1e65`；CI `34135996980` |
 | #35 | `feat/daily-result-contract-v1` | Structured DailyTaskResult status contract | OPEN / Draft / CI green；head `0117651`；CI `34168517929` 四项全绿（Node、Python 3.10–3.12） |
 | #36 | `feat/daily-auto-per-account-v1` | Per-account daily automation preference | OPEN / Draft / CI green；head `71872a8`；CI `34169152021` 四项全绿（Node、Python 3.10–3.12） |
@@ -53,7 +53,7 @@
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
 | Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；本轮补充 PR #19 的 Python 3.13 证据及 PR #26 的日志隐私 JSON Cookie 上下文脱敏证据；当前 head 与 CI 以 PR #14 最新检查为权威 |
-| Post-Profile V2 status reconciliation | `feat/profile-post-merge-v1` | `bada0b3` | Draft PR #33；在既有 `PROFILE_V2_ACCEPTANCE.md` 合并状态记录之外，同步 `POST_MERGE_STATUS.md` 与 `POST_MERGE_PHASE2_PLAN.md`：当前入口明确 PR #6/#7 已合并、Profile 为 `READY_OFFLINE` 且现场证据仍独立；新增状态入口回归测试；本地专项 1 passed、全量 pytest 257 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `8bb9cd5`；CI `34143501124` 四项全绿；不访问真实账号、不部署 |
+| Post-Profile V2 status reconciliation | `feat/profile-post-merge-v1` | `bada0b3` | Draft PR #33；在既有 `PROFILE_V2_ACCEPTANCE.md` 合并状态记录之外，同步 `POST_MERGE_STATUS.md` 与 `POST_MERGE_PHASE2_PLAN.md`：明确 PR #6/#7 已合并、Profile 为 `READY_OFFLINE` 且现场证据仍独立；日期化 SHA 只作核验快照，后续 session 必须重新 fetch，不能把静态文档冒充运行时状态；回归测试锁定历史/当前边界；本地专项 1 passed、全量 pytest 257 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `ab9aeee`；CI `34189505761` 四项全绿；不访问真实账号、不部署 |
 | CDK batch idempotency contract reconciliation | `feat/cdk-batch-contract-v1` | `bada0b3` | Draft PR #34；确认主命令逐码复用 `action_runs`，run key 为 `cdk:{qq_id}:{game_uid}:{SHA256(code)}`，unknown/终态不自动重放，失败/过期可原子重领；更新 README/DEVELOPMENT_PLAN 并新增验收记录；本地专项 42 passed、12 subtests，全量 pytest 256 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；CI `34135996980` 四项全绿；未访问真实账号、未执行兑换或部署 |
 | Structured DailyTaskResult status contract | `feat/daily-result-contract-v1` | `bada0b3` | Draft PR #35；签到主链统一 `SUCCESS`、`ALREADY_DONE`、`PENDING`、`FAILED`、`RATE_LIMITED`、`COOKIE_EXPIRED`、`UNKNOWN_AFTER_ACTION`、`UNAVAILABLE`，持久化改为严格 JSON-safe 记录，旧/损坏记录不静默冒充成功；修复 `PENDING`/`UNAVAILABLE` 被误记为 success 后无法同日重检；本地定向 8 passed、全量 pytest 264 passed、43 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；head `0117651`；CI `34168517929` 四项全绿；不访问真实账号、不执行签到、不发送消息、不部署，Like/Browse 与现场证据仍未完成 |
 | Per-account daily automation preference | `feat/daily-auto-per-account-v1` | `bada0b3` | Draft PR #36；新增默认关闭的 `accounts.auto_daily_enabled` 与 `/妮姬 日常 自动 开|关`；定时签到和汇总补跑同时筛选 `push_enabled=1` 与自动偏好，手动签到和管理员显式执行保持原选择语义；隔离 automatic/manual 日结果键，管理员批次与旧无 scope 结果不会污染自动汇总；本地定向 49 passed、4 subtests，全量 pytest 264 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `71872a8`；CI `34169152021` 四项全绿；不访问真实账号、不执行签到、不发送消息、不部署，Like/Browse 与现场调度证据仍未完成 |
