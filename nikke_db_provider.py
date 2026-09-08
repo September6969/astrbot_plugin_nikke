@@ -181,7 +181,8 @@ class NikkeDbProvider:
         ]
         return "_".join(parts)
 
-    def get_l2d_index(self) -> dict[str, dict]:
+    def get_l2d_index(self, *, allow_remote: bool = True) -> dict[str, dict]:
+        """读取 L2D 索引；角色卡路径可明确禁止为单个角色触发索引网络请求。"""
         now = time.monotonic()
         if self._index is not None and (now - self._index_loaded_at) < self.INDEX_TTL:
             return self._index
@@ -203,7 +204,7 @@ class NikkeDbProvider:
             except (OSError, ValueError):
                 pass
 
-        if self.remote and not self.is_failed("index:l2d"):
+        if allow_remote and self.remote and not self.is_failed("index:l2d"):
             try:
                 with httpx.Client(timeout=5) as client:
                     resp = client.get(self.INDEX_URL)
@@ -240,8 +241,11 @@ class NikkeDbProvider:
         self._index_loaded_at = now
         return self._index
 
-    def resolve_spine_version(self, character_id: str) -> float | str | None:
-        index = self.get_l2d_index()
+    def resolve_spine_version(
+        self, character_id: str, *, allow_remote: bool = True
+    ) -> float | str | None:
+        """解析 Spine 版本；默认可刷新索引，角色卡热路径应传 ``False``。"""
+        index = self.get_l2d_index(allow_remote=allow_remote)
         entry = index.get(character_id)
         if entry and isinstance(entry, dict) and "version" in entry:
             return entry["version"]

@@ -2,7 +2,7 @@
 
 更新时间：2026-09-07。
 
-本矩阵按路线图第 4、5、54、55 节建立，审计基线为 `origin/main` `bada0b3aafcd7127d07ca40f554808b0433540f8`。开放 Draft PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
+本矩阵按路线图第 4、5、54、55 节建立；本轮独立主题基线为已核验的 `origin/main` `492e1f56a759ef7d57bbb72d5a8a9d40a0e5a421`。开放 Draft PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
 
 ## 状态语义
 
@@ -39,7 +39,7 @@
 | REQ-DAILY-002 | Like | 日常框架（未作为默认可用命令） | 主线没有可宣称完成的真实 Like 闭环；仅有受控状态框架和安全测试 | 真实 endpoint 和状态变化未确认 | `NEEDS_LIVE_EVIDENCE` | 先取得官方响应/写后读取证据；没有证据不接线 |
 | REQ-DAILY-003 | Browse | 日常框架（未作为默认可用命令） | 主线没有可宣称完成的真实 Browse 闭环；不得用离线 payload 冒充 | 真实 endpoint 和状态变化未确认 | `NEEDS_LIVE_EVIDENCE` | 与 Like 分开确认 endpoint、前后状态和失败语义 |
 | REQ-VOICE-001 | Poke Voice | `/妮姬 戳一戳 [角色名]` | `voice_audio.py`、`voice_pipeline.py`、`voice_resource_provider.py` 已有离线资源管线；`tests/test_voice_*.py` 覆盖预算、并发、取消、缓存和迟到发送禁止；动态接线/映射仍在 Draft PR #10/#13 | 未发送真实 QQ 音频；角色/皮肤映射和实际播放未确认 | `IMPLEMENTED / WIRED`（文本路径）；`DRAFT_PENDING_REVIEW`；`NEEDS_LIVE_EVIDENCE` | 分层审阅 resource/pipeline/lifecycle/delivery；必须取得真实播放授权后再声称完成 |
-| REQ-SPINE-001 | 服务端 Spine 渲染 | 预渲染/角色卡资源链（生产入口未接线） | `spine_prerenderer.py` 有发现、队列、预算、缓存和预检查；`tests/test_spine_inspection.py`；技术 spike 在 Draft PR #12 | 未采用可授权生产 runtime，未做真实 server-side render 或 Linux benchmark | `SYNTHETIC_VERIFIED`；`NEEDS_HUMAN_DECISION` | 由人工决定 runtime/license，再做代表性素材 benchmark；第一张卡不能等待 Spine |
+| REQ-SPINE-001 | 服务端 Spine 渲染 | 角色卡资源链中的正式异步编排入口；cache hit 可供 portrait 使用，miss 不同步等待 | `spine_prerenderer.py` 有 runtime adapter、版本匹配、bundle 白名单缓存、队列、预算、PNG 缓存和回退；`tests/test_spine_formal_backend.py`、`tests/test_spine_spike.py`、`tests/test_spine_inspection.py`；`docs/SPINE_FORMAL_BACKEND_ACCEPTANCE.md` | 未安装/注入具体可授权 runtime，未做真实 server-side render、Linux benchmark 或真实素材许可确认 | `READY_OFFLINE`（编排层）；`NEEDS_LIVE_EVIDENCE` / `NEEDS_HUMAN_DECISION`（runtime、许可、现场） | 由人工决定 runtime/license，再做代表性合法素材 benchmark；第一张卡不能等待 Spine |
 | REQ-DATA-001 | Equipment registry | 角色卡/`/妮姬 查询 练度` 数据 | 主线有 equipment 数据模型和安全渲染，但没有可宣称完整 registry；`tests/test_character_card_renderer.py` 只证明展示合同 | 未确认完整 equipment 字段和权威静态源 | `PARTIAL`；`DRAFT_PENDING_REVIEW` | 依观察到的字段补 registry；不推断未观测属性 |
 | REQ-DATA-002 | Cube registry | Profile / 角色数据 | 主线没有独立完整 cube registry；未知数据保持中性或缺失 | 未确认 cube 属性和等级公式 | `PARTIAL`；`NEEDS_LIVE_EVIDENCE` | 先取得字段合同，再做本地静态映射和异常测试 |
 | REQ-DATA-003 | Favorite Item | 角色资料/卡片（当前无独立完成入口） | 主线没有完整 Favorite Item 合同；Character Data V2 Draft PR #11 仅是后续审阅材料 | 未确认字段、稀有度和角色关系 | `DRAFT_PENDING_REVIEW`；`NEEDS_LIVE_EVIDENCE` | 审阅公开静态 registry，未知项不得显示伪造名称 |

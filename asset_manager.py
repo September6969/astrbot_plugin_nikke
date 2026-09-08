@@ -21,6 +21,7 @@ from PIL import Image, ImageDraw
 from .card_models import CharacterCardAssets, CharacterCardData
 from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
+from .spine_prerenderer import SpineJob, SpinePreRenderer
 from .static_registry import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
@@ -44,7 +45,15 @@ class AssetManager:
     REMOTE_DOWNLOAD_LIMIT = 4
     _remote_download_slots = threading.BoundedSemaphore(REMOTE_DOWNLOAD_LIMIT)
 
-    def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
+    def __init__(
+        self,
+        cache_dir: str | Path,
+        asset_dir: str | Path,
+        *,
+        remote: bool = False,
+        spine_renderer: SpinePreRenderer | None = None,
+        spine_budget_seconds: float = 5.0,
+    ):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
         self.remote = remote
@@ -52,7 +61,10 @@ class AssetManager:
         self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._inflight_lock = threading.Lock()
         self._inflight: dict[str, _InflightAsset] = {}
-        self._experimental_spine = None
+        if isinstance(spine_budget_seconds, bool) or not isinstance(spine_budget_seconds, (int, float)) or spine_budget_seconds <= 0:
+            raise ValueError("Spine 预渲染预算必须是正数")
+        self.spine_renderer = spine_renderer or SpinePreRenderer(self.cache_dir)
+        self.spine_budget_seconds = float(spine_budget_seconds)
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
         try:
@@ -212,6 +224,42 @@ class AssetManager:
             draw.line([(64, 67), (64, 110)], fill=color, width=4)
         return image
 
+    def _spine_cache_key(self, char_id: str, costume_id, runtime_version) -> str:
+        return self.nikke_db.compute_cache_key(
+            char_id,
+            costume_id,
+            source_version=str(runtime_version),
+            runtime_version=str(runtime_version),
+            renderer_version=self.spine_renderer.RENDERER_VERSION,
+        )
+
+    def _get_spine_portrait(self, char_id: str, costume_id) -> Image.Image | None:
+        """优先命中版本化 Spine PNG；miss 时仅在 runtime 可用时后台预热。"""
+        # 角色卡热路径只消费已有索引；索引刷新必须由独立预热动作完成，避免
+        # 多个并发出卡请求各自触发一次 l2d.json 网络请求。
+        runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
+        if runtime_version is None or runtime_version == "SPINE_VERSION_UNKNOWN":
+            return None
+        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version)
+        image = self.spine_renderer.cached_portrait(cache_key)
+        if image is not None:
+            return image
+        if not self.spine_renderer.is_available(runtime_version):
+            return None
+        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="aim")
+        if not urls:
+            return None
+        self.spine_renderer.enqueue(
+            SpineJob(
+                cache_key=cache_key,
+                character_id=char_id,
+                runtime_version=runtime_version,
+                bundle_urls=urls,
+                budget_seconds=self.spine_budget_seconds,
+            )
+        )
+        return None
+
     def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
         costume_state, _ = self.nikke_db.costume_cache_token(costume_id)
         # 默认服装可以使用历史本地 override；非默认服装禁止命中无皮肤维度的旧缓存。
@@ -226,7 +274,11 @@ class AssetManager:
         if image is None and char_id and char_id != "missing":
             image = self._load("portraits", char_id)
 
-        # 3. 远端 Nikke-DB 静态 Full Body CDN
+        # Spine 版本化 PNG 是完整人物来源；首次 miss 只后台预热，当前请求继续 fallback。
+        if image is None and char_id and char_id != "missing":
+            image = self._get_spine_portrait(char_id, costume_id)
+
+        # 4. 远端 Nikke-DB 静态 Full Body CDN fallback
         if image is None and char_id and char_id != "missing":
             url = self.nikke_db.get_full_body_url(resource_id, costume_id)
             if costume_state == "default":
@@ -241,25 +293,26 @@ class AssetManager:
         return image if image is not None else self.fallback("portrait")
 
     def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
-        """显式实验入口；普通角色卡不会导入、构造或探测 Spine。"""
-        from .experimental.spine_prerenderer import SpineJob, SpinePreRenderer
-
+        """兼容旧调用名；正式 backend 仍受 runtime、版本和队列预算约束。"""
         char_id = self.nikke_db.resolve_character_id(resource_id, costume_id)
         if char_id == "missing":
             return False
-        spine = SpinePreRenderer(self.cache_dir)
-        self._experimental_spine = spine
-        if not spine.is_available():
-            spine.queue.stop(wait=False)
+        runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
+        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="aim")
+        if runtime_version is None or not urls or not self.spine_renderer.is_available(runtime_version):
             return False
-        cache_key = self.nikke_db.compute_cache_key(char_id, costume_id)
-        prerender_path = spine.prerender_dir / f"{cache_key}.png"
-        if prerender_path.is_file():
-            spine.queue.stop(wait=False)
+        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version)
+        if self.spine_renderer.cached_portrait(cache_key) is not None:
             return False
-        version = self.nikke_db.resolve_spine_version(char_id)
-        spine.queue.enqueue(SpineJob(cache_key=cache_key, character_id=char_id, runtime_version=version))
-        return True
+        return self.spine_renderer.enqueue(
+            SpineJob(
+                cache_key=cache_key,
+                character_id=char_id,
+                runtime_version=runtime_version,
+                bundle_urls=urls,
+                budget_seconds=self.spine_budget_seconds,
+            )
+        )
 
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
         resource = self.registry.resolve("equipment", equipment_id)
@@ -449,10 +502,8 @@ class AssetManager:
             self._executor.shutdown(wait=False)
         except Exception:
             pass
-        spine = self._experimental_spine
-        if spine is not None:
-            try:
-                spine.queue.stop(wait=False)
-            except Exception:
-                pass
+        try:
+            self.spine_renderer.close(wait=False)
+        except Exception:
+            pass
 

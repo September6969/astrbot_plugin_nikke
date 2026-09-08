@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `8ecc316f1940ab08c5c9e34a9e0dc24d75ec1b51`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `492e1f56a759ef7d57bbb72d5a8a9d40a0e5a421`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -40,7 +40,7 @@
 - P0 静态 FB / Costume 主链：`feat/fb-static-mainline-v1`，从 `origin/main@c4f1755a50903f7d47ac8904715b61c880c4605b` 建立；已补 costume 字段贯通、严格空映射清单和普通路径零 Spine 合同，状态 `READY_OFFLINE`，PR #47 CI 全绿。
 - Costume 实际映射及完整角色目录覆盖：`NEEDS_LIVE_EVIDENCE`；没有制造映射，也没有把可构造 URL 当作远端存在性证据。
 - P1 单角色练度卡最终版：`feat/character-card-final-v1`；完成非透明像素三色主题、企业低透明水印、属性弱 accent、Abnormal 深紫黑、装备图标放大和六张合成预览，状态 `READY_OFFLINE`，PR #48 CI 全绿。
-- P1 卡片视觉：PR #48 已合并；P1 Item/Cube 完整性：PR #49 已合并；P2 Guide/Help 素材：PR #50 已合并；P4 Spine 隔离：PR #51 CI 全绿、待合并；按 #47 → #48 → #49/#50 → #51 评审/合并。
+- P1 卡片视觉：PR #48 已合并；P1 Item/Cube 完整性：PR #49 已合并；P2 Guide/Help 素材：PR #50 已合并；P4 Spine 隔离：PR #51 已并入当前 main。本轮正式 Spine backend 从最新 main 独立建立，不回退已合并隔离提交。
 - Raid / Campaign / Tower 既有离线主题已在当前 main 基线中具备合同、fixture 和行为测试；真实 canonical identity、赛季范围和账号进度仍标为 `NEEDS_LIVE_EVIDENCE`，本轮未重复制造现场证据。
 - 真实账号、QQ 发送与部署保持未授权/未执行。
 ## 六项 Guide / Help（已合并）
@@ -51,6 +51,8 @@
 
 - `test/item-resource-integrity-v1` 从 `origin/main@c4f1755a` 独立建立；补齐未登记、404、超时、损坏缓存与解码失败行为证据，状态 `READY_OFFLINE`，PR #49 已合并。
 - 未发现带来源证据的新映射，故没有扩充当前 4 个 Favorite Item / 8 个 Cube 清单；完整覆盖仍为 `NEEDS_LIVE_EVIDENCE`。
-## Spine 遗留隔离（待合并）
+## Spine 正式后端（当前独立主题）
 
-- `feat/spine-experimental-isolation` 从角色卡分支独立演进；实现已移入 `experimental/`，保留根兼容壳和专项测试，普通静态路径不导入或构造 Spine，状态 `EXPERIMENTAL / NEEDS_LIVE_EVIDENCE`，PR #51 CI 全绿。
+- `feat/spine-formal-backend-v1` 从 `origin/main@492e1f56` 独立建立；根目录实现正式依赖注入、版本匹配、bundle 白名单缓存、后台队列、版本化 PNG 与 FB/占位回退，`experimental/` 仅保留兼容导出层。
+- 编排层与合成 adapter 测试状态 `READY_OFFLINE`；具体 runtime、真实 bundle/素材许可、Linux headless 和 benchmark 状态为 `NEEDS_LIVE_EVIDENCE`，不因缺少现场证据阻塞离线开发。
+- 角色卡热路径只消费已有 L2D 索引，不为每个角色单独刷新索引；Spine cache miss 不同步等待，当前请求继续静态 FB/几何 fallback。

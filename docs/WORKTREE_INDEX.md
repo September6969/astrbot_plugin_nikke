@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-08。当前核验的远端基线为 `origin/main@8ecc316f1940ab08c5c9e34a9e0dc24d75ec1b51`；下表是本轮收口时的索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-08。当前核验的远端基线为 `origin/main@492e1f56a759ef7d57bbb72d5a8a9d40a0e5a421`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -32,4 +32,5 @@
 | P1 角色卡最终版 | PR #48 已合并 | `E:\_codex_work\nikke-character-card-final-v1` / `feat/character-card-final-v1`；依赖 #47 |
 | P1 Item/Cube 完整性 | PR #49 已合并 | `E:\_codex_work\nikke-item-resource-integrity-v1` / `test/item-resource-integrity-v1`；仅补行为矩阵，不制造资源映射 |
 | P2 Guide/Help 素材 | PR #50 已合并 | `E:\_codex_work\nikke-guide-assets-v1` / `feat/guide-assets-v1`；原件保留在 `E:\walkthrough` |
-| P4 Spine 隔离 | PR #51 待合并，CI 全绿 | `E:\_codex_work\nikke-spine-isolation-v1` / `feat/spine-experimental-isolation`；普通路径无 Spine 引用，实验入口保留兼容 shim |
+| P4 Spine 隔离 | PR #51 已并入当前 main | `E:\_codex_work\nikke-spine-isolation-v1` / `feat/spine-experimental-isolation`；历史隔离分支保留，不代表当前基线 |
+| Spine 正式后端 | 当前独立 Draft PR 主题 | `E:\_codex_work\nikke-spine-formal-v1` / `feat/spine-formal-backend-v1`；从 `origin/main@492e1f56` 建立，编排层离线就绪，runtime/许可/Linux 仍待现场证据 |

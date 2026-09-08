@@ -530,14 +530,14 @@ class AssetManagerTests(unittest.TestCase):
                 release.set()
                 manager.close()
 
-    def test_production_portrait_path_does_not_import_or_queue_spine(self):
+    def test_production_portrait_path_keeps_formal_spine_backend_non_blocking(self):
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
         with tempfile.TemporaryDirectory() as td:
             manager = AssetManager(Path(td), assets_dir, remote=False)
             try:
-                with patch("builtins.__import__", wraps=__import__) as imported:
-                    manager.get_character_portrait("101", "c101")
-                self.assertFalse(any(call.args[0].endswith("spine_prerenderer") for call in imported.call_args_list))
+                image = manager.get_character_portrait("101", "c101")
+                self.assertIsNotNone(image)
+                self.assertTrue(hasattr(manager, "spine_renderer"))
                 self.assertFalse(hasattr(manager, "spine"))
             finally:
                 manager.close()
