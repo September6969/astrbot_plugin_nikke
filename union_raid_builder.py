@@ -19,6 +19,11 @@ class UnionRaidBuilder:
         return ""
 
     @staticmethod
+    def _optional_text(value: Any) -> str:
+        """展示文本只接受去除首尾空白后的字符串，拒绝容器和隐式数值转换。"""
+        return value.strip() if isinstance(value, str) else ""
+
+    @staticmethod
     def _optional_integer(value: Any, *, clamp_negative: bool = False) -> int | None:
         """只接受明确的整型值；仅 HP 调用方保留负数归零边界。"""
         parsed: int | None = None
@@ -86,20 +91,15 @@ class UnionRaidBuilder:
             names = raw.get("name_localvalues", {})
             name = ""
             if isinstance(names, dict):
-                name = (
-                    names.get("zh-cn")
-                    or names.get("zh-tw")
-                    or names.get("zh_tw")
-                    or names.get("en")
-                    or names.get("ja")
-                    or names.get("ko")
-                    or ""
-                )
+                for locale in ("zh-cn", "zh-tw", "zh_tw", "en", "ja", "ko"):
+                    name = self._optional_text(names.get(locale))
+                    if name:
+                        break
             if not name:
-                name = str(raw.get("name_localkey") or f"Boss {boss_id}")
+                name = self._optional_text(raw.get("name_localkey")) or f"Boss {boss_id or '?'}"
 
             elements = raw.get("element_id", [])
-            element_list = [str(e) for e in elements if e not in (None, "")] if isinstance(elements, list) else []
+            element_list = [identifier for value in elements if (identifier := self._identifier(value))] if isinstance(elements, list) else []
 
             boss_items.append({
                 "boss_id": boss_id,
@@ -107,8 +107,8 @@ class UnionRaidBuilder:
                 "current_hp": current_hp,
                 "max_hp": max_hp,
                 "elements": element_list,
-                "icon_id": str(raw.get("icon_id")) if raw.get("icon_id") not in (None, "") else None,
-                "monster_model_id": str(raw.get("monster_model_id")) if raw.get("monster_model_id") not in (None, "") else None,
+                "icon_id": self._identifier(raw.get("icon_id")) or None,
+                "monster_model_id": self._identifier(raw.get("monster_model_id")) or None,
             })
 
         if partial_boss_records:

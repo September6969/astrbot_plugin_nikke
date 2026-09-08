@@ -190,6 +190,40 @@ class RaidIncrementATests(unittest.TestCase):
         self.assertEqual(data.bosses, [])
         self.assertIsNone(data.total_progress)
 
+    def test_malformed_display_metadata_falls_back_and_renders(self) -> None:
+        data = self.builder.build(
+            guild_name="合成联盟",
+            level_info_payload={
+                "level_info": [
+                    _level(
+                        {
+                            "boss_id": "safe-boss",
+                            "current_hp": 50,
+                            "max_hp": 100,
+                            "name_localvalues": {"zh-cn": ["伪名称"], "en": "  Safe Boss  "},
+                            "element_id": ["fire", {"fake": "wind"}, True, 7],
+                            "icon_id": {"fake": "icon"},
+                            "monster_model_id": ["fake-model"],
+                        }
+                    )
+                ]
+            },
+            fetched_at="2026-09-06 13:30",
+            plugin_version="test",
+        )
+
+        boss = data.bosses[0]
+        self.assertEqual(boss.name, "Safe Boss")
+        self.assertEqual(boss.elements, ["fire", "7"])
+        self.assertIsNone(boss.icon_id)
+        self.assertIsNone(boss.monster_model_id)
+        with tempfile.TemporaryDirectory() as directory:
+            path = UnionRaidRenderer(
+                Path(directory) / "cards", Path(__file__).resolve().parents[1] / "fonts"
+            ).render_raid_overview(data)
+            with Image.open(path) as image:
+                self.assertEqual(image.size[0], 1600)
+
     def test_ranking_calls_rows_returned_records_not_attacks(self) -> None:
         ranking = build_ranking(
             {"participate_data": [_attack("synthetic-openid", 10), _attack("synthetic-openid", 20)]}

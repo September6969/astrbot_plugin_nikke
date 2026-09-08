@@ -18,6 +18,7 @@
 | --- | --- |
 | `level_info` | 只有恰好一个字典项时才读取难度、等级和 Boss；多项、空项或非列表不取首项，标记 `UNKNOWN_COVERAGE`。 |
 | Boss ID | 仅接受非空文本或明确整数；布尔值、浮点、容器和空值视为坏 ID，保留返回记录但使覆盖未知并隐藏聚合，不任意删除记录或假装完整。 |
+| 展示元数据 | 名称只接受文本并按 locale 安全回退；元素、图标和模型只接受非空文本或明确整数，容器/布尔值不会被字符串化成伪标识；畸形元数据仍可完成 Builder→Renderer。 |
 | HP | 仅接受 `int` 或十进制整数字符串；`bool`、浮点、坏字符串、容器值为未知。既有负整数归零 clamp 语义保留。 |
 | 聚合 | 仅对一个无部分记录且 HP 完整的响应计算“已返回 Boss 加权进度”；从不称完整赛季或当前阶段总进度。 |
 | 排名 | 按当前响应内已返回记录的伤害字段聚合；显示“条返回记录”，不称真实攻击次数或“刀数”；空白身份、空/非标 Boss ID 或角色 ID 拒绝聚合。 |
@@ -32,14 +33,15 @@
 
 ## 本地验收与预览
 
-- Raid A 定向回归（`tests/test_raid_increment_a.py tests/test_raid_participants.py tests/test_union_raid.py`）：`24 passed, 2 warnings, 16 subtests passed`；额外覆盖坏 Boss ID 的保守解析，不把容器或浮点转换成伪 ID。
-- 当前源码全量回归：`python -m pytest -q` → `267 passed, 2 warnings, 59 subtests passed in 16.70s`。
+- Raid A 定向回归（`tests/test_raid_increment_a.py tests/test_raid_participants.py tests/test_union_raid.py`）：`25 passed, 2 warnings, 16 subtests passed`；额外覆盖坏 Boss ID 和畸形展示元数据的保守解析，不把容器或浮点转换成伪 ID。
+- 当前源码全量回归：`python -m pytest -q` → `268 passed, 2 warnings, 59 subtests passed in 17.54s`。
 - 当前静态/扩展回归：`python -m compileall -q .` → exit 0；`node --test tests/extension.test.cjs` → 3 passed；`git diff --check` → exit 0。
 - 本次恢复后的 PATH Python 为 `C:\Python314\python.exe`，不含 `pytest`；这是临时测试运行器缺少 CI 依赖，不等同于产品测试失败。PR 的 Python 3.10/3.11/3.12 CI 是最终独立验证。
 - 合成 PNG（未提交源码）：`E:\DevCache\nikke-card-preview\raid-increment-a-20260906\`。
   - 完整单项响应：范围文案显示“本次响应范围（非完整赛季）”，卡片无截断。
   - 多阶段项：不选数组首项，不展示 Boss 或聚合。
   - 重复 Boss：保留返回项，显示覆盖未知且不显示聚合。
+  - 畸形展示元数据：`E:\DevCache\nikke-card-preview\raid-increment-a-20260907\union_raid_2fad16a1b2ce.png`；实际查看确认名称安全回退为 `Safe Boss`，容器/布尔伪标识未显示，卡片无遮挡。
 
 所有预览均为离线合成输入，实际查看过 PNG；不能视为真实账号联调或资源授权。
 
