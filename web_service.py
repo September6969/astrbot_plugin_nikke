@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import secrets
+import stat
 import time
 from collections import defaultdict, deque
 from pathlib import Path
@@ -27,6 +29,16 @@ MAX_COOKIE_COUNT = 100
 MAX_COOKIE_HEADER_LENGTH = 32 * 1024
 EXTENSION_ORIGIN_RE = re.compile(r"^(?:chrome-extension|extension)://[a-z0-9]{16,64}$")
 SITE_ORIGIN = "https://nikke.irises777.xyz"
+
+
+def _is_regular_file(path: object) -> bool:
+    """以一次 lstat 判断普通文件，避免 readiness 检查跟随符号链接或产生检查间隙。"""
+    if not isinstance(path, Path):
+        return False
+    try:
+        return stat.S_ISREG(os.lstat(path).st_mode)
+    except (OSError, ValueError):
+        return False
 
 
 def public_error(exc: Exception) -> str:
@@ -111,8 +123,23 @@ class BindingWebService:
     async def options(self, _: web.Request) -> web.Response:
         return web.Response(status=204)
 
+    def _storage_ready(self) -> bool:
+        """只检查本地存储文件是否存在，不读取密钥内容或数据库内容。"""
+        database = getattr(self.store, "db_path", None)
+        secret_key = getattr(self.store, "key_path", None)
+        return all(_is_regular_file(path) for path in (database, secret_key))
+
     async def health(self, _: web.Request) -> web.Response:
-        return web.json_response({"ok": True, "service": "nikke-binding", "version": PLUGIN_VERSION})
+        ready = self._storage_ready()
+        return web.json_response(
+            {
+                "ok": ready,
+                "service": "nikke-binding",
+                "version": PLUGIN_VERSION,
+                "storage": "ready" if ready else "unavailable",
+            },
+            status=200 if ready else 503,
+        )
 
     async def create_session(self, request: web.Request) -> web.Response:
         """供受信任的机器人进程创建绑定会话，公网匿名请求不能调用。"""

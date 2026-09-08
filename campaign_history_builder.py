@@ -11,10 +11,26 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .campaign_history_models import ClearLineupStatus, StageClearMember, StageClearRecord
 from .campaign_stage_resolver import CampaignStage
+
+
+def _strict_non_negative_int(value: Any) -> int:
+    """只接受 JSON 整数或十进制整数字符串，拒绝布尔、小数和负数。"""
+    if isinstance(value, bool):
+        raise ValueError("布尔值不是数值字段")
+    if isinstance(value, int):
+        parsed = value
+    elif isinstance(value, str) and re.fullmatch(r"[0-9]+", value, flags=re.ASCII):
+        parsed = int(value)
+    else:
+        raise ValueError("数值字段必须是整数")
+    if parsed < 0:
+        raise ValueError("数值字段不能为负数")
+    return parsed
 
 
 class CampaignHistoryBuilder:
@@ -41,7 +57,32 @@ class CampaignHistoryBuilder:
         fetched_at: str = "",
         plugin_version: str = "",
     ) -> StageClearRecord:
+        if not isinstance(response, dict):
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
+
         code = response.get("code")
+        if isinstance(code, bool) or not isinstance(code, int):
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
         msg = str(response.get("msg") or "")
 
         if code == 1300017:
@@ -86,7 +127,20 @@ class CampaignHistoryBuilder:
         data = response.get("data")
         raw_list = data.get("list") if isinstance(data, dict) else None
 
-        if not isinstance(raw_list, list) or len(raw_list) == 0:
+        if not isinstance(data, dict) or not isinstance(raw_list, list):
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
+
+        if len(raw_list) == 0:
             return StageClearRecord(
                 mode=stage.mode,
                 chapter=stage.chapter,
@@ -94,6 +148,19 @@ class CampaignHistoryBuilder:
                 stage_id=stage.stage_id,
                 status=ClearLineupStatus.UNAVAILABLE,
                 status_message="该关卡暂无可查询的历史阵容",
+                commander_name=commander_name,
+                fetched_at=fetched_at,
+                plugin_version=plugin_version,
+            )
+
+        if len(raw_list) != 5:
+            return StageClearRecord(
+                mode=stage.mode,
+                chapter=stage.chapter,
+                stage_name=stage.name,
+                stage_id=stage.stage_id,
+                status=ClearLineupStatus.ERROR,
+                status_message="历史阵容数据结构异常，请稍后重试",
                 commander_name=commander_name,
                 fetched_at=fetched_at,
                 plugin_version=plugin_version,
@@ -111,10 +178,12 @@ class CampaignHistoryBuilder:
                 malformed = True
                 continue
             try:
-                tid = int(item["tid"])
-                level = int(item["lv"])
-                combat = int(item["combat"])
-                slot = int(item["slot"])
+                tid = _strict_non_negative_int(item["tid"])
+                level = _strict_non_negative_int(item["lv"])
+                combat = _strict_non_negative_int(item["combat"])
+                slot = _strict_non_negative_int(item["slot"])
+                if tid == 0 or slot not in {1, 2, 3, 4, 5}:
+                    raise ValueError("tid 或 slot 超出合同")
             except (ValueError, TypeError):
                 malformed = True
                 continue
