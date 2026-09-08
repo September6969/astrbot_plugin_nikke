@@ -51,6 +51,19 @@ class TowerTests(IsolatedAsyncioTestCase):
                     with self.assertRaises(ValueError):
                         TowerRegistry(self._write_snapshot(root, data))
 
+    def test_snapshot_contract_rejects_duplicate_json_keys(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "tower_floors.json"
+            path.write_text(
+                '{"source":"synthetic","source":"overwritten",'
+                '"retrieved_at":"2026-09-05",'
+                '"normalized_source_sha256":"' + ("a" * 64) + '",'
+                '"floors":{"tribe:1":{"stage_id":1,"standard_battle_power":1}}}',
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "JSON 键重复"):
+                TowerRegistry(path)
+
     def test_describe_rejects_noncanonical_input_without_guessing(self):
         with tempfile.TemporaryDirectory() as directory:
             registry = TowerRegistry(self._write_snapshot(Path(directory), self._snapshot()))

@@ -14,8 +14,22 @@ class TowerRegistry:
     _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
     def __init__(self, path: Path):
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=self._reject_duplicate_keys,
+        )
         self.source, self.updated_at, self.source_sha256, self.floors = self._parse_snapshot(data)
+
+    @staticmethod
+    def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        """拒绝重复 JSON 键，避免静默覆盖造成快照合同歧义。"""
+
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("塔层快照 JSON 键重复")
+            result[key] = value
+        return result
 
     @classmethod
     def _parse_snapshot(cls, data: object) -> tuple[str, str, str, dict[str, dict[str, int]]]:
