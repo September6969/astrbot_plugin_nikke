@@ -32,7 +32,7 @@
 | #23 | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | OPEN / Draft / CI green；head `f64d3e7`；CI `34186653879` |
 | #24 | `feat/storage-migration-v1` | Transactional SQLite schema migration | OPEN / Draft / CI green；head `7a9602b`；CI `34165229014` |
 | #25 | `feat/healthz-readiness-v1` | Healthz storage readiness contract | OPEN / Draft / CI green；head `1d3abc2`；CI `34165779139` |
-| #26 | `feat/log-privacy-v1` | Plugin log privacy hardening | OPEN / Draft / CI green；head `d1c60cd`；CI `34166397758` 四项全绿（Node、Python 3.10–3.12） |
+| #26 | `feat/log-privacy-v1` | Plugin log privacy hardening | OPEN / Draft / CI green；head `57da376`；CI `34187268406` 四项全绿（Node、Python 3.10–3.12） |
 | #27 | `feat/cache-cleanup-v1` | Safe offline cache cleanup | OPEN / Draft / CI green；head `577f328`；CI `34167069222` 四项全绿（Node、Python 3.10–3.12） |
 | #28 | `feat/release-metadata-v1` | Release metadata and configuration contract | OPEN / Draft / CI green；head `1f379d6`；CI `34109454981` |
 | #29 | `feat/caddy-hardening-v1` | Caddy example privacy hardening | OPEN / Draft / CI green；head `160cb25`；CI `34110061494` |
@@ -52,7 +52,7 @@
 
 | 主题 | 分支 | 基线 | 状态 |
 | --- | --- | --- | --- |
-| Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；本轮补充 PR #19 的 Python 3.13 证据及 PR #26 的 AstrBot 本地矩阵证据；当前 head 与 CI 以 PR #14 最新检查为权威 |
+| Roadmap status reconciliation | `feat/roadmap-ledger-v3` | `bada0b3` | Draft PR #14；台账与工作树索引已同步；本轮补充 PR #19 的 Python 3.13 证据及 PR #26 的日志隐私 JSON Cookie 上下文脱敏证据；当前 head 与 CI 以 PR #14 最新检查为权威 |
 | Post-Profile V2 status reconciliation | `feat/profile-post-merge-v1` | `bada0b3` | Draft PR #33；在既有 `PROFILE_V2_ACCEPTANCE.md` 合并状态记录之外，同步 `POST_MERGE_STATUS.md` 与 `POST_MERGE_PHASE2_PLAN.md`：当前入口明确 PR #6/#7 已合并、Profile 为 `READY_OFFLINE` 且现场证据仍独立；新增状态入口回归测试；本地专项 1 passed、全量 pytest 257 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；head `8bb9cd5`；CI `34143501124` 四项全绿；不访问真实账号、不部署 |
 | CDK batch idempotency contract reconciliation | `feat/cdk-batch-contract-v1` | `bada0b3` | Draft PR #34；确认主命令逐码复用 `action_runs`，run key 为 `cdk:{qq_id}:{game_uid}:{SHA256(code)}`，unknown/终态不自动重放，失败/过期可原子重领；更新 README/DEVELOPMENT_PLAN 并新增验收记录；本地专项 42 passed、12 subtests，全量 pytest 256 passed、43 subtests、2 warnings、Node 3 passed、compileall/diff check 通过；CI `34135996980` 四项全绿；未访问真实账号、未执行兑换或部署 |
 | Structured DailyTaskResult status contract | `feat/daily-result-contract-v1` | `bada0b3` | Draft PR #35；签到主链统一 `SUCCESS`、`ALREADY_DONE`、`PENDING`、`FAILED`、`RATE_LIMITED`、`COOKIE_EXPIRED`、`UNKNOWN_AFTER_ACTION`、`UNAVAILABLE`，持久化改为严格 JSON-safe 记录，旧/损坏记录不静默冒充成功；修复 `PENDING`/`UNAVAILABLE` 被误记为 success 后无法同日重检；本地定向 8 passed、全量 pytest 264 passed、43 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；head `0117651`；CI `34168517929` 四项全绿；不访问真实账号、不执行签到、不发送消息、不部署，Like/Browse 与现场证据仍未完成 |
@@ -73,7 +73,7 @@
 | Runtime health diagnostics | `feat/health-diagnostics-v1` | `bada0b3` | Draft PR #23；`/妮姬 管理 健康` 接入只读数据/缓存/临时文件/磁盘摘要，拒绝跟随数据根目录及父级路径符号链接，并将异常或不可表示磁盘容量降级为未知，不删除缓存、不输出路径或凭据；直接 runtime_health 边界检查、compileall/diff check 通过，完整 targeted wiring 因缺少 astrbot 未本地执行；CI 全量 Python 3.10 报告 263 passed、43 subtests、3 warnings，Python 3.11/3.12 与 Node 全绿；head `f64d3e7`；CI `34186653879` 四项全绿；仅合成数据，无现场/部署声明 |
 | Storage migration hardening | `feat/storage-migration-v1` | `bada0b3` | Draft PR #24；schema_meta 版本化、显式事务/rollback、旧 accounts 字段兼容；负数/小数/布尔/非数字版本拒绝且不规范化覆盖，未来 schema 拒绝降级；head `7a9602b`；CI `34165229014` 全绿；仅临时 SQLite，无生产 migration 声明 |
 | Healthz readiness | `feat/healthz-readiness-v1` | `bada0b3` | Draft PR #25；`/healthz` 仅在 SQLite 与密钥均为 lstat 普通文件时返回 200/ready，目录或符号链接返回 503/unavailable；head `1d3abc2`；CI `34165779139` 全绿；仅合成文件，无部署声明 |
-| Plugin log privacy | `feat/log-privacy-v1` | `bada0b3` | Draft PR #26；统一异常/动态日志文本脱敏，覆盖主流程、公告、素材、卡片、Spine、反馈与绑定错误摘要；JSON 字符串/数字标量敏感值及用户错误回复均不回显；本地 Python 3.10.11 + AstrBot 4.14.6 完整矩阵 `262 passed`、43 subtests、2 warnings；head `d1c60cd`；CI `34166397758` 四项全绿；warning 为 FAISS/NumPy 与基线注册 API 弃用提示；无真实账号/线上日志/部署声明 |
+| Plugin log privacy | `feat/log-privacy-v1` | `bada0b3` | Draft PR #26；统一异常/动态日志文本脱敏，覆盖主流程、公告、素材、卡片、Spine、反馈与绑定错误摘要；JSON 字符串/数字标量敏感值及用户错误回复均不回显；补齐 JSON Cookie 上下文 `game_token`、`game_gameid`、`x-common-params` 脱敏；本地当前缺少 AstrBot 运行依赖，未宣称完整矩阵，已完成直接脱敏断言、compileall/diff check；CI Python 3.12 报告 `263 passed`、43 subtests、2 warnings，四项全绿；head `57da376`；CI `34187268406`；warning 为 FAISS/NumPy 与基线注册 API 弃用提示；无真实账号/线上日志/部署声明 |
 | Safe offline cache cleanup | `feat/cache-cleanup-v1` | `bada0b3` | Draft PR #27；默认只读计划，显式 `--apply` 仅清理白名单缓存和公告缓存，保护 cards/SQLite/secret.key/扩展 ZIP；数据根目录、缓存目录和条目跳过符号链接，应用阶段复核根目录、白名单与保护路径，拒绝负数/NaN/无穷保留时长和当前时间；head `577f328`；CI `34167069222` 四项全绿；本地专项 6 passed、4 subtests，全量 pytest 262 passed、47 subtests、2 warnings，compileall、Node 2 文件语法检查和 diff check 通过；未在真实 data/nikke 应用清理 |
 | Release metadata and configuration | `feat/release-metadata-v1` | `bada0b3` | Draft PR #28；新增当前 main 基线 `0.1.8` CHANGELOG、14 项配置合同及版本/schema/文档一致性测试；head `1f379d6`；CI `34109454981` 全绿；本地 pytest 259 passed、57 subtests、Node 3 passed；未创建发行包或部署 |
 | Caddy example privacy | `feat/caddy-hardening-v1` | `bada0b3` | Draft PR #29；关闭示例 access log，避免 `/bind/{token}` 令牌进入反代日志；静态验证安全头、只读挂载、外部网络及无 6210 宿主机映射；head `160cb25`；CI `34110061494` 全绿；本地 pytest 258 passed、48 subtests、Node 3 passed；未部署 |

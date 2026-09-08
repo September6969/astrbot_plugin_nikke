@@ -29,7 +29,7 @@
 | `E:\_codex_work\health-diagnostics-v1\astrbot_plugin_nikke` | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | Draft PR #23；head `f64d3e7`；CI `34186653879`；工作树 clean；父级路径链接和不可表示磁盘值边界已覆盖 |
 | `E:\_codex_work\storage-migration-v1\astrbot_plugin_nikke` | `feat/storage-migration-v1` | Transactional SQLite schema migration | Draft PR #24；head `7a9602b`；CI `34165229014`；工作树 clean |
 | `E:\_codex_work\healthz-readiness-v1\astrbot_plugin_nikke` | `feat/healthz-readiness-v1` | Healthz storage readiness contract | Draft PR #25；head `1d3abc2`；CI `34165779139`；工作树 clean |
-| `E:\_codex_work\log-privacy-v1-wt\astrbot_plugin_nikke` | `feat/log-privacy-v1` | Plugin log privacy hardening | Draft PR #26；head `d1c60cd`；CI `34166397758` 四项全绿；本地 Python 3.10 + AstrBot 完整测试 262 passed；工作树 clean |
+| `E:\_codex_work\log-privacy-v1-wt\astrbot_plugin_nikke` | `feat/log-privacy-v1` | Plugin log privacy hardening | Draft PR #26；head `57da376`；CI `34187268406` 四项全绿；补齐 JSON Cookie 上下文 `game_token`、`game_gameid`、`x-common-params` 脱敏；当前本机缺少 AstrBot，未宣称本地完整矩阵；工作树 clean |
 | `E:\_codex_work\cache-cleanup-v1-wt\astrbot_plugin_nikke` | `feat/cache-cleanup-v1` | Safe offline cache cleanup | Draft PR #27；head `577f328`；CI `34167069222` 四项全绿；本地专项 6 passed、全量 pytest 262 passed；工作树 clean |
 | `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1f379d6`；CI `34109454981`；工作树 clean |
 | `E:\_codex_work\caddy-hardening-v1-wt\astrbot_plugin_nikke` | `feat/caddy-hardening-v1` | Caddy example privacy hardening | Draft PR #29；head `160cb25`；CI `34110061494`；工作树 clean |
