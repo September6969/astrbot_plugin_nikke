@@ -20,7 +20,7 @@
 | #11 | `feat/character-data-v2` | Character Data V2 Increment A | OPEN / Draft / CI green；head `57d292d`；CI `34170484699` 四项全绿（Node、Python 3.10–3.12） |
 | #12 | `feat/spine-spike-v2` | Spine technical spike | OPEN / Draft / CI green；head `e5b9efc`；CI `34149003554` |
 | #13 | `feat/voice-mapping-v2` | Voice mapping public research | OPEN / Draft / CI green；head `68138bc`；CI `34115632353` |
-| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；台账与工作树索引已同步；当前 head 与 CI 以 PR #14 最新检查为权威 |
+| #14 | `feat/roadmap-ledger-v3` | Roadmap status reconciliation | OPEN / Draft；台账与工作树索引已同步；当前 head `53e76c6`；CI `34187474543` 四项全绿 |
 | #15 | `feat/campaign-history-contract-v2` | Campaign History numeric contract | OPEN / Draft / CI green；head `fe86c12`；CI `34171036388` 四项全绿（Node、Python 3.10–3.12） |
 | #16 | `feat/campaign-resource-lifecycle-v2` | Campaign renderer asset lifecycle | OPEN / Draft / CI green；head `d7f7d88`；CI `34171514608` |
 | #17 | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | OPEN / Draft / CI green；head `28b8dfb`；CI `34156636777` |
@@ -34,7 +34,7 @@
 | #25 | `feat/healthz-readiness-v1` | Healthz storage readiness contract | OPEN / Draft / CI green；head `1d3abc2`；CI `34165779139` |
 | #26 | `feat/log-privacy-v1` | Plugin log privacy hardening | OPEN / Draft / CI green；head `57da376`；CI `34187268406` 四项全绿（Node、Python 3.10–3.12） |
 | #27 | `feat/cache-cleanup-v1` | Safe offline cache cleanup | OPEN / Draft / CI green；head `577f328`；CI `34167069222` 四项全绿（Node、Python 3.10–3.12） |
-| #28 | `feat/release-metadata-v1` | Release metadata and configuration contract | OPEN / Draft / CI green；head `1f379d6`；CI `34109454981` |
+| #28 | `feat/release-metadata-v1` | Release metadata and configuration contract | OPEN / Draft / CI green；head `1ee60a9`；CI `34187676896` 四项全绿（Node、Python 3.10–3.12） |
 | #29 | `feat/caddy-hardening-v1` | Caddy example privacy hardening | OPEN / Draft / CI green；head `160cb25`；CI `34110061494` |
 | #30 | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | OPEN / Draft / CI green；head `a1191d8`；CI `34167575507` 四项全绿（Node、Python 3.10–3.12） |
 | #31 | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | OPEN / Draft / CI green；head `a824b69`；CI `34167894829` 四项全绿（Node、Python 3.10–3.12） |
@@ -75,7 +75,7 @@
 | Healthz readiness | `feat/healthz-readiness-v1` | `bada0b3` | Draft PR #25；`/healthz` 仅在 SQLite 与密钥均为 lstat 普通文件时返回 200/ready，目录或符号链接返回 503/unavailable；head `1d3abc2`；CI `34165779139` 全绿；仅合成文件，无部署声明 |
 | Plugin log privacy | `feat/log-privacy-v1` | `bada0b3` | Draft PR #26；统一异常/动态日志文本脱敏，覆盖主流程、公告、素材、卡片、Spine、反馈与绑定错误摘要；JSON 字符串/数字标量敏感值及用户错误回复均不回显；补齐 JSON Cookie 上下文 `game_token`、`game_gameid`、`x-common-params` 脱敏；本地当前缺少 AstrBot 运行依赖，未宣称完整矩阵，已完成直接脱敏断言、compileall/diff check；CI Python 3.12 报告 `263 passed`、43 subtests、2 warnings，四项全绿；head `57da376`；CI `34187268406`；warning 为 FAISS/NumPy 与基线注册 API 弃用提示；无真实账号/线上日志/部署声明 |
 | Safe offline cache cleanup | `feat/cache-cleanup-v1` | `bada0b3` | Draft PR #27；默认只读计划，显式 `--apply` 仅清理白名单缓存和公告缓存，保护 cards/SQLite/secret.key/扩展 ZIP；数据根目录、缓存目录和条目跳过符号链接，应用阶段复核根目录、白名单与保护路径，拒绝负数/NaN/无穷保留时长和当前时间；head `577f328`；CI `34167069222` 四项全绿；本地专项 6 passed、4 subtests，全量 pytest 262 passed、47 subtests、2 warnings，compileall、Node 2 文件语法检查和 diff check 通过；未在真实 data/nikke 应用清理 |
-| Release metadata and configuration | `feat/release-metadata-v1` | `bada0b3` | Draft PR #28；新增当前 main 基线 `0.1.8` CHANGELOG、14 项配置合同及版本/schema/文档一致性测试；head `1f379d6`；CI `34109454981` 全绿；本地 pytest 259 passed、57 subtests、Node 3 passed；未创建发行包或部署 |
+| Release metadata and configuration | `feat/release-metadata-v1` | `bada0b3` | Draft PR #28；新增当前 main 基线 `0.1.8` CHANGELOG、14 项配置键/类型/默认值/风险合同及版本/schema/文档一致性测试；本地 Python 3.10 专项 3 passed、compileall/diff check 通过；CI `34187676896` 四项全绿（Python 3.10/3.11/3.12 均 259 passed、57 subtests，warnings 3/3/2；Node 3 passed）；head `1ee60a9`；未创建发行包或部署 |
 | Caddy example privacy | `feat/caddy-hardening-v1` | `bada0b3` | Draft PR #29；关闭示例 access log，避免 `/bind/{token}` 令牌进入反代日志；静态验证安全头、只读挂载、外部网络及无 6210 宿主机映射；head `160cb25`；CI `34110061494` 全绿；本地 pytest 258 passed、48 subtests、Node 3 passed；未部署 |
 | Upgrade/rollback preflight | `feat/upgrade-preflight-v1` | `bada0b3` | Draft PR #30；只读检查 SQLite integrity/schema、数据库与 `secret.key` 成对存在、可选备份集和磁盘余量，输出 READY/MIGRATION_REQUIRED/BLOCKED；数据根目录和备份根目录拒绝符号链接，不读取外部目标；head `a1191d8`；CI `34167575507` 四项全绿；本地专项 8 passed、全量 pytest 264 passed、43 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；不执行迁移/回滚/复制/删除/生产写入 |
 | Final product review evidence matrix | `feat/requirement-evidence-matrix-v1` | `bada0b3` | Draft PR #31；覆盖路线图 27 个 `REQ-*`，区分主线代码/接线、Draft PR、离线测试、现场证据和人工授权；补充 `PARTIAL` 状态定义与逐行七列结构回归；head `a824b69`；CI `34167894829` 四项全绿；本地专项 3 passed、全量 pytest 259 passed、43 subtests、2 warnings，Node 3 passed、compileall/diff check 通过；不执行真实账号/消息/部署/生产 migration/rollback |

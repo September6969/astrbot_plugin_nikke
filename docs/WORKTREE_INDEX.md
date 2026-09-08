@@ -31,7 +31,7 @@
 | `E:\_codex_work\healthz-readiness-v1\astrbot_plugin_nikke` | `feat/healthz-readiness-v1` | Healthz storage readiness contract | Draft PR #25；head `1d3abc2`；CI `34165779139`；工作树 clean |
 | `E:\_codex_work\log-privacy-v1-wt\astrbot_plugin_nikke` | `feat/log-privacy-v1` | Plugin log privacy hardening | Draft PR #26；head `57da376`；CI `34187268406` 四项全绿；补齐 JSON Cookie 上下文 `game_token`、`game_gameid`、`x-common-params` 脱敏；当前本机缺少 AstrBot，未宣称本地完整矩阵；工作树 clean |
 | `E:\_codex_work\cache-cleanup-v1-wt\astrbot_plugin_nikke` | `feat/cache-cleanup-v1` | Safe offline cache cleanup | Draft PR #27；head `577f328`；CI `34167069222` 四项全绿；本地专项 6 passed、全量 pytest 262 passed；工作树 clean |
-| `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1f379d6`；CI `34109454981`；工作树 clean |
+| `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1ee60a9`；CI `34187676896` 四项全绿；配置键/类型/默认值合同专项 3 passed；工作树 clean |
 | `E:\_codex_work\caddy-hardening-v1-wt\astrbot_plugin_nikke` | `feat/caddy-hardening-v1` | Caddy example privacy hardening | Draft PR #29；head `160cb25`；CI `34110061494`；工作树 clean |
 | `E:\_codex_work\upgrade-preflight-v1-wt\astrbot_plugin_nikke` | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | Draft PR #30；head `a1191d8`；CI `34167575507` 四项全绿；本地专项 8 passed、全量 pytest 264 passed；工作树 clean |
 | `E:\_codex_work\requirement-evidence-matrix-v1-wt\astrbot_plugin_nikke` | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | Draft PR #31；head `a824b69`；CI `34167894829` 四项全绿；本地专项 3 passed、全量 pytest 259 passed；工作树 clean |
