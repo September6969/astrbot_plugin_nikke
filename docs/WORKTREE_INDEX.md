@@ -30,3 +30,4 @@
 | --- | --- | --- |
 | P0 静态 FB / Costume | 开发中 | `E:\_codex_work\nikke-fb-static-v1` / `feat/fb-static-mainline-v1`；基线 `origin/main@c4f1755a`，普通出卡不进入 Spine |
 | P1 单角色练度卡最终版 | 开发中（依赖 P0） | `E:\_codex_work\nikke-character-card-final-v1` / `feat/character-card-final-v1`；stacked 于 P0，不冒充独立 main 基线 |
+| P4 Spine 遗留隔离 | 开发中（依赖 P0/P1） | `E:\_codex_work\nikke-spine-isolation-v1` / `feat/spine-experimental-isolation`；实现位于 `experimental/`，不接回普通静态卡 |

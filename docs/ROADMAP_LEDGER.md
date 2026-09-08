@@ -41,3 +41,4 @@
 - Costume 实际映射及完整角色目录覆盖：`NEEDS_LIVE_EVIDENCE`；没有制造映射，也没有把可构造 URL 当作远端存在性证据。
 - 后续 P1–P4 继续按依赖拆分；真实账号、QQ 发送与部署保持未授权/未执行。
 - P1 单角色练度卡最终版：stacked 分支 `feat/character-card-final-v1`；完成非透明像素三色主题、企业低透明水印、属性弱 accent、Abnormal 深紫黑、装备图标放大和六张合成预览，状态 `READY_OFFLINE`。
+- P4 Spine 遗留隔离：stacked 分支 `feat/spine-experimental-isolation`；实现移入 `experimental/`，保留兼容壳和专项测试；普通静态路径零引用，状态 `EXPERIMENTAL / NEEDS_LIVE_EVIDENCE`。
