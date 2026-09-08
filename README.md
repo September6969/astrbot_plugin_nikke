@@ -63,6 +63,8 @@ python -m astrbot_plugin_nikke.scripts.backup_nikke_data \
 
 该命令只读取数据库和密钥，不连接网络；源数据目录、两个源文件和备份输出目录不能是符号链接，备份目录不能位于源目录内，已有同名备份不会覆盖。恢复前请人工确认目标环境和文件权限。
 
+管理员可发送 `/妮姬 管理 健康` 查看本地数据、缓存临时文件和磁盘容量摘要。健康诊断只读，不会自动删除缓存，不显示绝对路径、Cookie 或账号标识。
+
 启动时会在本地 SQLite 事务中执行兼容 schema migration；检测到更高版本 schema 会拒绝启动，不会自动降级或覆盖数据。真实生产数据库迁移仍需人工授权和备份。
 
 若绑定域名在本地代理下出现 `SSL_connect error 5`，可从 [GitHub Releases](https://github.com/September6969/astrbot_plugin_nikke/releases) 下载同一扩展包；不要关闭浏览器证书校验。
