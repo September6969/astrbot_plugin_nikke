@@ -8,10 +8,24 @@ from PIL import Image
 from astrbot_plugin_nikke.asset_manager import AssetManager
 from astrbot_plugin_nikke.card_models import EquipmentOption, OptionSummary
 from astrbot_plugin_nikke.character_card_renderer import CharacterCardRenderer
+from astrbot_plugin_nikke.card_theme import character_theme
 from astrbot_plugin_nikke.tests.test_card_builder import build_card
 
 
 class HorizontalRendererTests(unittest.TestCase):
+    def test_costume_is_used_when_renderer_fetches_portrait_directly(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(__file__).resolve().parents[1]
+            manager = AssetManager(td, td)
+            renderer = CharacterCardRenderer(td, root / "fonts", manager)
+            card = build_card()
+            card.costume_id = "skin_01"
+            with patch.object(manager, "get_character_portrait", return_value=Image.new("RGBA", (400, 900), "pink")) as portrait:
+                renderer.draw_character_area(
+                    Image.new("RGBA", (1800, 1000)), card, character_theme("TETRA", "Fire")
+                )
+            portrait.assert_called_once_with(card.name_code, card.resource_id, "skin_01")
+
     def test_portrait_empty_equipment_and_long_names(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(__file__).resolve().parents[1]
