@@ -27,3 +27,5 @@ pytest -q tests/test_data_backup.py
 ```
 
 测试覆盖数据库内容可恢复、密钥字节保持一致、manifest 文件合同、禁止源目录内备份、禁止同名覆盖、不可用输出目录、损坏 SQLite 和符号链接输入的统一错误语义。备份密钥文件会明确收紧为 `600`（在 Windows 上仅作平台允许的权限映射）。测试只使用临时合成 SQLite 与合成密钥；未读取或写入真实 `data/nikke`，没有现场证据或部署声明。
+
+本轮修复提交：`b841bbb`。本地专项为 `4 passed`；CI 运行 `34172817238` 对最终代码四项全绿，Python 3.10 全量 `260 passed、43 subtests、3 warnings`，Python 3.11/3.12 与 Node 扩展检查均成功；`compileall`、`git diff --check` 通过。
