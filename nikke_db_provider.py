@@ -29,6 +29,7 @@ class NikkeDbProvider:
 
     NIKKE_DB_ID_OVERRIDES: dict[str, str] = {}
     COSTUME_OVERRIDES: dict[str, str] = {}
+    _ID_PATTERN = re.compile(r"[a-z0-9]+(?:[_-][a-z0-9]+)*")
 
     def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
         self.cache_dir = Path(cache_dir)
@@ -62,9 +63,19 @@ class NikkeDbProvider:
         self._failed[key] = time.monotonic() + (duration if duration is not None else self.NEGATIVE_CACHE_TTL)
 
     @classmethod
+    def _normalize_id_component(cls, value: object) -> str:
+        if isinstance(value, bool):
+            return ""
+        if type(value) is int:
+            return str(value) if value >= 0 else ""
+        if not isinstance(value, str):
+            return ""
+        candidate = value.strip().lower()
+        return candidate if cls._ID_PATTERN.fullmatch(candidate) else ""
+
+    @classmethod
     def normalize_resource_id(cls, resource_id: int | str) -> str:
-        s = str(resource_id or "").strip().lower()
-        s = re.sub(r"[^a-z0-9_-]", "", s)
+        s = cls._normalize_id_component(resource_id)
         if s.startswith("c") and s[1:].isdigit():
             return s
         if s.isdigit():
@@ -72,22 +83,26 @@ class NikkeDbProvider:
         return s if s else "missing"
 
     def resolve_character_id(self, resource_id: int | str, costume_id: int | str | None = None) -> str:
-        res_str = str(resource_id or "").strip()
+        res_str = self._normalize_id_component(resource_id)
+        if not res_str:
+            return "missing"
         default_id = self.NIKKE_DB_ID_OVERRIDES.get(res_str) or self.normalize_resource_id(res_str)
 
-        if costume_id is not None and str(costume_id).strip():
-            cid_str = str(costume_id).strip()
+        cid_str = self._normalize_id_component(costume_id)
+        if cid_str:
             mapped = self.COSTUME_OVERRIDES.get(cid_str) or self.costume_map.get(cid_str)
-            if mapped and isinstance(mapped, str):
-                return mapped.strip()
+            normalized_mapping = self._normalize_id_component(mapped)
+            if normalized_mapping:
+                return normalized_mapping
 
         return default_id
 
     def get_full_body_url(self, resource_id: int | str, costume_id: int | str | None = None, pose: str = "00") -> str:
         char_id = self.resolve_character_id(resource_id, costume_id)
-        if not char_id or char_id == "missing":
+        pose_id = self._normalize_id_component(pose)
+        if not char_id or char_id == "missing" or not pose_id:
             return ""
-        return f"{self.CDN}/FB/{char_id}_{pose}.png"
+        return f"{self.CDN}/FB/{char_id}_{pose_id}.png"
 
     @staticmethod
     def compute_cache_key(
@@ -174,7 +189,10 @@ class NikkeDbProvider:
 
     def resolve_spine_bundle_urls(self, character_id: str, action: str = "aim") -> dict[str, str]:
         char_id = self.normalize_resource_id(character_id)
-        base = f"{self.L2D_CDN}/{char_id}/{action}"
+        action_id = self._normalize_id_component(action)
+        if char_id == "missing" or not action_id:
+            return {}
+        base = f"{self.L2D_CDN}/{char_id}/{action_id}"
         return {
             "skel": f"{base}/{char_id}_00.skel",
             "atlas": f"{base}/{char_id}_00.atlas",

@@ -27,3 +27,17 @@ class RankingTests(TestCase):
         for rows in [None, [None], [{}], [dict(attack("fake", 1), squad=[])], [dict(attack("fake", 1), total_damage="bad")]]:
             with self.assertRaises(ValueError):
                 build_ranking({"participate_data": rows})
+
+    def test_blank_identity_and_boss_or_character_ids_are_rejected(self):
+        for row in [
+            attack("   ", 1),
+            dict(attack("fake", 1), boss_id=""),
+            dict(attack("fake", 1), boss_id=None),
+            dict(attack("fake", 1), squad=[
+                dict(tid="", lv=100, combat=1000, slot=slot)
+                for slot in range(1, 6)
+            ]),
+        ]:
+            with self.subTest(row=row):
+                with self.assertRaises(ValueError):
+                    build_ranking({"participate_data": [row]})
