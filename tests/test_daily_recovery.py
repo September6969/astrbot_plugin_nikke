@@ -4,6 +4,7 @@ import asyncio
 from unittest import IsolatedAsyncioTestCase
 
 from astrbot_plugin_nikke.client import CookieExpired
+from astrbot_plugin_nikke.daily_models import DailyTaskStatus
 from astrbot_plugin_nikke.main import NikkePlugin
 
 
@@ -71,10 +72,10 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         plugin.config = {"enable_daily_actions": True}
         account = {"qq_id": "10001", "nickname": "测试指挥官"}
 
-        name, detail = await plugin._run_daily_for_account(account, "2026-09-07")
+        result = await plugin._run_daily_for_account(account, "2026-09-07")
 
-        self.assertEqual(name, "测试指挥官")
-        self.assertIn("签到成功", detail)
+        self.assertEqual(result.account_name, "测试指挥官")
+        self.assertIn("签到成功", result.detail)
         self.assertLess(store.events.index("claim:signin"), store.events.index("signin-read"))
         self.assertLess(store.events.index("claim:signin"), store.events.index("signin-write"))
 
@@ -89,10 +90,11 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         plugin.config = {"enable_daily_actions": True}
         account = {"qq_id": "10001", "nickname": "测试指挥官"}
 
-        name, detail = await plugin._run_daily_for_account(account, "2026-09-07")
+        result = await plugin._run_daily_for_account(account, "2026-09-07")
 
-        self.assertEqual(name, "测试指挥官")
-        self.assertIn("恢复核验", detail)
+        self.assertEqual(result.account_name, "测试指挥官")
+        self.assertEqual(result.status, DailyTaskStatus.ALREADY_DONE)
+        self.assertIn("恢复核验", result.detail)
         self.assertNotIn("signin-write", store.events)
         self.assertEqual(store.finished[run_key][0], "success")
 
@@ -107,10 +109,10 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         plugin.config = {"enable_daily_actions": True}
         account = {"qq_id": "10001", "nickname": "测试指挥官"}
 
-        name, detail = await plugin._run_daily_for_account(account, "2026-09-07")
+        result = await plugin._run_daily_for_account(account, "2026-09-07")
 
-        self.assertEqual(name, "测试指挥官")
-        self.assertIn("未自动重发", detail)
+        self.assertEqual(result.account_name, "测试指挥官")
+        self.assertIn("未自动重发", result.detail)
         self.assertNotIn("signin-write", store.events)
         self.assertEqual(store.finished[signin_key][0], "unknown")
 
@@ -125,10 +127,10 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         plugin.config = {"enable_daily_actions": True}
         account = {"qq_id": "10001", "nickname": "测试指挥官"}
 
-        name, detail = await plugin._run_daily_for_account(account, "2026-09-07")
+        result = await plugin._run_daily_for_account(account, "2026-09-07")
 
-        self.assertEqual(name, "测试指挥官")
-        self.assertEqual(detail, "登录有效；签到成功")
+        self.assertEqual(result.account_name, "测试指挥官")
+        self.assertEqual(result.detail, "登录有效；签到成功")
         self.assertEqual(store.runs[signin_key]["status"], "success")
         self.assertEqual(store.runs[signin_key]["detail"], "登录有效；签到成功")
         self.assertEqual(store.finished["2026-09-07:10001:daily"][0], "success")
@@ -147,10 +149,10 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         plugin.config = {"enable_daily_actions": True}
         account = {"qq_id": "10001", "nickname": "测试指挥官"}
 
-        name, detail = await plugin._run_daily_for_account(account, "2026-09-07")
+        result = await plugin._run_daily_for_account(account, "2026-09-07")
 
-        self.assertEqual(name, "测试指挥官")
-        self.assertIn("重新绑定", detail)
+        self.assertEqual(result.account_name, "测试指挥官")
+        self.assertIn("重新绑定", result.detail)
         self.assertEqual(store.invalid, ["10001"])
         self.assertEqual(store.finished[signin_key][0], "expired")
         self.assertEqual(store.finished[run_key][0], "expired")
