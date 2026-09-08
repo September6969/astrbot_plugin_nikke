@@ -15,3 +15,10 @@
 - 版本号以 `_version.py` 的 `PLUGIN_VERSION` 为源，并必须与 `metadata.yaml` 一致。
 - 配置项以 `_conf_schema.json` 为合同，默认值和安全边界见 [配置合同](docs/CONFIGURATION_ACCEPTANCE.md)。
 - 必须通过 CI 的 Python 3.10/3.11/3.12 与 Node 检查；测试和合成预览不能替代真实账号、消息发送或部署证据。
+
+## 2026-09-08 路线图收口补充
+
+- PR #52/#53：正式 Spine 编排、官方 Spine 4.1 headless worker Docker 构建、受限 RGBA adapter、严格版本匹配和静态 FB/占位回退进入 main；服务器实构建、合法 bundle、生产许可和 benchmark 仍待现场证据。
+- PR #54：Equipment/Cube/Favorite Item/Costume registry 统一来源、核验日期、SHA-256 和许可边界；`assets/costumes.json` 保持空表，不猜测服装映射。
+- PR #55：Poke Voice 正式接入本地音频 → 精确证据映射的官方动态资源 → 文本回退；single-flight、4/5 秒预算、24 小时源缓存、ffprobe/ffmpeg 24kHz mono WAV 和生命周期回收已覆盖离线合同。
+- 以上代码主题均已合并且当前无开放 PR；真实账号读取/写入、QQ Record 送达、生产部署、资源授权和服务器现场 runtime 仍未被离线证据替代。

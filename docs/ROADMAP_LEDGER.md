@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `09821816f7489885f4fb33045fd56fe39adda1d3`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `2f969756b18ad7e28c41564b07ba0aa60b0dc59d`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -81,3 +81,10 @@
 - `VoiceMapRegistry` 要求 `character + costume + locale` 完整精确键、HTTPS 来源和核验日期；`assets/voice_poke_map.json` 当前保持空表，未把剧情语音或 Alice 映射猜成 Poke 语音。
 - `VoicePipeline` 共享下载/编码任务，响应预算为 4 秒、最大 5 秒；插件关闭时回收 pipeline、provider 和 encoder。工具缺失或动态映射不存在时保持文本回退。
 - 离线状态目标为 `READY_OFFLINE`；角色/服装映射、资源授权、NapCat/OneBot 实际 Record 播放和 QQ 送达仍为 `NEEDS_LIVE_EVIDENCE`。
+
+## 最终回归与发布准备（当前独立主题）
+
+- `feat/final-acceptance-v1` 从 `origin/main@2f969756b18ad7e28c41564b07ba0aa60b0dc59d` 建立；核对 README、CHANGELOG、配置合同、Caddy/HTTPS 示例、healthz、backup、upgrade preflight、日志隐私、shutdown 和资源生命周期。
+- 新增 `docs/RELEASE_CHECKLIST.md` 与 `docs/FINAL_ACCEPTANCE_REPORT.md`，集中列出已合并 PR、离线测试、当前无开放 PR、现场阻塞原因和最小人工动作。
+- 本次 `ssh serv` 复核在 banner 阶段超时；不修改现有 `astrbot`、`napcat`、`nikke-caddy` 容器，不把旧快照当本次现场证据。
+- 本主题状态为 `READY_OFFLINE`；真实账号、QQ Record 送达、Spine 实构建/合法 bundle/许可、Costume/Voice 映射、部署、迁移和回滚仍按具体条目标为 `NEEDS_LIVE_EVIDENCE` 或 `NEEDS_HUMAN_DECISION`。

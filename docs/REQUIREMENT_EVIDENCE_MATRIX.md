@@ -46,14 +46,14 @@
 | REQ-DATA-004 | Skill | `/妮姬 查询 资料 <角色名>`（字段覆盖受限） | 主线保留角色资料框架，未证明完整 skill registry；不对缺失字段补公式 | 未确认 skill 字段和版本覆盖 | `PARTIAL`；`NEEDS_LIVE_EVIDENCE` | 以实际观察到的字段为最小合同，补离线异常测试 |
 | REQ-DATA-005 | Costume | 角色资源/角色资料 | `nikke_db_provider.py` 有 costume-aware cache key；PR #53/当前 registry 合同保持 `costumes.json` 空表，精确 ID/value 校验、manifest 来源/hash 和 unknown/invalid 隔离已覆盖 | 未确认完整 skin 映射、CDN 存在性和资源授权 | `IMPLEMENTED / READY_OFFLINE`（合同）；`NEEDS_LIVE_EVIDENCE` / `NEEDS_HUMAN_DECISION`（映射、素材、授权） | 只在 API costume ID → Nikke-DB asset ID 来源证据齐全时补映射，不回退默认服装 |
 | REQ-GUIDE-001 | Guide 框架 | `/妮姬 攻略 [分类]` | `guide_registry.py` 保留来源、作者、许可、版本和分页校验；无授权素材时保持占位 | 路线图明确禁止自动抓第三方内容、下载图片或生成正式攻略 | `DEFERRED_BY_USER`；非当前 release 阻塞项 | 等用户提供/授权素材；不为填矩阵而接入第三方内容 |
-| REQ-RELEASE-001 | 部署、升级、回滚 | Docker/Caddy、`/healthz`、离线运维脚本 | 主线已有基础部署与健康入口；备份、迁移、日志、清理、版本、Caddy、upgrade preflight 分别在 Draft PR #22–#30，均未进入 main | 未部署、未改 ruleset、未对生产 DB migration/rollback；需人工授权 | `DRAFT_PENDING_REVIEW`；`NEEDS_HUMAN_DECISION` | 审阅各独立 PR；生产升级前须有授权、备份、回滚演练和现场证据 |
+| REQ-RELEASE-001 | 部署、升级、回滚 | Docker/Caddy、`/healthz`、离线运维脚本 | 主线已有 `deploy/Caddyfile`、Caddy compose、`/healthz` readiness、backup、upgrade preflight、cache cleanup、shutdown、日志隐私和配置验收；`docs/RELEASE_CHECKLIST.md` 与 `docs/FINAL_ACCEPTANCE_REPORT.md` 汇总收口 | `ssh serv` 本次在 SSH banner 阶段超时；未部署、未改 ruleset、未对生产 DB migration/rollback；需人工授权 | `IMPLEMENTED / READY_OFFLINE`；`NEEDS_LIVE_EVIDENCE` / `NEEDS_HUMAN_DECISION` | 恢复 SSH 后执行只读容器/健康/日志检查；生产升级前须有授权、备份、回滚演练和现场证据 |
 
 ## 当前验收结论
 
 1. `/妮姬 我的` 的代码、命令接线、离线行为测试和合成图片证据已经在主线达到 `READY_OFFLINE`；真实账号兼容仍是 `NEEDS_LIVE_EVIDENCE`。
 2. 公开 Draft PR #8–#30 不改变 `origin/main` 的产品状态；它们必须各自通过审阅和 CI 后才能重新计算主线矩阵。
 3. 本矩阵没有执行真实账号读取、账号写入、消息发送、真实 CDK 消费、部署、生产 migration、rollback 或 ruleset 修改。
-4. 下一步按优先级是：审阅当前 Voice Pipeline Draft PR；随后推进既有模块回归与部署准备；对 Raid identity/scope、Daily Like/Browse、Voice 实际播放、Spine runtime/license 收集最小授权证据；Guide 已按授权素材进入主线但真实送达仍需现场证据。
+4. 主题 PR #52–#55 已按依赖顺序合并；当前只剩现场证据、许可与人工发布决定，不把它们伪装成离线完成。既有模块回归和部署准备已由主线代码、验收文档和最终清单收口。
 
 ## 证据类型边界
 
