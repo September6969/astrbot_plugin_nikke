@@ -103,12 +103,12 @@ nikke.example.com {
 - `/妮姬 我的`：查看指挥官资料、同步器、前哨和主线进度。
 - `/妮姬 查询 练度 [角色名]`：查看练度总表或单个角色练度。
 - `/妮姬 查询 资料 <角色名>`：查看角色基础资料。
-- `/妮姬 签到`：执行签到；`/妮姬 签到 状态` 只读查询。
+- `/妮姬 签到`：执行签到；`/妮姬 签到 状态` 只读查询；`/妮姬 日常 自动 开|关` 仅设置自己的定时签到偏好。
 - `/妮姬 兑换 <CDK>`：使用当前绑定账号真实兑换国际服 CDK。
 
 旧版 `/nikke bind`、`status`、`me`、`roster`、`character`、`info`、`daily`、`claim`、`cdk`、`push` 和管理员指令继续兼容。管理员中文入口为 `/妮姬 管理`。
 
-签到由 `enable_daily_actions` 控制，CDK 兑换由独立的 `enable_cdk_redemption` 控制；两项公开默认值均为 `false`。
+签到由全局 `enable_daily_actions` 与每账号的 `auto_daily_enabled` 共同控制：后者默认关闭，只影响定时批处理，手动签到不受影响。CDK 兑换由独立的 `enable_cdk_redemption` 控制；两项真实写操作公开默认值均为 `false`。
 
 如确实需要在可信群中生成链接，可将 `allow_group_bind` 设为 `true`；不建议对公开群开启。
 

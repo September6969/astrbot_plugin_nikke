@@ -3259,7 +3259,7 @@ timeout/network interruption：
 
 ### A-DAILY-06：统一命令
 
-状态：`TODO`
+状态：`PARTIAL / READY_OFFLINE`
 
 目标命令：
 
@@ -3273,9 +3273,11 @@ timeout/network interruption：
 
 当前 `/妮姬 签到` 可继续保留兼容。
 
+当前已提供 `/妮姬 日常 自动 开|关`；签到与状态入口保持兼容。Like/Browse 仍没有经过确认的接口合同。
+
 ### A-DAILY-07：每账号自动开关
 
-状态：`TODO`
+状态：`IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / NEEDS_LIVE_EVIDENCE`
 
 不是只有全局：
 
@@ -3288,6 +3290,8 @@ enable_daily_actions
 ```text
 auto_daily_enabled
 ```
+
+`accounts.auto_daily_enabled` 默认 `0`。仅定时批处理和汇总补跑会同时筛选 `push_enabled=1` 与该字段为 `1` 的账号；管理员显式执行与用户手动签到不受此偏好拦截。设置命令只写本地 SQLite，不会触发网络请求或签到。
 
 ### A-DAILY-08：失败通知与汇总
 
