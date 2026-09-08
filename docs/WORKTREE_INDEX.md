@@ -7,7 +7,7 @@
 | `E:\DevTools\astrbot_plugin_nikke` | `master` | 历史本地 checkout | 不作为当前开发基线 |
 | `E:\DevCache\nikke-post-merge\astrbot_plugin_nikke` | `chore/post-merge-sync` | Post-Merge Sync | 已完成 |
 | `E:\DevCache\nikke-profile-v2\astrbot_plugin_nikke` | `feat/profile-v2` | Profile V2 | 已完成 |
-| `E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke` | `feat/union-raid-v2` | Union Raid Increment A | Draft PR #8；head `c4a6fe4`；CI `34120205125` 全绿；工作树 clean |
+| `E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke` | `feat/union-raid-v2` | Union Raid Increment A | Draft PR #8；head `4ad74c0`；CI `34190392211` 四项全绿；展示元数据严格解析，畸形载荷预览已查看；工作树 clean |
 | `E:\DevCache\nikke-announcement-v2\astrbot_plugin_nikke` | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | Draft PR #9；head `3765448`；CI `34169661389` 四项全绿；本地 compileall/diff check 通过；工作树 clean |
 | `E:\DevCache\nikke-dynamic-voice-v2\astrbot_plugin_nikke` | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | Draft PR #10；head `528fcdf`；CI `34148538180` 全绿；工作树 clean |
 | `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11；head `57d292d`；CI `34170484699` 四项全绿；工作树 clean；新增重复 JSON 键拒绝；仅静态 registry/fallback，未宣称完整 Character Data V2 |
