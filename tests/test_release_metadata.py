@@ -22,28 +22,35 @@ class ReleaseMetadataTests(unittest.TestCase):
     def test_schema_defaults_and_configuration_document_are_complete(self):
         schema = json.loads((ROOT / "_conf_schema.json").read_text(encoding="utf-8"))
         expected = {
-            "public_base_url": "https://nikke.irises777.xyz",
-            "web_host": "0.0.0.0",
-            "web_port": 6210,
-            "binding_api_key": "",
-            "allow_group_bind": False,
-            "daily_hour": 8,
-            "daily_minute": 10,
-            "summary_hour": 8,
-            "summary_minute": 30,
-            "request_timeout": 20,
-            "max_concurrency": 2,
-            "enable_daily_actions": False,
-            "enable_announcement_push": False,
-            "enable_cdk_redemption": False,
+            "public_base_url": ("string", "https://nikke.irises777.xyz"),
+            "web_host": ("string", "0.0.0.0"),
+            "web_port": ("int", 6210),
+            "binding_api_key": ("string", ""),
+            "allow_group_bind": ("bool", False),
+            "daily_hour": ("int", 8),
+            "daily_minute": ("int", 10),
+            "summary_hour": ("int", 8),
+            "summary_minute": ("int", 30),
+            "request_timeout": ("int", 20),
+            "max_concurrency": ("int", 2),
+            "enable_daily_actions": ("bool", False),
+            "enable_announcement_push": ("bool", False),
+            "enable_cdk_redemption": ("bool", False),
         }
 
         self.assertEqual(set(schema), set(expected))
-        self.assertEqual({key: value["default"] for key, value in schema.items()}, expected)
+        self.assertEqual(
+            {
+                key: (value["type"], value["default"])
+                for key, value in schema.items()
+            },
+            expected,
+        )
         config_doc = (ROOT / "docs" / "CONFIGURATION_ACCEPTANCE.md").read_text(encoding="utf-8")
-        for key in expected:
+        for key, (_, default) in expected.items():
             with self.subTest(key=key):
                 self.assertIn(f"`{key}`", config_doc)
+                self.assertIn(str(default).lower() if isinstance(default, bool) else str(default), config_doc)
 
     def test_changelog_is_scoped_to_current_baseline(self):
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")

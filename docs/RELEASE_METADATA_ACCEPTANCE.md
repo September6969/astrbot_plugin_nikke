@@ -12,7 +12,7 @@
 `tests/test_release_metadata.py` 读取实际文件并验证：
 
 - 两处版本值一致；
-- schema 的 14 个键和默认值保持合同；
+- schema 的 14 个键、AstrBot 类型和默认值保持合同；
 - 配置说明覆盖全部 schema 键；
 - 更新记录明确当前基线且没有把 Draft PR 当作已发布内容。
 
