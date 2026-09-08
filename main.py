@@ -938,9 +938,8 @@ class NikkePlugin(Star):
                         DailyTaskStatus.UNKNOWN_AFTER_ACTION,
                         "今日签到结果未确认，请先查询状态；未自动重发",
                     )
-                if not signin_owned:
-                    self.store.finish_run(run_key, result.run_status, result.detail)
-                    return result
+                self.store.finish_run(run_key, result.run_status, result.detail)
+                return result
             if existing_status in {"failed", "expired"}:
                 return DailyTaskResult(
                     account_name,
@@ -1010,8 +1009,9 @@ class NikkePlugin(Star):
                         DailyTaskStatus.UNKNOWN_AFTER_ACTION,
                         "登录有效；签到已执行或正在执行，结果未确认；未自动重发",
                     )
-                self.store.finish_run(run_key, result.run_status, result.detail)
-                return result
+                if not signin_owned:
+                    self.store.finish_run(run_key, result.run_status, result.detail)
+                    return result
         result: DailyTaskResult
         try:
             await self.client.get_profile(account)

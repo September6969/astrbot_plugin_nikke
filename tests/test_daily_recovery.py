@@ -175,7 +175,7 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         plugin.store = store
         plugin.client = client
         plugin.config = {"enable_daily_actions": True}
-        account = {"qq_id": "10001", "nickname": "测试指挥官"}
+        account = self._account()
         run_key = NikkePlugin._daily_run_key("2026-09-07", self._account(), "daily")
         signin_key = NikkePlugin._daily_run_key("2026-09-07", self._account(), "signin")
 
