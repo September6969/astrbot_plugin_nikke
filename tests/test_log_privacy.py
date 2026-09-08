@@ -45,6 +45,18 @@ class LogPrivacyTests(unittest.TestCase):
             self.assertNotIn(secret, result)
         self.assertGreaterEqual(result.count("[已遮盖]"), 4)
 
+    def test_json_cookie_context_fields_are_removed(self):
+        raw = (
+            '{"game_token":"token-secret","game_gameid":"game-secret",'
+            '"x-common-params":"params-secret"}'
+        )
+
+        result = sanitize_log_text(raw)
+
+        for secret in ("token-secret", "game-secret", "params-secret"):
+            self.assertNotIn(secret, result)
+        self.assertEqual(result.count("[已遮盖]"), 3)
+
     def test_exception_summary_keeps_type_and_has_bounded_length(self):
         result = safe_exception_message(ValueError("secret=abc " + "x" * 500), max_length=80)
 

@@ -19,7 +19,8 @@ _QUERY_RE = re.compile(
 _SENSITIVE_KEYS = (
     r"access[_-]?token|refresh[_-]?token|id[_-]?token|token|cookie|"
     r"authorization|proxy-authorization|password|passwd|secret|api[_-]?key|"
-    r"x-api-key|openid|game[_-]?uid|game[_-]?openid|qq[_-]?id|user[_-]?id"
+    r"x-api-key|openid|game[_-]?token|game[_-]?gameid|game[_-]?uid|"
+    r"game[_-]?openid|x-common-params|qq[_-]?id|user[_-]?id"
 )
 _JSON_SCALAR_KV_RE = re.compile(
     rf"(?i)([\"'](?:{_SENSITIVE_KEYS})[\"']\s*:\s*)"

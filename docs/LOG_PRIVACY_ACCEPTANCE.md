@@ -22,7 +22,7 @@
 ## 离线验证
 
 - `tests/test_log_privacy.py` 验证普通键值、JSON 字符串/数字标量、查询参数、邮箱、异常长度上限、联盟突袭用户错误摘要，以及公告同步实际 logger 输出均不包含敏感值。
-- 专项日志隐私测试：6 passed；公告服务回归：15 passed、24 subtests。
+- 专项日志隐私测试：7 passed；公告服务回归：15 passed、24 subtests；JSON 形式的 `game_token`、`game_gameid` 与 `x-common-params` 也会遮盖。
 - 仅使用合成异常和本地日志捕获；没有真实账号、真实 Cookie、公开资源授权或部署证据。
 - 现有 PR CI run `34146296068` 已完成 Python 3.10/3.11/3.12 与 Node 检查，四项均为 SUCCESS。
 
