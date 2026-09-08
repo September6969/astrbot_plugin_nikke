@@ -13,6 +13,7 @@
 | 字段 | 合法范围 | 非法语义 |
 | --- | --- | --- |
 | `request_timeout` | 1–300 秒整数 | 回退 `20` |
+| `spine_worker_timeout` | 1–5 秒整数 | 回退 `4` |
 | `web_port` | 1–65535 整数 | 回退 `6210` |
 | `daily_hour` / `summary_hour` | 0–23 整数 | 分别回退 8 |
 | `daily_minute` / `summary_minute` | 0–59 整数 | 分别回退 10 / 30 |
