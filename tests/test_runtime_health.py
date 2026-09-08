@@ -9,7 +9,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch
 
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.runtime_health import collect_runtime_health, format_runtime_health
+from astrbot_plugin_nikke.runtime_health import RuntimeHealth, collect_runtime_health, format_runtime_health
 
 
 class RuntimeHealthTests(IsolatedAsyncioTestCase):
@@ -71,6 +71,17 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             self.assertEqual(snapshot.cache_file_count, 0)
             self.assertEqual(snapshot.cache_bytes, 0)
 
+            parent_target = base / "parent-target"
+            (parent_target / "nested" / "cache").mkdir(parents=True)
+            (parent_target / "nested" / "cache" / "outside.txt").write_bytes(b"must not count")
+            parent_link = base / "parent-link"
+            parent_link.symlink_to(parent_target, target_is_directory=True)
+            snapshot = collect_runtime_health(parent_link / "nested", min_free_bytes=0)
+
+            self.assertFalse(snapshot.data_dir_exists)
+            self.assertEqual(snapshot.cache_file_count, 0)
+            self.assertEqual(snapshot.cache_bytes, 0)
+
     def test_invalid_disk_usage_is_unknown_and_attention(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -85,6 +96,34 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             self.assertIsNone(snapshot.disk_total_bytes)
             self.assertIn("磁盘容量不可用", format_runtime_health(snapshot))
             self.assertEqual(snapshot.status, "需关注")
+
+    def test_unrepresentable_disk_usage_is_unknown_and_attention(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch("astrbot_plugin_nikke.runtime_health.shutil.disk_usage") as disk_usage:
+                disk_usage.return_value = SimpleNamespace(free=10**1000, total=10**1001)
+
+                snapshot = collect_runtime_health(root, min_free_bytes=0)
+
+            self.assertIsNone(snapshot.disk_free_bytes)
+            self.assertIsNone(snapshot.disk_total_bytes)
+            self.assertIn("磁盘容量不可用", format_runtime_health(snapshot))
+            self.assertEqual(snapshot.status, "需关注")
+
+    def test_format_bytes_handles_unrepresentable_snapshot_values(self) -> None:
+        snapshot = RuntimeHealth(
+            data_dir_exists=True,
+            database_present=True,
+            secret_key_present=True,
+            cache_file_count=0,
+            cache_bytes=0,
+            temporary_file_count=0,
+            disk_free_bytes=10**1000,
+            disk_total_bytes=10**1001,
+            issues=(),
+        )
+
+        self.assertIn("磁盘：未知 可用 / 未知 总计", format_runtime_health(snapshot))
 
     async def test_admin_health_command_includes_readonly_diagnostics(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

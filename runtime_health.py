@@ -36,6 +36,17 @@ def _is_temporary_name(name: str) -> bool:
     return name.endswith(".tmp") or name.startswith(".tmp-") or ".tmp." in name
 
 
+def _contains_symlink_component(path: Path) -> bool:
+    """检查数据目录路径的每个已存在部分，避免父级链接越界。"""
+    absolute = path.absolute()
+    current = Path(absolute.anchor)
+    for part in absolute.parts[1:]:
+        current /= part
+        if current.is_symlink():
+            return True
+    return False
+
+
 def _measure_tree(root: Path) -> tuple[int, int, int]:
     """统计缓存文件，不跟随符号链接，避免越出插件数据目录。"""
     if not root.is_dir() or root.is_symlink():
@@ -89,6 +100,11 @@ def _read_disk_usage(root: Path) -> tuple[int | None, int | None]:
         or free > total
     ):
         return None, None
+    try:
+        float(free)
+        float(total)
+    except OverflowError:
+        return None, None
     return free, total
 
 
@@ -100,7 +116,8 @@ def collect_runtime_health(
     """收集本地目录、缓存和磁盘容量状态；此函数不写入或删除任何文件。"""
     root = Path(data_dir).expanduser()
     # 保留原始目录边界；先 resolve 会把数据目录自身的符号链接变成真实目录。
-    data_dir_exists = root.is_dir() and not root.is_symlink()
+    has_symlink_component = _contains_symlink_component(root)
+    data_dir_exists = root.is_dir() and not has_symlink_component
     database = root / "nikke.sqlite3"
     secret_key = root / "secret.key"
     database_present = data_dir_exists and database.is_file() and not database.is_symlink()
@@ -116,7 +133,7 @@ def collect_runtime_health(
             cache_bytes += size
             temporary_file_count += temporary
 
-    usage_root = root if data_dir_exists else root.parent
+    usage_root = root if data_dir_exists else (Path(root.anchor) if has_symlink_component else root.parent)
     disk_free_bytes, disk_total_bytes = _read_disk_usage(usage_root)
 
     issues: list[str] = []
@@ -152,7 +169,10 @@ def _format_bytes(value: int | None) -> str:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
         return "未知"
     units = ("B", "KiB", "MiB", "GiB", "TiB")
-    amount = float(value)
+    try:
+        amount = float(value)
+    except OverflowError:
+        return "未知"
     for unit in units:
         if amount < 1024 or unit == units[-1]:
             break
