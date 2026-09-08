@@ -20,6 +20,18 @@ DEFAULT_MIN_FREE_BYTES = 1_073_741_824
 DEFAULT_MIN_FREE_PERCENT = 10.0
 
 
+def _contains_symlink_component(path: Path) -> bool:
+    """检查路径本身及所有现有父级组件，不通过符号链接进入外部目录。"""
+
+    candidate = path if path.is_absolute() else Path.cwd() / path
+    current = Path(candidate.anchor)
+    for component in candidate.parts[1:]:
+        current /= component
+        if current.is_symlink():
+            return True
+    return False
+
+
 def _check(status: str, reason: str) -> dict[str, str]:
     """构造不含路径、账号标识或凭据的固定格式检查结果。"""
 
@@ -29,13 +41,13 @@ def _check(status: str, reason: str) -> dict[str, str]:
 def _ordinary_file(path: Path) -> bool:
     """只接受普通文件，避免跟随符号链接检查未知目标。"""
 
-    return path.is_file() and not path.is_symlink()
+    return not _contains_symlink_component(path) and path.is_file()
 
 
 def _ordinary_directory(path: Path) -> bool:
     """只接受普通目录，避免通过数据根目录符号链接读取外部目标。"""
 
-    return path.is_dir() and not path.is_symlink()
+    return not _contains_symlink_component(path) and path.is_dir()
 
 
 def inspect_pair(data_dir: str | Path, label: str = "storage") -> dict[str, str]:

@@ -152,3 +152,30 @@ def test_symlinked_data_and_backup_roots_are_not_followed(tmp_path: Path) -> Non
     assert result["checks"]["backup_pair"]["reason"] == "backup_directory_missing_or_non_regular"
     assert result["checks"]["backup_database"]["reason"] == "backup_database_root_missing_or_non_regular"
     assert result["checks"]["disk_capacity"]["reason"] == "disk_data_dir_missing_or_non_regular"
+
+
+def test_symlinked_parent_components_are_not_followed(tmp_path: Path) -> None:
+    parent_target = tmp_path / "parent-target"
+    data_dir = parent_target / "data"
+    backup_dir = parent_target / "backup"
+    _make_store(data_dir)
+    _make_store(backup_dir)
+    parent_link = tmp_path / "parent-link"
+    try:
+        parent_link.symlink_to(parent_target, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("当前 Windows 环境不允许创建目录符号链接")
+
+    result = build_preflight(
+        parent_link / "data",
+        parent_link / "backup",
+        min_free_bytes=0,
+        min_free_percent=0,
+    )
+
+    assert result["overall"] == "BLOCKED"
+    assert result["checks"]["storage_pair"]["reason"] == "storage_directory_missing_or_non_regular"
+    assert result["checks"]["database"]["reason"] == "database_root_missing_or_non_regular"
+    assert result["checks"]["backup_pair"]["reason"] == "backup_directory_missing_or_non_regular"
+    assert result["checks"]["backup_database"]["reason"] == "backup_database_root_missing_or_non_regular"
+    assert result["checks"]["disk_capacity"]["reason"] == "disk_data_dir_missing_or_non_regular"
