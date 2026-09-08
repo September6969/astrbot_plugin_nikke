@@ -2,7 +2,7 @@
 import json
 from dataclasses import asdict
 from unittest import TestCase
-from astrbot_plugin_nikke.raid_participants import build_ranking, format_ranking
+from astrbot_plugin_nikke.raid_participants import build_member_ranking, build_ranking, format_ranking
 
 
 def attack(who, damage):
@@ -41,3 +41,21 @@ class RankingTests(TestCase):
             with self.subTest(row=row):
                 with self.assertRaises(ValueError):
                     build_ranking({"participate_data": [row]})
+
+    def test_member_filter_uses_exact_stable_identity_and_keeps_scope_honest(self):
+        result = build_member_ranking(
+            {"participate_data": [attack("me", 10), attack("other", 100)]},
+            "me",
+        )
+        self.assertEqual(result.scope, "CURRENT_RESPONSE_MEMBER")
+        self.assertEqual([item.total_damage for item in result.participants], [10])
+        output = format_ranking(result)
+        self.assertIn("我的当前响应范围", output)
+        self.assertIn("不代表完整赛季", output)
+        self.assertNotIn("other", output)
+
+    def test_member_filter_rejects_missing_identity_and_malformed_rows(self):
+        with self.assertRaises(ValueError):
+            build_member_ranking({"participate_data": []}, "")
+        with self.assertRaises(ValueError):
+            build_member_ranking({"participate_data": [None]}, "me")
