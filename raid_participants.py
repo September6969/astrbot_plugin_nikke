@@ -92,16 +92,45 @@ def build_ranking(payload: dict) -> RaidRankingData:
     return RaidRankingData(participants)
 
 
+def build_member_ranking(payload: dict, member_openid: str) -> RaidRankingData:
+    """按请求使用的稳定 openid 精确筛选当前响应，不猜测成员字段。"""
+    if not isinstance(member_openid, str) or not member_openid.strip():
+        raise ValueError("当前账号缺少稳定联盟身份")
+    rows = payload.get("participate_data") if isinstance(payload, dict) else None
+    if not isinstance(rows, list):
+        raise ValueError("突袭响应缺少攻击列表")
+    matched: list[dict] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError("攻击记录格式异常，不能安全筛选")
+        openid = row.get("openid")
+        if not isinstance(openid, str) or not openid.strip():
+            raise ValueError("攻击记录缺少有效身份，不能安全筛选")
+        if openid == member_openid:
+            matched.append(row)
+    ranking = build_ranking({"participate_data": matched})
+    return RaidRankingData(ranking.participants, scope="CURRENT_RESPONSE_MEMBER")
+
+
 def format_ranking(data: RaidRankingData) -> str:
-    lines = [
-        "【联盟突袭 · 当前响应范围排名】",
-        "按已返回记录的伤害字段汇总；不代表完整赛季或实际攻击次数。",
-    ]
+    if data.scope == "CURRENT_RESPONSE_MEMBER":
+        lines = [
+            "【联盟突袭 · 我的当前响应范围】",
+            "按当前响应中与本账号稳定身份精确匹配的记录汇总；不代表完整赛季或实际攻击次数。",
+        ]
+    else:
+        lines = [
+            "【联盟突袭 · 当前响应范围排名】",
+            "按已返回记录的伤害字段汇总；不代表完整赛季或实际攻击次数。",
+        ]
     for item in data.participants[:50]:
         name = " ".join(item.nickname.split())[:40]
         lines.append(f"{item.rank}. {name}：{item.total_damage:,} · {len(item.attacks)} 条返回记录")
     if not data.participants:
-        lines.append("当前响应没有攻击记录。")
+        if data.scope == "CURRENT_RESPONSE_MEMBER":
+            lines.append("当前响应未返回此账号的攻击记录。")
+        else:
+            lines.append("当前响应没有攻击记录。")
     if len(data.participants) > 50:
         lines.append(f"另有 {len(data.participants)-50} 位成员，当前仅展示前50项。")
     return "\n".join(lines)

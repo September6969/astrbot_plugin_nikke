@@ -280,6 +280,7 @@ class NikkePlugin(Star):
                 "/妮姬 战役 <关卡>　(/nikke campaign [普通/困难] 46-40)\n"
                 "/妮姬 联盟突袭　(/nikke raid)\n"
                 "/妮姬 联盟突袭 排名 — 当前响应范围\n"
+                "/妮姬 联盟突袭 我的 — 当前账号在本次响应中的记录\n"
                 "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
                 "/妮姬 日程　(/nikke schedule)\n"
                 "/妮姬 公告 [语言|分类|搜索|诊断]　(/nikke news)\n"
@@ -467,6 +468,10 @@ class NikkePlugin(Star):
         if command_key in {"突袭", "联盟突袭", "raid", "union_raid"}:
             if arg1 in {"排名", "ranking"}:
                 async for result in self.union_raid_ranking(event):
+                    yield result
+                return
+            if arg1 in {"我的", "my"}:
+                async for result in self.union_raid_my(event):
                     yield result
                 return
             async for result in self.union_raid(event):
@@ -731,6 +736,23 @@ class NikkePlugin(Star):
             yield event.plain_result("登录状态已失效，请重新绑定。")
         except (BlaBlaError, ValueError):
             yield event.plain_result("突袭排名暂不可用：数据不完整或请求失败，请稍后重试。")
+
+    async def union_raid_my(self, event: AstrMessageEvent):
+        """展示当前响应中与当前账号稳定 openid 精确匹配的突袭记录。"""
+        from .raid_participants import build_member_ranking, format_ranking
+        try:
+            account = self._account_or_error(event)
+            member_openid = str(account.get("game_openid") or "").strip()
+            if not member_openid:
+                yield event.plain_result("当前账号缺少稳定联盟身份，暂不能安全筛选个人记录。")
+                return
+            payload = await self.client.get_union_raid_data(account)
+            yield event.plain_result(format_ranking(build_member_ranking(payload, member_openid)))
+        except CookieExpired:
+            self.store.mark_cookie_invalid(self._qq_id(event))
+            yield event.plain_result("登录状态已失效，请重新绑定。")
+        except (BlaBlaError, ValueError):
+            yield event.plain_result("我的突袭记录暂不可用：数据不完整或请求失败，请稍后重试。")
 
     async def union_raid(self, event: AstrMessageEvent):
         """查询当前账号所属联盟的联盟突袭战况。"""

@@ -348,6 +348,25 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(len(calls), 4)
 
+    async def test_my_raid_command_routes_to_member_scope(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        calls = []
+
+        async def fake_union_raid_my(event):
+            calls.append("union_raid_my")
+            yield "我的突袭结果"
+
+        plugin.union_raid_my = fake_union_raid_my
+
+        class FakeEvent:
+            pass
+
+        results = [r async for r in plugin.nikke(FakeEvent(), "联盟突袭", "我的")]
+        self.assertEqual(results, ["我的突袭结果"])
+        self.assertEqual(calls, ["union_raid_my"])
+
 
 if __name__ == "__main__":
     unittest.main()
