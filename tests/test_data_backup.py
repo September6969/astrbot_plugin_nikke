@@ -7,7 +7,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.scripts.backup_nikke_data import BackupError, create_backup
+from cryptography.fernet import Fernet
+
+from astrbot_plugin_nikke.scripts.backup_nikke_data import BackupError, create_backup, restore_backup
 
 
 class DataBackupTests(unittest.TestCase):
@@ -24,7 +26,7 @@ class DataBackupTests(unittest.TestCase):
                 connection.commit()
             finally:
                 connection.close()
-            secret = b"synthetic-secret-key"
+            secret = Fernet.generate_key()
             (data_dir / "secret.key").write_bytes(secret)
 
             backup = create_backup(data_dir, backup_dir, label="test")
@@ -43,6 +45,7 @@ class DataBackupTests(unittest.TestCase):
             manifest = json.loads((backup / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["schema_version"], 1)
             self.assertEqual(manifest["files"], ["nikke.sqlite3", "secret.key"])
+            self.assertEqual(manifest["key_validation"]["status"], "no_encrypted_sample")
 
     def test_backup_refuses_source_subdirectory_and_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -50,7 +53,7 @@ class DataBackupTests(unittest.TestCase):
             data_dir = root / "data"
             data_dir.mkdir()
             sqlite3.connect(data_dir / "nikke.sqlite3").close()
-            (data_dir / "secret.key").write_bytes(b"key")
+            (data_dir / "secret.key").write_bytes(Fernet.generate_key())
 
             with self.assertRaises(BackupError):
                 create_backup(data_dir, data_dir / "backups", label="nested")
@@ -66,7 +69,7 @@ class DataBackupTests(unittest.TestCase):
             data_dir = root / "data"
             data_dir.mkdir()
             sqlite3.connect(data_dir / "nikke.sqlite3").close()
-            (data_dir / "secret.key").write_bytes(b"key")
+            (data_dir / "secret.key").write_bytes(Fernet.generate_key())
 
             destination_file = root / "destination-file"
             destination_file.write_bytes(b"not a directory")
@@ -77,6 +80,39 @@ class DataBackupTests(unittest.TestCase):
             with self.assertRaisesRegex(BackupError, "SQLite 备份失败"):
                 create_backup(data_dir, root / "backups", label="corrupt")
 
+    def test_restore_validates_encrypted_fields_and_never_overwrites(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            data_dir = root / "data"
+            data_dir.mkdir()
+            key = Fernet.generate_key()
+            cipher = Fernet(key)
+            connection = sqlite3.connect(data_dir / "nikke.sqlite3")
+            try:
+                connection.execute(
+                    "CREATE TABLE accounts (cookie_cipher BLOB NOT NULL, xcommon_cipher BLOB NOT NULL)"
+                )
+                connection.execute(
+                    "INSERT INTO accounts VALUES (?, ?)",
+                    (cipher.encrypt(b"synthetic-cookie"), cipher.encrypt(b"synthetic-xcommon")),
+                )
+                connection.commit()
+            finally:
+                connection.close()
+            (data_dir / "secret.key").write_bytes(key)
+
+            backup = create_backup(data_dir, root / "backups", label="encrypted")
+            manifest = json.loads((backup / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["key_validation"]["status"], "all_encrypted_fields")
+            self.assertEqual(manifest["key_validation"]["checked_fields"], 2)
+
+            restored = restore_backup(backup, root / "restored")
+            self.assertEqual((restored / "secret.key").read_bytes(), key)
+            restored_manifest = json.loads((restored / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(restored_manifest["key_validation"]["status"], "all_encrypted_fields")
+            with self.assertRaisesRegex(BackupError, "恢复目标已存在"):
+                restore_backup(backup, restored)
+
     def test_backup_refuses_symlinked_roots_and_source_files(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -84,7 +120,7 @@ class DataBackupTests(unittest.TestCase):
             source_target.mkdir()
             connection = sqlite3.connect(source_target / "nikke.sqlite3")
             connection.close()
-            (source_target / "secret.key").write_bytes(b"key")
+            (source_target / "secret.key").write_bytes(Fernet.generate_key())
             destination = root / "backups"
 
             source_link = root / "source-link"
