@@ -27,4 +27,4 @@ pytest -q tests/test_runtime_health.py
 
 测试覆盖完整数据目录、缺失目录、根目录及父级路径符号链接不跟随、缓存字节/临时文件统计、异常及不可表示磁盘数值降级为未知、敏感值不出现在文本中，以及管理员命令真实接线。测试只使用临时合成目录；没有现场账号或生产数据证据。
 
-本轮修复提交：`ce76135`。直接运行不依赖 AstrBot 的 `runtime_health` 边界检查与 `compileall`、`git diff --check` 已通过；当前环境的完整 targeted wiring 测试因缺少 `astrbot` 包无法本地导入，未将其冒充为通过。CI 运行 `34186436721` 对最终 head 四项全绿，Python 3.10 全量 `263 passed、43 subtests、3 warnings`，Python 3.11/3.12 与 Node 扩展检查均成功。
+本轮修复提交：`ce76135`。直接运行不依赖 AstrBot 的 `runtime_health` 边界检查与 `compileall`、`git diff --check` 已通过；当前环境的完整 targeted wiring 测试因缺少 `astrbot` 包无法本地导入，未将其冒充为通过。实现提交的 CI 运行 `34186436721` 四项全绿，Python 3.10 全量 `263 passed、43 subtests、3 warnings`，Python 3.11/3.12 与 Node 扩展检查均成功。随后仅更新本验收记录的提交 `1bb3217` 的 CI 运行 `34186538385` 也四项全绿。
