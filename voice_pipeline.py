@@ -1,5 +1,6 @@
 """下载与编码共享一次出卡预算；后台任务由管线统一回收。"""
 import asyncio
+import inspect
 import math
 
 
@@ -56,5 +57,11 @@ class VoicePipeline:
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
-        await self.provider.close()
+        for resource in (self.provider, self.encoder):
+            close = getattr(resource, "close", None)
+            if close is None:
+                continue
+            result = close()
+            if inspect.isawaitable(result):
+                await result
         self._tasks.clear()

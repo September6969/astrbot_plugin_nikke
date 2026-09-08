@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-08。当前核验的远端基线为 `origin/main@7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-08。当前核验的远端基线为 `origin/main@09821816f7489885f4fb33045fd56fe39adda1d3`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -35,4 +35,5 @@
 | P4 Spine 隔离 | PR #51 已并入当前 main | `E:\_codex_work\nikke-spine-isolation-v1` / `feat/spine-experimental-isolation`；历史隔离分支保留，不代表当前基线 |
 | Spine 正式后端 | PR #52 已合并 | `E:\_codex_work\nikke-spine-formal-v1` / `feat/spine-formal-backend-v1`；历史分支保留，HEAD 不代表当前 main |
 | Spine 4.1 runtime / Costume | PR #53 已合并 | `E:\_codex_work\nikke-spine-runtime-v1` / `feat/spine-runtime-costume-v1`；历史分支保留，官方 Linux 构建、合法 bundle 和现场渲染仍待证据 |
-| Resource Registry V2 | 当前独立 Draft PR 主题 | `E:\_codex_work\nikke-resource-registry-v2` / `feat/resource-registry-v2`；从 `origin/main@7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195` 建立，costume 映射保持空表 |
+| Resource Registry V2 | PR #54 已合并 | `E:\_codex_work\nikke-resource-registry-v2` / `feat/resource-registry-v2`；历史分支保留，costume 映射保持空表 |
+| Voice Pipeline V2 | 当前独立 Draft PR 主题 | `E:\_codex_work\nikke-voice-pipeline-v2` / `feat/voice-pipeline-v2`；从 `origin/main@09821816f7489885f4fb33045fd56fe39adda1d3` 建立，Poke 动态映射保持空表 |

@@ -13,6 +13,7 @@ class VoiceEncoder:
         self.cache = Path(cache) / "encoded"
         self.ffmpeg, self.ffprobe = ffmpeg, ffprobe
         self._lock = asyncio.Lock()
+        self._closed = False
 
     @staticmethod
     async def _run(*args, timeout=15):
@@ -29,7 +30,7 @@ class VoiceEncoder:
         return output
 
     async def encode(self, source: Path, *, adapter="aiocqhttp"):
-        if adapter != "aiocqhttp":
+        if self._closed or adapter != "aiocqhttp":
             raise ValueError("此适配器音频能力尚未验证")
         if source.stat().st_size > 12 * 1024 * 1024:
             raise ValueError("源音频过大")
@@ -65,3 +66,7 @@ class VoiceEncoder:
                 return (audio.getnchannels(), audio.getsampwidth(), audio.getframerate()) == (1, 2, 24000) and 0 < audio.getnframes() <= 720000 and len(audio.readframes(audio.getnframes())) == audio.getnframes() * 2
         except (OSError, EOFError, wave.Error):
             return False
+
+    async def close(self):
+        """编码器没有常驻子进程，但仍提供统一生命周期接口。"""
+        self._closed = True

@@ -36,6 +36,7 @@ class ReleaseMetadataTests(unittest.TestCase):
             "spine_worker_path": ("string", ""),
             "spine_runtime_version": ("string", "4.1"),
             "spine_worker_timeout": ("int", 4),
+            "voice_dynamic_enabled": ("bool", True),
             "enable_daily_actions": ("bool", False),
             "enable_announcement_push": ("bool", False),
             "enable_cdk_redemption": ("bool", False),

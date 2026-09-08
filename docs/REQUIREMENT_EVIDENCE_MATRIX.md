@@ -2,7 +2,7 @@
 
 更新时间：2026-09-08。
 
-本矩阵按路线图第 4、5、54、55 节建立；本轮独立主题基线为已核验的 `origin/main` `7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195`。开放 Draft PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
+本矩阵按路线图第 4、5、54、55 节建立；本轮独立主题基线为已核验的 `origin/main` `09821816f7489885f4fb33045fd56fe39adda1d3`。开放 Draft PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
 
 ## 状态语义
 
@@ -38,7 +38,7 @@
 | REQ-DAILY-001 | Check-in | `/妮姬 签到`、`/妮姬 签到 状态` | `main.py`、`client.py`、`storage.py`；`tests/test_daily_safety.py` 覆盖 intent、unknown 和不自动重放；写入默认关闭 | 未执行真实签到；状态变化需真实账号前后读取证据 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED`；`NEEDS_LIVE_EVIDENCE` | 授权后一次最小 write/read 现场核验；崩溃/unknown 不自动重试 |
 | REQ-DAILY-002 | Like | 日常框架（未作为默认可用命令） | 主线没有可宣称完成的真实 Like 闭环；仅有受控状态框架和安全测试 | 真实 endpoint 和状态变化未确认 | `NEEDS_LIVE_EVIDENCE` | 先取得官方响应/写后读取证据；没有证据不接线 |
 | REQ-DAILY-003 | Browse | 日常框架（未作为默认可用命令） | 主线没有可宣称完成的真实 Browse 闭环；不得用离线 payload 冒充 | 真实 endpoint 和状态变化未确认 | `NEEDS_LIVE_EVIDENCE` | 与 Like 分开确认 endpoint、前后状态和失败语义 |
-| REQ-VOICE-001 | Poke Voice | `/妮姬 戳一戳 [角色名]` | `voice_audio.py`、`voice_pipeline.py`、`voice_resource_provider.py` 已有离线资源管线；`tests/test_voice_*.py` 覆盖预算、并发、取消、缓存和迟到发送禁止；动态接线/映射仍待独立 Voice PR | 未发送真实 QQ 音频；角色/皮肤映射和实际播放未确认 | `IMPLEMENTED / WIRED`（文本路径）；`NEEDS_LIVE_EVIDENCE` | 完成 Voice resource/pipeline/lifecycle/delivery 接线；必须取得真实播放证据后再声称现场完成 |
+| REQ-VOICE-001 | Poke Voice | `/妮姬 戳一戳 [角色名]` | `voice_audio.py`、`voice_mapping.py`、`voice_pipeline.py`、`voice_resource_provider.py`、`voice_encoder.py`；PR #55 接入本地 → 证据映射动态资源 → 文本回退，Voice 专项行为测试与 Record 序列化测试覆盖预算、并发、取消、缓存、格式和生命周期 | `assets/voice_poke_map.json` 当前为空；未发送真实 QQ 音频，角色/皮肤映射、资源授权和实际播放未确认 | `IMPLEMENTED / WIRED / READY_OFFLINE`; `NEEDS_LIVE_EVIDENCE` | 仅在取得精确角色/服装/locale 映射和授权资源后补清单；恢复 `ssh serv` 后做最小 NapCat/OneBot Record 现场验证，不采集秘密 |
 | REQ-SPINE-001 | 服务端 Spine 渲染 | 角色卡资源链中的正式异步编排入口；cache hit 可供 portrait 使用，miss 不同步等待 | `spine_prerenderer.py`、`spine_runtime_worker.py`、`spine_runtime_config.py`、`runtime/spine_worker/`；PR #52/#53 已合并；worker RGBA/路径/超时测试与 formal backend 测试通过，Docker 构建已进入自动化检查 | 远端 `serv` 的隔离 Docker 编译会话曾在 SSH banner 阶段超时，尚未取得编译、合法 bundle 实渲染或 benchmark 证据；runtime 与 NIKKE 素材许可仍需逐项核验 | `READY_OFFLINE`（编排、adapter、构建合同）；`NEEDS_LIVE_EVIDENCE` / `NEEDS_HUMAN_DECISION`（服务器实构建、素材、许可、现场） | 恢复 SSH 后重试隔离 Docker 构建；只用合法测试 bundle 做 headless/benchmark；不改现有容器，不把公开 URL 当分发授权 |
 | REQ-DATA-001 | Equipment registry | 角色卡/`/妮姬 查询 练度` 数据 | 主线有 `StaticDataRegistry` 精确 ID、manifest 来源/hash 合同和安全渲染；完整上游覆盖仍未声称 | 未确认完整 equipment 字段和权威静态源 | `IMPLEMENTED / READY_OFFLINE`；`NEEDS_LIVE_EVIDENCE` | 仅在有来源证据时扩充映射；不推断未观测属性 |
 | REQ-DATA-002 | Cube registry | Profile / 角色数据 | 主线有 `StaticDataRegistry` 精确 ID、manifest 来源/hash 合同和未知 fallback；公式/完整属性不在本合同 | 未确认 cube 属性和等级公式 | `IMPLEMENTED / READY_OFFLINE`；`NEEDS_LIVE_EVIDENCE` | 先取得字段合同，再补有证据的静态映射 |
@@ -53,7 +53,7 @@
 1. `/妮姬 我的` 的代码、命令接线、离线行为测试和合成图片证据已经在主线达到 `READY_OFFLINE`；真实账号兼容仍是 `NEEDS_LIVE_EVIDENCE`。
 2. 公开 Draft PR #8–#30 不改变 `origin/main` 的产品状态；它们必须各自通过审阅和 CI 后才能重新计算主线矩阵。
 3. 本矩阵没有执行真实账号读取、账号写入、消息发送、真实 CDK 消费、部署、生产 migration、rollback 或 ruleset 修改。
-4. 下一步按优先级是：审阅当前 Resource Registry Draft PR；随后独立完成 Voice resource/pipeline/lifecycle/delivery 接线；对 Raid identity/scope、Daily Like/Browse、Voice 实际播放、Spine runtime/license 收集最小授权证据；Guide 已按授权素材进入主线但真实送达仍需现场证据。
+4. 下一步按优先级是：审阅当前 Voice Pipeline Draft PR；随后推进既有模块回归与部署准备；对 Raid identity/scope、Daily Like/Browse、Voice 实际播放、Spine runtime/license 收集最小授权证据；Guide 已按授权素材进入主线但真实送达仍需现场证据。
 
 ## 证据类型边界
 
