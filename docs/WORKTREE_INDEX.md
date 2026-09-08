@@ -1,49 +1,18 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-07。所有当前主题均从实时 `origin/main` 建立；`main` 未被直接修改。
+更新时间：2026-09-08。下表是本轮收口时的索引；工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
-| 工作树 | 分支 | 用途 | 状态 |
-| --- | --- | --- | --- |
-| `E:\DevTools\astrbot_plugin_nikke` | `master` | 历史本地 checkout | 不作为当前开发基线 |
-| `E:\DevCache\nikke-post-merge\astrbot_plugin_nikke` | `chore/post-merge-sync` | Post-Merge Sync | 已完成 |
-| `E:\DevCache\nikke-profile-v2\astrbot_plugin_nikke` | `feat/profile-v2` | Profile V2 | 已完成 |
-| `E:\DevCache\nikke-union-raid-v2\astrbot_plugin_nikke` | `feat/union-raid-v2` | Union Raid Increment A | Draft PR #8；head `4ad74c0`；CI `34190392211` 四项全绿；展示元数据严格解析，畸形载荷预览已查看；工作树 clean |
-| `E:\DevCache\nikke-announcement-v2\astrbot_plugin_nikke` | `feat/announcement-v2` | Announcement Increment A + cache lifecycle P1 | Draft PR #9；head `78b33a7`；CI `34191009192` 四项全绿；CMS 字段合同拒绝布尔/浮点/容器并兼容已证实时间戳形态；工作树 clean |
-| `E:\DevCache\nikke-dynamic-voice-v2\astrbot_plugin_nikke` | `feat/dynamic-voice-v2` | Dynamic Voice Increment A | Draft PR #10；head `6fc6137`；CI `34191491292` 四项全绿；缓存符号链接拒绝读写/联网；工作树 clean |
-| `E:\DevCache\nikke-character-data-v2\astrbot_plugin_nikke` | `feat/character-data-v2` | Character Data V2 Increment A | Draft PR #11；head `57d292d`；CI `34170484699` 四项全绿；工作树 clean；新增重复 JSON 键拒绝；仅静态 registry/fallback，未宣称完整 Character Data V2 |
-| `E:\DevCache\nikke-spine-spike-v2\astrbot_plugin_nikke` | `feat/spine-spike-v2` | Spine technical spike | Draft PR #12；head `e5b9efc`；CI `34149003554` 四项全绿；工作树 clean；仍仅为 runtime-free synthetic spike |
-| `E:\DevCache\nikke-voice-mapping-v2\astrbot_plugin_nikke` | `feat/voice-mapping-v2` | Voice 映射研究 | Draft PR #13；head `68138bc`；CI `34115632353` 全绿；工作树 clean |
-| `E:\_codex_work\nikke-roadmap-ledger-v3` | `feat/roadmap-ledger-v3` | 路线图合同债状态核验 | Draft PR #14；当前 head 与 CI 以 PR 检查为权威；工作树 clean |
-| `E:\_codex_work\campaign-history-contract-v2\astrbot_plugin_nikke` | `feat/campaign-history-contract-v2` | Campaign History 数值合同 | Draft PR #15；head `fe86c12`；CI `34171036388` 四项全绿；工作树 clean；严格拒绝非规范数字字符串及非整数响应 code |
-| `E:\_codex_work\campaign-resource-lifecycle-v2\astrbot_plugin_nikke` | `feat/campaign-resource-lifecycle-v2` | Campaign renderer 资源生命周期 | Draft PR #16；head `d7f7d88`；CI `34171514608` 四项全绿；工作树 clean；falsey 共享 manager 保持注入身份，仅同卡片资源键复用，不宣称全局 N+1 已消除 |
-| `E:\_codex_work\asset-request-dedup-v2-worktree\astrbot_plugin_nikke` | `feat/asset-request-dedup-v2` | AssetManager same-key single-flight | Draft PR #17；head `28b8dfb`；CI `34156636777` 四项全绿；工作树 clean；仅同键并发去重与不同键隔离，不宣称全局 N+1 |
-| `E:\_codex_work\asset-global-concurrency-v1-worktree\astrbot_plugin_nikke` | `feat/asset-global-concurrency-v1` | AssetManager global remote-download limit | Draft PR #37；head `43df09a`；CI `34157041468` 四项全绿；与 PR #17/#38 均修改 `asset_manager.py`，需合并时协调；工作树 clean |
-| `E:\_codex_work\asset-prefetch-lifecycle-v1-worktree\astrbot_plugin_nikke` | `feat/asset-prefetch-lifecycle-v1` | AssetManager bounded prefetch lifecycle | Draft PR #38；head `cd27fb3`；CI `34157376854` 四项全绿；与 PR #17/#37 均修改 `asset_manager.py`，需合并时协调；工作树 clean |
-| `E:\_codex_work\live-evidence-register-v1-worktree\astrbot_plugin_nikke` | `docs/live-evidence-register-v1` | Authorized live-evidence register | Draft PR #39；head `9877fc9`；CI `34142711091` 四项全绿；只记录现场证据最小动作，不执行账号/消息/部署操作；工作树 clean |
-| `E:\_codex_work\astrbot-registration-api-v1\astrbot_plugin_nikke` | `feat/astrbot-registration-api-v1` | AstrBot registration API migration | Draft PR #40；head `311a41e`；CI `34144460942` 四项全绿；移除废弃注册装饰器并保留自动发现；工作树 clean |
-| `E:\_codex_work\daily-evidence-p1\astrbot_plugin_nikke` | `feat/daily-evidence-p1` | Daily Evidence sign-in recovery safety | Draft PR #18；head `a3de03d`；CI `34162799034` 四项全绿；终态不被恢复读取改写；工作树 clean |
-| `E:\_codex_work\storage-connection-lifecycle\astrbot_plugin_nikke` | `feat/storage-connection-lifecycle` | SQLite connection lifecycle + Python 3.13 compatibility evidence | Draft PR #19；head `ffd96a5`；CI `34145647733` 五项全绿（Node、Python 3.10–3.13）；本地 Windows Python 3.13 全量 258 passed；工作树 clean |
-| `E:\_codex_work\astrbot_plugin_nikke` | `feat/runtime-config-hardening` | Runtime configuration and scheduler boundary hardening | Draft PR #20；head `6e00c5a`；CI `34163558500`；工作树 clean |
-| `E:\_codex_work\shutdown-lifecycle\astrbot_plugin_nikke` | `feat/plugin-shutdown-lifecycle` | Plugin shutdown lifecycle idempotency | Draft PR #21；head `080ea94`；CI `34172309963`；工作树 clean；部分初始化和 falsey 资源清理边界已覆盖 |
-| `E:\_codex_work\data-backup-hardening\astrbot_plugin_nikke` | `feat/data-backup-hardening` | Offline database and secret.key backup hardening | Draft PR #22；head `bc839c4`；CI `34186296724`；工作树 clean；拒绝源/输出路径符号链接，专项 4 passed |
-| `E:\_codex_work\health-diagnostics-v1\astrbot_plugin_nikke` | `feat/health-diagnostics-v1` | Read-only runtime health diagnostics | Draft PR #23；head `f64d3e7`；CI `34186653879`；工作树 clean；父级路径链接和不可表示磁盘值边界已覆盖 |
-| `E:\_codex_work\storage-migration-v1\astrbot_plugin_nikke` | `feat/storage-migration-v1` | Transactional SQLite schema migration | Draft PR #24；head `7a9602b`；CI `34165229014`；工作树 clean |
-| `E:\_codex_work\healthz-readiness-v1\astrbot_plugin_nikke` | `feat/healthz-readiness-v1` | Healthz storage readiness contract | Draft PR #25；head `1d3abc2`；CI `34165779139`；工作树 clean |
-| `E:\_codex_work\log-privacy-v1-wt\astrbot_plugin_nikke` | `feat/log-privacy-v1` | Plugin log privacy hardening | Draft PR #26；head `57da376`；CI `34187268406` 四项全绿；补齐 JSON Cookie 上下文 `game_token`、`game_gameid`、`x-common-params` 脱敏；当前本机缺少 AstrBot，未宣称本地完整矩阵；工作树 clean |
-| `E:\_codex_work\cache-cleanup-v1-wt\astrbot_plugin_nikke` | `feat/cache-cleanup-v1` | Safe offline cache cleanup | Draft PR #27；head `577f328`；CI `34167069222` 四项全绿；本地专项 6 passed、全量 pytest 262 passed；工作树 clean |
-| `E:\_codex_work\release-metadata-v1-wt\astrbot_plugin_nikke` | `feat/release-metadata-v1` | Release metadata and configuration contract | Draft PR #28；head `1ee60a9`；CI `34187676896` 四项全绿；配置键/类型/默认值合同专项 3 passed；工作树 clean |
-| `E:\_codex_work\caddy-hardening-v1-wt\astrbot_plugin_nikke` | `feat/caddy-hardening-v1` | Caddy example privacy hardening | Draft PR #29；head `160cb25`；CI `34110061494`；工作树 clean |
-| `E:\_codex_work\upgrade-preflight-v1-wt\astrbot_plugin_nikke` | `feat/upgrade-preflight-v1` | Read-only upgrade/rollback preflight | Draft PR #30；head `e36d7b0`；CI `34188160651` 四项全绿；覆盖所有现有父级路径组件符号链接；当前本机缺少 pytest，未宣称本地 pytest；工作树 clean |
-| `E:\_codex_work\requirement-evidence-matrix-v1-wt\astrbot_plugin_nikke` | `feat/requirement-evidence-matrix-v1` | Final product review requirement/evidence matrix | Draft PR #31；head `3ce033a`；CI `34188464410` 四项全绿；27 条需求、7 列证据与状态枚举专项 4 passed；工作树 clean |
-| `E:\_codex_work\tower-snapshot-contract-v1\astrbot_plugin_nikke` | `feat/tower-snapshot-contract-v1` | Tower static snapshot contract | Draft PR #32；head `f513b42`；CI `34188833142` 四项全绿；拒绝重复 JSON 键；当前本机缺少 pytest，未宣称本地 pytest；工作树 clean |
-| `E:\_codex_work\profile-post-merge-v1\astrbot_plugin_nikke` | `feat/profile-post-merge-v1` | Post-Profile V2 status reconciliation | Draft PR #33；head `ab9aeee`；CI `34189505761` 四项全绿；状态入口改为日期化核验快照并新增历史/实时边界回归测试；工作树 clean |
-| `E:\_codex_work\cdk-batch-contract-v1\astrbot_plugin_nikke` | `feat/cdk-batch-contract-v1` | CDK batch idempotency contract reconciliation | Draft PR #34；head `f07828e`；CI `34189931526` 四项全绿；命令层持久 Store/账号身份接线与输出脱敏已有行为测试；工作树 clean |
-| `E:\_codex_work\daily-result-contract-v1\astrbot_plugin_nikke` | `feat/daily-result-contract-v1` | Structured DailyTaskResult status contract | Draft PR #35；head `0117651`；CI `34168517929` 四项全绿；本地专项 8 passed、全量 pytest 264 passed；工作树 clean |
-| `E:\_codex_work\daily-auto-per-account-v1\astrbot_plugin_nikke` | `feat/daily-auto-per-account-v1` | Per-account daily automation preference | Draft PR #36；head `71872a8`；CI `34169152021` 四项全绿；本地 compileall/diff check 通过；工作树 clean |
+| 范围 | 状态 | 备注 |
+| --- | --- | --- |
+| `main` | 仅通过 GitHub PR 合并推进 | 本轮未直接修改本地 main、未 force push |
+| 已合并代码 worktree | 历史/独立分支 | 保留，不删除；其旧 HEAD 不代表当前 main |
+| 资源子系统 worktree | 已完成并入 main | #16、#17、#37、#38 按 campaign → single-flight → 全局槽位 → 预取生命周期顺序整合 |
+| 日常/存储 worktree | 已完成并入 main | #18、#19、#24、#35、#36 依赖顺序整合并经 CI 验证 |
+| 文档/evidence worktree | 已完成并入 main | #31、#33、#39 已分别更新、复核、合并；#14 负责最终台账收口 |
+| 现场证据 | 未执行 | 不访问真实账号，不发送消息，不做部署或账号写操作 |
 
-## 协作规则
+## 持久化规则
 
-- 每个主题独立 branch/worktree/Draft PR。
-- 不直接修改 `main`，不 force push，不自动 merge，不删除分支，不改 ruleset，不部署。
-- 不访问真实账号，不执行账号写操作，不发送消息。
-- 公开只读研究、合成测试和离线 payload 不得冒充真实联调、消息发送或资源授权。
+- 每个新主题独立 branch/worktree/Draft PR。
+- 不把旧 overnight 分支、历史文档 SHA 或未合并分支当作当前开发基线。
+- 只把实际运行的测试、CI、合成预览和已查来源写入台账；缺少 live evidence 时明确标为缺口。
