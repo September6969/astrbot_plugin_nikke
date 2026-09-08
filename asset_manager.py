@@ -214,10 +214,13 @@ class AssetManager:
         return image
 
     def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None, allow_spine_enqueue: bool = False) -> Image.Image:
-        # 1. 项目本地 override：优先检查 name_code，其次 resource_id
-        image = self._load("portraits", str(name_code))
-        if image is None and resource_id:
-            image = self._load("portraits", self._key(resource_id))
+        costume_state, _ = self.nikke_db.costume_cache_token(costume_id)
+        # 默认服装可以使用历史本地 override；非默认服装禁止命中无皮肤维度的旧缓存。
+        image = None
+        if costume_state == "default":
+            image = self._load("portraits", str(name_code))
+            if image is None and resource_id:
+                image = self._load("portraits", self._key(resource_id))
 
         # 2. 版本化预渲染缓存 / Nikke-DB 规范名缓存 (cXXX / cXXX_01)
         char_id = self.nikke_db.resolve_character_id(resource_id, costume_id) if resource_id else ""
@@ -227,8 +230,14 @@ class AssetManager:
         # 3. 远端 Nikke-DB 静态 Full Body CDN
         if image is None and char_id and char_id != "missing":
             url = self.nikke_db.get_full_body_url(resource_id, costume_id)
-            key = self._key(resource_id) if str(resource_id).isdigit() else char_id
-            image = self._load("portraits", key, url)
+            if costume_state == "default":
+                key = self._key(resource_id) if str(resource_id).isdigit() else char_id
+                image = self._load("portraits", key, url)
+            else:
+                # 远端与 single-flight 也必须包含皮肤身份，不能复用 resource_id 通用键。
+                cache_contract = self.nikke_db.compute_cache_key(char_id, costume_id)
+                scoped_key = "costume-" + hashlib.sha256(cache_contract.encode("utf-8")).hexdigest()[:24]
+                image = self._load("portraits", scoped_key, url, allow_source=False)
 
         # 4. Spine 处于实验阶段，生产出卡路径默认不投递后台预渲染任务
         if allow_spine_enqueue and char_id and char_id != "missing" and self.spine.is_available():

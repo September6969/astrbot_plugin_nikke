@@ -55,6 +55,47 @@ class AssetManagerTests(unittest.TestCase):
                 manager.get_character_portrait("5004", "191")
                 self.assertEqual(stream.call_count, 1)
 
+    def test_costume_portraits_use_distinct_remote_cache_keys(self):
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td, remote=True)
+            manager.nikke_db.COSTUME_OVERRIDES.update({"skin_01": "c191_01", "skin_02": "c191_02"})
+            responses = []
+            for color in ("red", "blue"):
+                payload = io.BytesIO()
+                Image.new("RGBA", (30, 50), color).save(payload, "PNG")
+                context = MagicMock()
+                context.__enter__.return_value = httpx.Response(
+                    200,
+                    content=payload.getvalue(),
+                    request=httpx.Request("GET", "https://example.com"),
+                )
+                responses.append(context)
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=responses) as stream:
+                    first = manager.get_character_portrait("5004", "191", "skin_01")
+                    second = manager.get_character_portrait("5004", "191", "skin_02")
+                self.assertEqual(first.getpixel((0, 0)), (255, 0, 0, 255))
+                self.assertEqual(second.getpixel((0, 0)), (0, 0, 255, 255))
+                self.assertEqual(stream.call_count, 2)
+                self.assertNotEqual(stream.call_args_list[0].args[1], stream.call_args_list[1].args[1])
+            finally:
+                manager.close()
+
+    def test_unknown_or_invalid_costume_never_reuses_default_portrait(self):
+        with tempfile.TemporaryDirectory() as td:
+            manager = AssetManager(td, td, remote=True)
+            (Path(td) / "portraits").mkdir(parents=True, exist_ok=True)
+            Image.new("RGBA", (20, 20), "green").save(Path(td) / "portraits/191.png")
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    unknown = manager.get_character_portrait("5004", "191", "unknown_skin")
+                    invalid = manager.get_character_portrait("5004", "191", True)
+                self.assertNotEqual(unknown.getpixel((0, 0)), (0, 128, 0, 255))
+                self.assertNotEqual(invalid.getpixel((0, 0)), (0, 128, 0, 255))
+                stream.assert_not_called()
+            finally:
+                manager.close()
+
     def test_global_remote_download_limit_returns_fallback_without_cooldown(self):
         """不同实例、不同键共用限额；压力降级不能被写成五分钟失败。"""
         with tempfile.TemporaryDirectory() as td:

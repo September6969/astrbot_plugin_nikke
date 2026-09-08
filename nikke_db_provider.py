@@ -82,20 +82,57 @@ class NikkeDbProvider:
             return f"c{s.zfill(3)}"
         return s if s else "missing"
 
+    @classmethod
+    def classify_costume_id(cls, costume_id: int | str | None) -> tuple[str, str]:
+        """返回 ``(状态, 规范化令牌)``，严格区分默认、未知与非法皮肤。"""
+        if costume_id is None:
+            return "default", "default"
+        if isinstance(costume_id, bool):
+            return "invalid", "invalid"
+        if type(costume_id) is int:
+            if costume_id == 0:
+                return "default", "default"
+            if costume_id < 0:
+                return "invalid", "invalid"
+        if isinstance(costume_id, str) and not costume_id.strip():
+            return "default", "default"
+        normalized = cls._normalize_id_component(costume_id)
+        if normalized in {"0", "default"}:
+            return "default", "default"
+        if not normalized:
+            return "invalid", "invalid"
+        return "known", normalized
+
+    def costume_cache_token(self, costume_id: int | str | None) -> tuple[str, str]:
+        """结合当前映射把皮肤令牌分成 default/known/unknown/invalid。"""
+        state, token = self.classify_costume_id(costume_id)
+        if state != "known":
+            return state, token
+        mapped = self.COSTUME_OVERRIDES.get(token) or self.costume_map.get(token)
+        if mapped is None:
+            return "unknown", f"unknown:{token}"
+        normalized_mapping = self._normalize_id_component(mapped)
+        if not normalized_mapping:
+            return "invalid", f"invalid:{token}"
+        return "known", f"known:{token}:{normalized_mapping}"
+
     def resolve_character_id(self, resource_id: int | str, costume_id: int | str | None = None) -> str:
         res_str = self._normalize_id_component(resource_id)
         if not res_str:
             return "missing"
         default_id = self.NIKKE_DB_ID_OVERRIDES.get(res_str) or self.normalize_resource_id(res_str)
 
-        cid_str = self._normalize_id_component(costume_id)
-        if cid_str:
-            mapped = self.COSTUME_OVERRIDES.get(cid_str) or self.costume_map.get(cid_str)
+        state, token = self.costume_cache_token(costume_id)
+        if state == "default":
+            return default_id
+        if state == "known":
+            costume_key = token.split(":", 2)[1]
+            mapped = self.COSTUME_OVERRIDES.get(costume_key) or self.costume_map.get(costume_key)
             normalized_mapping = self._normalize_id_component(mapped)
-            if normalized_mapping:
-                return normalized_mapping
+            return normalized_mapping or "missing"
 
-        return default_id
+        # 未知或非法皮肤禁止回退到默认角色，否则会把另一套立绘伪装成目标皮肤。
+        return "missing"
 
     def get_full_body_url(self, resource_id: int | str, costume_id: int | str | None = None, pose: str = "00") -> str:
         char_id = self.resolve_character_id(resource_id, costume_id)
@@ -104,17 +141,19 @@ class NikkeDbProvider:
             return ""
         return f"{self.CDN}/FB/{char_id}_{pose_id}.png"
 
-    @staticmethod
+    @classmethod
     def compute_cache_key(
+        cls,
         character_id: str,
         costume_id: str | int | None = None,
         source_version: str | None = None,
         runtime_version: str | None = None,
         renderer_version: str = "1.0",
     ) -> str:
+        _, costume_token = cls.classify_costume_id(costume_id)
         parts = [
             str(character_id or "unknown"),
-            str(costume_id or "default"),
+            costume_token,
             str(source_version or "src"),
             str(runtime_version or "none"),
             str(renderer_version),

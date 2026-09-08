@@ -38,25 +38,42 @@ class NikkeDbProviderTests(unittest.TestCase):
             provider = NikkeDbProvider(td, td)
             provider.COSTUME_OVERRIDES["bad_skin"] = "../c191_01"
             try:
-                self.assertEqual(provider.resolve_character_id(191, costume_id=True), "c191")
-                self.assertEqual(provider.resolve_character_id(191, costume_id="bad_skin"), "c191")
+                self.assertEqual(provider.resolve_character_id(191, costume_id=True), "missing")
+                self.assertEqual(provider.resolve_character_id(191, costume_id="bad_skin"), "missing")
                 self.assertEqual(provider.get_full_body_url(191, pose="../00"), "")
                 self.assertEqual(provider.resolve_spine_bundle_urls("../191"), {})
                 self.assertEqual(provider.resolve_spine_bundle_urls("191", action="../aim"), {})
             finally:
                 provider.COSTUME_OVERRIDES.pop("bad_skin", None)
 
-    def test_costume_mapping_and_fallback_to_default(self):
+    def test_costume_mapping_does_not_fallback_unknown_to_default(self):
         with tempfile.TemporaryDirectory() as td:
             provider = NikkeDbProvider(td, td)
             provider.COSTUME_OVERRIDES["skin_01"] = "c191_01"
             try:
                 # 已映射皮肤返回皮肤 ID
                 self.assertEqual(provider.resolve_character_id(191, costume_id="skin_01"), "c191_01")
-                # 未知皮肤安全回退至默认角色 ID
-                self.assertEqual(provider.resolve_character_id(191, costume_id="unknown_skin"), "c191")
+                # 未知皮肤不能伪装成默认角色
+                self.assertEqual(provider.resolve_character_id(191, costume_id="unknown_skin"), "missing")
                 # 无皮肤参数返回默认角色 ID
                 self.assertEqual(provider.resolve_character_id(191), "c191")
+            finally:
+                provider.COSTUME_OVERRIDES.pop("skin_01", None)
+
+    def test_costume_states_are_distinct(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td)
+            provider.COSTUME_OVERRIDES["skin_01"] = "c191_01"
+            try:
+                self.assertEqual(provider.costume_cache_token(None)[0], "default")
+                self.assertEqual(provider.costume_cache_token(0)[0], "default")
+                self.assertEqual(provider.costume_cache_token("skin_01")[0], "known")
+                self.assertEqual(provider.costume_cache_token("unknown_skin")[0], "unknown")
+                self.assertEqual(provider.costume_cache_token(True)[0], "invalid")
+                self.assertNotEqual(
+                    NikkeDbProvider.compute_cache_key("c191", None),
+                    NikkeDbProvider.compute_cache_key("c191", "unknown_skin"),
+                )
             finally:
                 provider.COSTUME_OVERRIDES.pop("skin_01", None)
 

@@ -117,6 +117,29 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         self.assertEqual(record.status, ClearLineupStatus.UNAVAILABLE)
         self.assertEqual(record.status_message, "该关卡暂无可查询的历史阵容")
 
+    def test_costume_id_is_preserved_as_an_explicit_member_field(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 120000, "slot": 1, "costume_id": "skin_01"},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+        ]
+        record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+        self.assertEqual(record.status, ClearLineupStatus.AVAILABLE)
+        self.assertEqual(record.members[0].costume_id, "skin_01")
+
+    def test_invalid_costume_id_is_structurally_invalid(self):
+        raw_list = [
+            {"tid": 101, "lv": 400, "combat": 120000, "slot": 1, "costume_id": True},
+            {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
+            {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
+            {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
+            {"tid": 105, "lv": 400, "combat": 102000, "slot": 5},
+        ]
+        record = self.builder.build(self.stage, {"code": 0, "data": {"list": raw_list}})
+        self.assertEqual(record.status, ClearLineupStatus.ERROR)
+
     def test_non_mapping_response_is_structurally_invalid(self):
         record = self.builder.build(self.stage, None)
         self.assertEqual(record.status, ClearLineupStatus.ERROR)
