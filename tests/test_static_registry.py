@@ -17,6 +17,8 @@ class StaticDataRegistryTests(unittest.TestCase):
 
         self.assertTrue(registry.is_valid)
         self.assertEqual(registry.metadata("equipment").source_ref, "assets/README.md")
+        self.assertEqual(registry.metadata("costume").checked_at, "2026-09-08")
+        self.assertEqual(registry.mapping("costume"), {})
         self.assertEqual(
             registry.resolve("equipment", "3100901"),
             "icn_equipment_head_attacker_t9_3",
@@ -37,7 +39,7 @@ class StaticDataRegistryTests(unittest.TestCase):
     def test_hash_mismatch_disables_only_tampered_registry(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
-            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json"):
+            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
                 shutil.copy2(self.assets / name, target / name)
 
             content = (target / "equipment.json").read_text(encoding="utf-8")
@@ -52,7 +54,7 @@ class StaticDataRegistryTests(unittest.TestCase):
     def test_duplicate_mapping_keys_disable_only_ambiguous_registry(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
-            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json"):
+            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
                 shutil.copy2(self.assets / name, target / name)
 
             # 更新 manifest hash，确保本测试验证的是重复键合同，而不是 hash 失败。
@@ -76,8 +78,28 @@ class StaticDataRegistryTests(unittest.TestCase):
         self.assertEqual(manifest["schema_version"], 1)
         self.assertEqual(
             set(manifest["registries"]),
-            {"equipment", "cube", "favorite_item"},
+            {"equipment", "cube", "favorite_item", "costume"},
         )
+
+    def test_costume_ids_are_explicit_and_use_asset_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
+                shutil.copy2(self.assets / name, target / name)
+
+            content = b'{"skin_01":"c191_01"}'
+            (target / "costumes.json").write_bytes(content)
+            manifest = json.loads((target / "registry_manifest.json").read_text(encoding="utf-8"))
+            manifest["registries"]["costume"]["sha256"] = hashlib.sha256(content).hexdigest()
+            (target / "registry_manifest.json").write_text(
+                json.dumps(manifest, ensure_ascii=False), encoding="utf-8"
+            )
+
+            registry = StaticDataRegistry(target)
+
+            self.assertEqual(registry.resolve("costume", "skin_01"), "c191_01")
+            self.assertIsNone(registry.resolve("costume", "../skin_01"))
+            self.assertIsNone(registry.resolve("costume", True))
 
 
 if __name__ == "__main__":

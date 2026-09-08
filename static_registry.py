@@ -29,21 +29,24 @@ class RegistryMetadata:
 
 
 class StaticDataRegistry:
-    """加载并校验 Equipment/Cube/Favorite Item 的只读标识映射。"""
+    """加载并校验资源类型的只读标识映射。"""
 
     MANIFEST = "registry_manifest.json"
     FILES = {
         "equipment": "equipment.json",
         "cube": "cubes.json",
         "favorite_item": "favorite_items.json",
+        "costume": "costumes.json",
     }
     ID_PATTERN = re.compile(r"^\d+$")
+    COSTUME_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[_-][a-z0-9]+)*$")
     VALUE_PATTERNS = {
         "equipment": re.compile(
             r"^icn_equipment_(head|body|arm|leg)_(attacker|defender|supporter)_t[1-9]\d*(?:_\d+)?$"
         ),
         "cube": re.compile(r"^harmony_cube_\d+$"),
         "favorite_item": re.compile(r"^favorite_item_\d+$"),
+        "costume": re.compile(r"^c\d+(?:_\d+)?$"),
     }
 
     def __init__(self, asset_dir: str | Path):
@@ -69,7 +72,8 @@ class StaticDataRegistry:
         if isinstance(resource_id, bool) or not isinstance(resource_id, (str, int)):
             return None
         key = str(resource_id)
-        if not self.ID_PATTERN.fullmatch(key):
+        id_pattern = self.COSTUME_ID_PATTERN if kind == "costume" else self.ID_PATTERN
+        if not id_pattern.fullmatch(key):
             return None
         return self._maps.get(kind, {}).get(key)
 
@@ -138,12 +142,13 @@ class StaticDataRegistry:
 
     @classmethod
     def _parse_mapping(cls, kind: str, data) -> dict[str, str]:
-        if not isinstance(data, dict) or not data:
+        if not isinstance(data, dict) or (not data and kind != "costume"):
             raise RegistryValidationError("映射必须是非空对象")
         pattern = cls.VALUE_PATTERNS[kind]
+        id_pattern = cls.COSTUME_ID_PATTERN if kind == "costume" else cls.ID_PATTERN
         result: dict[str, str] = {}
         for resource_id, resource_name in data.items():
-            if not isinstance(resource_id, str) or not cls.ID_PATTERN.fullmatch(resource_id):
+            if not isinstance(resource_id, str) or not id_pattern.fullmatch(resource_id):
                 raise RegistryValidationError(f"{kind} ID 无效: {resource_id!r}")
             if not isinstance(resource_name, str) or not pattern.fullmatch(resource_name):
                 raise RegistryValidationError(f"{kind} resource 标识无效: {resource_name!r}")
