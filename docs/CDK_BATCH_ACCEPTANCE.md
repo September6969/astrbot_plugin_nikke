@@ -21,7 +21,7 @@
 在 Python 3.10.11、`E:\DevCache\nikke-test-venv` 环境，以 `origin/main@bada0b3` 为基线：
 
 - `tests/test_cdk.py`、`tests/test_cdk_persistence.py`、`tests/test_cdk_stale_runs.py`、`tests/test_review_cancellation.py`：42 passed、12 subtests、2 warnings。
-- 覆盖批量上限/最小间隔、跨调用复用 success、unknown 不重放、终态与可重试态矩阵、过期 running 隔离、跨 Store 原子转换、同账号锁和取消传播。
+- 覆盖命令层 Store/账号身份接线及输出脱敏、批量上限/最小间隔、跨调用复用 success、unknown 不重放、终态与可重试态矩阵、过期 running 隔离、跨 Store 原子转换、同账号锁和取消传播。
 - `python -m compileall -q cdk_service.py cdk_models.py storage.py main.py`：通过。
 - 完整 `pytest -q`：256 passed、43 subtests、2 warnings；Node extension test：3 passed；全量 compileall 和 `git diff --check`：通过。
 - GitHub Actions CI 在提交后作为最终门禁；本记录不把离线结果冒充真实接口验收。
