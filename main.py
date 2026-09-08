@@ -74,7 +74,7 @@ class NikkePlugin(Star):
         self.raid_renderer = UnionRaidRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
         self.campaign_builder = CampaignHistoryBuilder()
-        self.campaign_renderer = CampaignHistoryRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
+        self.campaign_renderer = self._build_campaign_renderer()
         self.cdk_service = CdkService(self.client)
         self.feedback_manager = DelayedFeedbackManager(1.5)
         self.voice_resolver = VoiceResolver()
@@ -97,6 +97,14 @@ class NikkePlugin(Star):
         self._closing = False
         self._pack_extension()
         self._spawn_background_task(self._start_services())
+
+    def _build_campaign_renderer(self) -> CampaignHistoryRenderer:
+        """让所有图片渲染器复用同一个资源缓存与线程池。"""
+        return CampaignHistoryRenderer(
+            self.data_dir / "cards",
+            self.plugin_dir / "fonts",
+            self.asset_manager,
+        )
 
     def _spawn_background_task(self, coro):
         """统一登记任务，关闭期间拒绝新任务并释放尚未启动的协程。"""
