@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `09821816f7489885f4fb33045fd56fe39adda1d3`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -24,6 +24,7 @@
 | Offline Raid “我的” | 已合并 PR #45，merge `7b1b07cd89b1b5dbac20bf03f2f162b0b22b65c1`；使用绑定 `game_openid` 精确筛选当前响应、无 N+1、保留完整赛季与 canonical identity 现场缺口 |
 | Spine 正式编排基础 | 已合并 PR #52，merge `44266cad2cbc31f95b46ee7fb342c9c19c231f89`；正式 runtime 注入、bundle 白名单/缓存、严格版本匹配、队列和 PNG 回退进入主线 |
 | Spine 4.1 headless worker / Costume | 已合并 PR #53，merge `7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195`；官方 4.1 源码固定提交、Linux Docker 构建、SDL dummy/software worker、RGBA CLI adapter 和 Costume 空映射合同进入主线 |
+| Resource Registry V2 | 已合并 PR #54，merge `09821816f7489885f4fb33045fd56fe39adda1d3`；Costume registry 合同、来源/hash 清单和 unknown/invalid 隔离进入主线，映射保持空表 |
 
 ## 证据边界
 
@@ -67,9 +68,16 @@
 - `assets/costumes.json` 当前仍为空；没有可核验的 API costume ID → Nikke-DB asset ID 证据，因此不制造映射。default/known/unknown/invalid 状态隔离由现有 provider 与行为测试覆盖。
 - Python adapter 离线测试已通过 12 项（worker RGBA 协议、路径越界、坏输出、超时、配置接线及 formal backend）；官方 Linux 编译、合法 bundle 实渲染、benchmark 和服务器恢复后的现场证据仍为 `NEEDS_LIVE_EVIDENCE`，不可由合成测试替代。
 
-## 资源 Registry V2（当前独立主题）
+## 资源 Registry V2（已合并）
 
-- `feat/resource-registry-v2` 从已合并的 `origin/main@7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195` 独立建立；新增 `costumes.json` registry 合同、manifest 来源/hash/许可边界和 AssetManager 暴露字段。
+- `feat/resource-registry-v2` 从已合并的 `origin/main@7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195` 独立建立，PR #54 已合并；新增 `costumes.json` registry 合同、manifest 来源/hash/许可边界和 AssetManager 暴露字段。
 - `costumes.json` 当前保持空对象。没有 API costume ID → Nikke-DB asset ID 的来源证据时不制造映射；unknown/invalid 不推导相邻 ID，也不回退默认服装。
 - `tests/test_static_registry.py` 覆盖空表、显式 costume ID/value、hash mismatch、重复键、目录穿越和 bool ID；状态目标为 `READY_OFFLINE`。
 - CDN 完整覆盖、实际资源存在性、游戏美术授权和服务器现场渲染仍为 `NEEDS_LIVE_EVIDENCE` / `NEEDS_HUMAN_DECISION`，不可由可构造 URL、fixture 或绿色 CI 替代。
+
+## Voice Pipeline V2（当前独立主题）
+
+- `feat/voice-pipeline-v2` 从合并后的 `origin/main@09821816f7489885f4fb33045fd56fe39adda1d3` 建立；接入本地音频 → 精确证据映射的官方动态资源 → 文本三级回退。
+- `VoiceMapRegistry` 要求 `character + costume + locale` 完整精确键、HTTPS 来源和核验日期；`assets/voice_poke_map.json` 当前保持空表，未把剧情语音或 Alice 映射猜成 Poke 语音。
+- `VoicePipeline` 共享下载/编码任务，响应预算为 4 秒、最大 5 秒；插件关闭时回收 pipeline、provider 和 encoder。工具缺失或动态映射不存在时保持文本回退。
+- 离线状态目标为 `READY_OFFLINE`；角色/服装映射、资源授权、NapCat/OneBot 实际 Record 播放和 QQ 送达仍为 `NEEDS_LIVE_EVIDENCE`。

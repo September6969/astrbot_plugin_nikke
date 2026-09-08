@@ -10,6 +10,7 @@ import os
 import random
 import re
 import secrets
+import shutil
 import time
 import zipfile
 from datetime import datetime, timedelta, timezone
@@ -45,6 +46,11 @@ from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
 from .voice_feedback import VoiceResolver
+from .voice_audio import VoiceAudioCache, VoicePreference, is_self_poke
+from .voice_encoder import VoiceEncoder
+from .voice_mapping import VoiceMapRegistry
+from .voice_pipeline import VoicePipeline
+from .voice_resource_provider import VoiceResourceProvider
 from .web_service import BindingWebService
 
 
@@ -85,6 +91,15 @@ class NikkePlugin(Star):
         self.cdk_service = CdkService(self.client)
         self.feedback_manager = DelayedFeedbackManager(1.5)
         self.voice_resolver = VoiceResolver()
+        self.voice_mapping = VoiceMapRegistry(self.plugin_dir / "assets" / "voice_poke_map.json")
+        for error in self.voice_mapping.errors:
+            logger.warning("[NIKKE] 语音映射清单校验失败：%s", error)
+        self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
+        self.voice_provider = VoiceResourceProvider(self.data_dir / "voice_cache")
+        ffmpeg = shutil.which("ffmpeg")
+        ffprobe = shutil.which("ffprobe")
+        self.voice_encoder = VoiceEncoder(self.data_dir / "voice_cache", ffmpeg, ffprobe) if ffmpeg and ffprobe else None
+        self.voice_pipeline = VoicePipeline(self.voice_provider, self.voice_encoder) if self.voice_encoder else None
         self.announcements = AnnouncementService(self.data_dir / "announcements")
         self.announcement_delivery = AnnouncementDelivery(self.store)
         self.web = BindingWebService(
@@ -703,7 +718,6 @@ class NikkePlugin(Star):
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_nikke_poke(self, event: AstrMessageEvent):
         """仅对戳向本 Bot 的通知响应；默认关闭，不发送未经登记的音频。"""
-        from .voice_audio import VoicePreference, VoiceAudioCache, is_self_poke
         raw = getattr(event.message_obj, "raw_message", None)
         if event.get_platform_name() != "aiocqhttp" or not is_self_poke(raw):
             return
@@ -718,12 +732,23 @@ class NikkePlugin(Star):
         self._voice_poke_cooldowns = {key: stamp for key, stamp in cooldowns.items() if now - stamp < 10}
         self._voice_poke_cooldowns[cooldown_key] = now
         text = VoiceResolver.resolve_poke_line(preference.character, preference.locale)
-        if not hasattr(self, "_voice_audio"):
-            self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
         try:
             audio = await self._voice_audio.resolve(preference)
         except (OSError, ValueError, asyncio.TimeoutError):
             audio = None
+        if audio is None:
+            mapping_registry = getattr(self, "voice_mapping", None)
+            pipeline = getattr(self, "voice_pipeline", None)
+            mapping = mapping_registry.resolve(preference.character, preference.skin, preference.locale) if mapping_registry else None
+            if (
+                mapping is not None
+                and pipeline is not None
+                and getattr(self, "config", {}).get("voice_dynamic_enabled", True)
+            ):
+                try:
+                    audio = await pipeline.resolve(mapping.map_key, mapping.speech_id, mapping.locale, budget=4)
+                except (OSError, ValueError, asyncio.TimeoutError):
+                    audio = None
         if audio:
             from astrbot.api.message_components import Record
             yield event.chain_result([Record.fromFileSystem(str(audio))])
@@ -1719,6 +1744,24 @@ class NikkePlugin(Star):
                 except Exception as exc:
                     cleanup_errors.append(exc)
                     logger.debug("[NIKKE] 反馈管理器回收失败：%s", safe_exception_message(exc))
+            voice_pipeline = getattr(self, "voice_pipeline", None)
+            if voice_pipeline is not None:
+                try:
+                    await voice_pipeline.close()
+                except Exception as exc:
+                    cleanup_errors.append(exc)
+                    logger.debug("[NIKKE] 语音管线回收失败：%s", safe_exception_message(exc))
+            else:
+                for resource in (getattr(self, "voice_provider", None), getattr(self, "voice_encoder", None)):
+                    close = getattr(resource, "close", None)
+                    if close is not None:
+                        try:
+                            result = close()
+                            if asyncio.iscoroutine(result):
+                                await result
+                        except Exception as exc:
+                            cleanup_errors.append(exc)
+                            logger.debug("[NIKKE] 语音资源回收失败：%s", safe_exception_message(exc))
             asset_manager = getattr(self, "asset_manager", None)
             if asset_manager is not None:
                 try:

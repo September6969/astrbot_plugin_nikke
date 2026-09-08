@@ -69,6 +69,11 @@
     "type": "int",
     "default": 4
   },
+  "voice_dynamic_enabled": {
+    "description": "启用 voice_poke_map.json 中有来源证据的官方动态语音；空映射或关闭时使用本地登记音频/文本",
+    "type": "bool",
+    "default": true
+  },
   "enable_daily_actions": {
     "description": "启用已验证的社区签到与领奖接口",
     "type": "bool",
