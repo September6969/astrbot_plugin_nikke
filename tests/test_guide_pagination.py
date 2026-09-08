@@ -36,3 +36,29 @@ class GuidePaginationTests(IsolatedAsyncioTestCase):
             self.assertFalse(any("fixture-0" in value for value in result))
             self.assertEqual([x async for x in plugin.nikke(event, "攻略", "练度", "3")], ["该攻略页不存在。"])
             self.assertIn("页码", [x async for x in plugin.nikke(event, "攻略", "练度", "-1")][0])
+
+    async def test_six_categories_and_link_output_order(self):
+        with tempfile.TemporaryDirectory() as directory:
+            plugin = NikkePlugin.__new__(NikkePlugin)
+            plugin.plugin_dir = Path(directory)
+            root = plugin.plugin_dir / "assets/guides"
+            root.mkdir(parents=True)
+            image = root / "one.png"
+            image.write_bytes(b"synthetic")
+            categories = ["progression", "red_orbs", "favorite", "arena_charge", "overload", "pvp"]
+            rows = []
+            for category in categories:
+                rows.append(dict(id=category, category=category, title=category,
+                                 files=[] if category == "red_orbs" else ["one.png"],
+                                 links=["https://nikkeoutpost.netlify.app/"] if category == "red_orbs" else [],
+                                 source="synthetic", credit="test", license="self",
+                                 updated_at="2026-09-08", game_version="test"))
+            (root / "registry.json").write_text(json.dumps(rows), encoding="utf-8")
+            event = SimpleNamespace(plain_result=lambda x: "text:" + x, image_result=lambda x: "image:" + x)
+            aliases = ["练度", "红球", "珍藏品", "充能", "洗词条", "PVP"]
+            for alias in aliases:
+                output = [x async for x in plugin.guide(event, alias)]
+                self.assertTrue(output[0].startswith("text:【"))
+                self.assertTrue(output[1].startswith("text:"))
+            red = [x async for x in plugin.guide(event, "红球")]
+            self.assertEqual(red[-1], "text:https://nikkeoutpost.netlify.app/")
