@@ -34,3 +34,8 @@
 ## 后续工作
 
 下一主题必须从届时最新 `origin/main` 建立独立 worktree、branch 和 Draft PR，并先写清字段合同、请求预算、异常语义、测试和证据缺口。已合并主题不得通过旧 overnight 分支恢复；需要现场动作时，只记录最小授权动作并等待明确授权。当前 v4 离线主题已收口，后续先重新核验状态再选择下一个独立主题。
+
+## Favorite Item / Cube 完整性（进行中）
+
+- `test/item-resource-integrity-v1` 从 `origin/main@c4f1755a` 独立建立；补齐未登记、404、超时、损坏缓存与解码失败行为证据，状态 `READY_OFFLINE`。
+- 未发现带来源证据的新映射，故没有扩充当前 4 个 Favorite Item / 8 个 Cube 清单；完整覆盖仍为 `NEEDS_LIVE_EVIDENCE`。
