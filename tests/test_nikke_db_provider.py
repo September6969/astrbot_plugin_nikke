@@ -22,6 +22,30 @@ class NikkeDbProviderTests(unittest.TestCase):
             finally:
                 provider.NIKKE_DB_ID_OVERRIDES.pop("special_999", None)
 
+    def test_invalid_ids_are_rejected_instead_of_sanitized(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td)
+            invalid_values = [True, False, 1.5, -1, None, {}, [], "19.1", "../191", "c191/00"]
+
+            for value in invalid_values:
+                with self.subTest(value=value):
+                    self.assertEqual(provider.normalize_resource_id(value), "missing")
+                    self.assertEqual(provider.resolve_character_id(value), "missing")
+                    self.assertEqual(provider.get_full_body_url(value), "")
+
+    def test_invalid_costume_mapping_and_url_segments_fall_back_safely(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td)
+            provider.COSTUME_OVERRIDES["bad_skin"] = "../c191_01"
+            try:
+                self.assertEqual(provider.resolve_character_id(191, costume_id=True), "c191")
+                self.assertEqual(provider.resolve_character_id(191, costume_id="bad_skin"), "c191")
+                self.assertEqual(provider.get_full_body_url(191, pose="../00"), "")
+                self.assertEqual(provider.resolve_spine_bundle_urls("../191"), {})
+                self.assertEqual(provider.resolve_spine_bundle_urls("191", action="../aim"), {})
+            finally:
+                provider.COSTUME_OVERRIDES.pop("bad_skin", None)
+
     def test_costume_mapping_and_fallback_to_default(self):
         with tempfile.TemporaryDirectory() as td:
             provider = NikkeDbProvider(td, td)

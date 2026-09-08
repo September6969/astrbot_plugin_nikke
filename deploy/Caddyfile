@@ -2,17 +2,14 @@ nikke.irises777.xyz {
     encode zstd gzip
     reverse_proxy astrbot:6210
 
+    # 绑定链接把一次性令牌放在 URL 路径中，示例默认不启用访问日志，避免令牌进入日志。
+
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
         Referrer-Policy "no-referrer"
         -Server
-    }
-
-    log {
-        output stdout
-        format console
     }
 }
 
