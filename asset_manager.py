@@ -9,8 +9,10 @@ import hashlib
 import json
 import logging
 import re
+import threading
 import time
 import uuid
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import httpx
@@ -20,20 +22,37 @@ from .card_models import CharacterCardAssets, CharacterCardData
 from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
 from .spine_prerenderer import SpineJob, SpinePreRenderer
+from .static_registry import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
+
+
+@dataclass
+class _InflightAsset:
+    """同一缓存键的共享下载状态；缓存写入失败时仍保留内存结果。"""
+
+    event: threading.Event = field(default_factory=threading.Event)
+    result: Image.Image | None = None
 
 
 class AssetManager:
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
+    # 单张角色卡最多预取 11 项；保留少量余量，但禁止多张卡无限堆积在线程池队列。
+    MAX_PREFETCH_TASKS = 16
     CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images"
+    # 跨实例限制不同缓存键的远端下载；缓存命中不占用名额。
+    REMOTE_DOWNLOAD_LIMIT = 4
+    _remote_download_slots = threading.BoundedSemaphore(REMOTE_DOWNLOAD_LIMIT)
 
     def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
         self.remote = remote
         self._failed: dict[str, float] = {}
+        self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
+        self._inflight_lock = threading.Lock()
+        self._inflight: dict[str, _InflightAsset] = {}
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
         self.spine = SpinePreRenderer(self.cache_dir)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
@@ -43,24 +62,12 @@ class AssetManager:
             self.sources = {}
         if not isinstance(self.sources, dict):
             self.sources = {}
-        try:
-            self.equipment_map = json.loads((self.asset_dir / "equipment.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.equipment_map = {}
-        if not isinstance(self.equipment_map, dict):
-            self.equipment_map = {}
-        try:
-            self.favorite_items_map = json.loads((self.asset_dir / "favorite_items.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.favorite_items_map = {}
-        if not isinstance(self.favorite_items_map, dict):
-            self.favorite_items_map = {}
-        try:
-            self.cubes_map = json.loads((self.asset_dir / "cubes.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            self.cubes_map = {}
-        if not isinstance(self.cubes_map, dict):
-            self.cubes_map = {}
+        self.registry = StaticDataRegistry(self.asset_dir)
+        for error in self.registry.errors:
+            logger.warning("静态 registry 校验失败：%s", error)
+        self.equipment_map = self.registry.mapping("equipment")
+        self.favorite_items_map = self.registry.mapping("favorite_item")
+        self.cubes_map = self.registry.mapping("cube")
 
     @staticmethod
     def game_resource_url(path: str) -> str:
@@ -90,8 +97,7 @@ class AssetManager:
             image.load()
             return image.convert("RGBA")
 
-    def _load(self, kind: str, key: str, remote_url: str = "") -> Image.Image | None:
-        relative = f"{kind}/{self._key(key)}.png"
+    def _load_cached(self, relative: str) -> Image.Image | None:
         for base in (self.cache_dir, self.asset_dir):
             try:
                 path = base / relative
@@ -99,12 +105,51 @@ class AssetManager:
                     return self._decode(path.read_bytes())
             except (OSError, ValueError, Image.DecompressionBombError):
                 pass
-        url = self.sources.get(relative, remote_url)
+        return None
+
+    def _load(
+        self,
+        kind: str,
+        key: str,
+        remote_url: str = "",
+        *,
+        allow_source: bool = True,
+    ) -> Image.Image | None:
+        relative = f"{kind}/{self._key(key)}.png"
+        image = self._load_cached(relative)
+        if image is not None:
+            return image
+
+        # 静态 registry 素材必须只使用已确认映射生成的 URL，不能被通用来源清单绕过。
+        url = self.sources.get(relative, remote_url) if allow_source else remote_url
         if not self.remote or not isinstance(url, str) or not url.startswith("https://"):
             return None
-        if self._failed.get(relative, 0) > time.monotonic():
-            return None
+        with self._inflight_lock:
+            state = self._inflight.get(relative)
+            owner = state is None
+            if owner:
+                state = _InflightAsset()
+                self._inflight[relative] = state
+
+        if not owner:
+            # 同一素材已有下载者；不重复发请求，优先复用其内存结果，再读取缓存。
+            state.event.wait(timeout=7.0)
+            if state.result is not None:
+                return state.result
+            return self._load_cached(relative)
+        slot_acquired = False
         try:
+            # 注册 single-flight 后再次检查，覆盖刚刚由其它路径写入缓存的竞态。
+            image = self._load_cached(relative)
+            if image is not None:
+                return image
+            if self._failed.get(relative, 0) > time.monotonic():
+                return None
+            # 不同键的远端请求共用全局限额；满额立即降级，不能阻塞在线程队列中。
+            slot_acquired = self._remote_download_slots.acquire(blocking=False)
+            if not slot_acquired:
+                logger.warning("远端素材并发已满，使用占位素材: %s", relative)
+                return None
             # 公共素材请求不携带账号Cookie；限制总下载时长和响应大小。
             started = time.monotonic()
             content = bytearray()
@@ -130,6 +175,15 @@ class AssetManager:
         except (httpx.HTTPError, OSError, ValueError, Image.DecompressionBombError):
             self._failed[relative] = time.monotonic() + 300
             return None
+        finally:
+            with self._inflight_lock:
+                current = self._inflight.pop(relative, None)
+                if current is not None:
+                    if image is not None:
+                        current.result = image
+                    current.event.set()
+            if slot_acquired:
+                self._remote_download_slots.release()
 
     @staticmethod
     def fallback(kind: str) -> Image.Image:
@@ -189,44 +243,33 @@ class AssetManager:
         return image if image is not None else self.fallback("portrait")
 
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
-        resource = self.equipment_map.get(str(equipment_id), "")
-        url = self.game_resource_url(f"icon/equip/{resource}.webp") if resource and self._key(resource) != "missing" else ""
-        image = self._load("equipment", str(equipment_id), url) if equipment_id else None
+        resource = self.registry.resolve("equipment", equipment_id)
+        if resource is None:
+            image = self._load("slots", slot)
+            return image if image is not None else self.fallback(slot)
+        url = self.game_resource_url(f"icon/equip/{resource}.webp")
+        image = self._load("equipment", str(equipment_id), url, allow_source=False)
         if image is None:
             image = self._load("slots", slot)
         return image if image is not None else self.fallback(slot)
 
-    def _icon(self, kind, key, fallback, url="") -> Image.Image:
-        image = self._load(kind, self._key(key), url)
+    def _icon(self, kind, key, fallback, url="", *, allow_source=True) -> Image.Image:
+        image = self._load(kind, self._key(key), url, allow_source=allow_source)
         return image if image is not None else self.fallback(fallback)
 
     def get_favorite_item_icon(self, tid) -> Image.Image:
-        if not tid:
+        resource = self.registry.resolve("favorite_item", tid)
+        if resource is None:
             return self.fallback("favorite")
-        resource = self.favorite_items_map.get(str(tid), "")
-        url = ""
-        if resource:
-            if resource.startswith("http://") or resource.startswith("https://"):
-                url = resource
-            elif "/" in resource:
-                url = self.game_resource_url(resource)
-            else:
-                url = self.game_resource_url(f"icon/favorite/{resource}.webp")
-        return self._icon("favorite", tid, "favorite", url)
+        url = self.game_resource_url(f"icon/favorite/{resource}.webp")
+        return self._icon("favorite", tid, "favorite", url, allow_source=False)
 
     def get_cube_icon(self, tid) -> Image.Image:
-        if not tid:
+        resource = self.registry.resolve("cube", tid)
+        if resource is None:
             return self.fallback("cube")
-        resource = self.cubes_map.get(str(tid), "")
-        url = ""
-        if resource:
-            if resource.startswith("http://") or resource.startswith("https://"):
-                url = resource
-            elif "/" in resource:
-                url = self.game_resource_url(resource)
-            else:
-                url = self.game_resource_url(f"icon/cube/{resource}.webp")
-        return self._icon("cube", tid, "cube", url)
+        url = self.game_resource_url(f"icon/cube/{resource}.webp")
+        return self._icon("cube", tid, "cube", url, allow_source=False)
 
     def get_element_icon(self, element):
         key = self._key(element)
@@ -250,6 +293,18 @@ class AssetManager:
         resource = "icn_burst_all" if key == "allstep" else (f"icn_burst_0{key[-1]}" if key in {"step1", "step2", "step3"} else "")
         url = self.game_resource_url(f"icon/atlas_common_class/{resource}.webp") if resource else ""
         return self._icon("burst", key, "burst", url)
+
+    def _submit_prefetch(self, func) -> concurrent.futures.Future | None:
+        """有界地提交出卡预取任务，避免超时请求留下无限队列。"""
+        if not self._prefetch_slots.acquire(blocking=False):
+            return None
+        try:
+            future = self._executor.submit(func)
+        except Exception:
+            self._prefetch_slots.release()
+            raise
+        future.add_done_callback(lambda _: self._prefetch_slots.release())
+        return future
 
     def resolve_character_assets(
         self, data: CharacterCardData, timeout: float = 6.0
@@ -314,8 +369,12 @@ class AssetManager:
 
         for key, (func, _) in tasks.items():
             try:
-                fut = self._executor.submit(func)
-                future_map[fut] = key
+                fut = self._submit_prefetch(func)
+                if fut is None:
+                    logger.warning("素材预取队列已满 [%s]，使用降级 fallback", key)
+                    results[key] = tasks[key][1]()
+                else:
+                    future_map[fut] = key
             except Exception as exc:
                 logger.warning(
                     "提交素材获取任务失败 [%s]: %s",
@@ -341,11 +400,11 @@ class AssetManager:
 
             for fut in not_done:
                 key = future_map[fut]
-                logger.warning(
-                    "素材获取超时 (硬预算 %.1fs) [%s]，使用降级 fallback",
-                    timeout,
-                    sanitize_log_text(key, max_length=120),
-                )
+                safe_key = sanitize_log_text(key, max_length=120)
+                if fut.cancel():
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，已取消未启动任务并使用 fallback", timeout, safe_key)
+                else:
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，任务已运行并使用 fallback", timeout, safe_key)
                 results[key] = tasks[key][1]()
 
         return CharacterCardAssets(

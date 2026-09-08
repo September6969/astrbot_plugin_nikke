@@ -29,7 +29,10 @@ class CampaignHistoryRenderer(CardRenderer):
 
     def __init__(self, output_dir: str | Path, font_dir: str | Path, assets: AssetManager | None = None):
         super().__init__(output_dir, font_dir)
-        self.assets = assets or AssetManager(Path(output_dir) / "cache", Path(__file__).parent / "assets")
+        # 显式区分“未提供”与 falsey 的共享管理器，确保依赖注入不会被绕过。
+        self.assets = assets if assets is not None else AssetManager(
+            Path(output_dir) / "cache", Path(__file__).parent / "assets"
+        )
 
     def _text(self, draw, xy, text, size, color, *, width=None, bold=False):
         text = str(text).replace("\n", " ")
@@ -94,6 +97,8 @@ class CampaignHistoryRenderer(CardRenderer):
             card_width = (self.WIDTH - padding * 2 - 4 * 16) // 5
             card_height = 550
             card_y = 150
+            # 同一张卡片内复用相同资源键，避免重复触发资源解析或远程缓存检查。
+            portrait_cache = {}
 
             for index, member in enumerate(record.members[:5]):
                 card_x = padding + index * (card_width + 16)
@@ -118,7 +123,12 @@ class CampaignHistoryRenderer(CardRenderer):
                 )
 
                 # 角色立绘区域
-                portrait = self.assets.get_character_portrait(member.tid, member.resource_id)
+                portrait_key = (str(member.tid), str(member.resource_id))
+                if portrait_key not in portrait_cache:
+                    portrait_cache[portrait_key] = self.assets.get_character_portrait(
+                        member.tid, member.resource_id
+                    )
+                portrait = portrait_cache[portrait_key]
                 portrait_box = (card_x + 14, card_y + 48, card_width - 28, 330)
                 # 浅灰底衬
                 draw.rounded_rectangle(

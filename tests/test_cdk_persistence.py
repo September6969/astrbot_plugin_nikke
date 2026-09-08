@@ -1,15 +1,49 @@
 """重复批量、跨服务重启与取消使用持久执行记录。"""
 import tempfile
 import hashlib
+from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
 from unittest.mock import patch
 from astrbot_plugin_nikke.storage import NikkeStore
 from astrbot_plugin_nikke.client import CdkRedemptionResult, BlaBlaTimeoutError
 from astrbot_plugin_nikke.cdk_service import CdkService
+from astrbot_plugin_nikke.cdk_models import CdkBatchResult, CdkRedeemResult
+from astrbot_plugin_nikke.main import NikkePlugin
 
 
 class PersistenceTests(IsolatedAsyncioTestCase):
+    async def test_command_wires_persistent_store_and_account_identity(self):
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.config = {"enable_cdk_redemption": True}
+        plugin.store = object()
+        plugin._account_or_error = lambda event: {"game_uid": "synthetic-game"}
+        plugin.cdk_service = SimpleNamespace(
+            redeem_batch=AsyncMock(
+                return_value=CdkBatchResult(
+                    results=[CdkRedeemResult("SECRET-CODE", True, "兑换成功")]
+                )
+            )
+        )
+
+        class Event:
+            def get_sender_id(self):
+                return "synthetic-user"
+
+            def plain_result(self, text):
+                return text
+
+        output = [item async for item in plugin.cdk_batch(Event(), "SECRET-CODE")]
+
+        plugin.cdk_service.redeem_batch.assert_awaited_once_with(
+            {"game_uid": "synthetic-game"},
+            ["SECRET-CODE"],
+            account_key="synthetic-user:synthetic-game",
+            store=plugin.store,
+            qq_id="synthetic-user",
+        )
+        self.assertNotIn("SECRET-CODE", output[0])
+
     async def test_service_batch_limits_and_minimum_delay(self):
         client = AsyncMock()
         client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "ok")
