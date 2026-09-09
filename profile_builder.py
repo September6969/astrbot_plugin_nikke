@@ -4,14 +4,19 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime, timezone, timedelta
 from typing import Any
 
+from .campaign_stage_resolver import CampaignStageResolver
 from .profile_models import MemorialCountData, ProfileDashboardData, RecycleResearchData
 from .research_registry import research_labels
 
 
 _INTEGER_RE = re.compile(r"^[+-]?\d+$")
 _MAX_INTEGER_DIGITS = 12
+_PROFILE_DISPLAY_TZ = timezone(timedelta(hours=8))
+_MIN_PROFILE_TIMESTAMP = datetime(1970, 1, 1, tzinfo=timezone.utc)
+_MAX_PROFILE_TIMESTAMP = datetime(2100, 1, 1, tzinfo=timezone.utc)
 
 
 def _optional_int(value: Any) -> int | None:
@@ -56,6 +61,77 @@ def _first_optional_str(source: dict[str, Any], *keys: str) -> str | None:
             if value is not None:
                 return value
     return None
+
+
+def parse_profile_created_at(value: Any) -> str | None:
+    """把已确认的 Profile 注册时间统一为 UTC+8 日期文本。
+
+    Bla 的历史响应使用 Unix 秒级时间戳；兼容已确认的毫秒时间戳和
+    ISO-8601 响应。超界、布尔值、浮点数和无法解析的文本一律未知。
+    """
+    if value is None or isinstance(value, bool):
+        return None
+
+    timestamp: float | None = None
+    if isinstance(value, int):
+        digits = str(abs(value))
+        if len(digits) == 10:
+            timestamp = float(value)
+        elif len(digits) == 13:
+            timestamp = value / 1000.0
+    elif isinstance(value, str):
+        text = value.strip()
+        if re.fullmatch(r"\d{10}", text):
+            timestamp = float(text)
+        elif re.fullmatch(r"\d{13}", text):
+            timestamp = int(text) / 1000.0
+        elif text:
+            try:
+                parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+            except ValueError:
+                parsed = None
+            if parsed is not None:
+                if parsed.tzinfo is None:
+                    parsed = parsed.replace(tzinfo=_PROFILE_DISPLAY_TZ)
+                parsed = parsed.astimezone(_PROFILE_DISPLAY_TZ)
+                if _MIN_PROFILE_TIMESTAMP <= parsed.astimezone(timezone.utc) < _MAX_PROFILE_TIMESTAMP:
+                    return parsed.strftime("%Y-%m-%d")
+            return None
+    if timestamp is None:
+        return None
+    try:
+        parsed = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return None
+    if not (_MIN_PROFILE_TIMESTAMP <= parsed < _MAX_PROFILE_TIMESTAMP):
+        return None
+    return parsed.astimezone(_PROFILE_DISPLAY_TZ).strftime("%Y-%m-%d")
+
+
+def _format_campaign_progress(
+    value: Any,
+    *,
+    mode: str,
+    resolver: CampaignStageResolver | None,
+) -> str | None:
+    """将内部进度 ID 映射到静态表中的关卡名，未知时保留原始 ID。"""
+    raw = _optional_str(value)
+    if raw is None:
+        return None
+    if not re.fullmatch(r"\d+", raw):
+        return raw
+    if resolver is None:
+        return f"未映射 · ID {raw}"
+    stage = resolver.resolve_id(raw, mode_hint=mode)
+    return stage.name if stage is not None else f"未映射 · ID {raw}"
+
+
+def _format_unmapped_internal_id(value: Any) -> str | None:
+    """内部资料 ID 没有来源映射时保持中性，不伪装成等级或名称。"""
+    raw = _optional_str(value)
+    if raw is None:
+        return None
+    return f"未映射 · ID {raw}" if re.fullmatch(r"\d+", raw) else raw
 
 
 def _parse_researches(value: Any) -> tuple[list[RecycleResearchData] | None, bool]:
@@ -103,6 +179,9 @@ def _parse_memorials(value: Any) -> tuple[list[MemorialCountData] | None, bool]:
 
 
 class ProfileBuilder:
+    def __init__(self, campaign_resolver: CampaignStageResolver | None = None):
+        self.campaign_resolver = campaign_resolver
+
     def build(
         self,
         *,
@@ -125,11 +204,15 @@ class ProfileBuilder:
         synchro_level = _optional_int(outpost.get("synchro_level"))
         outpost_battle_level = _optional_int(outpost.get("outpost_battle_level"))
 
-        normal_campaign = _first_optional_str(
-            basic, "progress_normal_campaign", "progress_campaign_normal"
+        normal_campaign = _format_campaign_progress(
+            _first_optional_str(basic, "progress_normal_campaign", "progress_campaign_normal"),
+            mode="NORMAL",
+            resolver=self.campaign_resolver,
         )
-        hard_campaign = _first_optional_str(
-            basic, "progress_hard_campaign", "progress_campaign_hard"
+        hard_campaign = _format_campaign_progress(
+            _first_optional_str(basic, "progress_hard_campaign", "progress_campaign_hard"),
+            mode="HARD",
+            resolver=self.campaign_resolver,
         )
 
         basic_count = _optional_int(basic.get("character_count"))
@@ -163,7 +246,7 @@ class ProfileBuilder:
 
         commander_level = _optional_int(basic.get("lv"))
         team_combat = _optional_int(basic.get("team_combat"))
-        created_at = _optional_str(basic.get("created_at"))
+        created_at = parse_profile_created_at(basic.get("created_at"))
         character_costume_count = _optional_int(basic.get("character_costume_count"))
         progress_tribe_tower = _optional_str(basic.get("progress_tribe_tower"))
         sim_room_overclock_score = _optional_str(
@@ -171,8 +254,8 @@ class ProfileBuilder:
         )
 
         infra_core_level = _optional_str(outpost.get("infra_core_level"))
-        tactic_academy_class = _optional_str(outpost.get("tactic_academy_class"))
-        tactic_academy_lesson = _optional_str(outpost.get("tactic_academy_lesson"))
+        tactic_academy_class = _format_unmapped_internal_id(outpost.get("tactic_academy_class"))
+        tactic_academy_lesson = _format_unmapped_internal_id(outpost.get("tactic_academy_lesson"))
         jukebox_count = _optional_str(outpost.get("jukebox_count"))
 
         research_data, research_partial = _parse_researches(

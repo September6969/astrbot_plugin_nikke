@@ -81,11 +81,11 @@ class NikkePlugin(Star):
             self.plugin_dir / "fonts",
             self.asset_manager,
         )
-        self.profile_builder = ProfileBuilder()
+        self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
+        self.profile_builder = ProfileBuilder(campaign_resolver=self.campaign_resolver)
         self.profile_renderer = ProfileCardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.raid_builder = UnionRaidBuilder()
         self.raid_renderer = UnionRaidRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
-        self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
         self.campaign_builder = CampaignHistoryBuilder()
         self.campaign_renderer = self._build_campaign_renderer()
         self.cdk_service = CdkService(self.client)

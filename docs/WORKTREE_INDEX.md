@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-08。当前核验的远端基线为 `origin/main@2f969756b18ad7e28c41564b07ba0aa60b0dc59d`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-09。当前核验的远端基线为 `origin/main@d65065b`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -38,3 +38,4 @@
 | Resource Registry V2 | PR #54 已合并 | `E:\_codex_work\nikke-resource-registry-v2` / `feat/resource-registry-v2`；历史分支保留，costume 映射保持空表 |
 | Voice Pipeline V2 | PR #55 已合并 | `E:\_codex_work\nikke-voice-pipeline-v2` / `feat/voice-pipeline-v2`；历史分支保留，Poke 动态映射保持空表 |
 | Final acceptance / release prep | 当前独立 Draft PR 主题 | `E:\_codex_work\nikke-final-acceptance-v1` / `feat/final-acceptance-v1`；从 `origin/main@2f969756b18ad7e28c41564b07ba0aa60b0dc59d` 建立，收口清单与现场阻塞登记 |
+| Live RC Profile stabilization v1 | 当前独立主题 | `E:\DevCache\nikke-live-rc-profile-stabilization-20260909` / `feat/live-rc-profile-stabilization-v1`；从 `origin/main@d65065b` 建立，Campaign 反查、时间格式化和中性内部 ID 语义已完成离线验证 |
