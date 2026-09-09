@@ -70,17 +70,17 @@ class StateEffectRegistryTests(unittest.TestCase):
         registry = StateEffectRegistry.from_records([record()])
         self.assertIsNone(registry.resolve("7000999", "StatChargeDamage"))
 
-    def test_live_subset_uses_exact_option_identity_and_explicit_divisor(self):
+    def test_live_registry_uses_exact_option_identity_and_explicit_divisor(self):
         path = Path(__file__).resolve().parents[1] / "assets" / "state_effects.json"
         registry = StateEffectRegistry.from_file(path)
         expected = {
             "7000611": ("命中率增加", "percent", 100.0),
             "7001011": ("蓄力速度增加", "percent", 100.0),
-            "7001111": ("暴击率增加", "percent", 100.0),
-            "7001211": ("暴击伤害增加", "percent", 100.0),
+            "7001111": ("暴击率增加", "unknown", None),
+            "7001211": ("暴击伤害增加", "unknown", None),
         }
         self.assertTrue(registry.is_valid)
-        self.assertEqual({item.option_id for item in registry.entries}, set(expected))
+        self.assertGreaterEqual(len(registry.entries), 100)
         for option_id, (label, kind, divisor) in expected.items():
             metadata = registry.resolve(option_id, {
                 "7000611": "StatAccuracyCircle",
@@ -92,13 +92,17 @@ class StateEffectRegistryTests(unittest.TestCase):
             self.assertEqual(metadata.label, label)
             self.assertEqual(metadata.value_kind, kind)
             self.assertEqual(metadata.value_divisor, divisor)
-            self.assertEqual(metadata.format_value(1644), (16.44, "percent"))
+            expected_value = (16.44, "percent") if kind == "percent" else (1644.0, "unknown")
+            self.assertEqual(metadata.format_value(1644), expected_value)
 
-    def test_empty_checked_in_registry_remains_pending(self):
+    def test_integer_live_values_remain_unknown_until_unit_is_confirmed(self):
         path = Path(__file__).resolve().parents[1] / "assets" / "state_effects.json"
         registry = StateEffectRegistry.from_file(path)
         self.assertTrue(registry.is_valid)
-        self.assertEqual(len(registry.entries), 4)
+        metadata = registry.resolve("7001101", "StatCritical")
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.value_kind, "unknown")
+        self.assertEqual(metadata.format_value(1644), (1644.0, "unknown"))
 
 
 if __name__ == "__main__":

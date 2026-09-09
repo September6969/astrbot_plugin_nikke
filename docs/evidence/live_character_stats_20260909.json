@@ -1,0 +1,24 @@
+{
+  "status": "LIVE_READ_ONLY",
+  "checked_at": "2026-09-09",
+  "fetch_route": "ssh serv -> astrbot container -> decrypted credential in memory",
+  "account_scope": "one existing authorized bound account; identifiers and raw credentials were not persisted",
+  "roster_count": 177,
+  "character_details_count": 177,
+  "character_details_request": {
+    "endpoint": "GetUserCharacterDetails",
+    "name_codes_count": 177,
+    "request_count": 1
+  },
+  "character_detail_stat_like_fields": {
+    "combat": {"present": 177, "types": ["int"]},
+    "arena_combat": {"present": 177, "types": ["int"]}
+  },
+  "profile_stat_like_fields": {
+    "team_combat": {"present": 1, "types": ["int"]}
+  },
+  "hp_atk_def_fields_observed": false,
+  "formula_source_observed": false,
+  "raw_values_persisted": false,
+  "interpretation": "The authorized live contracts expose combat summaries but no HP/ATK/DEF fields or formula source; the card continues to display missing HP/ATK/DEF as — and does not infer them."
+}

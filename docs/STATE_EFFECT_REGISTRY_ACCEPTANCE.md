@@ -1,6 +1,6 @@
 # StateEffectRegistry 验收记录
 
-状态：`PARTIAL_LIVE_VERIFIED`（四条公开/现场交叉核验子集）/ `READY_OFFLINE`（合同与接线）。证据见 `docs/evidence/arcana_live_20260909.json` 与 `docs/evidence/state_effect_registry_live_20260909.json`。
+状态：`LIVE_READ_ONLY_VERIFIED`（109 条现场 option/function 映射）/ `READY_OFFLINE`（合同与接线）。证据见 `docs/evidence/live_data_closure` 与既有四条子集证据。
 
 ## 合同
 
@@ -13,7 +13,7 @@
 - 无凭据 HTTPS `source_url`、64 位 `source_sha256` 和 `checked_at`。
 - 若 divisor 来自独立展示规则，还要登记成对的 `value_source_url` / `value_source_sha256`。
 
-没有来源 hash、重复键、含凭据 URL、非法单位或模糊 ID 的记录全部不进入 registry。当前提交的 `assets/state_effects.json` 登记四条 exact 子集并标记 `PARTIAL_LIVE_VERIFIED`；没有把单账号样本冒充全量映射。
+没有来源 hash、重复键、含凭据 URL、非法单位或模糊 ID 的记录全部不进入 registry。当前提交的 `assets/state_effects.json` 登记现场批量响应中观察到的 109 条 exact option/function 映射；它不冒充未出现 option 的全量服务端数据库。
 
 ## 接线
 
@@ -23,7 +23,7 @@
 
 - 有来源记录可将 `StatChargeDamage` 的原始值按显式 divisor 转成 percent；
 - 缺失来源或 option_id 不精确匹配不解析；
-- 四条记录的公开标签、group ID、现场 function type/value type 和 `/100` 展示规则有来源哈希；
-- 真实 CDN metadata、完整 function_type 覆盖、准确 1–15 tier table、HP/ATK/DEF 公式和现场角色卡仍需后续证据；
-- 当前四条记录是部分闭环，不声称完整数据库。
+- 109 条记录的公开标签、group ID、现场 function type/value type 和响应内容 hash 已登记；Percent 使用 divisor 100；Integer 保持 unknown；
+- OL 1--15 分组算法已由独立注册表核验；
+- 现场 CharacterDetails/Profile 仍未提供 HP/ATK/DEF 字段或公式，角色卡继续显示 `—`，不从 combat 反推。
 

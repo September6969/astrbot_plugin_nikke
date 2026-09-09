@@ -1,6 +1,6 @@
 # NIKKE 现场证据登记
 
-更新时间：2026-09-09。基线：`origin/main@7c164cd1d9814fc7b4530de861813665187e63b5`。
+更新时间：2026-09-09。基线：`origin/main@ad0ef20895dbed36963ce8eea0948c3cb25ca133`。
 
 本登记将“已有离线代码/测试”与“需要现场证据”的问题分开。当前路线图已明确授权真实账号只读、最小必要真实写、QQ/NapCat、Voice、Spine 和部署验证；本登记不扩大该范围，也不替代具体动作的备份、前态/后态和隐私检查。
 
@@ -31,6 +31,16 @@
 **已登记**：`7000611`、`7001011`、`7001111`、`7001211`；对应 `StatAccuracyCircle`、`StatChargeTime`、`StatCritical`、`StatCriticalDamage`，显式 `value_divisor=100`。registry 只按 option/function/locale 精确命中，不再按 function type 唯一回退。
 
 **未决问题**：这是四条验证子集，不代表全量 StateEffect；剩余 option 的 function contract、完整 1–15 阶表、HP/ATK/DEF 公式和非默认 Costume 仍需独立证据。公开展示规则也不等于游戏服务端全部数值语义。
+
+## E-STATE-EFFECT-02：批量 OL function 现场闭环
+
+**状态**：`LIVE_READ_ONLY_VERIFIED`。证据文件：`docs/evidence/state_effect_function_inventory_live_20260909.json`、`docs/evidence/live_character_stats_20260909.json`。
+
+**已查来源**：`ssh serv` 上现有 `astrbot` 容器；一次 `GetUserCharacters` 取得 177 个角色后，一次 `GetUserCharacterDetails` 批量请求取得 177 条详情和 109 条 state-effect function 行；原始凭据和响应只在内存中使用。
+
+**已登记**：109 条现场出现的 option/function 精确键进入 `assets/state_effects.json`。Percent 的 divisor=100 有当前公开前端展示规则支持；Integer 的单位保持 unknown，不进入确认汇总。未出现的 option 不扩展推断。
+
+**HP/ATK/DEF 结论**：详情只观察到 `combat`、`arena_combat`，个人资料只观察到 `team_combat`；没有 HP/ATK/DEF 字段或公式来源，不能把战力、等级或静态资料反推成三项属性。
 
 ## E-NUMERIC-01：角色卡异常数值语义
 
