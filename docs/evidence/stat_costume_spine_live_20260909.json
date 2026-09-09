@@ -61,8 +61,14 @@
     "comparison": {
       "game_character_details_fields": ["combat", "arena_combat"],
       "hp_atk_def_fields_present": false,
-      "status": "BLOCKED_NO_CANONICAL_GAME_UI_VALUES",
-      "reason": "现场 API 没有 HP/ATK/DEF 原值；combat 不是可替代的属性值，未用战力冒充对照。"
+      "status": "USER_GAME_PANEL_MATCH_AT_LEVEL_526",
+      "screenshot_sha256": "8112cd6804a9feeb64f1d22943f1ad83dbee4deb1eeb446f877dc4a7f409c4a0",
+      "screenshot_level": 526,
+      "screenshot_combat": 174321,
+      "observed_panel": {"hp": 5429825, "atk": 176926, "def": 35499},
+      "computed_at_screenshot_level": {"hp": 5429825, "atk": 176926, "def": 35499},
+      "absolute_difference": {"hp": 0, "atk": 0, "def": 0},
+      "reason": "用户提供游戏截图并已查看。保留此前 525 级只读快照，改用截图 526 级及相同研究/装备条件重算，三值完全一致；仅此样本，不代表全角色或当前账号重新采集。"
     }
   },
   "costume_spine_mapping": {
