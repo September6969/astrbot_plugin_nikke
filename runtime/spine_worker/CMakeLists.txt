@@ -24,7 +24,10 @@ target_include_directories(nikke-spine-worker PRIVATE
     "${SFML_ROOT}/include"
 )
 target_link_directories(nikke-spine-worker PRIVATE "${SFML_ROOT}/lib")
-target_link_libraries(nikke-spine-worker PRIVATE spine-sfml-cpp spine-cpp sfml-graphics sfml-window sfml-system)
+target_link_libraries(nikke-spine-worker PRIVATE
+    spine-sfml-cpp spine-cpp sfml-graphics sfml-window sfml-system
+    freetype GL X11 Xrandr Xcursor Xi udev openal vorbisenc vorbisfile vorbis ogg
+)
 set_target_properties(nikke-spine-worker PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
 if(NOT MSVC)
     target_compile_options(spine-sfml-cpp PRIVATE -fno-exceptions -fno-rtti)

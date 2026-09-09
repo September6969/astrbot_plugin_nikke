@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates git cmake ninja-build g++ pkg-config wget \
+        libfreetype-dev libx11-dev libxrandr-dev libxcursor-dev libxi-dev libgl-dev libudev-dev libopenal-dev libvorbis-dev libogg-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 --branch 4.0 https://github.com/EsotericSoftware/spine-runtimes.git /opt/spine-runtimes \
