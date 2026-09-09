@@ -166,12 +166,23 @@ int render(const Options &options) {
 				phase("skeleton 解析完成");
 				spine::SkeletonDrawable drawable(skeleton_data);
 				drawable.setUsePremultipliedAlpha(true);
+				if (options.verbose) {
+					std::cerr << "nikke-spine-worker: skins=" << skeleton_data->getSkins().size() << "\n";
+					for (size_t skin_index = 0; skin_index < skeleton_data->getSkins().size(); ++skin_index) {
+						std::cerr << "nikke-spine-worker: skin[" << skin_index << "]="
+								<< skeleton_data->getSkins()[skin_index]->getName().buffer() << "\n";
+					}
+					std::cerr.flush();
+				}
 				if (!options.skin.empty() && skeleton_data->findSkin(options.skin.c_str()) == nullptr) {
 					print_error("请求的 skin 不存在");
 				} else if (options.animation != "setup" && skeleton_data->findAnimation(options.animation.c_str()) == nullptr) {
 					print_error("请求的 animation 不存在");
 				} else {
 					if (!options.skin.empty()) drawable.skeleton->setSkin(options.skin.c_str());
+					else if (skeleton_data->getSkins().size() == 1) {
+						drawable.skeleton->setSkin(skeleton_data->getSkins()[0]->getName().c_str());
+					}
 					drawable.skeleton->setToSetupPose();
 					drawable.skeleton->setSlotsToSetupPose();
 					if (options.animation != "setup") {
