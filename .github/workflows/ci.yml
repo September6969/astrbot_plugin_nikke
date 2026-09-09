@@ -19,6 +19,65 @@ jobs:
             --file runtime/spine_worker/Dockerfile \
             --tag nikke-spine-worker:ci \
             runtime/spine_worker
+      - name: Render public default and non-default Spine bundles
+        run: |
+          set -eu
+          mkdir -p .ci-spine-assets/c010 .ci-spine-assets/c010_01
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel \
+            --output .ci-spine-assets/c010/c010_00.skel
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.atlas \
+            --output .ci-spine-assets/c010/c010_00.atlas
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.png \
+            --output .ci-spine-assets/c010/c010_00.png
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.skel \
+            --output .ci-spine-assets/c010_01/c010_01_00.skel
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.atlas \
+            --output .ci-spine-assets/c010_01/c010_01_00.atlas
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_00.png \
+            --output .ci-spine-assets/c010_01/c010_00.png
+          docker run --rm \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010/c010_00.skel \
+            --atlas /bundles/c010/c010_00.atlas \
+            --output /bundles/c010/default.rgba \
+            --width 512 --height 512
+          docker run --rm \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010_01/c010_01_00.skel \
+            --atlas /bundles/c010_01/c010_01_00.atlas \
+            --output /bundles/c010_01/non-default.rgba \
+            --width 512 --height 512
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          for raw_path, png_path in (
+              (Path(".ci-spine-assets/c010/default.rgba"), Path(".ci-spine-assets/c010/default.png")),
+              (Path(".ci-spine-assets/c010_01/non-default.rgba"), Path(".ci-spine-assets/c010_01/non-default.png")),
+          ):
+              data = raw_path.read_bytes()
+              width = int.from_bytes(data[0:4], "little")
+              height = int.from_bytes(data[4:8], "little")
+              assert len(data) == 8 + width * height * 4
+              image = Image.frombytes("RGBA", (width, height), data[8:])
+              assert image.getbbox() is not None
+              image.save(png_path, format="PNG")
+          PY
+      - name: Upload viewed Spine render previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: spine-render-smoke
+          path: .ci-spine-assets/**/*.png
+          if-no-files-found: error
 
   extension:
     name: Extension (Node)
