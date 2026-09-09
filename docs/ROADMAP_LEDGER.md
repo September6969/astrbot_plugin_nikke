@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `530eeef5faf25cbf5b15bd71fc13ccd193a62f94`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `bee6d580ab763912afaeb3b855dfd4c617955826`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -54,10 +54,17 @@
 
 ## Live RC OL Contract（当前独立主题）
 
-- `feat/live-rc-ol-contract-v1` 从实时核验的 `origin/main@530eeef` 建立；当前工作树为 `E:\DevCache\nikke-live-rc-ol-20260909`，保持独立 Draft PR 边界，不修改 main。
+- `feat/live-rc-ol-contract-v1` 从实时核验的 `origin/main@530eeef` 建立，PR #60 已合并，merge `bee6d580ab763912afaeb3b855dfd4c617955826`；历史工作树为 `E:\DevCache\nikke-live-rc-ol-20260909`，HEAD 不代表当前 main。
 - `EquipmentOption` 记录 option position、原始 option/state-effect ID 和多 function components；每个已装备部位固定生成并渲染 option1/2/3 三行，缺失行显示“空槽 / —”，未知 effect 显示“未识别词条”，多 function 不再挤占后续位置。
 - 词条汇总只累加已识别且单位确认的 component；未知单位、复合行和空槽不参与数值汇总，不猜单位或阶级。精确 StateEffect registry、1–15 阶反查和 HP/ATK/DEF 现场字段仍不在本主题中伪造，保留后续证据缺口。
 - 离线证据：角色 builder / renderer 定向 16 passed，完整 pytest 490 passed / 190 subtests，`compileall`、Node 3/3、`git diff --check` 通过；合成渲染只证明本地布局与 fallback，不等于真实账号、QQ 送达或生产字段证据，状态为 `READY_OFFLINE`，现场项仍为 `NEEDS_LIVE_EVIDENCE`。
+
+## Live RC Character Stats Evidence（当前独立主题）
+
+- `feat/live-rc-card-evidence-v1` 从实时核验的 `origin/main@bee6d580` 建立；当前工作树为 `E:\DevCache\nikke-live-rc-card-evidence-20260909`，本主题只处理 HP/ATK/DEF 字段证据边界，不启用真实账号访问。
+- 新增脱敏 CharacterDetails 结构诊断：只记录字段名、类型、非空状态、位数和符号形状；过滤 Cookie、token、Authorization、openid、邮箱、密码和 secret，不输出账号原始值。
+- 已核对本地脱敏 fixture、Exia 的 simulated stats 说明和 monster 的 Bla CDN state-effect extractor；未确认真实 HP/ATK/DEF 字段，角色卡继续对缺失/坏值显示 `—`，不从 combat、等级或模拟值反推。
+- 离线证据：诊断定向 2 passed；脱敏 fixture CLI 可输出结构报告；真实 CharacterDetails 字段和游戏内数值对照仍为 `NEEDS_LIVE_EVIDENCE`。
 
 ## FB 静态立绘路线（进行中）
 
