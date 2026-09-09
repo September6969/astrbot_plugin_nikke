@@ -41,14 +41,16 @@ jobs:
           curl --fail --silent --show-error --location \
             https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_00.png \
             --output .ci-spine-assets/c010_01/c010_00.png
-          docker run --rm \
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
             --volume "$PWD/.ci-spine-assets:/bundles" \
             nikke-spine-worker:ci \
             --skeleton /bundles/c010/c010_00.skel \
             --atlas /bundles/c010/c010_00.atlas \
             --output /bundles/c010/default.rgba \
             --width 512 --height 512
-          docker run --rm \
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
             --volume "$PWD/.ci-spine-assets:/bundles" \
             nikke-spine-worker:ci \
             --skeleton /bundles/c010_01/c010_01_00.skel \
