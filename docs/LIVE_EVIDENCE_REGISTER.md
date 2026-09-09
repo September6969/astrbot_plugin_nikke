@@ -146,3 +146,17 @@
 6. 是否需要新测试、fixture 或用户决策。
 
 任何一项缺失时，能力保持 `NEEDS_LIVE_EVIDENCE` 或 `NEEDS_HUMAN_DECISION`，不得更新为生产完成。
+
+## E-DEPLOY-01：最新 main 部署与生产 smoke
+
+**执行日期**：2026-09-09。**授权范围**：用户已授权本项目所需部署验证、既有服务器容器和最小必要现场检查；未采集或持久化秘密。
+
+**前态**：`origin/main@39c469e7b95e20acae303af11273f43cba7ddfb0`；目标插件树已备份，数据库完整性为 `ok`、schema 2，备份 manifest 存在。
+
+**最小动作**：上传带 SHA-256 校验的 main 归档到服务器临时目录，分阶段替换插件树，保留旧树备份，重启 AstrBot，读取 healthz、容器状态、插件 registry 和最近日志摘要；临时归档与 staging 目录已清理。
+
+**后态**：`healthz=ok`、`storage=ready`、版本 `0.1.8`；AstrBot、NapCat、Caddy 均运行；OL registry 135 条、state-effect registry 109 条且均有效；最近 5 分钟日志未发现检查的秘密标记或错误行。
+
+**证据等级**：`AUTHORIZED_LIVE_WRITE`（部署替换及 AstrBot 重启）+ `AUTHORIZED_LIVE_READ`（健康、容器、数据和日志摘要）。机器可读记录：`docs/evidence/deployment_live_20260909.json`。
+
+**仍未完成**：NapCat 当前需要官方 QR/WebUI 登录后才能确认真实 QQ 文本和 Record 送达；Costume 非默认 FB 资源与 HP/ATK/DEF 公式分别受外部资源和字段合同阻塞。合成 WAV 不计作产品 Voice 证据。

@@ -163,3 +163,10 @@
 - 新增 `docs/RELEASE_CHECKLIST.md` 与 `docs/FINAL_ACCEPTANCE_REPORT.md`，集中列出已合并 PR、离线测试、当前无开放 PR、现场阻塞原因和最小人工动作。
 - 本次 `ssh serv` 复核在 banner 阶段超时；不修改现有 `astrbot`、`napcat`、`nikke-caddy` 容器，不把旧快照当本次现场证据。
 - 本主题状态为 `READY_OFFLINE`；真实账号、QQ Record 送达、Spine 实构建/合法 bundle/许可、Costume/Voice 映射、部署、迁移和回滚仍按具体条目标为 `NEEDS_LIVE_EVIDENCE` 或 `NEEDS_HUMAN_DECISION`。
+
+## 最终现场部署与数据闭环（2026-09-09）
+
+- PR #66（OL 1–15 阶级 registry）与 PR #67（现场只读数据闭环、109 条 state effect、一次授权 Signin）已从最新 main 独立完成并合并；最新 main 为 `39c469e7b95e20acae303af11273f43cba7ddfb0`。
+- 现场部署已完成：保留旧插件树备份，数据目录未改；`healthz`、AstrBot 加载、数据库完整性、三容器状态和日志隐私检查通过，详见 `docs/evidence/deployment_live_20260909.json`。
+- 本轮没有把外部条件冒充完成：13 个非默认 Costume 的公共 FB 资源均缺少可核验非默认路径/许可；HP/ATK/DEF 真实公式未出现在已授权 live contract；NapCat 当前需要官方 WebUI/QR 登录后才能重试真实文本与 Record 送达。
+- 状态：部署为 `DEPLOYED_MAIN_LIVE_SMOKE`；Costume 为 `BLOCKED_EXTERNAL_RESOURCE`；QQ/Voice 为 `BLOCKED_EXTERNAL_AUTH`；HP/ATK/DEF 为 `BLOCKED_MISSING_CONTRACT`。最小人工动作已写入 `docs/DEPLOYMENT_LIVE_ACCEPTANCE.md`。

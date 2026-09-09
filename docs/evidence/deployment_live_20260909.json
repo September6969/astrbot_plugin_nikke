@@ -1,0 +1,43 @@
+{
+  "status": "DEPLOYED_MAIN_LIVE_SMOKE",
+  "checked_at": "2026-09-09",
+  "main_commit": "39c469e7b95e20acae303af11273f43cba7ddfb0",
+  "target": "/opt/nikke-bot/astrbot/data/plugins/astrbot_plugin_nikke",
+  "archive_sha256": "24e155e9ae1a64c67bc844bfd60bd861444edd2b92291b6a276d276f71cb4438",
+  "backup": "/opt/nikke-bot/backups/astrbot_plugin_nikke-predeploy-39c469e-tree",
+  "preflight": {
+    "database_integrity": "ok",
+    "database_schema": 2,
+    "backup_manifest_present": true,
+    "data_directory_changed": false
+  },
+  "containers": {
+    "astrbot": "running",
+    "napcat": "running",
+    "nikke-caddy": "running"
+  },
+  "healthz": {
+    "ok": true,
+    "service": "nikke-binding",
+    "storage": "ready",
+    "version": "0.1.8"
+  },
+  "plugin_registry": {
+    "ol_entries": 135,
+    "ol_valid": true,
+    "state_effect_entries": 109,
+    "state_effect_valid": true,
+    "version": "0.1.8"
+  },
+  "post_deploy_log_privacy": {
+    "window": "5m",
+    "secret_marker_lines": 0,
+    "error_lines": 0
+  },
+  "not_completed_by_this_evidence": [
+    "NapCat is running but requires official WebUI/QR authentication before a real QQ text or Record delivery can be confirmed.",
+    "Costume non-default FB mappings remain blocked by missing exact public asset paths and license evidence.",
+    "HP/ATK/DEF formula closure remains blocked because the authorized live contract exposed no such fields or formula source."
+  ],
+  "secrets_persisted": false
+}
