@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `1a98895e4af19f360b3a2cc79bb40cb0542b415a`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次主题从已重新核验的 `origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5` 建立；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -26,6 +26,7 @@
 | Spine 4.1 headless worker / Costume | 已合并 PR #53，merge `7ad7a3a7bae5a854d289f75a18d6b6bd89c2e195`；官方 4.1 源码固定提交、Linux Docker 构建、SDL dummy/software worker、RGBA CLI adapter 和 Costume 空映射合同进入主线 |
 | Resource Registry V2 | 已合并 PR #54，merge `09821816f7489885f4fb33045fd56fe39adda1d3`；Costume registry 合同、来源/hash 清单和 unknown/invalid 隔离进入主线，映射保持空表 |
 | Live RC StateEffect Registry | 已合并 PR #62，merge `1a98895e4af19f360b3a2cc79bb40cb0542b415a`；严格 registry 合同和 builder 接线进入主线，真实映射仍待现场来源闭环 |
+| Live Data Closure / Arcana evidence | 已合并 PR #63，merge `bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5`；记录 Arcana 只读字段证据、身份解析和隐私边界 |
 
 ## 证据边界
 
@@ -33,7 +34,7 @@
 - `NEEDS_LIVE_EVIDENCE` 仍包括真实账号 Profile/Raid 字段兼容、Daily 写入后的真实状态、Voice 实际播放送达、Spine 生产运行时/许可、真实远端素材负载和部署环境图片。
 - Raid “我的”目前只证明了离线的精确 `game_openid` 筛选和当前响应文案；尚未证明响应 `openid` 与绑定身份的现场 canonical 关联，也不把返回条数当作真实出刀次数。
 - 未接线模块、mock/fixture、合成 PNG、公开只读访问和静态代码检查不得冒充产品完成、真实联调、消息发送或资源授权。
-- 本轮已在获授权环境执行一次服务器内的 Arcana 只读结构采样；没有执行账号写入、发送消息、部署、修改 main 工作树、删除分支或修改 ruleset。现场只保存脱敏字段合同、公开资源 ID、option ID、函数类型和值形状及响应 hash，不保存 Cookie、OpenID、QQ 标识、游戏 UID 或原始响应。P4 分支曾因修正已推送提交的 EOF 使用一次 `--force-with-lease`，未触及 main 或其他分支；随后已改为普通提交并保持线性历史。
+- 本轮已在获授权环境执行一次服务器内的 Arcana 只读结构采样；没有执行账号写入、发送消息、部署、修改 main 工作树、删除分支或修改 ruleset。现场只保存脱敏字段合同、公开资源 ID、option ID、函数类型和值形状及响应 hash，不保存 Cookie、OpenID、QQ 标识、游戏 UID 或原始响应。随后通过公开页面核验了四个 observed option 的分组标签和 `/100` 展示规则，但不把它扩展为全量数据库或完整阶级表。P4 分支曾因修正已推送提交的 EOF 使用一次 `--force-with-lease`，未触及 main 或其他分支；随后已改为普通提交并保持线性历史。
 
 ## 后续工作
 
@@ -41,10 +42,10 @@
 
 ## Live Data Closure / Arcana 现场证据（当前独立主题）
 
-- `feat/live-data-closure-v1` 从本次重新核验的 `origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a` 建立；工作树为 `E:\DevCache\nikke-live-data-closure-20260909`。不使用旧 overnight 或已合并主题工作树作为基线。
+- `feat/live-data-closure-v1` 已合并为 PR #63；工作树 `E:\DevCache\nikke-live-data-closure-20260909` 保留，不作为当前开发基线。该主题从 `origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a` 建立，不使用旧 overnight 或已合并主题工作树作为基线。
 - 通过 `ssh serv` 对现有 `astrbot` 容器执行只读采样：三个输入 `阿爾卡娜`、`阿尔卡娜`、`ARCANA` 均解析到 `name_code=5140`，公开目录 `resource_id=581`；绑定账号持有该角色，当前 `costume_id=0`。
 - 真实 `CharacterDetails` 观察到四个 option ID：`7000611`、`7001011`、`7001111`、`7001211`，对应 `StatAccuracyCircle`、`StatChargeTime`、`StatCritical`、`StatCriticalDamage`；详情字段名/类型和响应 hash 见 `docs/evidence/arcana_live_20260909.json`。
-- 本主题只完成 `AUTHORIZED_LIVE_READ` 证据登记与隐私边界测试；没有把单账号样本扩展为全量 StateEffect/OL tier、HP/ATK/DEF 公式或 Costume 映射。公开/static option metadata、精确 divisor/中文标签、1–15 阶表和非默认 Costume 仍是后续独立主题的证据缺口。
+- 本主题完成 `AUTHORIZED_LIVE_READ` 证据登记与隐私边界测试；没有把单账号样本扩展为全量 StateEffect/OL tier、HP/ATK/DEF 公式或 Costume 映射。公开/static option metadata、精确 divisor/中文标签、1–15 阶表和非默认 Costume 的后续闭环在当前独立主题处理。
 
 ## Live RC Stabilization v2（Profile 已合并）
 
@@ -77,9 +78,16 @@
 ## Live RC StateEffect Registry（已合并）
 
 - `feat/live-rc-state-effect-registry-v1` 从实时核验的 `origin/main@70c811c` 建立，PR #62 已合并，merge `1a98895e4af19f360b3a2cc79bb40cb0542b415a`；历史工作树为 `E:\DevCache\nikke-live-rc-state-effect-20260909`，HEAD 不代表当前 main。
-- `StateEffectRegistry` 严格要求 option/state-effect/group identity、function type、localized label、value kind/divisor、locale、无凭据 HTTPS 来源、来源 SHA-256 和核验日期；重复/非法/无来源记录拒绝加载。当前 `assets/state_effects.json` 保持空表，状态 `NEEDS_LIVE_EVIDENCE`。
+- `StateEffectRegistry` 严格要求 option/state-effect/group identity、function type、localized label、value kind/divisor、locale、无凭据 HTTPS 来源、来源 SHA-256 和核验日期；重复/非法/无来源记录拒绝加载。原始合并时 `assets/state_effects.json` 保持空表，等待现场来源闭环。
 - builder 命中来源记录时按显式 formatter 解析动态 `state_effects` 值；未命中继续既有安全 mapping，unknown 不进入确认单位汇总。没有猜测 1–15 阶表、相邻 ID 或单位。
 - 离线证据：registry + card builder 定向 15 passed；真实 Bla CDN metadata、完整 function_type 覆盖、精确 1–15 tier lookup 和现场角色卡仍待证据。
+
+## Live StateEffect Data Closure（当前独立主题）
+
+- `feat/live-state-effect-data-v1` 从最新 `origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5` 建立，工作树为 `E:\DevCache\nikke-live-state-effect-data-20260909`；不复用旧 overnight 或历史 StateEffect worktree。
+- 依据 Arcana 现场四个 option ID 与公开 BlaBlaLink StateEffect 分组表，登记四条 exact 映射：`7000611 → StatAccuracyCircle`、`7001011 → StatChargeTime`、`7001111 → StatCritical`、`7001211 → StatCriticalDamage`；来源 URL、SHA-256、标签和 group ID 保存在 `assets/state_effects.json` 及 `docs/evidence/state_effect_registry_live_20260909.json`。
+- 当前页面的 `getBuffContents` 公开展示路径明确使用 `abs(function_value) / 100` 后格式化为百分比；四条记录显式使用 `value_divisor=100`，不依据 option 相邻 ID 或名称顺序猜测。
+- 这是 `PARTIAL_LIVE_VERIFIED` 的四条子集，不是完整 StateEffect registry；其余 option、完整 1–15 阶数值、HP/ATK/DEF 公式和非默认 Costume 继续保留现场缺口。registry 解析已收紧为 exact option/function/locale，不再以唯一 function_type 跨 option 回退。
 
 ## FB 静态立绘路线（进行中）
 

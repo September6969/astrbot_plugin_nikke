@@ -1,6 +1,6 @@
 # NIKKE 现场证据登记
 
-更新时间：2026-09-09。基线：`origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a`。
+更新时间：2026-09-09。基线：`origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5`。
 
 本登记将“已有离线代码/测试”与“需要现场证据”的问题分开。当前路线图已明确授权真实账号只读、最小必要真实写、QQ/NapCat、Voice、Spine 和部署验证；本登记不扩大该范围，也不替代具体动作的备份、前态/后态和隐私检查。
 
@@ -21,6 +21,16 @@
 **结果**：`阿爾卡娜`、`阿尔卡娜`、`ARCANA` 均解析到 `name_code=5140`，公开目录 `resource_id=581`；账号持有该角色且现场 `costume_id=0`。详情字段只保存字段名/类型，StateEffect 只保存 option ID、function type、value type 和 value shape；没有保存原始响应或账号标识。
 
 **未决问题**：四个现场 option 尚不足以证明全量 StateEffect 映射、中文标签、divisor、1–15 阶表、HP/ATK/DEF 公式或非默认 Costume。下一步必须分别取得可复核的公开/static metadata 和公式对照，不从这一账号样本扩展推断。
+
+## E-STATE-EFFECT-01：四条公开 StateEffect 数据闭环
+
+**状态**：`PARTIAL_LIVE_VERIFIED`。现场/公开证据文件：`docs/evidence/state_effect_registry_live_20260909.json`。
+
+**已查来源**：当前 BlaBlaLink 公开页面加载的 StateEffect 分组 JSON；同页面公开 JS 的 `getBuffContents` 展示路径；Arcana `CharacterDetails` 只读样本。四条 exact option ID 均同时具备公开 group、现场 function type/value type 和来源 SHA-256。
+
+**已登记**：`7000611`、`7001011`、`7001111`、`7001211`；对应 `StatAccuracyCircle`、`StatChargeTime`、`StatCritical`、`StatCriticalDamage`，显式 `value_divisor=100`。registry 只按 option/function/locale 精确命中，不再按 function type 唯一回退。
+
+**未决问题**：这是四条验证子集，不代表全量 StateEffect；剩余 option 的 function contract、完整 1–15 阶表、HP/ATK/DEF 公式和非默认 Costume 仍需独立证据。公开展示规则也不等于游戏服务端全部数值语义。
 
 ## E-PROFILE-01：真实 `/妮姬 我的` 字段兼容
 
