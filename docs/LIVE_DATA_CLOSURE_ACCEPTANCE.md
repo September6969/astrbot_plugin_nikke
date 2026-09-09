@@ -8,6 +8,8 @@
 - 角色卡继续由严格 registry 处理异常值；未知 function、缺失值和未知单位不会借用相邻 option 或静默反推。
 - 真实详情、个人资料接口均未提供 HP/ATK/DEF 字段或公式来源；没有把 combat/team_combat 反推成三项属性。
 - 在现场已授权范围内完成一次 Signin：前态为 found=true/completed=false，写入尝试 1 次，后态 completed=true；未自动重发，证据见 `docs/evidence/signin_live_20260909.json`。
+- 13 个真实非默认 costume ID 已与公开角色目录的 `resource_id/costume_index` 逐项对齐；Nikke-DB 当前 FB 公共目录未提供可验证的非默认文件，13 个候选路径全部 404，因此没有制造映射或回退默认图。证据见 `docs/evidence/costume_mapping_live_20260909.json`。
+- Voice/QQ transport 已实际探测但未确认送达：临时内网 adapter 配置已恢复，合成 Record 仅作为 24 kHz 单声道传输 fixture；NapCat 重启后进入二维码登录，当前缺少已认证会话。证据见 `docs/evidence/voice_qq_live_20260909.json`。
 
 ## 证据边界
 

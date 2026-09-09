@@ -90,6 +90,22 @@
 
 **本轮结果**：已在 `ssh serv` 现有 `astrbot` 容器中对一个已绑定授权账号执行一次最小 `DailyCheckIn` 写入；前态待签到，写入一次，读后态已完成。脱敏记录见 `docs/evidence/signin_live_20260909.json`；没有发送 CDK、Like/Browse 或其他写操作。
 
+## E-COSTUME-01：真实 costume 与静态 FB 资源对照
+
+**状态**：`BLOCKED_EXTERNAL_RESOURCE`。证据：`docs/evidence/costume_mapping_live_20260909.json`。
+
+**结果**：真实 roster 的 13 个非默认 costume ID 全部能在公开角色目录中对齐到 `resource_id/costume_index`；当前 Nikke-DB `images/FB` 公共目录检查不到对应非默认文件，13 个直接/姿态候选均为 404。没有把默认 `cXXX_00.png` 冒充服装，也没有写入未经证实的 `assets/costumes.json` 映射。
+
+**最小动作**：上游提供每个非默认服装的精确文件路径/内容与许可证据后，重新做 URL 200、SHA-256、透明 PNG 和资产授权核验。
+
+## E-VOICE-QQ-01：Voice / NapCat 现场送达
+
+**状态**：`BLOCKED_EXTERNAL_AUTH`。证据：`docs/evidence/voice_qq_live_20260909.json`。
+
+**结果**：探测了 AstrBot reverse WebSocket；临时仅限 Docker 内网的 NapCat HTTP adapter 也已在同一轮动作中配置、调用并回滚。文本和合成 Record 均没有收到可确认的 OneBot 成功响应；NapCat 重启后进入二维码登录流程，当前没有已认证会话。
+
+**最小动作**：用户在 NapCat WebUI 完成 intended account 的官方登录/扫码后，重新执行一次文本和一次 Record；不采集二维码、token 或账号敏感标识。
+
 **最小授权动作**：
 
 1. 先在一个明确授权的测试账号上只读读取任务列表并保存脱敏字段矩阵。

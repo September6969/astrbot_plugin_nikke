@@ -110,6 +110,8 @@
 - 现场观察到 109 条 OL option/function 映射，写入 `assets/state_effects.json`；Percent divisor=100 有公开前端证据，Integer 维持 unknown，不进入确认汇总。
 - `CharacterDetails` 只观察到 `combat`、`arena_combat`，Profile 只观察到 `team_combat`；没有 HP/ATK/DEF 字段或公式来源，因此不做反推。证据登记在 `docs/evidence/live_character_stats_20260909.json` 与 `docs/evidence/state_effect_function_inventory_live_20260909.json`。
 - 现场授权的最小 Signin 已执行一次：前态待签到，`DailyCheckIn` 单次写入，后态已完成；无自动重发，证据登记在 `docs/evidence/signin_live_20260909.json`。
+- Costume 现场目录核验已完成：13 个真实非默认 ID 均有公开目录身份，但 checked Nikke-DB FB listing 没有任何可验证非默认文件，13 个候选路径全 404；`assets/costumes.json` 继续不写猜测映射，证据为 `BLOCKED_EXTERNAL_RESOURCE`。
+- Voice/QQ 现场 smoke 未确认送达：临时内部 adapter 已回滚，NapCat 容器仍 running 但重启后进入二维码登录；未保存 token/二维码，依赖人工登录后重试。证据为 `docs/evidence/voice_qq_live_20260909.json`。
 
 ## FB 静态立绘路线（进行中）
 
