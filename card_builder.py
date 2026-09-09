@@ -14,6 +14,7 @@ from .card_models import (
     FavoriteItemData,
     OptionSummary,
 )
+from .character_identity import CharacterDirectoryResolver
 from .log_privacy import sanitize_log_text
 
 
@@ -158,7 +159,7 @@ class CharacterCardBuilder:
             fetched_at=fetched_at,
             plugin_version=plugin_version,
             name_code=str(directory.get("name_code", roster.get("name_code", ""))),
-            name_cn=str(directory.get("name_cn", "") or "未知妮姬"),
+            name_cn=CharacterDirectoryResolver.display_name(directory),
             name_en=str(directory.get("name_en", "") or ""),
             resource_id=(
                 str(directory.get("resource_id"))

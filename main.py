@@ -31,6 +31,7 @@ from .campaign_history_renderer import CampaignHistoryRenderer
 from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
+from .character_identity import CharacterDirectoryResolver
 from .character_card_renderer import CharacterCardRenderer
 from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
 from .log_privacy import safe_exception_message
@@ -70,6 +71,9 @@ class NikkePlugin(Star):
         )
         self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.character_builder = CharacterCardBuilder()
+        self.character_identity = CharacterDirectoryResolver(
+            self.plugin_dir / "assets" / "character_aliases.json"
+        )
         self.asset_manager = AssetManager(
             self.data_dir / "cache",
             self.plugin_dir / "assets",
@@ -255,33 +259,15 @@ class NikkePlugin(Star):
         return account
 
     def _name_map(self) -> dict[str, str]:
+        resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
         return {
-            str(item.get("name_code", "")): str(item.get("name_cn") or item.get("name_en") or "")
+            str(item.get("name_code", "")): resolver.display_name(resolver.enrich(item))
             for item in self._directory
         }
 
     def _find_directory(self, query: str) -> list[dict]:
-        term = query.strip().casefold()
-        if not term:
-            return []
-        exact = [
-            item
-            for item in self._directory
-            if term in {
-                str(item.get("name_cn", "")).strip().casefold(),
-                str(item.get("name_en", "")).strip().casefold(),
-                str(item.get("name_code", "")).strip().casefold(),
-            }
-        ]
-        if exact:
-            return exact
-        return [
-            item
-            for item in self._directory
-            if term in str(item.get("name_cn", "")).casefold()
-            or term in str(item.get("name_en", "")).casefold()
-            or term == str(item.get("name_code", "")).casefold()
-        ]
+        resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
+        return resolver.find(self._directory, query)
 
     @staticmethod
     def _help_text(category: str = "", include_admin: bool = False) -> str:
@@ -846,12 +832,13 @@ class NikkePlugin(Star):
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
             account = self._account_or_error(event)
-            matches = self._find_directory(name)
+            identity = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
+            matches = identity.find(self._directory, name)
             if not matches:
                 raise ValueError("没有找到该妮姬")
             if len(matches) > 1:
                 candidates = "\n".join(
-                    f"{index}. {item.get('name_cn') or item.get('name_en') or item.get('name_code')}"
+                    f"{index}. {identity.display_name(item)}"
                     for index, item in enumerate(matches[:10], 1)
                 )
                 suffix = "\n候选过多，请继续补全名称。" if len(matches) > 10 else ""
@@ -868,7 +855,7 @@ class NikkePlugin(Star):
             except ValueError as exc:
                 if "未持有" in str(exc):
                     yield event.plain_result(
-                        f"你未持有该妮姬：{target.get('name_cn') or target.get('name_en') or code}"
+                        f"你未持有该妮姬：{identity.display_name(target)}"
                     )
                     return
                 raise
@@ -900,15 +887,20 @@ class NikkePlugin(Star):
             yield event.plain_result("没有找到该妮姬。")
             return
         item = matches[0]
+        identity = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
+        item = identity.enrich(item)
+        names = identity.display_name(item)
+        zh_tw = item.get("name_zh_tw") or item.get("name_cn") or "未知"
+        name_suffix = f"{names} / {zh_tw} / {item.get('name_en') or '未知'}"
         rows = [
-            ("中文 / 英文", f"{item.get('name_cn','')} / {item.get('name_en','')}"),
+            ("名称（简体别名 / 繁中 / 英文）", name_suffix),
             ("稀有度", str(item.get("rare") or "未知")),
             ("属性", str(item.get("element") or "未知")),
             ("武器", str(item.get("weapon") or "未知")),
             ("爆裂阶段", str(item.get("burst") or "未知")),
             ("企业", str(item.get("corporation") or "未知")),
         ]
-        path = self.renderer.render(item.get("name_cn") or item.get("name_en") or name, "妮姬基础资料", rows)
+        path = self.renderer.render(names or name, "妮姬基础资料", rows)
         yield event.image_result(path)
 
     @staticmethod

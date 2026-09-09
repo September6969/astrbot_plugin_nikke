@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "nikke_live_rc_stabilization_plan_v2_prior_decisions_audit",
+  "description": "仅用于查询的简体别名；不代表官方 zh-CN 名称。",
+  "entries": [
+    {
+      "name_zh_tw": "阿爾卡娜",
+      "aliases": ["阿尔卡娜"],
+      "source": "prior_decision_audit",
+      "verified_at": "2026-09-09"
+    }
+  ]
+}

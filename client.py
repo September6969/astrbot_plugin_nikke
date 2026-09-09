@@ -491,6 +491,10 @@ class BlaBlaClient:
                     "id": zh.get("id"),
                     "resource_id": zh.get("resource_id"),
                     "name_code": zh.get("name_code"),
+                    # 当前 zh CDN 字段是官方繁中；保留旧字段兼容旧调用方。
+                    "name_zh_tw": (zh.get("name_localkey") or {}).get("name", ""),
+                    "name_zh_cn": zh.get("name_zh_cn", "") if isinstance(zh.get("name_zh_cn", ""), str) else "",
+                    "name_zh_cn_alias": zh.get("name_zh_cn_alias", "") if isinstance(zh.get("name_zh_cn_alias", ""), str) else "",
                     "name_cn": (zh.get("name_localkey") or {}).get("name", ""),
                     "name_en": (en.get("name_localkey") or {}).get("name", ""),
                     "element": ((zh.get("element_id") or {}).get("element") or {}).get("element", ""),

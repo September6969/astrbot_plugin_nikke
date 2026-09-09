@@ -47,6 +47,18 @@ class CharacterCardBuilderTests(unittest.TestCase):
         )
         self.assertEqual(card.costume_id, "skin_01")
 
+    def test_display_name_prefers_explicit_simplified_query_alias(self):
+        fixture = load_fixture()
+        fixture["directory"]["name_zh_tw"] = "阿爾卡娜"
+        fixture["directory"]["name_zh_cn_alias"] = "阿尔卡娜"
+        fixture["directory"]["name_cn"] = "阿爾卡娜"
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.name_cn, "阿尔卡娜")
+
     def test_real_sanitized_fixture_preserves_four_equipment_slots(self):
         card = build_card()
         self.assertEqual(set(card.equipment), {"head", "torso", "arm", "leg"})

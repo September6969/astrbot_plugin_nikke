@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `2f969756b18ad7e28c41564b07ba0aa60b0dc59d`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `a34f6fcae2bc6d89eaa50eb72bcddc6675ebc559`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -38,12 +38,19 @@
 
 下一主题必须从届时最新 `origin/main` 建立独立 worktree、branch 和 Draft PR，并先写清字段合同、请求预算、异常语义、测试和证据缺口。已合并主题不得通过旧 overnight 分支恢复；需要现场动作时，只记录最小授权动作并等待明确授权。当前 v4 离线主题已收口，后续先重新核验状态再选择下一个独立主题。
 
-## Live RC Stabilization v2（当前独立主题）
+## Live RC Stabilization v2（Profile 已合并）
 
-- `feat/live-rc-profile-stabilization-v1` 从实时核验的 `origin/main@d65065b` 建立，专注 Phase 1 Profile 数据合同回接。
+- `feat/live-rc-profile-stabilization-v1` 从实时核验的 `origin/main@d65065b` 建立，PR #58 已合并，merge `a34f6fcae2bc6d89eaa50eb72bcddc6675ebc559`。
 - `CampaignStageResolver` 从已验证的 `assets/campaign_stages.json` 一次性建立 `stage_id → CampaignStage` 反向索引；6048044 → NORMAL 48-36、7037041 → HARD 37-33，未知或 mode 不匹配保留 `未映射 · ID …`，不使用经验公式。
 - `ProfileBuilder` 已接入共享 resolver；`created_at` 严格支持已确认的秒/毫秒 Unix 时间戳和 ISO-8601，按 UTC+8 输出日期，坏值为未知；战术学院数字字段保持中性未映射语义。
 - 离线证据：定向 Profile/Campaign 65 tests、完整 pytest 484 passed / 190 subtests、`compileall`、Node 扩展 3/3、`git diff --check` 均通过；尚未执行真实账号 Arcana/Profile 回归，状态为 `READY_OFFLINE`，现场项仍为 `NEEDS_LIVE_EVIDENCE`。
+
+## Live RC Character Localization（当前独立主题）
+
+- `feat/live-rc-character-localization-v1` 从实时核验的 `origin/main@a34f6fc` 建立；新增 `CharacterDirectoryResolver`，统一角色卡、练度查询、资料查询和练度表名称映射。
+- 目录明确区分 `name_zh_tw`、有来源时的 `name_zh_cn`、仅查询用途的 `name_zh_cn_alias`、`name_en` 和 `name_code`；旧 `name_cn` 保留为官方繁中兼容字段。
+- `assets/character_aliases.json` 只登记文档已确认的 `阿爾卡娜 → 阿尔卡娜` 查询别名，明确不声称官方 zh-CN；三种输入解析到同一 `name_code`。
+- 离线证据：身份/卡片/核心路由定向 53 passed / 10 subtests，完整 pytest 488 passed / 190 subtests，`compileall`、Node 3/3、`git diff --check` 通过；真实目录内容与 Arcana 现场查询仍为 `NEEDS_LIVE_EVIDENCE`。
 
 ## FB 静态立绘路线（进行中）
 
