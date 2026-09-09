@@ -10,7 +10,7 @@ from pathlib import Path
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 
 from .asset_manager import AssetManager
-from .card_models import CharacterCardAssets, CharacterCardData, EquipmentData
+from .card_models import CharacterCardAssets, CharacterCardData, EquipmentData, EquipmentOption
 from .card_theme import character_theme
 from .renderer import CardRenderer
 
@@ -32,6 +32,8 @@ class CharacterCardRenderer(CardRenderer):
 
     @staticmethod
     def _option_value(option):
+        if option.unit == "empty":
+            return "—"
         if option.unit == "percent":
             return f"{option.value * 100:.2f}%"
         if option.unit == "flat":
@@ -174,15 +176,24 @@ class CharacterCardRenderer(CardRenderer):
             self._text(draw, (x + 103, y + 17), self.SLOT_NAMES[slot], 24, theme.text, width=304, bold=True)
             status = f"Lv.{item.level}" if item.equipped and item.level is not None else ("已装备" if item.equipped else "未装备")
             self._text(draw, (x + 103, y + 51), status, 22, theme.primary if item.equipped else theme.muted)
-            options = item.options if item.equipped else []
-            if not options:
-                self._text(draw, (x + 20, y + 112), "暂无装备词条" if item.equipped else "未装备", 21, theme.muted)
-            for row, option in enumerate(options):
-                # 一个槽位可能展开多个效果，压缩行距而不静默截断。
-                step = min(28, 79 / max(1, len(options)))
+            if not item.equipped:
+                self._text(draw, (x + 20, y + 112), "未装备", 21, theme.muted)
+                continue
+
+            options = item.options
+            for row in range(3):
+                option = options[row] if row < len(options) else EquipmentOption(
+                    raw_type=f"option{row + 1}",
+                    display_name="空槽",
+                    value=0,
+                    unit="empty",
+                    position=row + 1,
+                )
+                # 每个装备固定渲染 option1/2/3 三行，避免多 function 拆槽。
+                step = 27
                 yy = y + 86 + row * step
                 name = option.display_name if option.unit != "unknown" else "未识别词条"
-                size = max(12, min(22, int(step - 3)))
+                size = 19
                 self._text(draw, (x + 20, yy), name, size, theme.text, width=266)
                 self._text(draw, (x + 301, yy), self._option_value(option), size, theme.primary, width=112, bold=True)
 

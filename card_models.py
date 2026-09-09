@@ -16,6 +16,10 @@ class EquipmentOption:
     value: float
     unit: str
     level: int | None = None
+    position: int | None = None
+    option_id: str | None = None
+    state_effect_id: str | None = None
+    components: tuple["EquipmentOption", ...] = ()
 
 
 @dataclass(slots=True)

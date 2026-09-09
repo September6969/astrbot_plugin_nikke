@@ -92,6 +92,58 @@ class CharacterCardBuilder:
             level=_optional_int(function.get("level")),
         )
 
+    @staticmethod
+    def _option_from_effect(
+        *,
+        effect_id: Any,
+        functions: list[Any],
+        position: int,
+    ) -> EquipmentOption:
+        """把一个 option 固定为一行，多 function detail 不再拆成多个槽位。"""
+        option_id = str(effect_id) if effect_id not in (None, "", 0, "0") else None
+        valid_functions = [item for item in functions if isinstance(item, dict)]
+        if not valid_functions:
+            return EquipmentOption(
+                raw_type=f"option{position}",
+                display_name="空槽" if option_id is None else "未识别词条",
+                value=0,
+                unit="empty" if option_id is None else "unknown",
+                position=position,
+                option_id=option_id,
+                state_effect_id=option_id,
+            )
+
+        components = tuple(CharacterCardBuilder._option_from_function(item) for item in valid_functions)
+        if len(components) == 1:
+            primary = components[0]
+            return EquipmentOption(
+                raw_type=primary.raw_type,
+                display_name=primary.display_name,
+                value=primary.value,
+                unit=primary.unit,
+                level=primary.level,
+                position=position,
+                option_id=option_id,
+                state_effect_id=option_id,
+                components=components,
+            )
+
+        names = list(dict.fromkeys(
+            component.display_name
+            for component in components
+            if component.display_name != "未识别词条"
+        ))
+        return EquipmentOption(
+            raw_type=option_id or f"option{position}",
+            display_name=" / ".join(names) if names else "未识别词条",
+            value=0,
+            unit="composite",
+            position=position,
+            option_id=option_id,
+            state_effect_id=option_id,
+            components=components,
+        )
+
     def build(
         self,
         *,
@@ -123,26 +175,18 @@ class CharacterCardBuilder:
                 if not equipped:
                     break
                 effect_id = detail.get(f"{slot}_equip_option{index}_id")
-                if effect_id in (None, "", 0, "0"):
-                    continue
                 effect = effects_map.get(str(effect_id), {})
                 functions = effect.get("function_details", []) or []
-                if not functions:
-                    item.options.append(
-                        EquipmentOption(
-                            raw_type=str(effect_id),
-                            display_name="未识别词条",
-                            value=0,
-                            unit="unknown",
-                        )
-                    )
-                    continue
-                for function in functions:
-                    option = self._option_from_function(function)
-                    item.options.append(option)
-                    if option.unit in {"percent", "flat"}:
-                        key = (option.display_name, option.unit)
-                        totals[key] = totals.get(key, 0.0) + option.value
+                option = self._option_from_effect(
+                    effect_id=effect_id,
+                    functions=functions,
+                    position=index,
+                )
+                item.options.append(option)
+                for component in option.components or (option,):
+                    if component.unit in {"percent", "flat"}:
+                        key = (component.display_name, component.unit)
+                        totals[key] = totals.get(key, 0.0) + component.value
             equipment[slot] = item
 
         option_totals = [
