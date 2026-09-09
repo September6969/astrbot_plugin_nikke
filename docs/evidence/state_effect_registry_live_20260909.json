@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "status": "PARTIAL_LIVE_VERIFIED",
+  "checked_at": "2026-09-09",
+  "baseline": "origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5",
+  "source_urls": [
+    "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
+    "https://www.blablalink.com/assets/nikke/version/default/assets/index-FhhpKaYK.js"
+  ],
+  "source_hashes": {
+    "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json": {
+      "sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
+      "bytes": 4789
+    },
+    "https://www.blablalink.com/assets/nikke/version/default/assets/index-FhhpKaYK.js": {
+      "sha256": "6f64503aae1c4d78a303457f6c99d5d955fe101637825575028eb8d3e328c17c",
+      "bytes": 2509793
+    }
+  },
+  "observed_option_mappings": [
+    {
+      "option_id": "7000611",
+      "state_effect_group_id": "100200",
+      "upstream_label": "【命中率增加】",
+      "function_type": "StatAccuracyCircle",
+      "function_value_type": "Percent",
+      "value_kind": "percent",
+      "value_divisor": 100
+    },
+    {
+      "option_id": "7001011",
+      "state_effect_group_id": "100600",
+      "upstream_label": "【蓄力速度增加】",
+      "function_type": "StatChargeTime",
+      "function_value_type": "Percent",
+      "value_kind": "percent",
+      "value_divisor": 100
+    },
+    {
+      "option_id": "7001111",
+      "state_effect_group_id": "100700",
+      "upstream_label": "【暴擊率增加】",
+      "function_type": "StatCritical",
+      "function_value_type": "Integer",
+      "value_kind": "percent",
+      "value_divisor": 100
+    },
+    {
+      "option_id": "7001211",
+      "state_effect_group_id": "100800",
+      "upstream_label": "【暴擊傷害增加】",
+      "function_type": "StatCriticalDamage",
+      "function_value_type": "Integer",
+      "value_kind": "percent",
+      "value_divisor": 100
+    }
+  ],
+  "formatter_observation": {
+    "source_function": "getBuffContents",
+    "rule": "abs(function_value) / 100 formatted with two decimal places and a percent sign",
+    "value_divisor": 100,
+    "scope": "public Overload display path; it does not prove unobserved option IDs or tier tables"
+  },
+  "privacy_boundary": {
+    "persisted": [
+      "public source URLs",
+      "public source SHA-256",
+      "observed option/function contracts",
+      "non-private live evidence reference"
+    ],
+    "omitted": [
+      "raw live account response",
+      "raw dynamic values",
+      "credentials and private identifiers"
+    ]
+  },
+  "remaining_gaps": [
+    "The registry is a verified four-option subset, not a complete StateEffect database.",
+    "The remaining observed account option IDs and all unobserved IDs need independent live samples before registration.",
+    "The public group table does not prove a complete 1-15 tier value table.",
+    "No non-default costume evidence was collected in this topic."
+  ]
+}

@@ -54,16 +54,51 @@ class StateEffectRegistryTests(unittest.TestCase):
         self.assertFalse(registry.is_valid)
         self.assertIsNone(registry.resolve("7000915", "StatChargeDamage"))
 
+        missing_value_source_hash = record(
+            value_source_url="https://example.com/formatter.js",
+        )
+        registry = StateEffectRegistry.from_records([missing_value_source_hash])
+        self.assertFalse(registry.is_valid)
+        self.assertIsNone(registry.resolve("7000915", "StatChargeDamage"))
+
         first = record(option_id="7000001", label="A")
         second = record(option_id="7000002", label="B")
         registry = StateEffectRegistry.from_records([first, second])
         self.assertIsNone(registry.resolve("unknown", "StatChargeDamage"))
 
+    def test_function_type_alone_never_resolves(self):
+        registry = StateEffectRegistry.from_records([record()])
+        self.assertIsNone(registry.resolve("7000999", "StatChargeDamage"))
+
+    def test_live_subset_uses_exact_option_identity_and_explicit_divisor(self):
+        path = Path(__file__).resolve().parents[1] / "assets" / "state_effects.json"
+        registry = StateEffectRegistry.from_file(path)
+        expected = {
+            "7000611": ("命中率增加", "percent", 100.0),
+            "7001011": ("蓄力速度增加", "percent", 100.0),
+            "7001111": ("暴击率增加", "percent", 100.0),
+            "7001211": ("暴击伤害增加", "percent", 100.0),
+        }
+        self.assertTrue(registry.is_valid)
+        self.assertEqual({item.option_id for item in registry.entries}, set(expected))
+        for option_id, (label, kind, divisor) in expected.items():
+            metadata = registry.resolve(option_id, {
+                "7000611": "StatAccuracyCircle",
+                "7001011": "StatChargeTime",
+                "7001111": "StatCritical",
+                "7001211": "StatCriticalDamage",
+            }[option_id])
+            self.assertIsNotNone(metadata)
+            self.assertEqual(metadata.label, label)
+            self.assertEqual(metadata.value_kind, kind)
+            self.assertEqual(metadata.value_divisor, divisor)
+            self.assertEqual(metadata.format_value(1644), (16.44, "percent"))
+
     def test_empty_checked_in_registry_remains_pending(self):
         path = Path(__file__).resolve().parents[1] / "assets" / "state_effects.json"
         registry = StateEffectRegistry.from_file(path)
         self.assertTrue(registry.is_valid)
-        self.assertEqual(registry.entries, ())
+        self.assertEqual(len(registry.entries), 4)
 
 
 if __name__ == "__main__":

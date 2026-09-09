@@ -9,6 +9,7 @@ import unittest
 
 
 EVIDENCE_PATH = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "arcana_live_20260909.json"
+STATE_EFFECT_EVIDENCE_PATH = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "state_effect_registry_live_20260909.json"
 
 
 class ArcanaLiveEvidenceTests(unittest.TestCase):
@@ -44,6 +45,25 @@ class ArcanaLiveEvidenceTests(unittest.TestCase):
         self.assertEqual(self.evidence["status"], "LIVE_READ_ONLY")
         self.assertEqual(len(self.evidence["source_urls"]), 3)
         self.assertRegex(self.evidence["authorized_read"]["state_effects_sha256"], r"^[0-9a-f]{64}$")
+
+
+class StateEffectLiveEvidenceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.evidence = json.loads(STATE_EFFECT_EVIDENCE_PATH.read_text(encoding="utf-8"))
+
+    def test_registry_evidence_is_explicitly_partial_and_hashed(self):
+        self.assertEqual(self.evidence["status"], "PARTIAL_LIVE_VERIFIED")
+        self.assertEqual(
+            {item["option_id"] for item in self.evidence["observed_option_mappings"]},
+            {"7000611", "7001011", "7001111", "7001211"},
+        )
+        for source in self.evidence["source_hashes"].values():
+            self.assertRegex(source["sha256"], r"^[0-9a-f]{64}$")
+            self.assertGreater(source["bytes"], 0)
+
+    def test_formatter_evidence_does_not_claim_a_complete_tier_table(self):
+        self.assertIn("1-15 tier", " ".join(self.evidence["remaining_gaps"]))
+        self.assertEqual(self.evidence["formatter_observation"]["value_divisor"], 100)
 
 
 if __name__ == "__main__":

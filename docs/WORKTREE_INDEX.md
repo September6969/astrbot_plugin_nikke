@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-09。当前核验的远端基线为 `origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-09。当前核验的远端基线为 `origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -43,4 +43,5 @@
 | Live RC OL contract v1 | PR #60 已合并 | `E:\DevCache\nikke-live-rc-ol-20260909` / `feat/live-rc-ol-contract-v1`；从 `origin/main@530eeef` 建立，固定四部位三 option 行与未知/空槽 fallback，离线证据已通过，HEAD 不代表当前 main |
 | Live RC Character stats evidence v1 | PR #61 已合并 | `E:\DevCache\nikke-live-rc-card-evidence-20260909` / `feat/live-rc-card-evidence-v1`；从 `origin/main@bee6d580` 建立，新增 HP/ATK/DEF 脱敏结构诊断，真实字段仍待现场证据，HEAD 不代表当前 main |
 | Live RC StateEffect registry v1 | PR #62 已合并 | `E:\DevCache\nikke-live-rc-state-effect-20260909` / `feat/live-rc-state-effect-registry-v1`；从 `origin/main@70c811c` 建立，merge `1a98895e`，严格来源/hash/formatter 合同，映射空表保持待证据 |
-| Live Data Closure / Arcana evidence v1 | 当前独立主题 | `E:\DevCache\nikke-live-data-closure-20260909` / `feat/live-data-closure-v1`；从 `origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a` 建立，Arcana 只读结构证据已登记，未执行账号写入、消息或部署 |
+| Live Data Closure / Arcana evidence v1 | PR #63 已合并 | `E:\DevCache\nikke-live-data-closure-20260909` / `feat/live-data-closure-v1`；merge `bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5`，保留历史工作树，HEAD 不代表当前 main |
+| Live StateEffect data v1 | 当前独立主题 | `E:\DevCache\nikke-live-state-effect-data-20260909` / `feat/live-state-effect-data-v1`；从最新 `origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5` 建立，四条 exact 映射和公开 formatter 证据，未执行账号写入、消息或部署 |

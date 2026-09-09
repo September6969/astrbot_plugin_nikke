@@ -34,6 +34,8 @@ class StateEffectMetadata:
     source_url: str
     source_sha256: str
     checked_at: str
+    value_source_url: str | None = None
+    value_source_sha256: str | None = None
 
     def format_value(self, raw_value: Any) -> tuple[float, str]:
         """仅按来源明确的 divisor 转换，缺证据时返回安全的 unknown。"""
@@ -109,18 +111,10 @@ class StateEffectRegistry:
         *,
         locale: str = "zh-CN",
     ) -> StateEffectMetadata | None:
-        """优先按 option_id 精确命中，function_type 回退必须唯一。"""
+        """只按 option_id、function_type 和 locale 精确命中。"""
         option_key = str(option_id or "").strip()
         function_key = str(function_type or "").strip().casefold()
-        exact = self._by_key.get((option_key, function_key, locale))
-        if exact is not None:
-            return exact
-        candidates = [
-            item
-            for item in self._entries
-            if item.function_type.casefold() == function_key and item.locale == locale
-        ]
-        return candidates[0] if len(candidates) == 1 else None
+        return self._by_key.get((option_key, function_key, locale))
 
     @staticmethod
     def _reject_duplicate_keys(pairs):
@@ -163,6 +157,33 @@ class StateEffectRegistry:
             if not _SHA256.fullmatch(source_sha256):
                 raise StateEffectRegistryError(f"entry[{index}].source_sha256 无效")
             checked_at = cls._required_text(record.get("checked_at"), f"entry[{index}].checked_at")
+            value_source_url = record.get("value_source_url")
+            value_source_sha256 = record.get("value_source_sha256")
+            if (value_source_url is None) != (value_source_sha256 is None):
+                raise StateEffectRegistryError(
+                    f"entry[{index}] 的 value_source_url/value_source_sha256 必须成对出现"
+                )
+            if value_source_url is not None:
+                value_source_url = cls._required_text(
+                    value_source_url, f"entry[{index}].value_source_url"
+                )
+                parsed_value_url = urlparse(value_source_url)
+                if (
+                    parsed_value_url.scheme != "https"
+                    or not parsed_value_url.netloc
+                    or parsed_value_url.username
+                    or parsed_value_url.password
+                ):
+                    raise StateEffectRegistryError(
+                        f"entry[{index}].value_source_url 必须是无凭据 HTTPS"
+                    )
+                value_source_sha256 = cls._required_text(
+                    value_source_sha256, f"entry[{index}].value_source_sha256"
+                ).lower()
+                if not _SHA256.fullmatch(value_source_sha256):
+                    raise StateEffectRegistryError(
+                        f"entry[{index}].value_source_sha256 无效"
+                    )
             key = (option_id, function_type.casefold(), locale)
             if key in seen:
                 raise StateEffectRegistryError(f"重复 registry key: {key!r}")
@@ -179,6 +200,8 @@ class StateEffectRegistry:
                 source_url=source_url,
                 source_sha256=source_sha256,
                 checked_at=checked_at,
+                value_source_url=value_source_url,
+                value_source_sha256=value_source_sha256,
             ))
         return result
 

@@ -1,5 +1,66 @@
 {
   "schema_version": 1,
-  "status": "NEEDS_LIVE_EVIDENCE",
-  "entries": []
+  "status": "PARTIAL_LIVE_VERIFIED",
+  "entries": [
+    {
+      "option_id": "7000611",
+      "state_effect_id": "7000611",
+      "group_id": "100200",
+      "function_type": "StatAccuracyCircle",
+      "label": "命中率增加",
+      "value_kind": "percent",
+      "value_divisor": 100,
+      "locale": "zh-CN",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
+      "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
+      "checked_at": "2026-09-09",
+      "value_source_url": "https://www.blablalink.com/assets/nikke/version/default/assets/index-FhhpKaYK.js",
+      "value_source_sha256": "6f64503aae1c4d78a303457f6c99d5d955fe101637825575028eb8d3e328c17c"
+    },
+    {
+      "option_id": "7001011",
+      "state_effect_id": "7001011",
+      "group_id": "100600",
+      "function_type": "StatChargeTime",
+      "label": "蓄力速度增加",
+      "value_kind": "percent",
+      "value_divisor": 100,
+      "locale": "zh-CN",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
+      "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
+      "checked_at": "2026-09-09",
+      "value_source_url": "https://www.blablalink.com/assets/nikke/version/default/assets/index-FhhpKaYK.js",
+      "value_source_sha256": "6f64503aae1c4d78a303457f6c99d5d955fe101637825575028eb8d3e328c17c"
+    },
+    {
+      "option_id": "7001111",
+      "state_effect_id": "7001111",
+      "group_id": "100700",
+      "function_type": "StatCritical",
+      "label": "暴击率增加",
+      "value_kind": "percent",
+      "value_divisor": 100,
+      "locale": "zh-CN",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
+      "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
+      "checked_at": "2026-09-09",
+      "value_source_url": "https://www.blablalink.com/assets/nikke/version/default/assets/index-FhhpKaYK.js",
+      "value_source_sha256": "6f64503aae1c4d78a303457f6c99d5d955fe101637825575028eb8d3e328c17c"
+    },
+    {
+      "option_id": "7001211",
+      "state_effect_id": "7001211",
+      "group_id": "100800",
+      "function_type": "StatCriticalDamage",
+      "label": "暴击伤害增加",
+      "value_kind": "percent",
+      "value_divisor": 100,
+      "locale": "zh-CN",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
+      "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
+      "checked_at": "2026-09-09",
+      "value_source_url": "https://www.blablalink.com/assets/nikke/version/default/assets/index-FhhpKaYK.js",
+      "value_source_sha256": "6f64503aae1c4d78a303457f6c99d5d955fe101637825575028eb8d3e328c17c"
+    }
+  ]
 }
