@@ -1,5 +1,6 @@
 # 只在部署方接受 Spine/SFML 许可和测试素材边界后构建；仓库不分发 runtime。
-FROM ubuntu:24.04 AS build
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE} AS build
 
 ARG SPINE_COMMIT=425ce416bb218b28caeec47b317aa57cd7140375
 ENV DEBIAN_FRONTEND=noninteractive
@@ -24,7 +25,7 @@ RUN cmake -S /opt/nikke-worker -B /opt/nikke-worker/build -G Ninja -DCMAKE_BUILD
         -DSPINE_ROOT=/opt/spine-runtimes -DSFML_ROOT=/opt/SFML-2.5.1 \
     && cmake --build /opt/nikke-worker/build --target nikke-spine-worker --parallel 2
 
-FROM ubuntu:24.04
+FROM ${BASE_IMAGE}
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libfreetype6 libx11-6 libxrandr2 libxcursor1 libxi6 libgl1 libudev1 libflac12 libvorbis0a libvorbisenc2 libogg0 libopenal1 xvfb xauth \
