@@ -1,6 +1,6 @@
 # NIKKE 现场证据登记
 
-更新时间：2026-09-09。基线：`origin/main@7c164cd1d9814fc7b4530de861813665187e63b5`。
+更新时间：2026-09-09。基线：`origin/main@ad0ef20895dbed36963ce8eea0948c3cb25ca133`。
 
 本登记将“已有离线代码/测试”与“需要现场证据”的问题分开。当前路线图已明确授权真实账号只读、最小必要真实写、QQ/NapCat、Voice、Spine 和部署验证；本登记不扩大该范围，也不替代具体动作的备份、前态/后态和隐私检查。
 
@@ -31,6 +31,16 @@
 **已登记**：`7000611`、`7001011`、`7001111`、`7001211`；对应 `StatAccuracyCircle`、`StatChargeTime`、`StatCritical`、`StatCriticalDamage`，显式 `value_divisor=100`。registry 只按 option/function/locale 精确命中，不再按 function type 唯一回退。
 
 **未决问题**：这是四条验证子集，不代表全量 StateEffect；剩余 option 的 function contract、完整 1–15 阶表、HP/ATK/DEF 公式和非默认 Costume 仍需独立证据。公开展示规则也不等于游戏服务端全部数值语义。
+
+## E-STATE-EFFECT-02：批量 OL function 现场闭环
+
+**状态**：`LIVE_READ_ONLY_VERIFIED`。证据文件：`docs/evidence/state_effect_function_inventory_live_20260909.json`、`docs/evidence/live_character_stats_20260909.json`。
+
+**已查来源**：`ssh serv` 上现有 `astrbot` 容器；一次 `GetUserCharacters` 取得 177 个角色后，一次 `GetUserCharacterDetails` 批量请求取得 177 条详情和 109 条 state-effect function 行；原始凭据和响应只在内存中使用。
+
+**已登记**：109 条现场出现的 option/function 精确键进入 `assets/state_effects.json`。Percent 的 divisor=100 有当前公开前端展示规则支持；Integer 的单位保持 unknown，不进入确认汇总。未出现的 option 不扩展推断。
+
+**HP/ATK/DEF 结论**：详情只观察到 `combat`、`arena_combat`，个人资料只观察到 `team_combat`；没有 HP/ATK/DEF 字段或公式来源，不能把战力、等级或静态资料反推成三项属性。
 
 ## E-NUMERIC-01：角色卡异常数值语义
 
@@ -77,6 +87,24 @@
 **已查来源**：`client.py` 的 `TASK_LIST`、`DAILY_CHECK_IN`；`main.py` 的默认关闭日常开关；`storage.py` 的 action/状态记录；`tests/test_daily_safety.py`。当前 main 没有经确认的 Like 或 Browse endpoint，不能依据旧计划或离线 payload 接线。
 
 **未决问题**：签到的写后状态字段、幂等/已完成业务码、超时后实际状态；Like/Browse 的官方 endpoint、前后状态和错误语义。
+
+**本轮结果**：已在 `ssh serv` 现有 `astrbot` 容器中对一个已绑定授权账号执行一次最小 `DailyCheckIn` 写入；前态待签到，写入一次，读后态已完成。脱敏记录见 `docs/evidence/signin_live_20260909.json`；没有发送 CDK、Like/Browse 或其他写操作。
+
+## E-COSTUME-01：真实 costume 与静态 FB 资源对照
+
+**状态**：`BLOCKED_EXTERNAL_RESOURCE`。证据：`docs/evidence/costume_mapping_live_20260909.json`。
+
+**结果**：真实 roster 的 13 个非默认 costume ID 全部能在公开角色目录中对齐到 `resource_id/costume_index`；当前 Nikke-DB `images/FB` 公共目录检查不到对应非默认文件，13 个直接/姿态候选均为 404。没有把默认 `cXXX_00.png` 冒充服装，也没有写入未经证实的 `assets/costumes.json` 映射。
+
+**最小动作**：上游提供每个非默认服装的精确文件路径/内容与许可证据后，重新做 URL 200、SHA-256、透明 PNG 和资产授权核验。
+
+## E-VOICE-QQ-01：Voice / NapCat 现场送达
+
+**状态**：`BLOCKED_EXTERNAL_AUTH`。证据：`docs/evidence/voice_qq_live_20260909.json`。
+
+**结果**：探测了 AstrBot reverse WebSocket；临时仅限 Docker 内网的 NapCat HTTP adapter 也已在同一轮动作中配置、调用并回滚。文本和合成 Record 均没有收到可确认的 OneBot 成功响应；NapCat 重启后进入二维码登录流程，当前没有已认证会话。
+
+**最小动作**：用户在 NapCat WebUI 完成 intended account 的官方登录/扫码后，重新执行一次文本和一次 Record；不采集二维码、token 或账号敏感标识。
 
 **最小授权动作**：
 

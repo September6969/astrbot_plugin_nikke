@@ -1,0 +1,29 @@
+{
+  "status": "LIVE_READ_ONLY",
+  "checked_at": "2026-09-09",
+  "endpoint": "GetUserCharacterDetails",
+  "roster_count": 177,
+  "detail_count": 177,
+  "state_effect_count": 109,
+  "function_row_count": 109,
+  "observed_option_function_rows": 109,
+  "all_observed_function_values_present": true,
+  "response_content_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+  "function_type_counts": {
+    "IncElementDmg": 13,
+    "StatAccuracyCircle": 9,
+    "StatAmmoLoad": 14,
+    "StatAtk": 15,
+    "StatChargeDamage": 10,
+    "StatChargeTime": 14,
+    "StatCritical": 14,
+    "StatCriticalDamage": 12,
+    "StatDef": 8
+  },
+  "value_type_counts": {"Percent": 87, "Integer": 22},
+  "value_semantics": {
+    "Percent": "source-backed divisor 100",
+    "Integer": "unit remains unknown and is excluded from confirmed totals"
+  },
+  "raw_values_persisted": false
+}

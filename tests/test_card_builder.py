@@ -99,10 +99,10 @@ class CharacterCardBuilderTests(unittest.TestCase):
     def test_percent_values_and_totals_use_raw_divided_by_10000(self):
         card = build_card()
         attack = card.equipment["head"].options[0]
-        self.assertEqual(attack.value, 0.1322)
+        self.assertEqual(attack.value, 13.22)
         totals = {(item.display_name, item.unit): item.value for item in card.option_totals}
-        self.assertAlmostEqual(totals[("攻击力增加", "percent")], 0.2644)
-        self.assertAlmostEqual(totals[("优越代码伤害增加", "percent")], 0.6365)
+        self.assertAlmostEqual(totals[("攻击力增加", "percent")], 26.44)
+        self.assertAlmostEqual(totals[("优越代码伤害增加", "percent")], 63.65)
 
     def test_ol_tier_registry_supplies_verified_level_when_detail_level_is_missing(self):
         fixture = load_fixture()
@@ -163,14 +163,17 @@ class CharacterCardBuilderTests(unittest.TestCase):
             if option.unit == "unknown"
         ]
         self.assertTrue(any(item.raw_type == "StatUnknownFake" for item in unknown))
-        self.assertTrue(all(item.display_name == "未识别词条" for item in unknown))
+        self.assertEqual(
+            [item.display_name for item in unknown if item.raw_type == "StatUnknownFake"],
+            ["未识别词条"],
+        )
         self.assertNotIn("未识别词条", {item.display_name for item in card.option_totals})
 
     def test_common_options_and_negative_charge_time(self):
         card = build_card()
         totals = {item.display_name: item.value for item in card.option_totals}
-        self.assertAlmostEqual(totals["最大装弹数增加"], 2.0679)
-        self.assertAlmostEqual(totals["蓄力速度增加"], 0.0228)
+        self.assertAlmostEqual(totals["最大装弹数增加"], 206.79)
+        self.assertAlmostEqual(totals["蓄力速度增加"], 2.28)
         self.assertNotIn("蓄力伤害增加", totals)
         charge_damage_unknown = [
             option
@@ -179,7 +182,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
             if option.raw_type == "StatChargeDamage"
         ]
         self.assertTrue(len(charge_damage_unknown) > 0)
-        self.assertTrue(all(item.display_name == "未识别词条" for item in charge_damage_unknown))
+        self.assertTrue(all(item.display_name == "蓄力伤害增加" for item in charge_damage_unknown))
         option = CharacterCardBuilder._option_from_function({
             "function_type": "StatCriticalDamage", "function_value": 688,
             "function_value_type": "Percent",

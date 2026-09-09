@@ -1,0 +1,25 @@
+{
+  "status": "BLOCKED_EXTERNAL_AUTH",
+  "checked_at": "2026-09-09",
+  "environment": "ssh serv; existing napcat and astrbot containers",
+  "attempts": {
+    "astrbot_reverse_websocket_probe": "connected as a probe but server did not return OneBot API responses",
+    "temporary_http_adapter": "temporary internal-only adapter was configured, then text/record calls returned URLError",
+    "text_delivery": "not confirmed",
+    "record_delivery": "not confirmed"
+  },
+  "record_fixture": {
+    "type": "synthetic transport smoke only",
+    "sample_rate": 24000,
+    "channels": 1,
+    "duration_ms": 250
+  },
+  "restoration": {
+    "original_napcat_config_restored": true,
+    "napcat_container_running": true,
+    "temporary_http_server_persisted": false
+  },
+  "observed_external_blocker": "After the required NapCat restart, logs entered QR-code login flow and did not report an authenticated QQ session; manual account authorization is required.",
+  "secrets_or_qr_persisted": false,
+  "minimum_human_action": "Log in the intended NapCat account through its WebUI/official QR flow, then repeat one text and one Record smoke."
+}

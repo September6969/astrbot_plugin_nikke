@@ -1,0 +1,23 @@
+{
+  "status": "LIVE_WRITE_VERIFIED",
+  "checked_at": "2026-09-09",
+  "environment": "ssh serv -> existing astrbot container",
+  "account_scope": "one existing authorized bound account; identifiers and credentials were not persisted",
+  "pre_state": {
+    "task_found": true,
+    "completed": false,
+    "task_id_present": true
+  },
+  "action": {
+    "endpoint": "DailyCheckIn",
+    "write_attempts": 1,
+    "automatic_retry": false
+  },
+  "post_state": {
+    "task_found": true,
+    "completed": true,
+    "task_id_present": true
+  },
+  "raw_values_persisted": false,
+  "notes": "The client performed one minimum necessary Signin write and one read-after-write verification."
+}
