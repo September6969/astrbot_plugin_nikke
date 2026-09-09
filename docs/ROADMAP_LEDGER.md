@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `bee6d580ab763912afaeb3b855dfd4c617955826`；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次核验时 `origin/main` 为 `70c811c6feeb5b09cf3115aba38792d85d84b4e7`；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -61,10 +61,17 @@
 
 ## Live RC Character Stats Evidence（当前独立主题）
 
-- `feat/live-rc-card-evidence-v1` 从实时核验的 `origin/main@bee6d580` 建立；当前工作树为 `E:\DevCache\nikke-live-rc-card-evidence-20260909`，本主题只处理 HP/ATK/DEF 字段证据边界，不启用真实账号访问。
+- `feat/live-rc-card-evidence-v1` 从实时核验的 `origin/main@bee6d580` 建立，PR #61 已合并，merge `70c811c6feeb5b09cf3115aba38792d85d84b4e7`；历史工作树为 `E:\DevCache\nikke-live-rc-card-evidence-20260909`，HEAD 不代表当前 main。
 - 新增脱敏 CharacterDetails 结构诊断：只记录字段名、类型、非空状态、位数和符号形状；过滤 Cookie、token、Authorization、openid、邮箱、密码和 secret，不输出账号原始值。
 - 已核对本地脱敏 fixture、Exia 的 simulated stats 说明和 monster 的 Bla CDN state-effect extractor；未确认真实 HP/ATK/DEF 字段，角色卡继续对缺失/坏值显示 `—`，不从 combat、等级或模拟值反推。
 - 离线证据：诊断定向 2 passed；脱敏 fixture CLI 可输出结构报告；真实 CharacterDetails 字段和游戏内数值对照仍为 `NEEDS_LIVE_EVIDENCE`。
+
+## Live RC StateEffect Registry（当前独立主题）
+
+- `feat/live-rc-state-effect-registry-v1` 从实时核验的 `origin/main@70c811c` 建立；当前工作树为 `E:\DevCache\nikke-live-rc-state-effect-20260909`，仅推进离线 registry 合同和 builder 接线。
+- `StateEffectRegistry` 严格要求 option/state-effect/group identity、function type、localized label、value kind/divisor、locale、无凭据 HTTPS 来源、来源 SHA-256 和核验日期；重复/非法/无来源记录拒绝加载。当前 `assets/state_effects.json` 保持空表，状态 `NEEDS_LIVE_EVIDENCE`。
+- builder 命中来源记录时按显式 formatter 解析动态 `state_effects` 值；未命中继续既有安全 mapping，unknown 不进入确认单位汇总。没有猜测 1–15 阶表、相邻 ID 或单位。
+- 离线证据：registry + card builder 定向 15 passed；真实 Bla CDN metadata、完整 function_type 覆盖、精确 1–15 tier lookup 和现场角色卡仍待证据。
 
 ## FB 静态立绘路线（进行中）
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
 from .card_models import (
@@ -16,6 +17,7 @@ from .card_models import (
 )
 from .character_identity import CharacterDirectoryResolver
 from .log_privacy import sanitize_log_text
+from .state_effect_registry import StateEffectRegistry
 
 
 SLOTS = ("head", "torso", "arm", "leg")
@@ -60,6 +62,11 @@ def _equipped_item(
 class CharacterCardBuilder:
     """只依据原始槽位字段解析装备，不使用拍平后的 equipment_effects。"""
 
+    def __init__(self, state_effect_registry: StateEffectRegistry | None = None):
+        self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(
+            Path(__file__).parent / "assets" / "state_effects.json"
+        )
+
     @staticmethod
     def _option_from_function(function: dict[str, Any]) -> EquipmentOption:
         raw_type = str(function.get("function_type", "") or "Unknown")
@@ -92,8 +99,28 @@ class CharacterCardBuilder:
             level=_optional_int(function.get("level")),
         )
 
-    @staticmethod
+    def _option_from_function_with_registry(
+        self,
+        function: dict[str, Any],
+        *,
+        option_id: Any,
+    ) -> EquipmentOption:
+        """有来源 registry 时使用其 label/formatter，否则保留旧合同。"""
+        raw_type = str(function.get("function_type", "") or "Unknown")
+        metadata = self.state_effect_registry.resolve(option_id, raw_type)
+        if metadata is None:
+            return self._option_from_function(function)
+        value, unit = metadata.format_value(function.get("function_value", 0))
+        return EquipmentOption(
+            raw_type=raw_type,
+            display_name=metadata.label,
+            value=value,
+            unit=unit,
+            level=_optional_int(function.get("level")),
+        )
+
     def _option_from_effect(
+        self,
         *,
         effect_id: Any,
         functions: list[Any],
@@ -113,7 +140,10 @@ class CharacterCardBuilder:
                 state_effect_id=option_id,
             )
 
-        components = tuple(CharacterCardBuilder._option_from_function(item) for item in valid_functions)
+        components = tuple(
+            self._option_from_function_with_registry(item, option_id=option_id)
+            for item in valid_functions
+        )
         if len(components) == 1:
             primary = components[0]
             return EquipmentOption(
