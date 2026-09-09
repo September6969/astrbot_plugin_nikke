@@ -1,0 +1,2 @@
+# Linux 启动脚本在 Windows 检出和归档时也必须保留 LF。
+*.sh text eol=lf
