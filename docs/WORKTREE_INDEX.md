@@ -4,7 +4,7 @@
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
-| `main` | 仅通过 GitHub PR 合并推进 | 本轮未直接修改本地 main、未 force push |
+| `main` | 仅通过 GitHub PR 合并推进 | 本轮未直接修改本地 main、未 force push；当前核验基线 `origin/main@75edaaa` |
 | 已合并代码 worktree | 历史/独立分支 | 保留，不删除；其旧 HEAD 不代表当前 main |
 | 资源子系统 worktree | 已完成并入 main | #16、#17、#37、#38 按 campaign → single-flight → 全局槽位 → 预取生命周期顺序整合 |
 | 日常/存储 worktree | 已完成并入 main | #18、#19、#24、#35、#36 依赖顺序整合并经 CI 验证 |
@@ -46,3 +46,4 @@
 | Live Data Closure / Arcana evidence v1 | PR #63 已合并 | `E:\DevCache\nikke-live-data-closure-20260909` / `feat/live-data-closure-v1`；merge `bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5`，保留历史工作树，HEAD 不代表当前 main |
 | Live StateEffect data v1 | PR #64 已合并 | `E:\DevCache\nikke-live-state-effect-data-20260909` / `feat/live-state-effect-data-v1`；merge `7c164cd1d9814fc7b4530de861813665187e63b5`，保留历史工作树，HEAD 不代表当前 main |
 | Live Numeric Semantics v1 | 当前独立主题 | `E:\DevCache\nikke-live-numeric-semantics-20260909` / `feat/live-numeric-semantics-v1`；从最新 `origin/main@7c164cd1d9814fc7b4530de861813665187e63b5` 建立，严格整数/有限值/fallback 行为测试，未执行账号读取、写入、消息或部署 |
+| Live OL Tier Registry v1 | 当前独立主题 | `E:\DevCache\nikke-ol-tier-registry-20260909` / `feat/ol-tier-registry-v1`；从最新 `origin/main@75edaaa` 建立，9 组/135 ID/1--15 阶级已接线，待提交 PR 与 CI |

@@ -19,6 +19,7 @@ from .card_models import (
 )
 from .character_identity import CharacterDirectoryResolver
 from .log_privacy import sanitize_log_text
+from .overload_tier_registry import OverloadTierRegistry
 from .state_effect_registry import StateEffectRegistry
 
 
@@ -97,9 +98,16 @@ def _equipped_item(
 class CharacterCardBuilder:
     """只依据原始槽位字段解析装备，不使用拍平后的 equipment_effects。"""
 
-    def __init__(self, state_effect_registry: StateEffectRegistry | None = None):
+    def __init__(
+        self,
+        state_effect_registry: StateEffectRegistry | None = None,
+        overload_tier_registry: OverloadTierRegistry | None = None,
+    ):
         self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(
             Path(__file__).parent / "assets" / "state_effects.json"
+        )
+        self.overload_tier_registry = overload_tier_registry or OverloadTierRegistry.from_file(
+            Path(__file__).parent / "assets" / "overload_tiers.json"
         )
 
     @staticmethod
@@ -150,16 +158,20 @@ class CharacterCardBuilder:
     ) -> EquipmentOption:
         """有来源 registry 时使用其 label/formatter，否则保留旧合同。"""
         raw_type = str(function.get("function_type", "") or "Unknown")
+        tier = self.overload_tier_registry.resolve(option_id)
+        level = tier.level if tier is not None else _optional_int(function.get("level"), minimum=0)
         metadata = self.state_effect_registry.resolve(option_id, raw_type)
         if metadata is None:
-            return self._option_from_function(function)
+            option = self._option_from_function(function)
+            option.level = level
+            return option
         value, unit = metadata.format_value(function.get("function_value", 0))
         return EquipmentOption(
             raw_type=raw_type,
             display_name=metadata.label,
             value=value,
             unit=unit,
-            level=_optional_int(function.get("level"), minimum=0),
+            level=level,
         )
 
     def _option_from_effect(

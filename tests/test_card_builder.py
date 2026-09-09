@@ -104,6 +104,33 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertAlmostEqual(totals[("攻击力增加", "percent")], 0.2644)
         self.assertAlmostEqual(totals[("优越代码伤害增加", "percent")], 0.6365)
 
+    def test_ol_tier_registry_supplies_verified_level_when_detail_level_is_missing(self):
+        fixture = load_fixture()
+        detail = fixture["character_details"][0]
+        detail["head_equip_option1_id"] = 7000813
+        fixture["state_effects"] = [{
+            "id": "7000813",
+            "function_details": [{
+                "function_type": "StatAtk",
+                "function_value": 1322,
+                "function_value_type": "Percent",
+            }],
+        }]
+        card = CharacterCardBuilder().build(
+            account={},
+            directory=fixture["directory"],
+            payload={
+                "roster_item": fixture["roster_item"],
+                "detail": detail,
+                "state_effects": fixture["state_effects"],
+            },
+            fetched_at="test",
+            plugin_version="test",
+        )
+
+        option = card.equipment["head"].options[0]
+        self.assertEqual(option.level, 13)
+
     def test_unknown_options_are_visible_but_not_summed(self):
         fixture = load_fixture()
         detail = fixture["character_details"][0]

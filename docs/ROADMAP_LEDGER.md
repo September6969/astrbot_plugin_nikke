@@ -97,6 +97,13 @@
 - HP/ATK/DEF 仍只使用源端确认字段；缺失、负数或异常保持 `None`，由角色卡渲染为 `—`。level/combat/skill/grade/core 的异常输入采用安全零值以保持现有数据合同，不由其他字段反推。
 - 本主题只需离线行为证据，不执行账号读取、账号写入、消息发送、部署或现场数值公式推断；现场 HP/ATK/DEF 字段是否存在仍按 `NEEDS_LIVE_EVIDENCE` 保留。
 
+## Live OL Tier Registry（当前独立主题）
+
+- `feat/ol-tier-registry-v1` 从最新 `origin/main@75edaaa0288222337b6d2609447db1a6405d7198` 建立，使用 `ssh serv -> curl` 实时取得公开 BlaBlaLink 分组源，不使用旧 overnight 分支。
+- 新增 `assets/overload_tiers.json` 与 `OverloadTierRegistry`：精确登记 9 个 OL 分组、27 条来源记录、135 个 state-effect ID，覆盖每组 1--15 阶；排除同响应中的 3 条通用 `931xxxx` 记录。
+- `CharacterCardBuilder` 在 option 等级缺失时接入已核验等级；未知 function type、单位和动态数值仍不猜测、不进入确认汇总。
+- 证据与验收：`docs/evidence/overload_tier_registry_live_20260909.json`、`docs/OL_TIER_REGISTRY_ACCEPTANCE.md`；状态为 `READY_OFFLINE` + `LIVE_PUBLIC_SOURCE_VERIFIED`。
+
 ## FB 静态立绘路线（进行中）
 
 - P0 静态 FB / Costume 主链：`feat/fb-static-mainline-v1`，从 `origin/main@c4f1755a50903f7d47ac8904715b61c880c4605b` 建立；已补 costume 字段贯通、严格空映射清单和普通路径零 Spine 合同，状态 `READY_OFFLINE`，PR #47 CI 全绿。
