@@ -1,4 +1,13 @@
 {
   "schema_version": 2,
-  "entries": []
+  "entries": [
+    {
+      "costume_id": "10005",
+      "character_resource_id": "10",
+      "spine_asset_id": "c010_02",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    }
+  ]
 }

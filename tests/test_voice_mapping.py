@@ -9,10 +9,18 @@ from astrbot_plugin_nikke.voice_mapping import VoiceMapRegistry
 
 
 class VoiceMappingTests(TestCase):
-    def test_empty_repository_map_is_valid_and_has_no_fallback(self):
+    def test_repository_map_is_valid_and_resolves_verified_rapi_without_fallback(self):
         path = Path(__file__).resolve().parents[1] / "assets" / "voice_poke_map.json"
         registry = VoiceMapRegistry(path)
         self.assertTrue(registry.is_valid)
+        rapi_ja = registry.resolve("rapi", "default", "ja")
+        self.assertIsNotNone(rapi_ja)
+        self.assertEqual(rapi_ja.speech_id, "d_main_01_03_s_45")
+        self.assertEqual(rapi_ja.map_key, "d_main_01")
+        self.assertEqual(rapi_ja.spine_asset_id, "c010")
+        self.assertIsNotNone(registry.resolve("rapi", "default", "en"))
+        self.assertIsNotNone(registry.resolve("rapi", "default", "ko"))
+        self.assertIsNone(registry.resolve("rapi", "other", "ja"))
         self.assertIsNone(registry.resolve("alice", "default", "en"))
         self.assertIsNone(registry.resolve("unknown", "default", "en"))
         self.assertIsNone(registry.resolve("alice", "summer", "en"))

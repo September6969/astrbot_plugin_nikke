@@ -32,6 +32,7 @@ class NikkeDbProvider:
     VERIFIED_SPINE_VERSIONS: dict[str, tuple[str, str]] = {
         "c010": ("4.0", "c7cf080108f99c048b7a2681be9cf635a750c5f7367c67fac2e5dd60aa3451a1"),
         "c010_01": ("4.0", "76c7a8b528fd02eb7a7db433b67fcb2c6bcbc2a51966fcd2f2d663ea97309156"),
+        "c010_02": ("4.0", "00f3a7c1c3ac873c13a09e30d785636a2e5ff3c26835de889ef0cba9b45b792b"),
     }
     _ID_PATTERN = re.compile(r"[a-z0-9]+(?:[_-][a-z0-9]+)*")
 
@@ -301,10 +302,13 @@ class NikkeDbProvider:
         else:
             base = f"{self.L2D_CDN}/{char_id}/{action_id}"
             file_prefix = f"{char_id}_{action_id}"
+        png_name = f"{file_prefix}_00.png"
+        if char_id == "c010_02" and action_id in {"base", "setup", "static"}:
+            png_name = "c010_01.png"
         return {
             "skel": f"{base}/{file_prefix}_00.skel",
             "atlas": f"{base}/{file_prefix}_00.atlas",
-            "png": f"{base}/{file_prefix}_00.png",
+            "png": f"{base}/{png_name}",
         }
 
 

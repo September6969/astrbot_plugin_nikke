@@ -30,7 +30,7 @@
       "source": "repository-maintained verified costume identifier mapping",
       "source_ref": "assets/README.md",
       "checked_at": "2026-09-09",
-      "sha256": "b32853e8e5ab9c4ad13e7ef05932303062c37e202ef840c2b579b2253c7e90c4",
+      "sha256": "6acad494ee6f427dba6d3151fbb8ffb4b6c650d3fc3607be42cf454fc4cfd03f",
       "license_boundary": "identifier metadata only; only exact CharacterCostumeTable plus Nikke-DB L2D index mappings are included"
     }
   }

@@ -1,4 +1,38 @@
 {
   "schema_version": 2,
-  "entries": []
+  "entries": [
+    {
+      "character": "rapi",
+      "costume": "default",
+      "spine_asset_id": "c010",
+      "locale": "ja",
+      "map_key": "d_main_01",
+      "speech_id": "d_main_01_03_s_45",
+      "source": "https://sg-tools-cdn.blablalink.com/bz-84/gr-54/1a6e24c42480ff9ad6da33278eae8707.mp3",
+      "source_ref": "https://sg-tools-cdn.blablalink.com/hk-00/qg-29/8826b074bb828c40a1bb0a749b855dbf.json",
+      "checked_at": "2026-09-09"
+    },
+    {
+      "character": "rapi",
+      "costume": "default",
+      "spine_asset_id": "c010",
+      "locale": "en",
+      "map_key": "d_main_01",
+      "speech_id": "d_main_01_03_s_45",
+      "source": "https://sg-tools-cdn.blablalink.com/sr-77/jg-77/4d49996c9142bacf246ec2127c13c73a.mp3",
+      "source_ref": "https://sg-tools-cdn.blablalink.com/hk-00/qg-29/8826b074bb828c40a1bb0a749b855dbf.json",
+      "checked_at": "2026-09-09"
+    },
+    {
+      "character": "rapi",
+      "costume": "default",
+      "spine_asset_id": "c010",
+      "locale": "ko",
+      "map_key": "d_main_01",
+      "speech_id": "d_main_01_03_s_45",
+      "source": "https://sg-tools-cdn.blablalink.com/di-18/xm-95/43edf54a8152a0e8103d1ba2c84fc80f.mp3",
+      "source_ref": "https://sg-tools-cdn.blablalink.com/hk-00/qg-29/8826b074bb828c40a1bb0a749b855dbf.json",
+      "checked_at": "2026-09-09"
+    }
+  ]
 }
