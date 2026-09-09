@@ -170,3 +170,12 @@
 - 现场部署已完成：保留旧插件树备份，数据目录未改；`healthz`、AstrBot 加载、数据库完整性、三容器状态和日志隐私检查通过，详见 `docs/evidence/deployment_live_20260909.json`。
 - 本轮没有把外部条件冒充完成：13 个非默认 Costume 的公共 FB 资源均缺少可核验非默认路径/许可；HP/ATK/DEF 真实公式未出现在已授权 live contract；NapCat 当前需要官方 WebUI/QR 登录后才能重试真实文本与 Record 送达。
 - 状态：部署为 `DEPLOYED_MAIN_LIVE_SMOKE`；Costume 为 `BLOCKED_EXTERNAL_RESOURCE`；QQ/Voice 为 `BLOCKED_EXTERNAL_AUTH`；HP/ATK/DEF 为 `BLOCKED_MISSING_CONTRACT`。最小人工动作已写入 `docs/DEPLOYMENT_LIVE_ACCEPTANCE.md`。
+
+## Spine-only Portrait & Card Calculation v2（当前独立主题）
+
+- `feat/spine-only-card-calc-v2` 从最新 `origin/main@8910170f` 建立；该主题 supersede 角色卡的 FB 官方视觉路线。
+- 角色官方视觉路径已改为 `resource_id/costume_id → canonical cXXX/cXXX_YY → L2D index → Spine cache/renderer`；FB URL、远端 FB fallback、FB portrait cache 和 FB Costume 探测已从角色路径移除。失败只返回中性程序占位图。
+- `assets/costumes.json` 已升级为 schema v2；当前仍为空，不制造未验证 Costume → Spine 映射。Voice registry 同步要求 canonical Spine identity。
+- OL tier registry 已接入真实角色卡三行词条的 T1–T15 badge；T12–T14 蓝色强调、T15 深色高对比。
+- 新增严格 `CharacterStatCalculator`：完整 verified 静态表和真实玩家输入齐全时才计算，否则三项统一 `unavailable_missing_input`；直接 `CharacterDetails.hp/attack/defense` 不再作为确认值。
+- 主题验收文档：`docs/SPINE_ONLY_CARD_CALC_V2_ACCEPTANCE.md`。Linux runtime、合法 bundle、Costume L2D 全量映射、完整静态表和真实游戏 UI 对照仍需独立现场证据。

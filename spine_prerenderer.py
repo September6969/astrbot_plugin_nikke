@@ -504,7 +504,7 @@ class SpinePreRenderer:
         return f"{match.group(1)}.{match.group(2)}" if match else None
 
     def cached_portrait(self, cache_key: str) -> Image.Image | None:
-        """读取并校验版本化 Spine PNG；损坏缓存不会阻断 FB fallback。"""
+        """读取并校验版本化 Spine PNG；损坏缓存会回到中性占位图。"""
         path = self.prerender_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
         try:
             with Image.open(path) as image:
@@ -552,7 +552,7 @@ class SpinePreRenderer:
         """严格匹配 runtime 并返回裁切后的透明 RGBA PNG 内容。
 
         没有明确 runtime、版本不匹配、bundle 不完整或渲染失败时返回 None，
-        由 AssetManager 继续使用 FB/placeholder fallback。
+        由 AssetManager 继续使用中性程序占位图。
         """
         expected_version = self._major_minor(version)
         if expected_version is None or version == SPINE_VERSION_UNKNOWN:

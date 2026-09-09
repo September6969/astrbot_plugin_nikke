@@ -142,7 +142,9 @@ class StaticDataRegistry:
 
     @classmethod
     def _parse_mapping(cls, kind: str, data) -> dict[str, str]:
-        if not isinstance(data, dict) or (not data and kind != "costume"):
+        if kind == "costume":
+            return cls._parse_costume_mapping(data)
+        if not isinstance(data, dict) or not data:
             raise RegistryValidationError("映射必须是非空对象")
         pattern = cls.VALUE_PATTERNS[kind]
         id_pattern = cls.COSTUME_ID_PATTERN if kind == "costume" else cls.ID_PATTERN
@@ -153,4 +155,35 @@ class StaticDataRegistry:
             if not isinstance(resource_name, str) or not pattern.fullmatch(resource_name):
                 raise RegistryValidationError(f"{kind} resource 标识无效: {resource_name!r}")
             result[resource_id] = resource_name
+        return result
+
+    @classmethod
+    def _parse_costume_mapping(cls, data) -> dict[str, str]:
+        """解析 costume_id → canonical Spine identity 的 v2 清单。"""
+        if not isinstance(data, dict) or data.get("schema_version") != 2:
+            raise RegistryValidationError("costume registry schema_version 无效")
+        entries = data.get("entries")
+        if not isinstance(entries, list):
+            raise RegistryValidationError("costume registry 缺少 entries")
+        result: dict[str, str] = {}
+        for row in entries:
+            if not isinstance(row, dict):
+                raise RegistryValidationError("costume registry 条目无效")
+            required = ("costume_id", "character_resource_id", "spine_asset_id", "source", "source_sha256", "verified_at")
+            if any(not isinstance(row.get(field), (str, int)) or not str(row[field]).strip() for field in required):
+                raise RegistryValidationError("costume registry 来源字段缺失")
+            costume_id = str(row["costume_id"])
+            owner = str(row["character_resource_id"])
+            asset_id = str(row["spine_asset_id"])
+            if not cls.COSTUME_ID_PATTERN.fullmatch(costume_id):
+                raise RegistryValidationError(f"costume ID 无效: {costume_id!r}")
+            if not re.fullmatch(r"(?:c\d+|\d+)", owner, re.IGNORECASE):
+                raise RegistryValidationError(f"costume character_resource_id 无效: {owner!r}")
+            if not cls.VALUE_PATTERNS["costume"].fullmatch(asset_id):
+                raise RegistryValidationError(f"costume Spine identity 无效: {asset_id!r}")
+            if not re.fullmatch(r"[0-9a-fA-F]{64}", str(row["source_sha256"])):
+                raise RegistryValidationError("costume source_sha256 无效")
+            if costume_id in result:
+                raise RegistryValidationError(f"costume ID 重复: {costume_id!r}")
+            result[costume_id] = asset_id
         return result

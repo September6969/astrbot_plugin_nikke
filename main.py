@@ -183,6 +183,11 @@ class NikkePlugin(Star):
             logger.info(f"[NIKKE] 已载入 {len(self._directory)} 条妮姬目录")
         except Exception as exc:
             logger.warning("[NIKKE] 妮姬目录载入失败: %s", safe_exception_message(exc))
+        try:
+            # L2D 索引只在服务启动时单次预热；角色卡热路径只读本地索引，避免 N+1。
+            await asyncio.to_thread(self.asset_manager.nikke_db.get_l2d_index, allow_remote=True)
+        except Exception as exc:
+            logger.debug("[NIKKE] L2D 索引预热跳过: %s", safe_exception_message(exc))
         self._spawn_background_task(self._sync_announcements_background())
         await self._scheduler_loop()
 
@@ -725,7 +730,15 @@ class NikkePlugin(Star):
         if audio is None:
             mapping_registry = getattr(self, "voice_mapping", None)
             pipeline = getattr(self, "voice_pipeline", None)
-            mapping = mapping_registry.resolve(preference.character, preference.skin, preference.locale) if mapping_registry else None
+            canonical_spine = getattr(preference, "spine_asset_id", "") or None
+            mapping = mapping_registry.resolve(
+                preference.character,
+                preference.skin,
+                preference.locale,
+                spine_asset_id=canonical_spine,
+            ) if mapping_registry else None
+            if mapping is None and canonical_spine and mapping_registry:
+                mapping = mapping_registry.resolve_by_spine_asset(canonical_spine, preference.locale)
             if (
                 mapping is not None
                 and pipeline is not None

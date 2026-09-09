@@ -12,10 +12,13 @@ class NikkeDbProviderTests(unittest.TestCase):
     def test_costume_file_accepts_only_strict_verified_shape(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "costumes.json"
-            path.write_text(json.dumps({"skin_01": "c191_01", "default": "c191", "bad": "../c1"}), encoding="utf-8")
+            path.write_text(json.dumps({"schema_version": 2, "entries": [{
+                "costume_id": "skin_01", "character_resource_id": "191", "spine_asset_id": "c191_01",
+                "source": "CharacterCostumeTable", "source_sha256": "a" * 64, "verified_at": "2026-09-09",
+            }, {"costume_id": "bad", "character_resource_id": "191", "spine_asset_id": "../c1"}]}), encoding="utf-8")
             provider = NikkeDbProvider(td, td)
             self.assertEqual(provider.costume_map, {"skin_01": "c191_01"})
-            self.assertEqual(len(provider.costume_errors), 2)
+            self.assertEqual(len(provider.costume_errors), 1)
 
     def test_id_normalization_and_overrides(self):
         with tempfile.TemporaryDirectory() as td:
@@ -39,7 +42,6 @@ class NikkeDbProviderTests(unittest.TestCase):
                 with self.subTest(value=value):
                     self.assertEqual(provider.normalize_resource_id(value), "missing")
                     self.assertEqual(provider.resolve_character_id(value), "missing")
-                    self.assertEqual(provider.get_full_body_url(value), "")
 
     def test_invalid_costume_mapping_and_url_segments_fall_back_safely(self):
         with tempfile.TemporaryDirectory() as td:
@@ -48,7 +50,6 @@ class NikkeDbProviderTests(unittest.TestCase):
             try:
                 self.assertEqual(provider.resolve_character_id(191, costume_id=True), "missing")
                 self.assertEqual(provider.resolve_character_id(191, costume_id="bad_skin"), "missing")
-                self.assertEqual(provider.get_full_body_url(191, pose="../00"), "")
                 self.assertEqual(provider.resolve_spine_bundle_urls("../191"), {})
                 self.assertEqual(provider.resolve_spine_bundle_urls("191", action="../aim"), {})
             finally:
@@ -85,21 +86,20 @@ class NikkeDbProviderTests(unittest.TestCase):
             finally:
                 provider.COSTUME_OVERRIDES.pop("skin_01", None)
 
-    def test_static_full_body_urls(self):
+    def test_spine_identity_requires_verified_l2d_index(self):
         with tempfile.TemporaryDirectory() as td:
-            provider = NikkeDbProvider(td, td)
-            url = provider.get_full_body_url(191)
-            self.assertEqual(
-                url,
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images/FB/c191_00.png",
-            )
+            cache = Path(td) / "cache"
+            index_dir = cache / "nikke-db" / "index"
+            index_dir.mkdir(parents=True)
+            (index_dir / "l2d.json").write_text(json.dumps([
+                {"id": "c191", "version": 4.1}, {"id": "c191_01", "version": 4.1}
+            ]), encoding="utf-8")
+            provider = NikkeDbProvider(cache, td)
+            self.assertEqual(provider.resolve_spine_asset_id(191), "c191")
             provider.COSTUME_OVERRIDES["skin_01"] = "c191_01"
             try:
-                skin_url = provider.get_full_body_url(191, costume_id="skin_01")
-                self.assertEqual(
-                    skin_url,
-                    "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images/FB/c191_01_00.png",
-                )
+                self.assertEqual(provider.resolve_spine_asset_id(191, costume_id="skin_01"), "c191_01")
+                self.assertEqual(provider.resolve_spine_asset_id(191, costume_id="unknown"), "missing")
             finally:
                 provider.COSTUME_OVERRIDES.pop("skin_01", None)
 

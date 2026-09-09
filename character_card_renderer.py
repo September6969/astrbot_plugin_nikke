@@ -41,6 +41,16 @@ class CharacterCardRenderer(CardRenderer):
         return "待确认"
 
     @staticmethod
+    def _tier_style(tier, theme):
+        if not isinstance(tier, int) or not 1 <= tier <= 15:
+            return "—", theme.muted, "#252B35"
+        if tier == 15:
+            return f"T{tier}", "#FFFFFF", "#3D1F4F"
+        if tier >= 12:
+            return f"T{tier}", theme.primary, "#20334A"
+        return f"T{tier}", theme.muted, "#252B35"
+
+    @staticmethod
     def _label(value, mapping):
         return mapping.get(str(value).casefold(), str(value or "—"))
 
@@ -194,8 +204,11 @@ class CharacterCardRenderer(CardRenderer):
                 yy = y + 86 + row * step
                 name = option.display_name if option.unit != "unknown" else "未识别词条"
                 size = 19
-                self._text(draw, (x + 20, yy), name, size, theme.text, width=266)
-                self._text(draw, (x + 301, yy), self._option_value(option), size, theme.primary, width=112, bold=True)
+                self._text(draw, (x + 20, yy), name, size, theme.text, width=228)
+                self._text(draw, (x + 257, yy), self._option_value(option), size, theme.primary, width=78, bold=True)
+                tier_label, tier_color, tier_background = self._tier_style(option.tier, theme)
+                draw.rounded_rectangle((x + 348, yy - 2, x + 416, yy + 24), 6, fill=tier_background)
+                self._text(draw, (x + 357, yy + 1), tier_label, 16, tier_color, width=52, bold=True)
 
     def draw_option_summary(self, canvas, data, theme):
         draw = ImageDraw.Draw(canvas)

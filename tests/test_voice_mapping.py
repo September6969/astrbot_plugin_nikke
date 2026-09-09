@@ -21,10 +21,11 @@ class VoiceMappingTests(TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "voice_poke_map.json"
             path.write_text(json.dumps({
-                "schema_version": 1,
+                "schema_version": 2,
                 "entries": [{
                     "character": "alice",
                     "costume": "default",
+                    "spine_asset_id": "c191",
                     "locale": "en",
                     "map_key": "alice_poke",
                     "speech_id": "alice_poke_01",
@@ -46,11 +47,11 @@ class VoiceMappingTests(TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "voice_poke_map.json"
             row = {
-                "character": "alice", "costume": "default", "locale": "en",
+                "character": "alice", "costume": "default", "spine_asset_id": "c191", "locale": "en",
                 "map_key": "map", "speech_id": "line", "source": "https://example.invalid/source",
                 "source_ref": "https://example.invalid/map", "checked_at": "2026-09-08",
             }
-            path.write_text(json.dumps({"schema_version": 1, "entries": [row, row]}), encoding="utf-8")
+            path.write_text(json.dumps({"schema_version": 2, "entries": [row, row]}), encoding="utf-8")
             registry = VoiceMapRegistry(path)
             self.assertFalse(registry.is_valid)
             self.assertIsNone(registry.resolve("alice", "default", "en"))

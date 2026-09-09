@@ -87,7 +87,10 @@ class StaticDataRegistryTests(unittest.TestCase):
             for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
                 shutil.copy2(self.assets / name, target / name)
 
-            content = b'{"skin_01":"c191_01"}'
+            content = json.dumps({"schema_version": 2, "entries": [{
+                "costume_id": "skin_01", "character_resource_id": "191", "spine_asset_id": "c191_01",
+                "source": "CharacterCostumeTable", "source_sha256": "a" * 64, "verified_at": "2026-09-09",
+            }]}).encode("utf-8")
             (target / "costumes.json").write_bytes(content)
             manifest = json.loads((target / "registry_manifest.json").read_text(encoding="utf-8"))
             manifest["registries"]["costume"]["sha256"] = hashlib.sha256(content).hexdigest()

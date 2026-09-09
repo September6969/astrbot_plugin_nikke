@@ -16,6 +16,7 @@ class VoicePreference:
     character: str = "rapi"
     locale: str = "zh-cn"
     skin: str = "default"
+    spine_asset_id: str = ""
 
     @classmethod
     def load(cls, store, key):
