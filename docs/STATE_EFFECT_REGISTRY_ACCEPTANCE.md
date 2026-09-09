@@ -1,6 +1,6 @@
 # StateEffectRegistry 验收记录
 
-状态：`READY_OFFLINE`（合同与接线）；具体 Bla CDN metadata、精确 OL 1–15 阶表和资源来源 hash 仍为 `NEEDS_LIVE_EVIDENCE`。
+状态：`READY_OFFLINE`（合同与接线）/ `AUTHORIZED_LIVE_READ`（Arcana 结构证据）；具体 public/static metadata、中文标签、精确 divisor、OL 1–15 阶表和 registry 来源 hash 仍为 `NEEDS_LIVE_EVIDENCE`。现场结构证据见 `docs/evidence/arcana_live_20260909.json`。
 
 ## 合同
 
@@ -12,7 +12,7 @@
 - 可选且来源明确的 `value_divisor`；
 - 无凭据 HTTPS `source_url`、64 位 `source_sha256` 和 `checked_at`。
 
-没有来源 hash、重复键、含凭据 URL、非法单位或模糊 ID 的记录全部不进入 registry。当前提交的 `assets/state_effects.json` 为空并标记 `NEEDS_LIVE_EVIDENCE`，不会制造映射。
+没有来源 hash、重复键、含凭据 URL、非法单位或模糊 ID 的记录全部不进入 registry。当前提交的 `assets/state_effects.json` 仍为空并标记 `NEEDS_LIVE_EVIDENCE`；Arcana 现场观察到的 option/function 结构已登记，但没有把单账号样本冒充全量映射。
 
 ## 接线
 
@@ -24,4 +24,5 @@
 - 缺失来源或非唯一 function_type 不解析；
 - 空 registry 保持有效但无 entries；
 - 真实 CDN metadata、完整 function_type 覆盖、准确 1–15 tier table 和现场角色卡仍需后续证据。
+- Arcana 现场已确认 `7000611`、`7001011`、`7001111`、`7001211` 的 function type/value shape；这不等于已确认 label/divisor/tier，后续 PR 必须补来源和生产命中测试。
 

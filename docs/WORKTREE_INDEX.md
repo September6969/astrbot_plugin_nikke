@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-09。当前核验的远端基线为 `origin/main@70c811c`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-09。当前核验的远端基线为 `origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -9,7 +9,7 @@
 | 资源子系统 worktree | 已完成并入 main | #16、#17、#37、#38 按 campaign → single-flight → 全局槽位 → 预取生命周期顺序整合 |
 | 日常/存储 worktree | 已完成并入 main | #18、#19、#24、#35、#36 依赖顺序整合并经 CI 验证 |
 | 文档/evidence worktree | 已完成并入 main | #31、#33、#39 已分别更新、复核、合并；#14 负责最终台账收口 |
-| 现场证据 | 未执行 | 不访问真实账号，不发送消息，不做部署或账号写操作 |
+| 现场证据 | Arcana 已完成授权只读采样 | 只保存脱敏结构证据；未执行账号写入、消息发送或部署 |
 | v4 CDK worktree | PR #41 已合并 | `E:\_codex_work\nikke-v4-cdk` / `feat/v4-cdk-safety`；保留，HEAD 不代表 main |
 | v4 Daily worktree | PR #42 已合并 | `E:\_codex_work\nikke-v4-daily` / `feat/v4-daily-safety`；保留，HEAD 不代表 main |
 | v4 Costume worktree | PR #43 已合并 | `E:\_codex_work\nikke-v4-costume` / `feat/v4-costume-cache`；保留，HEAD 不代表 main |
@@ -22,7 +22,7 @@
 - 每个新主题独立 branch/worktree/Draft PR。
 - 不把旧 overnight 分支、历史文档 SHA 或未合并分支当作当前开发基线。
 - 只把实际运行的测试、CI、合成预览和已查来源写入台账；缺少 live evidence 时明确标为缺口。
-- 本轮未启用真实账号读写、QQ 发送、部署或资源授权；GitHub 仓库未开放 Auto-Merge，因此未修改设置，所有合并均在 required checks 全绿后完成并保留远端分支。
+- 当前路线图授权最小现场范围；环境可用时执行真实账号只读、最小必要写入、QQ/NapCat、Voice、Spine 与部署验证；不采集秘密、不修改 ruleset。GitHub 合并仍按独立 PR、exact-head CI 全绿和自审执行，不直接改 main、不 force push、不删分支。
 
 ## 当前新增工作树
 
@@ -42,4 +42,5 @@
 | Live RC Character localization v1 | PR #59 已合并 | `E:\DevCache\nikke-live-rc-localization-20260909` / `feat/live-rc-character-localization-v1`；从 `origin/main@a34f6fc` 建立，统一目录身份字段与 Arcana 查询 alias，HEAD 不代表当前 main |
 | Live RC OL contract v1 | PR #60 已合并 | `E:\DevCache\nikke-live-rc-ol-20260909` / `feat/live-rc-ol-contract-v1`；从 `origin/main@530eeef` 建立，固定四部位三 option 行与未知/空槽 fallback，离线证据已通过，HEAD 不代表当前 main |
 | Live RC Character stats evidence v1 | PR #61 已合并 | `E:\DevCache\nikke-live-rc-card-evidence-20260909` / `feat/live-rc-card-evidence-v1`；从 `origin/main@bee6d580` 建立，新增 HP/ATK/DEF 脱敏结构诊断，真实字段仍待现场证据，HEAD 不代表当前 main |
-| Live RC StateEffect registry v1 | 当前独立主题 | `E:\DevCache\nikke-live-rc-state-effect-20260909` / `feat/live-rc-state-effect-registry-v1`；从 `origin/main@70c811c` 建立，严格来源/hash/formatter 合同，映射空表保持待证据 |
+| Live RC StateEffect registry v1 | PR #62 已合并 | `E:\DevCache\nikke-live-rc-state-effect-20260909` / `feat/live-rc-state-effect-registry-v1`；从 `origin/main@70c811c` 建立，merge `1a98895e`，严格来源/hash/formatter 合同，映射空表保持待证据 |
+| Live Data Closure / Arcana evidence v1 | 当前独立主题 | `E:\DevCache\nikke-live-data-closure-20260909` / `feat/live-data-closure-v1`；从 `origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a` 建立，Arcana 只读结构证据已登记，未执行账号写入、消息或部署 |
