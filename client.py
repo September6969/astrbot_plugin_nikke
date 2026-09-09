@@ -719,6 +719,7 @@ class BlaBlaClient:
                     return data[key]
         return []
 
+
     async def get_cdk_redemption_history(self, account: dict[str, Any]) -> list[dict]:
         """获取官方 CDK 历史兑换记录。
         先取响应 data，再按已确认字段拆包；接口异常抛出受控异常。
@@ -747,18 +748,3 @@ class BlaBlaClient:
                 if isinstance(data.get(key), list):
                     return data[key]
         return []
-
-    @staticmethod
-    def calculate_ael(character: dict[str, Any]) -> float:
-        atk = elem = 0.0
-        effects = character.get("equipment_effects", character.get("effects", [])) or []
-        for effect in effects:
-            kind = str(effect.get("function_type", "")).lower()
-            value = abs(float(effect.get("function_value", 0))) / 10000
-            if "attack" in kind or kind in {"atk", "statatk", "1"}:
-                atk += value
-            if "element" in kind or kind in {"elem", "incelementdmg", "2"}:
-                elem += value
-        grade = int(character.get("grade", 0) or 0)
-        core = int(character.get("core", 0) or 0)
-        return round((1 + 0.9 * atk) * (1 + elem + 0.10) * (1 + 0.03 * grade + 0.02 * core), 4)
