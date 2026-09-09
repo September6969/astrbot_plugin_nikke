@@ -1,13 +1,4 @@
 {
   "schema_version": 2,
-  "entries": [
-    {
-      "costume_id": "20001",
-      "character_resource_id": "10",
-      "spine_asset_id": "c010_01",
-      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json + https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json",
-      "source_sha256": "c5eb1f678eff0cb6c6c2a5f476bb39f38138aa42fb5385f52f6b30cf2ae4c64f",
-      "verified_at": "2026-09-09"
-    }
-  ]
+  "entries": []
 }

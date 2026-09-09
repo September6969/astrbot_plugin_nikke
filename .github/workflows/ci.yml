@@ -22,7 +22,12 @@ jobs:
       - name: Render public default and legacy multi-skin Spine bundles
         run: |
           set -eu
-          mkdir -p .ci-spine-assets/c010 .ci-spine-assets/c010_01
+          mkdir -p .ci-spine-assets/c010 .ci-spine-assets/c010_01 .ci-spine-assets/c010_02
+          for file in c010_02_00.skel c010_02_00.atlas c010_01.png; do
+            curl --fail --silent --show-error --location \
+              "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_02/$file" \
+              --output ".ci-spine-assets/c010_02/$file"
+          done
           curl --fail --silent --show-error --location \
             https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel \
             --output .ci-spine-assets/c010/c010_00.skel
@@ -69,12 +74,21 @@ jobs:
             --atlas /bundles/c010_01/c010_01_00.atlas \
             --output /bundles/c010_01/non-default-01.rgba \
             --width 512 --height 512 --skin 01 --verbose
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010_02/c010_02_00.skel \
+            --atlas /bundles/c010_02/c010_02_00.atlas \
+            --output /bundles/c010_02/white-promise.rgba \
+            --width 512 --height 512 --verbose
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
 
           cases = (
+              (Path(".ci-spine-assets/c010_02/white-promise.rgba"), Path(".ci-spine-assets/c010_02/white-promise.png")),
               (Path(".ci-spine-assets/c010/default.rgba"), Path(".ci-spine-assets/c010/default.png")),
               (Path(".ci-spine-assets/c010_01/non-default-00.rgba"), Path(".ci-spine-assets/c010_01/skin-00.png")),
               (Path(".ci-spine-assets/c010_01/non-default-01.rgba"), Path(".ci-spine-assets/c010_01/skin-01.png")),
@@ -101,6 +115,7 @@ jobs:
           path: |
             .ci-spine-assets/c010/default.png
             .ci-spine-assets/c010_01/skin-*.png
+            .ci-spine-assets/c010_02/white-promise.png
           if-no-files-found: error
 
   extension:

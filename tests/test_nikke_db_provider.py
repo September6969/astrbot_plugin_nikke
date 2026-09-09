@@ -103,7 +103,7 @@ class NikkeDbProviderTests(unittest.TestCase):
             finally:
                 provider.COSTUME_OVERRIDES.pop("skin_01", None)
 
-    def test_live_verified_costume_20001_uses_l2d_identity(self):
+    def test_costume_index_does_not_prove_legacy_l2d_identity(self):
         cache_dir = Path(__file__).resolve().parents[1] / "assets"
         provider = NikkeDbProvider(cache_dir / ".test-cache", cache_dir, remote=False)
         try:
@@ -114,7 +114,7 @@ class NikkeDbProviderTests(unittest.TestCase):
                 encoding="utf-8",
             )
             provider._index = None
-            self.assertEqual(provider.resolve_spine_asset_id(10, costume_id="20001"), "c010_01")
+            self.assertEqual(provider.resolve_spine_asset_id(10, costume_id="20001"), "missing")
         finally:
             import shutil
             shutil.rmtree(provider.cache_dir, ignore_errors=True)

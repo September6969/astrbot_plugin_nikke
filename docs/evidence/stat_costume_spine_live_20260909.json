@@ -71,14 +71,16 @@
     "l2d_index_url": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json",
     "l2d_index_sha256": "41090a2ae1c7bb130db65306c757b98e5bb5991122a6f6a31d35b5422432cf0b",
     "live_costume_ids": [10014, 110005, 110012, 110014, 110023, 110024, 120004, 20001, 30040, 30049, 30052, 30053, 50012],
-    "exact_verified_mappings": [
+    "exact_verified_mappings": [],
+    "rejected_mappings": [
       {
         "costume_id": 20001,
         "character_resource_id": 10,
         "costume_index": 1,
         "spine_asset_id": "c010_01",
         "l2d_name": "Rapi_old",
-        "mapping_status": "VERIFIED"
+        "mapping_status": "REJECTED_UNPROVEN_SUFFIX_MATCH",
+        "reason": "L2D 标签为 Rapi_old；角色表 costume_index 不能证明第三方资源后缀对应同一服装，撤销原先 VERIFIED 结论。"
       }
     ],
     "unresolved": [
@@ -95,12 +97,15 @@
       {"costume_id": 30053, "character_resource_id": 513, "costume_index": 2, "candidate": "c513_02", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
       {"costume_id": 50012, "character_resource_id": 470, "costume_index": 1, "candidate": "c470_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"}
     ],
-    "method_boundary": "只用 CharacterCostumeTable owner/index 与 Nikke-DB l2d.json 精确匹配；没有用 FB 路径、名称、顺序或发布日期推导映射。"
+    "method_boundary": "owner/index 只记录官方关联，不等同于 L2D suffix。候选路径不构成身份验证；禁止回退默认服装。"
   },
   "spine_render": {
-    "status": "BLOCKED_SSH_BANNER_DURING_RUNTIME_EXECUTION",
+    "status": "DEFAULT_RENDER_VERIFIED_LEGACY_SKIN_REJECTED",
+    "ci_run": "https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34394169661",
+    "default_preview_sha256": "ef3799894ea7dead436fb15ce4f7e0905f1ff96b6f0966f1155dbc84b69a241e",
+    "server_recheck": "SSH recovered; astrbot/napcat/nikke-caddy running; HTTPS healthz ok, storage ready, version 0.1.8",
     "default_asset_id": "c010",
-    "non_default_asset_id": "c010_01",
+    "legacy_test_asset_id": "c010_01",
     "bundle_sources": [
       "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel",
       "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.atlas",
@@ -119,15 +124,16 @@
     },
     "binary_header_check": {
       "c010": "Spine_4.0.47_observed_at_offset_8",
-      "c010_01": "not_yet_downloaded_locally"
+      "c010_01": "parsed_successfully_by_pinned_4.0_runtime_in_CI"
     },
     "worker_build": {
       "previous_4_1_build": "COMPILED_BUT_REJECTED_4.0.47_BUNDLE",
       "4_0_sdl_attempt": "FAILED_OFFICIAL_BRANCH_HAS_NO_SPINE_SDL",
-      "4_0_sfml_build": "NOT_CONFIRMED_SSH_BANNER_TIMEOUT"
+      "4_0_sfml_build": "CI_BUILD_AND_THREE_RGBA_OUTPUTS_VERIFIED"
     },
-    "render_verified": false,
-    "visual_preview": "NOT_GENERATED",
-    "boundary": "HTTP 200 and local header/preflight checks are not render evidence; no output is marked successful until the 4.0 worker produces RGBA and the images are viewed."
+    "render_verified": true,
+    "non_default_costume_verified": false,
+    "visual_preview": "Three PNGs actually viewed: c010 default centered full body; legacy skin00 full body; legacy skin01 blue hair and incomplete lower body, rejected for costume acceptance.",
+    "boundary": "Actual headless rendering of public assets in CI, not game-account costume identity verification, QQ delivery, production worker deployment, or redistribution permission."
   }
 }
