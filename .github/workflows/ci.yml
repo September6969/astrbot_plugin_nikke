@@ -48,7 +48,7 @@ jobs:
             --skeleton /bundles/c010/c010_00.skel \
             --atlas /bundles/c010/c010_00.atlas \
             --output /bundles/c010/default.rgba \
-            --width 512 --height 512
+            --width 512 --height 512 --verbose
           timeout --signal=TERM --kill-after=10s 120s docker run --rm \
             --env LIBGL_ALWAYS_SOFTWARE=1 \
             --volume "$PWD/.ci-spine-assets:/bundles" \
@@ -56,7 +56,7 @@ jobs:
             --skeleton /bundles/c010_01/c010_01_00.skel \
             --atlas /bundles/c010_01/c010_01_00.atlas \
             --output /bundles/c010_01/non-default.rgba \
-            --width 512 --height 512
+            --width 512 --height 512 --verbose
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from pathlib import Path

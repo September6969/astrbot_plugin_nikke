@@ -30,6 +30,7 @@ struct Options {
 	int height = 1024;
 	float frame_seconds = 0.0f;
 	float padding = 0.08f;
+	bool verbose = false;
 };
 
 void print_error(const std::string &message) {
@@ -83,6 +84,8 @@ bool parse_args(int argc, char **argv, Options &options) {
 			if (!next_value(argc, argv, index, value) || !parse_float(value.c_str(), options.frame_seconds, 0.0f, 60.0f)) return false;
 		} else if (std::string(argv[index]) == "--padding") {
 			if (!next_value(argc, argv, index, value) || !parse_float(value.c_str(), options.padding, 0.0f, 0.45f)) return false;
+		} else if (std::string(argv[index]) == "--verbose") {
+			options.verbose = true;
 		} else {
 			return false;
 		}
@@ -127,11 +130,19 @@ bool normalize_atlas_bom(const std::string &path, std::string &temporary_path) {
 
 int render(const Options &options) {
 	int result = 1;
+	const auto phase = [&options](const char *name) {
+		if (options.verbose) {
+			std::cerr << "nikke-spine-worker: " << name << "\n";
+			std::cerr.flush();
+		}
+	};
 	std::string temporary_atlas;
+	phase("开始读取 atlas");
 	const bool atlas_ready = normalize_atlas_bom(options.atlas, temporary_atlas);
 	const std::string atlas_path = temporary_atlas.empty() ? options.atlas : temporary_atlas;
 	{
 		spine::SFMLTextureLoader texture_loader;
+		phase("开始解析 atlas 与纹理");
 		spine::Atlas atlas(atlas_ready ? atlas_path.c_str() : "", &texture_loader);
 		if (!atlas_ready) {
 			print_error("atlas 文件读取失败");
@@ -139,6 +150,7 @@ int render(const Options &options) {
 			print_error("atlas 纹理页加载失败");
 		} else {
 			spine::SkeletonData *skeleton_data = nullptr;
+			phase("开始解析 skeleton");
 			const bool is_json = options.skeleton.size() >= 5 && options.skeleton.substr(options.skeleton.size() - 5) == ".json";
 			if (is_json) {
 				spine::SkeletonJson parser(&atlas);
@@ -151,6 +163,7 @@ int render(const Options &options) {
 			}
 
 			if (skeleton_data) {
+				phase("skeleton 解析完成");
 				spine::SkeletonDrawable drawable(skeleton_data);
 				drawable.setUsePremultipliedAlpha(true);
 				if (!options.skin.empty() && skeleton_data->findSkin(options.skin.c_str()) == nullptr) {
@@ -189,9 +202,11 @@ int render(const Options &options) {
 						if (!target.create(static_cast<unsigned int>(options.width), static_cast<unsigned int>(options.height))) {
 							print_error("SFML 输出纹理创建失败");
 						} else {
+							phase("开始绘制 RenderTexture");
 							target.clear(sf::Color(0, 0, 0, 0));
 							target.draw(drawable);
 							target.display();
+							phase("RenderTexture 绘制完成");
 							sf::Image image = target.getTexture().copyToImage();
 							if (!write_rgba(options.output, options.width, options.height, image.getPixelsPtr())) {
 								print_error("RGBA 输出文件写入失败");
