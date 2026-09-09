@@ -3,8 +3,7 @@ NIKKE 综合助手 0.1.8
 UI2 使用的外部角色立绘及游戏图标属于 SHIFT UP 及相关权利方，
 不在本项目 GPL 代码许可范围内。资源定位和来源见 assets/README.md。
 
-本项目包含基于 ExiaProject/ExiaInvasion 的 API 调用流程、异常恢复策略与
-AEL 计算方法所作的移植和修改。
+本项目包含基于 ExiaProject/ExiaInvasion 的 API 调用流程与异常恢复策略移植和修改。
 
 原项目：ExiaProject/ExiaInvasion
 原项目地址：https://github.com/ExiaProject/ExiaInvasion

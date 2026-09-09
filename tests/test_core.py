@@ -431,24 +431,6 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(BlaBlaError):
             await client.validate_cookie("game_token=x; game_uid=1")
 
-    def test_ael_formula(self):
-        value = BlaBlaClient.calculate_ael({"grade": 3, "core": 2, "effects": []})
-        self.assertEqual(value, round(1.1 * 1.13, 4))
-
-    def test_ael_uses_attack_and_element_effects(self):
-        value = BlaBlaClient.calculate_ael(
-            {
-                "grade": 0,
-                "core": 0,
-                "equipment_effects": [
-                    {"function_type": "StatAtk", "function_value": 1190},
-                    {"function_type": "IncElementDmg", "function_value": 2300},
-                ],
-            }
-        )
-        self.assertEqual(value, round((1 + 0.9 * 0.119) * (1 + 0.23 + 0.10), 4))
-
-
 class RendererTests(unittest.TestCase):
     def test_summary_card(self):
         with tempfile.TemporaryDirectory() as td:

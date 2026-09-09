@@ -59,5 +59,5 @@ class HorizontalRendererTests(unittest.TestCase):
             for summary in card.option_totals:
                 self.assertIn(summary.display_name, strings)
             joined = " ".join(strings)
-            for forbidden in ["CODE", "RESOURCE", "StatChargeDamage", "100602", "1000304", "AEL", "OpenID", "Cookie"]:
+            for forbidden in ["CODE", "RESOURCE", "StatChargeDamage", "100602", "1000304", "OpenID", "Cookie"]:
                 self.assertNotIn(forbidden, joined)

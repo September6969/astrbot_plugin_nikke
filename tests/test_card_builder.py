@@ -150,7 +150,6 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertIsNone(card.defense)
         self.assertIsNone(card.favorite_item.display_name)
         self.assertIsNone(card.cube.display_name)
-        self.assertFalse(hasattr(card, "ael"))
 
 
 class CharacterDetailClientTests(unittest.IsolatedAsyncioTestCase):
