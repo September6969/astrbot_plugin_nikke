@@ -198,12 +198,16 @@ int render(const Options &options) {
 					drawable.skeleton->getBounds(bounds_x, bounds_y, bounds_width, bounds_height, vertices);
 					const float usable_width = static_cast<float>(options.width) * (1.0f - 2.0f * options.padding);
 					const float usable_height = static_cast<float>(options.height) * (1.0f - 2.0f * options.padding);
-					if (bounds_width <= 0.0f || bounds_height <= 0.0f || usable_width <= 0.0f || usable_height <= 0.0f) {
+					if (!std::isfinite(bounds_x) || !std::isfinite(bounds_y)
+						|| !std::isfinite(bounds_width) || !std::isfinite(bounds_height)
+						|| bounds_width <= 0.0f || bounds_height <= 0.0f || usable_width <= 0.0f || usable_height <= 0.0f) {
 						print_error("skeleton bounds 无效");
 					} else {
 						const float scale = std::min(usable_width / bounds_width, usable_height / bounds_height);
 						drawable.skeleton->setScaleX(scale);
 						drawable.skeleton->setScaleY(scale);
+						// 缩放后先刷新世界坐标，避免用旧边界将人物移出画布。
+						drawable.skeleton->updateWorldTransform();
 						drawable.skeleton->getBounds(bounds_x, bounds_y, bounds_width, bounds_height, vertices);
 						drawable.skeleton->setPosition((static_cast<float>(options.width) - bounds_width) / 2.0f - bounds_x,
 											(static_cast<float>(options.height) - bounds_height) / 2.0f - bounds_y);

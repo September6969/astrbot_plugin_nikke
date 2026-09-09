@@ -19,7 +19,7 @@ jobs:
             --file runtime/spine_worker/Dockerfile \
             --tag nikke-spine-worker:ci \
             runtime/spine_worker
-      - name: Render public default and non-default Spine bundles
+      - name: Render public default and legacy multi-skin Spine bundles
         run: |
           set -eu
           mkdir -p .ci-spine-assets/c010 .ci-spine-assets/c010_01
@@ -59,30 +59,48 @@ jobs:
             nikke-spine-worker:ci \
             --skeleton /bundles/c010_01/c010_01_00.skel \
             --atlas /bundles/c010_01/c010_01_00.atlas \
-            --output /bundles/c010_01/non-default.rgba \
+            --output /bundles/c010_01/non-default-00.rgba \
+            --width 512 --height 512 --skin 00 --verbose
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010_01/c010_01_00.skel \
+            --atlas /bundles/c010_01/c010_01_00.atlas \
+            --output /bundles/c010_01/non-default-01.rgba \
             --width 512 --height 512 --skin 01 --verbose
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
 
-          for raw_path, png_path in (
+          cases = (
               (Path(".ci-spine-assets/c010/default.rgba"), Path(".ci-spine-assets/c010/default.png")),
-              (Path(".ci-spine-assets/c010_01/non-default.rgba"), Path(".ci-spine-assets/c010_01/non-default.png")),
-          ):
+              (Path(".ci-spine-assets/c010_01/non-default-00.rgba"), Path(".ci-spine-assets/c010_01/skin-00.png")),
+              (Path(".ci-spine-assets/c010_01/non-default-01.rgba"), Path(".ci-spine-assets/c010_01/skin-01.png")),
+          )
+          empty = []
+          for raw_path, png_path in cases:
               data = raw_path.read_bytes()
               width = int.from_bytes(data[0:4], "little")
               height = int.from_bytes(data[4:8], "little")
               assert len(data) == 8 + width * height * 4
               image = Image.frombytes("RGBA", (width, height), data[8:])
-              assert image.getbbox() is not None
+              alpha_box = image.getchannel("A").getbbox()
+              print(f"{raw_path}: size={width}x{height}, alpha_bbox={alpha_box}")
               image.save(png_path, format="PNG")
+              if alpha_box is None:
+                  empty.append(str(raw_path))
+          assert not empty, f"透明空图: {empty}"
           PY
-      - name: Upload viewed Spine render previews
+      - name: Upload Spine render previews
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: spine-render-smoke
-          path: .ci-spine-assets/**/*.png
+          path: |
+            .ci-spine-assets/c010/default.png
+            .ci-spine-assets/c010_01/skin-*.png
           if-no-files-found: error
 
   extension:
