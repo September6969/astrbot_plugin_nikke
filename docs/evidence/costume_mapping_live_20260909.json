@@ -1,0 +1,24 @@
+{
+  "status": "BLOCKED_EXTERNAL_RESOURCE",
+  "checked_at": "2026-09-09",
+  "account_scope": "one existing authorized bound account; no account identifiers or credentials persisted",
+  "account_roster_count": 177,
+  "nondefault_costume_count": 13,
+  "nondefault_costume_ids": ["110014", "110005", "10014", "30040", "110012", "110023", "30053", "50012", "30049", "110024", "120004", "30052", "20001"],
+  "public_directory": {
+    "url": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+    "row_count": 200,
+    "costume_fields": ["id", "costume_index"],
+    "all_13_ids_matched_to_resource_and_index": true
+  },
+  "nikke_db_fb_listing": {
+    "url": "https://api.github.com/repos/Nikke-db/Nikke-db.github.io/contents/images/FB?per_page=1000",
+    "file_count": 97,
+    "confirmed_base_assets": ["c010_00.png", "c222_00.png"],
+    "nondefault_candidate_paths_returning_200": 0,
+    "candidate_probe_result": "all 13 non-default direct/stem probes returned 404"
+  },
+  "mapping_written": false,
+  "reason": "No verifiable non-default Nikke-DB FB asset exists in the checked public listing; default assets must not be reused for a non-default costume.",
+  "minimum_external_action": "Provide or publish the exact non-default FB asset path/content and licensing evidence for each costume ID, then re-run the same hash-backed probe."
+}
