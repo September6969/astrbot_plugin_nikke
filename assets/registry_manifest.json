@@ -30,7 +30,7 @@
       "source": "repository-maintained verified costume identifier mapping",
       "source_ref": "assets/README.md",
       "checked_at": "2026-09-08",
-      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "sha256": "b32853e8e5ab9c4ad13e7ef05932303062c37e202ef840c2b579b2253c7e90c4",
       "license_boundary": "identifier metadata only; empty until API costume to Nikke-DB asset evidence is verified"
     }
   }

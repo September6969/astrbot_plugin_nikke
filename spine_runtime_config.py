@@ -14,7 +14,7 @@ logger = logging.getLogger("nikke.spine.config")
 
 
 def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None = None) -> SpinePreRenderer:
-    """只有明确配置且存在 worker 时启用 runtime，否则保留静态 FB 回退。"""
+    """只有明确配置且存在 worker 时启用 runtime，否则使用中性占位图。"""
 
     values = config if isinstance(config, Mapping) else {}
     worker_value = values.get("spine_worker_path", "")
@@ -26,10 +26,10 @@ def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None
     try:
         worker_path = worker_path.resolve()
     except OSError:
-        logger.warning("Spine worker 路径无法解析，保持 FB 回退")
+        logger.warning("Spine worker 路径无法解析，使用中性占位图")
         return SpinePreRenderer(root)
     if not worker_path.is_file():
-        logger.warning("Spine worker 不存在，保持 FB 回退")
+        logger.warning("Spine worker 不存在，使用中性占位图")
         return SpinePreRenderer(root)
     version = str(values.get("spine_runtime_version", "4.1")).strip() or "4.1"
     timeout = values.get("spine_worker_timeout", 4)
@@ -43,7 +43,7 @@ def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None
             version=version,
         )
     except (TypeError, ValueError, OSError):
-        logger.warning("Spine worker 配置无效，保持 FB 回退")
+        logger.warning("Spine worker 配置无效，使用中性占位图")
         return SpinePreRenderer(root)
     return SpinePreRenderer(
         root,

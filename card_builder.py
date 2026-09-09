@@ -18,6 +18,7 @@ from .card_models import (
     OptionSummary,
 )
 from .character_identity import CharacterDirectoryResolver
+from .character_stat_calculator import CharacterStatCalculator
 from .log_privacy import sanitize_log_text
 from .overload_tier_registry import OverloadTierRegistry
 from .state_effect_registry import StateEffectRegistry
@@ -102,6 +103,7 @@ class CharacterCardBuilder:
         self,
         state_effect_registry: StateEffectRegistry | None = None,
         overload_tier_registry: OverloadTierRegistry | None = None,
+        stat_calculator: CharacterStatCalculator | None = None,
     ):
         self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(
             Path(__file__).parent / "assets" / "state_effects.json"
@@ -109,6 +111,7 @@ class CharacterCardBuilder:
         self.overload_tier_registry = overload_tier_registry or OverloadTierRegistry.from_file(
             Path(__file__).parent / "assets" / "overload_tiers.json"
         )
+        self.stat_calculator = stat_calculator or CharacterStatCalculator()
 
     @staticmethod
     def _option_from_function(function: dict[str, Any]) -> EquipmentOption:
@@ -164,6 +167,7 @@ class CharacterCardBuilder:
         if metadata is None:
             option = self._option_from_function(function)
             option.level = level
+            option.tier = level
             return option
         value, unit = metadata.format_value(function.get("function_value", 0))
         return EquipmentOption(
@@ -172,6 +176,7 @@ class CharacterCardBuilder:
             value=value,
             unit=unit,
             level=level,
+            tier=level,
         )
 
     def _option_from_effect(
@@ -183,6 +188,8 @@ class CharacterCardBuilder:
     ) -> EquipmentOption:
         """把一个 option 固定为一行，多 function detail 不再拆成多个槽位。"""
         option_id = str(effect_id) if effect_id not in (None, "", 0, "0") else None
+        tier_metadata = self.overload_tier_registry.resolve(option_id)
+        tier = tier_metadata.level if tier_metadata is not None else None
         valid_functions = [item for item in functions if isinstance(item, dict)]
         if not valid_functions:
             return EquipmentOption(
@@ -193,6 +200,7 @@ class CharacterCardBuilder:
                 position=position,
                 option_id=option_id,
                 state_effect_id=option_id,
+                tier=tier,
             )
 
         components = tuple(
@@ -211,6 +219,7 @@ class CharacterCardBuilder:
                 option_id=option_id,
                 state_effect_id=option_id,
                 components=components,
+                tier=primary.tier,
             )
 
         names = list(dict.fromkeys(
@@ -226,6 +235,7 @@ class CharacterCardBuilder:
             position=position,
             option_id=option_id,
             state_effect_id=option_id,
+            tier=tier,
             components=components,
         )
 
@@ -283,6 +293,11 @@ class CharacterCardBuilder:
             or account.get("role_name")
             or "指挥官"
         )
+        stat_result = self.stat_calculator.calculate_from_payload(
+            account=account,
+            directory=directory,
+            payload=payload,
+        )
         return CharacterCardData(
             commander_name=commander_name,
             fetched_at=fetched_at,
@@ -303,9 +318,9 @@ class CharacterCardBuilder:
             corporation=directory.get("corporation"),
             level=_zero_if_invalid(roster.get("lv", detail.get("lv", 0))),
             combat=_zero_if_invalid(roster.get("combat", detail.get("combat", 0))),
-            hp=_optional_int(detail.get("hp"), minimum=0),
-            attack=_optional_int(detail.get("attack"), minimum=0),
-            defense=_optional_int(detail.get("defense"), minimum=0),
+            hp=stat_result.hp,
+            attack=stat_result.attack,
+            defense=stat_result.defense,
             skill1_level=_zero_if_invalid(detail.get("skill1_lv", 0)),
             skill2_level=_zero_if_invalid(detail.get("skill2_lv", 0)),
             burst_skill_level=_zero_if_invalid(detail.get("ulti_skill_lv", 0)),
@@ -324,4 +339,8 @@ class CharacterCardBuilder:
             ),
             equipment=equipment,
             option_totals=option_totals,
+            hp_source=stat_result.hp_source,
+            attack_source=stat_result.attack_source,
+            defense_source=stat_result.defense_source,
+            stat_calculation_reason=stat_result.reason,
         )

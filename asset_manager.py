@@ -262,36 +262,21 @@ class AssetManager:
         return None
 
     def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
-        costume_state, _ = self.nikke_db.costume_cache_token(costume_id)
-        # 默认服装可以使用历史本地 override；非默认服装禁止命中无皮肤维度的旧缓存。
-        image = None
-        if costume_state == "default":
-            image = self._load("portraits", str(name_code))
-            if image is None and resource_id:
-                image = self._load("portraits", self._key(resource_id))
+        """只从 canonical Spine identity 读取角色官方立绘。
 
-        # 2. 版本化预渲染缓存 / Nikke-DB 规范名缓存 (cXXX / cXXX_01)
-        char_id = self.nikke_db.resolve_character_id(resource_id, costume_id) if resource_id else ""
-        if image is None and char_id and char_id != "missing":
-            image = self._load("portraits", char_id)
-
-        # Spine 版本化 PNG 是完整人物来源；首次 miss 只后台预热，当前请求继续 fallback。
-        if image is None and char_id and char_id != "missing":
+        Spine 缓存未命中时由后台队列预热；当前请求只返回中性程序占位图，
+        不再生成、探测或下载 Nikke-db images/FB URL。
+        """
+        char_id = self.nikke_db.resolve_spine_asset_id(
+            resource_id,
+            costume_id,
+            allow_remote=False,
+        ) if resource_id else "missing"
+        if char_id != "missing":
             image = self._get_spine_portrait(char_id, costume_id)
-
-        # 4. 远端 Nikke-DB 静态 Full Body CDN fallback
-        if image is None and char_id and char_id != "missing":
-            url = self.nikke_db.get_full_body_url(resource_id, costume_id)
-            if costume_state == "default":
-                key = self._key(resource_id) if str(resource_id).isdigit() else char_id
-                image = self._load("portraits", key, url)
-            else:
-                # 远端与 single-flight 也必须包含皮肤身份，不能复用 resource_id 通用键。
-                cache_contract = self.nikke_db.compute_cache_key(char_id, costume_id)
-                scoped_key = "costume-" + hashlib.sha256(cache_contract.encode("utf-8")).hexdigest()[:24]
-                image = self._load("portraits", scoped_key, url, allow_source=False)
-
-        return image if image is not None else self.fallback("portrait")
+            if image is not None:
+                return image
+        return self.fallback("portrait")
 
     def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
         """兼容旧调用名；正式 backend 仍受 runtime、版本和队列预算约束。"""

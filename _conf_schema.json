@@ -55,7 +55,7 @@
     "default": 2
   },
   "spine_worker_path": {
-    "description": "可选的官方 Spine 4.1 headless worker 绝对路径；留空时只使用静态 FB 回退",
+    "description": "可选的官方 Spine 4.1 headless worker 绝对路径；留空时使用中性程序占位图",
     "type": "string",
     "default": ""
   },

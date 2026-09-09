@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Nikke-DB 资源适配器。
 
-负责角色/皮肤 ID 映射、静态全身像 CDN 地址解析、Spine 索引与版本探测、
-并发锁管理以及负缓存退避机制。
+负责角色/皮肤 ID 映射、canonical Spine identity、Spine 索引与版本探测、
+并发锁管理以及负缓存退避机制。角色官方视觉不再通过 FB URL 提供。
 """
 
 from __future__ import annotations
@@ -20,7 +20,6 @@ logger = logging.getLogger("nikke.nikke_db")
 
 
 class NikkeDbProvider:
-    CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images"
     L2D_CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d"
     INDEX_URL = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d.json"
 
@@ -44,6 +43,7 @@ class NikkeDbProvider:
         self._index_loaded_at: float = 0
 
         self.costume_errors: list[str] = []
+        self.costume_character_map: dict[str, str] = {}
         self.costume_map = self._load_costume_map()
 
     def _load_costume_map(self) -> dict[str, str]:
@@ -57,18 +57,38 @@ class NikkeDbProvider:
         except (OSError, ValueError) as exc:
             self.costume_errors.append(f"costumes.json 无法读取: {type(exc).__name__}")
             return {}
-        if not isinstance(raw, dict):
-            self.costume_errors.append("costumes.json 顶层必须是对象")
+        if not isinstance(raw, dict) or raw.get("schema_version") != 2:
+            self.costume_errors.append("costumes.json 必须使用 schema_version=2")
+            return {}
+        entries = raw.get("entries")
+        if not isinstance(entries, list):
+            self.costume_errors.append("costumes.json 缺少 entries 数组")
             return {}
 
         verified: dict[str, str] = {}
-        for api_id, asset_id in raw.items():
-            key = self._normalize_id_component(api_id)
-            value = self._normalize_id_component(asset_id)
-            if not key or key in {"0", "default"} or not value or not value.startswith("c"):
-                self.costume_errors.append(f"非法皮肤映射: {api_id!r}")
+        for row in entries:
+            if not isinstance(row, dict):
+                self.costume_errors.append("非法皮肤映射条目")
+                continue
+            key = self._normalize_id_component(row.get("costume_id"))
+            value = self._normalize_id_component(row.get("spine_asset_id"))
+            owner = self._normalize_id_component(row.get("character_resource_id"))
+            source = row.get("source")
+            source_hash = row.get("source_sha256")
+            checked_at = row.get("verified_at")
+            if (
+                not key or key in {"0", "default"} or not value or not value.startswith("c")
+                or not owner or not isinstance(source, str) or not source.strip()
+                or not isinstance(source_hash, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", source_hash)
+                or not isinstance(checked_at, str) or not checked_at.strip()
+            ):
+                self.costume_errors.append(f"非法皮肤映射: {row!r}")
+                continue
+            if key in verified:
+                self.costume_errors.append(f"重复皮肤映射: {key}")
                 continue
             verified[key] = value
+            self.costume_character_map[key] = self.normalize_resource_id(owner)
         return verified
 
     def get_character_lock(self, character_id: str) -> threading.Lock:
@@ -150,17 +170,27 @@ class NikkeDbProvider:
             costume_key = token.split(":", 2)[1]
             mapped = self.COSTUME_OVERRIDES.get(costume_key) or self.costume_map.get(costume_key)
             normalized_mapping = self._normalize_id_component(mapped)
+            owner = self.costume_character_map.get(costume_key)
+            if owner is not None and owner != default_id:
+                return "missing"
             return normalized_mapping or "missing"
 
         # 未知或非法皮肤禁止回退到默认角色，否则会把另一套立绘伪装成目标皮肤。
         return "missing"
 
-    def get_full_body_url(self, resource_id: int | str, costume_id: int | str | None = None, pose: str = "00") -> str:
-        char_id = self.resolve_character_id(resource_id, costume_id)
-        pose_id = self._normalize_id_component(pose)
-        if not char_id or char_id == "missing" or not pose_id:
-            return ""
-        return f"{self.CDN}/FB/{char_id}_{pose_id}.png"
+    def resolve_spine_asset_id(
+        self,
+        resource_id: int | str,
+        costume_id: int | str | None = None,
+        *,
+        allow_remote: bool = False,
+    ) -> str:
+        """返回已在 L2D 索引中存在的 canonical cXXX/cXXX_YY。"""
+        character_id = self.resolve_character_id(resource_id, costume_id)
+        if character_id == "missing":
+            return "missing"
+        index = self.get_l2d_index(allow_remote=allow_remote)
+        return character_id if character_id in index else "missing"
 
     @classmethod
     def compute_cache_key(

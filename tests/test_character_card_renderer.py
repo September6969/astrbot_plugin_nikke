@@ -61,6 +61,17 @@ class HorizontalRendererTests(unittest.TestCase):
             self.assertGreaterEqual(strings.count("空槽"), 2)
             self.assertGreaterEqual(strings.count("—"), 2)
 
+    def test_equipment_rows_draw_verified_tier_badges(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(__file__).resolve().parents[1]
+            renderer = CharacterCardRenderer(td, root / "fonts")
+            card = build_card()
+            card.equipment["head"].options[0].tier = 15
+            with patch.object(renderer, "_text", wraps=renderer._text) as text:
+                renderer.render_character(card)
+                strings = [str(call.args[2]) for call in text.call_args_list]
+            self.assertIn("T15", strings)
+
     def test_all_summary_entries_are_drawn_and_internal_ids_are_hidden(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(__file__).resolve().parents[1]

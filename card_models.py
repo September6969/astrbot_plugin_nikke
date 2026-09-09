@@ -20,6 +20,7 @@ class EquipmentOption:
     option_id: str | None = None
     state_effect_id: str | None = None
     components: tuple["EquipmentOption", ...] = ()
+    tier: int | None = None
 
 
 @dataclass(slots=True)
@@ -88,6 +89,11 @@ class CharacterCardData:
     cube: CubeData | None
     equipment: dict[str, EquipmentData]
     option_totals: list[OptionSummary]
+    hp_source: str = "unavailable_missing_input"
+    attack_source: str = "unavailable_missing_input"
+    defense_source: str = "unavailable_missing_input"
+    stat_calculation_reason: str | None = None
+    spine_asset_id: str | None = None
 
 
 @dataclass(slots=True)

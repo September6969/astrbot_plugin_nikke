@@ -130,6 +130,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
 
         option = card.equipment["head"].options[0]
         self.assertEqual(option.level, 13)
+        self.assertEqual(option.tier, 13)
 
     def test_unknown_options_are_visible_but_not_summed(self):
         fixture = load_fixture()
@@ -213,29 +214,21 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertIsNone(card.favorite_item.display_name)
         self.assertIsNone(card.cube.display_name)
 
-    def test_hp_attack_defense_reject_boolean_float_negative_and_non_finite_values(self):
-        cases = {
-            "hp": ("123456", 123456),
-            "attack": (True, None),
-            "defense": (12.5, None),
-        }
-        for field, (raw_value, expected) in cases.items():
-            fixture = load_fixture()
-            detail = fixture["character_details"][0]
-            detail[field] = raw_value
-            detail["hp"] = detail.get("hp") if field == "hp" else -1
-            detail["attack"] = detail.get("attack") if field == "attack" else "NaN"
-            detail["defense"] = detail.get("defense") if field == "defense" else "Infinity"
-            card = CharacterCardBuilder().build(
-                account={}, directory=fixture["directory"],
-                payload={
-                    "roster_item": fixture["roster_item"],
-                    "detail": detail,
-                    "state_effects": fixture["state_effects"],
-                },
-                fetched_at="test", plugin_version="test",
-            )
-            self.assertEqual(getattr(card, field), expected, field)
+    def test_direct_hp_attack_defense_fields_are_not_treated_as_verified(self):
+        fixture = load_fixture()
+        detail = fixture["character_details"][0]
+        detail.update({"hp": "123456", "attack": 789, "defense": 456})
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={
+                "roster_item": fixture["roster_item"],
+                "detail": detail,
+                "state_effects": fixture["state_effects"],
+            },
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual((card.hp, card.attack, card.defense), (None, None, None))
+        self.assertEqual(card.hp_source, "unavailable_missing_input")
 
     def test_malformed_required_numeric_fields_degrade_to_zero_without_crashing(self):
         fixture = load_fixture()

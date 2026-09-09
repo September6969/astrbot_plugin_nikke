@@ -2,6 +2,12 @@
 
 本文件记录当前仓库基线的可核对变更。未合并的 Draft PR 不计入当前版本，也不代表已发布或已部署。
 
+## Unreleased — Spine-only Portrait & Card Calculation v2
+
+- 角色官方立绘路径改为 canonical L2D/Spine；FB URL、FB cache 和 FB fallback 不再参与角色卡。
+- Costume registry 升级为带来源字段的 Spine identity schema v2。
+- 角色卡词条行增加 T1–T15 tier badge；HP/ATK/DEF 改由完整 verified 静态表计算器提供，缺输入时统一显示未知。
+
 ## 0.1.8（当前 main 基线）
 
 - 完成 Profile V2 仪表盘的已核验字段展示，并保持未知、空值与零值语义可区分。

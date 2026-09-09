@@ -1,4 +1,5 @@
 import io
+import json
 import tempfile
 import threading
 import time
@@ -20,16 +21,17 @@ class AssetManagerTests(unittest.TestCase):
             "https://sg-tools-cdn.blablalink.com/ct-58/xq-81/f1333fe625de471b7221f89b15e48242.webp",
         )
 
-    def test_cache_wins_and_corrupt_cache_falls_back_to_project(self):
+    def test_character_path_ignores_legacy_fb_cache_and_uses_neutral_placeholder(self):
         with tempfile.TemporaryDirectory() as td:
             cache, assets = Path(td) / "cache", Path(td) / "assets"
             for root, color in [(cache, "red"), (assets, "blue")]:
                 (root / "portraits").mkdir(parents=True)
                 Image.new("RGBA", (20, 20), color).save(root / "portraits/191.png")
             manager = AssetManager(cache, assets)
-            self.assertEqual(manager.get_character_portrait("5004", "191").getpixel((0, 0)), (255, 0, 0, 255))
-            (cache / "portraits/191.png").write_bytes(b"invalid")
-            self.assertEqual(manager.get_character_portrait("5004", "191").getpixel((0, 0)), (0, 0, 255, 255))
+            try:
+                self.assertEqual(manager.get_character_portrait("5004", "191").size, (600, 900))
+            finally:
+                manager.close()
 
     def test_missing_ids_and_network_errors_return_images(self):
         with tempfile.TemporaryDirectory() as td:
@@ -39,45 +41,38 @@ class AssetManagerTests(unittest.TestCase):
                     image = manager.get_character_portrait("unknown", "999999")
                     self.assertEqual(image.mode, "RGBA")
                     self.assertIsNotNone(image.getbbox())
-                self.assertEqual(request.call_count, 1)
+                self.assertEqual(request.call_count, 0)
             for slot in ("head", "torso", "arm", "leg"):
                 self.assertIsNotNone(manager.get_equipment_icon(slot, "../../absent").getbbox())
 
-    def test_remote_asset_is_cached_and_reused(self):
+    def test_cached_spine_png_is_reused_without_fb_request(self):
         with tempfile.TemporaryDirectory() as td:
-            buffer = io.BytesIO()
-            Image.new("RGBA", (30, 50), "green").save(buffer, "PNG")
-            response = httpx.Response(200, content=buffer.getvalue(), request=httpx.Request("GET", "https://example.com"))
-            manager = AssetManager(td, td, remote=True)
-            with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
-                stream.return_value.__enter__.return_value = response
-                self.assertEqual(manager.get_character_portrait("5004", "191").size, (30, 50))
-                manager.get_character_portrait("5004", "191")
-                self.assertEqual(stream.call_count, 1)
+            cache = Path(td)
+            index_dir = cache / "nikke-db" / "index"
+            index_dir.mkdir(parents=True)
+            (index_dir / "l2d.json").write_text(json.dumps([{"id": "c191", "version": 4.1}]), encoding="utf-8")
+            manager = AssetManager(cache, Path(__file__).resolve().parents[1] / "assets", remote=True)
+            key = manager.nikke_db.compute_cache_key("c191", None, "4.1", "4.1", manager.spine_renderer.RENDERER_VERSION)
+            (cache / "portraits").mkdir(parents=True, exist_ok=True)
+            Image.new("RGBA", (30, 50), "green").save(cache / "portraits" / f"{key}.png")
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    self.assertEqual(manager.get_character_portrait("5004", "191").size, (30, 50))
+                    stream.assert_not_called()
+            finally:
+                manager.close()
 
-    def test_costume_portraits_use_distinct_remote_cache_keys(self):
+    def test_costume_identity_never_reuses_default_portrait_cache(self):
         with tempfile.TemporaryDirectory() as td:
             manager = AssetManager(td, td, remote=True)
             manager.nikke_db.COSTUME_OVERRIDES.update({"skin_01": "c191_01", "skin_02": "c191_02"})
-            responses = []
-            for color in ("red", "blue"):
-                payload = io.BytesIO()
-                Image.new("RGBA", (30, 50), color).save(payload, "PNG")
-                context = MagicMock()
-                context.__enter__.return_value = httpx.Response(
-                    200,
-                    content=payload.getvalue(),
-                    request=httpx.Request("GET", "https://example.com"),
-                )
-                responses.append(context)
             try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=responses) as stream:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
                     first = manager.get_character_portrait("5004", "191", "skin_01")
                     second = manager.get_character_portrait("5004", "191", "skin_02")
-                self.assertEqual(first.getpixel((0, 0)), (255, 0, 0, 255))
-                self.assertEqual(second.getpixel((0, 0)), (0, 0, 255, 255))
-                self.assertEqual(stream.call_count, 2)
-                self.assertNotEqual(stream.call_args_list[0].args[1], stream.call_args_list[1].args[1])
+                self.assertEqual(first.size, (600, 900))
+                self.assertEqual(second.size, (600, 900))
+                stream.assert_not_called()
             finally:
                 manager.close()
 
@@ -182,76 +177,16 @@ class AssetManagerTests(unittest.TestCase):
             finally:
                 manager.close()
 
-    def test_concurrent_same_remote_asset_uses_single_flight_request(self):
+    def test_concurrent_portrait_requests_never_download_fb(self):
         with tempfile.TemporaryDirectory() as td:
-            buffer = io.BytesIO()
-            Image.new("RGBA", (30, 50), "green").save(buffer, "PNG")
-            response = httpx.Response(
-                200,
-                content=buffer.getvalue(),
-                request=httpx.Request("GET", "https://example.com"),
-            )
             manager = AssetManager(td, td, remote=True)
-            entered = threading.Event()
-            release = threading.Event()
-
-            def enter_stream():
-                entered.set()
-                self.assertTrue(release.wait(2.0))
-                return response
-
             try:
                 with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
-                    stream.return_value.__enter__.side_effect = enter_stream
                     with ThreadPoolExecutor(max_workers=5) as executor:
-                        futures = [
-                            executor.submit(manager.get_character_portrait, "5004", "191")
-                            for _ in range(5)
-                        ]
-                        self.assertTrue(entered.wait(2.0))
-                        time.sleep(0.05)
-                        release.set()
+                        futures = [executor.submit(manager.get_character_portrait, "5004", "191") for _ in range(5)]
                         images = [future.result(timeout=3.0) for future in futures]
-
-                    self.assertEqual(stream.call_count, 1)
-                    self.assertTrue(all(image.size == (30, 50) for image in images))
-            finally:
-                manager.close()
-
-    def test_waiters_reuse_memory_result_when_cache_write_fails(self):
-        with tempfile.TemporaryDirectory() as td:
-            buffer = io.BytesIO()
-            Image.new("RGBA", (30, 50), "green").save(buffer, "PNG")
-            response = httpx.Response(
-                200,
-                content=buffer.getvalue(),
-                request=httpx.Request("GET", "https://example.com"),
-            )
-            manager = AssetManager(td, td, remote=True)
-            entered = threading.Event()
-            release = threading.Event()
-
-            def enter_stream():
-                entered.set()
-                self.assertTrue(release.wait(2.0))
-                return response
-
-            try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
-                    stream.return_value.__enter__.side_effect = enter_stream
-                    with patch("PIL.Image.Image.save", side_effect=OSError("synthetic disk full")):
-                        with ThreadPoolExecutor(max_workers=5) as executor:
-                            futures = [
-                                executor.submit(manager.get_character_portrait, "5004", "191")
-                                for _ in range(5)
-                            ]
-                            self.assertTrue(entered.wait(2.0))
-                            time.sleep(0.05)
-                            release.set()
-                            images = [future.result(timeout=3.0) for future in futures]
-
-                    self.assertEqual(stream.call_count, 1)
-                    self.assertTrue(all(image.size == (30, 50) for image in images))
+                    stream.assert_not_called()
+                    self.assertTrue(all(image.size == (600, 900) for image in images))
             finally:
                 manager.close()
 
