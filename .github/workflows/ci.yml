@@ -60,7 +60,7 @@ jobs:
             --skeleton /bundles/c010_01/c010_01_00.skel \
             --atlas /bundles/c010_01/c010_01_00.atlas \
             --output /bundles/c010_01/non-default.rgba \
-            --width 512 --height 512 --verbose
+            --width 512 --height 512 --skin 01 --verbose
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from pathlib import Path
