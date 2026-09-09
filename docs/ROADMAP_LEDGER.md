@@ -185,8 +185,9 @@
 - 从最新 `origin/main@d3f824cc7f68c49c2603bb1ce7aa43967af99bf1` 建立独立 worktree：`E:\\DevCache\\nikke-stat-costume-spine-live-v1-20260909`，分支 `feat/stat-costume-spine-live-v1`；不使用旧 overnight 或历史 worktree 作为当前基线。
 - 新增 Exia 固定提交的 `level-stats.json`、官方 CDN `RecycleResearchStatTable` / `AttractiveLevelTable` / `ItemEquipTable-zh-tw` 及按需 cube/favorite loader/cache；缓存不携带 Cookie、token 或私有 header，角色卡请求对动态 ID 去重。
 - 修复官方目录字段合同，保留 `class` / `class_name` / `weapon_type`；否则 HP/ATK/DEF 计算会因旧适配器丢失职业而 fail-closed。
-- `ssh serv` 授权只读 Arcana 证据：按官方静态表和 Exia 公式得到 HP 5,418,249、ATK 176,541、DEF 35,425；现场 `GetUserCharacterDetails` 没有三项原值，只有 combat 173,949，因此真实游戏 UI 对照仍为 `BLOCKED_NO_CANONICAL_GAME_UI_VALUES`，未把战力冒充属性。
+- Arcana 525 级只读快照保留；用户补充 526 级游戏面板后，按相同研究/装备重算得到 HP 5,429,825、ATK 176,926、DEF 35,499，与截图三值完全一致。新增离线回放回归测试，不能外推为全角色验证。
 - 13 个 live costume ID 已记录官方角色表 owner/index；复审撤销 `20001 → c010_01`：L2D 标签为 `Rapi_old`，数字后缀不能证明服装身份。当前 13 项均待身份交叉验证，registry 不再提供该猜测映射。
 - 修正 Nikke-DB canonical bundle 路径：setup 使用 `l2d/cXXX/cXXX_00.*`，动作资源使用 `l2d/cXXX/<action>/cXXX_<action>_00.*`；普通角色卡使用 setup bundle，避免对当前公开目录构造错误路径。
 - 无 runtime 的预检查现在能读取 `.skel` 固定 hash 后的 Spine 版本头，并以 `utf-8-sig` 处理官方 atlas BOM；本地合成回归已覆盖 4.0 版本匹配与 BOM 页面。
-- 4.1 worker 已真实编译但拒绝 4.0.47 bundle；官方 4.0 分支没有 SDL 目录，已切换正式构建描述为官方 4.0 SFML + Xvfb headless。服务器构建/默认与非默认实际 RGBA 仍未确认，证据登记在 `docs/evidence/stat_costume_spine_live_20260909.json`，未把下载 200、预检查或合成 fixture 冒充实渲染。
+- 官方 4.0 SFML + Xvfb 已通过 CI 和 serv 隔离构建。默认 c010 与上游命名 White Promise c010_02 均实际出图并已查看，serv 512×512 分别耗时 3.055s/2.346s；这不等于生产卡片接线或账号 costume_id 身份验证。
+- serv 的 SSH、HTTPS、storage 健康检查恢复；NapCat 管理接口确认 isLogin=false、isOffline=false、loginError 非空，QQ/Record 等待用户官方登录，不采集二维码。既有 Signin 一次写入和读回记录保留，不重复签到。

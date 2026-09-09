@@ -115,6 +115,21 @@
     "ci_run": "https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34394169661",
     "default_preview_sha256": "ef3799894ea7dead436fb15ce4f7e0905f1ff96b6f0966f1155dbc84b69a241e",
     "server_recheck": "SSH recovered; astrbot/napcat/nikke-caddy running; HTTPS healthz ok, storage ready, version 0.1.8",
+    "server_render": {
+      "image": "nikke-spine-verified:local-base",
+      "image_manifest": "sha256:4facae23365c3e4e467102a4a70c996c539242ca1c9edef7d6ecf7b0c2161f7e",
+      "network": "none during rendering",
+      "memory_limit_mib": 256,
+      "cpu_limit": 1,
+      "dimensions": [512, 512],
+      "default_seconds_including_container_start": 3.055,
+      "white_promise_seconds_including_container_start": 2.346,
+      "default_rgba_sha256": "6d349952eb1e146f510dd3fe33195acc8b69b3826eb7d9ce773648a5336d7bf9",
+      "white_promise_rgba_sha256": "874707c7ad31d323bd331c959ee9c8dae4590d5b13009f614abb3dff5f8d94dd",
+      "visual_review": "Both server-produced images actually viewed; full body and transparent padding retained.",
+      "production_card_connected": false
+    },
+    "qq_recheck": {"webui_authenticated": true, "isLogin": false, "isOffline": false, "login_error_present": true, "messages_sent": 0},
     "default_asset_id": "c010",
     "legacy_test_asset_id": "c010_01",
     "bundle_sources": [
