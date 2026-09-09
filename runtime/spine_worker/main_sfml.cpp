@@ -181,7 +181,7 @@ int render(const Options &options) {
 				} else {
 					if (!options.skin.empty()) drawable.skeleton->setSkin(options.skin.c_str());
 					else if (skeleton_data->getSkins().size() == 1) {
-						drawable.skeleton->setSkin(skeleton_data->getSkins()[0]->getName().c_str());
+						drawable.skeleton->setSkin(skeleton_data->getSkins()[0]->getName().buffer());
 					}
 					drawable.skeleton->setToSetupPose();
 					drawable.skeleton->setSlotsToSetupPose();
