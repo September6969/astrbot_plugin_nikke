@@ -9,7 +9,7 @@ on:
 
 jobs:
   spine-runtime-build:
-    name: Spine 4.1 headless worker build
+    name: Spine 4.0 headless worker build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

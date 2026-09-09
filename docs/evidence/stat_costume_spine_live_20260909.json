@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-09-09",
+  "status": "IN_PROGRESS_LIVE_READ_ONLY",
+  "baseline": "origin/main@d3f824cc7f68c49c2603bb1ce7aa43967af99bf1",
+  "stat_sources": {
+    "level_stats": {
+      "url": "https://raw.githubusercontent.com/ExiaProject/ExiaInvasion/a6e653691d6a6d685f89c54694fadbf800e5d4b2/exia-invasion/public/level-stats.json",
+      "normalized_json_sha256": "d1a9d231de0532be11d41e8b4a006a7aefcb24963af41d99252d29cc1c08ddf8"
+    },
+    "research": {
+      "url": "https://sg-tools-cdn.blablalink.com/eu-96/258f853112b1d6f69d1508e12918ff3b.json",
+      "normalized_json_sha256": "df06f3d11fc4ff2d1de2886d2524dee13ceab5a1e817c1f1bc5f14e9db090b2d"
+    },
+    "attractive": {
+      "url": "https://sg-tools-cdn.blablalink.com/qe-66/cb6bd83fc9f961e0975612b760fbef8e.json",
+      "normalized_json_sha256": "1b553f05080c1f062683e4267dae52ca4ee2b23a2ae53bc54e47e7da8ff760ee"
+    },
+    "equipment": {
+      "url": "https://sg-tools-cdn.blablalink.com/md-16/02d7f979df58efa0aa8dbd18de91a916.json",
+      "normalized_json_sha256": "a52c8ab66632d71b8206462e13cdda4cb36f61a54f93ae86ec191b7bc452e333"
+    }
+  },
+  "arcana_live_read": {
+    "status": "LIVE_READ_ONLY",
+    "source_endpoints": [
+      "https://api.blablalink.com/api/game/proxy/Game/GetUserProfileOutpostInfo",
+      "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
+      "https://sg-tools-cdn.blablalink.com/jz-26/ww-14/c4619ec83335bcfd7b23e43600520dc7.json"
+    ],
+    "name_code": 5140,
+    "resource_id": 581,
+    "class": "Supporter",
+    "corporation": "ELYSION",
+    "weapon_type": "RL",
+    "level": 525,
+    "grade": 3,
+    "core": 2,
+    "attractive_level": 30,
+    "combat": 173949,
+    "research_levels": {
+      "general": 240,
+      "attacker": 134,
+      "defender": 119,
+      "supporter": 119,
+      "elysion": 116,
+      "missilis": 119,
+      "tetra": 119,
+      "pilgrim": 119,
+      "abnormal": 111
+    },
+    "equipment": [
+      {"slot": "head", "tid": 3131001, "level": 0, "corporation_type": 0},
+      {"slot": "torso", "tid": 3231001, "level": 0, "corporation_type": 0},
+      {"slot": "arm", "tid": 3331001, "level": 0, "corporation_type": 0},
+      {"slot": "leg", "tid": 3431001, "level": 0, "corporation_type": 0}
+    ],
+    "cube": {"tid": 0, "level": 0},
+    "favorite_item": {"tid": 0, "level": 0},
+    "computed_hp_atk_def": {"hp": 5418249, "atk": 176541, "def": 35425},
+    "comparison": {
+      "game_character_details_fields": ["combat", "arena_combat"],
+      "hp_atk_def_fields_present": false,
+      "status": "BLOCKED_NO_CANONICAL_GAME_UI_VALUES",
+      "reason": "现场 API 没有 HP/ATK/DEF 原值；combat 不是可替代的属性值，未用战力冒充对照。"
+    }
+  },
+  "costume_spine_mapping": {
+    "costume_table_url": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+    "costume_table_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+    "l2d_index_url": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json",
+    "l2d_index_sha256": "41090a2ae1c7bb130db65306c757b98e5bb5991122a6f6a31d35b5422432cf0b",
+    "live_costume_ids": [10014, 110005, 110012, 110014, 110023, 110024, 120004, 20001, 30040, 30049, 30052, 30053, 50012],
+    "exact_verified_mappings": [
+      {
+        "costume_id": 20001,
+        "character_resource_id": 10,
+        "costume_index": 1,
+        "spine_asset_id": "c010_01",
+        "l2d_name": "Rapi_old",
+        "mapping_status": "VERIFIED"
+      }
+    ],
+    "unresolved": [
+      {"costume_id": 10014, "character_resource_id": 16, "costume_index": 1, "candidate": "c016_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 110005, "character_resource_id": 830, "costume_index": 1, "candidate": "c830_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 110012, "character_resource_id": 835, "costume_index": 1, "candidate": "c835_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 110014, "character_resource_id": 834, "costume_index": 1, "candidate": "c834_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 110023, "character_resource_id": 222, "costume_index": 1, "candidate": "c222_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 110024, "character_resource_id": 840, "costume_index": 1, "candidate": "c840_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 120004, "character_resource_id": 17, "costume_index": 1, "candidate": "c017_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 30040, "character_resource_id": 310, "costume_index": 1, "candidate": "c310_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 30049, "character_resource_id": 95, "costume_index": 1, "candidate": "c095_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 30052, "character_resource_id": 330, "costume_index": 2, "candidate": "c330_02", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 30053, "character_resource_id": 513, "costume_index": 2, "candidate": "c513_02", "mapping_status": "NEEDS_LIVE_EVIDENCE"},
+      {"costume_id": 50012, "character_resource_id": 470, "costume_index": 1, "candidate": "c470_01", "mapping_status": "NEEDS_LIVE_EVIDENCE"}
+    ],
+    "method_boundary": "只用 CharacterCostumeTable owner/index 与 Nikke-DB l2d.json 精确匹配；没有用 FB 路径、名称、顺序或发布日期推导映射。"
+  },
+  "spine_render": {
+    "status": "BLOCKED_SSH_BANNER_DURING_RUNTIME_EXECUTION",
+    "default_asset_id": "c010",
+    "non_default_asset_id": "c010_01",
+    "bundle_sources": [
+      "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel",
+      "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.atlas",
+      "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.png",
+      "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.skel",
+      "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.atlas",
+      "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_00.png"
+    ],
+    "public_head_checks": {
+      "c010": "HTTP_200_SKELETON_ATLAS_TEXTURE",
+      "c010_01": "HTTP_200_SKELETON_ATLAS_TEXTURE"
+    },
+    "skeleton_sha256": {
+      "c010/c010_00.skel": "c7cf080108f99c048b7a2681be9cf635a750c5f7367c67fac2e5dd60aa3451a1",
+      "c010_01/c010_01_00.skel": "76c7a8b528fd02eb7a7db433b67fcb2c6bcbc2a51966fcd2f2d663ea97309156"
+    },
+    "binary_header_check": {
+      "c010": "Spine_4.0.47_observed_at_offset_8",
+      "c010_01": "not_yet_downloaded_locally"
+    },
+    "worker_build": {
+      "previous_4_1_build": "COMPILED_BUT_REJECTED_4.0.47_BUNDLE",
+      "4_0_sdl_attempt": "FAILED_OFFICIAL_BRANCH_HAS_NO_SPINE_SDL",
+      "4_0_sfml_build": "NOT_CONFIRMED_SSH_BANNER_TIMEOUT"
+    },
+    "render_verified": false,
+    "visual_preview": "NOT_GENERATED",
+    "boundary": "HTTP 200 and local header/preflight checks are not render evidence; no output is marked successful until the 4.0 worker produces RGBA and the images are viewed."
+  }
+}

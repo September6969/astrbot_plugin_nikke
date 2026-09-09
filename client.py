@@ -499,6 +499,10 @@ class BlaBlaClient:
                     "name_en": (en.get("name_localkey") or {}).get("name", ""),
                     "element": ((zh.get("element_id") or {}).get("element") or {}).get("element", ""),
                     "weapon": ((zh.get("shot_id") or {}).get("element") or {}).get("weapon_type", ""),
+                    # 计算器需要官方目录中的职业与武器合同；保留旧的 weapon 别名兼容已有卡片。
+                    "class": zh.get("class", ""),
+                    "class_name": zh.get("class", ""),
+                    "weapon_type": ((zh.get("shot_id") or {}).get("element") or {}).get("weapon_type", ""),
                     "burst": zh.get("use_burst_skill"),
                     "corporation": zh.get("corporation"),
                     "rare": zh.get("original_rare"),

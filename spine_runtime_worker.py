@@ -43,7 +43,7 @@ class SpineWorkerConfig:
 class SpineWorkerRuntime:
     """实现 ``SpineRuntimeBackend`` 的进程边界适配器。"""
 
-    def __init__(self, config: SpineWorkerConfig, *, version: str = "4.1") -> None:
+    def __init__(self, config: SpineWorkerConfig, *, version: str = "4.0") -> None:
         self.config = config
         self.version = version
 

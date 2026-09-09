@@ -50,3 +50,4 @@
 | Live Data Closure v1 | 当前独立主题 | `E:\DevCache\nikke-live-ol-data-closure-v1-20260909` / `feat/live-ol-data-closure-v1`；从 `origin/main@ad0ef20` 建立，177 角色批量详情、109 条 OL function、HP/ATK/DEF 字段审计与一次授权 Signin 已完成，待提交 PR 与 CI |
 | Final live deployment evidence v1 | 当前独立主题 | `E:\DevCache\nikke-final-live-deploy-evidence-20260909` / `feat/final-live-deploy-evidence-v1`；从 `origin/main@39c469e` 建立，记录部署后 healthz、registry、数据库、日志隐私及剩余外部阻塞 |
 | Spine-only Portrait & Card Calculation v2 | 当前独立主题 | `E:\DevCache\nikke-spine-only-card-calc-v2-20260909` / `feat/spine-only-card-calc-v2`；从 `origin/main@8910170f` 建立，移除角色路径 FB、升级 Costume identity、接入 OL tier UI 和 fail-closed stat calculator |
+| CharacterStatTables / Costume Spine live v1 | 当前独立主题 | `E:\DevCache\nikke-stat-costume-spine-live-v1-20260909` / `feat/stat-costume-spine-live-v1`；从 `origin/main@d3f824cc` 建立，静态属性 loader/cache、官方目录字段合同、Arcana 现场只读计算、CharacterCostumeTable + L2D 精确映射进行中；Spine 实渲染尚待 Linux runtime 证据 |

@@ -27,6 +27,7 @@ class CharacterStatTables:
     equipment_table: Any
     cube_records: Mapping[str, Any] = field(default_factory=dict)
     favorite_records: Mapping[str, Any] = field(default_factory=dict)
+    cube_catalog: Mapping[str, Any] | None = None
     verified: bool = False
     source_ref: str = ""
     checked_at: str = ""
@@ -42,6 +43,7 @@ class CharacterStatTables:
             equipment_table=data.get("equipment_table"),
             cube_records=data.get("cube_records") or {},
             favorite_records=data.get("favorite_records") or {},
+            cube_catalog=data.get("cube_catalog"),
             verified=data.get("status") == "VERIFIED_STATIC_RESOURCES" or data.get("verified") is True,
             source_ref=str(data.get("source_ref") or ""),
             checked_at=str(data.get("checked_at") or ""),
@@ -143,7 +145,12 @@ class CharacterStatCalculator:
         values = record.get(key)
         if not isinstance(values, list) or not 0 <= index < len(values):
             raise StatCalculationError(f"{label} {key}[{index}] 缺失")
-        return round(cls._finite(values[index], f"{label} {key}[{index}]"))
+        return cls._js_round(cls._finite(values[index], f"{label} {key}[{index}]"))
+
+    @staticmethod
+    def _js_round(value: float) -> int:
+        """复现正数场景下 JavaScript Math.round 的半入规则。"""
+        return math.floor(value + 0.5)
 
     def calculate(self, inputs: Mapping[str, Any], tables: CharacterStatTables | None = None) -> CharacterStatResult:
         active = tables or self.tables
@@ -204,14 +211,15 @@ class CharacterStatCalculator:
                 grade_fixed = self._finite(enhance.get(grade_key), grade_key)
                 core_ratio = self._finite(enhance.get(core_key), core_key)
                 character_value = math.floor(curve * (1 + grade * grade_ratio / 10000) + grade * grade_fixed)
-                research_value = 0
+                research_value = 0.0
                 for key, row in research_rows:
                     research_value += self._nonnegative_int(research_levels.get(key), f"{key} 研究等级") * self._finite(
                         row.get(research_key), f"{key} 研究 {research_key}"
                     )
+                research_value = math.floor(research_value)
                 attractive_key = f"{class_name.casefold()}_{attractive_suffix}"
-                attractive_value = round(self._finite(attractive_row.get(attractive_key), f"好感度 {attractive_key}")) if attractive_row else 0
-                core_value = round((character_value + research_value + attractive_value) * (1 + core * core_ratio / 10000))
+                attractive_value = self._js_round(self._finite(attractive_row.get(attractive_key), f"好感度 {attractive_key}")) if attractive_row else 0
+                core_value = self._js_round((character_value + research_value + attractive_value) * (1 + core * core_ratio / 10000))
                 equipment_value = 0
                 for index, equipment in enumerate(raw_equipment, 1):
                     if not isinstance(equipment, Mapping):
@@ -220,9 +228,10 @@ class CharacterStatCalculator:
                     if tid in (None, "", 0, "0"):
                         continue
                     equipment_level = self._nonnegative_int(equipment.get("level"), f"第 {index} 件装备等级")
-                    equipment_corporation = self._corporation(equipment.get("corporation_type"))
-                    if equipment_corporation is None:
+                    if "corporation_type" not in equipment:
                         raise StatCalculationError(f"第 {index} 件装备企业类型缺失")
+                    # 现场合同中的 0 表示没有企业加成；Exia 也会将其归一化为 null 后加成 0。
+                    equipment_corporation = self._corporation(equipment.get("corporation_type"))
                     record = equipment_records.get(str(tid))
                     if record is None or not isinstance(record.get("stat"), list):
                         raise StatCalculationError(f"装备 {tid} 静态记录缺失")
@@ -232,7 +241,7 @@ class CharacterStatCalculator:
                         if isinstance(entry, Mapping) and entry.get("stat_type") == equipment_type
                     )
                     corporation_bonus = 0.3 if equipment_corporation == corporation else 0
-                    equipment_value += round(base_value * (1 + corporation_bonus + equipment_level * 0.1))
+                    equipment_value += self._js_round(base_value * (1 + corporation_bonus + equipment_level * 0.1))
                 cube = inputs.get("cube") or {}
                 cube_record = active.cube_records.get(str(cube.get("tid"))) if isinstance(cube, Mapping) else None
                 cube_value = self._indexed(cube_record, resource_key, self._nonnegative_int(cube.get("level", 0), "魔方等级") - 1, f"魔方 {cube.get('tid')}") if cube.get("tid") not in (None, "", 0, "0") else 0

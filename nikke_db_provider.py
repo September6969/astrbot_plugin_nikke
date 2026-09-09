@@ -21,13 +21,18 @@ logger = logging.getLogger("nikke.nikke_db")
 
 class NikkeDbProvider:
     L2D_CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d"
-    INDEX_URL = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d.json"
+    INDEX_URL = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json"
 
     INDEX_TTL = 12 * 3600  # 12 小时本地索引缓存
     NEGATIVE_CACHE_TTL = 600  # 10 分钟失败退避冷却
 
     NIKKE_DB_ID_OVERRIDES: dict[str, str] = {}
     COSTUME_OVERRIDES: dict[str, str] = {}
+    # 仅登记已实际读取 skeleton 头部并记录 SHA-256 的版本；未知 canonical ID 仍返回 None。
+    VERIFIED_SPINE_VERSIONS: dict[str, tuple[str, str]] = {
+        "c010": ("4.0", "c7cf080108f99c048b7a2681be9cf635a750c5f7367c67fac2e5dd60aa3451a1"),
+        "c010_01": ("4.0", "76c7a8b528fd02eb7a7db433b67fcb2c6bcbc2a51966fcd2f2d663ea97309156"),
+    }
     _ID_PATTERN = re.compile(r"[a-z0-9]+(?:[_-][a-z0-9]+)*")
 
     def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
@@ -277,20 +282,29 @@ class NikkeDbProvider:
         """解析 Spine 版本；默认可刷新索引，角色卡热路径应传 ``False``。"""
         index = self.get_l2d_index(allow_remote=allow_remote)
         entry = index.get(character_id)
+        verified = self.VERIFIED_SPINE_VERSIONS.get(character_id)
+        if verified is not None:
+            return verified[0]
         if entry and isinstance(entry, dict) and "version" in entry:
             return entry["version"]
         return None
 
-    def resolve_spine_bundle_urls(self, character_id: str, action: str = "aim") -> dict[str, str]:
+    def resolve_spine_bundle_urls(self, character_id: str, action: str = "setup") -> dict[str, str]:
+        """生成 Nikke-DB 当前的 canonical bundle 路径。"""
         char_id = self.normalize_resource_id(character_id)
         action_id = self._normalize_id_component(action)
         if char_id == "missing" or not action_id:
             return {}
-        base = f"{self.L2D_CDN}/{char_id}/{action_id}"
+        if action_id in {"base", "setup", "static"}:
+            base = f"{self.L2D_CDN}/{char_id}"
+            file_prefix = char_id
+        else:
+            base = f"{self.L2D_CDN}/{char_id}/{action_id}"
+            file_prefix = f"{char_id}_{action_id}"
         return {
-            "skel": f"{base}/{char_id}_00.skel",
-            "atlas": f"{base}/{char_id}_00.atlas",
-            "png": f"{base}/{char_id}_00.png",
+            "skel": f"{base}/{file_prefix}_00.skel",
+            "atlas": f"{base}/{file_prefix}_00.atlas",
+            "png": f"{base}/{file_prefix}_00.png",
         }
 
 

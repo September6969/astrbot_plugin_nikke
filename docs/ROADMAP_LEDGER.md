@@ -179,3 +179,14 @@
 - OL tier registry 已接入真实角色卡三行词条的 T1–T15 badge；T12–T14 蓝色强调、T15 深色高对比。
 - 新增严格 `CharacterStatCalculator`：完整 verified 静态表和真实玩家输入齐全时才计算，否则三项统一 `unavailable_missing_input`；直接 `CharacterDetails.hp/attack/defense` 不再作为确认值。
 - 主题验收文档：`docs/SPINE_ONLY_CARD_CALC_V2_ACCEPTANCE.md`。Linux runtime、合法 bundle、Costume L2D 全量映射、完整静态表和真实游戏 UI 对照仍需独立现场证据。
+
+## CharacterStatTables / Costume Spine live v1（本轮当前主题）
+
+- 从最新 `origin/main@d3f824cc7f68c49c2603bb1ce7aa43967af99bf1` 建立独立 worktree：`E:\\DevCache\\nikke-stat-costume-spine-live-v1-20260909`，分支 `feat/stat-costume-spine-live-v1`；不使用旧 overnight 或历史 worktree 作为当前基线。
+- 新增 Exia 固定提交的 `level-stats.json`、官方 CDN `RecycleResearchStatTable` / `AttractiveLevelTable` / `ItemEquipTable-zh-tw` 及按需 cube/favorite loader/cache；缓存不携带 Cookie、token 或私有 header，角色卡请求对动态 ID 去重。
+- 修复官方目录字段合同，保留 `class` / `class_name` / `weapon_type`；否则 HP/ATK/DEF 计算会因旧适配器丢失职业而 fail-closed。
+- `ssh serv` 授权只读 Arcana 证据：按官方静态表和 Exia 公式得到 HP 5,418,249、ATK 176,541、DEF 35,425；现场 `GetUserCharacterDetails` 没有三项原值，只有 combat 173,949，因此真实游戏 UI 对照仍为 `BLOCKED_NO_CANONICAL_GAME_UI_VALUES`，未把战力冒充属性。
+- 13 个 live costume ID 已从 `CharacterCostumeTable` 对齐 owner/index；当前 `Nikke-db/js/json/l2d.json` 仅精确验证 `20001 → c010_01`，其余 12 个保持 `NEEDS_LIVE_EVIDENCE`，没有回退默认皮肤或猜测 canonical ID。
+- 修正 Nikke-DB canonical bundle 路径：setup 使用 `l2d/cXXX/cXXX_00.*`，动作资源使用 `l2d/cXXX/<action>/cXXX_<action>_00.*`；普通角色卡使用 setup bundle，避免对当前公开目录构造错误路径。
+- 无 runtime 的预检查现在能读取 `.skel` 固定 hash 后的 Spine 版本头，并以 `utf-8-sig` 处理官方 atlas BOM；本地合成回归已覆盖 4.0 版本匹配与 BOM 页面。
+- 4.1 worker 已真实编译但拒绝 4.0.47 bundle；官方 4.0 分支没有 SDL 目录，已切换正式构建描述为官方 4.0 SFML + Xvfb headless。服务器构建/默认与非默认实际 RGBA 仍未确认，证据登记在 `docs/evidence/stat_costume_spine_live_20260909.json`，未把下载 200、预检查或合成 fixture 冒充实渲染。

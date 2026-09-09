@@ -31,7 +31,7 @@ def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None
     if not worker_path.is_file():
         logger.warning("Spine worker 不存在，使用中性占位图")
         return SpinePreRenderer(root)
-    version = str(values.get("spine_runtime_version", "4.1")).strip() or "4.1"
+    version = str(values.get("spine_runtime_version", "4.0")).strip() or "4.0"
     timeout = values.get("spine_worker_timeout", 4)
     try:
         runtime = SpineWorkerRuntime(

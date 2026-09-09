@@ -197,7 +197,7 @@ class SpineJob:
     callback: Callable[[Image.Image | None], None] | None = None
     bundle: SpineBundle | None = None
     bundle_urls: Mapping[str, str] | None = None
-    animation: str = "aim"
+    animation: str = "setup"
     skin: str | None = None
     # 总预算从入队时开始计算，覆盖排队等待和后续运行时阶段。
     budget_seconds: float | None = None
@@ -546,7 +546,7 @@ class SpinePreRenderer:
         bundle_paths: SpineBundle | Mapping[str, object],
         version: str | float | None,
         *,
-        animation: str = "aim",
+        animation: str = "setup",
         skin: str | None = None,
     ) -> Image.Image | None:
         """严格匹配 runtime 并返回裁切后的透明 RGBA PNG 内容。

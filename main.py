@@ -15,6 +15,7 @@ import time
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
@@ -34,6 +35,7 @@ from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from .character_identity import CharacterDirectoryResolver
 from .character_card_renderer import CharacterCardRenderer
 from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
+from .character_stat_resources import CharacterStatResourceLoader, map_research_levels
 from .log_privacy import safe_exception_message
 from .daily_models import DailyTaskResult, DailyTaskStatus
 from .processing_feedback import DelayedFeedbackManager
@@ -65,6 +67,9 @@ class NikkePlugin(Star):
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.extension_zip = self.data_dir / "nikke-bind-extension.zip"
         self.store = NikkeStore(self.data_dir)
+        self.character_stat_resources = CharacterStatResourceLoader(
+            self.data_dir / "cache" / "character-stats"
+        )
         self.client = BlaBlaClient(
             int(self.config.get("request_timeout", 20)),
             lambda message: logger.info(f"[NIKKE诊断] {message}"),
@@ -119,6 +124,7 @@ class NikkePlugin(Star):
         self.web_host = str(self.config.get("web_host", "0.0.0.0"))
         self.web_port = int(self.config.get("web_port", 6210))
         self._directory: list[dict] = []
+        self._stats_profile_cache: dict[str, tuple[float, dict[str, object]]] = {}
         self._background_tasks: list[asyncio.Task] = []
         self._closing = False
         self._pack_extension()
@@ -188,6 +194,12 @@ class NikkePlugin(Star):
             await asyncio.to_thread(self.asset_manager.nikke_db.get_l2d_index, allow_remote=True)
         except Exception as exc:
             logger.debug("[NIKKE] L2D 索引预热跳过: %s", safe_exception_message(exc))
+        try:
+            # Exia 静态表只在服务启动时统一预热；角色卡只读取缓存，不逐字段请求网络。
+            await asyncio.to_thread(self.character_stat_resources.load_base)
+            logger.info("[NIKKE] Exia/NIKKE 静态属性表已载入并缓存")
+        except Exception as exc:
+            logger.warning("[NIKKE] 静态属性表预热失败，角色卡将保留 —：%s", safe_exception_message(exc))
         self._spawn_background_task(self._sync_announcements_background())
         await self._scheduler_loop()
 
@@ -203,6 +215,25 @@ class NikkePlugin(Star):
                 await self.context.send_message(event.unified_msg_origin, MessageChain([Plain(text)]))
         except Exception as exc:
             logger.debug("[NIKKE] 延迟提示发送跳过: %s", safe_exception_message(exc))
+
+    async def _get_profile_for_stat_calculation(self, account: dict[str, Any]) -> dict[str, Any]:
+        """缓存一次 Outpost 研究快照，避免每张卡重复请求同一账号。"""
+        cache_key = str(account.get("game_uid") or account.get("qq_id") or "account")
+        now = time.monotonic()
+        cached = self._stats_profile_cache.get(cache_key)
+        if cached and now - cached[0] < 300:
+            return cached[1]
+        try:
+            profile = await self.client.get_profile(account)
+        except CookieExpired:
+            raise
+        except Exception as exc:
+            logger.warning("[NIKKE] 研究快照读取失败：%s", safe_exception_message(exc))
+            profile = {}
+        if not isinstance(profile, dict):
+            profile = {}
+        self._stats_profile_cache[cache_key] = (now, profile)
+        return profile
 
     async def _scheduler_loop(self) -> None:
         last_daily = ""
@@ -872,8 +903,21 @@ class NikkePlugin(Star):
                     )
                     return
                 raise
+            profile = await self._get_profile_for_stat_calculation(account)
+            outpost = profile.get("outpost", {}) if isinstance(profile, dict) else {}
+            account_for_card = dict(account)
+            account_for_card["research_levels"] = map_research_levels(
+                outpost.get("recycle_room_researches") if isinstance(outpost, dict) else None
+            )
+            try:
+                payload = await asyncio.to_thread(
+                    self.character_stat_resources.prepare_payload,
+                    payload,
+                )
+            except Exception as exc:
+                logger.warning("[NIKKE] 角色静态属性资源准备失败：%s", safe_exception_message(exc))
             card = self.character_builder.build(
-                account=account,
+                account=account_for_card,
                 directory=target,
                 payload=payload,
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
