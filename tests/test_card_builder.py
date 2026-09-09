@@ -70,11 +70,31 @@ class CharacterCardBuilderTests(unittest.TestCase):
         card = build_card()
         head = card.equipment["head"].options
         torso = card.equipment["torso"].options
-        self.assertEqual([item.raw_type for item in head], ["StatAtk", "IncElementDmg"])
+        self.assertEqual([item.raw_type for item in head[:2]], ["StatAtk", "IncElementDmg"])
+        self.assertEqual(len(head), 3)
+        self.assertEqual([item.position for item in head], [1, 2, 3])
         self.assertEqual(
             [item.raw_type for item in torso],
             ["StatAtk", "StatAmmoLoad", "StatChargeDamage"],
         )
+
+    def test_multiple_function_details_stay_in_one_option_position(self):
+        fixture = load_fixture()
+        fixture["state_effects"][0]["function_details"].append({
+            "function_type": "StatAmmoLoad",
+            "function_value": 1000,
+            "function_value_type": "Percent",
+            "level": 2,
+        })
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        option = card.equipment["head"].options[0]
+        self.assertEqual(option.position, 1)
+        self.assertEqual(len(option.components), 2)
+        self.assertEqual(len(card.equipment["head"].options), 3)
 
     def test_percent_values_and_totals_use_raw_divided_by_10000(self):
         card = build_card()

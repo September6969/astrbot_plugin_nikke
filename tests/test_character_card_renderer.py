@@ -47,6 +47,20 @@ class HorizontalRendererTests(unittest.TestCase):
             with Image.open(path) as image:
                 self.assertEqual(image.size, (1800, 1000))
 
+    def test_equipped_slot_keeps_three_option_rows_with_empty_placeholders(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(__file__).resolve().parents[1]
+            manager = AssetManager(td, td)
+            renderer = CharacterCardRenderer(td, root / "fonts", manager)
+            card = build_card()
+            card.equipment["head"].options = card.equipment["head"].options[:1]
+            with patch.object(manager, "get_character_portrait", return_value=Image.new("RGBA", (400, 1000), "pink")):
+                with patch.object(renderer, "_text", wraps=renderer._text) as text:
+                    renderer.render_character(card)
+                    strings = [str(call.args[2]) for call in text.call_args_list]
+            self.assertGreaterEqual(strings.count("空槽"), 2)
+            self.assertGreaterEqual(strings.count("—"), 2)
+
     def test_all_summary_entries_are_drawn_and_internal_ids_are_hidden(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(__file__).resolve().parents[1]
