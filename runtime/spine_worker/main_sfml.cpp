@@ -15,6 +15,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -163,6 +164,8 @@ int render(const Options &options) {
 			}
 
 			if (skeleton_data) {
+				// 数据必须比 drawable 活得更久，避免析构时访问已释放的骨骼定义。
+				std::unique_ptr<spine::SkeletonData> owned_data(skeleton_data);
 				phase("skeleton 解析完成");
 				spine::SkeletonDrawable drawable(skeleton_data);
 				drawable.setUsePremultipliedAlpha(true);
@@ -233,7 +236,6 @@ int render(const Options &options) {
 						}
 					}
 				}
-				delete skeleton_data;
 			}
 		}
 	}

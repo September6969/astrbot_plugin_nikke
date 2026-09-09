@@ -22,7 +22,7 @@ COPY main.cpp /opt/nikke-worker/main.cpp
 COPY main_sfml.cpp /opt/nikke-worker/main_sfml.cpp
 RUN cmake -S /opt/nikke-worker -B /opt/nikke-worker/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
         -DSPINE_ROOT=/opt/spine-runtimes -DSFML_ROOT=/opt/SFML-2.5.1 \
-    && cmake --build /opt/nikke-worker/build --target nikke-spine-worker
+    && cmake --build /opt/nikke-worker/build --target nikke-spine-worker --parallel 2
 
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive

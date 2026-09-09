@@ -100,7 +100,12 @@
     "method_boundary": "owner/index 只记录官方关联，不等同于 L2D suffix。候选路径不构成身份验证；禁止回退默认服装。"
   },
   "spine_render": {
-    "status": "DEFAULT_RENDER_VERIFIED_LEGACY_SKIN_REJECTED",
+    "status": "DEFAULT_AND_NAMED_COSTUME_RENDER_VERIFIED",
+    "named_costume_asset_id": "c010_02",
+    "named_costume_upstream_label": "Rapi White Promise",
+    "named_costume_ci_run": "https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34394614238",
+    "named_costume_preview_sha256": "5b3888ec97ca36adf9243403a31de69ab3379a7f2aac77f71bd4bd12bb9f8e16",
+    "named_costume_visual_review": "Actually viewed 512x512 RGBA output: white uniform, centered full body, transparent padding, no visible body clipping. API costume_id correspondence remains unverified.",
     "ci_run": "https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34394169661",
     "default_preview_sha256": "ef3799894ea7dead436fb15ce4f7e0905f1ff96b6f0966f1155dbc84b69a241e",
     "server_recheck": "SSH recovered; astrbot/napcat/nikke-caddy running; HTTPS healthz ok, storage ready, version 0.1.8",
@@ -132,7 +137,8 @@
       "4_0_sfml_build": "CI_BUILD_AND_THREE_RGBA_OUTPUTS_VERIFIED"
     },
     "render_verified": true,
-    "non_default_costume_verified": false,
+    "non_default_costume_render_verified": true,
+    "api_costume_mapping_verified": false,
     "visual_preview": "Three PNGs actually viewed: c010 default centered full body; legacy skin00 full body; legacy skin01 blue hair and incomplete lower body, rejected for costume acceptance.",
     "boundary": "Actual headless rendering of public assets in CI, not game-account costume identity verification, QQ delivery, production worker deployment, or redistribution permission."
   }
