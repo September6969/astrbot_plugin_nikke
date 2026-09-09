@@ -59,6 +59,12 @@ def _base_payloads():
 
 
 class CharacterStatResourceTests(unittest.TestCase):
+    def test_research_rejects_non_integer_values_without_guessing(self):
+        for value in (True, False, 1.5, 10.0, " 10", "+10", "１", float("nan"), None):
+            with self.subTest(value=value):
+                self.assertIsNone(map_research_levels([{"tid": 1001, "lv": value}])["general"])
+                self.assertIsNone(map_research_levels([{"tid": value, "lv": 10}])["general"])
+
     def test_research_mapping_is_explicit_and_unknown_rows_are_ignored(self):
         result = map_research_levels([
             {"tid": 1001, "lv": 10},

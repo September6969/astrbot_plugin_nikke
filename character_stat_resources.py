@@ -89,11 +89,17 @@ def map_research_levels(researches: Any) -> dict[str, int | None]:
     for row in researches:
         if not isinstance(row, Mapping):
             continue
-        try:
-            tid = int(row.get("tid"))
-            level = int(row.get("lv"))
-        except (TypeError, ValueError, OverflowError):
+        raw_tid, raw_level = row.get("tid"), row.get("lv")
+        # 拒绝布尔值、小数和宽松转换，避免异常研究等级进入真实属性计算。
+        if any(
+            isinstance(value, bool)
+            or not isinstance(value, (int, str))
+            or not str(value).isascii()
+            or not str(value).isdigit()
+            for value in (raw_tid, raw_level)
+        ):
             continue
+        tid, level = int(raw_tid), int(raw_level)
         if tid in key_by_id and level >= 0:
             result[key_by_id[tid]] = level
     return result
