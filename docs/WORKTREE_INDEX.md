@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-09。当前核验的远端基线为 `origin/main@530eeef`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-09。当前核验的远端基线为 `origin/main@bee6d580`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -40,4 +40,5 @@
 | Final acceptance / release prep | 当前独立 Draft PR 主题 | `E:\_codex_work\nikke-final-acceptance-v1` / `feat/final-acceptance-v1`；从 `origin/main@2f969756b18ad7e28c41564b07ba0aa60b0dc59d` 建立，收口清单与现场阻塞登记 |
 | Live RC Profile stabilization v1 | PR #58 已合并 | `E:\DevCache\nikke-live-rc-profile-stabilization-20260909` / `feat/live-rc-profile-stabilization-v1`；从 `origin/main@d65065b` 建立，Campaign 反查、时间格式化和中性内部 ID 语义已完成离线验证 |
 | Live RC Character localization v1 | PR #59 已合并 | `E:\DevCache\nikke-live-rc-localization-20260909` / `feat/live-rc-character-localization-v1`；从 `origin/main@a34f6fc` 建立，统一目录身份字段与 Arcana 查询 alias，HEAD 不代表当前 main |
-| Live RC OL contract v1 | 当前独立主题 | `E:\DevCache\nikke-live-rc-ol-20260909` / `feat/live-rc-ol-contract-v1`；从 `origin/main@530eeef` 建立，固定四部位三 option 行与未知/空槽 fallback，离线证据已通过，现场字段仍待证据 |
+| Live RC OL contract v1 | PR #60 已合并 | `E:\DevCache\nikke-live-rc-ol-20260909` / `feat/live-rc-ol-contract-v1`；从 `origin/main@530eeef` 建立，固定四部位三 option 行与未知/空槽 fallback，离线证据已通过，HEAD 不代表当前 main |
+| Live RC Character stats evidence v1 | 当前独立主题 | `E:\DevCache\nikke-live-rc-card-evidence-20260909` / `feat/live-rc-card-evidence-v1`；从 `origin/main@bee6d580` 建立，新增 HP/ATK/DEF 脱敏结构诊断，真实字段仍待现场证据 |
