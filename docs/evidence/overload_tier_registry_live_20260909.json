@@ -1,0 +1,16 @@
+{
+  "status": "LIVE_PUBLIC_SOURCE_VERIFIED",
+  "checked_at": "2026-09-09",
+  "scope": "OL state-effect groups only",
+  "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
+  "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
+  "algorithm_source_url": "https://www.blablalink.com/assets/nikke/version/default/assets/index-FhhpKaYK.js",
+  "algorithm_source_sha256": "6f64503aae1c4d78a303457f6c99d5d955fe101637825575028eb8d3e328c17c",
+  "fetch_route": "ssh serv -> curl",
+  "ol_group_count": 9,
+  "source_record_count": 27,
+  "state_effect_count": 135,
+  "tier_coverage": "1-15 for each of the 9 OL state-effect groups",
+  "excluded_upstream_records": "3 generic records with state_effect IDs 931xxxx; they are not OL groups and are not silently reclassified",
+  "value_semantics": "This evidence verifies group membership, labels and the public level algorithm only. It does not invent per-account function values or HP/ATK/DEF formulas."
+}
