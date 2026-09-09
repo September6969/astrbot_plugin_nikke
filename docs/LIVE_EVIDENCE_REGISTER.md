@@ -1,16 +1,26 @@
 # NIKKE 现场证据登记
 
-更新时间：2026-09-07。基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。
+更新时间：2026-09-09。基线：`origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a`。
 
-本登记将“已有离线代码/测试”与“需要授权现场证据”的问题分开。它不是账号操作说明，也不授权 Agent 读取账号、提交写请求、发送消息、下载受限资源或部署。
+本登记将“已有离线代码/测试”与“需要现场证据”的问题分开。当前路线图已明确授权真实账号只读、最小必要真实写、QQ/NapCat、Voice、Spine 和部署验证；本登记不扩大该范围，也不替代具体动作的备份、前态/后态和隐私检查。
 
 ## 通用现场边界
 
-- 现场动作必须由账号与目标会话的授权人明确指定环境、范围和是否允许写入；默认只读。
+- 现场动作只在路线图授权的目标环境和最小范围内执行；默认仍为只读，写入、发送和部署必须逐项记录前态、意图、后态与回滚边界。
 - 采集前删除 Cookie、完整 OpenID、QQ、game UID、绑定 token、CDK 和群聊标识。只保留最小脱敏响应或字段清单。
 - 对写操作必须先记录前态、一次操作意图、后态读取和不可重放结果；超时或取消统一记为 `UNKNOWN_AFTER_ACTION`，不自动重试。
 - 消息或音频送达只允许在获授权的测试会话中验证一次；不得把 API 返回或 mock 当作送达证据。
 - 任何采集失败只记录 endpoint、HTTP/业务错误类别和脱敏字段，不扩展权限或改用其它账号。
+
+## E-ARCANA-01：三种查询入口与真实 CharacterDetails 结构
+
+**状态**：`AUTHORIZED_LIVE_READ`。现场证据文件：`docs/evidence/arcana_live_20260909.json`。
+
+**已查来源**：仓库 `CharacterDirectoryResolver`/`assets/character_aliases.json`；BlaBlaLink 中英文角色目录；`GetUserCharacters` 与 `GetUserCharacterDetails`。执行环境为 `ssh serv` 上现有 `astrbot` 容器，使用已绑定测试账号做只读请求。
+
+**结果**：`阿爾卡娜`、`阿尔卡娜`、`ARCANA` 均解析到 `name_code=5140`，公开目录 `resource_id=581`；账号持有该角色且现场 `costume_id=0`。详情字段只保存字段名/类型，StateEffect 只保存 option ID、function type、value type 和 value shape；没有保存原始响应或账号标识。
+
+**未决问题**：四个现场 option 尚不足以证明全量 StateEffect 映射、中文标签、divisor、1–15 阶表、HP/ATK/DEF 公式或非默认 Costume。下一步必须分别取得可复核的公开/static metadata 和公式对照，不从这一账号样本扩展推断。
 
 ## E-PROFILE-01：真实 `/妮姬 我的` 字段兼容
 
