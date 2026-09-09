@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""战役关卡名称到内部 stage_id 的静态解析器。"""
+"""战役关卡名称与内部 stage_id 的静态解析器。"""
 
 from __future__ import annotations
 
@@ -31,6 +31,37 @@ class CampaignStageResolver:
 
     def __init__(self, mapping: dict[str, dict[str, dict[str, int]]]):
         self.mapping = mapping
+        # 反向索引只从已验证的静态表构建；不使用章节编号公式推导 ID。
+        self.by_id: dict[int, CampaignStage] = {}
+        for mode, chapters in mapping.items():
+            normalized_mode = self.normalize_mode(mode)
+            if not isinstance(chapters, dict):
+                continue
+            for chapter_text, stages in chapters.items():
+                if not isinstance(stages, dict):
+                    continue
+                try:
+                    chapter = int(chapter_text)
+                except (TypeError, ValueError):
+                    continue
+                for stage_name, stage_id in stages.items():
+                    try:
+                        numeric_id = int(stage_id)
+                    except (TypeError, ValueError):
+                        continue
+                    cleaned_name = str(stage_name or "").strip().upper()
+                    if not cleaned_name or numeric_id < 0:
+                        continue
+                    # 当前 verified 表中的 ID 唯一；重复值不静默覆盖，避免错误关卡名。
+                    if numeric_id in self.by_id:
+                        del self.by_id[numeric_id]
+                        continue
+                    self.by_id[numeric_id] = CampaignStage(
+                        mode=normalized_mode,
+                        chapter=chapter,
+                        name=cleaned_name,
+                        stage_id=numeric_id,
+                    )
 
     @classmethod
     def from_file(cls, path: str | Path) -> CampaignStageResolver:
@@ -98,6 +129,28 @@ class CampaignStageResolver:
             name=cleaned_name,
             stage_id=int(stage_id),
         )
+
+    def resolve_id(self, stage_id: int | str, *, mode_hint: str | None = None) -> CampaignStage | None:
+        """按 verified 静态表反查内部 ID，不用经验公式猜测关卡。"""
+        if isinstance(stage_id, bool):
+            return None
+        if isinstance(stage_id, int):
+            numeric_id = stage_id
+        elif isinstance(stage_id, str) and re.fullmatch(r"\d+", stage_id.strip()):
+            try:
+                numeric_id = int(stage_id.strip())
+            except ValueError:
+                return None
+        else:
+            return None
+        if numeric_id < 0:
+            return None
+        stage = self.by_id.get(numeric_id)
+        if stage is None:
+            return None
+        if mode_hint is not None and stage.mode != self.normalize_mode(mode_hint):
+            return None
+        return stage
 
     def resolve_query(self, query: str) -> CampaignStage | None:
         mode, stage_name = self.parse_query(query)
