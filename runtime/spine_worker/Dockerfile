@@ -13,7 +13,8 @@ RUN git clone --depth 1 --branch 4.0 https://github.com/EsotericSoftware/spine-r
     && cd /opt/spine-runtimes \
     && git fetch --depth 1 origin "${SPINE_COMMIT}" \
     && git checkout --detach "${SPINE_COMMIT}" \
-    && wget -q https://www.sfml-dev.org/files/SFML-2.5.1-linux-gcc-64-bit.tar.gz -O /tmp/sfml.tar.gz \
+    && wget --quiet --timeout=30 --tries=5 --waitretry=5 \
+        https://www.sfml-dev.org/files/SFML-2.5.1-linux-gcc-64-bit.tar.gz -O /tmp/sfml.tar.gz \
     && tar -xzf /tmp/sfml.tar.gz -C /opt
 
 COPY CMakeLists.txt /opt/nikke-worker/CMakeLists.txt
