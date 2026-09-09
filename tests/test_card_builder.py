@@ -183,6 +183,64 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertIsNone(card.favorite_item.display_name)
         self.assertIsNone(card.cube.display_name)
 
+    def test_hp_attack_defense_reject_boolean_float_negative_and_non_finite_values(self):
+        cases = {
+            "hp": ("123456", 123456),
+            "attack": (True, None),
+            "defense": (12.5, None),
+        }
+        for field, (raw_value, expected) in cases.items():
+            fixture = load_fixture()
+            detail = fixture["character_details"][0]
+            detail[field] = raw_value
+            detail["hp"] = detail.get("hp") if field == "hp" else -1
+            detail["attack"] = detail.get("attack") if field == "attack" else "NaN"
+            detail["defense"] = detail.get("defense") if field == "defense" else "Infinity"
+            card = CharacterCardBuilder().build(
+                account={}, directory=fixture["directory"],
+                payload={
+                    "roster_item": fixture["roster_item"],
+                    "detail": detail,
+                    "state_effects": fixture["state_effects"],
+                },
+                fetched_at="test", plugin_version="test",
+            )
+            self.assertEqual(getattr(card, field), expected, field)
+
+    def test_malformed_required_numeric_fields_degrade_to_zero_without_crashing(self):
+        fixture = load_fixture()
+        roster = fixture["roster_item"]
+        detail = fixture["character_details"][0]
+        roster["lv"] = "525.5"
+        roster["combat"] = "not-a-number"
+        roster["grade"] = "unknown"
+        roster["core"] = float("inf")
+        detail["skill1_lv"] = True
+        detail["skill2_lv"] = "NaN"
+        detail["ulti_skill_lv"] = 4.5
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={
+                "roster_item": roster,
+                "detail": detail,
+                "state_effects": fixture["state_effects"],
+            },
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(
+            (card.level, card.combat, card.skill1_level, card.skill2_level,
+             card.burst_skill_level, card.grade, card.core),
+            (0, 0, 0, 0, 0, 0, 0),
+        )
+
+    def test_invalid_function_value_is_unknown_instead_of_nan_or_crash(self):
+        option = CharacterCardBuilder._option_from_function({
+            "function_type": "StatCriticalDamage",
+            "function_value": "NaN",
+            "function_value_type": "Percent",
+        })
+        self.assertEqual((option.display_name, option.unit, option.value), ("未识别词条", "unknown", 0))
+
 
 class CharacterDetailClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_only_target_name_code_is_requested(self):

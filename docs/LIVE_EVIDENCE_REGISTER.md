@@ -1,6 +1,6 @@
 # NIKKE 现场证据登记
 
-更新时间：2026-09-09。基线：`origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5`。
+更新时间：2026-09-09。基线：`origin/main@7c164cd1d9814fc7b4530de861813665187e63b5`。
 
 本登记将“已有离线代码/测试”与“需要现场证据”的问题分开。当前路线图已明确授权真实账号只读、最小必要真实写、QQ/NapCat、Voice、Spine 和部署验证；本登记不扩大该范围，也不替代具体动作的备份、前态/后态和隐私检查。
 
@@ -31,6 +31,16 @@
 **已登记**：`7000611`、`7001011`、`7001111`、`7001211`；对应 `StatAccuracyCircle`、`StatChargeTime`、`StatCritical`、`StatCriticalDamage`，显式 `value_divisor=100`。registry 只按 option/function/locale 精确命中，不再按 function type 唯一回退。
 
 **未决问题**：这是四条验证子集，不代表全量 StateEffect；剩余 option 的 function contract、完整 1–15 阶表、HP/ATK/DEF 公式和非默认 Costume 仍需独立证据。公开展示规则也不等于游戏服务端全部数值语义。
+
+## E-NUMERIC-01：角色卡异常数值语义
+
+**状态**：`READY_OFFLINE`；本主题没有新增现场动作。
+
+**已查来源**：`card_builder.py` 的 `CharacterDetails → CharacterCardData` 链路、现有脱敏 fixture、角色卡 renderer 的 `None → —` 合同和新增异常输入行为测试。
+
+**已完成**：整数只接受整数形状；bool、浮点截断、NaN/Infinity、负数 HP/ATK/DEF 和非法动态词条值不会被当作合法练度。HP/ATK/DEF 异常保留未知，不由 combat、等级或其他静态字段反推；动态词条异常不进入汇总。
+
+**未决问题**：真实账号是否提供 HP/ATK/DEF、字段单位和服务端公式仍需授权现场读取后确认；本主题不把 fixture 或静态推理升级为 live evidence。
 
 ## E-PROFILE-01：真实 `/妮姬 我的` 字段兼容
 
