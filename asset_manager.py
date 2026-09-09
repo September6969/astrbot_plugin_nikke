@@ -247,7 +247,7 @@ class AssetManager:
             return image
         if not self.spine_renderer.is_available(runtime_version):
             return None
-        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="aim")
+        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="setup")
         if not urls:
             return None
         self.spine_renderer.enqueue(
@@ -284,7 +284,7 @@ class AssetManager:
         if char_id == "missing":
             return False
         runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
-        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="aim")
+        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="setup")
         if runtime_version is None or not urls or not self.spine_renderer.is_available(runtime_version):
             return False
         cache_key = self._spine_cache_key(char_id, costume_id, runtime_version)

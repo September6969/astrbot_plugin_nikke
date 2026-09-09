@@ -17,7 +17,7 @@ class StaticDataRegistryTests(unittest.TestCase):
 
         self.assertTrue(registry.is_valid)
         self.assertEqual(registry.metadata("equipment").source_ref, "assets/README.md")
-        self.assertEqual(registry.metadata("costume").checked_at, "2026-09-08")
+        self.assertEqual(registry.metadata("costume").checked_at, "2026-09-09")
         self.assertEqual(registry.mapping("costume"), {})
         self.assertEqual(
             registry.resolve("equipment", "3100901"),

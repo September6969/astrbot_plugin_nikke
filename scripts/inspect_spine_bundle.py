@@ -5,13 +5,62 @@ import re
 from pathlib import Path
 
 
+def _read_varint(data: bytes, offset: int) -> tuple[int, int] | None:
+    """读取 Spine binary 的无符号变长整数；只解析文件头，不执行 runtime。"""
+    value = 0
+    for shift in range(0, 35, 7):
+        if offset >= len(data):
+            return None
+        byte = data[offset]
+        offset += 1
+        value |= (byte & 0x7F) << shift
+        if not byte & 0x80:
+            return value, offset
+    return None
+
+
+def _read_binary_string(data: bytes, offset: int) -> tuple[str | None, int] | None:
+    """读取 Spine binary 的一个头部字符串，非法 UTF-8 直接视为未知版本。"""
+    result = _read_varint(data, offset)
+    if result is None:
+        return None
+    length, offset = result
+    if length == 0:
+        return None, offset
+    if length == 1:
+        return "", offset
+    length -= 1
+    end = offset + length
+    if end > len(data):
+        return None
+    try:
+        return data[offset:end].decode("utf-8"), end
+    except UnicodeDecodeError:
+        return None
+
+
+def _binary_spine_version(skeleton: Path) -> str | None:
+    """从 skel 的固定 8 字节 hash 后的 version 字符串读取 major.minor。"""
+    try:
+        prefix = skeleton.read_bytes()[:512]
+    except OSError:
+        return None
+    if len(prefix) < 8:
+        return None
+    version = _read_binary_string(prefix, 8)
+    raw = version[0] if version else None
+    if not isinstance(raw, str) or not re.fullmatch(r"\d+\.\d+(?:\.\d+)?", raw):
+        return None
+    return ".".join(raw.split(".")[:2])
+
+
 def inspect(atlas: Path, skeleton: Path, expected_version=None):
     if atlas.stat().st_size > 4 * 1024 * 1024 or skeleton.stat().st_size > 16 * 1024 * 1024:
         raise ValueError("输入超过预检查大小预算")
     root = atlas.parent.resolve()
     pages = []
     # 官方 atlas 格式以空行分隔页；只读取页属性，不解释区域或绘制逻辑。
-    for block in re.split(r"\n\s*\n", atlas.read_text(encoding="utf-8").strip()):
+    for block in re.split(r"\n\s*\n", atlas.read_text(encoding="utf-8-sig").strip()):
         lines = [line.strip() for line in block.splitlines()]
         if not lines:
             continue
@@ -36,6 +85,8 @@ def inspect(atlas: Path, skeleton: Path, expected_version=None):
         raw = data.get("skeleton", {}).get("spine") if isinstance(data, dict) else None
         if isinstance(raw, str) and re.fullmatch(r"\d+\.\d+(?:\.\d+)?", raw):
             version = ".".join(raw.split(".")[:2])
+    elif skeleton.suffix.lower() == ".skel":
+        version = _binary_spine_version(skeleton)
     if expected_version is not None and not re.fullmatch(r"\d+\.\d+", expected_version):
         raise ValueError("运行时版本应明确到 major.minor")
     status = "SPINE_VERSION_UNKNOWN" if version is None else "VERSION_OBSERVED"

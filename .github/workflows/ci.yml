@@ -9,7 +9,7 @@ on:
 
 jobs:
   spine-runtime-build:
-    name: Spine 4.1 headless worker build
+    name: Spine 4.0 headless worker build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +19,104 @@ jobs:
             --file runtime/spine_worker/Dockerfile \
             --tag nikke-spine-worker:ci \
             runtime/spine_worker
+      - name: Render public default and legacy multi-skin Spine bundles
+        run: |
+          set -eu
+          mkdir -p .ci-spine-assets/c010 .ci-spine-assets/c010_01 .ci-spine-assets/c010_02
+          for file in c010_02_00.skel c010_02_00.atlas c010_01.png; do
+            curl --fail --silent --show-error --location \
+              "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_02/$file" \
+              --output ".ci-spine-assets/c010_02/$file"
+          done
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel \
+            --output .ci-spine-assets/c010/c010_00.skel
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.atlas \
+            --output .ci-spine-assets/c010/c010_00.atlas
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.png \
+            --output .ci-spine-assets/c010/c010_00.png
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.skel \
+            --output .ci-spine-assets/c010_01/c010_01_00.skel
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.atlas \
+            --output .ci-spine-assets/c010_01/c010_01_00.atlas
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_00.png \
+            --output .ci-spine-assets/c010_01/c010_00.png
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_00_2.png \
+            --output .ci-spine-assets/c010_01/c010_00_2.png
+          ls -l .ci-spine-assets/c010 .ci-spine-assets/c010_01
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010/c010_00.skel \
+            --atlas /bundles/c010/c010_00.atlas \
+            --output /bundles/c010/default.rgba \
+            --width 512 --height 512 --verbose
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010_01/c010_01_00.skel \
+            --atlas /bundles/c010_01/c010_01_00.atlas \
+            --output /bundles/c010_01/non-default-00.rgba \
+            --width 512 --height 512 --skin 00 --verbose
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010_01/c010_01_00.skel \
+            --atlas /bundles/c010_01/c010_01_00.atlas \
+            --output /bundles/c010_01/non-default-01.rgba \
+            --width 512 --height 512 --skin 01 --verbose
+          timeout --signal=TERM --kill-after=10s 120s docker run --rm \
+            --env LIBGL_ALWAYS_SOFTWARE=1 \
+            --volume "$PWD/.ci-spine-assets:/bundles" \
+            nikke-spine-worker:ci \
+            --skeleton /bundles/c010_02/c010_02_00.skel \
+            --atlas /bundles/c010_02/c010_02_00.atlas \
+            --output /bundles/c010_02/white-promise.rgba \
+            --width 512 --height 512 --verbose
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          cases = (
+              (Path(".ci-spine-assets/c010_02/white-promise.rgba"), Path(".ci-spine-assets/c010_02/white-promise.png")),
+              (Path(".ci-spine-assets/c010/default.rgba"), Path(".ci-spine-assets/c010/default.png")),
+              (Path(".ci-spine-assets/c010_01/non-default-00.rgba"), Path(".ci-spine-assets/c010_01/skin-00.png")),
+              (Path(".ci-spine-assets/c010_01/non-default-01.rgba"), Path(".ci-spine-assets/c010_01/skin-01.png")),
+          )
+          empty = []
+          for raw_path, png_path in cases:
+              data = raw_path.read_bytes()
+              width = int.from_bytes(data[0:4], "little")
+              height = int.from_bytes(data[4:8], "little")
+              assert len(data) == 8 + width * height * 4
+              image = Image.frombytes("RGBA", (width, height), data[8:])
+              alpha_box = image.getchannel("A").getbbox()
+              print(f"{raw_path}: size={width}x{height}, alpha_bbox={alpha_box}")
+              image.save(png_path, format="PNG")
+              if alpha_box is None:
+                  empty.append(str(raw_path))
+          assert not empty, f"透明空图: {empty}"
+          PY
+      - name: Upload Spine render previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spine-render-smoke
+          path: |
+            .ci-spine-assets/c010/default.png
+            .ci-spine-assets/c010_01/skin-*.png
+            .ci-spine-assets/c010_02/white-promise.png
+          if-no-files-found: error
 
   extension:
     name: Extension (Node)

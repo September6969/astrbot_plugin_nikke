@@ -34,7 +34,7 @@ class ReleaseMetadataTests(unittest.TestCase):
             "request_timeout": ("int", 20),
             "max_concurrency": ("int", 2),
             "spine_worker_path": ("string", ""),
-            "spine_runtime_version": ("string", "4.1"),
+            "spine_runtime_version": ("string", "4.0"),
             "spine_worker_timeout": ("int", 4),
             "voice_dynamic_enabled": ("bool", True),
             "enable_daily_actions": ("bool", False),

@@ -14,8 +14,8 @@
 | `summary_hour` | `8` | 北京时间每日汇总小时。 |
 | `summary_minute` | `30` | 每日汇总分钟。 |
 | `request_timeout` | `20` | BlaBlaLink 请求超时秒数。 |
-| `spine_worker_path` | 空字符串 | 可选的官方 Spine 4.1 headless worker 绝对路径；为空时只使用静态 FB 回退。 |
-| `spine_runtime_version` | `4.1` | worker 严格匹配的 Spine major.minor；未知或不匹配 bundle 不执行。 |
+| `spine_worker_path` | 空字符串 | 可选的官方 Spine 4.0 headless worker 绝对路径；为空时只使用中性占位图回退。 |
+| `spine_runtime_version` | `4.0` | worker 严格匹配的 Spine major.minor；未知或不匹配 bundle 不执行。 |
 | `spine_worker_timeout` | `4` | 单次 worker 最大秒数，配置范围 1–5。 |
 | `voice_dynamic_enabled` | `true` | 仅启用 `assets/voice_poke_map.json` 中有来源证据的官方动态语音；空映射或关闭时回退本地音频/文本。 |
 | `max_concurrency` | `2` | 每日账号任务最大并发数；应按上游频控和部署容量调整。 |

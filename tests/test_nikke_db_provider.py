@@ -103,6 +103,22 @@ class NikkeDbProviderTests(unittest.TestCase):
             finally:
                 provider.COSTUME_OVERRIDES.pop("skin_01", None)
 
+    def test_costume_index_does_not_prove_legacy_l2d_identity(self):
+        cache_dir = Path(__file__).resolve().parents[1] / "assets"
+        provider = NikkeDbProvider(cache_dir / ".test-cache", cache_dir, remote=False)
+        try:
+            index_dir = provider.cache_dir / "nikke-db" / "index"
+            index_dir.mkdir(parents=True)
+            (index_dir / "l2d.json").write_text(
+                json.dumps([{"id": "c010"}, {"id": "c010_01"}]),
+                encoding="utf-8",
+            )
+            provider._index = None
+            self.assertEqual(provider.resolve_spine_asset_id(10, costume_id="20001"), "missing")
+        finally:
+            import shutil
+            shutil.rmtree(provider.cache_dir, ignore_errors=True)
+
     def test_cache_key_generation_contract(self):
         key = NikkeDbProvider.compute_cache_key("c191", "skin_01", "v1", "4.1", "1.0")
         self.assertEqual(key, "c191_skin_01_v1_4.1_1.0")
@@ -130,21 +146,36 @@ class NikkeDbProviderTests(unittest.TestCase):
             # 未收录角色返回 None
             self.assertIsNone(provider.resolve_spine_version("c999"))
 
+    def test_verified_binary_header_version_is_used_when_index_has_no_version(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td)
+            index_dir = Path(td) / "nikke-db" / "index"
+            index_dir.mkdir(parents=True)
+            (index_dir / "l2d.json").write_text(json.dumps([{"id": "c010"}, {"id": "c010_01"}]), encoding="utf-8")
+            self.assertEqual(provider.resolve_spine_version("c010"), "4.0")
+            self.assertEqual(provider.resolve_spine_version("c010_01"), "4.0")
+
     def test_spine_bundle_urls(self):
         with tempfile.TemporaryDirectory() as td:
             provider = NikkeDbProvider(td, td)
             urls = provider.resolve_spine_bundle_urls("191", action="aim")
             self.assertEqual(
                 urls["skel"],
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_00.skel",
+                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_aim_00.skel",
             )
             self.assertEqual(
                 urls["atlas"],
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_00.atlas",
+                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_aim_00.atlas",
             )
             self.assertEqual(
                 urls["png"],
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_00.png",
+                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_aim_00.png",
+            )
+
+            static_urls = provider.resolve_spine_bundle_urls("10", action="setup")
+            self.assertEqual(
+                static_urls["skel"],
+                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel",
             )
 
     def test_negative_cache_and_concurrency_lock(self):
