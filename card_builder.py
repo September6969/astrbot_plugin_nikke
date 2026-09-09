@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import logging
+import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -38,15 +40,48 @@ OPTION_NAMES = {
 }
 
 logger = logging.getLogger(__name__)
+_INTEGER_LITERAL = re.compile(r"^[+-]?\d+$")
 
 
-def _optional_int(value: Any) -> int | None:
-    if value is None or value == "":
+def _optional_int(value: Any, *, minimum: int | None = None) -> int | None:
+    """只接受 JSON 整数或十进制整数字符串，异常值返回未知。"""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        parsed = value
+    elif isinstance(value, str):
+        text = value.strip()
+        if not _INTEGER_LITERAL.fullmatch(text):
+            return None
+        try:
+            parsed = int(text)
+        except ValueError:
+            return None
+    else:
+        return None
+    if minimum is not None and parsed < minimum:
+        return None
+    return parsed
+
+
+def _optional_finite_float(value: Any) -> float | None:
+    """解析动态词条数值并拒绝布尔、NaN、Infinity 和非标量。"""
+    if value is None or isinstance(value, bool):
+        return None
+    if not isinstance(value, (int, float, str)):
+        return None
+    if isinstance(value, str) and not value.strip():
         return None
     try:
-        return int(value)
-    except (TypeError, ValueError):
+        parsed = float(value)
+    except (TypeError, ValueError, OverflowError):
         return None
+    return parsed if math.isfinite(parsed) else None
+
+
+def _zero_if_invalid(value: Any) -> int:
+    parsed = _optional_int(value, minimum=0)
+    return 0 if parsed is None else parsed
 
 
 def _equipped_item(
@@ -56,7 +91,7 @@ def _equipped_item(
 ):
     if tid in (None, "", 0, "0"):
         return None
-    return model_type(tid=tid, level=_optional_int(level))
+    return model_type(tid=tid, level=_optional_int(level, minimum=0))
 
 
 class CharacterCardBuilder:
@@ -71,7 +106,15 @@ class CharacterCardBuilder:
     def _option_from_function(function: dict[str, Any]) -> EquipmentOption:
         raw_type = str(function.get("function_type", "") or "Unknown")
         mapping = OPTION_NAMES.get(raw_type.casefold())
-        raw_value = float(function.get("function_value", 0) or 0)
+        raw_value = _optional_finite_float(function.get("function_value"))
+        if raw_value is None:
+            return EquipmentOption(
+                raw_type=raw_type,
+                display_name="未识别词条",
+                value=0,
+                unit="unknown",
+                level=_optional_int(function.get("level"), minimum=0),
+            )
         value_type = str(function.get("function_value_type", "") or "").casefold()
         if mapping:
             display_name, unit = mapping
@@ -96,7 +139,7 @@ class CharacterCardBuilder:
             display_name=display_name,
             value=value,
             unit=unit,
-            level=_optional_int(function.get("level")),
+            level=_optional_int(function.get("level"), minimum=0),
         )
 
     def _option_from_function_with_registry(
@@ -116,7 +159,7 @@ class CharacterCardBuilder:
             display_name=metadata.label,
             value=value,
             unit=unit,
-            level=_optional_int(function.get("level")),
+            level=_optional_int(function.get("level"), minimum=0),
         )
 
     def _option_from_effect(
@@ -198,7 +241,7 @@ class CharacterCardBuilder:
             item = EquipmentData(
                 slot=slot,
                 equipment_id=str(equipment_id) if equipped else None,
-                level=_optional_int(detail.get(f"{slot}_equip_lv")) if equipped else None,
+                level=_optional_int(detail.get(f"{slot}_equip_lv"), minimum=0) if equipped else None,
                 equipped=equipped,
             )
             for index in (1, 2, 3):
@@ -246,17 +289,17 @@ class CharacterCardBuilder:
             weapon=directory.get("weapon"),
             burst=directory.get("burst"),
             corporation=directory.get("corporation"),
-            level=int(roster.get("lv", detail.get("lv", 0)) or 0),
-            combat=int(roster.get("combat", detail.get("combat", 0)) or 0),
-            hp=_optional_int(detail.get("hp")),
-            attack=_optional_int(detail.get("attack")),
-            defense=_optional_int(detail.get("defense")),
-            skill1_level=int(detail.get("skill1_lv", 0) or 0),
-            skill2_level=int(detail.get("skill2_lv", 0) or 0),
-            burst_skill_level=int(detail.get("ulti_skill_lv", 0) or 0),
-            grade=int(roster.get("grade", detail.get("grade", 0)) or 0),
-            core=int(roster.get("core", detail.get("core", 0)) or 0),
-            bond_level=_optional_int(detail.get("attractive_lv")),
+            level=_zero_if_invalid(roster.get("lv", detail.get("lv", 0))),
+            combat=_zero_if_invalid(roster.get("combat", detail.get("combat", 0))),
+            hp=_optional_int(detail.get("hp"), minimum=0),
+            attack=_optional_int(detail.get("attack"), minimum=0),
+            defense=_optional_int(detail.get("defense"), minimum=0),
+            skill1_level=_zero_if_invalid(detail.get("skill1_lv", 0)),
+            skill2_level=_zero_if_invalid(detail.get("skill2_lv", 0)),
+            burst_skill_level=_zero_if_invalid(detail.get("ulti_skill_lv", 0)),
+            grade=_zero_if_invalid(roster.get("grade", detail.get("grade", 0))),
+            core=_zero_if_invalid(roster.get("core", detail.get("core", 0))),
+            bond_level=_optional_int(detail.get("attractive_lv"), minimum=0),
             favorite_item=_equipped_item(
                 FavoriteItemData,
                 detail.get("favorite_item_tid"),

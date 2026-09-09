@@ -4,7 +4,7 @@
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次主题从已重新核验的 `origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5` 建立；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 Draft PR。本次主题从已重新核验的 `origin/main@7c164cd1d9814fc7b4530de861813665187e63b5` 建立；恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -27,6 +27,7 @@
 | Resource Registry V2 | 已合并 PR #54，merge `09821816f7489885f4fb33045fd56fe39adda1d3`；Costume registry 合同、来源/hash 清单和 unknown/invalid 隔离进入主线，映射保持空表 |
 | Live RC StateEffect Registry | 已合并 PR #62，merge `1a98895e4af19f360b3a2cc79bb40cb0542b415a`；严格 registry 合同和 builder 接线进入主线，真实映射仍待现场来源闭环 |
 | Live Data Closure / Arcana evidence | 已合并 PR #63，merge `bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5`；记录 Arcana 只读字段证据、身份解析和隐私边界 |
+| Live StateEffect data closure | 已合并 PR #64，merge `7c164cd1d9814fc7b4530de861813665187e63b5`；四条 Arcana observed option 的公开分组/formatter 证据进入 partial registry，解析改为 exact |
 
 ## 证据边界
 
@@ -82,12 +83,19 @@
 - builder 命中来源记录时按显式 formatter 解析动态 `state_effects` 值；未命中继续既有安全 mapping，unknown 不进入确认单位汇总。没有猜测 1–15 阶表、相邻 ID 或单位。
 - 离线证据：registry + card builder 定向 15 passed；真实 Bla CDN metadata、完整 function_type 覆盖、精确 1–15 tier lookup 和现场角色卡仍待证据。
 
-## Live StateEffect Data Closure（当前独立主题）
+## Live StateEffect Data Closure（已合并）
 
-- `feat/live-state-effect-data-v1` 从最新 `origin/main@bd5f518e8dcd5001d9b52d0a3f8882f4d7275df5` 建立，工作树为 `E:\DevCache\nikke-live-state-effect-data-20260909`；不复用旧 overnight 或历史 StateEffect worktree。
+- `feat/live-state-effect-data-v1` 已合并为 PR #64，merge `7c164cd1d9814fc7b4530de861813665187e63b5`；历史工作树为 `E:\DevCache\nikke-live-state-effect-data-20260909`，不复用旧 overnight 或历史 StateEffect worktree作为当前基线。
 - 依据 Arcana 现场四个 option ID 与公开 BlaBlaLink StateEffect 分组表，登记四条 exact 映射：`7000611 → StatAccuracyCircle`、`7001011 → StatChargeTime`、`7001111 → StatCritical`、`7001211 → StatCriticalDamage`；来源 URL、SHA-256、标签和 group ID 保存在 `assets/state_effects.json` 及 `docs/evidence/state_effect_registry_live_20260909.json`。
 - 当前页面的 `getBuffContents` 公开展示路径明确使用 `abs(function_value) / 100` 后格式化为百分比；四条记录显式使用 `value_divisor=100`，不依据 option 相邻 ID 或名称顺序猜测。
 - 这是 `PARTIAL_LIVE_VERIFIED` 的四条子集，不是完整 StateEffect registry；其余 option、完整 1–15 阶数值、HP/ATK/DEF 公式和非默认 Costume 继续保留现场缺口。registry 解析已收紧为 exact option/function/locale，不再以唯一 function_type 跨 option 回退。
+
+## Live Numeric Semantics（当前独立主题）
+
+- `feat/live-numeric-semantics-v1` 从最新 `origin/main@7c164cd1d9814fc7b4530de861813665187e63b5` 建立，工作树为 `E:\DevCache\nikke-live-numeric-semantics-20260909`；不在已合并 StateEffect worktree 或旧 overnight 分支上追加。
+- `CharacterCardBuilder` 的整数解析现在只接受 JSON 整数或十进制整数字符串，显式拒绝 bool、浮点截断、NaN/Infinity、非标量和负数 HP/ATK/DEF；动态词条值拒绝非有限值，异常词条显示“未识别词条”且不进入汇总。
+- HP/ATK/DEF 仍只使用源端确认字段；缺失、负数或异常保持 `None`，由角色卡渲染为 `—`。level/combat/skill/grade/core 的异常输入采用安全零值以保持现有数据合同，不由其他字段反推。
+- 本主题只需离线行为证据，不执行账号读取、账号写入、消息发送、部署或现场数值公式推断；现场 HP/ATK/DEF 字段是否存在仍按 `NEEDS_LIVE_EVIDENCE` 保留。
 
 ## FB 静态立绘路线（进行中）
 
