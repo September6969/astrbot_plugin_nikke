@@ -109,6 +109,7 @@
 - `feat/live-ol-data-closure-v1` 从合并后的 `origin/main@ad0ef20` 建立；使用一个已绑定且获授权账号完成只读 177 角色批量详情核对。
 - 现场观察到 109 条 OL option/function 映射，写入 `assets/state_effects.json`；Percent divisor=100 有公开前端证据，Integer 维持 unknown，不进入确认汇总。
 - `CharacterDetails` 只观察到 `combat`、`arena_combat`，Profile 只观察到 `team_combat`；没有 HP/ATK/DEF 字段或公式来源，因此不做反推。证据登记在 `docs/evidence/live_character_stats_20260909.json` 与 `docs/evidence/state_effect_function_inventory_live_20260909.json`。
+- 现场授权的最小 Signin 已执行一次：前态待签到，`DailyCheckIn` 单次写入，后态已完成；无自动重发，证据登记在 `docs/evidence/signin_live_20260909.json`。
 
 ## FB 静态立绘路线（进行中）
 

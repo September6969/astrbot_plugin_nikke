@@ -7,6 +7,7 @@
 - `Percent` 使用已查前端语义 divisor 100；`Integer` 只保留标签和 function type，单位为 unknown，不进入确认汇总。
 - 角色卡继续由严格 registry 处理异常值；未知 function、缺失值和未知单位不会借用相邻 option 或静默反推。
 - 真实详情、个人资料接口均未提供 HP/ATK/DEF 字段或公式来源；没有把 combat/team_combat 反推成三项属性。
+- 在现场已授权范围内完成一次 Signin：前态为 found=true/completed=false，写入尝试 1 次，后态 completed=true；未自动重发，证据见 `docs/evidence/signin_live_20260909.json`。
 
 ## 证据边界
 

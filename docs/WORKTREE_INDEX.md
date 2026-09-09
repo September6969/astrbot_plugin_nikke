@@ -47,4 +47,4 @@
 | Live StateEffect data v1 | PR #64 已合并 | `E:\DevCache\nikke-live-state-effect-data-20260909` / `feat/live-state-effect-data-v1`；merge `7c164cd1d9814fc7b4530de861813665187e63b5`，保留历史工作树，HEAD 不代表当前 main |
 | Live Numeric Semantics v1 | 当前独立主题 | `E:\DevCache\nikke-live-numeric-semantics-20260909` / `feat/live-numeric-semantics-v1`；从最新 `origin/main@7c164cd1d9814fc7b4530de861813665187e63b5` 建立，严格整数/有限值/fallback 行为测试，未执行账号读取、写入、消息或部署 |
 | Live OL Tier Registry v1 | PR #66 已合并 | `E:\DevCache\nikke-ol-tier-registry-20260909` / `feat/ol-tier-registry-v1`；merge `ad0ef208`，9 组/135 ID/1--15 阶级已接线，历史 worktree 保留 |
-| Live Data Closure v1 | 当前独立主题 | `E:\DevCache\nikke-live-ol-data-closure-v1-20260909` / `feat/live-ol-data-closure-v1`；从 `origin/main@ad0ef20` 建立，177 角色批量详情、109 条 OL function 现场映射与 HP/ATK/DEF 字段审计已完成，待提交 PR 与 CI |
+| Live Data Closure v1 | 当前独立主题 | `E:\DevCache\nikke-live-ol-data-closure-v1-20260909` / `feat/live-ol-data-closure-v1`；从 `origin/main@ad0ef20` 建立，177 角色批量详情、109 条 OL function、HP/ATK/DEF 字段审计与一次授权 Signin 已完成，待提交 PR 与 CI |
