@@ -9,25 +9,22 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from .renderer import CardRenderer
+from .card_theme import UI_COLORS
 from .union_raid_models import BossStatus, RaidResponseCoverage, UnionRaidOverviewData
 
 RAID_THEME = {
-    "background": "#0A1017",
-    "header": "#0E1722",
-    "panel": "#131E2C",
-    "panel_highlight": "#182638",
-    "border": "#22354A",
-    "border_highlight": "#38BDF8",
-    "text": "#F8FAFC",
-    "muted": "#94A3B8",
-    "dim": "#64748B",
-    # Status colors
-    "current_accent": "#38BDF8",
-    "defeated_accent": "#10B981",
-    "next_accent": "#F59E0B",
-    "locked_accent": "#475569",
-    "unknown_accent": "#64748B",
-    "hp_bar_bg": "#1E293B",
+    **UI_COLORS,
+    "header": UI_COLORS["background"],
+    "panel_highlight": UI_COLORS["raised"],
+    "border_highlight": UI_COLORS["accent"],
+    "dim": UI_COLORS["muted"],
+    # 仅映射已有状态，不根据配色推断业务结果。
+    "current_accent": UI_COLORS["accent"],
+    "defeated_accent": UI_COLORS["success"],
+    "next_accent": UI_COLORS["warning"],
+    "locked_accent": UI_COLORS["muted"],
+    "unknown_accent": UI_COLORS["unknown"],
+    "hp_bar_bg": UI_COLORS["border"],
 }
 
 

@@ -11,16 +11,14 @@ from PIL import Image, ImageColor, ImageDraw, ImageOps
 from .asset_manager import AssetManager
 from .campaign_history_models import ClearLineupStatus, StageClearRecord
 from .renderer import CardRenderer
+from .card_theme import UI_COLORS
 
 THEME = {
-    "background": "#14171D",
-    "panel": "#1B2028",
-    "panel_border": "#2D3442",
-    "primary": "#38B6FF",
-    "accent_hard": "#FF4655",
-    "text": "#F0F4F8",
-    "muted": "#7E8B9B",
-    "badge_bg": "#222936",
+    **UI_COLORS,
+    "panel_border": UI_COLORS["border"],
+    "primary": UI_COLORS["accent"],
+    "accent_hard": UI_COLORS["accent"],
+    "badge_bg": UI_COLORS["raised"],
 }
 
 
@@ -37,7 +35,7 @@ class CampaignHistoryRenderer(CardRenderer):
     def _text(self, draw, xy, text, size, color, *, width=None, bold=False):
         text = str(text).replace("\n", " ")
         font = self.font(size, bold)
-        while width and draw.textlength(text, font=font) > width and size > 11:
+        while width and draw.textlength(text, font=font) > width and size > 18:
             size -= 1
             font = self.font(size, bold)
         if width and draw.textlength(text, font=font) > width:
@@ -83,7 +81,7 @@ class CampaignHistoryRenderer(CardRenderer):
         padding = 50
         self._text(draw, (padding, 40), "CAMPAIGN CLEAR ARCHIVE", 16, primary_color, bold=True)
         mode_label = "HARD / 困难难度" if is_hard else "NORMAL / 普通难度"
-        self._text(draw, (padding, 64), f"STAGE {record.stage_name} · {mode_label}", 40, THEME["text"], bold=True)
+        self._text(draw, (padding, 64), f"STAGE {record.stage_name} · {mode_label}", 40, THEME["text"], width=880, bold=True)
 
         if record.status == ClearLineupStatus.AVAILABLE and record.members:
             combat_str = f"{record.total_combat:,}"
@@ -117,7 +115,7 @@ class CampaignHistoryRenderer(CardRenderer):
                     draw,
                     (card_x + 22, card_y + 16),
                     f"POSITION 0{member.slot}",
-                    14,
+                    18,
                     primary_color,
                     bold=True,
                 )
@@ -142,10 +140,10 @@ class CampaignHistoryRenderer(CardRenderer):
                 info_y = card_y + 395
                 draw.line((card_x + 14, info_y, card_x + card_width - 14, info_y), fill="#28303D", width=1)
 
-                self._text(draw, (card_x + 16, info_y + 12), member.name_cn, 21, THEME["text"], width=card_width - 32, bold=True)
-                self._text(draw, (card_x + 16, info_y + 42), f"Lv.{member.level}", 19, primary_color, bold=True)
-                self._text(draw, (card_x + 16, info_y + 70), "单体战力", 14, THEME["muted"])
-                self._text(draw, (card_x + 16, info_y + 90), f"{member.combat:,}", 22, THEME["text"], bold=True)
+                self._text(draw, (card_x + 16, info_y + 12), member.name_cn, 24, THEME["text"], width=card_width - 32, bold=True)
+                self._text(draw, (card_x + 16, info_y + 46), f"Lv.{member.level}", 22, primary_color, bold=True)
+                self._text(draw, (card_x + 16, info_y + 78), "单体战力", 18, THEME["muted"])
+                self._text(draw, (card_x + 16, info_y + 106), f"{member.combat:,}", 27, THEME["text"], width=card_width - 32, bold=True)
 
         else:
             # 空态或异常提示面板
@@ -167,7 +165,7 @@ class CampaignHistoryRenderer(CardRenderer):
         # 底部
         draw.line((padding, height - 60, self.WIDTH - padding, height - 60), fill="#262D38", width=1)
         footer_text = f"指挥官: {record.commander_name or '—'} · {record.fetched_at} · v{record.plugin_version} · BlaBlaLink"
-        self._text(draw, (padding, height - 44), footer_text, 15, THEME["muted"])
+        self._text(draw, (padding, height - 44), footer_text, 18, THEME["muted"], width=1030)
         self._text_right(draw, (self.WIDTH - padding, height - 44), "MAIN QUEST ARCHIVE", 15, primary_color, bold=True)
 
         path = self.output_dir / f"campaign-{uuid.uuid4().hex}.png"

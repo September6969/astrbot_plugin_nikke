@@ -10,18 +10,15 @@ from PIL import Image, ImageDraw
 
 from .profile_models import ProfileDashboardData
 from .renderer import CardRenderer
+from .card_theme import UI_COLORS
 
 
 PROFILE_THEME = {
-    "header": "#0B1118",
-    "background": "#0E141B",
-    "panel": "#151D26",
-    "panel_alt": "#192430",
-    "primary": "#29A7E8",
-    "secondary": "#70D6FF",
-    "text": "#F3F7FA",
-    "muted": "#8FA0AF",
-    "border": "#263646",
+    **UI_COLORS,
+    "header": UI_COLORS["background"],
+    "panel_alt": UI_COLORS["raised"],
+    "primary": UI_COLORS["accent"],
+    "secondary": UI_COLORS["text"],
 }
 
 

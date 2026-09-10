@@ -21,7 +21,7 @@ class GuideEntry:
 
     def caption(self, now: date | None = None) -> str:
         stale = ((now or date.today()) - date.fromisoformat(self.updated_at)).days > 90
-        return f"{self.title}\n版本：{self.game_version} · 更新：{self.updated_at}\n来源：{self.source}\n作者：{self.credit}\n授权：{self.license}" + ("\n内容可能过期，请核对当前版本。" if stale else "")
+        return f"{self.title}\n\n版本：{self.game_version}\n更新：{self.updated_at}\n\n来源：{self.source}\n作者：{self.credit}\n授权：{self.license}" + ("\n\n内容可能过期，请核对当前版本。" if stale else "")
 
 
 class GuideRegistry:
