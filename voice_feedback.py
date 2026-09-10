@@ -14,7 +14,7 @@ from typing import Any
 
 
 class VoiceResolver:
-    # 语言/Locale 台词库
+    # 历史遗留纯文本台词库（仅用于纯文本 `/妮姬 戳一戳`；不参与官方音频映射或角色白名单控制）
     CHARACTER_LINES: dict[str, dict[str, list[str]]] = {
         "alice": {
             "zh-cn": [

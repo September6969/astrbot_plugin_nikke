@@ -1,13 +1,719 @@
 {
   "schema_version": 1,
-  "source": "nikke_live_rc_stabilization_plan_v2_prior_decisions_audit",
-  "description": "仅用于查询的简体别名；不代表官方 zh-CN 名称。",
+  "source": "nikke_canonical_character_directory_and_aliases",
+  "description": "仅用于查询的简体别名与常用别称；不代表官方 zh-CN 名称。",
   "entries": [
     {
+      "name_zh_tw": "尼恩：藍色海洋",
+      "aliases": [
+        "尼恩：蓝色海洋",
+        "水尼恩"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "阿妮斯：閃耀夏日",
+      "aliases": [
+        "阿妮斯：闪耀夏日"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "拉毗：小紅帽",
+      "aliases": [
+        "拉毗：小红帽"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "德爾塔",
+      "aliases": [
+        "德尔塔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "德爾塔：怪盜忍者",
+      "aliases": [
+        "德尔塔：怪盜忍者"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "米蘭達",
+      "aliases": [
+        "米兰達"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "貝洛塔",
+      "aliases": [
+        "贝洛塔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "米卡：雪地夥伴",
+      "aliases": [
+        "米卡：雪地伙伴"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "布麗德",
+      "aliases": [
+        "布丽德"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "迪塞爾",
+      "aliases": [
+        "迪塞尔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "布麗德：靜默軌道",
+      "aliases": [
+        "布丽德：靜默軌道"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "迪塞爾：冬日甜心",
+      "aliases": [
+        "迪塞尔：冬日甜心"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "麗塔",
+      "aliases": [
+        "丽塔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "艾瑪",
+      "aliases": [
+        "艾玛"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "貝斯蒂",
+      "aliases": [
+        "贝斯蒂"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "銀華",
+      "aliases": [
+        "银华"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "艾瑪：戰術升級",
+      "aliases": [
+        "艾玛：战術升級"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "貝斯蒂：戰術升級",
+      "aliases": [
+        "贝斯蒂：战術升級"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "銀華：戰術升級",
+      "aliases": [
+        "银华：战術升級"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "麥斯威爾",
+      "aliases": [
+        "麥斯威尔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "德雷克：終極反派",
+      "aliases": [
+        "德雷克：终極反派"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "麥斯威爾：平凡技師",
+      "aliases": [
+        "麥斯威尔：平凡技師"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "安妮：奇蹟仙女",
+      "aliases": [
+        "安妮：奇迹仙女"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "米爾克",
+      "aliases": [
+        "米尔克"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "普琳瑪",
+      "aliases": [
+        "普琳玛"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "米爾克：花漾兔女郎",
+      "aliases": [
+        "米尔克：花漾兔女郎"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "尤莉亞",
+      "aliases": [
+        "尤莉亚"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "普麗瓦蒂",
+      "aliases": [
+        "普丽瓦蒂",
+        "初音"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "尤爾夏",
+      "aliases": [
+        "尤尔夏"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "吉蘿婷",
+      "aliases": [
+        "吉萝婷"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "吉蘿婷：寒冬殺手",
+      "aliases": [
+        "吉萝婷：寒冬殺手"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "魯德米拉",
+      "aliases": [
+        "鲁德米拉"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "愛麗絲",
+      "aliases": [
+        "爱丽丝"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "魯德米拉：冬日之主",
+      "aliases": [
+        "鲁德米拉：冬日之主",
+        "冬鲁",
+        "温泉鲁德米拉"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "愛麗絲：仙境兔女郎",
+      "aliases": [
+        "爱丽丝：仙境兔女郎",
+        "兔爱丽丝",
+        "兔爱"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "諾薇兒",
+      "aliases": [
+        "诺薇儿"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "紅蓮",
+      "aliases": [
+        "红莲"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "白雪公主：純真年代",
+      "aliases": [
+        "白雪公主：纯真年代",
+        "幼雪",
+        "小白雪"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "紅蓮：暗影",
+      "aliases": [
+        "红莲：暗影",
+        "黑莲"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "長髮公主：純潔恩典",
+      "aliases": [
+        "長髮公主：纯洁恩典"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "哈蘭",
+      "aliases": [
+        "哈兰"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "伊莎貝爾",
+      "aliases": [
+        "伊莎贝尔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "諾雅",
+      "aliases": [
+        "诺雅"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "桃樂絲",
+      "aliases": [
+        "桃乐丝"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "桃樂絲：機緣巧遇",
+      "aliases": [
+        "桃乐丝：机緣巧遇"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "魯瑪妮",
+      "aliases": [
+        "鲁玛妮"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "艾菲涅爾",
+      "aliases": [
+        "艾菲涅尔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "神罰",
+      "aliases": [
+        "神罚",
+        "玛丽安"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "莉貝雷利奧",
+      "aliases": [
+        "莉贝雷利奧"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "布蘭兒",
+      "aliases": [
+        "布兰儿",
+        "白兔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "諾亞爾",
+      "aliases": [
+        "诺亚尔",
+        "黑兔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "羅珊娜",
+      "aliases": [
+        "罗珊娜"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "櫻花",
+      "aliases": [
+        "樱花"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "羅珊娜：高雅海洋",
+      "aliases": [
+        "罗珊娜：高雅海洋"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "櫻花：夏日綻放",
+      "aliases": [
+        "樱花：夏日綻放"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "瑪娜",
+      "aliases": [
+        "玛娜"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "艾瑟兒",
+      "aliases": [
+        "艾瑟儿"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "愛德",
+      "aliases": [
+        "爱德"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "普麗瓦蒂：不友善的女僕",
+      "aliases": [
+        "普丽瓦蒂：不友善的女仆",
+        "女仆初音",
+        "女仆普丽瓦蒂"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "索達：閃亮兔女郎",
+      "aliases": [
+        "索達：闪亮兔女郎"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "愛德：特務兔女郎",
+      "aliases": [
+        "爱德：特務兔女郎"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "薇爾維特",
+      "aliases": [
+        "薇尔维特"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "瑪律恰那",
+      "aliases": [
+        "玛律恰那"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "瑪律恰那：海洋進修",
+      "aliases": [
+        "玛律恰那：海洋進修"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "鐘鳴",
+      "aliases": [
+        "钟鸣"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "海倫：海藍寶石",
+      "aliases": [
+        "海倫：海蓝宝石",
+        "海伦：海蓝宝石",
+        "水海伦"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "馬斯特：浪漫的女僕",
+      "aliases": [
+        "馬斯特：浪漫的女仆"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "安克：天真的女僕",
+      "aliases": [
+        "安克：天真的女仆"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "尼羅",
+      "aliases": [
+        "尼罗"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "愛因",
+      "aliases": [
+        "爱因"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "吉爾提",
+      "aliases": [
+        "吉尔提"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "芙羅拉",
+      "aliases": [
+        "芙罗拉"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "諾伊斯",
+      "aliases": [
+        "诺伊斯"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "阿莉亞",
+      "aliases": [
+        "阿莉亚"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "阿維斯塔",
+      "aliases": [
+        "阿维斯塔"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "蒂亞",
+      "aliases": [
+        "蒂亚"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "小紅帽",
+      "aliases": [
+        "小红帽"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "特羅尼",
+      "aliases": [
+        "特罗尼"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "格拉維",
+      "aliases": [
+        "格拉维"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "貝伊",
+      "aliases": [
+        "贝伊"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
       "name_zh_tw": "阿爾卡娜",
-      "aliases": ["阿尔卡娜"],
-      "source": "prior_decision_audit",
-      "verified_at": "2026-09-09"
+      "aliases": [
+        "阿尔卡娜"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "蕾貝兒",
+      "aliases": [
+        "蕾贝儿"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "阿爾卡娜：命運伴侶",
+      "aliases": [
+        "阿尔卡娜：命运伴侶"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "愛蜜莉雅",
+      "aliases": [
+        "爱蜜莉雅"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "櫻",
+      "aliases": [
+        "樱"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "吉兒",
+      "aliases": [
+        "吉儿"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "name_zh_tw": "克蕾兒",
+      "aliases": [
+        "克蕾儿"
+      ],
+      "source": "canonical_sc_and_community_alias",
+      "verified_at": "2026-09-10"
     }
   ]
 }

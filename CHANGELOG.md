@@ -2,13 +2,16 @@
 
 本文件记录当前仓库基线的可核对变更。未合并的 Draft PR 不计入当前版本，也不代表已发布或已部署。
 
-## Unreleased — Spine-only Portrait & Card Calculation v2
+## 0.2.0（当前 main 基线）
 
-- 角色官方立绘路径改为 canonical L2D/Spine；FB URL、FB cache 和 FB fallback 不再参与角色卡。
-- Costume registry 升级为带来源字段的 Spine identity schema v2。
-- 角色卡词条行增加 T1–T15 tier badge；HP/ATK/DEF 改由完整 verified 静态表计算器提供，缺输入时统一显示未知。
+- 全量支持 200 名可玩妮姬的语音角色设定与查询，支持简繁中文、英文、代码与 resource_id 解析。
+- 正式接入已核验的 40 套官方服装切换，实施严格所有者匹配，拒绝未核验皮肤与跨角色借用。
+- 官方语音统一采用日文（`ja`）作为产品默认语言，合法语言严格限制为 `ja`、`en`、`ko`，移除未登记的 `zh-cn`。
+- 戳一戳互动接入 Lobby_Touch 1..3 多台词动态选取，全链路纯音频发送，彻底移除捏造文本台词兜底。
+- 正式 Spine 4.0 与 4.1 生产级 headless worker 投产，角色立绘采用默认待机动作首帧（`t = 0.0`），隔离 setup pose。
+- 完整接入 CharacterStatCalculator 与真实 Lv.526 静态面板零误差核验，OL 词条全面对齐 4×3 槽位与 1–15 阶展示。
 
-## 0.1.8（当前 main 基线）
+## 0.1.8
 
 - 完成 Profile V2 仪表盘的已核验字段展示，并保持未知、空值与零值语义可区分。
 - 提供横版角色练度卡、角色资料、公告/日程、联盟突袭当前响应摘要、战役静态映射、塔层静态速查和本地攻略索引。

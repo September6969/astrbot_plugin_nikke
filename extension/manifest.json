@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NIKKE QQ 安全绑定助手",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "在BlaBlaLink官网登录后，将必要Cookie提交给用户指定的NIKKE机器人。",
   "permissions": ["cookies", "tabs", "storage", "webRequest"],
   "host_permissions": [

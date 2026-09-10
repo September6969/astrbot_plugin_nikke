@@ -48,6 +48,8 @@ from .spine_runtime_config import build_spine_renderer
 from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
+from .costume_registry import CostumeRegistry
+from .voice_character_resolver import VoiceCharacterResolver
 from .voice_feedback import VoiceResolver
 from .voice_audio import VoiceAudioCache, VoicePreference, is_self_poke
 from .voice_encoder import VoiceEncoder
@@ -105,6 +107,8 @@ class NikkePlugin(Star):
         self.voice_mapping = VoiceMapRegistry(self.plugin_dir / "assets" / "voice_poke_map.json")
         for error in self.voice_mapping.errors:
             logger.warning("[NIKKE] 语音映射清单校验失败：%s", error)
+        self.voice_character_resolver = VoiceCharacterResolver(self.plugin_dir / "assets")
+        self.costume_registry = CostumeRegistry(self.plugin_dir / "assets")
         self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
         self.voice_provider = VoiceResourceProvider(self.data_dir / "voice_cache")
         ffmpeg = shutil.which("ffmpeg")
@@ -307,6 +311,13 @@ class NikkePlugin(Star):
         resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
         return resolver.find(self._directory, query)
 
+    def resolve_voice_character(self, query: str) -> str | None:
+        resolver = getattr(self, "voice_character_resolver", None)
+        if resolver is None:
+            resolver = VoiceCharacterResolver(self.plugin_dir / "assets")
+            self.voice_character_resolver = resolver
+        return resolver.resolve(query, getattr(self, "_directory", None))
+
     @staticmethod
     def _help_text(category: str = "", include_admin: bool = False) -> str:
         sections = {
@@ -339,6 +350,7 @@ class NikkePlugin(Star):
                 "/妮姬 兑换 <CDK>　(/nikke cdk)\n"
                 "/妮姬 兑换 批量 <CDK1> <CDK2>...\n"
                 "/妮姬 兑换 可用|历史\n"
+                "/妮姬 语音 [开|关|语言|角色|服装]　(/nikke voice)\n"
                 "/妮姬 戳一戳 [角色名]　(/nikke poke) — 互动台词（文本展示）\n"
                 "注意：群聊发送兑换命令会公开兑换码。"
             ),
@@ -727,18 +739,62 @@ class NikkePlugin(Star):
         from .voice_audio import VoicePreference
         key = f"{event.get_platform_name()}:{self._qq_id(event)}"
         preference = VoicePreference.load(self.store, key)
-        if action in {"开", "关"}:
-            preference.enabled = action == "开"
-        elif action == "语言" and value in {"ja", "en", "ko", "zh-cn"}:
-            preference.locale = value
+        action_clean = str(action or "").strip()
+        value_clean = str(value or "").strip()
+
+        if action_clean in {"开", "关"}:
+            preference.enabled = action_clean == "开"
+        elif action_clean == "语言" and value_clean.lower() in {"ja", "en", "ko"}:
+            preference.locale = value_clean.lower()
             preference.explicit_locale = True
-        elif action == "角色" and value in VoiceResolver.CHARACTER_LINES:
-            preference.character = value
-        elif action:
-            yield event.plain_result("用法：/妮姬 语音 开|关，语音 语言 ja|en|ko，语音 角色 rapi|alice|anis|red_hood|scarlet|dorothy")
+        elif action_clean == "角色":
+            if not value_clean:
+                yield event.plain_result("用法：/妮姬 语音 角色 <角色名|英文名|代码>")
+                return
+            resolved_char = self.resolve_voice_character(value_clean)
+            if not resolved_char:
+                yield event.plain_result(f"未找到妮姬：{value_clean}")
+                return
+            preference.character = resolved_char
+            preference.skin = "default"
+            preference.spine_asset_id = ""
+        elif action_clean in {"服装", "皮肤", "skin", "costume"}:
+            char_res = getattr(self, "voice_character_resolver", None)
+            current_rid = char_res.get_resource_id(preference.character) if char_res else None
+            costume_reg = getattr(self, "costume_registry", None)
+            if costume_reg is None:
+                costume_reg = CostumeRegistry(self.plugin_dir / "assets")
+                self.costume_registry = costume_reg
+
+            if not value_clean:
+                available = costume_reg.get_costumes_for_resource(current_rid)
+                if available:
+                    lines = [f"当前角色 {preference.character} 可用已核验服装："]
+                    for c in available:
+                        lines.append(f"- {c.costume_id}：{c.costume_name} ({c.spine_asset_id})")
+                    lines.append("用法：/妮姬 语音 服装 <默认|服装ID|服装名>")
+                    yield event.plain_result("\n".join(lines))
+                else:
+                    yield event.plain_result(f"当前角色 {preference.character} 暂无可切换的已核验服装。\n用法：/妮姬 语音 服装 默认")
+                return
+
+            result = costume_reg.resolve(value_clean, expected_resource_id=current_rid)
+            if not result.ok:
+                yield event.plain_result(result.message)
+                return
+            if result.status == "RESET_DEFAULT":
+                preference.skin = "default"
+                preference.spine_asset_id = ""
+            else:
+                preference.skin = result.costume.costume_id
+                preference.spine_asset_id = result.costume.spine_asset_id
+        elif action_clean:
+            yield event.plain_result("用法：/妮姬 语音 开|关，语音 语言 ja|en|ko，语音 角色 <角色名>，语音 服装 <默认|服装ID|服装名>")
             return
+
         preference.save(self.store, key)
-        yield event.plain_result(f"互动语音：{'开启' if preference.enabled else '关闭'} · {preference.character} · {preference.locale}。")
+        skin_str = f" · {preference.skin}" if preference.skin != "default" else ""
+        yield event.plain_result(f"互动语音：{'开启' if preference.enabled else '关闭'} · {preference.character}{skin_str} · {preference.locale}。")
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_nikke_poke(self, event: AstrMessageEvent):
@@ -1504,17 +1560,14 @@ class NikkePlugin(Star):
 
     async def poke(self, event: AstrMessageEvent, character_name: str = ""):
         """戳一戳互动语音与台词。"""
-        char_key = character_name.strip().lower() if character_name else "alice"
-        aliases = {
-            "爱丽丝": "alice",
-            "小红帽": "red_hood",
-            "阿尼斯": "anis",
-            "拉毗": "rapi",
-            "红莲": "scarlet",
-            "桃乐丝": "dorothy",
-        }
-        key = aliases.get(char_key, char_key)
-        line = self.voice_resolver.resolve_poke_line(key, locale="zh-cn")
+        char_key = ""
+        if character_name.strip():
+            char_key = self.resolve_voice_character(character_name.strip()) or character_name.strip().lower()
+        if not char_key:
+            from .voice_audio import VoicePreference
+            pref = VoicePreference.load(self.store, f"{event.get_platform_name()}:{self._qq_id(event)}")
+            char_key = pref.character or "rapi"
+        line = self.voice_resolver.resolve_poke_line(char_key, locale="zh-cn")
         yield event.plain_result(line)
 
     async def event_schedule(self, event: AstrMessageEvent):
