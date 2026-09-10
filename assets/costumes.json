@@ -2,9 +2,334 @@
   "schema_version": 2,
   "entries": [
     {
+      "costume_id": "10001",
+      "character_resource_id": "82",
+      "spine_asset_id": "c082_01",
+      "costume_name": "Guardfish",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "10002",
+      "character_resource_id": "142",
+      "spine_asset_id": "c142_01",
+      "costume_name": "Sea of Sloth",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "10003",
+      "character_resource_id": "201",
+      "spine_asset_id": "c201_01",
+      "costume_name": "Sunrise Market",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "10004",
+      "character_resource_id": "131",
+      "spine_asset_id": "c131_01",
+      "costume_name": "Ocean Vitamin",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
       "costume_id": "10005",
       "character_resource_id": "10",
       "spine_asset_id": "c010_02",
+      "costume_name": "Classic Vacation",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "10006",
+      "character_resource_id": "350",
+      "spine_asset_id": "c350_01",
+      "costume_name": "A Pirate's Heart",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30001",
+      "character_resource_id": "11",
+      "spine_asset_id": "c011_01",
+      "costume_name": "Bling Bullet",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30002",
+      "character_resource_id": "30",
+      "spine_asset_id": "c030_01",
+      "costume_name": "Sweet Holic",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30003",
+      "character_resource_id": "70",
+      "spine_asset_id": "c070_01",
+      "costume_name": "Model Worker",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30004",
+      "character_resource_id": "102",
+      "spine_asset_id": "c102_01",
+      "costume_name": "Mechanic White",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30006",
+      "character_resource_id": "72",
+      "spine_asset_id": "c072_01",
+      "costume_name": "Black Sunday",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30007",
+      "character_resource_id": "181",
+      "spine_asset_id": "c181_01",
+      "costume_name": "Covert Nurse",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30008",
+      "character_resource_id": "160",
+      "spine_asset_id": "c160_01",
+      "costume_name": "Pretty in Pink",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30009",
+      "character_resource_id": "170",
+      "spine_asset_id": "c170_01",
+      "costume_name": "Government Grunt",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30010",
+      "character_resource_id": "212",
+      "spine_asset_id": "c212_01",
+      "costume_name": "Penguin Holmes",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30011",
+      "character_resource_id": "141",
+      "spine_asset_id": "c141_01",
+      "costume_name": "Extreme Fighter",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30012",
+      "character_resource_id": "80",
+      "spine_asset_id": "c080_01",
+      "costume_name": "Supreme Holiday",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30014",
+      "character_resource_id": "800",
+      "spine_asset_id": "c800_01",
+      "costume_name": "Coat Off",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30015",
+      "character_resource_id": "191",
+      "spine_asset_id": "c191_01",
+      "costume_name": "Sweet Home",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30016",
+      "character_resource_id": "90",
+      "spine_asset_id": "c090_02",
+      "costume_name": "Office Therapy",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30017",
+      "character_resource_id": "282",
+      "spine_asset_id": "c282_01",
+      "costume_name": "Midnight Stealth",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30018",
+      "character_resource_id": "260",
+      "spine_asset_id": "c260_01",
+      "costume_name": "First Affection",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "30019",
+      "character_resource_id": "70",
+      "spine_asset_id": "c070_02",
+      "costume_name": "Black Moon",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "40001",
+      "character_resource_id": "90",
+      "spine_asset_id": "c090_01",
+      "costume_name": "Color me Red",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "40002",
+      "character_resource_id": "210",
+      "spine_asset_id": "c210_01",
+      "costume_name": "Joy to the Nerds",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "50001",
+      "character_resource_id": "150",
+      "spine_asset_id": "c150_01",
+      "costume_name": "Mild Nocturne",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "50002",
+      "character_resource_id": "140",
+      "spine_asset_id": "c140_01",
+      "costume_name": "Hard-Boiled",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "50003",
+      "character_resource_id": "352",
+      "spine_asset_id": "c352_01",
+      "costume_name": "Chandelier",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "50004",
+      "character_resource_id": "202",
+      "spine_asset_id": "c202_01",
+      "costume_name": "Dark Rose",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "60001",
+      "character_resource_id": "22",
+      "spine_asset_id": "c022_01",
+      "costume_name": "Dramatic Chocolate",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "70002",
+      "character_resource_id": "200",
+      "spine_asset_id": "c200_01",
+      "costume_name": "Rabbit Deluxe",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "80001",
+      "character_resource_id": "101",
+      "spine_asset_id": "c101_01",
+      "costume_name": "Villain Racer",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "90001",
+      "character_resource_id": "810",
+      "spine_asset_id": "c810_01",
+      "costume_name": "Metamorphic Damage",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "90002",
+      "character_resource_id": "810",
+      "spine_asset_id": "c810_02",
+      "costume_name": "YoRHa Uniform 1",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "90003",
+      "character_resource_id": "811",
+      "spine_asset_id": "c811_01",
+      "costume_name": "Metamorphic Damage",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "90004",
+      "character_resource_id": "811",
+      "spine_asset_id": "c811_02",
+      "costume_name": "YoRHa Uniform Prototype",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "costume_id": "100001",
+      "character_resource_id": "212",
+      "spine_asset_id": "c212_02",
+      "costume_name": "Detective Nurse",
       "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
       "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
       "verified_at": "2026-09-09"

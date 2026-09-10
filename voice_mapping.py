@@ -24,20 +24,23 @@ class VoiceMapping:
     source: str
     source_ref: str
     checked_at: str
+    line_kind: str = "Lobby_Touch"
+    line_index: int = 1
 
 
 class VoiceMapRegistry:
     """加载精确的 Poke 语音映射；未知角色或服装不做默认借用。"""
 
     LOCALES = {"en", "ja", "ko"}
-    IDENTIFIER = re.compile(r"^[a-z0-9][a-z0-9_-]{0,99}$")
-    COSTUME = re.compile(r"^(?:default|[a-z0-9][a-z0-9_-]{0,99})$")
+    IDENTIFIER = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}$")
+    COSTUME = re.compile(r"^(?:default|[a-zA-Z0-9][a-zA-Z0-9_-]{0,99})$")
     SPINE_ASSET = re.compile(r"^c\d+(?:_\d+)?$")
+    SPEECH_ID = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}$")
 
     def __init__(self, path: str | Path):
         self.path = Path(path)
         self.errors: list[str] = []
-        self._entries: dict[tuple[str, str, str], VoiceMapping] = {}
+        self._entries: dict[tuple[str, str, str, str, int], VoiceMapping] = {}
         self._load()
 
     @property
@@ -51,8 +54,10 @@ class VoiceMapRegistry:
         locale: str | None,
         *,
         spine_asset_id: str | None = None,
+        line_kind: str = "Lobby_Touch",
+        line_index: int | None = None,
     ) -> VoiceMapping | None:
-        """只查找完整身份键；没有精确映射时返回 None。"""
+        """只查找完整身份键；没有精确映射时返回 None。对 Poke 只解析 Lobby_Touch。"""
         if not isinstance(character, str) or not isinstance(locale, str):
             return None
         normalized_character = character.strip().lower()
@@ -62,24 +67,55 @@ class VoiceMapRegistry:
             return None
         if not self.COSTUME.fullmatch(normalized_costume):
             return None
-        mapping = self._entries.get((normalized_character, normalized_costume, normalized_locale))
-        if mapping is None:
+        if line_kind != "Lobby_Touch":
             return None
-        if spine_asset_id is not None and mapping.spine_asset_id != str(spine_asset_id).strip().lower():
+        target_spine = str(spine_asset_id).strip().lower() if spine_asset_id is not None else None
+        candidates = [
+            e for e in self._entries.values()
+            if e.character == normalized_character
+            and e.costume == normalized_costume
+            and e.locale == normalized_locale
+            and e.line_kind == line_kind
+            and (target_spine is None or e.spine_asset_id == target_spine)
+        ]
+        if not candidates:
             return None
-        return mapping
+        if line_index is not None:
+            for c in candidates:
+                if c.line_index == line_index:
+                    return c
+            return None
+        return candidates[0]
 
-    def resolve_by_spine_asset(self, spine_asset_id: str | None, locale: str | None) -> VoiceMapping | None:
-        """按共享 canonical Spine identity查找，避免 Voice 自行猜测皮肤。"""
+    def resolve_by_spine_asset(
+        self,
+        spine_asset_id: str | None,
+        locale: str | None,
+        *,
+        line_kind: str = "Lobby_Touch",
+        line_index: int | None = None,
+    ) -> VoiceMapping | None:
+        """按共享 canonical Spine identity查找，避免 Voice 自行猜测皮肤。对 Poke 只解析 Lobby_Touch。"""
         if not isinstance(spine_asset_id, str) or not self.SPINE_ASSET.fullmatch(spine_asset_id.strip().lower()):
             return None
         if not isinstance(locale, str) or locale.strip().lower() not in self.LOCALES:
             return None
+        if line_kind != "Lobby_Touch":
+            return None
         candidates = [
             entry for entry in self._entries.values()
-            if entry.spine_asset_id == spine_asset_id.strip().lower() and entry.locale == locale.strip().lower()
+            if entry.spine_asset_id == spine_asset_id.strip().lower()
+            and entry.locale == locale.strip().lower()
+            and entry.line_kind == line_kind
         ]
-        return candidates[0] if len(candidates) == 1 else None
+        if not candidates:
+            return None
+        if line_index is not None:
+            for c in candidates:
+                if c.line_index == line_index:
+                    return c
+            return None
+        return candidates[0]
 
     @staticmethod
     def _reject_duplicate_keys(pairs):
@@ -96,14 +132,14 @@ class VoiceMapRegistry:
                 self.path.read_text(encoding="utf-8"),
                 object_pairs_hook=self._reject_duplicate_keys,
             )
-            if not isinstance(data, dict) or data.get("schema_version") != 2:
+            if not isinstance(data, dict) or data.get("schema_version") not in (2, 3):
                 raise VoiceMappingValidationError("voice_poke_map schema_version 无效")
             entries = data.get("entries")
             if not isinstance(entries, list):
                 raise VoiceMappingValidationError("voice_poke_map 缺少 entries 数组")
             for row in entries:
                 entry = self._parse_entry(row)
-                key = (entry.character, entry.costume, entry.locale)
+                key = (entry.character, entry.costume, entry.locale, entry.line_kind, entry.line_index)
                 if key in self._entries:
                     raise VoiceMappingValidationError(f"重复语音身份映射: {key!r}")
                 self._entries[key] = entry
@@ -123,12 +159,19 @@ class VoiceMapRegistry:
         spine_asset_id = row["spine_asset_id"].strip().lower()
         locale = row["locale"].strip().lower()
         map_key = row["map_key"].strip().lower()
-        speech_id = row["speech_id"].strip().lower()
+        speech_id = row["speech_id"].strip()
+        line_kind = str(row.get("line_kind", "Lobby_Touch")).strip()
+        line_index = row.get("line_index", 1)
+        if isinstance(line_index, bool) or not isinstance(line_index, int) or not (1 <= line_index <= 10):
+            raise VoiceMappingValidationError("语音 line_index 无效")
         if not cls.IDENTIFIER.fullmatch(character) or not cls.COSTUME.fullmatch(costume) or not cls.SPINE_ASSET.fullmatch(spine_asset_id):
             raise VoiceMappingValidationError("语音角色或服装标识无效")
-        if locale not in cls.LOCALES or not cls.IDENTIFIER.fullmatch(map_key) or not cls.IDENTIFIER.fullmatch(speech_id):
+        if locale not in cls.LOCALES or not cls.IDENTIFIER.fullmatch(map_key) or not cls.SPEECH_ID.fullmatch(speech_id):
             raise VoiceMappingValidationError("语音 locale 或资源标识无效")
+        if not cls.IDENTIFIER.fullmatch(line_kind):
+            raise VoiceMappingValidationError("语音 line_kind 标识无效")
         if not row["source"].startswith("https://") or not row["source_ref"].startswith("https://"):
             raise VoiceMappingValidationError("语音映射来源必须是 HTTPS")
         return VoiceMapping(character, costume, spine_asset_id, locale, map_key, speech_id,
-                            row["source"].strip(), row["source_ref"].strip(), row["checked_at"].strip())
+                            row["source"].strip(), row["source_ref"].strip(), row["checked_at"].strip(),
+                            line_kind, line_index)

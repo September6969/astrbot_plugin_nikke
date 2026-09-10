@@ -44,7 +44,7 @@ class VoiceResourceProvider:
             or budget <= 0
         ):
             raise ValueError("语音资源预算必须是正数")
-        if locale not in {"en", "ja", "ko"} or not all(isinstance(x, str) and re.fullmatch(r"[a-z0-9_]{1,100}", x) for x in (map_key, speech_id)):
+        if locale not in {"en", "ja", "ko"} or not all(isinstance(x, str) and re.fullmatch(r"[a-zA-Z0-9_]{1,100}", x) for x in (map_key, speech_id)):
             raise ValueError("语音语言或资源标识无效")
         key = hashlib.sha256(json.dumps([map_key, speech_id, locale]).encode()).hexdigest()
         self._failed = {item: until for item, until in self._failed.items() if until > time.monotonic()}
@@ -80,9 +80,16 @@ class VoiceResourceProvider:
             if cached is not None:
                 return cached
             async with httpx.AsyncClient(timeout=10, transport=self.transport, follow_redirects=False) as client:
-                mapping = await self._read(client, f"/scene/voice_map/{map_key}.json", 1024 * 1024)
-                identifiers = json.loads(mapping)
-                if not isinstance(identifiers, list) or speech_id not in identifiers:
+                if map_key.startswith("roledata_"):
+                    resource_id = map_key[len("roledata_"):]
+                    roledata_raw = await self._read(client, f"/roledata/{resource_id}-v2-en.json", 1024 * 1024)
+                    roledata = json.loads(roledata_raw)
+                    dialog_list = roledata.get("character_dialog_group_list", [])
+                    identifiers = {item.get("speech_id") for item in dialog_list if isinstance(item, dict)}
+                else:
+                    mapping = await self._read(client, f"/scene/voice_map/{map_key}.json", 1024 * 1024)
+                    identifiers = json.loads(mapping)
+                if not isinstance(identifiers, (list, set, tuple)) or speech_id not in identifiers:
                     raise ValueError("voice_map 未确认此语音 ID")
                 # 官网播放器显式请求 MP3，不依据文件名猜测 WAV 或 Silk。
                 content = await self._read(client, f"/voice/{locale}/{speech_id}.mp3", self.MAX_BYTES)

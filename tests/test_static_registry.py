@@ -17,7 +17,9 @@ class StaticDataRegistryTests(unittest.TestCase):
 
         self.assertTrue(registry.is_valid)
         self.assertEqual(registry.metadata("equipment").source_ref, "assets/README.md")
-        self.assertEqual(registry.mapping("costume"), {"10005": "c010_02"})
+        costumes = registry.mapping("costume")
+        self.assertEqual(len(costumes), 37)
+        self.assertEqual(costumes["10005"], "c010_02")
         self.assertEqual(registry.resolve("costume", "10005"), "c010_02")
         self.assertIsNone(registry.resolve("costume", "20001"))
         self.assertEqual(

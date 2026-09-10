@@ -1,0 +1,185 @@
+{
+  "audit_date": "2026-09-09",
+  "closure_policy": {
+    "shared_spine_identity": "Voice mappings share canonical cXXX / cXXX_YY identity with Spine",
+    "line_kind_requirement": "Poke voice lines require line_kind = Lobby_Touch; arbitrary story dialogue is strictly forbidden for Poke",
+    "locales_covered": [
+      "ja",
+      "en",
+      "ko"
+    ],
+    "lines_per_character": 3,
+    "story_speech_reclassification": {
+      "reclassified_id": "d_main_01_03_s_45",
+      "previous_role": "accidental poke placeholder",
+      "audit_category": "STORY_SCENE_DIALOGUE",
+      "source_map": "scene/voice_map/d_main_01.json",
+      "disposition": "Removed from assets/voice_poke_map.json; retained in story scene audit tests"
+    }
+  },
+  "statistics": {
+    "registered_entries": 81,
+    "covered_characters": 9,
+    "locales": [
+      "ja",
+      "en",
+      "ko"
+    ],
+    "all_audio_urls_verified_http_200": true
+  },
+  "entries_summary": [
+    {
+      "character": "rapi",
+      "costume": "default",
+      "spine_asset_id": "c010",
+      "resource_id": 10,
+      "speech_prefix": "c010",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "rapi",
+      "costume": "10005",
+      "spine_asset_id": "c010_02",
+      "resource_id": 10,
+      "speech_prefix": "c010",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "anis",
+      "costume": "default",
+      "spine_asset_id": "c012",
+      "resource_id": 12,
+      "speech_prefix": "c012",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "alice",
+      "costume": "default",
+      "spine_asset_id": "c191",
+      "resource_id": 191,
+      "speech_prefix": "c191",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "drake",
+      "costume": "default",
+      "spine_asset_id": "c101",
+      "resource_id": 101,
+      "speech_prefix": "c101",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "drake",
+      "costume": "80001",
+      "spine_asset_id": "c101_01",
+      "resource_id": 101,
+      "speech_prefix": "c101_01",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "red_hood",
+      "costume": "default",
+      "spine_asset_id": "c470",
+      "resource_id": 470,
+      "speech_prefix": "c470",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "scarlet",
+      "costume": "default",
+      "spine_asset_id": "c222",
+      "resource_id": 222,
+      "speech_prefix": "c222",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "character": "dorothy",
+      "costume": "default",
+      "spine_asset_id": "c233",
+      "resource_id": 233,
+      "speech_prefix": "c233",
+      "locales": [
+        "ja",
+        "en",
+        "ko"
+      ],
+      "line_indices": [
+        1,
+        2,
+        3
+      ]
+    }
+  ]
+}

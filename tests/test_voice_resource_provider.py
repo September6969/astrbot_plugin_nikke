@@ -180,3 +180,29 @@ class VoiceResourceTests(IsolatedAsyncioTestCase):
             with self.assertRaises(asyncio.CancelledError):
                 await request
             self.assertIsNone(await provider.resolve("fixture", "synthetic_line", "en"))
+
+    async def test_roledata_voice_verification_and_fetch(self):
+        calls = []
+
+        async def handle(request):
+            calls.append(str(request.url))
+            if str(request.url) == AssetManager.game_resource_url("/roledata/10-v2-en.json"):
+                return httpx.Response(200, json={
+                    "character_dialog_group_list": [
+                        {"speech_id": "c010_Lobby_Touch_1"},
+                        {"speech_id": "c010_Lobby_Touch_2"},
+                    ]
+                })
+            if str(request.url) == AssetManager.game_resource_url("/voice/ja/c010_Lobby_Touch_1.mp3"):
+                return httpx.Response(200, content=b"ID3touch_audio")
+            return httpx.Response(404)
+
+        with tempfile.TemporaryDirectory() as directory:
+            provider = VoiceResourceProvider(Path(directory), transport=httpx.MockTransport(handle))
+            result = await provider.resolve("roledata_10", "c010_Lobby_Touch_1", "ja")
+            self.assertIsNotNone(result)
+            self.assertEqual(result.read_bytes(), b"ID3touch_audio")
+
+            # Unverified speech_id in roledata rejected
+            self.assertIsNone(await provider.resolve("roledata_10", "c010_Lobby_Touch_99", "ja"))
+            await provider.close()
