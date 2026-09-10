@@ -1,0 +1,65 @@
+{
+  "timestamp": "2026-09-10T14:47:00Z",
+  "environment": {
+    "host": "serv",
+    "os": "Ubuntu 24.04 LTS",
+    "docker_container": "astrbot",
+    "python_version": "3.12"
+  },
+  "spine_4_1_worker": {
+    "repository": "https://github.com/EsotericSoftware/spine-runtimes.git",
+    "branch": "4.1",
+    "pinned_commit": "77a5db0ec6d16331f5efbaa7662bba9355bd3424",
+    "sfml_version": "2.5.1",
+    "worker_binary_container_path": "/usr/local/bin/nikke-spine-worker-4.1",
+    "worker_binary_bytes": 592736,
+    "entrypoint_container_path": "/usr/local/bin/entrypoint-xvfb-4.1.sh",
+    "host_persistent_path": "/opt/nikke-bot/astrbot/data/spine-worker-4.1/",
+    "configuration_key": "spine_worker_path_4_1",
+    "configuration_value": "/usr/local/bin/entrypoint-xvfb-4.1.sh",
+    "runtimes_coexistence": {
+      "4.0": true,
+      "4.1": true
+    }
+  },
+  "asset_verification": {
+    "character": "rapi",
+    "costume_id": 10005,
+    "costume_name": "Classic Vacation",
+    "costume_name_cn": "经典度假",
+    "spine_asset_id": "c010_03",
+    "spine_version": "4.1",
+    "skeleton_sha256": "6ce465eced20ef1ef336debeb39497b5567e5840c66dc5427fe764701d76998f",
+    "bundle_files": {
+      "skel": "skel.skel",
+      "atlas": "atlas.atlas",
+      "png": "png.png",
+      "declared_texture_page": "c010_02.png"
+    }
+  },
+  "production_render_evidence": {
+    "cache_key": "c010_03_10005_4.1_4.1_2.0",
+    "render_seconds": 1.509,
+    "rendered_dimensions": [536, 980],
+    "rendered_mode": "RGBA",
+    "bounding_box": [60, 60, 476, 920],
+    "portrait_path": "/AstrBot/data/nikke/cache/portraits/c010_03_10005_4.1_4.1_2.0.png",
+    "portrait_bytes": 288580,
+    "portrait_sha256": "7d1fc86f9ff7a8fc9b33af471594f2e35f30bfd9928b424f8c60b2264a20476a",
+    "visual_inspection": "PASS - Clean full-body RGBA render with transparent background and sharp alpha edges"
+  },
+  "character_progress_card_evidence": {
+    "card_path": "/AstrBot/data/nikke/cards/character-7377dd8a50c142c29d11314aaf9e0bc2.png",
+    "dimensions": [1800, 1000],
+    "bytes": 545434,
+    "sha256": "b7440b238f0bbba6cb8484adc0d0511d719081c3bfe1a85e860637c754f91f6c",
+    "visual_inspection": "PASS - Tactical Archive panel displays c010_03 full body, correct Chinese name and overload stats"
+  },
+  "voice_poke_verification": {
+    "method": "VoiceMapRegistry.resolve_poke()",
+    "line_selection": "Uniform random selection across available Lobby_Touch_1..3 lines",
+    "single_line_compatibility": "PASS - Verified 9 mass-produced characters stably select line 1 across repeated pokes",
+    "multi_line_coverage": "PASS - 100 trials on Rapi hit all 3 lines without selecting any missing lines",
+    "provider_hardening": "PASS - VoiceResourceProvider strictly requires category_group == 1 for all roledata speech mappings"
+  }
+}
