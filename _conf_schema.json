@@ -79,6 +79,11 @@
     "type": "bool",
     "default": true
   },
+  "custom_character_aliases": {
+    "description": "用户自定义角色别名，支持JSON对象格式或多行'角色名=别名1,别名2'格式；与内置别名表合并",
+    "type": "string",
+    "default": ""
+  },
   "enable_daily_actions": {
     "description": "启用已验证的社区签到与领奖接口",
     "type": "bool",

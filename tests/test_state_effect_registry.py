@@ -74,8 +74,8 @@ class StateEffectRegistryTests(unittest.TestCase):
         path = Path(__file__).resolve().parents[1] / "assets" / "state_effects.json"
         registry = StateEffectRegistry.from_file(path)
         expected = {
-            "7000611": ("命中率增加", "percent", 100.0),
-            "7001011": ("蓄力速度增加", "percent", 100.0),
+            "7000611": ("命中率增加", "percent", 10000.0),
+            "7001011": ("蓄力速度增加", "percent", 10000.0),
             "7001111": ("暴击率增加", "unknown", None),
             "7001211": ("暴击伤害增加", "unknown", None),
         }
@@ -92,7 +92,7 @@ class StateEffectRegistryTests(unittest.TestCase):
             self.assertEqual(metadata.label, label)
             self.assertEqual(metadata.value_kind, kind)
             self.assertEqual(metadata.value_divisor, divisor)
-            expected_value = (16.44, "percent") if kind == "percent" else (1644.0, "unknown")
+            expected_value = (0.1644, "percent") if kind == "percent" else (1644.0, "unknown")
             self.assertEqual(metadata.format_value(1644), expected_value)
 
     def test_integer_live_values_remain_unknown_until_unit_is_confirmed(self):

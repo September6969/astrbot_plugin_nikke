@@ -22,7 +22,7 @@ class VoiceCharacterResolver:
     - 英文名称（如 Arcana, Alice, Scarlet, Dorothy, Drake）
     """
 
-    def __init__(self, asset_dir: str | Path | None = None):
+    def __init__(self, asset_dir: str | Path | None = None, user_aliases: Any = None):
         if asset_dir is None:
             asset_dir = Path(__file__).resolve().parent / "assets"
         else:
@@ -32,13 +32,17 @@ class VoiceCharacterResolver:
         catalog_path = self.asset_dir / "character_catalog.json"
         alias_path = self.asset_dir / "character_aliases.json"
 
-        self.identity_resolver = CharacterDirectoryResolver(alias_path)
+        self.identity_resolver = CharacterDirectoryResolver(alias_path, user_aliases=user_aliases)
         self.key_to_resource_id: dict[str, int] = {}
         self.resource_id_to_key: dict[int, str] = {}
         self.spine_to_key: dict[str, str] = {}
         self.static_directory: list[dict[str, Any]] = []
 
         self._load_catalog(catalog_path)
+
+    def load_user_aliases(self, user_aliases: Any) -> None:
+        """加载并合并用户自定义别名。"""
+        self.identity_resolver.load_user_aliases(user_aliases)
 
     def _load_catalog(self, path: Path) -> None:
         if not path.is_file():

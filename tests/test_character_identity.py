@@ -3,7 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.character_identity import CharacterDirectoryResolver
+from astrbot_plugin_nikke.character_identity import CharacterDirectoryResolver, parse_user_aliases
+from astrbot_plugin_nikke.voice_character_resolver import VoiceCharacterResolver
 
 
 class CharacterDirectoryResolverTests(unittest.TestCase):
@@ -170,6 +171,73 @@ class CharacterDirectoryResolverTests(unittest.TestCase):
                 self.assertEqual(voice_resolver.resolve(spine_asset_id), char_key)
                 # 6. resource_id 解析
                 self.assertEqual(voice_resolver.resolve(str(resource_id)), char_key)
+
+    def test_parse_user_aliases_supports_multiple_formats(self):
+        # 1. 字典格式
+        res_dict = parse_user_aliases({"阿爾卡娜": ["卡娜", "大魔女"], "alice": "兔子"})
+        self.assertEqual(len(res_dict), 2)
+        self.assertEqual(res_dict[0], ("阿爾卡娜", ["卡娜", "大魔女"]))
+        self.assertEqual(res_dict[1], ("alice", ["兔子"]))
+
+        # 2. JSON 字符串格式
+        json_str = '{"阿爾卡娜": ["卡娜"], "c010": ["大拉毗"]}'
+        res_json = parse_user_aliases(json_str)
+        self.assertEqual(res_json, [("阿爾卡娜", ["卡娜"]), ("c010", ["大拉毗"])])
+
+        # 3. 多行 '角色名=别名1,别名2' 文本格式（支持多种分隔符，忽略注释与空行）
+        multiline_str = """
+        # 这是注释
+        // 也是注释
+        阿爾卡娜 = 卡娜, 大魔女、奥秘
+        alice: 兔子|爱丽|小兔
+        c010 = 大拉毗
+        """
+        res_text = parse_user_aliases(multiline_str)
+        self.assertEqual(res_text, [
+            ("阿爾卡娜", ["卡娜", "大魔女", "奥秘"]),
+            ("alice", ["兔子", "爱丽", "小兔"]),
+            ("c010", ["大拉毗"]),
+        ])
+
+        # 4. 边界与非法输入不崩溃
+        self.assertEqual(parse_user_aliases(None), [])
+        self.assertEqual(parse_user_aliases(""), [])
+        self.assertEqual(parse_user_aliases("   \n\n  "), [])
+        self.assertEqual(parse_user_aliases("invalid_no_delimiter_line"), [])
+        self.assertEqual(parse_user_aliases(12345), [])
+
+    def test_character_directory_resolver_with_user_aliases(self):
+        user_config = """
+        阿爾卡娜=大魔女,卡娜
+        alice=爱丽兔
+        """
+        resolver = CharacterDirectoryResolver(
+            Path(__file__).resolve().parents[1] / "assets" / "character_aliases.json",
+            user_aliases=user_config,
+        )
+        # 通过用户自定义别名查询
+        match_arcana = resolver.find(self.directory, "大魔女")
+        self.assertEqual(len(match_arcana), 1)
+        self.assertEqual(match_arcana[0]["name_code"], "arcana")
+
+        match_alice = resolver.find(self.directory, "爱丽兔")
+        self.assertEqual(len(match_alice), 1)
+        self.assertEqual(match_alice[0]["name_code"], "alice")
+
+        # 确保 display_name 绝不被自定义别名污染
+        enriched = resolver.enrich(self.directory[0])
+        self.assertIn("大魔女", enriched["aliases"])
+        self.assertEqual(CharacterDirectoryResolver.display_name(enriched), "阿爾卡娜")
+
+    def test_voice_character_resolver_with_user_aliases(self):
+        user_config = {
+            "snow_white_innocent_days": ["幼小白雪", "小纯真"],
+            "阿爾卡娜": ["塔罗魔女"],
+        }
+        voice_resolver = VoiceCharacterResolver(user_aliases=user_config)
+        self.assertEqual(voice_resolver.resolve("幼小白雪"), "snow_white_innocent_days")
+        self.assertEqual(voice_resolver.resolve("小纯真"), "snow_white_innocent_days")
+        self.assertEqual(voice_resolver.resolve("塔罗魔女"), "arcana")
 
 
 if __name__ == "__main__":

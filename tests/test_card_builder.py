@@ -109,10 +109,26 @@ class CharacterCardBuilderTests(unittest.TestCase):
     def test_percent_values_and_totals_use_raw_divided_by_10000(self):
         card = build_card()
         attack = card.equipment["head"].options[0]
-        self.assertEqual(attack.value, 13.22)
+        self.assertEqual(attack.value, 0.1322)
         totals = {(item.display_name, item.unit): item.value for item in card.option_totals}
-        self.assertAlmostEqual(totals[("攻击力增加", "percent")], 26.44)
-        self.assertAlmostEqual(totals[("优越代码伤害增加", "percent")], 63.65)
+        self.assertAlmostEqual(totals[("攻击力增加", "percent")], 0.2644)
+        self.assertAlmostEqual(totals[("优越代码伤害增加", "percent")], 0.6365)
+
+    def test_registry_and_fallback_option_values_are_identical(self):
+        builder = CharacterCardBuilder()
+        func = {
+            "function_type": "StatAtk",
+            "function_value": 1322,
+            "function_value_type": "Percent",
+            "level": 8,
+        }
+        fallback_option = builder._option_from_function(func)
+        registry_option = builder._option_from_function_with_registry(func, option_id="7000813")
+        self.assertEqual(fallback_option.value, 0.1322)
+        self.assertEqual(registry_option.value, 0.1322)
+        self.assertEqual(fallback_option.unit, "percent")
+        self.assertEqual(registry_option.unit, "percent")
+        self.assertEqual(fallback_option.value, registry_option.value)
 
     def test_ol_tier_registry_supplies_verified_level_when_detail_level_is_missing(self):
         fixture = load_fixture()
@@ -183,8 +199,8 @@ class CharacterCardBuilderTests(unittest.TestCase):
     def test_common_options_and_negative_charge_time(self):
         card = build_card()
         totals = {item.display_name: item.value for item in card.option_totals}
-        self.assertAlmostEqual(totals["最大装弹数增加"], 206.79)
-        self.assertAlmostEqual(totals["蓄力速度增加"], 2.28)
+        self.assertAlmostEqual(totals["最大装弹数增加"], 2.0679)
+        self.assertAlmostEqual(totals["蓄力速度增加"], 0.0228)
         self.assertNotIn("蓄力伤害增加", totals)
         charge_damage_unknown = [
             option

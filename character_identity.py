@@ -20,14 +20,94 @@ def _aliases(value: Any) -> list[str]:
     return [item for item in (_text(entry) for entry in value) if item]
 
 
+def parse_user_aliases(raw: Any) -> list[tuple[str, list[str]]]:
+    """解析用户自定义别名配置，支持 dict, list, JSON 字符串或多行 '角色名=别名1,别名2'。"""
+    results: list[tuple[str, list[str]]] = []
+    if not raw:
+        return results
+
+    if isinstance(raw, str):
+        text = raw.strip()
+        if not text:
+            return results
+        if text.startswith(("{", "[")):
+            try:
+                parsed = json.loads(text)
+                return parse_user_aliases(parsed)
+            except (ValueError, TypeError):
+                pass
+        import re
+        for line in text.splitlines():
+            line = line.strip()
+            if not line or line.startswith(("#", "//")):
+                continue
+            if "=" in line:
+                target, _, alias_part = line.partition("=")
+            elif ":" in line and not line.startswith("http"):
+                target, _, alias_part = line.partition(":")
+            else:
+                continue
+            target = target.strip()
+            if not target:
+                continue
+            aliases = [a.strip() for a in re.split(r"[,，、\|\t]+", alias_part) if a.strip()]
+            if aliases:
+                results.append((target, aliases))
+        return results
+
+    if isinstance(raw, dict):
+        import re
+        for target, val in raw.items():
+            t_str = _text(target)
+            if not t_str:
+                continue
+            if isinstance(val, (list, tuple)):
+                aliases = [a.strip() for a in (_text(x) for x in val) if a.strip()]
+            elif isinstance(val, str):
+                aliases = [a.strip() for a in re.split(r"[,，、\|\t]+", val) if a.strip()]
+            else:
+                continue
+            if aliases:
+                results.append((t_str, aliases))
+        return results
+
+    if isinstance(raw, (list, tuple)):
+        for item in raw:
+            if isinstance(item, dict):
+                target = _text(item.get("name") or item.get("target") or item.get("name_code") or item.get("name_zh_tw"))
+                val = item.get("aliases")
+                if target and isinstance(val, (list, tuple)):
+                    aliases = [a.strip() for a in (_text(x) for x in val) if a.strip()]
+                    if aliases:
+                        results.append((target, aliases))
+            elif isinstance(item, str):
+                results.extend(parse_user_aliases(item))
+        return results
+
+    return results
+
+
 class CharacterDirectoryResolver:
     """统一处理 name_code、官方名称和受控查询别名。"""
 
-    def __init__(self, alias_path: str | Path | None = None):
+    def __init__(self, alias_path: str | Path | None = None, user_aliases: Any = None):
         self._aliases_by_code: dict[str, list[str]] = {}
         self._aliases_by_zh_tw: dict[str, list[str]] = {}
+        self._user_aliases: dict[str, list[str]] = {}
         if alias_path is not None:
             self._load_aliases(Path(alias_path))
+        if user_aliases:
+            self.load_user_aliases(user_aliases)
+
+    def load_user_aliases(self, user_aliases: Any) -> None:
+        """加载并合并用户自定义别名。支持 dict, list, JSON 字符串或多行 '角色名=别名1,别名2'。"""
+        parsed = parse_user_aliases(user_aliases)
+        for target, aliases in parsed:
+            target_key = target.casefold()
+            existing = self._user_aliases.setdefault(target_key, [])
+            for alias in aliases:
+                if alias not in existing:
+                    existing.append(alias)
 
     def _load_aliases(self, path: Path) -> None:
         try:
@@ -65,13 +145,34 @@ class CharacterDirectoryResolver:
         result = dict(item)
         zh_tw = _text(result.get("name_zh_tw")) or _text(result.get("name_cn"))
         zh_cn = _text(result.get("name_zh_cn"))
+        name_en = _text(result.get("name_en"))
+        code = _text(result.get("name_code"))
         aliases = _aliases(result.get("aliases"))
         aliases.extend(_aliases(result.get("name_zh_cn_aliases")))
         aliases.extend(_aliases([result.get("name_zh_cn_alias")]))
-        code_key = _text(result.get("name_code")).casefold()
+        code_key = code.casefold()
         zh_tw_key = zh_tw.casefold()
+        zh_cn_key = zh_cn.casefold()
+        en_key = name_en.casefold()
+
         aliases.extend(self._aliases_by_code.get(code_key, []))
         aliases.extend(self._aliases_by_zh_tw.get(zh_tw_key, []))
+
+        keys_to_check = [code_key, zh_tw_key, zh_cn_key, en_key]
+        for extra in ("character_key", "spine_asset_id", "resource_id"):
+            val = _text(result.get(extra)).casefold()
+            if val and val not in keys_to_check:
+                keys_to_check.append(val)
+
+        for key in keys_to_check:
+            if key and key in self._user_aliases:
+                aliases.extend(self._user_aliases[key])
+
+        for existing_alias in list(aliases):
+            a_key = existing_alias.casefold()
+            if a_key in self._user_aliases:
+                aliases.extend(self._user_aliases[a_key])
+
         aliases = list(dict.fromkeys(alias for alias in aliases if alias and alias != zh_cn))
         result["name_zh_tw"] = zh_tw
         result["name_zh_cn"] = zh_cn
