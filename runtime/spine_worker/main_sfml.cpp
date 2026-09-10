@@ -6,6 +6,12 @@
 #include <spine/SkeletonJson.h>
 #include <spine/spine-sfml.h>
 
+#if defined(__has_include)
+#if __has_include(<spine/Version.h>)
+#include <spine/Version.h>
+#endif
+#endif
+
 #include <algorithm>
 #include <cerrno>
 #include <cmath>
@@ -20,6 +26,14 @@
 #include <vector>
 
 namespace {
+
+inline void *get_page_texture(const spine::AtlasPage *page) {
+#if defined(SPINE_MAJOR_VERSION) && (SPINE_MAJOR_VERSION > 4 || (SPINE_MAJOR_VERSION == 4 && SPINE_MINOR_VERSION >= 1))
+	return page != nullptr ? page->texture : nullptr;
+#else
+	return page != nullptr ? page->getRendererObject() : nullptr;
+#endif
+}
 
 struct Options {
 	std::string skeleton;
@@ -147,7 +161,7 @@ int render(const Options &options) {
 		spine::Atlas atlas(atlas_ready ? atlas_path.c_str() : "", &texture_loader);
 		if (!atlas_ready) {
 			print_error("atlas 文件读取失败");
-		} else if (atlas.getPages().size() == 0 || atlas.getPages()[0]->getRendererObject() == nullptr) {
+		} else if (atlas.getPages().size() == 0 || get_page_texture(atlas.getPages()[0]) == nullptr) {
 			print_error("atlas 纹理页加载失败");
 		} else {
 			spine::SkeletonData *skeleton_data = nullptr;

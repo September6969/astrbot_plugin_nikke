@@ -96,10 +96,14 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
             preference = VoicePreference(True, character="alice", locale="en", skin="default")
             preference.save(plugin.store, "aiocqhttp:fake-user")
             plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=None))
-            plugin.voice_mapping = SimpleNamespace(resolve=Mock(return_value=VoiceMapping(
+            mock_mapping = VoiceMapping(
                 "alice", "default", "c191", "en", "alice_poke", "alice_poke_01",
                 "https://example.invalid/source", "https://example.invalid/map", "2026-09-08",
-            )))
+            )
+            plugin.voice_mapping = SimpleNamespace(
+                resolve=Mock(return_value=mock_mapping),
+                resolve_poke=Mock(return_value=mock_mapping),
+            )
             plugin.voice_pipeline = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "verified.wav"))
             outputs = [x async for x in plugin.on_nikke_poke(event)]
             self.assertEqual(len(outputs), 1)

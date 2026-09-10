@@ -102,3 +102,48 @@ class VoiceMappingTests(TestCase):
             registry = VoiceMapRegistry(path)
             self.assertFalse(registry.is_valid)
             self.assertIsNone(registry.resolve("alice", "default", "en"))
+
+    def test_resolve_poke_selects_all_registered_lines_and_never_unregistered(self):
+        path = Path(__file__).resolve().parents[1] / "assets" / "voice_poke_map.json"
+        registry = VoiceMapRegistry(path)
+        self.assertTrue(registry.is_valid)
+
+        # Rapi has 3 Lobby_Touch lines
+        candidates = registry.resolve_candidates("rapi", "default", "ja")
+        self.assertEqual(len(candidates), 3)
+        self.assertEqual({c.line_index for c in candidates}, {1, 2, 3})
+
+        observed_indices = set()
+        for _ in range(100):
+            selected = registry.resolve_poke("rapi", "default", "ja")
+            self.assertIsNotNone(selected)
+            self.assertIn(selected.line_index, {1, 2, 3})
+            self.assertTrue(selected.speech_id.startswith("c010_Lobby_Touch_"))
+            observed_indices.add(selected.line_index)
+
+        # In 100 trials with uniform random choice, P(missing any of 3) = 3 * (2/3)^100 ~= 7.3e-18
+        self.assertEqual(observed_indices, {1, 2, 3})
+
+    def test_resolve_poke_single_line_characters_remain_stable(self):
+        path = Path(__file__).resolve().parents[1] / "assets" / "voice_poke_map.json"
+        registry = VoiceMapRegistry(path)
+        self.assertTrue(registry.is_valid)
+
+        # Test mass-produced R-grade characters with only Lobby_Touch_1
+        for char in ("soldier_eg", "soldier_fa", "product_08", "product_12", "idoll_flower"):
+            with self.subTest(character=char):
+                candidates = registry.resolve_candidates(char, "default", "ja")
+                self.assertEqual(len(candidates), 1)
+                self.assertEqual(candidates[0].line_index, 1)
+
+                observed = {registry.resolve_poke(char, "default", "ja").line_index for _ in range(30)}
+                self.assertEqual(observed, {1})
+
+    def test_resolve_poke_supports_custom_selector(self):
+        path = Path(__file__).resolve().parents[1] / "assets" / "voice_poke_map.json"
+        registry = VoiceMapRegistry(path)
+
+        # Selector always picks the last candidate (line 3)
+        selected = registry.resolve_poke("rapi", "default", "ja", selector=lambda c: c[-1])
+        self.assertIsNotNone(selected)
+        self.assertEqual(selected.line_index, 3)

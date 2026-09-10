@@ -85,7 +85,11 @@ class VoiceResourceProvider:
                     roledata_raw = await self._read(client, f"/roledata/{resource_id}-v2-en.json", 1024 * 1024)
                     roledata = json.loads(roledata_raw)
                     dialog_list = roledata.get("character_dialog_group_list", [])
-                    identifiers = {item.get("speech_id") for item in dialog_list if isinstance(item, dict)}
+                    identifiers = {
+                        item.get("speech_id")
+                        for item in dialog_list
+                        if isinstance(item, dict) and item.get("category_group") == 1
+                    }
                 else:
                     mapping = await self._read(client, f"/scene/voice_map/{map_key}.json", 1024 * 1024)
                     identifiers = json.loads(mapping)

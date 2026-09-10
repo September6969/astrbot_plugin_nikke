@@ -1,6 +1,6 @@
 # 配置合同与安全边界
 
-配置 schema 位于 `_conf_schema.json`。下表与 schema 的 15 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
+配置 schema 位于 `_conf_schema.json`。下表与 schema 的 19 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
 
 | 配置键 | 默认值 | 作用与边界 |
 | --- | --- | --- |
@@ -15,6 +15,7 @@
 | `summary_minute` | `30` | 每日汇总分钟。 |
 | `request_timeout` | `20` | BlaBlaLink 请求超时秒数。 |
 | `spine_worker_path` | 空字符串 | 可选的官方 Spine 4.0 headless worker 绝对路径；为空时只使用中性占位图回退。 |
+| `spine_worker_path_4_1` | 空字符串 | 可选的官方 Spine 4.1 headless worker 绝对路径；为空时对 4.1 bundle 只使用中性占位图回退。 |
 | `spine_runtime_version` | `4.0` | worker 严格匹配的 Spine major.minor；未知或不匹配 bundle 不执行。 |
 | `spine_worker_timeout` | `4` | 单次 worker 最大秒数，配置范围 1–5。 |
 | `voice_dynamic_enabled` | `true` | 仅启用 `assets/voice_poke_map.json` 中有来源证据的官方动态语音；空映射或关闭时回退本地音频/文本。 |

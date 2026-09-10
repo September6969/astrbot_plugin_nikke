@@ -189,8 +189,10 @@ class VoiceResourceTests(IsolatedAsyncioTestCase):
             if str(request.url) == AssetManager.game_resource_url("/roledata/10-v2-en.json"):
                 return httpx.Response(200, json={
                     "character_dialog_group_list": [
-                        {"speech_id": "c010_Lobby_Touch_1"},
-                        {"speech_id": "c010_Lobby_Touch_2"},
+                        {"speech_id": "c010_Lobby_Touch_1", "category_group": 1},
+                        {"speech_id": "c010_Lobby_Touch_2", "category_group": 1},
+                        {"speech_id": "c010_Story_Line", "category_group": 2},
+                        {"speech_id": "c010_Missing_Group"},
                     ]
                 })
             if str(request.url) == AssetManager.game_resource_url("/voice/ja/c010_Lobby_Touch_1.mp3"):
@@ -205,4 +207,8 @@ class VoiceResourceTests(IsolatedAsyncioTestCase):
 
             # Unverified speech_id in roledata rejected
             self.assertIsNone(await provider.resolve("roledata_10", "c010_Lobby_Touch_99", "ja"))
+
+            # Items with category_group != 1 or missing category_group rejected
+            self.assertIsNone(await provider.resolve("roledata_10", "c010_Story_Line", "ja"))
+            self.assertIsNone(await provider.resolve("roledata_10", "c010_Missing_Group", "ja"))
             await provider.close()

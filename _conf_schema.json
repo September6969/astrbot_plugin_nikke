@@ -59,6 +59,11 @@
     "type": "string",
     "default": ""
   },
+  "spine_worker_path_4_1": {
+    "description": "可选的官方 Spine 4.1 headless worker 绝对路径；留空时对 4.1 bundle 使用中性程序占位图",
+    "type": "string",
+    "default": ""
+  },
   "spine_runtime_version": {
     "description": "Spine worker 的严格 major.minor 版本；不得用默认值猜测不匹配 bundle",
     "type": "string",

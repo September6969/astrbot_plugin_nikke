@@ -7,6 +7,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 
 class VoiceMappingValidationError(ValueError):
@@ -47,6 +48,58 @@ class VoiceMapRegistry:
     def is_valid(self) -> bool:
         return not self.errors
 
+    def resolve_candidates(
+        self,
+        character: str | None,
+        costume: str | int | None,
+        locale: str | None,
+        *,
+        spine_asset_id: str | None = None,
+        line_kind: str = "Lobby_Touch",
+    ) -> list[VoiceMapping]:
+        """查找指定角色、服装和 locale 下所有可用的语音条目（如 Lobby_Touch_1..3）。"""
+        if not isinstance(character, str) or not isinstance(locale, str):
+            return []
+        normalized_character = character.strip().lower()
+        normalized_locale = locale.strip().lower()
+        normalized_costume = "default" if costume in (None, "", 0, "default") else str(costume).strip().lower()
+        if not self.IDENTIFIER.fullmatch(normalized_character) or normalized_locale not in self.LOCALES:
+            return []
+        if not self.COSTUME.fullmatch(normalized_costume):
+            return []
+        if line_kind != "Lobby_Touch":
+            return []
+        target_spine = str(spine_asset_id).strip().lower() if spine_asset_id is not None else None
+        return [
+            e for e in self._entries.values()
+            if e.character == normalized_character
+            and e.costume == normalized_costume
+            and e.locale == normalized_locale
+            and e.line_kind == line_kind
+            and (target_spine is None or e.spine_asset_id == target_spine)
+        ]
+
+    def resolve_candidates_by_spine_asset(
+        self,
+        spine_asset_id: str | None,
+        locale: str | None,
+        *,
+        line_kind: str = "Lobby_Touch",
+    ) -> list[VoiceMapping]:
+        """按共享 canonical Spine asset ID 查找所有可用的语音条目。"""
+        if not isinstance(spine_asset_id, str) or not self.SPINE_ASSET.fullmatch(spine_asset_id.strip().lower()):
+            return []
+        if not isinstance(locale, str) or locale.strip().lower() not in self.LOCALES:
+            return []
+        if line_kind != "Lobby_Touch":
+            return []
+        return [
+            entry for entry in self._entries.values()
+            if entry.spine_asset_id == spine_asset_id.strip().lower()
+            and entry.locale == locale.strip().lower()
+            and entry.line_kind == line_kind
+        ]
+
     def resolve(
         self,
         character: str | None,
@@ -58,26 +111,9 @@ class VoiceMapRegistry:
         line_index: int | None = None,
     ) -> VoiceMapping | None:
         """只查找完整身份键；没有精确映射时返回 None。对 Poke 只解析 Lobby_Touch。"""
-        if not isinstance(character, str) or not isinstance(locale, str):
-            return None
-        normalized_character = character.strip().lower()
-        normalized_locale = locale.strip().lower()
-        normalized_costume = "default" if costume in (None, "", 0, "default") else str(costume).strip().lower()
-        if not self.IDENTIFIER.fullmatch(normalized_character) or normalized_locale not in self.LOCALES:
-            return None
-        if not self.COSTUME.fullmatch(normalized_costume):
-            return None
-        if line_kind != "Lobby_Touch":
-            return None
-        target_spine = str(spine_asset_id).strip().lower() if spine_asset_id is not None else None
-        candidates = [
-            e for e in self._entries.values()
-            if e.character == normalized_character
-            and e.costume == normalized_costume
-            and e.locale == normalized_locale
-            and e.line_kind == line_kind
-            and (target_spine is None or e.spine_asset_id == target_spine)
-        ]
+        candidates = self.resolve_candidates(
+            character, costume, locale, spine_asset_id=spine_asset_id, line_kind=line_kind
+        )
         if not candidates:
             return None
         if line_index is not None:
@@ -96,18 +132,9 @@ class VoiceMapRegistry:
         line_index: int | None = None,
     ) -> VoiceMapping | None:
         """按共享 canonical Spine identity查找，避免 Voice 自行猜测皮肤。对 Poke 只解析 Lobby_Touch。"""
-        if not isinstance(spine_asset_id, str) or not self.SPINE_ASSET.fullmatch(spine_asset_id.strip().lower()):
-            return None
-        if not isinstance(locale, str) or locale.strip().lower() not in self.LOCALES:
-            return None
-        if line_kind != "Lobby_Touch":
-            return None
-        candidates = [
-            entry for entry in self._entries.values()
-            if entry.spine_asset_id == spine_asset_id.strip().lower()
-            and entry.locale == locale.strip().lower()
-            and entry.line_kind == line_kind
-        ]
+        candidates = self.resolve_candidates_by_spine_asset(
+            spine_asset_id, locale, line_kind=line_kind
+        )
         if not candidates:
             return None
         if line_index is not None:
@@ -116,6 +143,31 @@ class VoiceMapRegistry:
                     return c
             return None
         return candidates[0]
+
+    def resolve_poke(
+        self,
+        character: str | None,
+        costume: str | int | None,
+        locale: str | None,
+        *,
+        spine_asset_id: str | None = None,
+        selector: Callable[[list[VoiceMapping]], VoiceMapping] | None = None,
+    ) -> VoiceMapping | None:
+        """为 Poke 互动从实际可用的 Lobby_Touch 映射中选取条目。
+
+        对 3 条语音的角色在 1..3 之间随机选择；
+        对仅有 1 条语音的角色（如 9 名量产型）稳定选择 line 1。
+        支持传入 selector 函数便于可预测测试。
+        """
+        candidates = self.resolve_candidates(character, costume, locale, spine_asset_id=spine_asset_id)
+        if not candidates and spine_asset_id:
+            candidates = self.resolve_candidates_by_spine_asset(spine_asset_id, locale)
+        if not candidates:
+            return None
+        if selector is not None:
+            return selector(candidates)
+        import random
+        return random.choice(candidates)
 
     @staticmethod
     def _reject_duplicate_keys(pairs):

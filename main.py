@@ -764,14 +764,23 @@ class NikkePlugin(Star):
             mapping_registry = getattr(self, "voice_mapping", None)
             pipeline = getattr(self, "voice_pipeline", None)
             canonical_spine = getattr(preference, "spine_asset_id", "") or None
-            mapping = mapping_registry.resolve(
-                preference.character,
-                preference.skin,
-                preference.locale,
-                spine_asset_id=canonical_spine,
-            ) if mapping_registry else None
-            if mapping is None and canonical_spine and mapping_registry:
-                mapping = mapping_registry.resolve_by_spine_asset(canonical_spine, preference.locale)
+            if mapping_registry:
+                if hasattr(mapping_registry, "resolve_poke"):
+                    mapping = mapping_registry.resolve_poke(
+                        preference.character,
+                        preference.skin,
+                        preference.locale,
+                        spine_asset_id=canonical_spine,
+                    )
+                else:
+                    mapping = mapping_registry.resolve(
+                        preference.character,
+                        preference.skin,
+                        preference.locale,
+                        spine_asset_id=canonical_spine,
+                    )
+                    if mapping is None and canonical_spine:
+                        mapping = mapping_registry.resolve_by_spine_asset(canonical_spine, preference.locale)
             if (
                 mapping is not None
                 and pipeline is not None
