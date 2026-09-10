@@ -66,29 +66,6 @@ class VoiceResolverTests(unittest.TestCase):
         self.assertFalse(VoiceResolver.is_voice_supported("unverified_platform"))
         self.assertFalse(VoiceResolver.is_voice_supported(""))
 
-    def test_poke_line_locale_and_character_resolution(self):
-        # Alice zh-cn
-        zh_line = VoiceResolver.resolve_poke_line("alice", "zh-cn")
-        self.assertIsInstance(zh_line, str)
-        self.assertTrue(any(k in zh_line for k in ("爱丽丝", "兔兔", "胡萝卜", "心跳")))
-
-        # Alice en
-        en_line = VoiceResolver.resolve_poke_line("alice", "en")
-        self.assertIsInstance(en_line, str)
-        self.assertTrue(any(k in en_line for k in ("Alice", "Wonderland", "Commander", "tickles")))
-
-        # Other characters
-        for char in ("red_hood", "anis", "rapi", "scarlet", "dorothy"):
-            line = VoiceResolver.resolve_poke_line(char, "zh-cn")
-            self.assertIsInstance(line, str)
-            self.assertTrue(len(line) > 0)
-
-    def test_unknown_character_does_not_borrow_alice_line(self):
-        self.assertIsNone(VoiceResolver.resolve_character_key("not_registered"))
-        line = VoiceResolver.resolve_poke_line("not_registered", "zh-cn")
-        self.assertEqual(line, "指挥官，当前角色暂无已验证的互动台词。")
-        self.assertNotIn("爱丽丝", line)
-
 
 if __name__ == "__main__":
     unittest.main()

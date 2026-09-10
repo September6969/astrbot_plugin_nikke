@@ -638,10 +638,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             calls.append(("cdk_history",))
             yield "CDK历史结果"
 
-        async def poke(event, char=""):
-            calls.append(("poke", char))
-            yield "戳一戳结果"
-
         async def event_schedule(event):
             calls.append(("event_schedule",))
             yield "日程结果"
@@ -658,7 +654,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin.cdk_batch = cdk_batch
         plugin.cdk_available = cdk_available
         plugin.cdk_history = cdk_history
-        plugin.poke = poke
         plugin.event_schedule = event_schedule
         plugin.announcements_view = announcements_view
         plugin.guide = guide
@@ -668,7 +663,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         r2 = [item async for item in plugin.nikke(event, "cdk", "批量", "CODE1 CODE2")]
         r3 = [item async for item in plugin.nikke(event, "cdk", "可用", "")]
         r4 = [item async for item in plugin.nikke(event, "cdk", "历史", "")]
-        r5 = [item async for item in plugin.nikke(event, "戳一戳", "爱丽丝", "")]
         r6 = [item async for item in plugin.nikke(event, "日程", "", "")]
         r7 = [item async for item in plugin.nikke(event, "公告", "", "")]
         r8 = [item async for item in plugin.nikke(event, "攻略", "练度", "")]
@@ -677,7 +671,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(r2, ["批量CDK结果"])
         self.assertEqual(r3, ["可用CDK结果"])
         self.assertEqual(r4, ["CDK历史结果"])
-        self.assertEqual(r5, ["戳一戳结果"])
         self.assertEqual(r6, ["日程结果"])
         self.assertEqual(r7, ["公告结果"])
         self.assertEqual(r8, ["攻略结果"])
@@ -688,7 +681,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 ("cdk_batch", "CODE1 CODE2"),
                 ("cdk_available",),
                 ("cdk_history",),
-                ("poke", "爱丽丝"),
                 ("event_schedule",),
                 ("announcements_view",),
                 ("guide", "练度"),

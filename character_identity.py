@@ -37,6 +37,7 @@ class CharacterDirectoryResolver:
         entries = payload.get("entries", []) if isinstance(payload, dict) else []
         if not isinstance(entries, list):
             return
+        alias_to_target: dict[str, str] = {}
         for entry in entries:
             if not isinstance(entry, dict):
                 continue
@@ -45,6 +46,15 @@ class CharacterDirectoryResolver:
                 continue
             code = _text(entry.get("name_code"))
             zh_tw = _text(entry.get("name_zh_tw"))
+            target_key = (code or zh_tw).casefold()
+            if not target_key:
+                continue
+            for val in values:
+                norm_val = val.casefold()
+                existing = alias_to_target.get(norm_val)
+                if existing is not None and existing != target_key:
+                    raise ValueError(f"别名冲突: 别名 {val!r} 同时映射到多个不同角色 ({existing!r} 与 {target_key!r})")
+                alias_to_target[norm_val] = target_key
             if code:
                 self._aliases_by_code[code.casefold()] = values
             if zh_tw:

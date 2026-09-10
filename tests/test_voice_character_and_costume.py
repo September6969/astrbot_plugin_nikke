@@ -251,6 +251,34 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
         self.assertEqual(pref.locale, "en")  # 保持不变
 
+    async def test_text_poke_dialogue_is_completely_removed(self):
+        """测试纯文本 /妮姬 戳一戳 指令与伪造台词已被彻底移除。"""
+        from astrbot_plugin_nikke.voice_feedback import VoiceResolver
+        event = self._event()
+
+        # 1. CHARACTER_LINES 已从 VoiceResolver 彻底删除
+        self.assertFalse(hasattr(VoiceResolver, "CHARACTER_LINES"))
+        self.assertFalse(hasattr(VoiceResolver, "resolve_poke_line"))
+
+        # 2. poke 方法与 voice_resolver 实例在 plugin 中已不存在
+        self.assertFalse(hasattr(self.plugin, "poke"))
+        self.assertFalse(hasattr(self.plugin, "voice_resolver"))
+
+        # 3. 帮助文本中不再包含戳一戳
+        help_text = self.plugin._help_text()
+        self.assertNotIn("戳一戳", help_text)
+        self.assertNotIn("poke", help_text.lower())
+        self.assertNotIn("互动台词", help_text)
+
+        # 4. 路由不再处理 /nikke poke 或 /妮姬 戳一戳（回退到通用未知指令/帮助）
+        poke_results = [r async for r in self.plugin.nikke(event, "戳一戳")]
+        self.assertTrue(len(poke_results) > 0)
+        self.assertIn("未知指令", poke_results[0])
+
+        poke_en_results = [r async for r in self.plugin.nikke(event, "poke")]
+        self.assertTrue(len(poke_en_results) > 0)
+        self.assertIn("未知指令", poke_en_results[0])
+
 
 class ContextMock:
     pass

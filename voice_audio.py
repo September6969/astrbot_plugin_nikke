@@ -25,9 +25,10 @@ class VoicePreference:
         if not raw:
             return cls()
         data = {k: v for k, v in raw.items() if k in cls.__dataclass_fields__}
-        # 迁移旧版默认语言 "zh-cn" 到官方默认 "ja"，保留用户显式选择
-        if data.get("locale") == "zh-cn" and not data.get("explicit_locale", False):
+        # 严格收口至官方语音语言 ("ja", "en", "ko")；非法或遗留语言（如 "zh-cn"、"fr" 等）一律迁移至默认 "ja"
+        if data.get("locale") not in {"ja", "en", "ko"}:
             data["locale"] = "ja"
+            data["explicit_locale"] = False
         return cls(**data)
 
     def save(self, store, key):

@@ -124,14 +124,33 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
             loaded = VoicePreference.load(store, "legacy-user")
             self.assertEqual(loaded.locale, "ja")
 
-            # 用户显式指定的语言（包含 zh-cn）保留
-            store.set_setting("voice:" + hashlib.sha256(b"explicit-user").hexdigest(), {
+            # 即使显式设置了 zh-cn，也必须严格收口迁移到 ja
+            store.set_setting("voice:" + hashlib.sha256(b"explicit-zh-cn").hexdigest(), {
                 "enabled": True, "character": "rapi", "locale": "zh-cn", "skin": "default", "spine_asset_id": "",
                 "explicit_locale": True
             })
-            loaded_explicit = VoicePreference.load(store, "explicit-user")
-            self.assertEqual(loaded_explicit.locale, "zh-cn")
-            self.assertTrue(loaded_explicit.explicit_locale)
+            loaded_explicit = VoicePreference.load(store, "explicit-zh-cn")
+            self.assertEqual(loaded_explicit.locale, "ja")
+            self.assertFalse(loaded_explicit.explicit_locale)
+
+            # 未知/外部语言（如 fr）同样收口迁移到 ja
+            store.set_setting("voice:" + hashlib.sha256(b"fr-user").hexdigest(), {
+                "enabled": True, "character": "rapi", "locale": "fr", "skin": "default", "spine_asset_id": "",
+                "explicit_locale": True
+            })
+            loaded_fr = VoicePreference.load(store, "fr-user")
+            self.assertEqual(loaded_fr.locale, "ja")
+            self.assertFalse(loaded_fr.explicit_locale)
+
+            # 官方已验证语言 (ja, en, ko) 正常保留
+            for valid_loc in ("ja", "en", "ko"):
+                store.set_setting("voice:" + hashlib.sha256(f"valid-{valid_loc}".encode()).hexdigest(), {
+                    "enabled": True, "character": "rapi", "locale": valid_loc, "skin": "default", "spine_asset_id": "",
+                    "explicit_locale": True
+                })
+                loaded_valid = VoicePreference.load(store, f"valid-{valid_loc}")
+                self.assertEqual(loaded_valid.locale, valid_loc)
+                self.assertTrue(loaded_valid.explicit_locale)
 
     async def test_poke_interaction_audio_only_no_text_fallback(self):
         from types import SimpleNamespace

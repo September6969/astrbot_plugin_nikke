@@ -50,7 +50,6 @@ from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
 from .costume_registry import CostumeRegistry
 from .voice_character_resolver import VoiceCharacterResolver
-from .voice_feedback import VoiceResolver
 from .voice_audio import VoiceAudioCache, VoicePreference, is_self_poke
 from .voice_encoder import VoiceEncoder
 from .voice_mapping import VoiceMapRegistry
@@ -103,7 +102,6 @@ class NikkePlugin(Star):
         self.campaign_renderer = self._build_campaign_renderer()
         self.cdk_service = CdkService(self.client)
         self.feedback_manager = DelayedFeedbackManager(1.5)
-        self.voice_resolver = VoiceResolver()
         self.voice_mapping = VoiceMapRegistry(self.plugin_dir / "assets" / "voice_poke_map.json")
         for error in self.voice_mapping.errors:
             logger.warning("[NIKKE] 语音映射清单校验失败：%s", error)
@@ -351,7 +349,6 @@ class NikkePlugin(Star):
                 "/妮姬 兑换 批量 <CDK1> <CDK2>...\n"
                 "/妮姬 兑换 可用|历史\n"
                 "/妮姬 语音 [开|关|语言|角色|服装]　(/nikke voice)\n"
-                "/妮姬 戳一戳 [角色名]　(/nikke poke) — 互动台词（文本展示）\n"
                 "注意：群聊发送兑换命令会公开兑换码。"
             ),
             "管理": (
@@ -369,7 +366,7 @@ class NikkePlugin(Star):
             "raid": "查询", "突袭": "查询", "campaign": "查询", "stage": "查询", "战役": "查询",
             "schedule": "查询", "日程": "查询", "news": "查询", "公告": "查询",
             "guide": "查询", "攻略": "查询",
-            "daily": "日常", "routine": "日常", "日常": "日常", "push": "日常", "poke": "日常", "戳": "日常", "戳一戳": "日常",
+            "daily": "日常", "routine": "日常", "日常": "日常", "push": "日常",
             "admin": "管理",
         }
         selected = aliases.get(category.strip().lower(), category.strip())
@@ -456,10 +453,6 @@ class NikkePlugin(Star):
             return
         if command_key in {"战役", "campaign", "关卡", "stage"}:
             async for result in self.campaign(event, arg1, arg2):
-                yield result
-            return
-        if command_key in {"戳一戳", "戳", "poke"}:
-            async for result in self.poke(event, arg1):
                 yield result
             return
         if command_key in {"日程"}:
@@ -550,7 +543,6 @@ class NikkePlugin(Star):
             "campaign": (self.campaign, (event, arg1, arg2)),
             "raid": (self.union_raid, (event,)),
             "union_raid": (self.union_raid, (event,)),
-            "poke": (self.poke, (event, arg1)),
             "news": (self.announcements_view, (event,)),
             "guide": (self.guide, (event, arg1)),
             "push": (self.push, (event, arg1)),
@@ -1557,18 +1549,6 @@ class NikkePlugin(Star):
         finally:
             if handle:
                 await handle.cancel()
-
-    async def poke(self, event: AstrMessageEvent, character_name: str = ""):
-        """戳一戳互动语音与台词。"""
-        char_key = ""
-        if character_name.strip():
-            char_key = self.resolve_voice_character(character_name.strip()) or character_name.strip().lower()
-        if not char_key:
-            from .voice_audio import VoicePreference
-            pref = VoicePreference.load(self.store, f"{event.get_platform_name()}:{self._qq_id(event)}")
-            char_key = pref.character or "rapi"
-        line = self.voice_resolver.resolve_poke_line(char_key, locale="zh-cn")
-        yield event.plain_result(line)
 
     async def event_schedule(self, event: AstrMessageEvent):
         """查询进行中与即将截止的官方活动日程。"""
