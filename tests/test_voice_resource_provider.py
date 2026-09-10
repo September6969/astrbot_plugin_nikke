@@ -212,3 +212,42 @@ class VoiceResourceTests(IsolatedAsyncioTestCase):
             self.assertIsNone(await provider.resolve("roledata_10", "c010_Story_Line", "ja"))
             self.assertIsNone(await provider.resolve("roledata_10", "c010_Missing_Group", "ja"))
             await provider.close()
+
+    async def test_cache_integrity_detects_corrupted_or_replaced_audio_file(self):
+        """验证已进入可信缓存的文件一旦被外部篡改或覆盖，再次访问时能被确定性识别并拒绝。"""
+        calls = []
+
+        async def handle(request):
+            calls.append(str(request.url))
+            if str(request.url) == AssetManager.game_resource_url("/scene/voice_map/fixture.json"):
+                return httpx.Response(200, json=["synthetic_line"])
+            return httpx.Response(200, content=b"ID3good_audio")
+
+        with tempfile.TemporaryDirectory() as directory:
+            provider = VoiceResourceProvider(Path(directory), transport=httpx.MockTransport(handle))
+            result = await provider.resolve("fixture", "synthetic_line", "en")
+            self.assertIsNotNone(result)
+            self.assertEqual(result.read_bytes(), b"ID3good_audio")
+
+            # 第二次热命中（命中内存可信元数据）
+            hit = await provider.resolve("fixture", "synthetic_line", "en")
+            self.assertEqual(hit, result)
+
+            # 外部篡改目标文件内容
+            import time
+            time.sleep(0.02)
+            result.write_bytes(b"ID3corrupted_content")
+
+            # 篡改后，元数据变更，完整性校验必须察觉并拒绝损坏文件，绝不能永久信任篡改内容
+            calls.clear()
+
+            async def failing_handle(request):
+                calls.append(str(request.url))
+                if str(request.url) == AssetManager.game_resource_url("/scene/voice_map/fixture.json"):
+                    return httpx.Response(200, json=["synthetic_line"])
+                return httpx.Response(500)
+
+            provider.transport = httpx.MockTransport(failing_handle)
+            recheck = await provider.resolve("fixture", "synthetic_line", "en")
+            self.assertIsNone(recheck, "损坏的文件绝不能作为可信缓存返回")
+            await provider.close()

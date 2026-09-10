@@ -887,6 +887,35 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         # 最近的 uid_59 应存在
         self.assertIn("uid_59", plugin._stats_profile_cache)
 
+    def test_name_map_cache_identity_rejects_same_length_different_content(self):
+        """回归测试：目录 A 与目录 B 具有相同长度（如均为 200 条），但内容不同时，B 绝不能复用 A 的缓存。"""
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.plugin_dir = Path(__file__).resolve().parent.parent
+
+        dir_a = [
+            {"name_code": 101, "name_cn": "拉毗", "name_en": "Rapi"},
+            {"name_code": 102, "name_cn": "阿尼斯", "name_en": "Anis"},
+        ]
+        dir_b = [
+            {"name_code": 101, "name_cn": "红莲", "name_en": "Scarlet"},
+            {"name_code": 102, "name_cn": "神罚", "name_en": "Modernia"},
+        ]
+
+        self.assertEqual(len(dir_a), len(dir_b))
+
+        plugin._directory = dir_a
+        map_a = plugin._name_map()
+        self.assertIn("拉毗", map_a["101"])
+        self.assertIs(plugin._name_map(), map_a)
+
+        plugin._directory = dir_b
+        map_b = plugin._name_map()
+        self.assertNotEqual(map_a, map_b)
+        self.assertIn("红莲", map_b["101"])
+        self.assertNotIn("拉毗", map_b["101"])
+
 
 if __name__ == "__main__":
     unittest.main()

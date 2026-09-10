@@ -3,9 +3,12 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
 import json
 import os
+import re
 import sqlite3
 import threading
 import time
@@ -23,36 +26,76 @@ SCHEMA_VERSION = 2
 
 
 class NikkeStore:
-    # 44 字符是 Fernet 32 字节密钥的 URL-safe base64 长度。
-    _FERNET_KEY_LENGTH = 44
-
     def __init__(self, data_dir: str | Path):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.db_path = self.data_dir / "nikke.sqlite3"
         self.key_path = self.data_dir / "secret.key"
         self._lock = threading.RLock()
-        # WAL 模式持久化后不需要每次连接都重新设置；用标志跳过重复 PRAGMA。
-        self._wal_activated = False
+        # 记录当前已配置 WAL 模式的文件身份，避免盲目依赖进程级布尔值
+        self._active_db_identity: tuple[int, int, int] | None = None
         self._cipher = Fernet(self._load_or_create_key())
         self._init_db()
+
+    @staticmethod
+    def validate_fernet_key(key: bytes | str) -> bytes:
+        """语义校验 Fernet 密钥：必须是合法 URL-safe Base64 编码，且解码后恰好为 32 字节。"""
+        if isinstance(key, str):
+            try:
+                raw = key.encode("ascii")
+            except UnicodeEncodeError:
+                raise ValueError("NIKKE_ENCRYPTION_KEY 必须为 ASCII 编码字符串") from None
+        else:
+            raw = bytes(key)
+
+        # 校验字符集与形式：URL-safe Base64 规范（43 字符由 A-Za-z0-9_- 组成，末尾 1 个 '=' 填充）
+        if not re.fullmatch(rb"[A-Za-z0-9_-]{43}=", raw):
+            raise ValueError(
+                "NIKKE_ENCRYPTION_KEY 格式无效：必须是 44 字符的合法 URL-safe Base64 字符串（以 '=' 结尾）"
+            )
+
+        try:
+            decoded = base64.urlsafe_b64decode(raw)
+        except (binascii.Error, ValueError) as exc:
+            raise ValueError("NIKKE_ENCRYPTION_KEY Base64 解码失败") from exc
+
+        if len(decoded) != 32:
+            raise ValueError(
+                f"NIKKE_ENCRYPTION_KEY 解码后长度无效：期望恰好 32 字节（实际 {len(decoded)} 字节）"
+            )
+
+        try:
+            Fernet(raw)
+        except Exception as exc:
+            raise ValueError("NIKKE_ENCRYPTION_KEY 不是合法的 Fernet 密钥") from exc
+
+        return raw
 
     def _load_or_create_key(self) -> bytes:
         env_key = os.getenv("NIKKE_ENCRYPTION_KEY", "").strip()
         if env_key:
-            raw = env_key.encode("ascii")
-            if len(env_key) != self._FERNET_KEY_LENGTH:
-                raise ValueError(
-                    f"NIKKE_ENCRYPTION_KEY 长度无效（期望 {self._FERNET_KEY_LENGTH} 字符，"
-                    f"实际 {len(env_key)} 字符）；请使用 Fernet.generate_key() 生成合法密钥。"
-                )
-            return raw
+            return self.validate_fernet_key(env_key)
         if self.key_path.exists():
-            return self.key_path.read_bytes().strip()
+            key = self.key_path.read_bytes().strip()
+            return self.validate_fernet_key(key)
         key = Fernet.generate_key()
         self.key_path.write_bytes(key)
         os.chmod(self.key_path, 0o600)
         return key
+
+    def _ensure_wal_mode(self, conn: sqlite3.Connection) -> None:
+        """按实际数据库文件身份维护 WAL 模式。
+        若底层数据库文件被外部替换、重建或恢复，能自动感知并重新初始化 WAL 模式。
+        """
+        try:
+            st = self.db_path.stat()
+            file_id = (st.st_dev, st.st_ino, st.st_ctime_ns)
+        except OSError:
+            file_id = None
+
+        if getattr(self, "_active_db_identity", None) != file_id:
+            conn.execute("PRAGMA journal_mode=WAL")
+            self._active_db_identity = file_id
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
@@ -60,10 +103,7 @@ class NikkeStore:
         conn = sqlite3.connect(self.db_path, timeout=20)
         try:
             conn.row_factory = sqlite3.Row
-            # WAL 模式写入后持久化；仅第一次连接需要设置，之后跳过节省 PRAGMA 往返。
-            if not getattr(self, "_wal_activated", False):
-                conn.execute("PRAGMA journal_mode=WAL")
-                self._wal_activated = True
+            self._ensure_wal_mode(conn)
             conn.execute("PRAGMA foreign_keys=ON")
             yield conn
         except BaseException:
@@ -77,6 +117,7 @@ class NikkeStore:
     def _init_db(self) -> None:
         """在一个显式事务中创建基础表并执行可重复的 schema migration。"""
         with self._lock, self._connect() as conn:
+            conn.execute("PRAGMA journal_mode=WAL")
             try:
                 conn.execute("BEGIN IMMEDIATE")
                 self._create_base_schema(conn)

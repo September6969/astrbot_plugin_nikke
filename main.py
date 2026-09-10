@@ -336,15 +336,30 @@ class NikkePlugin(Star):
         return account
 
     def _name_map(self) -> dict[str, str]:
-        dir_len = len(self._directory)
-        if getattr(self, "_name_map_cache", None) is not None and self._name_map_cache[0] == dir_len:
-            return self._name_map_cache[1]
+        """按实际目录内容生成 name_code -> display_name 映射。
+        缓存键严格采用目录内容指纹（SHA-256），杜绝仅靠行数产生的碰撞与脏读。
+        """
+        directory = getattr(self, "_directory", ()) or ()
+        if not directory:
+            return {}
+
+        fingerprint = hashlib.sha256(
+            "".join(
+                f"{item.get('name_code')}:{item.get('name_cn')}:{item.get('name_en')}:{item.get('name_zh_tw')};"
+                for item in directory
+            ).encode("utf-8")
+        ).hexdigest()
+
+        cached = getattr(self, "_name_map_cache", None)
+        if cached is not None and cached[0] == fingerprint:
+            return cached[1]
+
         resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
         mapping = {
             str(item.get("name_code", "")): resolver.display_name(resolver.enrich(item))
-            for item in self._directory
+            for item in directory
         }
-        self._name_map_cache = (dir_len, mapping)
+        self._name_map_cache = (fingerprint, mapping)
         return mapping
 
     def _find_directory(self, query: str) -> list[dict]:

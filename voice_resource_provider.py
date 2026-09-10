@@ -116,34 +116,51 @@ class VoiceResourceProvider:
 
     def _cached_source(self, target, manifest, map_key, speech_id, locale):
         """只接受与当前请求身份、完整性和有效期都一致的本地缓存。"""
+        cache_key = (target, map_key, speech_id, locale)
         try:
             if not self._cache_path_is_safe() or target.is_symlink() or manifest.is_symlink():
+                self._validated_cache.pop(cache_key, None)
                 return None
             target_stat = target.stat()
             manifest_stat = manifest.stat()
             age = time.time() - manifest_stat.st_mtime
             if not target.is_file() or not manifest.is_file() or not 0 <= age < 86400 or target_stat.st_size > self.MAX_BYTES:
+                self._validated_cache.pop(cache_key, None)
                 return None
 
-            cache_key = (target, map_key, speech_id, locale)
             cached_meta = self._validated_cache.get(cache_key)
-            if cached_meta is not None and cached_meta == (target_stat.st_mtime_ns, manifest_stat.st_mtime_ns, target_stat.st_size):
-                return target
+            if cached_meta is not None:
+                # 必须精确匹配文件修改纳秒与大小
+                if (target_stat.st_mtime_ns, manifest_stat.st_mtime_ns, target_stat.st_size) == cached_meta[:3]:
+                    return target
+                # 任何元数据变动均立即作废旧缓存
+                self._validated_cache.pop(cache_key, None)
 
             raw = target.read_bytes()
             saved = json.loads(manifest.read_text(encoding="utf-8"))
         except (OSError, UnicodeDecodeError, ValueError):
+            self._validated_cache.pop(cache_key, None)
             return None
+
         expected_source_path = f"/voice/{locale}/{speech_id}.mp3"
+        actual_sha256 = hashlib.sha256(raw).hexdigest()
         if (
             not isinstance(saved, dict)
-            or saved.get("sha256") != hashlib.sha256(raw).hexdigest()
+            or saved.get("sha256") != actual_sha256
             or saved.get("source_path") != expected_source_path
             or saved.get("map_key") != map_key
             or not self.is_mp3(raw)
         ):
+            self._validated_cache.pop(cache_key, None)
             return None
-        self._validated_cache[cache_key] = (target_stat.st_mtime_ns, manifest_stat.st_mtime_ns, target_stat.st_size)
+
+        # 完整性校验通过后记入元数据缓存
+        self._validated_cache[cache_key] = (
+            target_stat.st_mtime_ns,
+            manifest_stat.st_mtime_ns,
+            target_stat.st_size,
+            actual_sha256,
+        )
         return target
 
     @staticmethod
