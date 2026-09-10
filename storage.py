@@ -61,7 +61,7 @@ class NikkeStore:
         try:
             conn.row_factory = sqlite3.Row
             # WAL 模式写入后持久化；仅第一次连接需要设置，之后跳过节省 PRAGMA 往返。
-            if not self._wal_activated:
+            if not getattr(self, "_wal_activated", False):
                 conn.execute("PRAGMA journal_mode=WAL")
                 self._wal_activated = True
             conn.execute("PRAGMA foreign_keys=ON")

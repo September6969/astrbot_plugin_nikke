@@ -49,6 +49,7 @@ from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_renderer import UnionRaidRenderer
 from .costume_registry import CostumeRegistry
+from .tower_registry import TowerRegistry
 from .voice_character_resolver import VoiceCharacterResolver
 from .voice_audio import VoiceAudioCache, VoicePreference, is_self_poke
 from .voice_encoder import VoiceEncoder
@@ -132,23 +133,30 @@ class NikkePlugin(Star):
         self.voice_pipeline = VoicePipeline(self.voice_provider, self.voice_encoder) if self.voice_encoder else None
         self.announcements = AnnouncementService(self.data_dir / "announcements")
         self.announcement_delivery = AnnouncementDelivery(self.store)
+        try:
+            self.tower_registry = TowerRegistry(self.plugin_dir / "assets" / "tower_floors.json")
+        except Exception as exc:
+            logger.warning("[NIKKE] 塔层静态资料加载失败：%s", safe_exception_message(exc))
+            self.tower_registry = None
+        self.public_base_url = str(
+            self.config.get("public_base_url", "https://nikke.irises777.xyz")
+        ).rstrip("/")
         self.web = BindingWebService(
             self.store,
             self.client,
             self.extension_zip,
             str(self.config.get("binding_api_key", "")),
-            public_base_url=str(self.config.get("public_base_url", "https://nikke.irises777.xyz")),
+            public_base_url=self.public_base_url,
         )
-        self.public_base_url = str(
-            self.config.get("public_base_url", "https://nikke.irises777.xyz")
-        ).rstrip("/")
         self.web_host = str(self.config.get("web_host", "0.0.0.0"))
         self.web_port = int(self.config.get("web_port", 6210))
         self._directory: list[dict] = []
+        self._name_map_cache: tuple[int, dict[str, str]] | None = None
         self._stats_profile_cache: dict[str, tuple[float, dict[str, object]]] = {}
+        self._voice_poke_cooldowns: dict[tuple, float] = {}
+        self._termination_lock = asyncio.Lock()
         self._background_tasks: list[asyncio.Task] = []
         self._closing = False
-        self._pack_extension()
         self._spawn_background_task(self._start_services())
 
     def _build_campaign_renderer(self) -> CampaignHistoryRenderer:
@@ -199,6 +207,10 @@ class NikkePlugin(Star):
                         archive.write(path, path.relative_to(extension_dir))
 
     async def _start_services(self) -> None:
+        try:
+            self._pack_extension()
+        except Exception as exc:
+            logger.warning("[NIKKE] 浏览器扩展打包跳过: %s", safe_exception_message(exc))
         try:
             await self.web.start(self.web_host, self.web_port)
             logger.info(f"[NIKKE] 绑定服务已监听 {self.web_host}:{self.web_port}")
@@ -253,6 +265,14 @@ class NikkePlugin(Star):
             profile = {}
         if not isinstance(profile, dict):
             profile = {}
+        # 限制缓存条目上限（最多 50 个账号），先淘汰过期条目，再淘汰最旧条目
+        if len(self._stats_profile_cache) >= 50:
+            expired = [k for k, v in self._stats_profile_cache.items() if now - v[0] >= 300]
+            for k in expired:
+                self._stats_profile_cache.pop(k, None)
+            while len(self._stats_profile_cache) >= 50:
+                oldest_k = min(self._stats_profile_cache, key=lambda k: self._stats_profile_cache[k][0])
+                self._stats_profile_cache.pop(oldest_k, None)
         self._stats_profile_cache[cache_key] = (now, profile)
         return profile
 
@@ -316,11 +336,16 @@ class NikkePlugin(Star):
         return account
 
     def _name_map(self) -> dict[str, str]:
+        dir_len = len(self._directory)
+        if getattr(self, "_name_map_cache", None) is not None and self._name_map_cache[0] == dir_len:
+            return self._name_map_cache[1]
         resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
-        return {
+        mapping = {
             str(item.get("name_code", "")): resolver.display_name(resolver.enrich(item))
             for item in self._directory
         }
+        self._name_map_cache = (dir_len, mapping)
+        return mapping
 
     def _find_directory(self, query: str) -> list[dict]:
         resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
@@ -419,10 +444,19 @@ class NikkePlugin(Star):
         """NIKKE 中文精简指令入口。"""
         command_key = command.strip().casefold()
         if command_key in {"塔层", "tower"}:
-            from .tower_registry import TowerRegistry
-            try:
-                result = TowerRegistry(self.plugin_dir / "assets" / "tower_floors.json").describe(arg1, arg2)
-            except (OSError, ValueError, KeyError, TypeError):
+            registry = getattr(self, "tower_registry", None)
+            if registry is None:
+                try:
+                    registry = TowerRegistry(self.plugin_dir / "assets" / "tower_floors.json")
+                    self.tower_registry = registry
+                except Exception:
+                    registry = None
+            if registry is not None:
+                try:
+                    result = registry.describe(arg1, arg2)
+                except (OSError, ValueError, KeyError, TypeError):
+                    result = "塔层静态资料暂不可用。"
+            else:
                 result = "塔层静态资料暂不可用。"
             yield event.plain_result(result)
             return
@@ -1007,8 +1041,11 @@ class NikkePlugin(Star):
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except Exception as exc:
+        except (BlaBlaError, ValueError, RuntimeError) as exc:
             yield event.plain_result(f"查询失败：{exc}")
+        except Exception as exc:
+            logger.error("[NIKKE] 角色查询异常: %s", safe_exception_message(exc))
+            yield event.plain_result(f"查询失败：{safe_exception_message(exc)}")
         finally:
             if handle:
                 await handle.cancel()
