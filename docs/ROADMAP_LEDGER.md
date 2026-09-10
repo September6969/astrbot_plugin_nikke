@@ -191,3 +191,19 @@
 - 无 runtime 的预检查现在能读取 `.skel` 固定 hash 后的 Spine 版本头，并以 `utf-8-sig` 处理官方 atlas BOM；本地合成回归已覆盖 4.0 版本匹配与 BOM 页面。
 - 官方 4.0 SFML + Xvfb 已通过 CI 和 serv 隔离构建。默认 c010 与上游命名 White Promise c010_02 均实际出图并已查看，serv 512×512 分别耗时 3.055s/2.346s；这不等于生产卡片接线或账号 costume_id 身份验证。
 - serv 的 SSH、HTTPS、storage 健康检查恢复；NapCat 管理接口确认 isLogin=false、isOffline=false、loginError 非空，QQ/Record 等待用户官方登录，不采集二维码。既有 Signin 一次写入和读回记录保留，不重复签到。
+
+## 最终现场验收与 v0.2.0 正式发布（2026-09-10）
+
+- 基线：`origin/main@1366f2d5bb9d42b9b647fe8e84f414e76c85a6f6`。
+- NapCat 官方 QR 登录完成，NapCat 容器恢复在线会话并稳定反向连接 AstrBot `ws://astrbot:6199/ws`。
+- 现场验收序列（8 项）全量通过，详见 `docs/evidence/live_acceptance_v0_2_0_report.json`：
+  1. Preflight：v0.2.0 版本核验、Costume 40 条核验、Voice 2,106 条核验（0 错误）、/healthz HTTP 200、Spine 4.0/4.1 worker 真实可执行。
+  2. 文本交付：`/妮姬 帮助` 准确返回 6 大入口帮助文本，单次交付，0 重复，0 异常。
+  3. 角色卡交付：`/妮姬 查询 练度 拉毗` 交付 1800×1000 完整卡片，Spine 闲置帧 t=0.0 命中缓存 `c010_default_4.0_4.0_2.0_idle.png`，OL 4×3 布局与阶级徽章完整。
+  4. 默认语音：`/妮姬 语音 开|角色 rapi|服装 默认|语言 ja` 四项指令正确响应，SQLite 持久化通过。
+  5. 现场戳一戳：Bot 账号收到 Poke 事件后输出纯语音 Record，零文本兜底；间隔 10 秒冷却后重复戳一戳命中不同 `Lobby_Touch` 音频（长度分别为 123,733 字节与 222,897 字节）。
+  6. 服装专属语音：切换 Drake 专属服装 80001（Villain Racer，Spine 资产 `c101_01`）后戳一戳准确输出专属日语音频 Record（484,329 字节），零文本兜底。
+  7. 音频失败合同：模拟音频解析失败时静默退出（零消息、零文本兜底、无崩溃），随后恢复正常 Rapi 偏好。
+  8. 最终健康检查：Docker 容器正常运行无崩溃循环，/healthz 持续返回 HTTP 200。
+- 最终验收状态：`LIVE RC ACCEPTED — v0.2.0`。
+
