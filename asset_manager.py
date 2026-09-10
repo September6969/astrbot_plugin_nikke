@@ -52,7 +52,7 @@ class AssetManager:
         *,
         remote: bool = False,
         spine_renderer: SpinePreRenderer | None = None,
-        spine_budget_seconds: float = 5.0,
+        spine_budget_seconds: float = 20.0,
     ):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)

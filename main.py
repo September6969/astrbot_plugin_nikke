@@ -79,11 +79,13 @@ class NikkePlugin(Star):
         self.character_identity = CharacterDirectoryResolver(
             self.plugin_dir / "assets" / "character_aliases.json"
         )
+        spine_budget = (self.config or {}).get("spine_budget_seconds", 20.0)
         self.asset_manager = AssetManager(
             self.data_dir / "cache",
             self.plugin_dir / "assets",
             remote=True,
             spine_renderer=build_spine_renderer(self.data_dir / "cache", self.config),
+            spine_budget_seconds=float(spine_budget) if isinstance(spine_budget, (int, float)) and spine_budget > 0 else 20.0,
         )
         self.character_renderer = CharacterCardRenderer(
             self.data_dir / "cards",

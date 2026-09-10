@@ -189,16 +189,16 @@ class SpineBundleFetcher:
 
         # 确保 atlas 声明的纹理页名称在 bundle 目录内可直接解析（官方 Spine runtime 按文件名查找）
         try:
-            atlas_text = targets["atlas"].read_text(encoding="utf-8", errors="replace")
+            atlas_text = targets["atlas"].read_text(encoding="utf-8-sig", errors="replace")
             for line in atlas_text.splitlines():
-                stripped = line.strip()
+                stripped = line.strip().lstrip("\ufeff")
                 if (
                     stripped.lower().endswith((".png", ".webp"))
                     and not any(sep in stripped for sep in ("/", "\\", ":"))
                     and not stripped.startswith(".")
                 ):
                     declared_texture = targets["atlas"].parent / stripped
-                    if not declared_texture.is_file() and targets["png"].is_file():
+                    if (not declared_texture.is_file() or declared_texture.stat().st_size == 0) and targets["png"].is_file():
                         try:
                             declared_texture.hardlink_to(targets["png"])
                         except (OSError, AttributeError):
