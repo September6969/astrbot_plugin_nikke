@@ -33,6 +33,32 @@ class CharacterDirectoryResolverTests(unittest.TestCase):
         self.assertEqual(matches[1][0]["name_zh_cn"], "")
         self.assertEqual(matches[1][0]["name_zh_cn_alias"], "阿尔卡娜")
 
+    def test_display_name_contract_priority_and_alias_exclusion(self):
+        """展示名优先级：官方 zh_cn -> 官方 zh_tw/cn -> name_en -> name_code；别名严禁作为展示名。"""
+        # 1. 只有繁中和简中查询别名 -> 展示官方繁中，绝不展示简中别名
+        item1 = {
+            "name_zh_tw": "阿爾卡娜",
+            "name_zh_cn_alias": "阿尔卡娜",
+            "name_en": "Arcana",
+            "name_code": "c581",
+        }
+        self.assertEqual(CharacterDirectoryResolver.display_name(item1), "阿爾卡娜")
+
+        # 2. 存在官方 zh_cn -> 优先展示官方 zh_cn
+        item2 = dict(item1, name_zh_cn="官方简中名")
+        self.assertEqual(CharacterDirectoryResolver.display_name(item2), "官方简中名")
+
+        # 3. 繁中缺省 -> 退回 name_en
+        item3 = {"name_en": "Arcana", "name_code": "c581", "name_zh_cn_alias": "阿尔卡娜"}
+        self.assertEqual(CharacterDirectoryResolver.display_name(item3), "Arcana")
+
+        # 4. 仅有 name_code -> 退回 name_code
+        item4 = {"name_code": "c581", "name_zh_cn_alias": "阿尔卡娜"}
+        self.assertEqual(CharacterDirectoryResolver.display_name(item4), "c581")
+
+        # 5. 空对象 -> 未知妮姬
+        self.assertEqual(CharacterDirectoryResolver.display_name({}), "未知妮姬")
+
     def test_exact_match_wins_over_bounded_substring(self):
         result = self.resolver.find(
             self.directory + [{"name_code": "arcana-alt", "name_zh_tw": "阿爾卡娜：限定"}],

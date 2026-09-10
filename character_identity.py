@@ -86,7 +86,6 @@ class CharacterDirectoryResolver:
         item = item or {}
         return (
             _text(item.get("name_zh_cn"))
-            or _text(item.get("name_zh_cn_alias"))
             or _text(item.get("name_zh_tw"))
             or _text(item.get("name_cn"))
             or _text(item.get("name_en"))

@@ -47,7 +47,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         )
         self.assertEqual(card.costume_id, "skin_01")
 
-    def test_display_name_prefers_explicit_simplified_query_alias(self):
+    def test_display_name_prefers_official_names_over_query_alias(self):
         fixture = load_fixture()
         fixture["directory"]["name_zh_tw"] = "阿爾卡娜"
         fixture["directory"]["name_zh_cn_alias"] = "阿尔卡娜"
@@ -57,7 +57,17 @@ class CharacterCardBuilderTests(unittest.TestCase):
             payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
         )
-        self.assertEqual(card.name_cn, "阿尔卡娜")
+        # 受控简中别名仅用于查询检索，卡片与展示名称严格遵循官方本地化 (zh_cn -> zh_tw/cn -> en -> code)
+        self.assertEqual(card.name_cn, "阿爾卡娜")
+
+        # 若存在官方确切 zh-CN 则优先展示
+        fixture["directory"]["name_zh_cn"] = "官方简中名"
+        card_with_sc = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card_with_sc.name_cn, "官方简中名")
 
     def test_real_sanitized_fixture_preserves_four_equipment_slots(self):
         card = build_card()
