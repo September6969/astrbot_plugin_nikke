@@ -202,3 +202,137 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
             third = await cache._load_registry()
             self.assertEqual(len(third), 2)
             self.assertIsNot(first, third)
+
+    async def test_bounded_concurrency_and_temp_file_cleanup_for_ogg(self):
+        """验证 20 个不同角色 OGG 转换任务：并发子进程数不超过配置上限、临时文件无碰撞、无残留、结果独立。"""
+        import asyncio
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache_dir = root / "cache"
+            voices_dir = root / "voices"
+            voices_dir.mkdir()
+            max_limit = 2
+            cache = VoiceAudioCache(voices_dir, cache_dir, max_concurrency=max_limit)
+
+            active_ffmpeg = 0
+            peak_ffmpeg = 0
+            lock = asyncio.Lock()
+            temp_files_seen = set()
+
+            registry_rows = []
+            preferences = []
+            for i in range(20):
+                char = f"char_{i}"
+                filename = f"{char}.ogg"
+                ogg_path = voices_dir / filename
+                ogg_path.write_bytes(b"OggSsynthetic_" + f"{i}".encode())
+                registry_rows.append(dict(
+                    character=char,
+                    locale="ja",
+                    skin="default",
+                    file=filename,
+                    source="test",
+                    license="test",
+                ))
+                preferences.append(VoicePreference(True, character=char, locale="ja", skin="default"))
+
+            (voices_dir / "registry.json").write_text(json.dumps(registry_rows), encoding="utf-8")
+
+            class MockProcess:
+                def __init__(self, target_path):
+                    self.target_path = target_path
+                    self.returncode = 0
+
+                async def wait(self):
+                    nonlocal active_ffmpeg, peak_ffmpeg
+                    async with lock:
+                        active_ffmpeg += 1
+                        if active_ffmpeg > peak_ffmpeg:
+                            peak_ffmpeg = active_ffmpeg
+                    await asyncio.sleep(0.02)
+                    Path(self.target_path).write_bytes(b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00")
+                    async with lock:
+                        active_ffmpeg -= 1
+                    return 0
+
+                def kill(self):
+                    self.returncode = -9
+
+            async def mock_exec(*args, **kwargs):
+                out_path = args[-1]
+                temp_files_seen.add(out_path)
+                return MockProcess(out_path)
+
+            with patch("shutil.which", return_value="fake_ffmpeg"):
+                with patch("asyncio.create_subprocess_exec", side_effect=mock_exec):
+                    results = await asyncio.gather(*(cache.resolve(pref) for pref in preferences))
+
+            self.assertEqual(len(results), 20)
+            self.assertEqual(len(set(results)), 20, "20 个不同音频必须生成 20 个不同文件")
+            self.assertTrue(all(r is not None and r.is_file() for r in results))
+            self.assertLessEqual(peak_ffmpeg, max_limit, f"并发 ffmpeg 活跃峰值 ({peak_ffmpeg}) 必须 <= 配置上限 ({max_limit})")
+            self.assertEqual(len(temp_files_seen), 20, "20 个临时文件必须完全独立无冲突")
+            leftover_tmps = [p for p in cache_dir.glob("*") if ".tmp." in p.name]
+            self.assertEqual(leftover_tmps, [], "转换完成后不得遗留临时文件")
+
+    async def test_ogg_conversion_cancellation_kills_process_and_cleans_temp(self):
+        """验证本地 OGG 转换任务被取消时，子进程被杀死且临时文件被彻底清理。"""
+        import asyncio
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache_dir = root / "cache"
+            voices_dir = root / "voices"
+            voices_dir.mkdir()
+            cache = VoiceAudioCache(voices_dir, cache_dir)
+            (voices_dir / "cancel.ogg").write_bytes(b"OggSsynthetic_cancel")
+            (voices_dir / "registry.json").write_text(json.dumps([
+                dict(
+                    character="cancel_char",
+                    locale="ja",
+                    skin="default",
+                    file="cancel.ogg",
+                    source="test",
+                    license="test",
+                )
+            ]), encoding="utf-8")
+
+            process_killed = False
+            created_temp = []
+
+            class SlowProcess:
+                def __init__(self, target_path):
+                    self.target_path = Path(target_path)
+                    self.returncode = None
+                    created_temp.append(self.target_path)
+                    self.target_path.write_bytes(b"partial_ogg_conversion")
+
+                async def wait(self):
+                    if self.returncode is not None:
+                        return self.returncode
+                    await asyncio.sleep(10)
+                    return 0
+
+                def kill(self):
+                    nonlocal process_killed
+                    process_killed = True
+                    self.returncode = -9
+
+            async def mock_exec(*args, **kwargs):
+                out_path = args[-1]
+                return SlowProcess(out_path)
+
+            pref = VoicePreference(True, character="cancel_char", locale="ja", skin="default")
+            with patch("shutil.which", return_value="fake_ffmpeg"):
+                with patch("asyncio.create_subprocess_exec", side_effect=mock_exec):
+                    task = asyncio.create_task(cache.resolve(pref))
+                    await asyncio.sleep(0.04)
+                    task.cancel()
+                    with self.assertRaises(asyncio.CancelledError):
+                        await task
+
+            self.assertTrue(process_killed, "任务取消时必须杀死运行中的 ffmpeg 子进程")
+            self.assertTrue(len(created_temp) > 0)
+            for p in created_temp:
+                self.assertFalse(p.exists(), f"被取消任务的临时文件 {p} 必须被彻底删除")

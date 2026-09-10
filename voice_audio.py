@@ -46,12 +46,18 @@ class VoiceAudioCache:
     registry.json 内容在文件未被修改时缓存在内存中（按 mtime 失效），
     避免每次 poke 都产生磁盘 I/O。
     每个 (character, locale, skin) 三元组持有独立的 asyncio.Lock，
-    防止对同一语音的并发处理，同时不阻塞独立用户。
+    防止对同一语音的并发重复处理，同时不同语音转换受限于 _conversion_slots 信号量。
     """
 
-    def __init__(self, root: Path, cache: Path):
+    DEFAULT_MAX_CONCURRENCY = 2
+
+    def __init__(self, root: Path, cache: Path, *, max_concurrency: int = DEFAULT_MAX_CONCURRENCY):
+        if isinstance(max_concurrency, bool) or not isinstance(max_concurrency, int) or not (1 <= max_concurrency <= 4):
+            raise ValueError("音频转换并发数必须在 1 到 4 之间")
         self.root = root.resolve()
         self.cache = cache
+        self.max_concurrency = max_concurrency
+        self._conversion_slots = asyncio.Semaphore(max_concurrency)
         # Registry cache: (mtime_ns, parsed_rows)
         self._registry_cache: tuple[int, list] | None = None
         self._registry_read_lock = asyncio.Lock()
@@ -129,19 +135,27 @@ class VoiceAudioCache:
             ffmpeg = shutil.which("ffmpeg")
             if not ffmpeg:
                 return None
-            temporary = target.with_name(uuid.uuid4().hex + ".wav")
-            process = await asyncio.create_subprocess_exec(ffmpeg, "-nostdin", "-y", "-i", str(source),
-                "-t", "30", "-ac", "1", "-ar", "24000", str(temporary), stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
-            try:
-                await asyncio.wait_for(process.wait(), 15)
-            except (asyncio.TimeoutError, asyncio.CancelledError):
-                process.kill()
-                await process.wait()
-                temporary.unlink(missing_ok=True)
-                raise
-            if process.returncode != 0:
-                temporary.unlink(missing_ok=True)
-                return None
-            temporary.replace(target)
-            return target
+            async with self._conversion_slots:
+                if target.is_file():
+                    return target
+                temporary = target.with_name(f".tmp.{uuid.uuid4().hex}.wav")
+                try:
+                    process = await asyncio.create_subprocess_exec(
+                        ffmpeg, "-nostdin", "-y", "-i", str(source),
+                        "-t", "30", "-ac", "1", "-ar", "24000", str(temporary),
+                        stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL,
+                    )
+                    try:
+                        await asyncio.wait_for(process.wait(), 15)
+                    except (asyncio.TimeoutError, asyncio.CancelledError):
+                        if process.returncode is None:
+                            process.kill()
+                        await process.wait()
+                        raise
+                    if process.returncode != 0:
+                        return None
+                    temporary.replace(target)
+                    return target
+                finally:
+                    temporary.unlink(missing_ok=True)
         return None

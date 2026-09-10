@@ -474,7 +474,9 @@ class NikkePlugin(Star):
             registry = getattr(self, "tower_registry", None)
             if registry is None:
                 try:
-                    registry = TowerRegistry(self.plugin_dir / "assets" / "tower_floors.json")
+                    registry = await asyncio.to_thread(
+                        TowerRegistry, self.plugin_dir / "assets" / "tower_floors.json"
+                    )
                     self.tower_registry = registry
                 except Exception:
                     registry = None
