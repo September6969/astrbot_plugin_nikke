@@ -76,8 +76,19 @@
     "costume_table_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
     "l2d_index_url": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json",
     "l2d_index_sha256": "41090a2ae1c7bb130db65306c757b98e5bb5991122a6f6a31d35b5422432cf0b",
-    "live_costume_ids": [10014, 110005, 110012, 110014, 110023, 110024, 120004, 20001, 30040, 30049, 30052, 30053, 50012],
-    "exact_verified_mappings": [],
+    "exact_verified_mappings": [
+      {
+        "costume_id": 10005,
+        "character_resource_id": 10,
+        "costume_index": 2,
+        "spine_asset_id": "c010_02",
+        "l2d_name": "Rapi White Promise",
+        "mapping_status": "EXACT_VERIFIED_IDENTITY",
+        "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+        "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+        "verified_at": "2026-09-09"
+      }
+    ],
     "rejected_mappings": [
       {
         "costume_id": 20001,
@@ -127,9 +138,23 @@
       "default_rgba_sha256": "6d349952eb1e146f510dd3fe33195acc8b69b3826eb7d9ce773648a5336d7bf9",
       "white_promise_rgba_sha256": "874707c7ad31d323bd331c959ee9c8dae4590d5b13009f614abb3dff5f8d94dd",
       "visual_review": "Both server-produced images actually viewed; full body and transparent padding retained.",
-      "production_card_connected": false
+      "production_card_connected": true,
+      "production_worker_path": "/usr/local/bin/entrypoint-xvfb.sh",
+      "production_card_renders": {
+        "arcana_lv526": "character-cff7f19fab884953955a14ad6c1eb0db.png",
+        "rapi_default": "character-e2a5544a506243998a316562659de7ac.png",
+        "rapi_white_promise": "character-9385a64c742a4469bd5ae37e00d9049e.png"
+      }
     },
-    "qq_recheck": {"webui_authenticated": true, "isLogin": false, "isOffline": false, "login_error_present": true, "messages_sent": 0},
+    "qq_recheck": {
+      "webui_authenticated": true,
+      "isLogin": false,
+      "isOffline": true,
+      "login_error_present": true,
+      "messages_sent": 0,
+      "kicked_offline_notice": "[KickedOffLine] 你的账号当前登录已失效，请重新登录。",
+      "blocker": "Manual account authorization via WebUI/official QR flow required before live message delivery."
+    },
     "default_asset_id": "c010",
     "legacy_test_asset_id": "c010_01",
     "bundle_sources": [
@@ -159,8 +184,9 @@
     },
     "render_verified": true,
     "non_default_costume_render_verified": true,
-    "api_costume_mapping_verified": false,
+    "api_costume_mapping_verified": true,
+    "voice_mapping_verified": true,
     "visual_preview": "Three PNGs actually viewed: c010 default centered full body; legacy skin00 full body; legacy skin01 blue hair and incomplete lower body, rejected for costume acceptance.",
-    "boundary": "Actual headless rendering of public assets in CI, not game-account costume identity verification, QQ delivery, production worker deployment, or redistribution permission."
+    "boundary": "Actual headless rendering of public assets in CI and production worker deployment, live game-account character card path connected, QQ delivery blocked by external login requirement."
   }
 }

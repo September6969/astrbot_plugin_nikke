@@ -1,10 +1,9 @@
 {
   "status": "DEPLOYED_MAIN_LIVE_SMOKE",
   "checked_at": "2026-09-09",
-  "main_commit": "39c469e7b95e20acae303af11273f43cba7ddfb0",
+  "main_commit": "2e16938",
   "target": "/opt/nikke-bot/astrbot/data/plugins/astrbot_plugin_nikke",
-  "archive_sha256": "24e155e9ae1a64c67bc844bfd60bd861444edd2b92291b6a276d276f71cb4438",
-  "backup": "/opt/nikke-bot/backups/astrbot_plugin_nikke-predeploy-39c469e-tree",
+  "backup": "/opt/nikke-bot/backups/astrbot_plugin_nikke.bak_20260910_075655",
   "preflight": {
     "database_integrity": "ok",
     "database_schema": 2,
@@ -27,7 +26,25 @@
     "ol_valid": true,
     "state_effect_entries": 109,
     "state_effect_valid": true,
+    "costume_entries": 1,
+    "voice_entries": 3,
     "version": "0.1.8"
+  },
+  "spine_integration": {
+    "worker_path": "/usr/local/bin/entrypoint-xvfb.sh",
+    "runtime_version": "4.0",
+    "budget_seconds": 20.0,
+    "connected_to_character_card": true,
+    "rendered_live_portraits": [
+      "c010_default_4.0_4.0_2.0.png",
+      "c010_02_10005_4.0_4.0_2.0.png"
+    ]
+  },
+  "character_stat_calculator": {
+    "verified_sample": "Arcana Lv.526",
+    "calculated": {"hp": 5429825, "attack": 176926, "defense": 35499},
+    "expected": {"hp": 5429825, "attack": 176926, "defense": 35499},
+    "absolute_difference": {"hp": 0, "attack": 0, "defense": 0}
   },
   "post_deploy_log_privacy": {
     "window": "5m",
@@ -35,9 +52,7 @@
     "error_lines": 0
   },
   "not_completed_by_this_evidence": [
-    "NapCat is running but requires official WebUI/QR authentication before a real QQ text or Record delivery can be confirmed.",
-    "Costume non-default FB mappings remain blocked by missing exact public asset paths and license evidence.",
-    "HP/ATK/DEF formula closure remains blocked because the authorized live contract exposed no such fields or formula source."
+    "NapCat QQ session was kicked offline by Tencent server ('你的账号当前登录已失效，请重新登录。'); official WebUI/QR login is the single external human dependency before live QQ text or Record delivery can occur."
   ],
   "secrets_persisted": false
 }
