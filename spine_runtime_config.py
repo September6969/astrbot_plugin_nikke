@@ -33,8 +33,9 @@ def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None
         return SpinePreRenderer(root)
     version = str(values.get("spine_runtime_version", "4.0")).strip() or "4.0"
     timeout = values.get("spine_worker_timeout", 4)
+    runtimes: dict[str, SpineWorkerRuntime] = {}
     try:
-        runtime = SpineWorkerRuntime(
+        runtimes[version] = SpineWorkerRuntime(
             SpineWorkerConfig(
                 executable=worker_path,
                 bundle_root=bundle_root,
@@ -45,8 +46,26 @@ def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None
     except (TypeError, ValueError, OSError):
         logger.warning("Spine worker 配置无效，使用中性占位图")
         return SpinePreRenderer(root)
+
+    # 可选配置 4.1 worker 路径（如独立的 spine 4.1 headless worker）
+    worker_41_value = values.get("spine_worker_path_4_1", "")
+    if isinstance(worker_41_value, str) and worker_41_value.strip():
+        try:
+            worker_41_path = Path(worker_41_value).expanduser().resolve()
+            if worker_41_path.is_file():
+                runtimes["4.1"] = SpineWorkerRuntime(
+                    SpineWorkerConfig(
+                        executable=worker_41_path,
+                        bundle_root=bundle_root,
+                        timeout_seconds=float(timeout),
+                    ),
+                    version="4.1",
+                )
+        except OSError:
+            pass
+
     return SpinePreRenderer(
         root,
-        runtime=runtime,
+        runtime=runtimes,
         fetcher=SpineBundleFetcher(bundle_root),
     )

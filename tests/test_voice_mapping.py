@@ -35,11 +35,16 @@ class VoiceMappingTests(TestCase):
         self.assertIsNotNone(spine_match)
         self.assertEqual(spine_match.speech_id, "c010_Lobby_Touch_1")
 
-        # Costume resolution
-        costume_match = registry.resolve_by_spine_asset("c010_02", "ja")
-        self.assertIsNotNone(costume_match)
-        self.assertEqual(costume_match.character, "rapi")
-        self.assertEqual(costume_match.costume, "10005")
+        # Costume resolution: c010_02 is 20001 (White Promise), c010_03 is 10005 (Classic Vacation)
+        white_promise = registry.resolve_by_spine_asset("c010_02", "ja")
+        self.assertIsNotNone(white_promise)
+        self.assertEqual(white_promise.character, "rapi")
+        self.assertEqual(white_promise.costume, "20001")
+
+        classic_vacation = registry.resolve_by_spine_asset("c010_03", "ja")
+        self.assertIsNotNone(classic_vacation)
+        self.assertEqual(classic_vacation.character, "rapi")
+        self.assertEqual(classic_vacation.costume, "10005")
 
         # Independent costume voice resolution (Drake Villain Racer)
         drake_costume = registry.resolve_by_spine_asset("c101_01", "ja")

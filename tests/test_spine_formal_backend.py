@@ -37,6 +37,7 @@ class FakeRuntime:
 
 
 def make_bundle(root: Path) -> SpineBundle:
+    root.mkdir(parents=True, exist_ok=True)
     texture = root / "page.png"
     Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(texture, format="PNG")
     skeleton = root / "sample.json"
@@ -145,3 +146,51 @@ class SpineFormalBackendTests(TestCase):
             SpineBundle.from_mapping(
                 {"skel": "sample.json", "atlas": "sample.atlas", "textures": ["page.png", 42]}
             )
+
+    def test_multi_runtime_selection_and_version_isolation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle_41 = make_bundle(root / "v41")
+
+            # Synthetic 4.0 bundle
+            dir_40 = root / "v40"
+            dir_40.mkdir(parents=True, exist_ok=True)
+            texture_40 = dir_40 / "page.png"
+            Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(texture_40, format="PNG")
+            skeleton_40 = dir_40 / "sample.json"
+            skeleton_40.write_text(json.dumps({"skeleton": {"spine": "4.0.50"}}), encoding="utf-8")
+            atlas_40 = dir_40 / "sample.atlas"
+            atlas_40.write_text("page.png\nsize: 64, 64\n\n", encoding="utf-8")
+            bundle_40 = SpineBundle(skeleton=skeleton_40, atlas=atlas_40, textures=(texture_40,))
+
+            class FakeRuntime40:
+                version = "4.0"
+                def __init__(self):
+                    self.calls = []
+                def render(self, bundle, *, animation, skin=None):
+                    self.calls.append((animation, skin))
+                    return Image.new("RGBA", (100, 100), (255, 0, 0, 255))
+
+            rt40 = FakeRuntime40()
+            rt41 = FakeRuntime()
+
+            # 1. 只有 4.0 runtime 时，4.1 asset 不会被强制喂给 4.0 worker，直接返回 None
+            renderer_only_40 = SpinePreRenderer(root / "only40", runtime=rt40)
+            self.assertTrue(renderer_only_40.is_available("4.0"))
+            self.assertFalse(renderer_only_40.is_available("4.1"))
+            self.assertIsNone(renderer_only_40.render_full_body(bundle_41, "4.1"))
+            self.assertEqual(rt40.calls, [])
+
+            # 2. 注入 multi-runtime 字典，4.0 和 4.1 各自路由到匹配的 worker
+            renderer_multi = SpinePreRenderer(root / "multi", runtime={"4.0": rt40, "4.1": rt41})
+            self.assertTrue(renderer_multi.is_available("4.0"))
+            self.assertTrue(renderer_multi.is_available("4.1"))
+            self.assertFalse(renderer_multi.is_available("3.8"))
+
+            res_40 = renderer_multi.render_full_body(bundle_40, "4.0", animation="idle")
+            self.assertIsNotNone(res_40)
+            self.assertEqual(rt40.calls, [("idle", None)])
+
+            res_41 = renderer_multi.render_full_body(bundle_41, "4.1", animation="setup")
+            self.assertIsNotNone(res_41)
+            self.assertEqual(rt41.calls, [("setup", None)])

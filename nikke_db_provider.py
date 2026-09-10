@@ -33,6 +33,7 @@ class NikkeDbProvider:
         "c010": ("4.0", "c7cf080108f99c048b7a2681be9cf635a750c5f7367c67fac2e5dd60aa3451a1"),
         "c010_01": ("4.0", "76c7a8b528fd02eb7a7db433b67fcb2c6bcbc2a51966fcd2f2d663ea97309156"),
         "c010_02": ("4.0", "00f3a7c1c3ac873c13a09e30d785636a2e5ff3c26835de889ef0cba9b45b792b"),
+        "c010_03": ("4.1", "6ce465eced20ef1ef336debeb39497b5567e5840c66dc5427fe764701d76998f"),
     }
     _ID_PATTERN = re.compile(r"[a-z0-9]+(?:[_-][a-z0-9]+)*")
 
@@ -305,6 +306,8 @@ class NikkeDbProvider:
         png_name = f"{file_prefix}_00.png"
         if char_id == "c010_02" and action_id in {"base", "setup", "static"}:
             png_name = "c010_01.png"
+        elif char_id == "c010_03" and action_id in {"base", "setup", "static"}:
+            png_name = "c010_02.png"
         return {
             "skel": f"{base}/{file_prefix}_00.skel",
             "atlas": f"{base}/{file_prefix}_00.atlas",

@@ -1,185 +1,114 @@
 {
-  "audit_date": "2026-09-09",
+  "audit_date": "2026-09-10",
   "closure_policy": {
     "shared_spine_identity": "Voice mappings share canonical cXXX / cXXX_YY identity with Spine",
-    "line_kind_requirement": "Poke voice lines require line_kind = Lobby_Touch; arbitrary story dialogue is strictly forbidden for Poke",
+    "line_kind_requirement": "Poke voice lines strictly require line_kind = Lobby_Touch; arbitrary story dialogue is strictly purged from Poke mapping",
     "locales_covered": [
       "ja",
       "en",
       "ko"
     ],
-    "lines_per_character": 3,
     "story_speech_reclassification": {
       "reclassified_id": "d_main_01_03_s_45",
       "previous_role": "accidental poke placeholder",
       "audit_category": "STORY_SCENE_DIALOGUE",
       "source_map": "scene/voice_map/d_main_01.json",
-      "disposition": "Removed from assets/voice_poke_map.json; retained in story scene audit tests"
-    }
+      "disposition": "Purged from assets/voice_poke_map.json; retained in story scene tests"
+    },
+    "costume_voice_policy": "Inherited costume Voice entries are only registered for VERIFIED costumes (40 verified costumes). Unverified costumes (138 unresolved) have zero voice entries."
   },
   "statistics": {
-    "registered_entries": 81,
-    "covered_characters": 9,
-    "locales": [
-      "ja",
-      "en",
-      "ko"
-    ],
+    "playable_characters_count": 200,
+    "characters_with_3_touch_lines": 191,
+    "characters_with_1_touch_line": 9,
+    "total_default_touch_lines": 582,
+    "verified_default_voice_entries": 1746,
+    "verified_costume_voice_overrides": 81,
+    "verified_costume_inherited_entries": 279,
+    "total_verified_costume_entries": 360,
+    "total_registered_entries": 2106,
+    "total_unique_audio_files_on_cdn": 1827,
     "all_audio_urls_verified_http_200": true
   },
-  "entries_summary": [
-    {
-      "character": "rapi",
-      "costume": "default",
-      "spine_asset_id": "c010",
-      "resource_id": 10,
-      "speech_prefix": "c010",
+  "breakdown_by_category": {
+    "default": {
+      "playable_characters": 200,
+      "lines_per_character": "3 lines for 191 characters, 1 line for 9 mass-produced characters",
+      "total_lines": 582,
+      "entries": 1746,
       "locales": [
         "ja",
         "en",
         "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
       ]
     },
-    {
-      "character": "rapi",
-      "costume": "10005",
-      "spine_asset_id": "c010_02",
-      "resource_id": 10,
-      "speech_prefix": "c010",
+    "costume_overrides": {
+      "costumes_count": 9,
+      "costumes": [
+        {
+          "costume_id": 40001,
+          "spine_id": "c090_01",
+          "name": "Emma: Color me Red"
+        },
+        {
+          "costume_id": 80001,
+          "spine_id": "c101_01",
+          "name": "Drake: Villain Racer"
+        },
+        {
+          "costume_id": 10004,
+          "spine_id": "c131_01",
+          "name": "Pepper: Ocean Vitamin"
+        },
+        {
+          "costume_id": 10001,
+          "spine_id": "c082_01",
+          "name": "Liter: Guardfish"
+        },
+        {
+          "costume_id": 40002,
+          "spine_id": "c210_01",
+          "name": "Exia: Joy to the Nerds"
+        },
+        {
+          "costume_id": 30015,
+          "spine_id": "c191_01",
+          "name": "Alice: Sweet Home"
+        },
+        {
+          "costume_id": 70002,
+          "spine_id": "c200_01",
+          "name": "Rupee: Rabbit Deluxe"
+        },
+        {
+          "costume_id": 30018,
+          "spine_id": "c260_01",
+          "name": "Modernia: First Affection"
+        },
+        {
+          "costume_id": 90002,
+          "spine_id": "c810_02",
+          "name": "2B: YoRHa Uniform 1"
+        }
+      ],
+      "lines_per_costume": 3,
+      "entries": 81,
       "locales": [
         "ja",
         "en",
         "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
       ]
     },
-    {
-      "character": "anis",
-      "costume": "default",
-      "spine_asset_id": "c012",
-      "resource_id": 12,
-      "speech_prefix": "c012",
+    "costume_inherited": {
+      "costumes_count": 31,
+      "lines_per_costume": 3,
+      "entries": 279,
       "locales": [
         "ja",
         "en",
         "ko"
       ],
-      "line_indices": [
-        1,
-        2,
-        3
-      ]
-    },
-    {
-      "character": "alice",
-      "costume": "default",
-      "spine_asset_id": "c191",
-      "resource_id": 191,
-      "speech_prefix": "c191",
-      "locales": [
-        "ja",
-        "en",
-        "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
-      ]
-    },
-    {
-      "character": "drake",
-      "costume": "default",
-      "spine_asset_id": "c101",
-      "resource_id": 101,
-      "speech_prefix": "c101",
-      "locales": [
-        "ja",
-        "en",
-        "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
-      ]
-    },
-    {
-      "character": "drake",
-      "costume": "80001",
-      "spine_asset_id": "c101_01",
-      "resource_id": 101,
-      "speech_prefix": "c101_01",
-      "locales": [
-        "ja",
-        "en",
-        "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
-      ]
-    },
-    {
-      "character": "red_hood",
-      "costume": "default",
-      "spine_asset_id": "c470",
-      "resource_id": 470,
-      "speech_prefix": "c470",
-      "locales": [
-        "ja",
-        "en",
-        "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
-      ]
-    },
-    {
-      "character": "scarlet",
-      "costume": "default",
-      "spine_asset_id": "c222",
-      "resource_id": 222,
-      "speech_prefix": "c222",
-      "locales": [
-        "ja",
-        "en",
-        "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
-      ]
-    },
-    {
-      "character": "dorothy",
-      "costume": "default",
-      "spine_asset_id": "c233",
-      "resource_id": 233,
-      "speech_prefix": "c233",
-      "locales": [
-        "ja",
-        "en",
-        "ko"
-      ],
-      "line_indices": [
-        1,
-        2,
-        3
-      ]
+      "note": "Inherits owner character default Lobby_Touch lines; uses same CDN audio URLs as default"
     }
-  ]
+  }
 }

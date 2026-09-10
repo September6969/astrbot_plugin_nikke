@@ -18,10 +18,12 @@ class StaticDataRegistryTests(unittest.TestCase):
         self.assertTrue(registry.is_valid)
         self.assertEqual(registry.metadata("equipment").source_ref, "assets/README.md")
         costumes = registry.mapping("costume")
-        self.assertEqual(len(costumes), 37)
-        self.assertEqual(costumes["10005"], "c010_02")
-        self.assertEqual(registry.resolve("costume", "10005"), "c010_02")
-        self.assertIsNone(registry.resolve("costume", "20001"))
+        self.assertEqual(len(costumes), 40)
+        self.assertEqual(costumes["10005"], "c010_03")
+        self.assertEqual(registry.resolve("costume", "10005"), "c010_03")
+        self.assertEqual(costumes["20001"], "c010_02")
+        self.assertEqual(registry.resolve("costume", "20001"), "c010_02")
+        self.assertIsNone(registry.resolve("costume", "10014"))
         self.assertEqual(
             registry.resolve("equipment", "3100901"),
             "icn_equipment_head_attacker_t9_3",

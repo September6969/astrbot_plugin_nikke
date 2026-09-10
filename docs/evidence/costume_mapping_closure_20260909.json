@@ -1,392 +1,595 @@
 {
-  "audit_date": "2026-09-09",
+  "audit_date": "2026-09-10",
+  "authoritative_source": {
+    "universe": "All 200 playable characters in official CharacterCostumeTable (from /roledata/{resource_id}-v2-en.json)",
+    "total_costume_rows": 178,
+    "unique_costume_ids": 178,
+    "costume_table_url": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+    "costume_table_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+    "l2d_index_url": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json"
+  },
   "rule_summary": {
     "verified_rule": "Owner character matches AND official costume name matches upstream Nikke-db L2D name AND spine bundle verified on CDN/GitHub",
-    "rejection_rule": "20001 -> c010_01 rejected because c010_01 is labeled Rapi_old; costume_index=1 does not prove _01",
-    "preservation_rule": "10005 -> c010_02 preserved as verified seed identity",
-    "unresolved_policy": "No guessing from costume_index; candidates without upstream L2D entries are recorded as UNRESOLVED"
+    "rapi_identity_correction": "Costume 20001 (White Promise) -> c010_02 (Spine 4.0, Verified). Costume 10005 (Classic Vacation) -> c010_03 (Spine 4.1, Verified). Upstream c010_01 is Rapi_old (legacy, unlinked).",
+    "unresolved_policy": "No guessing from costume_index; candidates without canonical L2D entries or without name matches are recorded as UNRESOLVED"
   },
   "statistics": {
-    "total_official_costumes": 166,
-    "verified_count": 37,
-    "unresolved_count": 129
+    "total_official_costumes": 178,
+    "verified_count": 40,
+    "unresolved_count": 138,
+    "equation": "178 = 40 (verified) + 138 (unresolved)"
   },
   "verified": [
     {
-      "costume_id": 30002,
-      "character_resource_id": 30,
-      "character_name": "Poli",
-      "costume_name": "Sweet Holic",
-      "costume_index": 1,
-      "spine_asset_id": "c030_01",
-      "l2d_name": "Poli Sweet Holic",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30007,
-      "character_resource_id": 181,
-      "character_name": "Maiden",
-      "costume_name": "Covert Nurse",
-      "costume_index": 1,
-      "spine_asset_id": "c181_01",
-      "l2d_name": "Maiden Covert Nurse",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30003,
-      "character_resource_id": 70,
-      "character_name": "Brid",
-      "costume_name": "Model Worker",
-      "costume_index": 1,
-      "spine_asset_id": "c070_01",
-      "l2d_name": "Brid Model Worker",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30019,
-      "character_resource_id": 70,
-      "character_name": "Brid",
-      "costume_name": "Black Moon",
-      "costume_index": 2,
-      "spine_asset_id": "c070_02",
-      "l2d_name": "Brid Black Moon",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 60001,
-      "character_resource_id": 22,
-      "character_name": "Signal",
-      "costume_name": "Dramatic Chocolate",
-      "costume_index": 1,
-      "spine_asset_id": "c022_01",
-      "l2d_name": "Signal Dramatic Chocolate",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30006,
-      "character_resource_id": 72,
-      "character_name": "Diesel",
-      "costume_name": "Black Sunday",
-      "costume_index": 2,
-      "spine_asset_id": "c072_01",
-      "l2d_name": "Diesel Black Sunday",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30016,
-      "character_resource_id": 90,
-      "character_name": "Emma",
-      "costume_name": "Office Therapy",
-      "costume_index": 2,
-      "spine_asset_id": "c090_02",
-      "l2d_name": "Emma Office Therapy",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 40001,
-      "character_resource_id": 90,
-      "character_name": "Emma",
-      "costume_name": "Color me Red",
-      "costume_index": 1,
-      "spine_asset_id": "c090_01",
-      "l2d_name": "Emma Color Me Red",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30009,
-      "character_resource_id": 170,
-      "character_name": "Privaty",
-      "costume_name": "Government Grunt",
-      "costume_index": 1,
-      "spine_asset_id": "c170_01",
-      "l2d_name": "Privaty Government Grunt",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 10006,
-      "character_resource_id": 350,
-      "character_name": "Mast",
-      "costume_name": "A Pirate's Heart",
-      "costume_index": 1,
-      "spine_asset_id": "c350_01",
-      "l2d_name": "Mast A Pirate's Heart",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30004,
-      "character_resource_id": 102,
-      "character_name": "Maxwell",
-      "costume_name": "Mechanic White",
-      "costume_index": 1,
-      "spine_asset_id": "c102_01",
-      "l2d_name": "Maxwell Mechanic White",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30008,
-      "character_resource_id": 160,
-      "character_name": "Yuni",
-      "costume_name": "Pretty in Pink",
-      "costume_index": 1,
-      "spine_asset_id": "c160_01",
-      "l2d_name": "Yuni Pretty In Pink",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 50001,
-      "character_resource_id": 150,
-      "character_name": "Julia",
-      "costume_name": "Mild Nocturne",
-      "costume_index": 1,
-      "spine_asset_id": "c150_01",
-      "l2d_name": "Julia Mild Nocturne",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30012,
-      "character_resource_id": 80,
-      "character_name": "Centi",
-      "costume_name": "Supreme Holiday",
-      "costume_index": 1,
-      "spine_asset_id": "c080_01",
-      "l2d_name": "Centi Supreme Holiday",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 80001,
-      "character_resource_id": 101,
-      "character_name": "Drake",
-      "costume_name": "Villain Racer",
-      "costume_index": 1,
-      "spine_asset_id": "c101_01",
-      "l2d_name": "Drake Villain Racer",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 10004,
-      "character_resource_id": 131,
-      "character_name": "Pepper",
-      "costume_name": "Ocean Vitamin",
-      "costume_index": 1,
-      "spine_asset_id": "c131_01",
-      "l2d_name": "Pepper Ocean Vitamin",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 10001,
-      "character_resource_id": 82,
-      "character_name": "Liter",
+      "costume_id": "10001",
+      "character_resource_id": "82",
+      "spine_asset_id": "c082_01",
       "costume_name": "Guardfish",
       "costume_index": 1,
-      "spine_asset_id": "c082_01",
       "l2d_name": "Liter Guardfish",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
     },
     {
-      "costume_id": 50003,
-      "character_resource_id": 352,
-      "character_name": "Helm",
-      "costume_name": "Chandelier",
-      "costume_index": 1,
-      "spine_asset_id": "c352_01",
-      "l2d_name": "Helm Chandelier",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 50002,
-      "character_resource_id": 140,
-      "character_name": "Sugar",
-      "costume_name": "Hard-Boiled",
-      "costume_index": 1,
-      "spine_asset_id": "c140_01",
-      "l2d_name": "Sugar Hard-Boiled",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 40002,
-      "character_resource_id": 210,
-      "character_name": "Exia",
-      "costume_name": "Joy to the Nerds",
-      "costume_index": 1,
-      "spine_asset_id": "c210_01",
-      "l2d_name": "Exia Joy to the Nerds",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30015,
-      "character_resource_id": 191,
-      "character_name": "Alice",
-      "costume_name": "Sweet Home",
-      "costume_index": 1,
-      "spine_asset_id": "c191_01",
-      "l2d_name": "Alice Sweet Home",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 10002,
-      "character_resource_id": 142,
-      "character_name": "Frima",
+      "costume_id": "10002",
+      "character_resource_id": "142",
+      "spine_asset_id": "c142_01",
       "costume_name": "Sea of Sloth",
       "costume_index": 1,
-      "spine_asset_id": "c142_01",
       "l2d_name": "Frima Sea of Sloth",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
     },
     {
-      "costume_id": 30011,
-      "character_resource_id": 141,
-      "character_name": "Milk",
-      "costume_name": "Extreme Fighter",
-      "costume_index": 1,
-      "spine_asset_id": "c141_01",
-      "l2d_name": "Milk Extreme Fighter",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 10003,
-      "character_resource_id": 201,
-      "character_name": "Yan",
+      "costume_id": "10003",
+      "character_resource_id": "201",
+      "spine_asset_id": "c201_01",
       "costume_name": "Sunrise Market",
       "costume_index": 1,
-      "spine_asset_id": "c201_01",
       "l2d_name": "Yan Sunrise Market",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
     },
     {
-      "costume_id": 70002,
-      "character_resource_id": 200,
-      "character_name": "Rupee",
-      "costume_name": "Rabbit Deluxe",
+      "costume_id": "10004",
+      "character_resource_id": "131",
+      "spine_asset_id": "c131_01",
+      "costume_name": "Ocean Vitamin",
       "costume_index": 1,
-      "spine_asset_id": "c200_01",
-      "l2d_name": "Rupee Rabbit Deluxe",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
+      "l2d_name": "Pepper Ocean Vitamin",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
     },
     {
-      "costume_id": 50004,
-      "character_resource_id": 202,
-      "character_name": "Dolla",
-      "costume_name": "Dark Rose",
-      "costume_index": 1,
-      "spine_asset_id": "c202_01",
-      "l2d_name": "Dolla Dark Rose",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30010,
-      "character_resource_id": 212,
-      "character_name": "Novel",
-      "costume_name": "Penguin Holmes",
-      "costume_index": 1,
-      "spine_asset_id": "c212_01",
-      "l2d_name": "Novel Penguin Holmes",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 100001,
-      "character_resource_id": 212,
-      "character_name": "Novel",
-      "costume_name": "Detective Nurse",
-      "costume_index": 2,
-      "spine_asset_id": "c212_02",
-      "l2d_name": "Novel Detective Nurse",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30017,
-      "character_resource_id": 282,
-      "character_name": "Sakura",
-      "costume_name": "Midnight Stealth",
-      "costume_index": 1,
-      "spine_asset_id": "c282_01",
-      "l2d_name": "Sakura Midnight Stealth",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30018,
-      "character_resource_id": 260,
-      "character_name": "Modernia",
-      "costume_name": "First Affection",
-      "costume_index": 1,
-      "spine_asset_id": "c260_01",
-      "l2d_name": "Modernia First Affection",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 30014,
-      "character_resource_id": 800,
-      "character_name": "Makima",
-      "costume_name": "Coat Off",
-      "costume_index": 1,
-      "spine_asset_id": "c800_01",
-      "l2d_name": "Makima Coat Off",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 90001,
-      "character_resource_id": 810,
-      "character_name": "2B",
-      "costume_name": "Metamorphic Damage",
-      "costume_index": 1,
-      "spine_asset_id": "c810_01",
-      "l2d_name": "2B Metamorphic Damage",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 90002,
-      "character_resource_id": 810,
-      "character_name": "2B",
-      "costume_name": "YoRHa Uniform 1",
-      "costume_index": 2,
-      "spine_asset_id": "c810_02",
-      "l2d_name": "2B YoRHa Uniform 1",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 90003,
-      "character_resource_id": 811,
-      "character_name": "A2",
-      "costume_name": "Metamorphic Damage",
-      "costume_index": 1,
-      "spine_asset_id": "c811_01",
-      "l2d_name": "A2 Metamorphic Damage",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 90004,
-      "character_resource_id": 811,
-      "character_name": "A2",
-      "costume_name": "YoRHa Uniform Prototype",
-      "costume_index": 2,
-      "spine_asset_id": "c811_02",
-      "l2d_name": "A2 YoRHa Uniform Prototype",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
-    },
-    {
-      "costume_id": 10005,
-      "character_resource_id": 10,
-      "character_name": "Rapi",
+      "costume_id": "10005",
+      "character_resource_id": "10",
+      "spine_asset_id": "c010_03",
       "costume_name": "Classic Vacation",
       "costume_index": 2,
-      "spine_asset_id": "c010_02",
-      "l2d_name": "Rapi White Promise",
-      "match_type": "SEED_VERIFIED_IDENTITY"
+      "l2d_name": "Rapi Classic Vacation",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
     },
     {
-      "costume_id": 30001,
-      "character_resource_id": 11,
-      "character_name": "Neon",
+      "costume_id": "10006",
+      "character_resource_id": "350",
+      "spine_asset_id": "c350_01",
+      "costume_name": "A Pirate's Heart",
+      "costume_index": 1,
+      "l2d_name": "Mast A Pirate's Heart",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "20001",
+      "character_resource_id": "10",
+      "spine_asset_id": "c010_02",
+      "costume_name": "White Promise",
+      "costume_index": 1,
+      "l2d_name": "Rapi White Promise",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30001",
+      "character_resource_id": "11",
+      "spine_asset_id": "c011_01",
       "costume_name": "Bling Bullet",
       "costume_index": 1,
-      "spine_asset_id": "c011_01",
       "l2d_name": "Neon Bling Bullet",
-      "match_type": "CHARACTER_PLUS_NAME_MATCH"
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30002",
+      "character_resource_id": "30",
+      "spine_asset_id": "c030_01",
+      "costume_name": "Sweet Holic",
+      "costume_index": 1,
+      "l2d_name": "Poli Sweet Holic",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30003",
+      "character_resource_id": "70",
+      "spine_asset_id": "c070_01",
+      "costume_name": "Model Worker",
+      "costume_index": 1,
+      "l2d_name": "Brid Model Worker",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30004",
+      "character_resource_id": "102",
+      "spine_asset_id": "c102_01",
+      "costume_name": "Mechanic White",
+      "costume_index": 1,
+      "l2d_name": "Maxwell Mechanic White",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30006",
+      "character_resource_id": "72",
+      "spine_asset_id": "c072_01",
+      "costume_name": "Black Sunday",
+      "costume_index": 2,
+      "l2d_name": "Diesel Black Sunday",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30007",
+      "character_resource_id": "181",
+      "spine_asset_id": "c181_01",
+      "costume_name": "Covert Nurse",
+      "costume_index": 1,
+      "l2d_name": "Maiden Covert Nurse",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30008",
+      "character_resource_id": "160",
+      "spine_asset_id": "c160_01",
+      "costume_name": "Pretty in Pink",
+      "costume_index": 1,
+      "l2d_name": "Yuni Pretty In Pink",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30009",
+      "character_resource_id": "170",
+      "spine_asset_id": "c170_01",
+      "costume_name": "Government Grunt",
+      "costume_index": 1,
+      "l2d_name": "Privaty Government Grunt",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30010",
+      "character_resource_id": "212",
+      "spine_asset_id": "c212_01",
+      "costume_name": "Penguin Holmes",
+      "costume_index": 1,
+      "l2d_name": "Novel Penguin Holmes",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30011",
+      "character_resource_id": "141",
+      "spine_asset_id": "c141_01",
+      "costume_name": "Extreme Fighter",
+      "costume_index": 1,
+      "l2d_name": "Milk Extreme Fighter",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30012",
+      "character_resource_id": "80",
+      "spine_asset_id": "c080_01",
+      "costume_name": "Supreme Holiday",
+      "costume_index": 1,
+      "l2d_name": "Centi Supreme Holiday",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30013",
+      "character_resource_id": "430",
+      "spine_asset_id": "c430_01",
+      "costume_name": "Cherry Blossom Stage",
+      "costume_index": 1,
+      "l2d_name": "Noise Cherry Blossom Stage",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30014",
+      "character_resource_id": "800",
+      "spine_asset_id": "c800_01",
+      "costume_name": "Coat Off",
+      "costume_index": 1,
+      "l2d_name": "Makima Coat Off",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30015",
+      "character_resource_id": "191",
+      "spine_asset_id": "c191_01",
+      "costume_name": "Sweet Home",
+      "costume_index": 1,
+      "l2d_name": "Alice Sweet Home",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30016",
+      "character_resource_id": "90",
+      "spine_asset_id": "c090_02",
+      "costume_name": "Office Therapy",
+      "costume_index": 2,
+      "l2d_name": "Emma Office Therapy",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30017",
+      "character_resource_id": "282",
+      "spine_asset_id": "c282_01",
+      "costume_name": "Midnight Stealth",
+      "costume_index": 1,
+      "l2d_name": "Sakura Midnight Stealth",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30018",
+      "character_resource_id": "260",
+      "spine_asset_id": "c260_01",
+      "costume_name": "First Affection",
+      "costume_index": 1,
+      "l2d_name": "Modernia First Affection",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "30019",
+      "character_resource_id": "70",
+      "spine_asset_id": "c070_02",
+      "costume_name": "Black Moon",
+      "costume_index": 2,
+      "l2d_name": "Brid Black Moon",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "40001",
+      "character_resource_id": "90",
+      "spine_asset_id": "c090_01",
+      "costume_name": "Color me Red",
+      "costume_index": 1,
+      "l2d_name": "Emma Color Me Red",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "40002",
+      "character_resource_id": "210",
+      "spine_asset_id": "c210_01",
+      "costume_name": "Joy to the Nerds",
+      "costume_index": 1,
+      "l2d_name": "Exia Joy to the Nerds",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "50001",
+      "character_resource_id": "150",
+      "spine_asset_id": "c150_01",
+      "costume_name": "Mild Nocturne",
+      "costume_index": 1,
+      "l2d_name": "Julia Mild Nocturne",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "50002",
+      "character_resource_id": "140",
+      "spine_asset_id": "c140_01",
+      "costume_name": "Hard-Boiled",
+      "costume_index": 1,
+      "l2d_name": "Sugar Hard-Boiled",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "50003",
+      "character_resource_id": "352",
+      "spine_asset_id": "c352_01",
+      "costume_name": "Chandelier",
+      "costume_index": 1,
+      "l2d_name": "Helm Chandelier",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "50004",
+      "character_resource_id": "202",
+      "spine_asset_id": "c202_01",
+      "costume_name": "Dark Rose",
+      "costume_index": 1,
+      "l2d_name": "Dolla Dark Rose",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "60001",
+      "character_resource_id": "22",
+      "spine_asset_id": "c022_01",
+      "costume_name": "Dramatic Chocolate",
+      "costume_index": 1,
+      "l2d_name": "Signal Dramatic Chocolate",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "70001",
+      "character_resource_id": "112",
+      "spine_asset_id": "c112_01",
+      "costume_name": "Toxic Rabbit",
+      "costume_index": 1,
+      "l2d_name": "Viper Toxic Rabbit",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "70002",
+      "character_resource_id": "200",
+      "spine_asset_id": "c200_01",
+      "costume_name": "Rabbit Deluxe",
+      "costume_index": 1,
+      "l2d_name": "Rupee Rabbit Deluxe",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "80001",
+      "character_resource_id": "101",
+      "spine_asset_id": "c101_01",
+      "costume_name": "Villain Racer",
+      "costume_index": 1,
+      "l2d_name": "Drake Villain Racer",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "90001",
+      "character_resource_id": "810",
+      "spine_asset_id": "c810_01",
+      "costume_name": "Metamorphic Damage",
+      "costume_index": 1,
+      "l2d_name": "2B Metamorphic Damage",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "90002",
+      "character_resource_id": "810",
+      "spine_asset_id": "c810_02",
+      "costume_name": "YoRHa Uniform 1",
+      "costume_index": 2,
+      "l2d_name": "2B YoRHa Uniform 1",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "90003",
+      "character_resource_id": "811",
+      "spine_asset_id": "c811_01",
+      "costume_name": "Metamorphic Damage",
+      "costume_index": 1,
+      "l2d_name": "A2 Metamorphic Damage",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "90004",
+      "character_resource_id": "811",
+      "spine_asset_id": "c811_02",
+      "costume_name": "YoRHa Uniform Prototype",
+      "costume_index": 2,
+      "l2d_name": "A2 YoRHa Uniform Prototype",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
+    },
+    {
+      "costume_id": "100001",
+      "character_resource_id": "212",
+      "spine_asset_id": "c212_02",
+      "costume_name": "Detective Nurse",
+      "costume_index": 2,
+      "l2d_name": "Novel Detective Nurse",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-10"
     }
   ],
   "unresolved": [
     {
-      "costume_id": 30025,
-      "character_resource_id": 30,
+      "costume_id": "10014",
+      "character_resource_id": "16",
+      "character_name": "Rapi: Red Hood",
+      "costume_name": "Red Flavor",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30050",
+      "character_resource_id": "16",
+      "character_name": "Rapi: Red Hood",
+      "costume_name": "Cherished Red",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "130005",
+      "character_resource_id": "16",
+      "character_name": "Rapi: Red Hood",
+      "costume_name": "Shining Light",
+      "costume_index": 3,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30064",
+      "character_resource_id": "17",
+      "character_name": "Anis: Star",
+      "costume_name": "T.T. STAR",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "120004",
+      "character_resource_id": "17",
+      "character_name": "Anis: Star",
+      "costume_name": "Starlight",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30025",
+      "character_resource_id": "30",
       "character_name": "Poli",
       "costume_name": "Cheer Up Police",
       "costume_index": 2,
@@ -396,34 +599,47 @@
           "Poli Sweet Holic"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 10007,
-      "character_resource_id": 181,
-      "character_name": "Maiden",
-      "costume_name": "Under The Sun",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c181_01",
-          "Maiden Covert Nurse"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 130002,
-      "character_resource_id": 91,
-      "character_name": "Vesti",
-      "costume_name": "Ark Mage",
+      "costume_id": "30031",
+      "character_resource_id": "32",
+      "character_name": "Miranda",
+      "costume_name": "Thief of Justice",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30005,
-      "character_resource_id": 72,
+      "costume_id": "100002",
+      "character_resource_id": "41",
+      "character_name": "K",
+      "costume_name": "Undercover",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "50013",
+      "character_resource_id": "43",
+      "character_name": "D: Killer Wife",
+      "costume_name": "Secret Party Cleaner",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "100003",
+      "character_resource_id": "43",
+      "character_name": "D: Killer Wife",
+      "costume_name": "Secret Police",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30005",
+      "character_resource_id": "72",
       "character_name": "Diesel",
       "costume_name": "Strawberry Flower",
       "costume_index": 1,
@@ -433,11 +649,11 @@
           "Diesel Black Sunday"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 50011,
-      "character_resource_id": 72,
+      "costume_id": "50011",
+      "character_resource_id": "72",
       "character_name": "Diesel",
       "costume_name": "Midnight Strawberry",
       "costume_index": 4,
@@ -447,29 +663,199 @@
           "Diesel Black Sunday"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 30031,
-      "character_resource_id": 32,
-      "character_name": "Miranda",
-      "costume_name": "Thief of Justice",
+      "costume_id": "10012",
+      "character_resource_id": "80",
+      "character_name": "Centi",
+      "costume_name": "Ocean Repair",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c080_01",
+          "Centi Supreme Holiday"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "50008",
+      "character_resource_id": "82",
+      "character_name": "Liter",
+      "costume_name": "Cute Sunflower",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c082_01",
+          "Liter Guardfish"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "130002",
+      "character_resource_id": "91",
+      "character_name": "Vesti",
+      "costume_name": "Ark Mage",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 50009,
-      "character_resource_id": 180,
-      "character_name": "Guillotine",
-      "costume_name": "Dark Tracer",
+      "costume_id": "50018",
+      "character_resource_id": "93",
+      "character_name": "Emma: Tactical Upgrade",
+      "costume_name": "Secret Therapy",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30047,
-      "character_resource_id": 170,
+      "costume_id": "30060",
+      "character_resource_id": "94",
+      "character_name": "Vesti: Tactical Upgrade",
+      "costume_name": "Pure Beginner",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30049",
+      "character_resource_id": "95",
+      "character_name": "Eunhwa: Tactical Upgrade",
+      "costume_name": "Day Off",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "60002",
+      "character_resource_id": "101",
+      "character_name": "Drake",
+      "costume_name": "Maid For Villain",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c101_01",
+          "Drake Villain Racer"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "30069",
+      "character_resource_id": "103",
+      "character_name": "Laplace: Ultimate Hero",
+      "costume_name": "Prototype Hero",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30070",
+      "character_resource_id": "105",
+      "character_name": "Maxwell: Ordinary Mechanic",
+      "costume_name": "Chief Researcher",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30054",
+      "character_resource_id": "111",
+      "character_name": "Jackal",
+      "costume_name": "Class Troublemaker",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "10009",
+      "character_resource_id": "112",
+      "character_name": "Viper",
+      "costume_name": "Shine of Love",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c112_01",
+          "Viper Toxic Rabbit"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "30059",
+      "character_resource_id": "112",
+      "character_name": "Viper",
+      "costume_name": "Punky Street",
+      "costume_index": 3,
+      "available_l2d_candidates": [
+        [
+          "c112_01",
+          "Viper Toxic Rabbit"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "30068",
+      "character_resource_id": "113",
+      "character_name": "E.H.",
+      "costume_name": "Junkyard Vanguard",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "70004",
+      "character_resource_id": "130",
+      "character_name": "Mary",
+      "costume_name": "Medical Rabbit",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30022",
+      "character_resource_id": "140",
+      "character_name": "Sugar",
+      "costume_name": "Wild Backyard",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c140_01",
+          "Sugar Hard-Boiled"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "30048",
+      "character_resource_id": "150",
+      "character_name": "Julia",
+      "costume_name": "Summer Romance",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c150_01",
+          "Julia Mild Nocturne"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "30043",
+      "character_resource_id": "162",
+      "character_name": "Mihara: Bonding Chain",
+      "costume_name": "Pain Eater",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30047",
+      "character_resource_id": "170",
       "character_name": "Privaty",
       "costume_name": "Destined in Blue",
       "costume_index": 3,
@@ -479,11 +865,11 @@
           "Privaty Government Grunt"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 30061,
-      "character_resource_id": 170,
+      "costume_id": "30061",
+      "character_resource_id": "170",
       "character_name": "Privaty",
       "costume_name": "Sharp Lesson",
       "costume_index": 4,
@@ -493,11 +879,11 @@
           "Privaty Government Grunt"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 50005,
-      "character_resource_id": 170,
+      "costume_id": "50005",
+      "character_resource_id": "170",
       "character_name": "Privaty",
       "costume_name": "Banquet Princess",
       "costume_index": 2,
@@ -507,92 +893,324 @@
           "Privaty Government Grunt"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 30029,
-      "character_resource_id": 321,
+      "costume_id": "50009",
+      "character_resource_id": "180",
+      "character_name": "Guillotine",
+      "costume_name": "Dark Tracer",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "10007",
+      "character_resource_id": "181",
+      "character_name": "Maiden",
+      "costume_name": "Under The Sun",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c181_01",
+          "Maiden Covert Nurse"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "130003",
+      "character_resource_id": "191",
+      "character_name": "Alice",
+      "costume_name": "Märchen Dream",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c191_01",
+          "Alice Sweet Home"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "10013",
+      "character_resource_id": "192",
+      "character_name": "Tove",
+      "costume_name": "Sunblaze",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30032",
+      "character_resource_id": "192",
+      "character_name": "Tove",
+      "costume_name": "Baseball Fan",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30023",
+      "character_resource_id": "210",
+      "character_name": "Exia",
+      "costume_name": "Gamer",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c210_01",
+          "Exia Joy to the Nerds"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "70005",
+      "character_resource_id": "210",
+      "character_name": "Exia",
+      "costume_name": "Hacker Rabbit",
+      "costume_index": 3,
+      "available_l2d_candidates": [
+        [
+          "c210_01",
+          "Exia Joy to the Nerds"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "30026",
+      "character_resource_id": "220",
+      "character_name": "Snow White",
+      "costume_name": "White Knight",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110023",
+      "character_resource_id": "222",
+      "character_name": "Scarlet",
+      "costume_name": "Racer's High",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "120003",
+      "character_resource_id": "223",
+      "character_name": "Nayuta",
+      "costume_name": "Wu Wei",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30033",
+      "character_resource_id": "225",
+      "character_name": "Scarlet: Black Shadow",
+      "costume_name": "Longing Flower",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "50006",
+      "character_resource_id": "230",
+      "character_name": "Harran",
+      "costume_name": "Banquet Witch",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "50014",
+      "character_resource_id": "231",
+      "character_name": "Isabel",
+      "costume_name": "Honeymoon Party",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "50007",
+      "character_resource_id": "233",
+      "character_name": "Dorothy",
+      "costume_name": "Nostalgia",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "130004",
+      "character_resource_id": "233",
+      "character_name": "Dorothy",
+      "costume_name": "Luna Light",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "70003",
+      "character_resource_id": "242",
+      "character_name": "Folkwang",
+      "costume_name": "Moist Rabbit",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "120002",
+      "character_resource_id": "260",
+      "character_name": "Modernia",
+      "costume_name": "Second Affection",
+      "costume_index": 2,
+      "available_l2d_candidates": [
+        [
+          "c260_01",
+          "Modernia First Affection"
+        ]
+      ],
+      "reason": "NO_NAME_IDENTITY_MATCH"
+    },
+    {
+      "costume_id": "50019",
+      "character_resource_id": "262",
+      "character_name": "Liberalio",
+      "costume_name": "Dreaming Lake",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30021",
+      "character_resource_id": "270",
+      "character_name": "Blanc",
+      "costume_name": "White Rabbit",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30044",
+      "character_resource_id": "270",
+      "character_name": "Blanc",
+      "costume_name": "No. 77 Batter",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30055",
+      "character_resource_id": "270",
+      "character_name": "Blanc",
+      "costume_name": "Fortune Express",
+      "costume_index": 3,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30020",
+      "character_resource_id": "271",
+      "character_name": "Noir",
+      "costume_name": "Black Rabbit",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30045",
+      "character_resource_id": "271",
+      "character_name": "Noir",
+      "costume_name": "Baseball Cheerleader",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "70006",
+      "character_resource_id": "272",
+      "character_name": "Rouge",
+      "costume_name": "Unlucky Rabbit",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30024",
+      "character_resource_id": "280",
+      "character_name": "Rosanna",
+      "costume_name": "Ms. Dangerous",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30046",
+      "character_resource_id": "281",
+      "character_name": "Moran",
+      "costume_name": "Off-Duty Queen",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "50020",
+      "character_resource_id": "281",
+      "character_name": "Moran",
+      "costume_name": "King of Flowers",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30040",
+      "character_resource_id": "310",
+      "character_name": "Ade",
+      "costume_name": "Maid In Spring",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "70008",
+      "character_resource_id": "316",
+      "character_name": "Velvet",
+      "costume_name": "Sensual Rabbit",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30029",
+      "character_resource_id": "321",
       "character_name": "Marciana",
       "costume_name": "School Days",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 100002,
-      "character_resource_id": 41,
-      "character_name": "K",
-      "costume_name": "Undercover",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30057,
-      "character_resource_id": 354,
-      "character_name": "Mast: Romantic Maid",
-      "costume_name": "Tea Service",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 130006,
-      "character_resource_id": 580,
-      "character_name": "Phantom",
-      "costume_name": "Saint Thief",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30034,
-      "character_resource_id": 390,
-      "character_name": "Zwei",
-      "costume_name": "First Festa",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30058,
-      "character_resource_id": 390,
-      "character_name": "Zwei",
-      "costume_name": "Spring Stroll",
+      "costume_id": "30052",
+      "character_resource_id": "330",
+      "character_name": "Crown",
+      "costume_name": "Glorious Flower",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 10014,
-      "character_resource_id": 16,
-      "character_name": "Rapi: Red Hood",
-      "costume_name": "Red Flavor",
+      "costume_id": "120001",
+      "character_resource_id": "330",
+      "character_name": "Crown",
+      "costume_name": "Naked King",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30050,
-      "character_resource_id": 16,
-      "character_name": "Rapi: Red Hood",
-      "costume_name": "Cherished Red",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 130005,
-      "character_resource_id": 16,
-      "character_name": "Rapi: Red Hood",
-      "costume_name": "Shining Light",
-      "costume_index": 3,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 10010,
-      "character_resource_id": 350,
+      "costume_id": "10010",
+      "character_resource_id": "350",
       "character_name": "Mast",
       "costume_name": "Mast the Diver",
       "costume_index": 2,
@@ -606,211 +1224,20 @@
           "Mast_old"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 50013,
-      "character_resource_id": 43,
-      "character_name": "D: Killer Wife",
-      "costume_name": "Secret Party Cleaner",
+      "costume_id": "10011",
+      "character_resource_id": "351",
+      "character_name": "Anchor",
+      "costume_name": "Anchor the Diver",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 100003,
-      "character_resource_id": 43,
-      "character_name": "D: Killer Wife",
-      "costume_name": "Secret Police",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30062,
-      "character_resource_id": 532,
-      "character_name": "Sora",
-      "costume_name": "Spring Flight",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 50018,
-      "character_resource_id": 93,
-      "character_name": "Emma: Tactical Upgrade",
-      "costume_name": "Secret Therapy",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30060,
-      "character_resource_id": 94,
-      "character_name": "Vesti: Tactical Upgrade",
-      "costume_name": "Pure Beginner",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30049,
-      "character_resource_id": 95,
-      "character_name": "Eunhwa: Tactical Upgrade",
-      "costume_name": "Day Off",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30068,
-      "character_resource_id": 113,
-      "character_name": "E.H.",
-      "costume_name": "Junkyard Vanguard",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30048,
-      "character_resource_id": 150,
-      "character_name": "Julia",
-      "costume_name": "Summer Romance",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c150_01",
-          "Julia Mild Nocturne"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 10012,
-      "character_resource_id": 80,
-      "character_name": "Centi",
-      "costume_name": "Ocean Repair",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c080_01",
-          "Centi Supreme Holiday"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 60002,
-      "character_resource_id": 101,
-      "character_name": "Drake",
-      "costume_name": "Maid For Villain",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c101_01",
-          "Drake Villain Racer"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30054,
-      "character_resource_id": 111,
-      "character_name": "Jackal",
-      "costume_name": "Class Troublemaker",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 10008,
-      "character_resource_id": 400,
-      "character_name": "Guilty",
-      "costume_name": "Wave of Disbelief",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 50008,
-      "character_resource_id": 82,
-      "character_name": "Liter",
-      "costume_name": "Cute Sunflower",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c082_01",
-          "Liter Guardfish"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 60004,
-      "character_resource_id": 401,
-      "character_name": "Sin",
-      "costume_name": "Backstreet Dream",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 10017,
-      "character_resource_id": 451,
-      "character_name": "Tia",
-      "costume_name": "Sea Lizzie",
-      "costume_index": 3,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30028,
-      "character_resource_id": 451,
-      "character_name": "Tia",
-      "costume_name": "Lovely Date",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30039,
-      "character_resource_id": 451,
-      "character_name": "Tia",
-      "costume_name": "Sweet Chef",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 10013,
-      "character_resource_id": 192,
-      "character_name": "Tove",
-      "costume_name": "Sunblaze",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30032,
-      "character_resource_id": 192,
-      "character_name": "Tove",
-      "costume_name": "Baseball Fan",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 60003,
-      "character_resource_id": 501,
-      "character_name": "Trony",
-      "costume_name": "Sweet Step",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30037,
-      "character_resource_id": 352,
+      "costume_id": "30037",
+      "character_resource_id": "352",
       "character_name": "Helm",
       "costume_name": "Post-Shower Moment",
       "costume_index": 2,
@@ -820,486 +1247,331 @@
           "Helm Chandelier"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 10015,
-      "character_resource_id": 450,
-      "character_name": "Naga",
-      "costume_name": "Ring Ensemble",
-      "costume_index": 3,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30027,
-      "character_resource_id": 450,
-      "character_name": "Naga",
-      "costume_name": "Elegant Date",
+      "costume_id": "30057",
+      "character_resource_id": "354",
+      "character_name": "Mast: Romantic Maid",
+      "costume_name": "Tea Service",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30036,
-      "character_resource_id": 450,
-      "character_name": "Naga",
-      "costume_name": "Last Girlhood",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 50017,
-      "character_resource_id": 403,
-      "character_name": "Quency: Escape Queen",
-      "costume_name": "Masquerade Swan",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 70009,
-      "character_resource_id": 411,
-      "character_name": "Flora",
-      "costume_name": "Fairy Rabbit",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30067,
-      "character_resource_id": 412,
-      "character_name": "Trina",
-      "costume_name": "Natural White",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30043,
-      "character_resource_id": 162,
-      "character_name": "Mihara: Bonding Chain",
-      "costume_name": "Pain Eater",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30069,
-      "character_resource_id": 103,
-      "character_name": "Laplace: Ultimate Hero",
-      "costume_name": "Prototype Hero",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30035,
-      "character_resource_id": 391,
-      "character_name": "Ein",
-      "costume_name": "Handmade Festa",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30070,
-      "character_resource_id": 105,
-      "character_name": "Maxwell: Ordinary Mechanic",
-      "costume_name": "Chief Researcher",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30022,
-      "character_resource_id": 140,
-      "character_name": "Sugar",
-      "costume_name": "Wild Backyard",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c140_01",
-          "Sugar Hard-Boiled"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30023,
-      "character_resource_id": 210,
-      "character_name": "Exia",
-      "costume_name": "Gamer",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c210_01",
-          "Exia Joy to the Nerds"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 70005,
-      "character_resource_id": 210,
-      "character_name": "Exia",
-      "costume_name": "Hacker Rabbit",
-      "costume_index": 3,
-      "available_l2d_candidates": [
-        [
-          "c210_01",
-          "Exia Joy to the Nerds"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 130003,
-      "character_resource_id": 191,
-      "character_name": "Alice",
-      "costume_name": "Märchen Dream",
-      "costume_index": 2,
-      "available_l2d_candidates": [
-        [
-          "c191_01",
-          "Alice Sweet Home"
-        ]
-      ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30020,
-      "character_resource_id": 271,
-      "character_name": "Noir",
-      "costume_name": "Black Rabbit",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30045,
-      "character_resource_id": 271,
-      "character_name": "Noir",
-      "costume_name": "Baseball Cheerleader",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30021,
-      "character_resource_id": 270,
-      "character_name": "Blanc",
-      "costume_name": "White Rabbit",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30044,
-      "character_resource_id": 270,
-      "character_name": "Blanc",
-      "costume_name": "No. 77 Batter",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30055,
-      "character_resource_id": 270,
-      "character_name": "Blanc",
-      "costume_name": "Fortune Express",
-      "costume_index": 3,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 70004,
-      "character_resource_id": 130,
-      "character_name": "Mary",
-      "costume_name": "Medical Rabbit",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 70003,
-      "character_resource_id": 242,
-      "character_name": "Folkwang",
-      "costume_name": "Moist Rabbit",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30038,
-      "character_resource_id": 381,
+      "costume_id": "30038",
+      "character_resource_id": "381",
       "character_name": "Biscuit",
       "costume_name": "Spring Puppy",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 130001,
-      "character_resource_id": 431,
-      "character_name": "Volume",
-      "costume_name": "Beat the Gun",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 30030,
-      "character_resource_id": 382,
+      "costume_id": "30030",
+      "character_resource_id": "382",
       "character_name": "Leona",
       "costume_name": "Zoo Keeper",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30063,
-      "character_resource_id": 551,
-      "character_name": "Clay",
-      "costume_name": "Cheer Up Training",
+      "costume_id": "30034",
+      "character_resource_id": "390",
+      "character_name": "Zwei",
+      "costume_name": "First Festa",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30046,
-      "character_resource_id": 281,
-      "character_name": "Moran",
-      "costume_name": "Off-Duty Queen",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 50020,
-      "character_resource_id": 281,
-      "character_name": "Moran",
-      "costume_name": "King of Flowers",
+      "costume_id": "30058",
+      "character_resource_id": "390",
+      "character_name": "Zwei",
+      "costume_name": "Spring Stroll",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30056,
-      "character_resource_id": 520,
-      "character_name": "Bready",
-      "costume_name": "Frosty Bite",
+      "costume_id": "30035",
+      "character_resource_id": "391",
+      "character_name": "Ein",
+      "costume_name": "Handmade Festa",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 70008,
-      "character_resource_id": 316,
-      "character_name": "Velvet",
-      "costume_name": "Sensual Rabbit",
+      "costume_id": "10008",
+      "character_resource_id": "400",
+      "character_name": "Guilty",
+      "costume_name": "Wave of Disbelief",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 70007,
-      "character_resource_id": 550,
-      "character_name": "Bay",
-      "costume_name": "Radiant Rabbit",
+      "costume_id": "60004",
+      "character_resource_id": "401",
+      "character_name": "Sin",
+      "costume_name": "Backstreet Dream",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30064,
-      "character_resource_id": 17,
-      "character_name": "Anis: Star",
-      "costume_name": "T.T. STAR",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 120004,
-      "character_resource_id": 17,
-      "character_name": "Anis: Star",
-      "costume_name": "Starlight",
+      "costume_id": "50017",
+      "character_resource_id": "403",
+      "character_name": "Quency: Escape Queen",
+      "costume_name": "Masquerade Swan",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30066,
-      "character_resource_id": 601,
-      "character_name": "Prika",
-      "costume_name": "Cool Paprika",
+      "costume_id": "70009",
+      "character_resource_id": "411",
+      "character_name": "Flora",
+      "costume_name": "Fairy Rabbit",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 50014,
-      "character_resource_id": 231,
-      "character_name": "Isabel",
-      "costume_name": "Honeymoon Party",
+      "costume_id": "30067",
+      "character_resource_id": "412",
+      "character_name": "Trina",
+      "costume_name": "Natural White",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110023,
-      "character_resource_id": 222,
-      "character_name": "Scarlet",
-      "costume_name": "Racer's High",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 50006,
-      "character_resource_id": 230,
-      "character_name": "Harran",
-      "costume_name": "Banquet Witch",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 120002,
-      "character_resource_id": 260,
-      "character_name": "Modernia",
-      "costume_name": "Second Affection",
+      "costume_id": "50010",
+      "character_resource_id": "430",
+      "character_name": "Noise",
+      "costume_name": "Classic Diva",
       "costume_index": 2,
       "available_l2d_candidates": [
         [
-          "c260_01",
-          "Modernia First Affection"
+          "c430_01",
+          "Noise Cherry Blossom Stage"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 50007,
-      "character_resource_id": 233,
-      "character_name": "Dorothy",
-      "costume_name": "Nostalgia",
+      "costume_id": "130001",
+      "character_resource_id": "431",
+      "character_name": "Volume",
+      "costume_name": "Beat the Gun",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 130004,
-      "character_resource_id": 233,
-      "character_name": "Dorothy",
-      "costume_name": "Luna Light",
+      "costume_id": "10015",
+      "character_resource_id": "450",
+      "character_name": "Naga",
+      "costume_name": "Ring Ensemble",
+      "costume_index": 3,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30027",
+      "character_resource_id": "450",
+      "character_name": "Naga",
+      "costume_name": "Elegant Date",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30036",
+      "character_resource_id": "450",
+      "character_name": "Naga",
+      "costume_name": "Last Girlhood",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30033,
-      "character_resource_id": 225,
-      "character_name": "Scarlet: Black Shadow",
-      "costume_name": "Longing Flower",
+      "costume_id": "10017",
+      "character_resource_id": "451",
+      "character_name": "Tia",
+      "costume_name": "Sea Lizzie",
+      "costume_index": 3,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30028",
+      "character_resource_id": "451",
+      "character_name": "Tia",
+      "costume_name": "Lovely Date",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30052,
-      "character_resource_id": 330,
-      "character_name": "Crown",
-      "costume_name": "Glorious Flower",
+      "costume_id": "30039",
+      "character_resource_id": "451",
+      "character_name": "Tia",
+      "costume_name": "Sweet Chef",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 120001,
-      "character_resource_id": 330,
-      "character_name": "Crown",
-      "costume_name": "Naked King",
+      "costume_id": "30051",
+      "character_resource_id": "470",
+      "character_name": "Red Hood",
+      "costume_name": "Retro Days",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "50012",
+      "character_resource_id": "470",
+      "character_name": "Red Hood",
+      "costume_name": "Nonsense Red",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30042,
-      "character_resource_id": 511,
+      "costume_id": "60003",
+      "character_resource_id": "501",
+      "character_name": "Trony",
+      "costume_name": "Sweet Step",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30042",
+      "character_resource_id": "511",
       "character_name": "Cinderella",
       "costume_name": "Beautiful Me",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 50015,
-      "character_resource_id": 511,
+      "costume_id": "50015",
+      "character_resource_id": "511",
       "character_name": "Cinderella",
       "costume_name": "Glass Princess",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30041,
-      "character_resource_id": 514,
-      "character_name": "Grave",
-      "costume_name": "Beautiful You",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 10016,
-      "character_resource_id": 513,
+      "costume_id": "10016",
+      "character_resource_id": "513",
       "character_name": "Little Mermaid",
       "costume_name": "Shell Princess",
       "costume_index": 3,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 30053,
-      "character_resource_id": 513,
+      "costume_id": "30053",
+      "character_resource_id": "513",
       "character_name": "Little Mermaid",
       "costume_name": "Beautiful Bubble",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 50016,
-      "character_resource_id": 513,
+      "costume_id": "50016",
+      "character_resource_id": "513",
       "character_name": "Little Mermaid",
       "costume_name": "Abyss Flower",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 120003,
-      "character_resource_id": 223,
-      "character_name": "Nayuta",
-      "costume_name": "Wu Wei",
+      "costume_id": "30041",
+      "character_resource_id": "514",
+      "character_name": "Grave",
+      "costume_name": "Beautiful You",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 50019,
-      "character_resource_id": 262,
-      "character_name": "Liberalio",
-      "costume_name": "Dreaming Lake",
+      "costume_id": "30056",
+      "character_resource_id": "520",
+      "character_name": "Bready",
+      "costume_name": "Frosty Bite",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 90005,
-      "character_resource_id": 810,
+      "costume_id": "30062",
+      "character_resource_id": "532",
+      "character_name": "Sora",
+      "costume_name": "Spring Flight",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "70007",
+      "character_resource_id": "550",
+      "character_name": "Bay",
+      "costume_name": "Radiant Rabbit",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30063",
+      "character_resource_id": "551",
+      "character_name": "Clay",
+      "costume_name": "Cheer Up Training",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "130006",
+      "character_resource_id": "580",
+      "character_name": "Phantom",
+      "costume_name": "Saint Thief",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30065",
+      "character_resource_id": "600",
+      "character_name": "Mint",
+      "costume_name": "Fresh Mint",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "30066",
+      "character_resource_id": "601",
+      "character_name": "Prika",
+      "costume_name": "Cool Paprika",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "90005",
+      "character_resource_id": "810",
       "character_name": "2B",
       "costume_name": "YoRHa Unofficial Waterfront Gear I",
       "costume_index": 3,
@@ -1313,11 +1585,11 @@
           "2B YoRHa Uniform 1"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 90006,
-      "character_resource_id": 811,
+      "costume_id": "90006",
+      "character_resource_id": "811",
       "character_name": "A2",
       "costume_name": "YoRHa Unofficial Waterfront Gear Prototype",
       "costume_index": 3,
@@ -1331,330 +1603,313 @@
           "A2 YoRHa Uniform Prototype"
         ]
       ],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_NAME_IDENTITY_MATCH"
     },
     {
-      "costume_id": 110003,
-      "character_resource_id": 821,
-      "character_name": "Emilia",
-      "costume_name": "Clumsy Maid",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110004,
-      "character_resource_id": 821,
-      "character_name": "Emilia",
-      "costume_name": "Spring Breeze",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110005,
-      "character_resource_id": 830,
-      "character_name": "Asuka",
-      "costume_name": "Asuka's School Uniform",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110008,
-      "character_resource_id": 830,
-      "character_name": "Asuka",
-      "costume_name": "Cynical Street",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110011,
-      "character_resource_id": 830,
-      "character_name": "Asuka",
-      "costume_name": "Test Plugsuit",
-      "costume_index": 3,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110001,
-      "character_resource_id": 820,
+      "costume_id": "110001",
+      "character_resource_id": "820",
       "character_name": "Rem",
       "costume_name": "Handy Maid",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110002,
-      "character_resource_id": 820,
+      "costume_id": "110002",
+      "character_resource_id": "820",
       "character_name": "Rem",
       "costume_name": "Pure Blossom",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110006,
-      "character_resource_id": 831,
+      "costume_id": "110003",
+      "character_resource_id": "821",
+      "character_name": "Emilia",
+      "costume_name": "Clumsy Maid",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110004",
+      "character_resource_id": "821",
+      "character_name": "Emilia",
+      "costume_name": "Spring Breeze",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110005",
+      "character_resource_id": "830",
+      "character_name": "Asuka",
+      "costume_name": "Asuka's School Uniform",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110008",
+      "character_resource_id": "830",
+      "character_name": "Asuka",
+      "costume_name": "Cynical Street",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110011",
+      "character_resource_id": "830",
+      "character_name": "Asuka",
+      "costume_name": "Test Plugsuit",
+      "costume_index": 3,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110006",
+      "character_resource_id": "831",
       "character_name": "Rei",
       "costume_name": "Rei's School Uniform",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110009,
-      "character_resource_id": 831,
+      "costume_id": "110009",
+      "character_resource_id": "831",
       "character_name": "Rei",
       "costume_name": "Peaceful Vacation",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110007,
-      "character_resource_id": 832,
+      "costume_id": "110007",
+      "character_resource_id": "832",
       "character_name": "Mari",
       "costume_name": "Mari's School Uniform",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110010,
-      "character_resource_id": 832,
+      "costume_id": "110010",
+      "character_resource_id": "832",
       "character_name": "Mari",
       "costume_name": "Leisure Travel",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110016,
-      "character_resource_id": 832,
+      "costume_id": "110016",
+      "character_resource_id": "832",
       "character_name": "Mari",
       "costume_name": "Final Battle: Mari",
       "costume_index": 3,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110017,
-      "character_resource_id": 832,
+      "costume_id": "110017",
+      "character_resource_id": "832",
       "character_name": "Mari",
       "costume_name": "Mystery Muse",
       "costume_index": 4,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110012,
-      "character_resource_id": 835,
-      "character_name": "Asuka: WILLE",
-      "costume_name": "Final Battle: Asuka",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110013,
-      "character_resource_id": 835,
-      "character_name": "Asuka: WILLE",
-      "costume_name": "Ocean's Lament",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110024,
-      "character_resource_id": 840,
-      "character_name": "Ada",
-      "costume_name": "Separate Ways",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110025,
-      "character_resource_id": 840,
-      "character_name": "Ada",
-      "costume_name": "Dress",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110021,
-      "character_resource_id": 851,
-      "character_name": "Raven",
-      "costume_name": "Planet Diving Suit (6th) V2",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110022,
-      "character_resource_id": 851,
-      "character_name": "Raven",
-      "costume_name": "Midsummer Alice",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110018,
-      "character_resource_id": 850,
-      "character_name": "EVE",
-      "costume_name": "Keyhole Dress",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110019,
-      "character_resource_id": 850,
-      "character_name": "EVE",
-      "costume_name": "Neurolink Suit",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110020,
-      "character_resource_id": 850,
-      "character_name": "EVE",
-      "costume_name": "Skin Suit",
-      "costume_index": 3,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110026,
-      "character_resource_id": 841,
-      "character_name": "Jill",
-      "costume_name": "Classic",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110027,
-      "character_resource_id": 841,
-      "character_name": "Jill",
-      "costume_name": "Battle Suit",
-      "costume_index": 2,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 110014,
-      "character_resource_id": 834,
+      "costume_id": "110014",
+      "character_resource_id": "834",
       "character_name": "Rei (Tentative Name)",
       "costume_name": "Miss Lookalike from Village-3",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110015,
-      "character_resource_id": 834,
+      "costume_id": "110015",
+      "character_resource_id": "834",
       "character_name": "Rei (Tentative Name)",
       "costume_name": "Soul Connect",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110028,
-      "character_resource_id": 860,
+      "costume_id": "110012",
+      "character_resource_id": "835",
+      "character_name": "Asuka: WILLE",
+      "costume_name": "Final Battle: Asuka",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110013",
+      "character_resource_id": "835",
+      "character_name": "Asuka: WILLE",
+      "costume_name": "Ocean's Lament",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110024",
+      "character_resource_id": "840",
+      "character_name": "Ada",
+      "costume_name": "Separate Ways",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110025",
+      "character_resource_id": "840",
+      "character_name": "Ada",
+      "costume_name": "Dress",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110026",
+      "character_resource_id": "841",
+      "character_name": "Jill",
+      "costume_name": "Classic",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110027",
+      "character_resource_id": "841",
+      "character_name": "Jill",
+      "costume_name": "Battle Suit",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110018",
+      "character_resource_id": "850",
+      "character_name": "EVE",
+      "costume_name": "Keyhole Dress",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110019",
+      "character_resource_id": "850",
+      "character_name": "EVE",
+      "costume_name": "Neurolink Suit",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110020",
+      "character_resource_id": "850",
+      "character_name": "EVE",
+      "costume_name": "Skin Suit",
+      "costume_index": 3,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110021",
+      "character_resource_id": "851",
+      "character_name": "Raven",
+      "costume_name": "Planet Diving Suit (6th) V2",
+      "costume_index": 1,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110022",
+      "character_resource_id": "851",
+      "character_name": "Raven",
+      "costume_name": "Midsummer Alice",
+      "costume_index": 2,
+      "available_l2d_candidates": [],
+      "reason": "NO_CANONICAL_L2D_ENTRY"
+    },
+    {
+      "costume_id": "110028",
+      "character_resource_id": "860",
       "character_name": "Chisato",
       "costume_name": "DA Training Wear (First)",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110029,
-      "character_resource_id": 860,
+      "costume_id": "110029",
+      "character_resource_id": "860",
       "character_name": "Chisato",
       "costume_name": "Red Spark Guitar",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110030,
-      "character_resource_id": 861,
+      "costume_id": "110030",
+      "character_resource_id": "861",
       "character_name": "Takina",
       "costume_name": "DA Training Wear (Second)",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110031,
-      "character_resource_id": 861,
+      "costume_id": "110031",
+      "character_resource_id": "861",
       "character_name": "Takina",
       "costume_name": "Blue Pulse Bass",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110032,
-      "character_resource_id": 870,
+      "costume_id": "110032",
+      "character_resource_id": "870",
       "character_name": "Queen (Makoto)",
       "costume_name": "Shujin Academy Student Council President",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110033,
-      "character_resource_id": 870,
+      "costume_id": "110033",
+      "character_resource_id": "870",
       "character_name": "Queen (Makoto)",
       "costume_name": "Queen's Pajamas (Ver. NIKKE Collabo)",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110034,
-      "character_resource_id": 871,
+      "costume_id": "110034",
+      "character_resource_id": "871",
       "character_name": "Yukiko",
       "costume_name": "Amagi Inn Kimono",
       "costume_index": 1,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
-      "costume_id": 110035,
-      "character_resource_id": 871,
+      "costume_id": "110035",
+      "character_resource_id": "871",
       "character_name": "Yukiko",
       "costume_name": "Winter Roomwear (Ver. NIKKE Collabo)",
       "costume_index": 2,
       "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
-    },
-    {
-      "costume_id": 20001,
-      "character_resource_id": 10,
-      "character_name": "Rapi",
-      "costume_name": "White Promise",
-      "costume_index": 1,
-      "reason": "REJECTED_UNPROVEN_SUFFIX_MATCH: L2D label is Rapi_old; costume_index does not prove suffix."
-    },
-    {
-      "costume_id": 10011,
-      "character_resource_id": 351,
-      "character_name": "Anchor",
-      "costume_name": "Anchor the Diver",
-      "costume_index": 1,
-      "available_l2d_candidates": [],
-      "reason": "NO_EXACT_NAME_IDENTITY_MATCH"
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     }
   ],
   "observed_13_costumes_audit": [
@@ -1662,86 +1917,103 @@
       "costume_id": 10005,
       "character_id": 10,
       "status": "VERIFIED",
-      "spine_id": "c010_02",
-      "name": "Classic Vacation / White Promise (Seed)"
+      "spine_id": "c010_03",
+      "costume_name": "Classic Vacation",
+      "spine_version": "4.1",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH"
     },
     {
       "costume_id": 20001,
       "character_id": 10,
-      "status": "REJECTED",
-      "reason": "Upstream c010_01 is Rapi_old; cannot guess from costume_index=1"
+      "status": "VERIFIED",
+      "spine_id": "c010_02",
+      "costume_name": "White Promise",
+      "spine_version": "4.0",
+      "match_type": "CHARACTER_PLUS_NAME_MATCH"
     },
     {
       "costume_id": 10014,
-      "character_id": 10,
+      "character_id": 16,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Red Flavor",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 110005,
-      "character_id": 10,
+      "character_id": 830,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Asuka's School Uniform",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 110012,
-      "character_id": 10,
+      "character_id": 835,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Final Battle: Asuka",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 110014,
-      "character_id": 10,
+      "character_id": 834,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Miss Lookalike from Village-3",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 110023,
-      "character_id": 10,
+      "character_id": 222,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Racer's High",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 110024,
-      "character_id": 10,
+      "character_id": 840,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Separate Ways",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 120004,
-      "character_id": 10,
+      "character_id": 17,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Starlight",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 30040,
-      "character_id": 10,
+      "character_id": 310,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Maid In Spring",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 30049,
-      "character_id": 10,
+      "character_id": 95,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Day Off",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 30052,
-      "character_id": 10,
+      "character_id": 330,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Glorious Flower",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 30053,
-      "character_id": 10,
+      "character_id": 513,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Beautiful Bubble",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     },
     {
       "costume_id": 50012,
-      "character_id": 10,
+      "character_id": 470,
       "status": "UNRESOLVED",
-      "reason": "NO_CANONICAL_L2D_ENTRY in upstream Nikke-db"
+      "costume_name": "Nonsense Red",
+      "reason": "NO_CANONICAL_L2D_ENTRY"
     }
   ]
 }

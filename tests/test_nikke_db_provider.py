@@ -133,14 +133,14 @@ class NikkeDbProviderTests(unittest.TestCase):
             index_dir = cache_dir / "nikke-db" / "index"
             index_dir.mkdir(parents=True)
             index_data = [
-                {"id": "c010_03", "name": "Anis", "version": 4.1},
+                {"id": "c999_01", "name": "Test", "version": 4.1},
                 {"id": "c191", "name": "Alice"},  # 无 version 字段
             ]
             (index_dir / "l2d.json").write_text(json.dumps(index_data), encoding="utf-8")
 
             provider = NikkeDbProvider(cache_dir, td, remote=False)
             # 明确标记 4.1
-            self.assertEqual(provider.resolve_spine_version("c010_03"), 4.1)
+            self.assertEqual(provider.resolve_spine_version("c999_01"), 4.1)
             # 无版本标记时严格返回 None，禁止盲猜默认 runtime
             self.assertIsNone(provider.resolve_spine_version("c191"))
             # 未收录角色返回 None
@@ -151,9 +151,11 @@ class NikkeDbProviderTests(unittest.TestCase):
             provider = NikkeDbProvider(td, td)
             index_dir = Path(td) / "nikke-db" / "index"
             index_dir.mkdir(parents=True)
-            (index_dir / "l2d.json").write_text(json.dumps([{"id": "c010"}, {"id": "c010_01"}]), encoding="utf-8")
+            index_data = [{"id": "c010"}, {"id": "c010_01"}, {"id": "c010_03"}]
+            (index_dir / "l2d.json").write_text(json.dumps(index_data), encoding="utf-8")
             self.assertEqual(provider.resolve_spine_version("c010"), "4.0")
             self.assertEqual(provider.resolve_spine_version("c010_01"), "4.0")
+            self.assertEqual(provider.resolve_spine_version("c010_03"), "4.1")
 
     def test_spine_bundle_urls(self):
         with tempfile.TemporaryDirectory() as td:

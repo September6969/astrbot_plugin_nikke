@@ -464,7 +464,7 @@ class SpinePreRenderer:
         self,
         cache_dir: str | Path,
         *,
-        runtime: SpineRuntimeBackend | None = None,
+        runtime: SpineRuntimeBackend | Mapping[str, SpineRuntimeBackend] | None = None,
         fetcher: SpineBundleFetcher | None = None,
         max_workers: int = 1,
         max_queue_size: int = 20,
@@ -472,9 +472,32 @@ class SpinePreRenderer:
         self.cache_dir = Path(cache_dir)
         self.prerender_dir = self.cache_dir / "portraits"
         self.prerender_dir.mkdir(parents=True, exist_ok=True)
-        self.runtime = runtime
+        self._runtimes: dict[str, SpineRuntimeBackend] = {}
+        if isinstance(runtime, Mapping):
+            for ver, rt in runtime.items():
+                v = self._major_minor(ver) or self._major_minor(getattr(rt, "version", None))
+                if v and rt is not None:
+                    self._runtimes[v] = rt
+        elif runtime is not None:
+            v = self._major_minor(getattr(runtime, "version", None))
+            if v:
+                self._runtimes[v] = runtime
         self.fetcher = fetcher or SpineBundleFetcher(self.cache_dir / "spine-bundles")
         self.queue = SpineTaskQueue(max_workers=max_workers, max_queue_size=max_queue_size)
+
+    @property
+    def runtime(self) -> SpineRuntimeBackend | None:
+        """主/兼容 runtime；若存在 4.0 则优先返回 4.0，否则返回首个注册的 runtime。"""
+        if "4.0" in self._runtimes:
+            return self._runtimes["4.0"]
+        return next(iter(self._runtimes.values()), None) if self._runtimes else None
+
+    def get_runtime(self, version: str | float | int | None) -> SpineRuntimeBackend | None:
+        """按 major.minor 版本获取精确适配的 Spine runtime。"""
+        major_minor = self._major_minor(version)
+        if major_minor is None:
+            return None
+        return self._runtimes.get(major_minor)
 
     def start(self) -> None:
         """启动受控后台队列；不会同步等待或补发旧卡。"""
@@ -511,12 +534,9 @@ class SpinePreRenderer:
 
     def is_available(self, version: str | float | None = None) -> bool:
         """只有明确注入且版本兼容的 runtime 才算可用。"""
-        if self.runtime is None:
-            return False
-        runtime_version = self._major_minor(getattr(self.runtime, "version", None))
-        if runtime_version is None:
-            return False
-        return version is None or runtime_version == self._major_minor(version)
+        if version is None:
+            return bool(self._runtimes)
+        return self.get_runtime(version) is not None
 
     @staticmethod
     def _major_minor(version: str | float | int | None) -> str | None:
@@ -581,8 +601,9 @@ class SpinePreRenderer:
         if expected_version is None or version == SPINE_VERSION_UNKNOWN:
             logger.warning("Spine 版本未知，严禁猜测默认 runtime，返回 None")
             return None
-        if self.runtime is None or not self.is_available(expected_version):
-            logger.debug("当前环境没有版本匹配的 Spine runtime，跳过实时预渲染")
+        runtime = self.get_runtime(expected_version)
+        if runtime is None:
+            logger.debug("当前环境没有版本匹配的 Spine runtime (%s)，跳过实时预渲染", expected_version)
             return None
 
         try:
@@ -598,7 +619,7 @@ class SpinePreRenderer:
                 raise SpineRenderError(f"Spine bundle 预检查失败: {inspection.get('status')}")
             if int(inspection.get("missing_pages", 0)) != 0:
                 raise SpineRenderError("Spine bundle 缺少纹理页")
-            result = self.runtime.render(bundle, animation=animation, skin=skin)
+            result = runtime.render(bundle, animation=animation, skin=skin)
             return self._normalize_output(result)
         except (OSError, ValueError, TypeError, SpineRenderError) as exc:
             logger.warning("Spine render fallback: %s", safe_exception_message(exc))
