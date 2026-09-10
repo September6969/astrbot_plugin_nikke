@@ -21,6 +21,7 @@ class VoiceResourceProvider:
         self._failed = {}
         self._slots = asyncio.Semaphore(2)
         self._closed = False
+        self._validated_cache: dict[tuple, tuple[int, int, int]] = {}
 
     def _cache_path_is_safe(self) -> bool:
         """缓存路径任一现有层级为符号链接时拒绝读写，避免越出数据目录。"""
@@ -118,9 +119,17 @@ class VoiceResourceProvider:
         try:
             if not self._cache_path_is_safe() or target.is_symlink() or manifest.is_symlink():
                 return None
-            age = time.time() - manifest.stat().st_mtime
-            if not target.is_file() or not manifest.is_file() or not 0 <= age < 86400 or target.stat().st_size > self.MAX_BYTES:
+            target_stat = target.stat()
+            manifest_stat = manifest.stat()
+            age = time.time() - manifest_stat.st_mtime
+            if not target.is_file() or not manifest.is_file() or not 0 <= age < 86400 or target_stat.st_size > self.MAX_BYTES:
                 return None
+
+            cache_key = (target, map_key, speech_id, locale)
+            cached_meta = self._validated_cache.get(cache_key)
+            if cached_meta is not None and cached_meta == (target_stat.st_mtime_ns, manifest_stat.st_mtime_ns, target_stat.st_size):
+                return target
+
             raw = target.read_bytes()
             saved = json.loads(manifest.read_text(encoding="utf-8"))
         except (OSError, UnicodeDecodeError, ValueError):
@@ -134,6 +143,7 @@ class VoiceResourceProvider:
             or not self.is_mp3(raw)
         ):
             return None
+        self._validated_cache[cache_key] = (target_stat.st_mtime_ns, manifest_stat.st_mtime_ns, target_stat.st_size)
         return target
 
     @staticmethod

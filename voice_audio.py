@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import json
+import os
 import shutil
 import io
 import uuid
@@ -40,22 +41,57 @@ def is_self_poke(raw):
 
 
 class VoiceAudioCache:
+    """本地登记语音缓存。
+
+    registry.json 内容在文件未被修改时缓存在内存中（按 mtime 失效），
+    避免每次 poke 都产生磁盘 I/O。
+    每个 (character, locale, skin) 三元组持有独立的 asyncio.Lock，
+    防止对同一语音的并发处理，同时不阻塞独立用户。
+    """
+
     def __init__(self, root: Path, cache: Path):
         self.root = root.resolve()
         self.cache = cache
-        self._lock = asyncio.Lock()
+        # Registry cache: (mtime_ns, parsed_rows)
+        self._registry_cache: tuple[int, list] | None = None
+        self._registry_read_lock = asyncio.Lock()
+        # Per-key locks: key → asyncio.Lock
+        self._key_locks: dict[tuple, asyncio.Lock] = {}
+        self._key_locks_meta_lock = asyncio.Lock()
+
+    async def _get_key_lock(self, key: tuple) -> asyncio.Lock:
+        async with self._key_locks_meta_lock:
+            if key not in self._key_locks:
+                self._key_locks[key] = asyncio.Lock()
+            return self._key_locks[key]
+
+    async def _load_registry(self) -> list:
+        """加载 registry.json；mtime 未变时直接返回内存缓存。"""
+        async with self._registry_read_lock:
+            registry_path = self.root / "registry.json"
+            try:
+                mtime_ns = registry_path.stat().st_mtime_ns
+            except OSError:
+                return []
+            if self._registry_cache is not None and self._registry_cache[0] == mtime_ns:
+                return self._registry_cache[1]
+            try:
+                rows = json.loads(registry_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, ValueError):
+                return []
+            if not isinstance(rows, list):
+                return []
+            self._registry_cache = (mtime_ns, rows)
+            return rows
 
     async def resolve(self, preference):
-        async with self._lock:
+        key = (preference.character, preference.locale, preference.skin)
+        lock = await self._get_key_lock(key)
+        async with lock:
             return await self._resolve(preference)
 
     async def _resolve(self, preference):
-        registry = self.root / "registry.json"
-        if not registry.is_file():
-            return None
-        rows = json.loads(registry.read_text(encoding="utf-8"))
-        if not isinstance(rows, list):
-            return None
+        rows = await self._load_registry()
         for row in rows:
             if not isinstance(row, dict) or not row.get("license") or not row.get("source"):
                 continue
