@@ -168,3 +168,37 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
             plugin.voice_mapping = SimpleNamespace(resolve_poke=Mock(return_value=None))
             outputs = [x async for x in plugin.on_nikke_poke(event)]
             self.assertEqual(outputs, [], "音频解析失败时戳一戳必须不发送任何内容，禁止伪造文本台词")
+
+    async def test_registry_json_is_cached_in_memory_and_invalidates_on_mtime(self):
+        """验证 VoiceAudioCache 在 registry.json 未被修改时复用内存缓存，修改后自动重新加载。"""
+        import json
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache_dir = root / "cache"
+            voices_dir = root / "voices"
+            voices_dir.mkdir()
+            cache = VoiceAudioCache(voices_dir, cache_dir)
+
+            registry_path = voices_dir / "registry.json"
+            registry_path.write_text(json.dumps([{"character": "rapi", "license": "test", "source": "test"}]), encoding="utf-8")
+
+            # 首次加载
+            first = await cache._load_registry()
+            self.assertEqual(len(first), 1)
+            self.assertEqual(first[0]["character"], "rapi")
+
+            # 在不改变 mtime 的情况下验证缓存命中（即使临时重命名或 mock）
+            second = await cache._load_registry()
+            self.assertIs(first, second)
+
+            # 更新文件并修改 mtime
+            import time
+            time.sleep(0.05)
+            registry_path.write_text(json.dumps([
+                {"character": "rapi", "license": "test", "source": "test"},
+                {"character": "anis", "license": "test", "source": "test"},
+            ]), encoding="utf-8")
+
+            third = await cache._load_registry()
+            self.assertEqual(len(third), 2)
+            self.assertIsNot(first, third)

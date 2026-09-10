@@ -17,6 +17,7 @@ def parse_cookie(cookie: str) -> dict[str, str]:
         if "=" not in part:
             continue
         name, value = part.strip().split("=", 1)
+        name = name.strip()
         if name:
             result[name] = value
     return result

@@ -867,6 +867,26 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         mock_asset_manager.close.assert_called_once()
         mock_web.stop.assert_awaited_once()
 
+    async def test_stats_profile_cache_bounded_lru_eviction(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+        from unittest.mock import AsyncMock
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._stats_profile_cache = {}
+        plugin.client = AsyncMock()
+        plugin.client.get_profile = AsyncMock(side_effect=lambda acc: {"synchro_level": 200})
+
+        # 连续填充 60 个账号，验证总容量不超过 50
+        for i in range(60):
+            account = {"game_uid": f"uid_{i}", "cookie": VALID_COOKIE}
+            await plugin._get_profile_for_stat_calculation(account)
+
+        self.assertLessEqual(len(plugin._stats_profile_cache), 50)
+        # 最早的 uid_0 应已被淘汰
+        self.assertNotIn("uid_0", plugin._stats_profile_cache)
+        # 最近的 uid_59 应存在
+        self.assertIn("uid_59", plugin._stats_profile_cache)
+
 
 if __name__ == "__main__":
     unittest.main()
