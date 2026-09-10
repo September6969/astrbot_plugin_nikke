@@ -240,5 +240,76 @@ class CharacterDirectoryResolverTests(unittest.TestCase):
         self.assertEqual(voice_resolver.resolve("塔罗魔女"), "arcana")
 
 
+    def test_custom_alias_collision_between_custom_targets_raises_value_error(self):
+        """两个不同角色的自定义目标共享相同别名时必须拒绝并抛出 ValueError。"""
+        # 1. 规范角色键冲突
+        with self.assertRaises(ValueError) as ctx1:
+            CharacterDirectoryResolver(user_aliases="rapi=老婆\narcana=老婆")
+        self.assertIn("别名冲突", str(ctx1.exception))
+        self.assertIn("老婆", str(ctx1.exception))
+
+        # 2. 跨标识（Spine ID 与规范键）指向不同角色但共享别名
+        with self.assertRaises(ValueError) as ctx2:
+            CharacterDirectoryResolver(user_aliases="c010=甜心\nc581=甜心")
+        self.assertIn("别名冲突", str(ctx2.exception))
+        self.assertIn("甜心", str(ctx2.exception))
+
+    def test_custom_alias_collision_with_builtin_alias_or_identity_raises_value_error(self):
+        """自定义别名若与另一角色的内置受控别名或官方标识冲突必须拒绝并抛出 ValueError。"""
+        # "水尼恩" 为 neon_blue_ocean 的内置受控别名，尝试分配给 rapi
+        with self.assertRaises(ValueError) as ctx1:
+            CharacterDirectoryResolver(user_aliases="rapi=水尼恩")
+        self.assertIn("别名冲突", str(ctx1.exception))
+        self.assertIn("水尼恩", str(ctx1.exception))
+
+        # 尝试将 arcana 的 spine_asset_id (c581) 分配给 rapi
+        with self.assertRaises(ValueError) as ctx2:
+            CharacterDirectoryResolver(user_aliases="rapi=c581")
+        self.assertIn("别名冲突", str(ctx2.exception))
+
+    def test_duplicate_same_character_alias_allowed_and_deduplicated(self):
+        """同一角色的重复自定义别名允许并自动去重。"""
+        # 同一角色通过不同标识（rapi 与 c010）配置相同别名，以及行内重复别名
+        voice_resolver = VoiceCharacterResolver(user_aliases="rapi=老婆,老婆\nc010=老婆")
+        self.assertEqual(voice_resolver.resolve("老婆"), "rapi")
+
+        resolver = CharacterDirectoryResolver(user_aliases="rapi=老婆,老婆\nc010=老婆")
+        test_dir = [
+            {"character_key": "rapi", "spine_asset_id": "c010", "name_zh_tw": "拉毗", "name_code": "rapi"}
+        ]
+        matches = resolver.find(test_dir, "老婆")
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0]["character_key"], "rapi")
+        self.assertEqual(matches[0]["aliases"].count("老婆"), 1)
+
+    def test_voice_character_resolver_with_spine_id_target(self):
+        """行为测试：VoiceCharacterResolver(user_aliases='c010=大拉毗').resolve('大拉毗') == 'rapi'。"""
+        voice_resolver = VoiceCharacterResolver(user_aliases="c010=大拉毗")
+        self.assertEqual(voice_resolver.resolve("大拉毗"), "rapi")
+
+    def test_custom_alias_targets_all_identifier_types_resolve_to_canonical(self):
+        """验证自定义别名目标支持全部 7 类标识并解析到规范角色身份：
+        canonical key, resource_id, name_code, English name, Traditional Chinese name, Simplified query alias, Spine asset id。
+        """
+        config = """
+        rapi = 别名_key
+        10 = 别名_rid
+        3001 = 别名_code
+        Rapi = 别名_en
+        拉毗 = 别名_tc
+        c010 = 别名_spine
+        幼雪 = 别名_sc_alias
+        """
+        voice_resolver = VoiceCharacterResolver(user_aliases=config)
+
+        # 前 6 个均指向拉毗（rapi）
+        for alias in ("别名_key", "别名_rid", "别名_code", "别名_en", "别名_tc", "别名_spine"):
+            with self.subTest(alias=alias):
+                self.assertEqual(voice_resolver.resolve(alias), "rapi")
+
+        # 幼雪（白雪公主：纯真年代的内置受控别名）作为目标，解析到 'snow_white_innocent_days'
+        self.assertEqual(voice_resolver.resolve("别名_sc_alias"), "snow_white_innocent_days")
+
+
 if __name__ == "__main__":
     unittest.main()

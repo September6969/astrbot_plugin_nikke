@@ -78,10 +78,16 @@ class NikkePlugin(Star):
         self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.character_builder = CharacterCardBuilder()
         user_aliases = (self.config or {}).get("custom_character_aliases")
-        self.character_identity = CharacterDirectoryResolver(
-            self.plugin_dir / "assets" / "character_aliases.json",
-            user_aliases=user_aliases,
-        )
+        try:
+            self.character_identity = CharacterDirectoryResolver(
+                self.plugin_dir / "assets" / "character_aliases.json",
+                user_aliases=user_aliases,
+            )
+        except ValueError as err:
+            logger.error("[NIKKE] 用户自定义别名配置错误，已忽略自定义别名：%s", err)
+            self.character_identity = CharacterDirectoryResolver(
+                self.plugin_dir / "assets" / "character_aliases.json",
+            )
         spine_budget = (self.config or {}).get("spine_budget_seconds", 20.0)
         self.asset_manager = AssetManager(
             self.data_dir / "cache",
@@ -107,10 +113,16 @@ class NikkePlugin(Star):
         self.voice_mapping = VoiceMapRegistry(self.plugin_dir / "assets" / "voice_poke_map.json")
         for error in self.voice_mapping.errors:
             logger.warning("[NIKKE] 语音映射清单校验失败：%s", error)
-        self.voice_character_resolver = VoiceCharacterResolver(
-            self.plugin_dir / "assets",
-            user_aliases=user_aliases,
-        )
+        try:
+            self.voice_character_resolver = VoiceCharacterResolver(
+                self.plugin_dir / "assets",
+                user_aliases=user_aliases,
+            )
+        except ValueError as err:
+            logger.error("[NIKKE] 语音用户自定义别名配置错误，已忽略自定义别名：%s", err)
+            self.voice_character_resolver = VoiceCharacterResolver(
+                self.plugin_dir / "assets",
+            )
         self.costume_registry = CostumeRegistry(self.plugin_dir / "assets")
         self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
         self.voice_provider = VoiceResourceProvider(self.data_dir / "voice_cache")
@@ -318,7 +330,11 @@ class NikkePlugin(Star):
         resolver = getattr(self, "voice_character_resolver", None)
         if resolver is None:
             user_aliases = (self.config or {}).get("custom_character_aliases")
-            resolver = VoiceCharacterResolver(self.plugin_dir / "assets", user_aliases=user_aliases)
+            try:
+                resolver = VoiceCharacterResolver(self.plugin_dir / "assets", user_aliases=user_aliases)
+            except ValueError as err:
+                logger.error("[NIKKE] 语音用户自定义别名配置错误，已忽略自定义别名：%s", err)
+                resolver = VoiceCharacterResolver(self.plugin_dir / "assets")
             self.voice_character_resolver = resolver
         return resolver.resolve(query, getattr(self, "_directory", None))
 

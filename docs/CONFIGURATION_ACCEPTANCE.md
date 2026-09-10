@@ -18,7 +18,7 @@
 | `spine_worker_path_4_1` | 空字符串 | 可选的官方 Spine 4.1 headless worker 绝对路径；为空时对 4.1 bundle 只使用中性占位图回退。 |
 | `spine_runtime_version` | `4.0` | worker 严格匹配的 Spine major.minor；未知或不匹配 bundle 不执行。 |
 | `spine_worker_timeout` | `4` | 单次 worker 最大秒数，配置范围 1–5。 |
-| `voice_dynamic_enabled` | `true` | 仅启用 `assets/voice_poke_map.json` 中有来源证据的官方动态语音；空映射或关闭时回退本地音频/文本。 |
+| `voice_dynamic_enabled` | `true` | 仅启用 `assets/voice_poke_map.json` 中有来源证据的官方动态语音；空映射或关闭时回退本地登记音频。 |
 | `custom_character_aliases` | 空字符串 | 用户自定义角色别名，支持JSON对象或多行“角色名=别名1,别名2”格式；与内置别名合并。 |
 | `max_concurrency` | `2` | 每日账号任务最大并发数；应按上游频控和部署容量调整。 |
 | `enable_daily_actions` | `false` | 社区签到/领奖写操作开关；未完成真实授权验收前保持关闭。 |

@@ -90,24 +90,111 @@ def parse_user_aliases(raw: Any) -> list[tuple[str, list[str]]]:
 class CharacterDirectoryResolver:
     """统一处理 name_code、官方名称和受控查询别名。"""
 
-    def __init__(self, alias_path: str | Path | None = None, user_aliases: Any = None):
+    def __init__(
+        self,
+        alias_path: str | Path | None = None,
+        user_aliases: Any = None,
+        catalog_path: str | Path | None = None,
+    ):
         self._aliases_by_code: dict[str, list[str]] = {}
         self._aliases_by_zh_tw: dict[str, list[str]] = {}
         self._user_aliases: dict[str, list[str]] = {}
+        self._canonical_by_identifier: dict[str, str] = {}
+        self._built_in_alias_to_canonical: dict[str, str] = {}
+        self._user_alias_to_canonical: dict[str, str] = {}
+
+        if catalog_path is not None:
+            self._load_catalog(Path(catalog_path))
+        elif alias_path is not None and (Path(alias_path).parent / "character_catalog.json").is_file():
+            self._load_catalog(Path(alias_path).parent / "character_catalog.json")
+        else:
+            default_cat = Path(__file__).resolve().parent / "assets" / "character_catalog.json"
+            if default_cat.is_file():
+                self._load_catalog(default_cat)
+
         if alias_path is not None:
             self._load_aliases(Path(alias_path))
+        else:
+            default_alias = Path(__file__).resolve().parent / "assets" / "character_aliases.json"
+            if default_alias.is_file():
+                self._load_aliases(default_alias)
         if user_aliases:
             self.load_user_aliases(user_aliases)
 
+    def _load_catalog(self, path: Path) -> None:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return
+        characters = payload.get("characters", []) if isinstance(payload, dict) else []
+        for char in characters:
+            if not isinstance(char, dict):
+                continue
+            key = str(char.get("character_key", "")).strip().lower()
+            if not key:
+                continue
+            self._canonical_by_identifier[key] = key
+            spine = str(char.get("spine_asset_id", "")).strip().lower()
+            if spine:
+                self._canonical_by_identifier[spine] = key
+            rid = str(char.get("resource_id", "")).strip().lower()
+            if rid:
+                self._canonical_by_identifier[rid] = key
+            code = str(char.get("name_code", "")).strip().lower()
+            if code:
+                self._canonical_by_identifier[code] = key
+            zh_tw = str(char.get("name_zh_tw", "")).strip().lower()
+            if zh_tw:
+                self._canonical_by_identifier[zh_tw] = key
+            name_en = str(char.get("name_en", "")).strip().lower()
+            if name_en and name_en not in {"rei", "sakura"}:
+                self._canonical_by_identifier[name_en] = key
+
+    def resolve_canonical(self, target: str) -> str:
+        """将名称、代码、Spine 资产号或别名解析为规范角色键。"""
+        norm = str(target).strip().casefold()
+        return self._canonical_by_identifier.get(norm, norm)
+
     def load_user_aliases(self, user_aliases: Any) -> None:
-        """加载并合并用户自定义别名。支持 dict, list, JSON 字符串或多行 '角色名=别名1,别名2'。"""
+        """加载并合并用户自定义别名。支持 dict, list, JSON 字符串或多行 '角色名=别名1,别名2'。
+
+        防冲突规则：
+        1. 自定义别名不能覆盖已核验的内置标识（规范键、Spine号、官方名称、内置别名）；
+        2. 两个不同角色的自定义配置不能共享相同别名；
+        3. 同一角色的重复别名自动去重并保留。
+        """
         parsed = parse_user_aliases(user_aliases)
         for target, aliases in parsed:
-            target_key = target.casefold()
-            existing = self._user_aliases.setdefault(target_key, [])
+            canonical_target = self.resolve_canonical(target)
+            target_key = target.strip().casefold()
+
             for alias in aliases:
-                if alias not in existing:
-                    existing.append(alias)
+                norm_alias = alias.strip().casefold()
+                if not norm_alias:
+                    continue
+
+                # 1. 检查是否与其它角色的内置标识或内置别名冲突
+                built_in_canonical = self._canonical_by_identifier.get(norm_alias)
+                if built_in_canonical is not None and norm_alias not in self._user_alias_to_canonical:
+                    if built_in_canonical != canonical_target:
+                        raise ValueError(
+                            f"别名冲突: 自定义别名 {alias!r} 与角色 {built_in_canonical!r} 的内置标识或别名冲突"
+                        )
+
+                # 2. 检查是否与其它角色的自定义别名冲突
+                existing_user = self._user_alias_to_canonical.get(norm_alias)
+                if existing_user is not None and existing_user != canonical_target:
+                    raise ValueError(
+                        f"别名冲突: 自定义别名 {alias!r} 同时映射到多个不同角色 ({existing_user!r} 与 {canonical_target!r})"
+                    )
+
+                self._user_alias_to_canonical[norm_alias] = canonical_target
+                self._canonical_by_identifier[norm_alias] = canonical_target
+
+                for key in {canonical_target, target_key}:
+                    existing = self._user_aliases.setdefault(key, [])
+                    if alias not in existing:
+                        existing.append(alias)
 
     def _load_aliases(self, path: Path) -> None:
         try:
@@ -126,15 +213,31 @@ class CharacterDirectoryResolver:
                 continue
             code = _text(entry.get("name_code"))
             zh_tw = _text(entry.get("name_zh_tw"))
+            code_lower = code.casefold() if code else ""
+            zh_tw_lower = zh_tw.casefold() if zh_tw else ""
             target_key = (code or zh_tw).casefold()
             if not target_key:
                 continue
+
+            canonical = (
+                self._canonical_by_identifier.get(code_lower)
+                or self._canonical_by_identifier.get(zh_tw_lower)
+                or target_key
+            )
+            if code_lower:
+                self._canonical_by_identifier.setdefault(code_lower, canonical)
+            if zh_tw_lower:
+                self._canonical_by_identifier.setdefault(zh_tw_lower, canonical)
+
             for val in values:
                 norm_val = val.casefold()
                 existing = alias_to_target.get(norm_val)
                 if existing is not None and existing != target_key:
                     raise ValueError(f"别名冲突: 别名 {val!r} 同时映射到多个不同角色 ({existing!r} 与 {target_key!r})")
                 alias_to_target[norm_val] = target_key
+                self._built_in_alias_to_canonical[norm_val] = canonical
+                self._canonical_by_identifier[norm_val] = canonical
+
             if code:
                 self._aliases_by_code[code.casefold()] = values
             if zh_tw:
@@ -163,6 +266,14 @@ class CharacterDirectoryResolver:
             val = _text(result.get(extra)).casefold()
             if val and val not in keys_to_check:
                 keys_to_check.append(val)
+
+        canonical_key = ""
+        for k in keys_to_check:
+            if k and k in self._canonical_by_identifier:
+                canonical_key = self._canonical_by_identifier[k]
+                break
+        if canonical_key and canonical_key not in keys_to_check:
+            keys_to_check.append(canonical_key)
 
         for key in keys_to_check:
             if key and key in self._user_aliases:

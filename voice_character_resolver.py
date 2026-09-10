@@ -79,6 +79,7 @@ class VoiceCharacterResolver:
                 "name_cn": str(row.get("name_zh_tw", "")).strip(),
                 "name_en": str(row.get("name_en", "")).strip(),
                 "character_key": key,
+                "spine_asset_id": spine,
             })
 
     def get_resource_id(self, character_key: str | None) -> int | None:
@@ -138,6 +139,9 @@ class VoiceCharacterResolver:
             code = str(best.get("name_code", "")).strip().lower()
             if code in self.key_to_resource_id:
                 return code
+            char_key = str(best.get("character_key", "")).strip().lower()
+            if char_key in self.key_to_resource_id:
+                return char_key
 
         # 5. 若传入的 active_directory 不是 static_directory，兜底到 static_directory
         if active_directory is not self.static_directory:
@@ -152,5 +156,16 @@ class VoiceCharacterResolver:
                             return matched_key
                     except (TypeError, ValueError):
                         pass
+                code = str(best.get("name_code", "")).strip().lower()
+                if code in self.key_to_resource_id:
+                    return code
+                char_key = str(best.get("character_key", "")).strip().lower()
+                if char_key in self.key_to_resource_id:
+                    return char_key
+
+        # 6. 检查是否直接通过规范映射解析
+        canonical = self.identity_resolver.resolve_canonical(term)
+        if canonical in self.key_to_resource_id:
+            return canonical
 
         return None
