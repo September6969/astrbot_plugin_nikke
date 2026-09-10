@@ -14,6 +14,8 @@ from typing import Any, Callable
 
 import httpx
 
+from .cookie_utils import parse_cookie as _parse_cookie
+
 
 API_BASE = "https://api.blablalink.com"
 PLAYER_INFO = "/api/ugc/direct/standalonesite/User/GetUserGamePlayerInfo"
@@ -97,13 +99,8 @@ class BlaBlaClient:
 
     @staticmethod
     def parse_cookie(cookie: str) -> dict[str, str]:
-        values: dict[str, str] = {}
-        for part in cookie.split(";"):
-            if "=" not in part:
-                continue
-            name, value = part.strip().split("=", 1)
-            values[name] = value
-        return values
+        """Cookie 字符串解析；委托至共享实现。"""
+        return _parse_cookie(cookie)
 
     async def _post(self, path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
         endpoint = path.rsplit("/", 1)[-1]

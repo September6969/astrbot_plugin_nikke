@@ -15,25 +15,38 @@ from typing import Any, Iterator
 
 from cryptography.fernet import Fernet, InvalidToken
 
+from .cookie_utils import parse_cookie
+
 
 SCHEMA_NAME = "nikke"
 SCHEMA_VERSION = 2
 
 
 class NikkeStore:
+    # 44 字符是 Fernet 32 字节密钥的 URL-safe base64 长度。
+    _FERNET_KEY_LENGTH = 44
+
     def __init__(self, data_dir: str | Path):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.db_path = self.data_dir / "nikke.sqlite3"
         self.key_path = self.data_dir / "secret.key"
         self._lock = threading.RLock()
+        # WAL 模式持久化后不需要每次连接都重新设置；用标志跳过重复 PRAGMA。
+        self._wal_activated = False
         self._cipher = Fernet(self._load_or_create_key())
         self._init_db()
 
     def _load_or_create_key(self) -> bytes:
         env_key = os.getenv("NIKKE_ENCRYPTION_KEY", "").strip()
         if env_key:
-            return env_key.encode("ascii")
+            raw = env_key.encode("ascii")
+            if len(env_key) != self._FERNET_KEY_LENGTH:
+                raise ValueError(
+                    f"NIKKE_ENCRYPTION_KEY 长度无效（期望 {self._FERNET_KEY_LENGTH} 字符，"
+                    f"实际 {len(env_key)} 字符）；请使用 Fernet.generate_key() 生成合法密钥。"
+                )
+            return raw
         if self.key_path.exists():
             return self.key_path.read_bytes().strip()
         key = Fernet.generate_key()
@@ -47,7 +60,10 @@ class NikkeStore:
         conn = sqlite3.connect(self.db_path, timeout=20)
         try:
             conn.row_factory = sqlite3.Row
-            conn.execute("PRAGMA journal_mode=WAL")
+            # WAL 模式写入后持久化；仅第一次连接需要设置，之后跳过节省 PRAGMA 往返。
+            if not self._wal_activated:
+                conn.execute("PRAGMA journal_mode=WAL")
+                self._wal_activated = True
             conn.execute("PRAGMA foreign_keys=ON")
             yield conn
         except BaseException:
@@ -178,14 +194,8 @@ class NikkeStore:
 
     @staticmethod
     def parse_cookie(cookie: str) -> dict[str, str]:
-        result: dict[str, str] = {}
-        for item in cookie.split(";"):
-            if "=" not in item:
-                continue
-            name, value = item.strip().split("=", 1)
-            if name:
-                result[name] = value
-        return result
+        """Cookie 字符串解析；委托至共享实现。"""
+        return parse_cookie(cookie)
 
     def create_bind_session(self, token: str, qq_id: str, ttl: int = 600) -> None:
         now = int(time.time())
@@ -287,7 +297,8 @@ class NikkeStore:
         with_cookie: bool = True,
         auto_daily_only: bool = False,
     ) -> list[dict[str, Any]]:
-        query = "SELECT qq_id FROM accounts"
+        """单次查询返回全部账号；cookie 解密在内存中逐行完成。"""
+        query = "SELECT * FROM accounts"
         conditions: list[str] = []
         if push_only:
             conditions.append("push_enabled=1")
@@ -296,8 +307,28 @@ class NikkeStore:
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         with self._lock, self._connect() as conn:
-            ids = [r[0] for r in conn.execute(query).fetchall()]
-        return [a for qq_id in ids if (a := self.get_account(qq_id, with_cookie))]
+            rows = [dict(r) for r in conn.execute(query).fetchall()]
+        results: list[dict[str, Any]] = []
+        for account in rows:
+            if with_cookie:
+                try:
+                    account["cookie"] = self._cipher.decrypt(
+                        account.pop("cookie_cipher")
+                    ).decode("utf-8")
+                    encrypted_xcommon = account.pop("xcommon_cipher", b"")
+                    account["x_common_params"] = (
+                        self._cipher.decrypt(encrypted_xcommon).decode("utf-8")
+                        if encrypted_xcommon
+                        else ""
+                    )
+                except InvalidToken:
+                    # 凭证损坏的账号跳过，不中断整体列表。
+                    continue
+            else:
+                account.pop("cookie_cipher", None)
+                account.pop("xcommon_cipher", None)
+            results.append(account)
+        return results
 
     def delete_account(self, qq_id: str) -> bool:
         with self._lock, self._connect() as conn:
