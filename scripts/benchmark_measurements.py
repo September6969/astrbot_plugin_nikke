@@ -202,15 +202,29 @@ def benchmark_name_map():
         t1 = time.perf_counter_ns()
         samples_before.append((t1 - t0) / 1000.0)
 
-    # After: 计算指纹并直接命中内存缓存
-    fingerprint = hashlib.sha256("".join(f"{item['name_code']}:{item['name_cn']}:{item['name_en']}:{item['name_zh_tw']};" for item in sample_dir).encode("utf-8")).hexdigest()
+    # After: 计算结构化 JSON 指纹并直接命中内存缓存
+    def compute_fp(d):
+        entries = [
+            (
+                str(item.get("name_code", "")),
+                str(item.get("name_zh_cn", "")),
+                str(item.get("name_zh_tw", "")),
+                str(item.get("name_cn", "")),
+                str(item.get("name_en", "")),
+            )
+            for item in d
+        ]
+        payload = json.dumps(entries, ensure_ascii=False, separators=(",", ":"))
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    fingerprint = compute_fp(sample_dir)
     precomputed = {str(item["name_code"]): resolver.display_name(resolver.enrich(item)) for item in sample_dir}
     cache = (fingerprint, precomputed)
 
     samples_after = []
     for _ in range(1000):
         t0 = time.perf_counter_ns()
-        fp = hashlib.sha256("".join(f"{item['name_code']}:{item['name_cn']}:{item['name_en']}:{item['name_zh_tw']};" for item in sample_dir).encode("utf-8")).hexdigest()
+        fp = compute_fp(sample_dir)
         if cache[0] == fp:
             _ = cache[1]
         t1 = time.perf_counter_ns()

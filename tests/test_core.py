@@ -916,6 +916,53 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("红莲", map_b["101"])
         self.assertNotIn("拉毗", map_b["101"])
 
+    def test_name_map_invalidates_on_name_zh_cn_difference(self):
+        """回归测试：相同长度且传统字段相同，但 name_zh_cn 不同时，缓存必须准确失效。"""
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.plugin_dir = Path(__file__).resolve().parent.parent
+
+        dir_a = [
+            {"name_code": 101, "name_cn": "拉毗", "name_zh_tw": "拉毗", "name_en": "Rapi", "name_zh_cn": "拉毗-初版"},
+        ]
+        dir_b = [
+            {"name_code": 101, "name_cn": "拉毗", "name_zh_tw": "拉毗", "name_en": "Rapi", "name_zh_cn": "拉毗-修正版"},
+        ]
+
+        plugin._directory = dir_a
+        map_a = plugin._name_map()
+        self.assertEqual(map_a["101"], "拉毗-初版")
+
+        plugin._directory = dir_b
+        map_b = plugin._name_map()
+        self.assertNotEqual(map_a, map_b)
+        self.assertEqual(map_b["101"], "拉毗-修正版")
+
+    def test_name_map_field_boundary_safety_with_special_characters(self):
+        """回归测试：字段内包含冒号等分隔符时，结构化序列化杜绝字段拼接坍缩与碰撞。"""
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.plugin_dir = Path(__file__).resolve().parent.parent
+
+        # 若使用简单的 ":" 拼接，两者都会变成 "101:a:b:c"
+        dir_1 = [
+            {"name_code": 101, "name_zh_cn": "a:b", "name_zh_tw": "c", "name_cn": "", "name_en": ""},
+        ]
+        dir_2 = [
+            {"name_code": 101, "name_zh_cn": "a", "name_zh_tw": "b:c", "name_cn": "", "name_en": ""},
+        ]
+
+        plugin._directory = dir_1
+        map_1 = plugin._name_map()
+        self.assertEqual(map_1["101"], "a:b")
+
+        plugin._directory = dir_2
+        map_2 = plugin._name_map()
+        self.assertNotEqual(map_1, map_2)
+        self.assertEqual(map_2["101"], "a")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,8 +1,8 @@
-"""按实际工具版本缓存 PCM WAV；格式和时长通过 ffprobe 验证。"""
 import asyncio
 import hashlib
 import json
 import math
+import shutil
 import uuid
 import wave
 from pathlib import Path
@@ -18,7 +18,51 @@ class VoiceEncoder:
         self.ffmpeg, self.ffprobe = ffmpeg, ffprobe
         self.max_concurrency = max_concurrency
         self._slots = asyncio.Semaphore(max_concurrency)
+        self._version_lock = asyncio.Lock()
+        self._cached_version_identity: tuple[str, int, int] | None = None
+        self._cached_version: bytes | None = None
         self._closed = False
+
+    def invalidate_version_cache(self) -> None:
+        """显式作废当前实例的 ffmpeg 版本缓存。"""
+        self._cached_version_identity = None
+        self._cached_version = None
+
+    def _ffmpeg_identity(self) -> tuple[str, int, int] | None:
+        """解析 ffmpeg 可执行文件在文件系统上的物理身份 (resolved_path, mtime_ns, size)。"""
+        try:
+            resolved = shutil.which(self.ffmpeg)
+            target = Path(resolved).resolve() if resolved else Path(self.ffmpeg)
+            if target.is_file():
+                st = target.stat()
+                return (str(target), st.st_mtime_ns, st.st_size)
+        except OSError:
+            pass
+        return None
+
+    async def _get_ffmpeg_version(self) -> bytes:
+        """受控获取并缓存 ffmpeg 版本信息：首次调用受限并发，热路径零子进程。"""
+        current_identity = self._ffmpeg_identity()
+        if self._cached_version is not None:
+            if current_identity is not None and self._cached_version_identity == current_identity:
+                return self._cached_version
+            if current_identity is None and self._cached_version_identity is None:
+                return self._cached_version
+
+        async with self._version_lock:
+            if self._cached_version is not None:
+                if current_identity is not None and self._cached_version_identity == current_identity:
+                    return self._cached_version
+                if current_identity is None and self._cached_version_identity is None:
+                    return self._cached_version
+
+            # 版本探测子进程也占用全局槽位，确保总并发进程数绝不逃逸配置预算
+            async with self._slots:
+                output = await self._run(self.ffmpeg, "-version", timeout=3)
+                version = output.splitlines()[0]
+                self._cached_version_identity = current_identity
+                self._cached_version = version
+                return version
 
     @staticmethod
     async def _run(*args, timeout=15):
@@ -44,7 +88,7 @@ class VoiceEncoder:
         if source.stat().st_size > 12 * 1024 * 1024:
             raise ValueError("源音频过大")
 
-        version = (await self._run(self.ffmpeg, "-version", timeout=3)).splitlines()[0]
+        version = await self._get_ffmpeg_version()
         digest = hashlib.sha256(
             source.read_bytes() + version + b"aiocqhttp:pcm_s16le:mono:24000:v1"
         ).hexdigest()

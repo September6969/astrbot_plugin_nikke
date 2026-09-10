@@ -133,11 +133,7 @@ class NikkePlugin(Star):
         self.voice_pipeline = VoicePipeline(self.voice_provider, self.voice_encoder) if self.voice_encoder else None
         self.announcements = AnnouncementService(self.data_dir / "announcements")
         self.announcement_delivery = AnnouncementDelivery(self.store)
-        try:
-            self.tower_registry = TowerRegistry(self.plugin_dir / "assets" / "tower_floors.json")
-        except Exception as exc:
-            logger.warning("[NIKKE] 塔层静态资料加载失败：%s", safe_exception_message(exc))
-            self.tower_registry = None
+        self.tower_registry: TowerRegistry | None = None
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
         ).rstrip("/")
@@ -151,7 +147,7 @@ class NikkePlugin(Star):
         self.web_host = str(self.config.get("web_host", "0.0.0.0"))
         self.web_port = int(self.config.get("web_port", 6210))
         self._directory: list[dict] = []
-        self._name_map_cache: tuple[int, dict[str, str]] | None = None
+        self._name_map_cache: tuple[str, dict[str, str]] | None = None
         self._stats_profile_cache: dict[str, tuple[float, dict[str, object]]] = {}
         self._voice_poke_cooldowns: dict[tuple, float] = {}
         self._termination_lock = asyncio.Lock()
@@ -208,9 +204,15 @@ class NikkePlugin(Star):
 
     async def _start_services(self) -> None:
         try:
-            self._pack_extension()
+            await asyncio.to_thread(self._pack_extension)
         except Exception as exc:
             logger.warning("[NIKKE] 浏览器扩展打包跳过: %s", safe_exception_message(exc))
+        try:
+            self.tower_registry = await asyncio.to_thread(
+                TowerRegistry, self.plugin_dir / "assets" / "tower_floors.json"
+            )
+        except Exception as exc:
+            logger.warning("[NIKKE] 塔层静态资料预热失败: %s", safe_exception_message(exc))
         try:
             await self.web.start(self.web_host, self.web_port)
             logger.info(f"[NIKKE] 绑定服务已监听 {self.web_host}:{self.web_port}")
@@ -337,18 +339,27 @@ class NikkePlugin(Star):
 
     def _name_map(self) -> dict[str, str]:
         """按实际目录内容生成 name_code -> display_name 映射。
-        缓存键严格采用目录内容指纹（SHA-256），杜绝仅靠行数产生的碰撞与脏读。
+        包含所有影响 display_name 与 enrich 的本地化字段：
+        name_code, name_zh_cn, name_zh_tw, name_cn, name_en。
+        采用确定性结构化 JSON 序列化杜绝字段边界歧义，以 SHA-256 建立指纹。
         """
         directory = getattr(self, "_directory", ()) or ()
         if not directory:
             return {}
 
-        fingerprint = hashlib.sha256(
-            "".join(
-                f"{item.get('name_code')}:{item.get('name_cn')}:{item.get('name_en')}:{item.get('name_zh_tw')};"
-                for item in directory
-            ).encode("utf-8")
-        ).hexdigest()
+        entries = [
+            (
+                str(item.get("name_code", "")),
+                str(item.get("name_zh_cn", "")),
+                str(item.get("name_zh_tw", "")),
+                str(item.get("name_cn", "")),
+                str(item.get("name_en", "")),
+            )
+            for item in directory
+            if isinstance(item, dict)
+        ]
+        payload = json.dumps(entries, ensure_ascii=False, separators=(",", ":"))
+        fingerprint = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
         cached = getattr(self, "_name_map_cache", None)
         if cached is not None and cached[0] == fingerprint:
@@ -358,6 +369,7 @@ class NikkePlugin(Star):
         mapping = {
             str(item.get("name_code", "")): resolver.display_name(resolver.enrich(item))
             for item in directory
+            if isinstance(item, dict)
         }
         self._name_map_cache = (fingerprint, mapping)
         return mapping

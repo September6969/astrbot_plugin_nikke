@@ -43,10 +43,11 @@ class VoiceEncoderTests(IsolatedAsyncioTestCase):
                 self.assertEqual(first, await encoder.encode(source))
                 self.assertEqual(len(writes), 1)
                 version[0] = b"version-2"
+                encoder.invalidate_version_cache()
                 self.assertNotEqual(first, await encoder.encode(source))
 
     async def test_bounded_concurrency_and_temp_file_cleanup(self):
-        """验证 20 个并发编码请求：最大活跃子进程数不超过限额、临时文件无碰撞、输出独立正确。"""
+        """验证 20 个并发编码请求：版本探测、ffprobe 与 ffmpeg 总并发子进程数严格受限，且临时文件无碰撞与无残留。"""
         import asyncio
         import wave
         with tempfile.TemporaryDirectory() as directory:
@@ -54,24 +55,70 @@ class VoiceEncoderTests(IsolatedAsyncioTestCase):
             max_limit = 2
             encoder = VoiceEncoder(root, "ffmpeg", "ffprobe", max_concurrency=max_limit)
 
-            active_count = 0
-            peak_active = 0
+            active_version = 0
+            peak_version = 0
+            version_calls = 0
+
+            active_ffprobe = 0
+            peak_ffprobe = 0
+
+            active_ffmpeg = 0
+            peak_ffmpeg = 0
+
+            active_total = 0
+            peak_total = 0
+
             lock = asyncio.Lock()
             temp_files_seen = set()
 
             async def run(*args, **kwargs):
-                nonlocal active_count, peak_active
+                nonlocal active_version, peak_version, version_calls
+                nonlocal active_ffprobe, peak_ffprobe
+                nonlocal active_ffmpeg, peak_ffmpeg
+                nonlocal active_total, peak_total
+
                 if "-version" in args:
-                    return b"version-test"
+                    async with lock:
+                        version_calls += 1
+                        active_version += 1
+                        active_total += 1
+                        if active_version > peak_version:
+                            peak_version = active_version
+                        if active_total > peak_total:
+                            peak_total = active_total
+
+                    await asyncio.sleep(0.04)  # 慢速版本探测
+
+                    async with lock:
+                        active_version -= 1
+                        active_total -= 1
+                    return b"ffmpeg-version-test"
+
                 if "-show_entries" in args:
+                    async with lock:
+                        active_ffprobe += 1
+                        active_total += 1
+                        if active_ffprobe > peak_ffprobe:
+                            peak_ffprobe = active_ffprobe
+                        if active_total > peak_total:
+                            peak_total = active_total
+
+                    await asyncio.sleep(0.02)
+
+                    async with lock:
+                        active_ffprobe -= 1
+                        active_total -= 1
                     return b'{"format":{"duration":"0.05"}}'
 
                 out_path = args[-1]
                 temp_files_seen.add(out_path)
                 async with lock:
-                    active_count += 1
-                    if active_count > peak_active:
-                        peak_active = active_count
+                    active_ffmpeg += 1
+                    active_total += 1
+                    if active_ffmpeg > peak_ffmpeg:
+                        peak_ffmpeg = active_ffmpeg
+                    if active_total > peak_total:
+                        peak_total = active_total
 
                 await asyncio.sleep(0.02)
 
@@ -82,7 +129,8 @@ class VoiceEncoderTests(IsolatedAsyncioTestCase):
                     audio.writeframes(b"\0\0" * 240)
 
                 async with lock:
-                    active_count -= 1
+                    active_ffmpeg -= 1
+                    active_total -= 1
                 return b""
 
             sources = []
@@ -96,7 +144,11 @@ class VoiceEncoderTests(IsolatedAsyncioTestCase):
 
             self.assertEqual(len(results), 20)
             self.assertEqual(len(set(results)), 20, "20 个不同源文件必须输出 20 个独立结果")
-            self.assertLessEqual(peak_active, max_limit, f"活跃并发数峰值 ({peak_active}) 不得超过配置上限 ({max_limit})")
+            self.assertEqual(version_calls, 1, f"20 个并发任务中的版本探测必须仅执行 1 次（实际 {version_calls} 次）")
+            self.assertLessEqual(peak_version, 1, f"版本探测并发峰值 ({peak_version}) 必须被锁限制在 1")
+            self.assertLessEqual(peak_ffprobe, max_limit, f"ffprobe 并发峰值 ({peak_ffprobe}) 不得超过配置上限 ({max_limit})")
+            self.assertLessEqual(peak_ffmpeg, max_limit, f"ffmpeg 编码并发峰值 ({peak_ffmpeg}) 不得超过配置上限 ({max_limit})")
+            self.assertLessEqual(peak_total, max_limit, f"总活跃子进程数峰值 ({peak_total}) 绝不能逃逸配置预算 ({max_limit})")
             self.assertEqual(len(temp_files_seen), 20, "20 个临时文件必须完全独立无碰撞")
             leftover_tmps = [p for p in encoder.cache.glob("*") if ".tmp." in p.name]
             self.assertEqual(leftover_tmps, [], "编码完成后不得遗留任何临时文件")
