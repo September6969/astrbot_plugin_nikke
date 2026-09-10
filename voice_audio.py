@@ -14,14 +14,21 @@ from pathlib import Path
 class VoicePreference:
     enabled: bool = False
     character: str = "rapi"
-    locale: str = "zh-cn"
+    locale: str = "ja"
     skin: str = "default"
     spine_asset_id: str = ""
+    explicit_locale: bool = False
 
     @classmethod
     def load(cls, store, key):
         raw = store.get_setting("voice:" + hashlib.sha256(key.encode()).hexdigest(), {})
-        return cls(**{k: v for k, v in raw.items() if k in cls.__dataclass_fields__})
+        if not raw:
+            return cls()
+        data = {k: v for k, v in raw.items() if k in cls.__dataclass_fields__}
+        # 迁移旧版默认语言 "zh-cn" 到官方默认 "ja"，保留用户显式选择
+        if data.get("locale") == "zh-cn" and not data.get("explicit_locale", False):
+            data["locale"] = "ja"
+        return cls(**data)
 
     def save(self, store, key):
         store.set_setting("voice:" + hashlib.sha256(key.encode()).hexdigest(), asdict(self))

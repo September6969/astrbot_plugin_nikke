@@ -52,7 +52,7 @@ class AssetManagerTests(unittest.TestCase):
             index_dir.mkdir(parents=True)
             (index_dir / "l2d.json").write_text(json.dumps([{"id": "c191", "version": 4.1}]), encoding="utf-8")
             manager = AssetManager(cache, Path(__file__).resolve().parents[1] / "assets", remote=True)
-            key = manager.nikke_db.compute_cache_key("c191", None, "4.1", "4.1", manager.spine_renderer.RENDERER_VERSION)
+            key = manager._spine_cache_key("c191", None, "4.1")
             (cache / "portraits").mkdir(parents=True, exist_ok=True)
             Image.new("RGBA", (30, 50), "green").save(cache / "portraits" / f"{key}.png")
             try:

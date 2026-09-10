@@ -145,3 +145,47 @@ class SpineWorkerRuntime:
             return self._read_rgba(output, self.config.max_output_bytes)
         finally:
             output.unlink(missing_ok=True)
+
+    def list_animations(self, bundle: SpineBundle) -> list[str]:
+        skeleton = self._inside_root(bundle.skeleton)
+        atlas = self._inside_root(bundle.atlas)
+        for texture in bundle.textures:
+            self._inside_root(texture)
+        if skeleton.suffix.lower() not in {".skel", ".json"}:
+            raise SpineRenderError("Spine worker skeleton 后缀无效")
+        command = [
+            str(self.config.executable),
+            "--skeleton",
+            str(skeleton),
+            "--atlas",
+            str(atlas),
+            "--list-animations",
+        ]
+        environment = os.environ.copy()
+        environment.update({"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"})
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=str(self.config.bundle_root),
+                env=environment,
+                capture_output=True,
+                timeout=self.config.timeout_seconds,
+                check=False,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise SpineRenderError("Spine worker 超时") from exc
+        if completed.returncode != 0:
+            raise SpineRenderError("Spine worker 获取动画列表失败")
+        try:
+            report: Any = json.loads(completed.stdout.strip() or "{}")
+        except json.JSONDecodeError as exc:
+            raise SpineRenderError("Spine worker 响应不是 JSON") from exc
+        if not isinstance(report, dict) or report.get("status") != "ok":
+            raise SpineRenderError("Spine worker 获取动画列表未报告成功")
+        anims = report.get("animations")
+        if not isinstance(anims, list):
+            raise SpineRenderError("Spine worker 返回的动画列表格式无效")
+        return [str(a) for a in anims]

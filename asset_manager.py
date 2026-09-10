@@ -19,6 +19,7 @@ import httpx
 from PIL import Image, ImageDraw
 
 from .card_models import CharacterCardAssets, CharacterCardData
+from .idle_animation_resolver import IdleAnimationResolver
 from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
 from .spine_prerenderer import SpineJob, SpinePreRenderer
@@ -225,13 +226,22 @@ class AssetManager:
             draw.line([(64, 67), (64, 110)], fill=color, width=4)
         return image
 
-    def _spine_cache_key(self, char_id: str, costume_id, runtime_version) -> str:
+    def _spine_cache_key(
+        self,
+        char_id: str,
+        costume_id,
+        runtime_version,
+        animation: str | None = None,
+    ) -> str:
+        if animation is None:
+            animation = IdleAnimationResolver.resolve_for_asset(char_id) or "idle"
         return self.nikke_db.compute_cache_key(
             char_id,
             costume_id,
             source_version=str(runtime_version),
             runtime_version=str(runtime_version),
             renderer_version=self.spine_renderer.RENDERER_VERSION,
+            animation=animation,
         )
 
     def _get_spine_portrait(self, char_id: str, costume_id) -> Image.Image | None:
@@ -241,7 +251,11 @@ class AssetManager:
         runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
         if runtime_version is None or runtime_version == "SPINE_VERSION_UNKNOWN":
             return None
-        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version)
+        animation = IdleAnimationResolver.resolve_for_asset(char_id)
+        if not animation:
+            logger.warning("Spine 角色 [%s] 未能解析到合法待机动画，fail-closed 返回中性占位图", char_id)
+            return None
+        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
         image = self.spine_renderer.cached_portrait(cache_key)
         if image is not None:
             return image
@@ -256,6 +270,7 @@ class AssetManager:
                 character_id=char_id,
                 runtime_version=runtime_version,
                 bundle_urls=urls,
+                animation=animation,
                 budget_seconds=self.spine_budget_seconds,
             )
         )
@@ -280,14 +295,17 @@ class AssetManager:
 
     def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
         """兼容旧调用名；正式 backend 仍受 runtime、版本和队列预算约束。"""
-        char_id = self.nikke_db.resolve_character_id(resource_id, costume_id)
+        char_id = self.nikke_db.resolve_spine_asset_id(resource_id, costume_id, allow_remote=False)
         if char_id == "missing":
             return False
         runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
         urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="setup")
         if runtime_version is None or not urls or not self.spine_renderer.is_available(runtime_version):
             return False
-        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version)
+        animation = IdleAnimationResolver.resolve_for_asset(char_id)
+        if not animation:
+            return False
+        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
         if self.spine_renderer.cached_portrait(cache_key) is not None:
             return False
         return self.spine_renderer.enqueue(
@@ -296,6 +314,7 @@ class AssetManager:
                 character_id=char_id,
                 runtime_version=runtime_version,
                 bundle_urls=urls,
+                animation=animation,
                 budget_seconds=self.spine_budget_seconds,
             )
         )

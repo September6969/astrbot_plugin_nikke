@@ -729,19 +729,20 @@ class NikkePlugin(Star):
         preference = VoicePreference.load(self.store, key)
         if action in {"开", "关"}:
             preference.enabled = action == "开"
-        elif action == "语言" and value in {"zh-cn", "en", "ja", "ko"}:
+        elif action == "语言" and value in {"ja", "en", "ko", "zh-cn"}:
             preference.locale = value
+            preference.explicit_locale = True
         elif action == "角色" and value in VoiceResolver.CHARACTER_LINES:
             preference.character = value
         elif action:
-            yield event.plain_result("用法：/妮姬 语音 开|关，语音 语言 zh-cn|en|ja|ko，语音 角色 rapi|alice|anis|red_hood|scarlet|dorothy")
+            yield event.plain_result("用法：/妮姬 语音 开|关，语音 语言 ja|en|ko，语音 角色 rapi|alice|anis|red_hood|scarlet|dorothy")
             return
         preference.save(self.store, key)
-        yield event.plain_result(f"互动语音：{'开启' if preference.enabled else '关闭'} · {preference.character} · {preference.locale}。缺少已登记音频时使用文本。")
+        yield event.plain_result(f"互动语音：{'开启' if preference.enabled else '关闭'} · {preference.character} · {preference.locale}。")
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_nikke_poke(self, event: AstrMessageEvent):
-        """仅对戳向本 Bot 的通知响应；默认关闭，不发送未经登记的音频。"""
+        """仅对戳向本 Bot 的通知响应；默认关闭，不发送未经登记的音频，纯语音无文本兜底。"""
         raw = getattr(event.message_obj, "raw_message", None)
         if event.get_platform_name() != "aiocqhttp" or not is_self_poke(raw):
             return
@@ -755,7 +756,6 @@ class NikkePlugin(Star):
             return
         self._voice_poke_cooldowns = {key: stamp for key, stamp in cooldowns.items() if now - stamp < 10}
         self._voice_poke_cooldowns[cooldown_key] = now
-        text = VoiceResolver.resolve_poke_line(preference.character, preference.locale)
         try:
             audio = await self._voice_audio.resolve(preference)
         except (OSError, ValueError, asyncio.TimeoutError):
@@ -793,8 +793,6 @@ class NikkePlugin(Star):
         if audio:
             from astrbot.api.message_components import Record
             yield event.chain_result([Record.fromFileSystem(str(audio))])
-        else:
-            yield event.plain_result(text)
 
     async def union_raid_ranking(self, event: AstrMessageEvent):
         """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""

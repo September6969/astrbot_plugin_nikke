@@ -46,6 +46,7 @@ struct Options {
 	float frame_seconds = 0.0f;
 	float padding = 0.08f;
 	bool verbose = false;
+	bool list_animations = false;
 };
 
 void print_error(const std::string &message) {
@@ -101,9 +102,14 @@ bool parse_args(int argc, char **argv, Options &options) {
 			if (!next_value(argc, argv, index, value) || !parse_float(value.c_str(), options.padding, 0.0f, 0.45f)) return false;
 		} else if (std::string(argv[index]) == "--verbose") {
 			options.verbose = true;
+		} else if (std::string(argv[index]) == "--list-animations") {
+			options.list_animations = true;
 		} else {
 			return false;
 		}
+	}
+	if (options.list_animations) {
+		return !options.skeleton.empty() && !options.atlas.empty();
 	}
 	return !options.skeleton.empty() && !options.atlas.empty() && !options.output.empty() && !options.animation.empty();
 }
@@ -189,7 +195,21 @@ int render(const Options &options) {
 						std::cerr << "nikke-spine-worker: skin[" << skin_index << "]="
 								<< skeleton_data->getSkins()[skin_index]->getName().buffer() << "\n";
 					}
+					std::cerr << "nikke-spine-worker: animations=" << skeleton_data->getAnimations().size() << "\n";
+					for (size_t anim_index = 0; anim_index < skeleton_data->getAnimations().size(); ++anim_index) {
+						std::cerr << "nikke-spine-worker: animation[" << anim_index << "]="
+								<< skeleton_data->getAnimations()[anim_index]->getName().buffer() << "\n";
+					}
 					std::cerr.flush();
+				}
+				if (options.list_animations) {
+					std::cout << "{\"status\":\"ok\",\"animations\":[";
+					for (size_t anim_index = 0; anim_index < skeleton_data->getAnimations().size(); ++anim_index) {
+						if (anim_index > 0) std::cout << ",";
+						std::cout << "\"" << skeleton_data->getAnimations()[anim_index]->getName().buffer() << "\"";
+					}
+					std::cout << "]}\n";
+					return 0;
 				}
 				if (!options.skin.empty() && skeleton_data->findSkin(options.skin.c_str()) == nullptr) {
 					print_error("请求的 skin 不存在");
@@ -244,7 +264,8 @@ int render(const Options &options) {
 								print_error("RGBA 输出文件写入失败");
 							} else {
 								std::cout << "{\"status\":\"ok\",\"width\":" << options.width
-										  << ",\"height\":" << options.height << "}\n";
+										  << ",\"height\":" << options.height
+										  << ",\"animation\":\"" << options.animation << "\"}\n";
 								result = 0;
 							}
 						}

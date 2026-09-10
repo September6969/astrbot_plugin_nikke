@@ -1,0 +1,65 @@
+{
+  "timestamp": "2026-09-10T15:20:00Z",
+  "environment": "serv (Ubuntu 24.04 LTS / Docker container astrbot)",
+  "contract_changes": {
+    "spine_portrait_pose": "first frame of default idle animation (t = 0.0)",
+    "setup_pose_fallback": "fail-closed to neutral placeholder; never silently pick combat/aim/skill/damage",
+    "cache_key_contract": "includes animation token (e.g. _idle) to cleanly isolate from setup pose cache",
+    "voice_default_locale": "ja (migrates legacy default zh-cn while preserving explicit choices)",
+    "poke_fallback": "audio-only, text fallback removed, zero fabricated dialogue"
+  },
+  "verified_idle_renders": {
+    "c010_spine_4_0": {
+      "character_resource_id": "10",
+      "costume_id": "default",
+      "spine_asset_id": "c010",
+      "runtime_version": "4.0",
+      "animation": "idle",
+      "frame_seconds": 0.0,
+      "cache_key": "c010_default_4.0_4.0_2.0_idle",
+      "dimensions": [513, 979],
+      "bounding_box": [60, 60, 453, 919],
+      "file_bytes": 321863,
+      "sha256": "e97628b1f676c363afc9f802f0917f581feefb4c9842027dc1ef70654f33ca74",
+      "setup_pose_sha256": "41998a55d444db379dd2ab19034b63738c3959650f681fd3995ece80f228a8fc",
+      "idle_differs_from_setup": true
+    },
+    "c010_03_spine_4_1": {
+      "character_resource_id": "10",
+      "costume_id": 10005,
+      "costume_name": "Classic Vacation",
+      "spine_asset_id": "c010_03",
+      "runtime_version": "4.1",
+      "animation": "idle",
+      "frame_seconds": 0.0,
+      "cache_key": "c010_03_10005_4.1_4.1_2.0_idle",
+      "dimensions": [555, 980],
+      "bounding_box": [60, 60, 495, 920],
+      "file_bytes": 291612,
+      "sha256": "d5e534cea40fe78db7da9d25312886afc752ee6df83f5eceba6472e81853c0b5",
+      "setup_pose_sha256": "7d1fc86f9ff7a8fc9b33af471594f2e35f30bfd9928b424f8c60b2264a20476a",
+      "idle_differs_from_setup": true
+    }
+  },
+  "character_progress_card": {
+    "target": "Rapi: Classic Vacation (costume 10005)",
+    "spine_asset_id": "c010_03",
+    "runtime_version": "4.1",
+    "animation": "idle",
+    "frame_seconds": 0.0,
+    "output_file": "rapi_classic_vacation_idle_card.png",
+    "dimensions": [1800, 1000],
+    "file_bytes": 549338,
+    "sha256": "9e3fe844f6ebae968c98a978ba29b654985a73e7f94ac5aa081d348b248af379"
+  },
+  "test_suite_status": {
+    "local_tests_passed": 536,
+    "server_container_tests_passed": 536,
+    "server_healthz": {
+      "ok": true,
+      "service": "nikke-binding",
+      "version": "0.1.8",
+      "storage": "ready"
+    }
+  }
+}

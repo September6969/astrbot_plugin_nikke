@@ -127,6 +127,10 @@ class NikkeDbProviderTests(unittest.TestCase):
         default_key = NikkeDbProvider.compute_cache_key("c191")
         self.assertEqual(default_key, "c191_default_src_none_1.0")
 
+        # 验证包含动画标识的缓存键
+        anim_key = NikkeDbProvider.compute_cache_key("c191", None, "4.1", "4.1", "2.0", animation="idle")
+        self.assertEqual(anim_key, "c191_default_4.1_4.1_2.0_idle")
+
     def test_spine_version_resolution_from_index_cache(self):
         with tempfile.TemporaryDirectory() as td:
             cache_dir = Path(td) / "cache"

@@ -12,7 +12,7 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
         import wave
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            row = dict(character="rapi", locale="zh-cn", file="test.wav", source="synthetic", license="self")
+            row = dict(character="rapi", locale="ja", file="test.wav", source="synthetic", license="self")
             (root / "registry.json").write_text(json.dumps([row]), encoding="utf-8")
             (root / "test.wav").write_bytes(b"RIFF0000WAVEbroken")
             cache = VoiceAudioCache(root, root / "cache")
@@ -39,7 +39,7 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
                 audio.setsampwidth(2)
                 audio.setframerate(24000)
                 audio.writeframes(b"\0\0" * 240)
-            row = dict(character="rapi", locale="zh-cn", file="test.wav", source="synthetic", license="self")
+            row = dict(character="rapi", locale="ja", file="test.wav", source="synthetic", license="self")
             (root / "registry.json").write_text(json.dumps([row]), encoding="utf-8")
             cache = VoiceAudioCache(root, root / "cache")
             first = await cache.resolve(preference)
@@ -108,3 +108,44 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
             outputs = [x async for x in plugin.on_nikke_poke(event)]
             self.assertEqual(len(outputs), 1)
             plugin.voice_pipeline.resolve.assert_awaited_once_with("alice_poke", "alice_poke_01", "en", budget=4)
+
+    def test_voice_preference_default_locale_and_migration(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as directory:
+            store = NikkeStore(Path(directory) / "store")
+            pref = VoicePreference(True)
+            self.assertEqual(pref.locale, "ja")
+            self.assertFalse(pref.explicit_locale)
+
+            # 旧版未显式设置 zh-cn 的偏好自动迁移到 ja
+            store.set_setting("voice:" + hashlib.sha256(b"legacy-user").hexdigest(), {
+                "enabled": True, "character": "rapi", "locale": "zh-cn", "skin": "default", "spine_asset_id": ""
+            })
+            loaded = VoicePreference.load(store, "legacy-user")
+            self.assertEqual(loaded.locale, "ja")
+
+            # 用户显式指定的语言（包含 zh-cn）保留
+            store.set_setting("voice:" + hashlib.sha256(b"explicit-user").hexdigest(), {
+                "enabled": True, "character": "rapi", "locale": "zh-cn", "skin": "default", "spine_asset_id": "",
+                "explicit_locale": True
+            })
+            loaded_explicit = VoicePreference.load(store, "explicit-user")
+            self.assertEqual(loaded_explicit.locale, "zh-cn")
+            self.assertTrue(loaded_explicit.explicit_locale)
+
+    async def test_poke_interaction_audio_only_no_text_fallback(self):
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock, Mock
+        from astrbot_plugin_nikke.main import NikkePlugin
+        with tempfile.TemporaryDirectory() as directory:
+            plugin = NikkePlugin.__new__(NikkePlugin)
+            plugin.store = NikkeStore(directory)
+            plugin.plugin_dir = Path(directory)
+            raw = dict(post_type="notice", notice_type="notify", sub_type="poke", self_id="fake-bot", target_id="fake-bot", user_id="fake-user")
+            event = SimpleNamespace(message_obj=SimpleNamespace(raw_message=raw), get_platform_name=lambda: "aiocqhttp",
+                get_sender_id=lambda: "fake-user", plain_result=lambda x: x, chain_result=Mock(side_effect=lambda x: x))
+            VoicePreference(True, character="rapi", locale="ja").save(plugin.store, "aiocqhttp:fake-user")
+            plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=None))
+            plugin.voice_mapping = SimpleNamespace(resolve_poke=Mock(return_value=None))
+            outputs = [x async for x in plugin.on_nikke_poke(event)]
+            self.assertEqual(outputs, [], "音频解析失败时戳一戳必须不发送任何内容，禁止伪造文本台词")

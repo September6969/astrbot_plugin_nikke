@@ -207,6 +207,7 @@ class NikkeDbProvider:
         source_version: str | None = None,
         runtime_version: str | None = None,
         renderer_version: str = "1.0",
+        animation: str | None = None,
     ) -> str:
         _, costume_token = cls.classify_costume_id(costume_id)
         parts = [
@@ -216,6 +217,8 @@ class NikkeDbProvider:
             str(runtime_version or "none"),
             str(renderer_version),
         ]
+        if animation:
+            parts.append(str(animation))
         return "_".join(parts)
 
     def get_l2d_index(self, *, allow_remote: bool = True) -> dict[str, dict]:

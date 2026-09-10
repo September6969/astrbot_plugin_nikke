@@ -220,7 +220,7 @@ class SpineJob:
     callback: Callable[[Image.Image | None], None] | None = None
     bundle: SpineBundle | None = None
     bundle_urls: Mapping[str, str] | None = None
-    animation: str = "setup"
+    animation: str = "idle"
     skin: str | None = None
     # 总预算从入队时开始计算，覆盖排队等待和后续运行时阶段。
     budget_seconds: float | None = None
@@ -589,7 +589,7 @@ class SpinePreRenderer:
         bundle_paths: SpineBundle | Mapping[str, object],
         version: str | float | None,
         *,
-        animation: str = "setup",
+        animation: str = "idle",
         skin: str | None = None,
     ) -> Image.Image | None:
         """严格匹配 runtime 并返回裁切后的透明 RGBA PNG 内容。
@@ -643,7 +643,10 @@ class SpinePreRenderer:
         bundle = job.bundle
         if bundle is None and job.bundle_urls:
             try:
-                bundle = self.fetcher.fetch(job.bundle_urls, job.cache_key, budget_seconds=job.budget_seconds)
+                bundle_key = job.cache_key
+                if job.animation and bundle_key.endswith(f"_{job.animation}"):
+                    bundle_key = bundle_key[:-len(f"_{job.animation}")]
+                bundle = self.fetcher.fetch(job.bundle_urls, bundle_key, budget_seconds=job.budget_seconds)
             except SpineRenderError as exc:
                 logger.warning("Spine bundle fallback [%s]: %s", sanitize_log_text(job.cache_key, max_length=120), exc)
         result = self.render_full_body(bundle, job.runtime_version, animation=job.animation, skin=job.skin) if bundle else None
