@@ -58,7 +58,7 @@ class CharacterCardRenderer(CardRenderer):
         # 有限宽度字段按实际字宽缩放，长中文名称不会覆盖相邻数值。
         text = str(text).replace("\n", " ")
         font = self.font(size, bold)
-        while width and draw.textlength(text, font=font) > width and size > 12:
+        while width and draw.textlength(text, font=font) > width and size > 18:
             size -= 1
             font = self.font(size, bold)
         if width and draw.textlength(text, font=font) > width:
@@ -86,8 +86,6 @@ class CharacterCardRenderer(CardRenderer):
             weight = 0.16 * max(0, 1 - x / 1150)
             color = tuple(round(a * (1 - weight) + b * weight) for a, b in zip(base, primary))
             draw.line((x, 0, x, self.HEIGHT), fill=color)
-        for x in range(-600, 1700, 170):
-            draw.line((x, 1000, x + 550, 0), fill="#242A35", width=1)
         draw.line((40, 146, 1760, 146), fill="#46505D", width=1)
         draw.line((40, 146, 220, 146), fill=theme.primary, width=3)
 
@@ -95,8 +93,9 @@ class CharacterCardRenderer(CardRenderer):
         draw = ImageDraw.Draw(canvas)
         self._text(draw, (40, 32), "NIKKE", 42, theme.text, bold=True)
         self._text(draw, (42, 91), "CHARACTER BUILD", 18, theme.primary)
+        self._text(draw, (42, 118), self._label(data.corporation, self.CORPORATION_NAMES), 18, theme.muted, width=240)
         self._text(draw, (305, 27), data.name_cn, 60, theme.text, width=900, bold=True)
-        self._text(draw, (308, 100), data.name_en.upper(), 26, theme.muted, width=890)
+        self._text(draw, (308, 100), data.name_en.upper(), 26, theme.muted, width=690)
         self._text(draw, (1410, 35), f"Lv.{data.level:,}", 54, theme.text, width=345, bold=True)
         self._text(draw, (1412, 105), "PERSONAL BUILD / 个人练度", 18, theme.muted, width=345)
 
@@ -108,32 +107,18 @@ class CharacterCardRenderer(CardRenderer):
             weight = 0.24 * (1 - abs(y - 330) / 740)
             color = tuple(round(a * (1 - weight) + b * weight) for a, b in zip(base, accent))
             draw.line((0, y, 600, y), fill=color)
-        draw.ellipse((15, 75, 585, 645), outline=(*accent, 90), width=2)
-        draw.ellipse((65, 125, 535, 595), outline=(*accent, 70), width=1)
-        self._text(draw, (22, 48), data.name_en.upper() or "NIKKE", 105, "#42404C", width=555, bold=True)
         if portrait is None:
             portrait = self.assets.get_character_portrait(data.name_code, data.resource_id, data.costume_id)
         bounds = portrait.getbbox()
         if bounds:
             portrait = portrait.crop(bounds)
-        # 保留人物上半身的视觉尺寸，过长立绘由面板底部自然裁切。
-        scale = min(590 / portrait.width, 890 / portrait.height)
+        # 只裁透明边缘，完整保留 idle 姿态，不裁掉头发、脚部或服装。
+        scale = min(576 / portrait.width, 710 / portrait.height)
         portrait = portrait.resize((max(1, round(portrait.width * scale)), max(1, round(portrait.height * scale))), Image.Resampling.LANCZOS)
-        area.alpha_composite(portrait, ((600 - portrait.width) // 2, 18))
-        overlay = Image.new("RGBA", area.size)
-        ink = ImageDraw.Draw(overlay)
-        for y in range(585, 740):
-            ink.line((0, y, 600, y), fill=(*base, round(235 * (y - 585) / 155)))
-        area = Image.alpha_composite(area, overlay)
-        draw = ImageDraw.Draw(area)
+        area.alpha_composite(portrait, ((600 - portrait.width) // 2, (740 - portrait.height) // 2))
         draw.line((18, 20, 90, 20), fill=theme.primary, width=3)
         draw.line((18, 20, 18, 85), fill=theme.primary, width=3)
         draw.line((580, 645, 580, 719, 510, 719), fill=theme.primary, width=3)
-        for index in range(32):
-            x = 28 + index * 5
-            draw.line((x, 697, x, 718 if index % 3 else 708), fill=theme.muted, width=1 + index % 2)
-        self._text(draw, (28, 628), data.name_en.upper() or "NIKKE", 38, theme.text, width=545, bold=True)
-        self._text(draw, (220, 699), "TACTICAL ARCHIVE", 17, theme.primary)
         canvas.alpha_composite(area, (40, 165))
 
     def draw_combat_panel(self, canvas, data, theme):
@@ -146,7 +131,7 @@ class CharacterCardRenderer(CardRenderer):
         for index, (label, value) in enumerate([("HP / 生命", data.hp), ("ATK / 攻击", data.attack), ("DEF / 防御", data.defense)]):
             x = 686 + index * 204
             self._text(draw, (x, 357), label, 18, theme.muted)
-            self._text(draw, (x, 388), self._number(value), 28, theme.text, width=184, bold=True)
+            self._text(draw, (x, 385), self._number(value), 32, theme.text, width=190, bold=True)
 
     def draw_growth_panel(self, canvas, data, theme, favorite_icon=None, cube_icon=None, corporation_icon=None):
         draw = ImageDraw.Draw(canvas)
@@ -178,19 +163,16 @@ class CharacterCardRenderer(CardRenderer):
             x, y = 1330, 165 + index * 189
             draw = ImageDraw.Draw(canvas)
             draw.rounded_rectangle((x, y, 1760, y + 173), 14, fill=theme.panel, outline="#343B46")
-            draw.rounded_rectangle((x + 12, y + 11, x + 92, y + 91), 8, fill="#282E3A")
+            draw.rounded_rectangle((x + 12, y + 8, x + 78, y + 74), 8, fill="#282E3A")
             icon = equipment_icons.get(slot) if equipment_icons and slot in equipment_icons else None
             if icon is None:
                 icon = self.assets.get_equipment_icon(slot, item.equipment_id if item.equipped else None)
-            self._paste(canvas, icon, (x + 16, y + 15, 72, 72))
+            self._paste(canvas, icon, (x + 14, y + 10, 62, 62))
             self._text(draw, (x + 103, y + 17), self.SLOT_NAMES[slot], 24, theme.text, width=304, bold=True)
             status = f"Lv.{item.level}" if item.equipped and item.level is not None else ("已装备" if item.equipped else "未装备")
             self._text(draw, (x + 103, y + 51), status, 22, theme.primary if item.equipped else theme.muted)
-            if not item.equipped:
-                self._text(draw, (x + 20, y + 112), "未装备", 21, theme.muted)
-                continue
-
-            options = item.options
+            # 未装备也保留三个空槽；不展示任何残留词条。
+            options = item.options if item.equipped else []
             for row in range(3):
                 option = options[row] if row < len(options) else EquipmentOption(
                     raw_type=f"option{row + 1}",
@@ -200,15 +182,15 @@ class CharacterCardRenderer(CardRenderer):
                     position=row + 1,
                 )
                 # 每个装备固定渲染 option1/2/3 三行，避免多 function 拆槽。
-                step = 27
-                yy = y + 86 + row * step
+                step = 30
+                yy = y + 80 + row * step
                 name = option.display_name if option.unit != "unknown" else "未识别词条"
-                size = 19
-                self._text(draw, (x + 20, yy), name, size, theme.text, width=228)
-                self._text(draw, (x + 257, yy), self._option_value(option), size, theme.primary, width=78, bold=True)
+                size = 26
+                self._text(draw, (x + 16, yy), name, size, theme.muted if option.unit == "empty" else theme.text, width=218)
+                self._text(draw, (x + 240, yy), self._option_value(option), size, theme.muted if option.unit in {"empty", "unknown"} else theme.primary, width=110, bold=True)
                 tier_label, tier_color, tier_background = self._tier_style(option.tier, theme)
-                draw.rounded_rectangle((x + 348, yy - 2, x + 416, yy + 24), 6, fill=tier_background)
-                self._text(draw, (x + 357, yy + 1), tier_label, 16, tier_color, width=52, bold=True)
+                draw.rounded_rectangle((x + 356, yy - 2, x + 416, yy + 26), 6, fill=tier_background)
+                self._text(draw, (x + 364, yy + 1), tier_label, 23, tier_color, width=48, bold=True)
 
     def draw_option_summary(self, canvas, data, theme):
         draw = ImageDraw.Draw(canvas)
@@ -261,8 +243,7 @@ class CharacterCardRenderer(CardRenderer):
         for index, icon in enumerate([
             card_assets.corporation, card_assets.element, card_assets.weapon, card_assets.burst,
         ]):
-            self._paste(canvas, icon, (67 + index * 67, 717, 48, 48))
-        self._text(ImageDraw.Draw(canvas), (67, 768), self._label(data.corporation, self.CORPORATION_NAMES), 18, theme.secondary, width=535)
+            self._paste(canvas, icon, (1030 + index * 56, 91, 38, 38))
         self.draw_footer(canvas, data, theme)
         path = self.output_dir / f"character-{uuid.uuid4().hex}.png"
         canvas.convert("RGB").save(path, "PNG", optimize=True)

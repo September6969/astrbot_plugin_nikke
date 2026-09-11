@@ -164,12 +164,12 @@ class BindingWebService:
         status = "链接有效，请在扩展中粘贴本页地址。" if valid else "链接无效、已使用或已过期。"
         page = f"""<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'><title>NIKKE 安全绑定</title>
-<style>body{{font-family:system-ui;background:#10131a;color:#eef2f7;margin:0}}main{{max-width:720px;margin:8vh auto;padding:36px;background:#191f2a;border-top:6px solid #f2b229}}a{{color:#f2b229}}code{{word-break:break-all}}.ok{{color:#71d49b}}.bad{{color:#ff776d}}</style></head>
+<style>*{{box-sizing:border-box}}body{{font:16px/1.7 system-ui,sans-serif;background:#111318;color:#f2f3f5;margin:0;padding:24px}}main{{max-width:720px;margin:6vh auto;padding:32px;background:#1a1e25;border:1px solid #343b46;border-top:3px solid #e9b85a;border-radius:12px}}h1{{font-size:clamp(22px,4vw,30px);line-height:1.4}}a{{color:#e9b85a;overflow-wrap:anywhere}}a:focus-visible{{outline:3px solid #e9b85a;outline-offset:4px}}li{{padding:8px 0}}.ok,.bad{{padding:16px;border-radius:8px;background:#222731}}.ok{{color:#8fbca2}}.bad{{color:#e9b85a}}.note{{color:#a9b2c0}}@media(max-width:480px){{body{{padding:16px}}main{{margin:16px auto;padding:20px}}}}</style></head>
 <body><main><h1>NIKKE · BlaBlaLink 安全绑定</h1><p class='{"ok" if valid else "bad"}'>{html.escape(status)}</p>
-<p>1. 安装辅助扩展；2. 点击扩展打开BlaBlaLink并完成官方登录；3. 回到扩展提交Cookie。</p>
+<ol><li>安装辅助扩展。</li><li>点击扩展打开BlaBlaLink并完成官方登录。</li><li>回到扩展提交Cookie。</li></ol>
 <p>机器人不会接收或保存你的账号密码。</p>
 <p><a href='/download'>从绑定服务器下载扩展</a> · <a href='https://github.com/September6969/astrbot_plugin_nikke/releases'>GitHub备用下载</a></p>
-<code>{html.escape(str(request.url))}</code></main></body></html>"""
+<p class='note'>绑定链接仅供本人使用，请勿转发或公开截图。有效链接可从浏览器地址栏复制到扩展；失效后请向机器人重新申请。</p></main></body></html>"""
         return web.Response(text=page, content_type="text/html")
 
     async def submit_cookies(self, request: web.Request) -> web.Response:

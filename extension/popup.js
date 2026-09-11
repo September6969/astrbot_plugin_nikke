@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 const bindInput = document.getElementById("bindUrl");
 const statusBox = document.getElementById("status");
+function setStatus(message, state) {
+  statusBox.textContent = message;
+  statusBox.dataset.state = state;
+}
 
 chrome.storage.local.get("bindUrl", ({ bindUrl }) => {
   if (bindUrl) bindInput.value = bindUrl;
@@ -38,14 +42,16 @@ document.getElementById("openLogin").addEventListener("click", async () => {
     parseBindUrl();
     await chrome.storage.local.set({ bindUrl: bindInput.value.trim() });
     await chrome.tabs.create({ url: "https://www.blablalink.com/login", active: true });
-    statusBox.textContent = "请在新标签页完成官网登录和验证码。";
+    setStatus("请在新标签页完成官网登录和验证码。", "pending");
   } catch (error) {
-    statusBox.textContent = error.message;
+    setStatus(error.message, "error");
   }
 });
 
 document.getElementById("submit").addEventListener("click", async () => {
-  statusBox.textContent = "正在读取并验证登录状态…";
+  const submitButton = document.getElementById("submit");
+  submitButton.disabled = true;
+  setStatus("正在读取并验证登录状态…", "pending");
   try {
     const { url, token } = parseBindUrl();
     // 与浏览器访问官网时的 Cookie 选择规则保持一致，避免同名跨子域 Cookie 串入。
@@ -76,8 +82,11 @@ document.getElementById("submit").addEventListener("click", async () => {
     const result = await response.json();
     if (!response.ok || !result.ok) throw new Error(result.error || `提交失败 HTTP ${response.status}`);
     await chrome.storage.local.remove(["bindUrl", "xCommonParams"]);
-    statusBox.textContent = `绑定成功：${result.nickname || result.qq_id}\n现在可以关闭或卸载本扩展。`;
+    // 成功界面不回显账号标识，便于用户安全截图。
+    setStatus("绑定成功。\n现在可以关闭或卸载本扩展。", "success");
   } catch (error) {
-    statusBox.textContent = error.message;
+    setStatus(error.message, "error");
+  } finally {
+    submitButton.disabled = false;
   }
 });

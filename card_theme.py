@@ -10,6 +10,17 @@ from typing import Any
 
 from PIL import Image
 
+# 共享展示令牌：状态色只用于状态，不参与数据判断。
+UI_COLORS = {
+    "background": "#111318", "panel": "#1A1E25", "raised": "#222731",
+    "border": "#343B46", "text": "#F2F3F5", "muted": "#A9B2C0",
+    "accent": "#E9B85A", "success": "#8FBCA2", "warning": "#E9B85A",
+    "error": "#E3A1A1", "unknown": "#A9B2C0",
+}
+UI_SPACING = (8, 16, 24, 32, 40)
+UI_RADIUS = 12
+UI_TYPE_SCALE = (18, 21, 24, 28, 32, 40, 54, 68)
+
 
 @dataclass(frozen=True, slots=True)
 class CharacterTheme:
@@ -229,11 +240,11 @@ def character_theme(
     primary = _saturate(primary, 0.08)
     secondary = _lighten(portrait_secondary or accent, 0.35)
 
-    background = _darken(portrait_dark or accent, 0.70)
+    background = _to_hex(*_mix(_parse(UI_COLORS["background"]), _parse(portrait_dark or accent), 0.10))
     if corp_key == "abnormal":
         background = _mix(_parse(background), _parse("#120D18"), 0.62)
         background = _to_hex(*background)
-    panel = _lighten(background, 0.10)
+    panel = _to_hex(*_mix(_parse(UI_COLORS["panel"]), _parse(background), 0.12))
     text, muted = _choose_text_colors(background)
 
     return CharacterTheme(
@@ -243,5 +254,5 @@ def character_theme(
         background=background,
         panel=panel,
         text=text,
-        muted=muted,
+        muted=UI_COLORS["muted"],
     )
