@@ -61,9 +61,87 @@ class CampaignStageResolverTests(unittest.TestCase):
         self.assertEqual(hard.stage_id, 7035044)
         self.assertEqual(hard.mode, "HARD")
 
+        # Regression fixture: 2-6 is 6002008, NOT 6002006 (blocks arithmetic formula guessing)
+        s_2_6 = self.resolver.resolve_query("2-6")
+        self.assertIsNotNone(s_2_6)
+        self.assertEqual(s_2_6.stage_id, 6002008)
+
+        # Prefix H and N formats
+        s_h = self.resolver.resolve_query("H35-36")
+        self.assertIsNotNone(s_h)
+        self.assertEqual(s_h.stage_id, 7035044)
+
+        # Postfix mode queries (35-36 困难, 46-14A-1 普通)
+        s_postfix = self.resolver.resolve_query("35-36 困难")
+        self.assertIsNotNone(s_postfix)
+        self.assertEqual(s_postfix.stage_id, 7035044)
+        s_postfix_n = self.resolver.resolve_query("46-14A-1 普通")
+        self.assertIsNotNone(s_postfix_n)
+        self.assertEqual(s_postfix_n.stage_id, 6046015)
+
+    def test_side_stages_ab_branching(self):
+        # A/B branching side stages
+        for query, expected_id in [
+            ("6-6A-1", 6006007),
+            ("6-6A-2", 6006008),
+            ("6-6B-1", 6006009),
+            ("6-6B-2", 6006010),
+            ("普通 46-14A-1", 6046015),
+            ("普通 46-14B-1", 6046017),
+        ]:
+            stage = self.resolver.resolve_query(query)
+            self.assertIsNotNone(stage, f"Failed for query: {query}")
+            self.assertEqual(stage.stage_id, expected_id)
+
     def test_nonexistent_stage_returns_none(self):
         self.assertIsNone(self.resolver.resolve_query("99-99"))
+        self.assertIsNone(self.resolver.resolve_query("999-999"))
         self.assertIsNone(self.resolver.resolve_query("困难 99-99"))
+        self.assertIsNone(self.resolver.resolve_query("困难 999-999"))
+
+    def test_reverse_resolution_by_id(self):
+        # Normal stage reverse resolve
+        n46 = self.resolver.resolve_id(6046044)
+        self.assertIsNotNone(n46)
+        self.assertEqual((n46.mode, n46.chapter, n46.name), ("NORMAL", 46, "46-40"))
+
+        # Side stage reverse resolve
+        n_side = self.resolver.resolve_id(6046015)
+        self.assertIsNotNone(n_side)
+        self.assertEqual((n_side.mode, n_side.chapter, n_side.name), ("NORMAL", 46, "46-14A-1"))
+
+        # Hard stage reverse resolve
+        h35 = self.resolver.resolve_id(7035044)
+        self.assertIsNotNone(h35)
+        self.assertEqual((h35.mode, h35.chapter, h35.name), ("HARD", 35, "35-36"))
+
+        # Regression fixture reverse: 6002008 -> 2-6
+        s_2_6 = self.resolver.resolve_id(6002008)
+        self.assertIsNotNone(s_2_6)
+        self.assertEqual((s_2_6.mode, s_2_6.chapter, s_2_6.name), ("NORMAL", 2, "2-6"))
+
+        # String ID handling
+        s_str = self.resolver.resolve_id("6046044")
+        self.assertIsNotNone(s_str)
+        self.assertEqual(s_str.name, "46-40")
+
+        # Mode hint mismatch strictly returns None
+        self.assertIsNone(self.resolver.resolve_id(6046044, mode_hint="HARD"))
+        self.assertIsNone(self.resolver.resolve_id(7035044, mode_hint="NORMAL"))
+
+        # Invalid IDs return None without throwing
+        self.assertIsNone(self.resolver.resolve_id(9999999))
+        self.assertIsNone(self.resolver.resolve_id(-1))
+        self.assertIsNone(self.resolver.resolve_id(True))
+        self.assertIsNone(self.resolver.resolve_id("not-a-number"))
+
+    def test_story_and_ex_are_excluded_from_static_mapping(self):
+        mapping = self.resolver.mapping
+        for mode, chapters in mapping.items():
+            for ch, stages in chapters.items():
+                for stage_name in stages.keys():
+                    self.assertNotIn("story", stage_name.lower())
+                    self.assertNotIn("ex", stage_name.lower())
 
 
 class CampaignHistoryBuilderTests(unittest.TestCase):

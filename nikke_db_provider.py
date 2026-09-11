@@ -27,7 +27,10 @@ class NikkeDbProvider:
     NEGATIVE_CACHE_TTL = 600  # 10 分钟失败退避冷却
 
     NIKKE_DB_ID_OVERRIDES: dict[str, str] = {}
-    COSTUME_OVERRIDES: dict[str, str] = {}
+    COSTUME_OVERRIDES: dict[str, str] = {
+        "c010_02": "c010_02",
+        "c010_03": "c010_03",
+    }
     # 仅登记已实际读取 skeleton 头部并记录 SHA-256 的版本；未知 canonical ID 仍返回 None。
     VERIFIED_SPINE_VERSIONS: dict[str, tuple[str, str]] = {
         "c010": ("4.0", "c7cf080108f99c048b7a2681be9cf635a750c5f7367c67fac2e5dd60aa3451a1"),

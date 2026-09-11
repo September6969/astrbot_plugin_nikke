@@ -163,6 +163,15 @@ class SpineBundleFetcher:
         for name in ("skel", "atlas", "png"):
             url = self._validate_url(urls.get(name))
             target = self._target(cache_key, name, url)
+            suffix = Path(urlparse(url).path).suffix.lower()
+            if not self._valid_cached(target, self._limit_for(name)):
+                # 优先复用同 cache_dir 下已存在的同 identity 候选目录，避免重复网络下载
+                candidates = sorted(self.cache_dir.glob(f"{cache_key}*"))
+                for alt_dir in candidates:
+                    alt_target = alt_dir / f"{name}{suffix}"
+                    if self._valid_cached(alt_target, self._limit_for(name)):
+                        target = alt_target
+                        break
             targets[name] = target
             if self._valid_cached(target, self._limit_for(name)):
                 total_bytes += target.stat().st_size
@@ -686,8 +695,8 @@ class SpinePreRenderer:
         bundle = job.bundle
         if bundle is None and job.bundle_urls:
             try:
-                bundle_key = job.cache_key
-                if job.animation and bundle_key.endswith(f"_{job.animation}"):
+                bundle_key = job.character_id or job.cache_key
+                if not job.character_id and job.animation and bundle_key.endswith(f"_{job.animation}"):
                     bundle_key = bundle_key[:-len(f"_{job.animation}")]
                 bundle = self.fetcher.fetch(job.bundle_urls, bundle_key, budget_seconds=job.budget_seconds)
             except SpineRenderError as exc:

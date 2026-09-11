@@ -703,15 +703,34 @@ class NikkePlugin(Star):
         )
 
     @staticmethod
-    def _profile_rows(account: dict, basic: dict, outpost: dict) -> list[tuple[str, str]]:
+    def _profile_rows(
+        account: dict,
+        basic: dict,
+        outpost: dict,
+        campaign_resolver: CampaignStageResolver | None = None,
+    ) -> list[tuple[str, str]]:
         """只使用真实响应已确认存在的字段生成档案行。"""
+        normal_raw = basic.get("progress_normal_campaign", basic.get("progress_campaign_normal"))
+        if normal_raw is not None and campaign_resolver is not None:
+            stage_normal = campaign_resolver.resolve_id(normal_raw, mode_hint="NORMAL")
+            normal_text = f"NORMAL {stage_normal.name}" if stage_normal else (f"未映射 · ID {normal_raw}" if re.fullmatch(r"\d+", str(normal_raw).strip()) else str(normal_raw))
+        else:
+            normal_text = str(normal_raw if normal_raw is not None else "未知")
+
+        hard_raw = basic.get("progress_hard_campaign", basic.get("progress_campaign_hard"))
+        if hard_raw is not None and campaign_resolver is not None:
+            stage_hard = campaign_resolver.resolve_id(hard_raw, mode_hint="HARD")
+            hard_text = f"HARD {stage_hard.name}" if stage_hard else (f"未映射 · ID {hard_raw}" if re.fullmatch(r"\d+", str(hard_raw).strip()) else str(hard_raw))
+        else:
+            hard_text = str(hard_raw if hard_raw is not None else "未知")
+
         rows = [
             ("指挥官", str(basic.get("nickname") or account.get("nickname") or account.get("role_name") or "未知")),
             ("区服", str(account.get("area_id") or "未知")),
             ("同步器", str(outpost.get("synchro_level", 0))),
             ("前哨等级", str(outpost.get("outpost_battle_level", 0))),
-            ("普通主线", str(basic.get("progress_normal_campaign", basic.get("progress_campaign_normal", "未知")))),
-            ("困难主线", str(basic.get("progress_hard_campaign", basic.get("progress_campaign_hard", "未知")))),
+            ("普通主线", normal_text),
+            ("困难主线", hard_text),
         ]
 
         optional = (
