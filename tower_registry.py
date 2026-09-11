@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 class TowerRegistry:
-    ALIASES = {"部落": "tribe", "综合": "tribe", "极乐净土": "elysion", "米西利斯": "missilis", "泰特拉": "tetra", "朝圣者": "pilgrim"}
+    ALIASES = {"无尽": "tribe", "部落": "tribe", "综合": "tribe", "极乐净土": "elysion", "米西利斯": "missilis", "泰特拉": "tetra", "朝圣者": "pilgrim"}
     TOWERS = frozenset({"tribe", "elysion", "missilis", "tetra", "pilgrim"})
     MAX_FLOOR = 10000
     MAX_RECORDS = 20000
@@ -97,10 +97,17 @@ class TowerRegistry:
         tower_id = self._tower_id(tower)
         floor_number = self._floor_number(floor)
         if tower_id is None or floor_number is None:
-            return "用法：/妮姬 塔层 部落|极乐净土|米西利斯|泰特拉|朝圣者 <层数>"
+            return "用法：/妮姬 塔层 无尽|极乐净土|米西利斯|泰特拉|朝圣者 <层数>"
         record = self.floors.get(f"{tower_id}:{floor_number}")
         if record is None:
             return "公开快照未收录该塔层，不推测关卡或战力。"
-        return (f"【塔层静态速查】{tower_id} · {floor_number} 层\n"
+        tower_display = {
+            "tribe": "无尽",
+            "elysion": "极乐净土",
+            "missilis": "米西利斯",
+            "tetra": "泰特拉",
+            "pilgrim": "朝圣者",
+        }.get(tower_id, tower_id)
+        return (f"【塔层静态速查】{tower_display} · {floor_number} 层\n"
                 f"表内标准战力：{record['standard_battle_power']:,}\n"
                 f"快照日期：{self.updated_at}\n这是关卡静态值，不是通关保证，也不代表你的进度。")

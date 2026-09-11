@@ -720,7 +720,7 @@ class NikkePlugin(Star):
             ("created_at", "注册时间"),
             ("character_count", "持有妮姬"),
             ("character_costume_count", "时装数量"),
-            ("progress_tribe_tower", "部落塔进度"),
+            ("progress_tribe_tower", "无尽塔进度"),
             ("sim_room_overclock_current_sub_season_high_score", "模拟室超频分数"),
         )
         for key, label in optional:
@@ -732,8 +732,6 @@ class NikkePlugin(Star):
 
         outpost_optional = (
             ("infra_core_level", "基础核心等级"),
-            ("tactic_academy_class", "战术学院班级"),
-            ("tactic_academy_lesson", "战术学院课程"),
             ("jukebox_count", "点唱机收集"),
         )
         for key, label in outpost_optional:

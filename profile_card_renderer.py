@@ -121,8 +121,6 @@ class ProfileCardRenderer(CardRenderer):
             or data.synchro_level is not None
             or data.outpost_battle_level is not None
             or data.infra_core_level
-            or data.tactic_academy_class
-            or data.tactic_academy_lesson
         ):
             sections.append(self._outpost_section(data))
         if (
@@ -236,10 +234,6 @@ class ProfileCardRenderer(CardRenderer):
                 items.append(("\u524d\u54e8\u6218\u6597\u7b49\u7ea7", self._number(data.outpost_battle_level)))
             if data.infra_core_level:
                 items.append(("\u57fa\u7840\u6838\u5fc3\u7b49\u7ea7", data.infra_core_level))
-            if data.tactic_academy_class:
-                items.append(("\u6218\u672f\u5b66\u9662\u73ed\u7ea7", data.tactic_academy_class))
-            if data.tactic_academy_lesson:
-                items.append(("\u6218\u672f\u5b66\u9662\u8bfe\u7a0b", data.tactic_academy_lesson))
             if data.outpost_available is False:
                 items.append(("前哨资料", "获取失败"))
             elif not items:
@@ -256,8 +250,6 @@ class ProfileCardRenderer(CardRenderer):
                 data.synchro_level,
                 data.outpost_battle_level,
                 data.infra_core_level,
-                data.tactic_academy_class,
-                data.tactic_academy_lesson,
             ]
             if value is not None and value != ""
         )
@@ -314,7 +306,7 @@ class ProfileCardRenderer(CardRenderer):
         if data.created_at:
             items.append(("注册时间", str(data.created_at)))
         if data.progress_tribe_tower:
-            items.append(("\u90e8\u843d\u5854\u8fdb\u5ea6", str(data.progress_tribe_tower)))
+            items.append(("无尽塔进度", str(data.progress_tribe_tower)))
         if data.sim_room_overclock_score:
             items.append(("\u6a21\u62df\u5ba4\u8d85\u9891\u5206\u6570", str(data.sim_room_overclock_score)))
         return items
