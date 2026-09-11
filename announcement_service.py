@@ -48,6 +48,14 @@ class GameDeadline:
             return False
         return current <= self.end_at
 
+    def is_upcoming(self, now: datetime | None = None) -> bool:
+        current = now or datetime.now(timezone.utc)
+        return self.start_at is not None and current < self.start_at
+
+    def is_ended(self, now: datetime | None = None) -> bool:
+        current = now or datetime.now(timezone.utc)
+        return current > self.end_at
+
     def remaining_display(self, now: datetime | None = None) -> str:
         current = now or datetime.now(timezone.utc)
         if current > self.end_at:
@@ -239,6 +247,9 @@ class AnnouncementService:
         "开发者笔记": "dev_note",
         "招募": "recruit",
         "联盟突袭": "union_raid",
+        "协同作战": "coop",
+        "协同": "coop",
+        "coop": "coop",
     }
 
     def __init__(self, data_dir: Path | None = None, *, clock: Any = None):
@@ -848,42 +859,62 @@ class AnnouncementService:
         lines.append("\n发送 /妮姬 日程 可查看进行中活动的结束倒计时。")
         return "\n".join(lines)
 
+    @staticmethod
+    def _is_coop_deadline(dl: GameDeadline) -> bool:
+        name_lower = dl.name.lower()
+        return (
+            dl.category == "coop"
+            or "协同作战" in dl.name
+            or "协同" in dl.name
+            or "co-op" in name_lower
+            or "coordinated operation" in name_lower
+            or "cooperative" in name_lower
+        )
+
     def format_schedule_text(self, now: datetime | None = None, fallback_error: str = "") -> str:
         current = now or datetime.now(timezone.utc)
         if not self._records:
             if fallback_error:
                 return f"暂时无法获取官方日程：{fallback_error}。当前没有可用缓存，请稍后重试。"
             return "功能尚未就绪，正在同步官方数据，请稍候。"
+
         deadlines = self.list_active_deadlines(current)
-        if not deadlines:
-            time_hint = f"（最近更新时间: {self.last_updated_at}）" if self.last_updated_at else ""
-            err_hint = f"\n⚠️ {fallback_error}" if fallback_error else ""
-            return f"近期暂无可追踪的官方活动日程。{time_hint}{err_hint}".strip()
         lines = ["【NIKKE 近期日程与活动倒计时】"]
         if self.last_updated_at:
             lines.append(f"（最近更新时间: {self.last_updated_at}）")
         if fallback_error:
             lines.append(f"⚠️ {fallback_error}")
         lines.append("")
-        ongoing = []
-        ending_soon = []
-        for dl in deadlines:
-            rem = dl.remaining_display(current)
-            end_cst = dl.end_at.astimezone(CST).strftime("%m-%d %H:%M")
-            entry = f"• {dl.name}\n  截止: {end_cst} ({rem})"
-            diff = dl.end_at - current
-            if diff.total_seconds() < 86400 * 2:
-                ending_soon.append(entry)
-            else:
-                ongoing.append(entry)
 
-        if ending_soon:
-            lines.append("⏳ 即将结束：")
-            lines.extend(ending_soon)
-            lines.append("")
+        coop_list = [dl for dl in deadlines if self._is_coop_deadline(dl)]
+        event_list = [dl for dl in deadlines if not self._is_coop_deadline(dl)]
 
-        if ongoing:
-            lines.append("📌 进行中：")
-            lines.extend(ongoing)
+        lines.append("【协同作战】")
+        if coop_list:
+            for dl in coop_list:
+                rem = dl.remaining_display(current)
+                start_cst = dl.start_at.astimezone(CST).strftime("%Y-%m-%d %H:%M") if dl.start_at else "见公告详情"
+                end_cst = dl.end_at.astimezone(CST).strftime("%Y-%m-%d %H:%M")
+                lines.append(f"• {dl.name}")
+                lines.append("  状态: 进行中")
+                lines.append(f"  开始时间: {start_cst}")
+                lines.append(f"  结束时间: {end_cst}")
+                lines.append(f"  剩余时间: {rem}")
+        else:
+            lines.append("当前暂无进行中的协同作战。")
 
+        lines.append("")
+        lines.append("【进行中活动】")
+        if event_list:
+            for dl in event_list:
+                rem = dl.remaining_display(current)
+                start_cst = dl.start_at.astimezone(CST).strftime("%Y-%m-%d %H:%M") if dl.start_at else "见公告详情"
+                end_cst = dl.end_at.astimezone(CST).strftime("%Y-%m-%d %H:%M")
+                lines.append(f"• {dl.name}")
+                lines.append("  状态: 进行中")
+                lines.append(f"  开始: {start_cst}")
+                lines.append(f"  结束: {end_cst}")
+                lines.append(f"  剩余时间: {rem}")
+        else:
+            lines.append("当前暂无进行中的活动。")
         return "\n".join(lines).strip()

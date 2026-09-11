@@ -310,5 +310,158 @@ class AnnouncementReviewRegressionTests(unittest.IsolatedAsyncioTestCase):
                     plugin.announcements.sync_from_source.assert_awaited_once()
 
 
+class ScheduleActiveCoopAndEventTests(unittest.TestCase):
+    def test_coop_vs_event_classification(self):
+        dl_coop1 = GameDeadline("c1", "【协同作战】古铁拦截战", "event", datetime(2026, 9, 20, tzinfo=timezone.utc))
+        dl_coop2 = GameDeadline("c2", "Co-op Raid: Land Eater", "event", datetime(2026, 9, 20, tzinfo=timezone.utc))
+        dl_coop3 = GameDeadline("c3", "Coordinated Operation: Harvester", "general", datetime(2026, 9, 20, tzinfo=timezone.utc))
+        dl_coop4 = GameDeadline("c4", "未知目标", "coop", datetime(2026, 9, 20, tzinfo=timezone.utc))
+
+        dl_event1 = GameDeadline("e1", "GREAT VILLAIN UNION 活动开启", "event", datetime(2026, 9, 20, tzinfo=timezone.utc))
+        dl_event2 = GameDeadline("e2", "Special Pick Up: 艾拉 招募", "recruit", datetime(2026, 9, 20, tzinfo=timezone.utc))
+
+        for dl in (dl_coop1, dl_coop2, dl_coop3, dl_coop4):
+            with self.subTest(coop=dl.name):
+                self.assertTrue(AnnouncementService._is_coop_deadline(dl))
+
+        for dl in (dl_event1, dl_event2):
+            with self.subTest(event=dl.name):
+                self.assertFalse(AnnouncementService._is_coop_deadline(dl))
+
+    def test_upcoming_active_ended_windows(self):
+        start = datetime(2026, 9, 10, 12, 0, tzinfo=timezone.utc)
+        end = datetime(2026, 9, 20, 12, 0, tzinfo=timezone.utc)
+        dl = GameDeadline("d1", "限时活动", "event", end_at=end, start_at=start)
+
+        t_before = datetime(2026, 9, 5, 12, 0, tzinfo=timezone.utc)
+        self.assertTrue(dl.is_upcoming(t_before))
+        self.assertFalse(dl.is_active(t_before))
+        self.assertFalse(dl.is_ended(t_before))
+
+        t_during = datetime(2026, 9, 15, 12, 0, tzinfo=timezone.utc)
+        self.assertFalse(dl.is_upcoming(t_during))
+        self.assertTrue(dl.is_active(t_during))
+        self.assertFalse(dl.is_ended(t_during))
+
+        t_after = datetime(2026, 9, 25, 12, 0, tzinfo=timezone.utc)
+        self.assertFalse(dl.is_upcoming(t_after))
+        self.assertFalse(dl.is_active(t_after))
+        self.assertTrue(dl.is_ended(t_after))
+
+    def test_format_schedule_text_reports_active_coop_and_multiple_events(self):
+        service = AnnouncementService()
+        now = datetime(2026, 9, 15, 12, 0, tzinfo=timezone.utc)
+
+        # 1 active coop
+        coop_rec = AnnouncementRecord(
+            content_id="rec_coop",
+            title="【协同作战】拦截暴走古铁",
+            body="活动时间 2026.09.12 12:00 ~ 2026.09.18 12:00",
+            published_at="2026-09-10 12:00",
+            category="event",
+        )
+        # 2 active events
+        evt_rec1 = AnnouncementRecord(
+            content_id="rec_evt1",
+            title="秋季特别活动 AUTUMN FEAST",
+            body="活动时间 2026.09.10 12:00 ~ 2026.09.24 12:00",
+            published_at="2026-09-08 12:00",
+            category="event",
+        )
+        evt_rec2 = AnnouncementRecord(
+            content_id="rec_evt2",
+            title="签到奖励活动 7 DAYS LOGIN",
+            body="活动时间 2026.09.14 04:00 ~ 2026.09.21 04:00",
+            published_at="2026-09-12 12:00",
+            category="event",
+        )
+        # 1 ended event (should NOT be displayed as active)
+        ended_rec = AnnouncementRecord(
+            content_id="rec_ended",
+            title="已结束的旧活动",
+            body="活动时间 2026.09.01 12:00 ~ 2026.09.08 12:00",
+            published_at="2026-08-30 12:00",
+            category="event",
+        )
+        # 1 upcoming event (should NOT be displayed as active)
+        upcoming_rec = AnnouncementRecord(
+            content_id="rec_upcoming",
+            title="尚未开始的未来活动",
+            body="活动时间 2026.09.28 12:00 ~ 2026.10.05 12:00",
+            published_at="2026-09-14 12:00",
+            category="event",
+        )
+
+        for rec in (coop_rec, evt_rec1, evt_rec2, ended_rec, upcoming_rec):
+            service.add_or_update(rec)
+
+        sched_text = service.format_schedule_text(now=now)
+
+        # Active Coop section
+        self.assertIn("【协同作战】", sched_text)
+        self.assertIn("【协同作战】拦截暴走古铁", sched_text)
+        self.assertIn("状态: 进行中", sched_text)
+        self.assertNotIn("当前暂无进行中的协同作战", sched_text)
+
+        # Active Events section
+        self.assertIn("【进行中活动】", sched_text)
+        self.assertIn("秋季特别活动 AUTUMN FEAST", sched_text)
+        self.assertIn("签到奖励活动 7 DAYS LOGIN", sched_text)
+        self.assertNotIn("当前暂无进行中的活动", sched_text)
+
+        # Excluded upcoming & ended
+        self.assertNotIn("已结束的旧活动", sched_text)
+        self.assertNotIn("尚未开始的未来活动", sched_text)
+        self.assertNotIn("UNKNOWN", sched_text)
+
+    def test_format_schedule_text_clean_empty_states_without_unknown(self):
+        service = AnnouncementService()
+        now = datetime(2026, 9, 15, 12, 0, tzinfo=timezone.utc)
+
+        # Case 1: only active event, no active coop
+        evt_rec = AnnouncementRecord(
+            content_id="rec_evt_only",
+            title="单一进行中活动",
+            body="活动时间 2026.09.10 12:00 ~ 2026.09.20 12:00",
+            published_at="2026-09-08 12:00",
+            category="event",
+        )
+        service.add_or_update(evt_rec)
+        sched1 = service.format_schedule_text(now=now)
+        self.assertIn("当前暂无进行中的协同作战。", sched1)
+        self.assertIn("单一进行中活动", sched1)
+        self.assertNotIn("UNKNOWN", sched1)
+
+        # Case 2: only active coop, no active event
+        service2 = AnnouncementService()
+        coop_rec = AnnouncementRecord(
+            content_id="rec_coop_only",
+            title="【协同作战】哈维斯特",
+            body="活动时间 2026.09.10 12:00 ~ 2026.09.20 12:00",
+            published_at="2026-09-08 12:00",
+            category="coop",
+        )
+        service2.add_or_update(coop_rec)
+        sched2 = service2.format_schedule_text(now=now)
+        self.assertIn("【协同作战】哈维斯特", sched2)
+        self.assertIn("当前暂无进行中的活动。", sched2)
+        self.assertNotIn("UNKNOWN", sched2)
+
+        # Case 3: neither active (e.g. only ended records)
+        service3 = AnnouncementService()
+        ended_rec = AnnouncementRecord(
+            content_id="rec_ended_only",
+            title="已过期活动",
+            body="活动时间 2026.08.01 12:00 ~ 2026.08.10 12:00",
+            published_at="2026-07-30 12:00",
+            category="event",
+        )
+        service3.add_or_update(ended_rec)
+        sched3 = service3.format_schedule_text(now=now)
+        self.assertIn("当前暂无进行中的协同作战。", sched3)
+        self.assertIn("当前暂无进行中的活动。", sched3)
+        self.assertNotIn("UNKNOWN", sched3)
+
+
 if __name__ == "__main__":
     unittest.main()
