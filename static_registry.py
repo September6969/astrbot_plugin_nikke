@@ -44,8 +44,8 @@ class StaticDataRegistry:
         "equipment": re.compile(
             r"^icn_equipment_(head|body|arm|leg)_(attacker|defender|supporter)_t[1-9]\d*(?:_\d+)?$"
         ),
-        "cube": re.compile(r"^harmony_cube_\d+$"),
-        "favorite_item": re.compile(r"^favorite_item_\d+$"),
+        "cube": re.compile(r"^(harmony_cube_\d+|ie_\d+)$"),
+        "favorite_item": re.compile(r"^(favorite_item_\d+|si_favoriteitem_[a-z0-9_]+)$"),
         "costume": re.compile(r"^c\d+(?:_\d+)?$"),
     }
 
