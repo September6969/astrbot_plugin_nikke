@@ -2,101 +2,156 @@
   "public_base_url": {
     "description": "绑定服务公网地址",
     "type": "string",
+    "hint": "必须是站点地址，不能带账号、路径或查询参数。改动后需重启插件并重新安装绑定扩展。",
     "default": "https://nikke.irises777.xyz"
   },
   "web_host": {
     "description": "绑定服务监听地址",
     "type": "string",
+    "hint": "容器内监听地址。不要把该端口直接暴露到公网，公网访问应经过 HTTPS 反向代理。",
     "default": "0.0.0.0"
   },
   "web_port": {
     "description": "绑定服务容器内端口",
     "type": "int",
+    "hint": "容器内监听端口，公网访问应经过 HTTPS 反向代理。取值 1–65535，超出范围回退默认值 6210。",
     "default": 6210
   },
   "binding_api_key": {
-    "description": "创建绑定会话接口的Bearer密钥；留空时禁用该接口",
+    "description": "绑定服务接口密钥",
     "type": "string",
+    "hint": "创建绑定会话接口的 Bearer 密钥；留空即禁用该接口。请勿提交到 Git。",
+    "obvious_hint": true,
+    "secret": true,
     "default": ""
   },
   "allow_group_bind": {
-    "description": "允许在群聊生成绑定链接；存在链接被旁观者抢先使用的风险",
+    "description": "允许在群聊生成绑定链接",
     "type": "bool",
+    "hint": "群聊生成的绑定链接可能被旁观者抢先使用，仅建议在可信私有群开启。",
+    "obvious_hint": true,
     "default": false
   },
   "daily_hour": {
     "description": "每日任务开始小时（北京时间）",
     "type": "int",
+    "hint": "北京时间小时，取值 0–23，超出范围回退默认值 8。",
+    "slider": {
+      "min": 0,
+      "max": 23,
+      "step": 1
+    },
     "default": 8
   },
   "daily_minute": {
     "description": "每日任务开始分钟",
     "type": "int",
+    "hint": "取值 0–59，超出范围回退默认值 10。",
+    "slider": {
+      "min": 0,
+      "max": 59,
+      "step": 1
+    },
     "default": 10
   },
   "summary_hour": {
     "description": "每日汇总小时（北京时间）",
     "type": "int",
+    "hint": "北京时间小时，取值 0–23，超出范围回退默认值 8。",
+    "slider": {
+      "min": 0,
+      "max": 23,
+      "step": 1
+    },
     "default": 8
   },
   "summary_minute": {
     "description": "每日汇总分钟",
     "type": "int",
+    "hint": "取值 0–59，超出范围回退默认值 30。",
+    "slider": {
+      "min": 0,
+      "max": 59,
+      "step": 1
+    },
     "default": 30
   },
   "request_timeout": {
     "description": "BlaBlaLink 请求超时秒数",
     "type": "int",
+    "hint": "取值 1–300，超出范围回退默认值 20。",
     "default": 20
   },
   "max_concurrency": {
     "description": "账号任务最大并发数",
     "type": "int",
+    "hint": "取值 1–32，超出范围回退默认值 2。请按上游频控和部署容量调整。",
+    "slider": {
+      "min": 1,
+      "max": 32,
+      "step": 1
+    },
     "default": 2
   },
   "spine_worker_path": {
-    "description": "可选的官方 Spine 4.0 headless worker 绝对路径；留空时使用中性程序占位图",
+    "description": "Spine 4.0 headless worker 路径",
     "type": "string",
+    "hint": "官方 Spine 4.0 worker 可执行文件的绝对路径；留空时使用中性程序占位图。",
     "default": ""
   },
   "spine_worker_path_4_1": {
-    "description": "可选的官方 Spine 4.1 headless worker 绝对路径；留空时对 4.1 bundle 使用中性程序占位图",
+    "description": "Spine 4.1 headless worker 路径",
     "type": "string",
+    "hint": "官方 Spine 4.1 worker 可执行文件的绝对路径；留空时对 4.1 bundle 使用中性程序占位图。",
     "default": ""
   },
   "spine_runtime_version": {
-    "description": "Spine worker 的严格 major.minor 版本；不得用默认值猜测不匹配 bundle",
+    "description": "Spine worker 严格匹配版本",
     "type": "string",
+    "hint": "worker 严格匹配的 major.minor 版本，不得用默认值猜测不匹配的 bundle。",
     "default": "4.0"
   },
   "spine_worker_timeout": {
-    "description": "Spine 单次 headless worker 最大秒数（最多 5 秒）",
+    "description": "Spine 单次 worker 最大秒数",
     "type": "int",
+    "hint": "取值 1–5，超出范围回退默认值 4。",
+    "slider": {
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
     "default": 4
   },
   "voice_dynamic_enabled": {
-    "description": "启用 voice_poke_map.json 中有来源证据的官方动态语音；空映射或关闭时使用本地登记音频",
+    "description": "启用官方动态语音",
     "type": "bool",
+    "hint": "仅启用 voice_poke_map.json 中有来源证据的官方动态语音；空映射或关闭时使用本地登记音频。",
     "default": true
   },
   "custom_character_aliases": {
-    "description": "用户自定义角色别名，支持JSON对象格式或多行'角色名=别名1,别名2'格式；与内置别名表合并",
-    "type": "string",
+    "description": "自定义角色别名",
+    "type": "text",
+    "hint": "支持 JSON 对象或多行「角色名=别名1,别名2」格式，与内置别名表合并。",
     "default": ""
   },
   "enable_daily_actions": {
-    "description": "启用已验证的社区签到与领奖接口",
+    "description": "启用每日签到与领奖",
     "type": "bool",
+    "hint": "启用已验证的社区签到与领奖接口，属于写操作；未完成真实授权验收前保持关闭。",
+    "obvious_hint": true,
     "default": false
   },
   "enable_announcement_push": {
-    "description": "启用已由机器人管理员订阅的会话公告与截止提醒；默认关闭",
+    "description": "启用公告推送",
     "type": "bool",
+    "hint": "启用已由机器人管理员订阅的会话公告与截止提醒；默认关闭。",
     "default": false
   },
   "enable_cdk_redemption": {
-    "description": "启用国际服CDK真实兑换；群聊命令会公开兑换码",
+    "description": "启用国际服 CDK 真实兑换",
     "type": "bool",
+    "hint": "群聊命令会公开兑换码，必须由管理员明确开启。",
+    "obvious_hint": true,
     "default": false
   }
 }
