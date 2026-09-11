@@ -27,7 +27,7 @@
 
 namespace {
 
-inline void *get_page_texture(const spine::AtlasPage *page) {
+inline void *get_page_texture(spine::AtlasPage *page) {
 #if defined(SPINE_MAJOR_VERSION) && (SPINE_MAJOR_VERSION > 4 || (SPINE_MAJOR_VERSION == 4 && SPINE_MINOR_VERSION >= 1))
 	return page != nullptr ? page->texture : nullptr;
 #else
