@@ -62,6 +62,8 @@ class AssetManager:
         self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._inflight_lock = threading.Lock()
         self._inflight: dict[str, _InflightAsset] = {}
+        self._spine_wait_lock = threading.Lock()
+        self._spine_wait_events: dict[str, list[threading.Event]] = {}
         if isinstance(spine_budget_seconds, bool) or not isinstance(spine_budget_seconds, (int, float)) or spine_budget_seconds <= 0:
             raise ValueError("Spine 预渲染预算必须是正数")
         self.spine_renderer = spine_renderer or SpinePreRenderer(self.cache_dir)
@@ -244,8 +246,14 @@ class AssetManager:
             animation=animation,
         )
 
-    def _get_spine_portrait(self, char_id: str, costume_id) -> Image.Image | None:
-        """优先命中版本化 Spine PNG；miss 时仅在 runtime 可用时后台预热。"""
+    def _get_spine_portrait(
+        self,
+        char_id: str,
+        costume_id,
+        *,
+        wait_seconds: float = 4.0,
+    ) -> Image.Image | None:
+        """优先命中版本化 Spine PNG；miss 且 runtime 可用时投递预渲染并同步等待预算内完成。"""
         # 角色卡热路径只消费已有索引；索引刷新必须由独立预热动作完成，避免
         # 多个并发出卡请求各自触发一次 l2d.json 网络请求。
         runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
@@ -264,17 +272,42 @@ class AssetManager:
         urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="setup")
         if not urls:
             return None
-        self.spine_renderer.enqueue(
-            SpineJob(
-                cache_key=cache_key,
-                character_id=char_id,
-                runtime_version=runtime_version,
-                bundle_urls=urls,
-                animation=animation,
-                budget_seconds=self.spine_budget_seconds,
+
+        event = threading.Event()
+        with self._spine_wait_lock:
+            is_first = cache_key not in self._spine_wait_events
+            if is_first:
+                self._spine_wait_events[cache_key] = [event]
+            else:
+                self._spine_wait_events[cache_key].append(event)
+
+        if is_first:
+            def _on_done(_):
+                with self._spine_wait_lock:
+                    waiters = self._spine_wait_events.pop(cache_key, [])
+                for w in waiters:
+                    w.set()
+
+            enqueued = self.spine_renderer.enqueue(
+                SpineJob(
+                    cache_key=cache_key,
+                    character_id=char_id,
+                    runtime_version=runtime_version,
+                    bundle_urls=urls,
+                    animation=animation,
+                    budget_seconds=self.spine_budget_seconds,
+                    callback=_on_done,
+                )
             )
-        )
-        return None
+            if not enqueued:
+                with self._spine_wait_lock:
+                    waiters = self._spine_wait_events.pop(cache_key, [])
+                for w in waiters:
+                    w.set()
+                return None
+
+        event.wait(timeout=min(wait_seconds, self.spine_budget_seconds))
+        return self.spine_renderer.cached_portrait(cache_key)
 
     def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
         """只从 canonical Spine identity 读取角色官方立绘。
@@ -338,14 +371,14 @@ class AssetManager:
         resource = self.registry.resolve("favorite_item", tid)
         if resource is None:
             return self.fallback("favorite")
-        url = self.game_resource_url(f"icon/favorite/{resource}.webp")
+        url = self.game_resource_url(f"icon/favoriteitem/{resource}.webp")
         return self._icon("favorite", tid, "favorite", url, allow_source=False)
 
     def get_cube_icon(self, tid) -> Image.Image:
         resource = self.registry.resolve("cube", tid)
         if resource is None:
             return self.fallback("cube")
-        url = self.game_resource_url(f"icon/cube/{resource}.webp")
+        url = self.game_resource_url(f"icon/equip/{resource}.webp")
         return self._icon("cube", tid, "cube", url, allow_source=False)
 
     def get_element_icon(self, element):

@@ -158,6 +158,8 @@ class SpineBundleFetcher:
         started = time.monotonic()
         targets: dict[str, Path] = {}
         total_bytes = 0
+        stream_timeout = max(self.timeout_seconds, budget_seconds) if budget_seconds is not None else self.timeout_seconds
+
         for name in ("skel", "atlas", "png"):
             url = self._validate_url(urls.get(name))
             target = self._target(cache_key, name, url)
@@ -169,7 +171,7 @@ class SpineBundleFetcher:
             limit = self._limit_for(name)
             content = bytearray()
             try:
-                with httpx.stream("GET", url, timeout=self.timeout_seconds, follow_redirects=False) as response:
+                with httpx.stream("GET", url, timeout=stream_timeout, follow_redirects=False) as response:
                     response.raise_for_status()
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
@@ -187,29 +189,70 @@ class SpineBundleFetcher:
                 temporary.unlink(missing_ok=True)
             total_bytes += len(content)
 
-        # 确保 atlas 声明的纹理页名称在 bundle 目录内可直接解析（官方 Spine runtime 按文件名查找）
+        # 确保 atlas 声明的所有纹理页名称在 bundle 目录内可直接解析（官方 Spine runtime 按文件名查找）
+        declared_pages: list[str] = []
         try:
             atlas_text = targets["atlas"].read_text(encoding="utf-8-sig", errors="replace")
-            for line in atlas_text.splitlines():
-                stripped = line.strip().lstrip("\ufeff")
+            for block in re.split(r"\n\s*\n", atlas_text.strip()):
+                lines = [line.strip().lstrip("\ufeff") for line in block.splitlines() if line.strip()]
                 if (
-                    stripped.lower().endswith((".png", ".webp"))
-                    and not any(sep in stripped for sep in ("/", "\\", ":"))
-                    and not stripped.startswith(".")
+                    lines
+                    and lines[0].lower().endswith((".png", ".webp"))
+                    and not any(sep in lines[0] for sep in ("/", "\\", ":"))
+                    and not lines[0].startswith(".")
                 ):
-                    declared_texture = targets["atlas"].parent / stripped
-                    if (not declared_texture.is_file() or declared_texture.stat().st_size == 0) and targets["png"].is_file():
-                        try:
-                            declared_texture.hardlink_to(targets["png"])
-                        except (OSError, AttributeError):
-                            try:
-                                declared_texture.write_bytes(targets["png"].read_bytes())
-                            except OSError:
-                                pass
+                    declared_pages.append(lines[0])
         except OSError:
             pass
 
-        return SpineBundle(targets["skel"], targets["atlas"], (targets["png"],))
+        for page_name in declared_pages:
+            declared_texture = targets["atlas"].parent / page_name
+            if self._valid_cached(declared_texture, self.MAX_TEXTURE_BYTES):
+                continue
+            if targets["png"].is_file():
+                # 若主 png 文件名匹配首页，直接链接
+                if not declared_texture.is_file() or declared_texture.stat().st_size == 0:
+                    try:
+                        declared_texture.hardlink_to(targets["png"])
+                        continue
+                    except (OSError, AttributeError):
+                        try:
+                            declared_texture.write_bytes(targets["png"].read_bytes())
+                            continue
+                        except OSError:
+                            pass
+            # 尝试从同目录或 URL 清单下载额外声明的纹理页
+            page_url = urls.get(page_name)
+            if not page_url:
+                primary_png_url = str(urls.get("png", ""))
+                if "/" in primary_png_url:
+                    page_url = f"{primary_png_url.rsplit('/', 1)[0]}/{page_name}"
+            if page_url:
+                try:
+                    val_url = self._validate_url(page_url)
+                    content = bytearray()
+                    with httpx.stream("GET", val_url, timeout=stream_timeout, follow_redirects=False) as resp:
+                        resp.raise_for_status()
+                        for chunk in resp.iter_bytes():
+                            content.extend(chunk)
+                            if len(content) > self.MAX_TEXTURE_BYTES or total_bytes + len(content) > self.MAX_TOTAL_BYTES:
+                                raise SpineRenderError("Spine bundle 下载超过大小预算")
+                            if budget_seconds is not None and time.monotonic() - started > budget_seconds:
+                                raise SpineRenderError("Spine bundle 下载超过总预算")
+                    tmp = declared_texture.with_name(f".{declared_texture.name}.{threading.get_ident()}.tmp")
+                    try:
+                        tmp.write_bytes(bytes(content))
+                        tmp.replace(declared_texture)
+                        total_bytes += len(content)
+                    finally:
+                        tmp.unlink(missing_ok=True)
+                except (httpx.HTTPError, OSError, SpineRenderError):
+                    pass
+
+        texture_files = [targets["atlas"].parent / p for p in declared_pages if (targets["atlas"].parent / p).is_file()]
+        if not texture_files and targets["png"].is_file():
+            texture_files = [targets["png"]]
+        return SpineBundle(targets["skel"], targets["atlas"], tuple(texture_files))
 
 
 @dataclass(slots=True)
