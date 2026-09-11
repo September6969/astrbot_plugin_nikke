@@ -236,10 +236,21 @@ class AssetManagerTests(unittest.TestCase):
             finally:
                 manager.close()
 
-    def test_favorite_item_and_cube_asset_chain_with_remote_cache(self):
+    def _make_metadata_assets(self, target_dir: Path) -> Path:
+        import shutil
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json", "sources.json"):
+            src = assets_dir / name
+            if src.is_file():
+                shutil.copy2(src, target_dir / name)
+        return target_dir
+
+    def test_favorite_item_and_cube_asset_chain_with_remote_cache(self):
         with tempfile.TemporaryDirectory() as td:
-            cache_dir = Path(td)
+            base = Path(td)
+            cache_dir = base / "cache"
+            assets_dir = self._make_metadata_assets(base / "assets")
             manager = AssetManager(cache_dir, assets_dir, remote=True)
             try:
                 self.assertIn("100602", manager.favorite_items_map)
@@ -275,41 +286,44 @@ class AssetManagerTests(unittest.TestCase):
                 manager.close()
 
     def test_favorite_and_cube_fault_matrix_keeps_card_renderable(self):
-        assets_dir = Path(__file__).resolve().parents[1] / "assets"
-        cases = [
-            ("favorite", 100602, "get_favorite_item_icon"),
-            ("cube", 1000304, "get_cube_icon"),
-        ]
-        for kind, tid, method_name in cases:
-            for failure in ("404", "timeout", "decode"):
-                with self.subTest(kind=kind, failure=failure), tempfile.TemporaryDirectory() as td:
-                    manager = AssetManager(td, assets_dir, remote=True)
-                    method = getattr(manager, method_name)
-                    try:
-                        if failure == "404":
-                            response = httpx.Response(404, request=httpx.Request("GET", "https://example.com/missing"))
-                            context = MagicMock()
-                            context.__enter__.return_value = response
-                            effect = context
-                        elif failure == "timeout":
-                            effect = httpx.ReadTimeout("synthetic timeout")
-                        else:
-                            response = httpx.Response(200, content=b"not-an-image", request=httpx.Request("GET", "https://example.com/bad"))
-                            context = MagicMock()
-                            context.__enter__.return_value = response
-                            effect = context
-                        with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=[effect] if failure != "timeout" else effect):
-                            image = method(tid)
-                        self.assertEqual(image.mode, "RGBA")
-                        self.assertEqual(image.size, (128, 128))
-                        self.assertIsNotNone(image.getbbox())
-                    finally:
-                        manager.close()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            assets_dir = self._make_metadata_assets(base / "assets")
+            cases = [
+                ("favorite", 100602, "get_favorite_item_icon"),
+                ("cube", 1000304, "get_cube_icon"),
+            ]
+            for kind, tid, method_name in cases:
+                for failure in ("404", "timeout", "decode"):
+                    with self.subTest(kind=kind, failure=failure), tempfile.TemporaryDirectory() as ctd:
+                        manager = AssetManager(ctd, assets_dir, remote=True)
+                        method = getattr(manager, method_name)
+                        try:
+                            if failure == "404":
+                                response = httpx.Response(404, request=httpx.Request("GET", "https://example.com/missing"))
+                                context = MagicMock()
+                                context.__enter__.return_value = response
+                                effect = context
+                            elif failure == "timeout":
+                                effect = httpx.ReadTimeout("synthetic timeout")
+                            else:
+                                response = httpx.Response(200, content=b"not-an-image", request=httpx.Request("GET", "https://example.com/bad"))
+                                context = MagicMock()
+                                context.__enter__.return_value = response
+                                effect = context
+                            with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=[effect] if failure != "timeout" else effect):
+                                image = method(tid)
+                            self.assertEqual(image.mode, "RGBA")
+                            self.assertEqual(image.size, (128, 128))
+                            self.assertIsNotNone(image.getbbox())
+                        finally:
+                            manager.close()
 
     def test_corrupt_favorite_and_cube_cache_falls_back_without_crashing(self):
-        assets_dir = Path(__file__).resolve().parents[1] / "assets"
         with tempfile.TemporaryDirectory() as td:
-            cache = Path(td)
+            base = Path(td)
+            cache = base / "cache"
+            assets_dir = self._make_metadata_assets(base / "assets")
             for kind, tid in (("favorite", 100602), ("cube", 1000304)):
                 path = cache / kind / f"{tid}.png"
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -318,6 +332,31 @@ class AssetManagerTests(unittest.TestCase):
             try:
                 self.assertEqual(manager.get_favorite_item_icon(100602).size, (128, 128))
                 self.assertEqual(manager.get_cube_icon(1000304).size, (128, 128))
+            finally:
+                manager.close()
+
+    def test_bundled_cube_and_favorite_assets_load_locally_offline(self):
+        assets_dir = Path(__file__).resolve().parents[1] / "assets"
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            manager = AssetManager(cache, assets_dir, remote=False)
+            try:
+                fb_cube = manager.fallback("cube")
+                fb_fav = manager.fallback("favorite")
+
+                # Verify all 14 cubes
+                for tid in manager.cubes_map:
+                    img = manager.get_cube_icon(tid)
+                    self.assertEqual(img.mode, "RGBA")
+                    self.assertEqual(img.size, (256, 256))
+                    self.assertIsNot(img, fb_cube)
+
+                # Verify all 33 favorite items
+                for tid in manager.favorite_items_map:
+                    img = manager.get_favorite_item_icon(tid)
+                    self.assertEqual(img.mode, "RGBA")
+                    self.assertIn(img.size, ((128, 128), (256, 256)))
+                    self.assertIsNot(img, fb_fav)
             finally:
                 manager.close()
 
