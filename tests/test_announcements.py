@@ -397,16 +397,12 @@ class ScheduleActiveCoopAndEventTests(unittest.TestCase):
 
         sched_text = service.format_schedule_text(now=now)
 
-        # Active Coop section
-        self.assertIn("【协同作战】", sched_text)
-        self.assertIn("【协同作战】拦截暴走古铁", sched_text)
-        self.assertIn("状态: 进行中", sched_text)
-        self.assertNotIn("当前暂无进行中的协同作战", sched_text)
-
-        # Active Events section
+        # Unified Active Events section with tags
         self.assertIn("【进行中活动】", sched_text)
+        self.assertIn("[协同] 【协同作战】拦截暴走古铁", sched_text)
         self.assertIn("秋季特别活动 AUTUMN FEAST", sched_text)
         self.assertIn("签到奖励活动 7 DAYS LOGIN", sched_text)
+        self.assertIn("状态: 进行中", sched_text)
         self.assertNotIn("当前暂无进行中的活动", sched_text)
 
         # Excluded upcoming & ended
@@ -428,8 +424,8 @@ class ScheduleActiveCoopAndEventTests(unittest.TestCase):
         )
         service.add_or_update(evt_rec)
         sched1 = service.format_schedule_text(now=now)
-        self.assertIn("当前暂无进行中的协同作战。", sched1)
         self.assertIn("单一进行中活动", sched1)
+        self.assertNotIn("当前暂无进行中的活动", sched1)
         self.assertNotIn("UNKNOWN", sched1)
 
         # Case 2: only active coop, no active event
@@ -443,8 +439,8 @@ class ScheduleActiveCoopAndEventTests(unittest.TestCase):
         )
         service2.add_or_update(coop_rec)
         sched2 = service2.format_schedule_text(now=now)
-        self.assertIn("【协同作战】哈维斯特", sched2)
-        self.assertIn("当前暂无进行中的活动。", sched2)
+        self.assertIn("[协同] 【协同作战】哈维斯特", sched2)
+        self.assertNotIn("当前暂无进行中的活动", sched2)
         self.assertNotIn("UNKNOWN", sched2)
 
         # Case 3: neither active (e.g. only ended records)
@@ -458,7 +454,6 @@ class ScheduleActiveCoopAndEventTests(unittest.TestCase):
         )
         service3.add_or_update(ended_rec)
         sched3 = service3.format_schedule_text(now=now)
-        self.assertIn("当前暂无进行中的协同作战。", sched3)
         self.assertIn("当前暂无进行中的活动。", sched3)
         self.assertNotIn("UNKNOWN", sched3)
 

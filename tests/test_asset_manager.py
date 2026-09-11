@@ -550,3 +550,35 @@ class AssetManagerTests(unittest.TestCase):
             # 队列中尚未开始的任务应被取消
             self.assertLess(len(executed), 8)
 
+    def test_static_prerendered_portrait_hit_without_network_or_worker(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td) / "cache"
+            assets = Path(td) / "assets"
+            rendered_dir = assets / "spine-rendered"
+            rendered_dir.mkdir(parents=True)
+            # 伪造已持久化预渲染好的 Crown c330.png
+            Image.new("RGBA", (150, 250), "gold").save(rendered_dir / "c330.png")
+
+            manager = AssetManager(cache, assets, remote=True)
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                    portrait = manager.get_character_portrait(5065, "330")
+                    self.assertEqual(portrait.size, (150, 250))
+                    # 绝对不能触发网络
+                    stream.assert_not_called()
+            finally:
+                manager.close()
+
+    def test_static_prerendered_portrait_missing_logs_and_returns_fallback(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td) / "cache"
+            assets = Path(td) / "assets"
+            manager = AssetManager(cache, assets, remote=True)
+            try:
+                with self.assertLogs("nikke.asset_manager", level="WARNING") as log_cm:
+                    portrait = manager.get_character_portrait(5065, "330")
+                    self.assertEqual(portrait.size, (600, 900))  # fallback
+                    self.assertTrue(any("STATIC_SPINE_ASSET_MISSING: c330" in m for m in log_cm.output))
+            finally:
+                manager.close()
+

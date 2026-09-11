@@ -152,13 +152,7 @@ class ProfileCardRenderer(CardRenderer):
             sections.append(self._structured_section(collection_title, collection_items))
 
         if data.recycle_room_researches is not None:
-            research_title = "RESEARCH / 研究"
-            if data.research_partial:
-                research_title += "（部分）"
-            sections.append(self._structured_section(research_title, [
-                (item.display_name or f"研究项目 {i+1}", f"Lv.{self._number(item.level)} · EXP {self._number(item.exp)}")
-                for i, item in enumerate(data.recycle_room_researches)
-            ]))
+            sections.append(self._recycle_room_section(data))
 
         extra = self._extra_items(data)
         if extra:
@@ -177,6 +171,42 @@ class ProfileCardRenderer(CardRenderer):
                 self._text(draw, (x, y), label, 20, PROFILE_THEME["muted"], width=450)
                 self._text(draw, (x + 480, y), value, 20, PROFILE_THEME["text"], width=520)
         return draw_section, 75 + len(visible) * 38
+
+    def _recycle_room_section(self, data):
+        title = "RECYCLE ROOM / 循环室"
+        if data.research_partial:
+            title += "（部分）"
+        items = []
+        for i, item in enumerate(data.recycle_room_researches or []):
+            label = item.display_name or f"研究项目 {i+1}"
+            level_str = f"Lv.{self._number(item.level)}"
+            try:
+                exp_val = int(item.exp) if item.exp is not None else 0
+            except (ValueError, TypeError):
+                exp_val = 0
+            if exp_val > 0:
+                val = f"{level_str} · EXP {self._number(item.exp)}"
+            else:
+                val = level_str
+            items.append((label, val))
+
+        visible = items[:30] or [("暂无记录", "—")]
+        if len(items) > 30:
+            visible.append(("其余项目", f"{len(items)-30} 项"))
+
+        def draw_section(draw, box, fill):
+            self._section_panel(draw, box, title, fill=fill)
+            for idx, (label, value) in enumerate(visible):
+                col = idx % 2
+                row = idx // 2
+                col_x = box[0] + 30 if col == 0 else box[0] + 580
+                y = box[1] + 55 + row * 38
+                self._text(draw, (col_x, y), label, 20, PROFILE_THEME["muted"], width=330)
+                self._text(draw, (col_x + 340, y), value, 20, PROFILE_THEME["text"], width=180)
+
+        rows = (len(visible) + 1) // 2
+        height = 75 + rows * 38
+        return draw_section, height
 
     def _campaign_section(self, data):
         def draw_section(draw, box, fill):

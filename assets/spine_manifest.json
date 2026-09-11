@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "characters": {
+    "c010": {
+      "canonical_asset_id": "c010",
+      "runtime_version": "4.0",
+      "png_file": "c010.png",
+      "width": 425,
+      "height": 891,
+      "alpha_bbox": [
+        316,
+        83,
+        709,
+        942
+      ],
+      "file_size": 313219,
+      "updated_at": "2026-09-11T17:55:33.564728+00:00"
+    },
+    "c010_02": {
+      "canonical_asset_id": "c010_02",
+      "runtime_version": "4.0",
+      "png_file": "c010_02.png",
+      "width": 426,
+      "height": 892,
+      "alpha_bbox": [
+        315,
+        82,
+        709,
+        942
+      ],
+      "file_size": 357301,
+      "updated_at": "2026-09-11T17:56:40.371666+00:00"
+    },
+    "c010_03": {
+      "canonical_asset_id": "c010_03",
+      "runtime_version": "4.1",
+      "png_file": "c010_03.png",
+      "width": 467,
+      "height": 892,
+      "alpha_bbox": [
+        295,
+        82,
+        730,
+        942
+      ],
+      "file_size": 282682,
+      "updated_at": "2026-09-11T17:57:04.287090+00:00"
+    },
+    "c330": {
+      "canonical_asset_id": "c330",
+      "runtime_version": "4.1",
+      "png_file": "c330.png",
+      "width": 794,
+      "height": 885,
+      "alpha_bbox": [
+        128,
+        82,
+        890,
+        935
+      ],
+      "file_size": 594100,
+      "updated_at": "2026-09-11T17:57:28.127481+00:00"
+    },
+    "c017": {
+      "canonical_asset_id": "c017",
+      "runtime_version": "4.1",
+      "png_file": "c017.png",
+      "width": 348,
+      "height": 891,
+      "alpha_bbox": [
+        354,
+        83,
+        670,
+        942
+      ],
+      "file_size": 282276,
+      "updated_at": "2026-09-11T17:58:25.481610+00:00"
+    },
+    "c471": {
+      "canonical_asset_id": "c471",
+      "runtime_version": "4.1",
+      "png_file": "c471.png",
+      "width": 618,
+      "height": 887,
+      "alpha_bbox": [
+        219,
+        82,
+        805,
+        937
+      ],
+      "file_size": 479770,
+      "updated_at": "2026-09-11T18:00:34.238980+00:00"
+    },
+    "c234": {
+      "canonical_asset_id": "c234",
+      "runtime_version": "4.1",
+      "png_file": "c234.png",
+      "width": 602,
+      "height": 891,
+      "alpha_bbox": [
+        233,
+        83,
+        803,
+        942
+      ],
+      "file_size": 618240,
+      "updated_at": "2026-09-11T18:00:45.215003+00:00"
+    },
+    "c352": {
+      "canonical_asset_id": "c352",
+      "runtime_version": "4.0",
+      "png_file": "c352.png",
+      "width": 657,
+      "height": 892,
+      "alpha_bbox": [
+        200,
+        82,
+        825,
+        942
+      ],
+      "file_size": 569464,
+      "updated_at": "2026-09-11T18:00:53.638973+00:00"
+    }
+  },
+  "total_characters": 8,
+  "last_updated_at": "2026-09-11T18:00:53.639019+00:00"
+}

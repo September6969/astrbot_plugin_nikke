@@ -251,79 +251,52 @@ class AssetManager:
         char_id: str,
         costume_id,
         *,
-        wait_seconds: float = 4.0,
+        wait_seconds: float = 0.0,
     ) -> Image.Image | None:
-        """优先命中版本化 Spine PNG；miss 且 runtime 可用时投递预渲染并同步等待预算内完成。"""
-        # 角色卡热路径只消费已有索引；索引刷新必须由独立预热动作完成，避免
-        # 多个并发出卡请求各自触发一次 l2d.json 网络请求。
+        """优先命中持久化静态预渲染与本地缓存；热路径绝不启动动态 Worker 渲染或网络下载。"""
+        # 1. 检查持久化静态预渲染资产目录
+        candidate_paths = [
+            self.asset_dir / "spine-rendered" / f"{char_id}.png",
+            self.cache_dir / "spine-rendered" / f"{char_id}.png",
+            self.cache_dir / "portraits" / f"{char_id}.png",
+        ]
+        for p in candidate_paths:
+            if p.is_file():
+                try:
+                    with Image.open(p) as img:
+                        if img.width * img.height <= self.MAX_PIXELS:
+                            img.load()
+                            return img.convert("RGBA")
+                except (OSError, ValueError, Image.DecompressionBombError):
+                    pass
+
+        # 2. 检查 SpinePreRenderer 内存或版本化缓存
         runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
-        if runtime_version is None or runtime_version == "SPINE_VERSION_UNKNOWN":
-            return None
-        animation = IdleAnimationResolver.resolve_for_asset(char_id)
-        if not animation:
-            logger.warning("Spine 角色 [%s] 未能解析到合法待机动画，fail-closed 返回中性占位图", char_id)
-            return None
-        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
-        image = self.spine_renderer.cached_portrait(cache_key)
-        if image is not None:
-            return image
-        if not self.spine_renderer.is_available(runtime_version):
-            return None
-        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="setup")
-        if not urls:
-            return None
+        if runtime_version is not None and runtime_version != "SPINE_VERSION_UNKNOWN":
+            animation = IdleAnimationResolver.resolve_for_asset(char_id)
+            if animation:
+                cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
+                cached = self.spine_renderer.cached_portrait(cache_key)
+                if cached is not None:
+                    return cached
 
-        event = threading.Event()
-        with self._spine_wait_lock:
-            is_first = cache_key not in self._spine_wait_events
-            if is_first:
-                self._spine_wait_events[cache_key] = [event]
-            else:
-                self._spine_wait_events[cache_key].append(event)
-
-        if is_first:
-            def _on_done(_):
-                with self._spine_wait_lock:
-                    waiters = self._spine_wait_events.pop(cache_key, [])
-                for w in waiters:
-                    w.set()
-
-            enqueued = self.spine_renderer.enqueue(
-                SpineJob(
-                    cache_key=cache_key,
-                    character_id=char_id,
-                    runtime_version=runtime_version,
-                    bundle_urls=urls,
-                    animation=animation,
-                    budget_seconds=self.spine_budget_seconds,
-                    callback=_on_done,
-                )
-            )
-            if not enqueued:
-                with self._spine_wait_lock:
-                    waiters = self._spine_wait_events.pop(cache_key, [])
-                for w in waiters:
-                    w.set()
-                return None
-
-        event.wait(timeout=min(wait_seconds, self.spine_budget_seconds))
-        return self.spine_renderer.cached_portrait(cache_key)
+        # 3. 用户查询热路径禁止动态在线渲染与网络拉取，fail-closed 返回 None
+        return None
 
     def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
-        """只从 canonical Spine identity 读取角色官方立绘。
+        """只从持久化静态预渲染或 canonical Spine identity 读取角色官方立绘。
 
-        Spine 缓存未命中时由后台队列预热；当前请求只返回中性程序占位图，
-        不再生成、探测或下载 Nikke-db images/FB URL。
+        未预渲染角色记录明确警告并返回中性程序占位图，严禁在热路径发起网络拉取或启动 Worker。
         """
-        char_id = self.nikke_db.resolve_spine_asset_id(
+        char_id = self.nikke_db.resolve_character_id(
             resource_id,
             costume_id,
-            allow_remote=False,
         ) if resource_id else "missing"
         if char_id != "missing":
             image = self._get_spine_portrait(char_id, costume_id)
             if image is not None:
                 return image
+            logger.warning("STATIC_SPINE_ASSET_MISSING: %s (costume: %s)", char_id, costume_id)
         return self.fallback("portrait")
 
     def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
