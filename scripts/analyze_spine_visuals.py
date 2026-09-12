@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """审计已渲染 Spine PNG 的可见结构并生成全量 contact sheet。
 
 本工具只对本地 manifest/PNG 做离线分析；自动指标只能标记 suspect，
@@ -36,6 +37,51 @@ def load_names(path: Path | None) -> dict[str, str]:
         str(row.get("spine_asset_id", "")): str(row.get("name_cn") or row.get("name_en") or "")
         for row in characters if isinstance(row, dict)
     }
+
+
+def load_metadata(master_path: Path | None, costumes_path: Path | None) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    if master_path and master_path.is_file():
+        try:
+            characters = json.loads(master_path.read_text(encoding="utf-8")).get("characters", [])
+            for c in characters:
+                if isinstance(c, dict):
+                    sid = str(c.get("spine_asset_id", ""))
+                    name = str(c.get("name_cn") or c.get("name_en") or "")
+                    rid = str(c.get("resource_id", ""))
+                    result[sid] = {
+                        "character_name": name,
+                        "resource_id": rid,
+                        "costume_name": "Default",
+                        "costume_id": "0",
+                    }
+        except Exception:
+            pass
+
+    if costumes_path and costumes_path.is_file():
+        try:
+            entries = json.loads(costumes_path.read_text(encoding="utf-8")).get("entries", [])
+            for e in entries:
+                if isinstance(e, dict):
+                    spine = e.get("spine", {})
+                    mode = spine.get("mode")
+                    aid = spine.get("asset_id")
+                    skin = spine.get("skin_name")
+                    render_id = aid if mode == "independent_asset" else f"{aid}@{skin}"
+                    rid = str(e.get("character_resource_id", ""))
+                    cname = str(e.get("costume_name", ""))
+                    cid = str(e.get("costume_id", ""))
+                    owner_sid = f"c{int(rid):03d}" if rid.isdigit() else ""
+                    owner_name = result.get(owner_sid, {}).get("character_name", f"Resource_{rid}")
+                    result[render_id] = {
+                        "character_name": owner_name,
+                        "resource_id": rid,
+                        "costume_name": cname,
+                        "costume_id": cid,
+                    }
+        except Exception:
+            pass
+    return result
 
 
 def largest_alpha_component_ratio(alpha: Image.Image) -> float:
@@ -125,20 +171,40 @@ def draw_sheet(items: list[dict[str, Any]], output: Path, page: int) -> str:
         x, y = (index % columns) * cell_width, (index // columns) * cell_height
         with Image.open(item["path"]) as raw:
             portrait = raw.convert("RGBA")
-        portrait.thumbnail((cell_width - 30, cell_height - 84), Image.Resampling.LANCZOS)
-        canvas.paste(portrait, (x + (cell_width - portrait.width) // 2, y + 34), portrait)
-        suffix = "costume" if "_" in item["asset_id"] else "default"
-        draw.text((x + 8, y + 8), f"{item['asset_id']} · {item['runtime']} · {suffix}", font=font, fill="#e5e7eb")
-        if item["name"]:
-            draw.text((x + 8, y + cell_height - 33), item["name"][:28], font=font, fill="#a5b4fc")
+        portrait.thumbnail((cell_width - 30, cell_height - 90), Image.Resampling.LANCZOS)
+        canvas.paste(portrait, (x + (cell_width - portrait.width) // 2, y + 26), portrait)
+
+        # Header: render_id runtime
+        draw.text((x + 8, y + 6), f"{item['asset_id']} · {item['runtime']}", font=font, fill="#e5e7eb")
+
+        # Footer line 1: Character [resource_id]
+        char_text = item.get("character_name") or item.get("name", "")
+        if item.get("resource_id"):
+            char_text = f"{char_text[:18]} [#{item['resource_id']}]"
+        if char_text:
+            draw.text((x + 8, y + cell_height - 42), char_text[:28], font=font, fill="#a5b4fc")
+
+        # Footer line 2: Costume [costume_id]
+        costume_text = item.get("costume_name")
+        if costume_text:
+            cid_label = f" [#{item['costume_id']}]" if item.get("costume_id") else ""
+            draw.text((x + 8, y + cell_height - 28), f"{costume_text[:18]}{cid_label}", font=font, fill="#93c5fd")
+
+        # Footer line 3: Suspects if any
         if item["suspects"]:
-            draw.text((x + 8, y + cell_height - 18), ",".join(item["suspects"]), font=font, fill="#fca5a5")
+            draw.text((x + 8, y + cell_height - 14), ",".join(item["suspects"])[:32], font=font, fill="#fca5a5")
+
     target = output / f"spine-contact-sheet-{page:02d}.png"
     canvas.save(target, "PNG", optimize=True)
     return sha256(target)
 
 
-def analyze(manifest_path: Path, rendered_dir: Path, output_dir: Path, names: dict[str, str]) -> dict[str, Any]:
+def analyze(
+    manifest_path: Path,
+    rendered_dir: Path,
+    output_dir: Path,
+    metadata_or_names: dict[str, Any],
+) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assets = manifest.get("assets")
     if not isinstance(assets, dict):
@@ -149,11 +215,22 @@ def analyze(manifest_path: Path, rendered_dir: Path, output_dir: Path, names: di
         if not isinstance(entry, dict):
             continue
         image_path = rendered_dir / str(entry.get("rendered_png", ""))
+        meta = metadata_or_names.get(asset_id, {})
+        if isinstance(meta, str):
+            meta = {"character_name": meta, "name": meta}
+
         result = {
             "asset_id": asset_id,
-            "name": names.get(asset_id, ""),
+            "render_id": asset_id,
+            "name": meta.get("character_name", meta.get("name", "")),
+            "character": meta.get("character_name", meta.get("name", "")),
+            "character_name": meta.get("character_name", meta.get("name", "")),
+            "resource_id": meta.get("resource_id", ""),
+            "costume": meta.get("costume_name", "Default" if "_" not in asset_id else "Alternate"),
+            "costume_name": meta.get("costume_name", "Default" if "_" not in asset_id else "Alternate"),
+            "costume_id": meta.get("costume_id", "0" if "_" not in asset_id else ""),
             "runtime": str(entry.get("runtime_version", "unknown")),
-            "kind": "costume" if "_" in asset_id else "default",
+            "kind": "costume" if ("_" in asset_id or "@" in asset_id) else "default",
             "path": str(image_path),
             "png_sha256": sha256(image_path) if image_path.is_file() else None,
         }
@@ -174,7 +251,18 @@ def analyze(manifest_path: Path, rendered_dir: Path, output_dir: Path, names: di
         if page_items:
             page = start // 24 + 1
             sheets.append({"name": f"spine-contact-sheet-{page:02d}.png", "sha256": draw_sheet(page_items, output_dir, page)})
-    suspects = [item for item in results if item["suspects"]]
+
+    suspects = [
+        {
+            "render_id": item["asset_id"],
+            "character": item["character"],
+            "costume": item["costume"],
+            "reason": ",".join(item["suspects"]),
+            "suspects": item["suspects"],
+            "metrics": item["metrics"],
+        }
+        for item in results if item["suspects"]
+    ]
     breakdown = {}
     for kind in ("default", "costume"):
         subset = [item for item in results if item["kind"] == kind]
@@ -206,8 +294,11 @@ def main() -> None:
     parser.add_argument("--rendered-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--character-master", type=Path)
+    parser.add_argument("--costumes", type=Path)
     args = parser.parse_args()
-    report = analyze(args.manifest, args.rendered_dir, args.output_dir, load_names(args.character_master))
+
+    metadata = load_metadata(args.character_master, args.costumes)
+    report = analyze(args.manifest, args.rendered_dir, args.output_dir, metadata)
     print(json.dumps({
         "total": report["total"], "breakdown": report["breakdown"],
         "suspect_count": report["suspect_count"], "visual_validated": report["visual_validated"],
