@@ -1,10 +1,10 @@
 # NIKKE 长期路线台账
 
-更新时间：2026-09-09。本文件是路线图状态摘要，不是运行时状态源；每次恢复前仍须重新 fetch、核验 GitHub PR/CI、工作树和未提交状态。
+更新时间：2026-09-11。本文件是路线图状态摘要，不是运行时状态源；每次恢复前仍须重新 fetch、核验 GitHub PR/CI、工作树和未提交状态。
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次主题从已重新核验的 `origin/main@7c164cd1d9814fc7b4530de861813665187e63b5` 建立；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 PR。本次接管主题在现有 `fix/live-runtime-v03` 分支原地继续；当前重新核验的 `origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0` 仅作为事实基线记录，恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -206,4 +206,13 @@
   7. 音频失败合同：模拟音频解析失败时静默退出（零消息、零文本兜底、无崩溃），随后恢复正常 Rapi 偏好。
   8. 最终健康检查：Docker 容器正常运行无崩溃循环，/healthz 持续返回 HTTP 200。
 - 最终验收状态：`LIVE RC ACCEPTED — v0.2.0`。
+
+## PR #79 接管续作：Profile Dashboard v0.4 / Local Spine / Campaign capture（2026-09-11）
+
+- 当前事实基线已重新核验：`origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；现有 PR #79 为 `OPEN`、非 Draft，分支为 `fix/live-runtime-v03`，原远端 head `34786c721daf7524bed3769898dafbfa9995b276`，本轮在该分支原地追加，不新建 PR、不修改 main、不合并 PR #79。
+- 本轮新增 Profile Dashboard v0.4 数据合同与 renderer 分区：Daily 四路并发读取、容量比例安全转换、remaining 语义、模拟室 `5-C`、资源 compact value、遗失物显式四组、循环室中文标签和缺失/部分状态；Daily/CDK 执行语义未改动。
+- 本轮新增本地 Nikke-db Spine 维护链：`LocalSpineBundleResolver`、atlas BOM/多纹理/路径越界/图片完整性/真实 4.0/4.1 版本识别、manifest v2 schema、维护期 sparse checkout 与 idle@t=0 PNG 预渲染脚本。角色卡热路径只读取 manifest/本地 PNG/受控缓存，不启动 Worker、不发 HTTP、不回退 FB。
+- 本轮新增只读 Campaign NORMAL/HARD 捕获工具：静态 verified stage 表、resume/force、串行 jitter、限流退避、原子 JSONL、状态分类、TID/Costume inventory 和脱敏快照回放；不执行账号写入或把完整响应落盘。
+- 离线证据：本轮新增/定向测试 `18 passed`；当前工作树最终 full pytest `616 passed`、`476 subtests`、`1 warning`，`compileall`、Node extension `4 passed`、`git diff --check` 均通过；Profile 合成前后图已实际查看，属于 `READY_OFFLINE`，不是真实账号、QQ 送达、部署或资源授权证据。
+- 本轮明确未完成：服务器本地 Nikke-db checkout 的全量维护运行、生产 runtime/素材许可核验、真实 Campaign 快照、真实 QQ/Voice、Signin、部署与 main 合并；这些保持 `NEEDS_LIVE_EVIDENCE`/`NEEDS_HUMAN_DECISION`，最终交接上限为 `READY_FOR_RETEST`。
 

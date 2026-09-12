@@ -101,6 +101,19 @@ class CharacterMasterResolver:
     def total_count(self) -> int:
         return len(self._characters)
 
+    @staticmethod
+    def normalize_battle_tid_prefix(tid: int | str) -> int | None:
+        """按既有战斗 TID 合同提取规范前缀；异常值保持未知。"""
+        if isinstance(tid, bool):
+            return None
+        try:
+            value = int(tid)
+        except (TypeError, ValueError):
+            return None
+        if value <= 0:
+            return None
+        return value // 100 if value >= 10000 else value
+
     def resolve_battle_tid(self, tid: int | str) -> ResolvedCharacter | None:
         """根据战斗返回的 6 位 TID（或 4 位前缀、raw id）解析规范角色。
 
@@ -108,18 +121,14 @@ class CharacterMasterResolver:
         - 5 或 6 位数字：按 tid // 100 归一化为 4 位前缀（去除突破/核心等级 00~11）
         - 直接命中 prefix / raw id / resource_id / name_code
         """
-        try:
-            val = int(tid)
-        except (ValueError, TypeError):
-            return None
-
-        if val <= 0:
+        val = self.normalize_battle_tid_prefix(tid)
+        if val is None:
             return None
 
         # 1. 6 位或 5 位 battle TID: 归一化前缀
-        if val >= 10000:
-            prefix = val // 100
-            hit = self._by_prefix.get(prefix)
+        raw_value = int(tid)
+        if raw_value >= 10000:
+            hit = self._by_prefix.get(val)
             if hit is not None:
                 return hit
 

@@ -96,6 +96,8 @@ class NikkePlugin(Star):
             remote=True,
             spine_renderer=build_spine_renderer(self.data_dir / "cache", self.config),
             spine_budget_seconds=float(spine_budget) if isinstance(spine_budget, (int, float)) and spine_budget > 0 else 20.0,
+            spine_manifest_path=self.data_dir / "spine-manifest.json",
+            spine_rendered_dir=self.data_dir / "spine-rendered",
         )
         self.character_renderer = CharacterCardRenderer(
             self.data_dir / "cards",
@@ -782,6 +784,8 @@ class NikkePlugin(Star):
                 roster=data["roster"],
                 outpost_available=data.get("outpost_available"),
                 roster_available=data.get("roster_available"),
+                daily=data.get("daily"),
+                daily_available=data.get("daily_available"),
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )

@@ -1,8 +1,8 @@
 # NIKKE 需求证据矩阵
 
-更新时间：2026-09-08。
+更新时间：2026-09-11。
 
-本矩阵按路线图第 4、5、54、55 节建立；本轮独立主题基线为已核验的 `origin/main` `09821816f7489885f4fb33045fd56fe39adda1d3`。开放 Draft PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
+本矩阵按路线图第 4、5、54、55 节建立；历史条目保留其当时基线，当前接管主题基线为已核验的 `origin/main` `e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`。开放 PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
 
 ## 状态语义
 
@@ -58,3 +58,15 @@
 ## 证据类型边界
 
 合成 fixture、离线 payload、测试 PNG、公开只读资料、绿色 CI 和模块存在只能证明代码或离线合同的一部分。它们不能替代真实账号响应、真实写后状态、QQ 送达、生产部署、资源授权、数据库迁移或回滚证据。
+
+## PR #79 接管续作增补（2026-09-11）
+
+以下记录只覆盖现有 PR #79 的工作树，不改写上方历史主线结论：
+
+| 范围 | 当前离线实现 | 离线证据 | 现场边界 |
+| --- | --- | --- | --- |
+| Profile Dashboard v0.4 | `client.py` 四路 Profile/Daily 读取、`profile_builder.py` 结构化字段、`profile_card_renderer.py` TODAY/RECYCLE/COLLECTION/RESOURCES 分区 | 新增 Profile/Daily/partial/height 行为测试；合成前后 PNG 已查看 | 真实账号字段兼容和 QQ 图片送达仍未在本轮确认 |
+| Local Nikke-db Spine | `local_spine_resolver.py`、manifest v2 schema、维护期 sparse checkout/预渲染脚本；正式头像热路径禁 HTTP/Worker/FB | 多纹理、BOM、4.0/4.1、损坏图片、路径越界、symlink escape、manifest hash 行为测试 | `serv` 本地 checkout 全量预渲染、生产 runtime 许可与现场稳定性仍需核验 |
+| Campaign capture | `scripts/capture_campaign_history.py` 只处理 NORMAL/HARD，支持状态、限流、resume/force、脱敏 JSONL、TID/Costume inventory | 捕获、隐私、回放、限流退避和静态目标过滤测试 | 真实已授权账号快照与最小现场请求尚未执行 |
+
+本增补的状态上限为 `READY_OFFLINE`；不把测试 fixture、合成图或静态 schema 写成真实联调、QQ 送达、部署或资源授权。

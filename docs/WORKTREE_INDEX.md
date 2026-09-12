@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-09。当前核验的远端基线为 `origin/main@7c164cd1d9814fc7b4530de861813665187e63b5`；下表是本轮工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-11。当前核验的远端基线为 `origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；下表是历史与当前工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -51,3 +51,5 @@
 | Final live deployment evidence v1 | 当前独立主题 | `E:\DevCache\nikke-final-live-deploy-evidence-20260909` / `feat/final-live-deploy-evidence-v1`；从 `origin/main@39c469e` 建立，记录部署后 healthz、registry、数据库、日志隐私及剩余外部阻塞 |
 | Spine-only Portrait & Card Calculation v2 | 当前独立主题 | `E:\DevCache\nikke-spine-only-card-calc-v2-20260909` / `feat/spine-only-card-calc-v2`；从 `origin/main@8910170f` 建立，移除角色路径 FB、升级 Costume identity、接入 OL tier UI 和 fail-closed stat calculator |
 | CharacterStatTables / Costume Spine live v1 | PR #72 Draft，进行中 | `E:\DevCache\nikke-stat-costume-spine-live-v1-20260909` / `feat/stat-costume-spine-live-v1`；基线 `origin/main@d3f824cc`。`7be1c6e` 全 CI 通过，默认 Spine 实渲染已查看；旧版 skin01 视觉异常，撤销未经证明的 20001 映射。SSH/HTTPS 已恢复，尚未部署此分支 |
+
+| PR #79 接管续作：Profile v0.4 / Local Spine / Campaign | 进行中，原地追加到现有 PR #79 | `E:\DevCache\nikke-live-runtime-v03` / `fix/live-runtime-v03`；基线/原 head `34786c7`，本轮追加待 push；Profile、local resolver、manifest v2、Campaign capture 已有离线测试，现场 runtime/账号/QQ/部署保持缺口 |

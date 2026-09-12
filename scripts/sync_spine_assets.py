@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Spine 离线持久化预渲染与同步脚本。
+"""从本地 Nikke-db checkout 维护 Spine idle@t=0 PNG 与 manifest v2。
 
-用于离线下载 Spine bundle、检测版本（4.0 / 4.1）、调用无头 Worker 渲染
-idle@t=0 PNG 并更新 spine_manifest.json。
+本脚本是维护期工具：它不下载 raw GitHub 文件，也不应由 QQ 命令调用。
 """
 
 from __future__ import annotations
 
 import argparse
-import datetime
+import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -17,13 +17,28 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.request
 from pathlib import Path
 from typing import Any
 
 from PIL import Image
 
-NIKKE_DB_L2D_BASE = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d"
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT.parent) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT.parent))
+try:
+    from astrbot_plugin_nikke.local_spine_resolver import (
+        LocalSpineBundle,
+        LocalSpineBundleResolver,
+        LocalSpineResolveError,
+    )
+except ImportError:
+    from local_spine_resolver import (  # type: ignore[no-redef]
+        LocalSpineBundle,
+        LocalSpineBundleResolver,
+        LocalSpineResolveError,
+    )
+
 
 DEFAULT_TARGETS = [
     "c010",
@@ -35,115 +50,156 @@ DEFAULT_TARGETS = [
     "c234",
     "c352",
 ]
+SOURCE_REPO = "https://github.com/Nikke-db/Nikke-db.github.io.git"
+MANIFEST_SCHEMA_VERSION = 2
+_ASSET_ID = re.compile(r"^c[0-9]+(?:_[0-9]+)?$", re.ASCII)
 
 
 def detect_spine_version(skel_path: Path) -> str:
-    """读取 skeleton 二进制文件头部，判定 major.minor 版本。"""
-    raw = skel_path.read_bytes()
-    header = raw[:64]
-    match = re.search(rb"(\d+\.\d+(?:\.\d+)?)", header)
-    if not match:
-        raise ValueError(f"无法在 {skel_path.name} 中检测到 Spine 版本字符串")
-    ver_str = match.group(1).decode("ascii")
-    if ver_str.startswith("4.0"):
-        return "4.0"
-    if ver_str.startswith("4.1"):
-        return "4.1"
-    raise ValueError(f"不支持的 Spine 版本: {ver_str}")
-
-
-def download_file(url: str, dest: Path) -> bool:
-    """下载单个文件，带重试与超时。"""
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    if dest.is_file() and dest.stat().st_size > 0:
-        return True
-    tmp = dest.with_suffix(".tmp")
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = resp.read()
-            tmp.write_bytes(data)
-            tmp.replace(dest)
-        return True
-    except Exception as exc:
-        tmp.unlink(missing_ok=True)
-        print(f"  下载失败 {url}: {exc}", file=sys.stderr)
-        return False
+    """通过 skeleton 真实头部识别 4.0/4.1，不按角色或服装猜测。"""
+    return LocalSpineBundleResolver.detect_runtime_version(skel_path)
 
 
 def parse_atlas_texture_pages(atlas_path: Path) -> list[str]:
-    """解析 atlas 文件获取所有声明的纹理页文件名。"""
-    text = atlas_path.read_text(encoding="utf-8-sig", errors="replace")
-    pages: list[str] = []
-    for line in text.splitlines():
-        line = line.strip().lstrip("\ufeff")
-        if line.lower().endswith(".png"):
-            if line not in pages:
-                pages.append(line)
-    return pages
+    """复用本地 resolver 的 UTF-8-SIG atlas 页面解析合同。"""
+    return LocalSpineBundleResolver._atlas_pages(atlas_path)
 
 
 def ensure_bundle(char_id: str, bundle_root: Path) -> tuple[Path, Path, list[Path]]:
-    """确保 bundle 文件已完整就绪，返回 (skel_path, atlas_path, texture_paths)。"""
-    char_dir = bundle_root / char_id
-    char_dir.mkdir(parents=True, exist_ok=True)
+    """确保本地 bundle 完整，返回旧脚本兼容的三元组。"""
+    bundle = LocalSpineBundleResolver(bundle_root).resolve(char_id)
+    return bundle.skel_path, bundle.atlas_path, list(bundle.texture_paths)
 
-    repo_root = Path(__file__).resolve().parent.parent
-    if str(repo_root) not in sys.path:
-        sys.path.insert(0, str(repo_root))
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _inside(path: Path, root: Path, label: str) -> Path:
+    resolved_root = root.resolve()
+    resolved = path.resolve()
+    if not resolved.is_relative_to(resolved_root):
+        raise LocalSpineResolveError(f"{label} 路径越界")
+    return resolved
+
+
+def _run_git_commit(root: Path) -> str:
     try:
-        from nikke_db_provider import NikkeDbProvider
-    except ImportError:
-        from astrbot_plugin_nikke.nikke_db_provider import NikkeDbProvider
+        completed = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
+    value = completed.stdout.strip()
+    return value if completed.returncode == 0 and re.fullmatch(r"[0-9a-fA-F]{7,64}", value) else "unknown"
 
-    provider = NikkeDbProvider(bundle_root, bundle_root)
-    bundle_urls = provider.resolve_spine_bundle_urls(char_id)
-    if not bundle_urls:
-        raise RuntimeError(f"无法解析 Spine bundle 资源 URL: {char_id}")
 
-    url_skel = bundle_urls["skel"]
-    url_atlas = bundle_urls["atlas"]
-    url_png = bundle_urls["png"]
+def _read_json(path: Path, default: Any) -> Any:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError):
+        return default
 
-    skel_name = url_skel.rsplit("/", 1)[-1]
-    atlas_name = url_atlas.rsplit("/", 1)[-1]
-    png_name = url_png.rsplit("/", 1)[-1]
 
-    skel_file = char_dir / skel_name
-    atlas_file = char_dir / atlas_name
+def _unique_asset_ids(values: list[Any]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        asset_id = value.strip().lower()
+        if not _ASSET_ID.fullmatch(asset_id) or asset_id in seen:
+            continue
+        seen.add(asset_id)
+        result.append(asset_id)
+    return result
 
-    if not skel_file.is_file():
-        print(f"下载 {url_skel} ...")
-        if not download_file(url_skel, skel_file):
-            raise RuntimeError(f"下载 skeleton 失败: {char_id}")
 
-    if not atlas_file.is_file():
-        print(f"下载 {url_atlas} ...")
-        if not download_file(url_atlas, atlas_file):
-            raise RuntimeError(f"下载 atlas 失败: {char_id}")
+def _verified_costume_asset_ids(value: Any) -> list[str]:
+    """只读取带来源、哈希和日期的已核验服装映射。"""
+    if not isinstance(value, dict) or value.get("schema_version") != 2:
+        return []
+    rows = value.get("entries")
+    if not isinstance(rows, list):
+        return []
+    candidates: list[Any] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        source_hash = row.get("source_sha256")
+        if (
+            not isinstance(row.get("source"), str)
+            or not row["source"].strip()
+            or not isinstance(source_hash, str)
+            or not re.fullmatch(r"[0-9a-fA-F]{64}", source_hash)
+            or not isinstance(row.get("verified_at"), str)
+            or not row["verified_at"].strip()
+        ):
+            continue
+        candidates.append(row.get("spine_asset_id"))
+    return _unique_asset_ids(candidates)
 
-    pages = parse_atlas_texture_pages(atlas_file)
-    if not pages:
-        pages = [png_name]
 
-    texture_paths: list[Path] = []
-    for page in pages:
-        tex_file = char_dir / page
-        if not tex_file.is_file():
-            if page == png_name:
-                url_page = url_png
-            else:
-                base_dir = url_atlas.rsplit("/", 1)[0]
-                url_page = f"{base_dir}/{page}"
-            print(f"下载纹理页 {url_page} ...")
-            if not download_file(url_page, tex_file):
-                raise RuntimeError(f"下载纹理页失败: {char_id}/{page}")
-        texture_paths.append(tex_file)
+def enumerate_targets(repo_root: Path, *, all_targets: bool) -> tuple[list[str], list[str], list[str]]:
+    """返回 (待处理目标, default 目标, verified costume 目标)。"""
+    if not all_targets:
+        defaults = _unique_asset_ids(DEFAULT_TARGETS)
+        return defaults, defaults, []
 
-    return skel_file, atlas_file, texture_paths
+    master = _read_json(repo_root / "assets" / "character_master.json", {})
+    default_values = [
+        row.get("spine_asset_id")
+        for row in (master.get("characters", []) if isinstance(master, dict) else [])
+        if isinstance(row, dict)
+    ]
+    defaults = _unique_asset_ids(default_values)
+    if not defaults:
+        defaults = _unique_asset_ids(DEFAULT_TARGETS)
+
+    costumes = _read_json(repo_root / "assets" / "costumes.json", {})
+    costume_targets = _verified_costume_asset_ids(costumes)
+    combined = _unique_asset_ids([*defaults, *costume_targets])
+    return combined, defaults, costume_targets
+
+
+def _manifest_entry(
+    bundle: LocalSpineBundle,
+    rendered_png: Path,
+    *,
+    source_commit: str,
+    output_root: Path,
+    nikke_db_root: Path,
+    animation: str,
+    alpha_bbox: list[int],
+) -> dict[str, Any]:
+    with Image.open(rendered_png) as image:
+        width, height = image.size
+    return {
+        "asset_id": bundle.skel_path.parent.name,
+        "source_repo": SOURCE_REPO,
+        "source_commit": source_commit,
+        "runtime_version": bundle.runtime_version,
+        "skel_relative_path": bundle.skel_path.relative_to(nikke_db_root.resolve()).as_posix(),
+        "atlas_relative_path": bundle.atlas_path.relative_to(nikke_db_root.resolve()).as_posix(),
+        "texture_count": len(bundle.texture_paths),
+        "animation": animation,
+        "rendered_png": rendered_png.relative_to(output_root.resolve()).as_posix(),
+        "width": width,
+        "height": height,
+        "alpha_bbox": alpha_bbox,
+        "sha256": _sha256(rendered_png),
+        "updated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+    }
 
 
 def render_spine_portrait(
@@ -156,208 +212,278 @@ def render_spine_portrait(
     worker_41: str,
     animation: str = "idle",
 ) -> dict[str, Any]:
-    """调用对应版本的 Spine worker 渲染 idle 帧并保存裁切后 PNG。"""
+    """调用已匹配版本 worker，使用 worker 的初始时间 0 渲染透明 PNG。"""
     version = detect_spine_version(skel_path)
     worker_bin = worker_40 if version == "4.0" else worker_41
     if not shutil.which(worker_bin) and not Path(worker_bin).exists():
-        raise FileNotFoundError(f"找不到 Spine {version} worker: {worker_bin}")
+        raise FileNotFoundError(f"找不到 Spine {version} worker")
 
-    bundle_root = skel_path.parent
+    bundle_root = skel_path.parent.resolve()
+    for path, label in ((skel_path, "skeleton"), (atlas_path, "atlas"), *[(item, "纹理") for item in textures]):
+        _inside(path, bundle_root, label)
+    if not textures:
+        raise LocalSpineResolveError("Spine bundle 缺少纹理页")
 
-    # 规范化纹理名：部分 worker 要求 png 必须与 atlas 或 skel 同名，建软链或拷贝确保命中
-    default_png = bundle_root / "png.png"
-    if not default_png.exists() and textures:
-        try:
-            shutil.copyfile(textures[0], default_png)
-        except OSError:
-            pass
-
-    fd, tmp_rgba = tempfile.mkstemp(prefix=f".spine-{char_id}-", suffix=".rgba", dir=bundle_root)
+    fd, tmp_name = tempfile.mkstemp(prefix=f".spine-{char_id}-", suffix=".rgba", dir=bundle_root)
     os.close(fd)
-    tmp_rgba_path = Path(tmp_rgba)
-
-    cmd = [
+    rgba_path = Path(tmp_name)
+    command = [
         worker_bin,
-        "--skeleton",
-        str(skel_path.resolve()),
-        "--atlas",
-        str(atlas_path.resolve()),
-        "--output",
-        str(tmp_rgba_path.resolve()),
-        "--animation",
-        animation,
-        "--width",
-        "1024",
-        "--height",
-        "1024",
+        "--skeleton", str(skel_path.resolve()),
+        "--atlas", str(atlas_path.resolve()),
+        "--output", str(rgba_path.resolve()),
+        "--animation", animation,
+        "--width", "1024",
+        "--height", "1024",
     ]
-
-    env = os.environ.copy()
-    env.update({"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"})
-
+    environment = os.environ.copy()
+    environment.update({"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"})
     try:
-        proc = subprocess.run(
-            cmd,
+        completed = subprocess.run(
+            command,
             cwd=str(bundle_root),
-            env=env,
+            env=environment,
             capture_output=True,
             timeout=30,
+            check=False,
             text=True,
             encoding="utf-8",
             errors="replace",
         )
-        if proc.returncode != 0:
-            raise RuntimeError(f"Worker 渲染失败 (code {proc.returncode}): {proc.stderr or proc.stdout}")
-
-        raw_bytes = tmp_rgba_path.read_bytes()
-        if len(raw_bytes) < 8:
-            raise RuntimeError("Worker 输出 RGBA 文件不完整")
-
-        width = int.from_bytes(raw_bytes[0:4], "little")
-        height = int.from_bytes(raw_bytes[4:8], "little")
-        expected_len = 8 + width * height * 4
-        if len(raw_bytes) != expected_len:
-            raise RuntimeError(f"RGBA 长度不匹配: 预期 {expected_len}, 实际 {len(raw_bytes)}")
-
-        img = Image.frombytes("RGBA", (width, height), raw_bytes[8:]).copy()
-        bbox = img.getbbox()
-        if not bbox:
-            raise RuntimeError("Worker 输出全透明图像 (bbox 为空)")
-
-        # 智能裁切并留 16px 边距
-        pad = 16
-        cropped = img.crop(
+        if completed.returncode != 0:
+            raise RuntimeError("Spine worker 执行失败")
+        raw = rgba_path.read_bytes()
+        if len(raw) < 8:
+            raise RuntimeError("Spine worker 输出 RGBA 不完整")
+        width = int.from_bytes(raw[0:4], "little")
+        height = int.from_bytes(raw[4:8], "little")
+        expected = 8 + width * height * 4
+        if not 1 <= width <= 4096 or not 1 <= height <= 4096 or len(raw) != expected:
+            raise RuntimeError("Spine worker RGBA 尺寸或长度无效")
+        image = Image.frombytes("RGBA", (width, height), raw[8:]).copy()
+        bbox = image.getbbox()
+        if bbox is None:
+            raise RuntimeError("Spine worker 输出全透明")
+        padding = 16
+        cropped = image.crop(
             (
-                max(0, bbox[0] - pad),
-                max(0, bbox[1] - pad),
-                min(img.width, bbox[2] + pad),
-                min(img.height, bbox[3] + pad),
+                max(0, bbox[0] - padding),
+                max(0, bbox[1] - padding),
+                min(image.width, bbox[2] + padding),
+                min(image.height, bbox[3] + padding),
             )
         )
-
         out_png.parent.mkdir(parents=True, exist_ok=True)
         cropped.save(out_png, "PNG", optimize=True)
-
         return {
-            "canonical_asset_id": char_id,
             "runtime_version": version,
-            "png_file": out_png.name,
             "width": cropped.width,
             "height": cropped.height,
             "alpha_bbox": list(bbox),
-            "file_size": out_png.stat().st_size,
         }
     finally:
-        tmp_rgba_path.unlink(missing_ok=True)
-        default_png.unlink(missing_ok=True)
+        rgba_path.unlink(missing_ok=True)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Spine 离线持久化预渲染与同步工具")
-    parser.add_argument(
-        "--assets",
-        nargs="+",
-        default=DEFAULT_TARGETS,
-        help="待渲染的角色 Spine 资产 ID (例如 c010 c330)",
-    )
-    parser.add_argument(
-        "--bundle-dir",
-        default="",
-        help="Spine bundle 存放目录",
-    )
-    parser.add_argument(
-        "--out-dir",
-        default="",
-        help="渲染产物输出目录",
-    )
-    parser.add_argument(
-        "--manifest",
-        default="",
-        help="输出的 spine_manifest.json 路径",
-    )
-    parser.add_argument(
-        "--worker-40",
-        default="/usr/local/bin/entrypoint-xvfb.sh",
-        help="Spine 4.0 worker 可执行文件路径",
-    )
-    parser.add_argument(
-        "--worker-41",
-        default="/usr/local/bin/entrypoint-xvfb-4.1.sh",
-        help="Spine 4.1 worker 可执行文件路径",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="覆盖已存在的预渲染 PNG",
-    )
-    args = parser.parse_args()
+def _cached_entry_is_valid(entry: Any, png: Path, asset_id: str, output_root: Path) -> bool:
+    if not isinstance(entry, dict) or entry.get("asset_id") != asset_id:
+        return False
+    try:
+        rendered = _inside(output_root / str(entry["rendered_png"]), output_root, "manifest PNG")
+        return rendered == png.resolve() and rendered.is_file() and _sha256(rendered) == entry.get("sha256")
+    except (KeyError, OSError, TypeError, ValueError):
+        return False
 
-    # 默认路径自动探测
-    repo_root = Path(__file__).resolve().parent.parent
-    bundle_dir = Path(args.bundle_dir) if args.bundle_dir else repo_root / "cache" / "spine-bundles"
-    out_dir = Path(args.out_dir) if args.out_dir else repo_root / "assets" / "spine-rendered"
-    manifest_path = Path(args.manifest) if args.manifest else repo_root / "assets" / "spine_manifest.json"
 
-    # 若 entrypoint 脚本不可用，降级查找裸 worker
-    worker_40 = args.worker_40
-    if not Path(worker_40).exists() and Path("/usr/local/bin/nikke-spine-worker").exists():
-        worker_40 = "/usr/local/bin/nikke-spine-worker"
+def _write_manifest(path: Path, data: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
-    worker_41 = args.worker_41
-    if not Path(worker_41).exists() and Path("/usr/local/bin/nikke-spine-worker-4.1").exists():
-        worker_41 = "/usr/local/bin/nikke-spine-worker-4.1"
 
-    out_dir.mkdir(parents=True, exist_ok=True)
-    bundle_dir.mkdir(parents=True, exist_ok=True)
+def _coverage_report(
+    *,
+    defaults: list[str],
+    costumes: list[str],
+    targets: list[str],
+    success: list[str],
+    bundle_found: list[str],
+    failed: list[str],
+    missing: list[str],
+) -> dict[str, Any]:
+    """生成按 default/costume/overall 分母计算的覆盖率，而不是示例通过即 PASS。"""
+    success_set = set(success)
+    default_set = set(defaults)
+    costume_set = set(costumes)
 
-    manifest_data: dict[str, Any] = {"schema_version": 1, "characters": {}}
-    if manifest_path.is_file():
-        try:
-            manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            pass
+    def percent(numerator: int, denominator: int) -> float | None:
+        return round(numerator * 100 / denominator, 2) if denominator else None
 
-    success_count = 0
-    fail_count = 0
+    return {
+        "schema_version": 1,
+        "character_master_count": len(defaults),
+        "default_spine_target_count": len(defaults),
+        "verified_costume_target_count": len(costumes),
+        "total_unique_targets": len(targets),
+        "local_bundle_found": len(bundle_found),
+        "local_bundle_missing": len(missing),
+        "runtime_40_count": 0,
+        "runtime_41_count": 0,
+        "render_success": len(success),
+        "render_failed": len(failed),
+        "render_missing": len(missing),
+        "default_success_count": len(success_set & default_set),
+        "costume_success_count": len(success_set & costume_set),
+        "default_coverage_percent": percent(len(success_set & default_set), len(defaults)),
+        "costume_coverage_percent": percent(len(success_set & costume_set), len(costumes)),
+        "overall_coverage_percent": percent(len(success_set & set(targets)), len(targets)),
+        "failed_ids": sorted(set(failed)),
+        "missing_ids": sorted(set(missing)),
+    }
 
-    print(f"=== 开始预渲染 {len(args.assets)} 个角色 Spine 立绘 ===")
-    for char_id in args.assets:
-        target_png = out_dir / f"{char_id}.png"
-        if target_png.is_file() and not args.force and char_id in manifest_data.get("characters", {}):
-            print(f"[{char_id}] 预渲染 PNG 已存在，跳过。")
-            success_count += 1
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="本地 Nikke-db Spine 维护期预渲染工具")
+    parser.add_argument("--assets", nargs="+", default=None, help="明确的 canonical Spine asset ID")
+    parser.add_argument("--all", action="store_true", help="处理 character master 默认资产与 verified costume 资产")
+    parser.add_argument("--nikke-db-root", default="", help="本地 Nikke-db checkout 根目录")
+    parser.add_argument("--out-dir", default="", help="PNG 输出目录")
+    parser.add_argument("--manifest-path", "--manifest", dest="manifest_path", default="", help="manifest v2 输出路径")
+    parser.add_argument("--coverage-report", default="", help="可选的 JSON 覆盖率报告路径")
+    parser.add_argument("--worker-40", default="/usr/local/bin/entrypoint-xvfb.sh")
+    parser.add_argument("--worker-41", default="/usr/local/bin/entrypoint-xvfb-4.1.sh")
+    parser.add_argument("--force", action="store_true", help="重新渲染已有 PNG")
+    args = parser.parse_args(argv)
+
+    nikke_db_root = Path(args.nikke_db_root) if args.nikke_db_root else Path("/AstrBot/data/vendor/nikke-db")
+    output_root = Path(args.out_dir) if args.out_dir else REPO_ROOT / "assets" / "spine-rendered"
+    manifest_path = Path(args.manifest_path) if args.manifest_path else REPO_ROOT / "assets" / "spine_manifest.json"
+    output_root.mkdir(parents=True, exist_ok=True)
+    targets, defaults, costumes = enumerate_targets(REPO_ROOT, all_targets=args.all)
+    if args.assets:
+        targets = _unique_asset_ids(args.assets)
+        default_set = set(defaults)
+        costume_set = set(costumes)
+        defaults = [item for item in targets if item in default_set]
+        costumes = [item for item in targets if item in costume_set and item not in default_set]
+
+    source_commit = _run_git_commit(nikke_db_root)
+    started_at = dt.datetime.now(dt.timezone.utc).isoformat()
+    old = _read_json(manifest_path, {})
+    old_entries = old.get("assets", {}) if isinstance(old, dict) else {}
+    if not isinstance(old_entries, dict):
+        old_entries = {}
+    target_set = set(targets)
+    # 非 force 的局部运行保留其它目标的已验证条目；当前目标失败时不保留旧 PNG，避免陈旧成功状态。
+    entries: dict[str, Any] = {
+        key: value for key, value in old_entries.items() if key not in target_set
+    }
+    success: list[str] = []
+    failed: list[str] = []
+    missing: list[str] = []
+    bundle_found: list[str] = []
+    runtime_versions: dict[str, str] = {}
+
+    print(f"=== 本地 Spine 预渲染 {len(targets)} 项 ===")
+    for asset_id in targets:
+        target_png = output_root / f"{asset_id}.png"
+        cached = old_entries.get(asset_id)
+        if not args.force and _cached_entry_is_valid(cached, target_png, asset_id, output_root):
+            entries[asset_id] = cached
+            success.append(asset_id)
+            bundle_found.append(asset_id)
+            if isinstance(cached.get("runtime_version"), str):
+                runtime_versions[asset_id] = cached["runtime_version"]
+            print(f"[{asset_id}] 命中 manifest v2，跳过")
             continue
-
-        print(f"\n处理 [{char_id}] ...")
         try:
-            skel, atlas, textures = ensure_bundle(char_id, bundle_dir)
-            meta = render_spine_portrait(
-                char_id,
-                skel,
-                atlas,
-                textures,
+            bundle = LocalSpineBundleResolver(nikke_db_root).resolve(asset_id)
+        except (LocalSpineResolveError, OSError) as exc:
+            print(f"[{asset_id}] bundle 缺失/无效: {exc}", file=sys.stderr)
+            missing.append(asset_id)
+            continue
+        bundle_found.append(asset_id)
+        runtime_versions[asset_id] = bundle.runtime_version
+        try:
+            render_spine_portrait(
+                asset_id,
+                bundle.skel_path,
+                bundle.atlas_path,
+                list(bundle.texture_paths),
                 target_png,
-                worker_40,
-                worker_41,
+                args.worker_40,
+                args.worker_41,
                 animation="idle",
             )
-            meta["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-            manifest_data.setdefault("characters", {})[char_id] = meta
-            print(f"[{char_id}] 预渲染成功: {target_png} ({meta['width']}x{meta['height']}, size={meta['file_size']}B)")
-            success_count += 1
-        except Exception as exc:
-            print(f"[{char_id}] 预渲染失败: {exc}", file=sys.stderr)
-            fail_count += 1
+            with Image.open(target_png) as image:
+                bbox = image.getbbox()
+                if image.mode != "RGBA" or bbox is None:
+                    raise RuntimeError("渲染 PNG 不是非空 RGBA")
+                alpha_bbox = list(bbox)
+            entries[asset_id] = _manifest_entry(
+                bundle,
+                target_png,
+                source_commit=source_commit,
+                output_root=output_root,
+                nikke_db_root=nikke_db_root,
+                animation="idle",
+                alpha_bbox=alpha_bbox,
+            )
+            success.append(asset_id)
+            print(f"[{asset_id}] 成功 {target_png}")
+        except (FileNotFoundError, LocalSpineResolveError, OSError, RuntimeError, ValueError) as exc:
+            print(f"[{asset_id}] 渲染失败: {exc}", file=sys.stderr)
+            failed.append(asset_id)
 
-    manifest_data["total_characters"] = len(manifest_data.get("characters", {}))
-    manifest_data["last_updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(json.dumps(manifest_data, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\nManifest 已更新至 {manifest_path} (共 {manifest_data['total_characters']} 项)")
-    print(f"完成: 成功 {success_count} / 失败 {fail_count}")
-
-    return 0 if fail_count == 0 else 1
+    manifest = {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
+        "source_repo": SOURCE_REPO,
+        "source_commit": source_commit,
+        "generated_at": started_at,
+        "default_target_count": len(defaults),
+        "costume_target_count": len(costumes),
+        "unique_target_count": len(targets),
+        "render_success": len(success),
+        "render_failed": len(failed),
+        "render_missing": len(missing),
+        "local_bundle_found": len(bundle_found),
+        "local_bundle_missing": len(missing),
+        "runtime_40_count": sum(version == "4.0" for version in runtime_versions.values()),
+        "runtime_41_count": sum(version == "4.1" for version in runtime_versions.values()),
+        "failed_ids": failed,
+        "missing_ids": missing,
+        "assets": entries,
+    }
+    coverage = _coverage_report(
+        defaults=defaults,
+        costumes=costumes,
+        targets=targets,
+        success=success,
+        bundle_found=bundle_found,
+        failed=failed,
+        missing=missing,
+    )
+    coverage["runtime_40_count"] = manifest["runtime_40_count"]
+    coverage["runtime_41_count"] = manifest["runtime_41_count"]
+    manifest["coverage"] = coverage
+    _write_manifest(manifest_path, manifest)
+    if args.coverage_report:
+        _write_manifest(Path(args.coverage_report), coverage)
+    print(f"Manifest 已写入 {manifest_path}")
+    print(json.dumps({
+        "default_target_count": len(defaults),
+        "costume_target_count": len(costumes),
+        "unique_target_count": len(targets),
+        "render_success": len(success),
+        "render_failed": len(failed),
+        "render_missing": len(missing),
+    }, ensure_ascii=False))
+    return 0 if not failed and not missing else 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
