@@ -206,14 +206,18 @@ class ProfileV04ContractTests(unittest.TestCase):
             finally:
                 manager.close()
 
-    def test_profile_renderer_keeps_ninth_live_currency_visible(self):
+    def test_profile_renderer_omits_unidentified_currency_from_card(self):
         currencies = [{"type": item, "value": item} for item in CurrencyRegistry.DEFINITIONS]
         currencies.insert(0, {"type": 98, "value": 16})
         data = self.build(basic={"currencies": currencies}, outpost={}, daily={})
         with tempfile.TemporaryDirectory() as directory:
             renderer = ProfileCardRenderer(Path(directory), Path(__file__).resolve().parents[1] / "fonts")
-            output = renderer.render_profile(data)
-            self.assertEqual(len(data.currencies), 9)
+            with patch.object(renderer, "_text", wraps=renderer._text) as text:
+                output = renderer.render_profile(data)
+            labels = [str(call.args[2]) for call in text.call_args_list]
+            self.assertEqual(len(data.currencies), 9)  # 底层数据不丢失。
+            self.assertNotIn("未知资源", labels)
+            self.assertIn("黄金积分券", labels)
             with Image.open(output) as rendered:
                 self.assertLessEqual(rendered.height, 1850)
 

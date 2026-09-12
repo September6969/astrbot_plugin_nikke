@@ -438,6 +438,7 @@ class ProfileCardRenderer(CardRenderer):
         all_items = [
             (item, item.display_name, item.compact_value if item.value is not None else "—")
             for item in (data.currencies or [])
+            if item.display_name != "未知资源"
         ]
         items = all_items[:12]
         if len(all_items) > 12:
