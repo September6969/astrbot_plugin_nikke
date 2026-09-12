@@ -34,4 +34,6 @@ class StructuredProfileTests(TestCase):
                 output = renderer.render_profile(data)
                 self.assertTrue(Path(output).is_file())
                 self.assertNotIn("private-id", str(draw.call_args_list))
-                self.assertIn("RESEARCH", str(draw.call_args_list))
+                self.assertIn("RECYCLE ROOM", str(draw.call_args_list))
+                self.assertIn("循环室", str(draw.call_args_list))
+                self.assertNotIn("EXP 0", str(draw.call_args_list))

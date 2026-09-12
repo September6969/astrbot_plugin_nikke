@@ -16,6 +16,11 @@ from pathlib import Path
 
 import httpx
 
+try:
+    from .character_master_resolver import CharacterMasterResolver
+except ImportError:
+    from character_master_resolver import CharacterMasterResolver
+
 logger = logging.getLogger("nikke.nikke_db")
 
 
@@ -27,7 +32,10 @@ class NikkeDbProvider:
     NEGATIVE_CACHE_TTL = 600  # 10 分钟失败退避冷却
 
     NIKKE_DB_ID_OVERRIDES: dict[str, str] = {}
-    COSTUME_OVERRIDES: dict[str, str] = {}
+    COSTUME_OVERRIDES: dict[str, str] = {
+        "c010_02": "c010_02",
+        "c010_03": "c010_03",
+    }
     # 仅登记已实际读取 skeleton 头部并记录 SHA-256 的版本；未知 canonical ID 仍返回 None。
     VERIFIED_SPINE_VERSIONS: dict[str, tuple[str, str]] = {
         "c010": ("4.0", "c7cf080108f99c048b7a2681be9cf635a750c5f7367c67fac2e5dd60aa3451a1"),
@@ -37,7 +45,14 @@ class NikkeDbProvider:
     }
     _ID_PATTERN = re.compile(r"[a-z0-9]+(?:[_-][a-z0-9]+)*")
 
-    def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
+    def __init__(
+        self,
+        cache_dir: str | Path,
+        asset_dir: str | Path,
+        *,
+        remote: bool = False,
+        master_resolver: CharacterMasterResolver | None = None,
+    ):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
         self.remote = remote
@@ -51,7 +66,35 @@ class NikkeDbProvider:
 
         self.costume_errors: list[str] = []
         self.costume_character_map: dict[str, str] = {}
+        self.costume_render_map: dict[str, str] = {}
         self.costume_map = self._load_costume_map()
+        self.master_resolver: CharacterMasterResolver | None = (
+            master_resolver if master_resolver is not None else self._load_master_resolver()
+        )
+
+    def _load_master_resolver(self) -> CharacterMasterResolver | None:
+        candidate_paths = [
+            self.asset_dir / "character_master.json",
+            Path(__file__).parent / "assets" / "character_master.json",
+        ]
+        for p in candidate_paths:
+            if p.is_file():
+                try:
+                    return CharacterMasterResolver(p)
+                except Exception as exc:
+                    logger.warning("Failed to load %s in NikkeDbProvider: %s", p, exc)
+        return None
+
+    def _is_default_costume_for_resource(
+        self, resource_id: int | str, costume_id: int | str | None
+    ) -> bool:
+        if costume_id is None:
+            return True
+        if costume_id in (0, "0", "default", ""):
+            return True
+        if hasattr(self, "master_resolver") and self.master_resolver is not None:
+            return self.master_resolver.is_default_costume(resource_id, costume_id)
+        return False
 
     def _load_costume_map(self) -> dict[str, str]:
         """读取严格的已核验皮肤映射；坏条目不能进入运行时合同。"""
@@ -64,8 +107,8 @@ class NikkeDbProvider:
         except (OSError, ValueError) as exc:
             self.costume_errors.append(f"costumes.json 无法读取: {type(exc).__name__}")
             return {}
-        if not isinstance(raw, dict) or raw.get("schema_version") != 2:
-            self.costume_errors.append("costumes.json 必须使用 schema_version=2")
+        if not isinstance(raw, dict) or raw.get("schema_version") not in {2, 3}:
+            self.costume_errors.append("costumes.json 必须使用 schema_version=2 或 3")
             return {}
         entries = raw.get("entries")
         if not isinstance(entries, list):
@@ -78,7 +121,19 @@ class NikkeDbProvider:
                 self.costume_errors.append("非法皮肤映射条目")
                 continue
             key = self._normalize_id_component(row.get("costume_id"))
-            value = self._normalize_id_component(row.get("spine_asset_id"))
+            spine = row.get("spine")
+            if isinstance(spine, dict):
+                mode = spine.get("mode")
+                value = self._normalize_id_component(spine.get("asset_id"))
+                raw_skin = spine.get("skin_name")
+                skin = self._normalize_id_component(raw_skin) if isinstance(raw_skin, str) else ""
+                if mode not in {"independent_asset", "shared_skin"} or (mode == "independent_asset" and raw_skin is not None) or (mode == "shared_skin" and not skin):
+                    self.costume_errors.append(f"非法皮肤 Spine 表示: {row!r}")
+                    continue
+                render_id = value if mode == "independent_asset" else f"{value}@{skin}"
+            else:  # schema v2 兼容读取；禁止据此推导任何缺失 Costume。
+                value = self._normalize_id_component(row.get("spine_asset_id"))
+                render_id = value
             owner = self._normalize_id_component(row.get("character_resource_id"))
             source = row.get("source")
             source_hash = row.get("source_sha256")
@@ -96,6 +151,7 @@ class NikkeDbProvider:
                 continue
             verified[key] = value
             self.costume_character_map[key] = self.normalize_resource_id(owner)
+            self.costume_render_map[key] = render_id
         return verified
 
     def get_character_lock(self, character_id: str) -> threading.Lock:
@@ -151,8 +207,12 @@ class NikkeDbProvider:
             return "invalid", "invalid"
         return "known", normalized
 
-    def costume_cache_token(self, costume_id: int | str | None) -> tuple[str, str]:
+    def costume_cache_token(
+        self, costume_id: int | str | None, resource_id: int | str | None = None
+    ) -> tuple[str, str]:
         """结合当前映射把皮肤令牌分成 default/known/unknown/invalid。"""
+        if resource_id is not None and self._is_default_costume_for_resource(resource_id, costume_id):
+            return "default", "default"
         state, token = self.classify_costume_id(costume_id)
         if state != "known":
             return state, token
@@ -170,7 +230,10 @@ class NikkeDbProvider:
             return "missing"
         default_id = self.NIKKE_DB_ID_OVERRIDES.get(res_str) or self.normalize_resource_id(res_str)
 
-        state, token = self.costume_cache_token(costume_id)
+        if self._is_default_costume_for_resource(resource_id, costume_id):
+            return default_id
+
+        state, token = self.costume_cache_token(costume_id, resource_id=resource_id)
         if state == "default":
             return default_id
         if state == "known":
@@ -184,6 +247,24 @@ class NikkeDbProvider:
 
         # 未知或非法皮肤禁止回退到默认角色，否则会把另一套立绘伪装成目标皮肤。
         return "missing"
+
+    def resolve_render_id(self, resource_id: int | str, costume_id: int | str | None = None) -> str:
+        """返回 manifest 专用 render ID；shared skin 不与默认 skeleton 共用键。"""
+        default_id = self.resolve_character_id(resource_id)
+        if default_id == "missing":
+            return "missing"
+        if self._is_default_costume_for_resource(resource_id, costume_id):
+            return default_id
+        state, token = self.costume_cache_token(costume_id, resource_id=resource_id)
+        if state == "default":
+            return default_id
+        if state != "known":
+            return "missing"
+        costume_key = token.split(":", 2)[1]
+        owner = self.costume_character_map.get(costume_key)
+        if owner is not None and owner != default_id:
+            return "missing"
+        return self.costume_render_map.get(costume_key, "missing")
 
     def resolve_spine_asset_id(
         self,

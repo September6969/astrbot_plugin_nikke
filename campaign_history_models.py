@@ -24,6 +24,7 @@ class StageClearMember:
     name_en: str = ""
     resource_id: str | None = None
     costume_id: int | str | None = None
+    name_code: int | None = None
 
 
 @dataclass(slots=True)

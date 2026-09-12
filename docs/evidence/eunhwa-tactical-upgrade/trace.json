@@ -1,0 +1,83 @@
+{
+  "target": "银华：战术升级",
+  "target_en": "Eunhwa: Tactical Upgrade",
+  "query_command": "/妮姬 查询 练度 银华：战术升级",
+  "character_identity": {
+    "character_key": "eunhwa_tactical_upgrade",
+    "name_code": 5149,
+    "resource_id": 95,
+    "battle_tid_prefix": 2095,
+    "battle_tid": 209501,
+    "spine_asset_id": "c095",
+    "costume_id": 0,
+    "equipped_costume_id": 30049,
+    "costume_name": "Day Off",
+    "api_costume_id": 30049,
+    "api_costume_tid": 30049
+  },
+  "root_cause": {
+    "summary": "The previous session erroneously treated costume TID 30049 as Eunhwa's default base costume, resolving to c095 (the base military uniform). Furthermore, card_builder.py prioritized roster.costume_id over detail.costume_tid/id, which would prevent detail skin IDs from being honored.",
+    "correction": "Costume TID 30049 is the official alternate skin 'Day Off' (度假 / 休息日), corresponding to independent Spine 4.1 asset c095_01. Default appearance in Nikke is costume ID 0 (or None/'0'/'default') mapping to c095. An equipped skin must NEVER fall back to default clothing."
+  },
+  "solution": {
+    "costume_selection": "Added resolve_equipped_costume() with priority detail.costume_tid > detail.costume_id > roster.costume_tid > roster.costume_id.",
+    "character_master": "Removed all false default_costume_id entries from character_master.json, ensuring 30049 is not classified as default.",
+    "costumes_registry": "Added verified entry 30049 -> c095_01 in assets/costumes.json with sha256 and source metadata.",
+    "spine_manifest": "Added c095_01 entry to spine-manifest.json with verified dimensions (398x892) and sha256 c8d03a30747d63acf9eab8607cec1fee68a6b176f7780a4c885d1cc7d676981d."
+  },
+  "runtime_resolution": {
+    "costume_selection": {
+      "resolved_costume_id": 30049,
+      "kind": "alternate",
+      "source": "detail.costume_tid"
+    },
+    "costume_token_state": "known",
+    "costume_token": "known:30049:c095_01",
+    "resolve_render_id": "c095_01",
+    "manifest_hit": true,
+    "manifest_entry": {
+      "runtime_version": "4.1",
+      "rendered_png": "c095_01.png",
+      "width": 398,
+      "height": 892,
+      "alpha_bbox": [
+        16,
+        16,
+        382,
+        876
+      ],
+      "canvas_alpha_bbox": [
+        329,
+        82,
+        695,
+        942
+      ],
+      "sha256": "c8d03a30747d63acf9eab8607cec1fee68a6b176f7780a4c885d1cc7d676981d"
+    },
+    "crop": {
+      "canvas": [
+        1024,
+        1024
+      ],
+      "canvas_bbox": [
+        329,
+        82,
+        695,
+        942
+      ],
+      "after_crop": [
+        398,
+        892
+      ]
+    },
+    "card_output": {
+      "dimensions": [
+        1800,
+        1000
+      ],
+      "render_status": "SUCCESS",
+      "portrait_asset": "c095_01.png",
+      "portrait_description": "White sundress, straw bag with strawberry, strawberry drink ('Day Off')"
+    }
+  }
+}

@@ -2,7 +2,8 @@
 import json
 from dataclasses import asdict
 from unittest import TestCase
-from astrbot_plugin_nikke.raid_participants import build_member_ranking, build_ranking, format_ranking
+from astrbot_plugin_nikke.raid_participants import build_member_ranking, build_ranking, format_ranking, format_compact_number
+
 
 
 def attack(who, damage):
@@ -59,3 +60,41 @@ class RankingTests(TestCase):
             build_member_ranking({"participate_data": []}, "")
         with self.assertRaises(ValueError):
             build_member_ranking({"participate_data": [None]}, "me")
+
+    def test_format_compact_number_boundaries(self):
+        cases = [
+            (0, "0"),
+            (950, "950"),
+            (999, "999"),
+            (1_000, "1K"),
+            (1_250, "1.25K"),
+            (12_000, "12K"),
+            (999_499, "999.5K"),
+            (999_999, "1M"),
+            (1_000_000, "1M"),
+            (1_200_000, "1.2M"),
+            (87_500_000, "87.5M"),
+            (999_999_999, "1B"),
+            (1_000_000_000, "1B"),
+            (1_250_000_000, "1.25B"),
+            (-950, "-950"),
+            (-1_250, "-1.25K"),
+            (-999_999, "-1M"),
+            (None, "0"),
+        ]
+        for val, expected in cases:
+            with self.subTest(val=val, expected=expected):
+                self.assertEqual(format_compact_number(val), expected)
+
+    def test_format_ranking_uses_compact_numbers(self):
+        result = build_ranking({
+            "participate_data": [
+                attack("u1", 1_250_000),
+                attack("u2", 999_999),
+            ]
+        })
+        output = format_ranking(result)
+        self.assertIn("1.25M", output)
+        self.assertIn("1M", output)
+        self.assertNotIn("1,250,000", output)
+        self.assertNotIn("999,999", output)

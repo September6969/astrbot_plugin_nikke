@@ -1,0 +1,76 @@
+{
+  "evidence_status": "READY_OFFLINE",
+  "handoff_status": "READY_FOR_RETEST",
+  "scope": "PR #79 existing branch continuation",
+  "pull_request": 79,
+  "branch": "fix/live-runtime-v03",
+  "visual_evidence": {
+    "type": "synthetic_offline_fixture",
+    "account_data": false,
+    "qq_delivery": false,
+    "artifacts": [
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/before-profile.png",
+        "width": 1200,
+        "height": 1221,
+        "bytes": 98235,
+        "sha256": "94da5c033ad2c458769b83c288326671dfda6a0349f3416aca461f6fa4aff2b1",
+        "inspected": true
+      },
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04.png",
+        "width": 1200,
+        "height": 2111,
+        "bytes": 180758,
+        "sha256": "a72fd788b9e6af3228daa0b2cb958f654d8b7a348fbd5bcdb614cfe64f1f801b",
+        "inspected": true
+      },
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04-50.jpg",
+        "width": 600,
+        "height": 1056,
+        "bytes": 68309,
+        "sha256": "eca7acf3088b3d8aa3a4e2e6f08f8fee7a3129a94af74d0e9d787f10de013440",
+        "inspected": true
+      },
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04-30.jpg",
+        "width": 360,
+        "height": 633,
+        "bytes": 26396,
+        "sha256": "92dac50a2a1aa1f2e80aa48ab6f7505fe4bed999e0808e794a3be8fc65d738f3",
+        "inspected": true
+      }
+    ],
+    "findings": [
+      "保管箱容量按原始比例展示：0.1322 -> 13.22%，不会变成 1322%",
+      "模拟室显示为 5-C；无尽塔、四类遗失物、资源紧凑值和部分状态均可读",
+      "50% 预览文字可读；30% 预览保留完整结构但字号仅适合缩略确认"
+    ]
+  },
+  "render_performance_ms": {
+    "samples": 12,
+    "warmup_discarded": 1,
+    "before_median": 76.465,
+    "before_p95": 78.353,
+    "after_median": 399.586,
+    "after_p95": 540.056
+  },
+  "verification": {
+    "targeted_profile_spine": "62 passed",
+    "full_pytest": "616 passed, 476 subtests passed, 1 warning",
+    "compileall": "passed",
+    "node_check_background_popup": "passed",
+    "node_extension_tests": "4 passed",
+    "git_diff_check": "passed"
+  },
+  "remaining_live_evidence": [
+    "serv 本地 Nikke-db 全量维护运行与生产 runtime/素材许可核验",
+    "真实账号 Profile/Campaign 字段与最小请求",
+    "QQ 图片、Voice、Signin、部署和生产 smoke"
+  ],
+  "notes": [
+    "本证据不包含 Cookie、token、账号标识或私有响应",
+    "不把离线 fixture、合成预览或静态资源访问当作真实联调、送达或授权"
+  ]
+}

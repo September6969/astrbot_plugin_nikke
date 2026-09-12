@@ -112,6 +112,43 @@ def build_member_ranking(payload: dict, member_openid: str) -> RaidRankingData:
     return RaidRankingData(ranking.participants, scope="CURRENT_RESPONSE_MEMBER")
 
 
+def format_compact_number(value: int | float | None) -> str:
+    """Format large numbers into compact K / M / B representation with carry-over rounding."""
+    if value is None:
+        return "0"
+    is_neg = value < 0
+    val = abs(value)
+    if val < 1000:
+        res = str(int(val))
+        return f"-{res}" if is_neg and res != "0" else res
+
+    tiers = [
+        (1_000_000_000, "B"),
+        (1_000_000, "M"),
+        (1_000, "K"),
+    ]
+    divisor, unit = tiers[-1]
+    for d, u in tiers:
+        if val >= d:
+            divisor, unit = d, u
+            break
+
+    num = val / divisor
+    rounded = round(num, 2)
+    if rounded >= 1000:
+        if unit == "K":
+            divisor, unit = 1_000_000, "M"
+            num = val / divisor
+            rounded = round(num, 2)
+        elif unit == "M":
+            divisor, unit = 1_000_000_000, "B"
+            num = val / divisor
+            rounded = round(num, 2)
+
+    s = f"{rounded:.2f}".rstrip("0").rstrip(".") + unit
+    return f"-{s}" if is_neg else s
+
+
 def format_ranking(data: RaidRankingData) -> str:
     if data.scope == "CURRENT_RESPONSE_MEMBER":
         lines = [
@@ -125,7 +162,7 @@ def format_ranking(data: RaidRankingData) -> str:
         ]
     for item in data.participants[:50]:
         name = " ".join(item.nickname.split())[:40]
-        lines.append(f"{item.rank}. {name}：{item.total_damage:,} · {len(item.attacks)} 条返回记录")
+        lines.append(f"{item.rank}. {name}：{format_compact_number(item.total_damage)} · {len(item.attacks)} 条返回记录")
     if not data.participants:
         if data.scope == "CURRENT_RESPONSE_MEMBER":
             lines.append("当前响应未返回此账号的攻击记录。")

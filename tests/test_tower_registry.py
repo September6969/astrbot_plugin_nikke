@@ -68,6 +68,8 @@ class TowerTests(IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as directory:
             registry = TowerRegistry(self._write_snapshot(Path(directory), self._snapshot()))
             self.assertIn("1,260", registry.describe("部落", "1"))
+            self.assertIn("1,260", registry.describe("无尽", "1"))
+            self.assertIn("无尽 · 1 层", registry.describe("无尽", "1"))
             for tower, floor in ((None, "1"), ("tribe", None), ("tribe", "01"), ("tribe", "+1"), ("tribe", "１")):
                 with self.subTest(tower=tower, floor=floor):
                     self.assertIn("用法", registry.describe(tower, floor))

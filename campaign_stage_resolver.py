@@ -94,6 +94,9 @@ class CampaignStageResolver:
             mode_cand = tokens[0].lower()
             if mode_cand in cls.MODE_ALIASES:
                 return cls.MODE_ALIASES[mode_cand], tokens[1].upper()
+            mode_cand_last = tokens[-1].lower()
+            if mode_cand_last in cls.MODE_ALIASES:
+                return cls.MODE_ALIASES[mode_cand_last], tokens[0].upper()
 
         # 检查前缀如 H35-36 或 N46-40
         m = re.match(r"^([hHnN])(\d+.*)$", raw)

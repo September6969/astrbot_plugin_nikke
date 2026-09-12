@@ -1,0 +1,1890 @@
+{
+  "schema_version": 1,
+  "source": "https://nikke.cannedjar.com",
+  "source_role": "public identity cross-reference; not the authoritative official Costume universe",
+  "list_source_sha256": "6f7912c2d71a96b8da5afc4f2608f1e3177664e3a8da85c35fea854891ad9b8f",
+  "official_owner_total": 110,
+  "alternate_asset_total": 178,
+  "owners": [
+    {
+      "character_resource_id": "10",
+      "owner_asset_id": "c010",
+      "slug": "rapi",
+      "source_url": "https://nikke.cannedjar.com/nikke/rapi/skins/0",
+      "source_sha256": "52d5c2e18d8c85a4513acd49839e54b8b8e7af0e85f8d9fecdf0e8a1f8c558e7",
+      "alternate_assets": [
+        {
+          "asset_id": "c010_02",
+          "costume_name": "Classic Vacation",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c010_02_s.png"
+        },
+        {
+          "asset_id": "c010_01",
+          "costume_name": "White Promise",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c010_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "11",
+      "owner_asset_id": "c011",
+      "slug": "neon",
+      "source_url": "https://nikke.cannedjar.com/nikke/neon/skins/0",
+      "source_sha256": "9ca583bfad2914f0eb361971cf7730ad803ffa85af10644cb5967a57e6ccf333",
+      "alternate_assets": [
+        {
+          "asset_id": "c011_01",
+          "costume_name": "Bling Bullet",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c011_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "16",
+      "owner_asset_id": "c016",
+      "slug": "rapi--red-hood",
+      "source_url": "https://nikke.cannedjar.com/nikke/rapi--red-hood/skins/0",
+      "source_sha256": "fb70abdf5be99d54f5b19a90411844c28102fc68c25346ecb41f6eb63e1ad770",
+      "alternate_assets": [
+        {
+          "asset_id": "c016_01",
+          "costume_name": "Red Flavor",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c016_01_s.png"
+        },
+        {
+          "asset_id": "c016_02",
+          "costume_name": "Cherished Red",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c016_02_s.png"
+        },
+        {
+          "asset_id": "c016_03",
+          "costume_name": "Shining Light",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c016_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "17",
+      "owner_asset_id": "c017",
+      "slug": "anis--star",
+      "source_url": "https://nikke.cannedjar.com/nikke/anis--star/skins/0",
+      "source_sha256": "c2bf5877c8e756d65c9bf62a15a7d0a6d0d281fd6bc447366292509225739f28",
+      "alternate_assets": [
+        {
+          "asset_id": "c017_02",
+          "costume_name": "T.T. Star",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c017_02_s.png"
+        },
+        {
+          "asset_id": "c017_01",
+          "costume_name": "Starlight",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c017_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "22",
+      "owner_asset_id": "c022",
+      "slug": "signal",
+      "source_url": "https://nikke.cannedjar.com/nikke/signal/skins/0",
+      "source_sha256": "5ca468575fcac12637a07b9b8813dcdff6c774711118123fab7b8ebea483ff76",
+      "alternate_assets": [
+        {
+          "asset_id": "c022_01",
+          "costume_name": "Dramatic Chocolate",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c022_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "30",
+      "owner_asset_id": "c030",
+      "slug": "poli",
+      "source_url": "https://nikke.cannedjar.com/nikke/poli/skins/0",
+      "source_sha256": "d318be0bef47beb6a8ac31e2eb64df0af532b2715c873cfba9b029240e4a84e0",
+      "alternate_assets": [
+        {
+          "asset_id": "c030_01",
+          "costume_name": "Sweet Holic",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c030_01_s.png"
+        },
+        {
+          "asset_id": "c030_02",
+          "costume_name": "Cheer Up Police",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c030_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "32",
+      "owner_asset_id": "c032",
+      "slug": "miranda",
+      "source_url": "https://nikke.cannedjar.com/nikke/miranda/skins/0",
+      "source_sha256": "759e99e65df008ecd6b0e9bc2c4143e2a919b450365f253f151881348ccdb4ae",
+      "alternate_assets": [
+        {
+          "asset_id": "c032_01",
+          "costume_name": "Thief of Justice",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c032_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "41",
+      "owner_asset_id": "c041",
+      "slug": "k",
+      "source_url": "https://nikke.cannedjar.com/nikke/k/skins/0",
+      "source_sha256": "01a7e688c680af2332d42c168e2093cc7550783a599788c22404a6630a1edf2c",
+      "alternate_assets": [
+        {
+          "asset_id": "c041_01",
+          "costume_name": "Undercover",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c041_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "43",
+      "owner_asset_id": "c043",
+      "slug": "d--killer-wife",
+      "source_url": "https://nikke.cannedjar.com/nikke/d--killer-wife/skins/0",
+      "source_sha256": "0bb4eef3de489d0270a0e368f3b0124c6275da3173cfeed59f86705b814ca160",
+      "alternate_assets": [
+        {
+          "asset_id": "c043_01",
+          "costume_name": "Secret Party Cleaner",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c043_01_s.png"
+        },
+        {
+          "asset_id": "c043_02",
+          "costume_name": "Secret Police",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c043_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "70",
+      "owner_asset_id": "c070",
+      "slug": "brid",
+      "source_url": "https://nikke.cannedjar.com/nikke/brid/skins/0",
+      "source_sha256": "1d324c4550ed52aae2c52871722df63f74badcc77c8e851a89403d6662fdf8ca",
+      "alternate_assets": [
+        {
+          "asset_id": "c070_01",
+          "costume_name": "Model Worker",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c070_01_s.png"
+        },
+        {
+          "asset_id": "c070_02",
+          "costume_name": "Black Moon",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c070_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "72",
+      "owner_asset_id": "c072",
+      "slug": "diesel",
+      "source_url": "https://nikke.cannedjar.com/nikke/diesel/skins/0",
+      "source_sha256": "fd36f9c9e9517f989c06fd312db56c878ea83ea48b5dbbcf6d701efc6d31cd59",
+      "alternate_assets": [
+        {
+          "asset_id": "c072_01",
+          "costume_name": "Strawberry Flower",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c072_01_s.png"
+        },
+        {
+          "asset_id": "c072_02",
+          "costume_name": "Black Sunday",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c072_02_s.png"
+        },
+        {
+          "asset_id": "c072_04",
+          "costume_name": "Midnight Strawberry",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c072_04_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "80",
+      "owner_asset_id": "c080",
+      "slug": "centi",
+      "source_url": "https://nikke.cannedjar.com/nikke/centi/skins/0",
+      "source_sha256": "8c7d0eefe0874adc2363d5c41c834920851ff5e8c16afe293c3bd04032e719ef",
+      "alternate_assets": [
+        {
+          "asset_id": "c080_02",
+          "costume_name": "Ocean Repair",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c080_02_s.png"
+        },
+        {
+          "asset_id": "c080_01",
+          "costume_name": "Supreme Holiday",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c080_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "82",
+      "owner_asset_id": "c082",
+      "slug": "liter",
+      "source_url": "https://nikke.cannedjar.com/nikke/liter/skins/0",
+      "source_sha256": "d946c8bfc5c693b6eb1555d472b7642323001fbec208502b9da3f90bffdbfaf5",
+      "alternate_assets": [
+        {
+          "asset_id": "c082_01",
+          "costume_name": "Guardfish",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c082_01_s.png"
+        },
+        {
+          "asset_id": "c082_02",
+          "costume_name": "Cute Sunflower",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c082_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "90",
+      "owner_asset_id": "c090",
+      "slug": "emma",
+      "source_url": "https://nikke.cannedjar.com/nikke/emma/skins/0",
+      "source_sha256": "c44641077b0d92519f61ed61c6503bacfc39a5b81e6215c5ca1bbc3fe0ae8a78",
+      "alternate_assets": [
+        {
+          "asset_id": "c090_02",
+          "costume_name": "Office Therapy",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c090_02_s.png"
+        },
+        {
+          "asset_id": "c090_01",
+          "costume_name": "Color me Red",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c090_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "91",
+      "owner_asset_id": "c091",
+      "slug": "vesti",
+      "source_url": "https://nikke.cannedjar.com/nikke/vesti/skins/0",
+      "source_sha256": "c3876fef2d65e6ae92f0b74ed23c88ab52b363233e62c9d574a7085e2fb8c6dd",
+      "alternate_assets": [
+        {
+          "asset_id": "c091_01",
+          "costume_name": "Ark Mage",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c091_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "93",
+      "owner_asset_id": "c093",
+      "slug": "emma--tactical-upgrade",
+      "source_url": "https://nikke.cannedjar.com/nikke/emma--tactical-upgrade/skins/0",
+      "source_sha256": "f5ccb68c611bd78a637a781990440fc9c0a6bbed0483eb9c3f5e47ab6891cb84",
+      "alternate_assets": [
+        {
+          "asset_id": "c093_01",
+          "costume_name": "Secret Therapy",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c093_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "94",
+      "owner_asset_id": "c094",
+      "slug": "vesti--tactical-upgrade",
+      "source_url": "https://nikke.cannedjar.com/nikke/vesti--tactical-upgrade/skins/0",
+      "source_sha256": "72de78ecfe70098de4821f838d637c061a3a724482e03aebd209c186f3d13f5f",
+      "alternate_assets": [
+        {
+          "asset_id": "c094_01",
+          "costume_name": "Pure Beginner",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c094_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "95",
+      "owner_asset_id": "c095",
+      "slug": "eunhwa--tactical-upgrade",
+      "source_url": "https://nikke.cannedjar.com/nikke/eunhwa--tactical-upgrade/skins/0",
+      "source_sha256": "52a9a421a8218e598484c760855dfbfaf7c4920126b8882d4cd2dd818385caa6",
+      "alternate_assets": [
+        {
+          "asset_id": "c095_01",
+          "costume_name": "Day Off",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c095_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "101",
+      "owner_asset_id": "c101",
+      "slug": "drake",
+      "source_url": "https://nikke.cannedjar.com/nikke/drake/skins/0",
+      "source_sha256": "26cec8c11be3f1e38c729070f7de9ee05e661329b7f39ebb3bdd275044709818",
+      "alternate_assets": [
+        {
+          "asset_id": "c101_01",
+          "costume_name": "Villain Racer",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c101_01_s.png"
+        },
+        {
+          "asset_id": "c101_02",
+          "costume_name": "Maid For Villain",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c101_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "102",
+      "owner_asset_id": "c102",
+      "slug": "maxwell",
+      "source_url": "https://nikke.cannedjar.com/nikke/maxwell/skins/0",
+      "source_sha256": "adf5eaaa8893ceee8e38658cee3a25dfc09813b990b66b62eb479cbef5907275",
+      "alternate_assets": [
+        {
+          "asset_id": "c102_01",
+          "costume_name": "Mechanic White",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c102_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "103",
+      "owner_asset_id": "c103",
+      "slug": "laplace--ultimate-hero",
+      "source_url": "https://nikke.cannedjar.com/nikke/laplace--ultimate-hero/skins/0",
+      "source_sha256": "ff850471fdbb9824b237059313caf347fe60f5cfeb207072d2f3cc5b2caf9e7a",
+      "alternate_assets": [
+        {
+          "asset_id": "c103_01",
+          "costume_name": "Prototype Hero",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c103_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "105",
+      "owner_asset_id": "c105",
+      "slug": "maxwell--ordinary-mechanic",
+      "source_url": "https://nikke.cannedjar.com/nikke/maxwell--ordinary-mechanic/skins/0",
+      "source_sha256": "222ad78c790f6211a4427523007883b41c2f52394e456c5c067e8a8a89aaab48",
+      "alternate_assets": [
+        {
+          "asset_id": "c105_01",
+          "costume_name": "Chief Researcher",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c105_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "111",
+      "owner_asset_id": "c111",
+      "slug": "jackal",
+      "source_url": "https://nikke.cannedjar.com/nikke/jackal/skins/0",
+      "source_sha256": "a06984418ac103d7438142a3fcb385d6fa14b1057ca2bd7632fc60d6039aa936",
+      "alternate_assets": [
+        {
+          "asset_id": "c111_01",
+          "costume_name": "Class Troublemaker",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c111_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "112",
+      "owner_asset_id": "c112",
+      "slug": "viper",
+      "source_url": "https://nikke.cannedjar.com/nikke/viper/skins/0",
+      "source_sha256": "c0473c33eda1c77c6d437d2be0b9ac4b208df573c032c39059ecc0796623b8f6",
+      "alternate_assets": [
+        {
+          "asset_id": "c112_01",
+          "costume_name": "Toxic Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c112_01_s.png"
+        },
+        {
+          "asset_id": "c112_02",
+          "costume_name": "Shine of Love",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c112_02_s.png"
+        },
+        {
+          "asset_id": "c112_03",
+          "costume_name": "Punky Street",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c112_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "113",
+      "owner_asset_id": "c113",
+      "slug": "e-h",
+      "source_url": "https://nikke.cannedjar.com/nikke/e-h/skins/0",
+      "source_sha256": "4566a66486a94ce48f420d6715ceccd010368c2e4b907f7a503015a3b4556398",
+      "alternate_assets": [
+        {
+          "asset_id": "c113_01",
+          "costume_name": "Junkyard Vanguard",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c113_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "130",
+      "owner_asset_id": "c130",
+      "slug": "mary",
+      "source_url": "https://nikke.cannedjar.com/nikke/mary/skins/0",
+      "source_sha256": "2ee1af52d9bd69387c9425bf99bbf78e4b0d19ccf111a8b9d49e5faec502ec4a",
+      "alternate_assets": [
+        {
+          "asset_id": "c130_01",
+          "costume_name": "Medical Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c130_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "131",
+      "owner_asset_id": "c131",
+      "slug": "pepper",
+      "source_url": "https://nikke.cannedjar.com/nikke/pepper/skins/0",
+      "source_sha256": "67f5f41cd60f123bb13359a11d96f231214894be04a8f34178f662280289d2c5",
+      "alternate_assets": [
+        {
+          "asset_id": "c131_01",
+          "costume_name": "Ocean Vitamin",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c131_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "140",
+      "owner_asset_id": "c140",
+      "slug": "sugar",
+      "source_url": "https://nikke.cannedjar.com/nikke/sugar/skins/0",
+      "source_sha256": "e5884f5165a74de6cf061e9e4643a6d12f93b9da5d35a37f812ee6a340e54ec8",
+      "alternate_assets": [
+        {
+          "asset_id": "c140_01",
+          "costume_name": "Hard-Boiled",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c140_01_s.png"
+        },
+        {
+          "asset_id": "c140_02",
+          "costume_name": "Wild Backyard",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c140_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "141",
+      "owner_asset_id": "c141",
+      "slug": "milk",
+      "source_url": "https://nikke.cannedjar.com/nikke/milk/skins/0",
+      "source_sha256": "8eaabb5c8744ef30c160d1ca44760cb8db58ab08dda9b00f4283176a160415f1",
+      "alternate_assets": [
+        {
+          "asset_id": "c141_01",
+          "costume_name": "Extreme Fighter",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c141_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "142",
+      "owner_asset_id": "c142",
+      "slug": "frima",
+      "source_url": "https://nikke.cannedjar.com/nikke/frima/skins/0",
+      "source_sha256": "c8a870969f63b226ea9addc47131cb343b7d493cd3d5db8cffacfb3bc2dd8910",
+      "alternate_assets": [
+        {
+          "asset_id": "c142_01",
+          "costume_name": "Sea of Sloth",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c142_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "150",
+      "owner_asset_id": "c150",
+      "slug": "julia",
+      "source_url": "https://nikke.cannedjar.com/nikke/julia/skins/0",
+      "source_sha256": "900959efd0510310e2354323e6a16dac0192c75f70f8d0659d8beff397e5abb2",
+      "alternate_assets": [
+        {
+          "asset_id": "c150_02",
+          "costume_name": "Summer Romance",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c150_02_s.png"
+        },
+        {
+          "asset_id": "c150_01",
+          "costume_name": "Mild Nocturne",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c150_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "160",
+      "owner_asset_id": "c160",
+      "slug": "yuni",
+      "source_url": "https://nikke.cannedjar.com/nikke/yuni/skins/0",
+      "source_sha256": "8bc429b548e2d97f57726287ffd58e0a72ce8a84246fad9fca95032aab9baa2c",
+      "alternate_assets": [
+        {
+          "asset_id": "c160_01",
+          "costume_name": "Pretty in Pink",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c160_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "162",
+      "owner_asset_id": "c162",
+      "slug": "mihara--bonding-chain",
+      "source_url": "https://nikke.cannedjar.com/nikke/mihara--bonding-chain/skins/0",
+      "source_sha256": "1f964d582f5ef8d4103c522c2cdbbe114075a742d0202a2651a023cd66280763",
+      "alternate_assets": [
+        {
+          "asset_id": "c162_01",
+          "costume_name": "Pain Eater",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c162_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "170",
+      "owner_asset_id": "c170",
+      "slug": "privaty",
+      "source_url": "https://nikke.cannedjar.com/nikke/privaty/skins/0",
+      "source_sha256": "838f8f35e6a30855c24561d8baa5399d0f513429e4cb09ce636c9ae02be52a52",
+      "alternate_assets": [
+        {
+          "asset_id": "c170_01",
+          "costume_name": "Government Grunt",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c170_01_s.png"
+        },
+        {
+          "asset_id": "c170_02",
+          "costume_name": "Banquet Princess",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c170_02_s.png"
+        },
+        {
+          "asset_id": "c170_03",
+          "costume_name": "Destined in Blue",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c170_03_s.png"
+        },
+        {
+          "asset_id": "c170_04",
+          "costume_name": "Sharp Lesson",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c170_04_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "180",
+      "owner_asset_id": "c180",
+      "slug": "guillotine",
+      "source_url": "https://nikke.cannedjar.com/nikke/guillotine/skins/0",
+      "source_sha256": "6d2d217d10c0321661b7ef311246a365e8c789260305988bb445c09b4bcc11b8",
+      "alternate_assets": [
+        {
+          "asset_id": "c180_01",
+          "costume_name": "Dark Tracer",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c180_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "181",
+      "owner_asset_id": "c181",
+      "slug": "maiden",
+      "source_url": "https://nikke.cannedjar.com/nikke/maiden/skins/0",
+      "source_sha256": "62510dd2ff76e38908c97d2b0defe3988c20b4b00bdbd9004a60e86f3cc66add",
+      "alternate_assets": [
+        {
+          "asset_id": "c181_01",
+          "costume_name": "Covert Nurse",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c181_01_s.png"
+        },
+        {
+          "asset_id": "c181_02",
+          "costume_name": "Under The Sun",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c181_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "191",
+      "owner_asset_id": "c191",
+      "slug": "alice",
+      "source_url": "https://nikke.cannedjar.com/nikke/alice/skins/0",
+      "source_sha256": "e9ba092055f5cfd328c182ceefe07d67aafcc72ad036ebcb566316238e08693d",
+      "alternate_assets": [
+        {
+          "asset_id": "c191_01",
+          "costume_name": "Sweet Home",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c191_01_s.png"
+        },
+        {
+          "asset_id": "c191_02",
+          "costume_name": "Märchen Dream",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c191_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "192",
+      "owner_asset_id": "c192",
+      "slug": "tove",
+      "source_url": "https://nikke.cannedjar.com/nikke/tove/skins/0",
+      "source_sha256": "1de07ed7c68bd7e51f3976ee8d38c33415d8bc90bb7bbf39d12ed7c0c31fe9b5",
+      "alternate_assets": [
+        {
+          "asset_id": "c192_02",
+          "costume_name": "Sunblaze",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c192_02_s.png"
+        },
+        {
+          "asset_id": "c192_01",
+          "costume_name": "Baseball Fan",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c192_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "200",
+      "owner_asset_id": "c200",
+      "slug": "rupee",
+      "source_url": "https://nikke.cannedjar.com/nikke/rupee/skins/0",
+      "source_sha256": "1bf893f5ef405de8a602c90edcd3a93c19eee5200835b51a3f670b1880786431",
+      "alternate_assets": [
+        {
+          "asset_id": "c200_01",
+          "costume_name": "Rabbit Deluxe",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c200_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "201",
+      "owner_asset_id": "c201",
+      "slug": "yan",
+      "source_url": "https://nikke.cannedjar.com/nikke/yan/skins/0",
+      "source_sha256": "36f33289df554bc7b3d8a69656c072fc66a5b9c475fc4194f5d5309c402dd693",
+      "alternate_assets": [
+        {
+          "asset_id": "c201_01",
+          "costume_name": "Sunrise Market",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c201_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "202",
+      "owner_asset_id": "c202",
+      "slug": "dolla",
+      "source_url": "https://nikke.cannedjar.com/nikke/dolla/skins/0",
+      "source_sha256": "a393ad21b98ac865abefec9fe1b5cf8431e54ff0a73b4ae4affa57b54e881ca7",
+      "alternate_assets": [
+        {
+          "asset_id": "c202_01",
+          "costume_name": "Dark Rose",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c202_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "210",
+      "owner_asset_id": "c210",
+      "slug": "exia",
+      "source_url": "https://nikke.cannedjar.com/nikke/exia/skins/0",
+      "source_sha256": "1cdbae52711f2a94cebbe0ddc52ed307bfa3eaaed39fe86e72a1568a6fbc430c",
+      "alternate_assets": [
+        {
+          "asset_id": "c210_01",
+          "costume_name": "Joy to the Nerds",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c210_01_s.png"
+        },
+        {
+          "asset_id": "c210_02",
+          "costume_name": "Gamer",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c210_02_s.png"
+        },
+        {
+          "asset_id": "c210_03",
+          "costume_name": "Hacker Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c210_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "212",
+      "owner_asset_id": "c212",
+      "slug": "novel",
+      "source_url": "https://nikke.cannedjar.com/nikke/novel/skins/0",
+      "source_sha256": "63bb055d0d77b689c7e6362499ce076652f273877ab1b75af2a05e55d0148087",
+      "alternate_assets": [
+        {
+          "asset_id": "c212_01",
+          "costume_name": "Penguin Holmes",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c212_01_s.png"
+        },
+        {
+          "asset_id": "c212_02",
+          "costume_name": "Detective Nurse",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c212_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "220",
+      "owner_asset_id": "c220",
+      "slug": "snow-white",
+      "source_url": "https://nikke.cannedjar.com/nikke/snow-white/skins/0",
+      "source_sha256": "7bf97c8a199ae2dc5a2a1c12ad326a29d38f2662ca6ad9a5d08323d12198599f",
+      "alternate_assets": [
+        {
+          "asset_id": "c220_01",
+          "costume_name": "White Knight",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c220_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "222",
+      "owner_asset_id": "c222",
+      "slug": "scarlet",
+      "source_url": "https://nikke.cannedjar.com/nikke/scarlet/skins/0",
+      "source_sha256": "25373a51743177954bc7a9e43af84844b4288bc5a8c1a813d7a1dcecef63f51e",
+      "alternate_assets": [
+        {
+          "asset_id": "c222_01",
+          "costume_name": "Racer's High",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c222_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "223",
+      "owner_asset_id": "c223",
+      "slug": "nayuta",
+      "source_url": "https://nikke.cannedjar.com/nikke/nayuta/skins/0",
+      "source_sha256": "b22cea7fc7db1f5fa15e4cb8162b9ad83db258dc512578682644256d01b009ef",
+      "alternate_assets": [
+        {
+          "asset_id": "c223_01",
+          "costume_name": "Wu Wei",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c223_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "225",
+      "owner_asset_id": "c225",
+      "slug": "scarlet--black-shadow",
+      "source_url": "https://nikke.cannedjar.com/nikke/scarlet--black-shadow/skins/0",
+      "source_sha256": "e47b79f14a0dfd53502e898fe1b387ecdc4698d72d4cd84f66e441a63b26122e",
+      "alternate_assets": [
+        {
+          "asset_id": "c225_01",
+          "costume_name": "Longing Flower",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c225_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "230",
+      "owner_asset_id": "c230",
+      "slug": "harran",
+      "source_url": "https://nikke.cannedjar.com/nikke/harran/skins/0",
+      "source_sha256": "aabdd09a526aaa322d1e53ea4229433fb8df47958886a8a2e6568a4f7b6c3ebb",
+      "alternate_assets": [
+        {
+          "asset_id": "c230_01",
+          "costume_name": "Banquet Witch",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c230_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "231",
+      "owner_asset_id": "c231",
+      "slug": "isabel",
+      "source_url": "https://nikke.cannedjar.com/nikke/isabel/skins/0",
+      "source_sha256": "97517d862521f9087f9ab6b4bb7060f70e2d2d1399baf1f409ac779660fad6f2",
+      "alternate_assets": [
+        {
+          "asset_id": "c231_01",
+          "costume_name": "Honeymoon Party",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c231_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "233",
+      "owner_asset_id": "c233",
+      "slug": "dorothy",
+      "source_url": "https://nikke.cannedjar.com/nikke/dorothy/skins/0",
+      "source_sha256": "33d8bdc325dd0fbb68092f03e3a3355abed31d0c831ac06c949e07971f1859fc",
+      "alternate_assets": [
+        {
+          "asset_id": "c233_01",
+          "costume_name": "Nostalgia",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c233_01_s.png"
+        },
+        {
+          "asset_id": "c233_02",
+          "costume_name": "Luna Light",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c233_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "242",
+      "owner_asset_id": "c242",
+      "slug": "folkwang",
+      "source_url": "https://nikke.cannedjar.com/nikke/folkwang/skins/0",
+      "source_sha256": "0c7bfd4d7ffc6d1d3d33333bd933db1bf7b82a574213fb8b5a7587adda7996fc",
+      "alternate_assets": [
+        {
+          "asset_id": "c242_01",
+          "costume_name": "Moist Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c242_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "260",
+      "owner_asset_id": "c260",
+      "slug": "modernia",
+      "source_url": "https://nikke.cannedjar.com/nikke/modernia/skins/0",
+      "source_sha256": "d5d001bcd9dd6e3e715f84f909b1831b32b050446bf04ec6efbd212640a8cf33",
+      "alternate_assets": [
+        {
+          "asset_id": "c260_01",
+          "costume_name": "First Affection",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c260_01_s.png"
+        },
+        {
+          "asset_id": "c260_02",
+          "costume_name": "Second Affection",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c260_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "262",
+      "owner_asset_id": "c262",
+      "slug": "liberalio",
+      "source_url": "https://nikke.cannedjar.com/nikke/liberalio/skins/0",
+      "source_sha256": "a81da849d469ee7db52f1bfec3df9a5c35dfe36103fa3f4e63b0c8dc527cc1da",
+      "alternate_assets": [
+        {
+          "asset_id": "c262_01",
+          "costume_name": "Dreaming Lake",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c262_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "270",
+      "owner_asset_id": "c270",
+      "slug": "blanc",
+      "source_url": "https://nikke.cannedjar.com/nikke/blanc/skins/0",
+      "source_sha256": "31cc05cca22eefbc0fcd396f15f60b8a266190097b78f6628c7cbc5e114e04ce",
+      "alternate_assets": [
+        {
+          "asset_id": "c270_01",
+          "costume_name": "Whtie Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c270_01_s.png"
+        },
+        {
+          "asset_id": "c270_02",
+          "costume_name": "No.77 Batter",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c270_02_s.png"
+        },
+        {
+          "asset_id": "c270_03",
+          "costume_name": "Fortune Express",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c270_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "271",
+      "owner_asset_id": "c271",
+      "slug": "noir",
+      "source_url": "https://nikke.cannedjar.com/nikke/noir/skins/0",
+      "source_sha256": "d68dbdf7dfd29369dffb8fec7ff0b3592bc24769f01f2d4906ee2128e8da673e",
+      "alternate_assets": [
+        {
+          "asset_id": "c271_01",
+          "costume_name": "Black Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c271_01_s.png"
+        },
+        {
+          "asset_id": "c271_02",
+          "costume_name": "Baseball Cheerleader",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c271_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "272",
+      "owner_asset_id": "c272",
+      "slug": "rouge",
+      "source_url": "https://nikke.cannedjar.com/nikke/rouge/skins/0",
+      "source_sha256": "2dca16ae077ee5845284c30b02d36ab4fb715275c94fb52d3a6011e1ca12a3d7",
+      "alternate_assets": [
+        {
+          "asset_id": "c272_01",
+          "costume_name": "Unlucky Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c272_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "280",
+      "owner_asset_id": "c280",
+      "slug": "rosanna",
+      "source_url": "https://nikke.cannedjar.com/nikke/rosanna/skins/0",
+      "source_sha256": "493a746c5ac40835fa37f639716387d22f8e65959a8c7f013f0b6b571d004e6e",
+      "alternate_assets": [
+        {
+          "asset_id": "c280_01",
+          "costume_name": "Ms. Dangerous",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c280_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "281",
+      "owner_asset_id": "c281",
+      "slug": "moran",
+      "source_url": "https://nikke.cannedjar.com/nikke/moran/skins/0",
+      "source_sha256": "66a092c77f314e8e9ae277a87215329710f728d7516614e0ad7ce1b415bd65ff",
+      "alternate_assets": [
+        {
+          "asset_id": "c281_01",
+          "costume_name": "Off-Duty Queen",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c281_01_s.png"
+        },
+        {
+          "asset_id": "c281_02",
+          "costume_name": "King of Flowers",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c281_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "282",
+      "owner_asset_id": "c282",
+      "slug": "sakura",
+      "source_url": "https://nikke.cannedjar.com/nikke/sakura/skins/0",
+      "source_sha256": "d29abd87e27056d4be564f89f8473ff1a388ceacabe2d5f45491f6ce02efeeec",
+      "alternate_assets": [
+        {
+          "asset_id": "c282_01",
+          "costume_name": "Midnight Stealth",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c282_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "310",
+      "owner_asset_id": "c310",
+      "slug": "ade",
+      "source_url": "https://nikke.cannedjar.com/nikke/ade/skins/0",
+      "source_sha256": "1be356855e83856c5ca9c6e00c26cbba5e30f0d2aeb737296b57217ed657c81f",
+      "alternate_assets": [
+        {
+          "asset_id": "c310_01",
+          "costume_name": "Maid in Spring",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c310_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "316",
+      "owner_asset_id": "c316",
+      "slug": "velvet",
+      "source_url": "https://nikke.cannedjar.com/nikke/velvet/skins/0",
+      "source_sha256": "08ed99f8f7585ad946b18e72446a58630813c74724e8a7926466e16ec70aa406",
+      "alternate_assets": [
+        {
+          "asset_id": "c316_01",
+          "costume_name": "Sensual Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c316_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "321",
+      "owner_asset_id": "c321",
+      "slug": "marciana",
+      "source_url": "https://nikke.cannedjar.com/nikke/marciana/skins/0",
+      "source_sha256": "e121bad99716455deffd7bf6eaf04d043a17f0c3606367977c32277b0a44ea18",
+      "alternate_assets": [
+        {
+          "asset_id": "c321_01",
+          "costume_name": "School Days",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c321_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "330",
+      "owner_asset_id": "c330",
+      "slug": "crown",
+      "source_url": "https://nikke.cannedjar.com/nikke/crown/skins/0",
+      "source_sha256": "ac145496b5ecffb7558e99426327a12c399853a4f2e564c0f19558a15e1e038b",
+      "alternate_assets": [
+        {
+          "asset_id": "c330_01",
+          "costume_name": "Naked King",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c330_01_s.png"
+        },
+        {
+          "asset_id": "c330_02",
+          "costume_name": "Glorious Flower",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c330_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "350",
+      "owner_asset_id": "c350",
+      "slug": "mast",
+      "source_url": "https://nikke.cannedjar.com/nikke/mast/skins/0",
+      "source_sha256": "92c0146d6dd940dcc59c5f624733413414cc17e1e6cc9df5d51cd2f20c12a542",
+      "alternate_assets": [
+        {
+          "asset_id": "c350_01",
+          "costume_name": "A Pirate's Heart",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c350_01_s.png"
+        },
+        {
+          "asset_id": "c350_02",
+          "costume_name": "Mast the Diver",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c350_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "351",
+      "owner_asset_id": "c351",
+      "slug": "anchor",
+      "source_url": "https://nikke.cannedjar.com/nikke/anchor/skins/0",
+      "source_sha256": "02e4230ad46ab4f248ccec9e392a96393812db4f17ca087f4400f630021c250d",
+      "alternate_assets": [
+        {
+          "asset_id": "c351_01",
+          "costume_name": "Anchor the Diver",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c351_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "352",
+      "owner_asset_id": "c352",
+      "slug": "helm",
+      "source_url": "https://nikke.cannedjar.com/nikke/helm/skins/0",
+      "source_sha256": "fbcf4e82efc8c6d276252b5a4e52fc79601bca80b18b3b188776b3064675433d",
+      "alternate_assets": [
+        {
+          "asset_id": "c352_02",
+          "costume_name": "Post-Shower Moment",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c352_02_s.png"
+        },
+        {
+          "asset_id": "c352_01",
+          "costume_name": "Chandelier",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c352_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "354",
+      "owner_asset_id": "c354",
+      "slug": "mast--romantic-maid",
+      "source_url": "https://nikke.cannedjar.com/nikke/mast--romantic-maid/skins/0",
+      "source_sha256": "cdbd5db6a5d6725cd28409a4ab2a4906cb1297e8437e1434fed2fd5253f8082f",
+      "alternate_assets": [
+        {
+          "asset_id": "c354_01",
+          "costume_name": "Tea Service",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c354_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "381",
+      "owner_asset_id": "c381",
+      "slug": "biscuit",
+      "source_url": "https://nikke.cannedjar.com/nikke/biscuit/skins/0",
+      "source_sha256": "34d7702f095cc66859b8f8e9b21fbf32af50b0fc0cc005c2a62372e96b9e95cf",
+      "alternate_assets": [
+        {
+          "asset_id": "c381_01",
+          "costume_name": "Spring Puppy",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c381_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "382",
+      "owner_asset_id": "c382",
+      "slug": "leona",
+      "source_url": "https://nikke.cannedjar.com/nikke/leona/skins/0",
+      "source_sha256": "225cc11cd6a4fcfe6c7edbd85cee51ae99d9eb7b2b2b83a78339dc4cfead1440",
+      "alternate_assets": [
+        {
+          "asset_id": "c382_01",
+          "costume_name": "Zoo Keeper",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c382_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "390",
+      "owner_asset_id": "c390",
+      "slug": "zwei",
+      "source_url": "https://nikke.cannedjar.com/nikke/zwei/skins/0",
+      "source_sha256": "6a871cb2954ce6bafdc836a3e8ab0bfe23e16994d1259e382a497cf406aad03c",
+      "alternate_assets": [
+        {
+          "asset_id": "c390_01",
+          "costume_name": "First Festa",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c390_01_s.png"
+        },
+        {
+          "asset_id": "c390_02",
+          "costume_name": "Spring Stroll",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c390_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "391",
+      "owner_asset_id": "c391",
+      "slug": "ein",
+      "source_url": "https://nikke.cannedjar.com/nikke/ein/skins/0",
+      "source_sha256": "e9b27c8e4c40fef5861c174665dec819a4a67597fe918a0aa207cd1f937b88ad",
+      "alternate_assets": [
+        {
+          "asset_id": "c391_01",
+          "costume_name": "Handmade Festa",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c391_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "400",
+      "owner_asset_id": "c400",
+      "slug": "guilty",
+      "source_url": "https://nikke.cannedjar.com/nikke/guilty/skins/0",
+      "source_sha256": "05a30471a1b41888aaa93ef91e1e57a73e1611dd2cfbb055120882739fcd1de1",
+      "alternate_assets": [
+        {
+          "asset_id": "c400_01",
+          "costume_name": "Wave of Disbelief",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c400_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "401",
+      "owner_asset_id": "c401",
+      "slug": "sin",
+      "source_url": "https://nikke.cannedjar.com/nikke/sin/skins/0",
+      "source_sha256": "7b1d00cd6f0b154cb04dacbfdb807d4f803dbad2f91d86cc4afa075a4da314d6",
+      "alternate_assets": [
+        {
+          "asset_id": "c401_01",
+          "costume_name": "Backstreet Dream",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c401_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "403",
+      "owner_asset_id": "c403",
+      "slug": "quency--escape-queen",
+      "source_url": "https://nikke.cannedjar.com/nikke/quency--escape-queen/skins/0",
+      "source_sha256": "e7322d7c16f82fdbc2e3044e45912750b751fdd22d321ec5c28c648eeb853e7c",
+      "alternate_assets": [
+        {
+          "asset_id": "c403_01",
+          "costume_name": "Masquerade Swan",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c403_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "411",
+      "owner_asset_id": "c411",
+      "slug": "flora",
+      "source_url": "https://nikke.cannedjar.com/nikke/flora/skins/0",
+      "source_sha256": "7365f4878d32431fcd2415c42c64b2581f7a83c76a3659da74665f484256edc6",
+      "alternate_assets": [
+        {
+          "asset_id": "c411_01",
+          "costume_name": "Fairy Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c411_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "412",
+      "owner_asset_id": "c412",
+      "slug": "trina",
+      "source_url": "https://nikke.cannedjar.com/nikke/trina/skins/0",
+      "source_sha256": "86b881d7dac35d047e50cb979bddc76521ba8ef4e8e96fcd0d3a353b3ee9cfb7",
+      "alternate_assets": [
+        {
+          "asset_id": "c412_01",
+          "costume_name": "Natural White",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c412_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "430",
+      "owner_asset_id": "c430",
+      "slug": "noise",
+      "source_url": "https://nikke.cannedjar.com/nikke/noise/skins/0",
+      "source_sha256": "cbea8ff0d59c29d32db06634116b7b6d4ed636af4721997593bdb65af43ab05c",
+      "alternate_assets": [
+        {
+          "asset_id": "c430_01",
+          "costume_name": "Cherry Blossom Stage",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c430_01_s.png"
+        },
+        {
+          "asset_id": "c430_02",
+          "costume_name": "Classic Diva",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c430_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "431",
+      "owner_asset_id": "c431",
+      "slug": "volume",
+      "source_url": "https://nikke.cannedjar.com/nikke/volume/skins/0",
+      "source_sha256": "34c906096aab14eab8aad96974f7b8d565471f0edbbb2871f6461704d8690df5",
+      "alternate_assets": [
+        {
+          "asset_id": "c431_01",
+          "costume_name": "Beat the Gun",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c431_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "450",
+      "owner_asset_id": "c450",
+      "slug": "naga",
+      "source_url": "https://nikke.cannedjar.com/nikke/naga/skins/0",
+      "source_sha256": "8983059dcf5e4bdbfe2641bf24491f61c896181347abaf4c26c9b98d278bf148",
+      "alternate_assets": [
+        {
+          "asset_id": "c450_01",
+          "costume_name": "Elegant Date",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c450_01_s.png"
+        },
+        {
+          "asset_id": "c450_02",
+          "costume_name": "Last Girlhood",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c450_02_s.png"
+        },
+        {
+          "asset_id": "c450_03",
+          "costume_name": "Ring Ensemble",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c450_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "451",
+      "owner_asset_id": "c451",
+      "slug": "tia",
+      "source_url": "https://nikke.cannedjar.com/nikke/tia/skins/0",
+      "source_sha256": "69cb7307bf1f1b4b80669fd55382c78a3532d9e1d4a365b237d220a1f4bd2d1b",
+      "alternate_assets": [
+        {
+          "asset_id": "c451_01",
+          "costume_name": "Lovely Date",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c451_01_s.png"
+        },
+        {
+          "asset_id": "c451_02",
+          "costume_name": "Sweet Chef",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c451_02_s.png"
+        },
+        {
+          "asset_id": "c451_03",
+          "costume_name": "Sea Lizzie",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c451_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "470",
+      "owner_asset_id": "c470",
+      "slug": "red-hood",
+      "source_url": "https://nikke.cannedjar.com/nikke/red-hood/skins/0",
+      "source_sha256": "5a3e13d69ed732ef9ba916dc30d3ebe27b33a4c6c41741c2636a655000f3d53c",
+      "alternate_assets": [
+        {
+          "asset_id": "c470_01",
+          "costume_name": "Nonsense Red",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c470_01_s.png"
+        },
+        {
+          "asset_id": "c470_02",
+          "costume_name": "Retro Days",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c470_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "501",
+      "owner_asset_id": "c501",
+      "slug": "trony",
+      "source_url": "https://nikke.cannedjar.com/nikke/trony/skins/0",
+      "source_sha256": "d0f4d91c9de740ad726a6594b25775bde7d2286bcea9b01437a9886b500b879a",
+      "alternate_assets": [
+        {
+          "asset_id": "c501_01",
+          "costume_name": "Sweet Step",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c501_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "511",
+      "owner_asset_id": "c511",
+      "slug": "cinderella",
+      "source_url": "https://nikke.cannedjar.com/nikke/cinderella/skins/0",
+      "source_sha256": "1e1ece0d95a89fa716f01dc62475ae56316e604c8e15b2196af22def83ec7c98",
+      "alternate_assets": [
+        {
+          "asset_id": "c511_02",
+          "costume_name": "Beautiful Me",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c511_02_s.png"
+        },
+        {
+          "asset_id": "c511_01",
+          "costume_name": "Glass Princess",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c511_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "513",
+      "owner_asset_id": "c513",
+      "slug": "little-mermaid",
+      "source_url": "https://nikke.cannedjar.com/nikke/little-mermaid/skins/0",
+      "source_sha256": "5f85819c0b8ae20af0a101f82ac1198ae2e9db86c2eb57d8f06d1969d7e61622",
+      "alternate_assets": [
+        {
+          "asset_id": "c513_01",
+          "costume_name": "Abyss Flower",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c513_01_s.png"
+        },
+        {
+          "asset_id": "c513_02",
+          "costume_name": "Beautiful Bubble",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c513_02_s.png"
+        },
+        {
+          "asset_id": "c513_03",
+          "costume_name": "Shell Princess",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c513_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "514",
+      "owner_asset_id": "c514",
+      "slug": "grave",
+      "source_url": "https://nikke.cannedjar.com/nikke/grave/skins/0",
+      "source_sha256": "390fe35d1219df4f73ecd21ea71713b8bd2081f0927e630265f48af5e2fdaa4e",
+      "alternate_assets": [
+        {
+          "asset_id": "c514_01",
+          "costume_name": "Beautiful You",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c514_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "520",
+      "owner_asset_id": "c520",
+      "slug": "bready",
+      "source_url": "https://nikke.cannedjar.com/nikke/bready/skins/0",
+      "source_sha256": "22192a1262e9e9d2d4e08c6583b8198b4b52a3f34eb370f97b410409972acfb6",
+      "alternate_assets": [
+        {
+          "asset_id": "c520_01",
+          "costume_name": "Frosty Bite",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c520_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "532",
+      "owner_asset_id": "c532",
+      "slug": "sora",
+      "source_url": "https://nikke.cannedjar.com/nikke/sora/skins/0",
+      "source_sha256": "4765dc0602c8d1c6b1852c7e9a7bf8689540fca9375eb0e11fb0223c89036506",
+      "alternate_assets": [
+        {
+          "asset_id": "c532_01",
+          "costume_name": "Spring Flight",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c532_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "550",
+      "owner_asset_id": "c550",
+      "slug": "bay",
+      "source_url": "https://nikke.cannedjar.com/nikke/bay/skins/0",
+      "source_sha256": "197f344278e9e9e18d7eb542fcf212cc53d805dc7a2f50bb66efb90f0cb47edb",
+      "alternate_assets": [
+        {
+          "asset_id": "c550_01",
+          "costume_name": "Radiant Rabbit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c550_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "551",
+      "owner_asset_id": "c551",
+      "slug": "clay",
+      "source_url": "https://nikke.cannedjar.com/nikke/clay/skins/0",
+      "source_sha256": "5007f73f8e059907e278aa391c047c6129140bbf9beaea5ca4df0b838440a3a1",
+      "alternate_assets": [
+        {
+          "asset_id": "c551_01",
+          "costume_name": "Cheer Up Training",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c551_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "580",
+      "owner_asset_id": "c580",
+      "slug": "phantom",
+      "source_url": "https://nikke.cannedjar.com/nikke/phantom/skins/0",
+      "source_sha256": "d553b21654273cd3ab30535b8536dc5c4f1c039463bdf808dd5991634d394c36",
+      "alternate_assets": [
+        {
+          "asset_id": "c580_01",
+          "costume_name": "Saint Thief",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c580_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "600",
+      "owner_asset_id": "c600",
+      "slug": "mint",
+      "source_url": "https://nikke.cannedjar.com/nikke/mint/skins/0",
+      "source_sha256": "476d87816b5681b692b1301be65251284ea7f461fdf03dd73402dc3038541785",
+      "alternate_assets": [
+        {
+          "asset_id": "c600_01",
+          "costume_name": "Fresh Mint",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c600_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "601",
+      "owner_asset_id": "c601",
+      "slug": "prika",
+      "source_url": "https://nikke.cannedjar.com/nikke/prika/skins/0",
+      "source_sha256": "5ca61ce2d7be181a9e54f160075a0d67faa9a13a2409765e814ae96f3fc5ca42",
+      "alternate_assets": [
+        {
+          "asset_id": "c601_01",
+          "costume_name": "Cool Paprika",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c601_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "800",
+      "owner_asset_id": "c800",
+      "slug": "makima",
+      "source_url": "https://nikke.cannedjar.com/nikke/makima/skins/0",
+      "source_sha256": "f2cb6530822f0cc45bc9220add58fc95b21f026612b66c687243b620008ec99b",
+      "alternate_assets": [
+        {
+          "asset_id": "c800_01",
+          "costume_name": "Coat Off",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c800_01_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "810",
+      "owner_asset_id": "c810",
+      "slug": "2b",
+      "source_url": "https://nikke.cannedjar.com/nikke/2b/skins/0",
+      "source_sha256": "d1393d9e7c014f98d3e9a0711c632d6962509bb6b9c592b1576344bbf8f6e2ae",
+      "alternate_assets": [
+        {
+          "asset_id": "c810_01",
+          "costume_name": "Metamorphic Damage",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c810_01_s.png"
+        },
+        {
+          "asset_id": "c810_02",
+          "costume_name": "YoRHa Uniform 1",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c810_02_s.png"
+        },
+        {
+          "asset_id": "c810_03",
+          "costume_name": "YoRHa Unofficial Waterfront Gear I",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c810_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "811",
+      "owner_asset_id": "c811",
+      "slug": "a2",
+      "source_url": "https://nikke.cannedjar.com/nikke/a2/skins/0",
+      "source_sha256": "557a8bb1ecfc070a7198f6c92863a9a7ee4f48be8485a15cc069eab304607f16",
+      "alternate_assets": [
+        {
+          "asset_id": "c811_01",
+          "costume_name": "Metamorphic Damage",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c811_01_s.png"
+        },
+        {
+          "asset_id": "c811_02",
+          "costume_name": "YoRHa Uniform Prototype",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c811_02_s.png"
+        },
+        {
+          "asset_id": "c811_03",
+          "costume_name": "YoRHa Unofficial Waterfront Gear Prototype",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c811_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "820",
+      "owner_asset_id": "c820",
+      "slug": "rem",
+      "source_url": "https://nikke.cannedjar.com/nikke/rem/skins/0",
+      "source_sha256": "0578781c506ccd22e78bc35f9af28798759f82b5ded030554b61136f38444b73",
+      "alternate_assets": [
+        {
+          "asset_id": "c820_01",
+          "costume_name": "Handy Maid",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c820_01_s.png"
+        },
+        {
+          "asset_id": "c820_02",
+          "costume_name": "Pure Blossom",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c820_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "821",
+      "owner_asset_id": "c821",
+      "slug": "emilia",
+      "source_url": "https://nikke.cannedjar.com/nikke/emilia/skins/0",
+      "source_sha256": "35375cf12317a5a8f0340c4676d0606a5b8b11f35be8d23da0f507a911a73bb1",
+      "alternate_assets": [
+        {
+          "asset_id": "c821_01",
+          "costume_name": "Clumsy Maid",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c821_01_s.png"
+        },
+        {
+          "asset_id": "c821_02",
+          "costume_name": "Spring Breeze",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c821_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "830",
+      "owner_asset_id": "c830",
+      "slug": "asuka-shikinami-langley",
+      "source_url": "https://nikke.cannedjar.com/nikke/asuka-shikinami-langley/skins/0",
+      "source_sha256": "6deaa5111b79652c66273f205627deca36784c2e5cf1b8b15a550bf3a6fde27b",
+      "alternate_assets": [
+        {
+          "asset_id": "c830_01",
+          "costume_name": "Asuka's School Uniform",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c830_01_s.png"
+        },
+        {
+          "asset_id": "c830_02",
+          "costume_name": "Cynical Street",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c830_02_s.png"
+        },
+        {
+          "asset_id": "c830_03",
+          "costume_name": "Test Plugsuit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c830_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "831",
+      "owner_asset_id": "c831",
+      "slug": "rei-ayanami",
+      "source_url": "https://nikke.cannedjar.com/nikke/rei-ayanami/skins/0",
+      "source_sha256": "cfb07de7d059b15e4ca1f6f0e345a720b332be05a690c701ecd6d815bf786df3",
+      "alternate_assets": [
+        {
+          "asset_id": "c831_01",
+          "costume_name": "Rei's School Uniform",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c831_01_s.png"
+        },
+        {
+          "asset_id": "c831_02",
+          "costume_name": "Peaceful Vacation",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c831_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "832",
+      "owner_asset_id": "c832",
+      "slug": "mari-makinami-illustrious",
+      "source_url": "https://nikke.cannedjar.com/nikke/mari-makinami-illustrious/skins/0",
+      "source_sha256": "d894cba00c78d04c6370ac8b1169365259af94a177e057450da71faf3e347c8c",
+      "alternate_assets": [
+        {
+          "asset_id": "c832_01",
+          "costume_name": "Mari's School Uniform",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c832_01_s.png"
+        },
+        {
+          "asset_id": "c832_02",
+          "costume_name": "Leisure Travel",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c832_02_s.png"
+        },
+        {
+          "asset_id": "c832_03",
+          "costume_name": "Final Battle: Mari",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c832_03_s.png"
+        },
+        {
+          "asset_id": "c832_04",
+          "costume_name": "Mystery Muse",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c832_04_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "834",
+      "owner_asset_id": "c834",
+      "slug": "rei-ayanami--tentative-name-",
+      "source_url": "https://nikke.cannedjar.com/nikke/rei-ayanami--tentative-name-/skins/0",
+      "source_sha256": "58700c1b8bdbb85b2c4ffaceede5c58c918718aaf31ade402d09e890e18dbe32",
+      "alternate_assets": [
+        {
+          "asset_id": "c834_01",
+          "costume_name": "Miss Lookalike from Village-3",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c834_01_s.png"
+        },
+        {
+          "asset_id": "c834_02",
+          "costume_name": "Soul Connect",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c834_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "835",
+      "owner_asset_id": "c835",
+      "slug": "asuka--wille",
+      "source_url": "https://nikke.cannedjar.com/nikke/asuka--wille/skins/0",
+      "source_sha256": "75160ce445efaa128e3928819c167d1ef503f73a535a6c50c7d6c37705925e1a",
+      "alternate_assets": [
+        {
+          "asset_id": "c835_01",
+          "costume_name": "Final Battle: Asuka",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c835_01_s.png"
+        },
+        {
+          "asset_id": "c835_02",
+          "costume_name": "Ocean's Lament",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c835_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "840",
+      "owner_asset_id": "c840",
+      "slug": "ada-wong",
+      "source_url": "https://nikke.cannedjar.com/nikke/ada-wong/skins/0",
+      "source_sha256": "5ac1f9a1a6545465bae8c85158a4f31f5355bfa2be0738f38e5a126cee487a7c",
+      "alternate_assets": [
+        {
+          "asset_id": "c840_01",
+          "costume_name": "Separate Ways",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c840_01_s.png"
+        },
+        {
+          "asset_id": "c840_02",
+          "costume_name": "Dress",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c840_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "841",
+      "owner_asset_id": "c841",
+      "slug": "jill-valentine",
+      "source_url": "https://nikke.cannedjar.com/nikke/jill-valentine/skins/0",
+      "source_sha256": "fa73abe1f66ca6748d124a329653a2b277dc5ac9fc2fc2ddccbeef2b567e89e4",
+      "alternate_assets": [
+        {
+          "asset_id": "c841_01",
+          "costume_name": "Classic",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c841_01_s.png"
+        },
+        {
+          "asset_id": "c841_02",
+          "costume_name": "Battle Suit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c841_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "850",
+      "owner_asset_id": "c850",
+      "slug": "eve",
+      "source_url": "https://nikke.cannedjar.com/nikke/eve/skins/0",
+      "source_sha256": "f956f68dc48eb804b68c9f2fbc2c8570f1658de6b43af38aa68a89ebacdbd36c",
+      "alternate_assets": [
+        {
+          "asset_id": "c850_01",
+          "costume_name": "Keyhole Dress",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c850_01_s.png"
+        },
+        {
+          "asset_id": "c850_02",
+          "costume_name": "Neurolink Suit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c850_02_s.png"
+        },
+        {
+          "asset_id": "c850_03",
+          "costume_name": "Skin Suit",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c850_03_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "851",
+      "owner_asset_id": "c851",
+      "slug": "raven",
+      "source_url": "https://nikke.cannedjar.com/nikke/raven/skins/0",
+      "source_sha256": "68f528ce474a67c9e02f1af6b2669801a60f6090e0d6e865d1b53e839e7efef4",
+      "alternate_assets": [
+        {
+          "asset_id": "c851_01",
+          "costume_name": "Planet Diving Suit (6th) V2",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c851_01_s.png"
+        },
+        {
+          "asset_id": "c851_02",
+          "costume_name": "Midsummer Alice",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c851_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "860",
+      "owner_asset_id": "c860",
+      "slug": "chisato",
+      "source_url": "https://nikke.cannedjar.com/nikke/chisato/skins/0",
+      "source_sha256": "0d04adb0b0c0b2eb218bd7512e46f93e1a424a5e3754ef3018486260ce7e8640",
+      "alternate_assets": [
+        {
+          "asset_id": "c860_01",
+          "costume_name": "DA Training Wear (First)",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c860_01_s.png"
+        },
+        {
+          "asset_id": "c860_02",
+          "costume_name": "Red Spark Guitar",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c860_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "861",
+      "owner_asset_id": "c861",
+      "slug": "takina",
+      "source_url": "https://nikke.cannedjar.com/nikke/takina/skins/0",
+      "source_sha256": "f6fda66e49dfc81466ab95c12a19bb2a8c0515b95199fa54fd5dc46fb2fe87d5",
+      "alternate_assets": [
+        {
+          "asset_id": "c861_01",
+          "costume_name": "DA Training Wear (Second)",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c861_01_s.png"
+        },
+        {
+          "asset_id": "c861_02",
+          "costume_name": "Blue Pulse Bass",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c861_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "870",
+      "owner_asset_id": "c870",
+      "slug": "queen--makoto-",
+      "source_url": "https://nikke.cannedjar.com/nikke/queen--makoto-/skins/0",
+      "source_sha256": "1b1dd48e7a7df481fd985e5d98dc6dd441a7f5458f5ce51e78fcc612c330bb54",
+      "alternate_assets": [
+        {
+          "asset_id": "c870_01",
+          "costume_name": "Shujin Academy Student Council President",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c870_01_s.png"
+        },
+        {
+          "asset_id": "c870_02",
+          "costume_name": "Queen's Pajamas (Ver. NIKKE Collabo)",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c870_02_s.png"
+        }
+      ]
+    },
+    {
+      "character_resource_id": "871",
+      "owner_asset_id": "c871",
+      "slug": "yukiko",
+      "source_url": "https://nikke.cannedjar.com/nikke/yukiko/skins/0",
+      "source_sha256": "fd946480933e6a5ef5ff25c2a051ea5a5155edf9126089c135f6a9daaffd4126",
+      "alternate_assets": [
+        {
+          "asset_id": "c871_01",
+          "costume_name": "Amagi Inn Kimono",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c871_01_s.png"
+        },
+        {
+          "asset_id": "c871_02",
+          "costume_name": "Winter Roomwear (Ver. NIKKE Collabo)",
+          "standing_asset_url": "https://nikke-res.cannedjar.com/assets/poster/mi_c871_02_s.png"
+        }
+      ]
+    }
+  ]
+}

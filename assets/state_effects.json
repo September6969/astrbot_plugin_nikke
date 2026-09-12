@@ -782,13 +782,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000902",
@@ -796,13 +797,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000904",
@@ -810,13 +812,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000905",
@@ -824,13 +827,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000907",
@@ -838,13 +842,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000908",
@@ -852,13 +857,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000909",
@@ -866,13 +872,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000910",
@@ -880,13 +887,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000911",
@@ -894,13 +902,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7000915",
@@ -908,13 +917,14 @@
       "group_id": "100500",
       "function_type": "StatChargeDamage",
       "label": "蓄力伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001001",
@@ -1132,13 +1142,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001102",
@@ -1146,13 +1157,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001103",
@@ -1160,13 +1172,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001104",
@@ -1174,13 +1187,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001105",
@@ -1188,13 +1202,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001106",
@@ -1202,13 +1217,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001107",
@@ -1216,13 +1232,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001109",
@@ -1230,13 +1247,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001110",
@@ -1244,13 +1262,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001111",
@@ -1258,13 +1277,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001112",
@@ -1272,13 +1292,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001113",
@@ -1286,13 +1307,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001114",
@@ -1300,13 +1322,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001115",
@@ -1314,13 +1337,14 @@
       "group_id": "100700",
       "function_type": "StatCritical",
       "label": "暴击率增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001201",
@@ -1328,13 +1352,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001202",
@@ -1342,13 +1367,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001203",
@@ -1356,13 +1382,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001204",
@@ -1370,13 +1397,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001205",
@@ -1384,13 +1412,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001206",
@@ -1398,13 +1427,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001207",
@@ -1412,13 +1442,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001208",
@@ -1426,13 +1457,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001210",
@@ -1440,13 +1472,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001211",
@@ -1454,13 +1487,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001213",
@@ -1468,13 +1502,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001215",
@@ -1482,13 +1517,14 @@
       "group_id": "100800",
       "function_type": "StatCriticalDamage",
       "label": "暴击伤害增加",
-      "value_kind": "unknown",
+      "value_kind": "percent",
       "locale": "zh-CN",
       "source_url": "https://sg-tools-cdn.blablalink.com/vv-42/b46c877b8d7077e4eba2f3e924550a25.json",
       "source_sha256": "bf967f0626e8dded7f1853a97e77c5ba14a256ae7e6170c0013049b45d1f929d",
       "checked_at": "2026-09-09",
       "value_source_url": "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails",
-      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675"
+      "value_source_sha256": "f7b7a66bd1f9f8441d1918d4c0adbdb1dc239c12c42c4eb13b7640cdeb3f6675",
+      "value_divisor": 10000
     },
     {
       "option_id": "7001302",

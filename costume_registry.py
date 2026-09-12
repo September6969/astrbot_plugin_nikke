@@ -13,9 +13,16 @@ from typing import Any
 class VerifiedCostume:
     costume_id: str
     character_resource_id: str
+    spine_mode: str
     spine_asset_id: str
+    skin_name: str | None
     costume_name: str
     verified_at: str
+
+    @property
+    def render_id(self) -> str:
+        """返回能唯一定位预渲染 PNG 的 canonical ID。"""
+        return self.spine_asset_id if self.spine_mode == "independent_asset" else f"{self.spine_asset_id}@{self.skin_name}"
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,18 +56,33 @@ class CostumeRegistry:
         except (OSError, ValueError):
             return
 
-        entries = data.get("entries", []) if isinstance(data, dict) else []
+        if not isinstance(data, dict) or data.get("schema_version") not in {2, 3}:
+            return
+        entries = data.get("entries", [])
         for row in entries:
             if not isinstance(row, dict):
                 continue
             cid = str(row.get("costume_id", "")).strip()
             rid = str(row.get("character_resource_id", "")).strip()
-            spine = str(row.get("spine_asset_id", "")).strip()
+            raw_spine = row.get("spine")
+            if isinstance(raw_spine, dict):
+                mode = str(raw_spine.get("mode", "")).strip()
+                spine = str(raw_spine.get("asset_id", "")).strip()
+                raw_skin = raw_spine.get("skin_name")
+                skin_name = str(raw_skin).strip() if isinstance(raw_skin, str) and raw_skin.strip() else None
+            else:  # 兼容历史 schema v2；不从该兼容层生成任何新映射。
+                mode = "independent_asset"
+                spine = str(row.get("spine_asset_id", "")).strip()
+                skin_name = None
             name = str(row.get("costume_name", "")).strip()
             verified_at = str(row.get("verified_at", "")).strip()
-            if not cid or not rid or not spine or not name:
+            if not cid or not rid or not spine or not name or mode not in {"independent_asset", "shared_skin"}:
                 continue
-            item = VerifiedCostume(cid, rid, spine, name, verified_at)
+            if mode == "independent_asset" and skin_name is not None:
+                continue
+            if mode == "shared_skin" and skin_name is None:
+                continue
+            item = VerifiedCostume(cid, rid, mode, spine, skin_name, name, verified_at)
             self._entries.append(item)
             self._by_id[cid] = item
 

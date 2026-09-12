@@ -16,6 +16,7 @@ from typing import Any
 
 from .campaign_history_models import ClearLineupStatus, StageClearMember, StageClearRecord
 from .campaign_stage_resolver import CampaignStage
+from .character_master_resolver import CharacterMasterResolver
 
 
 def _strict_non_negative_int(value: Any) -> int:
@@ -49,7 +50,12 @@ def _strict_costume_id(value: Any) -> int | str:
 
 
 class CampaignHistoryBuilder:
-    def __init__(self, directory: list[dict] | None = None):
+    def __init__(
+        self,
+        directory: list[dict] | None = None,
+        master_resolver: CharacterMasterResolver | None = None,
+    ):
+        self._resolver = master_resolver or CharacterMasterResolver()
         self._directory_by_tid: dict[int, dict] = {}
         if directory:
             self.update_directory(directory)
@@ -204,10 +210,25 @@ class CampaignHistoryBuilder:
                 malformed = True
                 continue
 
-            info = self._directory_by_tid.get(tid, {})
-            name_cn = info.get("name_cn", f"NIKKE {tid}")
-            name_en = info.get("name_en", "")
-            resource_id = str(info.get("resource_id", tid))
+            info = self._directory_by_tid.get(tid)
+            if info:
+                name_cn = info.get("name_cn", f"NIKKE {tid}")
+                name_en = info.get("name_en", "")
+                res_val = info.get("resource_id")
+                resource_id = str(res_val) if res_val is not None else None
+                name_code = info.get("name_code")
+            else:
+                char = self._resolver.resolve_battle_tid(tid)
+                if char is not None:
+                    name_cn = char.name_cn
+                    name_en = char.name_en
+                    resource_id = str(char.resource_id)
+                    name_code = char.name_code
+                else:
+                    name_cn = f"NIKKE {tid}"
+                    name_en = ""
+                    resource_id = None
+                    name_code = None
 
             members.append(
                 StageClearMember(
@@ -219,6 +240,7 @@ class CampaignHistoryBuilder:
                     name_en=name_en,
                     resource_id=resource_id,
                     costume_id=costume_id,
+                    name_code=name_code,
                 )
             )
 

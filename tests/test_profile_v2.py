@@ -146,7 +146,7 @@ class ProfileV2RendererTests(unittest.TestCase):
                     "OUTPOST / 前哨基地",
                     "ROSTER / 妮姬统计",
                     "COLLECTION / 收藏",
-                    "RESEARCH / 研究",
+                    "RECYCLE ROOM / 循环室",
                     "MORE / 更多数据",
                 ],
             )
@@ -158,9 +158,43 @@ class ProfileV2RendererTests(unittest.TestCase):
                 renderer.render_profile(self.full_data())
             rendered = str(text.call_args_list)
             self.assertIn("点唱机收集", rendered)
+            self.assertIn("无尽塔进度", rendered)
+            self.assertNotIn("部落塔进度", rendered)
+            self.assertNotIn("战术学院", rendered)
             self.assertNotIn("回收室研究", rendered)
             self.assertNotIn("收藏记录", rendered)
             self.assertNotIn("private-category", rendered)
+
+    def test_recycle_room_two_columns_and_omit_exp_zero(self):
+        data = self.full_data()
+        data.recycle_room_researches = [
+            RecycleResearchData("1001", 10, 0, "通用研究", "Common"),
+            RecycleResearchData("1002", 20, 500, "极乐净土研究", "Manufacturer"),
+            RecycleResearchData("1003", 30, 0, "米西里斯研究", "Manufacturer"),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            renderer = self.renderer(directory)
+            with patch.object(renderer, "_text", wraps=renderer._text) as text:
+                renderer.render_profile(data)
+
+            calls_str = str(text.call_args_list)
+            self.assertIn("Lv.10", calls_str)
+            self.assertNotIn("EXP 0", calls_str)
+            self.assertIn("Lv.20 · EXP 500", calls_str)
+            self.assertIn("Lv.30", calls_str)
+
+            rendered_labels = [
+                (call.args[1], call.args[2])
+                for call in text.call_args_list
+                if len(call.args) >= 3 and call.args[2] in ("通用研究", "极乐净土研究", "米西里斯研究")
+            ]
+            self.assertEqual(len(rendered_labels), 3)
+            pos_map = {name: xy for xy, name in rendered_labels}
+            self.assertEqual(pos_map["通用研究"][0], 70)
+            self.assertEqual(pos_map["极乐净土研究"][0], 620)
+            self.assertEqual(pos_map["米西里斯研究"][0], 70)
+            self.assertEqual(pos_map["通用研究"][1], pos_map["极乐净土研究"][1])
+            self.assertGreater(pos_map["米西里斯研究"][1], pos_map["通用研究"][1])
 
     def test_failure_and_partial_statuses_are_visible_without_fake_zeroes(self):
         data = self.full_data()

@@ -4,12 +4,21 @@
 from __future__ import annotations
 
 import re
+import math
 from datetime import datetime, timezone, timedelta
 from typing import Any
 
 from .campaign_stage_resolver import CampaignStageResolver
-from .profile_models import MemorialCountData, ProfileDashboardData, RecycleResearchData
-from .research_registry import research_labels
+from .currency_registry import CurrencyRegistry
+from .memorial_registry import MemorialCategoryRegistry
+from .profile_models import (
+    DailyTowerInfo,
+    MemorialCountData,
+    ProfileDashboardData,
+    RecycleResearchData,
+    SimulationRoomDailyRecord,
+)
+from .research_registry import research_labels, research_presentation_label
 
 
 _INTEGER_RE = re.compile(r"^[+-]?\d+$")
@@ -61,6 +70,27 @@ def _first_optional_str(source: dict[str, Any], *keys: str) -> str | None:
             if value is not None:
                 return value
     return None
+
+
+def _optional_ratio(value: Any) -> float | None:
+    """解析 0..1 的容量比例；不把百分数或异常值静默转换。"""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        parsed = float(value)
+    elif isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        try:
+            parsed = float(text)
+        except (TypeError, ValueError, OverflowError):
+            return None
+    else:
+        return None
+    if not math.isfinite(parsed) or not 0 <= parsed <= 1:
+        return None
+    return parsed
 
 
 def parse_profile_created_at(value: Any) -> str | None:
@@ -155,7 +185,16 @@ def _parse_researches(value: Any) -> tuple[list[RecycleResearchData] | None, boo
         if ("lv" in item and level is None) or ("exp" in item and exp is None):
             partial = True
         display_name, category = research_labels(tid)
-        rows.append(RecycleResearchData(tid, level, exp, display_name, category))
+        rows.append(
+            RecycleResearchData(
+                tid,
+                level,
+                exp,
+                display_name,
+                category,
+                research_presentation_label(tid),
+            )
+        )
     return rows, partial
 
 
@@ -171,16 +210,120 @@ def _parse_memorials(value: Any) -> tuple[list[MemorialCountData] | None, bool]:
             continue
         category = _optional_str(item.get("category"))
         count = _optional_int(item.get("count"))
-        # category 不做未经证实的名称映射；缺失时由 renderer 使用中性名称。
+        group = MemorialCategoryRegistry.group_for(category)
+        display_name = MemorialCategoryRegistry.GROUP_NAMES.get(group) if group else None
+        # category 不做未经证实的名称映射；未知分类只保持原始状态并由 registry 诊断。
         if "count" not in item or count is None:
             partial = True
-        rows.append(MemorialCountData(category, count))
+        rows.append(MemorialCountData(category, count, display_name, group))
     return rows, partial
 
 
+def _parse_daily_tower(value: Any) -> tuple[list[DailyTowerInfo] | None, bool]:
+    if value is None:
+        return None, False
+    if not isinstance(value, list):
+        return None, True
+    result: list[DailyTowerInfo] = []
+    partial = False
+    for item in value:
+        if not isinstance(item, dict):
+            result.append(DailyTowerInfo({}))
+            partial = True
+            continue
+        # serv 现场确认的字段合同：type / is_opened / remaining_count。
+        # raw 是脱离账号身份的每日记录副本；renderer 不直接读取它。
+        display_name = _first_optional_str(item, "name", "tower_name")
+        tower_type = _optional_int(item.get("type"))
+        is_opened = item.get("is_opened") if isinstance(item.get("is_opened"), bool) else None
+        remaining = _optional_int(item.get("remaining_count"))
+        if any(key not in item for key in ("type", "is_opened", "remaining_count")):
+            partial = True
+        if tower_type is None or is_opened is None or remaining is None:
+            partial = True
+        result.append(DailyTowerInfo(dict(item), display_name, remaining, tower_type, is_opened))
+    return result, partial
+
+
+def _parse_sim_room_record(value: Any) -> tuple[SimulationRoomDailyRecord | None, bool]:
+    if value is None:
+        return None, False
+    if not isinstance(value, dict):
+        return None, True
+    chapter = _optional_int(value.get("chapter"))
+    difficulty = _optional_int(value.get("difficulty"))
+    partial = ("chapter" in value and chapter is None) or ("difficulty" in value and difficulty is None)
+    score = None
+    for key in ("score", "best_score"):
+        if key in value:
+            score = _optional_int(value.get(key))
+            if score is None:
+                partial = True
+            break
+    if chapter not in {None, 1, 2, 3}:
+        # 只有 A/B/C 有确认展示合同，未知章节不能拼成看似合法的标签。
+        chapter = None
+        partial = True
+    if difficulty is None and ("chapter" in value or "difficulty" in value):
+        partial = True
+    return SimulationRoomDailyRecord(chapter, difficulty, dict(value), score), partial
+
+
+def _parse_daily(value: Any) -> tuple[dict[str, Any], bool]:
+    """把 Daily 单条 progress 转成 renderer 可消费的结构化字段。"""
+    if value is None:
+        return {
+            "storage_fullness": None,
+            "intercept_remaining": None,
+            "rookie_arena_remaining": None,
+            "special_arena_remaining": None,
+            "counsel_remaining": None,
+            "dispatch_completed": None,
+            "dispatch_in_progress": None,
+            "tower_daily_info": None,
+            "sim_room_daily_record": None,
+        }, False
+    if not isinstance(value, dict):
+        return {}, True
+
+    fields = {
+        "storage_fullness": _optional_ratio(value.get("outpost_battle_storage_fullness")),
+        "intercept_remaining": _optional_int(value.get("intercept_remaining_tickets")),
+        "rookie_arena_remaining": _optional_int(value.get("rookie_arena_remaining_count")),
+        "special_arena_remaining": _optional_int(value.get("special_arena_remaining_count")),
+        "counsel_remaining": _optional_int(value.get("counsel_remaining_count")),
+        "dispatch_completed": _optional_int(value.get("dispatch_completed_count")),
+        "dispatch_in_progress": _optional_int(value.get("dispatch_in_progress_count")),
+    }
+    partial = False
+    for source_key, field_name in (
+        ("outpost_battle_storage_fullness", "storage_fullness"),
+        ("intercept_remaining_tickets", "intercept_remaining"),
+        ("rookie_arena_remaining_count", "rookie_arena_remaining"),
+        ("special_arena_remaining_count", "special_arena_remaining"),
+        ("counsel_remaining_count", "counsel_remaining"),
+        ("dispatch_completed_count", "dispatch_completed"),
+        ("dispatch_in_progress_count", "dispatch_in_progress"),
+    ):
+        if source_key in value and fields[field_name] is None:
+            partial = True
+    tower, tower_partial = _parse_daily_tower(value.get("tower_daily_info_list"))
+    sim_room, sim_partial = _parse_sim_room_record(value.get("sim_room_daily_best_record"))
+    fields["tower_daily_info"] = tower
+    fields["sim_room_daily_record"] = sim_room
+    return fields, partial or tower_partial or sim_partial
+
+
 class ProfileBuilder:
-    def __init__(self, campaign_resolver: CampaignStageResolver | None = None):
+    def __init__(
+        self,
+        campaign_resolver: CampaignStageResolver | None = None,
+        currency_registry: CurrencyRegistry | None = None,
+        memorial_registry: MemorialCategoryRegistry | None = None,
+    ):
         self.campaign_resolver = campaign_resolver
+        self.currency_registry = currency_registry or CurrencyRegistry()
+        self.memorial_registry = memorial_registry or MemorialCategoryRegistry()
 
     def build(
         self,
@@ -193,7 +336,11 @@ class ProfileBuilder:
         plugin_version: str,
         outpost_available: bool | None = None,
         roster_available: bool | None = None,
+        daily: dict[str, Any] | None = None,
+        daily_available: bool | None = None,
     ) -> ProfileDashboardData:
+        basic = basic if isinstance(basic, dict) else {}
+        outpost = outpost if isinstance(outpost, dict) else {}
         commander_name = (
             _optional_str(basic.get("nickname"))
             or _first_optional_str(account, "nickname", "role_name")
@@ -252,6 +399,9 @@ class ProfileBuilder:
         sim_room_overclock_score = _optional_str(
             basic.get("sim_room_overclock_current_sub_season_high_score")
         )
+        sim_room_overclock_season = _optional_str(
+            basic.get("sim_room_overclock_latest_season_high_score")
+        )
 
         infra_core_level = _optional_str(outpost.get("infra_core_level"))
         tactic_academy_class = _format_unmapped_internal_id(outpost.get("tactic_academy_class"))
@@ -262,6 +412,17 @@ class ProfileBuilder:
             outpost.get("recycle_room_researches")
         )
         memorial_data, memorial_partial = _parse_memorials(outpost.get("memorial_counts"))
+        jukebox_value = _optional_int(outpost.get("jukebox_count"))
+        if "jukebox_count" in outpost and jukebox_value is None:
+            memorial_partial = True
+        memorial_summary, memorial_summary_partial = self.memorial_registry.summarize(
+            memorial_data,
+            jukebox_count=jukebox_value,
+        )
+        memorial_partial = memorial_partial or memorial_summary_partial
+
+        currencies, currencies_partial = self.currency_registry.parse(basic.get("currencies"))
+        daily_fields, daily_partial = _parse_daily(daily)
 
         return ProfileDashboardData(
             commander_name=commander_name,
@@ -287,7 +448,7 @@ class ProfileBuilder:
             jukebox_count=jukebox_count,
             # 摘要字段保留兼容性，但不再从可能部分的明细推导总数。
             recycle_room_summary=None,
-            memorial_summary=None,
+            memorial_summary=memorial_summary,
             recycle_room_researches=research_data,
             memorial_counts=memorial_data,
             outpost_available=outpost_available,
@@ -295,4 +456,19 @@ class ProfileBuilder:
             roster_partial=roster_partial,
             research_partial=research_partial,
             memorial_partial=memorial_partial,
+            daily_available=daily_available,
+            storage_fullness=daily_fields.get("storage_fullness"),
+            intercept_remaining=daily_fields.get("intercept_remaining"),
+            rookie_arena_remaining=daily_fields.get("rookie_arena_remaining"),
+            special_arena_remaining=daily_fields.get("special_arena_remaining"),
+            counsel_remaining=daily_fields.get("counsel_remaining"),
+            dispatch_completed=daily_fields.get("dispatch_completed"),
+            dispatch_in_progress=daily_fields.get("dispatch_in_progress"),
+            tower_daily_info=daily_fields.get("tower_daily_info"),
+            sim_room_daily_record=daily_fields.get("sim_room_daily_record"),
+            sim_room_overclock_subseason=sim_room_overclock_score,
+            sim_room_overclock_season=sim_room_overclock_season,
+            currencies=currencies,
+            currencies_partial=currencies_partial,
+            daily_partial=daily_partial,
         )
