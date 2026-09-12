@@ -22,6 +22,7 @@
 - `docs/evidence/spine_runtime_resolution_audit.json`：默认 200 与官方 Costume 178 的 resolver/manifest/PNG 审计。
 - `docs/evidence/spine_visual_suspects.json`：378 项结构视觉审计，suspect 0。
 - `docs/evidence/official_costume_support_risk.json`：178 状态机最终台账。
+- `docs/evidence/qq_costume_sampled_acceptance.json`：用户确认的最终 QQ 卡片抽样结果；不保存 QQ ID、OpenID 或任何凭据。
 
 ## 映射边界
 
@@ -33,4 +34,4 @@
 
 ## 当前状态
 
-`PARTIAL`。本轮 inventory 一致性修正后的本地定向测试为 17 passed，最终 full pytest 为 660 passed、484 subtests passed；compileall 与 diff check 通过。生产重启后的全量 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，插件启动日志无 registry 错误。最终 HEAD CI 与用户 QQ 抽样通过前不得 merge PR #79。
+`PARTIAL`（仅等待最终 HEAD CI）。本轮 inventory 一致性修正后的本地定向测试为 17 passed，最终 full pytest 为 660 passed、484 subtests passed；compileall 与 diff check 通过。生产重启后的全量 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，插件启动日志无 registry 错误。用户已确认 QQ 抽样 PASS；最终 evidence HEAD CI 全绿后状态升级为 `READY_TO_MERGE` 并按正常 gate 合并 PR #79。

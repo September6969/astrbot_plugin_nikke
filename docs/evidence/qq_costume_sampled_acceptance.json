@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "accepted_at": "2026-09-12T22:59:16Z",
+  "result": "PASS",
+  "confirmation_source": "user QQ visual acceptance confirmation",
+  "confirmation_text": "QQ抽样通过了",
+  "privacy": "No QQ ID, OpenID, Cookie, Token or Authorization data is stored.",
+  "requested_samples": [
+    {"character": "Crown", "costume": "Glorious Flower", "result": "PASS"},
+    {"character": "Siren", "costume": "Beautiful Bubble", "result": "PASS"},
+    {"character": "Eunhwa", "costume": "Day Off", "result": "PASS"},
+    {"character": "Scarlet", "costume": "Racer's High", "result": "PASS"},
+    {"character": "Rapi", "costume": "White Promise", "result": "PASS"},
+    {"character": "Asuka: WILLE", "costume": "user-confirmed sampled result", "result": "PASS"},
+    {"character": "Ade", "costume": "user-confirmed sampled result", "result": "PASS"},
+    {"character": "Snow White", "costume": "user-confirmed sampled result", "result": "PASS"}
+  ],
+  "sample_count": 8,
+  "runtime_log_evidence": {
+    "scope": "command names only; sender identifiers redacted",
+    "observed_characters": ["Crown", "Eunhwa", "Scarlet", "Asuka: WILLE", "Ade", "Snow White"],
+    "note": "The user confirmation is authoritative for final rendered-card appearance; runtime logs only corroborate command receipt and do not prove visual correctness."
+  },
+  "acceptance_checks": {
+    "correct_character": true,
+    "correct_costume": true,
+    "no_gray_placeholder": true,
+    "no_wrong_default_portrait": true,
+    "no_wrong_costume": true,
+    "no_abnormal_crop": true,
+    "final_character_card_visual_normal": true
+  }
+}

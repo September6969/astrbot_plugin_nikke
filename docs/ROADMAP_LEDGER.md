@@ -248,3 +248,4 @@
 - 对剩余 131 条按 owner 建立候选集合，使用固定 Nikke-db commit `a2358b72bd1335c30737e46482a99947f3788bc7` 的完整 Git tree 核验 skel/atlas；服务器小批量 sparse 拉取并真实渲染，45 张 owner contact sheet 已实际查看，逐条 poster/render/sheet SHA-256 固化于 `costume_identity_manual_validation.json`。
 - 正式 registry 为 178 条独立 Spine asset，Costume ID、owner 与 render ID 均唯一；临时挂载新 registry 的服务器审计结果为默认 200/200、Costume 178/178、fallback risk 0。378 项结构视觉审计 suspect 0。
 - 提交 `103ebd3f3a881da51acaff7255dec57d370d2268` 的最终 HEAD CI 已全绿；生产插件 registry 已在备份后原子切换并重启。生产 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，启动日志无 registry 错误。用户 QQ 抽样前 PR 状态保持 `PARTIAL`，禁止 merge。
+- 2026-09-12 用户确认最终 QQ Costume 卡片抽样 PASS；脱敏 evidence 记录 5 个关键路径与 3 个追加样本，并明确区分用户视觉确认和仅能证明命令接收的运行日志。PR 只剩最新 evidence HEAD 自身 CI gate，全部 required checks 通过后允许正常 merge。
