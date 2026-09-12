@@ -229,3 +229,14 @@
 - 本轮最终本地验证：`639 passed`、`481 subtests`、1 个既有依赖弃用警告；`compileall`、Node `--check`、extension tests、`git diff --check` 均通过。最终状态上限保持 `READY_FOR_RETEST`，在 Campaign/Spine 现场覆盖闭合前不标记完成。
 - Costume schema v3 与 Scarlet Racer's High（110023 → c222_01）端到端闭环已完成：Spine 4.1 离线预渲染 PNG、478×891 alpha bbox 裁切、生产 manifest 接入与静态部署已在 `serv` 完成。verified registry coverage 达到 41/41（100.0%），官方 178 分母覆盖率达到 23.03%（41/178）；manifest 缺项归零。本地 CharacterCard 合成预览已生成并人工复核立绘红黑赛车服与朝圣者主题，serv 容器内部 AssetManager 验证零网络、零动态 worker 直读本地静态 PNG。QQ 验收仍待用户执行，当前状态保持 PARTIAL。
 
+## PR #79 续作更新：修复实际装备皮肤被 Base Costume TID 吞掉问题（2026-09-12 第二轮）
+
+- 用户真实 QQ 验收反馈：“银华：战术升级确实装备了皮肤，但当前卡片显示的是原皮”。经 live probe 与官方数据表比对确认，30049 为该角色的专属购买/解锁皮肤“Day Off / 度假”（白色吊带夏日洋装），对应独立 Spine 4.1 资产 `c095_01`；而 `c095` 为未穿皮肤的基础默认军服。
+- 根因与系统性修复：
+  1. 修复优先级倒挂：重构 `card_builder.py` 的皮肤选择机制为 `resolve_equipped_costume()`，确立严格优先级 `detail.costume_tid > detail.costume_id > roster.costume_tid > roster.costume_id`，防止 roster 中的字段吞噬权威单角色 detail 结果。
+  2. 清理误注入的默认服装字段：彻底清除 `assets/character_master.json` 中 76 位角色的 `default_costume_id`，消除了任何将正整数 Costume TID 误当成默认服装的系统性漏洞；Nikke 中默认服装严格遵循 `0 / None / "0" / "default"` 语义。
+  3. 登记已核验皮肤：在 `assets/costumes.json` 中为 30049（Day Off）登记 verified 条目（`character_resource_id: "95"`, `spine: c095_01`，独立资产模式），并同步更新 `assets/registry_manifest.json` 的规范化 LF SHA-256。
+  4. 生产环境预渲染与部署：在 `serv` 上拉取 `c095_01` 独立 Spine 4.1 资产，通过本地隔离 Docker worker 预渲染（1024×1024 → 398×892 alpha bbox 裁剪，SHA-256 `c8d03a30747d63acf9eab8607cec1fee68a6b176f7780a4c885d1cc7d676981d`），写入生产 `spine-manifest.json`。
+  5. 现场与安全审计：生成 `equipped_costume_resolution_audit.json`，针对用户账号当前装备皮肤的全部 5 位角色（银华 30049、红莲 110023、拉毗 20001、皇冠 30052、塞壬 30053）进行全覆盖审计，`fallback_to_default_risk = 0`；未映射皮肤严格降级中性占位图，绝对不冒充默认立绘。
+  6. 角色卡复核与证据闭环：重新合成 `final-character-card.png`，人工视觉复核确认银华身穿白裙草帽夏日立绘，未培养数值状态完全保留；更新 `trace.json`、`before-crop.png`、`after-crop.png`、`worker-canvas.rgba`。
+  7. 全量测试通过：本地全套 pytest `646 passed`（0 failed）；`serv` 容器内部真实 probe 校验通过，热路径零网络零动态 worker。PR #79 保持 PARTIAL，等待用户真实 QQ 验收。

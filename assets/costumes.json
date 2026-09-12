@@ -552,6 +552,19 @@
           "role": "Nikke-DB independent Spine skeleton"
         }
       ]
+    },
+    {
+      "costume_id": "30049",
+      "character_resource_id": "95",
+      "costume_name": "Day Off",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-12",
+      "spine": {
+        "mode": "independent_asset",
+        "asset_id": "c095_01",
+        "skin_name": null
+      }
     }
   ]
 }

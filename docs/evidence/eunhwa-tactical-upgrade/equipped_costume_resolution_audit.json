@@ -1,0 +1,125 @@
+{
+  "audit_title": "Equipped Costume Resolution & Default Swallowing Audit",
+  "audited_at": "2026-09-12T13:30:00Z",
+  "verified_total_equipped_characters": 5,
+  "fallback_to_default_risk": 0,
+  "verdict": "SAFE",
+  "policy": "Strict priority detail.costume_tid > detail.costume_id > roster.costume_tid > roster.costume_id. Unmapped skins MUST yield missing / placeholder and NEVER fall back to default base clothes.",
+  "entries": [
+    {
+      "character_name_cn": "银华：战术升级",
+      "character_name_en": "Eunhwa: Tactical Upgrade",
+      "resource_id": 95,
+      "name_code": 5149,
+      "equipped_costume_id": 30049,
+      "costume_name": "Day Off",
+      "costume_selection": {
+        "resolved_costume_id": 30049,
+        "kind": "alternate",
+        "source": "detail.costume_tid"
+      },
+      "costume_token": {
+        "state": "known",
+        "token": "known:30049:c095_01"
+      },
+      "default_render_id": "c095",
+      "equipped_render_id": "c095_01",
+      "expected_spine_asset": "c095_01",
+      "render_matches_expected": true,
+      "falls_back_to_default": false,
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET"
+    },
+    {
+      "character_name_cn": "红莲",
+      "character_name_en": "Scarlet",
+      "resource_id": 222,
+      "name_code": 5057,
+      "equipped_costume_id": 110023,
+      "costume_name": "Racer's High",
+      "costume_selection": {
+        "resolved_costume_id": 110023,
+        "kind": "alternate",
+        "source": "detail.costume_tid"
+      },
+      "costume_token": {
+        "state": "known",
+        "token": "known:110023:c222_01"
+      },
+      "default_render_id": "c222",
+      "equipped_render_id": "c222_01",
+      "expected_spine_asset": "c222_01",
+      "render_matches_expected": true,
+      "falls_back_to_default": false,
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET"
+    },
+    {
+      "character_name_cn": "拉毗",
+      "character_name_en": "Rapi",
+      "resource_id": 10,
+      "name_code": 3001,
+      "equipped_costume_id": 20001,
+      "costume_name": "White Promise",
+      "costume_selection": {
+        "resolved_costume_id": 20001,
+        "kind": "alternate",
+        "source": "detail.costume_tid"
+      },
+      "costume_token": {
+        "state": "known",
+        "token": "known:20001:c010_02"
+      },
+      "default_render_id": "c010",
+      "equipped_render_id": "c010_02",
+      "expected_spine_asset": "c010_02",
+      "render_matches_expected": true,
+      "falls_back_to_default": false,
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET"
+    },
+    {
+      "character_name_cn": "皇冠",
+      "character_name_en": "Crown",
+      "resource_id": 330,
+      "name_code": 5104,
+      "equipped_costume_id": 30052,
+      "costume_name": "Glorious Flower",
+      "costume_selection": {
+        "resolved_costume_id": 30052,
+        "kind": "alternate",
+        "source": "detail.costume_tid"
+      },
+      "costume_token": {
+        "state": "unknown",
+        "token": "unknown:30052"
+      },
+      "default_render_id": "c330",
+      "equipped_render_id": "missing",
+      "expected_spine_asset": "missing",
+      "render_matches_expected": true,
+      "falls_back_to_default": false,
+      "resolution_verdict": "CORRECT_PLACEHOLDER_FOR_UNMAPPED_SKIN"
+    },
+    {
+      "character_name_cn": "塞壬",
+      "character_name_en": "Siren",
+      "resource_id": 513,
+      "name_code": 5155,
+      "equipped_costume_id": 30053,
+      "costume_name": "Beautiful Bubble",
+      "costume_selection": {
+        "resolved_costume_id": 30053,
+        "kind": "alternate",
+        "source": "detail.costume_tid"
+      },
+      "costume_token": {
+        "state": "unknown",
+        "token": "unknown:30053"
+      },
+      "default_render_id": "c513",
+      "equipped_render_id": "missing",
+      "expected_spine_asset": "missing",
+      "render_matches_expected": true,
+      "falls_back_to_default": false,
+      "resolution_verdict": "CORRECT_PLACEHOLDER_FOR_UNMAPPED_SKIN"
+    }
+  ]
+}

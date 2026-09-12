@@ -47,6 +47,53 @@ class CharacterCardBuilderTests(unittest.TestCase):
         )
         self.assertEqual(card.costume_id, "skin_01")
 
+    def test_costume_resolution_detail_costume_tid_wins_over_roster(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 0
+        detail = dict(fixture["character_details"][0])
+        detail["costume_tid"] = 30049
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.costume_id, 30049)
+
+    def test_costume_resolution_detail_overrides_stale_roster_costume_id(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 99999
+        detail = dict(fixture["character_details"][0])
+        detail["costume_tid"] = 30049
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.costume_id, 30049)
+
+    def test_costume_resolution_default_when_both_zero(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 0
+        detail = dict(fixture["character_details"][0])
+        detail["costume_tid"] = 0
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertIn(card.costume_id, (0, None))
+
+    def test_costume_resolution_roster_fallback_when_detail_missing_costume(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 30049
+        detail = {k: v for k, v in fixture["character_details"][0].items() if "costume" not in k}
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.costume_id, 30049)
+
     def test_display_name_prefers_official_names_over_query_alias(self):
         fixture = load_fixture()
         fixture["directory"]["name_zh_tw"] = "阿爾卡娜"

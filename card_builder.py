@@ -11,6 +11,7 @@ from typing import Any
 
 from .card_models import (
     CharacterCardData,
+    CostumeSelection,
     CubeData,
     EquipmentData,
     EquipmentOption,
@@ -95,6 +96,52 @@ def _equipped_item(
     if tid in (None, "", 0, "0"):
         return None
     return model_type(tid=tid, level=_optional_int(level, minimum=0))
+
+
+def resolve_equipped_costume(
+    resource_id: int | str | None,
+    roster: dict[str, Any] | None,
+    detail: dict[str, Any] | None,
+    default_costume_id: int | str | None = None,
+) -> CostumeSelection:
+    """按 detail.costume_tid > detail.costume_id > roster.costume_tid > roster.costume_id 解析装备皮肤。
+
+    0 / None / "0" / "default" 均判定为默认外观；
+    正整数或非零数字字符串判定为 alternate 皮肤。
+    """
+    detail_dict = detail if isinstance(detail, dict) else {}
+    roster_dict = roster if isinstance(roster, dict) else {}
+
+    candidates = [
+        ("detail.costume_tid", detail_dict.get("costume_tid")),
+        ("detail.costume_id", detail_dict.get("costume_id")),
+        ("roster.costume_tid", roster_dict.get("costume_tid")),
+        ("roster.costume_id", roster_dict.get("costume_id")),
+    ]
+
+    for source, val in candidates:
+        if val is None or val == "":
+            continue
+        if isinstance(val, bool):
+            continue
+
+        if val in (0, "0", "default"):
+            return CostumeSelection(costume_id=0, source=source, kind="default")
+        if default_costume_id is not None and str(val).strip() == str(default_costume_id).strip():
+            return CostumeSelection(costume_id=0, source=source, kind="default")
+
+        if isinstance(val, int):
+            if val > 0:
+                return CostumeSelection(costume_id=val, source=source, kind="alternate")
+            return CostumeSelection(costume_id=val, source=source, kind="unknown")
+
+        if isinstance(val, str):
+            s = val.strip()
+            if s.isdigit() and int(s) > 0:
+                return CostumeSelection(costume_id=int(s), source=source, kind="alternate")
+            return CostumeSelection(costume_id=s, source=source, kind="unknown")
+
+    return CostumeSelection(costume_id=0, source="default", kind="default")
 
 
 class CharacterCardBuilder:
@@ -343,6 +390,11 @@ class CharacterCardBuilder:
             directory=directory,
             payload=payload,
         )
+        costume_selection = resolve_equipped_costume(
+            resource_id=directory.get("resource_id"),
+            roster=roster,
+            detail=detail,
+        )
         return CharacterCardData(
             commander_name=commander_name,
             fetched_at=fetched_at,
@@ -355,10 +407,8 @@ class CharacterCardBuilder:
                 if directory.get("resource_id") not in (None, "")
                 else None
             ),
-            costume_id=roster.get(
-                "costume_id",
-                detail.get("costume_id", detail.get("costume_tid")),
-            ),
+            costume_id=costume_selection.costume_id,
+            costume_selection=costume_selection,
             rarity=directory.get("rare"),
             element=directory.get("element"),
             weapon=directory.get("weapon"),

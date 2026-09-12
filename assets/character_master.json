@@ -127,8 +127,7 @@
       "burst": "Step3",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30069
+      "costume_id": 0
     },
     {
       "id": 110401,
@@ -164,8 +163,7 @@
       "burst": "Step2",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30070
+      "costume_id": 0
     },
     {
       "id": 111001,
@@ -201,8 +199,7 @@
       "burst": "Step1",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30054
+      "costume_id": 0
     },
     {
       "id": 112001,
@@ -328,8 +325,7 @@
       "burst": "Step3",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30043
+      "costume_id": 0
     },
     {
       "id": 117201,
@@ -365,8 +361,7 @@
       "burst": "Step1",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30032
+      "costume_id": 0
     },
     {
       "id": 129001,
@@ -492,8 +487,7 @@
       "burst": "Step3",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30035
+      "costume_id": 0
     },
     {
       "id": 140001,
@@ -511,8 +505,7 @@
       "burst": "Step2",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 10008
+      "costume_id": 0
     },
     {
       "id": 140101,
@@ -530,8 +523,7 @@
       "burst": "Step2",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 60004
+      "costume_id": 0
     },
     {
       "id": 140201,
@@ -567,8 +559,7 @@
       "burst": "Step3",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50017
+      "costume_id": 0
     },
     {
       "id": 141101,
@@ -586,8 +577,7 @@
       "burst": "Step2",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 70009
+      "costume_id": 0
     },
     {
       "id": 141201,
@@ -605,8 +595,7 @@
       "burst": "Step2",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30067
+      "costume_id": 0
     },
     {
       "id": 145001,
@@ -624,8 +613,7 @@
       "burst": "Step2",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30027
+      "costume_id": 0
     },
     {
       "id": 145101,
@@ -643,8 +631,7 @@
       "burst": "Step1",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30028
+      "costume_id": 0
     },
     {
       "id": 150001,
@@ -680,8 +667,7 @@
       "burst": "Step3",
       "corporation": "MISSILIS",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 60003
+      "costume_id": 0
     },
     {
       "id": 150201,
@@ -807,8 +793,7 @@
       "burst": "Step3",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 10014
+      "costume_id": 0
     },
     {
       "id": 202001,
@@ -880,8 +865,7 @@
       "burst": "Step1",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30031
+      "costume_id": 0
     },
     {
       "id": 203301,
@@ -935,8 +919,7 @@
       "burst": "Step3",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 100002
+      "costume_id": 0
     },
     {
       "id": 204301,
@@ -954,8 +937,7 @@
       "burst": "Step1",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50013
+      "costume_id": 0
     },
     {
       "id": 207001,
@@ -1009,8 +991,7 @@
       "burst": "Step2",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30005
+      "costume_id": 0
     },
     {
       "id": 207301,
@@ -1100,8 +1081,7 @@
       "burst": "Step3",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 130002
+      "costume_id": 0
     },
     {
       "id": 209201,
@@ -1137,8 +1117,7 @@
       "burst": "Step1",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50018
+      "costume_id": 0
     },
     {
       "id": 209401,
@@ -1156,8 +1135,7 @@
       "burst": "Step3",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30060
+      "costume_id": 0
     },
     {
       "id": 209501,
@@ -1175,8 +1153,7 @@
       "burst": "Step2",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30049
+      "costume_id": 0
     },
     {
       "id": 211301,
@@ -1194,8 +1171,7 @@
       "burst": "Step3",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30068
+      "costume_id": 0
     },
     {
       "id": 217001,
@@ -1231,8 +1207,7 @@
       "burst": "Step3",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50009
+      "costume_id": 0
     },
     {
       "id": 218101,
@@ -1304,8 +1279,7 @@
       "burst": "Step1",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30024
+      "costume_id": 0
     },
     {
       "id": 230001,
@@ -1395,8 +1369,7 @@
       "burst": "Step2",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30029
+      "costume_id": 0
     },
     {
       "id": 232201,
@@ -1450,8 +1423,7 @@
       "burst": "Step1",
       "corporation": "ELYSION",
       "rare": "SR",
-      "costume_id": 0,
-      "default_costume_id": 10011
+      "costume_id": 0
     },
     {
       "id": 235201,
@@ -1505,8 +1477,7 @@
       "burst": "Step2",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30057
+      "costume_id": 0
     },
     {
       "id": 235501,
@@ -1542,8 +1513,7 @@
       "burst": "Step1",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30034
+      "costume_id": 0
     },
     {
       "id": 244101,
@@ -1579,8 +1549,7 @@
       "burst": "Step1",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30062
+      "costume_id": 0
     },
     {
       "id": 258001,
@@ -1598,8 +1567,7 @@
       "burst": "Step3",
       "corporation": "ELYSION",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 130006
+      "costume_id": 0
     },
     {
       "id": 258101,
@@ -1707,8 +1675,7 @@
       "burst": "Step1",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 120004
+      "costume_id": 0
     },
     {
       "id": 306001,
@@ -1798,8 +1765,7 @@
       "burst": "Step1",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 70004
+      "costume_id": 0
     },
     {
       "id": 313201,
@@ -2159,8 +2125,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 70003
+      "costume_id": 0
     },
     {
       "id": 327001,
@@ -2178,8 +2143,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30021
+      "costume_id": 0
     },
     {
       "id": 327101,
@@ -2197,8 +2161,7 @@
       "burst": "Step3",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30020
+      "costume_id": 0
     },
     {
       "id": 327201,
@@ -2216,8 +2179,7 @@
       "burst": "Step1",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 70006
+      "costume_id": 0
     },
     {
       "id": 328101,
@@ -2235,8 +2197,7 @@
       "burst": "Step1",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30046
+      "costume_id": 0
     },
     {
       "id": 328201,
@@ -2362,8 +2323,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30040
+      "costume_id": 0
     },
     {
       "id": 331101,
@@ -2453,8 +2413,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 70008
+      "costume_id": 0
     },
     {
       "id": 338001,
@@ -2490,8 +2449,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30038
+      "costume_id": 0
     },
     {
       "id": 338201,
@@ -2509,8 +2467,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30030
+      "costume_id": 0
     },
     {
       "id": 339201,
@@ -2564,8 +2521,7 @@
       "burst": "Step1",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 130001
+      "costume_id": 0
     },
     {
       "id": 343201,
@@ -2601,8 +2557,7 @@
       "burst": "Step3",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30056
+      "costume_id": 0
     },
     {
       "id": 352101,
@@ -2638,8 +2593,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 70007
+      "costume_id": 0
     },
     {
       "id": 355101,
@@ -2657,8 +2611,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30063
+      "costume_id": 0
     },
     {
       "id": 357001,
@@ -2694,8 +2647,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30065
+      "costume_id": 0
     },
     {
       "id": 360101,
@@ -2713,8 +2665,7 @@
       "burst": "Step2",
       "corporation": "TETRA",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30066
+      "costume_id": 0
     },
     {
       "id": 422001,
@@ -2732,8 +2683,7 @@
       "burst": "Step3",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30026
+      "costume_id": 0
     },
     {
       "id": 422101,
@@ -2787,8 +2737,7 @@
       "burst": "Step2",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 120003
+      "costume_id": 0
     },
     {
       "id": 422401,
@@ -2824,8 +2773,7 @@
       "burst": "Step3",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30033
+      "costume_id": 0
     },
     {
       "id": 422601,
@@ -2861,8 +2809,7 @@
       "burst": "Step3",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50006
+      "costume_id": 0
     },
     {
       "id": 423101,
@@ -2880,8 +2827,7 @@
       "burst": "Step3",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50014
+      "costume_id": 0
     },
     {
       "id": 423201,
@@ -2917,8 +2863,7 @@
       "burst": "Step1",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50007
+      "costume_id": 0
     },
     {
       "id": 423401,
@@ -2990,8 +2935,7 @@
       "burst": "Step3",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50019
+      "costume_id": 0
     },
     {
       "id": 433001,
@@ -3009,8 +2953,7 @@
       "burst": "Step2",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 120001
+      "costume_id": 0
     },
     {
       "id": 433101,
@@ -3046,8 +2989,7 @@
       "burst": "AllStep",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50012
+      "costume_id": 0
     },
     {
       "id": 447101,
@@ -3083,8 +3025,7 @@
       "burst": "Step3",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50015
+      "costume_id": 0
     },
     {
       "id": 451301,
@@ -3102,8 +3043,7 @@
       "burst": "Step1",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 50016
+      "costume_id": 0
     },
     {
       "id": 451401,
@@ -3121,8 +3061,7 @@
       "burst": "Step2",
       "corporation": "PILGRIM",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 30041
+      "costume_id": 0
     },
     {
       "id": 451501,
@@ -3284,8 +3223,7 @@
       "burst": "Step2",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110001
+      "costume_id": 0
     },
     {
       "id": 582101,
@@ -3303,8 +3241,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110003
+      "costume_id": 0
     },
     {
       "id": 582201,
@@ -3340,8 +3277,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110005
+      "costume_id": 0
     },
     {
       "id": 583101,
@@ -3359,8 +3295,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110006
+      "costume_id": 0
     },
     {
       "id": 583201,
@@ -3378,8 +3313,7 @@
       "burst": "Step2",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110007
+      "costume_id": 0
     },
     {
       "id": 583301,
@@ -3415,8 +3349,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110014
+      "costume_id": 0
     },
     {
       "id": 583501,
@@ -3434,8 +3367,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110012
+      "costume_id": 0
     },
     {
       "id": 583601,
@@ -3471,8 +3403,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110024
+      "costume_id": 0
     },
     {
       "id": 584101,
@@ -3490,8 +3421,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110026
+      "costume_id": 0
     },
     {
       "id": 584201,
@@ -3527,8 +3457,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110018
+      "costume_id": 0
     },
     {
       "id": 585101,
@@ -3546,8 +3475,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110021
+      "costume_id": 0
     },
     {
       "id": 585201,
@@ -3583,8 +3511,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110028
+      "costume_id": 0
     },
     {
       "id": 586101,
@@ -3602,8 +3529,7 @@
       "burst": "Step2",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110030
+      "costume_id": 0
     },
     {
       "id": 586201,
@@ -3639,8 +3565,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110032
+      "costume_id": 0
     },
     {
       "id": 587101,
@@ -3658,8 +3583,7 @@
       "burst": "Step3",
       "corporation": "ABNORMAL",
       "rare": "SSR",
-      "costume_id": 0,
-      "default_costume_id": 110034
+      "costume_id": 0
     },
     {
       "id": 587201,

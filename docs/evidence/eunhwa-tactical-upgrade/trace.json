@@ -9,63 +9,75 @@
     "battle_tid_prefix": 2095,
     "battle_tid": 209501,
     "spine_asset_id": "c095",
-    "default_costume_id": 30049,
+    "costume_id": 0,
+    "equipped_costume_id": 30049,
+    "costume_name": "Day Off",
     "api_costume_id": 30049,
     "api_costume_tid": 30049
   },
   "root_cause": {
-    "summary": "Nikke API returns official base costume TID 30049 in roster_item.costume_id / detail.costume_tid. NikkeDbProvider previously classified non-zero costume_id as an alternate costume and failed lookup in costumes.json, returning missing instead of c095.",
-    "vulnerability": "Treated base costume TIDs as unknown alternate skins, causing 76 newer characters to drop to grey placeholder when costume_id was returned from game server."
+    "summary": "The previous session erroneously treated costume TID 30049 as Eunhwa's default base costume, resolving to c095 (the base military uniform). Furthermore, card_builder.py prioritized roster.costume_id over detail.costume_tid/id, which would prevent detail skin IDs from being honored.",
+    "correction": "Costume TID 30049 is the official alternate skin 'Day Off' (度假 / 休息日), corresponding to independent Spine 4.1 asset c095_01. Default appearance in Nikke is costume ID 0 (or None/'0'/'default') mapping to c095. An equipped skin must NEVER fall back to default clothing."
   },
   "solution": {
-    "character_master": "Added default_costume_id=30049 and costume_id=0 to character_master.json for resource 95 and all 200 characters.",
-    "resolver": "Added CharacterMasterResolver.is_default_costume(resource_id, costume_id) supporting both 0/None and official default costume TIDs.",
-    "provider": "Integrated CharacterMasterResolver into NikkeDbProvider.resolve_character_id, resolve_render_id, and costume_cache_token to map default costume TIDs directly to default_id (c095).",
-    "card_builder": "Supported detail.costume_tid as fallback in CharacterCardBuilder.build."
+    "costume_selection": "Added resolve_equipped_costume() with priority detail.costume_tid > detail.costume_id > roster.costume_tid > roster.costume_id.",
+    "character_master": "Removed all false default_costume_id entries from character_master.json, ensuring 30049 is not classified as default.",
+    "costumes_registry": "Added verified entry 30049 -> c095_01 in assets/costumes.json with sha256 and source metadata.",
+    "spine_manifest": "Added c095_01 entry to spine-manifest.json with verified dimensions (398x892) and sha256 c8d03a30747d63acf9eab8607cec1fee68a6b176f7780a4c885d1cc7d676981d."
   },
   "runtime_resolution": {
-    "resolve_render_id": "c095",
-    "costume_token_state": "default",
+    "costume_selection": {
+      "resolved_costume_id": 30049,
+      "kind": "alternate",
+      "source": "detail.costume_tid"
+    },
+    "costume_token_state": "known",
+    "costume_token": "known:30049:c095_01",
+    "resolve_render_id": "c095_01",
     "manifest_hit": true,
     "manifest_entry": {
       "runtime_version": "4.1",
-      "rendered_png": "c095.png",
-      "width": 504,
+      "rendered_png": "c095_01.png",
+      "width": 398,
       "height": 892,
-      "bbox": [
+      "alpha_bbox": [
         16,
         16,
-        488,
+        382,
         876
       ],
-      "sha256": "386d31f1ded4682fad5b498818095cc9ab2bb2dd8321d1a00366a74a4f1f589b"
+      "canvas_alpha_bbox": [
+        329,
+        82,
+        695,
+        942
+      ],
+      "sha256": "c8d03a30747d63acf9eab8607cec1fee68a6b176f7780a4c885d1cc7d676981d"
     },
     "crop": {
-      "before_crop": [
-        504,
-        892
+      "canvas": [
+        1024,
+        1024
       ],
-      "bbox": [
-        16,
-        16,
-        488,
-        876
+      "canvas_bbox": [
+        329,
+        82,
+        695,
+        942
       ],
       "after_crop": [
-        472,
-        860
+        398,
+        892
       ]
     },
     "card_output": {
       "dimensions": [
-        1920,
-        1080
+        1800,
+        1000
       ],
-      "portrait_area": [
-        600,
-        740
-      ],
-      "render_status": "SUCCESS"
+      "render_status": "SUCCESS",
+      "portrait_asset": "c095_01.png",
+      "portrait_description": "White sundress, straw bag with strawberry, strawberry drink ('Day Off')"
     }
   }
 }
