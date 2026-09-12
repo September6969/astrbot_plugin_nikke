@@ -77,6 +77,10 @@ class ProfileV04ContractTests(unittest.TestCase):
         self.assertEqual(data.sim_room_daily_record.display_label, "5-C")
         self.assertNotIn("5-3", data.sim_room_daily_record.display_label)
         self.assertEqual([item.compact_value for item in data.currencies[:4]], ["26M", "130M", "10.5K", "999"])
+        self.assertEqual(
+            [item.display_name for item in data.currencies],
+            ["珠宝", "战斗数据辑", "信用点", "芯尘", "普通招募券", "高级招募券", "躯体标签", "黄金积分券"],
+        )
         self.assertEqual([item.count for item in data.memorial_summary], [2, 3, 15, 7])
         self.assertEqual([item.display_name for item in data.memorial_summary], ["手机", "通话记录", "数据资料", "BGM"])
         self.assertEqual(data.sim_room_overclock_subseason, "88")
@@ -145,9 +149,9 @@ class ProfileV04ContractTests(unittest.TestCase):
     def test_currency_icon_registry_is_explicit_and_local_only(self):
         coverage = CurrencyRegistry.icon_coverage()
         self.assertEqual(coverage["total"], 8)
-        self.assertEqual(coverage["verified"], 3)
-        self.assertEqual(coverage["unverified"], 5)
-        self.assertEqual(coverage["unverified_types"], [99, 5100, 5200, 11000, 12000])
+        self.assertEqual(coverage["verified"], 8)
+        self.assertEqual(coverage["unverified"], 0)
+        self.assertEqual(coverage["unverified_types"], [])
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             manager = AssetManager(root / "cache", root, remote=True)
@@ -197,10 +201,21 @@ class ProfileV04ContractTests(unittest.TestCase):
                 with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=AssertionError("currency icon network")):
                     loaded = manager.get_currency_icon(1000)
                 self.assertIsNotNone(loaded)
-                self.assertEqual(loaded.size, (126, 117))
-                self.assertIsNone(manager.get_currency_icon(99))
+                self.assertEqual(loaded.size, (105, 96))
+                self.assertEqual(manager.get_currency_icon(99).size, (53, 57))
             finally:
                 manager.close()
+
+    def test_profile_renderer_keeps_ninth_live_currency_visible(self):
+        currencies = [{"type": item, "value": item} for item in CurrencyRegistry.DEFINITIONS]
+        currencies.insert(0, {"type": 98, "value": 16})
+        data = self.build(basic={"currencies": currencies}, outpost={}, daily={})
+        with tempfile.TemporaryDirectory() as directory:
+            renderer = ProfileCardRenderer(Path(directory), Path(__file__).resolve().parents[1] / "fonts")
+            output = renderer.render_profile(data)
+            self.assertEqual(len(data.currencies), 9)
+            with Image.open(output) as rendered:
+                self.assertLessEqual(rendered.height, 1850)
 
 
 class ProfileDailyClientTests(unittest.IsolatedAsyncioTestCase):

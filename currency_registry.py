@@ -28,21 +28,28 @@ class CurrencyRegistry:
         "https://github.com/Nikke-db/Nikke-db.github.io/blob/"
         f"{_NIKKE_DB_COMMIT}/images"
     )
+    _USER_REFERENCE = "user-provided:2026-09-12/profile-resource-quantity-reference"
     DEFINITIONS = {
-        99: CurrencyDefinition(99, "珠宝", verified_source=None, source_sha256=None),
+        99: CurrencyDefinition(
+            99,
+            "珠宝",
+            "gem",
+            _USER_REFERENCE,
+            "f99ae40780266faa746ac7bd9be44b4fd53e50c0d054caee9f5010f6f59d0700",
+        ),
         1000: CurrencyDefinition(
             1000,
-            "信用点",
-            "credit",
-            f"{_NIKKE_DB_SOURCE}/credit.png",
-            "85f242e863eab4a9f30391907843073c889f0fb7607fb530d12e7a15cc6a7035",
-        ),
-        2000: CurrencyDefinition(
-            2000,
             "战斗数据辑",
             "battledata",
             f"{_NIKKE_DB_SOURCE}/battledata.png",
             "dbea9945e42a5e6904e1d26cb8c136fb5947269b72b9fb14344565134f390486",
+        ),
+        2000: CurrencyDefinition(
+            2000,
+            "信用点",
+            "credit",
+            f"{_NIKKE_DB_SOURCE}/credit.png",
+            "85f242e863eab4a9f30391907843073c889f0fb7607fb530d12e7a15cc6a7035",
         ),
         3000: CurrencyDefinition(
             3000,
@@ -51,10 +58,10 @@ class CurrencyRegistry:
             f"{_NIKKE_DB_SOURCE}/coredust.png",
             "e0cf067c4b6443a736b8169568e858c99ee75340553974801ed35e6a8b931034",
         ),
-        5100: CurrencyDefinition(5100, "高级招募券", verified_source=None, source_sha256=None),
-        5200: CurrencyDefinition(5200, "普通招募券", verified_source=None, source_sha256=None),
-        11000: CurrencyDefinition(11000, "躯体标签", verified_source=None, source_sha256=None),
-        12000: CurrencyDefinition(12000, "联盟芯片", verified_source=None, source_sha256=None),
+        5100: CurrencyDefinition(5100, "普通招募券", "recruit_voucher", _USER_REFERENCE, "330449dd8a7241af8195b200d7526144d6d8b6ffc83f81561e7eb542ce344f91"),
+        5200: CurrencyDefinition(5200, "高级招募券", "advanced_recruit_voucher", _USER_REFERENCE, "3f67077cd4d65afbf489398e88f865092781d84ff1ebba2559837aab694198ba"),
+        11000: CurrencyDefinition(11000, "躯体标签", "body_label", _USER_REFERENCE, "e3c8e83a99501de71209309b4784db98b52c2636dbb3ced47987cfbfabd431dc"),
+        12000: CurrencyDefinition(12000, "黄金积分券", "gold_mileage_ticket", _USER_REFERENCE, "2a91fdd916cb801d020fa506ddf77644858bedd7cd1f89ddb67a765decf395ff"),
     }
     _INTEGER = re.compile(r"^[0-9]+$", re.ASCII)
 

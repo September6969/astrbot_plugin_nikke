@@ -435,10 +435,14 @@ class ProfileCardRenderer(CardRenderer):
         title = "RESOURCES / 我的资源"
         if data.currencies_partial:
             title += "（部分）"
-        items = [
+        all_items = [
             (item, item.display_name, item.compact_value if item.value is not None else "—")
             for item in (data.currencies or [])
-        ][:8]
+        ]
+        items = all_items[:12]
+        if len(all_items) > 12:
+            # 极端响应仍保持高度有界，但必须显式告知省略数量，不能静默截断。
+            items[-1] = (None, "其余资源", f"{len(all_items) - 11} 项")
         if not items:
             items = [(None, "暂无资源", "—")]
 
