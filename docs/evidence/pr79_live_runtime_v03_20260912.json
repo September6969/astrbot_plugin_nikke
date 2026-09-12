@@ -3,7 +3,7 @@
   "captured_at": "2026-09-12",
   "repository": "September6969/astrbot_plugin_nikke",
   "branch": "fix/live-runtime-v03",
-  "head": "5993c9b",
+  "head": "be7e2ce",
   "origin_main": "e4a9ff9867dc9a92c203484c748562e4c0a7f1d0",
   "pr": {
     "number": 79,
@@ -66,21 +66,22 @@
     },
     "currency_icons": {
       "total": 8,
-      "verified": 3,
-      "verified_types": [1000, 2000, 3000],
-      "unverified": 5,
-      "unverified_types": [99, 5100, 5200, 11000, 12000],
+      "verified": 8,
+      "verified_types": [99, 1000, 2000, 3000, 5100, 5200, 11000, 12000],
+      "unverified": 0,
+      "unverified_types": [],
       "source_commit": "a2358b72bd1335c30737e46482a99947f3788bc7",
+      "user_quantity_reference": true,
       "network_on_render": false,
-      "status": "PARTIAL_VERIFIED"
+      "status": "VERIFIED_FOR_KNOWN_TYPES"
     },
     "live_redacted_render": {
-      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-currency.png",
-      "dimensions": [1200, 1715],
-      "sha256": "f25237e325be87a4076fb9d3eeb5c8386f8c1cc5582e590e0717043235566b3c",
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-all-currency.png",
+      "dimensions": [1200, 1770],
+      "sha256": "eea9ece0cb798f5a2ad37b81f13413c78423c75b5ae50539c1a4b8bd6adbf844",
       "currency_count": 9,
       "tower_items": 4,
-      "visual_inspection": "PASS: verified icons scale, alpha and text avoidance",
+      "visual_inspection": "PASS: 8 known icons have correct semantics, scale, alpha and text avoidance; ninth item is not silently truncated",
       "raw_payload_saved": false,
       "identity_values_saved": false
     }
