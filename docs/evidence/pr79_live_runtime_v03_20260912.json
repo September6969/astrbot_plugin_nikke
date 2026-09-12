@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-09-12",
+  "repository": "September6969/astrbot_plugin_nikke",
+  "branch": "fix/live-runtime-v03",
+  "head": "745c6948f0e506ec92715a9a8477309697366374",
+  "head_semantics": "tested code and parent of the evidence-only closeout commit; the final immutable commit SHA is recorded in PR #79 because a tracked file cannot contain the SHA of the commit that contains itself",
+  "origin_main": "e4a9ff9867dc9a92c203484c748562e4c0a7f1d0",
+  "pr": {
+    "number": 79,
+    "state": "OPEN",
+    "draft": false,
+    "merge_state": "CLEAN",
+    "merge_performed": false
+  },
+  "acceptance_state": "PARTIAL",
+  "worktree": {
+    "path": "E:/DevCache/nikke-live-runtime-v03",
+    "main_modified": false,
+    "force_push": false,
+    "deployment_performed": true
+  },
+  "tests": {
+    "targeted": "PASS: prior Profile/Campaign 56 tests + 15 subtests; AssetManager/Spine 31 tests + 11 subtests; local resolver 7 tests; capture/sync targeted tests; post-full currency icon change 28 tests + 5 subtests; 2026-09-13 OL/Card/Spine audit 47 tests + 5 subtests",
+    "final_full_pytest": {
+      "status": "PASS",
+      "tests": 623,
+      "subtests": 481,
+      "warnings": 1,
+      "warning_scope": "existing google.genai deprecation warning"
+    },
+    "compileall": "PASS",
+    "node_check": "PASS: extension/background.js, extension/popup.js",
+    "node_tests": "PASS: 4/4",
+    "git_diff_check": "PASS"
+  },
+  "profile": {
+    "visual_artifacts_viewed": true,
+    "before": {
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/before-profile.png",
+      "dimensions": [1200, 1221],
+      "sha256": "94da5c033ad2c458769b83c288326671dfda6a0349f3416aca461f6fa4aff2b1"
+    },
+    "after": {
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04.png",
+      "dimensions": [1200, 1619],
+      "sha256": "74a69cd2601007c6f4bfcce6c25963a092cfa08c1bf5a5f4869de35114c1eea8"
+    },
+    "after_previews": [
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04-50.jpg",
+        "dimensions": [600, 810],
+        "sha256": "f50c232a2446fd7db444b96638339d02684128850e74252d85a8f7137f0bb389"
+      },
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04-30.jpg",
+        "dimensions": [360, 486],
+        "sha256": "9bf3a193060daf0b53e9c7b35b5c77fff9bd0c506fa240d685fc6762def74c54"
+      }
+    ],
+    "benchmark": {
+      "samples_total": 13,
+      "warmup_discarded": 1,
+      "samples_used": 12,
+      "median_ms": 126.2293,
+      "p95_ms": 134.312
+    },
+    "currency_icons": {
+      "total": 8,
+      "verified": 8,
+      "verified_types": [99, 1000, 2000, 3000, 5100, 5200, 11000, 12000],
+      "unverified": 0,
+      "unverified_types": [],
+      "source_commit": "a2358b72bd1335c30737e46482a99947f3788bc7",
+      "user_quantity_reference": true,
+      "network_on_render": false,
+      "status": "VERIFIED_FOR_KNOWN_TYPES"
+    },
+    "live_redacted_render": {
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-known-currency.png",
+      "dimensions": [1200, 1715],
+      "sha256": "ea09d416f57f2cef3c235833c3a3cc0969f01786c2e651ddd2491ce707037f30",
+      "currency_count": 9,
+      "tower_items": 4,
+      "visual_inspection": "PASS: 8 known icons have correct semantics, scale, alpha and text avoidance; unidentified type 98 is retained below UI but omitted from card by user request",
+      "raw_payload_saved": false,
+      "identity_values_saved": false
+    }
+  },
+  "tower_live_shape": {
+    "source": "serv / existing authorized binding / redacted read-only shape",
+    "array_length": 4,
+    "element_keys": ["is_opened", "remaining_count", "type"],
+    "open_type_values": [2],
+    "display_semantics": "only opened entries count; no reliable total, so display remaining X times",
+    "observed_open_remaining": 3,
+    "raw_payload_saved": false,
+    "identity_values_saved": false
+  },
+  "ol_live_remediation_20260913": {
+    "status": "RESOLVED_IN_CODE_PENDING_QQ",
+    "source": "one authorized read-only character-details diagnostic, sanitized server-side",
+    "unknown_before": [
+      {"raw_id": "7001211", "raw_key": "StatCriticalDamage", "slot": "head", "ol_slot": 1, "value_kind": "unknown"},
+      {"raw_id": "7000909", "raw_key": "StatChargeDamage", "slot": "arm", "ol_slot": 2, "value_kind": "unknown"},
+      {"raw_id": "7001111", "raw_key": "StatCritical", "slot": "leg", "ol_slot": 1, "value_kind": "unknown"}
+    ],
+    "display_after": "7000909/7001111/7001211 resolve through the authoritative OL tier registry and exact percent contract; only IDs absent from that registry show '未知词条 · ID <raw_id>' with value '待确认'.",
+    "inventory": "server-only ol_unknown_inventory.json now excludes known OL IDs, preserves true unknown ID/key observations and records raw-key occurrence conflicts without account identity.",
+    "percent_contract": "1322 -> 0.1322 -> 13.22%; formatting depends on declared value_kind and never renderer magnitude inference.",
+    "real_qq_validation": false,
+    "regression_resolution": {
+      "7000909": {"label": "蓄力伤害增加", "tier": 9, "raw_value": 1040, "display": "10.40%"},
+      "7001111": {"label": "暴击率增加", "tier": 11, "raw_value": 571, "display": "5.71%"},
+      "7001211": {"label": "暴击伤害增加", "tier": 11, "raw_value": 1644, "display": "16.44%"}
+    }
+  },
+  "spine_maintenance": {
+    "source_repo": "https://github.com/Nikke-db/Nikke-db.github.io.git",
+    "source_commit": "a2358b72bd1335c30737e46482a99947f3788bc7",
+    "disk_guard_default_gb": 5,
+    "vendor_size_kib": 4651740,
+    "render_size_kib": 85368,
+    "free_space_kib_observed": 9372168,
+    "default_target_count": 200,
+    "historical_verified_costume_target_count": 40,
+    "unique_target_count": 240,
+    "bundle_found": 240,
+    "bundle_missing": 0,
+    "runtime_4_0": 102,
+    "runtime_4_1": 138,
+    "render_success": 240,
+    "render_failed": 0,
+    "render_invalid": 0,
+    "render_missing": 0,
+    "default_coverage_percent": 100.0,
+    "historical_verified_subset_coverage_percent": 100.0,
+    "overall_coverage_percent": 100.0,
+    "worker_bridge": "isolated Docker workers with network disabled",
+    "integrity_validated": 240,
+    "integrity_failures": 0,
+    "visual_sample_count": 20,
+    "visual_sample_sha256": "ca0e4af5ecd833e08f18d642d49dce034407c8bf98ac57c1c896908ac01e7321",
+    "visual_sample_result": "Historical limited sample only; it is not a QQ visual acceptance result.",
+    "production_static_asset_repair": {
+      "status": "DEPLOYED",
+      "reason": "The original real-QQ White Snow failure resolved to absent production static asset c220 while the 240-entry evidence set existed outside the hot path.",
+      "repaired_assets": ["c220", "c330", "c016", "c511", "c352"],
+      "manifest_and_rendered_tree": "Atomically replaced after SHA-256 verification; no account identifiers were recorded."
+    },
+    "visual_audit_20260913": {
+      "render_success": 240,
+      "integrity_valid": 240,
+      "visual_validated": false,
+      "default": {"total": 200, "auto_clear": 200, "suspect": 0},
+      "historical_verified_costume_subset": {"total": 40, "auto_clear": 40, "suspect": 0},
+      "contact_sheet_path": "E:/DevCache/nikke-live-runtime-v03-artifacts/spine-visual-audit-20260913/",
+      "automatic_check": "Alpha bounds, margins, aspect, occupancy and connected-component heuristics only; all 10 contact sheets were inspected by maintainer but real QQ/card acceptance remains required.",
+      "source_bundle_trace": "BLOCKED: production retains the rendered static PNG/manifest but not c220 source skel/atlas bundle, so no truthful new worker raw/crop trace can be generated in place. The maintenance renderer now supports explicit evidence output when a verified local bundle is available."
+    },
+    "fallback_counted_as_success": false
+  },
+  "costume_full_coverage_20260912": {
+    "status": "RACER_HIGH_DEPLOYED_IN_PRODUCTION_MANIFEST",
+    "official_source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+    "official_source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+    "official_costume_total": 178,
+    "verified_costume_total": 41,
+    "verified_subset_coverage_percent": 100.0,
+    "official_costume_coverage_percent": 23.03,
+    "production_supported_independent": 41,
+    "mapping_missing": 137,
+    "manifest_missing": 0,
+    "racer_high": {
+      "costume_id": "110023",
+      "character_resource_id": "222",
+      "spine_mode": "independent_asset",
+      "spine_asset_id": "c222_01",
+      "runtime_version": "4.1",
+      "skin_name": null,
+      "rendered_png": "E:/DevCache/nikke-live-runtime-v03-artifacts/costume-source-audit/racer-high/after-crop.png",
+      "rendered_png_sha256": "c69863515e039f9cb2a2a67474bc51c29d6036afb8b693f3241b66be48a734af",
+      "visual_inspection": "PASS: Scarlet in red-black Racer's High, not default Scarlet; transparent edges and full character are intact.",
+      "manifest_hit": true,
+      "final_card_path": "E:/DevCache/nikke-live-runtime-v03-artifacts/costume-source-audit/racer-high/final-character-card.png",
+      "final_card_visual_inspection": "PASS: Character card correctly renders Scarlet with red-and-black Racer's High outfit, pilgrim theme, correct OL badges and option summaries.",
+      "qq_result": "READY_FOR_USER_QQ_TEST"
+    },
+    "boundary": "The 41/41 figure is verified-subset render coverage (100.0%). It is not all-official Costume coverage (23.03% of 178), and local final card render is not user QQ acceptance."
+  },
+  "campaign": {
+    "verified_mapping": {
+      "normal": 1785,
+      "hard": 1787,
+      "total": 3572
+    },
+    "chapter_1_smoke": {
+      "mode": "NORMAL",
+      "chapter": 1,
+      "requests": 4,
+      "available": 0,
+      "unavailable": 4,
+      "error": 0,
+      "rate_limited": 0,
+      "raw_response_saved": false
+    },
+    "full_capture": {
+      "status_at_capture": "COMPLETE",
+      "order": "NORMAL then HARD",
+      "single_thread": false,
+      "initial_concurrency": 3,
+      "retry_concurrency": 1,
+      "jitter_seconds": [0.8, 1.5],
+      "rate_limit_backoff_seconds": [5, 10, 20, 40],
+      "normal_records": 1785,
+      "hard_records": 1787,
+      "total_records": 3572,
+      "available": 2699,
+      "unavailable": 873,
+      "rate_limited": 0,
+      "error": 0,
+      "malformed": 0,
+      "initial_pass_retryable_errors": 4,
+      "retry_request_count": 4,
+      "retry_elapsed_seconds": 18.126,
+      "rate_limit_incidents": 0,
+      "stopped_reason": "",
+      "normal_sha256": "739ec54bd31de52289554cc4b11eb4f44fff7ebe5364ac3927341a38426238a5",
+      "hard_sha256": "ed72381a244c339143cfd1cbef59149c9d03a42b02eca1278bf528bcecc32eb5",
+      "server_output_dir": "/AstrBot/data/nikke/campaign-capture/",
+      "full_snapshots_committed": false
+    },
+    "character_inventory": {
+      "unique_raw_tids": 71,
+      "unique_normalized_prefixes": 33,
+      "resolved": 71,
+      "unresolved": 0,
+      "coverage_percent": 100.0,
+      "unresolved_ids": [],
+      "sha256": "0fbeac32efbba1f71adacaeed8b13ce36ddb2bc5d15ba20438c89d3e0c416049"
+    },
+    "costume_inventory": {
+      "unique_explicit_pairs": 0,
+      "resolved": 0,
+      "unresolved": 0,
+      "coverage_percent": null,
+      "interpretation": "The live API responses did not explicitly include costume_id; no costume was inferred from TID.",
+      "sha256": "03f56a819b346a286546d355303b80fd6a9813ae59ef46c33665ac30c5fb604e"
+    },
+    "offline_replay": {
+      "seed": 79,
+      "normal_samples": 10,
+      "hard_samples": 10,
+      "five_member_valid": 20,
+      "name_valid": 20,
+      "portrait_valid": 20,
+      "combat_sum_valid": 20,
+      "visual_inspection": "PASS: no empty portrait, gray silhouette or obvious crop defect",
+      "contact_sheet_path": "E:/DevCache/nikke-live-runtime-v03-artifacts/campaign-replay-contact-sheet.png",
+      "contact_sheet_sha256": "389934931264869614212a4d7b9136bb88f88ce4fb08952a0730f47fa55a5dde"
+    },
+    "privacy_audit": {
+      "files_scanned": ["campaign_capture_normal.jsonl", "campaign_capture_hard.jsonl"],
+      "forbidden_key_hits": 0,
+      "forbidden_text_hits": 0,
+      "excluded": ["Cookie", "Token", "Authorization", "OpenID", "QQ ID", "Account ID", "headers"]
+    }
+  },
+  "boundaries": [
+    "No main modification, force push, merge, release, tag, version bump, CHANGELOG change, ruleset change or Issue #80 implementation.",
+    "Production static Spine assets and the unknown-OL visibility hotfix were deployed after backup/preflight; no QQ message was sent by the maintainer.",
+    "No Cookie, token, Authorization header, OpenID or QQ ID was written to repository evidence.",
+    "Spine render_success, integrity_valid and visual_validated are separate: 240/240 renders and structural checks are not a visual or QQ pass.",
+    "Campaign full capture is complete with no retryable stages; the live API exposed no explicit costume_id, so the costume inventory is truthfully empty.",
+    "Final status is PARTIAL. PR #79 must not merge and must not be labelled READY_FOR_RETEST until the user confirms the real QQ portrait/card regression is fixed."
+  ]
+}

@@ -61,9 +61,87 @@ class CampaignStageResolverTests(unittest.TestCase):
         self.assertEqual(hard.stage_id, 7035044)
         self.assertEqual(hard.mode, "HARD")
 
+        # Regression fixture: 2-6 is 6002008, NOT 6002006 (blocks arithmetic formula guessing)
+        s_2_6 = self.resolver.resolve_query("2-6")
+        self.assertIsNotNone(s_2_6)
+        self.assertEqual(s_2_6.stage_id, 6002008)
+
+        # Prefix H and N formats
+        s_h = self.resolver.resolve_query("H35-36")
+        self.assertIsNotNone(s_h)
+        self.assertEqual(s_h.stage_id, 7035044)
+
+        # Postfix mode queries (35-36 困难, 46-14A-1 普通)
+        s_postfix = self.resolver.resolve_query("35-36 困难")
+        self.assertIsNotNone(s_postfix)
+        self.assertEqual(s_postfix.stage_id, 7035044)
+        s_postfix_n = self.resolver.resolve_query("46-14A-1 普通")
+        self.assertIsNotNone(s_postfix_n)
+        self.assertEqual(s_postfix_n.stage_id, 6046015)
+
+    def test_side_stages_ab_branching(self):
+        # A/B branching side stages
+        for query, expected_id in [
+            ("6-6A-1", 6006007),
+            ("6-6A-2", 6006008),
+            ("6-6B-1", 6006009),
+            ("6-6B-2", 6006010),
+            ("普通 46-14A-1", 6046015),
+            ("普通 46-14B-1", 6046017),
+        ]:
+            stage = self.resolver.resolve_query(query)
+            self.assertIsNotNone(stage, f"Failed for query: {query}")
+            self.assertEqual(stage.stage_id, expected_id)
+
     def test_nonexistent_stage_returns_none(self):
         self.assertIsNone(self.resolver.resolve_query("99-99"))
+        self.assertIsNone(self.resolver.resolve_query("999-999"))
         self.assertIsNone(self.resolver.resolve_query("困难 99-99"))
+        self.assertIsNone(self.resolver.resolve_query("困难 999-999"))
+
+    def test_reverse_resolution_by_id(self):
+        # Normal stage reverse resolve
+        n46 = self.resolver.resolve_id(6046044)
+        self.assertIsNotNone(n46)
+        self.assertEqual((n46.mode, n46.chapter, n46.name), ("NORMAL", 46, "46-40"))
+
+        # Side stage reverse resolve
+        n_side = self.resolver.resolve_id(6046015)
+        self.assertIsNotNone(n_side)
+        self.assertEqual((n_side.mode, n_side.chapter, n_side.name), ("NORMAL", 46, "46-14A-1"))
+
+        # Hard stage reverse resolve
+        h35 = self.resolver.resolve_id(7035044)
+        self.assertIsNotNone(h35)
+        self.assertEqual((h35.mode, h35.chapter, h35.name), ("HARD", 35, "35-36"))
+
+        # Regression fixture reverse: 6002008 -> 2-6
+        s_2_6 = self.resolver.resolve_id(6002008)
+        self.assertIsNotNone(s_2_6)
+        self.assertEqual((s_2_6.mode, s_2_6.chapter, s_2_6.name), ("NORMAL", 2, "2-6"))
+
+        # String ID handling
+        s_str = self.resolver.resolve_id("6046044")
+        self.assertIsNotNone(s_str)
+        self.assertEqual(s_str.name, "46-40")
+
+        # Mode hint mismatch strictly returns None
+        self.assertIsNone(self.resolver.resolve_id(6046044, mode_hint="HARD"))
+        self.assertIsNone(self.resolver.resolve_id(7035044, mode_hint="NORMAL"))
+
+        # Invalid IDs return None without throwing
+        self.assertIsNone(self.resolver.resolve_id(9999999))
+        self.assertIsNone(self.resolver.resolve_id(-1))
+        self.assertIsNone(self.resolver.resolve_id(True))
+        self.assertIsNone(self.resolver.resolve_id("not-a-number"))
+
+    def test_story_and_ex_are_excluded_from_static_mapping(self):
+        mapping = self.resolver.mapping
+        for mode, chapters in mapping.items():
+            for ch, stages in chapters.items():
+                for stage_name in stages.keys():
+                    self.assertNotIn("story", stage_name.lower())
+                    self.assertNotIn("ex", stage_name.lower())
 
 
 class CampaignHistoryBuilderTests(unittest.TestCase):
@@ -472,6 +550,114 @@ class CampaignClientToBuilderIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(record.members), 5)
         self.assertEqual(record.total_combat, 120000 + 115000 + 118000 + 95000 + 102000)
         self.assertEqual(record.total_combat, 550000)
+
+class CampaignRealBattleTidRegressionTests(unittest.TestCase):
+    """验证真实 QQ 复测中暴露的 5 个战役 TID 及突破等级归一化合同。"""
+
+    def setUp(self):
+        self.builder = CampaignHistoryBuilder()
+        self.stage = CampaignStage(mode="HARD", chapter=35, name="35-36", stage_id=7035044)
+
+    def test_real_five_battle_tids_resolve_canonical_names_and_resources(self):
+        # 真实 QQ 复测中 /妮姬 战役 困难 35-36 返回的真实阵容
+        payload = {
+            "code": 0,
+            "msg": "ok",
+            "data": {
+                "list": [
+                    {"tid": 433004, "lv": 441, "combat": 182300, "slot": 1},
+                    {"tid": 301704, "lv": 441, "combat": 178500, "slot": 2},
+                    {"tid": 447105, "lv": 441, "combat": 195200, "slot": 3},
+                    {"tid": 423401, "lv": 441, "combat": 180100, "slot": 4},
+                    {"tid": 235207, "lv": 441, "combat": 176400, "slot": 5},
+                ]
+            },
+        }
+        record = self.builder.build(self.stage, payload, commander_name="测试指挥官")
+        self.assertEqual(record.status, ClearLineupStatus.AVAILABLE)
+        self.assertEqual(len(record.members), 5)
+
+        m1, m2, m3, m4, m5 = record.members
+        # 1. 皇冠 (Crown)
+        self.assertEqual(m1.tid, 433004)
+        self.assertEqual(m1.name_cn, "皇冠")
+        self.assertEqual(m1.name_en, "Crown")
+        self.assertEqual(m1.resource_id, "330")
+        self.assertEqual(m1.name_code, 5065)
+        self.assertIsNone(m1.costume_id)
+
+        # 2. 阿妮斯：超级巨星 (Anis: Star)
+        self.assertEqual(m2.tid, 301704)
+        self.assertEqual(m2.name_cn, "阿妮斯：超级巨星")
+        self.assertEqual(m2.name_en, "Anis: Star")
+        self.assertEqual(m2.resource_id, "17")
+        self.assertEqual(m2.name_code, 5169)
+        self.assertIsNone(m2.costume_id)
+
+        # 3. 白雪公主：重型武装 (Snow White: Heavy Arms)
+        self.assertEqual(m3.tid, 447105)
+        self.assertEqual(m3.name_cn, "白雪公主：重型武装")
+        self.assertEqual(m3.name_en, "Snow White: Heavy Arms")
+        self.assertEqual(m3.resource_id, "471")
+        self.assertEqual(m3.name_code, 5161)
+        self.assertIsNone(m3.costume_id)
+
+        # 4. 桃乐丝：机缘巧遇 (Dorothy: Serendipity)
+        self.assertEqual(m4.tid, 423401)
+        self.assertEqual(m4.name_cn, "桃乐丝：机缘巧遇")
+        self.assertEqual(m4.name_en, "Dorothy: Serendipity")
+        self.assertEqual(m4.resource_id, "234")
+        self.assertEqual(m4.name_code, 5145)
+        self.assertIsNone(m4.costume_id)
+
+        # 5. 海伦 (Helm)
+        self.assertEqual(m5.tid, 235207)
+        self.assertEqual(m5.name_cn, "海伦")
+        self.assertEqual(m5.name_en, "Helm")
+        self.assertEqual(m5.resource_id, "352")
+        self.assertEqual(m5.name_code, 5066)
+        self.assertIsNone(m5.costume_id)
+
+    def test_core_break_normalization(self):
+        # 验证不同突破/核心等级 (00~11) 全部归一化到同一角色
+        for raw_tid in (301700, 301701, 301704, 301710):
+            payload = {
+                "code": 0,
+                "msg": "ok",
+                "data": {
+                    "list": [
+                        {"tid": raw_tid, "lv": 400, "combat": 100000, "slot": 1},
+                        {"tid": 101, "lv": 400, "combat": 100000, "slot": 2},
+                        {"tid": 102, "lv": 400, "combat": 100000, "slot": 3},
+                        {"tid": 103, "lv": 400, "combat": 100000, "slot": 4},
+                        {"tid": 104, "lv": 400, "combat": 100000, "slot": 5},
+                    ]
+                },
+            }
+            record = self.builder.build(self.stage, payload)
+            m = record.members[0]
+            self.assertEqual(m.name_cn, "阿妮斯：超级巨星")
+            self.assertEqual(m.resource_id, "17")
+            self.assertIsNone(m.costume_id)
+
+    def test_unknown_tid_does_not_leak_raw_tid_as_resource_id(self):
+        payload = {
+            "code": 0,
+            "msg": "ok",
+            "data": {
+                "list": [
+                    {"tid": 999999, "lv": 400, "combat": 100000, "slot": 1},
+                    {"tid": 101, "lv": 400, "combat": 100000, "slot": 2},
+                    {"tid": 102, "lv": 400, "combat": 100000, "slot": 3},
+                    {"tid": 103, "lv": 400, "combat": 100000, "slot": 4},
+                    {"tid": 104, "lv": 400, "combat": 100000, "slot": 5},
+                ]
+            },
+        }
+        record = self.builder.build(self.stage, payload)
+        m = record.members[0]
+        self.assertEqual(m.name_cn, "NIKKE 999999")
+        self.assertIsNone(m.resource_id)  # 严格不能把 999999 赋给 resource_id
 
 
 if __name__ == "__main__":

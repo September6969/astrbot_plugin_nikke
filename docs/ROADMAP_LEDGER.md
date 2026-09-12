@@ -1,10 +1,10 @@
 # NIKKE 长期路线台账
 
-更新时间：2026-09-09。本文件是路线图状态摘要，不是运行时状态源；每次恢复前仍须重新 fetch、核验 GitHub PR/CI、工作树和未提交状态。
+更新时间：2026-09-12。本文件是路线图状态摘要，不是运行时状态源；每次恢复前仍须重新 fetch、核验 GitHub PR/CI、工作树和未提交状态。
 
 ## 当前基线
 
-本轮按依赖顺序推进独立 Draft PR。本次主题从已重新核验的 `origin/main@7c164cd1d9814fc7b4530de861813665187e63b5` 建立；恢复任务时仍须重新核验。
+本轮按依赖顺序推进独立 PR。本次接管主题在现有 `fix/live-runtime-v03` 分支原地继续；当前重新核验的 `origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0` 仅作为事实基线记录，恢复任务时仍须重新核验。
 
 ## 本轮已合并主题
 
@@ -207,3 +207,36 @@
   8. 最终健康检查：Docker 容器正常运行无崩溃循环，/healthz 持续返回 HTTP 200。
 - 最终验收状态：`LIVE RC ACCEPTED — v0.2.0`。
 
+## PR #79 接管续作：Profile Dashboard v0.4 / Local Spine / Campaign capture（2026-09-11）
+
+- 当前事实基线已重新核验：`origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；现有 PR #79 为 `OPEN`、非 Draft，分支为 `fix/live-runtime-v03`，原远端 head `34786c721daf7524bed3769898dafbfa9995b276`，本轮在该分支原地追加，不新建 PR、不修改 main、不合并 PR #79。
+- 本轮新增 Profile Dashboard v0.4 数据合同与 renderer 分区：Daily 四路并发读取、容量比例安全转换、remaining 语义、模拟室 `5-C`、资源 compact value、遗失物显式四组、循环室中文标签和缺失/部分状态；Daily/CDK 执行语义未改动。
+- 本轮新增本地 Nikke-db Spine 维护链：`LocalSpineBundleResolver`、atlas BOM/多纹理/路径越界/图片完整性/真实 4.0/4.1 版本识别、manifest v2 schema、维护期 sparse checkout 与 idle@t=0 PNG 预渲染脚本。角色卡热路径只读取 manifest/本地 PNG/受控缓存，不启动 Worker、不发 HTTP、不回退 FB。
+- 本轮新增只读 Campaign NORMAL/HARD 捕获工具：静态 verified stage 表、resume/force、串行 jitter、限流退避、原子 JSONL、状态分类、TID/Costume inventory 和脱敏快照回放；不执行账号写入或把完整响应落盘。
+- 离线证据：本轮新增/定向测试 `18 passed`；当前工作树最终 full pytest `616 passed`、`476 subtests`、`1 warning`，`compileall`、Node extension `4 passed`、`git diff --check` 均通过；Profile 合成前后图已实际查看，属于 `READY_OFFLINE`，不是真实账号、QQ 送达、部署或资源授权证据。
+- 本轮明确未完成：服务器本地 Nikke-db checkout 的全量维护运行、生产 runtime/素材许可核验、真实 Campaign 快照、真实 QQ/Voice、Signin、部署与 main 合并；这些保持 `NEEDS_LIVE_EVIDENCE`/`NEEDS_HUMAN_DECISION`，最终交接上限为 `READY_FOR_RETEST`。
+
+## PR #79 接管续作更新（2026-09-12）
+
+- 重新核验当前事实基线：`origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；当前分支 `fix/live-runtime-v03` 的完整 Profile 图标代码提交为 `be7e2ce`，PR #79 仍为 OPEN、非 Draft，没有合并或修改 main。
+- Manifest fail-closed 已锁定：声明过的 entry 对路径、PNG 解码和 SHA-256 具有权威性；失效项记录 `STATIC_SPINE_ASSET_INVALID` 后直接交给 UI fallback，不再读取旧 Spine cache、启动 worker 或访问网络。Hot path 只允许本地文件、Pillow 和 hash。
+- Nikke-db 维护脚本已加入默认 5 GB 磁盘门禁，并修复中断的 `--no-checkout` 初始索引误判；两阶段 sparse checkout 已在 `serv` 实际跑通，240 个目标的 atlas 纹理页均按声明路径加入，未默认拉取 aim/cover。
+- `serv` 隔离维护证据：Nikke-db source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，200 默认 + 40 历史已核验 Costume，共 240 项，runtime 4.0/4.1 为 102/138；补齐精确 sparse Costume bundle 并通过禁网 Docker worker 桥接后，渲染成功 240、失败 0、无效 0、缺失 0。这里的 Costume 100% 仅是历史 verified subset，不是全官方 Costume coverage；全量分母、状态和 Racer's High 追踪由 `scripts/audit_costume_spine_coverage.py` 及 `docs/evidence/pr79_live_runtime_v03_20260912.json` 单独记录。不把隔离结果冒充生产部署。
+- Profile v0.4 已完成 live Tower 字段形状核查：`type`、`is_opened`、`remaining_count`；只统计开放条目，无法可靠取得 total 时显示“剩余 X 次”，不使用数组长度伪造 `0/3`。8 项已知资源均按固定上游或用户数量对照、SHA-256 和本地只读路径接入；type 98 仍未知并按用户要求不上卡。
+- `serv` 授权账号只读 Profile 已在隔离目录实渲染为 `1200×1715`，底层 9 项资源、卡面 8 项、4 项 Tower；脱敏图已实际查看，8 枚 verified 图标的语义、缩放、透明边缘和文字避让正常。该证据不等于生产部署或 QQ 送达。
+- Profile 合成 after 图为 `1200×1619`，已查看原图、50% 和 30% 预览；12 个 warmup 后样本 median `126.2293 ms`、p95 `134.312 ms`。
+- Campaign 只读现场已完成 NORMAL Chapter 1 smoke：4/4 `UNAVAILABLE`、0 error、0 rate-limit；按用户要求新增 1–4 有界请求并发、单写入器合同，5 项 Campaign 定向测试通过。全量抓取现以 3 路并发、jitter 与 5/10/20/40 秒退避运行，输出仅在 `/AstrBot/data/nikke/campaign-capture/`，完整快照不提交仓库。
+- 本轮最终本地验证：`639 passed`、`481 subtests`、1 个既有依赖弃用警告；`compileall`、Node `--check`、extension tests、`git diff --check` 均通过。最终状态上限保持 `READY_FOR_RETEST`，在 Campaign/Spine 现场覆盖闭合前不标记完成。
+- Costume schema v3 与 Scarlet Racer's High（110023 → c222_01）端到端闭环已完成：Spine 4.1 离线预渲染 PNG、478×891 alpha bbox 裁切、生产 manifest 接入与静态部署已在 `serv` 完成。verified registry coverage 达到 41/41（100.0%），官方 178 分母覆盖率达到 23.03%（41/178）；manifest 缺项归零。本地 CharacterCard 合成预览已生成并人工复核立绘红黑赛车服与朝圣者主题，serv 容器内部 AssetManager 验证零网络、零动态 worker 直读本地静态 PNG。QQ 验收仍待用户执行，当前状态保持 PARTIAL。
+
+## PR #79 续作更新：修复实际装备皮肤被 Base Costume TID 吞掉问题（2026-09-12 第二轮）
+
+- 用户真实 QQ 验收反馈：“银华：战术升级确实装备了皮肤，但当前卡片显示的是原皮”。经 live probe 与官方数据表比对确认，30049 为该角色的专属购买/解锁皮肤“Day Off / 度假”（白色吊带夏日洋装），对应独立 Spine 4.1 资产 `c095_01`；而 `c095` 为未穿皮肤的基础默认军服。
+- 根因与系统性修复：
+  1. 修复优先级倒挂：重构 `card_builder.py` 的皮肤选择机制为 `resolve_equipped_costume()`，确立严格优先级 `detail.costume_tid > detail.costume_id > roster.costume_tid > roster.costume_id`，防止 roster 中的字段吞噬权威单角色 detail 结果。
+  2. 清理误注入的默认服装字段：彻底清除 `assets/character_master.json` 中 76 位角色的 `default_costume_id`，消除了任何将正整数 Costume TID 误当成默认服装的系统性漏洞；Nikke 中默认服装严格遵循 `0 / None / "0" / "default"` 语义。
+  3. 登记已核验皮肤：在 `assets/costumes.json` 中为 30049（Day Off）登记 verified 条目（`character_resource_id: "95"`, `spine: c095_01`，独立资产模式），并同步更新 `assets/registry_manifest.json` 的规范化 LF SHA-256。
+  4. 生产环境预渲染与部署：在 `serv` 上拉取 `c095_01` 独立 Spine 4.1 资产，通过本地隔离 Docker worker 预渲染（1024×1024 → 398×892 alpha bbox 裁剪，SHA-256 `c8d03a30747d63acf9eab8607cec1fee68a6b176f7780a4c885d1cc7d676981d`），写入生产 `spine-manifest.json`。
+  5. 现场与安全审计：生成 `equipped_costume_resolution_audit.json`，针对用户账号当前装备皮肤的全部 5 位角色（银华 30049、红莲 110023、拉毗 20001、皇冠 30052、塞壬 30053）进行全覆盖审计，`fallback_to_default_risk = 0`；未映射皮肤严格降级中性占位图，绝对不冒充默认立绘。
+  6. 角色卡复核与证据闭环：重新合成 `final-character-card.png`，人工视觉复核确认银华身穿白裙草帽夏日立绘，未培养数值状态完全保留；更新 `trace.json`、`before-crop.png`、`after-crop.png`、`worker-canvas.rgba`。
+  7. 全量测试通过：本地全套 pytest `646 passed`（0 failed）；`serv` 容器内部真实 probe 校验通过，热路径零网络零动态 worker。PR #79 保持 PARTIAL，等待用户真实 QQ 验收。

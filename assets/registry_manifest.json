@@ -14,7 +14,7 @@
       "source": "repository-maintained verified resource identifier mapping",
       "source_ref": "assets/README.md",
       "checked_at": "2026-09-06",
-      "sha256": "1268ed2fa6b0272817c3d422f86a32bf90b8f3ce0806e3d14745edb6994fbc94",
+      "sha256": "a34ec2fe6b86219c344c1daf20acd11aeba65311d97e07298287f6cd6e5e86ca",
       "license_boundary": "identifier metadata only; not game asset redistribution"
     },
     "favorite_item": {
@@ -22,15 +22,15 @@
       "source": "repository-maintained verified resource identifier mapping",
       "source_ref": "assets/README.md",
       "checked_at": "2026-09-06",
-      "sha256": "df89ab0a9e421a98e248aad2760dcef07518d6ba817cf4d64536d32617561b30",
+      "sha256": "ecaec9aa2b54d762d70d17b912fa384218670db8107b52b02de88f950981d630",
       "license_boundary": "identifier metadata only; not game asset redistribution"
     },
     "costume": {
       "path": "costumes.json",
       "source": "repository-maintained verified costume identifier mapping",
       "source_ref": "assets/README.md",
-      "checked_at": "2026-09-10",
-      "sha256": "00015341af88879a62c0de5759923e10085ef43e9a57290582827de884f33ce5",
+      "checked_at": "2026-09-12",
+      "sha256": "f96671b89be7475d7f5516418bf1de36c91deeaf9d33f715d50f66e02e18f274",
       "license_boundary": "identifier metadata only; only exact CharacterCostumeTable plus Nikke-DB L2D index mappings are included"
     }
   }

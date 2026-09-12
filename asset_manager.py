@@ -14,15 +14,17 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import httpx
 from PIL import Image, ImageDraw
 
 from .card_models import CharacterCardAssets, CharacterCardData
+from .currency_registry import CurrencyRegistry
 from .idle_animation_resolver import IdleAnimationResolver
 from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
-from .spine_prerenderer import SpineJob, SpinePreRenderer
+from .spine_prerenderer import SpineBundleFetcher, SpineJob, SpinePreRenderer
 from .static_registry import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
@@ -54,6 +56,8 @@ class AssetManager:
         remote: bool = False,
         spine_renderer: SpinePreRenderer | None = None,
         spine_budget_seconds: float = 20.0,
+        spine_manifest_path: str | Path | None = None,
+        spine_rendered_dir: str | Path | None = None,
     ):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
@@ -62,11 +66,21 @@ class AssetManager:
         self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._inflight_lock = threading.Lock()
         self._inflight: dict[str, _InflightAsset] = {}
+        self._spine_wait_lock = threading.Lock()
+        self._spine_wait_events: dict[str, list[threading.Event]] = {}
         if isinstance(spine_budget_seconds, bool) or not isinstance(spine_budget_seconds, (int, float)) or spine_budget_seconds <= 0:
             raise ValueError("Spine 预渲染预算必须是正数")
         self.spine_renderer = spine_renderer or SpinePreRenderer(self.cache_dir)
         self.spine_budget_seconds = float(spine_budget_seconds)
         self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
+        self.spine_manifest_path = Path(spine_manifest_path) if spine_manifest_path is not None else None
+        self.spine_rendered_dir = Path(spine_rendered_dir) if spine_rendered_dir is not None else None
+        self._spine_manifest: dict[str, Any] = {}
+        self._spine_manifest_entries: dict[str, dict[str, Any]] = {}
+        self._spine_manifest_declared_ids: set[str] = set()
+        self._spine_manifest_source: Path | None = None
+        self._spine_manifest_schema: int | None = None
+        self.refresh_spine_manifest()
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
         try:
             self.sources = json.loads((self.asset_dir / "sources.json").read_text(encoding="utf-8"))
@@ -75,12 +89,113 @@ class AssetManager:
         if not isinstance(self.sources, dict):
             self.sources = {}
         self.registry = StaticDataRegistry(self.asset_dir)
+        self.currency_registry = CurrencyRegistry()
         for error in self.registry.errors:
             logger.warning("静态 registry 校验失败：%s", error)
         self.equipment_map = self.registry.mapping("equipment")
         self.favorite_items_map = self.registry.mapping("favorite_item")
         self.cubes_map = self.registry.mapping("cube")
         self.costumes_map = self.registry.mapping("costume")
+
+    def refresh_spine_manifest(self) -> None:
+        """读取本地 Spine manifest；读取失败时保持空 manifest 并安全降级。"""
+        candidates: list[Path] = []
+        if self.spine_manifest_path is not None:
+            candidates.append(self.spine_manifest_path)
+        candidates.extend(
+            [
+                self.asset_dir / "spine_manifest.json",
+                self.cache_dir / "spine-manifest.json",
+                self.cache_dir / "spine_manifest.json",
+            ]
+        )
+        self._spine_manifest = {}
+        self._spine_manifest_entries = {}
+        self._spine_manifest_declared_ids = set()
+        self._spine_manifest_source = None
+        self._spine_manifest_schema = None
+        for candidate in candidates:
+            try:
+                if not candidate.is_file():
+                    continue
+                payload = json.loads(candidate.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, ValueError):
+                continue
+            if not isinstance(payload, dict):
+                continue
+            schema = payload.get("schema_version")
+            entries = payload.get("assets") if schema == 2 else payload.get("characters") if schema == 1 else None
+            if not isinstance(entries, dict):
+                continue
+            declared_ids = {
+                str(key).strip().lower()
+                for key in entries
+                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?", str(key).strip().lower())
+            }
+            valid_entries = {
+                str(key).strip().lower(): value
+                for key, value in entries.items()
+                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?", str(key).strip().lower()) and isinstance(value, dict)
+            }
+            self._spine_manifest = payload
+            self._spine_manifest_entries = valid_entries
+            # 即使条目本身不是对象，也必须视为权威声明，避免绕过 manifest 读取旧缓存。
+            self._spine_manifest_declared_ids = declared_ids
+            self._spine_manifest_source = candidate
+            self._spine_manifest_schema = schema if isinstance(schema, int) else None
+            return
+
+    @staticmethod
+    def _sha256_file(path: Path) -> str:
+        digest = hashlib.sha256()
+        with path.open("rb") as source:
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def _manifest_png_path(self, char_id: str) -> tuple[Path | None, bool]:
+        """解析 manifest 声明的 PNG；返回 (路径, 是否存在该 ID 条目)。"""
+        if char_id not in self._spine_manifest_declared_ids:
+            return None, False
+        entry = self._spine_manifest_entries.get(char_id)
+        if entry is None:
+            return None, True
+        relative = entry.get("rendered_png") if self._spine_manifest_schema == 2 else entry.get("png_file")
+        if not isinstance(relative, str) or not relative.strip():
+            return None, True
+        base = self.spine_rendered_dir
+        if base is None:
+            source_parent = self._spine_manifest_source.parent if self._spine_manifest_source else self.asset_dir
+            base = source_parent / "spine-rendered"
+        try:
+            base_resolved = base.expanduser().resolve()
+            target = (base_resolved / relative).resolve()
+            if not target.is_relative_to(base_resolved):
+                return None, True
+            if not target.is_file():
+                return None, True
+        except (OSError, RuntimeError, ValueError):
+            return None, True
+        return target, True
+
+    def _load_spine_image(self, path: Path, entry: dict[str, Any] | None = None) -> Image.Image | None:
+        try:
+            if path.stat().st_size > self.MAX_BYTES:
+                return None
+            if entry is not None:
+                expected = entry.get("sha256")
+                if not isinstance(expected, str):
+                    return None
+                expected = expected.lower()
+                if not re.fullmatch(r"[0-9a-f]{64}", expected) or self._sha256_file(path) != expected:
+                    return None
+            with Image.open(path) as image:
+                if image.width * image.height > self.MAX_PIXELS:
+                    return None
+                image.load()
+                return image.convert("RGBA")
+        except (OSError, ValueError, Image.DecompressionBombError):
+            return None
 
     @staticmethod
     def game_resource_url(path: str) -> str:
@@ -244,53 +359,88 @@ class AssetManager:
             animation=animation,
         )
 
-    def _get_spine_portrait(self, char_id: str, costume_id) -> Image.Image | None:
-        """优先命中版本化 Spine PNG；miss 时仅在 runtime 可用时后台预热。"""
-        # 角色卡热路径只消费已有索引；索引刷新必须由独立预热动作完成，避免
-        # 多个并发出卡请求各自触发一次 l2d.json 网络请求。
-        runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
-        if runtime_version is None or runtime_version == "SPINE_VERSION_UNKNOWN":
-            return None
-        animation = IdleAnimationResolver.resolve_for_asset(char_id)
-        if not animation:
-            logger.warning("Spine 角色 [%s] 未能解析到合法待机动画，fail-closed 返回中性占位图", char_id)
-            return None
-        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
-        image = self.spine_renderer.cached_portrait(cache_key)
-        if image is not None:
-            return image
-        if not self.spine_renderer.is_available(runtime_version):
-            return None
-        urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="setup")
-        if not urls:
-            return None
-        self.spine_renderer.enqueue(
-            SpineJob(
-                cache_key=cache_key,
-                character_id=char_id,
-                runtime_version=runtime_version,
-                bundle_urls=urls,
-                animation=animation,
-                budget_seconds=self.spine_budget_seconds,
+    def _get_spine_portrait(
+        self,
+        char_id: str,
+        costume_id,
+        *,
+        wait_seconds: float = 0.0,
+    ) -> Image.Image | None:
+        """优先命中持久化静态预渲染与本地缓存；热路径绝不启动动态 Worker 渲染或网络下载。"""
+        # 1. 优先读取 manifest 声明的持久化 PNG，并校验其哈希。
+        manifest_path, manifest_entry_exists = self._manifest_png_path(char_id)
+        if manifest_entry_exists:
+            entry = self._spine_manifest_entries.get(char_id)
+            if manifest_path is None:
+                logger.warning("STATIC_SPINE_ASSET_INVALID: %s (costume: %s)", char_id, costume_id)
+                return None
+            image = self._load_spine_image(
+                manifest_path,
+                entry,
             )
+            if image is not None:
+                return image
+            logger.warning("STATIC_SPINE_ASSET_INVALID: %s (costume: %s)", char_id, costume_id)
+            return None
+
+        # manifest 已存在但没有该 ID 时，不接受未登记的 plugin 资产；保留旧版本化缓存兼容性。
+        manifest_loaded = self._spine_manifest_source is not None
+        candidate_paths = []
+        if not manifest_loaded:
+            candidate_paths.append(self.asset_dir / "spine-rendered" / f"{char_id}.png")
+        if self.spine_rendered_dir is not None and not manifest_loaded:
+            candidate_paths.append(self.spine_rendered_dir / f"{char_id}.png")
+        candidate_paths.extend(
+            [
+                self.cache_dir / "spine-rendered" / f"{char_id}.png",
+                self.cache_dir / "portraits" / f"{char_id}.png",
+            ]
         )
+        seen: set[Path] = set()
+        for path in candidate_paths:
+            try:
+                resolved = path.resolve()
+            except OSError:
+                continue
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            image = self._load_spine_image(resolved)
+            if image is not None:
+                return image
+
+        # 2. 兼容旧的版本化本地 PNG，但直接读取文件，不能调用 Worker cache API。
+        runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
+        if runtime_version is not None and runtime_version != "SPINE_VERSION_UNKNOWN":
+            animation = IdleAnimationResolver.resolve_for_asset(char_id)
+            if animation:
+                cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
+                try:
+                    cached_path = self.spine_renderer.prerender_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
+                except (AttributeError, OSError, ValueError):
+                    cached_path = None
+                if cached_path is not None:
+                    cached = self._load_spine_image(cached_path)
+                    if cached is not None:
+                        return cached
+
+        # 3. 用户查询热路径只允许读取静态文件；不触碰 Worker 或网络。
         return None
 
     def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
-        """只从 canonical Spine identity 读取角色官方立绘。
+        """只从持久化静态预渲染或 canonical Spine identity 读取角色官方立绘。
 
-        Spine 缓存未命中时由后台队列预热；当前请求只返回中性程序占位图，
-        不再生成、探测或下载 Nikke-db images/FB URL。
+        未预渲染角色记录明确警告并返回中性程序占位图，严禁在热路径发起网络拉取或启动 Worker。
         """
-        char_id = self.nikke_db.resolve_spine_asset_id(
+        char_id = self.nikke_db.resolve_render_id(
             resource_id,
             costume_id,
-            allow_remote=False,
         ) if resource_id else "missing"
         if char_id != "missing":
             image = self._get_spine_portrait(char_id, costume_id)
             if image is not None:
                 return image
+            logger.warning("STATIC_SPINE_ASSET_MISSING: %s (costume: %s)", char_id, costume_id)
         return self.fallback("portrait")
 
     def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
@@ -338,15 +488,48 @@ class AssetManager:
         resource = self.registry.resolve("favorite_item", tid)
         if resource is None:
             return self.fallback("favorite")
-        url = self.game_resource_url(f"icon/favorite/{resource}.webp")
+        url = self.game_resource_url(f"icon/favoriteitem/{resource}.webp")
         return self._icon("favorite", tid, "favorite", url, allow_source=False)
 
     def get_cube_icon(self, tid) -> Image.Image:
         resource = self.registry.resolve("cube", tid)
         if resource is None:
             return self.fallback("cube")
-        url = self.game_resource_url(f"icon/cube/{resource}.webp")
+        url = self.game_resource_url(f"icon/equip/{resource}.webp")
         return self._icon("cube", tid, "cube", url, allow_source=False)
+
+    def get_currency_icon(self, currency_type) -> Image.Image | None:
+        """只读取有完整来源/hash 证据的本地图标；不触发公共网络下载。"""
+        definition = self.currency_registry.resolve(currency_type)
+        if definition is None or not definition.icon_key:
+            return None
+        if (
+            not definition.verified_source
+            or not isinstance(definition.source_sha256, str)
+            or not re.fullmatch(r"[0-9a-fA-F]{64}", definition.source_sha256)
+        ):
+            logger.warning("ICON_UNVERIFIED: currency type %s", definition.type)
+            return None
+        key = self._key(definition.icon_key)
+        if key == "missing":
+            return None
+        entry = {"sha256": definition.source_sha256}
+        for base in (self.cache_dir, self.asset_dir):
+            try:
+                base_resolved = base.resolve()
+            except OSError:
+                continue
+            for suffix in (".png", ".webp"):
+                try:
+                    path = (base / "currency" / f"{key}{suffix}").resolve()
+                    if not path.is_relative_to(base_resolved) or not path.is_file():
+                        continue
+                except (OSError, RuntimeError, ValueError):
+                    continue
+                image = self._load_spine_image(path, entry)
+                if image is not None:
+                    return image
+        return None
 
     def get_element_icon(self, element):
         key = self._key(element)

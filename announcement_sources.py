@@ -69,31 +69,45 @@ class InformationFeedsSource:
             news = next((x for x in columns.get("primary_label_list", []) if isinstance(x, dict) and x.get("raw_label_name") == "official_news"), None)
             if not news:
                 raise ValueError("CMS 官方新闻栏目不存在")
-            offset, seen, items, pages_scanned = 0, set(), [], 0
+
+            target_secondary_ids: list[Any] = []
+            for sec in news.get("secondary_label_list", []):
+                if isinstance(sec, dict) and sec.get("raw_label_name") in {"NEWS", "NOTICE"}:
+                    sid = sec.get("label_id")
+                    if sid is not None and sid not in target_secondary_ids:
+                        target_secondary_ids.append(sid)
+            if not target_secondary_ids:
+                default_sid = news.get("default_secondary_label_id")
+                if default_sid is not None and not isinstance(default_sid, bool):
+                    target_secondary_ids.append(default_sid)
+
+            seen, items, pages_scanned = set(), [], 0
             finished = False
-            for _ in range(self.max_pages):
-                page = await post("GetContentByLabel", {
-                    "language": [self.locale], "gameid": "16", "offset": offset, "get_num": self.page_size,
-                    "ext_info_type_list": [0, 1, 2], "primary_label_id": news["label_id"],
-                    "secondary_label_id": news["default_secondary_label_id"], "content_class": 0,
-                })
-                rows = page.get("info_content")
-                if not isinstance(rows, list):
-                    raise ValueError("CMS 公告列表格式无效")
-                pages_scanned += 1
-                for row in rows:
-                    if not isinstance(row, dict) or type(row.get("content_id")) not in {str, int} or not str(row["content_id"]).strip():
-                        raise ValueError("CMS 公告缺少 ID")
-                    identifier = str(row["content_id"]).strip()
-                    if identifier not in seen:
-                        seen.add(identifier)
-                        items.append(identifier)
-                next_offset = page.get("next_offset")
-                total_num = page.get("total_num")
-                if not rows or page.get("is_finish") is True or type(next_offset) is not int or type(total_num) is not int or next_offset <= offset or next_offset >= total_num:
-                    finished = True
-                    break
-                offset = next_offset
+            for sec_id in target_secondary_ids:
+                offset = 0
+                for _ in range(self.max_pages):
+                    page = await post("GetContentByLabel", {
+                        "language": [self.locale], "gameid": "16", "offset": offset, "get_num": self.page_size,
+                        "ext_info_type_list": [0, 1, 2], "primary_label_id": news["label_id"],
+                        "secondary_label_id": sec_id, "content_class": 0,
+                    })
+                    rows = page.get("info_content")
+                    if not isinstance(rows, list):
+                        raise ValueError("CMS 公告列表格式无效")
+                    pages_scanned += 1
+                    for row in rows:
+                        if not isinstance(row, dict) or type(row.get("content_id")) not in {str, int} or not str(row["content_id"]).strip():
+                            raise ValueError("CMS 公告缺少 ID")
+                        identifier = str(row["content_id"]).strip()
+                        if identifier not in seen:
+                            seen.add(identifier)
+                            items.append(identifier)
+                    next_offset = page.get("next_offset")
+                    total_num = page.get("total_num")
+                    if not rows or page.get("is_finish") is True or type(next_offset) is not int or type(total_num) is not int or next_offset <= offset or next_offset >= total_num:
+                        finished = True
+                        break
+                    offset = next_offset
             limit = asyncio.Semaphore(3)
             async def detail(identifier):
                 async with limit:

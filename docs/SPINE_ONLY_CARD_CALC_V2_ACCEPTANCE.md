@@ -4,7 +4,7 @@
 
 - Character portraits no longer call `get_full_body_url()`, generate `images/FB` URLs, read legacy portrait caches, or download remote FB images.
 - `NikkeDbProvider.resolve_spine_asset_id()` resolves default `cXXX` or verified Costume `cXXX_YY` and requires the canonical identity to exist in the cached L2D index.
-- `assets/costumes.json` now uses schema v2 with `costume_id`, owner `character_resource_id`, `spine_asset_id`, source, source hash and verification date. The registry remains empty until exact Spine evidence is available.
+- `assets/costumes.json` now uses schema v3 with `costume_id`, owner `character_resource_id`, a typed `spine` representation, source, source hash and verification date. Historical v2 input remains readable for migration only; new entries require exact evidence and unknown Costume IDs remain fail-closed.
 - L2D index warming is a single service-start action; card rendering reads the local index and versioned Spine PNG cache without per-card index requests.
 - OL rows retain three positions per equipment slot and now render a tier badge: neutral T1–T11, blue-emphasis T12–T14, and dark high-contrast T15.
 - `CharacterStatCalculator` ports the verified ExiaInvasion calculation order and fails closed. It returns `calculated_verified` only when the complete verified static-table bundle and all player inputs are present; otherwise all three values are `None` with `unavailable_missing_input`.

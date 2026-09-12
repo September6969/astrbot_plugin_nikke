@@ -26,6 +26,20 @@ class TestOverloadTierRegistry:
         assert registry.resolve("7000599") is None
         assert registry.resolve(None) is None
 
+    def test_every_authoritative_group_has_t1_to_t15(self):
+        registry = OverloadTierRegistry.from_file(ROOT / "assets" / "overload_tiers.json")
+
+        grouped = {}
+        for entry in registry.entries:
+            grouped.setdefault(entry.group_id, []).append(entry)
+        assert len(grouped) == 9
+        for group_id, entries in grouped.items():
+            assert {entry.level for entry in entries} == set(range(1, 16)), group_id
+            for level in (1, 5, 6, 10, 11, 15):
+                resolved = next(entry for entry in entries if entry.level == level)
+                assert registry.resolve(resolved.state_effect_id) == resolved
+                assert resolved.label
+
     def test_registry_rejects_duplicate_state_effects(self, tmp_path):
         data = {
             "schema_version": 1,

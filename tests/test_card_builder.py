@@ -47,6 +47,53 @@ class CharacterCardBuilderTests(unittest.TestCase):
         )
         self.assertEqual(card.costume_id, "skin_01")
 
+    def test_costume_resolution_detail_costume_tid_wins_over_roster(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 0
+        detail = dict(fixture["character_details"][0])
+        detail["costume_tid"] = 30049
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.costume_id, 30049)
+
+    def test_costume_resolution_detail_overrides_stale_roster_costume_id(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 99999
+        detail = dict(fixture["character_details"][0])
+        detail["costume_tid"] = 30049
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.costume_id, 30049)
+
+    def test_costume_resolution_default_when_both_zero(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 0
+        detail = dict(fixture["character_details"][0])
+        detail["costume_tid"] = 0
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertIn(card.costume_id, (0, None))
+
+    def test_costume_resolution_roster_fallback_when_detail_missing_costume(self):
+        fixture = load_fixture()
+        fixture["roster_item"]["costume_id"] = 30049
+        detail = {k: v for k, v in fixture["character_details"][0].items() if "costume" not in k}
+        card = CharacterCardBuilder().build(
+            account={}, directory=fixture["directory"],
+            payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
+            fetched_at="test", plugin_version="test",
+        )
+        self.assertEqual(card.costume_id, 30049)
+
     def test_display_name_prefers_official_names_over_query_alias(self):
         fixture = load_fixture()
         fixture["directory"]["name_zh_tw"] = "阿爾卡娜"
@@ -192,7 +239,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertTrue(any(item.raw_type == "StatUnknownFake" for item in unknown))
         self.assertEqual(
             [item.display_name for item in unknown if item.raw_type == "StatUnknownFake"],
-            ["未识别词条"],
+            ["未知词条 · ID 9999999"],
         )
         self.assertNotIn("未识别词条", {item.display_name for item in card.option_totals})
 
@@ -201,7 +248,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         totals = {item.display_name: item.value for item in card.option_totals}
         self.assertAlmostEqual(totals["最大装弹数增加"], 2.0679)
         self.assertAlmostEqual(totals["蓄力速度增加"], 0.0228)
-        self.assertNotIn("蓄力伤害增加", totals)
+        self.assertAlmostEqual(totals["蓄力伤害增加"], 0.1463)
         charge_damage_unknown = [
             option
             for equipment in card.equipment.values()
@@ -216,6 +263,44 @@ class CharacterCardBuilderTests(unittest.TestCase):
         })
         self.assertEqual(option.display_name, "暴击伤害增加")
         self.assertAlmostEqual(option.value, 0.0688)
+
+    def test_known_integer_encoded_ol_regressions_keep_name_tier_and_percent(self):
+        builder = CharacterCardBuilder()
+        cases = {
+            "7000909": ("StatChargeDamage", 1040, "蓄力伤害增加", 9, 0.104),
+            "7001111": ("StatCritical", 571, "暴击率增加", 11, 0.0571),
+            "7001211": ("StatCriticalDamage", 1644, "暴击伤害增加", 11, 0.1644),
+        }
+        for option_id, (raw_type, raw_value, label, tier, value) in cases.items():
+            with self.subTest(option_id=option_id):
+                option = builder._option_from_effect(
+                    effect_id=option_id,
+                    functions=[{
+                        "function_type": raw_type,
+                        "function_value": raw_value,
+                        "function_value_type": "Integer",
+                    }],
+                    position=1,
+                )
+                self.assertEqual((option.display_name, option.tier, option.unit), (label, tier, "percent"))
+                self.assertAlmostEqual(option.value, value)
+
+    def test_known_ol_function_type_mismatch_keeps_authoritative_identity(self):
+        builder = CharacterCardBuilder()
+        with self.assertLogs("astrbot_plugin_nikke.card_builder", level="WARNING") as logs:
+            option = builder._option_from_effect(
+                effect_id="7001211",
+                functions=[{
+                    "function_type": "StatUnexpected",
+                    "function_value": 1644,
+                    "function_value_type": "Integer",
+                }],
+                position=1,
+            )
+        expected_label = builder.overload_tier_registry.resolve("7001211").label
+        self.assertEqual((option.display_name, option.tier, option.unit), (expected_label, 11, "percent"))
+        self.assertAlmostEqual(option.value, 0.1644)
+        self.assertTrue(any("OL_FUNCTION_TYPE_MISMATCH" in line for line in logs.output))
 
     def test_unequipped_slot_drops_stale_options_and_totals(self):
         fixture = load_fixture()

@@ -18,18 +18,20 @@ class StaticDataRegistryTests(unittest.TestCase):
         self.assertTrue(registry.is_valid)
         self.assertEqual(registry.metadata("equipment").source_ref, "assets/README.md")
         costumes = registry.mapping("costume")
-        self.assertEqual(len(costumes), 40)
+        self.assertEqual(len(costumes), 42)
         self.assertEqual(costumes["10005"], "c010_03")
         self.assertEqual(registry.resolve("costume", "10005"), "c010_03")
         self.assertEqual(costumes["20001"], "c010_02")
         self.assertEqual(registry.resolve("costume", "20001"), "c010_02")
+        self.assertEqual(costumes["30049"], "c095_01")
+        self.assertEqual(registry.resolve("costume", "30049"), "c095_01")
         self.assertIsNone(registry.resolve("costume", "10014"))
         self.assertEqual(
             registry.resolve("equipment", "3100901"),
             "icn_equipment_head_attacker_t9_3",
         )
-        self.assertEqual(registry.resolve("cube", 1000304), "harmony_cube_1000304")
-        self.assertEqual(registry.resolve("favorite_item", "100602"), "favorite_item_100602")
+        self.assertEqual(registry.resolve("cube", 1000304), "ie_10004")
+        self.assertEqual(registry.resolve("favorite_item", "100602"), "si_favoriteitem_sr_00")
 
     def test_unknown_ids_are_not_normalized_or_guessed(self):
         registry = StaticDataRegistry(self.assets)
@@ -54,7 +56,7 @@ class StaticDataRegistryTests(unittest.TestCase):
             self.assertFalse(registry.is_valid)
             self.assertTrue(any("equipment sha256" in error for error in registry.errors))
             self.assertEqual(registry.mapping("equipment"), {})
-            self.assertEqual(registry.resolve("cube", "1000304"), "harmony_cube_1000304")
+            self.assertEqual(registry.resolve("cube", "1000304"), "ie_10004")
 
     def test_duplicate_mapping_keys_disable_only_ambiguous_registry(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -75,7 +77,7 @@ class StaticDataRegistryTests(unittest.TestCase):
 
             self.assertEqual(registry.mapping("equipment"), {})
             self.assertTrue(any("重复键" in error for error in registry.errors))
-            self.assertEqual(registry.resolve("cube", "1000304"), "harmony_cube_1000304")
+            self.assertEqual(registry.resolve("cube", "1000304"), "ie_10004")
 
     def test_manifest_is_json_and_declares_all_supported_maps(self):
         manifest = json.loads((self.assets / "registry_manifest.json").read_text(encoding="utf-8"))

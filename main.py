@@ -77,7 +77,9 @@ class NikkePlugin(Star):
             lambda message: logger.info(f"[NIKKE诊断] {message}"),
         )
         self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
-        self.character_builder = CharacterCardBuilder()
+        self.character_builder = CharacterCardBuilder(
+            unknown_ol_inventory_path=self.data_dir / "ol_unknown_inventory.json",
+        )
         user_aliases = (self.config or {}).get("custom_character_aliases")
         try:
             self.character_identity = CharacterDirectoryResolver(
@@ -96,6 +98,8 @@ class NikkePlugin(Star):
             remote=True,
             spine_renderer=build_spine_renderer(self.data_dir / "cache", self.config),
             spine_budget_seconds=float(spine_budget) if isinstance(spine_budget, (int, float)) and spine_budget > 0 else 20.0,
+            spine_manifest_path=self.data_dir / "spine-manifest.json",
+            spine_rendered_dir=self.data_dir / "spine-rendered",
         )
         self.character_renderer = CharacterCardRenderer(
             self.data_dir / "cards",
@@ -104,7 +108,11 @@ class NikkePlugin(Star):
         )
         self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
         self.profile_builder = ProfileBuilder(campaign_resolver=self.campaign_resolver)
-        self.profile_renderer = ProfileCardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
+        self.profile_renderer = ProfileCardRenderer(
+            self.data_dir / "cards",
+            self.plugin_dir / "fonts",
+            currency_icon_provider=self.asset_manager.get_currency_icon,
+        )
         self.raid_builder = UnionRaidBuilder()
         self.raid_renderer = UnionRaidRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.campaign_builder = CampaignHistoryBuilder()
@@ -703,15 +711,34 @@ class NikkePlugin(Star):
         )
 
     @staticmethod
-    def _profile_rows(account: dict, basic: dict, outpost: dict) -> list[tuple[str, str]]:
+    def _profile_rows(
+        account: dict,
+        basic: dict,
+        outpost: dict,
+        campaign_resolver: CampaignStageResolver | None = None,
+    ) -> list[tuple[str, str]]:
         """只使用真实响应已确认存在的字段生成档案行。"""
+        normal_raw = basic.get("progress_normal_campaign", basic.get("progress_campaign_normal"))
+        if normal_raw is not None and campaign_resolver is not None:
+            stage_normal = campaign_resolver.resolve_id(normal_raw, mode_hint="NORMAL")
+            normal_text = f"NORMAL {stage_normal.name}" if stage_normal else (f"未映射 · ID {normal_raw}" if re.fullmatch(r"\d+", str(normal_raw).strip()) else str(normal_raw))
+        else:
+            normal_text = str(normal_raw if normal_raw is not None else "未知")
+
+        hard_raw = basic.get("progress_hard_campaign", basic.get("progress_campaign_hard"))
+        if hard_raw is not None and campaign_resolver is not None:
+            stage_hard = campaign_resolver.resolve_id(hard_raw, mode_hint="HARD")
+            hard_text = f"HARD {stage_hard.name}" if stage_hard else (f"未映射 · ID {hard_raw}" if re.fullmatch(r"\d+", str(hard_raw).strip()) else str(hard_raw))
+        else:
+            hard_text = str(hard_raw if hard_raw is not None else "未知")
+
         rows = [
             ("指挥官", str(basic.get("nickname") or account.get("nickname") or account.get("role_name") or "未知")),
             ("区服", str(account.get("area_id") or "未知")),
             ("同步器", str(outpost.get("synchro_level", 0))),
             ("前哨等级", str(outpost.get("outpost_battle_level", 0))),
-            ("普通主线", str(basic.get("progress_normal_campaign", basic.get("progress_campaign_normal", "未知")))),
-            ("困难主线", str(basic.get("progress_hard_campaign", basic.get("progress_campaign_hard", "未知")))),
+            ("普通主线", normal_text),
+            ("困难主线", hard_text),
         ]
 
         optional = (
@@ -720,7 +747,7 @@ class NikkePlugin(Star):
             ("created_at", "注册时间"),
             ("character_count", "持有妮姬"),
             ("character_costume_count", "时装数量"),
-            ("progress_tribe_tower", "部落塔进度"),
+            ("progress_tribe_tower", "无尽塔进度"),
             ("sim_room_overclock_current_sub_season_high_score", "模拟室超频分数"),
         )
         for key, label in optional:
@@ -732,8 +759,6 @@ class NikkePlugin(Star):
 
         outpost_optional = (
             ("infra_core_level", "基础核心等级"),
-            ("tactic_academy_class", "战术学院班级"),
-            ("tactic_academy_lesson", "战术学院课程"),
             ("jukebox_count", "点唱机收集"),
         )
         for key, label in outpost_optional:
@@ -765,6 +790,8 @@ class NikkePlugin(Star):
                 roster=data["roster"],
                 outpost_available=data.get("outpost_available"),
                 roster_available=data.get("roster_available"),
+                daily=data.get("daily"),
+                daily_available=data.get("daily_available"),
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )

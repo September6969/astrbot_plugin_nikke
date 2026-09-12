@@ -12,7 +12,7 @@
 
 `sources.json` 可为相同相对路径指定 HTTPS 图片地址。未知装备、收藏品和魔方不会猜测 TID 对应的图片；未登记资源时使用抽象占位图。占位图不代表装备品级或属性。
 
-`registry_manifest.json` 为 `equipment.json`、`cubes.json`、`favorite_items.json` 和 `costumes.json` 提供来源字段、核验日期与 SHA-256。`costumes.json` 当前有意保持为空，直到 API costume ID 到 Nikke-DB asset ID 的来源证据完成核验；unknown/invalid costume 不回退成默认服装。运行时只接受符合 registry 合同的精确 ID；manifest 或映射损坏时对应 registry 失效并回退占位图，不从相邻 ID 推断资源。
+`registry_manifest.json` 为 `equipment.json`、`cubes.json`、`favorite_items.json` 和 `costumes.json` 提供来源字段、核验日期与 SHA-256。`costumes.json` 使用 schema v3，分别表达独立 Spine asset 与已核验的 shared skin；unknown/invalid costume 不回退成默认服装。运行时只接受符合 registry 合同的精确 ID；manifest 或映射损坏时对应 registry 失效并回退占位图，不从相邻 ID 推断资源。
 
 角色官方立绘不再登记为 FB 图片；角色卡只消费已核验的 L2D/Spine identity 和版本化透明 PNG 缓存。企业、武器和爆裂图标仍按各自来源合同读取；Spine 失败时只使用程序生成的中性占位图。
 

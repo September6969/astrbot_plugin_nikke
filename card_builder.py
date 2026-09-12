@@ -11,6 +11,7 @@ from typing import Any
 
 from .card_models import (
     CharacterCardData,
+    CostumeSelection,
     CubeData,
     EquipmentData,
     EquipmentOption,
@@ -21,6 +22,7 @@ from .character_identity import CharacterDirectoryResolver
 from .character_stat_calculator import CharacterStatCalculator
 from .log_privacy import sanitize_log_text
 from .overload_tier_registry import OverloadTierRegistry
+from .ol_unknown_inventory import UnknownOlInventory
 from .state_effect_registry import StateEffectRegistry
 
 
@@ -96,6 +98,52 @@ def _equipped_item(
     return model_type(tid=tid, level=_optional_int(level, minimum=0))
 
 
+def resolve_equipped_costume(
+    resource_id: int | str | None,
+    roster: dict[str, Any] | None,
+    detail: dict[str, Any] | None,
+    default_costume_id: int | str | None = None,
+) -> CostumeSelection:
+    """按 detail.costume_tid > detail.costume_id > roster.costume_tid > roster.costume_id 解析装备皮肤。
+
+    0 / None / "0" / "default" 均判定为默认外观；
+    正整数或非零数字字符串判定为 alternate 皮肤。
+    """
+    detail_dict = detail if isinstance(detail, dict) else {}
+    roster_dict = roster if isinstance(roster, dict) else {}
+
+    candidates = [
+        ("detail.costume_tid", detail_dict.get("costume_tid")),
+        ("detail.costume_id", detail_dict.get("costume_id")),
+        ("roster.costume_tid", roster_dict.get("costume_tid")),
+        ("roster.costume_id", roster_dict.get("costume_id")),
+    ]
+
+    for source, val in candidates:
+        if val is None or val == "":
+            continue
+        if isinstance(val, bool):
+            continue
+
+        if val in (0, "0", "default"):
+            return CostumeSelection(costume_id=0, source=source, kind="default")
+        if default_costume_id is not None and str(val).strip() == str(default_costume_id).strip():
+            return CostumeSelection(costume_id=0, source=source, kind="default")
+
+        if isinstance(val, int):
+            if val > 0:
+                return CostumeSelection(costume_id=val, source=source, kind="alternate")
+            return CostumeSelection(costume_id=val, source=source, kind="unknown")
+
+        if isinstance(val, str):
+            s = val.strip()
+            if s.isdigit() and int(s) > 0:
+                return CostumeSelection(costume_id=int(s), source=source, kind="alternate")
+            return CostumeSelection(costume_id=s, source=source, kind="unknown")
+
+    return CostumeSelection(costume_id=0, source="default", kind="default")
+
+
 class CharacterCardBuilder:
     """只依据原始槽位字段解析装备，不使用拍平后的 equipment_effects。"""
 
@@ -104,6 +152,7 @@ class CharacterCardBuilder:
         state_effect_registry: StateEffectRegistry | None = None,
         overload_tier_registry: OverloadTierRegistry | None = None,
         stat_calculator: CharacterStatCalculator | None = None,
+        unknown_ol_inventory_path: str | Path | None = None,
     ):
         self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(
             Path(__file__).parent / "assets" / "state_effects.json"
@@ -112,6 +161,21 @@ class CharacterCardBuilder:
             Path(__file__).parent / "assets" / "overload_tiers.json"
         )
         self.stat_calculator = stat_calculator or CharacterStatCalculator()
+        self.unknown_ol_inventory = (
+            UnknownOlInventory(unknown_ol_inventory_path)
+            if unknown_ol_inventory_path is not None else None
+        )
+        if self.unknown_ol_inventory is not None:
+            self.unknown_ol_inventory.prune_known({
+                entry.state_effect_id for entry in self.overload_tier_registry.entries
+            })
+
+    @staticmethod
+    def _unknown_option_label(option_id: str | None, raw_type: str) -> str:
+        """未知项必须可见，但不能把 function key 猜成已验证词条。"""
+        if option_id:
+            return f"未知词条 · ID {option_id}"
+        return f"未映射词条 {raw_type}" if raw_type else "未映射词条"
 
     @staticmethod
     def _option_from_function(function: dict[str, Any]) -> EquipmentOption:
@@ -159,13 +223,34 @@ class CharacterCardBuilder:
         *,
         option_id: Any,
     ) -> EquipmentOption:
-        """有来源 registry 时使用其 label/formatter，否则保留旧合同。"""
+        """优先使用完整 OL 等级表；现场 registry 仅补充精确 formatter 证据。"""
         raw_type = str(function.get("function_type", "") or "Unknown")
         tier = self.overload_tier_registry.resolve(option_id)
         level = tier.level if tier is not None else _optional_int(function.get("level"), minimum=0)
         metadata = self.state_effect_registry.resolve(option_id, raw_type)
+        if metadata is None and tier is not None:
+            observed = self.state_effect_registry.resolve_option(option_id)
+            if observed is not None:
+                logger.warning(
+                    "OL_FUNCTION_TYPE_MISMATCH: id=%s expected=%s observed=%s",
+                    sanitize_log_text(str(option_id), max_length=32),
+                    sanitize_log_text(observed.function_type, max_length=80),
+                    sanitize_log_text(raw_type, max_length=80),
+                )
+                value, unit = observed.format_value(function.get("function_value", 0))
+                return EquipmentOption(
+                    raw_type=raw_type,
+                    display_name=tier.label,
+                    value=value,
+                    unit=unit,
+                    level=level,
+                    tier=level,
+                )
         if metadata is None:
             option = self._option_from_function(function)
+            # 完整 OL registry 已确认该 ID 时，不能因现场观测表缺项降级为未知。
+            if tier is not None:
+                option.display_name = tier.label
             option.level = level
             option.tier = level
             return option
@@ -194,7 +279,7 @@ class CharacterCardBuilder:
         if not valid_functions:
             return EquipmentOption(
                 raw_type=f"option{position}",
-                display_name="空槽" if option_id is None else "未识别词条",
+                display_name="空槽" if option_id is None else self._unknown_option_label(option_id, ""),
                 value=0,
                 unit="empty" if option_id is None else "unknown",
                 position=position,
@@ -209,9 +294,12 @@ class CharacterCardBuilder:
         )
         if len(components) == 1:
             primary = components[0]
+            display_name = primary.display_name
+            if primary.unit == "unknown" and tier_metadata is None:
+                display_name = self._unknown_option_label(option_id, primary.raw_type)
             return EquipmentOption(
                 raw_type=primary.raw_type,
-                display_name=primary.display_name,
+                display_name=display_name,
                 value=primary.value,
                 unit=primary.unit,
                 level=primary.level,
@@ -223,9 +311,9 @@ class CharacterCardBuilder:
             )
 
         names = list(dict.fromkeys(
-            component.display_name
+            self._unknown_option_label(option_id, component.raw_type)
+            if component.unit == "unknown" and tier_metadata is None else component.display_name
             for component in components
-            if component.display_name != "未识别词条"
         ))
         return EquipmentOption(
             raw_type=option_id or f"option{position}",
@@ -278,6 +366,10 @@ class CharacterCardBuilder:
                     position=index,
                 )
                 item.options.append(option)
+                if self.unknown_ol_inventory is not None:
+                    for component in option.components or (option,):
+                        if component.unit == "unknown" and self.overload_tier_registry.resolve(option.option_id) is None:
+                            self.unknown_ol_inventory.observe(option.option_id, component.raw_type)
                 for component in option.components or (option,):
                     if component.unit in {"percent", "flat"}:
                         key = (component.display_name, component.unit)
@@ -298,6 +390,11 @@ class CharacterCardBuilder:
             directory=directory,
             payload=payload,
         )
+        costume_selection = resolve_equipped_costume(
+            resource_id=directory.get("resource_id"),
+            roster=roster,
+            detail=detail,
+        )
         return CharacterCardData(
             commander_name=commander_name,
             fetched_at=fetched_at,
@@ -310,7 +407,8 @@ class CharacterCardBuilder:
                 if directory.get("resource_id") not in (None, "")
                 else None
             ),
-            costume_id=roster.get("costume_id", detail.get("costume_id")),
+            costume_id=costume_selection.costume_id,
+            costume_selection=costume_selection,
             rarity=directory.get("rare"),
             element=directory.get("element"),
             weapon=directory.get("weapon"),

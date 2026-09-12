@@ -48,6 +48,14 @@ class GameDeadline:
             return False
         return current <= self.end_at
 
+    def is_upcoming(self, now: datetime | None = None) -> bool:
+        current = now or datetime.now(timezone.utc)
+        return self.start_at is not None and current < self.start_at
+
+    def is_ended(self, now: datetime | None = None) -> bool:
+        current = now or datetime.now(timezone.utc)
+        return current > self.end_at
+
     def remaining_display(self, now: datetime | None = None) -> str:
         current = now or datetime.now(timezone.utc)
         if current > self.end_at:
@@ -68,10 +76,27 @@ class DeadlineParser:
         ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"), 1)}
 
     @classmethod
-    def _normalize_english_dates(cls, body):
+    def _normalize_english_dates(cls, body: str) -> str:
         """只转换带明确年份和时间的英文月份日期，不补猜年份。"""
-        pattern = re.compile(r"\b(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})\s+(?:at\s+)?(?=\d{1,2}:\d{2})", re.IGNORECASE)
-        return pattern.sub(lambda match: f"{match[3]}-{cls.MONTHS[match[1].lower()]:02d}-{int(match[2]):02d} ", body)
+        # 1. 带具体时间的格式: "September 17, 2026, 4:59:59" / "September 6, 2026 at 18:00"
+        pattern_time = re.compile(
+            r"\b(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})(?:,\s*|\s+(?:at\s+)?)(\d{1,2}):(\d{2})(?::\d{2})?",
+            re.IGNORECASE,
+        )
+        body = pattern_time.sub(
+            lambda m: f"{m.group(3)}-{cls.MONTHS[m.group(1).lower()]:02d}-{int(m.group(2)):02d} {int(m.group(4)):02d}:{m.group(5)}",
+            body,
+        )
+        # 2. 维护结束时间格式: "From the end of the September 3, 2026 maintenance" / "after the maintenance on September 3, 2026"
+        pattern_maint = re.compile(
+            r"(?:From the end of the|after(?: the)? maintenance on)\s+(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})(?:\s+maintenance)?",
+            re.IGNORECASE,
+        )
+        body = pattern_maint.sub(
+            lambda m: f"{m.group(3)}-{cls.MONTHS[m.group(1).lower()]:02d}-{int(m.group(2)):02d} 04:00",
+            body,
+        )
+        return body
 
     # 匹配类似 2026.09.15 04:59 或 2026-09-15 05:00 或 2026/09/15 23:59 的时间
     DATETIME_PATTERN = re.compile(
@@ -122,100 +147,147 @@ class DeadlineParser:
         category: str = "event",
     ) -> list[GameDeadline]:
         body = cls._normalize_english_dates(body)
-        matches = list(cls.DATETIME_PATTERN.finditer(body))
-        if not matches:
+        total_matches = list(cls.DATETIME_PATTERN.finditer(body))
+        if not total_matches:
             return []
+
+        # 检查是否包含结构化多事件小节（如 "1. ", "2. ", "2.1 " 等）
+        section_pattern = re.compile(r"(?m)^(?=[0-9]+(?:\.[0-9]+)*\s*[\.:、\s]+[A-Za-z\u4e00-\u9fff])")
+        raw_sections = section_pattern.split(body)
+        if len(raw_sections) > 1:
+            sections = [s.strip() for s in raw_sections if s.strip()]
+        else:
+            sections = [body]
 
         deadlines: list[GameDeadline] = []
-        # 如果找到至少两个时间点（通常为 开始 ~ 结束）
-        if len(matches) > 2:
-            # 多事件正文尚无可靠分段合同，保守拒绝把前两个日期拼成活动。
-            return []
-        if len(matches) == 2:
-            try:
-                m_start, m_end = matches[0], matches[1]
-                between = body[m_start.end():m_end.start()]
-                if len(between) > 120 or not re.search(r"[~～–—]|(?<!\w)-(?!\w)|至|到|结束|\b(?:to|until|ends?|ending)\b", between, re.IGNORECASE):
-                    return []
-                start_tz = cls._extract_timezone(body[m_start.end() : m_start.end() + 30], body)
-                start_dt = datetime(
-                    int(m_start.group(1)),
-                    int(m_start.group(2)),
-                    int(m_start.group(3)),
-                    int(m_start.group(4)),
-                    int(m_start.group(5)),
-                    tzinfo=start_tz,
-                ).astimezone(timezone.utc)
 
-                end_tz = cls._extract_timezone(body[m_end.end() : m_end.end() + 30], body)
-                end_dt = datetime(
-                    int(m_end.group(1)),
-                    int(m_end.group(2)),
-                    int(m_end.group(3)),
-                    int(m_end.group(4)),
-                    int(m_end.group(5)),
-                    tzinfo=end_tz,
-                ).astimezone(timezone.utc)
+        for sec_idx, sec in enumerate(sections):
+            matches = list(cls.DATETIME_PATTERN.finditer(sec))
+            if not matches:
+                continue
 
-                if end_dt <= start_dt:
-                    return []
-                deadlines.append(
-                    GameDeadline(
-                        event_id=f"{content_id or hashlib.md5(title.encode()).hexdigest()[:8]}_0",
-                        name=title,
-                        category=category,
-                        start_at=start_dt,
-                        end_at=end_dt,
-                        source_content_id=content_id,
+            lines = [line.strip() for line in sec.splitlines() if line.strip()]
+            first_line = lines[0] if lines else title
+            clean_subname = re.sub(r"^[0-9]+(?:\.[0-9]+)*\s*[\.:、\s]*", "", first_line).strip()
+
+            if len(sections) == 1:
+                event_name = title
+            else:
+                is_date_or_header = bool(
+                    cls.DATETIME_PATTERN.search(clean_subname)
+                    or re.match(r"^(?:活动时间|时间|开放时间|Period|Time|Duration|Notice|公告|Overview)", clean_subname, re.IGNORECASE)
+                )
+                if clean_subname and len(clean_subname) >= 3 and not is_date_or_header:
+                    event_name = clean_subname
+                else:
+                    event_name = f"{title} ({sec_idx + 1})"
+
+            sec_lower = (first_line + " " + sec).lower()
+            inferred_cat = category
+            if any(w in sec_lower for w in ["coop", "co-op", "coordinated operation", "协同"]):
+                inferred_cat = "coop"
+            elif any(w in sec_lower for w in ["raid", "突袭"]):
+                inferred_cat = "raid"
+            elif any(w in sec_lower for w in ["recruit", "pick up", "招募"]):
+                inferred_cat = "recruit"
+
+            if len(matches) > 2:
+                continue
+
+            if len(matches) == 2:
+                try:
+                    m_start, m_end = matches[0], matches[1]
+                    between = sec[m_start.end() : m_end.start()]
+                    if len(between) > 120 or not re.search(
+                        r"[~～–—]|(?<!\w)-(?!\w)|至|到|结束|\b(?:to|until|ends?|ending)\b",
+                        between,
+                        re.IGNORECASE,
+                    ):
+                        continue
+                    start_tz = cls._extract_timezone(sec[m_start.end() : m_start.end() + 30], sec)
+                    start_dt = datetime(
+                        int(m_start.group(1)),
+                        int(m_start.group(2)),
+                        int(m_start.group(3)),
+                        int(m_start.group(4)),
+                        int(m_start.group(5)),
+                        tzinfo=start_tz,
+                    ).astimezone(timezone.utc)
+
+                    end_tz = cls._extract_timezone(sec[m_end.end() : m_end.end() + 30], sec)
+                    end_dt = datetime(
+                        int(m_end.group(1)),
+                        int(m_end.group(2)),
+                        int(m_end.group(3)),
+                        int(m_end.group(4)),
+                        int(m_end.group(5)),
+                        tzinfo=end_tz,
+                    ).astimezone(timezone.utc)
+
+                    if end_dt <= start_dt:
+                        continue
+
+                    cid_prefix = content_id or hashlib.md5(title.encode()).hexdigest()[:8]
+                    deadlines.append(
+                        GameDeadline(
+                            event_id=f"{cid_prefix}_{len(deadlines)}",
+                            name=event_name,
+                            category=inferred_cat,
+                            start_at=start_dt,
+                            end_at=end_dt,
+                            source_content_id=content_id,
+                        )
+                    )
+                except (ValueError, OverflowError):
+                    pass
+            elif len(matches) == 1:
+                m_single = matches[0]
+                start_pos = max(0, m_single.start() - 30)
+                end_pos = min(len(sec), m_single.end() + 30)
+                surrounding = (sec[start_pos:end_pos] + " " + first_line).lower()
+
+                is_start_marker = bool(
+                    re.search(
+                        r"开始|开启|上线|开放|举办|发布|启动|\b(?:starts?|starting|opens?|opening|launch(?:es|ing)?|begins?|beginning)\b",
+                        surrounding,
                     )
                 )
-            except (ValueError, OverflowError):
-                pass
-        elif len(matches) == 1:
-            # 只有单个时间点时，严格检查是否为截止时间。
-            # 如果是“开始/开启/上线/首发”等开始时间，绝不能误标为截止日程。
-            m_single = matches[0]
-            start_pos = max(0, m_single.start() - 30)
-            end_pos = min(len(body), m_single.end() + 30)
-            surrounding = (body[start_pos:end_pos] + " " + title).lower()
-
-            is_start_marker = bool(
-                re.search(r"开始|开启|上线|开放|举办|发布|启动|\b(?:starts?|starting|opens?|opening|launch(?:es|ing)?|begins?|beginning)\b", surrounding)
-            )
-            is_deadline_marker = bool(
-                re.search(r"截止|结束|至|到|前|\b(?:ends?|ending|until|deadline)\b|维护结束", surrounding)
-            )
-
-            # 如果含有明确的“开始”语义且没有明确的“截止”语义，跳过不建 deadline
-            if is_start_marker and not is_deadline_marker:
-                return []
-            # 如果既没有截止词也没有任何结束标识，避免盲目将单个时间识别为 deadline
-            if not is_deadline_marker:
-                return []
-
-            try:
-                end_tz = cls._extract_timezone(body[m_single.end() : m_single.end() + 30], body)
-                end_dt = datetime(
-                    int(m_single.group(1)),
-                    int(m_single.group(2)),
-                    int(m_single.group(3)),
-                    int(m_single.group(4)),
-                    int(m_single.group(5)),
-                    tzinfo=end_tz,
-                ).astimezone(timezone.utc)
-
-                deadlines.append(
-                    GameDeadline(
-                        event_id=f"{content_id or hashlib.md5(title.encode()).hexdigest()[:8]}_0",
-                        name=title,
-                        category=category,
-                        start_at=None,
-                        end_at=end_dt,
-                        source_content_id=content_id,
+                is_deadline_marker = bool(
+                    re.search(
+                        r"截止|结束|至|到|前|\b(?:ends?|ending|until|deadline)\b|维护结束",
+                        surrounding,
                     )
                 )
-            except (ValueError, OverflowError):
-                pass
+
+                if is_start_marker and not is_deadline_marker:
+                    continue
+                if not is_deadline_marker:
+                    continue
+
+                try:
+                    end_tz = cls._extract_timezone(sec[m_single.end() : m_single.end() + 30], sec)
+                    end_dt = datetime(
+                        int(m_single.group(1)),
+                        int(m_single.group(2)),
+                        int(m_single.group(3)),
+                        int(m_single.group(4)),
+                        int(m_single.group(5)),
+                        tzinfo=end_tz,
+                    ).astimezone(timezone.utc)
+
+                    cid_prefix = content_id or hashlib.md5(title.encode()).hexdigest()[:8]
+                    deadlines.append(
+                        GameDeadline(
+                            event_id=f"{cid_prefix}_{len(deadlines)}",
+                            name=event_name,
+                            category=inferred_cat,
+                            start_at=None,
+                            end_at=end_dt,
+                            source_content_id=content_id,
+                        )
+                    )
+                except (ValueError, OverflowError):
+                    pass
 
         return deadlines
 
@@ -239,6 +311,9 @@ class AnnouncementService:
         "开发者笔记": "dev_note",
         "招募": "recruit",
         "联盟突袭": "union_raid",
+        "协同作战": "coop",
+        "协同": "coop",
+        "coop": "coop",
     }
 
     def __init__(self, data_dir: Path | None = None, *, clock: Any = None):
@@ -848,42 +923,49 @@ class AnnouncementService:
         lines.append("\n发送 /妮姬 日程 可查看进行中活动的结束倒计时。")
         return "\n".join(lines)
 
+    @staticmethod
+    def _is_coop_deadline(dl: GameDeadline) -> bool:
+        name_lower = dl.name.lower()
+        return (
+            dl.category == "coop"
+            or "协同作战" in dl.name
+            or "协同" in dl.name
+            or "co-op" in name_lower
+            or "coordinated operation" in name_lower
+            or "cooperative" in name_lower
+        )
+
     def format_schedule_text(self, now: datetime | None = None, fallback_error: str = "") -> str:
         current = now or datetime.now(timezone.utc)
         if not self._records:
             if fallback_error:
                 return f"暂时无法获取官方日程：{fallback_error}。当前没有可用缓存，请稍后重试。"
             return "功能尚未就绪，正在同步官方数据，请稍候。"
+
         deadlines = self.list_active_deadlines(current)
-        if not deadlines:
-            time_hint = f"（最近更新时间: {self.last_updated_at}）" if self.last_updated_at else ""
-            err_hint = f"\n⚠️ {fallback_error}" if fallback_error else ""
-            return f"近期暂无可追踪的官方活动日程。{time_hint}{err_hint}".strip()
         lines = ["【NIKKE 近期日程与活动倒计时】"]
         if self.last_updated_at:
             lines.append(f"（最近更新时间: {self.last_updated_at}）")
         if fallback_error:
             lines.append(f"⚠️ {fallback_error}")
-        lines.append("")
-        ongoing = []
-        ending_soon = []
-        for dl in deadlines:
-            rem = dl.remaining_display(current)
-            end_cst = dl.end_at.astimezone(CST).strftime("%m-%d %H:%M")
-            entry = f"• {dl.name}\n  截止: {end_cst} ({rem})"
-            diff = dl.end_at - current
-            if diff.total_seconds() < 86400 * 2:
-                ending_soon.append(entry)
-            else:
-                ongoing.append(entry)
-
-        if ending_soon:
-            lines.append("⏳ 即将结束：")
-            lines.extend(ending_soon)
-            lines.append("")
-
-        if ongoing:
-            lines.append("📌 进行中：")
-            lines.extend(ongoing)
-
+        lines.append("【进行中活动】")
+        if deadlines:
+            for dl in deadlines:
+                rem = dl.remaining_display(current)
+                start_cst = dl.start_at.astimezone(CST).strftime("%Y-%m-%d %H:%M") if dl.start_at else "见公告详情"
+                end_cst = dl.end_at.astimezone(CST).strftime("%Y-%m-%d %H:%M")
+                tag = ""
+                if self._is_coop_deadline(dl):
+                    tag = "[协同] "
+                elif dl.category == "raid" or "突袭" in dl.name or "raid" in dl.name.lower():
+                    tag = "[突袭] "
+                elif dl.category == "recruit" or "招募" in dl.name or "recruit" in dl.name.lower() or "pick up" in dl.name.lower():
+                    tag = "[招募] "
+                lines.append(f"• {tag}{dl.name}")
+                lines.append("  状态: 进行中")
+                lines.append(f"  开始时间: {start_cst}")
+                lines.append(f"  结束时间: {end_cst}")
+                lines.append(f"  剩余时间: {rem}")
+        else:
+            lines.append("当前暂无进行中的活动。")
         return "\n".join(lines).strip()

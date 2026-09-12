@@ -588,9 +588,36 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(rows["指挥官等级"], "99")
         self.assertEqual(rows["部队总战力"], "1,234,567")
+        self.assertEqual(rows["无尽塔进度"], "200")
+        self.assertNotIn("部落塔进度", rows)
+        self.assertNotIn("战术学院班级", rows)
+        self.assertNotIn("战术学院课程", rows)
         self.assertEqual(rows["回收室研究"], "2 项 · 等级合计 30")
         self.assertEqual(rows["收藏记录"], "10")
         self.assertNotIn("头像 ID", rows)
+
+    def test_profile_rows_with_campaign_resolver(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.campaign_stage_resolver import CampaignStageResolver
+
+        resolver = CampaignStageResolver({
+            "NORMAL": {"46": {"46-40": 6046044}},
+            "HARD": {"35": {"35-36": 7035044}},
+        })
+        rows = dict(
+            NikkePlugin._profile_rows(
+                {"area_id": "3", "nickname": "测试"},
+                {
+                    "nickname": "测试",
+                    "progress_normal_campaign": 6046044,
+                    "progress_hard_campaign": 7035044,
+                },
+                {},
+                campaign_resolver=resolver,
+            )
+        )
+        self.assertEqual(rows["普通主线"], "NORMAL 46-40")
+        self.assertEqual(rows["困难主线"], "HARD 35-36")
 
     async def test_chinese_and_legacy_commands_share_one_root_router(self):
         from astrbot_plugin_nikke.main import NikkePlugin
