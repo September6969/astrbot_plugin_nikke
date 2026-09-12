@@ -21,6 +21,7 @@ from .character_identity import CharacterDirectoryResolver
 from .character_stat_calculator import CharacterStatCalculator
 from .log_privacy import sanitize_log_text
 from .overload_tier_registry import OverloadTierRegistry
+from .ol_unknown_inventory import UnknownOlInventory
 from .state_effect_registry import StateEffectRegistry
 
 
@@ -104,6 +105,7 @@ class CharacterCardBuilder:
         state_effect_registry: StateEffectRegistry | None = None,
         overload_tier_registry: OverloadTierRegistry | None = None,
         stat_calculator: CharacterStatCalculator | None = None,
+        unknown_ol_inventory_path: str | Path | None = None,
     ):
         self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(
             Path(__file__).parent / "assets" / "state_effects.json"
@@ -112,6 +114,17 @@ class CharacterCardBuilder:
             Path(__file__).parent / "assets" / "overload_tiers.json"
         )
         self.stat_calculator = stat_calculator or CharacterStatCalculator()
+        self.unknown_ol_inventory = (
+            UnknownOlInventory(unknown_ol_inventory_path)
+            if unknown_ol_inventory_path is not None else None
+        )
+
+    @staticmethod
+    def _unknown_option_label(option_id: str | None, raw_type: str) -> str:
+        """未知项必须可见，但不能把 function key 猜成已验证词条。"""
+        if option_id:
+            return f"未知词条 · ID {option_id}"
+        return f"未映射词条 {raw_type}" if raw_type else "未映射词条"
 
     @staticmethod
     def _option_from_function(function: dict[str, Any]) -> EquipmentOption:
@@ -194,7 +207,7 @@ class CharacterCardBuilder:
         if not valid_functions:
             return EquipmentOption(
                 raw_type=f"option{position}",
-                display_name="空槽" if option_id is None else "未识别词条",
+                display_name="空槽" if option_id is None else self._unknown_option_label(option_id, ""),
                 value=0,
                 unit="empty" if option_id is None else "unknown",
                 position=position,
@@ -209,9 +222,12 @@ class CharacterCardBuilder:
         )
         if len(components) == 1:
             primary = components[0]
+            display_name = primary.display_name
+            if primary.unit == "unknown":
+                display_name = self._unknown_option_label(option_id, primary.raw_type)
             return EquipmentOption(
                 raw_type=primary.raw_type,
-                display_name=primary.display_name,
+                display_name=display_name,
                 value=primary.value,
                 unit=primary.unit,
                 level=primary.level,
@@ -223,9 +239,9 @@ class CharacterCardBuilder:
             )
 
         names = list(dict.fromkeys(
-            component.display_name
+            self._unknown_option_label(option_id, component.raw_type)
+            if component.unit == "unknown" else component.display_name
             for component in components
-            if component.display_name != "未识别词条"
         ))
         return EquipmentOption(
             raw_type=option_id or f"option{position}",
@@ -278,6 +294,10 @@ class CharacterCardBuilder:
                     position=index,
                 )
                 item.options.append(option)
+                if self.unknown_ol_inventory is not None:
+                    for component in option.components or (option,):
+                        if component.unit == "unknown":
+                            self.unknown_ol_inventory.observe(option.option_id, component.raw_type)
                 for component in option.components or (option,):
                     if component.unit in {"percent", "flat"}:
                         key = (component.display_name, component.unit)

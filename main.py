@@ -77,7 +77,9 @@ class NikkePlugin(Star):
             lambda message: logger.info(f"[NIKKE诊断] {message}"),
         )
         self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
-        self.character_builder = CharacterCardBuilder()
+        self.character_builder = CharacterCardBuilder(
+            unknown_ol_inventory_path=self.data_dir / "ol_unknown_inventory.json",
+        )
         user_aliases = (self.config or {}).get("custom_character_aliases")
         try:
             self.character_identity = CharacterDirectoryResolver(

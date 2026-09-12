@@ -192,7 +192,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertTrue(any(item.raw_type == "StatUnknownFake" for item in unknown))
         self.assertEqual(
             [item.display_name for item in unknown if item.raw_type == "StatUnknownFake"],
-            ["未识别词条"],
+            ["未知词条 · ID 9999999"],
         )
         self.assertNotIn("未识别词条", {item.display_name for item in card.option_totals})
 
@@ -209,7 +209,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
             if option.raw_type == "StatChargeDamage"
         ]
         self.assertTrue(len(charge_damage_unknown) > 0)
-        self.assertTrue(all(item.display_name == "蓄力伤害增加" for item in charge_damage_unknown))
+        self.assertTrue(all(item.display_name.startswith("未知词条 · ID ") for item in charge_damage_unknown))
         option = CharacterCardBuilder._option_from_function({
             "function_type": "StatCriticalDamage", "function_value": 688,
             "function_value_type": "Percent",
