@@ -1,0 +1,1610 @@
+{
+  "total_default_characters": 200,
+  "manifest_present_count": 200,
+  "manifest_missing_count": 0,
+  "missing_characters": [],
+  "missing_files_count": 0,
+  "missing_files": [],
+  "characters_audited": [
+    {
+      "resource_id": 18,
+      "spine_asset_id": "c018",
+      "name_cn": "尼恩：透视之眼",
+      "name_en": "Neon: Vision Eye",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 80,
+      "spine_asset_id": "c080",
+      "name_cn": "桑迪",
+      "name_en": "Centi",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 82,
+      "spine_asset_id": "c082",
+      "name_cn": "丽塔",
+      "name_en": "Liter",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 100,
+      "spine_asset_id": "c100",
+      "name_cn": "拉普拉斯",
+      "name_en": "Laplace",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 101,
+      "spine_asset_id": "c101",
+      "name_cn": "德雷克",
+      "name_en": "Drake",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 102,
+      "spine_asset_id": "c102",
+      "name_cn": "麦斯威尔",
+      "name_en": "Maxwell",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 103,
+      "spine_asset_id": "c103",
+      "name_cn": "拉普拉斯：究极英雄",
+      "name_en": "Laplace: Ultimate Hero",
+      "default_costume_id": 30069,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 104,
+      "spine_asset_id": "c104",
+      "name_cn": "德雷克：终极反派",
+      "name_en": "Drake: Great Villain",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 105,
+      "spine_asset_id": "c105",
+      "name_cn": "麦斯威尔：平凡技师",
+      "name_en": "Maxwell: Ordinary Mechanic",
+      "default_costume_id": 30070,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 110,
+      "spine_asset_id": "c110",
+      "name_cn": "克拉乌",
+      "name_en": "Crow",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 111,
+      "spine_asset_id": "c111",
+      "name_cn": "豺狼",
+      "name_en": "Jackal",
+      "default_costume_id": 30054,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 120,
+      "spine_asset_id": "c120",
+      "name_cn": "N102",
+      "name_en": "N102",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 121,
+      "spine_asset_id": "c121",
+      "name_cn": "安妮：奇迹仙女",
+      "name_en": "Anne: Miracle Fairy",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 131,
+      "spine_asset_id": "c131",
+      "name_cn": "佩珀",
+      "name_en": "Pepper",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 150,
+      "spine_asset_id": "c150",
+      "name_cn": "尤莉亚",
+      "name_en": "Julia",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 160,
+      "spine_asset_id": "c160",
+      "name_cn": "尤妮",
+      "name_en": "Yuni",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 161,
+      "spine_asset_id": "c161",
+      "name_cn": "米哈拉",
+      "name_en": "Mihara",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 162,
+      "spine_asset_id": "c162",
+      "name_cn": "米哈拉：羁绊锁链",
+      "name_en": "Mihara: Bonding Chain",
+      "default_costume_id": 30043,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 172,
+      "spine_asset_id": "c172",
+      "name_cn": "艾德米",
+      "name_en": "Admi",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 192,
+      "spine_asset_id": "c192",
+      "name_cn": "托比",
+      "name_en": "Tove",
+      "default_costume_id": 30032,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 290,
+      "spine_asset_id": "c290",
+      "name_cn": "玛娜",
+      "name_en": "Mana",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 291,
+      "spine_asset_id": "c291",
+      "name_cn": "艾瑟儿",
+      "name_en": "Ether",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 302,
+      "spine_asset_id": "c302",
+      "name_cn": "产品08",
+      "name_en": "Product 08",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 303,
+      "spine_asset_id": "c303",
+      "name_cn": "产品12",
+      "name_en": "Product 12",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 307,
+      "spine_asset_id": "c307",
+      "name_cn": "产品23",
+      "name_en": "Product 23",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 361,
+      "spine_asset_id": "c361",
+      "name_cn": "吉洛",
+      "name_en": "Kilo",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 391,
+      "spine_asset_id": "c391",
+      "name_cn": "爱因",
+      "name_en": "Ein",
+      "default_costume_id": 30035,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 400,
+      "spine_asset_id": "c400",
+      "name_cn": "吉尔提",
+      "name_en": "Guilty",
+      "default_costume_id": 10008,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 401,
+      "spine_asset_id": "c401",
+      "name_cn": "森",
+      "name_en": "Sin",
+      "default_costume_id": 60004,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 402,
+      "spine_asset_id": "c402",
+      "name_cn": "坎西",
+      "name_en": "Quency",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 403,
+      "spine_asset_id": "c403",
+      "name_cn": "坎西：逃生女王",
+      "name_en": "Quency: Escape Queen",
+      "default_costume_id": 50017,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 411,
+      "spine_asset_id": "c411",
+      "name_cn": "芙罗拉",
+      "name_en": "Flora",
+      "default_costume_id": 70009,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 412,
+      "spine_asset_id": "c412",
+      "name_cn": "特蕾娜",
+      "name_en": "Trina",
+      "default_costume_id": 30067,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 450,
+      "spine_asset_id": "c450",
+      "name_cn": "娜嘉",
+      "name_en": "Naga",
+      "default_costume_id": 30027,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 451,
+      "spine_asset_id": "c451",
+      "name_cn": "蒂亚",
+      "name_en": "Tia",
+      "default_costume_id": 30028,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 500,
+      "spine_asset_id": "c500",
+      "name_cn": "伊莱格",
+      "name_en": "Elegg",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 501,
+      "spine_asset_id": "c501",
+      "name_cn": "特罗尼",
+      "name_en": "Trony",
+      "default_costume_id": 60003,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 502,
+      "spine_asset_id": "c502",
+      "name_cn": "伊莱格：BOOM与惊吓",
+      "name_en": "Elegg: Boom and Shock",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 590,
+      "spine_asset_id": "c590",
+      "name_cn": "莫莉",
+      "name_en": "Mori",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 620,
+      "spine_asset_id": "c620",
+      "name_cn": "白鹤",
+      "name_en": "Snow Crane",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 10,
+      "spine_asset_id": "c010",
+      "name_cn": "拉毗",
+      "name_en": "Rapi",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 11,
+      "spine_asset_id": "c011",
+      "name_cn": "尼恩",
+      "name_en": "Neon",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 14,
+      "spine_asset_id": "c014",
+      "name_cn": "尼恩：蓝色海洋",
+      "name_en": "Neon: Blue Ocean",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 16,
+      "spine_asset_id": "c016",
+      "name_cn": "拉毗：小红帽",
+      "name_en": "Rapi: Red Hood",
+      "default_costume_id": 10014,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 20,
+      "spine_asset_id": "c020",
+      "name_cn": "德尔塔",
+      "name_en": "Delta",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 22,
+      "spine_asset_id": "c022",
+      "name_cn": "西格娜",
+      "name_en": "Signal",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 30,
+      "spine_asset_id": "c030",
+      "name_cn": "波莉",
+      "name_en": "Poli",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 32,
+      "spine_asset_id": "c032",
+      "name_cn": "米兰达",
+      "name_en": "Miranda",
+      "default_costume_id": 30031,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 33,
+      "spine_asset_id": "c033",
+      "name_cn": "基里",
+      "name_en": "Quiry",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 40,
+      "spine_asset_id": "c040",
+      "name_cn": "D",
+      "name_en": "D",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 41,
+      "spine_asset_id": "c041",
+      "name_cn": "K",
+      "name_en": "K",
+      "default_costume_id": 100002,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 43,
+      "spine_asset_id": "c043",
+      "name_cn": "D：杀手妻子",
+      "name_en": "D: Killer Wife",
+      "default_costume_id": 50013,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 70,
+      "spine_asset_id": "c070",
+      "name_cn": "布丽德",
+      "name_en": "Brid",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 71,
+      "spine_asset_id": "c071",
+      "name_cn": "索林",
+      "name_en": "Soline",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 72,
+      "spine_asset_id": "c072",
+      "name_cn": "迪塞尔",
+      "name_en": "Diesel",
+      "default_costume_id": 30005,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 73,
+      "spine_asset_id": "c073",
+      "name_cn": "布丽德：静默轨道",
+      "name_en": "Brid: Silent Track",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 74,
+      "spine_asset_id": "c074",
+      "name_cn": "索林：霜雪车票",
+      "name_en": "Soline: Frost Ticket",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 75,
+      "spine_asset_id": "c075",
+      "name_cn": "迪塞尔：冬日甜心",
+      "name_en": "Diesel: Winter Sweets",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 90,
+      "spine_asset_id": "c090",
+      "name_cn": "艾玛",
+      "name_en": "Emma",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 91,
+      "spine_asset_id": "c091",
+      "name_cn": "贝斯蒂",
+      "name_en": "Vesti",
+      "default_costume_id": 130002,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 92,
+      "spine_asset_id": "c092",
+      "name_cn": "银华",
+      "name_en": "Eunhwa",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 93,
+      "spine_asset_id": "c093",
+      "name_cn": "艾玛：战术升级",
+      "name_en": "Emma: Tactical Upgrade",
+      "default_costume_id": 50018,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 94,
+      "spine_asset_id": "c094",
+      "name_cn": "贝斯蒂：战术升级",
+      "name_en": "Vesti: Tactical Upgrade",
+      "default_costume_id": 30060,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 95,
+      "spine_asset_id": "c095",
+      "name_cn": "银华：战术升级",
+      "name_en": "Eunhwa: Tactical Upgrade",
+      "default_costume_id": 30049,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 113,
+      "spine_asset_id": "c113",
+      "name_cn": "E.H.",
+      "name_en": "E.H.",
+      "default_costume_id": 30068,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 170,
+      "spine_asset_id": "c170",
+      "name_cn": "普丽瓦蒂",
+      "name_en": "Privaty",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 180,
+      "spine_asset_id": "c180",
+      "name_cn": "吉萝婷",
+      "name_en": "Guillotine",
+      "default_costume_id": 50009,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 181,
+      "spine_asset_id": "c181",
+      "name_cn": "梅登",
+      "name_en": "Maiden",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 182,
+      "spine_asset_id": "c182",
+      "name_cn": "吉萝婷：寒冬杀手",
+      "name_en": "Guillotine: Winter Slayer",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 183,
+      "spine_asset_id": "c183",
+      "name_cn": "梅登：冰玫瑰",
+      "name_en": "Maiden: Ice Rose",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 280,
+      "spine_asset_id": "c280",
+      "name_cn": "罗珊娜",
+      "name_en": "Rosanna",
+      "default_costume_id": 30024,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 300,
+      "spine_asset_id": "c300",
+      "name_cn": "士兵E.G.",
+      "name_en": "Soldier EG",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 301,
+      "spine_asset_id": "c301",
+      "name_cn": "士兵F.A.",
+      "name_en": "Soldier FA",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 306,
+      "spine_asset_id": "c306",
+      "name_cn": "士兵O.W.",
+      "name_en": "Soldier OW",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 313,
+      "spine_asset_id": "c313",
+      "name_cn": "普丽瓦蒂：不友善的女仆",
+      "name_en": "Privaty: Unkind Maid",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 321,
+      "spine_asset_id": "c321",
+      "name_cn": "玛律恰那",
+      "name_en": "Marciana",
+      "default_costume_id": 30029,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 322,
+      "spine_asset_id": "c322",
+      "name_cn": "玛律恰那：海洋进修",
+      "name_en": "Marciana: Marine Study",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 350,
+      "spine_asset_id": "c350",
+      "name_cn": "马斯特",
+      "name_en": "Mast",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 351,
+      "spine_asset_id": "c351",
+      "name_cn": "安克",
+      "name_en": "Anchor",
+      "default_costume_id": 10011,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 352,
+      "spine_asset_id": "c352",
+      "name_cn": "海伦",
+      "name_en": "Helm",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 353,
+      "spine_asset_id": "c353",
+      "name_cn": "海伦：海蓝宝石",
+      "name_en": "Helm: Aquamarine",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 354,
+      "spine_asset_id": "c354",
+      "name_cn": "马斯特：浪漫的女仆",
+      "name_en": "Mast: Romantic Maid",
+      "default_costume_id": 30057,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 355,
+      "spine_asset_id": "c355",
+      "name_cn": "安克：天真的女仆",
+      "name_en": "Anchor: Innocent Maid",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 390,
+      "spine_asset_id": "c390",
+      "name_cn": "茨瓦伊",
+      "name_en": "Zwei",
+      "default_costume_id": 30034,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 441,
+      "spine_asset_id": "c441",
+      "name_cn": "阿维斯塔",
+      "name_en": "Avistar",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 532,
+      "spine_asset_id": "c532",
+      "name_cn": "索拉",
+      "name_en": "Sora",
+      "default_costume_id": 30062,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 580,
+      "spine_asset_id": "c580",
+      "name_cn": "潘托姆",
+      "name_en": "Phantom",
+      "default_costume_id": 130006,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 581,
+      "spine_asset_id": "c581",
+      "name_cn": "阿尔卡娜",
+      "name_en": "Arcana",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 582,
+      "spine_asset_id": "c582",
+      "name_cn": "蕾贝儿",
+      "name_en": "Label",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 583,
+      "spine_asset_id": "c583",
+      "name_cn": "阿尔卡娜：命运伴侣",
+      "name_en": "Arcana: Fortune Mate",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 12,
+      "spine_asset_id": "c012",
+      "name_cn": "阿妮斯",
+      "name_en": "Anis",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 15,
+      "spine_asset_id": "c015",
+      "name_cn": "阿妮斯：闪耀夏日",
+      "name_en": "Anis: Sparkling Summer",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 17,
+      "spine_asset_id": "c017",
+      "name_cn": "阿妮斯：超级巨星",
+      "name_en": "Anis: Star",
+      "default_costume_id": 120004,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 60,
+      "spine_asset_id": "c060",
+      "name_cn": "贝洛塔",
+      "name_en": "Belorta",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 61,
+      "spine_asset_id": "c061",
+      "name_cn": "米卡",
+      "name_en": "Mica",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 62,
+      "spine_asset_id": "c062",
+      "name_cn": "米卡：雪地伙伴",
+      "name_en": "Mica: Snow Buddy",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 112,
+      "spine_asset_id": "c112",
+      "name_cn": "毒蛇",
+      "name_en": "Viper",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 130,
+      "spine_asset_id": "c130",
+      "name_cn": "梅里",
+      "name_en": "Mary",
+      "default_costume_id": 70004,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 132,
+      "spine_asset_id": "c132",
+      "name_cn": "梅里：海湾女神",
+      "name_en": "Mary: Bay Goddess",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 140,
+      "spine_asset_id": "c140",
+      "name_cn": "舒格",
+      "name_en": "Sugar",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 141,
+      "spine_asset_id": "c141",
+      "name_cn": "米尔克",
+      "name_en": "Milk",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 142,
+      "spine_asset_id": "c142",
+      "name_cn": "普琳玛",
+      "name_en": "Frima",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 143,
+      "spine_asset_id": "c143",
+      "name_cn": "米尔克：花漾兔女郎",
+      "name_en": "Milk: Blooming Bunny",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 171,
+      "spine_asset_id": "c171",
+      "name_cn": "尤尔夏",
+      "name_en": "Yulha",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 190,
+      "spine_asset_id": "c190",
+      "name_cn": "鲁德米拉",
+      "name_en": "Ludmilla",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 191,
+      "spine_asset_id": "c191",
+      "name_cn": "爱丽丝",
+      "name_en": "Alice",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 193,
+      "spine_asset_id": "c193",
+      "name_cn": "尼夫",
+      "name_en": "Neve",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 194,
+      "spine_asset_id": "c194",
+      "name_cn": "鲁德米拉：冬日之主",
+      "name_en": "Ludmilla: Winter Owner",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 195,
+      "spine_asset_id": "c195",
+      "name_cn": "爱丽丝：仙境兔女郎",
+      "name_en": "Alice: Wonderland Bunny",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 200,
+      "spine_asset_id": "c200",
+      "name_cn": "露菲",
+      "name_en": "Rupee",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 201,
+      "spine_asset_id": "c201",
+      "name_cn": "杨",
+      "name_en": "Yan",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 202,
+      "spine_asset_id": "c202",
+      "name_cn": "朵拉",
+      "name_en": "Dolla",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 203,
+      "spine_asset_id": "c203",
+      "name_cn": "露菲：冬日购物狂",
+      "name_en": "Rupee: Winter Shopper",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 210,
+      "spine_asset_id": "c210",
+      "name_cn": "艾可希雅",
+      "name_en": "Exia",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 212,
+      "spine_asset_id": "c212",
+      "name_cn": "诺薇儿",
+      "name_en": "Novel",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 240,
+      "spine_asset_id": "c240",
+      "name_cn": "鲁玛妮",
+      "name_en": "Rumani",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 241,
+      "spine_asset_id": "c241",
+      "name_cn": "艾菲涅尔",
+      "name_en": "Epinel",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 242,
+      "spine_asset_id": "c242",
+      "name_cn": "富克旺",
+      "name_en": "Folkwang",
+      "default_costume_id": 70003,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 270,
+      "spine_asset_id": "c270",
+      "name_cn": "布兰儿",
+      "name_en": "Blanc",
+      "default_costume_id": 30021,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 271,
+      "spine_asset_id": "c271",
+      "name_cn": "诺亚尔",
+      "name_en": "Noir",
+      "default_costume_id": 30020,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 272,
+      "spine_asset_id": "c272",
+      "name_cn": "露姬",
+      "name_en": "Rouge",
+      "default_costume_id": 70006,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 281,
+      "spine_asset_id": "c281",
+      "name_cn": "牡丹",
+      "name_en": "Moran",
+      "default_costume_id": 30046,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 282,
+      "spine_asset_id": "c282",
+      "name_cn": "樱花",
+      "name_en": "Sakura",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 283,
+      "spine_asset_id": "c283",
+      "name_cn": "罗珊娜：高雅海洋",
+      "name_en": "Rosanna: Chic Ocean",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 284,
+      "spine_asset_id": "c284",
+      "name_cn": "樱花：夏日绽放",
+      "name_en": "Sakura: Bloom in Summer",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 304,
+      "spine_asset_id": "c304",
+      "name_cn": "iDoll花",
+      "name_en": "iDoll Flower",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 305,
+      "spine_asset_id": "c305",
+      "name_cn": "iDoll海",
+      "name_en": "iDoll Ocean",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 308,
+      "spine_asset_id": "c308",
+      "name_cn": "iDoll太阳",
+      "name_en": "iDoll Sun",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 310,
+      "spine_asset_id": "c310",
+      "name_cn": "爱德",
+      "name_en": "Ade",
+      "default_costume_id": 30040,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 311,
+      "spine_asset_id": "c311",
+      "name_cn": "可可",
+      "name_en": "Cocoa",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 312,
+      "spine_asset_id": "c312",
+      "name_cn": "索达",
+      "name_en": "Soda",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 314,
+      "spine_asset_id": "c314",
+      "name_cn": "索达：闪亮兔女郎",
+      "name_en": "Soda: Twinkling Bunny",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 315,
+      "spine_asset_id": "c315",
+      "name_cn": "爱德：特务兔女郎",
+      "name_en": "Ade: Agent Bunny",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 316,
+      "spine_asset_id": "c316",
+      "name_cn": "薇尔维特",
+      "name_en": "Velvet",
+      "default_costume_id": 70008,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 380,
+      "spine_asset_id": "c380",
+      "name_cn": "尼罗",
+      "name_en": "Nero",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 381,
+      "spine_asset_id": "c381",
+      "name_cn": "饼干",
+      "name_en": "Biscuit",
+      "default_costume_id": 30038,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 382,
+      "spine_asset_id": "c382",
+      "name_cn": "莱昂纳",
+      "name_en": "Leona",
+      "default_costume_id": 30030,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 392,
+      "spine_asset_id": "c392",
+      "name_cn": "莱伊",
+      "name_en": "Rei",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 430,
+      "spine_asset_id": "c430",
+      "name_cn": "诺伊斯",
+      "name_en": "Noise",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 431,
+      "spine_asset_id": "c431",
+      "name_cn": "沃纶姆",
+      "name_en": "Volume",
+      "default_costume_id": 130001,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 432,
+      "spine_asset_id": "c432",
+      "name_cn": "阿莉亚",
+      "name_en": "Aria",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 520,
+      "spine_asset_id": "c520",
+      "name_cn": "布蕾德",
+      "name_en": "Bready",
+      "default_costume_id": 30056,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 521,
+      "spine_asset_id": "c521",
+      "name_cn": "克劳斯特",
+      "name_en": "Crust",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 550,
+      "spine_asset_id": "c550",
+      "name_cn": "贝伊",
+      "name_en": "Bay",
+      "default_costume_id": 70007,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 551,
+      "spine_asset_id": "c551",
+      "name_cn": "克雷伊",
+      "name_en": "Clay",
+      "default_costume_id": 30063,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 570,
+      "spine_asset_id": "c570",
+      "name_cn": "方舟黑色游侠",
+      "name_en": "Ark Ranger Black",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 600,
+      "spine_asset_id": "c600",
+      "name_cn": "敏特",
+      "name_en": "Mint",
+      "default_costume_id": 30065,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 601,
+      "spine_asset_id": "c601",
+      "name_cn": "普莉卡",
+      "name_en": "Prika",
+      "default_costume_id": 30066,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 220,
+      "spine_asset_id": "c220",
+      "name_cn": "白雪公主",
+      "name_en": "Snow White",
+      "default_costume_id": 30026,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 221,
+      "spine_asset_id": "c221",
+      "name_cn": "长发公主",
+      "name_en": "Rapunzel",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 222,
+      "spine_asset_id": "c222",
+      "name_cn": "红莲",
+      "name_en": "Scarlet",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 223,
+      "spine_asset_id": "c223",
+      "name_cn": "娜由塔",
+      "name_en": "Nayuta",
+      "default_costume_id": 120003,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 224,
+      "spine_asset_id": "c224",
+      "name_cn": "白雪公主：纯真年代",
+      "name_en": "Snow White: Innocent Days",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 225,
+      "spine_asset_id": "c225",
+      "name_cn": "红莲：暗影",
+      "name_en": "Scarlet: Black Shadow",
+      "default_costume_id": 30033,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 226,
+      "spine_asset_id": "c226",
+      "name_cn": "长发公主：纯洁恩典",
+      "name_en": "Rapunzel: Pure Grace",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 230,
+      "spine_asset_id": "c230",
+      "name_cn": "哈兰",
+      "name_en": "Harran",
+      "default_costume_id": 50006,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 231,
+      "spine_asset_id": "c231",
+      "name_cn": "伊莎贝尔",
+      "name_en": "Isabel",
+      "default_costume_id": 50014,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 232,
+      "spine_asset_id": "c232",
+      "name_cn": "诺雅",
+      "name_en": "Noah",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 233,
+      "spine_asset_id": "c233",
+      "name_cn": "桃乐丝",
+      "name_en": "Dorothy",
+      "default_costume_id": 50007,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 234,
+      "spine_asset_id": "c234",
+      "name_cn": "桃乐丝：机缘巧遇",
+      "name_en": "Dorothy: Serendipity",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 260,
+      "spine_asset_id": "c260",
+      "name_cn": "神罚",
+      "name_en": "Modernia",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 261,
+      "spine_asset_id": "c261",
+      "name_cn": "尼希利斯塔",
+      "name_en": "Nihilister",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 262,
+      "spine_asset_id": "c262",
+      "name_cn": "莉贝雷利奥",
+      "name_en": "Liberalio",
+      "default_costume_id": 50019,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 330,
+      "spine_asset_id": "c330",
+      "name_cn": "皇冠",
+      "name_en": "Crown",
+      "default_costume_id": 120001,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 331,
+      "spine_asset_id": "c331",
+      "name_cn": "钟鸣",
+      "name_en": "Chime",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 470,
+      "spine_asset_id": "c470",
+      "name_cn": "小红帽",
+      "name_en": "Red Hood",
+      "default_costume_id": 50012,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 471,
+      "spine_asset_id": "c471",
+      "name_cn": "白雪公主：重型武装",
+      "name_en": "Snow White: Heavy Arms",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 511,
+      "spine_asset_id": "c511",
+      "name_cn": "灰姑娘",
+      "name_en": "Cinderella",
+      "default_costume_id": 50015,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 513,
+      "spine_asset_id": "c513",
+      "name_cn": "小美人鱼",
+      "name_en": "Little Mermaid",
+      "default_costume_id": 50016,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 514,
+      "spine_asset_id": "c514",
+      "name_cn": "格拉维",
+      "name_en": "Grave",
+      "default_costume_id": 30041,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 515,
+      "spine_asset_id": "c515",
+      "name_cn": "灰姑娘：琉璃波光",
+      "name_en": "Cinderella: Crystal Wave",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 23,
+      "spine_asset_id": "c023",
+      "name_cn": "德尔塔：怪盗忍者",
+      "name_en": "Delta: Ninja Thief",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 800,
+      "spine_asset_id": "c800",
+      "name_cn": "真纪真",
+      "name_en": "Makima",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 801,
+      "spine_asset_id": "c801",
+      "name_cn": "帕瓦",
+      "name_en": "Power",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 802,
+      "spine_asset_id": "c802",
+      "name_cn": "姬野",
+      "name_en": "Himeno",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 810,
+      "spine_asset_id": "c810",
+      "name_cn": "2B",
+      "name_en": "2B",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 811,
+      "spine_asset_id": "c811",
+      "name_cn": "A2",
+      "name_en": "A2",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 812,
+      "spine_asset_id": "c812",
+      "name_cn": "帕斯卡",
+      "name_en": "Pascal",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 820,
+      "spine_asset_id": "c820",
+      "name_cn": "雷姆",
+      "name_en": "Rem",
+      "default_costume_id": 110001,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 821,
+      "spine_asset_id": "c821",
+      "name_cn": "爱蜜莉雅",
+      "name_en": "Emilia",
+      "default_costume_id": 110003,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 822,
+      "spine_asset_id": "c822",
+      "name_cn": "拉姆",
+      "name_en": "Ram",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 830,
+      "spine_asset_id": "c830",
+      "name_cn": "明日香",
+      "name_en": "Asuka",
+      "default_costume_id": 110005,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 831,
+      "spine_asset_id": "c831",
+      "name_cn": "零",
+      "name_en": "Rei",
+      "default_costume_id": 110006,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 832,
+      "spine_asset_id": "c832",
+      "name_cn": "真理",
+      "name_en": "Mari",
+      "default_costume_id": 110007,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 833,
+      "spine_asset_id": "c833",
+      "name_cn": "美里",
+      "name_en": "Misato",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 834,
+      "spine_asset_id": "c834",
+      "name_cn": "零（暂称）",
+      "name_en": "Rei (Tentative Name)",
+      "default_costume_id": 110014,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 835,
+      "spine_asset_id": "c835",
+      "name_cn": "明日香：WILLE",
+      "name_en": "Asuka: WILLE",
+      "default_costume_id": 110012,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 836,
+      "spine_asset_id": "c836",
+      "name_cn": "樱",
+      "name_en": "Sakura",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 840,
+      "spine_asset_id": "c840",
+      "name_cn": "艾达",
+      "name_en": "Ada",
+      "default_costume_id": 110024,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 841,
+      "spine_asset_id": "c841",
+      "name_cn": "吉儿",
+      "name_en": "Jill",
+      "default_costume_id": 110026,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 842,
+      "spine_asset_id": "c842",
+      "name_cn": "克蕾儿",
+      "name_en": "Claire",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 850,
+      "spine_asset_id": "c850",
+      "name_cn": "伊芙",
+      "name_en": "EVE",
+      "default_costume_id": 110018,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 851,
+      "spine_asset_id": "c851",
+      "name_cn": "蕾雯",
+      "name_en": "Raven",
+      "default_costume_id": 110021,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 852,
+      "spine_asset_id": "c852",
+      "name_cn": "百合",
+      "name_en": "Lily",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 860,
+      "spine_asset_id": "c860",
+      "name_cn": "千束",
+      "name_en": "Chisato",
+      "default_costume_id": 110028,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 861,
+      "spine_asset_id": "c861",
+      "name_cn": "泷奈",
+      "name_en": "Takina",
+      "default_costume_id": 110030,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 862,
+      "spine_asset_id": "c862",
+      "name_cn": "胡桃",
+      "name_en": "Kurumi",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 870,
+      "spine_asset_id": "c870",
+      "name_cn": "QUEEN（真）",
+      "name_en": "Queen (Makoto)",
+      "default_costume_id": 110032,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 871,
+      "spine_asset_id": "c871",
+      "name_cn": "雪子",
+      "name_en": "Yukiko",
+      "default_costume_id": 110034,
+      "manifest_status": "present"
+    },
+    {
+      "resource_id": 872,
+      "spine_asset_id": "c872",
+      "name_cn": "埃癸斯",
+      "name_en": "Aigis",
+      "default_costume_id": null,
+      "manifest_status": "present"
+    }
+  ]
+}

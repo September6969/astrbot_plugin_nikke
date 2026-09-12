@@ -16,6 +16,11 @@ from pathlib import Path
 
 import httpx
 
+try:
+    from .character_master_resolver import CharacterMasterResolver
+except ImportError:
+    from character_master_resolver import CharacterMasterResolver
+
 logger = logging.getLogger("nikke.nikke_db")
 
 
@@ -40,7 +45,14 @@ class NikkeDbProvider:
     }
     _ID_PATTERN = re.compile(r"[a-z0-9]+(?:[_-][a-z0-9]+)*")
 
-    def __init__(self, cache_dir: str | Path, asset_dir: str | Path, *, remote: bool = False):
+    def __init__(
+        self,
+        cache_dir: str | Path,
+        asset_dir: str | Path,
+        *,
+        remote: bool = False,
+        master_resolver: CharacterMasterResolver | None = None,
+    ):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
         self.remote = remote
@@ -56,6 +68,33 @@ class NikkeDbProvider:
         self.costume_character_map: dict[str, str] = {}
         self.costume_render_map: dict[str, str] = {}
         self.costume_map = self._load_costume_map()
+        self.master_resolver: CharacterMasterResolver | None = (
+            master_resolver if master_resolver is not None else self._load_master_resolver()
+        )
+
+    def _load_master_resolver(self) -> CharacterMasterResolver | None:
+        candidate_paths = [
+            self.asset_dir / "character_master.json",
+            Path(__file__).parent / "assets" / "character_master.json",
+        ]
+        for p in candidate_paths:
+            if p.is_file():
+                try:
+                    return CharacterMasterResolver(p)
+                except Exception as exc:
+                    logger.warning("Failed to load %s in NikkeDbProvider: %s", p, exc)
+        return None
+
+    def _is_default_costume_for_resource(
+        self, resource_id: int | str, costume_id: int | str | None
+    ) -> bool:
+        if costume_id is None:
+            return True
+        if costume_id in (0, "0", "default", ""):
+            return True
+        if hasattr(self, "master_resolver") and self.master_resolver is not None:
+            return self.master_resolver.is_default_costume(resource_id, costume_id)
+        return False
 
     def _load_costume_map(self) -> dict[str, str]:
         """读取严格的已核验皮肤映射；坏条目不能进入运行时合同。"""
@@ -168,8 +207,12 @@ class NikkeDbProvider:
             return "invalid", "invalid"
         return "known", normalized
 
-    def costume_cache_token(self, costume_id: int | str | None) -> tuple[str, str]:
+    def costume_cache_token(
+        self, costume_id: int | str | None, resource_id: int | str | None = None
+    ) -> tuple[str, str]:
         """结合当前映射把皮肤令牌分成 default/known/unknown/invalid。"""
+        if resource_id is not None and self._is_default_costume_for_resource(resource_id, costume_id):
+            return "default", "default"
         state, token = self.classify_costume_id(costume_id)
         if state != "known":
             return state, token
@@ -187,7 +230,10 @@ class NikkeDbProvider:
             return "missing"
         default_id = self.NIKKE_DB_ID_OVERRIDES.get(res_str) or self.normalize_resource_id(res_str)
 
-        state, token = self.costume_cache_token(costume_id)
+        if self._is_default_costume_for_resource(resource_id, costume_id):
+            return default_id
+
+        state, token = self.costume_cache_token(costume_id, resource_id=resource_id)
         if state == "default":
             return default_id
         if state == "known":
@@ -207,7 +253,9 @@ class NikkeDbProvider:
         default_id = self.resolve_character_id(resource_id)
         if default_id == "missing":
             return "missing"
-        state, token = self.costume_cache_token(costume_id)
+        if self._is_default_costume_for_resource(resource_id, costume_id):
+            return default_id
+        state, token = self.costume_cache_token(costume_id, resource_id=resource_id)
         if state == "default":
             return default_id
         if state != "known":

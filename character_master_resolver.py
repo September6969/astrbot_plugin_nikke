@@ -30,6 +30,8 @@ class ResolvedCharacter:
     burst: str
     corporation: str
     rare: str
+    costume_id: int = 0
+    default_costume_id: int | None = None
 
 
 class CharacterMasterResolver:
@@ -43,6 +45,7 @@ class CharacterMasterResolver:
         self._by_prefix: dict[int, ResolvedCharacter] = {}
         self._by_id: dict[int, ResolvedCharacter] = {}
         self._by_resource_id: dict[int, ResolvedCharacter] = {}
+        self._by_default_costume_id: dict[int, ResolvedCharacter] = {}
         self._by_name_code: dict[int, ResolvedCharacter] = {}
         self._by_character_key: dict[str, ResolvedCharacter] = {}
         self._by_spine_id: dict[str, ResolvedCharacter] = {}
@@ -61,6 +64,9 @@ class CharacterMasterResolver:
         for row in chars_raw:
             if not isinstance(row, dict):
                 continue
+            costume_id = int(row.get("costume_id", 0)) if row.get("costume_id") is not None else 0
+            raw_def_costume = row.get("default_costume_id")
+            default_costume_id = int(raw_def_costume) if raw_def_costume is not None else None
             char = ResolvedCharacter(
                 id=int(row.get("id", 0)),
                 battle_tid_prefix=int(row.get("battle_tid_prefix", 0)),
@@ -77,6 +83,8 @@ class CharacterMasterResolver:
                 burst=str(row.get("burst", "")).strip(),
                 corporation=str(row.get("corporation", "")).strip(),
                 rare=str(row.get("rare", "")).strip(),
+                costume_id=costume_id,
+                default_costume_id=default_costume_id,
             )
             self._characters.append(char)
 
@@ -86,6 +94,8 @@ class CharacterMasterResolver:
                 self._by_id[char.id] = char
             if char.resource_id > 0:
                 self._by_resource_id[char.resource_id] = char
+            if default_costume_id is not None:
+                self._by_default_costume_id[default_costume_id] = char
             if char.name_code is not None:
                 self._by_name_code[char.name_code] = char
             if char.character_key:
@@ -201,3 +211,42 @@ class CharacterMasterResolver:
             return self._by_name[folded]
 
         return None
+
+    def resolve_resource_id(self, resource_id: int | str) -> ResolvedCharacter | None:
+        """根据 resource_id（如 95 或 'c095'）返回已解析角色对象。"""
+        try:
+            r_int = int(str(resource_id).strip().lower().lstrip("c"))
+            return self._by_resource_id.get(r_int)
+        except (ValueError, TypeError):
+            return None
+
+    def is_default_costume(
+        self, resource_id: int | str, costume_id: int | str | None
+    ) -> bool:
+        """检查 costume_id 是否为指定角色的默认服装（0/None/"0"/"default" 或匹配官方 default_costume_id）。"""
+        if costume_id is None:
+            return True
+        if isinstance(costume_id, bool):
+            return False
+        if isinstance(costume_id, int) and costume_id == 0:
+            return True
+        c_str = str(costume_id).strip().lower()
+        if c_str in {"0", "default", ""}:
+            return True
+        if not c_str.isdigit():
+            return False
+        c_int = int(c_str)
+
+        char = self.resolve_resource_id(resource_id)
+        if char is not None and char.default_costume_id is not None:
+            return char.default_costume_id == c_int
+
+        matching_char = self._by_default_costume_id.get(c_int)
+        if matching_char is not None:
+            try:
+                r_int = int(str(resource_id).strip().lower().lstrip("c"))
+                return matching_char.resource_id == r_int
+            except (ValueError, TypeError):
+                return False
+
+        return False
