@@ -3,7 +3,7 @@
   "captured_at": "2026-09-12",
   "repository": "September6969/astrbot_plugin_nikke",
   "branch": "fix/live-runtime-v03",
-  "head": "43adedefcbc5e7b51a558c5ffe9b7208ffc490c5",
+  "head": "5993c9b",
   "origin_main": "e4a9ff9867dc9a92c203484c748562e4c0a7f1d0",
   "pr": {
     "number": 79,
@@ -20,7 +20,7 @@
     "deployment_performed": false
   },
   "tests": {
-    "targeted": "PASS: Profile/Campaign 56 tests + 15 subtests; AssetManager/Spine 31 tests + 11 subtests; local resolver 7 tests; capture/sync targeted tests",
+    "targeted": "PASS: prior Profile/Campaign 56 tests + 15 subtests; AssetManager/Spine 31 tests + 11 subtests; local resolver 7 tests; capture/sync targeted tests; post-full currency icon change 28 tests + 5 subtests",
     "final_full_pytest": {
       "status": "PASS",
       "tests": 623,
@@ -66,9 +66,23 @@
     },
     "currency_icons": {
       "total": 8,
-      "verified": 0,
-      "unverified": 8,
-      "status": "ICON_UNVERIFIED"
+      "verified": 3,
+      "verified_types": [1000, 2000, 3000],
+      "unverified": 5,
+      "unverified_types": [99, 5100, 5200, 11000, 12000],
+      "source_commit": "a2358b72bd1335c30737e46482a99947f3788bc7",
+      "network_on_render": false,
+      "status": "PARTIAL_VERIFIED"
+    },
+    "live_redacted_render": {
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-currency.png",
+      "dimensions": [1200, 1715],
+      "sha256": "f25237e325be87a4076fb9d3eeb5c8386f8c1cc5582e590e0717043235566b3c",
+      "currency_count": 9,
+      "tower_items": 4,
+      "visual_inspection": "PASS: verified icons scale, alpha and text avoidance",
+      "raw_payload_saved": false,
+      "identity_values_saved": false
     }
   },
   "tower_live_shape": {

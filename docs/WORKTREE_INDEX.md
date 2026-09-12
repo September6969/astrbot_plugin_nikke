@@ -52,7 +52,7 @@
 | Spine-only Portrait & Card Calculation v2 | 当前独立主题 | `E:\DevCache\nikke-spine-only-card-calc-v2-20260909` / `feat/spine-only-card-calc-v2`；从 `origin/main@8910170f` 建立，移除角色路径 FB、升级 Costume identity、接入 OL tier UI 和 fail-closed stat calculator |
 | CharacterStatTables / Costume Spine live v1 | PR #72 Draft，进行中 | `E:\DevCache\nikke-stat-costume-spine-live-v1-20260909` / `feat/stat-costume-spine-live-v1`；基线 `origin/main@d3f824cc`。`7be1c6e` 全 CI 通过，默认 Spine 实渲染已查看；旧版 skin01 视觉异常，撤销未经证明的 20001 映射。SSH/HTTPS 已恢复，尚未部署此分支 |
 
-| PR #79 接管续作：Profile v0.4 / Local Spine / Campaign | 进行中，原地追加到现有 PR #79，HEAD `43adede` 已 push | `E:\DevCache\nikke-live-runtime-v03` / `fix/live-runtime-v03`；基线 `origin/main@e4a9ff9`，PR OPEN/非 Draft/CLEAN；Profile targeted + final full pytest 已通过，Campaign 全量抓取在服务器运行，Spine 240 项中 238 项因隔离容器缺 runtime worker 失败；不 merge、不部署 |
+| PR #79 接管续作：Profile v0.4 / Local Spine / Campaign | 进行中，原地追加到现有 PR #79，Profile 图标提交 `5993c9b` | `E:\DevCache\nikke-live-runtime-v03` / `fix/live-runtime-v03`；基线 `origin/main@e4a9ff9`，PR OPEN/非 Draft；Profile targeted + final full pytest 已通过，3 项 verified currency icon 已完成服务器脱敏实渲染，Campaign 全量抓取在服务器运行，Spine 240 项中 238 项因隔离容器缺 runtime worker 失败；不 merge、不部署 |
 
 ## 2026-09-12 现场与测试增补
 

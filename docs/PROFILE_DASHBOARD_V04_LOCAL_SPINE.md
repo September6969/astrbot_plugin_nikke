@@ -71,9 +71,10 @@ coverage 报告分别统计 character master、default、verified costume、uniq
 
 ## 2026-09-12 接管续作现场记录
 
-- 当前分支 `fix/live-runtime-v03` HEAD `43adede`；PR #79 保持 OPEN、非 Draft，未修改 main、未合并、未部署。
+- 当前分支 `fix/live-runtime-v03` 的 Profile 图标代码提交为 `5993c9b`；PR #79 保持 OPEN、非 Draft，未修改 main、未合并、未部署。
 - Profile v0.4 现代数据路径将 BASIC/CAMPAIGN、OUTPOST/ROSTER 并列，TODAY 使用紧凑多列，COLLECTION 为四格，RESOURCES 为 4×2，RECYCLE ROOM 为双列。合成 after 为 `1200×1619`，原图、50% 和 30% 预览已实际查看；12 个 warmup 后样本 median `126.2293 ms`、p95 `134.312 ms`。
 - `serv` 只读 shape 核验确认 `tower_daily_info_list` 元素字段为 `type`、`is_opened`、`remaining_count`；当前只统计开放条目，未发现可靠 total 时不生成 `0/3`。
-- `CurrencyRegistry` 的 8 项资源没有已核验本地图标来源/哈希，均保持名称+数值并记录 `ICON_UNVERIFIED`；AssetManager 的 `get_currency_icon()` 不联网、不读取未经 registry 证明的图标。
+- `CurrencyRegistry` 的 8 项资源中，信用点、战斗数据辑、芯尘已从 Nikke-db 固定提交 `a2358b72bd1335c30737e46482a99947f3788bc7` 取得、核对 SHA-256 并接入本地只读图标；珠宝、两类招募券、躯体标签和联盟芯片继续保持 `ICON_UNVERIFIED`。AssetManager 的 `get_currency_icon()` 不联网、不读取未经 registry 证明的图标。
+- `serv` 授权账号只读 Profile 已在隔离代码目录实渲染并脱敏查看：`1200×1715`，9 项实际资源、4 项塔信息；三枚已验证图标缩放、透明边缘和文字避让正常。外部证据图为 `E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-currency.png`，SHA-256 `f25237e325be87a4076fb9d3eeb5c8386f8c1cc5582e590e0717043235566b3c`，不提交仓库。
 - `serv` 隔离 Nikke-db 维护已按两阶段 sparse 规则完成：source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，240 bundles found，runtime 4.0/4.1 为 102/138，渲染成功 2、失败 238、无效 0、缺失 0。失败是缺少可执行匹配 Spine worker/runtime，属于 `PARTIAL`，不是产品完成证据。
 - Campaign NORMAL Chapter 1 只读 smoke 为 4/4 `UNAVAILABLE`，full NORMAL→HARD 抓取已在服务器后台运行，快照不进仓库；最终统计以服务器脱敏 manifest 为准。

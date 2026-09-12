@@ -218,11 +218,12 @@
 
 ## PR #79 接管续作更新（2026-09-12）
 
-- 重新核验当前事实基线：`origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；当前分支 `fix/live-runtime-v03` 的 HEAD 为 `43adede`，PR #79 仍为 OPEN、非 Draft、`CLEAN`，没有合并或修改 main。
+- 重新核验当前事实基线：`origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；当前分支 `fix/live-runtime-v03` 的 Profile 图标代码提交为 `5993c9b`，PR #79 仍为 OPEN、非 Draft，没有合并或修改 main。
 - Manifest fail-closed 已锁定：声明过的 entry 对路径、PNG 解码和 SHA-256 具有权威性；失效项记录 `STATIC_SPINE_ASSET_INVALID` 后直接交给 UI fallback，不再读取旧 Spine cache、启动 worker 或访问网络。Hot path 只允许本地文件、Pillow 和 hash。
 - Nikke-db 维护脚本已加入默认 5 GB 磁盘门禁，并修复中断的 `--no-checkout` 初始索引误判；两阶段 sparse checkout 已在 `serv` 实际跑通，240 个目标的 atlas 纹理页均按声明路径加入，未默认拉取 aim/cover。
 - `serv` 隔离维护证据：Nikke-db source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，200 默认 + 40 已核验 Costume，共 240 bundle，runtime 4.0/4.1 为 102/138；渲染成功 2、失败 238、无效 0、缺失 0，失败原因为当前隔离容器没有可执行的匹配 Spine worker/runtime。该结果为 `PARTIAL`，不把 fallback 计为成功。
-- Profile v0.4 已完成 live Tower 字段形状核查：`type`、`is_opened`、`remaining_count`；只统计开放条目，无法可靠取得 total 时显示“剩余 X 次”，不使用数组长度伪造 `0/3`。资源 8 项仍保持 `ICON_UNVERIFIED`，没有塞入未经来源核验的图标。
+- Profile v0.4 已完成 live Tower 字段形状核查：`type`、`is_opened`、`remaining_count`；只统计开放条目，无法可靠取得 total 时显示“剩余 X 次”，不使用数组长度伪造 `0/3`。信用点、战斗数据辑、芯尘已按 Nikke-db 固定提交、SHA-256 和本地只读路径接入；其余 5 类没有塞入未经来源核验的图标。
+- `serv` 授权账号只读 Profile 已在隔离目录实渲染为 `1200×1715`，9 项资源、4 项 Tower；脱敏图已实际查看，三枚 verified 图标的缩放、透明边缘和文字避让正常。该证据不等于生产部署或 QQ 送达。
 - Profile 合成 after 图为 `1200×1619`，已查看原图、50% 和 30% 预览；12 个 warmup 后样本 median `126.2293 ms`、p95 `134.312 ms`。
 - Campaign 只读现场已完成 NORMAL Chapter 1 smoke：4/4 `UNAVAILABLE`、0 error、0 rate-limit；全量抓取已在服务器端按 NORMAL→HARD、单线程、jitter 与 5/10/20/40 秒退避运行，输出仅在 `/AstrBot/data/nikke/campaign-capture/`，完整快照不提交仓库。
 - 本轮最终本地验证：`623 passed`、`481 subtests`、1 个既有依赖弃用警告；`compileall`、Node `--check`、extension tests 4/4、`git diff --check` 均通过。最终状态上限保持 `READY_FOR_RETEST`，在 Campaign/Spine 现场覆盖闭合前不标记完成。
