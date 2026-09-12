@@ -159,8 +159,8 @@ class StaticDataRegistry:
 
     @classmethod
     def _parse_costume_mapping(cls, data) -> dict[str, str]:
-        """解析 costume_id → canonical Spine identity 的 v2 清单。"""
-        if not isinstance(data, dict) or data.get("schema_version") != 2:
+        """解析 costume_id → canonical Spine identity 的 v2/v3 清单。"""
+        if not isinstance(data, dict) or data.get("schema_version") not in {2, 3}:
             raise RegistryValidationError("costume registry schema_version 无效")
         entries = data.get("entries")
         if not isinstance(entries, list):
@@ -169,12 +169,24 @@ class StaticDataRegistry:
         for row in entries:
             if not isinstance(row, dict):
                 raise RegistryValidationError("costume registry 条目无效")
-            required = ("costume_id", "character_resource_id", "spine_asset_id", "source", "source_sha256", "verified_at")
+            required = ("costume_id", "character_resource_id", "source", "source_sha256", "verified_at")
             if any(not isinstance(row.get(field), (str, int)) or not str(row[field]).strip() for field in required):
                 raise RegistryValidationError("costume registry 来源字段缺失")
             costume_id = str(row["costume_id"])
             owner = str(row["character_resource_id"])
-            asset_id = str(row["spine_asset_id"])
+            spine = row.get("spine")
+            if isinstance(spine, dict):
+                mode = spine.get("mode")
+                asset_id = str(spine.get("asset_id", ""))
+                skin_name = spine.get("skin_name")
+                if mode not in {"independent_asset", "shared_skin"}:
+                    raise RegistryValidationError("costume Spine mode 无效")
+                if mode == "independent_asset" and skin_name is not None:
+                    raise RegistryValidationError("independent costume 不得提供 skin_name")
+                if mode == "shared_skin" and (not isinstance(skin_name, str) or not skin_name.strip()):
+                    raise RegistryValidationError("shared costume 缺少 skin_name")
+            else:
+                asset_id = str(row.get("spine_asset_id", ""))
             if not cls.COSTUME_ID_PATTERN.fullmatch(costume_id):
                 raise RegistryValidationError(f"costume ID 无效: {costume_id!r}")
             if not re.fullmatch(r"(?:c\d+|\d+)", owner, re.IGNORECASE):

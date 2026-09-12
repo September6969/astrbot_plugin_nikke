@@ -127,7 +127,7 @@ def _unique_asset_ids(values: list[Any]) -> list[str]:
 
 def _verified_costume_asset_ids(value: Any) -> list[str]:
     """只读取带来源、哈希和日期的已核验服装映射。"""
-    if not isinstance(value, dict) or value.get("schema_version") != 2:
+    if not isinstance(value, dict) or value.get("schema_version") not in {2, 3}:
         return []
     rows = value.get("entries")
     if not isinstance(rows, list):
@@ -146,7 +146,13 @@ def _verified_costume_asset_ids(value: Any) -> list[str]:
             or not row["verified_at"].strip()
         ):
             continue
-        candidates.append(row.get("spine_asset_id"))
+        spine = row.get("spine")
+        if isinstance(spine, dict):
+            # shared skin 需要独立的 maintenance render，不能误把 base asset 当作皮肤成功。
+            if spine.get("mode") == "independent_asset" and spine.get("skin_name") is None:
+                candidates.append(spine.get("asset_id"))
+        else:
+            candidates.append(row.get("spine_asset_id"))
     return _unique_asset_ids(candidates)
 
 

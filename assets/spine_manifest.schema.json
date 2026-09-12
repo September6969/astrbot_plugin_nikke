@@ -31,7 +31,7 @@
     "assets": {
       "type": "object",
       "patternProperties": {
-        "^c[0-9]+(?:_[0-9]+)?$": {
+        "^c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?$": {
           "type": "object",
           "required": [
             "asset_id",

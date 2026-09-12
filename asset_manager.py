@@ -135,7 +135,7 @@ class AssetManager:
             valid_entries = {
                 str(key).strip().lower(): value
                 for key, value in entries.items()
-                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?", str(key).strip().lower()) and isinstance(value, dict)
+                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?", str(key).strip().lower()) and isinstance(value, dict)
             }
             self._spine_manifest = payload
             self._spine_manifest_entries = valid_entries
@@ -432,7 +432,7 @@ class AssetManager:
 
         未预渲染角色记录明确警告并返回中性程序占位图，严禁在热路径发起网络拉取或启动 Worker。
         """
-        char_id = self.nikke_db.resolve_character_id(
+        char_id = self.nikke_db.resolve_render_id(
             resource_id,
             costume_id,
         ) if resource_id else "missing"

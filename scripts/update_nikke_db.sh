@@ -103,7 +103,12 @@ costumes = json.loads((root / "assets" / "costumes.json").read_text(encoding="ut
 for row in costumes.get("entries", []):
     if isinstance(row, dict):
         if all(isinstance(row.get(key), str) and row[key].strip() for key in ("source", "source_sha256", "verified_at")):
-            add(row.get("spine_asset_id"))
+            spine = row.get("spine")
+            if isinstance(spine, dict):
+                if spine.get("mode") == "independent_asset" and spine.get("skin_name") is None:
+                    add(spine.get("asset_id"))
+            else:
+                add(row.get("spine_asset_id"))
 PY
 )
 

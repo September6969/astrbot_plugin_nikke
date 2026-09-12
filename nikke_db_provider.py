@@ -54,6 +54,7 @@ class NikkeDbProvider:
 
         self.costume_errors: list[str] = []
         self.costume_character_map: dict[str, str] = {}
+        self.costume_render_map: dict[str, str] = {}
         self.costume_map = self._load_costume_map()
 
     def _load_costume_map(self) -> dict[str, str]:
@@ -67,8 +68,8 @@ class NikkeDbProvider:
         except (OSError, ValueError) as exc:
             self.costume_errors.append(f"costumes.json 无法读取: {type(exc).__name__}")
             return {}
-        if not isinstance(raw, dict) or raw.get("schema_version") != 2:
-            self.costume_errors.append("costumes.json 必须使用 schema_version=2")
+        if not isinstance(raw, dict) or raw.get("schema_version") not in {2, 3}:
+            self.costume_errors.append("costumes.json 必须使用 schema_version=2 或 3")
             return {}
         entries = raw.get("entries")
         if not isinstance(entries, list):
@@ -81,7 +82,19 @@ class NikkeDbProvider:
                 self.costume_errors.append("非法皮肤映射条目")
                 continue
             key = self._normalize_id_component(row.get("costume_id"))
-            value = self._normalize_id_component(row.get("spine_asset_id"))
+            spine = row.get("spine")
+            if isinstance(spine, dict):
+                mode = spine.get("mode")
+                value = self._normalize_id_component(spine.get("asset_id"))
+                raw_skin = spine.get("skin_name")
+                skin = self._normalize_id_component(raw_skin) if isinstance(raw_skin, str) else ""
+                if mode not in {"independent_asset", "shared_skin"} or (mode == "independent_asset" and raw_skin is not None) or (mode == "shared_skin" and not skin):
+                    self.costume_errors.append(f"非法皮肤 Spine 表示: {row!r}")
+                    continue
+                render_id = value if mode == "independent_asset" else f"{value}@{skin}"
+            else:  # schema v2 兼容读取；禁止据此推导任何缺失 Costume。
+                value = self._normalize_id_component(row.get("spine_asset_id"))
+                render_id = value
             owner = self._normalize_id_component(row.get("character_resource_id"))
             source = row.get("source")
             source_hash = row.get("source_sha256")
@@ -99,6 +112,7 @@ class NikkeDbProvider:
                 continue
             verified[key] = value
             self.costume_character_map[key] = self.normalize_resource_id(owner)
+            self.costume_render_map[key] = render_id
         return verified
 
     def get_character_lock(self, character_id: str) -> threading.Lock:
@@ -187,6 +201,22 @@ class NikkeDbProvider:
 
         # 未知或非法皮肤禁止回退到默认角色，否则会把另一套立绘伪装成目标皮肤。
         return "missing"
+
+    def resolve_render_id(self, resource_id: int | str, costume_id: int | str | None = None) -> str:
+        """返回 manifest 专用 render ID；shared skin 不与默认 skeleton 共用键。"""
+        default_id = self.resolve_character_id(resource_id)
+        if default_id == "missing":
+            return "missing"
+        state, token = self.costume_cache_token(costume_id)
+        if state == "default":
+            return default_id
+        if state != "known":
+            return "missing"
+        costume_key = token.split(":", 2)[1]
+        owner = self.costume_character_map.get(costume_key)
+        if owner is not None and owner != default_id:
+            return "missing"
+        return self.costume_render_map.get(costume_key, "missing")
 
     def resolve_spine_asset_id(
         self,
