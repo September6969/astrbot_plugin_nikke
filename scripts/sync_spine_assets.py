@@ -211,8 +211,13 @@ def render_spine_portrait(
     worker_40: str,
     worker_41: str,
     animation: str = "idle",
+    evidence_dir: Path | None = None,
 ) -> dict[str, Any]:
-    """调用已匹配版本 worker，使用 worker 的初始时间 0 渲染透明 PNG。"""
+    """调用已匹配版本 worker，使用 worker 的初始时间 0 渲染透明 PNG。
+
+    ``evidence_dir`` 仅供指定角色的维护诊断：保留 worker 原始 RGBA、
+    裁切前画布 PNG 与裁切后的输出 PNG，便于定位原始渲染、裁切或卡片合成阶段。
+    """
     version = detect_spine_version(skel_path)
     worker_bin = worker_40 if version == "4.0" else worker_41
     if not shutil.which(worker_bin) and not Path(worker_bin).exists():
@@ -261,6 +266,11 @@ def render_spine_portrait(
         if not 1 <= width <= 4096 or not 1 <= height <= 4096 or len(raw) != expected:
             raise RuntimeError("Spine worker RGBA 尺寸或长度无效")
         image = Image.frombytes("RGBA", (width, height), raw[8:]).copy()
+        if evidence_dir is not None:
+            trace_dir = evidence_dir / char_id
+            trace_dir.mkdir(parents=True, exist_ok=True)
+            (trace_dir / "worker-canvas.rgba").write_bytes(raw)
+            image.save(trace_dir / "before-crop.png", "PNG", optimize=True)
         bbox = image.getbbox()
         if bbox is None:
             raise RuntimeError("Spine worker 输出全透明")
@@ -275,6 +285,8 @@ def render_spine_portrait(
         )
         out_png.parent.mkdir(parents=True, exist_ok=True)
         cropped.save(out_png, "PNG", optimize=True)
+        if evidence_dir is not None:
+            shutil.copy2(out_png, trace_dir / "after-crop.png")
         return {
             "runtime_version": version,
             "width": cropped.width,
@@ -364,6 +376,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-dir", default="", help="PNG 输出目录")
     parser.add_argument("--manifest-path", "--manifest", dest="manifest_path", default="", help="manifest v2 输出路径")
     parser.add_argument("--coverage-report", default="", help="可选的 JSON 覆盖率报告路径")
+    parser.add_argument("--evidence-dir", default="", help="指定渲染的原始画布/裁切诊断输出目录")
     parser.add_argument("--worker-40", default="/usr/local/bin/entrypoint-xvfb.sh")
     parser.add_argument("--worker-41", default="/usr/local/bin/entrypoint-xvfb-4.1.sh")
     parser.add_argument("--force", action="store_true", help="重新渲染已有 PNG")
@@ -432,6 +445,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.worker_40,
                 args.worker_41,
                 animation="idle",
+                evidence_dir=Path(args.evidence_dir) if args.evidence_dir else None,
             )
             with Image.open(target_png) as image:
                 bbox = image.getbbox()

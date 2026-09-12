@@ -13,15 +13,15 @@
     "merge_state": "CLEAN",
     "merge_performed": false
   },
-  "acceptance_state": "READY_FOR_RETEST",
+  "acceptance_state": "PARTIAL",
   "worktree": {
     "path": "E:/DevCache/nikke-live-runtime-v03",
     "main_modified": false,
     "force_push": false,
-    "deployment_performed": false
+    "deployment_performed": true
   },
   "tests": {
-    "targeted": "PASS: prior Profile/Campaign 56 tests + 15 subtests; AssetManager/Spine 31 tests + 11 subtests; local resolver 7 tests; capture/sync targeted tests; post-full currency icon change 28 tests + 5 subtests",
+    "targeted": "PASS: prior Profile/Campaign 56 tests + 15 subtests; AssetManager/Spine 31 tests + 11 subtests; local resolver 7 tests; capture/sync targeted tests; post-full currency icon change 28 tests + 5 subtests; 2026-09-13 OL/Card/Spine audit 47 tests + 5 subtests",
     "final_full_pytest": {
       "status": "PASS",
       "tests": 623,
@@ -97,6 +97,19 @@
     "raw_payload_saved": false,
     "identity_values_saved": false
   },
+  "ol_live_remediation_20260913": {
+    "status": "PARTIAL",
+    "source": "one authorized read-only character-details diagnostic, sanitized server-side",
+    "unknown_before": [
+      {"raw_id": "7001211", "raw_key": "StatCriticalDamage", "slot": "head", "ol_slot": 1, "value_kind": "unknown"},
+      {"raw_id": "7000909", "raw_key": "StatChargeDamage", "slot": "arm", "ol_slot": 2, "value_kind": "unknown"},
+      {"raw_id": "7001111", "raw_key": "StatCritical", "slot": "leg", "ol_slot": 1, "value_kind": "unknown"}
+    ],
+    "display_after": "Unknown options preserve raw identity as '未知词条 · ID <raw_id>' with value '待确认'; no nearby stat or percentage unit is guessed.",
+    "inventory": "server-only ol_unknown_inventory.json stores raw ID/key, count, first/last seen and UNKNOWN_OL_OPTION without account identity.",
+    "percent_contract": "1322 -> 0.1322 -> 13.22%; formatting depends on declared value_kind and never renderer magnitude inference.",
+    "real_qq_validation": false
+  },
   "spine_maintenance": {
     "source_repo": "https://github.com/Nikke-db/Nikke-db.github.io.git",
     "source_commit": "a2358b72bd1335c30737e46482a99947f3788bc7",
@@ -123,7 +136,23 @@
     "integrity_failures": 0,
     "visual_sample_count": 20,
     "visual_sample_sha256": "ca0e4af5ecd833e08f18d642d49dce034407c8bf98ac57c1c896908ac01e7321",
-    "visual_sample_result": "PASS: five corporations, runtime 4.0/4.1 and five costumes inspected",
+    "visual_sample_result": "Historical limited sample only; it is not a QQ visual acceptance result.",
+    "production_static_asset_repair": {
+      "status": "DEPLOYED",
+      "reason": "The original real-QQ White Snow failure resolved to absent production static asset c220 while the 240-entry evidence set existed outside the hot path.",
+      "repaired_assets": ["c220", "c330", "c016", "c511", "c352"],
+      "manifest_and_rendered_tree": "Atomically replaced after SHA-256 verification; no account identifiers were recorded."
+    },
+    "visual_audit_20260913": {
+      "render_success": 240,
+      "integrity_valid": 240,
+      "visual_validated": false,
+      "default": {"total": 200, "auto_clear": 200, "suspect": 0},
+      "costume": {"total": 40, "auto_clear": 40, "suspect": 0},
+      "contact_sheet_path": "E:/DevCache/nikke-live-runtime-v03-artifacts/spine-visual-audit-20260913/",
+      "automatic_check": "Alpha bounds, margins, aspect, occupancy and connected-component heuristics only; all 10 contact sheets were inspected by maintainer but real QQ/card acceptance remains required.",
+      "source_bundle_trace": "BLOCKED: production retains the rendered static PNG/manifest but not c220 source skel/atlas bundle, so no truthful new worker raw/crop trace can be generated in place. The maintenance renderer now supports explicit evidence output when a verified local bundle is available."
+    },
     "fallback_counted_as_success": false
   },
   "campaign": {
@@ -206,10 +235,10 @@
   },
   "boundaries": [
     "No main modification, force push, merge, release, tag, version bump, CHANGELOG change, ruleset change or Issue #80 implementation.",
-    "No production plugin replacement or deployment was performed.",
+    "Production static Spine assets and the unknown-OL visibility hotfix were deployed after backup/preflight; no QQ message was sent by the maintainer.",
     "No Cookie, token, Authorization header, OpenID or QQ ID was written to repository evidence.",
-    "Spine full static render coverage is verified for the current 240-target registry; this isolated maintenance evidence does not establish production deployment or QQ delivery.",
+    "Spine render_success, integrity_valid and visual_validated are separate: 240/240 renders and structural checks are not a visual or QQ pass.",
     "Campaign full capture is complete with no retryable stages; the live API exposed no explicit costume_id, so the costume inventory is truthfully empty.",
-    "Final status is READY_FOR_RETEST because real QQ client acceptance remains outside this closeout."
+    "Final status is PARTIAL. PR #79 must not merge and must not be labelled READY_FOR_RETEST until the user confirms the real QQ portrait/card regression is fixed."
   ]
 }
