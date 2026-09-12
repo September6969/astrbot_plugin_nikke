@@ -65,7 +65,7 @@
 
 | 范围 | 当前离线实现 | 离线证据 | 现场边界 |
 | --- | --- | --- | --- |
-| Profile Dashboard v0.4 | `client.py` 四路 Profile/Daily 读取、`profile_builder.py` 结构化字段、`profile_card_renderer.py` TODAY/RECYCLE/COLLECTION/RESOURCES 分区；8 项已知资源均有来源与 SHA-256 的本地图标 | 新增 Profile/Daily/partial/height/icon/第 9 项不丢失行为测试；服务器脱敏实渲染 PNG 已查看 | QQ 图片送达仍未在本轮确认；未登记 type 98 继续保持未知 |
+| Profile Dashboard v0.4 | `client.py` 四路 Profile/Daily 读取、`profile_builder.py` 结构化字段、`profile_card_renderer.py` TODAY/RECYCLE/COLLECTION/RESOURCES 分区；8 项已知资源均有来源与 SHA-256 的本地图标 | 新增 Profile/Daily/partial/height/icon/未知资源不上卡行为测试；服务器脱敏实渲染 PNG 已查看 | QQ 图片送达仍未在本轮确认；未登记 type 98 仅保留底层审计数据 |
 | Local Nikke-db Spine | `local_spine_resolver.py`、manifest v2 schema、维护期 sparse checkout/预渲染脚本；正式头像热路径禁 HTTP/Worker/FB | 多纹理、BOM、4.0/4.1、损坏图片、路径越界、symlink escape、manifest hash 行为测试 | `serv` 本地 checkout 全量预渲染、生产 runtime 许可与现场稳定性仍需核验 |
 | Campaign capture | `scripts/capture_campaign_history.py` 只处理 NORMAL/HARD，支持状态、限流、resume/force、脱敏 JSONL、TID/Costume inventory | 捕获、隐私、回放、限流退避和静态目标过滤测试 | 真实已授权账号快照与最小现场请求尚未执行 |
 
@@ -77,6 +77,6 @@
 | --- | --- | --- | --- |
 | Manifest / Spine hot path | 声明 entry 的路径、PNG、解码和 SHA-256 失效均 fail-closed，记录 `STATIC_SPINE_ASSET_INVALID`；31 个 AssetManager/Spine 测试与 11 个子测试覆盖旧 cache 不命中、零网络、零 worker | 角色查询未部署到服务器；服务器维护链生成 240 项报告但隔离容器缺匹配 worker | `READY_OFFLINE / PARTIAL`；需可执行 runtime 后重跑 240 项实渲染 |
 | Nikke-db sparse / disk guard | 两阶段 sparse checkout 先取 `.skel/.atlas`，再取 atlas 声明的纹理页；路径越界/BOM/多页/4.0/4.1 测试通过；5 GiB 默认门禁超阈值 smoke 返回 `BLOCKED_BY_DISK_CAPACITY` | `serv` 实际检出 source `a2358b72bd1335c30737e46482a99947f3788bc7`，vendor 约 4,651,740 KiB，维护后约 12,269,004 KiB 可用 | `READY_FOR_RETEST / PARTIAL`；保留供应商数据，不把公开代码或 URL 当素材授权 |
-| Profile v0.4 | TODAY/OUTPOST/ROSTER/RECYCLE/COLLECTION/RESOURCES 紧凑分区，Tower 不使用 list length；8 项已知资源图标 verified，未知 type 不猜测 | `serv` 脱敏 shape 确认 4 项 Tower；授权只读数据隔离实渲染 `1200×1770`，9 项资源，8 枚图标及第三行已实际查看 | `READY_FOR_RETEST`；真实 QQ 图片送达仍未在本 PR 部署验证 |
+| Profile v0.4 | TODAY/OUTPOST/ROSTER/RECYCLE/COLLECTION/RESOURCES 紧凑分区，Tower 不使用 list length；8 项已知资源图标 verified，未知 type 不上卡 | `serv` 脱敏 shape 确认 4 项 Tower；授权只读数据隔离实渲染 `1200×1715`，底层 9 项、卡面 8 项，图标已实际查看 | `READY_FOR_RETEST`；真实 QQ 图片送达仍未在本 PR 部署验证 |
 | Campaign capture | NORMAL Chapter 1 smoke 4/4 `UNAVAILABLE`，0 error/0 rate-limit；全量工具按 NORMAL→HARD、single-thread、jitter、退避、source-aware resume 运行，输出仅服务器目录 | full capture 当前后台运行，进度和最终状态以服务器脱敏 manifest 为准；不提交完整快照 | `PARTIAL`；完成后仍需 TID/Costume coverage 与 replay 统计 |
 | Overall | 当前 HEAD `43adede`，PR #79 OPEN/非 Draft/CLEAN；最终本地 full pytest 623 passed/481 subtests，compileall、Node、diff check 通过 | 未修改 main、未 merge、未部署、未发送 QQ 消息 | 最终状态最多 `READY_FOR_RETEST`；Spine runtime、Campaign 完整现场结果仍是现场缺口 |

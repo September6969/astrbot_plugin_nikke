@@ -76,12 +76,12 @@
       "status": "VERIFIED_FOR_KNOWN_TYPES"
     },
     "live_redacted_render": {
-      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-all-currency.png",
-      "dimensions": [1200, 1770],
-      "sha256": "eea9ece0cb798f5a2ad37b81f13413c78423c75b5ae50539c1a4b8bd6adbf844",
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-known-currency.png",
+      "dimensions": [1200, 1715],
+      "sha256": "ea09d416f57f2cef3c235833c3a3cc0969f01786c2e651ddd2491ce707037f30",
       "currency_count": 9,
       "tower_items": 4,
-      "visual_inspection": "PASS: 8 known icons have correct semantics, scale, alpha and text avoidance; ninth item is not silently truncated",
+      "visual_inspection": "PASS: 8 known icons have correct semantics, scale, alpha and text avoidance; unidentified type 98 is retained below UI but omitted from card by user request",
       "raw_payload_saved": false,
       "identity_values_saved": false
     }
