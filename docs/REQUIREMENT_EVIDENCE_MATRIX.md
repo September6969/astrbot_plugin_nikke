@@ -1,6 +1,6 @@
 # NIKKE 需求证据矩阵
 
-更新时间：2026-09-11。
+更新时间：2026-09-12。
 
 本矩阵按路线图第 4、5、54、55 节建立；历史条目保留其当时基线，当前接管主题基线为已核验的 `origin/main` `e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`。开放 PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
 
@@ -70,3 +70,13 @@
 | Campaign capture | `scripts/capture_campaign_history.py` 只处理 NORMAL/HARD，支持状态、限流、resume/force、脱敏 JSONL、TID/Costume inventory | 捕获、隐私、回放、限流退避和静态目标过滤测试 | 真实已授权账号快照与最小现场请求尚未执行 |
 
 本增补的状态上限为 `READY_OFFLINE`；不把测试 fixture、合成图或静态 schema 写成真实联调、QQ 送达、部署或资源授权。
+
+## PR #79 现场续作增补（2026-09-12）
+
+| 范围 | 当前实现与证据 | 现场结果 | 状态与剩余边界 |
+| --- | --- | --- | --- |
+| Manifest / Spine hot path | 声明 entry 的路径、PNG、解码和 SHA-256 失效均 fail-closed，记录 `STATIC_SPINE_ASSET_INVALID`；31 个 AssetManager/Spine 测试与 11 个子测试覆盖旧 cache 不命中、零网络、零 worker | 角色查询未部署到服务器；服务器维护链生成 240 项报告但隔离容器缺匹配 worker | `READY_OFFLINE / PARTIAL`；需可执行 runtime 后重跑 240 项实渲染 |
+| Nikke-db sparse / disk guard | 两阶段 sparse checkout 先取 `.skel/.atlas`，再取 atlas 声明的纹理页；路径越界/BOM/多页/4.0/4.1 测试通过；5 GiB 默认门禁超阈值 smoke 返回 `BLOCKED_BY_DISK_CAPACITY` | `serv` 实际检出 source `a2358b72bd1335c30737e46482a99947f3788bc7`，vendor 约 4,651,740 KiB，维护后约 12,269,004 KiB 可用 | `READY_FOR_RETEST / PARTIAL`；保留供应商数据，不把公开代码或 URL 当素材授权 |
+| Profile v0.4 | TODAY/OUTPOST/ROSTER/RECYCLE/COLLECTION/RESOURCES 紧凑分区，Tower 不使用 list length；8 项 currency 没有已核验图标时保持名称+数值并标 `ICON_UNVERIFIED` | `serv` 脱敏 shape 确认 `tower_daily_info_list` 为 4 项，每项 `type/is_opened/remaining_count`；开放 type 2 剩余 3 次 | `READY_FOR_RETEST`；真实 `/妮姬 我的` 图片/QQ 送达仍未在本 PR 部署验证 |
+| Campaign capture | NORMAL Chapter 1 smoke 4/4 `UNAVAILABLE`，0 error/0 rate-limit；全量工具按 NORMAL→HARD、single-thread、jitter、退避、source-aware resume 运行，输出仅服务器目录 | full capture 当前后台运行，进度和最终状态以服务器脱敏 manifest 为准；不提交完整快照 | `PARTIAL`；完成后仍需 TID/Costume coverage 与 replay 统计 |
+| Overall | 当前 HEAD `43adede`，PR #79 OPEN/非 Draft/CLEAN；最终本地 full pytest 623 passed/481 subtests，compileall、Node、diff check 通过 | 未修改 main、未 merge、未部署、未发送 QQ 消息 | 最终状态最多 `READY_FOR_RETEST`；Spine runtime、Campaign 完整现场结果仍是现场缺口 |

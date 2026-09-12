@@ -49,7 +49,7 @@ checkout 使用 blobless、no-checkout、非 cone sparse 规则，只取目标 `
 
 ## Spine hot path / maintenance path
 
-生产 `get_character_portrait()` 只按已验证 `resource/costume → canonical spine asset → manifest/PNG → Pillow` 读取本地文件，禁止 HTTP、Git、Worker、动态队列和 FB 回退。缺失时记录 `STATIC_SPINE_ASSET_MISSING` 并返回抽象占位图；占位图不计为成功立绘。
+生产 `get_character_portrait()` 只按已验证 `resource/costume → canonical spine asset → manifest/PNG → Pillow` 读取本地文件，禁止 HTTP、Git、Worker、动态队列和 FB 回退。manifest 没有 entry 时按兼容策略处理；一旦 entry 存在，路径、PNG、解码和 SHA-256 失效即记录 `STATIC_SPINE_ASSET_INVALID` 并立即返回，由 UI 使用抽象占位图，不再读取旧 Spine cache；未声明 entry 的缺失仍记录 `STATIC_SPINE_ASSET_MISSING`。占位图不计为成功立绘。
 
 维护脚本 `scripts/update_nikke_db.sh` 与 `scripts/sync_spine_assets.py` 仅由人工维护期调用，不配置 cron，也不从 QQ 命令调用。
 
@@ -68,3 +68,12 @@ coverage 报告分别统计 character master、default、verified costume、uniq
 ## Tests
 
 定向覆盖 Daily、容量比例、模拟室、Currency、Memorial、循环室、partial failure、local resolver、路径/atlas/纹理/版本、manifest、hot path zero-network，以及 Campaign capture 的 resume/privacy/rate-limit/TID/Costume/snapshot replay。交接前运行完整 pytest、compileall、Node extension tests、`git diff --check`，并区分离线合成证据与现场证据。
+
+## 2026-09-12 接管续作现场记录
+
+- 当前分支 `fix/live-runtime-v03` HEAD `43adede`；PR #79 保持 OPEN、非 Draft，未修改 main、未合并、未部署。
+- Profile v0.4 现代数据路径将 BASIC/CAMPAIGN、OUTPOST/ROSTER 并列，TODAY 使用紧凑多列，COLLECTION 为四格，RESOURCES 为 4×2，RECYCLE ROOM 为双列。合成 after 为 `1200×1619`，原图、50% 和 30% 预览已实际查看；12 个 warmup 后样本 median `126.2293 ms`、p95 `134.312 ms`。
+- `serv` 只读 shape 核验确认 `tower_daily_info_list` 元素字段为 `type`、`is_opened`、`remaining_count`；当前只统计开放条目，未发现可靠 total 时不生成 `0/3`。
+- `CurrencyRegistry` 的 8 项资源没有已核验本地图标来源/哈希，均保持名称+数值并记录 `ICON_UNVERIFIED`；AssetManager 的 `get_currency_icon()` 不联网、不读取未经 registry 证明的图标。
+- `serv` 隔离 Nikke-db 维护已按两阶段 sparse 规则完成：source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，240 bundles found，runtime 4.0/4.1 为 102/138，渲染成功 2、失败 238、无效 0、缺失 0。失败是缺少可执行匹配 Spine worker/runtime，属于 `PARTIAL`，不是产品完成证据。
+- Campaign NORMAL Chapter 1 只读 smoke 为 4/4 `UNAVAILABLE`，full NORMAL→HARD 抓取已在服务器后台运行，快照不进仓库；最终统计以服务器脱敏 manifest 为准。

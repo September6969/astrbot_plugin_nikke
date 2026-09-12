@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-09-12",
+  "repository": "September6969/astrbot_plugin_nikke",
+  "branch": "fix/live-runtime-v03",
+  "head": "43adedefcbc5e7b51a558c5ffe9b7208ffc490c5",
+  "origin_main": "e4a9ff9867dc9a92c203484c748562e4c0a7f1d0",
+  "pr": {
+    "number": 79,
+    "state": "OPEN",
+    "draft": false,
+    "merge_state": "CLEAN",
+    "merge_performed": false
+  },
+  "acceptance_state": "PARTIAL",
+  "worktree": {
+    "path": "E:/DevCache/nikke-live-runtime-v03",
+    "main_modified": false,
+    "force_push": false,
+    "deployment_performed": false
+  },
+  "tests": {
+    "targeted": "PASS: Profile/Campaign 56 tests + 15 subtests; AssetManager/Spine 31 tests + 11 subtests; local resolver 7 tests; capture/sync targeted tests",
+    "final_full_pytest": {
+      "status": "PASS",
+      "tests": 623,
+      "subtests": 481,
+      "warnings": 1,
+      "warning_scope": "existing google.genai deprecation warning"
+    },
+    "compileall": "PASS",
+    "node_check": "PASS: extension/background.js, extension/popup.js",
+    "node_tests": "PASS: 4/4",
+    "git_diff_check": "PASS"
+  },
+  "profile": {
+    "visual_artifacts_viewed": true,
+    "before": {
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/before-profile.png",
+      "dimensions": [1200, 1221],
+      "sha256": "94da5c033ad2c458769b83c288326671dfda6a0349f3416aca461f6fa4aff2b1"
+    },
+    "after": {
+      "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04.png",
+      "dimensions": [1200, 1619],
+      "sha256": "74a69cd2601007c6f4bfcce6c25963a092cfa08c1bf5a5f4869de35114c1eea8"
+    },
+    "after_previews": [
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04-50.jpg",
+        "dimensions": [600, 810],
+        "sha256": "f50c232a2446fd7db444b96638339d02684128850e74252d85a8f7137f0bb389"
+      },
+      {
+        "path": "E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/after-profile-v04-30.jpg",
+        "dimensions": [360, 486],
+        "sha256": "9bf3a193060daf0b53e9c7b35b5c77fff9bd0c506fa240d685fc6762def74c54"
+      }
+    ],
+    "benchmark": {
+      "samples_total": 13,
+      "warmup_discarded": 1,
+      "samples_used": 12,
+      "median_ms": 126.2293,
+      "p95_ms": 134.312
+    },
+    "currency_icons": {
+      "total": 8,
+      "verified": 0,
+      "unverified": 8,
+      "status": "ICON_UNVERIFIED"
+    }
+  },
+  "tower_live_shape": {
+    "source": "serv / existing authorized binding / redacted read-only shape",
+    "array_length": 4,
+    "element_keys": ["is_opened", "remaining_count", "type"],
+    "open_type_values": [2],
+    "display_semantics": "only opened entries count; no reliable total, so display remaining X times",
+    "observed_open_remaining": 3,
+    "raw_payload_saved": false,
+    "identity_values_saved": false
+  },
+  "spine_maintenance": {
+    "source_repo": "https://github.com/Nikke-db/Nikke-db.github.io.git",
+    "source_commit": "a2358b72bd1335c30737e46482a99947f3788bc7",
+    "disk_guard_default_gb": 5,
+    "vendor_size_kib": 4651740,
+    "render_size_kib": 9740,
+    "free_space_kib_observed": 12269004,
+    "default_target_count": 200,
+    "verified_costume_target_count": 40,
+    "unique_target_count": 240,
+    "bundle_found": 240,
+    "bundle_missing": 0,
+    "runtime_4_0": 102,
+    "runtime_4_1": 138,
+    "render_success": 2,
+    "render_failed": 238,
+    "render_invalid": 0,
+    "render_missing": 0,
+    "default_coverage_percent": 1.0,
+    "costume_coverage_percent": 0.0,
+    "overall_coverage_percent": 0.83,
+    "failure_reason": "isolated astrbot container has no executable matching Spine worker/runtime",
+    "fallback_counted_as_success": false
+  },
+  "campaign": {
+    "verified_mapping": {
+      "normal": 1785,
+      "hard": 1787,
+      "total": 3572
+    },
+    "chapter_1_smoke": {
+      "mode": "NORMAL",
+      "chapter": 1,
+      "requests": 4,
+      "available": 0,
+      "unavailable": 4,
+      "error": 0,
+      "rate_limited": 0,
+      "raw_response_saved": false
+    },
+    "full_capture": {
+      "status_at_capture": "RUNNING",
+      "order": "NORMAL then HARD",
+      "single_thread": true,
+      "jitter_seconds": [0.8, 1.5],
+      "rate_limit_backoff_seconds": [5, 10, 20, 40],
+      "normal_records_observed": 99,
+      "hard_records_observed": 0,
+      "server_output_dir": "/AstrBot/data/nikke/campaign-capture/",
+      "full_snapshots_committed": false
+    }
+  },
+  "boundaries": [
+    "No main modification, force push, merge, release, tag, version bump, CHANGELOG change, ruleset change or Issue #80 implementation.",
+    "No production plugin replacement or deployment was performed.",
+    "No Cookie, token, Authorization header, OpenID or QQ ID was written to repository evidence.",
+    "Spine runtime/source licensing and full live render coverage remain unresolved; status stays PARTIAL/READY_FOR_RETEST."
+  ]
+}

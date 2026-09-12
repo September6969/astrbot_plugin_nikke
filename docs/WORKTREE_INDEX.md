@@ -1,10 +1,10 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-11。当前核验的远端基线为 `origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；下表是历史与当前工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-12。当前核验的远端基线为 `origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；下表是历史与当前工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
-| `main` | 仅通过 GitHub PR 合并推进 | 本轮未直接修改本地 main、未 force push；当前核验基线 `origin/main@75edaaa` |
+| `main` | 仅通过 GitHub PR 合并推进 | 本轮未直接修改本地 main、未 force push；当前核验基线 `origin/main@e4a9ff9` |
 | 已合并代码 worktree | 历史/独立分支 | 保留，不删除；其旧 HEAD 不代表当前 main |
 | 资源子系统 worktree | 已完成并入 main | #16、#17、#37、#38 按 campaign → single-flight → 全局槽位 → 预取生命周期顺序整合 |
 | 日常/存储 worktree | 已完成并入 main | #18、#19、#24、#35、#36 依赖顺序整合并经 CI 验证 |
@@ -52,4 +52,11 @@
 | Spine-only Portrait & Card Calculation v2 | 当前独立主题 | `E:\DevCache\nikke-spine-only-card-calc-v2-20260909` / `feat/spine-only-card-calc-v2`；从 `origin/main@8910170f` 建立，移除角色路径 FB、升级 Costume identity、接入 OL tier UI 和 fail-closed stat calculator |
 | CharacterStatTables / Costume Spine live v1 | PR #72 Draft，进行中 | `E:\DevCache\nikke-stat-costume-spine-live-v1-20260909` / `feat/stat-costume-spine-live-v1`；基线 `origin/main@d3f824cc`。`7be1c6e` 全 CI 通过，默认 Spine 实渲染已查看；旧版 skin01 视觉异常，撤销未经证明的 20001 映射。SSH/HTTPS 已恢复，尚未部署此分支 |
 
-| PR #79 接管续作：Profile v0.4 / Local Spine / Campaign | 进行中，原地追加到现有 PR #79 | `E:\DevCache\nikke-live-runtime-v03` / `fix/live-runtime-v03`；基线/原 head `34786c7`，本轮追加待 push；Profile、local resolver、manifest v2、Campaign capture 已有离线测试，现场 runtime/账号/QQ/部署保持缺口 |
+| PR #79 接管续作：Profile v0.4 / Local Spine / Campaign | 进行中，原地追加到现有 PR #79，HEAD `43adede` 已 push | `E:\DevCache\nikke-live-runtime-v03` / `fix/live-runtime-v03`；基线 `origin/main@e4a9ff9`，PR OPEN/非 Draft/CLEAN；Profile targeted + final full pytest 已通过，Campaign 全量抓取在服务器运行，Spine 240 项中 238 项因隔离容器缺 runtime worker 失败；不 merge、不部署 |
+
+## 2026-09-12 现场与测试增补
+
+- 服务器隔离维护目录：`/AstrBot/data/vendor/nikke-db`、`/AstrBot/data/nikke/spine-rendered`、`/AstrBot/data/nikke/spine-manifest.json`；运行中的 AstrBot 插件未被替换。
+- 服务器数据盘维护后可用空间约 12,269,004 KiB，仍高于 5 GiB 门禁；Nikke-db vendor 约 4,651,740 KiB，渲染目录约 9,740 KiB。
+- 只读 Campaign 输出目录为 `/AstrBot/data/nikke/campaign-capture/`；Chapter 1 smoke 已完成，full capture 继续后台运行，快照不回写仓库。
+- 证据文件：`docs/evidence/pr79_live_runtime_v03_20260912.json`；其中区分 `READY_OFFLINE`、`READY_FOR_RETEST`、`PARTIAL` 与 `NEEDS_LIVE_EVIDENCE`，不记录 Cookie、Token、OpenID 或 QQ ID。
