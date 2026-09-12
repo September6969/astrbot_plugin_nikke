@@ -23,11 +23,34 @@ class CurrencyDefinition:
 class CurrencyRegistry:
     """把 basic_info.currencies 转成不携带账号上下文的显示模型。"""
 
+    _NIKKE_DB_COMMIT = "a2358b72bd1335c30737e46482a99947f3788bc7"
+    _NIKKE_DB_SOURCE = (
+        "https://github.com/Nikke-db/Nikke-db.github.io/blob/"
+        f"{_NIKKE_DB_COMMIT}/images"
+    )
     DEFINITIONS = {
         99: CurrencyDefinition(99, "珠宝", verified_source=None, source_sha256=None),
-        1000: CurrencyDefinition(1000, "信用点", verified_source=None, source_sha256=None),
-        2000: CurrencyDefinition(2000, "战斗数据辑", verified_source=None, source_sha256=None),
-        3000: CurrencyDefinition(3000, "芯尘", verified_source=None, source_sha256=None),
+        1000: CurrencyDefinition(
+            1000,
+            "信用点",
+            "credit",
+            f"{_NIKKE_DB_SOURCE}/credit.png",
+            "85f242e863eab4a9f30391907843073c889f0fb7607fb530d12e7a15cc6a7035",
+        ),
+        2000: CurrencyDefinition(
+            2000,
+            "战斗数据辑",
+            "battledata",
+            f"{_NIKKE_DB_SOURCE}/battledata.png",
+            "dbea9945e42a5e6904e1d26cb8c136fb5947269b72b9fb14344565134f390486",
+        ),
+        3000: CurrencyDefinition(
+            3000,
+            "芯尘",
+            "coredust",
+            f"{_NIKKE_DB_SOURCE}/coredust.png",
+            "e0cf067c4b6443a736b8169568e858c99ee75340553974801ed35e6a8b931034",
+        ),
         5100: CurrencyDefinition(5100, "高级招募券", verified_source=None, source_sha256=None),
         5200: CurrencyDefinition(5200, "普通招募券", verified_source=None, source_sha256=None),
         11000: CurrencyDefinition(11000, "躯体标签", verified_source=None, source_sha256=None),

@@ -421,6 +421,16 @@ class ProfileCardRenderer(CardRenderer):
             # 图标是可选装饰；提供器异常不能阻断整张 Profile。
             return None
 
+    @staticmethod
+    def _paste_icon(draw, icon: Image.Image, xy: tuple[int, int]) -> bool:
+        """将 RGBA 图标贴到 ImageDraw 对应画布；失败时保持文字路径。"""
+        canvas = getattr(draw, "_image", None)
+        if not isinstance(canvas, Image.Image):
+            return False
+        normalized = icon if icon.mode == "RGBA" else icon.convert("RGBA")
+        canvas.paste(normalized, xy, normalized)
+        return True
+
     def _resources_section(self, data: ProfileDashboardData):
         title = "RESOURCES / 我的资源"
         if data.currencies_partial:
@@ -444,9 +454,9 @@ class ProfileCardRenderer(CardRenderer):
                 text_width = 245
                 if icon is not None:
                     icon.thumbnail((34, 34), Image.Resampling.LANCZOS)
-                    draw.paste(icon, (x, y + 2), icon)
-                    text_x += 42
-                    text_width -= 42
+                    if self._paste_icon(draw, icon, (x, y + 2)):
+                        text_x += 42
+                        text_width -= 42
                 self._text(draw, (text_x, y), label, 17, PROFILE_THEME["muted"], width=text_width)
                 self._text(draw, (text_x, y + 26), value, 24, PROFILE_THEME["text"], width=text_width, bold=True)
 

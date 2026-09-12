@@ -145,7 +145,9 @@ class ProfileV04ContractTests(unittest.TestCase):
     def test_currency_icon_registry_is_explicit_and_local_only(self):
         coverage = CurrencyRegistry.icon_coverage()
         self.assertEqual(coverage["total"], 8)
-        self.assertEqual(coverage["verified"], 0)
+        self.assertEqual(coverage["verified"], 3)
+        self.assertEqual(coverage["unverified"], 5)
+        self.assertEqual(coverage["unverified_types"], [99, 5100, 5200, 11000, 12000])
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             manager = AssetManager(root / "cache", root, remote=True)
@@ -167,6 +169,36 @@ class ProfileV04ContractTests(unittest.TestCase):
                     loaded = manager.get_currency_icon(99)
                 self.assertIsNotNone(loaded)
                 self.assertEqual(loaded.size, (16, 16))
+            finally:
+                manager.close()
+
+    def test_profile_renderer_pastes_verified_currency_icon(self):
+        data = self.build(
+            basic={"currencies": [{"type": 1000, "value": 130_000_000}]},
+            outpost={},
+            daily={},
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            icon = Image.new("RGBA", (24, 24), (255, 64, 32, 220))
+            renderer = ProfileCardRenderer(
+                Path(directory),
+                Path(__file__).resolve().parents[1] / "fonts",
+                currency_icon_provider=lambda _currency_type: icon,
+            )
+            output = renderer.render_profile(data)
+            with Image.open(output) as rendered:
+                self.assertEqual(rendered.width, 1200)
+                self.assertLessEqual(rendered.height, 1850)
+
+        with tempfile.TemporaryDirectory() as directory:
+            assets = Path(__file__).resolve().parents[1] / "assets"
+            manager = AssetManager(Path(directory) / "cache", assets, remote=True)
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=AssertionError("currency icon network")):
+                    loaded = manager.get_currency_icon(1000)
+                self.assertIsNotNone(loaded)
+                self.assertEqual(loaded.size, (126, 117))
+                self.assertIsNone(manager.get_currency_icon(99))
             finally:
                 manager.close()
 
