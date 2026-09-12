@@ -290,8 +290,14 @@ def _cached_entry_is_valid(entry: Any, png: Path, asset_id: str, output_root: Pa
         return False
     try:
         rendered = _inside(output_root / str(entry["rendered_png"]), output_root, "manifest PNG")
-        return rendered == png.resolve() and rendered.is_file() and _sha256(rendered) == entry.get("sha256")
-    except (KeyError, OSError, TypeError, ValueError):
+        if rendered != png.resolve() or not rendered.is_file() or _sha256(rendered) != entry.get("sha256"):
+            return False
+        with Image.open(rendered) as image:
+            if image.mode != "RGBA" or image.width * image.height > 20_000_000:
+                return False
+            image.load()
+        return True
+    except (KeyError, OSError, TypeError, ValueError, Image.DecompressionBombError):
         return False
 
 
@@ -314,6 +320,7 @@ def _coverage_report(
     bundle_found: list[str],
     failed: list[str],
     missing: list[str],
+    invalid: list[str] | None = None,
 ) -> dict[str, Any]:
     """生成按 default/costume/overall 分母计算的覆盖率，而不是示例通过即 PASS。"""
     success_set = set(success)
@@ -323,6 +330,7 @@ def _coverage_report(
     def percent(numerator: int, denominator: int) -> float | None:
         return round(numerator * 100 / denominator, 2) if denominator else None
 
+    invalid_ids = sorted(set(invalid or []))
     return {
         "schema_version": 1,
         "character_master_count": len(defaults),
@@ -334,6 +342,7 @@ def _coverage_report(
         "runtime_40_count": 0,
         "runtime_41_count": 0,
         "render_success": len(success),
+        "render_invalid": len(invalid_ids),
         "render_failed": len(failed),
         "render_missing": len(missing),
         "default_success_count": len(success_set & default_set),
@@ -343,6 +352,7 @@ def _coverage_report(
         "overall_coverage_percent": percent(len(success_set & set(targets)), len(targets)),
         "failed_ids": sorted(set(failed)),
         "missing_ids": sorted(set(missing)),
+        "render_invalid_ids": invalid_ids,
     }
 
 
@@ -385,6 +395,7 @@ def main(argv: list[str] | None = None) -> int:
     success: list[str] = []
     failed: list[str] = []
     missing: list[str] = []
+    render_invalid: list[str] = []
     bundle_found: list[str] = []
     runtime_versions: dict[str, str] = {}
 
@@ -392,6 +403,9 @@ def main(argv: list[str] | None = None) -> int:
     for asset_id in targets:
         target_png = output_root / f"{asset_id}.png"
         cached = old_entries.get(asset_id)
+        if isinstance(cached, dict) and not _cached_entry_is_valid(cached, target_png, asset_id, output_root):
+            # 旧 manifest 的坏条目是独立的 invalid 证据，不能被 fallback 当作成功。
+            render_invalid.append(asset_id)
         if not args.force and _cached_entry_is_valid(cached, target_png, asset_id, output_root):
             entries[asset_id] = cached
             success.append(asset_id)
@@ -448,6 +462,7 @@ def main(argv: list[str] | None = None) -> int:
         "costume_target_count": len(costumes),
         "unique_target_count": len(targets),
         "render_success": len(success),
+        "render_invalid": len(render_invalid),
         "render_failed": len(failed),
         "render_missing": len(missing),
         "local_bundle_found": len(bundle_found),
@@ -463,6 +478,7 @@ def main(argv: list[str] | None = None) -> int:
         costumes=costumes,
         targets=targets,
         success=success,
+        invalid=render_invalid,
         bundle_found=bundle_found,
         failed=failed,
         missing=missing,
@@ -479,6 +495,7 @@ def main(argv: list[str] | None = None) -> int:
         "costume_target_count": len(costumes),
         "unique_target_count": len(targets),
         "render_success": len(success),
+        "render_invalid": len(render_invalid),
         "render_failed": len(failed),
         "render_missing": len(missing),
     }, ensure_ascii=False))

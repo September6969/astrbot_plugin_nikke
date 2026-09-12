@@ -19,6 +19,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Iterable
@@ -48,6 +49,7 @@ HARD_SNAPSHOT = "campaign_capture_hard.jsonl"
 MANIFEST_NAME = "campaign_capture_manifest.json"
 TID_INVENTORY_NAME = "campaign_tid_inventory.json"
 COSTUME_INVENTORY_NAME = "campaign_costume_inventory.json"
+TID_UNRESOLVED_NAME = "campaign_tid_unresolved.json"
 DEFAULT_OUTPUT_DIR = Path("/AstrBot/data/nikke/campaign-capture")
 DEFAULT_DATA_DIR = Path("/AstrBot/data/nikke")
 RATE_LIMIT_CODES = {"212000", "429", "too_many_requests", "rate_limit", "rate_limited"}
@@ -55,7 +57,6 @@ RATE_LIMIT_BACKOFF = (5.0, 10.0, 20.0, 40.0)
 COMPLETED_STATUSES = {
     ClearLineupStatus.AVAILABLE.value,
     ClearLineupStatus.UNAVAILABLE.value,
-    "malformed",
 }
 _INTEGER = re.compile(r"^[0-9]+$", re.ASCII)
 _SAFE_COSTUME = re.compile(r"^[A-Za-z0-9_-]{1,120}$", re.ASCII)
@@ -404,6 +405,25 @@ def _read_jsonl(path: Path) -> OrderedDict[tuple[str, int], dict[str, Any]]:
     return result
 
 
+def _filter_active_rows(
+    rows_by_mode: dict[str, OrderedDict[tuple[str, int], dict[str, Any]]],
+    stages: Iterable[CampaignStage],
+) -> dict[str, OrderedDict[tuple[str, int], dict[str, Any]]]:
+    """只保留当前静态 stage 表仍声明的 mode/stage_id 快照。"""
+    active_keys = {
+        _stage_key(stage.mode, stage.stage_id)
+        for stage in stages
+    }
+    return {
+        mode: OrderedDict(
+            (key, row)
+            for key, row in rows.items()
+            if key in active_keys
+        )
+        for mode, rows in rows_by_mode.items()
+    }
+
+
 def _write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> None:
     """以同目录临时文件原子替换快照，避免限流中断留下半行。"""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -618,6 +638,7 @@ async def capture(
     stages = enumerate_stages(stage_resolver, mode=mode, chapter=chapter)
     if not stages:
         raise ValueError("verified Campaign stage 表中没有符合筛选条件的关卡")
+    active_stages = enumerate_stages(stage_resolver)
 
     if account is None:
         store = store_cls(data_dir)
@@ -645,6 +666,9 @@ async def capture(
         "NORMAL": _read_jsonl(normal_path),
         "HARD": _read_jsonl(hard_path),
     }
+    # 映射更新时立即排除旧 stage_id；旧 JSONL 仍保留在历史存储中，但不再进入
+    # 当前 TID、服装 inventory、统计或后续回放输入。
+    rows_by_mode = _filter_active_rows(rows_by_mode, active_stages)
     selected_keys = {_stage_key(stage.mode, stage.stage_id) for stage in stages}
     if force:
         for selected_key in selected_keys:
@@ -655,6 +679,7 @@ async def capture(
     skipped_count = 0
     stopped_reason = ""
     started_at = _now_iso()
+    started_monotonic = time.monotonic()
     last_request = False
     active_client = client or BlaBlaClient()
 
@@ -693,12 +718,23 @@ async def capture(
     costume_inventory = build_costume_inventory(all_rows, resolver, CostumeRegistry(REPO_ROOT / "assets"))
     _write_json(output_dir / TID_INVENTORY_NAME, tid_inventory)
     _write_json(output_dir / COSTUME_INVENTORY_NAME, costume_inventory)
+    unresolved_entries = [
+        entry for entry in tid_inventory["entries"]
+        if entry.get("resolved_character") is None
+    ]
+    unresolved_payload = {
+        "schema_version": 1,
+        "unresolved": len(unresolved_entries),
+        "entries": unresolved_entries,
+    }
+    _write_json(output_dir / TID_UNRESOLVED_NAME, unresolved_payload)
 
     source_hash = _sha256(source_path)
     previous_hash = old_manifest.get("stage_source_sha256")
     snapshot_status = "SNAPSHOT_OUTDATED" if previous_hash and previous_hash != source_hash else "CURRENT"
     status_counts = {name: sum(row.get("status") == name for row in all_rows) for name in ("available", "unavailable", "rate_limited", "error", "malformed")}
     completed_at = _now_iso()
+    elapsed_seconds = round(max(0.0, time.monotonic() - started_monotonic), 3)
     manifest = {
         "schema_version": 1,
         "snapshot_status": snapshot_status,
@@ -712,11 +748,15 @@ async def capture(
         "normal_count": len(rows_by_mode["NORMAL"]),
         "hard_count": len(rows_by_mode["HARD"]),
         "total_count": len(all_rows),
+        "normal_target_count": sum(stage.mode == "NORMAL" for stage in active_stages),
+        "hard_target_count": sum(stage.mode == "HARD" for stage in active_stages),
+        "target_count": len(active_stages),
         "requested_mode": CampaignStageResolver.normalize_mode(mode) if mode else "ALL",
         "requested_chapter": chapter,
         "request_count": request_count,
         "skipped_count": skipped_count,
         "estimated_minimum_seconds": estimate_duration_seconds(len(stages)),
+        "elapsed_seconds": elapsed_seconds,
         "status_counts": status_counts,
         "stopped_reason": stopped_reason,
         "files": {
@@ -724,6 +764,7 @@ async def capture(
             "hard": {"name": HARD_SNAPSHOT, "sha256": _sha256(hard_path), "records": len(rows_by_mode["HARD"])},
             "tid_inventory": {"name": TID_INVENTORY_NAME, "sha256": _sha256(output_dir / TID_INVENTORY_NAME)},
             "costume_inventory": {"name": COSTUME_INVENTORY_NAME, "sha256": _sha256(output_dir / COSTUME_INVENTORY_NAME)},
+            "tid_unresolved": {"name": TID_UNRESOLVED_NAME, "sha256": _sha256(output_dir / TID_UNRESOLVED_NAME)},
         },
     }
     _write_json(manifest_path, manifest)
@@ -735,6 +776,12 @@ async def capture(
         "skipped_count": skipped_count,
         "status_counts": status_counts,
         "stopped_reason": stopped_reason,
+        "normal_target_count": sum(stage.mode == "NORMAL" for stage in active_stages),
+        "hard_target_count": sum(stage.mode == "HARD" for stage in active_stages),
+        "target_count": len(active_stages),
+        "elapsed_seconds": elapsed_seconds,
+        "tid_resolved": tid_inventory["resolved"],
+        "tid_unresolved": tid_inventory["unresolved"],
         "output_dir": str(output_dir),
     }
 
@@ -746,7 +793,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--stage-file", type=Path, default=REPO_ROOT / "assets" / "campaign_stages.json")
     parser.add_argument("--mode", choices=("NORMAL", "HARD"), default=None)
     parser.add_argument("--chapter", type=int, default=None)
-    parser.add_argument("--resume", action="store_true", help="跳过已有 AVAILABLE/UNAVAILABLE/MALFORMED 快照")
+    parser.add_argument("--resume", action="store_true", help="跳过已有 AVAILABLE/UNAVAILABLE 快照")
     parser.add_argument("--force", action="store_true", help="重抓筛选范围内的快照")
     parser.add_argument("--max-rate-retries", type=int, default=len(RATE_LIMIT_BACKOFF))
     return parser.parse_args()

@@ -106,7 +106,11 @@ class NikkePlugin(Star):
         )
         self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
         self.profile_builder = ProfileBuilder(campaign_resolver=self.campaign_resolver)
-        self.profile_renderer = ProfileCardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
+        self.profile_renderer = ProfileCardRenderer(
+            self.data_dir / "cards",
+            self.plugin_dir / "fonts",
+            currency_icon_provider=self.asset_manager.get_currency_icon,
+        )
         self.raid_builder = UnionRaidBuilder()
         self.raid_renderer = UnionRaidRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.campaign_builder = CampaignHistoryBuilder()

@@ -6,6 +6,7 @@ from __future__ import annotations
 import math
 import uuid
 from pathlib import Path
+from typing import Callable
 
 from PIL import Image, ImageDraw
 
@@ -25,6 +26,10 @@ PROFILE_THEME = {
 
 class ProfileCardRenderer(CardRenderer):
     WIDTH = 1200
+
+    def __init__(self, output_dir: str | Path, font_dir: str | Path, currency_icon_provider: Callable | None = None):
+        super().__init__(output_dir, font_dir)
+        self.currency_icon_provider = currency_icon_provider
 
     def _text(self, draw, xy, text, size, color, *, width=None, bold=False):
         text = str(text).replace("\n", " ")
@@ -127,40 +132,52 @@ class ProfileCardRenderer(CardRenderer):
 
     def _collect_sections(self, data):
         sections = []
-        if data.area_id or data.commander_level is not None or data.team_combat is not None:
-            sections.append(self._basic_info_section(data))
-        if data.normal_campaign or data.hard_campaign:
-            sections.append(self._campaign_section(data))
-        if self._has_today(data):
-            sections.append(self._today_section(data))
-        if (
+        has_basic = bool(data.area_id or data.commander_level is not None or data.team_combat is not None)
+        has_campaign = bool(data.normal_campaign or data.hard_campaign)
+        has_outpost = bool(
             data.outpost_available is not None
             or data.synchro_level is not None
             or data.outpost_battle_level is not None
             or data.infra_core_level
-        ):
-            sections.append(self._outpost_section(data))
-        if (
+        )
+        has_roster = bool(
             data.roster_available is not None
             or any(
                 v is not None
-                for v in [
+                for v in (
                     data.character_count,
                     data.max_level,
                     data.max_combat,
                     data.character_costume_count,
-                ]
+                )
             )
-        ):
-            sections.append(self._roster_stats_section(data))
-
+        )
         modern_order = bool(data.memorial_summary is not None or data.currencies is not None or self._has_today(data))
-        if modern_order and data.recycle_room_researches is not None:
-            sections.append(self._recycle_room_section(data))
 
-        if data.memorial_summary is not None or (modern_order and data.memorial_counts is not None):
-            sections.append(self._collection_section(data))
+        if modern_order:
+            # v0.4 画布采用横向合并面板，减少重复标题和纵向滚动长度。
+            if has_basic or has_campaign:
+                sections.append(self._basic_campaign_section(data))
+            if self._has_today(data):
+                sections.append(self._today_section(data))
+            if has_outpost or has_roster:
+                sections.append(self._outpost_roster_section(data))
+            if data.recycle_room_researches is not None:
+                sections.append(self._recycle_room_section(data))
+            if data.memorial_summary is not None or data.memorial_counts is not None:
+                sections.append(self._collection_section(data))
+            if data.currencies is not None:
+                sections.append(self._resources_section(data))
         else:
+            # 保持旧 fixture 与兼容调用的既有标题顺序。
+            if has_basic:
+                sections.append(self._basic_info_section(data))
+            if has_campaign:
+                sections.append(self._campaign_section(data))
+            if has_outpost:
+                sections.append(self._outpost_section(data))
+            if has_roster:
+                sections.append(self._roster_stats_section(data))
             collection_items = []
             if data.jukebox_count is not None:
                 collection_items.append(("点唱机收集", data.jukebox_count))
@@ -174,12 +191,8 @@ class ProfileCardRenderer(CardRenderer):
                 if data.memorial_partial:
                     collection_title += "（部分）"
                 sections.append(self._structured_section(collection_title, collection_items))
-
-        if data.currencies is not None:
-            sections.append(self._resources_section(data))
-
-        if not modern_order and data.recycle_room_researches is not None:
-            sections.append(self._recycle_room_section(data))
+            if data.recycle_room_researches is not None:
+                sections.append(self._recycle_room_section(data))
 
         extra = self._extra_items(data)
         if extra:
@@ -214,9 +227,107 @@ class ProfileCardRenderer(CardRenderer):
 
     @staticmethod
     def _tower_value(data: ProfileDashboardData) -> str:
-        if data.tower_daily_info is None:
+        if not data.tower_daily_info:
             return "—"
-        return f"{len(data.tower_daily_info)} 项" if data.tower_daily_info else "0 项"
+        # serv 现场确认 closed 条目也带 remaining_count，只有 opened 条目计入可用次数。
+        if any(
+            item.tower_type is None or item.is_opened is None or item.remaining is None
+            for item in data.tower_daily_info
+        ):
+            return "次数待核验"
+        opened = [item for item in data.tower_daily_info if item.is_opened]
+        if not opened:
+            return "暂无开放塔"
+        return f"剩余 {sum(item.remaining for item in opened):,} 次"
+
+    def _basic_campaign_section(self, data: ProfileDashboardData):
+        title = "BASIC + CAMPAIGN / 基本信息与主线"
+        basic_items = []
+        if data.area_id:
+            basic_items.append(("区服 ID", data.area_id))
+        if data.commander_level is not None:
+            basic_items.append(("指挥官等级", self._number(data.commander_level)))
+        if data.team_combat is not None:
+            basic_items.append(("部队总战力", f"{data.team_combat:,}"))
+        campaign_items = []
+        if data.normal_campaign:
+            campaign_items.append(("普通主线", data.normal_campaign))
+        if data.hard_campaign:
+            campaign_items.append(("困难主线", data.hard_campaign))
+
+        def draw_items(draw, box, items, value_color):
+            for idx, (label, value) in enumerate(items):
+                col = idx % 2
+                row = idx // 2
+                x = box[0] + col * 250
+                y = box[1] + row * 48
+                self._text(draw, (x, y), label, 16, PROFILE_THEME["muted"], width=230)
+                self._text(draw, (x, y + 23), value, 23, value_color, width=230, bold=True)
+
+        rows = max((len(basic_items) + 1) // 2, (len(campaign_items) + 1) // 2, 1)
+
+        def draw_section(draw, box, fill):
+            self._section_panel(draw, box, title, fill=fill)
+            left = (box[0] + 30, box[1] + 55)
+            right = (box[0] + 590, box[1] + 55)
+            self._text(draw, left, "BASIC INFO", 14, PROFILE_THEME["primary"], bold=True)
+            self._text(draw, right, "CAMPAIGN", 14, PROFILE_THEME["primary"], bold=True)
+            draw_items(draw, (left[0], left[1] + 22), basic_items, PROFILE_THEME["text"])
+            draw_items(draw, (right[0], right[1] + 22), campaign_items, PROFILE_THEME["secondary"])
+
+        return draw_section, 82 + rows * 48
+
+    def _outpost_roster_section(self, data: ProfileDashboardData):
+        title = "OUTPOST + ROSTER / 前哨与妮姬"
+        outpost_items = []
+        if data.synchro_level is not None:
+            outpost_items.append(("同步器等级", self._number(data.synchro_level)))
+        if data.outpost_battle_level is not None:
+            outpost_items.append(("前哨战斗等级", self._number(data.outpost_battle_level)))
+        if data.infra_core_level:
+            outpost_items.append(("基础核心等级", data.infra_core_level))
+        if data.outpost_available is False:
+            outpost_items.append(("前哨资料", "获取失败"))
+        elif not outpost_items:
+            outpost_items.append(("前哨资料", "未提供"))
+
+        roster_items = []
+        if data.character_count is not None:
+            roster_items.append(("角色数量", self._number(data.character_count)))
+        if data.max_level is not None:
+            roster_items.append(("最高等级", f"Lv.{data.max_level}"))
+        if data.max_combat is not None:
+            roster_items.append(("最高单体战力", f"{data.max_combat:,}"))
+        if data.character_costume_count is not None:
+            roster_items.append(("时装数量", self._number(data.character_costume_count)))
+        if data.roster_available is False:
+            roster_items.append(("花名册状态", "获取失败"))
+        elif data.roster_partial:
+            roster_items.append(("花名册状态", "部分数据不可用"))
+        if not roster_items:
+            roster_items.append(("花名册资料", "未提供"))
+
+        def draw_items(draw, origin, items, value_color):
+            for idx, (label, value) in enumerate(items):
+                col = idx % 2
+                row = idx // 2
+                x = origin[0] + col * 250
+                y = origin[1] + row * 48
+                self._text(draw, (x, y), label, 16, PROFILE_THEME["muted"], width=230)
+                self._text(draw, (x, y + 23), value, 23, value_color, width=230, bold=True)
+
+        rows = max((len(outpost_items) + 1) // 2, (len(roster_items) + 1) // 2, 1)
+
+        def draw_section(draw, box, fill):
+            self._section_panel(draw, box, title, fill=fill)
+            left = (box[0] + 30, box[1] + 55)
+            right = (box[0] + 590, box[1] + 55)
+            self._text(draw, left, "OUTPOST", 14, PROFILE_THEME["primary"], bold=True)
+            self._text(draw, right, "ROSTER", 14, PROFILE_THEME["primary"], bold=True)
+            draw_items(draw, (left[0], left[1] + 22), outpost_items, PROFILE_THEME["secondary"])
+            draw_items(draw, (right[0], right[1] + 22), roster_items, PROFILE_THEME["primary"])
+
+        return draw_section, 82 + rows * 48
 
     def _today_section(self, data: ProfileDashboardData):
         items = [
@@ -272,12 +383,12 @@ class ProfileCardRenderer(CardRenderer):
                 col = idx % 2
                 row = idx // 2
                 x = box[0] + 30 + col * 550
-                item_y = y + row * 48
+                item_y = y + row * 38
                 self._text(draw, (x, item_y), label, 18, PROFILE_THEME["muted"], width=220)
                 self._text_right(draw, (x + 510, item_y), value, 22, PROFILE_THEME["secondary"], width=280, bold=True)
 
         rows = (len(visible) + 1) // 2
-        height = 75 + (65 if has_storage else 0) + rows * 48 + 20
+        height = 70 + (50 if has_storage else 0) + rows * 38 + 15
         return draw_section, height
 
     def _collection_section(self, data: ProfileDashboardData):
@@ -298,31 +409,49 @@ class ProfileCardRenderer(CardRenderer):
                 self._text(draw, (x, y), label, 18, PROFILE_THEME["muted"], width=240)
                 self._text(draw, (x, y + 32), value, 26, PROFILE_THEME["secondary"], width=240, bold=True)
 
-        return draw_section, 150
+        return draw_section, 126
+
+    def _currency_icon(self, item):
+        if self.currency_icon_provider is None or item is None or not item.icon_key:
+            return None
+        try:
+            image = self.currency_icon_provider(item.type)
+            return image.copy() if isinstance(image, Image.Image) else None
+        except Exception:
+            # 图标是可选装饰；提供器异常不能阻断整张 Profile。
+            return None
 
     def _resources_section(self, data: ProfileDashboardData):
         title = "RESOURCES / 我的资源"
         if data.currencies_partial:
             title += "（部分）"
         items = [
-            (item.display_name, item.compact_value if item.value is not None else "—")
+            (item, item.display_name, item.compact_value if item.value is not None else "—")
             for item in (data.currencies or [])
         ][:8]
         if not items:
-            items = [("暂无资源", "—")]
+            items = [(None, "暂无资源", "—")]
 
         def draw_section(draw, box, fill):
             self._section_panel(draw, box, title, fill=fill)
-            for idx, (label, value) in enumerate(items):
+            for idx, (item, label, value) in enumerate(items):
                 col = idx % 4
                 row = idx // 4
                 x = box[0] + 30 + col * 275
-                y = box[1] + 55 + row * 70
-                self._text(draw, (x, y), label, 17, PROFILE_THEME["muted"], width=245)
-                self._text(draw, (x, y + 27), value, 25, PROFILE_THEME["text"], width=245, bold=True)
+                y = box[1] + 50 + row * 55
+                icon = self._currency_icon(item)
+                text_x = x
+                text_width = 245
+                if icon is not None:
+                    icon.thumbnail((34, 34), Image.Resampling.LANCZOS)
+                    draw.paste(icon, (x, y + 2), icon)
+                    text_x += 42
+                    text_width -= 42
+                self._text(draw, (text_x, y), label, 17, PROFILE_THEME["muted"], width=text_width)
+                self._text(draw, (text_x, y + 26), value, 24, PROFILE_THEME["text"], width=text_width, bold=True)
 
         rows = (len(items) + 3) // 4
-        return draw_section, 55 + rows * 70 + 20
+        return draw_section, 50 + rows * 55 + 15
 
     def _structured_section(self, title, items):
         # 展示序号而非未确认的内部标识；限制单卡长度以适配 QQ。
@@ -365,12 +494,12 @@ class ProfileCardRenderer(CardRenderer):
                 col = idx % 2
                 row = idx // 2
                 col_x = box[0] + 30 if col == 0 else box[0] + 580
-                y = box[1] + 55 + row * 38
+                y = box[1] + 52 + row * 32
                 self._text(draw, (col_x, y), label, 20, PROFILE_THEME["muted"], width=330)
                 self._text(draw, (col_x + 340, y), value, 20, PROFILE_THEME["text"], width=180)
 
         rows = (len(visible) + 1) // 2
-        height = 75 + rows * 38
+        height = 68 + rows * 32
         return draw_section, height
 
     def _campaign_section(self, data):

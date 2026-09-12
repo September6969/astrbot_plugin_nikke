@@ -33,6 +33,24 @@ class LocalSpineResolverTests(TestCase):
             self.assertEqual([path.name for path in result.texture_paths], ["one.png", "two.png"])
             self.assertEqual(result.as_spine_bundle().textures, result.texture_paths)
 
+    def test_resolves_nested_atlas_texture_page(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = root / "l2d" / "c010"
+            bundle.mkdir(parents=True)
+            (bundle / "c010_00.skel").write_bytes(b"header 4.0.47")
+            nested = bundle / "textures"
+            nested.mkdir()
+            page = nested / "body.png"
+            Image.new("RGBA", (24, 16), "purple").save(page)
+            (bundle / "c010_00.atlas").write_text(
+                "\ufefftextures/body.png\nsize: 24, 16\n", encoding="utf-8-sig"
+            )
+
+            result = LocalSpineBundleResolver(root).resolve("c010")
+
+            self.assertEqual(result.texture_paths, (page.resolve(),))
+
     def test_supports_40_without_guessing_from_character(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

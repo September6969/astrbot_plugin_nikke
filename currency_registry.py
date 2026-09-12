@@ -16,20 +16,22 @@ class CurrencyDefinition:
     type: int
     display_name: str
     icon_key: str | None = None
+    verified_source: str | None = None
+    source_sha256: str | None = None
 
 
 class CurrencyRegistry:
     """把 basic_info.currencies 转成不携带账号上下文的显示模型。"""
 
     DEFINITIONS = {
-        99: CurrencyDefinition(99, "珠宝"),
-        1000: CurrencyDefinition(1000, "信用点"),
-        2000: CurrencyDefinition(2000, "战斗数据辑"),
-        3000: CurrencyDefinition(3000, "芯尘"),
-        5100: CurrencyDefinition(5100, "高级招募券"),
-        5200: CurrencyDefinition(5200, "普通招募券"),
-        11000: CurrencyDefinition(11000, "躯体标签"),
-        12000: CurrencyDefinition(12000, "联盟芯片"),
+        99: CurrencyDefinition(99, "珠宝", verified_source=None, source_sha256=None),
+        1000: CurrencyDefinition(1000, "信用点", verified_source=None, source_sha256=None),
+        2000: CurrencyDefinition(2000, "战斗数据辑", verified_source=None, source_sha256=None),
+        3000: CurrencyDefinition(3000, "芯尘", verified_source=None, source_sha256=None),
+        5100: CurrencyDefinition(5100, "高级招募券", verified_source=None, source_sha256=None),
+        5200: CurrencyDefinition(5200, "普通招募券", verified_source=None, source_sha256=None),
+        11000: CurrencyDefinition(11000, "躯体标签", verified_source=None, source_sha256=None),
+        12000: CurrencyDefinition(12000, "联盟芯片", verified_source=None, source_sha256=None),
     }
     _INTEGER = re.compile(r"^[0-9]+$", re.ASCII)
 
@@ -54,6 +56,29 @@ class CurrencyRegistry:
     def resolve(cls, type_value: Any) -> CurrencyDefinition | None:
         parsed = cls._integer(type_value)
         return cls.DEFINITIONS.get(parsed) if parsed is not None else None
+
+    @classmethod
+    def icon_coverage(cls) -> dict[str, Any]:
+        """报告有完整来源证据的图标数量；未知图标不回退到相邻资源。"""
+        verified = [
+            definition for definition in cls.DEFINITIONS.values()
+            if (
+                definition.icon_key
+                and definition.verified_source
+                and isinstance(definition.source_sha256, str)
+                and re.fullmatch(r"[0-9a-fA-F]{64}", definition.source_sha256)
+            )
+        ]
+        return {
+            "total": len(cls.DEFINITIONS),
+            "verified": len(verified),
+            "unverified": len(cls.DEFINITIONS) - len(verified),
+            "unverified_types": [
+                definition.type
+                for definition in cls.DEFINITIONS.values()
+                if definition not in verified
+            ],
+        }
 
     def parse_item(self, value: Any) -> CurrencyItem | None:
         if not isinstance(value, dict):

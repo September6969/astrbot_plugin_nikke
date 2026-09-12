@@ -231,12 +231,17 @@ def _parse_daily_tower(value: Any) -> tuple[list[DailyTowerInfo] | None, bool]:
             result.append(DailyTowerInfo({}))
             partial = True
             continue
+        # serv 现场确认的字段合同：type / is_opened / remaining_count。
         # raw 是脱离账号身份的每日记录副本；renderer 不直接读取它。
-        display_name = _first_optional_str(item, "name", "tower_name", "type")
-        remaining = _optional_int(item.get("remaining"))
-        if "remaining" in item and remaining is None:
+        display_name = _first_optional_str(item, "name", "tower_name")
+        tower_type = _optional_int(item.get("type"))
+        is_opened = item.get("is_opened") if isinstance(item.get("is_opened"), bool) else None
+        remaining = _optional_int(item.get("remaining_count"))
+        if any(key not in item for key in ("type", "is_opened", "remaining_count")):
             partial = True
-        result.append(DailyTowerInfo(dict(item), display_name, remaining))
+        if tower_type is None or is_opened is None or remaining is None:
+            partial = True
+        result.append(DailyTowerInfo(dict(item), display_name, remaining, tower_type, is_opened))
     return result, partial
 
 

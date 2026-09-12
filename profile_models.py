@@ -25,6 +25,8 @@ class DailyTowerInfo:
     raw: dict[str, Any]
     display_name: str | None = None
     remaining: int | None = None
+    tower_type: int | None = None
+    is_opened: bool | None = None
 
 
 @dataclass(slots=True)

@@ -12,6 +12,7 @@ from PIL import Image
 
 from astrbot_plugin_nikke.asset_manager import AssetManager
 from astrbot_plugin_nikke.client import BlaBlaClient, BlaBlaError, DAILY_CONTENTS_PROGRESS, PROFILE
+from astrbot_plugin_nikke.currency_registry import CurrencyDefinition, CurrencyRegistry
 from astrbot_plugin_nikke.profile_builder import ProfileBuilder
 from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
 from astrbot_plugin_nikke.profile_models import ProfileDashboardData
@@ -96,6 +97,23 @@ class ProfileV04ContractTests(unittest.TestCase):
         self.assertIsNone(data.memorial_summary)
         self.assertTrue(data.memorial_partial)
 
+    def test_tower_daily_uses_opened_remaining_count_not_list_length(self):
+        data = self.build(
+            daily={
+                "tower_daily_info_list": [
+                    {"type": 1, "is_opened": False, "remaining_count": 3},
+                    {"type": 2, "is_opened": True, "remaining_count": 3},
+                    {"type": 3, "is_opened": False, "remaining_count": 3},
+                    {"type": 4, "is_opened": False, "remaining_count": 3},
+                ]
+            }
+        )
+        self.assertFalse(data.daily_partial)
+        self.assertEqual(ProfileCardRenderer._tower_value(data), "剩余 3 次")
+
+        incomplete = self.build(daily={"tower_daily_info_list": [{"type": 2, "remaining_count": 3}]})
+        self.assertEqual(ProfileCardRenderer._tower_value(incomplete), "次数待核验")
+
     def test_profile_v04_sections_and_height_are_bounded(self):
         data = self.build(
             basic={"currencies": [{"type": 99, "value": 26_000_000}]},
@@ -121,8 +139,36 @@ class ProfileV04ContractTests(unittest.TestCase):
             self.assertIn("COLLECTION / 遗失物品", titles)
             self.assertIn("RESOURCES / 我的资源", titles)
             with Image.open(output) as image:
-                self.assertLessEqual(image.height, 2200)
+                self.assertLessEqual(image.height, 1850)
                 self.assertEqual(image.width, 1200)
+
+    def test_currency_icon_registry_is_explicit_and_local_only(self):
+        coverage = CurrencyRegistry.icon_coverage()
+        self.assertEqual(coverage["total"], 8)
+        self.assertEqual(coverage["verified"], 0)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manager = AssetManager(root / "cache", root, remote=True)
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=AssertionError("currency icon network")):
+                    self.assertIsNone(manager.get_currency_icon(99))
+
+                icon = root / "cache" / "currency" / "gem.png"
+                icon.parent.mkdir(parents=True)
+                Image.new("RGBA", (16, 16), "gold").save(icon)
+                definition = CurrencyDefinition(
+                    99,
+                    "珠宝",
+                    "gem",
+                    "offline-test",
+                    hashlib.sha256(icon.read_bytes()).hexdigest(),
+                )
+                with patch.dict(CurrencyRegistry.DEFINITIONS, {99: definition}):
+                    loaded = manager.get_currency_icon(99)
+                self.assertIsNotNone(loaded)
+                self.assertEqual(loaded.size, (16, 16))
+            finally:
+                manager.close()
 
 
 class ProfileDailyClientTests(unittest.IsolatedAsyncioTestCase):
@@ -195,6 +241,71 @@ class SpineManifestHotPathTests(unittest.TestCase):
             finally:
                 manager.close()
 
+    def test_declared_manifest_invalid_asset_is_fail_closed_before_legacy_cache(self):
+        """manifest 一旦声明角色，损坏条目不能绕过合同命中旧缓存或 Worker。"""
+        invalid_entries = (
+            {"rendered_png": "../outside.png", "sha256": "0" * 64},
+            {"rendered_png": "missing.png", "sha256": "0" * 64},
+            {"rendered_png": "c010.png", "sha256": "f" * 64},
+            {"rendered_png": "c010.png"},
+            [],
+        )
+        for entry in invalid_entries:
+            with self.subTest(entry=entry), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                rendered = root / "spine-rendered"
+                legacy = root / "cache" / "spine-rendered"
+                rendered.mkdir(parents=True)
+                legacy.mkdir(parents=True)
+                legacy_path = legacy / "c010.png"
+                Image.new("RGBA", (32, 48), "red").save(legacy_path)
+                declared_path = rendered / "c010.png"
+                Image.new("RGBA", (32, 48), "blue").save(declared_path)
+                manifest = {"schema_version": 2, "assets": {"c010": entry}}
+                manifest_path = root / "spine_manifest.json"
+                manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+                manager = AssetManager(root / "cache", root, remote=True)
+                try:
+                    with self.assertLogs("nikke.asset_manager", level="WARNING") as logs, patch.object(
+                        SpinePreRenderer,
+                        "cached_portrait",
+                        side_effect=AssertionError("invalid manifest must not inspect Worker cache"),
+                    ):
+                        portrait = manager.get_character_portrait("5010", "10")
+                    self.assertEqual(portrait.size, (600, 900))
+                    self.assertNotEqual(portrait.getpixel((0, 0)), (255, 0, 0, 255))
+                    self.assertIn("STATIC_SPINE_ASSET_INVALID", "\n".join(logs.output))
+                finally:
+                    manager.close()
+
+    def test_static_manifest_hot_path_does_not_touch_network_or_worker(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rendered = root / "spine-rendered"
+            rendered.mkdir()
+            image_path = rendered / "c010.png"
+            Image.new("RGBA", (32, 48), "green").save(image_path)
+            manifest = {
+                "schema_version": 2,
+                "assets": {
+                    "c010": {
+                        "asset_id": "c010",
+                        "rendered_png": "c010.png",
+                        "sha256": hashlib.sha256(image_path.read_bytes()).hexdigest(),
+                    }
+                },
+            }
+            (root / "spine_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            manager = AssetManager(root / "cache", root, remote=True)
+            try:
+                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=AssertionError("network")), patch.object(
+                    SpinePreRenderer, "cached_portrait", side_effect=AssertionError("worker cache")
+                ), patch.object(SpinePreRenderer, "enqueue", side_effect=AssertionError("worker enqueue")):
+                    portrait = manager.get_character_portrait("5010", "10")
+                self.assertEqual(portrait.size, (32, 48))
+            finally:
+                manager.close()
+
 
 class SpineSyncTests(unittest.TestCase):
     def test_all_targets_accept_only_verified_costume_entries(self):
@@ -245,6 +356,50 @@ class SpineSyncTests(unittest.TestCase):
             self.assertEqual(saved["schema_version"], 2)
             self.assertEqual(saved["assets"]["c010"]["runtime_version"], "4.0")
             self.assertEqual(json.loads(coverage_path.read_text(encoding="utf-8"))["render_success"], 1)
+
+    def test_sync_reports_invalid_existing_manifest_separately(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            db = root / "db" / "l2d" / "c010"
+            db.mkdir(parents=True)
+            (db / "c010_00.skel").write_bytes(b"header 4.0.47")
+            Image.new("RGBA", (12, 12), "green").save(db / "page.png")
+            (db / "c010_00.atlas").write_text("page.png\nsize: 12, 12\n", encoding="utf-8-sig")
+            output = root / "out"
+            output.mkdir()
+            old_png = output / "c010.png"
+            Image.new("RGBA", (20, 30), "red").save(old_png)
+            manifest_path = root / "manifest.json"
+            manifest_path.write_text(
+                json.dumps({
+                    "schema_version": 2,
+                    "assets": {
+                        "c010": {
+                            "asset_id": "c010",
+                            "rendered_png": "c010.png",
+                            "sha256": "0" * 64,
+                        }
+                    },
+                }),
+                encoding="utf-8",
+            )
+            coverage_path = root / "coverage.json"
+
+            def fake_render(_asset, _skel, _atlas, _textures, destination, *_workers, **_kwargs):
+                Image.new("RGBA", (20, 30), "blue").save(destination)
+                return {"runtime_version": "4.0"}
+
+            with patch.object(sync, "render_spine_portrait", side_effect=fake_render):
+                code = sync.main([
+                    "--assets", "c010", "--nikke-db-root", str(root / "db"),
+                    "--out-dir", str(output), "--manifest-path", str(manifest_path),
+                    "--coverage-report", str(coverage_path),
+                ])
+            self.assertEqual(code, 0)
+            coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
+            self.assertEqual(coverage["render_invalid"], 1)
+            self.assertEqual(coverage["render_invalid_ids"], ["c010"])
+            self.assertEqual(coverage["render_success"], 1)
 
 
 class CampaignCaptureTests(unittest.IsolatedAsyncioTestCase):
@@ -330,6 +485,61 @@ class CampaignCaptureTests(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(limited["stopped_reason"], "RATE_LIMITED")
             self.assertEqual(sleeps, [5.0, 10.0])
+
+    async def test_resume_retries_malformed_and_filters_stale_stage_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stage_file = self.stage_file(root, hard=False)
+            output = root / "out"
+            output.mkdir()
+            old_rows = [
+                {
+                    "mode": "NORMAL",
+                    "chapter": 1,
+                    "stage_name": "1-1",
+                    "stage_id": 6001001,
+                    "status": "malformed",
+                    "members": [],
+                },
+                {
+                    "mode": "NORMAL",
+                    "chapter": 99,
+                    "stage_name": "99-9",
+                    "stage_id": 9999999,
+                    "status": "unavailable",
+                    "members": [],
+                },
+            ]
+            (output / capture.NORMAL_SNAPSHOT).write_text(
+                "".join(json.dumps(row) + "\n" for row in old_rows), encoding="utf-8"
+            )
+
+            class FakeClient:
+                def __init__(self):
+                    self.calls = []
+
+                async def get_main_quest_clear_lineup(self, account, stage_id, area_id):
+                    self.calls.append(stage_id)
+                    return {"code": 0, "data": {"list": [
+                        {"tid": 101, "lv": 1, "combat": 1, "slot": slot}
+                        for slot in range(1, 6)
+                    ]}}
+
+            fake = FakeClient()
+            result = await capture.capture(
+                root / "data", output, stage_file=stage_file, resume=True,
+                account={"area_id": "1"}, client=fake, sleep=AsyncMock(), jitter=lambda *_: 0,
+            )
+            self.assertEqual(fake.calls, [6001001])
+            self.assertEqual(result["total_count"], 1)
+            saved = [
+                json.loads(line)
+                for line in (output / capture.NORMAL_SNAPSHOT).read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual([row["stage_id"] for row in saved], [6001001])
+            self.assertEqual(result["status_counts"]["available"], 1)
+            unresolved = json.loads((output / capture.TID_UNRESOLVED_NAME).read_text(encoding="utf-8"))
+            self.assertEqual(unresolved["unresolved"], 0)
 
     def test_replay_normalizes_untrusted_timestamp_without_copying_text(self):
         row = {

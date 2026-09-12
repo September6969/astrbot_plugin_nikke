@@ -108,6 +108,8 @@ class LocalSpineBundleResolver:
         if (
             page_path.is_absolute()
             or page_path.drive
+            or "\\" in page
+            or re.match(r"^[A-Za-z]:", page)
             or any(part in {"", ".", ".."} for part in page_path.parts)
             or page_path.suffix.lower() not in self.PAGE_SUFFIXES
         ):
