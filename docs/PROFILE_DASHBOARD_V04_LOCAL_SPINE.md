@@ -76,5 +76,5 @@ coverage 报告分别统计 character master、default、verified costume、uniq
 - `serv` 只读 shape 核验确认 `tower_daily_info_list` 元素字段为 `type`、`is_opened`、`remaining_count`；当前只统计开放条目，未发现可靠 total 时不生成 `0/3`。
 - `CurrencyRegistry` 的 8 项已知资源均有核验图标：信用点、战斗数据辑、芯尘来自 Nikke-db 固定提交；珠宝、两类招募券、躯体标签、黄金积分券来自用户提供图标及同日数量对照图。每项记录 SHA-256，AssetManager 的 `get_currency_icon()` 不联网、不读取未经 registry 证明的图标。
 - `serv` 授权账号只读 Profile 已在隔离代码目录实渲染并脱敏查看：`1200×1715`，底层 9 项实际资源、4 项塔信息；卡面只放 8 项已知资源，图标缩放、透明边缘和文字避让正常。外部证据图为 `E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-known-currency.png`，SHA-256 `ea09d416f57f2cef3c235833c3a3cc0969f01786c2e651ddd2491ce707037f30`，不提交仓库。
-- `serv` 隔离 Nikke-db 维护已按两阶段 sparse 规则完成：source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，240 bundles found，runtime 4.0/4.1 为 102/138，渲染成功 2、失败 238、无效 0、缺失 0。失败是缺少可执行匹配 Spine worker/runtime，属于 `PARTIAL`，不是产品完成证据。
+- `serv` 隔离 Nikke-db 维护已按两阶段 sparse 规则完成：source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，200 个默认角色与 40 个 verified Costume 共 240 项，runtime 4.0/4.1 为 102/138；通过禁网 Docker worker 桥接后 240/240 渲染成功，失败、无效、缺失均为 0。全量 PNG 的 SHA-256、RGBA、非空 alpha、尺寸和比例已复核；20 张接触表覆盖五企业、两个 runtime 与 5 个 Costume 并已实际查看。该证据仍是隔离维护结果，不代表生产部署。
 - Campaign NORMAL Chapter 1 只读 smoke 为 4/4 `UNAVAILABLE`，full NORMAL→HARD 抓取已在服务器后台运行，快照不进仓库；最终统计以服务器脱敏 manifest 为准。
