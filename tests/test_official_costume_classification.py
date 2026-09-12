@@ -13,12 +13,21 @@ def _load(relative: str) -> dict:
 
 
 def test_all_official_costumes_have_final_mapping() -> None:
-    inventory = _load("docs/evidence/official_costume_inventory.json")["costumes"]
+    inventory_document = _load("docs/evidence/official_costume_inventory.json")
+    inventory = inventory_document["costumes"]
+    inventory_stats = inventory_document["statistics"]
     matrix = _load("docs/evidence/costume_spine_candidate_matrix.json")
     registry = _load("assets/costumes.json")["entries"]
     manual = _load("docs/evidence/costume_identity_manual_validation.json")
 
+    assert inventory_stats == {
+        "total_official_costumes": 178,
+        "verified_supported": 178,
+        "official_unmapped": 0,
+        "verified_coverage_percent": 100.0,
+    }
     assert len(inventory) == len(matrix["items"]) == len(registry) == 178
+    assert all(row["classification"] == "VERIFIED_SUPPORTED" for row in inventory)
     assert matrix["classification_counts"] == {
         "VERIFIED_EXISTING": 47,
         "MANUAL_VALIDATED_CANDIDATE": 131,
@@ -26,6 +35,26 @@ def test_all_official_costumes_have_final_mapping() -> None:
     assert manual["entry_count"] == 131
     assert {row["costume_id"] for row in inventory} == {row["costume_id"] for row in registry}
     assert all(row["classification"] in {"VERIFIED_EXISTING", "MANUAL_VALIDATED_CANDIDATE"} for row in matrix["items"])
+
+
+def test_official_costume_evidence_files_are_consistent() -> None:
+    inventory = _load("docs/evidence/official_costume_inventory.json")
+    risk = _load("docs/evidence/official_costume_support_risk.json")
+    matrix = _load("docs/evidence/costume_spine_candidate_matrix.json")
+    registry = _load("assets/costumes.json")
+    runtime = _load("docs/evidence/spine_runtime_resolution_audit.json")
+
+    assert inventory["statistics"]["total_official_costumes"] == 178
+    assert risk["total_official_costumes"] == 178
+    assert matrix["official_total"] == 178
+    assert len(registry["entries"]) == 178
+    assert runtime["alternate"]["total"] == 178
+
+    assert inventory["statistics"]["official_unmapped"] == 0
+    assert risk["breakdown"]["MAPPING_MISSING"] == 0
+    assert risk["breakdown"]["UNRESOLVED"] == 0
+    assert risk["breakdown"]["SUPPORTED"] == 178
+    assert runtime["alternate"]["failed"] == []
 
 
 def test_official_costume_owners_and_render_ids_are_unique() -> None:

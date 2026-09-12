@@ -12,9 +12,9 @@
   },
   "statistics": {
     "total_official_costumes": 178,
-    "verified_supported": 47,
-    "official_unmapped": 131,
-    "verified_coverage_percent": 26.4
+    "verified_supported": 178,
+    "official_unmapped": 0,
+    "verified_coverage_percent": 100
   },
   "costumes": [
     {
@@ -27,7 +27,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c082_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10002",
@@ -39,7 +39,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c142_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10003",
@@ -51,7 +51,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c201_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10004",
@@ -63,7 +63,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c131_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10005",
@@ -75,7 +75,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c010_03",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10006",
@@ -87,7 +87,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c350_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "20001",
@@ -99,7 +99,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c010_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30001",
@@ -111,7 +111,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c011_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30002",
@@ -123,7 +123,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c030_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30003",
@@ -135,7 +135,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c070_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30004",
@@ -147,7 +147,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c102_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30006",
@@ -159,7 +159,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c072_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30007",
@@ -171,7 +171,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c181_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30008",
@@ -183,7 +183,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c160_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30009",
@@ -195,7 +195,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c170_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30010",
@@ -207,7 +207,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c212_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30011",
@@ -219,7 +219,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c141_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30012",
@@ -231,7 +231,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c080_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30013",
@@ -243,7 +243,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c430_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30014",
@@ -255,7 +255,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c800_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30015",
@@ -267,7 +267,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c191_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30016",
@@ -279,7 +279,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c090_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30017",
@@ -291,7 +291,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c282_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30018",
@@ -303,7 +303,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c260_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30019",
@@ -315,7 +315,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c070_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "40001",
@@ -327,7 +327,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c090_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "40002",
@@ -339,7 +339,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c210_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50001",
@@ -351,7 +351,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c150_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50002",
@@ -363,7 +363,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c140_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50003",
@@ -375,7 +375,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c352_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50004",
@@ -387,7 +387,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c202_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "60001",
@@ -399,7 +399,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c022_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70001",
@@ -411,7 +411,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c112_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70002",
@@ -423,7 +423,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c200_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "80001",
@@ -435,7 +435,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c101_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "90001",
@@ -447,7 +447,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c810_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "90002",
@@ -459,7 +459,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c810_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "90003",
@@ -471,7 +471,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c811_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "90004",
@@ -483,7 +483,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c811_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "100001",
@@ -495,7 +495,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c212_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10014",
@@ -503,11 +503,11 @@
       "character_name": "Rapi: Red Hood",
       "costume_name": "Red Flavor",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c016_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30050",
@@ -515,11 +515,11 @@
       "character_name": "Rapi: Red Hood",
       "costume_name": "Cherished Red",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c016_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "130005",
@@ -527,11 +527,11 @@
       "character_name": "Rapi: Red Hood",
       "costume_name": "Shining Light",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c016_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30064",
@@ -539,11 +539,11 @@
       "character_name": "Anis: Star",
       "costume_name": "T.T. STAR",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c017_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "120004",
@@ -551,11 +551,11 @@
       "character_name": "Anis: Star",
       "costume_name": "Starlight",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c017_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30025",
@@ -563,11 +563,11 @@
       "character_name": "Poli",
       "costume_name": "Cheer Up Police",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c030_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30031",
@@ -575,11 +575,11 @@
       "character_name": "Miranda",
       "costume_name": "Thief of Justice",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c032_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "100002",
@@ -587,11 +587,11 @@
       "character_name": "K",
       "costume_name": "Undercover",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c041_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50013",
@@ -599,11 +599,11 @@
       "character_name": "D: Killer Wife",
       "costume_name": "Secret Party Cleaner",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c043_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "100003",
@@ -611,11 +611,11 @@
       "character_name": "D: Killer Wife",
       "costume_name": "Secret Police",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c043_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30005",
@@ -623,11 +623,11 @@
       "character_name": "Diesel",
       "costume_name": "Strawberry Flower",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c072_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50011",
@@ -635,11 +635,11 @@
       "character_name": "Diesel",
       "costume_name": "Midnight Strawberry",
       "costume_index": 4,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c072_04",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10012",
@@ -647,11 +647,11 @@
       "character_name": "Centi",
       "costume_name": "Ocean Repair",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c080_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50008",
@@ -659,11 +659,11 @@
       "character_name": "Liter",
       "costume_name": "Cute Sunflower",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c082_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "130002",
@@ -671,11 +671,11 @@
       "character_name": "Vesti",
       "costume_name": "Ark Mage",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c091_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50018",
@@ -683,11 +683,11 @@
       "character_name": "Emma: Tactical Upgrade",
       "costume_name": "Secret Therapy",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c093_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30060",
@@ -695,11 +695,11 @@
       "character_name": "Vesti: Tactical Upgrade",
       "costume_name": "Pure Beginner",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c094_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30049",
@@ -711,7 +711,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c095_01",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "60002",
@@ -719,11 +719,11 @@
       "character_name": "Drake",
       "costume_name": "Maid For Villain",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c101_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30069",
@@ -731,11 +731,11 @@
       "character_name": "Laplace: Ultimate Hero",
       "costume_name": "Prototype Hero",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c103_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30070",
@@ -743,11 +743,11 @@
       "character_name": "Maxwell: Ordinary Mechanic",
       "costume_name": "Chief Researcher",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c105_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30054",
@@ -755,11 +755,11 @@
       "character_name": "Jackal",
       "costume_name": "Class Troublemaker",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c111_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10009",
@@ -767,11 +767,11 @@
       "character_name": "Viper",
       "costume_name": "Shine of Love",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c112_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30059",
@@ -779,11 +779,11 @@
       "character_name": "Viper",
       "costume_name": "Punky Street",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c112_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30068",
@@ -791,11 +791,11 @@
       "character_name": "E.H.",
       "costume_name": "Junkyard Vanguard",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c113_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70004",
@@ -803,11 +803,11 @@
       "character_name": "Mary",
       "costume_name": "Medical Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c130_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30022",
@@ -815,11 +815,11 @@
       "character_name": "Sugar",
       "costume_name": "Wild Backyard",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c140_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30048",
@@ -827,11 +827,11 @@
       "character_name": "Julia",
       "costume_name": "Summer Romance",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c150_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30043",
@@ -839,11 +839,11 @@
       "character_name": "Mihara: Bonding Chain",
       "costume_name": "Pain Eater",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c162_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30047",
@@ -851,11 +851,11 @@
       "character_name": "Privaty",
       "costume_name": "Destined in Blue",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c170_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30061",
@@ -863,11 +863,11 @@
       "character_name": "Privaty",
       "costume_name": "Sharp Lesson",
       "costume_index": 4,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c170_04",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50005",
@@ -875,11 +875,11 @@
       "character_name": "Privaty",
       "costume_name": "Banquet Princess",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c170_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50009",
@@ -887,11 +887,11 @@
       "character_name": "Guillotine",
       "costume_name": "Dark Tracer",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c180_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10007",
@@ -899,11 +899,11 @@
       "character_name": "Maiden",
       "costume_name": "Under The Sun",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c181_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "130003",
@@ -911,11 +911,11 @@
       "character_name": "Alice",
       "costume_name": "Märchen Dream",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c191_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10013",
@@ -923,11 +923,11 @@
       "character_name": "Tove",
       "costume_name": "Sunblaze",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c192_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30032",
@@ -935,11 +935,11 @@
       "character_name": "Tove",
       "costume_name": "Baseball Fan",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c192_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30023",
@@ -947,11 +947,11 @@
       "character_name": "Exia",
       "costume_name": "Gamer",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c210_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70005",
@@ -959,11 +959,11 @@
       "character_name": "Exia",
       "costume_name": "Hacker Rabbit",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c210_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30026",
@@ -971,11 +971,11 @@
       "character_name": "Snow White",
       "costume_name": "White Knight",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c220_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110023",
@@ -987,7 +987,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c222_01",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "120003",
@@ -995,11 +995,11 @@
       "character_name": "Nayuta",
       "costume_name": "Wu Wei",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c223_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30033",
@@ -1007,11 +1007,11 @@
       "character_name": "Scarlet: Black Shadow",
       "costume_name": "Longing Flower",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c225_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50006",
@@ -1019,11 +1019,11 @@
       "character_name": "Harran",
       "costume_name": "Banquet Witch",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c230_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50014",
@@ -1031,11 +1031,11 @@
       "character_name": "Isabel",
       "costume_name": "Honeymoon Party",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c231_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50007",
@@ -1043,11 +1043,11 @@
       "character_name": "Dorothy",
       "costume_name": "Nostalgia",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c233_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "130004",
@@ -1055,11 +1055,11 @@
       "character_name": "Dorothy",
       "costume_name": "Luna Light",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c233_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70003",
@@ -1067,11 +1067,11 @@
       "character_name": "Folkwang",
       "costume_name": "Moist Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c242_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "120002",
@@ -1079,11 +1079,11 @@
       "character_name": "Modernia",
       "costume_name": "Second Affection",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c260_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50019",
@@ -1091,11 +1091,11 @@
       "character_name": "Liberalio",
       "costume_name": "Dreaming Lake",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c262_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30021",
@@ -1103,11 +1103,11 @@
       "character_name": "Blanc",
       "costume_name": "White Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c270_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30044",
@@ -1115,11 +1115,11 @@
       "character_name": "Blanc",
       "costume_name": "No. 77 Batter",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c270_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30055",
@@ -1127,11 +1127,11 @@
       "character_name": "Blanc",
       "costume_name": "Fortune Express",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c270_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30020",
@@ -1139,11 +1139,11 @@
       "character_name": "Noir",
       "costume_name": "Black Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c271_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30045",
@@ -1151,11 +1151,11 @@
       "character_name": "Noir",
       "costume_name": "Baseball Cheerleader",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c271_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70006",
@@ -1163,11 +1163,11 @@
       "character_name": "Rouge",
       "costume_name": "Unlucky Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c272_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30024",
@@ -1175,11 +1175,11 @@
       "character_name": "Rosanna",
       "costume_name": "Ms. Dangerous",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c280_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30046",
@@ -1187,11 +1187,11 @@
       "character_name": "Moran",
       "costume_name": "Off-Duty Queen",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c281_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50020",
@@ -1199,11 +1199,11 @@
       "character_name": "Moran",
       "costume_name": "King of Flowers",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c281_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30040",
@@ -1211,11 +1211,11 @@
       "character_name": "Ade",
       "costume_name": "Maid In Spring",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c310_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70008",
@@ -1223,11 +1223,11 @@
       "character_name": "Velvet",
       "costume_name": "Sensual Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c316_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30029",
@@ -1235,11 +1235,11 @@
       "character_name": "Marciana",
       "costume_name": "School Days",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c321_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30052",
@@ -1251,7 +1251,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c330_02",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "120001",
@@ -1263,7 +1263,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c330_01",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10010",
@@ -1271,11 +1271,11 @@
       "character_name": "Mast",
       "costume_name": "Mast the Diver",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c350_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10011",
@@ -1283,11 +1283,11 @@
       "character_name": "Anchor",
       "costume_name": "Anchor the Diver",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c351_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30037",
@@ -1295,11 +1295,11 @@
       "character_name": "Helm",
       "costume_name": "Post-Shower Moment",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c352_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30057",
@@ -1307,11 +1307,11 @@
       "character_name": "Mast: Romantic Maid",
       "costume_name": "Tea Service",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c354_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30038",
@@ -1319,11 +1319,11 @@
       "character_name": "Biscuit",
       "costume_name": "Spring Puppy",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c381_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30030",
@@ -1331,11 +1331,11 @@
       "character_name": "Leona",
       "costume_name": "Zoo Keeper",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c382_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30034",
@@ -1343,11 +1343,11 @@
       "character_name": "Zwei",
       "costume_name": "First Festa",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c390_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30058",
@@ -1355,11 +1355,11 @@
       "character_name": "Zwei",
       "costume_name": "Spring Stroll",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c390_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30035",
@@ -1367,11 +1367,11 @@
       "character_name": "Ein",
       "costume_name": "Handmade Festa",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c391_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10008",
@@ -1379,11 +1379,11 @@
       "character_name": "Guilty",
       "costume_name": "Wave of Disbelief",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c400_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "60004",
@@ -1391,11 +1391,11 @@
       "character_name": "Sin",
       "costume_name": "Backstreet Dream",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c401_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50017",
@@ -1403,11 +1403,11 @@
       "character_name": "Quency: Escape Queen",
       "costume_name": "Masquerade Swan",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c403_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70009",
@@ -1415,11 +1415,11 @@
       "character_name": "Flora",
       "costume_name": "Fairy Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c411_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30067",
@@ -1427,11 +1427,11 @@
       "character_name": "Trina",
       "costume_name": "Natural White",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c412_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50010",
@@ -1439,11 +1439,11 @@
       "character_name": "Noise",
       "costume_name": "Classic Diva",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c430_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "130001",
@@ -1451,11 +1451,11 @@
       "character_name": "Volume",
       "costume_name": "Beat the Gun",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c431_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10015",
@@ -1463,11 +1463,11 @@
       "character_name": "Naga",
       "costume_name": "Ring Ensemble",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c450_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30027",
@@ -1475,11 +1475,11 @@
       "character_name": "Naga",
       "costume_name": "Elegant Date",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c450_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30036",
@@ -1487,11 +1487,11 @@
       "character_name": "Naga",
       "costume_name": "Last Girlhood",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c450_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10017",
@@ -1499,11 +1499,11 @@
       "character_name": "Tia",
       "costume_name": "Sea Lizzie",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c451_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30028",
@@ -1511,11 +1511,11 @@
       "character_name": "Tia",
       "costume_name": "Lovely Date",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c451_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30039",
@@ -1523,11 +1523,11 @@
       "character_name": "Tia",
       "costume_name": "Sweet Chef",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c451_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30051",
@@ -1535,11 +1535,11 @@
       "character_name": "Red Hood",
       "costume_name": "Retro Days",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c470_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50012",
@@ -1547,11 +1547,11 @@
       "character_name": "Red Hood",
       "costume_name": "Nonsense Red",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c470_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "60003",
@@ -1559,11 +1559,11 @@
       "character_name": "Trony",
       "costume_name": "Sweet Step",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c501_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30042",
@@ -1571,11 +1571,11 @@
       "character_name": "Cinderella",
       "costume_name": "Beautiful Me",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c511_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50015",
@@ -1583,11 +1583,11 @@
       "character_name": "Cinderella",
       "costume_name": "Glass Princess",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c511_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "10016",
@@ -1599,7 +1599,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c513_03",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30053",
@@ -1611,7 +1611,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c513_02",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "50016",
@@ -1623,7 +1623,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c513_01",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry and rendered in production"
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30041",
@@ -1631,11 +1631,11 @@
       "character_name": "Grave",
       "costume_name": "Beautiful You",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c514_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30056",
@@ -1643,11 +1643,11 @@
       "character_name": "Bready",
       "costume_name": "Frosty Bite",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c520_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30062",
@@ -1655,11 +1655,11 @@
       "character_name": "Sora",
       "costume_name": "Spring Flight",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c532_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "70007",
@@ -1667,11 +1667,11 @@
       "character_name": "Bay",
       "costume_name": "Radiant Rabbit",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c550_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30063",
@@ -1679,11 +1679,11 @@
       "character_name": "Clay",
       "costume_name": "Cheer Up Training",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c551_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "130006",
@@ -1691,11 +1691,11 @@
       "character_name": "Phantom",
       "costume_name": "Saint Thief",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c580_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30065",
@@ -1703,11 +1703,11 @@
       "character_name": "Mint",
       "costume_name": "Fresh Mint",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c600_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "30066",
@@ -1715,11 +1715,11 @@
       "character_name": "Prika",
       "costume_name": "Cool Paprika",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c601_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "90005",
@@ -1727,11 +1727,11 @@
       "character_name": "2B",
       "costume_name": "YoRHa Unofficial Waterfront Gear I",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c810_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "90006",
@@ -1739,11 +1739,11 @@
       "character_name": "A2",
       "costume_name": "YoRHa Unofficial Waterfront Gear Prototype",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c811_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110001",
@@ -1751,11 +1751,11 @@
       "character_name": "Rem",
       "costume_name": "Handy Maid",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c820_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110002",
@@ -1763,11 +1763,11 @@
       "character_name": "Rem",
       "costume_name": "Pure Blossom",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c820_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110003",
@@ -1775,11 +1775,11 @@
       "character_name": "Emilia",
       "costume_name": "Clumsy Maid",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c821_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110004",
@@ -1787,11 +1787,11 @@
       "character_name": "Emilia",
       "costume_name": "Spring Breeze",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c821_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110005",
@@ -1799,11 +1799,11 @@
       "character_name": "Asuka",
       "costume_name": "Asuka's School Uniform",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c830_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110008",
@@ -1811,11 +1811,11 @@
       "character_name": "Asuka",
       "costume_name": "Cynical Street",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c830_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110011",
@@ -1823,11 +1823,11 @@
       "character_name": "Asuka",
       "costume_name": "Test Plugsuit",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c830_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110006",
@@ -1835,11 +1835,11 @@
       "character_name": "Rei",
       "costume_name": "Rei's School Uniform",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c831_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110009",
@@ -1847,11 +1847,11 @@
       "character_name": "Rei",
       "costume_name": "Peaceful Vacation",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c831_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110007",
@@ -1859,11 +1859,11 @@
       "character_name": "Mari",
       "costume_name": "Mari's School Uniform",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c832_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110010",
@@ -1871,11 +1871,11 @@
       "character_name": "Mari",
       "costume_name": "Leisure Travel",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c832_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110016",
@@ -1883,11 +1883,11 @@
       "character_name": "Mari",
       "costume_name": "Final Battle: Mari",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c832_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110017",
@@ -1895,11 +1895,11 @@
       "character_name": "Mari",
       "costume_name": "Mystery Muse",
       "costume_index": 4,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c832_04",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110014",
@@ -1907,11 +1907,11 @@
       "character_name": "Rei (Tentative Name)",
       "costume_name": "Miss Lookalike from Village-3",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c834_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110015",
@@ -1919,11 +1919,11 @@
       "character_name": "Rei (Tentative Name)",
       "costume_name": "Soul Connect",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c834_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110012",
@@ -1931,11 +1931,11 @@
       "character_name": "Asuka: WILLE",
       "costume_name": "Final Battle: Asuka",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c835_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110013",
@@ -1943,11 +1943,11 @@
       "character_name": "Asuka: WILLE",
       "costume_name": "Ocean's Lament",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c835_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110024",
@@ -1955,11 +1955,11 @@
       "character_name": "Ada",
       "costume_name": "Separate Ways",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c840_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110025",
@@ -1967,11 +1967,11 @@
       "character_name": "Ada",
       "costume_name": "Dress",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c840_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110026",
@@ -1979,11 +1979,11 @@
       "character_name": "Jill",
       "costume_name": "Classic",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c841_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110027",
@@ -1991,11 +1991,11 @@
       "character_name": "Jill",
       "costume_name": "Battle Suit",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c841_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110018",
@@ -2003,11 +2003,11 @@
       "character_name": "EVE",
       "costume_name": "Keyhole Dress",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c850_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110019",
@@ -2015,11 +2015,11 @@
       "character_name": "EVE",
       "costume_name": "Neurolink Suit",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c850_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110020",
@@ -2027,11 +2027,11 @@
       "character_name": "EVE",
       "costume_name": "Skin Suit",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c850_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110021",
@@ -2039,11 +2039,11 @@
       "character_name": "Raven",
       "costume_name": "Planet Diving Suit (6th) V2",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c851_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110022",
@@ -2051,11 +2051,11 @@
       "character_name": "Raven",
       "costume_name": "Midsummer Alice",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c851_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110028",
@@ -2063,11 +2063,11 @@
       "character_name": "Chisato",
       "costume_name": "DA Training Wear (First)",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c860_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110029",
@@ -2075,11 +2075,11 @@
       "character_name": "Chisato",
       "costume_name": "Red Spark Guitar",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c860_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110030",
@@ -2087,11 +2087,11 @@
       "character_name": "Takina",
       "costume_name": "DA Training Wear (Second)",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c861_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110031",
@@ -2099,11 +2099,11 @@
       "character_name": "Takina",
       "costume_name": "Blue Pulse Bass",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c861_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110032",
@@ -2111,11 +2111,11 @@
       "character_name": "Queen (Makoto)",
       "costume_name": "Shujin Academy Student Council President",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c870_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110033",
@@ -2123,11 +2123,11 @@
       "character_name": "Queen (Makoto)",
       "costume_name": "Queen's Pajamas (Ver. NIKKE Collabo)",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c870_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110034",
@@ -2135,11 +2135,11 @@
       "character_name": "Yukiko",
       "costume_name": "Amagi Inn Kimono",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c871_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     },
     {
       "costume_id": "110035",
@@ -2147,11 +2147,11 @@
       "character_name": "Yukiko",
       "costume_name": "Winter Roomwear (Ver. NIKKE Collabo)",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c871_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and resolved by production Spine manifest/PNG audit"
     }
   ]
 }
