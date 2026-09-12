@@ -3,7 +3,7 @@
   "render_success_is_visual_pass": false,
   "visual_validated": false,
   "automatic_check": "Structural heuristics only; human QQ/card validation remains required.",
-  "total": 247,
+  "total": 378,
   "breakdown": {
     "default": {
       "total": 200,
@@ -12,8 +12,8 @@
       "visual_validated": false
     },
     "costume": {
-      "total": 47,
-      "auto_clear": 47,
+      "total": 178,
+      "auto_clear": 178,
       "suspect": 0,
       "visual_validated": false
     }
@@ -23,47 +23,67 @@
   "contact_sheets": [
     {
       "name": "spine-contact-sheet-01.png",
-      "sha256": "fda93c97be9a23ef2dcb8c0bfbc56d93ec40d3ae403d23fda58e41d5914f41de"
+      "sha256": "c91504e498714767673b2706819c575a6b7c850d00cbaeeda8ed4133d2ceac61"
     },
     {
       "name": "spine-contact-sheet-02.png",
-      "sha256": "a70d98b9b74b53d3c54131632031e9096e23d0fc9f2e74e340e84ebfa7b3abcf"
+      "sha256": "05aecbb8f41cd0175f2904d9041d57458434bafb8ba9b66eb362efa98ffff5b7"
     },
     {
       "name": "spine-contact-sheet-03.png",
-      "sha256": "1e70df9a0d28a17419d8cd3289257188dc001ba6b7b286fcc8b338a553de2cde"
+      "sha256": "d2d4949f924bdc245cd1183c8c8a0c042796de98bc96c90918c81f7c11323fac"
     },
     {
       "name": "spine-contact-sheet-04.png",
-      "sha256": "7c2ccd8613de0fa05379ad666c8e363022d9a440e7cd6c4cc56c08c2d24117a8"
+      "sha256": "45692215c7f4a12b3828ae0b96131b85b582416a6f35a931a9116f97d8c8d03a"
     },
     {
       "name": "spine-contact-sheet-05.png",
-      "sha256": "c9973afe1e8f66cf4a4a29d0b262e14c8c0d1da6c0f49c29f2b67ec2a38af890"
+      "sha256": "7cf92c4db889bed2cfc92f66a3bf8dfad08a68b0a4a32c07c29ce3e905557e35"
     },
     {
       "name": "spine-contact-sheet-06.png",
-      "sha256": "5e251809ec456bc85579b4380df9a88cda9da7bd48276c9fdea471ef9b6abb30"
+      "sha256": "a68066913bb6f6390255aad01e24b5dc7ebb9ba7b19b1d1b2fdf6b77d8fda83c"
     },
     {
       "name": "spine-contact-sheet-07.png",
-      "sha256": "0f40fe3a3575907a2bdde8bb86eb50c994b72a045067043665377318a31509f3"
+      "sha256": "65898d709276cfaa1397d39ff188da9b55c1391543d249c7347fec34d5ef50b2"
     },
     {
       "name": "spine-contact-sheet-08.png",
-      "sha256": "bb25a5db390b2428cde6a2a6598f2230a7b6394ee0d21235855de31b02fb3518"
+      "sha256": "60caf49fc8b880179ebf4b4bb0df73f84212287e3dfbbd00f254a57fdce90248"
     },
     {
       "name": "spine-contact-sheet-09.png",
-      "sha256": "7b6182e548bc13788b95cacd456ae8e5b99d0d165c00d7010bdc479c3f50289d"
+      "sha256": "835e75fa3d4921a4064b60647447d26e763932d76e4dbd934eee7c1b4fab0406"
     },
     {
       "name": "spine-contact-sheet-10.png",
-      "sha256": "139261aa88c88b40a8c2bf32cd726e93a5c10f0ac4c61a48a5077752be5f6d05"
+      "sha256": "4b8bae5ddf348e6738e2f919236f0742d62e714d4994ae6892ae429e91179cf2"
     },
     {
       "name": "spine-contact-sheet-11.png",
-      "sha256": "6735029d1fcfaa0473dd3640a95fb9f275c9ab712e77648be4a3f17bc06a1a7d"
+      "sha256": "eb6ae6856ff162b51eb8de719f2000e4b57c7719b63196d6453570a3be176702"
+    },
+    {
+      "name": "spine-contact-sheet-12.png",
+      "sha256": "621dcef1c24c1a51c76a014c06b7060fd4d2e13b4e864ef96429e4d2a5db5aea"
+    },
+    {
+      "name": "spine-contact-sheet-13.png",
+      "sha256": "da93fb0278cd164972045107acb6621b77d3f0d7a6cc75d6b96f5c788a9a540c"
+    },
+    {
+      "name": "spine-contact-sheet-14.png",
+      "sha256": "752264782a1c1a70297418fbc8730c5dec35a4f8f3825dce3b7f22f5d7e1a370"
+    },
+    {
+      "name": "spine-contact-sheet-15.png",
+      "sha256": "3e2bb2cfa9bf495cd5d5f4458ba45270e7f618656a9c4e8870338ef11e06173d"
+    },
+    {
+      "name": "spine-contact-sheet-16.png",
+      "sha256": "1b3c2db924f5b48bc8c60ce5a143450e9b840d33fb1a2e0e5bfe12e3ce8023da"
     }
   ],
   "assets": [
@@ -455,6 +475,135 @@
       "suspects": []
     },
     {
+      "asset_id": "c016_01",
+      "render_id": "c016_01",
+      "name": "拉毗：小红帽",
+      "character": "拉毗：小红帽",
+      "character_name": "拉毗：小红帽",
+      "resource_id": "16",
+      "costume": "Red Flavor",
+      "costume_name": "Red Flavor",
+      "costume_id": "10014",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c016_01.png",
+      "png_sha256": "4ae4426d58e893bb2d15a57b79526922de294034f6338ec50130a0a7e36e2659",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          306,
+          876
+        ],
+        "canvas": [
+          322,
+          892
+        ],
+        "bbox_area_ratio": 0.868312,
+        "alpha_ratio": 0.384014,
+        "largest_alpha_component_ratio": 0.997343,
+        "bbox_aspect": 0.337209,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c016_02",
+      "render_id": "c016_02",
+      "name": "拉毗：小红帽",
+      "character": "拉毗：小红帽",
+      "character_name": "拉毗：小红帽",
+      "resource_id": "16",
+      "costume": "Cherished Red",
+      "costume_name": "Cherished Red",
+      "costume_id": "30050",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c016_02.png",
+      "png_sha256": "676aaf18f38373af3572bc0f5d6c92abe196740327437585974c6eb558f92728",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          454,
+          678
+        ],
+        "canvas": [
+          470,
+          694
+        ],
+        "bbox_area_ratio": 0.888945,
+        "alpha_ratio": 0.397366,
+        "largest_alpha_component_ratio": 0.993661,
+        "bbox_aspect": 0.661631,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c016_03",
+      "render_id": "c016_03",
+      "name": "拉毗：小红帽",
+      "character": "拉毗：小红帽",
+      "character_name": "拉毗：小红帽",
+      "resource_id": "16",
+      "costume": "Shining Light",
+      "costume_name": "Shining Light",
+      "costume_id": "130005",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c016_03.png",
+      "png_sha256": "2cf1a794fec2aebda3e8792e077e4c8eda883181d375a214c2f4c7cfae8a12dd",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          487,
+          875
+        ],
+        "canvas": [
+          503,
+          891
+        ],
+        "bbox_area_ratio": 0.902752,
+        "alpha_ratio": 0.391275,
+        "largest_alpha_component_ratio": 0.99834,
+        "bbox_aspect": 0.548312,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c017",
       "render_id": "c017",
       "name": "阿妮斯：超级巨星",
@@ -484,6 +633,92 @@
         "alpha_ratio": 0.406359,
         "largest_alpha_component_ratio": 0.994242,
         "bbox_aspect": 0.36787,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c017_01",
+      "render_id": "c017_01",
+      "name": "阿妮斯：超级巨星",
+      "character": "阿妮斯：超级巨星",
+      "character_name": "阿妮斯：超级巨星",
+      "resource_id": "17",
+      "costume": "Starlight",
+      "costume_name": "Starlight",
+      "costume_id": "120004",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c017_01.png",
+      "png_sha256": "2a9446375a00aea5b480ae4376340015f8a608dd18ea66842663e50468a059db",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          562,
+          870
+        ],
+        "canvas": [
+          578,
+          886
+        ],
+        "bbox_area_ratio": 0.910519,
+        "alpha_ratio": 0.372492,
+        "largest_alpha_component_ratio": 0.985732,
+        "bbox_aspect": 0.639344,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c017_02",
+      "render_id": "c017_02",
+      "name": "阿妮斯：超级巨星",
+      "character": "阿妮斯：超级巨星",
+      "character_name": "阿妮斯：超级巨星",
+      "resource_id": "17",
+      "costume": "T.T. STAR",
+      "costume_name": "T.T. STAR",
+      "costume_id": "30064",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c017_02.png",
+      "png_sha256": "ffe4661819b9dd09e222502f38ea5bed49aac4f921795aaa9b340fe41482b293",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          369,
+          875
+        ],
+        "canvas": [
+          385,
+          891
+        ],
+        "bbox_area_ratio": 0.883954,
+        "alpha_ratio": 0.368035,
+        "largest_alpha_component_ratio": 0.994231,
+        "bbox_aspect": 0.410943,
         "subject_center": [
           0.5,
           0.5
@@ -799,6 +1034,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c030_02",
+      "render_id": "c030_02",
+      "name": "波莉",
+      "character": "波莉",
+      "character_name": "波莉",
+      "resource_id": "30",
+      "costume": "Cheer Up Police",
+      "costume_name": "Cheer Up Police",
+      "costume_id": "30025",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c030_02.png",
+      "png_sha256": "97f805055abfd7cbb97ff3cf28a078851a239c60026fabdacc909eefdf3eb7c0",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          468,
+          876
+        ],
+        "canvas": [
+          484,
+          892
+        ],
+        "bbox_area_ratio": 0.900382,
+        "alpha_ratio": 0.451217,
+        "largest_alpha_component_ratio": 0.996235,
+        "bbox_aspect": 0.525581,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c032",
       "render_id": "c032",
       "name": "米兰达",
@@ -828,6 +1106,49 @@
         "alpha_ratio": 0.409007,
         "largest_alpha_component_ratio": 0.981168,
         "bbox_aspect": 0.45518,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c032_01",
+      "render_id": "c032_01",
+      "name": "米兰达",
+      "character": "米兰达",
+      "character_name": "米兰达",
+      "resource_id": "32",
+      "costume": "Thief of Justice",
+      "costume_name": "Thief of Justice",
+      "costume_id": "30031",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c032_01.png",
+      "png_sha256": "6d0c742e8ddf79f957662b2dc13b5ed505958d8af7876e5e1ca853648cc0ca40",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          416,
+          873
+        ],
+        "canvas": [
+          432,
+          889
+        ],
+        "bbox_area_ratio": 0.892597,
+        "alpha_ratio": 0.419442,
+        "largest_alpha_component_ratio": 0.994901,
+        "bbox_aspect": 0.466744,
         "subject_center": [
           0.5,
           0.5
@@ -971,6 +1292,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c041_01",
+      "render_id": "c041_01",
+      "name": "K",
+      "character": "K",
+      "character_name": "K",
+      "resource_id": "41",
+      "costume": "Undercover",
+      "costume_name": "Undercover",
+      "costume_id": "100002",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c041_01.png",
+      "png_sha256": "79de3f1edb749a7324075814208d109b125053c898af9eb22c5af82492423ab6",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          445,
+          679
+        ],
+        "canvas": [
+          461,
+          695
+        ],
+        "bbox_area_ratio": 0.887739,
+        "alpha_ratio": 0.378477,
+        "largest_alpha_component_ratio": 0.99661,
+        "bbox_aspect": 0.647059,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c043",
       "render_id": "c043",
       "name": "D：杀手妻子",
@@ -1000,6 +1364,92 @@
         "alpha_ratio": 0.380832,
         "largest_alpha_component_ratio": 0.999339,
         "bbox_aspect": 0.468293,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c043_01",
+      "render_id": "c043_01",
+      "name": "D：杀手妻子",
+      "character": "D：杀手妻子",
+      "character_name": "D：杀手妻子",
+      "resource_id": "43",
+      "costume": "Secret Party Cleaner",
+      "costume_name": "Secret Party Cleaner",
+      "costume_id": "50013",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c043_01.png",
+      "png_sha256": "d1e35a7ee0252e416925e04fc5ba15d90572113e3b03c9a27831bdd3b0e48531",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          307,
+          854
+        ],
+        "canvas": [
+          323,
+          870
+        ],
+        "bbox_area_ratio": 0.867791,
+        "alpha_ratio": 0.406509,
+        "largest_alpha_component_ratio": 0.997599,
+        "bbox_aspect": 0.347255,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c043_02",
+      "render_id": "c043_02",
+      "name": "D：杀手妻子",
+      "character": "D：杀手妻子",
+      "character_name": "D：杀手妻子",
+      "resource_id": "43",
+      "costume": "Secret Police",
+      "costume_name": "Secret Police",
+      "costume_id": "100003",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c043_02.png",
+      "png_sha256": "63e7c73e16e470b78fb70aaf92be9f0c4dc991c331d482f7ea26f7daf74787b1",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          408,
+          874
+        ],
+        "canvas": [
+          424,
+          890
+        ],
+        "bbox_area_ratio": 0.891287,
+        "alpha_ratio": 0.338268,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.456876,
         "subject_center": [
           0.5,
           0.5
@@ -1401,6 +1851,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c072_02",
+      "render_id": "c072_02",
+      "name": "迪塞尔",
+      "character": "迪塞尔",
+      "character_name": "迪塞尔",
+      "resource_id": "72",
+      "costume": "Strawberry Flower",
+      "costume_name": "Strawberry Flower",
+      "costume_id": "30005",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c072_02.png",
+      "png_sha256": "a963d61c81b0bc935ab4bffea1894a6cd8f0d90c3c1866548da72d91f9f6bfc8",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          473,
+          875
+        ],
+        "canvas": [
+          489,
+          891
+        ],
+        "bbox_area_ratio": 0.900996,
+        "alpha_ratio": 0.319916,
+        "largest_alpha_component_ratio": 0.991684,
+        "bbox_aspect": 0.532014,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c072_04",
+      "render_id": "c072_04",
+      "name": "迪塞尔",
+      "character": "迪塞尔",
+      "character_name": "迪塞尔",
+      "resource_id": "72",
+      "costume": "Midnight Strawberry",
+      "costume_name": "Midnight Strawberry",
+      "costume_id": "50011",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c072_04.png",
+      "png_sha256": "de61f97ac06a14bc95ce1b64b60219bc6b620831c7f9577992e5a0ec637835d4",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          441,
+          876
+        ],
+        "canvas": [
+          457,
+          892
+        ],
+        "bbox_area_ratio": 0.896616,
+        "alpha_ratio": 0.38542,
+        "largest_alpha_component_ratio": 0.988308,
+        "bbox_aspect": 0.494186,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c073",
       "render_id": "c073",
       "name": "布丽德：静默轨道",
@@ -1616,6 +2152,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c080_02",
+      "render_id": "c080_02",
+      "name": "桑迪",
+      "character": "桑迪",
+      "character_name": "桑迪",
+      "resource_id": "80",
+      "costume": "Ocean Repair",
+      "costume_name": "Ocean Repair",
+      "costume_id": "10012",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c080_02.png",
+      "png_sha256": "3a23969e7734669a5d4863a382cf3463e299dd4d3938a2a9b4591cc7770380f6",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          594,
+          876
+        ],
+        "canvas": [
+          610,
+          892
+        ],
+        "bbox_area_ratio": 0.913548,
+        "alpha_ratio": 0.41421,
+        "largest_alpha_component_ratio": 0.977009,
+        "bbox_aspect": 0.672093,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c082",
       "render_id": "c082",
       "name": "丽塔",
@@ -1688,6 +2267,49 @@
         "alpha_ratio": 0.553056,
         "largest_alpha_component_ratio": 0.999693,
         "bbox_aspect": 0.705251,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c082_02",
+      "render_id": "c082_02",
+      "name": "丽塔",
+      "character": "丽塔",
+      "character_name": "丽塔",
+      "resource_id": "82",
+      "costume": "Cute Sunflower",
+      "costume_name": "Cute Sunflower",
+      "costume_id": "50008",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c082_02.png",
+      "png_sha256": "26f28e04547df8fcf3e6fb014b74a7be43bde7f7644c875c630b6b5977c51d61",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          481,
+          873
+        ],
+        "canvas": [
+          497,
+          889
+        ],
+        "bbox_area_ratio": 0.901936,
+        "alpha_ratio": 0.48964,
+        "largest_alpha_component_ratio": 0.998451,
+        "bbox_aspect": 0.54259,
         "subject_center": [
           0.5,
           0.5
@@ -1874,6 +2496,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c091_01",
+      "render_id": "c091_01",
+      "name": "贝斯蒂",
+      "character": "贝斯蒂",
+      "character_name": "贝斯蒂",
+      "resource_id": "91",
+      "costume": "Ark Mage",
+      "costume_name": "Ark Mage",
+      "costume_id": "130002",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c091_01.png",
+      "png_sha256": "c1b60c8ba0485e6c8573f7f8fe2960fb5b801abe0b11404b6ab51b2f06f02a92",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          606,
+          875
+        ],
+        "canvas": [
+          622,
+          891
+        ],
+        "bbox_area_ratio": 0.914486,
+        "alpha_ratio": 0.366052,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.686845,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c092",
       "render_id": "c092",
       "name": "银华",
@@ -1960,6 +2625,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c093_01",
+      "render_id": "c093_01",
+      "name": "艾玛：战术升级",
+      "character": "艾玛：战术升级",
+      "character_name": "艾玛：战术升级",
+      "resource_id": "93",
+      "costume": "Secret Therapy",
+      "costume_name": "Secret Therapy",
+      "costume_id": "50018",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c093_01.png",
+      "png_sha256": "aa95c4aac161625957ee237857eb2ebfa1b34ba8ecc7229911f843c690bf99c9",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          354,
+          875
+        ],
+        "canvas": [
+          370,
+          891
+        ],
+        "bbox_area_ratio": 0.880705,
+        "alpha_ratio": 0.388934,
+        "largest_alpha_component_ratio": 0.998492,
+        "bbox_aspect": 0.393481,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c094",
       "render_id": "c094",
       "name": "贝斯蒂：战术升级",
@@ -1989,6 +2697,49 @@
         "alpha_ratio": 0.517675,
         "largest_alpha_component_ratio": 1.0,
         "bbox_aspect": 0.859302,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c094_01",
+      "render_id": "c094_01",
+      "name": "贝斯蒂：战术升级",
+      "character": "贝斯蒂：战术升级",
+      "character_name": "贝斯蒂：战术升级",
+      "resource_id": "94",
+      "costume": "Pure Beginner",
+      "costume_name": "Pure Beginner",
+      "costume_id": "30060",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c094_01.png",
+      "png_sha256": "897d86b08e19d6c0497b278f3f87ceb801cea5806c5e6a4e975bc07a6dae5416",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          426,
+          806
+        ],
+        "canvas": [
+          442,
+          822
+        ],
+        "bbox_area_ratio": 0.891491,
+        "alpha_ratio": 0.377162,
+        "largest_alpha_component_ratio": 0.968168,
+        "bbox_aspect": 0.518987,
         "subject_center": [
           0.5,
           0.5
@@ -2218,6 +2969,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c101_02",
+      "render_id": "c101_02",
+      "name": "德雷克",
+      "character": "德雷克",
+      "character_name": "德雷克",
+      "resource_id": "101",
+      "costume": "Maid For Villain",
+      "costume_name": "Maid For Villain",
+      "costume_id": "60002",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c101_02.png",
+      "png_sha256": "944dd89e865bf667ffcf3349806c796595069d64e9ae37e83a52662e990e5a89",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          396,
+          870
+        ],
+        "canvas": [
+          412,
+          886
+        ],
+        "bbox_area_ratio": 0.889018,
+        "alpha_ratio": 0.370055,
+        "largest_alpha_component_ratio": 0.99965,
+        "bbox_aspect": 0.444965,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c102",
       "render_id": "c102",
       "name": "麦斯威尔",
@@ -2347,6 +3141,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c103_01",
+      "render_id": "c103_01",
+      "name": "拉普拉斯：究极英雄",
+      "character": "拉普拉斯：究极英雄",
+      "character_name": "拉普拉斯：究极英雄",
+      "resource_id": "103",
+      "costume": "Prototype Hero",
+      "costume_name": "Prototype Hero",
+      "costume_id": "30069",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c103_01.png",
+      "png_sha256": "cd9697eb05311dbe79d48d0c5a2f2839cc8b76581a1e2794c4f729fc3a3f1b42",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          350,
+          876
+        ],
+        "canvas": [
+          366,
+          892
+        ],
+        "bbox_area_ratio": 0.87983,
+        "alpha_ratio": 0.411634,
+        "largest_alpha_component_ratio": 0.996055,
+        "bbox_aspect": 0.388372,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c104",
       "render_id": "c104",
       "name": "德雷克：终极反派",
@@ -2419,6 +3256,49 @@
         "alpha_ratio": 0.542226,
         "largest_alpha_component_ratio": 1.0,
         "bbox_aspect": 0.609813,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c105_01",
+      "render_id": "c105_01",
+      "name": "麦斯威尔：平凡技师",
+      "character": "麦斯威尔：平凡技师",
+      "character_name": "麦斯威尔：平凡技师",
+      "resource_id": "105",
+      "costume": "Chief Researcher",
+      "costume_name": "Chief Researcher",
+      "costume_id": "30070",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c105_01.png",
+      "png_sha256": "60ba3286599b391141a362b300e45f8e8e2961b649bc84c7a1a51972dcd16b55",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          510,
+          876
+        ],
+        "canvas": [
+          526,
+          892
+        ],
+        "bbox_area_ratio": 0.905472,
+        "alpha_ratio": 0.506667,
+        "largest_alpha_component_ratio": 0.99959,
+        "bbox_aspect": 0.574419,
         "subject_center": [
           0.5,
           0.5
@@ -2519,6 +3399,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c111_01",
+      "render_id": "c111_01",
+      "name": "豺狼",
+      "character": "豺狼",
+      "character_name": "豺狼",
+      "resource_id": "111",
+      "costume": "Class Troublemaker",
+      "costume_name": "Class Troublemaker",
+      "costume_id": "30054",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c111_01.png",
+      "png_sha256": "6e99a033011ed0817d4a8eae34ead7e5589e3aff48405bc165a5119dae9cdcf1",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          554,
+          874
+        ],
+        "canvas": [
+          570,
+          890
+        ],
+        "bbox_area_ratio": 0.909923,
+        "alpha_ratio": 0.327274,
+        "largest_alpha_component_ratio": 0.981998,
+        "bbox_aspect": 0.62704,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c112",
       "render_id": "c112",
       "name": "毒蛇",
@@ -2605,6 +3528,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c112_02",
+      "render_id": "c112_02",
+      "name": "毒蛇",
+      "character": "毒蛇",
+      "character_name": "毒蛇",
+      "resource_id": "112",
+      "costume": "Shine of Love",
+      "costume_name": "Shine of Love",
+      "costume_id": "10009",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c112_02.png",
+      "png_sha256": "1299a36a7a41488f587388529cd8310e738a43def37496c9bca3e83999cae16d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          627,
+          876
+        ],
+        "canvas": [
+          643,
+          892
+        ],
+        "bbox_area_ratio": 0.916144,
+        "alpha_ratio": 0.353693,
+        "largest_alpha_component_ratio": 0.980139,
+        "bbox_aspect": 0.710465,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c112_03",
+      "render_id": "c112_03",
+      "name": "毒蛇",
+      "character": "毒蛇",
+      "character_name": "毒蛇",
+      "resource_id": "112",
+      "costume": "Punky Street",
+      "costume_name": "Punky Street",
+      "costume_id": "30059",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c112_03.png",
+      "png_sha256": "9f087374d11af6ef2e13d2575f0354974921cf7ab2ffd914321aaedd6a6b4a4a",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          346,
+          876
+        ],
+        "canvas": [
+          362,
+          892
+        ],
+        "bbox_area_ratio": 0.878899,
+        "alpha_ratio": 0.340414,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.383721,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c113",
       "render_id": "c113",
       "name": "E.H.",
@@ -2634,6 +3643,49 @@
         "alpha_ratio": 0.315197,
         "largest_alpha_component_ratio": 0.988808,
         "bbox_aspect": 0.7331,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c113_01",
+      "render_id": "c113_01",
+      "name": "E.H.",
+      "character": "E.H.",
+      "character_name": "E.H.",
+      "resource_id": "113",
+      "costume": "Junkyard Vanguard",
+      "costume_name": "Junkyard Vanguard",
+      "costume_id": "30068",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c113_01.png",
+      "png_sha256": "270e914523ff39fdd0610442fcc9eb39da05a35accd2483e9cce75beee08c702",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          488,
+          876
+        ],
+        "canvas": [
+          504,
+          892
+        ],
+        "bbox_area_ratio": 0.902911,
+        "alpha_ratio": 0.358171,
+        "largest_alpha_component_ratio": 0.999088,
+        "bbox_aspect": 0.548837,
         "subject_center": [
           0.5,
           0.5
@@ -2763,6 +3815,49 @@
         "alpha_ratio": 0.453149,
         "largest_alpha_component_ratio": 1.0,
         "bbox_aspect": 0.479021,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c130_01",
+      "render_id": "c130_01",
+      "name": "梅里",
+      "character": "梅里",
+      "character_name": "梅里",
+      "resource_id": "130",
+      "costume": "Medical Rabbit",
+      "costume_name": "Medical Rabbit",
+      "costume_id": "70004",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c130_01.png",
+      "png_sha256": "0cb2341cec6077dad47c860c966a12b07160cb701e53d381ed5a585fb682bf1e",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          326,
+          874
+        ],
+        "canvas": [
+          342,
+          890
+        ],
+        "bbox_area_ratio": 0.873842,
+        "alpha_ratio": 0.326286,
+        "largest_alpha_component_ratio": 0.999513,
+        "bbox_aspect": 0.361305,
         "subject_center": [
           0.5,
           0.5
@@ -2978,6 +4073,49 @@
         "alpha_ratio": 0.424684,
         "largest_alpha_component_ratio": 0.999839,
         "bbox_aspect": 1.128647,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c140_02",
+      "render_id": "c140_02",
+      "name": "舒格",
+      "character": "舒格",
+      "character_name": "舒格",
+      "resource_id": "140",
+      "costume": "Wild Backyard",
+      "costume_name": "Wild Backyard",
+      "costume_id": "30022",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c140_02.png",
+      "png_sha256": "b8973fabfbd3e8ea2626760ad98a5ce8ff2838e52f04108eb39785461e1ff501",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          843,
+          773
+        ],
+        "canvas": [
+          859,
+          789
+        ],
+        "bbox_area_ratio": 0.923701,
+        "alpha_ratio": 0.424289,
+        "largest_alpha_component_ratio": 0.999531,
+        "bbox_aspect": 1.09247,
         "subject_center": [
           0.5,
           0.5
@@ -3293,6 +4431,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c150_02",
+      "render_id": "c150_02",
+      "name": "尤莉亚",
+      "character": "尤莉亚",
+      "character_name": "尤莉亚",
+      "resource_id": "150",
+      "costume": "Summer Romance",
+      "costume_name": "Summer Romance",
+      "costume_id": "30048",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c150_02.png",
+      "png_sha256": "1c511b49e0698e1e31fd5dfb8e53035642fb1214055eb415610935755612e232",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          674,
+          876
+        ],
+        "canvas": [
+          690,
+          892
+        ],
+        "bbox_area_ratio": 0.919412,
+        "alpha_ratio": 0.298681,
+        "largest_alpha_component_ratio": 0.998683,
+        "bbox_aspect": 0.765116,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c160",
       "render_id": "c160",
       "name": "尤妮",
@@ -3465,6 +4646,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c162_01",
+      "render_id": "c162_01",
+      "name": "米哈拉：羁绊锁链",
+      "character": "米哈拉：羁绊锁链",
+      "character_name": "米哈拉：羁绊锁链",
+      "resource_id": "162",
+      "costume": "Pain Eater",
+      "costume_name": "Pain Eater",
+      "costume_id": "30043",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c162_01.png",
+      "png_sha256": "c83d202892e242578858f57b361fdf2044f28fd0d2c4c780ff5a69775a3999c3",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          731,
+          870
+        ],
+        "canvas": [
+          747,
+          886
+        ],
+        "bbox_area_ratio": 0.922592,
+        "alpha_ratio": 0.371895,
+        "largest_alpha_component_ratio": 0.992597,
+        "bbox_aspect": 0.837237,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c170",
       "render_id": "c170",
       "name": "普丽瓦蒂",
@@ -3537,6 +4761,135 @@
         "alpha_ratio": 0.416029,
         "largest_alpha_component_ratio": 0.993188,
         "bbox_aspect": 0.631579,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c170_02",
+      "render_id": "c170_02",
+      "name": "普丽瓦蒂",
+      "character": "普丽瓦蒂",
+      "character_name": "普丽瓦蒂",
+      "resource_id": "170",
+      "costume": "Banquet Princess",
+      "costume_name": "Banquet Princess",
+      "costume_id": "50005",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c170_02.png",
+      "png_sha256": "6b2008a66f8127b9659484188eb44d007c8e884ede076a7851a8c5da0af0c22c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          494,
+          874
+        ],
+        "canvas": [
+          510,
+          890
+        ],
+        "bbox_area_ratio": 0.903556,
+        "alpha_ratio": 0.415096,
+        "largest_alpha_component_ratio": 0.991,
+        "bbox_aspect": 0.55711,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c170_03",
+      "render_id": "c170_03",
+      "name": "普丽瓦蒂",
+      "character": "普丽瓦蒂",
+      "character_name": "普丽瓦蒂",
+      "resource_id": "170",
+      "costume": "Destined in Blue",
+      "costume_name": "Destined in Blue",
+      "costume_id": "30047",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c170_03.png",
+      "png_sha256": "edf7b2f1efa4bf5c72758245f1e0a65a3e5b4fcb5fd040db17ac75294b062f32",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          493,
+          875
+        ],
+        "canvas": [
+          509,
+          891
+        ],
+        "bbox_area_ratio": 0.903475,
+        "alpha_ratio": 0.402731,
+        "largest_alpha_component_ratio": 0.993355,
+        "bbox_aspect": 0.555297,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c170_04",
+      "render_id": "c170_04",
+      "name": "普丽瓦蒂",
+      "character": "普丽瓦蒂",
+      "character_name": "普丽瓦蒂",
+      "resource_id": "170",
+      "costume": "Sharp Lesson",
+      "costume_name": "Sharp Lesson",
+      "costume_id": "30061",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c170_04.png",
+      "png_sha256": "345ff1481818f0371be069a05cea4378bdd550a67755e597821e9736ca3796e0",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          634,
+          876
+        ],
+        "canvas": [
+          650,
+          892
+        ],
+        "bbox_area_ratio": 0.916661,
+        "alpha_ratio": 0.3836,
+        "largest_alpha_component_ratio": 0.996274,
+        "bbox_aspect": 0.718605,
         "subject_center": [
           0.5,
           0.5
@@ -3680,6 +5033,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c180_01",
+      "render_id": "c180_01",
+      "name": "吉萝婷",
+      "character": "吉萝婷",
+      "character_name": "吉萝婷",
+      "resource_id": "180",
+      "costume": "Dark Tracer",
+      "costume_name": "Dark Tracer",
+      "costume_id": "50009",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c180_01.png",
+      "png_sha256": "0f4472a49187dd90d7258de648a98bdb66d1f617e7cfc932e52b46ce08905baa",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          484,
+          875
+        ],
+        "canvas": [
+          500,
+          891
+        ],
+        "bbox_area_ratio": 0.902384,
+        "alpha_ratio": 0.394067,
+        "largest_alpha_component_ratio": 0.993964,
+        "bbox_aspect": 0.54482,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c181",
       "render_id": "c181",
       "name": "梅登",
@@ -3752,6 +5148,49 @@
         "alpha_ratio": 0.290186,
         "largest_alpha_component_ratio": 0.9792,
         "bbox_aspect": 0.77907,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c181_02",
+      "render_id": "c181_02",
+      "name": "梅登",
+      "character": "梅登",
+      "character_name": "梅登",
+      "resource_id": "181",
+      "costume": "Under The Sun",
+      "costume_name": "Under The Sun",
+      "costume_id": "10007",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c181_02.png",
+      "png_sha256": "d3361622834989a5764be0f869037748aa7f560d32a3346ed7325788f8c60e29",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          683,
+          876
+        ],
+        "canvas": [
+          699,
+          892
+        ],
+        "bbox_area_ratio": 0.919988,
+        "alpha_ratio": 0.253618,
+        "largest_alpha_component_ratio": 0.982093,
+        "bbox_aspect": 0.775581,
         "subject_center": [
           0.5,
           0.5
@@ -3981,6 +5420,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c191_02",
+      "render_id": "c191_02",
+      "name": "爱丽丝",
+      "character": "爱丽丝",
+      "character_name": "爱丽丝",
+      "resource_id": "191",
+      "costume": "Märchen Dream",
+      "costume_name": "Märchen Dream",
+      "costume_id": "130003",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c191_02.png",
+      "png_sha256": "80b1b185571753a11e451f392f4dfc5cd2b7e68fa9e9776fc9dfb2db22d65336",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          845,
+          876
+        ],
+        "canvas": [
+          861,
+          892
+        ],
+        "bbox_area_ratio": 0.928293,
+        "alpha_ratio": 0.497658,
+        "largest_alpha_component_ratio": 0.999874,
+        "bbox_aspect": 0.963953,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c192",
       "render_id": "c192",
       "name": "托比",
@@ -4010,6 +5492,92 @@
         "alpha_ratio": 0.41534,
         "largest_alpha_component_ratio": 0.99852,
         "bbox_aspect": 0.37907,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c192_01",
+      "render_id": "c192_01",
+      "name": "托比",
+      "character": "托比",
+      "character_name": "托比",
+      "resource_id": "192",
+      "costume": "Baseball Fan",
+      "costume_name": "Baseball Fan",
+      "costume_id": "30032",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c192_01.png",
+      "png_sha256": "3dd7e5b477518eb15c9c3bd03de3cd007520cd018cf375dcfd0db6adc6f670e7",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          385,
+          876
+        ],
+        "canvas": [
+          401,
+          892
+        ],
+        "bbox_area_ratio": 0.887188,
+        "alpha_ratio": 0.355093,
+        "largest_alpha_component_ratio": 0.998488,
+        "bbox_aspect": 0.42907,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c192_02",
+      "render_id": "c192_02",
+      "name": "托比",
+      "character": "托比",
+      "character_name": "托比",
+      "resource_id": "192",
+      "costume": "Sunblaze",
+      "costume_name": "Sunblaze",
+      "costume_id": "10013",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c192_02.png",
+      "png_sha256": "f674a5ae2f6fb26e70858f34f06c5303324f57973139abc447d16f3056fb1ece",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          359,
+          870
+        ],
+        "canvas": [
+          375,
+          886
+        ],
+        "bbox_area_ratio": 0.881631,
+        "alpha_ratio": 0.463142,
+        "largest_alpha_component_ratio": 0.998445,
+        "bbox_aspect": 0.401639,
         "subject_center": [
           0.5,
           0.5
@@ -4540,6 +6108,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c210_02",
+      "render_id": "c210_02",
+      "name": "艾可希雅",
+      "character": "艾可希雅",
+      "character_name": "艾可希雅",
+      "resource_id": "210",
+      "costume": "Gamer",
+      "costume_name": "Gamer",
+      "costume_id": "30023",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c210_02.png",
+      "png_sha256": "d506f2364c3a7d5335e2fd4e787d3b8269af42e0f8ea6239994c56503be08276",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          362,
+          844
+        ],
+        "canvas": [
+          378,
+          860
+        ],
+        "bbox_area_ratio": 0.881285,
+        "alpha_ratio": 0.409105,
+        "largest_alpha_component_ratio": 0.996587,
+        "bbox_aspect": 0.417874,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c210_03",
+      "render_id": "c210_03",
+      "name": "艾可希雅",
+      "character": "艾可希雅",
+      "character_name": "艾可希雅",
+      "resource_id": "210",
+      "costume": "Hacker Rabbit",
+      "costume_name": "Hacker Rabbit",
+      "costume_id": "70005",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c210_03.png",
+      "png_sha256": "1ae3bccc90917da1bfa3a2609da83e9e2084a3804909225f5885537fc5bebef5",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          261,
+          786
+        ],
+        "canvas": [
+          277,
+          802
+        ],
+        "bbox_area_ratio": 0.849186,
+        "alpha_ratio": 0.408361,
+        "largest_alpha_component_ratio": 0.998689,
+        "bbox_aspect": 0.318182,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c212",
       "render_id": "c212",
       "name": "诺薇儿",
@@ -4698,6 +6352,49 @@
         "alpha_ratio": 0.363289,
         "largest_alpha_component_ratio": 1.0,
         "bbox_aspect": 1.201977,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c220_01",
+      "render_id": "c220_01",
+      "name": "白雪公主",
+      "character": "白雪公主",
+      "character_name": "白雪公主",
+      "resource_id": "220",
+      "costume": "White Knight",
+      "costume_name": "White Knight",
+      "costume_id": "30026",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c220_01.png",
+      "png_sha256": "1c3a925de64b1a73623e419bfcf7faebe4c6cabec9701b08b72f29b15c5c7d2c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          758,
+          876
+        ],
+        "canvas": [
+          774,
+          892
+        ],
+        "bbox_area_ratio": 0.924265,
+        "alpha_ratio": 0.302585,
+        "largest_alpha_component_ratio": 0.98101,
+        "bbox_aspect": 0.862791,
         "subject_center": [
           0.5,
           0.5
@@ -4884,6 +6581,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c223_01",
+      "render_id": "c223_01",
+      "name": "娜由塔",
+      "character": "娜由塔",
+      "character_name": "娜由塔",
+      "resource_id": "223",
+      "costume": "Wu Wei",
+      "costume_name": "Wu Wei",
+      "costume_id": "120003",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c223_01.png",
+      "png_sha256": "ff0c04657c173c55db3bc90d9b2d38fc1c0dbbb85fcfe02656b2889add25464c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          694,
+          739
+        ],
+        "canvas": [
+          710,
+          755
+        ],
+        "bbox_area_ratio": 0.914456,
+        "alpha_ratio": 0.424751,
+        "largest_alpha_component_ratio": 0.988187,
+        "bbox_aspect": 0.937759,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c224",
       "render_id": "c224",
       "name": "白雪公主：纯真年代",
@@ -4956,6 +6696,49 @@
         "alpha_ratio": 0.34771,
         "largest_alpha_component_ratio": 0.994571,
         "bbox_aspect": 0.492308,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c225_01",
+      "render_id": "c225_01",
+      "name": "红莲：暗影",
+      "character": "红莲：暗影",
+      "character_name": "红莲：暗影",
+      "resource_id": "225",
+      "costume": "Longing Flower",
+      "costume_name": "Longing Flower",
+      "costume_id": "30033",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c225_01.png",
+      "png_sha256": "dcc5ed2f25a707e9b52b593d959538af4ec0595e6370b82ac243fc42ee79d57e",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          555,
+          874
+        ],
+        "canvas": [
+          571,
+          890
+        ],
+        "bbox_area_ratio": 0.910018,
+        "alpha_ratio": 0.50454,
+        "largest_alpha_component_ratio": 0.9951,
+        "bbox_aspect": 0.628205,
         "subject_center": [
           0.5,
           0.5
@@ -5056,6 +6839,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c230_01",
+      "render_id": "c230_01",
+      "name": "哈兰",
+      "character": "哈兰",
+      "character_name": "哈兰",
+      "resource_id": "230",
+      "costume": "Banquet Witch",
+      "costume_name": "Banquet Witch",
+      "costume_id": "50006",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c230_01.png",
+      "png_sha256": "62f91c990c664618ced2c2c5bc64a07b6a80cd7de671d87e4e7d5f6031364bd4",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          529,
+          869
+        ],
+        "canvas": [
+          545,
+          885
+        ],
+        "bbox_area_ratio": 0.907249,
+        "alpha_ratio": 0.296377,
+        "largest_alpha_component_ratio": 0.989967,
+        "bbox_aspect": 0.601407,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c231",
       "render_id": "c231",
       "name": "伊莎贝尔",
@@ -5085,6 +6911,49 @@
         "alpha_ratio": 0.230654,
         "largest_alpha_component_ratio": 0.994435,
         "bbox_aspect": 1.252187,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c231_01",
+      "render_id": "c231_01",
+      "name": "伊莎贝尔",
+      "character": "伊莎贝尔",
+      "character_name": "伊莎贝尔",
+      "resource_id": "231",
+      "costume": "Honeymoon Party",
+      "costume_name": "Honeymoon Party",
+      "costume_id": "50014",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c231_01.png",
+      "png_sha256": "9a88f1591311ae59209c5128a259e9c0fe4fb45ba1fce67d4a857a38ea18be40",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          327,
+          876
+        ],
+        "canvas": [
+          343,
+          892
+        ],
+        "bbox_area_ratio": 0.874178,
+        "alpha_ratio": 0.469224,
+        "largest_alpha_component_ratio": 0.997619,
+        "bbox_aspect": 0.361628,
         "subject_center": [
           0.5,
           0.5
@@ -5171,6 +7040,92 @@
         "alpha_ratio": 0.37551,
         "largest_alpha_component_ratio": 0.973255,
         "bbox_aspect": 0.560465,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c233_01",
+      "render_id": "c233_01",
+      "name": "桃乐丝",
+      "character": "桃乐丝",
+      "character_name": "桃乐丝",
+      "resource_id": "233",
+      "costume": "Nostalgia",
+      "costume_name": "Nostalgia",
+      "costume_id": "50007",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c233_01.png",
+      "png_sha256": "59dc0327ec98d62606e298a3904e81c787eef2a6f036bee835f40971f58b4850",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          570,
+          873
+        ],
+        "canvas": [
+          586,
+          889
+        ],
+        "bbox_area_ratio": 0.911363,
+        "alpha_ratio": 0.475318,
+        "largest_alpha_component_ratio": 0.977081,
+        "bbox_aspect": 0.646441,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c233_02",
+      "render_id": "c233_02",
+      "name": "桃乐丝",
+      "character": "桃乐丝",
+      "character_name": "桃乐丝",
+      "resource_id": "233",
+      "costume": "Luna Light",
+      "costume_name": "Luna Light",
+      "costume_id": "130004",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c233_02.png",
+      "png_sha256": "bbdf43d7a5b07a0278fdf9afae41281e7b417e4ce36af82aa534984fd3bea93d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          502,
+          876
+        ],
+        "canvas": [
+          518,
+          892
+        ],
+        "bbox_area_ratio": 0.904566,
+        "alpha_ratio": 0.337048,
+        "largest_alpha_component_ratio": 0.989662,
+        "bbox_aspect": 0.565116,
         "subject_center": [
           0.5,
           0.5
@@ -5357,6 +7312,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c242_01",
+      "render_id": "c242_01",
+      "name": "富克旺",
+      "character": "富克旺",
+      "character_name": "富克旺",
+      "resource_id": "242",
+      "costume": "Moist Rabbit",
+      "costume_name": "Moist Rabbit",
+      "costume_id": "70003",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c242_01.png",
+      "png_sha256": "2a740a75f9bdfe896e5fca00a92de177044ef4dde00a297071cd4a7a2a064f62",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          292,
+          876
+        ],
+        "canvas": [
+          308,
+          892
+        ],
+        "bbox_area_ratio": 0.863957,
+        "alpha_ratio": 0.347781,
+        "largest_alpha_component_ratio": 0.994895,
+        "bbox_aspect": 0.32093,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c260",
       "render_id": "c260",
       "name": "神罚",
@@ -5429,6 +7427,49 @@
         "alpha_ratio": 0.360528,
         "largest_alpha_component_ratio": 1.0,
         "bbox_aspect": 0.411628,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c260_02",
+      "render_id": "c260_02",
+      "name": "神罚",
+      "character": "神罚",
+      "character_name": "神罚",
+      "resource_id": "260",
+      "costume": "Second Affection",
+      "costume_name": "Second Affection",
+      "costume_id": "120002",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c260_02.png",
+      "png_sha256": "167070bff3660dbd7d37de2797b4a211cc4c9c98a2462e17cae5704937d13bfc",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          824,
+          876
+        ],
+        "canvas": [
+          840,
+          892
+        ],
+        "bbox_area_ratio": 0.927397,
+        "alpha_ratio": 0.434955,
+        "largest_alpha_component_ratio": 0.999109,
+        "bbox_aspect": 0.939535,
         "subject_center": [
           0.5,
           0.5
@@ -5529,6 +7570,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c262_01",
+      "render_id": "c262_01",
+      "name": "莉贝雷利奥",
+      "character": "莉贝雷利奥",
+      "character_name": "莉贝雷利奥",
+      "resource_id": "262",
+      "costume": "Dreaming Lake",
+      "costume_name": "Dreaming Lake",
+      "costume_id": "50019",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c262_01.png",
+      "png_sha256": "a4940f19adfacca1fe8749548b695b8846f503628fe54dc40a56a77814f1f16c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          856,
+          875
+        ],
+        "canvas": [
+          872,
+          891
+        ],
+        "bbox_area_ratio": 0.928706,
+        "alpha_ratio": 0.506945,
+        "largest_alpha_component_ratio": 0.999876,
+        "bbox_aspect": 0.977881,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c270",
       "render_id": "c270",
       "name": "布兰儿",
@@ -5558,6 +7642,135 @@
         "alpha_ratio": 0.271124,
         "largest_alpha_component_ratio": 0.985277,
         "bbox_aspect": 0.752714,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c270_01",
+      "render_id": "c270_01",
+      "name": "布兰儿",
+      "character": "布兰儿",
+      "character_name": "布兰儿",
+      "resource_id": "270",
+      "costume": "White Rabbit",
+      "costume_name": "White Rabbit",
+      "costume_id": "30021",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c270_01.png",
+      "png_sha256": "e4a7b045a7ac7a1e698da05cb75fc2e08cd70c99e68d7b3fb9f672f1823e9add",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          332,
+          844
+        ],
+        "canvas": [
+          348,
+          860
+        ],
+        "bbox_area_ratio": 0.874258,
+        "alpha_ratio": 0.471291,
+        "largest_alpha_component_ratio": 0.995214,
+        "bbox_aspect": 0.381643,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c270_02",
+      "render_id": "c270_02",
+      "name": "布兰儿",
+      "character": "布兰儿",
+      "character_name": "布兰儿",
+      "resource_id": "270",
+      "costume": "No. 77 Batter",
+      "costume_name": "No. 77 Batter",
+      "costume_id": "30044",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c270_02.png",
+      "png_sha256": "b8c06d2278cd6ad80420d48415bbd437cf3ebd5c4f2168453a2c65b20a194d94",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          680,
+          709
+        ],
+        "canvas": [
+          696,
+          725
+        ],
+        "bbox_area_ratio": 0.911914,
+        "alpha_ratio": 0.301106,
+        "largest_alpha_component_ratio": 0.985669,
+        "bbox_aspect": 0.958153,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c270_03",
+      "render_id": "c270_03",
+      "name": "布兰儿",
+      "character": "布兰儿",
+      "character_name": "布兰儿",
+      "resource_id": "270",
+      "costume": "Fortune Express",
+      "costume_name": "Fortune Express",
+      "costume_id": "30055",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c270_03.png",
+      "png_sha256": "c0f1546a657f75b59733a622c16f31baafe8303ce1dde15187cd89269d69b795",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          717,
+          873
+        ],
+        "canvas": [
+          733,
+          889
+        ],
+        "bbox_area_ratio": 0.92192,
+        "alpha_ratio": 0.35629,
+        "largest_alpha_component_ratio": 0.981999,
+        "bbox_aspect": 0.81797,
         "subject_center": [
           0.5,
           0.5
@@ -5615,6 +7828,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c271_01",
+      "render_id": "c271_01",
+      "name": "诺亚尔",
+      "character": "诺亚尔",
+      "character_name": "诺亚尔",
+      "resource_id": "271",
+      "costume": "Black Rabbit",
+      "costume_name": "Black Rabbit",
+      "costume_id": "30020",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c271_01.png",
+      "png_sha256": "e27fae6d7944388b4470b87c9682cd44d0e4d2ede245b751f79f2f8a27775b22",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          401,
+          872
+        ],
+        "canvas": [
+          417,
+          888
+        ],
+        "bbox_area_ratio": 0.889991,
+        "alpha_ratio": 0.410769,
+        "largest_alpha_component_ratio": 0.999683,
+        "bbox_aspect": 0.449766,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c271_02",
+      "render_id": "c271_02",
+      "name": "诺亚尔",
+      "character": "诺亚尔",
+      "character_name": "诺亚尔",
+      "resource_id": "271",
+      "costume": "Baseball Cheerleader",
+      "costume_name": "Baseball Cheerleader",
+      "costume_id": "30045",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c271_02.png",
+      "png_sha256": "e6c712423b8d0686cfc9a331292afba5238f98f529f6da986d7d4185c9d512e1",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          301,
+          875
+        ],
+        "canvas": [
+          317,
+          891
+        ],
+        "bbox_area_ratio": 0.866764,
+        "alpha_ratio": 0.412492,
+        "largest_alpha_component_ratio": 0.995878,
+        "bbox_aspect": 0.331781,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c272",
       "render_id": "c272",
       "name": "露姬",
@@ -5644,6 +7943,49 @@
         "alpha_ratio": 0.363689,
         "largest_alpha_component_ratio": 0.999676,
         "bbox_aspect": 0.495349,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c272_01",
+      "render_id": "c272_01",
+      "name": "露姬",
+      "character": "露姬",
+      "character_name": "露姬",
+      "resource_id": "272",
+      "costume": "Unlucky Rabbit",
+      "costume_name": "Unlucky Rabbit",
+      "costume_id": "70006",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c272_01.png",
+      "png_sha256": "38999ecd19100920d79f411c2ece1ae47682b8a88c0ab5b5d428486bd790961b",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          528,
+          875
+        ],
+        "canvas": [
+          544,
+          891
+        ],
+        "bbox_area_ratio": 0.907374,
+        "alpha_ratio": 0.463937,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.596042,
         "subject_center": [
           0.5,
           0.5
@@ -5701,6 +8043,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c280_01",
+      "render_id": "c280_01",
+      "name": "罗珊娜",
+      "character": "罗珊娜",
+      "character_name": "罗珊娜",
+      "resource_id": "280",
+      "costume": "Ms. Dangerous",
+      "costume_name": "Ms. Dangerous",
+      "costume_id": "30024",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c280_01.png",
+      "png_sha256": "bd033af777c9e9a6047bc92c10c2956702655b93cdc2d277e4621cfa2d0bc4f5",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          348,
+          710
+        ],
+        "canvas": [
+          364,
+          726
+        ],
+        "bbox_area_ratio": 0.871886,
+        "alpha_ratio": 0.407653,
+        "largest_alpha_component_ratio": 0.999099,
+        "bbox_aspect": 0.478386,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c281",
       "render_id": "c281",
       "name": "牡丹",
@@ -5730,6 +8115,92 @@
         "alpha_ratio": 0.570487,
         "largest_alpha_component_ratio": 0.998332,
         "bbox_aspect": 0.561941,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c281_01",
+      "render_id": "c281_01",
+      "name": "牡丹",
+      "character": "牡丹",
+      "character_name": "牡丹",
+      "resource_id": "281",
+      "costume": "Off-Duty Queen",
+      "costume_name": "Off-Duty Queen",
+      "costume_id": "30046",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c281_01.png",
+      "png_sha256": "f90ee815d830cc9cd1f51cfda2c405ed0588e086512a2fc707c88550a1bb68aa",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          315,
+          740
+        ],
+        "canvas": [
+          331,
+          756
+        ],
+        "bbox_area_ratio": 0.865087,
+        "alpha_ratio": 0.362666,
+        "largest_alpha_component_ratio": 0.98228,
+        "bbox_aspect": 0.412983,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c281_02",
+      "render_id": "c281_02",
+      "name": "牡丹",
+      "character": "牡丹",
+      "character_name": "牡丹",
+      "resource_id": "281",
+      "costume": "King of Flowers",
+      "costume_name": "King of Flowers",
+      "costume_id": "50020",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c281_02.png",
+      "png_sha256": "dac92a3dca381ff2d372dfb339a21b9c8e93a02e34fad2039d53f1b32403efea",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          495,
+          876
+        ],
+        "canvas": [
+          511,
+          892
+        ],
+        "bbox_area_ratio": 0.90375,
+        "alpha_ratio": 0.379762,
+        "largest_alpha_component_ratio": 0.984793,
+        "bbox_aspect": 0.556977,
         "subject_center": [
           0.5,
           0.5
@@ -6432,6 +8903,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c310_01",
+      "render_id": "c310_01",
+      "name": "爱德",
+      "character": "爱德",
+      "character_name": "爱德",
+      "resource_id": "310",
+      "costume": "Maid In Spring",
+      "costume_name": "Maid In Spring",
+      "costume_id": "30040",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c310_01.png",
+      "png_sha256": "ed6d01139bed47a510535f7ebc48cae2d295c836804107e9f133772b132735a6",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          386,
+          762
+        ],
+        "canvas": [
+          402,
+          778
+        ],
+        "bbox_area_ratio": 0.882541,
+        "alpha_ratio": 0.385818,
+        "largest_alpha_component_ratio": 0.997552,
+        "bbox_aspect": 0.495979,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c311",
       "render_id": "c311",
       "name": "可可",
@@ -6690,6 +9204,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c316_01",
+      "render_id": "c316_01",
+      "name": "薇尔维特",
+      "character": "薇尔维特",
+      "character_name": "薇尔维特",
+      "resource_id": "316",
+      "costume": "Sensual Rabbit",
+      "costume_name": "Sensual Rabbit",
+      "costume_id": "70008",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c316_01.png",
+      "png_sha256": "5935755fa190098246478b78d476c2333afa04ac2f352c56c7ec90764ec9ccb9",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          388,
+          876
+        ],
+        "canvas": [
+          404,
+          892
+        ],
+        "bbox_area_ratio": 0.887759,
+        "alpha_ratio": 0.338865,
+        "largest_alpha_component_ratio": 0.982875,
+        "bbox_aspect": 0.432558,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c321",
       "render_id": "c321",
       "name": "玛律恰那",
@@ -6719,6 +9276,49 @@
         "alpha_ratio": 0.415194,
         "largest_alpha_component_ratio": 0.998891,
         "bbox_aspect": 0.370219,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c321_01",
+      "render_id": "c321_01",
+      "name": "玛律恰那",
+      "character": "玛律恰那",
+      "character_name": "玛律恰那",
+      "resource_id": "321",
+      "costume": "School Days",
+      "costume_name": "School Days",
+      "costume_id": "30029",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c321_01.png",
+      "png_sha256": "87bc7ccb3ccdcd3840300f6e85d908fe45dadfd0cf5cd161e879ba0af5e629c4",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          640,
+          860
+        ],
+        "canvas": [
+          656,
+          876
+        ],
+        "bbox_area_ratio": 0.916472,
+        "alpha_ratio": 0.488546,
+        "largest_alpha_component_ratio": 0.991477,
+        "bbox_aspect": 0.739336,
         "subject_center": [
           0.5,
           0.5
@@ -7034,6 +9634,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c350_02",
+      "render_id": "c350_02",
+      "name": "马斯特",
+      "character": "马斯特",
+      "character_name": "马斯特",
+      "resource_id": "350",
+      "costume": "Mast the Diver",
+      "costume_name": "Mast the Diver",
+      "costume_id": "10010",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c350_02.png",
+      "png_sha256": "c649e04c774f93d0a9f043c342583a73ea2dc3c064ee8f8492233fbb80ea7f17",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          514,
+          876
+        ],
+        "canvas": [
+          530,
+          892
+        ],
+        "bbox_area_ratio": 0.905914,
+        "alpha_ratio": 0.392191,
+        "largest_alpha_component_ratio": 0.998415,
+        "bbox_aspect": 0.57907,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c351",
       "render_id": "c351",
       "name": "安克",
@@ -7063,6 +9706,49 @@
         "alpha_ratio": 0.345925,
         "largest_alpha_component_ratio": 0.998724,
         "bbox_aspect": 0.393939,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c351_01",
+      "render_id": "c351_01",
+      "name": "安克",
+      "character": "安克",
+      "character_name": "安克",
+      "resource_id": "351",
+      "costume": "Anchor the Diver",
+      "costume_name": "Anchor the Diver",
+      "costume_id": "10011",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c351_01.png",
+      "png_sha256": "a4d9fc4e90f9c8a2bdc52422f3e9a035d6b518b32286123202555a64db45a507",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          382,
+          876
+        ],
+        "canvas": [
+          398,
+          892
+        ],
+        "bbox_area_ratio": 0.886608,
+        "alpha_ratio": 0.413976,
+        "largest_alpha_component_ratio": 0.99934,
+        "bbox_aspect": 0.425581,
         "subject_center": [
           0.5,
           0.5
@@ -7163,6 +9849,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c352_02",
+      "render_id": "c352_02",
+      "name": "海伦",
+      "character": "海伦",
+      "character_name": "海伦",
+      "resource_id": "352",
+      "costume": "Post-Shower Moment",
+      "costume_name": "Post-Shower Moment",
+      "costume_id": "30037",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c352_02.png",
+      "png_sha256": "d6e0c56fd908dd1988e473785c05c5acee1130cb6974eef018ed7f282dc002e3",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          516,
+          876
+        ],
+        "canvas": [
+          532,
+          892
+        ],
+        "bbox_area_ratio": 0.906133,
+        "alpha_ratio": 0.50357,
+        "largest_alpha_component_ratio": 0.99572,
+        "bbox_aspect": 0.581395,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c353",
       "render_id": "c353",
       "name": "海伦：海蓝宝石",
@@ -7235,6 +9964,49 @@
         "alpha_ratio": 0.370967,
         "largest_alpha_component_ratio": 1.0,
         "bbox_aspect": 0.345349,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c354_01",
+      "render_id": "c354_01",
+      "name": "马斯特：浪漫的女仆",
+      "character": "马斯特：浪漫的女仆",
+      "character_name": "马斯特：浪漫的女仆",
+      "resource_id": "354",
+      "costume": "Tea Service",
+      "costume_name": "Tea Service",
+      "costume_id": "30057",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c354_01.png",
+      "png_sha256": "e6bc36d683bc31e52b3473c918853044d08c462fa67ecb6f5fd25015b9216561",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          585,
+          876
+        ],
+        "canvas": [
+          601,
+          892
+        ],
+        "bbox_area_ratio": 0.912791,
+        "alpha_ratio": 0.338136,
+        "largest_alpha_component_ratio": 0.999731,
+        "bbox_aspect": 0.661628,
         "subject_center": [
           0.5,
           0.5
@@ -7421,6 +10193,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c381_01",
+      "render_id": "c381_01",
+      "name": "饼干",
+      "character": "饼干",
+      "character_name": "饼干",
+      "resource_id": "381",
+      "costume": "Spring Puppy",
+      "costume_name": "Spring Puppy",
+      "costume_id": "30038",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c381_01.png",
+      "png_sha256": "d970687081643d0bc2d1e49a7d0e3811ac37e6a77cd9c67f46a41be42a8ad691",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          589,
+          854
+        ],
+        "canvas": [
+          605,
+          870
+        ],
+        "bbox_area_ratio": 0.912271,
+        "alpha_ratio": 0.400815,
+        "largest_alpha_component_ratio": 0.995611,
+        "bbox_aspect": 0.683771,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c382",
       "render_id": "c382",
       "name": "莱昂纳",
@@ -7450,6 +10265,49 @@
         "alpha_ratio": 0.460747,
         "largest_alpha_component_ratio": 0.998354,
         "bbox_aspect": 0.216279,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c382_01",
+      "render_id": "c382_01",
+      "name": "莱昂纳",
+      "character": "莱昂纳",
+      "character_name": "莱昂纳",
+      "resource_id": "382",
+      "costume": "Zoo Keeper",
+      "costume_name": "Zoo Keeper",
+      "costume_id": "30030",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c382_01.png",
+      "png_sha256": "662776b8a3b707fb17773806b171539faaf3375172ee2c3eceb1e661b2f2abb3",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          203,
+          876
+        ],
+        "canvas": [
+          219,
+          892
+        ],
+        "bbox_area_ratio": 0.823249,
+        "alpha_ratio": 0.449608,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.217442,
         "subject_center": [
           0.5,
           0.5
@@ -7507,6 +10365,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c390_01",
+      "render_id": "c390_01",
+      "name": "茨瓦伊",
+      "character": "茨瓦伊",
+      "character_name": "茨瓦伊",
+      "resource_id": "390",
+      "costume": "First Festa",
+      "costume_name": "First Festa",
+      "costume_id": "30034",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c390_01.png",
+      "png_sha256": "71fa11b6d8d395bf3ab43747afe7b8090e194fe5549579b7da6d0584044f9523",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          386,
+          876
+        ],
+        "canvas": [
+          402,
+          892
+        ],
+        "bbox_area_ratio": 0.887379,
+        "alpha_ratio": 0.407573,
+        "largest_alpha_component_ratio": 0.97397,
+        "bbox_aspect": 0.430233,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c390_02",
+      "render_id": "c390_02",
+      "name": "茨瓦伊",
+      "character": "茨瓦伊",
+      "character_name": "茨瓦伊",
+      "resource_id": "390",
+      "costume": "Spring Stroll",
+      "costume_name": "Spring Stroll",
+      "costume_id": "30058",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c390_02.png",
+      "png_sha256": "32348fd1d9744dce74496f6a350340f054fa5b3ccd0c6ee2af3c849dd71cac95",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          262,
+          876
+        ],
+        "canvas": [
+          278,
+          892
+        ],
+        "bbox_area_ratio": 0.853147,
+        "alpha_ratio": 0.374774,
+        "largest_alpha_component_ratio": 0.9979,
+        "bbox_aspect": 0.286047,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c391",
       "render_id": "c391",
       "name": "爱因",
@@ -7536,6 +10480,49 @@
         "alpha_ratio": 0.349429,
         "largest_alpha_component_ratio": 0.777617,
         "bbox_aspect": 0.834884,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c391_01",
+      "render_id": "c391_01",
+      "name": "爱因",
+      "character": "爱因",
+      "character_name": "爱因",
+      "resource_id": "391",
+      "costume": "Handmade Festa",
+      "costume_name": "Handmade Festa",
+      "costume_id": "30035",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c391_01.png",
+      "png_sha256": "fdec6fc86ddd18def0ccd9a50ba8ea02bac6634c12f8f7506f7ff6f3ce43ff85",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          389,
+          875
+        ],
+        "canvas": [
+          405,
+          891
+        ],
+        "bbox_area_ratio": 0.887911,
+        "alpha_ratio": 0.417032,
+        "largest_alpha_component_ratio": 0.997741,
+        "bbox_aspect": 0.434226,
         "subject_center": [
           0.5,
           0.5
@@ -7636,6 +10623,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c400_01",
+      "render_id": "c400_01",
+      "name": "吉尔提",
+      "character": "吉尔提",
+      "character_name": "吉尔提",
+      "resource_id": "400",
+      "costume": "Wave of Disbelief",
+      "costume_name": "Wave of Disbelief",
+      "costume_id": "10008",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c400_01.png",
+      "png_sha256": "37328a0b26e23f8aebde678fc456524184350063ebf15f5fa20ce79cc68b6a50",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          381,
+          876
+        ],
+        "canvas": [
+          397,
+          892
+        ],
+        "bbox_area_ratio": 0.886413,
+        "alpha_ratio": 0.403802,
+        "largest_alpha_component_ratio": 0.967436,
+        "bbox_aspect": 0.424419,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c401",
       "render_id": "c401",
       "name": "森",
@@ -7665,6 +10695,49 @@
         "alpha_ratio": 0.34414,
         "largest_alpha_component_ratio": 0.985299,
         "bbox_aspect": 0.469767,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c401_01",
+      "render_id": "c401_01",
+      "name": "森",
+      "character": "森",
+      "character_name": "森",
+      "resource_id": "401",
+      "costume": "Backstreet Dream",
+      "costume_name": "Backstreet Dream",
+      "costume_id": "60004",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c401_01.png",
+      "png_sha256": "d3d1cfae65f2fa5c680d0057088eb7ae1e7ac0c96aae26b5c64c767d88bdcd45",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          389,
+          846
+        ],
+        "canvas": [
+          405,
+          862
+        ],
+        "bbox_area_ratio": 0.886798,
+        "alpha_ratio": 0.312787,
+        "largest_alpha_component_ratio": 0.998341,
+        "bbox_aspect": 0.449398,
         "subject_center": [
           0.5,
           0.5
@@ -7765,6 +10838,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c403_01",
+      "render_id": "c403_01",
+      "name": "坎西：逃生女王",
+      "character": "坎西：逃生女王",
+      "character_name": "坎西：逃生女王",
+      "resource_id": "403",
+      "costume": "Masquerade Swan",
+      "costume_name": "Masquerade Swan",
+      "costume_id": "50017",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c403_01.png",
+      "png_sha256": "26cec4a780f54bb39adf60f6c4af59abe0c00c47db9256f7069d60c12b938a64",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          682,
+          876
+        ],
+        "canvas": [
+          698,
+          892
+        ],
+        "bbox_area_ratio": 0.919925,
+        "alpha_ratio": 0.190983,
+        "largest_alpha_component_ratio": 0.992596,
+        "bbox_aspect": 0.774419,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c411",
       "render_id": "c411",
       "name": "芙罗拉",
@@ -7808,6 +10924,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c411_01",
+      "render_id": "c411_01",
+      "name": "芙罗拉",
+      "character": "芙罗拉",
+      "character_name": "芙罗拉",
+      "resource_id": "411",
+      "costume": "Fairy Rabbit",
+      "costume_name": "Fairy Rabbit",
+      "costume_id": "70009",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c411_01.png",
+      "png_sha256": "8e8109cc9ab9a22749edb54ed1ea94871dfe3239a07c259f158b7cb017f3c73d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          458,
+          872
+        ],
+        "canvas": [
+          474,
+          888
+        ],
+        "bbox_area_ratio": 0.898886,
+        "alpha_ratio": 0.408237,
+        "largest_alpha_component_ratio": 0.998594,
+        "bbox_aspect": 0.516355,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c412",
       "render_id": "c412",
       "name": "特蕾娜",
@@ -7837,6 +10996,49 @@
         "alpha_ratio": 0.317005,
         "largest_alpha_component_ratio": 0.982596,
         "bbox_aspect": 0.486047,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c412_01",
+      "render_id": "c412_01",
+      "name": "特蕾娜",
+      "character": "特蕾娜",
+      "character_name": "特蕾娜",
+      "resource_id": "412",
+      "costume": "Natural White",
+      "costume_name": "Natural White",
+      "costume_id": "30067",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c412_01.png",
+      "png_sha256": "8a695eda531bf0ba41892f26275c82e89f96d98c64bf8e89b282770f1bde457d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          618,
+          876
+        ],
+        "canvas": [
+          634,
+          892
+        ],
+        "bbox_area_ratio": 0.915463,
+        "alpha_ratio": 0.449553,
+        "largest_alpha_component_ratio": 0.994298,
+        "bbox_aspect": 0.7,
         "subject_center": [
           0.5,
           0.5
@@ -7937,6 +11139,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c430_02",
+      "render_id": "c430_02",
+      "name": "诺伊斯",
+      "character": "诺伊斯",
+      "character_name": "诺伊斯",
+      "resource_id": "430",
+      "costume": "Classic Diva",
+      "costume_name": "Classic Diva",
+      "costume_id": "50010",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c430_02.png",
+      "png_sha256": "2d4959ae4800d8bc916eef9ceab57f5416402835ba5e24fcd0f74fa71e520be7",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          506,
+          876
+        ],
+        "canvas": [
+          522,
+          892
+        ],
+        "bbox_area_ratio": 0.905022,
+        "alpha_ratio": 0.419398,
+        "largest_alpha_component_ratio": 0.993033,
+        "bbox_aspect": 0.569767,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c431",
       "render_id": "c431",
       "name": "沃纶姆",
@@ -7966,6 +11211,49 @@
         "alpha_ratio": 0.377301,
         "largest_alpha_component_ratio": 0.959246,
         "bbox_aspect": 0.615116,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c431_01",
+      "render_id": "c431_01",
+      "name": "沃纶姆",
+      "character": "沃纶姆",
+      "character_name": "沃纶姆",
+      "resource_id": "431",
+      "costume": "Beat the Gun",
+      "costume_name": "Beat the Gun",
+      "costume_id": "130001",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c431_01.png",
+      "png_sha256": "6e4e05a584a46f505e771e4ec9ccd91a9f21371f410e99d976ab3fb61052e2ed",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          622,
+          782
+        ],
+        "canvas": [
+          638,
+          798
+        ],
+        "bbox_area_ratio": 0.911754,
+        "alpha_ratio": 0.455298,
+        "largest_alpha_component_ratio": 0.998822,
+        "bbox_aspect": 0.791123,
         "subject_center": [
           0.5,
           0.5
@@ -8109,6 +11397,135 @@
       "suspects": []
     },
     {
+      "asset_id": "c450_01",
+      "render_id": "c450_01",
+      "name": "娜嘉",
+      "character": "娜嘉",
+      "character_name": "娜嘉",
+      "resource_id": "450",
+      "costume": "Elegant Date",
+      "costume_name": "Elegant Date",
+      "costume_id": "30027",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c450_01.png",
+      "png_sha256": "d6f35153cd1b2cae8d0d985fc57a39afa3603ce7184190e7b1feb4fbc0d74d08",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          266,
+          874
+        ],
+        "canvas": [
+          282,
+          890
+        ],
+        "bbox_area_ratio": 0.85465,
+        "alpha_ratio": 0.454973,
+        "largest_alpha_component_ratio": 0.998746,
+        "bbox_aspect": 0.291375,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c450_02",
+      "render_id": "c450_02",
+      "name": "娜嘉",
+      "character": "娜嘉",
+      "character_name": "娜嘉",
+      "resource_id": "450",
+      "costume": "Last Girlhood",
+      "costume_name": "Last Girlhood",
+      "costume_id": "30036",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c450_02.png",
+      "png_sha256": "09d88ccfe7f3082c83ec42652a3bfd183dceed0d2d5ac752f6aad3d2eaf1df29",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          587,
+          876
+        ],
+        "canvas": [
+          603,
+          892
+        ],
+        "bbox_area_ratio": 0.912961,
+        "alpha_ratio": 0.485011,
+        "largest_alpha_component_ratio": 0.990746,
+        "bbox_aspect": 0.663953,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c450_03",
+      "render_id": "c450_03",
+      "name": "娜嘉",
+      "character": "娜嘉",
+      "character_name": "娜嘉",
+      "resource_id": "450",
+      "costume": "Ring Ensemble",
+      "costume_name": "Ring Ensemble",
+      "costume_id": "10015",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c450_03.png",
+      "png_sha256": "17401a92f5396253002edc52888ce47a206606ae90d350f0eb194d67dd25605a",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          334,
+          876
+        ],
+        "canvas": [
+          350,
+          892
+        ],
+        "bbox_area_ratio": 0.875977,
+        "alpha_ratio": 0.431259,
+        "largest_alpha_component_ratio": 0.998549,
+        "bbox_aspect": 0.369767,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c451",
       "render_id": "c451",
       "name": "蒂亚",
@@ -8152,6 +11569,135 @@
       "suspects": []
     },
     {
+      "asset_id": "c451_01",
+      "render_id": "c451_01",
+      "name": "蒂亚",
+      "character": "蒂亚",
+      "character_name": "蒂亚",
+      "resource_id": "451",
+      "costume": "Lovely Date",
+      "costume_name": "Lovely Date",
+      "costume_id": "30028",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c451_01.png",
+      "png_sha256": "7b323bb5566973361762aaec999446f91a76f04d1ad8cd7f746bdcd08cc64da5",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          296,
+          876
+        ],
+        "canvas": [
+          312,
+          892
+        ],
+        "bbox_area_ratio": 0.865241,
+        "alpha_ratio": 0.416218,
+        "largest_alpha_component_ratio": 0.954128,
+        "bbox_aspect": 0.325581,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c451_02",
+      "render_id": "c451_02",
+      "name": "蒂亚",
+      "character": "蒂亚",
+      "character_name": "蒂亚",
+      "resource_id": "451",
+      "costume": "Sweet Chef",
+      "costume_name": "Sweet Chef",
+      "costume_id": "30039",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c451_02.png",
+      "png_sha256": "7043a7536c40acd3672c17893cbae0eb65312a467e197e933b539b630b84564d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          274,
+          875
+        ],
+        "canvas": [
+          290,
+          891
+        ],
+        "bbox_area_ratio": 0.857703,
+        "alpha_ratio": 0.360393,
+        "largest_alpha_component_ratio": 0.999485,
+        "bbox_aspect": 0.300349,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c451_03",
+      "render_id": "c451_03",
+      "name": "蒂亚",
+      "character": "蒂亚",
+      "character_name": "蒂亚",
+      "resource_id": "451",
+      "costume": "Sea Lizzie",
+      "costume_name": "Sea Lizzie",
+      "costume_id": "10017",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c451_03.png",
+      "png_sha256": "ffa5eeca64d62a1aafcd161d6503499e9ae893b778c72c170231113bf2c6913d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          324,
+          860
+        ],
+        "canvas": [
+          340,
+          876
+        ],
+        "bbox_area_ratio": 0.872791,
+        "alpha_ratio": 0.354284,
+        "largest_alpha_component_ratio": 0.960776,
+        "bbox_aspect": 0.364929,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c470",
       "render_id": "c470",
       "name": "小红帽",
@@ -8181,6 +11727,92 @@
         "alpha_ratio": 0.275831,
         "largest_alpha_component_ratio": 0.991394,
         "bbox_aspect": 0.920838,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c470_01",
+      "render_id": "c470_01",
+      "name": "小红帽",
+      "character": "小红帽",
+      "character_name": "小红帽",
+      "resource_id": "470",
+      "costume": "Nonsense Red",
+      "costume_name": "Nonsense Red",
+      "costume_id": "50012",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c470_01.png",
+      "png_sha256": "42eba531fee6c801a9af0551fe220ddb01f53be8c70cb80e2656aa358a5d60ca",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          639,
+          876
+        ],
+        "canvas": [
+          655,
+          892
+        ],
+        "bbox_area_ratio": 0.917023,
+        "alpha_ratio": 0.459809,
+        "largest_alpha_component_ratio": 0.998553,
+        "bbox_aspect": 0.724419,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c470_02",
+      "render_id": "c470_02",
+      "name": "小红帽",
+      "character": "小红帽",
+      "character_name": "小红帽",
+      "resource_id": "470",
+      "costume": "Retro Days",
+      "costume_name": "Retro Days",
+      "costume_id": "30051",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c470_02.png",
+      "png_sha256": "70fc7854214a8b6fa1a60807cd87aaf3c25123e9e99653fb73e9f9421a5e4f85",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          722,
+          876
+        ],
+        "canvas": [
+          738,
+          892
+        ],
+        "bbox_area_ratio": 0.922321,
+        "alpha_ratio": 0.461393,
+        "largest_alpha_component_ratio": 0.99553,
+        "bbox_aspect": 0.82093,
         "subject_center": [
           0.5,
           0.5
@@ -8324,6 +11956,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c501_01",
+      "render_id": "c501_01",
+      "name": "特罗尼",
+      "character": "特罗尼",
+      "character_name": "特罗尼",
+      "resource_id": "501",
+      "costume": "Sweet Step",
+      "costume_name": "Sweet Step",
+      "costume_id": "60003",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c501_01.png",
+      "png_sha256": "4b2a3362cbe2ef68722c78ffe5e0f2871f1e0e9ab128e738b66ac9b19f29d3b2",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          548,
+          876
+        ],
+        "canvas": [
+          564,
+          892
+        ],
+        "bbox_area_ratio": 0.909423,
+        "alpha_ratio": 0.554577,
+        "largest_alpha_component_ratio": 0.998435,
+        "bbox_aspect": 0.618605,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c502",
       "render_id": "c502",
       "name": "伊莱格：BOOM与惊吓",
@@ -8396,6 +12071,92 @@
         "alpha_ratio": 0.341933,
         "largest_alpha_component_ratio": 0.987774,
         "bbox_aspect": 1.11065,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c511_01",
+      "render_id": "c511_01",
+      "name": "灰姑娘",
+      "character": "灰姑娘",
+      "character_name": "灰姑娘",
+      "resource_id": "511",
+      "costume": "Glass Princess",
+      "costume_name": "Glass Princess",
+      "costume_id": "50015",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c511_01.png",
+      "png_sha256": "5bb09ba8229eae1e2f6294b6b8169f614247c6ff262fe515fc339550d2ba0343",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          750,
+          866
+        ],
+        "canvas": [
+          766,
+          882
+        ],
+        "bbox_area_ratio": 0.923459,
+        "alpha_ratio": 0.401634,
+        "largest_alpha_component_ratio": 0.99003,
+        "bbox_aspect": 0.863529,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c511_02",
+      "render_id": "c511_02",
+      "name": "灰姑娘",
+      "character": "灰姑娘",
+      "character_name": "灰姑娘",
+      "resource_id": "511",
+      "costume": "Beautiful Me",
+      "costume_name": "Beautiful Me",
+      "costume_id": "30042",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c511_02.png",
+      "png_sha256": "22584530e328e41fbd12575f51129597cc6feea42cd91276b1876641fcecf41a",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          354,
+          780
+        ],
+        "canvas": [
+          370,
+          796
+        ],
+        "bbox_area_ratio": 0.876789,
+        "alpha_ratio": 0.453334,
+        "largest_alpha_component_ratio": 0.979765,
+        "bbox_aspect": 0.442408,
         "subject_center": [
           0.5,
           0.5
@@ -8625,6 +12386,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c514_01",
+      "render_id": "c514_01",
+      "name": "格拉维",
+      "character": "格拉维",
+      "character_name": "格拉维",
+      "resource_id": "514",
+      "costume": "Beautiful You",
+      "costume_name": "Beautiful You",
+      "costume_id": "30041",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c514_01.png",
+      "png_sha256": "6e60c0d03d6852bc2181fbdee9a89d3f6ab9d449acb7f9f81e002d307707b49a",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          324,
+          876
+        ],
+        "canvas": [
+          340,
+          892
+        ],
+        "bbox_area_ratio": 0.873384,
+        "alpha_ratio": 0.497471,
+        "largest_alpha_component_ratio": 0.996463,
+        "bbox_aspect": 0.35814,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c515",
       "render_id": "c515",
       "name": "灰姑娘：琉璃波光",
@@ -8697,6 +12501,49 @@
         "alpha_ratio": 0.299746,
         "largest_alpha_component_ratio": 0.997005,
         "bbox_aspect": 0.877273,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c520_01",
+      "render_id": "c520_01",
+      "name": "布蕾德",
+      "character": "布蕾德",
+      "character_name": "布蕾德",
+      "resource_id": "520",
+      "costume": "Frosty Bite",
+      "costume_name": "Frosty Bite",
+      "costume_id": "30056",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c520_01.png",
+      "png_sha256": "2e2a4ed81d126b01979ab5d7491f2e6f1ee047ffa306f03573be427e9cfe5726",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          405,
+          675
+        ],
+        "canvas": [
+          421,
+          691
+        ],
+        "bbox_area_ratio": 0.881201,
+        "alpha_ratio": 0.405141,
+        "largest_alpha_component_ratio": 0.997768,
+        "bbox_aspect": 0.590288,
         "subject_center": [
           0.5,
           0.5
@@ -8797,6 +12644,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c532_01",
+      "render_id": "c532_01",
+      "name": "索拉",
+      "character": "索拉",
+      "character_name": "索拉",
+      "resource_id": "532",
+      "costume": "Spring Flight",
+      "costume_name": "Spring Flight",
+      "costume_id": "30062",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c532_01.png",
+      "png_sha256": "fb1ca94dcbf4ca0a25fcfc407c7d16b4c0acb3656d56f0edadb75c10e3eaa949",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          376,
+          858
+        ],
+        "canvas": [
+          392,
+          874
+        ],
+        "bbox_area_ratio": 0.884743,
+        "alpha_ratio": 0.354402,
+        "largest_alpha_component_ratio": 0.994555,
+        "bbox_aspect": 0.427553,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c550",
       "render_id": "c550",
       "name": "贝伊",
@@ -8840,6 +12730,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c550_01",
+      "render_id": "c550_01",
+      "name": "贝伊",
+      "character": "贝伊",
+      "character_name": "贝伊",
+      "resource_id": "550",
+      "costume": "Radiant Rabbit",
+      "costume_name": "Radiant Rabbit",
+      "costume_id": "70007",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c550_01.png",
+      "png_sha256": "6c8b11b24610b02790558ff0868b2588451a9f2a63ed4837754c7e4ea68ceb1b",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          383,
+          876
+        ],
+        "canvas": [
+          399,
+          892
+        ],
+        "bbox_area_ratio": 0.886802,
+        "alpha_ratio": 0.314733,
+        "largest_alpha_component_ratio": 0.985237,
+        "bbox_aspect": 0.426744,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c551",
       "render_id": "c551",
       "name": "克雷伊",
@@ -8869,6 +12802,49 @@
         "alpha_ratio": 0.378426,
         "largest_alpha_component_ratio": 0.997496,
         "bbox_aspect": 0.5,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c551_01",
+      "render_id": "c551_01",
+      "name": "克雷伊",
+      "character": "克雷伊",
+      "character_name": "克雷伊",
+      "resource_id": "551",
+      "costume": "Cheer Up Training",
+      "costume_name": "Cheer Up Training",
+      "costume_id": "30063",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c551_01.png",
+      "png_sha256": "edf02c28610e4312bc07676037c04e128912a41b39c767c4ee479f98c39b9b59",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          588,
+          876
+        ],
+        "canvas": [
+          604,
+          892
+        ],
+        "bbox_area_ratio": 0.913046,
+        "alpha_ratio": 0.330021,
+        "largest_alpha_component_ratio": 0.782679,
+        "bbox_aspect": 0.665116,
         "subject_center": [
           0.5,
           0.5
@@ -8955,6 +12931,49 @@
         "alpha_ratio": 0.310861,
         "largest_alpha_component_ratio": 0.982477,
         "bbox_aspect": 0.632653,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c580_01",
+      "render_id": "c580_01",
+      "name": "潘托姆",
+      "character": "潘托姆",
+      "character_name": "潘托姆",
+      "resource_id": "580",
+      "costume": "Saint Thief",
+      "costume_name": "Saint Thief",
+      "costume_id": "130006",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c580_01.png",
+      "png_sha256": "a55b5807bfb9e11f799b60e75f442b79870e5e360140a8327abe0d77543922c6",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          658,
+          775
+        ],
+        "canvas": [
+          674,
+          791
+        ],
+        "bbox_area_ratio": 0.913988,
+        "alpha_ratio": 0.380041,
+        "largest_alpha_component_ratio": 0.988701,
+        "bbox_aspect": 0.84585,
         "subject_center": [
           0.5,
           0.5
@@ -9184,6 +13203,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c600_01",
+      "render_id": "c600_01",
+      "name": "敏特",
+      "character": "敏特",
+      "character_name": "敏特",
+      "resource_id": "600",
+      "costume": "Fresh Mint",
+      "costume_name": "Fresh Mint",
+      "costume_id": "30065",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c600_01.png",
+      "png_sha256": "cd2877e75b376c1941682844b1dc3cfc2c5a6b98785b81426e62851922bff1ea",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          255,
+          876
+        ],
+        "canvas": [
+          271,
+          892
+        ],
+        "bbox_area_ratio": 0.85028,
+        "alpha_ratio": 0.429376,
+        "largest_alpha_component_ratio": 0.998598,
+        "bbox_aspect": 0.277907,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c601",
       "render_id": "c601",
       "name": "普莉卡",
@@ -9213,6 +13275,49 @@
         "alpha_ratio": 0.393571,
         "largest_alpha_component_ratio": 0.997514,
         "bbox_aspect": 0.411687,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c601_01",
+      "render_id": "c601_01",
+      "name": "普莉卡",
+      "character": "普莉卡",
+      "character_name": "普莉卡",
+      "resource_id": "601",
+      "costume": "Cool Paprika",
+      "costume_name": "Cool Paprika",
+      "costume_id": "30066",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c601_01.png",
+      "png_sha256": "3a2fffaffb2f5f3d0e8587d0166fdc4824b18cc24864a5ddadbf2ecbbb0da945",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          275,
+          702
+        ],
+        "canvas": [
+          291,
+          718
+        ],
+        "bbox_area_ratio": 0.850367,
+        "alpha_ratio": 0.468321,
+        "largest_alpha_component_ratio": 0.981416,
+        "bbox_aspect": 0.377551,
         "subject_center": [
           0.5,
           0.5
@@ -9571,6 +13676,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c810_03",
+      "render_id": "c810_03",
+      "name": "2B",
+      "character": "2B",
+      "character_name": "2B",
+      "resource_id": "810",
+      "costume": "YoRHa Unofficial Waterfront Gear I",
+      "costume_name": "YoRHa Unofficial Waterfront Gear I",
+      "costume_id": "90005",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c810_03.png",
+      "png_sha256": "2a7e617538ce9b97977ce4185b2772f80d6fe1e9553a826d19d46fd30da2c7e2",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          570,
+          745
+        ],
+        "canvas": [
+          586,
+          761
+        ],
+        "bbox_area_ratio": 0.905639,
+        "alpha_ratio": 0.184296,
+        "largest_alpha_component_ratio": 0.999571,
+        "bbox_aspect": 0.759945,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c811",
       "render_id": "c811",
       "name": "A2",
@@ -9700,6 +13848,49 @@
       "suspects": []
     },
     {
+      "asset_id": "c811_03",
+      "render_id": "c811_03",
+      "name": "A2",
+      "character": "A2",
+      "character_name": "A2",
+      "resource_id": "811",
+      "costume": "YoRHa Unofficial Waterfront Gear Prototype",
+      "costume_name": "YoRHa Unofficial Waterfront Gear Prototype",
+      "costume_id": "90006",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c811_03.png",
+      "png_sha256": "3c3928388f6156d5dd1f96528cea25ed065e5faacf4fe874aec35abf098978d4",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          312,
+          874
+        ],
+        "canvas": [
+          328,
+          890
+        ],
+        "bbox_area_ratio": 0.869992,
+        "alpha_ratio": 0.316426,
+        "largest_alpha_component_ratio": 0.994734,
+        "bbox_aspect": 0.344988,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c812",
       "render_id": "c812",
       "name": "帕斯卡",
@@ -9786,6 +13977,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c820_01",
+      "render_id": "c820_01",
+      "name": "雷姆",
+      "character": "雷姆",
+      "character_name": "雷姆",
+      "resource_id": "820",
+      "costume": "Handy Maid",
+      "costume_name": "Handy Maid",
+      "costume_id": "110001",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c820_01.png",
+      "png_sha256": "cce17fcbe0c89107972b6101afa93ec827322af325837028ad4ba483338f8028",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          380,
+          832
+        ],
+        "canvas": [
+          396,
+          848
+        ],
+        "bbox_area_ratio": 0.884505,
+        "alpha_ratio": 0.389863,
+        "largest_alpha_component_ratio": 0.999666,
+        "bbox_aspect": 0.446078,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c820_02",
+      "render_id": "c820_02",
+      "name": "雷姆",
+      "character": "雷姆",
+      "character_name": "雷姆",
+      "resource_id": "820",
+      "costume": "Pure Blossom",
+      "costume_name": "Pure Blossom",
+      "costume_id": "110002",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c820_02.png",
+      "png_sha256": "408e2d23159511948778360492d297d97d45fabcac25acd22baa9dacb9b620fc",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          256,
+          828
+        ],
+        "canvas": [
+          272,
+          844
+        ],
+        "bbox_area_ratio": 0.848899,
+        "alpha_ratio": 0.390581,
+        "largest_alpha_component_ratio": 0.997062,
+        "bbox_aspect": 0.295567,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c821",
       "render_id": "c821",
       "name": "爱蜜莉雅",
@@ -9815,6 +14092,92 @@
         "alpha_ratio": 0.33013,
         "largest_alpha_component_ratio": 0.9892,
         "bbox_aspect": 0.705739,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c821_01",
+      "render_id": "c821_01",
+      "name": "爱蜜莉雅",
+      "character": "爱蜜莉雅",
+      "character_name": "爱蜜莉雅",
+      "resource_id": "821",
+      "costume": "Clumsy Maid",
+      "costume_name": "Clumsy Maid",
+      "costume_id": "110003",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c821_01.png",
+      "png_sha256": "d2c00c174e7bef19321594d2cd6ff521fe7eb74d96092811cd6dde367dc70c5c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          454,
+          816
+        ],
+        "canvas": [
+          470,
+          832
+        ],
+        "bbox_area_ratio": 0.896072,
+        "alpha_ratio": 0.404148,
+        "largest_alpha_component_ratio": 0.999463,
+        "bbox_aspect": 0.5475,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c821_02",
+      "render_id": "c821_02",
+      "name": "爱蜜莉雅",
+      "character": "爱蜜莉雅",
+      "character_name": "爱蜜莉雅",
+      "resource_id": "821",
+      "costume": "Spring Breeze",
+      "costume_name": "Spring Breeze",
+      "costume_id": "110004",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c821_02.png",
+      "png_sha256": "e8d2408397dffe1ea38a606a20003ab97646ff11621e845b18790526e4c50a10",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          526,
+          834
+        ],
+        "canvas": [
+          542,
+          850
+        ],
+        "bbox_area_ratio": 0.905535,
+        "alpha_ratio": 0.293773,
+        "largest_alpha_component_ratio": 0.989929,
+        "bbox_aspect": 0.623472,
         "subject_center": [
           0.5,
           0.5
@@ -9915,6 +14278,135 @@
       "suspects": []
     },
     {
+      "asset_id": "c830_01",
+      "render_id": "c830_01",
+      "name": "明日香",
+      "character": "明日香",
+      "character_name": "明日香",
+      "resource_id": "830",
+      "costume": "Asuka's School Uniform",
+      "costume_name": "Asuka's School Uniform",
+      "costume_id": "110005",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c830_01.png",
+      "png_sha256": "88b6b53e2b6b1660c1f6f9197490fbd2f9b4c1e72c49863b04963cb02bf1048c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          299,
+          876
+        ],
+        "canvas": [
+          315,
+          892
+        ],
+        "bbox_area_ratio": 0.866183,
+        "alpha_ratio": 0.409189,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.32907,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c830_02",
+      "render_id": "c830_02",
+      "name": "明日香",
+      "character": "明日香",
+      "character_name": "明日香",
+      "resource_id": "830",
+      "costume": "Cynical Street",
+      "costume_name": "Cynical Street",
+      "costume_id": "110008",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c830_02.png",
+      "png_sha256": "2589911ecbaf9813fabe369e2069e8f33c8bc49a18f436ed0f68b7638ad40244",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          345,
+          873
+        ],
+        "canvas": [
+          361,
+          889
+        ],
+        "bbox_area_ratio": 0.878553,
+        "alpha_ratio": 0.384992,
+        "largest_alpha_component_ratio": 0.995686,
+        "bbox_aspect": 0.383897,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c830_03",
+      "render_id": "c830_03",
+      "name": "明日香",
+      "character": "明日香",
+      "character_name": "明日香",
+      "resource_id": "830",
+      "costume": "Test Plugsuit",
+      "costume_name": "Test Plugsuit",
+      "costume_id": "110011",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c830_03.png",
+      "png_sha256": "3e535b4451d39c20bbf9d7dd83e9e83f98ed958ab8438105ebb70da230da83e1",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          442,
+          876
+        ],
+        "canvas": [
+          458,
+          892
+        ],
+        "bbox_area_ratio": 0.896763,
+        "alpha_ratio": 0.32157,
+        "largest_alpha_component_ratio": 0.997052,
+        "bbox_aspect": 0.495349,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c831",
       "render_id": "c831",
       "name": "零",
@@ -9958,6 +14450,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c831_01",
+      "render_id": "c831_01",
+      "name": "零",
+      "character": "零",
+      "character_name": "零",
+      "resource_id": "831",
+      "costume": "Rei's School Uniform",
+      "costume_name": "Rei's School Uniform",
+      "costume_id": "110006",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c831_01.png",
+      "png_sha256": "6a9a67043f8ad95d4a76a8fe87262dcd07915ba7a596b479bae6669ba33a9709",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          288,
+          666
+        ],
+        "canvas": [
+          304,
+          682
+        ],
+        "bbox_area_ratio": 0.852755,
+        "alpha_ratio": 0.426078,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.418462,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c831_02",
+      "render_id": "c831_02",
+      "name": "零",
+      "character": "零",
+      "character_name": "零",
+      "resource_id": "831",
+      "costume": "Peaceful Vacation",
+      "costume_name": "Peaceful Vacation",
+      "costume_id": "110009",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c831_02.png",
+      "png_sha256": "d2d92381739731b82c7e7aa1068c031e9cc6bbd7c9cb6f4c8cc02081a59122fa",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          325,
+          663
+        ],
+        "canvas": [
+          341,
+          679
+        ],
+        "bbox_area_ratio": 0.863453,
+        "alpha_ratio": 0.370033,
+        "largest_alpha_component_ratio": 0.99967,
+        "bbox_aspect": 0.477589,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c832",
       "render_id": "c832",
       "name": "真理",
@@ -9987,6 +14565,178 @@
         "alpha_ratio": 0.369075,
         "largest_alpha_component_ratio": 0.996009,
         "bbox_aspect": 0.265425,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c832_01",
+      "render_id": "c832_01",
+      "name": "真理",
+      "character": "真理",
+      "character_name": "真理",
+      "resource_id": "832",
+      "costume": "Final Battle: Mari",
+      "costume_name": "Final Battle: Mari",
+      "costume_id": "110016",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c832_01.png",
+      "png_sha256": "6a7411ad88d38a641c981bb0f0f2c94a7e409433ab7b9d2a01237fc98227cca2",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          239,
+          875
+        ],
+        "canvas": [
+          255,
+          891
+        ],
+        "bbox_area_ratio": 0.843102,
+        "alpha_ratio": 0.383724,
+        "largest_alpha_component_ratio": 0.99945,
+        "bbox_aspect": 0.259604,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c832_02",
+      "render_id": "c832_02",
+      "name": "真理",
+      "character": "真理",
+      "character_name": "真理",
+      "resource_id": "832",
+      "costume": "Leisure Travel",
+      "costume_name": "Leisure Travel",
+      "costume_id": "110010",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c832_02.png",
+      "png_sha256": "ed44c5db501eb093769192e969a189d66532387d9b276c194ee5104675febead",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          261,
+          876
+        ],
+        "canvas": [
+          277,
+          892
+        ],
+        "bbox_area_ratio": 0.852746,
+        "alpha_ratio": 0.379774,
+        "largest_alpha_component_ratio": 0.994356,
+        "bbox_aspect": 0.284884,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c832_03",
+      "render_id": "c832_03",
+      "name": "真理",
+      "character": "真理",
+      "character_name": "真理",
+      "resource_id": "832",
+      "costume": "Mari's School Uniform",
+      "costume_name": "Mari's School Uniform",
+      "costume_id": "110007",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c832_03.png",
+      "png_sha256": "0158bcd09d4c58ea4b6650cd1ee3eabdfc25dacfe86e21a82329456de195c32c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          245,
+          875
+        ],
+        "canvas": [
+          261,
+          891
+        ],
+        "bbox_area_ratio": 0.845883,
+        "alpha_ratio": 0.367425,
+        "largest_alpha_component_ratio": 0.997717,
+        "bbox_aspect": 0.266589,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c832_04",
+      "render_id": "c832_04",
+      "name": "真理",
+      "character": "真理",
+      "character_name": "真理",
+      "resource_id": "832",
+      "costume": "Mystery Muse",
+      "costume_name": "Mystery Muse",
+      "costume_id": "110017",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c832_04.png",
+      "png_sha256": "daf6e1620d1d6663bdf96a7dcc40c0e83ba3d149e8b310c24059739bc4214b9c",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          584,
+          876
+        ],
+        "canvas": [
+          600,
+          892
+        ],
+        "bbox_area_ratio": 0.912706,
+        "alpha_ratio": 0.436358,
+        "largest_alpha_component_ratio": 0.999792,
+        "bbox_aspect": 0.660465,
         "subject_center": [
           0.5,
           0.5
@@ -10087,6 +14837,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c834_01",
+      "render_id": "c834_01",
+      "name": "零（暂称）",
+      "character": "零（暂称）",
+      "character_name": "零（暂称）",
+      "resource_id": "834",
+      "costume": "Miss Lookalike from Village-3",
+      "costume_name": "Miss Lookalike from Village-3",
+      "costume_id": "110014",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c834_01.png",
+      "png_sha256": "2549ee1345a3db9ddfa41e5633ba8f4d28f6a53cf664c7b087381534253ccd4d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          356,
+          876
+        ],
+        "canvas": [
+          372,
+          892
+        ],
+        "bbox_area_ratio": 0.88119,
+        "alpha_ratio": 0.310842,
+        "largest_alpha_component_ratio": 0.999051,
+        "bbox_aspect": 0.395349,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c834_02",
+      "render_id": "c834_02",
+      "name": "零（暂称）",
+      "character": "零（暂称）",
+      "character_name": "零（暂称）",
+      "resource_id": "834",
+      "costume": "Soul Connect",
+      "costume_name": "Soul Connect",
+      "costume_id": "110015",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c834_02.png",
+      "png_sha256": "e6b6f663f0196cf45661e3ede11d1dddd9346a9b85f6578c8795bfae07ae87ad",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          474,
+          875
+        ],
+        "canvas": [
+          490,
+          891
+        ],
+        "bbox_area_ratio": 0.901125,
+        "alpha_ratio": 0.322002,
+        "largest_alpha_component_ratio": 0.983425,
+        "bbox_aspect": 0.533178,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c835",
       "render_id": "c835",
       "name": "明日香：WILLE",
@@ -10116,6 +14952,92 @@
         "alpha_ratio": 0.270581,
         "largest_alpha_component_ratio": 0.974086,
         "bbox_aspect": 0.472093,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c835_01",
+      "render_id": "c835_01",
+      "name": "明日香：WILLE",
+      "character": "明日香：WILLE",
+      "character_name": "明日香：WILLE",
+      "resource_id": "835",
+      "costume": "Final Battle: Asuka",
+      "costume_name": "Final Battle: Asuka",
+      "costume_id": "110012",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c835_01.png",
+      "png_sha256": "4c863c4d18dfc4e2a46ee1a951023e19f6e9d2cdf6d49f25b5f99526af2aedfd",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          442,
+          876
+        ],
+        "canvas": [
+          458,
+          892
+        ],
+        "bbox_area_ratio": 0.896763,
+        "alpha_ratio": 0.239974,
+        "largest_alpha_component_ratio": 0.937316,
+        "bbox_aspect": 0.495349,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c835_02",
+      "render_id": "c835_02",
+      "name": "明日香：WILLE",
+      "character": "明日香：WILLE",
+      "character_name": "明日香：WILLE",
+      "resource_id": "835",
+      "costume": "Ocean's Lament",
+      "costume_name": "Ocean's Lament",
+      "costume_id": "110013",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c835_02.png",
+      "png_sha256": "a02e33d90d01a16a7d5a8f6d48dba17f497cef11ffeb70f787bfee5bf62fc07f",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          398,
+          730
+        ],
+        "canvas": [
+          414,
+          746
+        ],
+        "bbox_area_ratio": 0.883125,
+        "alpha_ratio": 0.504682,
+        "largest_alpha_component_ratio": 0.9965,
+        "bbox_aspect": 0.535014,
         "subject_center": [
           0.5,
           0.5
@@ -10216,6 +15138,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c840_01",
+      "render_id": "c840_01",
+      "name": "艾达",
+      "character": "艾达",
+      "character_name": "艾达",
+      "resource_id": "840",
+      "costume": "Separate Ways",
+      "costume_name": "Separate Ways",
+      "costume_id": "110024",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c840_01.png",
+      "png_sha256": "424c3000bf06fd767418e1a7397fdfc883d59f89e003d0786fd86e8f215dec3b",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          416,
+          875
+        ],
+        "canvas": [
+          432,
+          891
+        ],
+        "bbox_area_ratio": 0.892672,
+        "alpha_ratio": 0.310144,
+        "largest_alpha_component_ratio": 0.99676,
+        "bbox_aspect": 0.465658,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c840_02",
+      "render_id": "c840_02",
+      "name": "艾达",
+      "character": "艾达",
+      "character_name": "艾达",
+      "resource_id": "840",
+      "costume": "Dress",
+      "costume_name": "Dress",
+      "costume_id": "110025",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c840_02.png",
+      "png_sha256": "f19a4811c066eb0e9e0b2ff86cabd76b9d6151ba640c339f0c2f6f9323c26888",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          410,
+          875
+        ],
+        "canvas": [
+          426,
+          891
+        ],
+        "bbox_area_ratio": 0.891666,
+        "alpha_ratio": 0.317059,
+        "largest_alpha_component_ratio": 0.995943,
+        "bbox_aspect": 0.458673,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c841",
       "render_id": "c841",
       "name": "吉儿",
@@ -10245,6 +15253,92 @@
         "alpha_ratio": 0.44665,
         "largest_alpha_component_ratio": 1.0,
         "bbox_aspect": 0.357895,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c841_01",
+      "render_id": "c841_01",
+      "name": "吉儿",
+      "character": "吉儿",
+      "character_name": "吉儿",
+      "resource_id": "841",
+      "costume": "Classic",
+      "costume_name": "Classic",
+      "costume_id": "110026",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c841_01.png",
+      "png_sha256": "c05a6177cb0c6f4afc6e806019332a47d918a319cf3e1eb803b35a82edcf5828",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          287,
+          775
+        ],
+        "canvas": [
+          303,
+          791
+        ],
+        "bbox_area_ratio": 0.858207,
+        "alpha_ratio": 0.445244,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.357049,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c841_02",
+      "render_id": "c841_02",
+      "name": "吉儿",
+      "character": "吉儿",
+      "character_name": "吉儿",
+      "resource_id": "841",
+      "costume": "Battle Suit",
+      "costume_name": "Battle Suit",
+      "costume_id": "110027",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c841_02.png",
+      "png_sha256": "a47ef7799c89ae92d83f79d311826c90dae4e3f2cd57f33fffa23b9ce6f423ce",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          304,
+          780
+        ],
+        "canvas": [
+          320,
+          796
+        ],
+        "bbox_area_ratio": 0.863819,
+        "alpha_ratio": 0.381541,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.376963,
         "subject_center": [
           0.5,
           0.5
@@ -10345,6 +15439,135 @@
       "suspects": []
     },
     {
+      "asset_id": "c850_01",
+      "render_id": "c850_01",
+      "name": "伊芙",
+      "character": "伊芙",
+      "character_name": "伊芙",
+      "resource_id": "850",
+      "costume": "Keyhole Dress",
+      "costume_name": "Keyhole Dress",
+      "costume_id": "110018",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c850_01.png",
+      "png_sha256": "9a31251ee63ae555e1b9e28c1dfc68b59cc454cfd58abe5d08a5d8698e729400",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          343,
+          876
+        ],
+        "canvas": [
+          359,
+          892
+        ],
+        "bbox_area_ratio": 0.878187,
+        "alpha_ratio": 0.313039,
+        "largest_alpha_component_ratio": 0.988985,
+        "bbox_aspect": 0.380233,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c850_02",
+      "render_id": "c850_02",
+      "name": "伊芙",
+      "character": "伊芙",
+      "character_name": "伊芙",
+      "resource_id": "850",
+      "costume": "Neurolink Suit",
+      "costume_name": "Neurolink Suit",
+      "costume_id": "110019",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c850_02.png",
+      "png_sha256": "6417ef8607881d69ff84f691fb6f603f4d8ace64aea87203313cae66f4d981d5",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          345,
+          876
+        ],
+        "canvas": [
+          361,
+          892
+        ],
+        "bbox_area_ratio": 0.878663,
+        "alpha_ratio": 0.310678,
+        "largest_alpha_component_ratio": 0.989387,
+        "bbox_aspect": 0.382558,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c850_03",
+      "render_id": "c850_03",
+      "name": "伊芙",
+      "character": "伊芙",
+      "character_name": "伊芙",
+      "resource_id": "850",
+      "costume": "Skin Suit",
+      "costume_name": "Skin Suit",
+      "costume_id": "110020",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c850_03.png",
+      "png_sha256": "71c79cfe31b1deb76a56f32dafe19367c545c624fba31ba89ab9f03841ec4ec4",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          474,
+          742
+        ],
+        "canvas": [
+          490,
+          758
+        ],
+        "bbox_area_ratio": 0.895235,
+        "alpha_ratio": 0.396591,
+        "largest_alpha_component_ratio": 0.993341,
+        "bbox_aspect": 0.630854,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c851",
       "render_id": "c851",
       "name": "蕾雯",
@@ -10374,6 +15597,92 @@
         "alpha_ratio": 0.194415,
         "largest_alpha_component_ratio": 0.993333,
         "bbox_aspect": 1.061327,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c851_01",
+      "render_id": "c851_01",
+      "name": "蕾雯",
+      "character": "蕾雯",
+      "character_name": "蕾雯",
+      "resource_id": "851",
+      "costume": "Planet Diving Suit (6th) V2",
+      "costume_name": "Planet Diving Suit (6th) V2",
+      "costume_id": "110021",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c851_01.png",
+      "png_sha256": "91e860f05835456e455ad51d3de21bd0aeb3002ea7f23ea917aef2a4d0445395",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          863,
+          816
+        ],
+        "canvas": [
+          879,
+          832
+        ],
+        "bbox_area_ratio": 0.926534,
+        "alpha_ratio": 0.189494,
+        "largest_alpha_component_ratio": 0.991831,
+        "bbox_aspect": 1.05875,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c851_02",
+      "render_id": "c851_02",
+      "name": "蕾雯",
+      "character": "蕾雯",
+      "character_name": "蕾雯",
+      "resource_id": "851",
+      "costume": "Midsummer Alice",
+      "costume_name": "Midsummer Alice",
+      "costume_id": "110022",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c851_02.png",
+      "png_sha256": "b10eaf19816c95eac65cef03afc6eea8363207c2d00cb64b95bc838a6d323e79",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          856,
+          808
+        ],
+        "canvas": [
+          872,
+          824
+        ],
+        "bbox_area_ratio": 0.925893,
+        "alpha_ratio": 0.189853,
+        "largest_alpha_component_ratio": 0.992185,
+        "bbox_aspect": 1.060606,
         "subject_center": [
           0.5,
           0.5
@@ -10474,6 +15783,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c860_01",
+      "render_id": "c860_01",
+      "name": "千束",
+      "character": "千束",
+      "character_name": "千束",
+      "resource_id": "860",
+      "costume": "DA Training Wear (First)",
+      "costume_name": "DA Training Wear (First)",
+      "costume_id": "110028",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c860_01.png",
+      "png_sha256": "804e9f7514fe2c5404bda0c44d7869280461a230fc6cee6a8e5cd7afd99a2657",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          575,
+          824
+        ],
+        "canvas": [
+          591,
+          840
+        ],
+        "bbox_area_ratio": 0.909822,
+        "alpha_ratio": 0.30052,
+        "largest_alpha_component_ratio": 0.997119,
+        "bbox_aspect": 0.691832,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c860_02",
+      "render_id": "c860_02",
+      "name": "千束",
+      "character": "千束",
+      "character_name": "千束",
+      "resource_id": "860",
+      "costume": "Red Spark Guitar",
+      "costume_name": "Red Spark Guitar",
+      "costume_id": "110029",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c860_02.png",
+      "png_sha256": "d6f5635a6b985aa91ab8479784af0a4851aefa243cbb4f9c1d69a46bd0dec887",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          441,
+          876
+        ],
+        "canvas": [
+          457,
+          892
+        ],
+        "bbox_area_ratio": 0.896616,
+        "alpha_ratio": 0.410939,
+        "largest_alpha_component_ratio": 0.990199,
+        "bbox_aspect": 0.494186,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c861",
       "render_id": "c861",
       "name": "泷奈",
@@ -10503,6 +15898,92 @@
         "alpha_ratio": 0.384397,
         "largest_alpha_component_ratio": 0.994436,
         "bbox_aspect": 0.405814,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c861_01",
+      "render_id": "c861_01",
+      "name": "泷奈",
+      "character": "泷奈",
+      "character_name": "泷奈",
+      "resource_id": "861",
+      "costume": "DA Training Wear (Second)",
+      "costume_name": "DA Training Wear (Second)",
+      "costume_id": "110030",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c861_01.png",
+      "png_sha256": "82b0430c9e1924cc2cade4ad8af4a5cbdda4b44c58944e219408d0ffcc5d1020",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          420,
+          876
+        ],
+        "canvas": [
+          436,
+          892
+        ],
+        "bbox_area_ratio": 0.893364,
+        "alpha_ratio": 0.428747,
+        "largest_alpha_component_ratio": 0.99536,
+        "bbox_aspect": 0.469767,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c861_02",
+      "render_id": "c861_02",
+      "name": "泷奈",
+      "character": "泷奈",
+      "character_name": "泷奈",
+      "resource_id": "861",
+      "costume": "Blue Pulse Bass",
+      "costume_name": "Blue Pulse Bass",
+      "costume_id": "110031",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c861_02.png",
+      "png_sha256": "602f551f36bfbd3abc43b5168cc021ced742cd6d5a787b8997fa34ff38c2b3d1",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          484,
+          876
+        ],
+        "canvas": [
+          500,
+          892
+        ],
+        "bbox_area_ratio": 0.902422,
+        "alpha_ratio": 0.336522,
+        "largest_alpha_component_ratio": 0.996154,
+        "bbox_aspect": 0.544186,
         "subject_center": [
           0.5,
           0.5
@@ -10603,6 +16084,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c870_01",
+      "render_id": "c870_01",
+      "name": "QUEEN（真）",
+      "character": "QUEEN（真）",
+      "character_name": "QUEEN（真）",
+      "resource_id": "870",
+      "costume": "Shujin Academy Student Council President",
+      "costume_name": "Shujin Academy Student Council President",
+      "costume_id": "110032",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c870_01.png",
+      "png_sha256": "33b3546f08f88736040850c86de80325e61c8f9daffb99d5da9129d96f81b323",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          492,
+          875
+        ],
+        "canvas": [
+          508,
+          891
+        ],
+        "bbox_area_ratio": 0.903356,
+        "alpha_ratio": 0.247422,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.554133,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c870_02",
+      "render_id": "c870_02",
+      "name": "QUEEN（真）",
+      "character": "QUEEN（真）",
+      "character_name": "QUEEN（真）",
+      "resource_id": "870",
+      "costume": "Queen's Pajamas (Ver. NIKKE Collabo)",
+      "costume_name": "Queen's Pajamas (Ver. NIKKE Collabo)",
+      "costume_id": "110033",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c870_02.png",
+      "png_sha256": "d3b3041fa5fd3c69e2ab2b1c3dd5878f3c4e1f9920be8d50764c2677b6d42523",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          328,
+          875
+        ],
+        "canvas": [
+          344,
+          891
+        ],
+        "bbox_area_ratio": 0.874403,
+        "alpha_ratio": 0.501811,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.363213,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c871",
       "render_id": "c871",
       "name": "雪子",
@@ -10632,6 +16199,92 @@
         "alpha_ratio": 0.311242,
         "largest_alpha_component_ratio": 0.988606,
         "bbox_aspect": 0.713514,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c871_01",
+      "render_id": "c871_01",
+      "name": "雪子",
+      "character": "雪子",
+      "character_name": "雪子",
+      "resource_id": "871",
+      "costume": "Amagi Inn Kimono",
+      "costume_name": "Amagi Inn Kimono",
+      "costume_id": "110034",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c871_01.png",
+      "png_sha256": "ec68fd5e6eed4848b5c4e7f9d7282a0106540ee956854e3929b481e62cd8e5cb",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          557,
+          753
+        ],
+        "canvas": [
+          573,
+          769
+        ],
+        "bbox_area_ratio": 0.904865,
+        "alpha_ratio": 0.342402,
+        "largest_alpha_component_ratio": 0.995929,
+        "bbox_aspect": 0.734057,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c871_02",
+      "render_id": "c871_02",
+      "name": "雪子",
+      "character": "雪子",
+      "character_name": "雪子",
+      "resource_id": "871",
+      "costume": "Winter Roomwear (Ver. NIKKE Collabo)",
+      "costume_name": "Winter Roomwear (Ver. NIKKE Collabo)",
+      "costume_id": "110035",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c871_02.png",
+      "png_sha256": "e1393a06b9114cbea009e9adc23ac2d2b3ea319cf57e35e31cee0112cdec456d",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          454,
+          754
+        ],
+        "canvas": [
+          470,
+          770
+        ],
+        "bbox_area_ratio": 0.893186,
+        "alpha_ratio": 0.308279,
+        "largest_alpha_component_ratio": 0.990212,
+        "bbox_aspect": 0.593496,
         "subject_center": [
           0.5,
           0.5

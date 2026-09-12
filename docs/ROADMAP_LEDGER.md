@@ -240,3 +240,11 @@
   5. 现场与安全审计：生成 `equipped_costume_resolution_audit.json`，针对用户账号当前装备皮肤的全部 5 位角色（银华 30049、红莲 110023、拉毗 20001、皇冠 30052、塞壬 30053）进行全覆盖审计，`fallback_to_default_risk = 0`；未映射皮肤严格降级中性占位图，绝对不冒充默认立绘。
   6. 角色卡复核与证据闭环：重新合成 `final-character-card.png`，人工视觉复核确认银华身穿白裙草帽夏日立绘，未培养数值状态完全保留；更新 `trace.json`、`before-crop.png`、`after-crop.png`、`worker-canvas.rgba`。
   7. 全量测试通过：本地全套 pytest `646 passed`（0 failed）；`serv` 容器内部真实 probe 校验通过，热路径零网络零动态 worker。PR #79 保持 PARTIAL，等待用户真实 QQ 验收。
+
+## PR #79 官方 Costume / Spine 178 全量收口（2026-09-12）
+
+- Universe 固定为 `docs/evidence/official_costume_inventory.json` 的 178 条；不再以 registry subset 作为分母。47 条已有映射保持冻结，包含 Crown、Siren、Eunhwa Day Off、Scarlet Racer's High 与 Rapi White Promise 回归。
+- 公开实名 poster 只用于服装身份视觉参考，明确禁止把 `poster/mi_cXXX_YY` 后缀直接当作 Spine ID；Rapi 与 Diesel 的编号偏移已加入回归测试。
+- 对剩余 131 条按 owner 建立候选集合，使用固定 Nikke-db commit `a2358b72bd1335c30737e46482a99947f3788bc7` 的完整 Git tree 核验 skel/atlas；服务器小批量 sparse 拉取并真实渲染，45 张 owner contact sheet 已实际查看，逐条 poster/render/sheet SHA-256 固化于 `costume_identity_manual_validation.json`。
+- 正式 registry 为 178 条独立 Spine asset，Costume ID、owner 与 render ID 均唯一；临时挂载新 registry 的服务器审计结果为默认 200/200、Costume 178/178、fallback risk 0。378 项结构视觉审计 suspect 0。
+- 生产数据目录已维护预渲染所需 PNG/manifest，但生产插件 registry 尚未切换；必须等待最终 full pytest 与最终 HEAD CI 后再同步 registry/restart/probe。用户 QQ 抽样前 PR 状态保持 `PARTIAL`，禁止 merge。

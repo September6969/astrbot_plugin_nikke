@@ -121,8 +121,8 @@ class VoiceCharacterAndCostumeTests(unittest.TestCase):
         self.assertEqual(res.status, "OWNER_MISMATCH")
         self.assertIn("不属于", res.message)
 
-        # 7. 未核验服装：10014 或任意未登记 ID -> 拒绝
-        res = self.costume_registry.resolve("10014", 10)
+        # 7. 任意未登记 ID -> 拒绝
+        res = self.costume_registry.resolve("999999", 10)
         self.assertFalse(res.ok)
         self.assertEqual(res.status, "UNVERIFIED_COSTUME")
         self.assertIn("未找到已核验服装", res.message)
@@ -140,7 +140,7 @@ class VoiceCharacterAndCostumeTests(unittest.TestCase):
         self.assertIn("20001", cids)
 
         drake_costumes = self.costume_registry.get_costumes_for_resource(101)
-        self.assertEqual([c.costume_id for c in drake_costumes], ["80001"])
+        self.assertEqual({c.costume_id for c in drake_costumes}, {"80001", "60002"})
 
 
 class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
@@ -226,7 +226,7 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(pref.spine_asset_id, "c101_01")
 
         # 选择未核验服装 -> 拒绝
-        results = [r async for r in self.plugin.voice_settings(event, "服装", "10014")]
+        results = [r async for r in self.plugin.voice_settings(event, "服装", "999999")]
         self.assertIn("未找到已核验服装", results[0])
 
     async def test_voice_settings_locale_clean_options(self):

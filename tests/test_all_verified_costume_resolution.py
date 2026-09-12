@@ -14,7 +14,6 @@ def get_manifest_assets() -> tuple[dict[str, Any] | None, Path | None]:
     candidates = [
         Path("/AstrBot/data/nikke/spine-manifest.json"),
         Path("/opt/nikke-bot/astrbot/data/nikke/spine-manifest.json"),
-        Path(__file__).parent.parent / "docs" / "evidence" / "spine_runtime_resolution_audit.json",
     ]
     for p in candidates:
         if p.is_file():
@@ -41,7 +40,7 @@ def costume_entries() -> list[dict]:
 
 
 def test_all_verified_costumes_resolve(provider: NikkeDbProvider, costume_entries: list[dict]):
-    assert len(costume_entries) == 47, f"Expected 47 verified costumes, got {len(costume_entries)}"
+    assert len(costume_entries) == 178, f"Expected 178 verified costumes, got {len(costume_entries)}"
     assets, manifest_path = get_manifest_assets()
 
     for entry in costume_entries:

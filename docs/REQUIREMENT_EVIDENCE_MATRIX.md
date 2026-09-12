@@ -80,3 +80,11 @@
 | Profile v0.4 | TODAY/OUTPOST/ROSTER/RECYCLE/COLLECTION/RESOURCES 紧凑分区，Tower 不使用 list length；8 项已知资源图标 verified，未知 type 不上卡 | `serv` 脱敏 shape 确认 4 项 Tower；授权只读数据隔离实渲染 `1200×1715`，底层 9 项、卡面 8 项，图标已实际查看 | `READY_FOR_RETEST`；真实 QQ 图片送达仍未在本 PR 部署验证 |
 | Campaign capture | 工具支持 1–4 有界请求并发、单写入器、jitter、退避与 source-aware resume；正式首轮 concurrency=3，错误清理 concurrency=1 | NORMAL 1785/1785、HARD 1787/1787；2699 available、873 unavailable、0 rate-limit/error/malformed；71 raw TID 100% resolved；10+10 replay 20/20 通过 | `READY_FOR_RETEST`；完整快照不提交，API 未提供显式 Costume，真实 QQ 客户端仍待维护者复测 |
 | Overall | PR #79 保持 OPEN/非 Draft；本地 full pytest 已完成一次：623 passed/481 subtests；后续只有文档与现场证据变化，未重复 full suite | 未修改 main、未 merge、未部署、未发送 QQ 消息 | `READY_FOR_RETEST`；最终提交以后续 GitHub CI 为跨版本回归依据 |
+
+## PR #79 Costume 178 全量收口增补（2026-09-12）
+
+| Requirement | Implementation / offline evidence | Server evidence | Status / boundary |
+|---|---|---|---|
+| Official Costume classification | 178 条 inventory、178 条 registry；47 existing + 131 manual contact-sheet validated；`MAPPING_MISSING=0`、`UNRESOLVED=0` | 临时挂载新 registry 后 resolver 178/178、owner/manifest/SHA/decode 全通过 | `READY_FOR_FINAL_CI`；QQ 只做抽样验收，不承担映射发现 |
+| Costume identity | 110 个 owner 公共实名页面、178 张 poster；45 张 owner 分组 sheet 实际查看；逐项记录页面、poster、render、sheet SHA-256 | 191/193 alternate tree asset 成功渲染；失败的 `c010_01` 为已知 Rapi_old，`c907_01` 不属于 official 178 owner universe | `IDENTITY_VERIFIED`；poster 后缀不作为 Spine 映射公式 |
+| Runtime / manifest / PNG | 新 registry 保持 alternate 不回退 default，render ID 全局唯一 | 默认 200/200 + Costume 178/178；fallback 0；378 项结构 suspect 0 | `READY_FOR_FINAL_CI`；生产 registry 尚未切换，需 CI 后部署 probe |
