@@ -247,4 +247,4 @@
 - 公开实名 poster 只用于服装身份视觉参考，明确禁止把 `poster/mi_cXXX_YY` 后缀直接当作 Spine ID；Rapi 与 Diesel 的编号偏移已加入回归测试。
 - 对剩余 131 条按 owner 建立候选集合，使用固定 Nikke-db commit `a2358b72bd1335c30737e46482a99947f3788bc7` 的完整 Git tree 核验 skel/atlas；服务器小批量 sparse 拉取并真实渲染，45 张 owner contact sheet 已实际查看，逐条 poster/render/sheet SHA-256 固化于 `costume_identity_manual_validation.json`。
 - 正式 registry 为 178 条独立 Spine asset，Costume ID、owner 与 render ID 均唯一；临时挂载新 registry 的服务器审计结果为默认 200/200、Costume 178/178、fallback risk 0。378 项结构视觉审计 suspect 0。
-- 生产数据目录已维护预渲染所需 PNG/manifest，但生产插件 registry 尚未切换；必须等待最终 full pytest 与最终 HEAD CI 后再同步 registry/restart/probe。用户 QQ 抽样前 PR 状态保持 `PARTIAL`，禁止 merge。
+- 提交 `103ebd3f3a881da51acaff7255dec57d370d2268` 的最终 HEAD CI 已全绿；生产插件 registry 已在备份后原子切换并重启。生产 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，启动日志无 registry 错误。用户 QQ 抽样前 PR 状态保持 `PARTIAL`，禁止 merge。

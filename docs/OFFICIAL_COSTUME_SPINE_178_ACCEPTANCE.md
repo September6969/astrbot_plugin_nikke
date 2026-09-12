@@ -22,8 +22,8 @@
 
 ## 服务器维护
 
-固定 Nikke-db commit：`a2358b72bd1335c30737e46482a99947f3788bc7`。候选按小批量 partial clone 拉取，atlas 路径逐项验证，并始终保留 5 GiB 空间门禁。预渲染 PNG/manifest 已进入服务器持久化数据目录，但新 178 registry 在最终 CI 前只挂载于临时 audit 目录，未改变当前 QQ 热路径。
+固定 Nikke-db commit：`a2358b72bd1335c30737e46482a99947f3788bc7`。候选按小批量 partial clone 拉取，atlas 路径逐项验证，并始终保留 5 GiB 空间门禁。预渲染 PNG/manifest 已进入服务器持久化数据目录。提交 `103ebd3f3a881da51acaff7255dec57d370d2268` 的 GitHub CI 全绿后，178 registry 已原子同步到生产插件并重启 AstrBot；旧 registry 已单独备份。
 
 ## 当前状态
 
-`PARTIAL`。代码完成后只执行一次最终 full pytest，再以最终 HEAD GitHub CI 为跨版本门槛。CI 通过后同步生产 registry、重启并执行 200+178 全量 probe；用户 QQ 最终抽样通过前不得 merge PR #79。
+`PARTIAL`。提交 `103ebd3f3a881da51acaff7255dec57d370d2268` 的 GitHub CI 已通过 Python 3.10--3.13、Node extension 与 Spine 4.0 headless worker；生产重启后的全量 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，插件启动日志无 registry 错误。用户 QQ 最终抽样通过前不得 merge PR #79。
