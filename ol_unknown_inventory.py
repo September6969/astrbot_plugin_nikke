@@ -50,6 +50,7 @@ class UnknownOlInventory:
                 entry = {
                     "raw_id": option_id,
                     "raw_key": key,
+                    "observed_raw_keys": {},
                     "occurrence": 0,
                     "first_seen": now,
                     "last_seen": now,
@@ -60,7 +61,26 @@ class UnknownOlInventory:
             entry["last_seen"] = now
             if entry.get("raw_key") is None and key is not None:
                 entry["raw_key"] = key
+            observed = entry.setdefault("observed_raw_keys", {})
+            if key is not None:
+                observed[key] = int(observed.get(key, 0)) + 1
             self._write_entries(entries)
+
+    def prune_known(self, known_option_ids: set[str]) -> list[str]:
+        """移除已由完整 OL 表确认的历史误报，不影响真正未知条目。"""
+        with self._lock:
+            entries = self._read_entries()
+            resolved = sorted(
+                key.removeprefix("id:") for key, row in entries.items()
+                if row.get("raw_id") in known_option_ids
+            )
+            if resolved:
+                entries = {
+                    key: row for key, row in entries.items()
+                    if row.get("raw_id") not in known_option_ids
+                }
+                self._write_entries(entries)
+            return resolved
 
     def _read_entries(self) -> dict[str, dict[str, Any]]:
         try:

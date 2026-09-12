@@ -201,7 +201,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         totals = {item.display_name: item.value for item in card.option_totals}
         self.assertAlmostEqual(totals["最大装弹数增加"], 2.0679)
         self.assertAlmostEqual(totals["蓄力速度增加"], 0.0228)
-        self.assertNotIn("蓄力伤害增加", totals)
+        self.assertAlmostEqual(totals["蓄力伤害增加"], 0.1463)
         charge_damage_unknown = [
             option
             for equipment in card.equipment.values()
@@ -209,13 +209,51 @@ class CharacterCardBuilderTests(unittest.TestCase):
             if option.raw_type == "StatChargeDamage"
         ]
         self.assertTrue(len(charge_damage_unknown) > 0)
-        self.assertTrue(all(item.display_name.startswith("未知词条 · ID ") for item in charge_damage_unknown))
+        self.assertTrue(all(item.display_name == "蓄力伤害增加" for item in charge_damage_unknown))
         option = CharacterCardBuilder._option_from_function({
             "function_type": "StatCriticalDamage", "function_value": 688,
             "function_value_type": "Percent",
         })
         self.assertEqual(option.display_name, "暴击伤害增加")
         self.assertAlmostEqual(option.value, 0.0688)
+
+    def test_known_integer_encoded_ol_regressions_keep_name_tier_and_percent(self):
+        builder = CharacterCardBuilder()
+        cases = {
+            "7000909": ("StatChargeDamage", 1040, "蓄力伤害增加", 9, 0.104),
+            "7001111": ("StatCritical", 571, "暴击率增加", 11, 0.0571),
+            "7001211": ("StatCriticalDamage", 1644, "暴击伤害增加", 11, 0.1644),
+        }
+        for option_id, (raw_type, raw_value, label, tier, value) in cases.items():
+            with self.subTest(option_id=option_id):
+                option = builder._option_from_effect(
+                    effect_id=option_id,
+                    functions=[{
+                        "function_type": raw_type,
+                        "function_value": raw_value,
+                        "function_value_type": "Integer",
+                    }],
+                    position=1,
+                )
+                self.assertEqual((option.display_name, option.tier, option.unit), (label, tier, "percent"))
+                self.assertAlmostEqual(option.value, value)
+
+    def test_known_ol_function_type_mismatch_keeps_authoritative_identity(self):
+        builder = CharacterCardBuilder()
+        with self.assertLogs("astrbot_plugin_nikke.card_builder", level="WARNING") as logs:
+            option = builder._option_from_effect(
+                effect_id="7001211",
+                functions=[{
+                    "function_type": "StatUnexpected",
+                    "function_value": 1644,
+                    "function_value_type": "Integer",
+                }],
+                position=1,
+            )
+        expected_label = builder.overload_tier_registry.resolve("7001211").label
+        self.assertEqual((option.display_name, option.tier, option.unit), (expected_label, 11, "percent"))
+        self.assertAlmostEqual(option.value, 0.1644)
+        self.assertTrue(any("OL_FUNCTION_TYPE_MISMATCH" in line for line in logs.output))
 
     def test_unequipped_slot_drops_stale_options_and_totals(self):
         fixture = load_fixture()

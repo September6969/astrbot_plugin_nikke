@@ -41,3 +41,14 @@ class UnknownOlInventoryTests(unittest.TestCase):
             inventory = UnknownOlInventory(path)
             inventory.observe(True, {"not": "scalar"})
             self.assertFalse(path.exists())
+
+    def test_known_ol_history_is_pruned_but_real_unknown_is_retained(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "ol_unknown_inventory.json"
+            inventory = UnknownOlInventory(path)
+            inventory.observe("7001211", "StatCriticalDamage")
+            inventory.observe("7999999", "StatUnknownFuture")
+            self.assertEqual(inventory.prune_known({"7001211"}), ["7001211"])
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual([entry["raw_id"] for entry in data["entries"]], ["7999999"])
+            self.assertEqual(data["entries"][0]["observed_raw_keys"], {"StatUnknownFuture": 1})

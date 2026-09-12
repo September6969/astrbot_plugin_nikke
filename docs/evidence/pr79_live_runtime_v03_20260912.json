@@ -98,17 +98,22 @@
     "identity_values_saved": false
   },
   "ol_live_remediation_20260913": {
-    "status": "PARTIAL",
+    "status": "RESOLVED_IN_CODE_PENDING_QQ",
     "source": "one authorized read-only character-details diagnostic, sanitized server-side",
     "unknown_before": [
       {"raw_id": "7001211", "raw_key": "StatCriticalDamage", "slot": "head", "ol_slot": 1, "value_kind": "unknown"},
       {"raw_id": "7000909", "raw_key": "StatChargeDamage", "slot": "arm", "ol_slot": 2, "value_kind": "unknown"},
       {"raw_id": "7001111", "raw_key": "StatCritical", "slot": "leg", "ol_slot": 1, "value_kind": "unknown"}
     ],
-    "display_after": "Unknown options preserve raw identity as '未知词条 · ID <raw_id>' with value '待确认'; no nearby stat or percentage unit is guessed.",
-    "inventory": "server-only ol_unknown_inventory.json stores raw ID/key, count, first/last seen and UNKNOWN_OL_OPTION without account identity.",
+    "display_after": "7000909/7001111/7001211 resolve through the authoritative OL tier registry and exact percent contract; only IDs absent from that registry show '未知词条 · ID <raw_id>' with value '待确认'.",
+    "inventory": "server-only ol_unknown_inventory.json now excludes known OL IDs, preserves true unknown ID/key observations and records raw-key occurrence conflicts without account identity.",
     "percent_contract": "1322 -> 0.1322 -> 13.22%; formatting depends on declared value_kind and never renderer magnitude inference.",
-    "real_qq_validation": false
+    "real_qq_validation": false,
+    "regression_resolution": {
+      "7000909": {"label": "蓄力伤害增加", "tier": 9, "raw_value": 1040, "display": "10.40%"},
+      "7001111": {"label": "暴击率增加", "tier": 11, "raw_value": 571, "display": "5.71%"},
+      "7001211": {"label": "暴击伤害增加", "tier": 11, "raw_value": 1644, "display": "16.44%"}
+    }
   },
   "spine_maintenance": {
     "source_repo": "https://github.com/Nikke-db/Nikke-db.github.io.git",

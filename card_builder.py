@@ -118,6 +118,10 @@ class CharacterCardBuilder:
             UnknownOlInventory(unknown_ol_inventory_path)
             if unknown_ol_inventory_path is not None else None
         )
+        if self.unknown_ol_inventory is not None:
+            self.unknown_ol_inventory.prune_known({
+                entry.state_effect_id for entry in self.overload_tier_registry.entries
+            })
 
     @staticmethod
     def _unknown_option_label(option_id: str | None, raw_type: str) -> str:
@@ -172,13 +176,34 @@ class CharacterCardBuilder:
         *,
         option_id: Any,
     ) -> EquipmentOption:
-        """有来源 registry 时使用其 label/formatter，否则保留旧合同。"""
+        """优先使用完整 OL 等级表；现场 registry 仅补充精确 formatter 证据。"""
         raw_type = str(function.get("function_type", "") or "Unknown")
         tier = self.overload_tier_registry.resolve(option_id)
         level = tier.level if tier is not None else _optional_int(function.get("level"), minimum=0)
         metadata = self.state_effect_registry.resolve(option_id, raw_type)
+        if metadata is None and tier is not None:
+            observed = self.state_effect_registry.resolve_option(option_id)
+            if observed is not None:
+                logger.warning(
+                    "OL_FUNCTION_TYPE_MISMATCH: id=%s expected=%s observed=%s",
+                    sanitize_log_text(str(option_id), max_length=32),
+                    sanitize_log_text(observed.function_type, max_length=80),
+                    sanitize_log_text(raw_type, max_length=80),
+                )
+                value, unit = observed.format_value(function.get("function_value", 0))
+                return EquipmentOption(
+                    raw_type=raw_type,
+                    display_name=tier.label,
+                    value=value,
+                    unit=unit,
+                    level=level,
+                    tier=level,
+                )
         if metadata is None:
             option = self._option_from_function(function)
+            # 完整 OL registry 已确认该 ID 时，不能因现场观测表缺项降级为未知。
+            if tier is not None:
+                option.display_name = tier.label
             option.level = level
             option.tier = level
             return option
@@ -223,7 +248,7 @@ class CharacterCardBuilder:
         if len(components) == 1:
             primary = components[0]
             display_name = primary.display_name
-            if primary.unit == "unknown":
+            if primary.unit == "unknown" and tier_metadata is None:
                 display_name = self._unknown_option_label(option_id, primary.raw_type)
             return EquipmentOption(
                 raw_type=primary.raw_type,
@@ -240,7 +265,7 @@ class CharacterCardBuilder:
 
         names = list(dict.fromkeys(
             self._unknown_option_label(option_id, component.raw_type)
-            if component.unit == "unknown" else component.display_name
+            if component.unit == "unknown" and tier_metadata is None else component.display_name
             for component in components
         ))
         return EquipmentOption(
@@ -296,7 +321,7 @@ class CharacterCardBuilder:
                 item.options.append(option)
                 if self.unknown_ol_inventory is not None:
                     for component in option.components or (option,):
-                        if component.unit == "unknown":
+                        if component.unit == "unknown" and self.overload_tier_registry.resolve(option.option_id) is None:
                             self.unknown_ol_inventory.observe(option.option_id, component.raw_type)
                 for component in option.components or (option,):
                     if component.unit in {"percent", "flat"}:
