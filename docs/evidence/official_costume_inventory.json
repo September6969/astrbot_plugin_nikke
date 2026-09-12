@@ -12,9 +12,9 @@
   },
   "statistics": {
     "total_official_costumes": 178,
-    "verified_supported": 42,
-    "official_unmapped": 136,
-    "verified_coverage_percent": 23.6
+    "verified_supported": 47,
+    "official_unmapped": 131,
+    "verified_coverage_percent": 26.4
   },
   "costumes": [
     {
@@ -27,7 +27,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c082_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "10002",
@@ -39,7 +39,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c142_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "10003",
@@ -51,7 +51,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c201_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "10004",
@@ -63,7 +63,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c131_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "10005",
@@ -75,7 +75,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c010_03",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "10006",
@@ -87,7 +87,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c350_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "20001",
@@ -99,7 +99,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c010_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30001",
@@ -111,7 +111,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c011_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30002",
@@ -123,7 +123,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c030_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30003",
@@ -135,7 +135,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c070_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30004",
@@ -147,7 +147,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c102_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30006",
@@ -159,7 +159,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c072_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30007",
@@ -171,7 +171,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c181_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30008",
@@ -183,7 +183,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c160_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30009",
@@ -195,7 +195,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c170_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30010",
@@ -207,7 +207,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c212_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30011",
@@ -219,7 +219,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c141_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30012",
@@ -231,7 +231,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c080_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30013",
@@ -243,7 +243,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c430_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30014",
@@ -255,7 +255,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c800_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30015",
@@ -267,7 +267,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c191_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30016",
@@ -279,7 +279,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c090_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30017",
@@ -291,7 +291,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c282_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30018",
@@ -303,7 +303,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c260_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30019",
@@ -315,7 +315,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c070_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "40001",
@@ -327,7 +327,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c090_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "40002",
@@ -339,7 +339,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c210_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "50001",
@@ -351,7 +351,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c150_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "50002",
@@ -363,7 +363,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c140_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "50003",
@@ -375,7 +375,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c352_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "50004",
@@ -387,7 +387,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c202_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "60001",
@@ -399,7 +399,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c022_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "70001",
@@ -411,7 +411,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c112_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "70002",
@@ -423,7 +423,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c200_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "80001",
@@ -435,7 +435,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c101_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "90001",
@@ -447,7 +447,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c810_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "90002",
@@ -459,7 +459,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c810_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "90003",
@@ -471,7 +471,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c811_01",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "90004",
@@ -483,7 +483,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c811_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "100001",
@@ -495,7 +495,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c212_02",
       "verified_at": "2026-09-10",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "10014",
@@ -711,7 +711,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c095_01",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "60002",
@@ -987,7 +987,7 @@
       "spine_mode": "independent_asset",
       "render_id": "c222_01",
       "verified_at": "2026-09-12",
-      "notes": "Verified in costume registry"
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "120003",
@@ -1247,11 +1247,11 @@
       "character_name": "Crown",
       "costume_name": "Glorious Flower",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c330_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "120001",
@@ -1259,11 +1259,11 @@
       "character_name": "Crown",
       "costume_name": "Naked King",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c330_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "10010",
@@ -1595,11 +1595,11 @@
       "character_name": "Little Mermaid",
       "costume_name": "Shell Princess",
       "costume_index": 3,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c513_03",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30053",
@@ -1607,11 +1607,11 @@
       "character_name": "Little Mermaid",
       "costume_name": "Beautiful Bubble",
       "costume_index": 2,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c513_02",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "50016",
@@ -1619,11 +1619,11 @@
       "character_name": "Little Mermaid",
       "costume_name": "Abyss Flower",
       "costume_index": 1,
-      "classification": "OFFICIAL_UNMAPPED",
-      "spine_mode": "unresolved",
-      "render_id": null,
-      "verified_at": null,
-      "notes": "Official costume known from table; Spine asset mapping unverified or missing upstream"
+      "classification": "VERIFIED_SUPPORTED",
+      "spine_mode": "independent_asset",
+      "render_id": "c513_01",
+      "verified_at": "2026-09-12",
+      "notes": "Verified in costume registry and rendered in production"
     },
     {
       "costume_id": "30041",

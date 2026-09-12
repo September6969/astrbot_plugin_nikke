@@ -27,7 +27,9 @@
       "expected_spine_asset": "c095_01",
       "render_matches_expected": true,
       "falls_back_to_default": false,
-      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET"
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET",
+      "safety_status": "PASS",
+      "support_status": "PASS"
     },
     {
       "character_name_cn": "红莲",
@@ -50,7 +52,9 @@
       "expected_spine_asset": "c222_01",
       "render_matches_expected": true,
       "falls_back_to_default": false,
-      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET"
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET",
+      "safety_status": "PASS",
+      "support_status": "PASS"
     },
     {
       "character_name_cn": "拉毗",
@@ -73,7 +77,9 @@
       "expected_spine_asset": "c010_02",
       "render_matches_expected": true,
       "falls_back_to_default": false,
-      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET"
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET",
+      "safety_status": "PASS",
+      "support_status": "PASS"
     },
     {
       "character_name_cn": "皇冠",
@@ -88,15 +94,17 @@
         "source": "detail.costume_tid"
       },
       "costume_token": {
-        "state": "unknown",
-        "token": "unknown:30052"
+        "state": "known",
+        "token": "known:30052:c330_02"
       },
       "default_render_id": "c330",
-      "equipped_render_id": "missing",
-      "expected_spine_asset": "missing",
+      "equipped_render_id": "c330_02",
+      "expected_spine_asset": "c330_02",
       "render_matches_expected": true,
       "falls_back_to_default": false,
-      "resolution_verdict": "CORRECT_PLACEHOLDER_FOR_UNMAPPED_SKIN"
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET",
+      "safety_status": "PASS",
+      "support_status": "PASS"
     },
     {
       "character_name_cn": "塞壬",
@@ -111,15 +119,17 @@
         "source": "detail.costume_tid"
       },
       "costume_token": {
-        "state": "unknown",
-        "token": "unknown:30053"
+        "state": "known",
+        "token": "known:30053:c513_02"
       },
       "default_render_id": "c513",
-      "equipped_render_id": "missing",
-      "expected_spine_asset": "missing",
+      "equipped_render_id": "c513_02",
+      "expected_spine_asset": "c513_02",
       "render_matches_expected": true,
       "falls_back_to_default": false,
-      "resolution_verdict": "CORRECT_PLACEHOLDER_FOR_UNMAPPED_SKIN"
+      "resolution_verdict": "CORRECT_ALTERNATE_SPINE_ASSET",
+      "safety_status": "PASS",
+      "support_status": "PASS"
     }
   ]
 }

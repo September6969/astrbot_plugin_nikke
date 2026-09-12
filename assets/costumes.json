@@ -565,6 +565,71 @@
         "asset_id": "c095_01",
         "skin_name": null
       }
+    },
+    {
+      "costume_id": "30052",
+      "character_resource_id": "330",
+      "costume_name": "Glorious Flower",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-12",
+      "spine": {
+        "mode": "independent_asset",
+        "asset_id": "c330_02",
+        "skin_name": null
+      }
+    },
+    {
+      "costume_id": "120001",
+      "character_resource_id": "330",
+      "costume_name": "Naked King",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-12",
+      "spine": {
+        "mode": "independent_asset",
+        "asset_id": "c330_01",
+        "skin_name": null
+      }
+    },
+    {
+      "costume_id": "30053",
+      "character_resource_id": "513",
+      "costume_name": "Beautiful Bubble",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-12",
+      "spine": {
+        "mode": "independent_asset",
+        "asset_id": "c513_02",
+        "skin_name": null
+      }
+    },
+    {
+      "costume_id": "50016",
+      "character_resource_id": "513",
+      "costume_name": "Abyss Flower",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-12",
+      "spine": {
+        "mode": "independent_asset",
+        "asset_id": "c513_01",
+        "skin_name": null
+      }
+    },
+    {
+      "costume_id": "10016",
+      "character_resource_id": "513",
+      "costume_name": "Shell Princess",
+      "source": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+      "source_sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+      "verified_at": "2026-09-12",
+      "spine": {
+        "mode": "independent_asset",
+        "asset_id": "c513_03",
+        "skin_name": null
+      }
     }
   ]
 }

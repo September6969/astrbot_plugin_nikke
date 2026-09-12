@@ -3,7 +3,7 @@
   "render_success_is_visual_pass": false,
   "visual_validated": false,
   "automatic_check": "Structural heuristics only; human QQ/card validation remains required.",
-  "total": 242,
+  "total": 247,
   "breakdown": {
     "default": {
       "total": 200,
@@ -12,8 +12,8 @@
       "visual_validated": false
     },
     "costume": {
-      "total": 42,
-      "auto_clear": 42,
+      "total": 47,
+      "auto_clear": 47,
       "suspect": 0,
       "visual_validated": false
     }
@@ -47,23 +47,23 @@
     },
     {
       "name": "spine-contact-sheet-07.png",
-      "sha256": "5a87e66894fbf82429bc5b27fc7706ff8a3bff2df0afdd871c206f43a2b0c6cb"
+      "sha256": "0f40fe3a3575907a2bdde8bb86eb50c994b72a045067043665377318a31509f3"
     },
     {
       "name": "spine-contact-sheet-08.png",
-      "sha256": "0dcba9898b37a5e31d6cdef2076d104cd06d560c38d3fa46e8af132f1359a1ae"
+      "sha256": "bb25a5db390b2428cde6a2a6598f2230a7b6394ee0d21235855de31b02fb3518"
     },
     {
       "name": "spine-contact-sheet-09.png",
-      "sha256": "aec64bf1344ac3f1b1e3d889b98b8c1347d2ebb5176358193129bb0cefccd125"
+      "sha256": "7b6182e548bc13788b95cacd456ae8e5b99d0d165c00d7010bdc479c3f50289d"
     },
     {
       "name": "spine-contact-sheet-10.png",
-      "sha256": "7960d224427f48ec0941f82330907fbde26730b9a60391ea465810bec4efb5c3"
+      "sha256": "139261aa88c88b40a8c2bf32cd726e93a5c10f0ac4c61a48a5077752be5f6d05"
     },
     {
       "name": "spine-contact-sheet-11.png",
-      "sha256": "5aa75620041c81d86efe21f261634c53a82004c7d4877971b7634d7bedbe1219"
+      "sha256": "6735029d1fcfaa0473dd3640a95fb9f275c9ab712e77648be4a3f17bc06a1a7d"
     }
   ],
   "assets": [
@@ -6819,6 +6819,92 @@
       "suspects": []
     },
     {
+      "asset_id": "c330_01",
+      "render_id": "c330_01",
+      "name": "皇冠",
+      "character": "皇冠",
+      "character_name": "皇冠",
+      "resource_id": "330",
+      "costume": "Naked King",
+      "costume_name": "Naked King",
+      "costume_id": "120001",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c330_01.png",
+      "png_sha256": "77aeda059cfbb138ad0254f70de3f1e07a94de0a8bc0a9ce3bf259a3d68cdc6b",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          722,
+          857
+        ],
+        "canvas": [
+          738,
+          873
+        ],
+        "bbox_area_ratio": 0.921574,
+        "alpha_ratio": 0.376402,
+        "largest_alpha_component_ratio": 0.996922,
+        "bbox_aspect": 0.839477,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c330_02",
+      "render_id": "c330_02",
+      "name": "皇冠",
+      "character": "皇冠",
+      "character_name": "皇冠",
+      "resource_id": "330",
+      "costume": "Glorious Flower",
+      "costume_name": "Glorious Flower",
+      "costume_id": "30052",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c330_02.png",
+      "png_sha256": "af25cc78a62bf579362f3ca772be1f37e60ed314534dea9acac33670fd8ef43f",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          748,
+          848
+        ],
+        "canvas": [
+          764,
+          864
+        ],
+        "bbox_area_ratio": 0.922629,
+        "alpha_ratio": 0.372491,
+        "largest_alpha_component_ratio": 0.991282,
+        "bbox_aspect": 0.879808,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
       "asset_id": "c331",
       "render_id": "c331",
       "name": "钟鸣",
@@ -8353,6 +8439,135 @@
         "alpha_ratio": 0.446114,
         "largest_alpha_component_ratio": 0.994393,
         "bbox_aspect": 0.978923,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c513_01",
+      "render_id": "c513_01",
+      "name": "小美人鱼",
+      "character": "小美人鱼",
+      "character_name": "小美人鱼",
+      "resource_id": "513",
+      "costume": "Abyss Flower",
+      "costume_name": "Abyss Flower",
+      "costume_id": "50016",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c513_01.png",
+      "png_sha256": "cf3338c2aa5cb6cce8884841315c7a76ae194e0d0049ba6b87be5bb027b19cf3",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          849,
+          876
+        ],
+        "canvas": [
+          865,
+          892
+        ],
+        "bbox_area_ratio": 0.928458,
+        "alpha_ratio": 0.684353,
+        "largest_alpha_component_ratio": 0.982789,
+        "bbox_aspect": 0.968605,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c513_02",
+      "render_id": "c513_02",
+      "name": "小美人鱼",
+      "character": "小美人鱼",
+      "character_name": "小美人鱼",
+      "resource_id": "513",
+      "costume": "Beautiful Bubble",
+      "costume_name": "Beautiful Bubble",
+      "costume_id": "30053",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c513_02.png",
+      "png_sha256": "714bfcba1a8bd7c156254471089d9c2230b3dc14d937a286eb23dad286ed2453",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          528,
+          876
+        ],
+        "canvas": [
+          544,
+          892
+        ],
+        "bbox_area_ratio": 0.907412,
+        "alpha_ratio": 0.535567,
+        "largest_alpha_component_ratio": 0.998691,
+        "bbox_aspect": 0.595349,
+        "subject_center": [
+          0.5,
+          0.5
+        ],
+        "margins": {
+          "left": 16,
+          "top": 16,
+          "right": 16,
+          "bottom": 16
+        }
+      },
+      "suspects": []
+    },
+    {
+      "asset_id": "c513_03",
+      "render_id": "c513_03",
+      "name": "小美人鱼",
+      "character": "小美人鱼",
+      "character_name": "小美人鱼",
+      "resource_id": "513",
+      "costume": "Shell Princess",
+      "costume_name": "Shell Princess",
+      "costume_id": "10016",
+      "runtime": "4.1",
+      "kind": "costume",
+      "path": "/AstrBot/data/nikke/spine-rendered/c513_03.png",
+      "png_sha256": "479da371b279b0c6a5bd664a2212af8a54946d8669a6af45979b4c7c47aa98b7",
+      "metrics": {
+        "empty": false,
+        "bbox": [
+          16,
+          16,
+          641,
+          875
+        ],
+        "canvas": [
+          657,
+          891
+        ],
+        "bbox_area_ratio": 0.917128,
+        "alpha_ratio": 0.498877,
+        "largest_alpha_component_ratio": 1.0,
+        "bbox_aspect": 0.72759,
         "subject_center": [
           0.5,
           0.5

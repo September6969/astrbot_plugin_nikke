@@ -41,7 +41,7 @@ def costume_entries() -> list[dict]:
 
 
 def test_all_verified_costumes_resolve(provider: NikkeDbProvider, costume_entries: list[dict]):
-    assert len(costume_entries) == 42, f"Expected 42 verified costumes, got {len(costume_entries)}"
+    assert len(costume_entries) == 47, f"Expected 47 verified costumes, got {len(costume_entries)}"
     assets, manifest_path = get_manifest_assets()
 
     for entry in costume_entries:
