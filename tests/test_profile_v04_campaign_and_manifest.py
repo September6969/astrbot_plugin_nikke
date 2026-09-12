@@ -497,6 +497,45 @@ class CampaignCaptureTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(normal_line["total_combat"], 150)
             self.assertEqual(normal_line["members"][0]["costume_id"], "10005")
 
+    async def test_bounded_concurrency_keeps_single_writer_snapshot_complete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stage_file = root / "stages.json"
+            stage_file.write_text(json.dumps({
+                "NORMAL": {"1": {f"1-{index}": 6001000 + index for index in range(1, 7)}},
+                "HARD": {},
+            }), encoding="utf-8")
+
+            class ConcurrentClient:
+                def __init__(self):
+                    self.active = 0
+                    self.maximum = 0
+
+                async def get_main_quest_clear_lineup(self, account, stage_id, area_id):
+                    self.active += 1
+                    self.maximum = max(self.maximum, self.active)
+                    await asyncio.sleep(0.01)
+                    self.active -= 1
+                    return {"code": 1300017, "data": None}
+
+            client = ConcurrentClient()
+            result = await capture.capture(
+                root / "data", root / "out", stage_file=stage_file,
+                account={"area_id": "1"}, client=client, sleep=AsyncMock(),
+                jitter=lambda *_: 0, concurrency=3,
+            )
+            rows = (root / "out" / capture.NORMAL_SNAPSHOT).read_text(encoding="utf-8").splitlines()
+            self.assertEqual(client.maximum, 3)
+            self.assertEqual(result["request_count"], 6)
+            self.assertEqual(len(rows), 6)
+            self.assertEqual(len({json.loads(row)["stage_id"] for row in rows}), 6)
+
+            with self.assertRaisesRegex(ValueError, "1–4"):
+                await capture.capture(
+                    root / "data", root / "invalid", stage_file=stage_file,
+                    account={"area_id": "1"}, client=client, concurrency=5,
+                )
+
     async def test_resume_force_and_rate_limit_backoff(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

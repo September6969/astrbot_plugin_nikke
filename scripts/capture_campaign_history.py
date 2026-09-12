@@ -652,9 +652,12 @@ async def capture(
     sleep: Callable[[float], Awaitable[Any]] = asyncio.sleep,
     jitter: Callable[[float, float], float] = random.uniform,
     max_rate_retries: int = len(RATE_LIMIT_BACKOFF),
+    concurrency: int = 1,
     plugin_version: str = "",
 ) -> dict[str, Any]:
     """执行一次只读抓取并返回不含凭证的摘要。"""
+    if isinstance(concurrency, bool) or not isinstance(concurrency, int) or not 1 <= concurrency <= 4:
+        raise ValueError("Campaign 并发数必须是 1–4 的整数")
     if force:
         resume = False
     data_dir = Path(data_dir)
@@ -709,16 +712,16 @@ async def capture(
     last_request = False
     active_client = client or BlaBlaClient()
 
+    pending_stages: list[CampaignStage] = []
     for stage in stages:
         key = _stage_key(stage.mode, stage.stage_id)
         existing = rows_by_mode[stage.mode].get(key)
         if resume and not force and existing and existing.get("status") in COMPLETED_STATUSES:
             skipped_count += 1
             continue
-        if last_request:
-            await sleep(float(jitter(0.8, 1.5)))
-        last_request = True
-        request_count += 1
+        pending_stages.append(stage)
+
+    async def query_stage(stage: CampaignStage):
         response, error, rate_limited = await _query_with_rate_limit(
             active_client,
             account,
@@ -731,10 +734,31 @@ async def capture(
             snapshot = make_exception_snapshot(stage, error)
         else:
             snapshot = make_snapshot(stage, response, builder=history_builder)
-        rows_by_mode[stage.mode][key] = snapshot
+        return stage, snapshot, rate_limited
+
+    # 请求有限并发，快照仍由当前协程串行写入，避免任务或进程争写 JSONL。
+    for offset in range(0, len(pending_stages), concurrency):
+        batch = pending_stages[offset:offset + concurrency]
+        tasks = []
+        for stage in batch:
+            if last_request:
+                await sleep(float(jitter(0.8, 1.5)))
+            last_request = True
+            request_count += 1
+            tasks.append(asyncio.create_task(query_stage(stage)))
+        results = await asyncio.gather(*tasks)
+        batch_rate_limited = False
+        for stage, snapshot, rate_limited in results:
+            key = _stage_key(stage.mode, stage.stage_id)
+            rows_by_mode[stage.mode][key] = snapshot
+            batch_rate_limited = (
+                batch_rate_limited
+                or rate_limited
+                or snapshot.get("status") == "rate_limited"
+            )
         _write_jsonl(normal_path, rows_by_mode["NORMAL"].values())
         _write_jsonl(hard_path, rows_by_mode["HARD"].values())
-        if rate_limited or snapshot.get("status") == "rate_limited":
+        if batch_rate_limited:
             stopped_reason = "RATE_LIMITED"
             break
 
@@ -822,6 +846,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--resume", action="store_true", help="跳过已有 AVAILABLE/UNAVAILABLE 快照")
     parser.add_argument("--force", action="store_true", help="重抓筛选范围内的快照")
     parser.add_argument("--max-rate-retries", type=int, default=len(RATE_LIMIT_BACKOFF))
+    parser.add_argument("--concurrency", type=int, choices=range(1, 5), default=1, help="有界只读请求并发数（1–4）")
     return parser.parse_args()
 
 
@@ -844,6 +869,7 @@ async def _main() -> int:
         force=args.force,
         stage_file=args.stage_file,
         max_rate_retries=max(0, args.max_rate_retries),
+        concurrency=args.concurrency,
     )
     print(json.dumps(summary, ensure_ascii=False))
     return 0 if not summary["stopped_reason"] else 2
