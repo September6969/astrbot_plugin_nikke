@@ -7,6 +7,13 @@
 - 既有 47 条映射全部冻结；新增 131 条使用 owner 分组实名 poster 与真实 Spine `idle@t=0` contact sheet 人工核验。
 - 默认角色保持 200/200；官方 Costume resolver、manifest、PNG、SHA-256 与 decode 为 178/178；错误回退原皮为 0。
 
+## 提交边界
+
+- `implementation_head`：`103ebd3f3a881da51acaff7255dec57d370d2268`，完成 178 registry、映射、运行时审计与测试实现。
+- `evidence_head`：`d258a29`，修正 official inventory 最终分类并加入跨 evidence 一致性 invariant。
+- `latest_ci_head`：以 PR #79 当前最终 HEAD 的 required checks 为准；最终 run 与完整 SHA 记录在 PR body，不能沿用旧提交的 CI。
+- `production_head`：runtime 实现未因本轮 evidence 修正而改变；生产只同步了 `implementation_head` 的 registry/manifest 内容，不能把后续纯 evidence/test 提交冒充为已部署代码。
+
 ## 关键证据
 
 - `docs/evidence/costume_identity_snapshot.json`：110 个 owner 页面与 178 个实名 poster identity。
@@ -26,4 +33,4 @@
 
 ## 当前状态
 
-`PARTIAL`。提交 `103ebd3f3a881da51acaff7255dec57d370d2268` 的 GitHub CI 已通过 Python 3.10--3.13、Node extension 与 Spine 4.0 headless worker；生产重启后的全量 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，插件启动日志无 registry 错误。用户 QQ 最终抽样通过前不得 merge PR #79。
+`PARTIAL`。本轮 inventory 一致性修正后的本地定向测试为 17 passed，最终 full pytest 为 660 passed、484 subtests passed；compileall 与 diff check 通过。生产重启后的全量 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，插件启动日志无 registry 错误。最终 HEAD CI 与用户 QQ 抽样通过前不得 merge PR #79。
