@@ -13,6 +13,7 @@ import argparse
 import asyncio
 import datetime as dt
 import hashlib
+import importlib.util
 import json
 import random
 import re
@@ -28,6 +29,31 @@ from typing import Any, Awaitable, Callable, Iterable
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT.parent) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT.parent))
+
+
+def _load_current_worktree_package() -> None:
+    """脚本直接运行时，优先加载当前 worktree 而不是同级旧目录。"""
+    package_name = "astrbot_plugin_nikke"
+    package_init = REPO_ROOT / "__init__.py"
+    if REPO_ROOT.name == package_name or not package_init.is_file():
+        return
+    loaded = sys.modules.get(package_name)
+    loaded_paths = getattr(loaded, "__path__", ()) if loaded is not None else ()
+    if any(Path(path).resolve() == REPO_ROOT for path in loaded_paths):
+        return
+    spec = importlib.util.spec_from_file_location(
+        package_name,
+        package_init,
+        submodule_search_locations=[str(REPO_ROOT)],
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError("无法加载当前 worktree 的插件包")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[package_name] = module
+    spec.loader.exec_module(module)
+
+
+_load_current_worktree_package()
 
 from astrbot_plugin_nikke.campaign_history_builder import CampaignHistoryBuilder
 from astrbot_plugin_nikke.campaign_history_models import ClearLineupStatus

@@ -53,14 +53,24 @@ df -h "$DATA_ROOT"
 du -sh "$DATA_ROOT" 2>/dev/null || true
 check_disk_capacity "before-clone"
 
+fresh_checkout=0
 if [[ ! -d "$DB_ROOT/.git" ]]; then
   mkdir -p "$(dirname -- "$DB_ROOT")"
   git clone --depth 1 --filter=blob:none --no-checkout "$SOURCE_REPO" "$DB_ROOT"
+  fresh_checkout=1
 fi
 
-if [[ -n "$(git -C "$DB_ROOT" status --porcelain)" ]]; then
-  echo "Nikke-db checkout 存在未提交改动，停止以保护本地维护状态" >&2
-  exit 2
+if [[ "$fresh_checkout" -eq 0 && -n "$(git -C "$DB_ROOT" status --porcelain)" ]]; then
+  # 中断发生在 no-checkout 初始阶段时，允许恢复；其余脏状态继续保护现场。
+  tracked_count=$(git -C "$DB_ROOT" ls-files | wc -l)
+  tree_count=$(git -C "$DB_ROOT" ls-tree -r --name-only HEAD | wc -l)
+  sparse_enabled=$(git -C "$DB_ROOT" config --bool core.sparseCheckout || true)
+  if [[ "$sparse_enabled" != "true" && "$tree_count" -gt 0 && "$tracked_count" -eq 0 ]]; then
+    fresh_checkout=1
+  else
+    echo "Nikke-db checkout 存在未提交改动，停止以保护本地维护状态" >&2
+    exit 2
+  fi
 fi
 
 check_disk_capacity "before-fetch"
