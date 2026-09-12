@@ -3,7 +3,8 @@
   "captured_at": "2026-09-12",
   "repository": "September6969/astrbot_plugin_nikke",
   "branch": "fix/live-runtime-v03",
-  "head": "23ad4c3fc19c20171987eadb21437df741059f6b",
+  "head": "745c6948f0e506ec92715a9a8477309697366374",
+  "head_semantics": "tested code and parent of the evidence-only closeout commit; the final immutable commit SHA is recorded in PR #79 because a tracked file cannot contain the SHA of the commit that contains itself",
   "origin_main": "e4a9ff9867dc9a92c203484c748562e4c0a7f1d0",
   "pr": {
     "number": 79,
@@ -12,7 +13,7 @@
     "merge_state": "CLEAN",
     "merge_performed": false
   },
-  "acceptance_state": "PARTIAL",
+  "acceptance_state": "READY_FOR_RETEST",
   "worktree": {
     "path": "E:/DevCache/nikke-live-runtime-v03",
     "main_modified": false,
@@ -101,8 +102,8 @@
     "source_commit": "a2358b72bd1335c30737e46482a99947f3788bc7",
     "disk_guard_default_gb": 5,
     "vendor_size_kib": 4651740,
-    "render_size_kib": 9740,
-    "free_space_kib_observed": 12269004,
+    "render_size_kib": 85368,
+    "free_space_kib_observed": 9372168,
     "default_target_count": 200,
     "verified_costume_target_count": 40,
     "unique_target_count": 240,
@@ -142,22 +143,73 @@
       "raw_response_saved": false
     },
     "full_capture": {
-      "status_at_capture": "RUNNING",
+      "status_at_capture": "COMPLETE",
       "order": "NORMAL then HARD",
       "single_thread": false,
-      "concurrency": 3,
+      "initial_concurrency": 3,
+      "retry_concurrency": 1,
       "jitter_seconds": [0.8, 1.5],
       "rate_limit_backoff_seconds": [5, 10, 20, 40],
-      "normal_records_observed": 99,
-      "hard_records_observed": 0,
+      "normal_records": 1785,
+      "hard_records": 1787,
+      "total_records": 3572,
+      "available": 2699,
+      "unavailable": 873,
+      "rate_limited": 0,
+      "error": 0,
+      "malformed": 0,
+      "initial_pass_retryable_errors": 4,
+      "retry_request_count": 4,
+      "retry_elapsed_seconds": 18.126,
+      "rate_limit_incidents": 0,
+      "stopped_reason": "",
+      "normal_sha256": "739ec54bd31de52289554cc4b11eb4f44fff7ebe5364ac3927341a38426238a5",
+      "hard_sha256": "ed72381a244c339143cfd1cbef59149c9d03a42b02eca1278bf528bcecc32eb5",
       "server_output_dir": "/AstrBot/data/nikke/campaign-capture/",
       "full_snapshots_committed": false
+    },
+    "character_inventory": {
+      "unique_raw_tids": 71,
+      "unique_normalized_prefixes": 33,
+      "resolved": 71,
+      "unresolved": 0,
+      "coverage_percent": 100.0,
+      "unresolved_ids": [],
+      "sha256": "0fbeac32efbba1f71adacaeed8b13ce36ddb2bc5d15ba20438c89d3e0c416049"
+    },
+    "costume_inventory": {
+      "unique_explicit_pairs": 0,
+      "resolved": 0,
+      "unresolved": 0,
+      "coverage_percent": null,
+      "interpretation": "The live API responses did not explicitly include costume_id; no costume was inferred from TID.",
+      "sha256": "03f56a819b346a286546d355303b80fd6a9813ae59ef46c33665ac30c5fb604e"
+    },
+    "offline_replay": {
+      "seed": 79,
+      "normal_samples": 10,
+      "hard_samples": 10,
+      "five_member_valid": 20,
+      "name_valid": 20,
+      "portrait_valid": 20,
+      "combat_sum_valid": 20,
+      "visual_inspection": "PASS: no empty portrait, gray silhouette or obvious crop defect",
+      "contact_sheet_path": "E:/DevCache/nikke-live-runtime-v03-artifacts/campaign-replay-contact-sheet.png",
+      "contact_sheet_sha256": "389934931264869614212a4d7b9136bb88f88ce4fb08952a0730f47fa55a5dde"
+    },
+    "privacy_audit": {
+      "files_scanned": ["campaign_capture_normal.jsonl", "campaign_capture_hard.jsonl"],
+      "forbidden_key_hits": 0,
+      "forbidden_text_hits": 0,
+      "excluded": ["Cookie", "Token", "Authorization", "OpenID", "QQ ID", "Account ID", "headers"]
     }
   },
   "boundaries": [
     "No main modification, force push, merge, release, tag, version bump, CHANGELOG change, ruleset change or Issue #80 implementation.",
     "No production plugin replacement or deployment was performed.",
     "No Cookie, token, Authorization header, OpenID or QQ ID was written to repository evidence.",
-    "Spine runtime/source licensing and full live render coverage remain unresolved; status stays PARTIAL/READY_FOR_RETEST."
+    "Spine full static render coverage is verified for the current 240-target registry; this isolated maintenance evidence does not establish production deployment or QQ delivery.",
+    "Campaign full capture is complete with no retryable stages; the live API exposed no explicit costume_id, so the costume inventory is truthfully empty.",
+    "Final status is READY_FOR_RETEST because real QQ client acceptance remains outside this closeout."
   ]
 }

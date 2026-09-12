@@ -31,6 +31,8 @@ Daily builder 保留来源语义：
 
 `CurrencyRegistry` 只登记已确认类型：99 珠宝、1000 战斗数据辑、2000 信用点、3000 芯尘、5100 普通招募券、5200 高级招募券、11000 躯体标签、12000 黄金积分券。`CurrencyItem` 同时保留整数 `value` 与 `compact_value`；compact formatter 使用项目已有 K/M/B 规则，底层数值不改写。未登记的 type 98 保留在底层审计数据，但按用户要求不放上卡面，不猜名称或图标。
 
+Current live-verified currency mapping supersedes earlier draft mapping.
+
 `MemorialCategoryRegistry` 按类别 key 映射四个最终格位：`HandWriting`→手机、`CallLog`→通话记录、已验证的 `Data`/`OldTales`/`UnbreakableSphere` 数据组→数据资料，`jukebox_count`→BGM。未知 key 不按数组顺序归类，进入诊断并在 UI 中保持未知安全状态；遗落传说和奇迹之球不单独成格。
 
 ## UI layout
@@ -77,4 +79,4 @@ coverage 报告分别统计 character master、default、verified costume、uniq
 - `CurrencyRegistry` 的 8 项已知资源均有核验图标：信用点、战斗数据辑、芯尘来自 Nikke-db 固定提交；珠宝、两类招募券、躯体标签、黄金积分券来自用户提供图标及同日数量对照图。每项记录 SHA-256，AssetManager 的 `get_currency_icon()` 不联网、不读取未经 registry 证明的图标。
 - `serv` 授权账号只读 Profile 已在隔离代码目录实渲染并脱敏查看：`1200×1715`，底层 9 项实际资源、4 项塔信息；卡面只放 8 项已知资源，图标缩放、透明边缘和文字避让正常。外部证据图为 `E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-known-currency.png`，SHA-256 `ea09d416f57f2cef3c235833c3a3cc0969f01786c2e651ddd2491ce707037f30`，不提交仓库。
 - `serv` 隔离 Nikke-db 维护已按两阶段 sparse 规则完成：source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，200 个默认角色与 40 个 verified Costume 共 240 项，runtime 4.0/4.1 为 102/138；通过禁网 Docker worker 桥接后 240/240 渲染成功，失败、无效、缺失均为 0。全量 PNG 的 SHA-256、RGBA、非空 alpha、尺寸和比例已复核；20 张接触表覆盖五企业、两个 runtime 与 5 个 Costume 并已实际查看。该证据仍是隔离维护结果，不代表生产部署。
-- Campaign NORMAL Chapter 1 只读 smoke 为 4/4 `UNAVAILABLE`，full NORMAL→HARD 抓取已在服务器后台运行，快照不进仓库；最终统计以服务器脱敏 manifest 为准。
+- Campaign NORMAL→HARD 只读全量抓取已完成 3572/3572：NORMAL 1785、HARD 1787，最终 2699 `AVAILABLE`、873 `UNAVAILABLE`、0 retryable；71 个 raw TID 全部解析，响应未明确提供 costume_id。完整快照不进仓库。固定种子抽取 10+10 张离线卡均通过五槽、中文名、静态 Spine portrait 和战力求和检查，接触表已实际查看；该结果不代表真实 QQ 客户端送达。

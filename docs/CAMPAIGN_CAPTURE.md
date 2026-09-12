@@ -16,7 +16,7 @@
 
 ## Resume、过滤与限流
 
-默认单线程；`--resume` 跳过已有完成 stage，`--force` 重抓；支持 `--mode NORMAL|HARD` 与 `--chapter N` 局部运行。请求间使用 0.8–1.5 秒 jitter；限流按 5/10/20/40 秒退避，达到阈值先落盘进度再停止。正式运行前输出 NORMAL、HARD、TOTAL 数量和最低耗时估算；推荐顺序为 NORMAL chapter 1 smoke、NORMAL 全量、HARD 全量，不并发两种模式。
+正式现场抓取使用最多 3 路的有界只读并发，快照仍由单写入器按批次原子落盘；`--resume` 跳过已有完成 stage，`--force` 重抓；支持 `--mode NORMAL|HARD` 与 `--chapter N` 局部运行。请求间使用 0.8–1.5 秒 jitter；限流按 5/10/20/40 秒退避，达到阈值先落盘进度再停止，并将后续续跑降为单并发。正式运行前输出 NORMAL、HARD、TOTAL 数量和最低耗时估算；顺序固定为 NORMAL chapter 1 smoke、NORMAL 全量、HARD 全量，不同时抓取两种模式。
 
 ## Output 与隐私
 
@@ -26,4 +26,6 @@
 
 ## Regression usage
 
-抓取完成后从 snapshot 随机抽取至少 10 个 NORMAL 与 10 个 HARD，使用 `CampaignHistoryBuilder → CharacterMasterResolver → static Spine portrait → CampaignHistoryRenderer` 离线回放。检查 stage、5 个 slot、中文名、总战力求和及无 `NIKKE <tid>`/灰色 silhouette；回放不再请求真实 API。缺少现场账号或响应时，工具和 fixture 仍可完成合同测试，但报告必须保留 `NEEDS_LIVE_EVIDENCE`/`PARTIAL` 边界。
+2026-09-12 的授权只读现场抓取已覆盖 NORMAL 1785/1785、HARD 1787/1787：最终 2699 `AVAILABLE`、873 `UNAVAILABLE`、0 `RATE_LIMITED`、0 `ERROR`、0 `MALFORMED`，`stopped_reason` 为空。首轮 3 并发产生的 4 个可重试错误已由单并发 `--resume` 全部清零；全程未观察到限流。71 个 unique raw battle TID、33 个 normalized prefix 均解析成功；API 响应没有明确提供 costume_id，因此 Costume inventory 为 0，不从 TID 猜测服装。完整快照只保留在服务器持久化目录。
+
+完成后使用固定随机种子从 snapshot 抽取 10 个 NORMAL 与 10 个 HARD，经 `CampaignHistoryBuilder → CharacterMasterResolver → static Spine portrait → CampaignHistoryRenderer` 离线回放。20/20 均满足 5 个 slot、正式中文名、本地 manifest 立绘和总战力求和；接触表已实际查看，无 `NIKKE <tid>`、灰色 silhouette、空图或明显裁切异常。回放不再请求真实 API，仍不代表真实 QQ 客户端送达。

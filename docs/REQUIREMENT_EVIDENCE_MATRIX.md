@@ -66,17 +66,17 @@
 | 范围 | 当前离线实现 | 离线证据 | 现场边界 |
 | --- | --- | --- | --- |
 | Profile Dashboard v0.4 | `client.py` 四路 Profile/Daily 读取、`profile_builder.py` 结构化字段、`profile_card_renderer.py` TODAY/RECYCLE/COLLECTION/RESOURCES 分区；8 项已知资源均有来源与 SHA-256 的本地图标 | 新增 Profile/Daily/partial/height/icon/未知资源不上卡行为测试；服务器脱敏实渲染 PNG 已查看 | QQ 图片送达仍未在本轮确认；未登记 type 98 仅保留底层审计数据 |
-| Local Nikke-db Spine | `local_spine_resolver.py`、manifest v2 schema、维护期 sparse checkout/预渲染脚本；正式头像热路径禁 HTTP/Worker/FB | 多纹理、BOM、4.0/4.1、损坏图片、路径越界、symlink escape、manifest hash 行为测试 | `serv` 本地 checkout 全量预渲染、生产 runtime 许可与现场稳定性仍需核验 |
-| Campaign capture | `scripts/capture_campaign_history.py` 只处理 NORMAL/HARD，支持状态、限流、resume/force、脱敏 JSONL、TID/Costume inventory | 捕获、隐私、回放、限流退避和静态目标过滤测试 | 真实已授权账号快照与最小现场请求尚未执行 |
+| Local Nikke-db Spine | `local_spine_resolver.py`、manifest v2 schema、维护期 sparse checkout/预渲染脚本；正式头像热路径禁 HTTP/Worker/FB | 多纹理、BOM、4.0/4.1、损坏图片、路径越界、symlink escape、manifest hash 行为测试；`serv` 隔离维护对当前 240-target registry 达到 240/240 render 与 integrity validation | `SPINE_STATIC_PIPELINE_COMPLETE`；证据为隔离维护产物，不代表部署或真实 QQ 送达，runtime/source 与游戏素材权利分别记录 |
+| Campaign capture | `scripts/capture_campaign_history.py` 只处理 NORMAL/HARD，支持状态、限流、resume/force、脱敏 JSONL、TID/Costume inventory | 授权只读现场完成 NORMAL 1785 + HARD 1787；最终 2699 available、873 unavailable、0 retryable；71 raw TID 100% resolved；10+10 离线渲染回放全部通过 | 完整快照仅在服务器；API 未明确返回 costume_id，inventory 如实为 0；真实 QQ 客户端送达未验证 |
 
-本增补的状态上限为 `READY_OFFLINE`；不把测试 fixture、合成图或静态 schema 写成真实联调、QQ 送达、部署或资源授权。
+上表是现场续作前的离线基线；其 `READY_OFFLINE` 上限已由下方 2026-09-12 现场增补取代。测试 fixture、合成图或静态 schema 仍不冒充真实联调、QQ 送达、部署或资源授权。
 
 ## PR #79 现场续作增补（2026-09-12）
 
 | 范围 | 当前实现与证据 | 现场结果 | 状态与剩余边界 |
 | --- | --- | --- | --- |
-| Manifest / Spine hot path | 声明 entry 的路径、PNG、解码和 SHA-256 失效均 fail-closed，记录 `STATIC_SPINE_ASSET_INVALID`；31 个 AssetManager/Spine 测试与 11 个子测试覆盖旧 cache 不命中、零网络、零 worker | 角色查询未部署到服务器；服务器维护链生成 240 项报告但隔离容器缺匹配 worker | `READY_OFFLINE / PARTIAL`；需可执行 runtime 后重跑 240 项实渲染 |
-| Nikke-db sparse / disk guard | 两阶段 sparse checkout 先取 `.skel/.atlas`，再取 atlas 声明的纹理页；路径越界/BOM/多页/4.0/4.1 测试通过；5 GiB 默认门禁超阈值 smoke 返回 `BLOCKED_BY_DISK_CAPACITY` | `serv` 实际检出 source `a2358b72bd1335c30737e46482a99947f3788bc7`，vendor 约 4,651,740 KiB，维护后约 12,269,004 KiB 可用 | `READY_FOR_RETEST / PARTIAL`；保留供应商数据，不把公开代码或 URL 当素材授权 |
+| Manifest / Spine hot path | 声明 entry 的路径、PNG、解码和 SHA-256 失效均 fail-closed，记录 `STATIC_SPINE_ASSET_INVALID`；31 个 AssetManager/Spine 测试与 11 个子测试覆盖旧 cache 不命中、零网络、零 worker | 隔离禁网 Docker workers 完成 240/240 渲染与 240/240 integrity validation；20 张五企业/双 runtime/Costume 样本已实际查看 | `SPINE_STATIC_PIPELINE_COMPLETE`；不等同生产部署或真实 QQ 客户端验收 |
+| Nikke-db sparse / disk guard | 两阶段 sparse checkout 先取 `.skel/.atlas`，再取 atlas 声明的纹理页；路径越界/BOM/多页/4.0/4.1 测试通过；5 GiB 默认门禁超阈值 smoke 返回 `BLOCKED_BY_DISK_CAPACITY` | `serv` 实际检出 source `a2358b72bd1335c30737e46482a99947f3788bc7`；检出完整时观察 vendor 约 4,651,740 KiB，最终证据复核时剩余 9,372,168 KiB | `READY_FOR_RETEST`；稀疏检出后续占用统计异常不改写既有实测，保留供应商数据，不把公开代码或 URL 当素材授权 |
 | Profile v0.4 | TODAY/OUTPOST/ROSTER/RECYCLE/COLLECTION/RESOURCES 紧凑分区，Tower 不使用 list length；8 项已知资源图标 verified，未知 type 不上卡 | `serv` 脱敏 shape 确认 4 项 Tower；授权只读数据隔离实渲染 `1200×1715`，底层 9 项、卡面 8 项，图标已实际查看 | `READY_FOR_RETEST`；真实 QQ 图片送达仍未在本 PR 部署验证 |
-| Campaign capture | NORMAL Chapter 1 smoke 4/4 `UNAVAILABLE`，0 error/0 rate-limit；工具支持 1–4 有界请求并发、单写入器、jitter、退避与 source-aware resume | full capture 当前以 `--concurrency 3` 在服务器后台运行；在线检查无重复 stage_id、无 rate-limit，不提交完整快照 | `PARTIAL`；完成后仍需 TID/Costume coverage 与 replay 统计 |
-| Overall | 当前 HEAD `43adede`，PR #79 OPEN/非 Draft/CLEAN；最终本地 full pytest 623 passed/481 subtests，compileall、Node、diff check 通过 | 未修改 main、未 merge、未部署、未发送 QQ 消息 | 最终状态最多 `READY_FOR_RETEST`；Spine runtime、Campaign 完整现场结果仍是现场缺口 |
+| Campaign capture | 工具支持 1–4 有界请求并发、单写入器、jitter、退避与 source-aware resume；正式首轮 concurrency=3，错误清理 concurrency=1 | NORMAL 1785/1785、HARD 1787/1787；2699 available、873 unavailable、0 rate-limit/error/malformed；71 raw TID 100% resolved；10+10 replay 20/20 通过 | `READY_FOR_RETEST`；完整快照不提交，API 未提供显式 Costume，真实 QQ 客户端仍待维护者复测 |
+| Overall | PR #79 保持 OPEN/非 Draft；本地 full pytest 已完成一次：623 passed/481 subtests；后续只有文档与现场证据变化，未重复 full suite | 未修改 main、未 merge、未部署、未发送 QQ 消息 | `READY_FOR_RETEST`；最终提交以后续 GitHub CI 为跨版本回归依据 |
