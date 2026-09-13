@@ -159,7 +159,13 @@ def profile_cases():
                    "recycle_room_researches": [{"tid": str(tid), "lv": 101, "exp": 0} for tid in (1101, 1102, 1103, 1201, 1202, 1203, 1204)]}
         daily = {"outpost_battle_storage_fullness": 0.72, "intercept_remaining_tickets": 3, "rookie_arena_remaining_count": 5,
                  "special_arena_remaining_count": 0, "counsel_remaining_count": 7, "dispatch_completed_count": 4, "dispatch_in_progress_count": 2,
-                 "sim_room_daily_best_record": {"chapter": 3, "difficulty": 5, "score": 12345}}
+                 "sim_room_daily_best_record": {"chapter": 3, "difficulty": 5, "score": 12345},
+                 "tower_daily_info_list": [
+                     {"type": 1, "is_opened": False, "remaining_count": 3},
+                     {"type": 2, "is_opened": False, "remaining_count": 3},
+                     {"type": 3, "is_opened": True, "remaining_count": 3},
+                     {"type": 4, "is_opened": False, "remaining_count": 3},
+                 ]}
         if name == "full-current-model":
             # 完整合成示例只使用当前 Builder 已验证的字段，不代表真实账号。
             basic.update(character_costume_count=87, progress_tribe_tower="318",
@@ -167,8 +173,12 @@ def profile_cases():
                          sim_room_overclock_latest_season_high_score="23456")
             outpost["memorial_counts"] = [{"category": key, "count": value} for key, value in
                                            (("handwriting", 72), ("calllog", 48), ("data", 120))]
-            daily["tower_daily_info_list"] = [{"type": 1, "name": "合成塔开放记录", "is_opened": True, "remaining_count": 3},
-                                              {"type": 2, "name": "合成塔关闭记录", "is_opened": False, "remaining_count": 0}]
+            daily["tower_daily_info_list"] = [
+                {"type": 1, "is_opened": False, "remaining_count": 3},
+                {"type": 2, "is_opened": False, "remaining_count": 3},
+                {"type": 3, "is_opened": True, "remaining_count": 3},
+                {"type": 4, "is_opened": False, "remaining_count": 3},
+            ]
         if name == "today-partial":
             daily["intercept_remaining_tickets"] = "unverified"
         if name == "resource-partial":

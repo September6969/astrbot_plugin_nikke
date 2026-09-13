@@ -14,6 +14,7 @@ from astrbot_plugin_nikke.t2i_payloads import (
 from astrbot_plugin_nikke.static_registry import StaticDataRegistry
 from astrbot_plugin_nikke.profile_builder import ProfileBuilder
 from astrbot_plugin_nikke.currency_registry import CurrencyRegistry
+from astrbot_plugin_nikke.tower_registry import TowerRegistry
 from astrbot_plugin_nikke.card_models import (
     CharacterCardData,
     EquipmentData,
@@ -305,3 +306,132 @@ def test_profile_partial_status_is_section_level_only():
     for match in re.finditer(r'<span class="badge state-partial">PARTIAL</span>', html):
         prefix = html[:match.start()]
         assert "today-head" in prefix[-200:] or "section-header" in prefix[-200:]
+
+
+# ==============================================================================
+# 6. PROFILE TODAY TOWER RESOLUTION AND PRESENTATION
+# ==============================================================================
+
+def test_tower_registry_known_types_map_to_chinese_names():
+    # Integer type mapping
+    assert TowerRegistry.resolve_tower_name(1) == "极乐净土"
+    assert TowerRegistry.resolve_tower_name(2) == "米西利斯"
+    assert TowerRegistry.resolve_tower_name(3) == "泰特拉"
+    assert TowerRegistry.resolve_tower_name(4) == "朝圣者"
+
+    # String integer mapping
+    assert TowerRegistry.resolve_tower_name("1") == "极乐净土"
+    assert TowerRegistry.resolve_tower_name("2") == "米西利斯"
+    assert TowerRegistry.resolve_tower_name("3") == "泰特拉"
+    assert TowerRegistry.resolve_tower_name("4") == "朝圣者"
+
+    # Canonical keys
+    assert TowerRegistry.resolve_tower_name("elysion") == "极乐净土"
+    assert TowerRegistry.resolve_tower_name("missilis") == "米西利斯"
+    assert TowerRegistry.resolve_tower_name("tetra") == "泰特拉"
+    assert TowerRegistry.resolve_tower_name("pilgrim") == "朝圣者"
+    assert TowerRegistry.resolve_tower_name("tribe") == "无限塔"
+
+    # Aliases
+    assert TowerRegistry.resolve_tower_name("极乐净土") == "极乐净土"
+    assert TowerRegistry.resolve_tower_name("极乐净土塔") == "极乐净土"
+    assert TowerRegistry.resolve_tower_name("米西利斯塔") == "米西利斯"
+    assert TowerRegistry.resolve_tower_name("泰特拉塔") == "泰特拉"
+    assert TowerRegistry.resolve_tower_name("朝圣者塔") == "朝圣者"
+    assert TowerRegistry.resolve_tower_name("无限塔") == "无限塔"
+
+
+def test_tower_registry_unknown_type_and_builder_fallback():
+    # Unknown types return None from registry
+    assert TowerRegistry.resolve_tower_name(99) is None
+    assert TowerRegistry.resolve_tower_name("future_tower") is None
+    assert TowerRegistry.resolve_tower_name(None) is None
+
+    # ProfileBuilder falls back to explicit 未知塔 · TYPE {type}
+    data_num = ProfileBuilder().build(
+        account={}, basic={}, outpost={},
+        daily={"tower_daily_info_list": [{"type": 99, "is_opened": False, "remaining_count": 0}]},
+        roster=None, fetched_at="2026-09-13 12:00", plugin_version="test"
+    )
+    assert data_num.tower_daily_info is not None
+    assert len(data_num.tower_daily_info) == 1
+    assert data_num.tower_daily_info[0].display_name == "未知塔 · TYPE 99"
+
+    data_str = ProfileBuilder().build(
+        account={}, basic={}, outpost={},
+        daily={"tower_daily_info_list": [{"type": "alien", "is_opened": False, "remaining_count": 0}]},
+        roster=None, fetched_at="2026-09-13 12:00", plugin_version="test"
+    )
+    assert data_str.tower_daily_info is not None
+    assert data_str.tower_daily_info[0].display_name == "未知塔 · TYPE alien"
+
+    # Missing type and missing name falls back to 未知塔
+    data_none = ProfileBuilder().build(
+        account={}, basic={}, outpost={},
+        daily={"tower_daily_info_list": [{"is_opened": False, "remaining_count": 0}]},
+        roster=None, fetched_at="2026-09-13 12:00", plugin_version="test"
+    )
+    assert data_none.tower_daily_info is not None
+    assert data_none.tower_daily_info[0].display_name == "未知塔"
+
+
+def test_api_explicit_name_takes_priority_over_registry():
+    # If API provides name or tower_name, it overrides registry resolution
+    data_name = ProfileBuilder().build(
+        account={}, basic={}, outpost={},
+        daily={"tower_daily_info_list": [{"type": 1, "name": "特异开放极乐塔", "is_opened": True, "remaining_count": 3}]},
+        roster=None, fetched_at="2026-09-13 12:00", plugin_version="test"
+    )
+    assert data_name.tower_daily_info is not None
+    assert data_name.tower_daily_info[0].display_name == "特异开放极乐塔"
+
+    data_tower_name = ProfileBuilder().build(
+        account={}, basic={}, outpost={},
+        daily={"tower_daily_info_list": [{"type": 2, "tower_name": "米西利斯挑战", "is_opened": True, "remaining_count": 2}]},
+        roster=None, fetched_at="2026-09-13 12:00", plugin_version="test"
+    )
+    assert data_tower_name.tower_daily_info is not None
+    assert data_tower_name.tower_daily_info[0].display_name == "米西利斯挑战"
+
+
+def test_profile_today_renders_four_distinct_tower_names_no_generic_record():
+    # Real production shape: 4 items with type 1, 2, 3, 4 without name field
+    daily = {
+        "outpost_battle_storage_fullness": 0.5,
+        "tower_daily_info_list": [
+            {"type": 1, "is_opened": False, "remaining_count": 3},
+            {"type": 2, "is_opened": False, "remaining_count": 3},
+            {"type": 3, "is_opened": True, "remaining_count": 3},
+            {"type": 4, "is_opened": False, "remaining_count": 3},
+        ]
+    }
+    profile_data = ProfileBuilder().build(
+        account={}, basic={"nickname": "指挥官"}, outpost={},
+        daily=daily, roster=None, fetched_at="2026-09-13 12:00", plugin_version="test"
+    )
+
+    # 1. Check data models
+    assert profile_data.tower_daily_info is not None
+    assert len(profile_data.tower_daily_info) == 4
+    names = [item.display_name for item in profile_data.tower_daily_info]
+    assert names == ["极乐净土", "米西利斯", "泰特拉", "朝圣者"]
+
+    # 2. Check T2I payload
+    payload = ProfileT2IPayloadBuilder().build(profile_data)
+    today_labels = [row["label"] for row in payload["today"]]
+    assert "极乐净土" in today_labels
+    assert "米西利斯" in today_labels
+    assert "泰特拉" in today_labels
+    assert "朝圣者" in today_labels
+    assert "塔记录" not in today_labels
+
+    # 3. Check rendered HTML
+    html = render("profile", payload)
+    assert "塔记录" not in html
+    assert "极乐净土" in html
+    assert "米西利斯" in html
+    assert "泰特拉" in html
+    assert "朝圣者" in html
+    # Check statuses
+    assert "未开放" in html
+    assert "剩余 3" in html

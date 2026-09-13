@@ -1,13 +1,83 @@
 """公开静态塔层速查；不估计玩家进度与通关能力。"""
 import json
 import re
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
 
+@dataclass(frozen=True, slots=True)
+class TowerDefinition:
+    """已核验的塔层元数据定义。"""
+
+    type_id: int | None
+    canonical_key: str
+    display_name: str
+
+
 class TowerRegistry:
-    ALIASES = {"无尽": "tribe", "部落": "tribe", "综合": "tribe", "极乐净土": "elysion", "米西利斯": "missilis", "泰特拉": "tetra", "朝圣者": "pilgrim"}
+    ALIASES = {
+        "无尽": "tribe",
+        "部落": "tribe",
+        "综合": "tribe",
+        "无限塔": "tribe",
+        "无限之塔": "tribe",
+        "无尽塔": "tribe",
+        "极乐净土": "elysion",
+        "极乐净土塔": "elysion",
+        "米西利斯": "missilis",
+        "米西利斯塔": "missilis",
+        "米西里斯": "missilis",
+        "米西里斯塔": "missilis",
+        "泰特拉": "tetra",
+        "泰特拉塔": "tetra",
+        "朝圣者": "pilgrim",
+        "朝圣者塔": "pilgrim",
+    }
     TOWERS = frozenset({"tribe", "elysion", "missilis", "tetra", "pilgrim"})
+
+    # 官方/权威映射：tower_type -> TowerDefinition(type_id, canonical_key, zh_cn_name)
+    # 依据 BlaBlaLink 前端 bundle (TOWER_LABEL_KEYS / i18n) 与 NIKKE 企业枚举：
+    # 1: elysion -> 极乐净土
+    # 2: missilis -> 米西利斯
+    # 3: tetra -> 泰特拉
+    # 4: pilgrim -> 朝圣者
+    # 0 / tribe -> 无限塔
+    DEFINITIONS: dict[int, TowerDefinition] = {
+        1: TowerDefinition(1, "elysion", "极乐净土"),
+        2: TowerDefinition(2, "missilis", "米西利斯"),
+        3: TowerDefinition(3, "tetra", "泰特拉"),
+        4: TowerDefinition(4, "pilgrim", "朝圣者"),
+    }
+    BY_KEY: dict[str, TowerDefinition] = {
+        "elysion": TowerDefinition(1, "elysion", "极乐净土"),
+        "missilis": TowerDefinition(2, "missilis", "米西利斯"),
+        "tetra": TowerDefinition(3, "tetra", "泰特拉"),
+        "pilgrim": TowerDefinition(4, "pilgrim", "朝圣者"),
+        "tribe": TowerDefinition(None, "tribe", "无限塔"),
+    }
+
+    @classmethod
+    def get_definition(cls, tower_type: int | str | None) -> TowerDefinition | None:
+        """根据 tower_type（整数或标准键/别名）获取已核验的塔定义。"""
+        if tower_type is None:
+            return None
+        if isinstance(tower_type, int):
+            return cls.DEFINITIONS.get(tower_type)
+        if isinstance(tower_type, str):
+            s = tower_type.strip()
+            if s.isdigit():
+                return cls.DEFINITIONS.get(int(s))
+            canonical = cls.ALIASES.get(s, cls.ALIASES.get(s.casefold(), s.casefold()))
+            return cls.BY_KEY.get(canonical)
+        return None
+
+    @classmethod
+    def resolve_tower_name(cls, tower_type: int | str | None) -> str | None:
+        """解析 tower_type 对应的权威中文展示名；未核验类型返回 None。"""
+        defn = cls.get_definition(tower_type)
+        return defn.display_name if defn is not None else None
+
     MAX_FLOOR = 10000
     MAX_RECORDS = 20000
     _FLOOR_KEY = re.compile(r"^(tribe|elysion|missilis|tetra|pilgrim):([1-9][0-9]*)$")

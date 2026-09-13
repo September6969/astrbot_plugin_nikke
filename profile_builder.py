@@ -11,6 +11,7 @@ from typing import Any
 from .campaign_stage_resolver import CampaignStageResolver
 from .currency_registry import CurrencyRegistry
 from .memorial_registry import MemorialCategoryRegistry
+from .tower_registry import TowerRegistry
 from .profile_models import (
     DailyTowerInfo,
     MemorialCountData,
@@ -233,10 +234,23 @@ def _parse_daily_tower(value: Any) -> tuple[list[DailyTowerInfo] | None, bool]:
             continue
         # serv 现场确认的字段合同：type / is_opened / remaining_count。
         # raw 是脱离账号身份的每日记录副本；renderer 不直接读取它。
-        display_name = _first_optional_str(item, "name", "tower_name")
-        tower_type = _optional_int(item.get("type"))
+        raw_type = item.get("type")
+        tower_type = _optional_int(raw_type)
         is_opened = item.get("is_opened") if isinstance(item.get("is_opened"), bool) else None
         remaining = _optional_int(item.get("remaining_count"))
+
+        # 优先级：
+        # 1. API 明确返回的 name / tower_name
+        # 2. 已核验的 TowerRegistry 名称
+        # 3. 未知塔 · TYPE {type}（若 type 缺失则回退为 未知塔）
+        display_name = _first_optional_str(item, "name", "tower_name")
+        if not display_name:
+            if raw_type is not None:
+                resolved = TowerRegistry.resolve_tower_name(raw_type)
+                display_name = resolved if resolved else f"未知塔 · TYPE {raw_type}"
+            else:
+                display_name = "未知塔"
+
         if any(key not in item for key in ("type", "is_opened", "remaining_count")):
             partial = True
         if tower_type is None or is_opened is None or remaining is None:

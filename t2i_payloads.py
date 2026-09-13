@@ -143,7 +143,8 @@ class ProfileT2IPayloadBuilder:
                    "semantic": "strong-warning" if ratio is not None and ratio >= .95 else "warning" if ratio is not None and ratio >= .8 else "normal",
                    "scope": today_state}
         for tower in data.tower_daily_info or []:
-            today.extend(pairs([(tower.display_name or "塔记录", "未开放" if tower.is_opened is False else
+            tower_label = tower.display_name or (f"未知塔 · TYPE {tower.tower_type}" if tower.tower_type is not None else "未知塔")
+            today.extend(pairs([(tower_label, "未开放" if tower.is_opened is False else
                                  f"剩余 {display_number(tower.remaining)}" if tower.is_opened is True else "开放状态 Unknown")], today_state))
         if data.daily_available is False:
             simulation_state = "UNAVAILABLE"
