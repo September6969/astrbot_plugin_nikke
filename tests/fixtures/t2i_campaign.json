@@ -1,0 +1,261 @@
+{
+  "normal": {
+    "query": "46-40",
+    "response": {
+      "code": 0,
+      "data": {
+        "list": [
+          {
+            "tid": 433004,
+            "lv": 441,
+            "combat": 232663,
+            "slot": 1
+          },
+          {
+            "tid": 301704,
+            "lv": 441,
+            "combat": 258765,
+            "slot": 2
+          },
+          {
+            "tid": 447105,
+            "lv": 441,
+            "combat": 260154,
+            "slot": 3
+          },
+          {
+            "tid": 423401,
+            "lv": 441,
+            "combat": 265133,
+            "slot": 4
+          },
+          {
+            "tid": 235207,
+            "lv": 441,
+            "combat": 269885,
+            "slot": 5
+          }
+        ]
+      }
+    }
+  },
+  "hard": {
+    "query": "困难 35-36",
+    "response": {
+      "code": 0,
+      "data": {
+        "list": [
+          {
+            "tid": 433004,
+            "lv": 441,
+            "combat": 232663,
+            "slot": 1
+          },
+          {
+            "tid": 301704,
+            "lv": 441,
+            "combat": 258765,
+            "slot": 2
+          },
+          {
+            "tid": 447105,
+            "lv": 441,
+            "combat": 260154,
+            "slot": 3
+          },
+          {
+            "tid": 423401,
+            "lv": 441,
+            "combat": 265133,
+            "slot": 4
+          },
+          {
+            "tid": 235207,
+            "lv": 441,
+            "combat": 269885,
+            "slot": 5
+          }
+        ]
+      }
+    }
+  },
+  "long-text": {
+    "query": "46-14A-1",
+    "response": {
+      "code": 0,
+      "data": {
+        "list": [
+          {
+            "tid": 433004,
+            "lv": 441,
+            "combat": 232663,
+            "slot": 1
+          },
+          {
+            "tid": 301704,
+            "lv": 441,
+            "combat": 258765,
+            "slot": 2
+          },
+          {
+            "tid": 447105,
+            "lv": 441,
+            "combat": 260154,
+            "slot": 3
+          },
+          {
+            "tid": 423401,
+            "lv": 441,
+            "combat": 265133,
+            "slot": 4
+          },
+          {
+            "tid": 235207,
+            "lv": 441,
+            "combat": 269885,
+            "slot": 5
+          }
+        ]
+      }
+    },
+    "display_name": "合成边界测试：超长角色正式名称与特殊行动代号",
+    "commander": "合成示例：用于验证较长指挥官名称的完整显示"
+  },
+  "missing-asset": {
+    "query": "46-40",
+    "response": {
+      "code": 0,
+      "data": {
+        "list": [
+          {
+            "tid": 433004,
+            "lv": 441,
+            "combat": 232663,
+            "slot": 1
+          },
+          {
+            "tid": 301704,
+            "lv": 441,
+            "combat": 258765,
+            "slot": 2
+          },
+          {
+            "tid": 447105,
+            "lv": 441,
+            "combat": 260154,
+            "slot": 3
+          },
+          {
+            "tid": 423401,
+            "lv": 441,
+            "combat": 265133,
+            "slot": 4
+          },
+          {
+            "tid": 235207,
+            "lv": 441,
+            "combat": 269885,
+            "slot": 5
+          }
+        ]
+      }
+    }
+  },
+  "partial-data": {
+    "query": "46-40",
+    "response": {
+      "code": 0,
+      "data": {
+        "list": [
+          {
+            "tid": 999999,
+            "lv": 441,
+            "combat": 232663,
+            "slot": 1
+          },
+          {
+            "tid": 301704,
+            "lv": 441,
+            "combat": 258765,
+            "slot": 2
+          },
+          {
+            "tid": 447105,
+            "lv": 441,
+            "combat": 260154,
+            "slot": 3
+          },
+          {
+            "tid": 423401,
+            "lv": 441,
+            "combat": 265133,
+            "slot": 4
+          },
+          {
+            "tid": 235207,
+            "lv": 441,
+            "combat": 269885,
+            "slot": 5
+          }
+        ]
+      }
+    }
+  },
+  "empty": {
+    "query": "46-40",
+    "response": {
+      "code": 0,
+      "data": {
+        "list": []
+      }
+    }
+  },
+  "error": {
+    "query": "46-40",
+    "response": {
+      "code": 123,
+      "msg": "合成错误状态 · 非真实接口错误"
+    }
+  },
+  "max-density": {
+    "query": "困难 35-36",
+    "response": {
+      "code": 0,
+      "data": {
+        "list": [
+          {
+            "tid": 433004,
+            "lv": 999,
+            "combat": 999999999,
+            "slot": 1
+          },
+          {
+            "tid": 301704,
+            "lv": 999,
+            "combat": 999999999,
+            "slot": 2
+          },
+          {
+            "tid": 447105,
+            "lv": 999,
+            "combat": 999999999,
+            "slot": 3
+          },
+          {
+            "tid": 423401,
+            "lv": 999,
+            "combat": 999999999,
+            "slot": 4
+          },
+          {
+            "tid": 235207,
+            "lv": 999,
+            "combat": 999999999,
+            "slot": 5
+          }
+        ]
+      }
+    },
+    "display_name": "合成测试用超长角色名称：完整数据不截断"
+  }
+}

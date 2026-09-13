@@ -1,0 +1,1362 @@
+{
+  "version": "1.0.0",
+  "target_dir": "data\\nikke\\blabla-assets",
+  "total_items": 150,
+  "downloaded": 72,
+  "cached": 0,
+  "failed": 0,
+  "not_found": 78,
+  "total_bytes": 303696,
+  "items": [
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_attacker_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_attacker_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ct-58/xq-81/f1333fe625de471b7221f89b15e48242.webp",
+      "status": "downloaded",
+      "bytes": 5120,
+      "sha256": "91c04f5e2fcca99cd14350d56125866dcdfaf414628e83cabe4ab0c58d5f30c7",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_attacker_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_attacker_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/xk-33/nh-73/c0f199844c6a9de99b111a9774cbd0eb.webp",
+      "status": "downloaded",
+      "bytes": 2732,
+      "sha256": "8c42a878fbb55ce0d16a588d79d9584f0b7d0b5e8f37dbabba78404fe8c55073",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_attacker_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_attacker_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/by-72/jd-49/bb32cfcd4fd7bb19bbc34368d17ef085.webp",
+      "status": "downloaded",
+      "bytes": 4332,
+      "sha256": "9c0b7175ece86331ce3e3d2985f5791123149fe35eb863c8050a37af3b2c9885",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_attacker_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_attacker_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/gm-12/yw-78/07c833ea3f3e9f4e827da62b1f799fff.webp",
+      "status": "downloaded",
+      "bytes": 4122,
+      "sha256": "ac6689905347a2ac8de49c0aa7855b4b35a715782907a8e4ecd642514fdec8d9",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_attacker_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_attacker_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/zh-44/us-54/47f4c291f665f5b2ff8ce02e25657b9f.webp",
+      "status": "downloaded",
+      "bytes": 4662,
+      "sha256": "5019c6273af549c83a72104d82556b669222ba80811888a8612c4bdcba1aeef5",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_attacker_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_attacker_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/yf-19/bu-06/fa56f7dab30cbba7c2e1a3c70049cc68.webp",
+      "status": "downloaded",
+      "bytes": 4822,
+      "sha256": "9e785a13bce71eef34fd09cced1cca4f45f06cda7766c4d9b6fcf8388fb44649",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_defender_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_defender_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ce-04/kl-37/73107b1e2563a0562011985f48d8ebac.webp",
+      "status": "downloaded",
+      "bytes": 3212,
+      "sha256": "90b54fb8dff4acd5d328558c3671907250498ec5e2e7d3dfb25f55a4c6f34918",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_defender_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_defender_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/gs-43/gh-13/1cfe84fb1048bfc05e6af2e2b960f22c.webp",
+      "status": "downloaded",
+      "bytes": 4192,
+      "sha256": "010817914c26b5f10e90e01544592434a46242042b361006aced715b16dc6614",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_defender_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_defender_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/lg-82/cd-88/aae2878efa72146dd486427ca27e53a9.webp",
+      "status": "downloaded",
+      "bytes": 3786,
+      "sha256": "0d12e3f89e042899b0ecff8ee657f993705fd4ff261b43d612431fe98eb48bad",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_defender_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_defender_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/eb-15/rw-18/9826026670d91f18bbda588f4eabf565.webp",
+      "status": "downloaded",
+      "bytes": 4222,
+      "sha256": "204b71c435e008cb8911865adf75ea9b3ab64d280d5abdd4b583b6af2dfd9c61",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_defender_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_defender_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/gd-76/aj-85/dce6a776be6364805ff03df6b9e29626.webp",
+      "status": "downloaded",
+      "bytes": 4468,
+      "sha256": "8d41ab7d508944844c618fccb5e9faa4eb3cf8caf211e0975a824455665ef9c8",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_defender_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_defender_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/kr-16/wf-61/e0ac62ca0b674ffaf10117e655499278.webp",
+      "status": "downloaded",
+      "bytes": 4952,
+      "sha256": "6dba8a4fe939ca73cba4fb6acf9e77b8d7047f973c869e7ba8bf127560432585",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_supporter_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_supporter_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/fr-53/bd-29/0a9c35f550cb0705b098e3748c8f4fed.webp",
+      "status": "downloaded",
+      "bytes": 3046,
+      "sha256": "bb0cb08ca0736ae368316ef29eaf1bc0957bb62f4bf6aa5e751461cd20d57d9a",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_supporter_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_supporter_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ym-85/wz-05/b5c89fa6714c9f3343097ed8c3c19157.webp",
+      "status": "downloaded",
+      "bytes": 4420,
+      "sha256": "5f7044d90875418e0a810e113980a7bc43e20a4dc5857cf11e830f748407bcdb",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_supporter_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_supporter_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/da-25/ms-34/075d65698a4c337348822914445dcbd3.webp",
+      "status": "downloaded",
+      "bytes": 4144,
+      "sha256": "d3589d2106d064e597f87cf50cd68142e8b7aad0ebe792278a89a0a4db00d4a2",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_supporter_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_supporter_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/yl-88/io-10/e1c4f6f1600b01bbc20dfa1583fe64bf.webp",
+      "status": "downloaded",
+      "bytes": 4116,
+      "sha256": "6602db4316093171bd54edda28e8520e29eda1053657a1436b2ae7d7534b93a5",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_supporter_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_supporter_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/io-56/jk-70/84623b6dc2b91d93ccfe7260a7cfe82e.webp",
+      "status": "downloaded",
+      "bytes": 5006,
+      "sha256": "c12d30622fbab7842eb0f66c49996def7f8330ab208e819629e57861f9890945",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_head_supporter_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_head_supporter_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/nc-95/fg-46/ede73a4a3206b72bb7f6ed4e245c11d4.webp",
+      "status": "downloaded",
+      "bytes": 6068,
+      "sha256": "877f2b1d10d89d51fec5306447317f0740492a870a63128404e61bfa50d58c52",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_attacker_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_attacker_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/xd-32/ny-61/f8cfc0121c1966eb6f2d0144f75efc10.webp",
+      "status": "downloaded",
+      "bytes": 5850,
+      "sha256": "35200e9e66a4ca37cb91a81c2a6cee1edde73c8aba8a62e53872f0921456987b",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_attacker_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_attacker_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/nf-62/sm-78/0905b996a3d7dafcd6aee0260b1307d8.webp",
+      "status": "downloaded",
+      "bytes": 2682,
+      "sha256": "d5e47c1a8778d6fe492a1fcd8d516780811bbbcd24054fb7526bea8d85ab9bb9",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_attacker_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_attacker_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rt-02/oi-54/b7e899b454e6ed28a14a54c392f5fb57.webp",
+      "status": "downloaded",
+      "bytes": 3898,
+      "sha256": "fab0b9d8171c7d02e151830e89344639f7f1647a4ef91be7af90675fa6ed92ad",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_attacker_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_attacker_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/wh-41/ke-30/d52331cb67f68e687167e8196ac2ef14.webp",
+      "status": "downloaded",
+      "bytes": 3546,
+      "sha256": "952f395087db3c21d0134b7cec8d87bb129ea75816c70c4658b2ca856cc2ef68",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_attacker_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_attacker_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/av-80/ga-06/c6a9a3f2184a7dbaf835612018bae74f.webp",
+      "status": "downloaded",
+      "bytes": 5164,
+      "sha256": "4007e290acdd8566a121bd02bb3c65a0f673701df623f8fea046514bab2bbdce",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_attacker_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_attacker_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/sp-92/sc-85/c8c4557556f24734095fd0e09bb89189.webp",
+      "status": "downloaded",
+      "bytes": 5466,
+      "sha256": "767496d5f2945faa8fc67c9e8d0b5aa04304c5f9afecd54762096713f31cedf5",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_defender_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_defender_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rz-33/vt-88/71f3a88041781287a40f3b1d5cf64c96.webp",
+      "status": "downloaded",
+      "bytes": 3008,
+      "sha256": "9d66bccd427c715dbbb0f9edee32ab4ea42cdf84529097e1bb4dcc852305d810",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_defender_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_defender_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/wn-72/lm-18/f31e892efd85ae58d77d57883d732f8d.webp",
+      "status": "downloaded",
+      "bytes": 4204,
+      "sha256": "2639022d3045e06ad5743c320477601cd4925a8b34471ff075fe2fefd5858031",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_defender_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_defender_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/bb-12/hi-93/b533e2126f2481fa3f60bf2cf93335be.webp",
+      "status": "downloaded",
+      "bytes": 4682,
+      "sha256": "4b789275e06aecd13c7a9153c3567330982c8413ad7afe2800b93385f0f56941",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_defender_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_defender_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/fp-51/de-69/56c1b3991e67a30674de87d8ecaa794a.webp",
+      "status": "downloaded",
+      "bytes": 5114,
+      "sha256": "97dfd7ccd08cc21e062512759575ee8ad67f7472745c6f7c36ce6af479764722",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_defender_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_defender_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/an-50/bh-43/f2be2f974e0149404ac0ae1189844b87.webp",
+      "status": "downloaded",
+      "bytes": 5370,
+      "sha256": "d9d1f1ec5f8e8fb72d32c38a7657d964893b773234b7d2b0c566d9ccf34579ed",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_defender_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_defender_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/fb-89/ra-72/06e97e56045b8f88b8fdd6002b01f835.webp",
+      "status": "downloaded",
+      "bytes": 6800,
+      "sha256": "2fafc271244d92d33bc44612afc76a6a381b950aa1d67d30763a15a110167e77",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_supporter_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_supporter_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ki-34/qz-48/08adfbd1f0eb07c2413deb59937a61e6.webp",
+      "status": "downloaded",
+      "bytes": 3968,
+      "sha256": "6295b1bba8299f6e7d12a56a0f17ddb3dd5f88b4045b190084fc045397f56f1a",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_supporter_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_supporter_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ow-73/mv-24/b40b2d3ece7bc7921ae91de437d1f89e.webp",
+      "status": "downloaded",
+      "bytes": 4742,
+      "sha256": "a72da1af232cd492a6a581b72e8508d14b23a2f99f2f0bef2313c2824e27366f",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_supporter_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_supporter_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/hr-06/yb-22/2c0a3b3199d7db8d172e59b1b9b8ebc7.webp",
+      "status": "downloaded",
+      "bytes": 4942,
+      "sha256": "6d5f4e16caeb3ec5c43946ba99b7571dcf2771054ce2df21a04b8db05a6a93bb",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_supporter_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_supporter_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mf-45/tx-97/25b90216216ac2c74c3d23c5411c4e7f.webp",
+      "status": "downloaded",
+      "bytes": 5098,
+      "sha256": "1779a2514427958d5b96a216901076baf6ef16634569f6e44bf0f7a6a1f2d9d3",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_supporter_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_supporter_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/nk-98/dc-54/1170cb487556267356727d14bbaad346.webp",
+      "status": "downloaded",
+      "bytes": 5578,
+      "sha256": "c6c4aeb9e6ca9b563946a5f5b26504a986c2c3946debea1319b2196901614162",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_body_supporter_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_body_supporter_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ry-38/yy-30/41530c816693dc2c0716e016e5ba5b67.webp",
+      "status": "downloaded",
+      "bytes": 7134,
+      "sha256": "85130133a3d7ea555c937d4f6748a7f8cde8d4e0cb0579d15ef89aee57c5ab62",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_attacker_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_attacker_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ui-79/sc-66/370524d1c9e7ecf23f3e5daac5a7cd3f.webp",
+      "status": "downloaded",
+      "bytes": 4024,
+      "sha256": "87f01917e5a8cb3a258d92323a4b706753a5ea8db053e616d062f3edad7442e8",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_attacker_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_attacker_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/xn-03/as-35/d0699247819a2e9fa6cf852cae1599e5.webp",
+      "status": "downloaded",
+      "bytes": 1694,
+      "sha256": "5db3c153f5d8b5f0324fda6412a33a2f3f133672db125f955c3bda15191c4f2f",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_attacker_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_attacker_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/cb-42/wo-11/232a875e2b3e74ad3f5f6fc95e68b06c.webp",
+      "status": "downloaded",
+      "bytes": 3568,
+      "sha256": "1ff7a13b9d1ae83422e3502649b04ed32a509e48fa00a3c60a8105f7c6418bd4",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_attacker_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_attacker_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/uw-74/mh-40/d755492b80d97c7ec71cb3f5a67c11f1.webp",
+      "status": "downloaded",
+      "bytes": 3336,
+      "sha256": "55feeff34b2bd662f046d11e92a7ca6677e34b75140a1f2f265000c9c3765e88",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_attacker_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_attacker_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/zk-14/id-16/14fadc4d0b019fbc18af796c443ddb19.webp",
+      "status": "downloaded",
+      "bytes": 3942,
+      "sha256": "1a3d0a9239da72536a2d8729ad01244968986f62261bed6518112fe0eb517c21",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_attacker_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_attacker_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/pu-40/wg-90/2fdc6673e7b5c9a0521f539b9d122bd8.webp",
+      "status": "downloaded",
+      "bytes": 4226,
+      "sha256": "0a73046b5a8b705748a5945ff337dbb7259d04b134ab9744b3b365b9239a8840",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_defender_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_defender_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ch-73/xw-98/0a78e18bc7e0e90ab1d74a80788bbca7.webp",
+      "status": "downloaded",
+      "bytes": 2470,
+      "sha256": "d341c910424b9c4332d6a93fd3713e74dcfeb14ef5c5432cb364c6c948eae3f4",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_defender_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_defender_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/gv-13/ts-74/11121f3a9c4498ffd2484ccde9adbc58.webp",
+      "status": "downloaded",
+      "bytes": 3170,
+      "sha256": "a9103611b4957bd456ac3611e96f2604ba685aeb3ff047f3093c5bfa6ea271df",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_defender_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_defender_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/zq-45/po-50/2ab0c9300ed5d450b6d24adf691835e8.webp",
+      "status": "downloaded",
+      "bytes": 3214,
+      "sha256": "f6e5742682d608d94d2f9072b75dd568ecbc6c64cc630b27fbe9eaf0ebfa31fe",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_defender_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_defender_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ee-84/fh-79/b3ccb26dc48bbbbbe967c5979c8c5069.webp",
+      "status": "downloaded",
+      "bytes": 4732,
+      "sha256": "acd8448126de953bb7201873dcef999333c896181e7551aa7e6d697f15033ae8",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_defender_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_defender_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/xs-97/fl-48/8851fb8371776355da3a5ff53c10c007.webp",
+      "status": "downloaded",
+      "bytes": 4682,
+      "sha256": "cbb462a53afabd8853e341912bcd45df8c9c1385c303bc80578454b9f4525aaf",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_defender_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_defender_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/cg-37/bh-24/e339b65d2faba018346fec30ef10bdd4.webp",
+      "status": "downloaded",
+      "bytes": 4532,
+      "sha256": "d26bc078cbc9ac86b26506236297a5c5cd21b01bae44587af04093e125b3c306",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_supporter_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_supporter_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/wg-28/cq-88/10ab4b30e2d7c7839d2d50c93f0d8243.webp",
+      "status": "downloaded",
+      "bytes": 3088,
+      "sha256": "bc730e0232331866ed8970b8d710b8fbdaadd2defabcb43fdd6dbad2253d793b",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_supporter_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_supporter_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/au-67/sj-18/c059a928b16dccee0b74f148e40f3286.webp",
+      "status": "downloaded",
+      "bytes": 3650,
+      "sha256": "17c607375f491baa0974d79160ba2f59e4a8aab6d4ec0fea395df0f9ec09b5af",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_supporter_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_supporter_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/fi-07/of-93/328a52328a16679dec25ef2eb3609379.webp",
+      "status": "downloaded",
+      "bytes": 3324,
+      "sha256": "63823424a08828d06b23b838de0d746608b73d266cc7c7b68b02fea1db70f333",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_supporter_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_supporter_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/yd-39/kb-69/4bb7967a5c6e8cbd7b9212e6fce78539.webp",
+      "status": "downloaded",
+      "bytes": 4118,
+      "sha256": "b6aa4bece4f673a8eeb9a9a7839a84a792731a960e56e503a106775daa89a60c",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_supporter_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_supporter_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ew-49/ii-83/fbf49c52708ea268076e39cafe93a5e5.webp",
+      "status": "downloaded",
+      "bytes": 4112,
+      "sha256": "b1128c45ac8f26c35dccdd294b081ece0bea1f93220051d3c601e4bac0ebd100",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_arm_supporter_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_arm_supporter_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/xr-81/ee-59/d894e4b0f34880c080ff6fad309cc680.webp",
+      "status": "downloaded",
+      "bytes": 6094,
+      "sha256": "28a844f978b63994f90ffded30e9a0ab3bdf41d3251962092813c76f7afa6176",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_attacker_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_attacker_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/hy-44/ng-40/17e93f7be4c5085b3e9da4b68e3eceab.webp",
+      "status": "downloaded",
+      "bytes": 4492,
+      "sha256": "9d10226f14a61d9f87e2d8f7cbf9377516e4b73c4b8701a70b2d988d1898121e",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_attacker_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_attacker_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ic-17/nt-50/883a1f24f6a1b80c160e9e73d26af241.webp",
+      "status": "downloaded",
+      "bytes": 2180,
+      "sha256": "41d07ca61157a4f8cea0fafd09a9bde55eda3faf4289afb24aca1ac35872adf2",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_attacker_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_attacker_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mq-56/jp-26/2ff93539e09130ab4326a0498a2eb5f4.webp",
+      "status": "downloaded",
+      "bytes": 3660,
+      "sha256": "09abfde430100791c5c5d6835b74563232e232071ac5cdf75a3d1077aaf6e433",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_attacker_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_attacker_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/re-95/fl-02/a69b45002da5ef93fe45e766519d0aaf.webp",
+      "status": "downloaded",
+      "bytes": 4102,
+      "sha256": "0ee15b4435d42b8c4717a33be3a01c19bf453fcde0e9706d516d555bf0aaeaff",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_attacker_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_attacker_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/jz-28/bh-77/ed8434221c3dd6f17eadf4ea4971e2e7.webp",
+      "status": "downloaded",
+      "bytes": 4312,
+      "sha256": "185fdb34acd5c8ccef39736643425d3494450bb8bcea23ac731b87c2e3535cde",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_attacker_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_attacker_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/pd-12/rk-64/2dfebfaa108459cccd18713ce5f7a1b4.webp",
+      "status": "downloaded",
+      "bytes": 4340,
+      "sha256": "1573aaacd2e3aca4a698d028ed842b2c4b1d2314054f73b88c884d8cf044b5a3",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_defender_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_defender_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mw-87/kx-14/2b5ab8bcbe3c64d7b745c249e4d5ab6e.webp",
+      "status": "downloaded",
+      "bytes": 2642,
+      "sha256": "1bc4d83877727cca1a0fc81b98d11cb37a77c8ca36581803d9dea5553751c931",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_defender_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_defender_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rk-27/gt-89/b47c43a24710098504cf8f5c26beea4c.webp",
+      "status": "downloaded",
+      "bytes": 3624,
+      "sha256": "e37962391593ed74b4f3957929e17c9ad1b46312d2aabb93105babb023f55720",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_defender_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_defender_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/vy-66/cp-65/c991da2e4456a3b0d5b01d667c4f3386.webp",
+      "status": "downloaded",
+      "bytes": 3532,
+      "sha256": "6f673b46ce21ccc6c99f3709481288fd6ec835eecb0813fb5ec9342a544378b2",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_defender_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_defender_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ot-98/yl-41/9ae6c68cc3673af0490131472ba14142.webp",
+      "status": "downloaded",
+      "bytes": 4126,
+      "sha256": "ca41c4e22e631f5d8a79435b4d4908e15ff15837c82b2c495a4c728349be8f14",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_defender_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_defender_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/li-62/ap-22/e6cc31fc7af4cb4d4220c993210ed0eb.webp",
+      "status": "downloaded",
+      "bytes": 4942,
+      "sha256": "3975a3bcd40c792dfce0fe70dfa9c6bf688c579cfb5fd273357ff790d113ce59",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_defender_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_defender_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/gt-26/wl-97/8aa6083058956a94ab328390b9a268aa.webp",
+      "status": "downloaded",
+      "bytes": 4994,
+      "sha256": "e6820d404e0fd53dd463caa01e0380c3378b47c1d066a5961e688c09054a260f",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_supporter_t1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_supporter_t1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ul-96/wc-48/f7380e6513eaa0da6145b97cdbd4f735.webp",
+      "status": "downloaded",
+      "bytes": 2390,
+      "sha256": "052b036299cc6b3ddf74f0fd6801a4c675c246fca8c01fc76d290f0c8f24fa07",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_supporter_t3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_supporter_t3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ed-53/ry-24/1559835d3a6494591ce48ff1f2644f49.webp",
+      "status": "downloaded",
+      "bytes": 3758,
+      "sha256": "1548104211c753a334ff1b268f9e1a759ef386e0f4f974a8634656d85a18db89",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_supporter_t5.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_supporter_t5.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ir-92/nu-00/7c11ee5006647d68e1a7407663de1c71.webp",
+      "status": "downloaded",
+      "bytes": 4134,
+      "sha256": "cae2c94a86f64dd77875e9619d7bc19c26fb9fb97f5deef639e8ae808083e012",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_supporter_t7.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_supporter_t7.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/nf-32/jq-75/6021d1a441454c6309c1c3ad7f6b16ed.webp",
+      "status": "downloaded",
+      "bytes": 4194,
+      "sha256": "a8a2074ad1ac4949812194b354adb19659d67207dabc840d33aef57a9c397b36",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_supporter_t9_1.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_supporter_t9_1.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/lh-06/wu-66/2200a12ec52be89c6fd2aef0379065f5.webp",
+      "status": "downloaded",
+      "bytes": 4858,
+      "sha256": "0396ced33e4095d58a6ceb987c545346cb78d6c9ce17403d4551ab6e5d9b07ce",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/equip/icn_equipment_leg_supporter_t9_3.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\equip\\icn_equipment_leg_supporter_t9_3.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/pv-45/mn-95/657d6a3a3689f77f139f1e1e58b60764.webp",
+      "status": "downloaded",
+      "bytes": 4772,
+      "sha256": "2cd3a3ac76258eba628b6a3f2785c4a3b805a92493676b924be7a7921b90ed5d",
+      "error": null
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1011.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1011.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/zi-44/ld-51/6630a24233b80c2de49512cc5fe0e15a.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1012.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1012.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/bp-14/wb-39/13aea802e86383f975613d4a6d546810.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2001.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2001.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ea-64/xf-70/9b1f2c29674730c10fe8571bb0c55f62.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2002.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2002.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/gh-34/id-58/f4b320026494c3cae2414d3383310e3f.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2003.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2003.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/io-04/tb-46/266100d235af7d3899811345ad0fd1ba.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2004.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2004.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/kv-73/xw-87/20528e560636976112bbef204ccd6509.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2005.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2005.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/nc-43/iu-75/e2729a2b0d0807aeeeaa974c30877a24.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2006.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2006.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/pj-13/ts-63/0ba73e0deea6826c8ca0815225f541c3.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2008.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2008.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ie-45/po-39/0b880e15466d107ab08b96da8885ac3f.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2009.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2009.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/kl-15/am-27/8723f73fdd501a9efd35eb58f6e7ae7b.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2012.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2012.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ig-06/gd-72/1ad45b36a59205538248223e702930dd.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2014.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2014.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/bb-38/bz-48/0b6af0ffa96d76fe0db8e3eacfae568c.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2015.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2015.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/di-08/mx-36/a39d99cdcc092f5846a2c55344688f1f.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2016.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2016.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/fp-77/xv-24/fb7c1b6741a47f3443f2889b67cd00ac.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2017.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2017.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/hw-47/cq-65/4fcc6f14d17b2b3201f0a14c440406c7.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2018.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2018.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/kd-17/no-53/1816b57b4270006d647ffe7f42e29624.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2022.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2022.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/pj-94/ed-86/c3d9530b829588be54c500c4686676b5.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2025.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2025.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/we-04/kx-50/5de0e1b0f2b7e5d99e6dd94851e04ce3.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2028.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2028.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rg-06/rr-14/12a7fdf304e274cb31f8d8bc7c2b5221.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2029.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2029.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/tn-75/cp-02/9593f590a4260fd5852d87a78772f076.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2032.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2032.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ri-66/xq-69/68ffe95b626373c6e24679531d75ccb0.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2034.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2034.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/kd-98/tm-45/17c65d948e52a3450ae33737a2ef96e4.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2038.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2038.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/tf-77/fb-50/12f2268366d0b32f33a3417ca6eb4bce.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2040.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2040.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/da-91/fx-54/1f2cc07fe4d49619b4a581e911ed13c2.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2042.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2042.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ho-31/vq-83/9e998e322857cb0f213c2fa59a57fe12.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2043.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2043.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/jv-01/go-71/4f0d64b3f741689ce44430f5c6726946.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2044.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2044.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mc-70/rm-59/7abe36a163f4b1765bc337ef47cf07c1.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2045.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2045.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/oj-40/ck-47/c0cba4f58e23cb4eb4fa2d6a661732ec.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2046.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2046.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/qq-10/ni-35/5adb6d6422494e0f4c60d265544e118d.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2047.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2047.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/he-72/yg-23/f01314f76355f68fa8a158b0779c483f.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2048.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2048.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/jl-42/je-11/6c7e6813515d61aa26aae7ff07b4fa61.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2051.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2051.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/yd-57/ov-56/4e9bfa96c6651421e0c06fe3859a36e1.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2052.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2052.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ak-27/zt-44/30de383f4c246b97f4a47faf15047b57.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2055.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2055.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/vm-29/ak-61/30b01afa491d55c897b8b1c9f689e270.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2056.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2056.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/xt-98/li-49/5284a3127583806abfbd325f2407436c.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2058.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2058.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ch-38/he-25/8933b60f8fcb5080b0747467303aef6a.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2059.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2059.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/eo-08/sc-13/39df35067038c4baec16ad26b05f5f73.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2060.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2060.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mc-52/bx-82/11fde3bac168c98eee708be368b43279.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2007.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2007.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rq-82/eq-51/f874d3965057f606575a9274614ec23e.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2010.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2010.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ds-66/kh-96/62a8b8aaacd72d82a9619d5a24a983be.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2011.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2011.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/fz-36/vf-84/6421eafd38bd6fbf1eae40a2d14407eb.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2013.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2013.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/kn-75/rb-60/091ca7b879bb1a3b833ac10101f5ac7a.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2019.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2019.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mk-86/ym-41/8db7964890827972e23831d00fb9d756.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2020.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2020.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/wo-62/ok-57/0179ca2e75d4582207b13c62e455d9d4.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2021.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2021.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/nc-25/zi-45/51072910a89779a9a326110c98ecd2b2.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2023.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2023.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rq-64/pb-74/2df02c66777cc6bf22de0dfc0c5fa002.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2024.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2024.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/tx-34/zz-62/8fd35ad28b69d45ad34ae329753d79ce.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2026.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2026.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/yl-73/vv-38/7a803a5617a831de351d1a4e2571e930.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2027.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2027.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/as-43/gt-26/e219cdf869d7f1eb392f42665aefdcd2.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2030.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2030.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mu-27/bu-93/0131e5084d21cfb450a384334b1555ea.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2031.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2031.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/pb-96/ms-81/672247c9deba3807821354f55df9fda3.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2033.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2033.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/tp-36/io-57/cb9e6970dd3f671bb4d5d8aedc9fb94f.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2035.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2035.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/mk-68/ek-33/7c87ebb08f15c1cca808f8d43202a846.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2036.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2036.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/or-38/pi-21/6c0fb82030f7314d476a0e3fe82293f5.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2037.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2037.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/qy-08/ud-62/1db1946c55d3f8498ecabb0ab11ba3e3.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2039.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2039.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/vm-47/pz-38/d11d34f1853514d8ba9483342ed79aa4.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2041.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2041.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/fh-61/ks-95/c6f8b4514d2c7d5269802cfe681b1e02.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2049.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2049.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ls-12/uc-98/a936dede36898eae01d60b2cd6d97eb5.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2050.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2050.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/vw-87/dx-68/0ff0832f535abdceda1367e1e63b9a10.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2053.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2053.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/qy-89/kr-32/70a9be170f7b089abc80d912db84a178.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2054.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2054.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/tf-59/pm-73/2bb86a92938833ee76928b29a6dbbd6b.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/2057.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\2057.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/aa-68/wg-37/65a735891562b0b58d1ed2ab2c48c2a6.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1021.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1021.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/po-09/pg-12/4cf66aa831635b77cc1cf3ee7d463fb0.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1022.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1022.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rv-78/ub-53/6cfe3346fff9aa98f8e4d80ef2289c50.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1031.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1031.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/rn-80/ng-26/bfbed22e0052ef632c3e32292c979cf0.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1032.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1032.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/tu-50/ye-14/39f2e576760934743704032fa628bbce.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1041.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1041.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/yq-69/lg-40/8c0d6eb2e2afcfe5d25640f0762609f6.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1042.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1042.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ax-39/we-28/7a3cc39a72c585383c52ef9d209fad4c.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1051.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1051.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ap-41/et-23/630d88f51e12ab2b15c2d5293440ff8a.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1052.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1052.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/cw-11/pr-11/364a345f441bf4524b62337527015124.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1061.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1061.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/qv-06/ct-37/e6d1dd3239537fe57dfe2ba21fcd30fa.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1062.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1062.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/tc-75/nr-25/aade576b97dd27e28daf2e291060c866.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1071.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1071.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/jr-02/gw-97/b00a641670eaf6134f3f93fcfe95ae2e.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1072.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1072.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/af-64/lr-39/34572bfae425b9588e11d99c808dbf8e.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1081.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1081.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/zx-66/ug-34/dde6c9af72458a25094a490f3101a911.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1082.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1082.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/ce-36/fe-22/bed541d7f992df98f72d1895145148e0.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1091.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1091.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/qd-31/yj-94/55f35610a709ab810475cb204c60d49c.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    },
+    {
+      "relative_path": "/icon/guild_emblem/1092.webp",
+      "local_path": "data\\nikke\\blabla-assets\\icon\\guild_emblem\\1092.webp",
+      "url": "https://sg-tools-cdn.blablalink.com/sk-01/de-36/e60ab3d8d8deed60cf7551864edf2d60.webp",
+      "status": "not_found_404",
+      "bytes": 0,
+      "sha256": "",
+      "error": "HTTP 404 Not Found"
+    }
+  ]
+}

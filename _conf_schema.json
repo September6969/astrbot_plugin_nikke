@@ -1,4 +1,11 @@
 {
+  "ui_renderer": {
+    "description": "图片渲染方式",
+    "type": "string",
+    "options": ["pillow", "t2i"],
+    "hint": "默认 Pillow。t2i 使用 AstrBot 原生 html_render，七页可用；失败或 30 秒超时后使用同一数据回退原有 Pillow 或文本。",
+    "default": "pillow"
+  },
   "public_base_url": {
     "description": "绑定服务公网地址",
     "type": "string",

@@ -30,6 +30,8 @@ from .asset_manager import AssetManager
 from .campaign_history_builder import CampaignHistoryBuilder
 from .campaign_history_models import ClearLineupStatus
 from .campaign_history_renderer import CampaignHistoryRenderer
+from .t2i_renderer import T2IRenderer
+from .t2i_payloads import CalendarT2IPayloadBuilder
 from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
@@ -187,6 +189,33 @@ class NikkePlugin(Star):
                 logger.warning("[NIKKE] 后台任务失败: %s", type(completed.exception()).__name__)
         task.add_done_callback(done)
         return task
+
+    async def _render_campaign_record(self, record):
+        """同一 DTO 切换展示路径，渲染失败不重新请求业务接口。"""
+        if (getattr(self, "config", None) or {}).get("ui_renderer", "pillow") == "t2i":
+            try:
+                renderer = getattr(self, "campaign_t2i_renderer", None)
+                if renderer is None:
+                    renderer = T2IRenderer(html_render=self.html_render, assets=self.asset_manager)
+                    self.campaign_t2i_renderer = renderer
+                return await renderer.render_campaign_history(record)
+            except Exception as exc:
+                logger.warning("[NIKKE] Campaign T2I 失败，回退 Pillow: %s", type(exc).__name__)
+        return await asyncio.to_thread(self.campaign_renderer.render_campaign_history, record)
+
+    async def _try_t2i(self, page, data, **kwargs):
+        """图片展示失败返回空信号，由命令使用已取得的数据安全回退。"""
+        if (getattr(self, "config", None) or {}).get("ui_renderer", "pillow") != "t2i":
+            return None
+        try:
+            renderer = getattr(self, "campaign_t2i_renderer", None)
+            if renderer is None:
+                renderer = T2IRenderer(html_render=self.html_render, assets=self.asset_manager)
+                self.campaign_t2i_renderer = renderer
+            return await renderer.render_view(page, data, **kwargs)
+        except Exception as exc:
+            logger.warning("[NIKKE] %s T2I 失败，使用已有数据回退: %s", page, type(exc).__name__)
+            return None
 
     @property
     def cdk_service(self) -> CdkService:
@@ -824,7 +853,9 @@ class NikkePlugin(Star):
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )
-            path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
+            path = await self._try_t2i("profile", dashboard)
+            if not path:
+                path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -989,7 +1020,9 @@ class NikkePlugin(Star):
         try:
             account = self._account_or_error(event)
             payload = await self.client.get_union_raid_data(account)
-            yield event.plain_result(format_ranking(build_ranking(payload)))
+            data = build_ranking(payload)
+            path = await self._try_t2i("union_records", data)
+            yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
@@ -1006,7 +1039,9 @@ class NikkePlugin(Star):
                 yield event.plain_result("当前账号缺少稳定联盟身份，暂不能安全筛选个人记录。")
                 return
             payload = await self.client.get_union_raid_data(account)
-            yield event.plain_result(format_ranking(build_member_ranking(payload, member_openid)))
+            data = build_member_ranking(payload, member_openid)
+            path = await self._try_t2i("union_member", data)
+            yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
@@ -1027,7 +1062,9 @@ class NikkePlugin(Star):
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )
-            path = await asyncio.to_thread(self.raid_renderer.render_raid_overview, data)
+            path = await self._try_t2i("union_overview", data)
+            if not path:
+                path = await asyncio.to_thread(self.raid_renderer.render_raid_overview, data)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -1121,7 +1158,9 @@ class NikkePlugin(Star):
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )
-            path = await asyncio.to_thread(self.character_renderer.render_character, card)
+            path = await self._try_t2i("character", card)
+            if not path:
+                path = await asyncio.to_thread(self.character_renderer.render_character, card)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -1680,7 +1719,7 @@ class NikkePlugin(Star):
             if record.status == ClearLineupStatus.ERROR:
                 yield event.plain_result(record.status_message)
                 return
-            path = await asyncio.to_thread(self.campaign_renderer.render_campaign_history, record)
+            path = await self._render_campaign_record(record)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -1730,8 +1769,9 @@ class NikkePlugin(Star):
                 calendar_error = f"同步结构化日程异常: {safe_exception_message(e)}"
 
         if calendar.has_snapshot():
-            text = calendar.format_schedule_text(days=days, fallback_error=calendar_error)
-            yield event.plain_result(text)
+            payload = CalendarT2IPayloadBuilder().build(calendar, days, warning=calendar_error)
+            path = await self._try_t2i("calendar_schedule", payload)
+            yield event.image_result(path) if path else event.plain_result(payload["fallback_text"])
             return
 
         announcement_error = ""

@@ -1,0 +1,116 @@
+{
+  "generated_at": "2026-09-13T14:44:22.913821+00:00",
+  "manifest_path": "assets/spine_manifest.json",
+  "total_rendered_png_count": 8,
+  "verified_count": 8,
+  "missing": 0,
+  "corrupt": 0,
+  "conflict": 0,
+  "unresolved": 0,
+  "default_characters": {
+    "total": 200,
+    "verified": 6,
+    "coverage_percent": 3.0,
+    "verified_entries": [
+      {
+        "spine_asset_id": "c010",
+        "resource_id": "10",
+        "character_name": "拉毗",
+        "character_name_en": "Rapi",
+        "dimensions": [
+          425,
+          891
+        ],
+        "sha256": "fb05dccee549af72da59b33d6181d2f47d19302caf98ed364e3d216e2c21a0c3"
+      },
+      {
+        "spine_asset_id": "c017",
+        "resource_id": "17",
+        "character_name": "阿妮斯：超级巨星",
+        "character_name_en": "Anis: Star",
+        "dimensions": [
+          348,
+          891
+        ],
+        "sha256": "0f031045cf1268526ecc5ae6b59bb5236489e1325e5999d4f6d220009eda6886"
+      },
+      {
+        "spine_asset_id": "c234",
+        "resource_id": "234",
+        "character_name": "桃乐丝：机缘巧遇",
+        "character_name_en": "Dorothy: Serendipity",
+        "dimensions": [
+          602,
+          891
+        ],
+        "sha256": "ddf9e9f84fff65f0e16f1559808c2e414ee1ff5d37169dbc58a18f0338b6e3b4"
+      },
+      {
+        "spine_asset_id": "c330",
+        "resource_id": "330",
+        "character_name": "皇冠",
+        "character_name_en": "Crown",
+        "dimensions": [
+          794,
+          885
+        ],
+        "sha256": "3b42e870819fb81278caad9401b42b1b699558a2f51f566b4d31e85ae1609dbe"
+      },
+      {
+        "spine_asset_id": "c352",
+        "resource_id": "352",
+        "character_name": "海伦",
+        "character_name_en": "Helm",
+        "dimensions": [
+          657,
+          892
+        ],
+        "sha256": "0a817a46efbd864c456afbe6f34d6fbe4ce2cd022e2a517ebbc1f1dd15804b0f"
+      },
+      {
+        "spine_asset_id": "c471",
+        "resource_id": "471",
+        "character_name": "白雪公主：重型武装",
+        "character_name_en": "Snow White: Heavy Arms",
+        "dimensions": [
+          618,
+          887
+        ],
+        "sha256": "63bc619f215fc84544c9e185e4a005ecab8f5c1dac5eb06d9f47d2f959a6f5aa"
+      }
+    ]
+  },
+  "costumes": {
+    "total": 40,
+    "verified": 2,
+    "coverage_percent": 5.0,
+    "verified_entries": [
+      {
+        "spine_asset_id": "c010_02",
+        "resource_id": "10",
+        "character_name": "拉毗",
+        "character_name_en": "Rapi",
+        "costume_id": "20001",
+        "costume_name": "White Promise",
+        "dimensions": [
+          426,
+          892
+        ],
+        "sha256": "623ec249fce5441f19f4b181556410ce6c0f3f6c1b738730f4319e2eb7571258"
+      },
+      {
+        "spine_asset_id": "c010_03",
+        "resource_id": "10",
+        "character_name": "拉毗",
+        "character_name_en": "Rapi",
+        "costume_id": "10005",
+        "costume_name": "Classic Vacation",
+        "dimensions": [
+          467,
+          892
+        ],
+        "sha256": "0ef8d58e0484b687f72c6e19f3cf91e470bac08f735cc1bc1ef78f0117f7dbeb"
+      }
+    ]
+  }
+}

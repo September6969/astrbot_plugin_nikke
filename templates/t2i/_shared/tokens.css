@@ -1,0 +1,2 @@
+:root { --bg: #111318; --panel: #1a1e25; --line: #343b46; --text: #f2f3f5; --muted: #a9b2c0; --accent: #a6bfd5; }
+body { background: var(--bg); color: var(--text); font-family: "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
