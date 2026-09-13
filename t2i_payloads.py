@@ -7,6 +7,33 @@ def display_number(value):
     return "Unknown" if value is None else f"{value:,}"
 
 
+def format_compact_number(value):
+    """仅 Profile Resources 8 项使用的 compact 紧凑数字格式化（约 3 位有效数字）。"""
+    if value is None:
+        return "Unknown"
+    if isinstance(value, str):
+        try:
+            value = float(value)
+        except ValueError:
+            return value
+    if value < 0:
+        return "-" + format_compact_number(-value)
+    if value < 1000:
+        return str(int(round(value)))
+    for divisor, suffix in ((1_000_000_000, "B"), (1_000_000, "M"), (1_000, "K")):
+        if value >= divisor:
+            scaled = value / divisor
+            if round(scaled, 2) < 10:
+                return f"{scaled:.2f}{suffix}"
+            elif round(scaled, 1) < 100:
+                return f"{scaled:.1f}{suffix}"
+            elif round(scaled, 0) < 1000:
+                return f"{scaled:.0f}{suffix}"
+            else:
+                continue
+    return f"{value / 1_000_000_000:.0f}B"
+
+
 def section_state(available=None, partial=False, items=None):
     if available is False:
         return "UNAVAILABLE"
@@ -26,6 +53,7 @@ class CharacterT2IPayloadBuilder:
         from .card_models import EquipmentData, EquipmentOption
         from .card_theme import character_theme, _extract_portrait_palette, _parse
         from .character_card_renderer import CharacterCardRenderer
+        from .static_registry import StaticDataRegistry
         from PIL import Image
         portrait = card_assets.portrait
         if isinstance(portrait, Image.Image):
@@ -63,18 +91,33 @@ class CharacterT2IPayloadBuilder:
         identities = []
         for key, value in (("corporation", data.corporation), ("element", data.element), ("weapon", data.weapon), ("burst", data.burst)):
             identities.append({"label": str(value) if value is not None else "Unknown", "icon": self.resolver.encode(getattr(card_assets, key), (40, 40))})
-        def item_payload(item, image):
-            return {"name": item.display_name or "已装备 · 名称 Unknown" if item else "EMPTY / 未装备",
-                    "level": "LV." + display_number(item.level) if item else "—", "icon": self.resolver.encode(image, (48, 48))}
+        def item_payload(item, image, kind=None):
+            fallback_unworn = "未佩戴魔方" if kind == "cube" else "未装配珍藏品/收藏品"
+            if not item or not getattr(item, "tid", None) or item.tid in (0, "0"):
+                return {"name": fallback_unworn, "level": "—", "icon": self.resolver.encode(image, (48, 48))}
+            name = getattr(item, "display_name", None)
+            if not name and kind:
+                name = StaticDataRegistry.resolve_display_name(kind, item.tid)
+            return {"name": name or "已装备 · 名称 Unknown",
+                    "level": "LV." + display_number(item.level), "icon": self.resolver.encode(image, (48, 48))}
         corp_asset = getattr(card_assets, "corporation", None)
         watermark = self.resolver.encode(corp_asset, (260, 260)) if corp_asset else None
+        summary_items = [{"label": item.display_name, "value": CharacterCardRenderer._option_value(item), "tier": "—"} for item in data.option_totals]
+        count = len(summary_items)
+        if count <= 6:
+            ol_density_class = "ol-normal"
+        elif count <= 9:
+            ol_density_class = "ol-compact"
+        else:
+            ol_density_class = "ol-dense"
         return {"name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
                 "character_art_data_uri": self.resolver.encode(portrait, (700, 744)), "theme": asdict(theme), "identities": identities,
                 "corporation_watermark": watermark, "bg_gradient": bg_grad,
-                "summary": [{"label": item.display_name, "value": CharacterCardRenderer._option_value(item), "tier": "—"} for item in data.option_totals],
+                "summary": summary_items, "ol_density_class": ol_density_class,
                 "equipment": equipment, "skills": f"{data.skill1_level} / {data.skill2_level} / {data.burst_skill_level}",
-                "favorite": item_payload(data.favorite_item, card_assets.favorite_item), "cube": item_payload(data.cube, card_assets.cube),
+                "favorite": item_payload(data.favorite_item, card_assets.favorite_item, "favorite_item"),
+                "cube": item_payload(data.cube, card_assets.cube, "cube"),
                 "stats": [{"label": label, "value": display_number(value), "source": source} for label, value, source in
                           (("HP", data.hp, data.hp_source), ("ATK", data.attack, data.attack_source), ("DEF", data.defense, data.defense_source))],
                 "growth": f"突破 {data.grade} · 核心 +{data.core} · 好感 {display_number(data.bond_level)}",
@@ -102,6 +145,14 @@ class ProfileT2IPayloadBuilder:
         for tower in data.tower_daily_info or []:
             today.extend(pairs([(tower.display_name or "塔记录", "未开放" if tower.is_opened is False else
                                  f"剩余 {display_number(tower.remaining)}" if tower.is_opened is True else "开放状态 Unknown")], today_state))
+        if data.daily_available is False:
+            simulation_state = "UNAVAILABLE"
+        elif data.daily_partial or (data.daily_available and data.sim_room_daily_record is None and not (data.sim_room_overclock_subseason or data.sim_room_overclock_season)):
+            simulation_state = "PARTIAL"
+        elif data.daily_available is True:
+            simulation_state = "AVAILABLE"
+        else:
+            simulation_state = "UNKNOWN"
         roster_state = section_state(data.roster_available, data.roster_partial)
         outpost_state = section_state(data.outpost_available)
         research_state = section_state(partial=data.research_partial, items=data.recycle_room_researches)
@@ -121,7 +172,8 @@ class ProfileT2IPayloadBuilder:
                     pass
             raw_label = item.display_name if item else definition.display_name
             label = "白银积分券" if raw_label == "躯体标签" else raw_label
-            resources.append({"label": label, "value": display_number(item.value) if item else "Unknown",
+            val = format_compact_number(item.value) if item and item.value is not None else "Unknown"
+            resources.append({"label": label, "value": val,
                               "scope": resource_state, "icon_data_uri": icon})
         extras = [{"label": "白银积分券" if item.display_name == "躯体标签" else item.display_name, "value": display_number(item.value), "scope": resource_state} for item in data.currencies or [] if id(item) not in used]
         researches = pairs([(item.presentation_name or item.display_name or "研究项目名称 Unknown",
@@ -131,11 +183,14 @@ class ProfileT2IPayloadBuilder:
                 "today": today, "today_state": today_state, "storage": storage,
                 "simulation": pairs([("模拟室每日最佳", data.sim_room_daily_record.display_label if data.sim_room_daily_record else None),
                                      ("每日最佳分数", display_number(data.sim_room_daily_record.score) if data.sim_room_daily_record else None),
-                                     ("双周最高", data.sim_room_overclock_subseason), ("赛季最高", data.sim_room_overclock_season)], today_state),
+                                     ("双周最高", data.sim_room_overclock_subseason), ("赛季最高", data.sim_room_overclock_season)], simulation_state),
+                "simulation_state": simulation_state,
                 "outpost": pairs([("同步器等级", display_number(data.synchro_level)), ("前哨战斗等级", display_number(data.outpost_battle_level)),
                                   ("基础核心", data.infra_core_level), ("普通主线", data.normal_campaign), ("困难主线", data.hard_campaign)], outpost_state),
+                "outpost_state": outpost_state,
                 "roster": pairs([("角色数量", display_number(data.character_count)), ("最高等级", display_number(data.max_level)),
                                  ("最高单体 CP", display_number(data.max_combat)), ("时装数量", display_number(data.character_costume_count))], roster_state),
+                "roster_state": roster_state,
                 "researches": researches, "research_state": research_state,
                 "collection": pairs([(item.display_name or "未知分类", display_number(item.count)) for item in data.memorial_summary or []], collection_state),
                 "collection_state": collection_state, "resources": resources, "extra_resources": extras, "resource_state": resource_state,
