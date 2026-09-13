@@ -25,6 +25,7 @@ from astrbot.api.star import Context, Star
 from ._version import PLUGIN_VERSION
 from .announcement_service import AnnouncementService
 from .announcement_delivery import AnnouncementDelivery
+from .calendar_service import CalendarService
 from .asset_manager import AssetManager
 from .campaign_history_builder import CampaignHistoryBuilder
 from .campaign_history_models import ClearLineupStatus
@@ -141,6 +142,7 @@ class NikkePlugin(Star):
         self.voice_pipeline = VoicePipeline(self.voice_provider, self.voice_encoder) if self.voice_encoder else None
         self.announcements = AnnouncementService(self.data_dir / "announcements")
         self.announcement_delivery = AnnouncementDelivery(self.store)
+        self.calendar = CalendarService(self.data_dir / "calendar")
         self.tower_registry: TowerRegistry | None = None
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
@@ -244,6 +246,7 @@ class NikkePlugin(Star):
         except Exception as exc:
             logger.warning("[NIKKE] 静态属性表预热失败，角色卡将保留 —：%s", safe_exception_message(exc))
         self._spawn_background_task(self._sync_announcements_background())
+        self._spawn_background_task(self._sync_calendar_background())
         await self._scheduler_loop()
 
     async def _sync_announcements_background(self) -> None:
@@ -251,6 +254,12 @@ class NikkePlugin(Star):
             await self.announcements.sync_from_source()
         except Exception as exc:
             logger.debug("[NIKKE] 后台公告同步跳过: %s", safe_exception_message(exc))
+
+    async def _sync_calendar_background(self) -> None:
+        try:
+            await self.calendar.sync_from_source()
+        except Exception as exc:
+            logger.debug("[NIKKE] 后台日程同步跳过: %s", safe_exception_message(exc))
 
     async def _send_delayed_notice(self, event: AstrMessageEvent, text: str) -> None:
         try:
@@ -290,6 +299,7 @@ class NikkePlugin(Star):
         last_daily = ""
         last_summary = ""
         last_announcement_sync = 0.0
+        last_calendar_sync = 0.0
         while not self._closing:
             now = datetime.now(timezone(timedelta(hours=8)))
             today = now.strftime("%Y-%m-%d")
@@ -314,11 +324,20 @@ class NikkePlugin(Star):
             if time.time() - last_announcement_sync > 3600:
                 last_announcement_sync = time.time()
                 self._spawn_background_task(self._sync_announcements_background())
+            if time.time() - last_calendar_sync > 3600:
+                last_calendar_sync = time.time()
+                self._spawn_background_task(self._sync_calendar_background())
             if self.config.get("enable_announcement_push", False):
                 task = getattr(self, "_announcement_push_task", None)
                 if task is None or task.done():
                     self._announcement_push_task = self._spawn_background_task(self._dispatch_announcements())
             await asyncio.sleep(20)
+
+    def _deadline_reminders_for_delivery(self):
+        calendar = getattr(self, "calendar", None)
+        if calendar is not None and calendar.has_snapshot() and calendar.activity_count() > 0:
+            return calendar.list_reminder_deadlines()
+        return self.announcements.list_active_deadlines()
 
     async def _dispatch_announcements(self):
         """默认关闭，只有管理员启用且目标显式订阅后才由调度调用。"""
@@ -329,7 +348,9 @@ class NikkePlugin(Star):
             return True
         await self.announcement_delivery.dispatch(
             self.announcements.list_announcements(limit=10000),
-            self.announcements.list_active_deadlines(), sender)
+            self._deadline_reminders_for_delivery(),
+            sender,
+        )
 
     @staticmethod
     def _qq_id(event: AstrMessageEvent) -> str:
@@ -418,7 +439,7 @@ class NikkePlugin(Star):
                 "/妮姬 联盟突袭 排名 — 当前响应范围\n"
                 "/妮姬 联盟突袭 我的 — 当前账号在本次响应中的记录\n"
                 "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
-                "/妮姬 日程　(/nikke schedule)\n"
+                "/妮姬 日程 [7|14|30]　(/nikke schedule [7|14|30])\n"
                 "/妮姬 公告 [语言|分类|搜索|诊断]　(/nikke news)\n"
                 "/妮姬 攻略 [分类]　(/nikke guide)"
             ),
@@ -549,7 +570,11 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"日程"}:
-            async for result in self.event_schedule(event):
+            try:
+                stream = self.event_schedule(event, arg1)
+            except TypeError:
+                stream = self.event_schedule(event)
+            async for result in stream:
                 yield result
             return
         if command_key in {"schedule"}:
@@ -557,7 +582,11 @@ class NikkePlugin(Star):
                 async for result in self.schedule(event, arg1):
                     yield result
                 return
-            async for result in self.event_schedule(event):
+            try:
+                stream = self.event_schedule(event, arg1)
+            except TypeError:
+                stream = self.event_schedule(event)
+            async for result in stream:
                 yield result
             return
         if command_key in {"公告", "news", "announcement"}:
@@ -1665,20 +1694,62 @@ class NikkePlugin(Star):
             if handle:
                 await handle.cancel()
 
-    async def event_schedule(self, event: AstrMessageEvent):
+    async def event_schedule(self, event: AstrMessageEvent, horizon: str = ""):
         """查询进行中与即将截止的官方活动日程。"""
-        fallback_error = ""
+        try:
+            days = CalendarService.normalize_horizon(horizon)
+        except ValueError as exc:
+            yield event.plain_result(f"日程范围错误：{exc}\n用法：/妮姬 日程 [7|14|30]")
+            return
+
+        calendar = getattr(self, "calendar", None)
+        if calendar is None:
+            fallback_error = ""
+            if self.announcements.record_count() == 0:
+                try:
+                    success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
+                    if not success:
+                        fallback_error = msg
+                except asyncio.TimeoutError:
+                    fallback_error = "同步公告超时"
+                except Exception as e:
+                    fallback_error = f"同步异常: {e}"
+            text = self.announcements.format_schedule_text(fallback_error=fallback_error)
+            yield event.plain_result(text)
+            return
+
+        calendar_error = ""
+        if not calendar.has_snapshot():
+            try:
+                success, msg = await asyncio.wait_for(calendar.sync_from_source(), timeout=4.0)
+                if not success:
+                    calendar_error = msg
+            except asyncio.TimeoutError:
+                calendar_error = "同步结构化日程超时"
+            except Exception as e:
+                calendar_error = f"同步结构化日程异常: {safe_exception_message(e)}"
+
+        if calendar.has_snapshot():
+            text = calendar.format_schedule_text(days=days, fallback_error=calendar_error)
+            yield event.plain_result(text)
+            return
+
+        announcement_error = ""
         if self.announcements.record_count() == 0:
             try:
                 success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
                 if not success:
-                    fallback_error = msg
+                    announcement_error = msg
             except asyncio.TimeoutError:
-                fallback_error = "同步公告超时"
+                announcement_error = "同步公告超时"
             except Exception as e:
-                fallback_error = f"同步异常: {e}"
-        text = self.announcements.format_schedule_text(fallback_error=fallback_error)
-        yield event.plain_result(text)
+                announcement_error = f"同步公告异常: {safe_exception_message(e)}"
+
+        announcement_text = self.announcements.format_schedule_text(fallback_error=announcement_error)
+        fallback_notice = "⚠️ 结构化日程不可用，已降级使用官方公告时间解析。"
+        if calendar_error:
+            fallback_notice += f"\n（结构化源错误: {calendar_error}）"
+        yield event.plain_result(f"{fallback_notice}\n\n{announcement_text}")
 
     async def announcements_view(
         self,
