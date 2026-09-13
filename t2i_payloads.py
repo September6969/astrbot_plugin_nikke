@@ -29,11 +29,14 @@ class CharacterT2IPayloadBuilder:
         from PIL import Image
         portrait = card_assets.portrait
         if isinstance(portrait, Image.Image):
-            # 只移除透明边缘，不裁切立绘实体或延伸武器。
-            portrait = portrait.convert("RGBA")
-            bounds = portrait.getchannel("A").getbbox()
-            if bounds:
-                portrait = portrait.crop(bounds)
+            from .character_crop import crop_and_fit_character_portrait, resolve_crop_key
+            crop_key = resolve_crop_key(
+                name_code=getattr(data, "name_code", None) if not isinstance(data, dict) else data.get("name_code"),
+                resource_id=getattr(data, "resource_id", None) if not isinstance(data, dict) else data.get("resource_id"),
+                costume_id=getattr(data, "costume_id", None) if not isinstance(data, dict) else data.get("costume_id"),
+                spine_asset_id=getattr(data, "spine_asset_id", None) if not isinstance(data, dict) else data.get("spine_asset_id"),
+            )
+            portrait = crop_and_fit_character_portrait(portrait, crop_key=crop_key)
         theme = character_theme(data.corporation, data.element, portrait)
         dom, sec, drk, sat = _extract_portrait_palette(portrait)
         if dom and sat:
