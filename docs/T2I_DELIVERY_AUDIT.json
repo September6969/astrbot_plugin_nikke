@@ -4,7 +4,7 @@
   "pytest": {
     "passed": 763,
     "subtests_passed": 490,
-    "log": "E:\\DevCache\\nikke-t2i-phase1\\full-frontend-delivery-tests.log"
+    "log": "full-frontend-delivery-tests.log"
   },
   "asset_integration": {
     "passed": 15,
@@ -23,7 +23,7 @@
   },
   "preview_images": [
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\normal.png",
+      "path": "preview\\t2i\\campaign\\normal.png",
       "size": [
         1600,
         880
@@ -32,7 +32,7 @@
       "sha256": "f86e9ce2c0b7db3de9c4bec161ad000b481bb87fdeb360913f5faf8e29105c6d"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\normal-50.png",
+      "path": "preview\\t2i\\campaign\\normal-50.png",
       "size": [
         800,
         440
@@ -41,7 +41,7 @@
       "sha256": "8831b9addd0e56f7ca6f8ba252f0d0897baa13f86de9ddf490dcf877513bd60d"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\normal-30.png",
+      "path": "preview\\t2i\\campaign\\normal-30.png",
       "size": [
         480,
         264
@@ -50,7 +50,7 @@
       "sha256": "7cab37c010b69d21b1d5077bbcb1534ddd703c4c82f05eaa690eb698a138da69"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\hard.png",
+      "path": "preview\\t2i\\campaign\\hard.png",
       "size": [
         1600,
         880
@@ -59,7 +59,7 @@
       "sha256": "5db1b6231c3aba417eedb448cfa7b2fa72d08037133ba7d0521569d9ca2b42e0"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\hard-50.png",
+      "path": "preview\\t2i\\campaign\\hard-50.png",
       "size": [
         800,
         440
@@ -68,7 +68,7 @@
       "sha256": "69dc2d7dd635003b4bbc06c80de25fce4c95ec842ed63b22e2e30224f064d81d"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\hard-30.png",
+      "path": "preview\\t2i\\campaign\\hard-30.png",
       "size": [
         480,
         264
@@ -77,7 +77,7 @@
       "sha256": "8e2c8073eaa56891d0b8e877b4047b8e19d9993520db43169fb150d90d61eb69"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\with-portraits.png",
+      "path": "preview\\t2i\\campaign\\with-portraits.png",
       "size": [
         1600,
         880
@@ -86,7 +86,7 @@
       "sha256": "f86e9ce2c0b7db3de9c4bec161ad000b481bb87fdeb360913f5faf8e29105c6d"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\with-portraits-50.png",
+      "path": "preview\\t2i\\campaign\\with-portraits-50.png",
       "size": [
         800,
         440
@@ -95,7 +95,7 @@
       "sha256": "8831b9addd0e56f7ca6f8ba252f0d0897baa13f86de9ddf490dcf877513bd60d"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\with-portraits-30.png",
+      "path": "preview\\t2i\\campaign\\with-portraits-30.png",
       "size": [
         480,
         264
@@ -104,7 +104,7 @@
       "sha256": "7cab37c010b69d21b1d5077bbcb1534ddd703c4c82f05eaa690eb698a138da69"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\calendar\\normal.png",
+      "path": "preview\\t2i\\calendar\\normal.png",
       "size": [
         1400,
         1371
@@ -113,7 +113,7 @@
       "sha256": "6c440fdec384a58ae03209be783d1f83e006787b3e5eda4fc29f18e73c8688c4"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\calendar\\normal-50.png",
+      "path": "preview\\t2i\\calendar\\normal-50.png",
       "size": [
         700,
         685
@@ -122,7 +122,7 @@
       "sha256": "3b9e40418e437253e526a05167037a7b3c334210852980736e22257c0fe72113"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\calendar\\normal-30.png",
+      "path": "preview\\t2i\\calendar\\normal-30.png",
       "size": [
         420,
         411
@@ -131,7 +131,7 @@
       "sha256": "fbb1a3e9cb0600bc2a0f1b705d47f89efadd42766f7fa940f255841d95a4f336"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_overview\\with-boss-assets.png",
+      "path": "preview\\t2i\\union_overview\\with-boss-assets.png",
       "size": [
         1600,
         900
@@ -140,7 +140,7 @@
       "sha256": "fb89f27129d26ebd8c0807bd9612181048fd335ae8bf065689c184bab6f630b0"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_overview\\with-boss-assets-50.png",
+      "path": "preview\\t2i\\union_overview\\with-boss-assets-50.png",
       "size": [
         800,
         450
@@ -149,7 +149,7 @@
       "sha256": "df4d87b89b1c2c394db0da63a3b66ab9dc024a48da5fe78f7c36be25c65337a2"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_overview\\with-boss-assets-30.png",
+      "path": "preview\\t2i\\union_overview\\with-boss-assets-30.png",
       "size": [
         480,
         270
@@ -158,7 +158,7 @@
       "sha256": "a85c151c80448de74aa15b7607fd2cff13c9ebb6414e036069e2ae39f11f7cec"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_records\\normal.png",
+      "path": "preview\\t2i\\union_records\\normal.png",
       "size": [
         1500,
         720
@@ -167,7 +167,7 @@
       "sha256": "72e32d2a459a4506c72375e178ae68560cc194890f31b8ee4d14ddb76cb0e8fe"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_records\\normal-50.png",
+      "path": "preview\\t2i\\union_records\\normal-50.png",
       "size": [
         750,
         360
@@ -176,7 +176,7 @@
       "sha256": "e7e28e296d1ae98596e6351a28ab0e9355a89c8c4650f02e44f73cad01cbcc0d"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_records\\normal-30.png",
+      "path": "preview\\t2i\\union_records\\normal-30.png",
       "size": [
         450,
         216
@@ -185,7 +185,7 @@
       "sha256": "9f8cec6029c0c39b6053518140d154032aaf076e0e0dd5553430a10c92d2f11a"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_member\\with-portraits.png",
+      "path": "preview\\t2i\\union_member\\with-portraits.png",
       "size": [
         1500,
         1896
@@ -194,7 +194,7 @@
       "sha256": "95e44f0ba7a5f28cba94226cc9c8067b59575b7694f553874c7c5b74bc44aa91"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_member\\with-portraits-50.png",
+      "path": "preview\\t2i\\union_member\\with-portraits-50.png",
       "size": [
         750,
         948
@@ -203,7 +203,7 @@
       "sha256": "f0458efa35f8f4e0bc7578dbd2c577c1f0adf79104efebbd116f7ec30fa753d8"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_member\\with-portraits-30.png",
+      "path": "preview\\t2i\\union_member\\with-portraits-30.png",
       "size": [
         450,
         568
@@ -212,7 +212,7 @@
       "sha256": "4df26d88f37fd14e6776fe45f676229fcb681b1aa4f8ba56414d43bde58f291a"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\profile\\full-current-model.png",
+      "path": "preview\\t2i\\profile\\full-current-model.png",
       "size": [
         1200,
         2680
@@ -221,7 +221,7 @@
       "sha256": "00b281cf830b06ece48485ed1378583c6efc005e80d7eb98f941721a0061382a"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\profile\\full-current-model-50.png",
+      "path": "preview\\t2i\\profile\\full-current-model-50.png",
       "size": [
         600,
         1340
@@ -230,7 +230,7 @@
       "sha256": "02dbc3a13e570e17c0b0dc46514822886f8d6b91594e6d43917e8fa568baf9e0"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\profile\\full-current-model-30.png",
+      "path": "preview\\t2i\\profile\\full-current-model-30.png",
       "size": [
         360,
         804
@@ -239,7 +239,7 @@
       "sha256": "a06a4ea7372ecc50be7641689662b0db7cf31e12d17dd9f8dacfba0efa3db946"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010.png",
+      "path": "preview\\t2i\\character\\c010.png",
       "size": [
         1800,
         1000
@@ -248,7 +248,7 @@
       "sha256": "f70638c345caea0c602f4cfba528a0f612d0b227fe67e1728ea479bb8ccb43d2"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010-50.png",
+      "path": "preview\\t2i\\character\\c010-50.png",
       "size": [
         900,
         500
@@ -257,7 +257,7 @@
       "sha256": "c439b03eafd2e01746ddc288a1585c46e84f805c4b18b7db697998a317b45205"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010-30.png",
+      "path": "preview\\t2i\\character\\c010-30.png",
       "size": [
         540,
         300
@@ -266,7 +266,7 @@
       "sha256": "2c678c25b13d80d081b26a1b1130a916b65e6be43a836bee50c1e19b62bc88e8"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_02.png",
+      "path": "preview\\t2i\\character\\c010_02.png",
       "size": [
         1800,
         1000
@@ -275,7 +275,7 @@
       "sha256": "64fd01649e7c1c294cd4d0e5b2dfc82f1c6e47c4d41baeeee29c44d77fc087fd"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_02-50.png",
+      "path": "preview\\t2i\\character\\c010_02-50.png",
       "size": [
         900,
         500
@@ -284,7 +284,7 @@
       "sha256": "01894c95e14943b472d99270e4209aa8c1715b37acc66dd75890991e823f93a0"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_02-30.png",
+      "path": "preview\\t2i\\character\\c010_02-30.png",
       "size": [
         540,
         300
@@ -293,7 +293,7 @@
       "sha256": "99c6c5cd2df9790ac3342747cde1fbb0bac28dcb4e55b2340650e61cd64f103c"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_03.png",
+      "path": "preview\\t2i\\character\\c010_03.png",
       "size": [
         1800,
         1000
@@ -302,7 +302,7 @@
       "sha256": "1f0de9a43c15866745106043a6b3f9f28396298ee45168f547012b8d8c660d42"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_03-50.png",
+      "path": "preview\\t2i\\character\\c010_03-50.png",
       "size": [
         900,
         500
@@ -311,7 +311,7 @@
       "sha256": "179ced9ab5269580c4fac54b3fc28b814f613e952712e48c320aebb8f5b1b722"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_03-30.png",
+      "path": "preview\\t2i\\character\\c010_03-30.png",
       "size": [
         540,
         300
@@ -320,7 +320,7 @@
       "sha256": "6f9a4273e0b067f708b2b8dada327c7bad226f1b9f1c1defb45aead1b749b906"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c017.png",
+      "path": "preview\\t2i\\character\\c017.png",
       "size": [
         1800,
         1000
@@ -329,7 +329,7 @@
       "sha256": "8189167f01931e41d5336514e546d060625393cf365ac8d24886b88f1dca47b0"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c017-50.png",
+      "path": "preview\\t2i\\character\\c017-50.png",
       "size": [
         900,
         500
@@ -338,7 +338,7 @@
       "sha256": "b730b22d26b982c86cec817289df464d594e01a85f653611456ab67ac1ac761d"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c017-30.png",
+      "path": "preview\\t2i\\character\\c017-30.png",
       "size": [
         540,
         300
@@ -347,7 +347,7 @@
       "sha256": "8dd725add2be2f1ae1249ff20d5147922c903d67571b1a30334e46d4bfaa96d1"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c234.png",
+      "path": "preview\\t2i\\character\\c234.png",
       "size": [
         1800,
         1000
@@ -356,7 +356,7 @@
       "sha256": "0eef923837e75b406e7658cc6cdb943222738c0b59da1b56b68bbcfb571c3c35"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c234-50.png",
+      "path": "preview\\t2i\\character\\c234-50.png",
       "size": [
         900,
         500
@@ -365,7 +365,7 @@
       "sha256": "0f233313b6b2c2c56dc3745e20209901142c2406266c6f36d5f39785193ca51b"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c234-30.png",
+      "path": "preview\\t2i\\character\\c234-30.png",
       "size": [
         540,
         300
@@ -374,7 +374,7 @@
       "sha256": "9d8f37db73bf5db194f2c4547ab379a5d4ab81dca2e10a0174257a86634bd87e"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c330.png",
+      "path": "preview\\t2i\\character\\c330.png",
       "size": [
         1800,
         1000
@@ -383,7 +383,7 @@
       "sha256": "9bd102e4e42c1b2bc21e0b337527a2318ec08718b895939ecc15b65aa4009833"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c330-50.png",
+      "path": "preview\\t2i\\character\\c330-50.png",
       "size": [
         900,
         500
@@ -392,7 +392,7 @@
       "sha256": "979d867377ea90e8ada8e71f78756a4950325748d5586b21073de94acc38764f"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c330-30.png",
+      "path": "preview\\t2i\\character\\c330-30.png",
       "size": [
         540,
         300
@@ -401,7 +401,7 @@
       "sha256": "a257547e0eb1c34f21b8c97c09930d438cd072e3ab816938f2ff5294bd77f79a"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c352.png",
+      "path": "preview\\t2i\\character\\c352.png",
       "size": [
         1800,
         1000
@@ -410,7 +410,7 @@
       "sha256": "7cc17059d697ed396f6165efb7c964b84a382ca0abacd1d1ee497493c6325511"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c352-50.png",
+      "path": "preview\\t2i\\character\\c352-50.png",
       "size": [
         900,
         500
@@ -419,7 +419,7 @@
       "sha256": "ae949a757150433325bf993a8de0531cca0231e7c59ba87cb43ddae7af372ff6"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c352-30.png",
+      "path": "preview\\t2i\\character\\c352-30.png",
       "size": [
         540,
         300
@@ -428,7 +428,7 @@
       "sha256": "80537f9a57613cd1eb9d8fc6afbc310936ef6c31dbf2e5ca0cb3c68a703b27ba"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c471.png",
+      "path": "preview\\t2i\\character\\c471.png",
       "size": [
         1800,
         1000
@@ -437,7 +437,7 @@
       "sha256": "314eaf95cf88e08d023f5fccfb19dc9bed631666c24b87797efdd6ea7471899e"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c471-50.png",
+      "path": "preview\\t2i\\character\\c471-50.png",
       "size": [
         900,
         500
@@ -446,7 +446,7 @@
       "sha256": "52e6a29109e6ea7d2039886752fdf83b665a11752d1102a8126611cc4ae3388c"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c471-30.png",
+      "path": "preview\\t2i\\character\\c471-30.png",
       "size": [
         540,
         300
@@ -455,7 +455,7 @@
       "sha256": "b6dc94de948970acb6db3830f37c646002ff51c322e113209195aaf0173402c8"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-dark.png",
+      "path": "preview\\t2i\\character\\representative-dark.png",
       "size": [
         1800,
         1000
@@ -464,7 +464,7 @@
       "sha256": "f70638c345caea0c602f4cfba528a0f612d0b227fe67e1728ea479bb8ccb43d2"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-dark-50.png",
+      "path": "preview\\t2i\\character\\representative-dark-50.png",
       "size": [
         900,
         500
@@ -473,7 +473,7 @@
       "sha256": "c439b03eafd2e01746ddc288a1585c46e84f805c4b18b7db697998a317b45205"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-dark-30.png",
+      "path": "preview\\t2i\\character\\representative-dark-30.png",
       "size": [
         540,
         300
@@ -482,7 +482,7 @@
       "sha256": "2c678c25b13d80d081b26a1b1130a916b65e6be43a836bee50c1e19b62bc88e8"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-light.png",
+      "path": "preview\\t2i\\character\\representative-light.png",
       "size": [
         1800,
         1000
@@ -491,7 +491,7 @@
       "sha256": "9bd102e4e42c1b2bc21e0b337527a2318ec08718b895939ecc15b65aa4009833"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-light-50.png",
+      "path": "preview\\t2i\\character\\representative-light-50.png",
       "size": [
         900,
         500
@@ -500,7 +500,7 @@
       "sha256": "979d867377ea90e8ada8e71f78756a4950325748d5586b21073de94acc38764f"
     },
     {
-      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-light-30.png",
+      "path": "preview\\t2i\\character\\representative-light-30.png",
       "size": [
         540,
         300
