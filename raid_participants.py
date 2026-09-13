@@ -54,9 +54,10 @@ class RaidParticipantSummary:
 class RaidRankingData:
     participants: list[RaidParticipantSummary]
     scope: str = "CURRENT_RESPONSE"
+    union_members: list[str] | None = None
 
 
-def build_ranking(payload: dict) -> RaidRankingData:
+def build_ranking(payload: dict, union_members: list[str] | None = None) -> RaidRankingData:
     rows = payload.get("participate_data")
     if not isinstance(rows, list):
         raise ValueError("突袭响应缺少攻击列表")
@@ -89,7 +90,9 @@ def build_ranking(payload: dict) -> RaidRankingData:
             rank = index
         participant.rank = rank
         previous = participant.total_damage
-    return RaidRankingData(participants)
+    if union_members is None and isinstance(payload, dict):
+        union_members = payload.get("union_members") or payload.get("guild_members")
+    return RaidRankingData(participants, union_members=union_members)
 
 
 def build_member_ranking(payload: dict, member_openid: str) -> RaidRankingData:

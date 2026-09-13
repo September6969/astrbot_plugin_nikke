@@ -152,7 +152,7 @@ def profile_cases():
 def union_records_cases(page):
     from astrbot_plugin_nikke.raid_participants import build_ranking, build_member_ranking
     result = {}
-    cases = ("normal", "long-name", "tie-rank", "many-members", "empty") if page == "union_records" else ("with-portraits", "1-record", "2-records", "3-records", "many-records", "empty")
+    cases = ("normal", "long-name", "tie-rank", "many-members", "unattacked-members", "all-attacked", "empty") if page == "union_records" else ("with-portraits", "1-record", "2-records", "3-records", "many-records", "empty")
     for name in cases:
         count = {"1-record": 1, "2-records": 2, "3-records": 3, "many-records": 10, "many-members": 35, "empty": 0}.get(name, 5)
         rows = []
@@ -168,5 +168,9 @@ def union_records_cases(page):
                 row["boss_id"] = "2420020214"
                 row["squad"][0].update(tid=201004, costume_id=10005)
         payload = {"participate_data": rows}
+        if name == "unattacked-members":
+            payload["union_members"] = [f"合成成员 {i + 1}" for i in range(count)] + ["未出刀队员 Alpha", "未出刀队员 Beta", "未出刀队员 Gamma"]
+        elif name == "all-attacked":
+            payload["union_members"] = [f"合成成员 {i + 1}" for i in range(count)]
         result[name] = build_member_ranking(payload, "synthetic-member") if page == "union_member" else build_ranking(payload)
     return result

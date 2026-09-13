@@ -24,7 +24,7 @@ class CharacterT2IPayloadBuilder:
     def build(self, data, card_assets):
         from dataclasses import asdict
         from .card_models import EquipmentData, EquipmentOption
-        from .card_theme import character_theme
+        from .card_theme import character_theme, _extract_portrait_palette, _parse
         from .character_card_renderer import CharacterCardRenderer
         from PIL import Image
         portrait = card_assets.portrait
@@ -35,6 +35,14 @@ class CharacterT2IPayloadBuilder:
             if bounds:
                 portrait = portrait.crop(bounds)
         theme = character_theme(data.corporation, data.element, portrait)
+        dom, sec, drk, sat = _extract_portrait_palette(portrait)
+        if dom and sat:
+            dr, dg, db = _parse(dom)
+            sr, sg, sb = _parse(sec) if sec else _parse(theme.accent)
+            bg_grad = f"radial-gradient(1100px 750px at 24% 42%, rgba({dr},{dg},{db},0.18) 0%, rgba({sr},{sg},{sb},0.07) 45%, transparent 80%), linear-gradient(135deg, rgba({dr},{dg},{db},0.08) 0%, {theme.background} 100%)"
+        else:
+            ar, ag, ab = _parse(theme.accent)
+            bg_grad = f"radial-gradient(1100px 750px at 24% 42%, rgba({ar},{ag},{ab},0.14) 0%, transparent 75%), linear-gradient(135deg, rgba({ar},{ag},{ab},0.06) 0%, {theme.background} 100%)"
         equipment = []
         for slot, label in CharacterCardRenderer.SLOT_NAMES.items():
             item = data.equipment.get(slot, EquipmentData(slot))
@@ -60,7 +68,7 @@ class CharacterT2IPayloadBuilder:
         return {"name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
                 "character_art_data_uri": self.resolver.encode(portrait, (700, 744)), "theme": asdict(theme), "identities": identities,
-                "corporation_watermark": watermark,
+                "corporation_watermark": watermark, "bg_gradient": bg_grad,
                 "summary": [{"label": item.display_name, "value": CharacterCardRenderer._option_value(item), "tier": "—"} for item in data.option_totals],
                 "equipment": equipment, "skills": f"{data.skill1_level} / {data.skill2_level} / {data.burst_skill_level}",
                 "favorite": item_payload(data.favorite_item, card_assets.favorite_item), "cube": item_payload(data.cube, card_assets.cube),
@@ -189,9 +197,55 @@ class UnionOverviewT2IPayloadBuilder:
 
 
 class UnionRecordsT2IPayloadBuilder:
-    def build(self, data):
-        return {"scope": data.scope, "rows": [{"rank": str(item.rank), "nickname": item.nickname,
-                "damage": display_number(item.total_damage), "records": str(len(item.attacks))} for item in data.participants]}
+    def build(self, data, union_members=None, **kwargs):
+        if union_members is None:
+            union_members = getattr(data, "union_members", None)
+        if union_members is None and isinstance(data, dict):
+            union_members = data.get("union_members") or data.get("guild_members")
+        participants = getattr(data, "participants", None)
+        if participants is None and isinstance(data, dict):
+            participants = data.get("participants", [])
+        participants = participants or []
+        attacked_nicknames = {item.nickname for item in participants if hasattr(item, "nickname")}
+
+        if union_members is None:
+            no_attack = {
+                "status": "UNKNOWN",
+                "count": None,
+                "label": "无法确认",
+                "detail": "缺少全员名单数据，无法确认",
+                "members": [],
+            }
+        else:
+            clean_members = []
+            for m in union_members:
+                if isinstance(m, str) and m.strip():
+                    clean_members.append(m.strip())
+                elif isinstance(m, dict) and m.get("nickname"):
+                    clean_members.append(str(m["nickname"]).strip())
+            unattacked = [name for name in clean_members if name not in attacked_nicknames]
+            if not unattacked:
+                no_attack = {
+                    "status": "ALL_ATTACKED",
+                    "count": 0,
+                    "label": "全员已出刀",
+                    "detail": "当前已知联盟成员均已有出刀记录",
+                    "members": [],
+                }
+            else:
+                no_attack = {
+                    "status": "HAS_UNATTACKED",
+                    "count": len(unattacked),
+                    "label": f"未出刀 {len(unattacked)} 人",
+                    "detail": "",
+                    "members": unattacked,
+                }
+        return {
+            "scope": getattr(data, "scope", "CURRENT_RESPONSE") if not isinstance(data, dict) else data.get("scope", "CURRENT_RESPONSE"),
+            "rows": [{"rank": str(item.rank), "nickname": item.nickname,
+                     "damage": display_number(item.total_damage), "records": str(len(item.attacks))} for item in participants],
+            "no_attack": no_attack,
+        }
 
 
 class UnionMemberT2IPayloadBuilder:

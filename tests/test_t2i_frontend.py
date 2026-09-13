@@ -256,3 +256,59 @@ def test_calendar_progress_presentation(tmp_path):
     assert "progress-bar" in html
     assert "未开始" in html
 
+
+@pytest.mark.asyncio
+async def test_character_card_visual_polish(tmp_path):
+    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.asset_manager import AssetManager
+    from pathlib import Path
+    assets = AssetManager(tmp_path / "cache", Path(__file__).resolve().parents[1] / "assets", remote=False)
+    native = AsyncMock(return_value="preview.png")
+    renderer = T2IRenderer(native, assets)
+    cases = get_cases("character", tmp_path)
+    await renderer.render_view("character", cases["c010"])
+    template, payload = native.call_args.args
+    assert "bg_gradient" in payload
+    assert payload["bg_gradient"].startswith("radial-gradient(")
+    html = Environment(autoescape=False).from_string(template).render(**payload)
+    assert "--bg-gradient:" in html
+    assert "backdrop-filter:blur(12px)" in html
+    assert "overflow:hidden" in html
+    assert "font-size:70px" in html
+    assert "font-size:62px" in html
+    assets.close()
+
+
+def test_union_records_no_attack_summary(tmp_path):
+    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.t2i_payloads import UnionRecordsT2IPayloadBuilder
+    cases = get_cases("union_records", tmp_path)
+    builder = UnionRecordsT2IPayloadBuilder()
+    template = T2ITemplateLoader().load("union_records")
+
+    # 1. Unattacked members
+    payload_unattacked = builder.build(cases["unattacked-members"])
+    assert payload_unattacked["no_attack"]["status"] == "HAS_UNATTACKED"
+    assert payload_unattacked["no_attack"]["count"] == 3
+    assert payload_unattacked["no_attack"]["label"] == "未出刀 3 人"
+    assert "未出刀队员 Alpha" in payload_unattacked["no_attack"]["members"]
+    html1 = Environment(autoescape=False).from_string(template).render(**payload_unattacked)
+    assert "未出刀 3 人" in html1
+    assert "未出刀队员 Alpha" in html1
+    assert "no-attack-chip" in html1
+
+    # 2. All attacked
+    payload_all = builder.build(cases["all-attacked"])
+    assert payload_all["no_attack"]["status"] == "ALL_ATTACKED"
+    assert payload_all["no_attack"]["count"] == 0
+    assert payload_all["no_attack"]["label"] == "全员已出刀"
+    html2 = Environment(autoescape=False).from_string(template).render(**payload_all)
+    assert "全员已出刀" in html2
+
+    # 3. Unknown (normal without union_members)
+    payload_unknown = builder.build(cases["normal"])
+    assert payload_unknown["no_attack"]["status"] == "UNKNOWN"
+    assert payload_unknown["no_attack"]["label"] == "无法确认"
+    html3 = Environment(autoescape=False).from_string(template).render(**payload_unknown)
+    assert "无法确认" in html3
+
