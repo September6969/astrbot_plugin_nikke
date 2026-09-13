@@ -1,0 +1,896 @@
+{
+  "branch": "feat/t2i-campaign-phase1",
+  "head": "ebbb18f8c32ca5cf27ba3fb3ceb1255fe6acabb5",
+  "scope": "uncommitted presentation-only visual review; no commit/push/PR/deploy/QQ",
+  "changed_existing_files": [
+    "scripts/preview_t2i_frontend.py",
+    "scripts/preview_t2i_ui.py",
+    "templates/t2i/_shared/components.css",
+    "templates/t2i/_shared/macros.jinja",
+    "templates/t2i/_shared/utilities.css",
+    "templates/t2i/calendar_schedule.html",
+    "templates/t2i/campaign.html",
+    "templates/t2i/character.html",
+    "templates/t2i/profile.html",
+    "templates/t2i/union_member.html",
+    "templates/t2i/union_overview.html",
+    "templates/t2i/union_records.html"
+  ],
+  "new_files": [
+    "tests/test_t2i_visual_contracts.py",
+    "docs/FINAL_VISUAL_REVIEW_REPORT.md",
+    "docs/T2I_VISUAL_REVIEW_AUDIT.json"
+  ],
+  "unchanged_baseline_file_count": 1030,
+  "old_delivery_pngs_preserved": 54,
+  "representative_payloads_equal_except_live_remaining_time": true,
+  "tests": {
+    "pytest_passed": 775,
+    "subtests_passed": 490,
+    "t2i_targeted_passed": 57,
+    "new_visual_tests_passed": 12,
+    "extension_passed": 4,
+    "compileall": "pass",
+    "diff_check": "pass"
+  },
+  "comparisons": [
+    {
+      "page": "campaign",
+      "before": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\normal.png",
+      "after": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\normal.png",
+      "before_size": [
+        1600,
+        880
+      ],
+      "after_size": [
+        1600,
+        880
+      ],
+      "payload_unchanged": true
+    },
+    {
+      "page": "calendar_schedule",
+      "before": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\calendar_schedule\\normal.png",
+      "after": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\normal.png",
+      "before_size": [
+        1400,
+        1371
+      ],
+      "after_size": [
+        1400,
+        1247
+      ],
+      "payload_unchanged": true
+    },
+    {
+      "page": "union_overview",
+      "before": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_overview\\with-boss-assets.png",
+      "after": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\with-boss-assets.png",
+      "before_size": [
+        1600,
+        900
+      ],
+      "after_size": [
+        1600,
+        900
+      ],
+      "payload_unchanged": true
+    },
+    {
+      "page": "union_records",
+      "before": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_records\\normal.png",
+      "after": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\normal.png",
+      "before_size": [
+        1500,
+        720
+      ],
+      "after_size": [
+        1500,
+        720
+      ],
+      "payload_unchanged": true
+    },
+    {
+      "page": "union_member",
+      "before": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_member\\with-portraits.png",
+      "after": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_member\\with-portraits.png",
+      "before_size": [
+        1500,
+        1896
+      ],
+      "after_size": [
+        1500,
+        1903
+      ],
+      "payload_unchanged": true
+    },
+    {
+      "page": "profile",
+      "before": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\profile\\full-current-model.png",
+      "after": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\full-current-model.png",
+      "before_size": [
+        1200,
+        2680
+      ],
+      "after_size": [
+        1200,
+        2331
+      ],
+      "payload_unchanged": true
+    },
+    {
+      "page": "character",
+      "before": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c330.png",
+      "after": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c330.png",
+      "before_size": [
+        1800,
+        1000
+      ],
+      "after_size": [
+        1800,
+        1000
+      ],
+      "payload_unchanged": true
+    }
+  ],
+  "cases": [
+    {
+      "page": "calendar_schedule",
+      "case": "empty",
+      "size": [
+        1400,
+        720
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\empty.png",
+          "sha256": "1768b33197c051e944c37dd0ce5977ecb8ef0ff41ee5f37e948ee0ac88d1d27a"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\empty-50.png",
+          "sha256": "918dcccd8d035ae4727639b68fb236025e6adedbae8c22e7131fdeed9129bd40"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\empty-30.png",
+          "sha256": "edef9dee5df81718fc29fe2092b74c441bf97c9d002f427c52ad2a52183b4d92"
+        }
+      ]
+    },
+    {
+      "page": "calendar_schedule",
+      "case": "long-title",
+      "size": [
+        1400,
+        1652
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\long-title.png",
+          "sha256": "cf32a3955250004b14901711e0692838fe3422a3caa60bac2ab41cac49a1c310"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\long-title-50.png",
+          "sha256": "ba6f1d52277fe53567817dbeffe67669e3f71dc7675fc711a963ff86e644d7ea"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\long-title-30.png",
+          "sha256": "3e503694e0a55792f1cd9303d6892c7444683a176b7663a27bf8f51b6ab71b6f"
+        }
+      ]
+    },
+    {
+      "page": "calendar_schedule",
+      "case": "many-events",
+      "size": [
+        1400,
+        4153
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\many-events.png",
+          "sha256": "b0ca6c5eee0b94b2cc4f666b4c1d586a92e717dbc7afb99e6dcc1947eee0d67a"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\many-events-50.png",
+          "sha256": "1f7b89a7d71b7af46f766e057333fde8606a12b93f5e67a587ae47eec77208dd"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\many-events-30.png",
+          "sha256": "d7eb0062086c3de182853d267b9457c3069ba3c8006c77fb6b2e193a690c123a"
+        }
+      ]
+    },
+    {
+      "page": "calendar_schedule",
+      "case": "normal",
+      "size": [
+        1400,
+        1247
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\normal.png",
+          "sha256": "e0e38947e4c6ac04904d2bb4a63a1d0e8736ee41a721cfeed3331635e149431a"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\normal-50.png",
+          "sha256": "448552d20b28c6e77395e524b4559d16471136b6fe6defca2309c9ecbe5b41de"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\normal-30.png",
+          "sha256": "a13b77418bf71aa0a186bd39d383e5d350a26322c98016555b138177a1aaf446"
+        }
+      ]
+    },
+    {
+      "page": "calendar_schedule",
+      "case": "stale",
+      "size": [
+        1400,
+        1326
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\stale.png",
+          "sha256": "9173b0c38a00e151f2a9e4b5e0e5af13a0a3deed2fe14e2fbdda94f6cc677e0c"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\stale-50.png",
+          "sha256": "14442b2bdc7f2b0f4e5b33e56163bfdab1906f024e3a0d6b68f9353fb79b71c8"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\calendar_schedule\\stale-30.png",
+          "sha256": "d97ef76ecc57911efdd3435724a7a5319c23dc2059ca77132bdb32671b76b21e"
+        }
+      ]
+    },
+    {
+      "page": "campaign",
+      "case": "hard",
+      "size": [
+        1600,
+        880
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\hard.png",
+          "sha256": "9e39332a7913b0012d598e2d56afdde482be62dcf9520cfead71f1904b440d73"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\hard-50.png",
+          "sha256": "cee61a046e0752d37994ca5f1b2d60d7d9774994322d23a84307c3ebb3f59a02"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\hard-30.png",
+          "sha256": "a960e8db6209aff2a24018da795aa0c7e3dac5db5670a1617baad8df4981bb69"
+        }
+      ]
+    },
+    {
+      "page": "campaign",
+      "case": "long-text",
+      "size": [
+        1600,
+        880
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\long-text.png",
+          "sha256": "bf8ccc9aff20b8e530a3f9c22b0de520807b8b6e1bc712ddf8ffd5734d85f9b1"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\long-text-50.png",
+          "sha256": "f211f787e67fff5c41f16aea943d1659dcdb0ae602338a6b04e28e36efac05a3"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\long-text-30.png",
+          "sha256": "d2ac53168315de3df4bae985cba638f3426b6cc60b95cd064971e59308fa5141"
+        }
+      ]
+    },
+    {
+      "page": "campaign",
+      "case": "max-density",
+      "size": [
+        1600,
+        880
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\max-density.png",
+          "sha256": "7e8b142d9279337db01c532b8c20de529520bad54666d0ee675f8e2a9b142c5a"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\max-density-50.png",
+          "sha256": "cbb0fa399c0d90a42a504dc013e00c744416a9d9922d6c65fe509b99315ce73b"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\max-density-30.png",
+          "sha256": "f38aa620cb8ec286519df5146d8d1546ab0b649b6af314453acacfbc2e4d9c1b"
+        }
+      ]
+    },
+    {
+      "page": "campaign",
+      "case": "normal",
+      "size": [
+        1600,
+        880
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\normal.png",
+          "sha256": "d2862d33bda8665d47d0916e95a8cae54e765a60682c1ad3cddad516f0169477"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\normal-50.png",
+          "sha256": "2a6590e78a3799f5a7bb046ac6cb107d868ae790ce283701f3c368588c3bde34"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\campaign\\normal-30.png",
+          "sha256": "d1f320a153773ed1eca47fc2016c3d03e0ebcac0ef954bbbb709e16851ef7725"
+        }
+      ]
+    },
+    {
+      "page": "character",
+      "case": "c010",
+      "size": [
+        1800,
+        1000
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010.png",
+          "sha256": "8b11213d8cf31bea7fc46f7b86c68a370229767ca1c7b6f0eb2bba6b9da715a4"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010-50.png",
+          "sha256": "e679bb47f83aaf3df893424dcd6372209049b54c95aa77ec867a6c3e3b0ce69a"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010-30.png",
+          "sha256": "d5b34c447057dd193b16999d1a10573d04cbf50aa1c1f576a040ae220f2738a2"
+        }
+      ]
+    },
+    {
+      "page": "character",
+      "case": "c010_02",
+      "size": [
+        1800,
+        1000
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010_02.png",
+          "sha256": "96e8954c3be5de9f350c255ce0b5f2ba9ea993115ee606cda898456369fbbad7"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010_02-50.png",
+          "sha256": "5984f0203722d1d897d07a1fcccb7b05300c3561790b32536fd0bb3c8fab96bc"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010_02-30.png",
+          "sha256": "283973a0717e2f1d3454b57d9535637cb584ff6c9f919a2426f664739819aada"
+        }
+      ]
+    },
+    {
+      "page": "character",
+      "case": "c010_03",
+      "size": [
+        1800,
+        1000
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010_03.png",
+          "sha256": "68117980fbacf7b37db924ced34e8ae996cf3b0ffcd3b3ff7d1668bf5ee336ff"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010_03-50.png",
+          "sha256": "e3a4afc65e7d1c24052ed18cddcdef00efeab4906a4cb39ae28f8c6564f0680a"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c010_03-30.png",
+          "sha256": "cf6bf9d840578e76062d3a2b30f5c734cc5489595b5c2a1087a830e97f0e2729"
+        }
+      ]
+    },
+    {
+      "page": "character",
+      "case": "c330",
+      "size": [
+        1800,
+        1000
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c330.png",
+          "sha256": "7a5f45808c633f159bfbedb10865551315d515c41cb42e796a2776c27fc3b6c1"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c330-50.png",
+          "sha256": "975499f577811065538a800fc294e25512d524e75f6a25426cb461ea2a1eb181"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c330-30.png",
+          "sha256": "7f71f54a02233da1d08ff444f29e3b8e310f88fb3b548d92198252567bf22948"
+        }
+      ]
+    },
+    {
+      "page": "character",
+      "case": "c471",
+      "size": [
+        1800,
+        1000
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c471.png",
+          "sha256": "c4342dc282c7f90318cbfdd693eedaeb8f8eb8b31ddee4fd025fb2c92f17280f"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c471-50.png",
+          "sha256": "591f217a52087cf83e8221e0d0940207958a454744e8e7f707cd81a07a7c7406"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\c471-30.png",
+          "sha256": "92edf9186d423cb2f2594efb0cd83fdacbc59584990af88be2e09a021a55dba8"
+        }
+      ]
+    },
+    {
+      "page": "character",
+      "case": "long-name",
+      "size": [
+        1800,
+        1000
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\long-name.png",
+          "sha256": "b673def9e41defe99cee2b3baa2a190e9bc61cdb51fe89b842e49a3f2eb5b401"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\long-name-50.png",
+          "sha256": "9a677e80b5fe76c336e075b54c71319c8437487419a38131a10ad6b86b407b17"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\long-name-30.png",
+          "sha256": "1a30976b02ea3df96f967edd550fceefe62aa0297f10563269f174ad25c5b16b"
+        }
+      ]
+    },
+    {
+      "page": "character",
+      "case": "missing-art",
+      "size": [
+        1800,
+        1000
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\missing-art.png",
+          "sha256": "c12cf8cea7e2dccc2ee1be0577082c8452f3bd699d69315ee9c4c5f3108e272e"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\missing-art-50.png",
+          "sha256": "a04a4ef02085d6a214439edb108827180e0e42a5e04a494b91d379ed965bb396"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\character\\missing-art-30.png",
+          "sha256": "ef12c00b005db70e1dedf142d76b38eee769eede1bd1733dbc0c3431cdc271fe"
+        }
+      ]
+    },
+    {
+      "page": "profile",
+      "case": "full-current-model",
+      "size": [
+        1200,
+        2331
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\full-current-model.png",
+          "sha256": "134a945264ae4afb0d9be3f5bd7071c2d2a8901f89b16f98dae644e0fe9a94b1"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\full-current-model-50.png",
+          "sha256": "30ce46edb286ff04542cba42f024eb68653d6278f1e14c38ae073c980d36260f"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\full-current-model-30.png",
+          "sha256": "b21a99071affc86698522dfcec6a6b73b532be94489761e3c6e1ca460730a3f6"
+        }
+      ]
+    },
+    {
+      "page": "profile",
+      "case": "long-commander",
+      "size": [
+        1200,
+        2322
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\long-commander.png",
+          "sha256": "d193602190c5fa1652f8a7aebbd269df5f399a6a1ebcd52b5de784ec3c779772"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\long-commander-50.png",
+          "sha256": "2913935d8ff69f17c6b2ac91b66935aa17053ae57d4daa9973c4f3d8c90952f9"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\long-commander-30.png",
+          "sha256": "d121a55a9b850b3b98200914b56b0b51ea8dbfa1907249222df401772482fb1a"
+        }
+      ]
+    },
+    {
+      "page": "profile",
+      "case": "research-long-names",
+      "size": [
+        1200,
+        2378
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\research-long-names.png",
+          "sha256": "ef3036644a526b433b693fbb8d2ac498112428ce7edeec319f8694108613a033"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\research-long-names-50.png",
+          "sha256": "e927a856541eb0ca3ad80fc146ebfc9001a37fc2b58dd6dd25e30f9562f2dec1"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\research-long-names-30.png",
+          "sha256": "7d709e01be7fd9d762c925464f86f1bb3d41adae99a6c809928cd36d5498686b"
+        }
+      ]
+    },
+    {
+      "page": "profile",
+      "case": "today-partial",
+      "size": [
+        1200,
+        2428
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\today-partial.png",
+          "sha256": "125f796e618b0e331c392e408ba69b264a0b2825df97771132350a813a8bf76b"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\today-partial-50.png",
+          "sha256": "82ea46e867cfab60ed1770c016610653f35840b7a60a9b8b9ce297fac0471218"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\today-partial-30.png",
+          "sha256": "d83c5024499dec2e4e5d2b868ac69cedc57179e4ea2c84d0a4a81d713e650e39"
+        }
+      ]
+    },
+    {
+      "page": "profile",
+      "case": "unavailable",
+      "size": [
+        1200,
+        2325
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\unavailable.png",
+          "sha256": "cb31f7c7db7128f250b3f27e079c3599d8d727b980bb45810950561c1d4c53e7"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\unavailable-50.png",
+          "sha256": "d6a1c43ceef0efa85d7d9437ae24ab6ca1374b54f00ce61cc00355fa3a8026ab"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\profile\\unavailable-30.png",
+          "sha256": "febab3327f72823c7d2ce35d79f69b4eb4f9740341adfc0b3c58b215a816f34c"
+        }
+      ]
+    },
+    {
+      "page": "union_member",
+      "case": "many-records",
+      "size": [
+        1500,
+        3381
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_member\\many-records.png",
+          "sha256": "5a5c895b62d51ba9ded61c1a560b19d23a29107235bfbcfd06b2f1376fd015ff"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_member\\many-records-50.png",
+          "sha256": "6826f21b04263e55e0f4f1e3aad83a7d8172416d414be4d229d19e197aad3588"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_member\\many-records-30.png",
+          "sha256": "a04e2e7ef75f2ad24a064cf5bd172be80ebb84eac5cef50890a9faaf999c8de3"
+        }
+      ]
+    },
+    {
+      "page": "union_member",
+      "case": "with-portraits",
+      "size": [
+        1500,
+        1903
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_member\\with-portraits.png",
+          "sha256": "8ae87ccf708948f1d704e3acb9d07177c2d377ad4eebd596371f88a7180b7827"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_member\\with-portraits-50.png",
+          "sha256": "2ee7afd9836c3fab4e3f4facc82523d0452f9b66c214409c9dcf896e83653741"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_member\\with-portraits-30.png",
+          "sha256": "7af92c72c7740f52b4916d2ae7cc4a82a37fa10d2b3287984e84b62030c0dd3e"
+        }
+      ]
+    },
+    {
+      "page": "union_overview",
+      "case": "empty",
+      "size": [
+        1600,
+        900
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\empty.png",
+          "sha256": "bb39caf51f3a01ec0d19afba08a02de9c0f5d694b4d5671dbc35fc03a1dfe67e"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\empty-50.png",
+          "sha256": "d1e1db5603ec0118879dc495674ff0ab858fa6b5384aa6c40ecae2eddce4e7a6"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\empty-30.png",
+          "sha256": "b3742a830c33709c5c73e3fc1ede8689adf7956b5c91730078e1d9748cf10a20"
+        }
+      ]
+    },
+    {
+      "page": "union_overview",
+      "case": "partial-hp",
+      "size": [
+        1600,
+        900
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\partial-hp.png",
+          "sha256": "c74536b73c0c8b7b34da02286135dd4701df7df08a8d38abf205a0548ba4789f"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\partial-hp-50.png",
+          "sha256": "8a120f9a99eaecc052738189ce6912601d9f2c706b6482bdf1a3bdf5e670ee3e"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\partial-hp-30.png",
+          "sha256": "40350d9ce7d0dfd95624d6c3e8e6a5c5303faced82c6c5be780140dfebafba24"
+        }
+      ]
+    },
+    {
+      "page": "union_overview",
+      "case": "with-boss-assets",
+      "size": [
+        1600,
+        900
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\with-boss-assets.png",
+          "sha256": "548bf74ed906b8710fecc4c9228d7e749c6ab902bdd58863ec8c734979fb150f"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\with-boss-assets-50.png",
+          "sha256": "c598f3e70622d2548a67d395cfc05d898ff9338cbe75ed683ba92a019540fdbb"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_overview\\with-boss-assets-30.png",
+          "sha256": "7c26e03879b37f7bae1399aba24cf7f972dcc91428c6d9894513d20dcb1b55f1"
+        }
+      ]
+    },
+    {
+      "page": "union_records",
+      "case": "long-name",
+      "size": [
+        1500,
+        1003
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\long-name.png",
+          "sha256": "aa07041c3321b3e7f380771daebc32e288c69d9c7b113c2f0956b8b8d00b65ca"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\long-name-50.png",
+          "sha256": "1665a1c804a954209a05260191b88b43b957ddb93de54d0d4d890dc796274eaa"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\long-name-30.png",
+          "sha256": "3fef0d240ffb2e198d87608ece767480687d10497dfd40e351494059028f29ac"
+        }
+      ]
+    },
+    {
+      "page": "union_records",
+      "case": "many-members",
+      "size": [
+        1500,
+        2653
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\many-members.png",
+          "sha256": "32a251c46a31cb5ca8cc5b72efa8bf09de1ff954290458fa9e6820584a0b2d9c"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\many-members-50.png",
+          "sha256": "32df112be0bfc6c85517dc15e7797cdef6992fbe8f5c3666c97a7002e69df58a"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\many-members-30.png",
+          "sha256": "d8baaa92486ceeb8b205bec8fe0db24e16a7cdcf482fc462cfead152cc8cae83"
+        }
+      ]
+    },
+    {
+      "page": "union_records",
+      "case": "normal",
+      "size": [
+        1500,
+        720
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\normal.png",
+          "sha256": "4e141786e834abf9a33a525751290f1ed9171663860bb81bfb4ac136088067b9"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\normal-50.png",
+          "sha256": "68fe3d852b4c416e76a8a1246f74daf3757e2b5b2231591c55b94bc9e9b35456"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\normal-30.png",
+          "sha256": "7d6f1b75a371c52033876ad48f7052c1e5417b9a0e4234f2298d3769edff7124"
+        }
+      ]
+    },
+    {
+      "page": "union_records",
+      "case": "tie-rank",
+      "size": [
+        1500,
+        720
+      ],
+      "scales": [
+        {
+          "percent": 100,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\tie-rank.png",
+          "sha256": "b15a588d9dbea08ac771d4a22582bee81b2e93862d1f1c555f5a18eeda933a43"
+        },
+        {
+          "percent": 50,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\tie-rank-50.png",
+          "sha256": "8c0a05d90f0c290efb6e7b837d83346ec86d00b8983f83b28c8e1207f29dce2b"
+        },
+        {
+          "percent": 30,
+          "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i-visual-final\\union_records\\tie-rank-30.png",
+          "sha256": "db7a6ae303c737ca696094d261f704cecbb2ba3ba0ecdf275dc690ebe1bbe106"
+        }
+      ]
+    }
+  ],
+  "png_count": 90,
+  "manual_review": "seven representative pages at 100/50/30; selected long names/titles, partial/unavailable, wide weapon and costume previews",
+  "remaining_debt": [
+    "native endpoint CJK font differences",
+    "untested extreme future text lengths",
+    "QQ visual acceptance requires separate authorization"
+  ],
+  "functional_regressions_found": []
+}

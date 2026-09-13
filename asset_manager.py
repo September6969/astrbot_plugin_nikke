@@ -21,6 +21,9 @@ from PIL import Image, ImageDraw
 
 from .card_models import CharacterCardAssets, CharacterCardData
 from .currency_registry import CurrencyRegistry
+from .lineup_portrait_resolver import LineupPortraitResolver
+from .boss_asset_resolver import BossAssetResolver
+from .character_master_resolver import CharacterMasterResolver
 from .idle_animation_resolver import IdleAnimationResolver
 from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
@@ -39,6 +42,41 @@ class _InflightAsset:
 
 
 class AssetManager:
+    def resolve_lineup_portrait(self, tid=None, costume_id=None, character_id=None, avatar_id=None):
+        """直接复用本地头像解析器的完整契约。"""
+        return self.lineup_portrait_resolver.resolve(tid=tid, costume_id=costume_id, character_id=character_id, avatar_id=avatar_id)
+
+    def get_lineup_portrait(self, member=None, *, tid=None, costume_id=None, character_id=None, avatar_id=None):
+        """领域成员先经正式 Master 归一化，再消费已验证头像；不接受串角色或皮肤降级。"""
+        if member is not None and hasattr(member, "tid"):
+            canonical = self.character_master.resolve_battle_tid(member.tid)
+            if canonical is None or str(canonical.resource_id) != str(member.resource_id):
+                return None
+            costume_id = member.costume_id
+            if self.character_master.is_default_costume(canonical.resource_id, costume_id):
+                costume_id = None
+            result = self.resolve_lineup_portrait(character_id=canonical.id, costume_id=costume_id)
+            if result.is_fallback or result.resource_id != canonical.resource_id:
+                return None
+        else:
+            result = self.resolve_lineup_portrait(tid=tid if tid is not None else member, costume_id=costume_id,
+                                                 character_id=character_id, avatar_id=avatar_id)
+        try:
+            return self._decode(result.local_path.read_bytes()) if result.local_path.stat().st_size <= self.MAX_BYTES else None
+        except (OSError, ValueError):
+            return None
+
+    def resolve_boss_asset(self, boss_id=None, icon_id=None, monster_model_id=None, boss_name=None):
+        """Boss 身份与本地路径完全由已交付解析器负责。"""
+        return self.boss_asset_resolver.resolve(boss_id=boss_id, icon_id=icon_id, monster_model_id=monster_model_id, boss_name=boss_name)
+
+    def get_boss_image(self, **identity):
+        result = self.resolve_boss_asset(**identity)
+        try:
+            return self._decode(result.local_path.read_bytes()) if result.local_path.stat().st_size <= self.MAX_BYTES else None
+        except (OSError, ValueError):
+            return None
+
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
     # 单张角色卡最多预取 11 项；保留少量余量，但禁止多张卡无限堆积在线程池队列。
@@ -62,6 +100,11 @@ class AssetManager:
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
         self.remote = remote
+        mirror = self.asset_dir.parent / "data" / "nikke" / "blabla-assets"
+        self.blabla_assets_dir = mirror
+        self.lineup_portrait_resolver = LineupPortraitResolver(mirror, self.asset_dir)
+        self.boss_asset_resolver = BossAssetResolver(mirror, self.asset_dir)
+        self.character_master = CharacterMasterResolver(self.asset_dir / "character_master.json")
         self._failed: dict[str, float] = {}
         self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._inflight_lock = threading.Lock()
@@ -124,7 +167,7 @@ class AssetManager:
             if not isinstance(payload, dict):
                 continue
             schema = payload.get("schema_version")
-            entries = payload.get("assets") if schema == 2 else payload.get("characters") if schema == 1 else None
+            entries = payload.get("assets", payload.get("characters")) if schema == 2 else payload.get("characters") if schema == 1 else None
             if not isinstance(entries, dict):
                 continue
             declared_ids = {
@@ -137,6 +180,18 @@ class AssetManager:
                 for key, value in entries.items()
                 if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?", str(key).strip().lower()) and isinstance(value, dict)
             }
+            # 两种既有 v2 容器均保留；Gemini 身份冲突检查在过滤无效键之前执行。
+            if schema == 2 and "characters" in payload:
+                identities = {}
+                for key, entry in entries.items():
+                    if not isinstance(entry, dict):
+                        continue
+                    identity = (str(entry.get("character_resource_id")), str(entry.get("costume_id")))
+                    if identity in identities:
+                        entry["_conflict"] = identities[identity]["_conflict"] = True
+                    identities[identity] = entry
+                    if entry.get("spine_asset_id", key) != key:
+                        entry["_conflict"] = True
             self._spine_manifest = payload
             self._spine_manifest_entries = valid_entries
             # 即使条目本身不是对象，也必须视为权威声明，避免绕过 manifest 读取旧缓存。
@@ -160,6 +215,21 @@ class AssetManager:
         entry = self._spine_manifest_entries.get(char_id)
         if entry is None:
             return None, True
+        if entry.get("_conflict"):
+            logger.warning("SPINE_ASSET_CONFLICT_REJECTED: %s", char_id)
+            return None, True
+        if self._spine_manifest_schema == 2 and "characters" in self._spine_manifest:
+            relative = entry.get("local_relpath", f"assets/spine-rendered/{char_id}.png")
+            try:
+                target = (self.asset_dir.parent / relative).resolve()
+                if not target.is_relative_to(self.asset_dir.resolve()):
+                    return None, True
+                if not target.is_file():
+                    logger.warning("SPINE_ASSET_FILE_MISSING: %s", char_id)
+                    return None, True
+                return target, True
+            except (OSError, RuntimeError, ValueError, TypeError):
+                return None, True
         relative = entry.get("rendered_png") if self._spine_manifest_schema == 2 else entry.get("png_file")
         if not isinstance(relative, str) or not relative.strip():
             return None, True
@@ -178,18 +248,28 @@ class AssetManager:
             return None, True
         return target, True
 
-    def _load_spine_image(self, path: Path, entry: dict[str, Any] | None = None) -> Image.Image | None:
+    def _load_spine_image(self, path: Path, entry: dict[str, Any] | None = None, *, strict_png: bool = False) -> Image.Image | None:
         try:
             if path.stat().st_size > self.MAX_BYTES:
                 return None
             if entry is not None:
                 expected = entry.get("sha256")
                 if not isinstance(expected, str):
+                    logger.warning("SPINE_MANIFEST_MISSING_HASH")
                     return None
                 expected = expected.lower()
                 if not re.fullmatch(r"[0-9a-f]{64}", expected) or self._sha256_file(path) != expected:
+                    logger.warning("SPINE_HASH_MISMATCH")
                     return None
+            if strict_png:
+                with path.open("rb") as stream:
+                    if stream.read(8) != b"\x89PNG\r\n\x1a\n":
+                        logger.warning("SPINE_ASSET_CORRUPT")
+                        return None
             with Image.open(path) as image:
+                if strict_png and entry is not None and any(entry.get(key) is not None and entry[key] != value for key, value in (("width", image.width), ("height", image.height))):
+                    logger.warning("SPINE_ASSET_CORRUPT: dimensions")
+                    return None
                 if image.width * image.height > self.MAX_PIXELS:
                     return None
                 image.load()
@@ -226,13 +306,24 @@ class AssetManager:
             return image.convert("RGBA")
 
     def _load_cached(self, relative: str) -> Image.Image | None:
-        for base in (self.cache_dir, self.asset_dir):
-            try:
-                path = base / relative
-                if path.stat().st_size <= self.MAX_BYTES:
-                    return self._decode(path.read_bytes())
-            except (OSError, ValueError, Image.DecompressionBombError):
-                pass
+        bases = [self.cache_dir, self.asset_dir]
+        if hasattr(self, "blabla_assets_dir") and self.blabla_assets_dir:
+            bases.append(self.blabla_assets_dir)
+
+        candidates = [relative]
+        if relative.endswith(".png"):
+            candidates.append(relative[:-4] + ".webp")
+        elif relative.endswith(".webp"):
+            candidates.append(relative[:-5] + ".png")
+
+        for base in bases:
+            for cand in candidates:
+                try:
+                    path = base / cand
+                    if path.is_file() and path.stat().st_size <= self.MAX_BYTES:
+                        return self._decode(path.read_bytes())
+                except (OSError, ValueError, Image.DecompressionBombError):
+                    pass
         return None
 
     def _load(
@@ -377,6 +468,7 @@ class AssetManager:
             image = self._load_spine_image(
                 manifest_path,
                 entry,
+                strict_png=True,
             )
             if image is not None:
                 return image
@@ -534,23 +626,52 @@ class AssetManager:
     def get_element_icon(self, element):
         key = self._key(element)
         key = "electronic" if key == "electric" else key
+        # 优先读取本地 blabla-assets/icon/element
+        local_img = self._load_cached(f"icon/element/icon-code-{key}.png")
+        if local_img is not None:
+            return local_img
         url = f"https://www.blablalink.com/assets/nikke/version/default/shiftysassets/images/icon-code-{key}.png" if key in {"fire", "water", "wind", "iron", "electronic"} else ""
         return self._icon("element", element, "element", url)
 
     def get_corporation_icon(self, corporation):
         key = self._key(corporation)
+        corp_map = {"elysion": "01", "missilis": "02", "tetra": "03", "pilgrim": "04", "abnormal": "05"}
+        idx = corp_map.get(key)
+        if idx:
+            local_img = self._load_cached(f"icon/atlas_common_corp/icn_corp_{idx}.webp")
+            if local_img is not None:
+                return local_img
+            local_logo = self._load_cached(f"icon/atlas_common_corp/img_logo_{key}.webp")
+            if local_logo is not None:
+                return local_logo
         slug = "tetraline" if key == "tetra" else key
         url = f"{self.CDN}/manufacturer/icn_corp_{slug}.png" if key in {"tetra", "elysion", "missilis", "pilgrim"} else ""
         return self._icon("corporation", key, "corporation", url)
 
     def get_weapon_icon(self, weapon):
         key = self._key(weapon)
+        w_map = {
+            "ar": "assault_rifle",
+            "mg": "machine_gun",
+            "rl": "rocket_launcher",
+            "sg": "shot_gun",
+            "smg": "sub_machine_gun",
+            "sr": "sniper_rifle",
+        }
+        full_name = w_map.get(key, key)
+        local_img = self._load_cached(f"icon/weapon/icon-weapon-{full_name}.png")
+        if local_img is not None:
+            return local_img
         url = f"{self.CDN}/gun/icn_weapon_{key}.png" if key in {"ar", "mg", "rl", "sg", "smg", "sr"} else ""
         return self._icon("weapon", key, "weapon", url)
 
     def get_burst_icon(self, burst):
         key = self._key(burst)
         resource = "icn_burst_all" if key == "allstep" else (f"icn_burst_0{key[-1]}" if key in {"step1", "step2", "step3"} else "")
+        if resource:
+            local_img = self._load_cached(f"icon/atlas_common_class/{resource}.webp")
+            if local_img is not None:
+                return local_img
         url = self.game_resource_url(f"icon/atlas_common_class/{resource}.webp") if resource else ""
         return self._icon("burst", key, "burst", url)
 

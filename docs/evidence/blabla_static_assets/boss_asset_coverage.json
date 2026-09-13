@@ -1,0 +1,1012 @@
+{
+  "title": "Union Raid Boss Asset Coverage Report",
+  "generated_at": "2026-09-13T07:15:00Z",
+  "scope": "Union Raid records declared by current raid_list snapshot (Seasons 1000035 - 1000044, 10 seasons x 5 encounters = 50 total records)",
+  "sub_scope_verified_seasons": "Historical verified seasons (Seasons 1000035 - 1000040, 6 seasons x 5 encounters = 30 records)",
+  "boss_records_total": 50,
+  "boss_identity_resolved": 30,
+  "boss_image_mirrored": 30,
+  "boss_image_missing": 0,
+  "boss_identity_unresolved": 20,
+  "coverage_percent": 60.0,
+  "verified_seasons_coverage_percent": 100.0,
+  "unique_boss_images_mirrored": 23,
+  "unresolved_reason": "Seasons 1000041 to 1000044 did not have live session raid level payloads captured prior to snapshot creation; these records safely fall back to default_boss.webp until authorized session unmasks their seasonal boss rosters.",
+  "mirrored_icons_summary": [
+    "ecg002",
+    "ecg006",
+    "eba001",
+    "mca003_re",
+    "ebg002_dmtr",
+    "mcg005",
+    "mcg006",
+    "bbg004_dmtr",
+    "eca001_re",
+    "mbg004_anmi",
+    "bcg002",
+    "mca003",
+    "mbg002",
+    "ecg005_re",
+    "bbg003",
+    "bcg003",
+    "eca003",
+    "ebg001",
+    "xcg002",
+    "bcg001_re",
+    "bca002",
+    "mcg004_re",
+    "mbg001_psid"
+  ],
+  "records": [
+    {
+      "season_id": "1000035",
+      "step": 1,
+      "boss_id": "2420020214",
+      "all_boss_ids": [
+        "2420020214",
+        "2420020714"
+      ],
+      "icon_id": "ecg002",
+      "monster_model_id": "242002",
+      "display_name": "雙環 / Dual Ring",
+      "name_localvalues": {
+        "ko": "듀얼 링",
+        "zh-tw": "雙環",
+        "en": "Dual Ring",
+        "ja": "デュアルリング"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/monster_full/full_ecg002.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000035",
+      "step": 2,
+      "boss_id": "2420060124",
+      "all_boss_ids": [
+        "2420060124",
+        "2420060724"
+      ],
+      "icon_id": "ecg006",
+      "monster_model_id": "242006",
+      "display_name": "擴散 / Spread",
+      "name_localvalues": {
+        "ko": "스프레드",
+        "zh-tw": "擴散",
+        "en": "Spread",
+        "ja": "スプレッド"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/monster_full/full_ecg006.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000035",
+      "step": 3,
+      "boss_id": "2510010144",
+      "all_boss_ids": [
+        "2510010144",
+        "2510010744"
+      ],
+      "icon_id": "eba001",
+      "monster_model_id": "251001",
+      "display_name": "風暴使者 (Z.E.U.S.) / Storm Bringer (Z.E.U.S.)",
+      "name_localvalues": {
+        "ko": "스톰 브링어",
+        "zh-tw": "風暴使者 (Z.E.U.S.)",
+        "en": "Storm Bringer (Z.E.U.S.)",
+        "ja": "ストームブリンガー"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/monster_full/full_eba001.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000035",
+      "step": 4,
+      "boss_id": "3411030134",
+      "all_boss_ids": [
+        "3411030134",
+        "3411030734"
+      ],
+      "icon_id": "mca003_re",
+      "monster_model_id": "341103",
+      "display_name": "重構手指 (A.N.M.I.) / Rebuild Fingers (A.N.M.I.)",
+      "name_localvalues": {
+        "ko": "리빌드 핑거즈",
+        "zh-tw": "重構手指 (A.N.M.I.)",
+        "en": "Rebuild Fingers (A.N.M.I.)",
+        "ja": "リビルドフィンガーズ"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/monster_full/full_mca003_re.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000035",
+      "step": 5,
+      "boss_id": "2520120144",
+      "all_boss_ids": [
+        "2520120144",
+        "2520120744"
+      ],
+      "icon_id": "ebg002_dmtr",
+      "monster_model_id": "252012",
+      "display_name": "材料H (D.M.T.R.) / Material H (D.M.T.R.)",
+      "name_localvalues": {
+        "ko": "마테리얼H",
+        "zh-tw": "材料H (D.M.T.R.)",
+        "en": "Material H (D.M.T.R.)",
+        "ja": "マテリアルH"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/monster_full/full_ebg002_dmtr.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000036",
+      "step": 1,
+      "boss_id": "3420050224",
+      "all_boss_ids": [
+        "3420050224",
+        "3420050724"
+      ],
+      "icon_id": "mcg005",
+      "monster_model_id": "342005",
+      "display_name": "醫生 / Doctor",
+      "name_localvalues": {
+        "ko": "닥터",
+        "zh-tw": "醫生",
+        "en": "Doctor",
+        "ja": "ドクター"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/monster_full/full_mcg005.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000036",
+      "step": 2,
+      "boss_id": "3420060114",
+      "all_boss_ids": [
+        "3420060114",
+        "3420060714"
+      ],
+      "icon_id": "mcg006",
+      "monster_model_id": "342006",
+      "display_name": "重金屬 / Heavy Metal",
+      "name_localvalues": {
+        "ko": "헤비메탈",
+        "zh-tw": "重金屬",
+        "en": "Heavy Metal",
+        "ja": "ヘビーメタル"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/monster_full/full_mcg006.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000036",
+      "step": 3,
+      "boss_id": "1520040154",
+      "all_boss_ids": [
+        "1520040154",
+        "1520040754"
+      ],
+      "icon_id": "bbg004_dmtr",
+      "monster_model_id": "152004",
+      "display_name": "克拉肯 (D.M.T.R.) / Kraken (D.M.T.R.)",
+      "name_localvalues": {
+        "ko": "크라켄",
+        "zh-tw": "克拉肯 (D.M.T.R.)",
+        "en": "Kraken (D.M.T.R.)",
+        "ja": "クラーケン"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/monster_full/full_bbg004_dmtr.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000036",
+      "step": 4,
+      "boss_id": "2411010144",
+      "all_boss_ids": [
+        "2411010144",
+        "2411010741"
+      ],
+      "icon_id": "eca001_re",
+      "monster_model_id": "241101",
+      "display_name": "重構方尖碑 / Rebuild Obelisk",
+      "name_localvalues": {
+        "ko": "리빌드 오벨리스크",
+        "zh-tw": "重構方尖碑",
+        "en": "Rebuild Obelisk",
+        "ja": "リビルドオベリスク"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/monster_full/full_eca001_re.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000036",
+      "step": 5,
+      "boss_id": "3520040134",
+      "all_boss_ids": [
+        "3520040134",
+        "3520040734"
+      ],
+      "icon_id": "mbg004_anmi",
+      "monster_model_id": "352004",
+      "display_name": "莫德妮亞 (A.N.M.I.) / Modernia (A.N.M.I.)",
+      "name_localvalues": {
+        "ko": "모더니아",
+        "zh-tw": "莫德妮亞 (A.N.M.I.)",
+        "en": "Modernia (A.N.M.I.)",
+        "ja": "モダニア"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/monster_full/full_mbg004_anmi.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000037",
+      "step": 1,
+      "boss_id": "1420020134",
+      "all_boss_ids": [
+        "1420020134",
+        "1420020734"
+      ],
+      "icon_id": "bcg002",
+      "monster_model_id": "142002",
+      "display_name": "潛伏 / Latency",
+      "name_localvalues": {
+        "ko": "레이턴스",
+        "zh-tw": "潛伏",
+        "en": "Latency",
+        "ja": "レイテンス"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/monster_full/full_bcg002.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000037",
+      "step": 2,
+      "boss_id": "3410030154",
+      "all_boss_ids": [
+        "3410030154",
+        "3410030754"
+      ],
+      "icon_id": "mca003",
+      "monster_model_id": "341003",
+      "display_name": "手指 / Fingers",
+      "name_localvalues": {
+        "ko": "핑거즈",
+        "zh-tw": "手指",
+        "en": "Fingers",
+        "ja": "フィンガーズ"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/monster_full/full_mca003.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000037",
+      "step": 3,
+      "boss_id": "3520020144",
+      "all_boss_ids": [
+        "3520020144",
+        "3520020744"
+      ],
+      "icon_id": "mbg002",
+      "monster_model_id": "352002",
+      "display_name": "掘墓 / Grave Digger",
+      "name_localvalues": {
+        "ko": "그레이브 디거",
+        "zh-tw": "掘墓",
+        "en": "Grave Digger",
+        "ja": "グレイブディガー"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/monster_full/full_mbg002.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000037",
+      "step": 4,
+      "boss_id": "2421050124",
+      "all_boss_ids": [
+        "2421050124",
+        "2421050724"
+      ],
+      "icon_id": "ecg005_re",
+      "monster_model_id": "242105",
+      "display_name": "重構巨大軀幹 / Rebuild Big Torso",
+      "name_localvalues": {
+        "ko": "리빌드 빅 토르소",
+        "zh-tw": "重構巨大軀幹",
+        "en": "Rebuild Big Torso",
+        "ja": "リビルドビッグトルソ"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/monster_full/full_ecg005_re.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000037",
+      "step": 5,
+      "boss_id": "1520030114",
+      "all_boss_ids": [
+        "1520030114",
+        "1520030714"
+      ],
+      "icon_id": "bbg003",
+      "monster_model_id": "152003",
+      "display_name": "鐵匠 / Blacksmith",
+      "name_localvalues": {
+        "ko": "블랙스미스",
+        "zh-tw": "鐵匠",
+        "en": "Blacksmith",
+        "ja": "ブラックスミス"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/monster_full/full_bbg003.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000038",
+      "step": 1,
+      "boss_id": "1420030144",
+      "all_boss_ids": [
+        "1420030144",
+        "1420030744"
+      ],
+      "icon_id": "bcg003",
+      "monster_model_id": "142003",
+      "display_name": "搬運工 (Z.E.U.S.) / Porter (Z.E.U.S.)",
+      "name_localvalues": {
+        "ko": "포터",
+        "zh-tw": "搬運工 (Z.E.U.S.)",
+        "en": "Porter (Z.E.U.S.)",
+        "ja": "ポーター"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/monster_full/full_bcg003.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000038",
+      "step": 2,
+      "boss_id": "2410030214",
+      "all_boss_ids": [
+        "2410030214",
+        "2410030714"
+      ],
+      "icon_id": "eca003",
+      "monster_model_id": "241003",
+      "display_name": "板塊 (H.S.T.A.) / Plate (H.S.T.A.)",
+      "name_localvalues": {
+        "ko": "플레이트",
+        "zh-tw": "板塊 (H.S.T.A.)",
+        "en": "Plate (H.S.T.A.)",
+        "ja": "プレート"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/monster_full/full_eca003.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000038",
+      "step": 3,
+      "boss_id": "2520010124",
+      "all_boss_ids": [
+        "2520010124",
+        "2520010724"
+      ],
+      "icon_id": "ebg001",
+      "monster_model_id": "252001",
+      "display_name": "噬地者 (P.S.I.D.) / Land Eater (P.S.I.D.)",
+      "name_localvalues": {
+        "ko": "랜드 이터",
+        "zh-tw": "噬地者 (P.S.I.D.)",
+        "en": "Land Eater (P.S.I.D.)",
+        "ja": "ランドイーター"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/monster_full/full_ebg001.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000038",
+      "step": 4,
+      "boss_id": "3411030134",
+      "all_boss_ids": [
+        "3411030134",
+        "3411030734"
+      ],
+      "icon_id": "mca003_re",
+      "monster_model_id": "341103",
+      "display_name": "重構手指 (A.N.M.I.) / Rebuild Fingers (A.N.M.I.)",
+      "name_localvalues": {
+        "ko": "리빌드 핑거즈",
+        "zh-tw": "重構手指 (A.N.M.I.)",
+        "en": "Rebuild Fingers (A.N.M.I.)",
+        "ja": "リビルドフィンガーズ"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/monster_full/full_mca003_re.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000038",
+      "step": 5,
+      "boss_id": "2520120144",
+      "all_boss_ids": [
+        "2520120144",
+        "2520120744"
+      ],
+      "icon_id": "ebg002_dmtr",
+      "monster_model_id": "252012",
+      "display_name": "材料H (D.M.T.R.) / Material H (D.M.T.R.)",
+      "name_localvalues": {
+        "ko": "마테리얼H",
+        "zh-tw": "材料H (D.M.T.R.)",
+        "en": "Material H (D.M.T.R.)",
+        "ja": "マテリアルH"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/monster_full/full_ebg002_dmtr.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000039",
+      "step": 1,
+      "boss_id": "2420060114",
+      "all_boss_ids": [
+        "2420060114",
+        "2420060714"
+      ],
+      "icon_id": "ecg006",
+      "monster_model_id": "242006",
+      "display_name": "擴散 / Spread",
+      "name_localvalues": {
+        "ko": "스프레드",
+        "zh-tw": "擴散",
+        "en": "Spread",
+        "ja": "スプレッド"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/monster_full/full_ecg006.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000039",
+      "step": 2,
+      "boss_id": "4420020124",
+      "all_boss_ids": [
+        "4420020124",
+        "4420020724"
+      ],
+      "icon_id": "xcg002",
+      "monster_model_id": "442002",
+      "display_name": "水晶裝甲 / Crystal Armor",
+      "name_localvalues": {
+        "ko": "크리스탈 아머",
+        "zh-tw": "水晶裝甲",
+        "en": "Crystal Armor",
+        "ja": "クリスタルアーマー"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/monster_full/full_xcg002.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000039",
+      "step": 3,
+      "boss_id": "1520040154",
+      "all_boss_ids": [
+        "1520040154",
+        "1520040754"
+      ],
+      "icon_id": "bbg004_dmtr",
+      "monster_model_id": "152004",
+      "display_name": "克拉肯 (D.M.T.R.) / Kraken (D.M.T.R.)",
+      "name_localvalues": {
+        "ko": "크라켄",
+        "zh-tw": "克拉肯 (D.M.T.R.)",
+        "en": "Kraken (D.M.T.R.)",
+        "ja": "クラーケン"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/monster_full/full_bbg004_dmtr.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000039",
+      "step": 4,
+      "boss_id": "1421010134",
+      "all_boss_ids": [
+        "1421010134",
+        "1421010734"
+      ],
+      "icon_id": "bcg001_re",
+      "monster_model_id": "142101",
+      "display_name": "重構黃瓜 / Rebuild Cucumber",
+      "name_localvalues": {
+        "ko": "리빌드 쿠쿰버",
+        "zh-tw": "重構黃瓜",
+        "en": "Rebuild Cucumber",
+        "ja": "リビルドキュウリ"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/monster_full/full_bcg001_re.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000039",
+      "step": 5,
+      "boss_id": "2510010144",
+      "all_boss_ids": [
+        "2510010144",
+        "2510010744"
+      ],
+      "icon_id": "eba001",
+      "monster_model_id": "251001",
+      "display_name": "風暴使者 (Z.E.U.S.) / Storm Bringer (Z.E.U.S.)",
+      "name_localvalues": {
+        "ko": "스톰 브링어",
+        "zh-tw": "風暴使者 (Z.E.U.S.)",
+        "en": "Storm Bringer (Z.E.U.S.)",
+        "ja": "ストームブリンガー"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/monster_full/full_eba001.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000040",
+      "step": 1,
+      "boss_id": "1410020154",
+      "all_boss_ids": [
+        "1410020154",
+        "1410020754"
+      ],
+      "icon_id": "bca002",
+      "monster_model_id": "141002",
+      "display_name": "榴蓮 / Durian",
+      "name_localvalues": {
+        "ko": "두리안",
+        "zh-tw": "榴蓮",
+        "en": "Durian",
+        "ja": "ドリアン"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/monster_full/full_bca002.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000040",
+      "step": 2,
+      "boss_id": "3420060114",
+      "all_boss_ids": [
+        "3420060114",
+        "3420060714"
+      ],
+      "icon_id": "mcg006",
+      "monster_model_id": "342006",
+      "display_name": "重金屬 / Heavy Metal",
+      "name_localvalues": {
+        "ko": "헤비메탈",
+        "zh-tw": "重金屬",
+        "en": "Heavy Metal",
+        "ja": "ヘビーメタル"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/monster_full/full_mcg006.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000040",
+      "step": 3,
+      "boss_id": "3520040134",
+      "all_boss_ids": [
+        "3520040134",
+        "3520040734"
+      ],
+      "icon_id": "mbg004_anmi",
+      "monster_model_id": "352004",
+      "display_name": "莫德妮亞 (A.N.M.I.) / Modernia (A.N.M.I.)",
+      "name_localvalues": {
+        "ko": "모더니아",
+        "zh-tw": "莫德妮亞 (A.N.M.I.)",
+        "en": "Modernia (A.N.M.I.)",
+        "ja": "モダニア"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/monster_full/full_mbg004_anmi.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000040",
+      "step": 4,
+      "boss_id": "3421040144",
+      "all_boss_ids": [
+        "3421040144",
+        "3421040744"
+      ],
+      "icon_id": "mcg004_re",
+      "monster_model_id": "342104",
+      "display_name": "重構火神R / Rebuild Vulcan R",
+      "name_localvalues": {
+        "ko": "리빌드 벌컨R",
+        "zh-tw": "重構火神R",
+        "en": "Rebuild Vulcan R",
+        "ja": "リビルドバルカンR"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/monster_full/full_mcg004_re.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000040",
+      "step": 5,
+      "boss_id": "3520010124",
+      "all_boss_ids": [
+        "3520010124",
+        "3520010724"
+      ],
+      "icon_id": "mbg001_psid",
+      "monster_model_id": "352001",
+      "display_name": "古鐵 (P.S.I.D.) / Alteisen (P.S.I.D.)",
+      "name_localvalues": {
+        "ko": "알트아이젠",
+        "zh-tw": "古鐵 (P.S.I.D.)",
+        "en": "Alteisen (P.S.I.D.)",
+        "ja": "アルトアイゼン"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/monster_full/full_mbg001_psid.webp",
+      "status": "IDENTITY_RESOLVED"
+    },
+    {
+      "season_id": "1000041",
+      "step": 1,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "凶兆 / Sinister",
+      "name_localvalues": {
+        "ko": "시니스터",
+        "zh-tw": "凶兆",
+        "en": "Sinister",
+        "ja": "シニスター"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000041",
+      "step": 2,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "複製品紅舞鞋 / Replica Red Shoes",
+      "name_localvalues": {
+        "ko": "레플리카 레드 슈즈",
+        "zh-tw": "複製品紅舞鞋",
+        "en": "Replica Red Shoes",
+        "ja": "レプリカレッドシューズ"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000041",
+      "step": 3,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "尼希利斯塔 / Nihilister",
+      "name_localvalues": {
+        "ko": "니힐리스타",
+        "zh-tw": "尼希利斯塔",
+        "en": "Nihilister",
+        "ja": "ニヒリスター"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000041",
+      "step": 4,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "重構巨大軀幹 / Rebuild Big Torso",
+      "name_localvalues": {
+        "ko": "리빌드 빅 토르소",
+        "zh-tw": "重構巨大軀幹",
+        "en": "Rebuild Big Torso",
+        "ja": "リビルドビッグトルソ"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000041",
+      "step": 5,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "超級 / Ultra",
+      "name_localvalues": {
+        "ko": "울트라",
+        "zh-tw": "超級",
+        "en": "Ultra",
+        "ja": "ウルトラ"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000042",
+      "step": 1,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "榴蓮 / Durian",
+      "name_localvalues": {
+        "ko": "두리안",
+        "zh-tw": "榴蓮",
+        "en": "Durian",
+        "ja": "ドリアン"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000042",
+      "step": 2,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "醫生 / Doctor",
+      "name_localvalues": {
+        "ko": "닥터",
+        "zh-tw": "醫生",
+        "en": "Doctor",
+        "ja": "ドクター"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000042",
+      "step": 3,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "古鐵 (P.S.I.D.) / Alteisen (P.S.I.D.)",
+      "name_localvalues": {
+        "ko": "알트아이젠",
+        "zh-tw": "古鐵 (P.S.I.D.)",
+        "en": "Alteisen (P.S.I.D.)",
+        "ja": "アルトアイゼン"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000042",
+      "step": 4,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "重構方尖碑 / Rebuild Obelisk",
+      "name_localvalues": {
+        "ko": "리빌드 오벨리스크",
+        "zh-tw": "重構方尖碑",
+        "en": "Rebuild Obelisk",
+        "ja": "リビルドオベリスク"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000042",
+      "step": 5,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "克拉肯 (D.M.T.R.) / Kraken (D.M.T.R.)",
+      "name_localvalues": {
+        "ko": "크라켄",
+        "zh-tw": "克拉肯 (D.M.T.R.)",
+        "en": "Kraken (D.M.T.R.)",
+        "ja": "クラーケン"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000043",
+      "step": 1,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "日光浴者 / Sunbath",
+      "name_localvalues": {
+        "ko": "선바스",
+        "zh-tw": "日光浴者",
+        "en": "Sunbath",
+        "ja": "サンバザー"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000043",
+      "step": 2,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "板塊 (H.S.T.A.) / Plate (H.S.T.A.)",
+      "name_localvalues": {
+        "ko": "플레이트",
+        "zh-tw": "板塊 (H.S.T.A.)",
+        "en": "Plate (H.S.T.A.)",
+        "ja": "プレート"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000043",
+      "step": 3,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "喧噪 / Chatterbox (Talkative)",
+      "name_localvalues": {
+        "ko": "토커티브",
+        "zh-tw": "喧噪",
+        "en": "Chatterbox (Talkative)",
+        "ja": "トーカティブ"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000043",
+      "step": 4,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "重構手指 (A.N.M.I.) / Rebuild Fingers (A.N.M.I.)",
+      "name_localvalues": {
+        "ko": "리빌드 핑거즈",
+        "zh-tw": "重構手指 (A.N.M.I.)",
+        "en": "Rebuild Fingers (A.N.M.I.)",
+        "ja": "リビルドフィンガーズ"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000043",
+      "step": 5,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "材料H (D.M.T.R.) / Material H (D.M.T.R.)",
+      "name_localvalues": {
+        "ko": "마테리얼H",
+        "zh-tw": "材料H (D.M.T.R.)",
+        "en": "Material H (D.M.T.R.)",
+        "ja": "マテリアルH"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000044",
+      "step": 1,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "潛伏 / Latency",
+      "name_localvalues": {
+        "ko": "레이턴스",
+        "zh-tw": "潛伏",
+        "en": "Latency",
+        "ja": "レイテンス"
+      },
+      "element_id": "400001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000044",
+      "step": 2,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "墓碑 / Tombstone",
+      "name_localvalues": {
+        "ko": "툼스톤",
+        "zh-tw": "墓碑",
+        "en": "Tombstone",
+        "ja": "トゥームストーン"
+      },
+      "element_id": "100001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000044",
+      "step": 3,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "莫德妮亞 (A.N.M.I.) / Modernia (A.N.M.I.)",
+      "name_localvalues": {
+        "ko": "모더니아",
+        "zh-tw": "莫德妮亞 (A.N.M.I.)",
+        "en": "Modernia (A.N.M.I.)",
+        "ja": "モダニア"
+      },
+      "element_id": "300001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000044",
+      "step": 4,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "重構巨大軀幹 / Rebuild Big Torso",
+      "name_localvalues": {
+        "ko": "리빌드 빅 토르소",
+        "zh-tw": "重構巨大軀幹",
+        "en": "Rebuild Big Torso",
+        "ja": "リビルドビッグトルソ"
+      },
+      "element_id": "200001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    },
+    {
+      "season_id": "1000044",
+      "step": 5,
+      "boss_id": null,
+      "icon_id": null,
+      "monster_model_id": null,
+      "display_name": "毀滅 / Annihilio",
+      "name_localvalues": {
+        "ko": "애니힐리오",
+        "zh-tw": "毀滅",
+        "en": "Annihilio",
+        "ja": "アニヒリオ"
+      },
+      "element_id": "500001",
+      "asset_relative_uri": "/icon/default_boss.webp",
+      "status": "IDENTITY_UNRESOLVED_PENDING_LIVE_SESSION"
+    }
+  ]
+}

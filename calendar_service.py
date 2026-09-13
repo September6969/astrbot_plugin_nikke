@@ -211,6 +211,21 @@ class CalendarService:
         active_acts.sort(key=lambda a: a.end_at)
         return active_acts
 
+    def group_window(self, days: int = 14, now: datetime | None = None) -> dict[str, list[CalendarActivity]]:
+        """统一文本与图片展示的分组规则，不在展示适配器复制分类逻辑。"""
+        current = _aware_utc(now) if now else datetime.now(timezone.utc)
+        horizon = timedelta(days=self.normalize_horizon(days))
+        soon, active, upcoming = [], [], []
+        for act in self._activities.values():
+            if act.is_active(current):
+                (soon if act.end_at - current <= timedelta(hours=24) else active).append(act)
+            elif act.is_upcoming(current) and act.start_at <= current + horizon:
+                upcoming.append(act)
+        soon.sort(key=lambda a: a.end_at)
+        active.sort(key=lambda a: a.end_at)
+        upcoming.sort(key=lambda a: a.start_at)
+        return {"ending_soon": soon, "active": active, "upcoming": upcoming}
+
     def format_schedule_text(
         self,
         days: int = 14,
@@ -225,22 +240,8 @@ class CalendarService:
                 return f"暂时无法获取官方日程：{fallback_error}。当前没有可用缓存，请稍后重试。"
             return "功能尚未就绪，正在同步官方日程，请稍候。"
 
-        soon: list[CalendarActivity] = []
-        active: list[CalendarActivity] = []
-        upcoming: list[CalendarActivity] = []
-
-        for act in self._activities.values():
-            if act.is_active(current):
-                if act.end_at - current <= timedelta(hours=24):
-                    soon.append(act)
-                else:
-                    active.append(act)
-            elif act.is_upcoming(current) and act.start_at <= current + horizon:
-                upcoming.append(act)
-
-        soon.sort(key=lambda a: a.end_at)
-        active.sort(key=lambda a: a.end_at)
-        upcoming.sort(key=lambda a: a.start_at)
+        groups = self.group_window(days, current)
+        soon, active, upcoming = groups["ending_soon"], groups["active"], groups["upcoming"]
 
         lines: list[str] = [f"【NIKKE 近期日程 · 未来 {days} 天】"]
         if self.last_updated_at:

@@ -1,0 +1,1127 @@
+{
+  "branch": "feat/t2i-campaign-phase1",
+  "head": "ebbb18f8c32ca5cf27ba3fb3ceb1255fe6acabb5",
+  "pytest": {
+    "passed": 763,
+    "subtests_passed": 490,
+    "log": "E:\\DevCache\\nikke-t2i-phase1\\full-frontend-delivery-tests.log"
+  },
+  "asset_integration": {
+    "passed": 15,
+    "compact_default": 200,
+    "compact_costume": 178,
+    "boss_images": 23,
+    "spine_png": 8
+  },
+  "extension_tests_passed": 4,
+  "preview_stack": "AstrBot Star.html_render; production loader/adapter; synthetic fixtures only",
+  "preview_aliases": {
+    "campaign/with-portraits": "campaign/normal",
+    "calendar/normal": "calendar_schedule/normal",
+    "character/representative-dark": "character/c010",
+    "character/representative-light": "character/c330"
+  },
+  "preview_images": [
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\normal.png",
+      "size": [
+        1600,
+        880
+      ],
+      "scale_percent": 100,
+      "sha256": "f86e9ce2c0b7db3de9c4bec161ad000b481bb87fdeb360913f5faf8e29105c6d"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\normal-50.png",
+      "size": [
+        800,
+        440
+      ],
+      "scale_percent": 50,
+      "sha256": "8831b9addd0e56f7ca6f8ba252f0d0897baa13f86de9ddf490dcf877513bd60d"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\normal-30.png",
+      "size": [
+        480,
+        264
+      ],
+      "scale_percent": 30,
+      "sha256": "7cab37c010b69d21b1d5077bbcb1534ddd703c4c82f05eaa690eb698a138da69"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\hard.png",
+      "size": [
+        1600,
+        880
+      ],
+      "scale_percent": 100,
+      "sha256": "5db1b6231c3aba417eedb448cfa7b2fa72d08037133ba7d0521569d9ca2b42e0"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\hard-50.png",
+      "size": [
+        800,
+        440
+      ],
+      "scale_percent": 50,
+      "sha256": "69dc2d7dd635003b4bbc06c80de25fce4c95ec842ed63b22e2e30224f064d81d"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\hard-30.png",
+      "size": [
+        480,
+        264
+      ],
+      "scale_percent": 30,
+      "sha256": "8e2c8073eaa56891d0b8e877b4047b8e19d9993520db43169fb150d90d61eb69"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\with-portraits.png",
+      "size": [
+        1600,
+        880
+      ],
+      "scale_percent": 100,
+      "sha256": "f86e9ce2c0b7db3de9c4bec161ad000b481bb87fdeb360913f5faf8e29105c6d"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\with-portraits-50.png",
+      "size": [
+        800,
+        440
+      ],
+      "scale_percent": 50,
+      "sha256": "8831b9addd0e56f7ca6f8ba252f0d0897baa13f86de9ddf490dcf877513bd60d"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\campaign\\with-portraits-30.png",
+      "size": [
+        480,
+        264
+      ],
+      "scale_percent": 30,
+      "sha256": "7cab37c010b69d21b1d5077bbcb1534ddd703c4c82f05eaa690eb698a138da69"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\calendar\\normal.png",
+      "size": [
+        1400,
+        1371
+      ],
+      "scale_percent": 100,
+      "sha256": "6c440fdec384a58ae03209be783d1f83e006787b3e5eda4fc29f18e73c8688c4"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\calendar\\normal-50.png",
+      "size": [
+        700,
+        685
+      ],
+      "scale_percent": 50,
+      "sha256": "3b9e40418e437253e526a05167037a7b3c334210852980736e22257c0fe72113"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\calendar\\normal-30.png",
+      "size": [
+        420,
+        411
+      ],
+      "scale_percent": 30,
+      "sha256": "fbb1a3e9cb0600bc2a0f1b705d47f89efadd42766f7fa940f255841d95a4f336"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_overview\\with-boss-assets.png",
+      "size": [
+        1600,
+        900
+      ],
+      "scale_percent": 100,
+      "sha256": "fb89f27129d26ebd8c0807bd9612181048fd335ae8bf065689c184bab6f630b0"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_overview\\with-boss-assets-50.png",
+      "size": [
+        800,
+        450
+      ],
+      "scale_percent": 50,
+      "sha256": "df4d87b89b1c2c394db0da63a3b66ab9dc024a48da5fe78f7c36be25c65337a2"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_overview\\with-boss-assets-30.png",
+      "size": [
+        480,
+        270
+      ],
+      "scale_percent": 30,
+      "sha256": "a85c151c80448de74aa15b7607fd2cff13c9ebb6414e036069e2ae39f11f7cec"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_records\\normal.png",
+      "size": [
+        1500,
+        720
+      ],
+      "scale_percent": 100,
+      "sha256": "72e32d2a459a4506c72375e178ae68560cc194890f31b8ee4d14ddb76cb0e8fe"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_records\\normal-50.png",
+      "size": [
+        750,
+        360
+      ],
+      "scale_percent": 50,
+      "sha256": "e7e28e296d1ae98596e6351a28ab0e9355a89c8c4650f02e44f73cad01cbcc0d"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_records\\normal-30.png",
+      "size": [
+        450,
+        216
+      ],
+      "scale_percent": 30,
+      "sha256": "9f8cec6029c0c39b6053518140d154032aaf076e0e0dd5553430a10c92d2f11a"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_member\\with-portraits.png",
+      "size": [
+        1500,
+        1896
+      ],
+      "scale_percent": 100,
+      "sha256": "95e44f0ba7a5f28cba94226cc9c8067b59575b7694f553874c7c5b74bc44aa91"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_member\\with-portraits-50.png",
+      "size": [
+        750,
+        948
+      ],
+      "scale_percent": 50,
+      "sha256": "f0458efa35f8f4e0bc7578dbd2c577c1f0adf79104efebbd116f7ec30fa753d8"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\union_member\\with-portraits-30.png",
+      "size": [
+        450,
+        568
+      ],
+      "scale_percent": 30,
+      "sha256": "4df26d88f37fd14e6776fe45f676229fcb681b1aa4f8ba56414d43bde58f291a"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\profile\\full-current-model.png",
+      "size": [
+        1200,
+        2680
+      ],
+      "scale_percent": 100,
+      "sha256": "00b281cf830b06ece48485ed1378583c6efc005e80d7eb98f941721a0061382a"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\profile\\full-current-model-50.png",
+      "size": [
+        600,
+        1340
+      ],
+      "scale_percent": 50,
+      "sha256": "02dbc3a13e570e17c0b0dc46514822886f8d6b91594e6d43917e8fa568baf9e0"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\profile\\full-current-model-30.png",
+      "size": [
+        360,
+        804
+      ],
+      "scale_percent": 30,
+      "sha256": "a06a4ea7372ecc50be7641689662b0db7cf31e12d17dd9f8dacfba0efa3db946"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "f70638c345caea0c602f4cfba528a0f612d0b227fe67e1728ea479bb8ccb43d2"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "c439b03eafd2e01746ddc288a1585c46e84f805c4b18b7db697998a317b45205"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "2c678c25b13d80d081b26a1b1130a916b65e6be43a836bee50c1e19b62bc88e8"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_02.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "64fd01649e7c1c294cd4d0e5b2dfc82f1c6e47c4d41baeeee29c44d77fc087fd"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_02-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "01894c95e14943b472d99270e4209aa8c1715b37acc66dd75890991e823f93a0"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_02-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "99c6c5cd2df9790ac3342747cde1fbb0bac28dcb4e55b2340650e61cd64f103c"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_03.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "1f0de9a43c15866745106043a6b3f9f28396298ee45168f547012b8d8c660d42"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_03-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "179ced9ab5269580c4fac54b3fc28b814f613e952712e48c320aebb8f5b1b722"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c010_03-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "6f9a4273e0b067f708b2b8dada327c7bad226f1b9f1c1defb45aead1b749b906"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c017.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "8189167f01931e41d5336514e546d060625393cf365ac8d24886b88f1dca47b0"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c017-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "b730b22d26b982c86cec817289df464d594e01a85f653611456ab67ac1ac761d"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c017-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "8dd725add2be2f1ae1249ff20d5147922c903d67571b1a30334e46d4bfaa96d1"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c234.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "0eef923837e75b406e7658cc6cdb943222738c0b59da1b56b68bbcfb571c3c35"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c234-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "0f233313b6b2c2c56dc3745e20209901142c2406266c6f36d5f39785193ca51b"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c234-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "9d8f37db73bf5db194f2c4547ab379a5d4ab81dca2e10a0174257a86634bd87e"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c330.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "9bd102e4e42c1b2bc21e0b337527a2318ec08718b895939ecc15b65aa4009833"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c330-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "979d867377ea90e8ada8e71f78756a4950325748d5586b21073de94acc38764f"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c330-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "a257547e0eb1c34f21b8c97c09930d438cd072e3ab816938f2ff5294bd77f79a"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c352.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "7cc17059d697ed396f6165efb7c964b84a382ca0abacd1d1ee497493c6325511"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c352-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "ae949a757150433325bf993a8de0531cca0231e7c59ba87cb43ddae7af372ff6"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c352-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "80537f9a57613cd1eb9d8fc6afbc310936ef6c31dbf2e5ca0cb3c68a703b27ba"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c471.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "314eaf95cf88e08d023f5fccfb19dc9bed631666c24b87797efdd6ea7471899e"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c471-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "52e6a29109e6ea7d2039886752fdf83b665a11752d1102a8126611cc4ae3388c"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\c471-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "b6dc94de948970acb6db3830f37c646002ff51c322e113209195aaf0173402c8"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-dark.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "f70638c345caea0c602f4cfba528a0f612d0b227fe67e1728ea479bb8ccb43d2"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-dark-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "c439b03eafd2e01746ddc288a1585c46e84f805c4b18b7db697998a317b45205"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-dark-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "2c678c25b13d80d081b26a1b1130a916b65e6be43a836bee50c1e19b62bc88e8"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-light.png",
+      "size": [
+        1800,
+        1000
+      ],
+      "scale_percent": 100,
+      "sha256": "9bd102e4e42c1b2bc21e0b337527a2318ec08718b895939ecc15b65aa4009833"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-light-50.png",
+      "size": [
+        900,
+        500
+      ],
+      "scale_percent": 50,
+      "sha256": "979d867377ea90e8ada8e71f78756a4950325748d5586b21073de94acc38764f"
+    },
+    {
+      "path": "E:\\DevCache\\nikke-t2i-phase1\\preview\\t2i\\character\\representative-light-30.png",
+      "size": [
+        540,
+        300
+      ],
+      "scale_percent": 30,
+      "sha256": "a257547e0eb1c34f21b8c97c09930d438cd072e3ab816938f2ff5294bd77f79a"
+    }
+  ],
+  "changed_files": [
+    ".gitignore",
+    "_conf_schema.json",
+    "asset_manager.py",
+    "assets/spine_manifest.json",
+    "boss_asset_resolver.py",
+    "calendar_service.py",
+    "data/nikke/blabla-assets/boss/full_bbg003.webp",
+    "data/nikke/blabla-assets/boss/full_bbg004_dmtr.webp",
+    "data/nikke/blabla-assets/boss/full_bca002.webp",
+    "data/nikke/blabla-assets/boss/full_bcg001_re.webp",
+    "data/nikke/blabla-assets/boss/full_bcg002.webp",
+    "data/nikke/blabla-assets/boss/full_bcg003.webp",
+    "data/nikke/blabla-assets/boss/full_eba001.webp",
+    "data/nikke/blabla-assets/boss/full_ebg001.webp",
+    "data/nikke/blabla-assets/boss/full_ebg002_dmtr.webp",
+    "data/nikke/blabla-assets/boss/full_eca001_re.webp",
+    "data/nikke/blabla-assets/boss/full_eca003.webp",
+    "data/nikke/blabla-assets/boss/full_ecg002.webp",
+    "data/nikke/blabla-assets/boss/full_ecg005_re.webp",
+    "data/nikke/blabla-assets/boss/full_ecg006.webp",
+    "data/nikke/blabla-assets/boss/full_mbg001_psid.webp",
+    "data/nikke/blabla-assets/boss/full_mbg002.webp",
+    "data/nikke/blabla-assets/boss/full_mbg004_anmi.webp",
+    "data/nikke/blabla-assets/boss/full_mca003.webp",
+    "data/nikke/blabla-assets/boss/full_mca003_re.webp",
+    "data/nikke/blabla-assets/boss/full_mcg004_re.webp",
+    "data/nikke/blabla-assets/boss/full_mcg005.webp",
+    "data/nikke/blabla-assets/boss/full_mcg006.webp",
+    "data/nikke/blabla-assets/boss/full_xcg002.webp",
+    "data/nikke/blabla-assets/character/si/default_avatar.png",
+    "data/nikke/blabla-assets/character/si/default_avatar.webp",
+    "data/nikke/blabla-assets/character/si/si_c010_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c010_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c010_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c011_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c011_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c012_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c014_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c015_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c016_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c016_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c016_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c016_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c017_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c017_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c017_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c018_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c020_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c022_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c022_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c023_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c030_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c030_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c030_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c032_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c032_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c033_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c040_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c041_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c041_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c043_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c043_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c043_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c060_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c061_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c062_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c070_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c070_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c070_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c071_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c072_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c072_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c072_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c072_04_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c073_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c074_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c075_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c080_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c080_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c080_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c082_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c082_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c082_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c090_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c090_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c090_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c091_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c091_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c092_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c093_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c093_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c094_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c094_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c095_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c095_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c100_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c101_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c101_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c101_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c102_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c102_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c103_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c103_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c104_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c105_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c105_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c110_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c111_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c111_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c112_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c112_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c112_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c112_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c113_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c113_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c120_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c121_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c130_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c130_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c131_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c131_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c132_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c140_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c140_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c140_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c141_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c141_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c142_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c142_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c143_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c150_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c150_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c150_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c160_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c160_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c161_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c162_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c162_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c170_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c170_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c170_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c170_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c170_04_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c171_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c172_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c180_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c180_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c181_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c181_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c181_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c182_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c183_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c190_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c191_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c191_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c191_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c192_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c192_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c192_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c193_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c194_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c195_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c200_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c200_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c201_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c201_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c202_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c202_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c203_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c210_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c210_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c210_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c210_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c212_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c212_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c212_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c220_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c220_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c221_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c222_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c222_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c223_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c223_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c224_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c225_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c225_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c226_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c230_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c230_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c231_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c231_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c232_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c233_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c233_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c233_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c234_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c240_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c241_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c242_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c242_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c260_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c260_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c260_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c261_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c262_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c262_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c270_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c270_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c270_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c270_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c271_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c271_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c271_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c272_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c272_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c280_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c280_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c281_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c281_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c281_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c282_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c282_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c283_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c284_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c290_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c291_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c300_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c301_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c302_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c303_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c304_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c305_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c306_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c307_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c308_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c310_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c310_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c311_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c312_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c313_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c314_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c315_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c316_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c316_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c321_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c321_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c322_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c330_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c330_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c330_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c331_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c350_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c350_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c350_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c351_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c351_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c352_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c352_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c352_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c353_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c354_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c354_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c355_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c361_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c380_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c381_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c381_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c382_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c382_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c390_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c390_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c390_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c391_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c391_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c392_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c400_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c400_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c401_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c401_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c402_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c403_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c403_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c411_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c411_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c412_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c412_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c430_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c430_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c430_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c431_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c431_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c432_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c441_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c450_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c450_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c450_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c450_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c451_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c451_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c451_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c451_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c470_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c470_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c470_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c471_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c500_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c501_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c501_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c502_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c511_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c511_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c511_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c513_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c513_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c513_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c513_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c514_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c514_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c515_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c520_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c520_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c521_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c532_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c532_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c550_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c550_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c551_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c551_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c570_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c580_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c580_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c581_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c582_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c583_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c590_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c600_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c600_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c601_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c601_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c620_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c800_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c800_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c801_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c802_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c810_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c810_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c810_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c810_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c811_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c811_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c811_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c811_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c812_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c820_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c820_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c820_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c821_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c821_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c821_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c822_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c830_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c830_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c830_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c830_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c831_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c831_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c831_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c832_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c832_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c832_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c832_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c832_04_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c833_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c834_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c834_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c834_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c835_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c835_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c835_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c836_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c840_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c840_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c840_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c841_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c841_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c841_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c842_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c850_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c850_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c850_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c850_03_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c851_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c851_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c851_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c852_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c860_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c860_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c860_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c861_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c861_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c861_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c862_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c870_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c870_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c870_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c871_00_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c871_01_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c871_02_s.webp",
+    "data/nikke/blabla-assets/character/si/si_c872_00_s.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_class/icn_burst_01.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_class/icn_burst_02.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_class/icn_burst_03.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_class/icn_burst_all.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_class/icn_class_attacker.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_class/icn_class_defender.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_class/icn_class_supporter.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/icn_corp_01.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/icn_corp_02.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/icn_corp_03.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/icn_corp_04.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/icn_corp_05.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/img_logo_abnormal.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/img_logo_elysion.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/img_logo_missilis.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/img_logo_pilgrim.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_corp/img_logo_tetra.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_grade/ele_grade_icon_001.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_grade/ele_grade_icon_002.webp",
+    "data/nikke/blabla-assets/icon/atlas_common_grade/ele_grade_icon_003.webp",
+    "data/nikke/blabla-assets/icon/default_boss.png",
+    "data/nikke/blabla-assets/icon/default_boss.webp",
+    "data/nikke/blabla-assets/icon/element/icon-code-electronic.png",
+    "data/nikke/blabla-assets/icon/element/icon-code-fire.png",
+    "data/nikke/blabla-assets/icon/element/icon-code-iron.png",
+    "data/nikke/blabla-assets/icon/element/icon-code-water.png",
+    "data/nikke/blabla-assets/icon/element/icon-code-wind.png",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_attacker_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_attacker_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_attacker_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_attacker_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_attacker_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_attacker_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_defender_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_defender_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_defender_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_defender_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_defender_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_defender_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_supporter_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_supporter_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_supporter_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_supporter_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_supporter_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_arm_supporter_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_attacker_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_attacker_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_attacker_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_attacker_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_attacker_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_attacker_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_defender_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_defender_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_defender_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_defender_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_defender_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_defender_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_supporter_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_supporter_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_supporter_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_supporter_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_supporter_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_body_supporter_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_attacker_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_attacker_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_attacker_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_attacker_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_attacker_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_attacker_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_defender_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_defender_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_defender_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_defender_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_defender_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_defender_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_supporter_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_supporter_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_supporter_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_supporter_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_supporter_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_head_supporter_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_attacker_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_attacker_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_attacker_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_attacker_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_attacker_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_attacker_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_defender_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_defender_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_defender_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_defender_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_defender_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_defender_t9_3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_supporter_t1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_supporter_t3.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_supporter_t5.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_supporter_t7.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_supporter_t9_1.webp",
+    "data/nikke/blabla-assets/icon/equip/icn_equipment_leg_supporter_t9_3.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_bbg003.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_bbg004_dmtr.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_bca002.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_bcg001_re.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_bcg002.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_bcg003.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_eba001.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_ebg001.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_ebg002_dmtr.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_eca001_re.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_eca003.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_ecg002.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_ecg005_re.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_ecg006.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mbg001_psid.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mbg002.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mbg004_anmi.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mca003.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mca003_re.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mcg004_re.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mcg005.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_mcg006.webp",
+    "data/nikke/blabla-assets/icon/monster_full/full_xcg002.webp",
+    "data/nikke/blabla-assets/icon/weapon/icon-weapon-assault_rifle.png",
+    "data/nikke/blabla-assets/icon/weapon/icon-weapon-machine_gun.png",
+    "data/nikke/blabla-assets/icon/weapon/icon-weapon-rocket_launcher.png",
+    "data/nikke/blabla-assets/icon/weapon/icon-weapon-shot_gun.png",
+    "data/nikke/blabla-assets/icon/weapon/icon-weapon-sniper_rifle.png",
+    "data/nikke/blabla-assets/icon/weapon/icon-weapon-sub_machine_gun.png",
+    "data/nikke/blabla-assets/mirror_manifest.json",
+    "data/nikke/blabla-manifests/boss_identity_manifest.json",
+    "data/nikke/blabla-manifests/character_character_avatar_map.json",
+    "data/nikke/blabla-manifests/character_character_id_map.json",
+    "data/nikke/blabla-manifests/character_character_skill_map.json",
+    "data/nikke/blabla-manifests/character_en_nikke_list_en_v2.json",
+    "data/nikke/blabla-manifests/character_zh-tw_character_face_list.json",
+    "data/nikke/blabla-manifests/character_zh-tw_nikke_list_zh-TW_v2.json",
+    "data/nikke/blabla-manifests/equip_ItemEquipTable-zh-tw.json",
+    "data/nikke/blabla-manifests/guild_guild_emblem.json",
+    "data/nikke/blabla-manifests/raid_raid_list.json",
+    "docs/CONFIGURATION_ACCEPTANCE.md",
+    "docs/T2I_ASSET_HANDOFF_FOR_ASTRA.md",
+    "docs/T2I_ASSET_IMPORT_PROVENANCE.json",
+    "docs/T2I_CAMPAIGN_PHASE1.md",
+    "docs/T2I_DELIVERY_AUDIT.json",
+    "docs/T2I_FRONTEND_HANDOFF.md",
+    "docs/evidence/blabla_static_assets/STATIC_ASSET_SIZE_REPORT.md",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_character_avatar_map.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_character_id_map.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_character_skill_map.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_en_nikke_list_en_v2.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_zh-tw_character_face_list.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_zh-tw_nikke_list_zh-TW_v2.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/equip_ItemEquipTable-zh-tw.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/guild_guild_emblem.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/manifest_meta.json",
+    "docs/evidence/blabla_static_assets/blabla_manifest_snapshots/raid_raid_list.json",
+    "docs/evidence/blabla_static_assets/boss_asset_coverage.json",
+    "docs/evidence/blabla_static_assets/boss_contact_sheet.html",
+    "docs/evidence/blabla_static_assets/boss_identity_manifest.json",
+    "docs/evidence/blabla_static_assets/lineup_portrait_contact_sheet.html",
+    "docs/evidence/blabla_static_assets/lineup_portrait_coverage.json",
+    "docs/evidence/blabla_static_assets/mirror_manifest.json",
+    "docs/evidence/blabla_static_assets/static_asset_inventory.json",
+    "docs/evidence/spine_rendered_assets/spine_render_contact_sheet.html",
+    "docs/evidence/spine_rendered_assets/spine_render_coverage.json",
+    "lineup_portrait_resolver.py",
+    "main.py",
+    "scripts/preview_t2i_frontend.py",
+    "scripts/preview_t2i_ui.py",
+    "scripts/rebuild_spine_render_manifest.py",
+    "scripts/t2i_preview_fixtures.py",
+    "t2i_assets.py",
+    "t2i_payloads.py",
+    "t2i_renderer.py",
+    "t2i_templates.py",
+    "templates/t2i/_shared/components.css",
+    "templates/t2i/_shared/macros.jinja",
+    "templates/t2i/_shared/reset.css",
+    "templates/t2i/_shared/tokens.css",
+    "templates/t2i/_shared/utilities.css",
+    "templates/t2i/calendar_schedule.html",
+    "templates/t2i/campaign.html",
+    "templates/t2i/character.html",
+    "templates/t2i/profile.html",
+    "templates/t2i/union_member.html",
+    "templates/t2i/union_overview.html",
+    "templates/t2i/union_records.html",
+    "tests/fixtures/t2i_campaign.json",
+    "tests/test_boss_asset_resolver.py",
+    "tests/test_lineup_portrait_resolver.py",
+    "tests/test_release_metadata.py",
+    "tests/test_spine_render_manifest.py",
+    "tests/test_t2i_asset_integration.py",
+    "tests/test_t2i_campaign.py",
+    "tests/test_t2i_frontend.py"
+  ],
+  "scope": "local uncommitted worktree; no push, PR, deploy or QQ",
+  "blockers": [],
+  "limitations": [
+    "Boss Seasons 41-44 metadata unresolved",
+    "local Spine coverage 6/200 defaults plus 2 costumes",
+    "native service availability",
+    "CJK fonts and final visual polish",
+    "long-content hardening"
+  ]
+}

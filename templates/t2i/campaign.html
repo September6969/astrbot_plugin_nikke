@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1600">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
+<style><!-- SHARED_CSS -->
+.campaign { width: 1600px; height: 880px; padding: 36px 44px; display: grid; grid-template-rows: 180px 450px 74px 44px; gap: 18px; border-top: 4px solid var(--accent); }
+.campaign.hard { --accent: #d79a9b; }
+.campaign header { display: grid; grid-template-columns: 1fr auto; align-items: start; }
+.title-line { display: flex; align-items: center; gap: 30px; margin-top: 6px; }
+h1 { font-size: 112px; line-height: 1.18; letter-spacing: -4px; }
+.record-label { text-align: right; padding-top: 5px; font-size: 22px; line-height: 1.8; }
+.lineup { display: grid; grid-template-rows: 30px 1fr; gap: 16px; }
+.cards { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 22px; }
+.summary { border-top: 1px solid var(--line); padding-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+.campaign .level {font-size:18px;color:var(--muted);}.campaign .character-name {font-size:22px;}.campaign .character-name.long-name {font-size:18px;}
+.summary-note { font-size: 20px; color: var(--muted); }
+</style></head><body><main class="campaign {{ 'hard' if mode == 'HARD' else 'normal' }}">
+<header><div><div class="eyebrow muted">CAMPAIGN OPERATION · 战役通关记录</div><div class="title-line"><h1>{{ stage }}</h1>{{ mode_badge(mode) }}</div></div><div class="record-label">{{ metric('TOTAL CP / 队伍战力', total_combat) }}</div></header>
+{% if available %}<section class="lineup">{{ section_header('CLEAR LINEUP / 通关阵容', portrait_notice) }}<div class="cards">{% for member in members %}{{ portrait_card(member) }}{% endfor %}</div></section>
+{% else %}{{ unavailable_state(status, status_message) }}{% endif %}
+<section class="summary"><span class="eyebrow muted">COMBAT RECORD</span><div class="summary-note">{{ status_badge(status) }}</div></section>
+{{ footer_meta(commander, updated, version) }}
+</main></body></html>

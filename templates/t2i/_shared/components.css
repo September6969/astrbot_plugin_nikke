@@ -1,0 +1,33 @@
+.section-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; font-size: 20px; line-height: 1.4; }
+.badge { display: inline-block; padding: 7px 12px; border: 1px solid var(--line); color: var(--muted); font-size: 18px; }
+.mode { color: var(--accent); border-color: var(--accent); font-weight: 800; letter-spacing: 2.4px; font-size: 26px; }
+.metric-label { color: var(--muted); font-size: 20px; letter-spacing: 2px; }
+.metric-value { font-size: 56px; font-weight: 800; line-height: 1.2; }
+.portrait-card { min-width: 0; background: var(--panel); border-top: 2px solid var(--accent); clip-path: polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%); }
+.portrait { position: relative; height: 220px; display: flex; justify-content: center; align-items: center; background: #222731; }
+.slot { position: absolute; left: 14px; top: 12px; color: var(--muted); font-size: 18px; }
+.portrait img { width: 100%; height: 100%; object-fit: contain; }
+.placeholder { width: 116px; height: 146px; color: #556171; }
+.portrait-info { padding: 16px 18px 20px; }
+.level { color: var(--accent); font-size: 20px; }
+.character-name { height: 66px; margin-top: 7px; font-size: 21px; line-height: 1.5; overflow-wrap: anywhere; }
+.character-name.long-name { font-size: 18px; line-height: 22px; }
+.combat { font-size: 32px; line-height: 38px; font-weight: 750; margin-top: 6px; }
+.empty-state { min-height: 360px; display: flex; flex-direction: column; justify-content: center; border-top: 1px solid var(--line); gap: 24px; }
+.empty-state h2 { font-size: 40px; }
+.empty-state p { font-size: 24px; color: var(--muted); overflow-wrap: anywhere; }
+.footer-meta { display: flex; gap: 24px; align-items: baseline; justify-content: space-between; font-size: 16px; line-height: 1.4; color: var(--muted); }
+.footer-meta > span { min-width: 0; overflow-wrap: anywhere; }
+.footer-meta .commander { max-width: 720px; overflow-wrap: anywhere; }
+
+.badge.state-available {color:#a9c5bd;border-color:#617f76;}
+.badge.state-partial {color:#ddbd83;border-color:#9d8050;}
+.badge.state-unavailable {color:#d5a7a7;border-color:#966767;}
+.badge.state-unknown {border-style:dashed;color:var(--muted);}
+.badge.state-empty {color:var(--muted);border-color:var(--line);}
+.profile .state-available,.schedule .state-available {color:#46665b;border-color:#92a89f;}
+.profile .state-partial,.schedule .state-partial {color:#785522;border-color:#a3895c;}
+.profile .state-unavailable,.schedule .state-unavailable {color:#864e4e;border-color:#b08e8e;}
+.profile .today .state-available {color:#a9c5bd;border-color:#617f76;}
+.profile .today .state-partial {color:#ddbd83;border-color:#9d8050;}
+.profile .today .state-unavailable {color:#d5a7a7;border-color:#966767;}
