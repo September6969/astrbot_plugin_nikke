@@ -14,5 +14,30 @@ RESEARCH_TYPES = {
 }
 
 
+RESEARCH_ZH_NAMES = {
+    "General": "通用研究",
+    "Attacker": "火力型",
+    "Defender": "防御型",
+    "Supporter": "辅助型",
+    "Elysion": "极乐净土",
+    "Missilis": "米西里斯",
+    "Tetra": "泰特拉",
+    "Pilgrim": "朝圣者",
+    "Abnormal": "反常",
+}
+
+RESEARCH_ZH_CATEGORIES = {
+    "Personal": "通用",
+    "Class": "职业",
+    "Corporation": "企业",
+}
+
+
 def research_labels(tid):
     return RESEARCH_TYPES.get(str(tid), (None, None))
+
+
+def research_zh_name(display_name: str | None) -> str | None:
+    if not display_name:
+        return None
+    return RESEARCH_ZH_NAMES.get(display_name, display_name)

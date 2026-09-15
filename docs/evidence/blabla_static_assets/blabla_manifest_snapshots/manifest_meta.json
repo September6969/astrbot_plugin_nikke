@@ -1,0 +1,65 @@
+{
+  "character/zh-tw/nikke_list_zh-TW_v2.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/jz-26/ww-14/c4619ec83335bcfd7b23e43600520dc7.json",
+    "bytes": 134628,
+    "sha256": "af1c16679be741d3505a1cf3e8cfe9885d2fe4f383b8eb94ecdaa0e90042e224",
+    "md5": "8e75d977c13938ef8c6df077ff20c779",
+    "saved_filename": "character_zh-tw_nikke_list_zh-TW_v2.json"
+  },
+  "character/en/nikke_list_en_v2.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+    "bytes": 134138,
+    "sha256": "78256685b8ffe1dcf8b52a1ab8b12d8c88eadc8a1c1af431bd90e7ac62737edd",
+    "md5": "7054bd2bf60b44b616c901077f1198ae",
+    "saved_filename": "character_en_nikke_list_en_v2.json"
+  },
+  "character/character_avatar_map.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/kw-85/7548a00f7a945550ddf0958a80abce46.json",
+    "bytes": 18822,
+    "sha256": "643d07e7cd35587ab26f4622a1a741a4e59a237c22a85f200ddb9e9b259f4b36",
+    "md5": "c7dcf5c8ab329bb65dc220fc7f45a5e0",
+    "saved_filename": "character_character_avatar_map.json"
+  },
+  "character/character_id_map.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/kx-19/bc64a706accd3c7ec1f9a9f2afd8f1bc.json",
+    "bytes": 167855,
+    "sha256": "34eee96339e875a4c149c49e8e0915747d29707adc6012fc1f8b40e1a02cfa62",
+    "md5": "e9b4d6702aed6874ead12430ee02e4a9",
+    "saved_filename": "character_character_id_map.json"
+  },
+  "character/character_skill_map.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/pv-80/4c2e6af2b69d78bafbf1aa4f0c267adc.json",
+    "bytes": 27705,
+    "sha256": "c03d51559f4654eeb0c2954abdbe9f636fb40a57318045035bd7c2c22ae180de",
+    "md5": "258c642b80b2c6a050d7dda9725737ac",
+    "saved_filename": "character_character_skill_map.json"
+  },
+  "character/zh-tw/character_face_list.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/zz-56/rq-11/cd2cf93b2125b14e34ca624589d756d9.json",
+    "bytes": 83676,
+    "sha256": "f1fde72528c22be54bb2d4b79ef9d494a03d69cd4bb60d4238cac29f0d8485d6",
+    "md5": "7e87d5b84933e8ae55bc6fefc0fdf965",
+    "saved_filename": "character_zh-tw_character_face_list.json"
+  },
+  "equip/ItemEquipTable-zh-tw.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/md-16/02d7f979df58efa0aa8dbd18de91a916.json",
+    "bytes": 107321,
+    "sha256": "a52c8ab66632d71b8206462e13cdda4cb36f61a54f93ae86ec191b7bc452e333",
+    "md5": "0f900d1e209745a9c3f5e3a86546a608",
+    "saved_filename": "equip_ItemEquipTable-zh-tw.json"
+  },
+  "guild/guild_emblem.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/ud-47/278041bce19be0eabc0cf6497ae591ab.json",
+    "bytes": 3154,
+    "sha256": "206a1a74e44ff6b4c802ef204350246cd79ec074218a822eccc77694211f8e2e",
+    "md5": "8dd442553fbdd4cc569415d73ac061ad",
+    "saved_filename": "guild_guild_emblem.json"
+  },
+  "raid/raid_list.json": {
+    "url": "https://sg-tools-cdn.blablalink.com/rm-58/a7f993363fe3e2df8a4a7e579decc872.json",
+    "bytes": 2461,
+    "sha256": "8e80187e96f1f16670585981f2614aab5be15c5e107d3d51bdf434387a8eff29",
+    "md5": "d52408030e2519c6b8c1923dc6b812da",
+    "saved_filename": "raid_raid_list.json"
+  }
+}

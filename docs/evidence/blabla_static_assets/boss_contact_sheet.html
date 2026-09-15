@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Union Raid Boss Mirrored Assets Contact Sheet</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #f97316;
+      --accent-green: #10b981;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 32px 48px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+    .metrics-bar {
+      display: flex;
+      gap: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 24px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .metric {
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .metric-value.success {
+      color: var(--accent-green);
+    }
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .boss-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .boss-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    .boss-img-container {
+      width: 100%;
+      height: 200px;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .boss-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .boss-details {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .boss-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .boss-meta {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge {
+      background: #334155;
+      color: #cbd5e1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .badge-dim {
+      background: #1e3a8a;
+      color: #93c5fd;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .badge-status {
+      background: #065f46;
+      color: #6ee7b7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .badge-fallback {
+      background: #991b1b;
+      color: #fca5a5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #38bdf8;
+    }
+    #fallback-example {
+      margin-top: 48px;
+      padding: 24px;
+      background: #18181b;
+      border: 1px dashed #ef4444;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Union Raid Boss Mirrored Assets Contact Sheet</h1>
+  <div class="subtitle">
+    Authoritative visual contact sheet of mirrored Union Raid Boss assets from BlaBlaLink CDN contract <code>/icon/monster_full/full_{icon_id}.webp</code>
+  </div>
+
+  <div class="metrics-bar">
+    <div class="metric">
+      <div class="metric-value">50</div>
+      <div class="metric-label">Scope Total Records (Seasons 35-44)</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value success">30</div>
+      <div class="metric-label">Identity Resolved</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value success">30</div>
+      <div class="metric-label">Images Mirrored (100% of Verified)</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value success">23</div>
+      <div class="metric-label">Unique Boss Images</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">0</div>
+      <div class="metric-label">Missing Images</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">20</div>
+      <div class="metric-label">Unresolved Pending Live Session</div>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span>Verified Mirrored Boss Assets (23 Unique Boss Images)</span>
+  </div>
+
+  <div class="boss-grid">
+    
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_ecg002.webp" alt="雙環 / Dual Ring" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">雙環 / Dual Ring</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>ecg002</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2420020214</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>242002</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_ecg006.webp" alt="擴散 / Spread" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">擴散 / Spread</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>ecg006</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2420060124</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>242006</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_eba001.webp" alt="風暴使者 (Z.E.U.S.) / Storm Bringer (Z.E.U.S.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">風暴使者 (Z.E.U.S.) / Storm Bringer (Z.E.U.S.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>eba001</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2510010144</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>251001</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mca003_re.webp" alt="重構手指 (A.N.M.I.) / Rebuild Fingers (A.N.M.I.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">重構手指 (A.N.M.I.) / Rebuild Fingers (A.N.M.I.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mca003_re</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3411030134</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>341103</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_ebg002_dmtr.webp" alt="材料H (D.M.T.R.) / Material H (D.M.T.R.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">材料H (D.M.T.R.) / Material H (D.M.T.R.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>ebg002_dmtr</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2520120144</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>252012</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mcg005.webp" alt="醫生 / Doctor" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">醫生 / Doctor</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mcg005</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3420050224</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>342005</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mcg006.webp" alt="重金屬 / Heavy Metal" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">重金屬 / Heavy Metal</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mcg006</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3420060114</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>342006</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_bbg004_dmtr.webp" alt="克拉肯 (D.M.T.R.) / Kraken (D.M.T.R.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">克拉肯 (D.M.T.R.) / Kraken (D.M.T.R.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>bbg004_dmtr</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>1520040154</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>152004</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_eca001_re.webp" alt="重構方尖碑 / Rebuild Obelisk" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">重構方尖碑 / Rebuild Obelisk</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>eca001_re</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2411010144</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>241101</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mbg004_anmi.webp" alt="莫德妮亞 (A.N.M.I.) / Modernia (A.N.M.I.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">莫德妮亞 (A.N.M.I.) / Modernia (A.N.M.I.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mbg004_anmi</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3520040134</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>352004</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_bcg002.webp" alt="潛伏 / Latency" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">潛伏 / Latency</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>bcg002</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>1420020134</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>142002</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mca003.webp" alt="手指 / Fingers" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">手指 / Fingers</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mca003</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3410030154</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>341003</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mbg002.webp" alt="掘墓 / Grave Digger" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">掘墓 / Grave Digger</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mbg002</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3520020144</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>352002</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_ecg005_re.webp" alt="重構巨大軀幹 / Rebuild Big Torso" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">重構巨大軀幹 / Rebuild Big Torso</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>ecg005_re</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2421050124</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>242105</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_bbg003.webp" alt="鐵匠 / Blacksmith" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">鐵匠 / Blacksmith</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>bbg003</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>1520030114</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>152003</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_bcg003.webp" alt="搬運工 (Z.E.U.S.) / Porter (Z.E.U.S.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">搬運工 (Z.E.U.S.) / Porter (Z.E.U.S.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>bcg003</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>1420030144</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>142003</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_eca003.webp" alt="板塊 (H.S.T.A.) / Plate (H.S.T.A.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">板塊 (H.S.T.A.) / Plate (H.S.T.A.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>eca003</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2410030214</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>241003</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_ebg001.webp" alt="噬地者 (P.S.I.D.) / Land Eater (P.S.I.D.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">噬地者 (P.S.I.D.) / Land Eater (P.S.I.D.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>ebg001</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>2520010124</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>252001</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_xcg002.webp" alt="水晶裝甲 / Crystal Armor" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">水晶裝甲 / Crystal Armor</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>xcg002</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>4420020124</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>442002</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_bcg001_re.webp" alt="重構黃瓜 / Rebuild Cucumber" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">重構黃瓜 / Rebuild Cucumber</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>bcg001_re</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>1421010134</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>142101</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_bca002.webp" alt="榴蓮 / Durian" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">榴蓮 / Durian</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>bca002</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>1410020154</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>141002</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mcg004_re.webp" alt="重構火神R / Rebuild Vulcan R" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">重構火神R / Rebuild Vulcan R</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mcg004_re</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3421040144</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>342104</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+
+        <div class="boss-card">
+          <div class="boss-img-container">
+            <img class="boss-img" src="../../../data/nikke/blabla-assets/boss/full_mbg001_psid.webp" alt="古鐵 (P.S.I.D.) / Alteisen (P.S.I.D.)" loading="lazy" />
+          </div>
+          <div class="boss-details">
+            <div class="boss-name">古鐵 (P.S.I.D.) / Alteisen (P.S.I.D.)</div>
+            <div class="boss-meta"><span class="badge">icon_id</span> <code>mbg001_psid</code></div>
+            <div class="boss-meta"><span class="badge">boss_id</span> <code>3520010124</code></div>
+            <div class="boss-meta"><span class="badge">model_id</span> <code>352001</code></div>
+            <div class="boss-meta"><span class="badge-dim">1024x1024</span> <span class="badge-status">MIRRORED</span></div>
+          </div>
+        </div>
+        
+  </div>
+
+  <section id="fallback-example">
+    <div class="section-title" style="margin-top: 0; color: #ef4444; border-color: #ef4444;">
+      <span>FALLBACK EXAMPLE (Isolated Defensive Infrastructure)</span>
+    </div>
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+      This default silhouette is strictly isolated for unmirrored or unresolved targets (e.g. newly announced raid seasons before live payload capture). It is NEVER returned for known verified bosses.
+    </p>
+    <div class="boss-card" style="max-width: 320px; border-color: #7f1d1d;">
+      <div class="boss-img-container">
+        <img class="boss-img" src="../../../data/nikke/blabla-assets/icon/default_boss.webp" alt="Default Fallback Silhouette" />
+      </div>
+      <div class="boss-details">
+        <div class="boss-name">Default Tactical Silhouette</div>
+        <div class="boss-meta"><span class="badge">file</span> <code>default_boss.webp</code></div>
+        <div class="boss-meta"><span class="badge">dimensions</span> <code>256x256</code></div>
+        <div class="boss-meta"><span class="badge-fallback">DEFENSIVE FALLBACK</span></div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

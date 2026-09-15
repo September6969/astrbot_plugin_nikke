@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Spine 离线持久化预渲染与同步脚本。
 
-用于离线下载 Spine bundle、检测版本（4.0 / 4.1）、调用无头 Worker 渲染
-idle@t=0 PNG 并更新 spine_manifest.json。
+支持：
+1. --all: 读取 character_master.json 全量 200 个角色的 canonical Spine ID
+2. --nikke-db-root: 本地 Nikke-db 仓库检出目录，通过 LocalSpineBundleResolver 严格从本地读取
+3. 单一持久化 Xvfb 会话，原生无头调用 4.0 / 4.1 Worker 渲染 idle 帧
+4. 生成规范 Manifest v2 与覆盖率报告
 """
 
 from __future__ import annotations
@@ -14,16 +17,16 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.request
 from pathlib import Path
 from typing import Any
 
 from PIL import Image
-
-NIKKE_DB_L2D_BASE = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d"
 
 DEFAULT_TARGETS = [
     "c010",
@@ -193,6 +196,8 @@ def render_spine_portrait(
     ]
 
     env = os.environ.copy()
+    if "DISPLAY" not in env:
+        env["DISPLAY"] = ":99"
     env.update({"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"})
 
     try:
@@ -201,7 +206,7 @@ def render_spine_portrait(
             cwd=str(bundle_root),
             env=env,
             capture_output=True,
-            timeout=30,
+            timeout=45,
             text=True,
             encoding="utf-8",
             errors="replace",
@@ -252,18 +257,37 @@ def render_spine_portrait(
         default_png.unlink(missing_ok=True)
 
 
+def _resolve_worker_bin(preferred: str, candidates: list[str]) -> str:
+    if preferred and (shutil.which(preferred) or Path(preferred).exists()):
+        return preferred
+    for c in candidates:
+        if c and (shutil.which(c) or Path(c).exists()):
+            return c
+    return preferred
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Spine 离线持久化预渲染与同步工具")
     parser.add_argument(
+        "--all",
+        action="store_true",
+        help="从 character_master.json 读取全部角色的 canonical Spine ID 进行全量预渲染",
+    )
+    parser.add_argument(
         "--assets",
         nargs="+",
-        default=DEFAULT_TARGETS,
+        default=None,
         help="待渲染的角色 Spine 资产 ID (例如 c010 c330)",
+    )
+    parser.add_argument(
+        "--nikke-db-root",
+        default="",
+        help="本地 Nikke-db 检出目录 (例如 /opt/nikke-bot/vendor/nikke-db)，优先从本地解析 bundle",
     )
     parser.add_argument(
         "--bundle-dir",
         default="",
-        help="Spine bundle 存放目录",
+        help="Spine bundle 存放目录（网络下载时的临时目录）",
     )
     parser.add_argument(
         "--out-dir",
@@ -273,16 +297,21 @@ def main() -> int:
     parser.add_argument(
         "--manifest",
         default="",
-        help="输出的 spine_manifest.json 路径",
+        help="输出的 spine-manifest.json 路径",
+    )
+    parser.add_argument(
+        "--manifest-path",
+        default="",
+        help="--manifest 的别名",
     )
     parser.add_argument(
         "--worker-40",
-        default="/usr/local/bin/entrypoint-xvfb.sh",
+        default="",
         help="Spine 4.0 worker 可执行文件路径",
     )
     parser.add_argument(
         "--worker-41",
-        default="/usr/local/bin/entrypoint-xvfb-4.1.sh",
+        default="",
         help="Spine 4.1 worker 可执行文件路径",
     )
     parser.add_argument(
@@ -292,69 +321,160 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    # 默认路径自动探测
     repo_root = Path(__file__).resolve().parent.parent
-    bundle_dir = Path(args.bundle_dir) if args.bundle_dir else repo_root / "cache" / "spine-bundles"
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+
+    # 确定目标角色清单
+    if args.all:
+        master_path = repo_root / "assets" / "character_master.json"
+        if not master_path.is_file():
+            print(f"错误: 找不到 {master_path}", file=sys.stderr)
+            return 1
+        master_data = json.loads(master_path.read_text(encoding="utf-8"))
+        chars = master_data.get("characters", [])
+        char_ids = sorted(list(set(c["spine_asset_id"] for c in chars if c.get("spine_asset_id"))))
+        targets = char_ids
+    elif args.assets:
+        targets = args.assets
+    else:
+        targets = DEFAULT_TARGETS
+
+    # 确定输出路径
     out_dir = Path(args.out_dir) if args.out_dir else repo_root / "assets" / "spine-rendered"
-    manifest_path = Path(args.manifest) if args.manifest else repo_root / "assets" / "spine_manifest.json"
-
-    # 若 entrypoint 脚本不可用，降级查找裸 worker
-    worker_40 = args.worker_40
-    if not Path(worker_40).exists() and Path("/usr/local/bin/nikke-spine-worker").exists():
-        worker_40 = "/usr/local/bin/nikke-spine-worker"
-
-    worker_41 = args.worker_41
-    if not Path(worker_41).exists() and Path("/usr/local/bin/nikke-spine-worker-4.1").exists():
-        worker_41 = "/usr/local/bin/nikke-spine-worker-4.1"
+    manifest_arg = args.manifest_path or args.manifest
+    manifest_path = Path(manifest_arg) if manifest_arg else repo_root / "assets" / "spine-manifest.json"
+    bundle_dir = Path(args.bundle_dir) if args.bundle_dir else repo_root / "cache" / "spine-bundles"
 
     out_dir.mkdir(parents=True, exist_ok=True)
     bundle_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest_data: dict[str, Any] = {"schema_version": 1, "characters": {}}
+    # 自动定位 Worker 二进制：优先直接使用裸二进制，其次使用 wrapper 脚本
+    worker_40 = _resolve_worker_bin(
+        args.worker_40,
+        [
+            "/usr/local/bin/nikke-spine-worker",
+            "/AstrBot/data/spine-worker/nikke-spine-worker",
+            "/opt/nikke-bot/astrbot/data/spine-worker/nikke-spine-worker",
+            "/AstrBot/data/spine-worker/entrypoint-xvfb.sh",
+            "/opt/nikke-bot/astrbot/data/spine-worker/entrypoint-xvfb.sh",
+        ],
+    )
+    worker_41 = _resolve_worker_bin(
+        args.worker_41,
+        [
+            "/usr/local/bin/nikke-spine-worker-4.1",
+            "/AstrBot/data/spine-worker-4.1/nikke-spine-worker-4.1",
+            "/opt/nikke-bot/astrbot/data/spine-worker-4.1/nikke-spine-worker-4.1",
+            "/AstrBot/data/spine-worker-4.1/entrypoint-xvfb-4.1.sh",
+            "/opt/nikke-bot/astrbot/data/spine-worker-4.1/entrypoint-xvfb-4.1.sh",
+        ],
+    )
+
+    # 本地解析器
+    local_resolver = None
+    if args.nikke_db_root:
+        from local_spine_resolver import LocalSpineBundleResolver
+        local_resolver = LocalSpineBundleResolver(args.nikke_db_root)
+        print(f"启用本地 Nikke-db 检出解析: {local_resolver.local_root}")
+
+    # 读取已有 manifest (schema v2)
+    manifest_data: dict[str, Any] = {
+        "schema_version": 2,
+        "source": "local_nikke_db" if local_resolver else "remote_nikke_db",
+        "characters": {},
+    }
     if manifest_path.is_file():
         try:
-            manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            loaded = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                manifest_data["characters"] = loaded.get("characters", {})
         except (OSError, ValueError):
             pass
 
+    # 若使用裸 worker，且在 Linux 下未运行 X，启动一个持久化的单一 Xvfb 进程
+    xvfb_proc = None
+    if sys.platform.startswith("linux") and shutil.which("Xvfb"):
+        try:
+            subprocess.run(["sh", "-c", "killall Xvfb 2>/dev/null || true; rm -f /tmp/.X99-lock /tmp/.X11-unix/X99"], check=False)
+            xvfb_proc = subprocess.Popen(["Xvfb", ":99", "-screen", "0", "1024x1024x24", "-nolisten", "tcp"])
+            time.sleep(0.3)
+            os.environ["DISPLAY"] = ":99"
+        except Exception as exc:
+            print(f"警告: 启动背景 Xvfb 失败: {exc}", file=sys.stderr)
+
     success_count = 0
     fail_count = 0
+    missing_bundles: list[str] = []
+    render_errors: list[tuple[str, str]] = []
 
-    print(f"=== 开始预渲染 {len(args.assets)} 个角色 Spine 立绘 ===")
-    for char_id in args.assets:
-        target_png = out_dir / f"{char_id}.png"
-        if target_png.is_file() and not args.force and char_id in manifest_data.get("characters", {}):
-            print(f"[{char_id}] 预渲染 PNG 已存在，跳过。")
-            success_count += 1
-            continue
+    print(f"=== 开始处理 {len(targets)} 个角色的 Spine 立绘 (输出: {out_dir}) ===")
+    try:
+        for idx, char_id in enumerate(targets, 1):
+            target_png = out_dir / f"{char_id}.png"
+            if target_png.is_file() and not args.force and char_id in manifest_data["characters"]:
+                success_count += 1
+                continue
 
-        print(f"\n处理 [{char_id}] ...")
-        try:
-            skel, atlas, textures = ensure_bundle(char_id, bundle_dir)
-            meta = render_spine_portrait(
-                char_id,
-                skel,
-                atlas,
-                textures,
-                target_png,
-                worker_40,
-                worker_41,
-                animation="idle",
-            )
-            meta["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-            manifest_data.setdefault("characters", {})[char_id] = meta
-            print(f"[{char_id}] 预渲染成功: {target_png} ({meta['width']}x{meta['height']}, size={meta['file_size']}B)")
-            success_count += 1
-        except Exception as exc:
-            print(f"[{char_id}] 预渲染失败: {exc}", file=sys.stderr)
-            fail_count += 1
+            try:
+                if local_resolver is not None:
+                    bundle = local_resolver.resolve_bundle(char_id)
+                    if bundle is None:
+                        missing_bundles.append(char_id)
+                        fail_count += 1
+                        continue
+                    skel, atlas, textures = bundle.skel_path, bundle.atlas_path, bundle.texture_paths
+                else:
+                    skel, atlas, textures = ensure_bundle(char_id, bundle_dir)
 
-    manifest_data["total_characters"] = len(manifest_data.get("characters", {}))
+                meta = render_spine_portrait(
+                    char_id,
+                    skel,
+                    atlas,
+                    textures,
+                    target_png,
+                    worker_40,
+                    worker_41,
+                    animation="idle",
+                )
+                meta["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                manifest_data["characters"][char_id] = meta
+                print(f"[{idx}/{len(targets)}] [{char_id}] 预渲染成功: {target_png.name} ({meta['width']}x{meta['height']}, size={meta['file_size']}B)")
+                success_count += 1
+            except Exception as exc:
+                print(f"[{idx}/{len(targets)}] [{char_id}] 预渲染失败: {exc}", file=sys.stderr)
+                render_errors.append((char_id, str(exc)))
+                fail_count += 1
+    finally:
+        if xvfb_proc is not None:
+            try:
+                xvfb_proc.terminate()
+                xvfb_proc.wait(timeout=2)
+            except Exception:
+                xvfb_proc.kill()
+            subprocess.run(["sh", "-c", "rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true"], check=False)
+
+    manifest_data["total_characters"] = len(targets)
+    manifest_data["rendered_count"] = success_count
+    manifest_data["failed_count"] = fail_count
     manifest_data["last_updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest_data, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\nManifest 已更新至 {manifest_path} (共 {manifest_data['total_characters']} 项)")
-    print(f"完成: 成功 {success_count} / 失败 {fail_count}")
+
+    total = len(targets)
+    pct = (success_count / total * 100.0) if total > 0 else 0.0
+    print("\n" + "=" * 50)
+    print("Spine 资产预渲染流水线覆盖报告")
+    print("=" * 50)
+    print(f"目标角色总数: {total}")
+    print(f"成功 / 已就绪: {success_count} ({pct:.1f}%)")
+    print(f"失败 / 未就绪: {fail_count}")
+    if missing_bundles:
+        print(f"本地缺少 bundle ({len(missing_bundles)}): {missing_bundles[:10]}{'...' if len(missing_bundles) > 10 else ''}")
+    if render_errors:
+        print(f"渲染错误条数: {len(render_errors)}")
+    print(f"Manifest v2 已写入: {manifest_path}")
+    print("=" * 50 + "\n")
 
     return 0 if fail_count == 0 else 1
 

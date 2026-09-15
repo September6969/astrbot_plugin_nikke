@@ -22,6 +22,15 @@ class MemorialCountData:
 
 
 @dataclass(slots=True)
+class CurrencyItem:
+    type: int
+    value: int
+    display_name: str
+    icon_key: str
+    compact_value: str
+
+
+@dataclass(slots=True)
 class ProfileDashboardData:
     commander_name: str
     area_id: str
@@ -51,6 +60,21 @@ class ProfileDashboardData:
     # None 表示调用方没有提供可选接口状态；False 表示请求或响应不可用。
     outpost_available: bool | None = None
     roster_available: bool | None = None
+    daily_available: bool | None = None
     roster_partial: bool = False
     research_partial: bool = False
     memorial_partial: bool = False
+    daily_partial: bool = False
+    storage_fullness: float | None = None
+    intercept_remaining: int | None = None
+    rookie_arena_remaining: int | None = None
+    special_arena_remaining: int | None = None
+    counsel_remaining: int | None = None
+    dispatch_completed: int | None = None
+    dispatch_total: int | None = None
+    tower_daily_remaining: int | None = None
+    sim_room_daily_record: str | None = None
+    sim_room_overclock_subseason: int | None = None
+    sim_room_overclock_season: int | None = None
+    currencies: list[CurrencyItem] | None = None
+    memorial_summary_dict: dict[str, int] | None = None

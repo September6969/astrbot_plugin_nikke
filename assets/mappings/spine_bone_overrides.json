@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "description": "人工骨骼语义覆盖表。优先级绝对高于自动推断。",
+  "entries": {
+    "470:default": {
+      "head": "c_head",
+      "chest": "c_breast_belt",
+      "pelvis": "lower_boddy",
+      "left_foot": "c_foot_l",
+      "right_foot": "c_foot_r"
+    }
+  }
+}

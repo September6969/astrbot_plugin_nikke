@@ -1,0 +1,2389 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-15T04:45:02.232238+00:00",
+  "total_entries": 156,
+  "total_with_bones": 0,
+  "entries": {
+    "80:default": {
+      "resource_id": "80",
+      "costume_id": null,
+      "character_name": "桑迪",
+      "has_spine": true,
+      "spine_asset_id": "c080",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c080/c080_00.skel",
+      "atlas_path": "spine/c080/c080_00.atlas",
+      "textures": [
+        "c080_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "80:30012": {
+      "resource_id": "80",
+      "costume_id": "30012",
+      "character_name": "桑迪",
+      "costume_name": "Supreme Holiday",
+      "has_spine": true,
+      "spine_asset_id": "c080_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c080_01/c080_01_00.skel",
+      "atlas_path": "spine/c080_01/c080_01_00.atlas",
+      "textures": [
+        "c080_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "82:default": {
+      "resource_id": "82",
+      "costume_id": null,
+      "character_name": "丽塔",
+      "has_spine": true,
+      "spine_asset_id": "c082",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c082/c082_00.skel",
+      "atlas_path": "spine/c082/c082_00.atlas",
+      "textures": [
+        "c082_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "82:10001": {
+      "resource_id": "82",
+      "costume_id": "10001",
+      "character_name": "丽塔",
+      "costume_name": "Guardfish",
+      "has_spine": true,
+      "spine_asset_id": "c082_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c082_01/c082_01_00.skel",
+      "atlas_path": "spine/c082_01/c082_01_00.atlas",
+      "textures": [
+        "c082_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "100:default": {
+      "resource_id": "100",
+      "costume_id": null,
+      "character_name": "拉普拉斯",
+      "has_spine": true,
+      "spine_asset_id": "c100",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c100/c100_00.skel",
+      "atlas_path": "spine/c100/c100_00.atlas",
+      "textures": [
+        "c100_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "101:default": {
+      "resource_id": "101",
+      "costume_id": null,
+      "character_name": "德雷克",
+      "has_spine": true,
+      "spine_asset_id": "c101",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c101/c101_00.skel",
+      "atlas_path": "spine/c101/c101_00.atlas",
+      "textures": [
+        "c101_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "101:80001": {
+      "resource_id": "101",
+      "costume_id": "80001",
+      "character_name": "德雷克",
+      "costume_name": "Villain Racer",
+      "has_spine": true,
+      "spine_asset_id": "c101_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c101_01/c101_01_00.skel",
+      "atlas_path": "spine/c101_01/c101_01_00.atlas",
+      "textures": [
+        "c101_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "102:default": {
+      "resource_id": "102",
+      "costume_id": null,
+      "character_name": "麦斯威尔",
+      "has_spine": true,
+      "spine_asset_id": "c102",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c102/c102_00.skel",
+      "atlas_path": "spine/c102/c102_00.atlas",
+      "textures": [
+        "c102_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "102:30004": {
+      "resource_id": "102",
+      "costume_id": "30004",
+      "character_name": "麦斯威尔",
+      "costume_name": "Mechanic White",
+      "has_spine": true,
+      "spine_asset_id": "c102_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c102_01/c102_01_00.skel",
+      "atlas_path": "spine/c102_01/c102_01_00.atlas",
+      "textures": [
+        "c102_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "110:default": {
+      "resource_id": "110",
+      "costume_id": null,
+      "character_name": "克拉乌",
+      "has_spine": true,
+      "spine_asset_id": "c110",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c110/c110_00.skel",
+      "atlas_path": "spine/c110/c110_00.atlas",
+      "textures": [
+        "c110_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "111:default": {
+      "resource_id": "111",
+      "costume_id": null,
+      "character_name": "豺狼",
+      "has_spine": true,
+      "spine_asset_id": "c111",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c111/c111_00.skel",
+      "atlas_path": "spine/c111/c111_00.atlas",
+      "textures": [
+        "c111_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "120:default": {
+      "resource_id": "120",
+      "costume_id": null,
+      "character_name": "N102",
+      "has_spine": true,
+      "spine_asset_id": "c120",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c120/c120_00.skel",
+      "atlas_path": "spine/c120/c120_00.atlas",
+      "textures": [
+        "c120_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "121:default": {
+      "resource_id": "121",
+      "costume_id": null,
+      "character_name": "安妮：奇迹仙女",
+      "has_spine": true,
+      "spine_asset_id": "c121",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c121/c121_00.skel",
+      "atlas_path": "spine/c121/c121_00.atlas",
+      "textures": [
+        "c121_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "131:default": {
+      "resource_id": "131",
+      "costume_id": null,
+      "character_name": "佩珀",
+      "has_spine": true,
+      "spine_asset_id": "c131",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c131/c131_00.skel",
+      "atlas_path": "spine/c131/c131_00.atlas",
+      "textures": [
+        "c131_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "131:10004": {
+      "resource_id": "131",
+      "costume_id": "10004",
+      "character_name": "佩珀",
+      "costume_name": "Ocean Vitamin",
+      "has_spine": true,
+      "spine_asset_id": "c131_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c131_01/c131_01_00.skel",
+      "atlas_path": "spine/c131_01/c131_01_00.atlas",
+      "textures": [
+        "c131_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "150:default": {
+      "resource_id": "150",
+      "costume_id": null,
+      "character_name": "尤莉亚",
+      "has_spine": true,
+      "spine_asset_id": "c150",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c150/c150_00.skel",
+      "atlas_path": "spine/c150/c150_00.atlas",
+      "textures": [
+        "c150_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "150:50001": {
+      "resource_id": "150",
+      "costume_id": "50001",
+      "character_name": "尤莉亚",
+      "costume_name": "Mild Nocturne",
+      "has_spine": true,
+      "spine_asset_id": "c150_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c150_01/c150_01_00.skel",
+      "atlas_path": "spine/c150_01/c150_01_00.atlas",
+      "textures": [
+        "c150_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "160:default": {
+      "resource_id": "160",
+      "costume_id": null,
+      "character_name": "尤妮",
+      "has_spine": true,
+      "spine_asset_id": "c160",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c160/c160_00.skel",
+      "atlas_path": "spine/c160/c160_00.atlas",
+      "textures": [
+        "c160_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "160:30008": {
+      "resource_id": "160",
+      "costume_id": "30008",
+      "character_name": "尤妮",
+      "costume_name": "Pretty in Pink",
+      "has_spine": true,
+      "spine_asset_id": "c160_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c160_01/c160_01_00.skel",
+      "atlas_path": "spine/c160_01/c160_01_00.atlas",
+      "textures": [
+        "c160_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "161:default": {
+      "resource_id": "161",
+      "costume_id": null,
+      "character_name": "米哈拉",
+      "has_spine": true,
+      "spine_asset_id": "c161",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c161/c161_00.skel",
+      "atlas_path": "spine/c161/c161_00.atlas",
+      "textures": [
+        "c161_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "172:default": {
+      "resource_id": "172",
+      "costume_id": null,
+      "character_name": "艾德米",
+      "has_spine": true,
+      "spine_asset_id": "c172",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c172/c172_00.skel",
+      "atlas_path": "spine/c172/c172_00.atlas",
+      "textures": [
+        "c172_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "290:default": {
+      "resource_id": "290",
+      "costume_id": null,
+      "character_name": "玛娜",
+      "has_spine": true,
+      "spine_asset_id": "c290",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c290/c290_00.skel",
+      "atlas_path": "spine/c290/c290_00.atlas",
+      "textures": [
+        "c290_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "291:default": {
+      "resource_id": "291",
+      "costume_id": null,
+      "character_name": "艾瑟儿",
+      "has_spine": true,
+      "spine_asset_id": "c291",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c291/c291_00.skel",
+      "atlas_path": "spine/c291/c291_00.atlas",
+      "textures": [
+        "c291_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "302:default": {
+      "resource_id": "302",
+      "costume_id": null,
+      "character_name": "产品08",
+      "has_spine": true,
+      "spine_asset_id": "c302",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c302/c302_00.skel",
+      "atlas_path": "spine/c302/c302_00.atlas",
+      "textures": [
+        "c302_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "303:default": {
+      "resource_id": "303",
+      "costume_id": null,
+      "character_name": "产品12",
+      "has_spine": true,
+      "spine_asset_id": "c303",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c303/c303_00.skel",
+      "atlas_path": "spine/c303/c303_00.atlas",
+      "textures": [
+        "c303_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "307:default": {
+      "resource_id": "307",
+      "costume_id": null,
+      "character_name": "产品23",
+      "has_spine": true,
+      "spine_asset_id": "c307",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c307/c307_00.skel",
+      "atlas_path": "spine/c307/c307_00.atlas",
+      "textures": [
+        "c307_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "361:default": {
+      "resource_id": "361",
+      "costume_id": null,
+      "character_name": "吉洛",
+      "has_spine": true,
+      "spine_asset_id": "c361",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c361/c361_00.skel",
+      "atlas_path": "spine/c361/c361_00.atlas",
+      "textures": [
+        "c361_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "391:default": {
+      "resource_id": "391",
+      "costume_id": null,
+      "character_name": "爱因",
+      "has_spine": true,
+      "spine_asset_id": "c391",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c391/c391_00.skel",
+      "atlas_path": "spine/c391/c391_00.atlas",
+      "textures": [
+        "c391_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "400:default": {
+      "resource_id": "400",
+      "costume_id": null,
+      "character_name": "吉尔提",
+      "has_spine": true,
+      "spine_asset_id": "c400",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c400/c400_00.skel",
+      "atlas_path": "spine/c400/c400_00.atlas",
+      "textures": [
+        "c400_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "401:default": {
+      "resource_id": "401",
+      "costume_id": null,
+      "character_name": "森",
+      "has_spine": true,
+      "spine_asset_id": "c401",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c401/c401_00.skel",
+      "atlas_path": "spine/c401/c401_00.atlas",
+      "textures": [
+        "c401_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "402:default": {
+      "resource_id": "402",
+      "costume_id": null,
+      "character_name": "坎西",
+      "has_spine": true,
+      "spine_asset_id": "c402",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c402/c402_00.skel",
+      "atlas_path": "spine/c402/c402_00.atlas",
+      "textures": [
+        "c402_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "450:default": {
+      "resource_id": "450",
+      "costume_id": null,
+      "character_name": "娜嘉",
+      "has_spine": true,
+      "spine_asset_id": "c450",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c450/c450_00.skel",
+      "atlas_path": "spine/c450/c450_00.atlas",
+      "textures": [
+        "c450_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "451:default": {
+      "resource_id": "451",
+      "costume_id": null,
+      "character_name": "蒂亚",
+      "has_spine": true,
+      "spine_asset_id": "c451",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c451/c451_00.skel",
+      "atlas_path": "spine/c451/c451_00.atlas",
+      "textures": [
+        "c451_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "10:default": {
+      "resource_id": "10",
+      "costume_id": null,
+      "character_name": "拉毗",
+      "has_spine": true,
+      "spine_asset_id": "c010",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c010/c010_00.skel",
+      "atlas_path": "spine/c010/c010_00.atlas",
+      "textures": [
+        "c010_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "10:10005": {
+      "resource_id": "10",
+      "costume_id": "10005",
+      "character_name": "拉毗",
+      "costume_name": "Classic Vacation",
+      "has_spine": true,
+      "spine_asset_id": "c010_03",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c010_03/c010_03_00.skel",
+      "atlas_path": "spine/c010_03/c010_03_00.atlas",
+      "textures": [
+        "c010_02.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "10:20001": {
+      "resource_id": "10",
+      "costume_id": "20001",
+      "character_name": "拉毗",
+      "costume_name": "White Promise",
+      "has_spine": true,
+      "spine_asset_id": "c010_02",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c010_02/c010_02_00.skel",
+      "atlas_path": "spine/c010_02/c010_02_00.atlas",
+      "textures": [
+        "c010_01.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "11:default": {
+      "resource_id": "11",
+      "costume_id": null,
+      "character_name": "尼恩",
+      "has_spine": true,
+      "spine_asset_id": "c011",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c011/c011_00.skel",
+      "atlas_path": "spine/c011/c011_00.atlas",
+      "textures": [
+        "c011_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "11:30001": {
+      "resource_id": "11",
+      "costume_id": "30001",
+      "character_name": "尼恩",
+      "costume_name": "Bling Bullet",
+      "has_spine": true,
+      "spine_asset_id": "c011_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c011_01/c011_01_00.skel",
+      "atlas_path": "spine/c011_01/c011_01_00.atlas",
+      "textures": [
+        "c011_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "14:default": {
+      "resource_id": "14",
+      "costume_id": null,
+      "character_name": "尼恩：蓝色海洋",
+      "has_spine": true,
+      "spine_asset_id": "c014",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c014/c014_00.skel",
+      "atlas_path": "spine/c014/c014_00.atlas",
+      "textures": [
+        "c014_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "20:default": {
+      "resource_id": "20",
+      "costume_id": null,
+      "character_name": "德尔塔",
+      "has_spine": true,
+      "spine_asset_id": "c020",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c020/c020_00.skel",
+      "atlas_path": "spine/c020/c020_00.atlas",
+      "textures": [
+        "c020_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "22:default": {
+      "resource_id": "22",
+      "costume_id": null,
+      "character_name": "西格娜",
+      "has_spine": true,
+      "spine_asset_id": "c022",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c022/c022_00.skel",
+      "atlas_path": "spine/c022/c022_00.atlas",
+      "textures": [
+        "c022_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "22:60001": {
+      "resource_id": "22",
+      "costume_id": "60001",
+      "character_name": "西格娜",
+      "costume_name": "Dramatic Chocolate",
+      "has_spine": true,
+      "spine_asset_id": "c022_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c022_01/c022_01_00.skel",
+      "atlas_path": "spine/c022_01/c022_01_00.atlas",
+      "textures": [
+        "c022_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "30:default": {
+      "resource_id": "30",
+      "costume_id": null,
+      "character_name": "波莉",
+      "has_spine": true,
+      "spine_asset_id": "c030",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c030/c030_00.skel",
+      "atlas_path": "spine/c030/c030_00.atlas",
+      "textures": [
+        "c030_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "30:30002": {
+      "resource_id": "30",
+      "costume_id": "30002",
+      "character_name": "波莉",
+      "costume_name": "Sweet Holic",
+      "has_spine": true,
+      "spine_asset_id": "c030_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c030_01/c030_01_00.skel",
+      "atlas_path": "spine/c030_01/c030_01_00.atlas",
+      "textures": [
+        "c030_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "32:default": {
+      "resource_id": "32",
+      "costume_id": null,
+      "character_name": "米兰达",
+      "has_spine": true,
+      "spine_asset_id": "c032",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c032/c032_00.skel",
+      "atlas_path": "spine/c032/c032_00.atlas",
+      "textures": [
+        "c032_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "40:default": {
+      "resource_id": "40",
+      "costume_id": null,
+      "character_name": "D",
+      "has_spine": true,
+      "spine_asset_id": "c040",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c040/c040_00.skel",
+      "atlas_path": "spine/c040/c040_00.atlas",
+      "textures": [
+        "c040_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "41:default": {
+      "resource_id": "41",
+      "costume_id": null,
+      "character_name": "K",
+      "has_spine": true,
+      "spine_asset_id": "c041",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c041/c041_00.skel",
+      "atlas_path": "spine/c041/c041_00.atlas",
+      "textures": [
+        "c041_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "70:default": {
+      "resource_id": "70",
+      "costume_id": null,
+      "character_name": "布丽德",
+      "has_spine": true,
+      "spine_asset_id": "c070",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c070/c070_00.skel",
+      "atlas_path": "spine/c070/c070_00.atlas",
+      "textures": [
+        "c070_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "70:30003": {
+      "resource_id": "70",
+      "costume_id": "30003",
+      "character_name": "布丽德",
+      "costume_name": "Model Worker",
+      "has_spine": true,
+      "spine_asset_id": "c070_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c070_01/c070_01_00.skel",
+      "atlas_path": "spine/c070_01/c070_01_00.atlas",
+      "textures": [
+        "c070_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "70:30019": {
+      "resource_id": "70",
+      "costume_id": "30019",
+      "character_name": "布丽德",
+      "costume_name": "Black Moon",
+      "has_spine": true,
+      "spine_asset_id": "c070_02",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c070_02/c070_02_00.skel",
+      "atlas_path": "spine/c070_02/c070_02_00.atlas",
+      "textures": [
+        "c070_02_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "71:default": {
+      "resource_id": "71",
+      "costume_id": null,
+      "character_name": "索林",
+      "has_spine": true,
+      "spine_asset_id": "c071",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c071/c071_00.skel",
+      "atlas_path": "spine/c071/c071_00.atlas",
+      "textures": [
+        "c071_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "72:default": {
+      "resource_id": "72",
+      "costume_id": null,
+      "character_name": "迪塞尔",
+      "has_spine": true,
+      "spine_asset_id": "c072",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c072/c072_00.skel",
+      "atlas_path": "spine/c072/c072_00.atlas",
+      "textures": [
+        "c072_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "72:30005": {
+      "resource_id": "72",
+      "costume_id": "30005",
+      "character_name": "迪塞尔",
+      "costume_name": "Costume",
+      "has_spine": true,
+      "spine_asset_id": "c072_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c072_01/c072_01_00.skel",
+      "atlas_path": "spine/c072_01/c072_01_00.atlas",
+      "textures": [
+        "c072_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "72:30006": {
+      "resource_id": "72",
+      "costume_id": "30006",
+      "character_name": "迪塞尔",
+      "costume_name": "Black Sunday",
+      "has_spine": true,
+      "spine_asset_id": "c072_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c072_01/c072_01_00.skel",
+      "atlas_path": "spine/c072_01/c072_01_00.atlas",
+      "textures": [
+        "c072_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "90:default": {
+      "resource_id": "90",
+      "costume_id": null,
+      "character_name": "艾玛",
+      "has_spine": true,
+      "spine_asset_id": "c090",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c090/c090_00.skel",
+      "atlas_path": "spine/c090/c090_00.atlas",
+      "textures": [
+        "c090_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "90:30016": {
+      "resource_id": "90",
+      "costume_id": "30016",
+      "character_name": "艾玛",
+      "costume_name": "Office Therapy",
+      "has_spine": true,
+      "spine_asset_id": "c090_02",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c090_02/c090_02_00.skel",
+      "atlas_path": "spine/c090_02/c090_02_00.atlas",
+      "textures": [
+        "c090_02_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "90:40001": {
+      "resource_id": "90",
+      "costume_id": "40001",
+      "character_name": "艾玛",
+      "costume_name": "Color me Red",
+      "has_spine": true,
+      "spine_asset_id": "c090_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c090_01/c090_01_00.skel",
+      "atlas_path": "spine/c090_01/c090_01_00.atlas",
+      "textures": [
+        "c090_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "91:default": {
+      "resource_id": "91",
+      "costume_id": null,
+      "character_name": "贝斯蒂",
+      "has_spine": true,
+      "spine_asset_id": "c091",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c091/c091_00.skel",
+      "atlas_path": "spine/c091/c091_00.atlas",
+      "textures": [
+        "c091_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "92:default": {
+      "resource_id": "92",
+      "costume_id": null,
+      "character_name": "银华",
+      "has_spine": true,
+      "spine_asset_id": "c092",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c092/c092_00.skel",
+      "atlas_path": "spine/c092/c092_00.atlas",
+      "textures": [
+        "c092_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "113:default": {
+      "resource_id": "113",
+      "costume_id": null,
+      "character_name": "E.H.",
+      "has_spine": true,
+      "spine_asset_id": "c940",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c940/c940_00.skel",
+      "atlas_path": "spine/c940/c940_00.atlas",
+      "textures": [
+        "c940_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "170:default": {
+      "resource_id": "170",
+      "costume_id": null,
+      "character_name": "普丽瓦蒂",
+      "has_spine": true,
+      "spine_asset_id": "c170",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c170/c170_00.skel",
+      "atlas_path": "spine/c170/c170_00.atlas",
+      "textures": [
+        "c170_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "170:30009": {
+      "resource_id": "170",
+      "costume_id": "30009",
+      "character_name": "普丽瓦蒂",
+      "costume_name": "Government Grunt",
+      "has_spine": true,
+      "spine_asset_id": "c170_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c170_01/c170_01_00.skel",
+      "atlas_path": "spine/c170_01/c170_01_00.atlas",
+      "textures": [
+        "c170_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "180:default": {
+      "resource_id": "180",
+      "costume_id": null,
+      "character_name": "吉萝婷",
+      "has_spine": true,
+      "spine_asset_id": "c180",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c180/c180_00.skel",
+      "atlas_path": "spine/c180/c180_00.atlas",
+      "textures": [
+        "c180_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "181:default": {
+      "resource_id": "181",
+      "costume_id": null,
+      "character_name": "梅登",
+      "has_spine": true,
+      "spine_asset_id": "c181",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c181/c181_00.skel",
+      "atlas_path": "spine/c181/c181_00.atlas",
+      "textures": [
+        "c181_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "181:30007": {
+      "resource_id": "181",
+      "costume_id": "30007",
+      "character_name": "梅登",
+      "costume_name": "Covert Nurse",
+      "has_spine": true,
+      "spine_asset_id": "c181_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c181_01/c181_01_00.skel",
+      "atlas_path": "spine/c181_01/c181_01_00.atlas",
+      "textures": [
+        "c181_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "280:default": {
+      "resource_id": "280",
+      "costume_id": null,
+      "character_name": "罗珊娜",
+      "has_spine": true,
+      "spine_asset_id": "c280",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c280/c280_00.skel",
+      "atlas_path": "spine/c280/c280_00.atlas",
+      "textures": [
+        "c280_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "300:default": {
+      "resource_id": "300",
+      "costume_id": null,
+      "character_name": "士兵E.G.",
+      "has_spine": true,
+      "spine_asset_id": "c300",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c300/c300_00.skel",
+      "atlas_path": "spine/c300/c300_00.atlas",
+      "textures": [
+        "c300_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "301:default": {
+      "resource_id": "301",
+      "costume_id": null,
+      "character_name": "士兵F.A.",
+      "has_spine": true,
+      "spine_asset_id": "c301",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c301/c301_00.skel",
+      "atlas_path": "spine/c301/c301_00.atlas",
+      "textures": [
+        "c301_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "306:default": {
+      "resource_id": "306",
+      "costume_id": null,
+      "character_name": "士兵O.W.",
+      "has_spine": true,
+      "spine_asset_id": "c306",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c306/c306_00.skel",
+      "atlas_path": "spine/c306/c306_00.atlas",
+      "textures": [
+        "c306_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "321:default": {
+      "resource_id": "321",
+      "costume_id": null,
+      "character_name": "玛律恰那",
+      "has_spine": true,
+      "spine_asset_id": "c321",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c321/c321_00.skel",
+      "atlas_path": "spine/c321/c321_00.atlas",
+      "textures": [
+        "c321_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "350:default": {
+      "resource_id": "350",
+      "costume_id": null,
+      "character_name": "马斯特",
+      "has_spine": true,
+      "spine_asset_id": "c350",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c350/c350_00.skel",
+      "atlas_path": "spine/c350/c350_00.atlas",
+      "textures": [
+        "c350_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "350:10006": {
+      "resource_id": "350",
+      "costume_id": "10006",
+      "character_name": "马斯特",
+      "costume_name": "A Pirate's Heart",
+      "has_spine": true,
+      "spine_asset_id": "c350_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c350_01/c350_01_00.skel",
+      "atlas_path": "spine/c350_01/c350_01_00.atlas",
+      "textures": [
+        "c350_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "351:default": {
+      "resource_id": "351",
+      "costume_id": null,
+      "character_name": "安克",
+      "has_spine": true,
+      "spine_asset_id": "c351",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c351/c351_00.skel",
+      "atlas_path": "spine/c351/c351_00.atlas",
+      "textures": [
+        "c351_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "352:default": {
+      "resource_id": "352",
+      "costume_id": null,
+      "character_name": "海伦",
+      "has_spine": true,
+      "spine_asset_id": "c352",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c352/c352_00.skel",
+      "atlas_path": "spine/c352/c352_00.atlas",
+      "textures": [
+        "c352_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "352:50003": {
+      "resource_id": "352",
+      "costume_id": "50003",
+      "character_name": "海伦",
+      "costume_name": "Chandelier",
+      "has_spine": true,
+      "spine_asset_id": "c352_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c352_01/c352_01_00.skel",
+      "atlas_path": "spine/c352_01/c352_01_00.atlas",
+      "textures": [
+        "c352_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "353:default": {
+      "resource_id": "353",
+      "costume_id": null,
+      "character_name": "海伦：海蓝宝石",
+      "has_spine": true,
+      "spine_asset_id": "c353",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c353/c353_00.skel",
+      "atlas_path": "spine/c353/c353_00.atlas",
+      "textures": [
+        "c353_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "390:default": {
+      "resource_id": "390",
+      "costume_id": null,
+      "character_name": "茨瓦伊",
+      "has_spine": true,
+      "spine_asset_id": "c390",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c390/c390_00.skel",
+      "atlas_path": "spine/c390/c390_00.atlas",
+      "textures": [
+        "c390_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "12:default": {
+      "resource_id": "12",
+      "costume_id": null,
+      "character_name": "阿妮斯",
+      "has_spine": true,
+      "spine_asset_id": "c012",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c012/c012_00.skel",
+      "atlas_path": "spine/c012/c012_00.atlas",
+      "textures": [
+        "c012_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "15:default": {
+      "resource_id": "15",
+      "costume_id": null,
+      "character_name": "阿妮斯：闪耀夏日",
+      "has_spine": true,
+      "spine_asset_id": "c015",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c015/c015_00.skel",
+      "atlas_path": "spine/c015/c015_00.atlas",
+      "textures": [
+        "c015_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "60:default": {
+      "resource_id": "60",
+      "costume_id": null,
+      "character_name": "贝洛塔",
+      "has_spine": true,
+      "spine_asset_id": "c060",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c060/c060_00.skel",
+      "atlas_path": "spine/c060/c060_00.atlas",
+      "textures": [
+        "c060_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "61:default": {
+      "resource_id": "61",
+      "costume_id": null,
+      "character_name": "米卡",
+      "has_spine": true,
+      "spine_asset_id": "c061",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c061/c061_00.skel",
+      "atlas_path": "spine/c061/c061_00.atlas",
+      "textures": [
+        "c061_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "112:default": {
+      "resource_id": "112",
+      "costume_id": null,
+      "character_name": "毒蛇",
+      "has_spine": true,
+      "spine_asset_id": "c112",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c112/c112_00.skel",
+      "atlas_path": "spine/c112/c112_00.atlas",
+      "textures": [
+        "c112_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "112:70001": {
+      "resource_id": "112",
+      "costume_id": "70001",
+      "character_name": "毒蛇",
+      "costume_name": "Toxic Rabbit",
+      "has_spine": true,
+      "spine_asset_id": "c112_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c112_01/c112_01_00.skel",
+      "atlas_path": "spine/c112_01/c112_01_00.atlas",
+      "textures": [
+        "c112_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "130:default": {
+      "resource_id": "130",
+      "costume_id": null,
+      "character_name": "梅里",
+      "has_spine": true,
+      "spine_asset_id": "c130",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c130/c130_00.skel",
+      "atlas_path": "spine/c130/c130_00.atlas",
+      "textures": [
+        "c130_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "132:default": {
+      "resource_id": "132",
+      "costume_id": null,
+      "character_name": "梅里：海湾女神",
+      "has_spine": true,
+      "spine_asset_id": "c132",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c132/c132_00.skel",
+      "atlas_path": "spine/c132/c132_00.atlas",
+      "textures": [
+        "c132_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "140:default": {
+      "resource_id": "140",
+      "costume_id": null,
+      "character_name": "舒格",
+      "has_spine": true,
+      "spine_asset_id": "c140",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c140/c140_00.skel",
+      "atlas_path": "spine/c140/c140_00.atlas",
+      "textures": [
+        "c140_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "140:50002": {
+      "resource_id": "140",
+      "costume_id": "50002",
+      "character_name": "舒格",
+      "costume_name": "Hard-Boiled",
+      "has_spine": true,
+      "spine_asset_id": "c140_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c140_01/c140_01_00.skel",
+      "atlas_path": "spine/c140_01/c140_01_00.atlas",
+      "textures": [
+        "c140_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "141:default": {
+      "resource_id": "141",
+      "costume_id": null,
+      "character_name": "米尔克",
+      "has_spine": true,
+      "spine_asset_id": "c141",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c141/c141_00.skel",
+      "atlas_path": "spine/c141/c141_00.atlas",
+      "textures": [
+        "c141_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "141:30011": {
+      "resource_id": "141",
+      "costume_id": "30011",
+      "character_name": "米尔克",
+      "costume_name": "Extreme Fighter",
+      "has_spine": true,
+      "spine_asset_id": "c141_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c141_01/c141_01_00.skel",
+      "atlas_path": "spine/c141_01/c141_01_00.atlas",
+      "textures": [
+        "c141_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "142:default": {
+      "resource_id": "142",
+      "costume_id": null,
+      "character_name": "普琳玛",
+      "has_spine": true,
+      "spine_asset_id": "c142",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c142/c142_00.skel",
+      "atlas_path": "spine/c142/c142_00.atlas",
+      "textures": [
+        "c142_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "142:10002": {
+      "resource_id": "142",
+      "costume_id": "10002",
+      "character_name": "普琳玛",
+      "costume_name": "Sea of Sloth",
+      "has_spine": true,
+      "spine_asset_id": "c142_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c142_01/c142_01_00.skel",
+      "atlas_path": "spine/c142_01/c142_01_00.atlas",
+      "textures": [
+        "c142_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "171:default": {
+      "resource_id": "171",
+      "costume_id": null,
+      "character_name": "尤尔夏",
+      "has_spine": true,
+      "spine_asset_id": "c171",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c171/c171_00.skel",
+      "atlas_path": "spine/c171/c171_00.atlas",
+      "textures": [
+        "c171_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "190:default": {
+      "resource_id": "190",
+      "costume_id": null,
+      "character_name": "鲁德米拉",
+      "has_spine": true,
+      "spine_asset_id": "c190",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c190/c190_00.skel",
+      "atlas_path": "spine/c190/c190_00.atlas",
+      "textures": [
+        "c190_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "191:default": {
+      "resource_id": "191",
+      "costume_id": null,
+      "character_name": "爱丽丝",
+      "has_spine": true,
+      "spine_asset_id": "c191",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c191/c191_00.skel",
+      "atlas_path": "spine/c191/c191_00.atlas",
+      "textures": [
+        "c191_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "191:30015": {
+      "resource_id": "191",
+      "costume_id": "30015",
+      "character_name": "爱丽丝",
+      "costume_name": "Sweet Home",
+      "has_spine": true,
+      "spine_asset_id": "c191_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c191_01/c191_01_00.skel",
+      "atlas_path": "spine/c191_01/c191_01_00.atlas",
+      "textures": [
+        "c191_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "193:default": {
+      "resource_id": "193",
+      "costume_id": null,
+      "character_name": "尼夫",
+      "has_spine": true,
+      "spine_asset_id": "c193",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c193/c193_00.skel",
+      "atlas_path": "spine/c193/c193_00.atlas",
+      "textures": [
+        "c193_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "200:default": {
+      "resource_id": "200",
+      "costume_id": null,
+      "character_name": "露菲",
+      "has_spine": true,
+      "spine_asset_id": "c200",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c200/c200_00.skel",
+      "atlas_path": "spine/c200/c200_00.atlas",
+      "textures": [
+        "c200_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "200:70002": {
+      "resource_id": "200",
+      "costume_id": "70002",
+      "character_name": "露菲",
+      "costume_name": "Rabbit Deluxe",
+      "has_spine": true,
+      "spine_asset_id": "c200_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c200_01/c200_01_00.skel",
+      "atlas_path": "spine/c200_01/c200_01_00.atlas",
+      "textures": [
+        "c200_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "201:default": {
+      "resource_id": "201",
+      "costume_id": null,
+      "character_name": "杨",
+      "has_spine": true,
+      "spine_asset_id": "c201",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c201/c201_00.skel",
+      "atlas_path": "spine/c201/c201_00.atlas",
+      "textures": [
+        "c201_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "201:10003": {
+      "resource_id": "201",
+      "costume_id": "10003",
+      "character_name": "杨",
+      "costume_name": "Sunrise Market",
+      "has_spine": true,
+      "spine_asset_id": "c201_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c201_01/c201_01_00.skel",
+      "atlas_path": "spine/c201_01/c201_01_00.atlas",
+      "textures": [
+        "c201_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "202:default": {
+      "resource_id": "202",
+      "costume_id": null,
+      "character_name": "朵拉",
+      "has_spine": true,
+      "spine_asset_id": "c202",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c202/c202_00.skel",
+      "atlas_path": "spine/c202/c202_00.atlas",
+      "textures": [
+        "c202_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "202:50004": {
+      "resource_id": "202",
+      "costume_id": "50004",
+      "character_name": "朵拉",
+      "costume_name": "Dark Rose",
+      "has_spine": true,
+      "spine_asset_id": "c202_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c202_01/c202_01_00.skel",
+      "atlas_path": "spine/c202_01/c202_01_00.atlas",
+      "textures": [
+        "c202_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "203:default": {
+      "resource_id": "203",
+      "costume_id": null,
+      "character_name": "露菲：冬日购物狂",
+      "has_spine": true,
+      "spine_asset_id": "c203",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c203/c203_00.skel",
+      "atlas_path": "spine/c203/c203_00.atlas",
+      "textures": [
+        "c203_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "210:default": {
+      "resource_id": "210",
+      "costume_id": null,
+      "character_name": "艾可希雅",
+      "has_spine": true,
+      "spine_asset_id": "c210",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c210/c210_00.skel",
+      "atlas_path": "spine/c210/c210_00.atlas",
+      "textures": [
+        "c210_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "210:40002": {
+      "resource_id": "210",
+      "costume_id": "40002",
+      "character_name": "艾可希雅",
+      "costume_name": "Joy to the Nerds",
+      "has_spine": true,
+      "spine_asset_id": "c210_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c210_01/c210_01_00.skel",
+      "atlas_path": "spine/c210_01/c210_01_00.atlas",
+      "textures": [
+        "c210_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "212:default": {
+      "resource_id": "212",
+      "costume_id": null,
+      "character_name": "诺薇儿",
+      "has_spine": true,
+      "spine_asset_id": "c212",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c212/c212_00.skel",
+      "atlas_path": "spine/c212/c212_00.atlas",
+      "textures": [
+        "c212_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "212:30010": {
+      "resource_id": "212",
+      "costume_id": "30010",
+      "character_name": "诺薇儿",
+      "costume_name": "Penguin Holmes",
+      "has_spine": true,
+      "spine_asset_id": "c212_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c212_01/c212_01_00.skel",
+      "atlas_path": "spine/c212_01/c212_01_00.atlas",
+      "textures": [
+        "c212_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "212:100001": {
+      "resource_id": "212",
+      "costume_id": "100001",
+      "character_name": "诺薇儿",
+      "costume_name": "Detective Nurse",
+      "has_spine": true,
+      "spine_asset_id": "c212_02",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c212_02/c212_02_00.skel",
+      "atlas_path": "spine/c212_02/c212_02_00.atlas",
+      "textures": [
+        "c212_02_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "240:default": {
+      "resource_id": "240",
+      "costume_id": null,
+      "character_name": "鲁玛妮",
+      "has_spine": true,
+      "spine_asset_id": "c240",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c240/c240_00.skel",
+      "atlas_path": "spine/c240/c240_00.atlas",
+      "textures": [
+        "c240_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "241:default": {
+      "resource_id": "241",
+      "costume_id": null,
+      "character_name": "艾菲涅尔",
+      "has_spine": true,
+      "spine_asset_id": "c241",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c241/c241_00.skel",
+      "atlas_path": "spine/c241/c241_00.atlas",
+      "textures": [
+        "c241_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "242:default": {
+      "resource_id": "242",
+      "costume_id": null,
+      "character_name": "富克旺",
+      "has_spine": true,
+      "spine_asset_id": "c242",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c242/c242_00.skel",
+      "atlas_path": "spine/c242/c242_00.atlas",
+      "textures": [
+        "c242_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "270:default": {
+      "resource_id": "270",
+      "costume_id": null,
+      "character_name": "布兰儿",
+      "has_spine": true,
+      "spine_asset_id": "c270",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c270/c270_00.skel",
+      "atlas_path": "spine/c270/c270_00.atlas",
+      "textures": [
+        "c270_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "271:default": {
+      "resource_id": "271",
+      "costume_id": null,
+      "character_name": "诺亚尔",
+      "has_spine": true,
+      "spine_asset_id": "c271",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c271/c271_00.skel",
+      "atlas_path": "spine/c271/c271_00.atlas",
+      "textures": [
+        "c271_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "272:default": {
+      "resource_id": "272",
+      "costume_id": null,
+      "character_name": "露姬",
+      "has_spine": true,
+      "spine_asset_id": "c272",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c272/c272_00.skel",
+      "atlas_path": "spine/c272/c272_00.atlas",
+      "textures": [
+        "c272_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "281:default": {
+      "resource_id": "281",
+      "costume_id": null,
+      "character_name": "牡丹",
+      "has_spine": true,
+      "spine_asset_id": "c281",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c281/c281_00.skel",
+      "atlas_path": "spine/c281/c281_00.atlas",
+      "textures": [
+        "c281_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "282:default": {
+      "resource_id": "282",
+      "costume_id": null,
+      "character_name": "樱花",
+      "has_spine": true,
+      "spine_asset_id": "c282",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c282/c282_00.skel",
+      "atlas_path": "spine/c282/c282_00.atlas",
+      "textures": [
+        "c282_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "282:30017": {
+      "resource_id": "282",
+      "costume_id": "30017",
+      "character_name": "樱花",
+      "costume_name": "Midnight Stealth",
+      "has_spine": true,
+      "spine_asset_id": "c282_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c282_01/c282_01_00.skel",
+      "atlas_path": "spine/c282_01/c282_01_00.atlas",
+      "textures": [
+        "c282_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "304:default": {
+      "resource_id": "304",
+      "costume_id": null,
+      "character_name": "iDoll花",
+      "has_spine": true,
+      "spine_asset_id": "c304",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c304/c304_00.skel",
+      "atlas_path": "spine/c304/c304_00.atlas",
+      "textures": [
+        "c304_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "305:default": {
+      "resource_id": "305",
+      "costume_id": null,
+      "character_name": "iDoll海",
+      "has_spine": true,
+      "spine_asset_id": "c305",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c305/c305_00.skel",
+      "atlas_path": "spine/c305/c305_00.atlas",
+      "textures": [
+        "c305_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "308:default": {
+      "resource_id": "308",
+      "costume_id": null,
+      "character_name": "iDoll太阳",
+      "has_spine": true,
+      "spine_asset_id": "c308",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c308/c308_00.skel",
+      "atlas_path": "spine/c308/c308_00.atlas",
+      "textures": [
+        "c308_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "310:default": {
+      "resource_id": "310",
+      "costume_id": null,
+      "character_name": "爱德",
+      "has_spine": true,
+      "spine_asset_id": "c310",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c310/c310_00.skel",
+      "atlas_path": "spine/c310/c310_00.atlas",
+      "textures": [
+        "c310_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "311:default": {
+      "resource_id": "311",
+      "costume_id": null,
+      "character_name": "可可",
+      "has_spine": true,
+      "spine_asset_id": "c311",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c311/c311_00.skel",
+      "atlas_path": "spine/c311/c311_00.atlas",
+      "textures": [
+        "c311_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "312:default": {
+      "resource_id": "312",
+      "costume_id": null,
+      "character_name": "索达",
+      "has_spine": true,
+      "spine_asset_id": "c312",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c312/c312_00.skel",
+      "atlas_path": "spine/c312/c312_00.atlas",
+      "textures": [
+        "c312_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "380:default": {
+      "resource_id": "380",
+      "costume_id": null,
+      "character_name": "尼罗",
+      "has_spine": true,
+      "spine_asset_id": "c380",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c380/c380_00.skel",
+      "atlas_path": "spine/c380/c380_00.atlas",
+      "textures": [
+        "c380_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "381:default": {
+      "resource_id": "381",
+      "costume_id": null,
+      "character_name": "饼干",
+      "has_spine": true,
+      "spine_asset_id": "c381",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c381/c381_00.skel",
+      "atlas_path": "spine/c381/c381_00.atlas",
+      "textures": [
+        "c381_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "382:default": {
+      "resource_id": "382",
+      "costume_id": null,
+      "character_name": "莱昂纳",
+      "has_spine": true,
+      "spine_asset_id": "c382",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c382/c382_00.skel",
+      "atlas_path": "spine/c382/c382_00.atlas",
+      "textures": [
+        "c382_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "392:default": {
+      "resource_id": "392",
+      "costume_id": null,
+      "character_name": "莱伊",
+      "has_spine": true,
+      "spine_asset_id": "c392",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c392/c392_00.skel",
+      "atlas_path": "spine/c392/c392_00.atlas",
+      "textures": [
+        "c392_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "430:default": {
+      "resource_id": "430",
+      "costume_id": null,
+      "character_name": "诺伊斯",
+      "has_spine": true,
+      "spine_asset_id": "c430",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c430/c430_00.skel",
+      "atlas_path": "spine/c430/c430_00.atlas",
+      "textures": [
+        "c430_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "430:30013": {
+      "resource_id": "430",
+      "costume_id": "30013",
+      "character_name": "诺伊斯",
+      "costume_name": "Cherry Blossom Stage",
+      "has_spine": true,
+      "spine_asset_id": "c430_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c430_01/c430_01_00.skel",
+      "atlas_path": "spine/c430_01/c430_01_00.atlas",
+      "textures": [
+        "c430_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "431:default": {
+      "resource_id": "431",
+      "costume_id": null,
+      "character_name": "沃纶姆",
+      "has_spine": true,
+      "spine_asset_id": "c431",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c431/c431_00.skel",
+      "atlas_path": "spine/c431/c431_00.atlas",
+      "textures": [
+        "c431_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "432:default": {
+      "resource_id": "432",
+      "costume_id": null,
+      "character_name": "阿莉亚",
+      "has_spine": true,
+      "spine_asset_id": "c432",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c432/c432_00.skel",
+      "atlas_path": "spine/c432/c432_00.atlas",
+      "textures": [
+        "c432_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "220:default": {
+      "resource_id": "220",
+      "costume_id": null,
+      "character_name": "白雪公主",
+      "has_spine": true,
+      "spine_asset_id": "c220",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c220/c220_00.skel",
+      "atlas_path": "spine/c220/c220_00.atlas",
+      "textures": [
+        "c220_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "221:default": {
+      "resource_id": "221",
+      "costume_id": null,
+      "character_name": "长发公主",
+      "has_spine": true,
+      "spine_asset_id": "c221",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c221/c221_00.skel",
+      "atlas_path": "spine/c221/c221_00.atlas",
+      "textures": [
+        "c221_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "222:default": {
+      "resource_id": "222",
+      "costume_id": null,
+      "character_name": "红莲",
+      "has_spine": true,
+      "spine_asset_id": "c222",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c222/c222_00.skel",
+      "atlas_path": "spine/c222/c222_00.atlas",
+      "textures": [
+        "c222_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "230:default": {
+      "resource_id": "230",
+      "costume_id": null,
+      "character_name": "哈兰",
+      "has_spine": true,
+      "spine_asset_id": "c230",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c230/c230_00.skel",
+      "atlas_path": "spine/c230/c230_00.atlas",
+      "textures": [
+        "c230_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "231:default": {
+      "resource_id": "231",
+      "costume_id": null,
+      "character_name": "伊莎贝尔",
+      "has_spine": true,
+      "spine_asset_id": "c231",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c231/c231_00.skel",
+      "atlas_path": "spine/c231/c231_00.atlas",
+      "textures": [
+        "c231_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "232:default": {
+      "resource_id": "232",
+      "costume_id": null,
+      "character_name": "诺雅",
+      "has_spine": true,
+      "spine_asset_id": "c232",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c232/c232_00.skel",
+      "atlas_path": "spine/c232/c232_00.atlas",
+      "textures": [
+        "c232_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "233:default": {
+      "resource_id": "233",
+      "costume_id": null,
+      "character_name": "桃乐丝",
+      "has_spine": true,
+      "spine_asset_id": "c233",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c233/c233_00.skel",
+      "atlas_path": "spine/c233/c233_00.atlas",
+      "textures": [
+        "c233_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "260:default": {
+      "resource_id": "260",
+      "costume_id": null,
+      "character_name": "神罚",
+      "has_spine": true,
+      "spine_asset_id": "c260",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c260/c260_00.skel",
+      "atlas_path": "spine/c260/c260_00.atlas",
+      "textures": [
+        "c260_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "260:30018": {
+      "resource_id": "260",
+      "costume_id": "30018",
+      "character_name": "神罚",
+      "costume_name": "First Affection",
+      "has_spine": true,
+      "spine_asset_id": "c260_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c260_01/c260_01_00.skel",
+      "atlas_path": "spine/c260_01/c260_01_00.atlas",
+      "textures": [
+        "c260_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "261:default": {
+      "resource_id": "261",
+      "costume_id": null,
+      "character_name": "尼希利斯塔",
+      "has_spine": true,
+      "spine_asset_id": "c261",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c261/c261_00.skel",
+      "atlas_path": "spine/c261/c261_00.atlas",
+      "textures": [
+        "c261_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "262:default": {
+      "resource_id": "262",
+      "costume_id": null,
+      "character_name": "莉贝雷利奥",
+      "has_spine": true,
+      "spine_asset_id": "c262",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c262/c262_00.skel",
+      "atlas_path": "spine/c262/c262_00.atlas",
+      "textures": [
+        "c262_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "330:default": {
+      "resource_id": "330",
+      "costume_id": null,
+      "character_name": "皇冠",
+      "has_spine": true,
+      "spine_asset_id": "c330",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c330/c330_00.skel",
+      "atlas_path": "spine/c330/c330_00.atlas",
+      "textures": [
+        "c330_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "331:default": {
+      "resource_id": "331",
+      "costume_id": null,
+      "character_name": "钟鸣",
+      "has_spine": true,
+      "spine_asset_id": "c331",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c331/c331_00.skel",
+      "atlas_path": "spine/c331/c331_00.atlas",
+      "textures": [
+        "c331_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "470:default": {
+      "resource_id": "470",
+      "costume_id": null,
+      "character_name": "小红帽",
+      "has_spine": true,
+      "spine_asset_id": "c470",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c470/c470_00.skel",
+      "atlas_path": "spine/c470/c470_00.atlas",
+      "textures": [
+        "c470_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "800:default": {
+      "resource_id": "800",
+      "costume_id": null,
+      "character_name": "真纪真",
+      "has_spine": true,
+      "spine_asset_id": "c800",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c800/c800_00.skel",
+      "atlas_path": "spine/c800/c800_00.atlas",
+      "textures": [
+        "c800_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "800:30014": {
+      "resource_id": "800",
+      "costume_id": "30014",
+      "character_name": "真纪真",
+      "costume_name": "Coat Off",
+      "has_spine": true,
+      "spine_asset_id": "c800_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c800_01/c800_01_00.skel",
+      "atlas_path": "spine/c800_01/c800_01_00.atlas",
+      "textures": [
+        "c800_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "801:default": {
+      "resource_id": "801",
+      "costume_id": null,
+      "character_name": "帕瓦",
+      "has_spine": true,
+      "spine_asset_id": "c801",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c801/c801_00.skel",
+      "atlas_path": "spine/c801/c801_00.atlas",
+      "textures": [
+        "c801_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "802:default": {
+      "resource_id": "802",
+      "costume_id": null,
+      "character_name": "姬野",
+      "has_spine": true,
+      "spine_asset_id": "c802",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c802/c802_00.skel",
+      "atlas_path": "spine/c802/c802_00.atlas",
+      "textures": [
+        "c802_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "810:default": {
+      "resource_id": "810",
+      "costume_id": null,
+      "character_name": "2B",
+      "has_spine": true,
+      "spine_asset_id": "c810",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c810/c810_00.skel",
+      "atlas_path": "spine/c810/c810_00.atlas",
+      "textures": [
+        "c810_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "810:90001": {
+      "resource_id": "810",
+      "costume_id": "90001",
+      "character_name": "2B",
+      "costume_name": "Metamorphic Damage",
+      "has_spine": true,
+      "spine_asset_id": "c810_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c810_01/c810_01_00.skel",
+      "atlas_path": "spine/c810_01/c810_01_00.atlas",
+      "textures": [
+        "c810_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "810:90002": {
+      "resource_id": "810",
+      "costume_id": "90002",
+      "character_name": "2B",
+      "costume_name": "YoRHa Uniform 1",
+      "has_spine": true,
+      "spine_asset_id": "c810_02",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c810_02/c810_02_00.skel",
+      "atlas_path": "spine/c810_02/c810_02_00.atlas",
+      "textures": [
+        "c810_02_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "811:default": {
+      "resource_id": "811",
+      "costume_id": null,
+      "character_name": "A2",
+      "has_spine": true,
+      "spine_asset_id": "c811",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c811/c811_00.skel",
+      "atlas_path": "spine/c811/c811_00.atlas",
+      "textures": [
+        "c811_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "811:90003": {
+      "resource_id": "811",
+      "costume_id": "90003",
+      "character_name": "A2",
+      "costume_name": "Metamorphic Damage",
+      "has_spine": true,
+      "spine_asset_id": "c811_01",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c811_01/c811_01_00.skel",
+      "atlas_path": "spine/c811_01/c811_01_00.atlas",
+      "textures": [
+        "c811_01_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "811:90004": {
+      "resource_id": "811",
+      "costume_id": "90004",
+      "character_name": "A2",
+      "costume_name": "YoRHa Uniform Prototype",
+      "has_spine": true,
+      "spine_asset_id": "c811_02",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c811_02/c811_02_00.skel",
+      "atlas_path": "spine/c811_02/c811_02_00.atlas",
+      "textures": [
+        "c811_02_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    },
+    "812:default": {
+      "resource_id": "812",
+      "costume_id": null,
+      "character_name": "帕斯卡",
+      "has_spine": true,
+      "spine_asset_id": "c812",
+      "skeleton_format": "skel",
+      "skeleton_path": "spine/c812/c812_00.skel",
+      "atlas_path": "spine/c812/c812_00.atlas",
+      "textures": [
+        "c812_00.png"
+      ],
+      "bones": null,
+      "slots": null
+    }
+  }
+}

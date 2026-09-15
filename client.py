@@ -28,6 +28,7 @@ CHARACTERS = "/api/game/proxy/Game/GetUserCharacters"
 CHARACTER_DETAILS = "/api/game/proxy/Game/GetUserCharacterDetails"
 TASK_LIST = "/api/lip/proxy/lipass/Points/GetTaskListWithStatusV2"
 DAILY_CHECK_IN = "/api/lip/proxy/lipass/Points/DailyCheckIn"
+DAILY_CONTENTS_PROGRESS = "/api/game/proxy/Game/GetUserDailyContentsProgress"
 CDK_REDEEM = "/api/game/proxy/Game/RecordCdkRedemption"
 MY_GUILD_INFO = "/api/game/proxy/Game/GetMyGuildInfo"
 UNION_RAID_LEVEL_INFO = "/api/game/proxy/Game/GetUnionRaidLevelInfo"
@@ -250,6 +251,27 @@ class BlaBlaClient:
             "outpost": outpost.get("data", {}).get("outpost_info", {}),
         }
 
+    async def get_daily_contents_progress(self, account: dict[str, Any]) -> dict[str, Any]:
+        """获取每日内容完成进度（保管箱、拦截、竞技场、咨询、派遣、模拟室等）。"""
+        area_id = str(account.get("area_id", ""))
+        if not area_id:
+            validated = await self.validate_cookie(account["cookie"])
+            area_id = validated.area_id
+        payload: dict[str, Any] = {"nikke_area_id": int(area_id)}
+        if account.get("game_openid"):
+            payload["intl_open_id"] = account["game_openid"]
+        resp = await self._post(DAILY_CONTENTS_PROGRESS, account["cookie"], payload)
+        data = resp.get("data") if isinstance(resp, dict) else {}
+        if isinstance(data, dict):
+            dp_list = data.get("daily_progress")
+            if isinstance(dp_list, list) and dp_list:
+                first = dp_list[0]
+                if isinstance(first, dict):
+                    return first
+            elif isinstance(data.get("daily_progress"), dict):
+                return data["daily_progress"]
+        return {}
+
     async def get_profile_dashboard(self, account: dict[str, Any]) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))
         if not area_id:
@@ -259,10 +281,11 @@ class BlaBlaClient:
         if account.get("game_openid"):
             payload["intl_open_id"] = account["game_openid"]
         roster_payload = {"intl_open_id": account.get("game_openid", ""), "nikke_area_id": int(area_id)}
-        basic_resp, outpost_resp, roster_resp = await asyncio.gather(
+        basic_resp, outpost_resp, roster_resp, daily_resp = await asyncio.gather(
             self._post(PROFILE, account["cookie"], payload),
             self._post(OUTPOST, account["cookie"], {"nikke_area_id": int(area_id)}),
             self._post(CHARACTERS, account["cookie"], roster_payload),
+            self._post(DAILY_CONTENTS_PROGRESS, account["cookie"], payload),
             return_exceptions=True,
         )
         # PROFILE is required.
@@ -302,12 +325,33 @@ class BlaBlaClient:
                 if isinstance(roster_value, list):
                     roster = roster_value
                     roster_available = True
+
+        daily: dict[str, Any] = {}
+        daily_available = False
+        if isinstance(daily_resp, BaseException):
+            if isinstance(daily_resp, (asyncio.CancelledError, CookieExpired)):
+                raise daily_resp
+        else:
+            daily_data = daily_resp.get("data") if isinstance(daily_resp, dict) else None
+            if isinstance(daily_data, dict):
+                dp_list = daily_data.get("daily_progress")
+                if isinstance(dp_list, list) and dp_list:
+                    first = dp_list[0]
+                    if isinstance(first, dict):
+                        daily = first
+                        daily_available = True
+                elif isinstance(daily_data.get("daily_progress"), dict):
+                    daily = daily_data["daily_progress"]
+                    daily_available = True
+
         return {
             "basic": basic,
             "outpost": outpost,
             "roster": roster,
+            "daily": daily,
             "outpost_available": outpost_available,
             "roster_available": roster_available,
+            "daily_available": daily_available,
         }
 
     async def get_union_raid_overview(self, account: dict[str, Any], *, attacks: bool = False) -> dict[str, Any]:

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from PIL import Image
@@ -106,5 +107,35 @@ class CharacterCardAssets:
     corporation: Image.Image
     weapon: Image.Image
     burst: Image.Image
+
+
+@dataclass(slots=True)
+class SpineBundle:
+    """Spine 骨骼动画组合型资源契约。"""
+
+    skeleton: Path | str | None = None
+    atlas: Path | str | None = None
+    textures: list[Path | str] = field(default_factory=list)
+    format: str | None = None  # "json" or "skel"
+    bone_names: list[str] | None = None
+    slot_names: list[str] | None = None
+
+
+@dataclass(slots=True)
+class CharacterVisualAssets:
+    """角色视觉资产统一逻辑集合模型。"""
+
+    resource_id: str
+    character_id: str | None = None
+    costume_id: str | None = None
+
+    icon: str | None = None
+    portrait: str | None = None
+    fullbody: str | None = None
+
+    spine_skeleton: str | None = None
+    spine_atlas: str | None = None
+    spine_textures: list[str] | None = None
+
 
 
