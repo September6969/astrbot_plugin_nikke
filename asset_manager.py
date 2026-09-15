@@ -72,41 +72,6 @@ class _InflightAsset:
 
 
 class AssetManager:
-    def resolve_lineup_portrait(self, tid=None, costume_id=None, character_id=None, avatar_id=None):
-        """直接复用本地头像解析器的完整契约。"""
-        return self.lineup_portrait_resolver.resolve(tid=tid, costume_id=costume_id, character_id=character_id, avatar_id=avatar_id)
-
-    def get_lineup_portrait(self, member=None, *, tid=None, costume_id=None, character_id=None, avatar_id=None):
-        """领域成员先经正式 Master 归一化，再消费已验证头像；不接受串角色或皮肤降级。"""
-        if member is not None and hasattr(member, "tid"):
-            canonical = self.character_master.resolve_battle_tid(member.tid)
-            if canonical is None or str(canonical.resource_id) != str(member.resource_id):
-                return None
-            costume_id = member.costume_id
-            if self.character_master.is_default_costume(canonical.resource_id, costume_id):
-                costume_id = None
-            result = self.resolve_lineup_portrait(character_id=canonical.id, costume_id=costume_id)
-            if result.is_fallback or result.resource_id != canonical.resource_id:
-                return None
-        else:
-            result = self.resolve_lineup_portrait(tid=tid if tid is not None else member, costume_id=costume_id,
-                                                 character_id=character_id, avatar_id=avatar_id)
-        try:
-            return self._decode(result.local_path.read_bytes()) if result.local_path.stat().st_size <= self.MAX_BYTES else None
-        except (OSError, ValueError):
-            return None
-
-    def resolve_boss_asset(self, boss_id=None, icon_id=None, monster_model_id=None, boss_name=None):
-        """Boss 身份与本地路径完全由已交付解析器负责。"""
-        return self.boss_asset_resolver.resolve(boss_id=boss_id, icon_id=icon_id, monster_model_id=monster_model_id, boss_name=boss_name)
-
-    def get_boss_image(self, **identity):
-        result = self.resolve_boss_asset(**identity)
-        try:
-            return self._decode(result.local_path.read_bytes()) if result.local_path.stat().st_size <= self.MAX_BYTES else None
-        except (OSError, ValueError):
-            return None
-
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
     # 单张角色卡最多预取 11 项；保留少量余量，但禁止多张卡无限堆积在线程池队列。
@@ -709,16 +674,36 @@ class AssetManager:
         costume_id: int | str | None = None,
         character_id: int | str | None = None,
         avatar_id: int | str | None = None,
-    ) -> Image.Image:
+    ) -> Image.Image | None:
         """获取 128x128 紧凑阵容小头像（PIL Image）。严格从本地镜像与兜底中读取，绝不发网络请求。"""
-        res = self.lineup_resolver.resolve(
-            tid=tid, costume_id=costume_id, character_id=character_id, avatar_id=avatar_id
-        )
+        member = tid if hasattr(tid, "tid") else None
+        if member is not None:
+            canonical = self.character_master.resolve_battle_tid(member.tid)
+            if canonical is None or str(canonical.resource_id) != str(member.resource_id):
+                return None
+            member_costume = getattr(member, "costume_id", None)
+            if self.character_master.is_default_costume(canonical.resource_id, member_costume):
+                member_costume = None
+            result = self.resolve_lineup_portrait(
+                character_id=canonical.id,
+                costume_id=member_costume,
+            )
+            if result.is_fallback or str(result.resource_id) != str(canonical.resource_id):
+                return None
+        else:
+            result = self.resolve_lineup_portrait(
+                tid=tid,
+                costume_id=costume_id,
+                character_id=character_id,
+                avatar_id=avatar_id,
+            )
         try:
-            with Image.open(res.local_path) as img:
+            with Image.open(result.local_path) as img:
                 return img.convert("RGBA")
         except Exception:
-            return self.fallback("slots")
+            # 资源解码失败时把缺图状态交给 T2I DTO；不要把损坏文件伪装成
+            # 可用头像，也不要影响同一张卡的其他成员。
+            return None
 
     def resolve_lineup_portrait(
         self,
