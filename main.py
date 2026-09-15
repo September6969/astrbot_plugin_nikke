@@ -32,6 +32,7 @@ from .campaign_history_models import ClearLineupStatus
 from .campaign_history_renderer import CampaignHistoryRenderer
 from .t2i_renderer import T2IRenderer
 from .t2i_payloads import CalendarT2IPayloadBuilder
+from .tarot_service import TarotDataError, TarotService
 from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
@@ -160,6 +161,16 @@ class NikkePlugin(Star):
         self.announcements = AnnouncementService(self.data_dir / "announcements")
         self.announcement_delivery = AnnouncementDelivery(self.store)
         self.calendar = CalendarService(self.data_dir / "calendar", announcement_service=self.announcements)
+        try:
+            self.tarot = TarotService(
+                self.plugin_dir,
+                self.data_dir / "tarot",
+                deck_mode="auto",
+                rotate_reversed=True,
+            )
+        except (OSError, ValueError, TarotDataError) as exc:
+            logger.warning("[NIKKE] 塔罗服务初始化失败：%s", safe_exception_message(exc))
+            self.tarot = None
         self.tower_registry: TowerRegistry | None = None
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
@@ -485,7 +496,8 @@ class NikkePlugin(Star):
                 "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
                 "/妮姬 日程 [7|14|30]　(/nikke schedule [7|14|30])\n"
                 "/妮姬 公告　(/nikke news)\n"
-                "/妮姬 攻略 [分类]　(/nikke guide)"
+                "/妮姬 攻略 [分类]　(/nikke guide)\n"
+                "/妮姬 塔罗 [单抽|三张|今日|状态]　(/nikke tarot)"
             ),
             "日常": (
                 "【日常】\n"
@@ -513,6 +525,7 @@ class NikkePlugin(Star):
             "raid": "查询", "突袭": "查询", "campaign": "查询", "stage": "查询", "战役": "查询",
             "schedule": "查询", "日程": "查询", "news": "查询", "公告": "查询",
             "guide": "查询", "攻略": "查询",
+            "tarot": "查询", "塔罗": "查询",
             "daily": "日常", "routine": "日常", "日常": "日常", "push": "日常",
             "admin": "管理",
         }
@@ -571,6 +584,10 @@ class NikkePlugin(Star):
             return
         if command_key in {"语音", "voice"}:
             async for result in self.voice_settings(event, arg1, arg2):
+                yield result
+            return
+        if command_key in {"塔罗", "tarot"}:
+            async for result in self.tarot_command(event, arg1, arg2):
                 yield result
             return
         if command_key in {"", "帮助", "help"}:
@@ -691,6 +708,7 @@ class NikkePlugin(Star):
             "summary": (self.summary, (event, arg1)),
             "run": (self.run, (event,)),
             "health": (self.health, (event,)),
+            "tarot": (self.tarot_command, (event, arg1, arg2)),
         }
         target = legacy.get(command_key)
         if target:
@@ -699,6 +717,59 @@ class NikkePlugin(Star):
                 yield result
             return
         yield event.plain_result("未知指令。发送 /妮姬 帮助 查看可用功能。")
+
+    async def tarot_command(
+        self,
+        event: AstrMessageEvent,
+        action: str = "",
+        value: str = "",
+    ):
+        """NIKKE 塔罗：单抽、三张牌阵与每日固定抽牌。"""
+        service = getattr(self, "tarot", None)
+        if service is None:
+            try:
+                service = TarotService(
+                    self.plugin_dir,
+                    self.data_dir / "tarot",
+                    deck_mode="auto",
+                    rotate_reversed=True,
+                )
+                self.tarot = service
+            except (OSError, ValueError, TarotDataError) as exc:
+                logger.warning("[NIKKE] 塔罗服务不可用：%s", safe_exception_message(exc))
+                yield event.plain_result("塔罗功能暂不可用：牌库资源尚未准备完成。")
+                return
+
+        action_key = str(action or "").strip().casefold()
+        if action_key in {"", "帮助", "help"}:
+            yield event.plain_result(service.format_help())
+            return
+        if action_key in {"状态", "status"}:
+            yield event.plain_result(service.format_status())
+            return
+
+        try:
+            if action_key in {"单抽", "单张", "single", "one"}:
+                reading = service.draw_single()
+            elif action_key in {"三张", "三张牌", "three", "spread"}:
+                reading = service.draw_three()
+            elif action_key in {"今日", "每日", "daily", "today"}:
+                user_key = f"{event.get_platform_name()}:{self._qq_id(event)}"
+                reading = service.draw_daily(user_key)
+            else:
+                yield event.plain_result("用法：/妮姬 塔罗 [单抽|三张|今日|状态|帮助]")
+                return
+
+            for image_path in service.image_paths(reading):
+                if image_path is not None:
+                    yield event.image_result(str(image_path))
+            yield event.plain_result(service.format_reading(reading))
+        except TarotDataError as exc:
+            logger.warning("[NIKKE] 塔罗牌库错误：%s", safe_exception_message(exc))
+            yield event.plain_result("塔罗牌库暂不可用，请稍后再试。")
+        except (OSError, ValueError) as exc:
+            logger.warning("[NIKKE] 塔罗抽牌失败：%s", safe_exception_message(exc))
+            yield event.plain_result("塔罗抽牌失败，请稍后再试。")
 
     async def nikke_help(self, event: AstrMessageEvent, category: str = ""):
         """查看精简后的中文指令。"""
