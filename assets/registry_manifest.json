@@ -29,8 +29,8 @@
       "path": "costumes.json",
       "source": "repository-maintained verified costume identifier mapping",
       "source_ref": "assets/README.md",
-      "checked_at": "2026-09-10",
-      "sha256": "00015341af88879a62c0de5759923e10085ef43e9a57290582827de884f33ce5",
+      "checked_at": "2026-09-12",
+      "sha256": "3d525498788d2e6d3c01d48732bb8b3a83986c8cdcc351585b80d2f3d6340e61",
       "license_boundary": "identifier metadata only; only exact CharacterCostumeTable plus Nikke-DB L2D index mappings are included"
     }
   }

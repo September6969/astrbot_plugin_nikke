@@ -61,6 +61,9 @@ class StateEffectRegistry:
             (item.option_id, item.function_type.casefold(), item.locale): item
             for item in self._entries
         }
+        self._by_option = {}
+        for item in self._entries:
+            self._by_option.setdefault((item.option_id, item.locale), []).append(item)
 
     @classmethod
     def empty(cls) -> "StateEffectRegistry":
@@ -115,6 +118,11 @@ class StateEffectRegistry:
         option_key = str(option_id or "").strip()
         function_key = str(function_type or "").strip().casefold()
         return self._by_key.get((option_key, function_key, locale))
+
+    def resolve_option(self, option_id: Any, *, locale: str = "zh-CN") -> StateEffectMetadata | None:
+        """返回唯一的现场观察记录，仅用于报告 function type 冲突。"""
+        candidates = self._by_option.get((str(option_id or "").strip(), locale), [])
+        return candidates[0] if len(candidates) == 1 else None
 
     @staticmethod
     def _reject_duplicate_keys(pairs):

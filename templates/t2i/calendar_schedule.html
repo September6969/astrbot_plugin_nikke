@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1400"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'"><style><!-- SHARED_CSS -->
+.schedule { width:1400px; padding:52px 60px; background:#eeefed; color:#222731; --text:#222731; --muted:#59616b; --line:#c5cacf; }
+.schedule header { display:flex; justify-content:space-between; align-items:end; margin-bottom:32px; }
+.schedule h1 { font-size:54px; margin-top:12px; }.horizon {font-size:42px;}
+.schedule section { margin:28px 0; }.events { margin-top:18px; border-left:3px solid #9caab6; padding-left:26px; }
+.event {display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;padding:22px 0;border-bottom:1px solid var(--line);break-inside:avoid;}
+.event h2 {font-size:27px;line-height:1.5;overflow-wrap:anywhere;}.event p {font-size:19px;margin-top:12px;color:var(--muted);}
+.event-meta {display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:8px;text-align:right;}
+.remaining {font-size:28px;font-weight:750;text-align:right;}.category {font-size:17px;color:#516b7a;letter-spacing:.5px;}
+.progress-wrap {display:flex;align-items:center;gap:10px;width:190px;}
+.progress-track {flex:1;height:5px;background:#d3d8dc;border-radius:3px;overflow:hidden;}
+.progress-bar {height:100%;border-radius:3px;background:#52756a;}
+.progress-label {font-size:14px;color:var(--muted);min-width:38px;text-align:right;font-variant-numeric:tabular-nums;}
+.notice {padding:18px 0;font-size:22px;overflow-wrap:anywhere;}.warning {border-left:4px solid #956c2b;padding-left:18px;color:#785522;}
+.schedule-footer {margin-top:28px;border-top:1px solid var(--line);padding-top:24px;}
+.ending-soon .events {border-left-color:#9b7840;}.ending-soon .remaining {color:#785522;}.ending-soon .progress-bar {background:#9b7840;}
+.active .events {border-left-color:#607e75;}.active .event h2 {font-weight:650;}.active .progress-bar {background:#52756a;}
+.upcoming .events {border-left-width:1px;}.upcoming .remaining {font-size:25px;font-weight:600;}.upcoming .event h2 {font-weight:500;}
+.upcoming .progress-wrap .progress-track {background:#e2e6e9;border:1px dashed #b9c1c7;height:4px;}
+.upcoming .progress-wrap .progress-bar {display:none;}
+.upcoming .progress-label {font-size:13px;color:var(--muted);min-width:44px;}
+.schedule-group.is-empty .events {border-left:0;padding-left:0;}.schedule-group.is-empty .notice {font-size:19px;padding:8px 0;}
+.schedule .warning {font-size:20px;padding-top:12px;padding-bottom:12px;}
+</style></head><body><main class="schedule"><header><div><div class="eyebrow">NIKKE / OPERATIONS SCHEDULE</div><h1>近期日程</h1></div><div class="horizon">{{ horizon_days }} DAYS</div></header>
+{% if sync_warning %}<div class="notice warning">缓存快照 · 同步失败：{{ sync_warning }}</div>{% endif %}
+{% if not available %}{{ unavailable_state('日程暂不可用', '当前没有可用快照') }}{% else %}
+{% for group in groups %}<section class="schedule-group {{ {'ENDING SOON / 即将结束':'ending-soon','ACTIVE / 进行中':'active','UPCOMING / 即将开始':'upcoming'}.get(group.title, '') }} {{ 'is-empty' if not group['items'] else '' }}">{{ section_header(group.title) }}<div class="events">{% for item in group["items"] %}<article class="event"><div><span class="category">{{ item.category }}</span><h2>{{ item.title }}</h2><p>{{ item.start }} → {{ item.end }} · UTC+8</p></div><div class="event-meta"><div class="remaining">{{ item.remaining }}</div><div class="progress-wrap {{ 'is-upcoming' if item.is_upcoming else '' }}"><div class="progress-track">{% if not item.is_upcoming %}<div class="progress-bar" style="width:{{ item.progress_percent }}%"></div>{% endif %}</div><span class="progress-label">{{ item.progress_label }}</span></div></div></article>{% else %}<p class="notice muted">暂无已记录活动</p>{% endfor %}</div></section>{% endfor %}{% endif %}
+<div class="schedule-footer">{{ footer_meta('CALENDAR SNAPSHOT', updated_at_display, '') }}</div></main></body></html>

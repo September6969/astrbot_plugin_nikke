@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1600"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'"><style><!-- SHARED_CSS -->
+.raid {width:1600px;height:900px;padding:44px;display:grid;grid-template-rows:150px 460px 110px 44px;gap:16px;border-top:4px solid #b7a88c;}
+.raid header {display:flex;justify-content:space-between;gap:30px;}.raid h1 {font-size:62px;margin-top:14px;}.guild {font-size:26px;max-width:500px;overflow-wrap:anywhere;}
+.bosses {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;}.boss {border-top:1px solid var(--line);padding:16px 16px;background:var(--panel);}
+.boss-art {height:150px;display:flex;align-items:center;justify-content:center;color:#59616b;}.boss-art img {width:100%;height:100%;object-fit:contain;}.boss-art svg {width:105px;height:105px;}
+.boss h2 {font-size:22px;line-height:30px;height:90px;overflow-wrap:anywhere;}.boss p {font-size:16px;margin-top:10px;overflow-wrap:anywhere;}.hp {font-size:27px;margin-top:12px;}.hp-track {height:6px;background:#343b46;margin-top:10px;}.hp-track span {display:block;height:100%;background:#a6bfd5;}
+.raid-summary {display:flex;justify-content:space-between;gap:40px;border-top:1px solid var(--line);padding-top:18px;}.raid-summary strong {font-size:30px;}.raid-summary p {font-size:18px;color:var(--muted);margin-top:8px;}
+.offseason-panel {grid-column:1/-1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:36px 48px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;}
+.offseason-tag {display:inline-block;padding:6px 20px;background:rgba(233,184,90,0.15);border:1px solid #e9b85a;color:#e9b85a;font-size:16px;font-weight:700;border-radius:6px;letter-spacing:2px;margin-bottom:18px;}
+.offseason-title {font-size:44px;font-weight:700;color:#ffffff;margin-bottom:12px;}
+.offseason-sub {font-size:20px;color:var(--muted);margin-bottom:32px;}
+.last-season-card {background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:8px;padding:22px 36px;display:flex;align-items:center;justify-content:space-around;width:100%;max-width:920px;}
+.last-season-item {text-align:left;}
+.last-season-label {font-size:14px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;font-weight:600;}
+.last-season-val {font-size:24px;font-weight:700;color:#f2f3f5;}
+.last-season-divider {width:1px;height:52px;background:var(--line);}
+</style></head><body><main class="raid">
+{% if raid_state == 'OFFSEASON' %}
+<header><div><div class="eyebrow muted">UNION RAID / OFF SEASON</div><h1>联盟突袭 · 休赛中</h1></div><div class="guild">{{ guild }}</div></header>
+<section class="offseason-panel">
+<div class="offseason-tag">OFF SEASON</div>
+<div class="offseason-title">当前无进行中的联盟突袭</div>
+<div class="offseason-sub">联盟突袭通常于每月下旬开启，敬请期待下一期官方日程。</div>
+{% if previous_season %}
+<div class="last-season-card">
+<div class="last-season-item">
+<div class="last-season-label">LAST SEASON</div>
+<div class="last-season-val">{{ previous_season.season_name }} · 已结算</div>
+{% if previous_season.date_range %}<div style="font-size:15px; color:var(--muted); margin-top:4px;">{{ previous_season.date_range }}</div>{% endif %}
+</div>
+<div class="last-season-divider"></div>
+<div class="last-season-item">
+<div class="last-season-label">TOTAL ATTACKS</div>
+<div class="last-season-val">总出刀：{{ previous_season.total_attacks }}</div>
+{% if previous_season.total_damage_formatted and previous_season.total_damage_formatted != "0" %}<div style="font-size:15px; color:var(--muted); margin-top:4px;">总伤害：{{ previous_season.total_damage_formatted }}</div>{% endif %}
+</div>
+</div>
+{% endif %}
+</section>
+<section class="raid-summary"><div><strong>HISTORICAL DATA AVAILABLE</strong></div><div><strong>数据正常 · 历史战况已归档</strong><p>如需查看上一期战报详情，请发送 /妮姬 突袭 榜</p></div></section>
+{{ footer_meta('联盟突袭休赛期 · 历史数据已归档', updated, version) }}
+{% elif raid_state == 'SETTLEMENT' %}
+<header><div><div class="eyebrow muted">UNION RAID / SETTLEMENT</div><h1>联盟突袭 · 结算中</h1></div><div class="guild">{{ guild }}</div></header>
+<section class="offseason-panel">
+<div class="offseason-tag" style="border-color:#8fbca2; color:#8fbca2; background:rgba(143,188,162,0.15);">SETTLEMENT</div>
+<div class="offseason-title">{% if current_season_name %}{{ current_season_name }} · {% endif %}战斗阶段已结束</div>
+<div class="offseason-sub">本期联盟突袭正在进行最终排名与奖励结算，稍后可查验最终排名。</div>
+</section>
+<section class="raid-summary"><div><strong>SETTLEMENT IN PROGRESS</strong></div><div><strong>数据核算中</strong><p>阶段战果已锁定 · 正在等待最终排行确认</p></div></section>
+{{ footer_meta('联盟突袭结算中', updated, version) }}
+{% else %}
+<header><div><div class="eyebrow muted">UNION RAID / RAID OVERVIEW</div><h1>DIFFICULTY {{ difficulty }} · LEVEL {{ level }}</h1></div><div class="guild">{{ guild }}</div></header>
+<section class="bosses">{% for boss in bosses %}<article class="boss"><div class="boss-art">{% if boss.boss_image_data_uri %}<img src="{{ boss.boss_image_data_uri }}" alt="{{ boss.name }}">{% else %}<svg viewBox="0 0 100 100" aria-label="UNRESOLVED"><path d="M25 15H75L95 50L75 85H25L5 50Z" stroke="currentColor" stroke-width="3" fill="none"/><path d="M30 50H70M50 30V70" stroke="currentColor" stroke-width="3"/></svg>{% endif %}</div><h2>{{ boss.name }}</h2>{{ status_badge(boss.status) }}<p>ELEMENT {{ boss.elements }}</p><div class="hp">HP {{ boss.percent }}</div>{% if boss.bar is not none %}<div class="hp-track"><span style="width:{{ boss.bar }}%"></span></div>{% endif %}<p>{{ boss.hp }}</p></article>{% endfor %}</section>
+<section class="raid-summary"><div><strong>剩余 {{ remaining }}</strong></div><div><strong>已清除 {{ progress }}</strong><p>{{ coverage }} · 返回 {{ returned }} 个 Boss{% if partial %} · PARTIAL{% endif %}</p></div></section>
+{{ footer_meta('五 Boss 战况 · 不推断当前目标', updated, version) }}
+{% endif %}</main></body></html>

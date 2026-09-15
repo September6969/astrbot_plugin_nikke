@@ -25,6 +25,7 @@ PRIVACY_SETTING = "/api/ugc/direct/standalonesite/User/GetUserPrivacySetting"
 PROFILE = "/api/game/proxy/Game/GetUserProfileBasicInfo"
 OUTPOST = "/api/game/proxy/Game/GetUserProfileOutpostInfo"
 CHARACTERS = "/api/game/proxy/Game/GetUserCharacters"
+DAILY_CONTENTS_PROGRESS = "/api/game/proxy/Game/GetUserDailyContentsProgress"
 CHARACTER_DETAILS = "/api/game/proxy/Game/GetUserCharacterDetails"
 TASK_LIST = "/api/lip/proxy/lipass/Points/GetTaskListWithStatusV2"
 DAILY_CHECK_IN = "/api/lip/proxy/lipass/Points/DailyCheckIn"
@@ -280,12 +281,16 @@ class BlaBlaClient:
         payload = {"nikke_area_id": int(area_id)}
         if account.get("game_openid"):
             payload["intl_open_id"] = account["game_openid"]
-        roster_payload = {"intl_open_id": account.get("game_openid", ""), "nikke_area_id": int(area_id)}
+        roster_payload = {
+            "intl_open_id": account.get("game_openid", ""),
+            "nikke_area_id": int(area_id),
+        }
+        daily_payload = {"nikke_area_id": int(area_id)}
         basic_resp, outpost_resp, roster_resp, daily_resp = await asyncio.gather(
             self._post(PROFILE, account["cookie"], payload),
             self._post(OUTPOST, account["cookie"], {"nikke_area_id": int(area_id)}),
             self._post(CHARACTERS, account["cookie"], roster_payload),
-            self._post(DAILY_CONTENTS_PROGRESS, account["cookie"], payload),
+            self._post(DAILY_CONTENTS_PROGRESS, account["cookie"], daily_payload),
             return_exceptions=True,
         )
         # PROFILE is required.
@@ -326,24 +331,20 @@ class BlaBlaClient:
                     roster = roster_value
                     roster_available = True
 
-        daily: dict[str, Any] = {}
+        daily: dict[str, Any] | None = None
         daily_available = False
         if isinstance(daily_resp, BaseException):
             if isinstance(daily_resp, (asyncio.CancelledError, CookieExpired)):
                 raise daily_resp
         else:
             daily_data = daily_resp.get("data") if isinstance(daily_resp, dict) else None
-            if isinstance(daily_data, dict):
-                dp_list = daily_data.get("daily_progress")
-                if isinstance(dp_list, list) and dp_list:
-                    first = dp_list[0]
-                    if isinstance(first, dict):
-                        daily = first
-                        daily_available = True
-                elif isinstance(daily_data.get("daily_progress"), dict):
-                    daily = daily_data["daily_progress"]
-                    daily_available = True
-
+            daily_progress = daily_data.get("daily_progress") if isinstance(daily_data, dict) else None
+            if isinstance(daily_progress, list) and daily_progress and isinstance(daily_progress[0], dict):
+                daily = daily_progress[0]
+                daily_available = True
+            elif isinstance(daily_progress, dict):
+                daily = daily_progress
+                daily_available = True
         return {
             "basic": basic,
             "outpost": outpost,
@@ -353,6 +354,23 @@ class BlaBlaClient:
             "roster_available": roster_available,
             "daily_available": daily_available,
         }
+
+    async def get_daily_contents_progress(self, account: dict[str, Any]) -> dict[str, Any]:
+        """读取每日内容进度；只返回 data.daily_progress[0]，不执行任何写操作。"""
+        area_id = str(account.get("area_id", ""))
+        if not area_id:
+            validated = await self.validate_cookie(account["cookie"])
+            area_id = validated.area_id
+        response = await self._post(
+            DAILY_CONTENTS_PROGRESS,
+            account["cookie"],
+            {"nikke_area_id": int(area_id)},
+        )
+        data = response.get("data") if isinstance(response, dict) else None
+        progress = data.get("daily_progress") if isinstance(data, dict) else None
+        if not isinstance(progress, list) or not progress or not isinstance(progress[0], dict):
+            raise BlaBlaError("每日内容进度格式异常", endpoint="GetUserDailyContentsProgress")
+        return progress[0]
 
     async def get_union_raid_overview(self, account: dict[str, Any], *, attacks: bool = False) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))

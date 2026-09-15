@@ -18,7 +18,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 108001,
@@ -35,7 +36,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 108201,
@@ -52,7 +54,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 110001,
@@ -69,7 +72,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 110101,
@@ -86,7 +90,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 110201,
@@ -103,7 +108,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 110301,
@@ -120,7 +126,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 110401,
@@ -137,7 +144,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 110501,
@@ -154,7 +162,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 111001,
@@ -171,7 +180,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 111101,
@@ -188,7 +198,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 112001,
@@ -205,7 +216,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 112101,
@@ -222,7 +234,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 113101,
@@ -239,7 +252,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 115001,
@@ -256,7 +270,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 116001,
@@ -273,7 +288,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 116101,
@@ -290,7 +306,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 116201,
@@ -307,7 +324,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 117201,
@@ -324,7 +342,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 119201,
@@ -341,7 +360,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 129001,
@@ -358,7 +378,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 129101,
@@ -375,7 +396,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 130201,
@@ -392,7 +414,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 130301,
@@ -409,7 +432,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 130701,
@@ -426,7 +450,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 136101,
@@ -443,7 +468,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 139101,
@@ -460,7 +486,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 140001,
@@ -477,7 +504,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 140101,
@@ -494,7 +522,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 140201,
@@ -511,7 +540,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 140301,
@@ -528,7 +558,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 141101,
@@ -545,7 +576,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 141201,
@@ -562,7 +594,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 145001,
@@ -579,7 +612,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 145101,
@@ -596,7 +630,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 150001,
@@ -613,7 +648,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 150101,
@@ -630,7 +666,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 150201,
@@ -647,7 +684,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 159001,
@@ -664,7 +702,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 162001,
@@ -681,7 +720,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 201001,
@@ -698,7 +738,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 201101,
@@ -715,7 +756,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 201401,
@@ -732,7 +774,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 201601,
@@ -749,7 +792,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 202001,
@@ -766,7 +810,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 202201,
@@ -783,7 +828,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 203001,
@@ -800,7 +846,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 203201,
@@ -817,7 +864,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 203301,
@@ -834,7 +882,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 204001,
@@ -851,7 +900,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 204101,
@@ -868,7 +918,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 204301,
@@ -885,7 +936,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 207001,
@@ -902,7 +954,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 207101,
@@ -919,7 +972,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 207201,
@@ -936,7 +990,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 207301,
@@ -953,7 +1008,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 207401,
@@ -970,7 +1026,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 207501,
@@ -987,7 +1044,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 209001,
@@ -1004,7 +1062,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 209101,
@@ -1021,7 +1080,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 209201,
@@ -1038,7 +1098,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 209301,
@@ -1055,7 +1116,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 209401,
@@ -1072,7 +1134,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 209501,
@@ -1089,7 +1152,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 211301,
@@ -1106,7 +1170,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 217001,
@@ -1123,7 +1188,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 218001,
@@ -1140,7 +1206,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 218101,
@@ -1157,7 +1224,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 218201,
@@ -1174,7 +1242,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 218301,
@@ -1191,7 +1260,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 228001,
@@ -1208,7 +1278,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 230001,
@@ -1225,7 +1296,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 230101,
@@ -1242,7 +1314,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 230601,
@@ -1259,7 +1332,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 231301,
@@ -1276,7 +1350,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 232101,
@@ -1293,7 +1368,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 232201,
@@ -1310,7 +1386,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 235001,
@@ -1327,7 +1404,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 235101,
@@ -1344,7 +1422,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 235201,
@@ -1361,7 +1440,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 235301,
@@ -1378,7 +1458,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 235401,
@@ -1395,7 +1476,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 235501,
@@ -1412,7 +1494,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 239001,
@@ -1429,7 +1512,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 244101,
@@ -1446,7 +1530,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 253201,
@@ -1463,7 +1548,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 258001,
@@ -1480,7 +1566,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 258101,
@@ -1497,7 +1584,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 258201,
@@ -1514,7 +1602,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 258301,
@@ -1531,7 +1620,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 301201,
@@ -1548,7 +1638,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 301501,
@@ -1565,7 +1656,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 301701,
@@ -1582,7 +1674,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 306001,
@@ -1599,7 +1692,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 306101,
@@ -1616,7 +1710,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 306201,
@@ -1633,7 +1728,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 311201,
@@ -1650,7 +1746,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 313001,
@@ -1667,7 +1764,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 313201,
@@ -1684,7 +1782,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 314001,
@@ -1701,7 +1800,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 314101,
@@ -1718,7 +1818,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 314201,
@@ -1735,7 +1836,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 314301,
@@ -1752,7 +1854,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 317101,
@@ -1769,7 +1872,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 319001,
@@ -1786,7 +1890,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 319101,
@@ -1803,7 +1908,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 319301,
@@ -1820,7 +1926,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 319401,
@@ -1837,7 +1944,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 319501,
@@ -1854,7 +1962,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 320001,
@@ -1871,7 +1980,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 320101,
@@ -1888,7 +1998,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 320201,
@@ -1905,7 +2016,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 320301,
@@ -1922,7 +2034,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 321001,
@@ -1939,7 +2052,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 321201,
@@ -1956,7 +2070,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 324001,
@@ -1973,7 +2088,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 324101,
@@ -1990,7 +2106,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "MISSILIS",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 324201,
@@ -2007,7 +2124,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 327001,
@@ -2024,7 +2142,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 327101,
@@ -2041,7 +2160,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 327201,
@@ -2058,7 +2178,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 328101,
@@ -2075,7 +2196,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 328201,
@@ -2092,7 +2214,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 328301,
@@ -2109,7 +2232,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 328401,
@@ -2126,7 +2250,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 330401,
@@ -2143,7 +2268,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 330501,
@@ -2160,7 +2286,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 330801,
@@ -2177,7 +2304,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "R"
+      "rare": "R",
+      "costume_id": 0
     },
     {
       "id": 331001,
@@ -2194,7 +2322,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 331101,
@@ -2211,7 +2340,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 331201,
@@ -2228,7 +2358,8 @@
       "element": "Fire",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 331401,
@@ -2245,7 +2376,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 331501,
@@ -2262,7 +2394,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 331601,
@@ -2279,7 +2412,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 338001,
@@ -2296,7 +2430,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 338101,
@@ -2313,7 +2448,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 338201,
@@ -2330,7 +2466,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 339201,
@@ -2347,7 +2484,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 343001,
@@ -2364,7 +2502,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 343101,
@@ -2381,7 +2520,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 343201,
@@ -2398,7 +2538,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 352001,
@@ -2415,7 +2556,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 352101,
@@ -2432,7 +2574,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 355001,
@@ -2449,7 +2592,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 355101,
@@ -2466,7 +2610,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 357001,
@@ -2483,7 +2628,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 360001,
@@ -2500,7 +2646,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 360101,
@@ -2517,7 +2664,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "TETRA",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 422001,
@@ -2534,7 +2682,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 422101,
@@ -2551,7 +2700,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 422201,
@@ -2568,7 +2718,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 422301,
@@ -2585,7 +2736,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 422401,
@@ -2602,7 +2754,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 422501,
@@ -2619,7 +2772,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 422601,
@@ -2636,7 +2790,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 423001,
@@ -2653,7 +2808,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 423101,
@@ -2670,7 +2826,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 423201,
@@ -2687,7 +2844,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 423301,
@@ -2704,7 +2862,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 423401,
@@ -2721,7 +2880,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 426001,
@@ -2738,7 +2898,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 426101,
@@ -2755,7 +2916,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 426201,
@@ -2772,7 +2934,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 433001,
@@ -2789,7 +2952,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 433101,
@@ -2806,7 +2970,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 447001,
@@ -2823,7 +2988,8 @@
       "element": "Iron",
       "burst": "AllStep",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 447101,
@@ -2840,7 +3006,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 451101,
@@ -2857,7 +3024,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 451301,
@@ -2874,7 +3042,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 451401,
@@ -2891,7 +3060,8 @@
       "element": "Fire",
       "burst": "Step2",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 451501,
@@ -2908,7 +3078,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "PILGRIM",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 502301,
@@ -2925,7 +3096,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "ELYSION",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 580001,
@@ -2942,7 +3114,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 580101,
@@ -2959,7 +3132,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 580201,
@@ -2976,7 +3150,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 581001,
@@ -2993,7 +3168,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 581101,
@@ -3010,7 +3186,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 581201,
@@ -3027,7 +3204,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 582001,
@@ -3044,7 +3222,8 @@
       "element": "Water",
       "burst": "Step2",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 582101,
@@ -3061,7 +3240,8 @@
       "element": "Water",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 582201,
@@ -3078,7 +3258,8 @@
       "element": "Wind",
       "burst": "Step1",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 583001,
@@ -3095,7 +3276,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 583101,
@@ -3112,7 +3294,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 583201,
@@ -3129,7 +3312,8 @@
       "element": "Electronic",
       "burst": "Step2",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 583301,
@@ -3146,7 +3330,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 583401,
@@ -3163,7 +3348,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 583501,
@@ -3180,7 +3366,8 @@
       "element": "Wind",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 583601,
@@ -3197,7 +3384,8 @@
       "element": "Water",
       "burst": "Step1",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 584001,
@@ -3214,7 +3402,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 584101,
@@ -3231,7 +3420,8 @@
       "element": "Electronic",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 584201,
@@ -3248,7 +3438,8 @@
       "element": "Electronic",
       "burst": "Step1",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 585001,
@@ -3265,7 +3456,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 585101,
@@ -3282,7 +3474,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 585201,
@@ -3299,7 +3492,8 @@
       "element": "Wind",
       "burst": "Step2",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 586001,
@@ -3316,7 +3510,8 @@
       "element": "Iron",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 586101,
@@ -3333,7 +3528,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 586201,
@@ -3350,7 +3546,8 @@
       "element": "Iron",
       "burst": "Step1",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     },
     {
       "id": 587001,
@@ -3367,7 +3564,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 587101,
@@ -3384,7 +3582,8 @@
       "element": "Fire",
       "burst": "Step3",
       "corporation": "ABNORMAL",
-      "rare": "SSR"
+      "rare": "SSR",
+      "costume_id": 0
     },
     {
       "id": 587201,
@@ -3401,7 +3600,8 @@
       "element": "Iron",
       "burst": "Step2",
       "corporation": "ABNORMAL",
-      "rare": "SR"
+      "rare": "SR",
+      "costume_id": 0
     }
   ]
 }

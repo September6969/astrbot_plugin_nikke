@@ -116,6 +116,9 @@ class AnnouncementDelivery:
                 end = aware(deadline.end_at)
                 if end <= now:
                     continue
+                start = getattr(deadline, "start_at", None)
+                if start is not None and aware(start) > now:
+                    continue
                 for hour in preference["reminder_hours"]:
                     due = end - timedelta(hours=hour)
                     # 只在到期后的短窗口提醒；重启不补发早已错过的提醒。

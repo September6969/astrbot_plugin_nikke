@@ -25,10 +25,13 @@ from astrbot.api.star import Context, Star
 from ._version import PLUGIN_VERSION
 from .announcement_service import AnnouncementService
 from .announcement_delivery import AnnouncementDelivery
+from .calendar_service import CalendarService
 from .asset_manager import AssetManager
 from .campaign_history_builder import CampaignHistoryBuilder
 from .campaign_history_models import ClearLineupStatus
 from .campaign_history_renderer import CampaignHistoryRenderer
+from .t2i_renderer import T2IRenderer
+from .t2i_payloads import CalendarT2IPayloadBuilder
 from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
@@ -47,6 +50,7 @@ from .runtime_config import normalize_runtime_config, read_schedule_clock
 from .spine_runtime_config import build_spine_renderer
 from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
+from .union_raid_models import PreviousSeasonSummary, RaidState
 from .union_raid_renderer import UnionRaidRenderer
 from .costume_registry import CostumeRegistry
 from .tower_registry import TowerRegistry
@@ -59,10 +63,24 @@ from .voice_resource_provider import VoiceResourceProvider
 from .web_service import BindingWebService
 
 
+def normalize_nikke_prefix(text: str) -> str:
+    """将 #妮姬 / #nikke 统一预处理规范化为 /妮姬 / /nikke。"""
+    stripped = text.strip()
+    if stripped.startswith("#妮姬"):
+        return "/妮姬" + stripped[len("#妮姬"):]
+    if stripped.startswith("#nikke"):
+        return "/nikke" + stripped[len("#nikke"):]
+    return text
+
+
 class NikkePlugin(Star):
     def __init__(self, context: Context, config=None):
         super().__init__(context)
         self.context = context
+        if hasattr(self.context, "astrbot_config") and isinstance(self.context.astrbot_config, dict):
+            wake_prefixes = self.context.astrbot_config.setdefault("wake_prefix", ["/"])
+            if isinstance(wake_prefixes, list) and "#" not in wake_prefixes:
+                wake_prefixes.append("#")
         self.config = normalize_runtime_config(config)
         self.plugin_dir = Path(__file__).resolve().parent
         self.data_dir = Path("data") / "nikke"
@@ -77,7 +95,9 @@ class NikkePlugin(Star):
             lambda message: logger.info(f"[NIKKE诊断] {message}"),
         )
         self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
-        self.character_builder = CharacterCardBuilder()
+        self.character_builder = CharacterCardBuilder(
+            unknown_ol_inventory_path=self.data_dir / "ol_unknown_inventory.json",
+        )
         user_aliases = (self.config or {}).get("custom_character_aliases")
         try:
             self.character_identity = CharacterDirectoryResolver(
@@ -96,6 +116,8 @@ class NikkePlugin(Star):
             remote=True,
             spine_renderer=build_spine_renderer(self.data_dir / "cache", self.config),
             spine_budget_seconds=float(spine_budget) if isinstance(spine_budget, (int, float)) and spine_budget > 0 else 20.0,
+            spine_manifest_path=self.data_dir / "spine-manifest.json",
+            spine_rendered_dir=self.data_dir / "spine-rendered",
         )
         self.character_renderer = CharacterCardRenderer(
             self.data_dir / "cards",
@@ -104,7 +126,11 @@ class NikkePlugin(Star):
         )
         self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
         self.profile_builder = ProfileBuilder(campaign_resolver=self.campaign_resolver)
-        self.profile_renderer = ProfileCardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
+        self.profile_renderer = ProfileCardRenderer(
+            self.data_dir / "cards",
+            self.plugin_dir / "fonts",
+            currency_icon_provider=self.asset_manager.get_currency_icon,
+        )
         self.raid_builder = UnionRaidBuilder()
         self.raid_renderer = UnionRaidRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
         self.campaign_builder = CampaignHistoryBuilder()
@@ -133,6 +159,7 @@ class NikkePlugin(Star):
         self.voice_pipeline = VoicePipeline(self.voice_provider, self.voice_encoder) if self.voice_encoder else None
         self.announcements = AnnouncementService(self.data_dir / "announcements")
         self.announcement_delivery = AnnouncementDelivery(self.store)
+        self.calendar = CalendarService(self.data_dir / "calendar", announcement_service=self.announcements)
         self.tower_registry: TowerRegistry | None = None
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
@@ -177,6 +204,33 @@ class NikkePlugin(Star):
                 logger.warning("[NIKKE] 后台任务失败: %s", type(completed.exception()).__name__)
         task.add_done_callback(done)
         return task
+
+    async def _render_campaign_record(self, record):
+        """同一 DTO 切换展示路径，渲染失败不重新请求业务接口。"""
+        if (getattr(self, "config", None) or {}).get("ui_renderer", "pillow") == "t2i":
+            try:
+                renderer = getattr(self, "campaign_t2i_renderer", None)
+                if renderer is None:
+                    renderer = T2IRenderer(html_render=self.html_render, assets=self.asset_manager)
+                    self.campaign_t2i_renderer = renderer
+                return await renderer.render_campaign_history(record)
+            except Exception as exc:
+                logger.warning("[NIKKE] Campaign T2I 失败，回退 Pillow: %s", type(exc).__name__)
+        return await asyncio.to_thread(self.campaign_renderer.render_campaign_history, record)
+
+    async def _try_t2i(self, page, data, **kwargs):
+        """图片展示失败返回空信号，由命令使用已取得的数据安全回退。"""
+        if (getattr(self, "config", None) or {}).get("ui_renderer", "pillow") != "t2i":
+            return None
+        try:
+            renderer = getattr(self, "campaign_t2i_renderer", None)
+            if renderer is None:
+                renderer = T2IRenderer(html_render=self.html_render, assets=self.asset_manager)
+                self.campaign_t2i_renderer = renderer
+            return await renderer.render_view(page, data, **kwargs)
+        except Exception as exc:
+            logger.warning("[NIKKE] %s T2I 失败，使用已有数据回退: %s", page, type(exc).__name__)
+            return None
 
     @property
     def cdk_service(self) -> CdkService:
@@ -236,6 +290,7 @@ class NikkePlugin(Star):
         except Exception as exc:
             logger.warning("[NIKKE] 静态属性表预热失败，角色卡将保留 —：%s", safe_exception_message(exc))
         self._spawn_background_task(self._sync_announcements_background())
+        self._spawn_background_task(self._sync_calendar_background())
         await self._scheduler_loop()
 
     async def _sync_announcements_background(self) -> None:
@@ -243,6 +298,12 @@ class NikkePlugin(Star):
             await self.announcements.sync_from_source()
         except Exception as exc:
             logger.debug("[NIKKE] 后台公告同步跳过: %s", safe_exception_message(exc))
+
+    async def _sync_calendar_background(self) -> None:
+        try:
+            await self.calendar.sync_from_source()
+        except Exception as exc:
+            logger.debug("[NIKKE] 后台日程同步跳过: %s", safe_exception_message(exc))
 
     async def _send_delayed_notice(self, event: AstrMessageEvent, text: str) -> None:
         try:
@@ -282,6 +343,7 @@ class NikkePlugin(Star):
         last_daily = ""
         last_summary = ""
         last_announcement_sync = 0.0
+        last_calendar_sync = 0.0
         while not self._closing:
             now = datetime.now(timezone(timedelta(hours=8)))
             today = now.strftime("%Y-%m-%d")
@@ -306,11 +368,20 @@ class NikkePlugin(Star):
             if time.time() - last_announcement_sync > 3600:
                 last_announcement_sync = time.time()
                 self._spawn_background_task(self._sync_announcements_background())
+            if time.time() - last_calendar_sync > 300:
+                last_calendar_sync = time.time()
+                self._spawn_background_task(self._sync_calendar_background())
             if self.config.get("enable_announcement_push", False):
                 task = getattr(self, "_announcement_push_task", None)
                 if task is None or task.done():
                     self._announcement_push_task = self._spawn_background_task(self._dispatch_announcements())
             await asyncio.sleep(20)
+
+    def _deadline_reminders_for_delivery(self):
+        calendar = getattr(self, "calendar", None)
+        if calendar is not None and calendar.has_snapshot() and calendar.activity_count() > 0:
+            return calendar.list_reminder_deadlines()
+        return self.announcements.list_active_deadlines()
 
     async def _dispatch_announcements(self):
         """默认关闭，只有管理员启用且目标显式订阅后才由调度调用。"""
@@ -321,7 +392,9 @@ class NikkePlugin(Star):
             return True
         await self.announcement_delivery.dispatch(
             self.announcements.list_announcements(limit=10000),
-            self.announcements.list_active_deadlines(), sender)
+            self._deadline_reminders_for_delivery(),
+            sender,
+        )
 
     @staticmethod
     def _qq_id(event: AstrMessageEvent) -> str:
@@ -410,8 +483,8 @@ class NikkePlugin(Star):
                 "/妮姬 联盟突袭 排名 — 当前响应范围\n"
                 "/妮姬 联盟突袭 我的 — 当前账号在本次响应中的记录\n"
                 "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
-                "/妮姬 日程　(/nikke schedule)\n"
-                "/妮姬 公告 [语言|分类|搜索|诊断]　(/nikke news)\n"
+                "/妮姬 日程 [7|14|30]　(/nikke schedule [7|14|30])\n"
+                "/妮姬 公告　(/nikke news)\n"
                 "/妮姬 攻略 [分类]　(/nikke guide)"
             ),
             "日常": (
@@ -458,9 +531,10 @@ class NikkePlugin(Star):
             + "\n\n分类帮助：/妮姬 帮助 账号|查询|日常"
             + ("|管理" if include_admin else "")
             + "\n安全提示：不要发送Cookie、密码或转发绑定链接。"
+            + "\n所有 /妮姬 命令均支持使用 #妮姬 触发。"
         )
 
-    @filter.command("妮姬", alias={"nikke"})
+    @filter.command("妮姬", alias={"nikke", "#妮姬", "#nikke"})
     async def nikke(
         self,
         event: AstrMessageEvent,
@@ -469,6 +543,12 @@ class NikkePlugin(Star):
         arg2: str = "",
     ):
         """NIKKE 中文精简指令入口。"""
+        if command.startswith("#"):
+            norm = normalize_nikke_prefix(f"{command} {arg1} {arg2}".strip())
+            parts = norm.lstrip("/").split(maxsplit=3)
+            command = parts[1] if len(parts) > 1 else ""
+            arg1 = parts[2] if len(parts) > 2 else ""
+            arg2 = parts[3] if len(parts) > 3 else ""
         command_key = command.strip().casefold()
         if command_key in {"塔层", "tower"}:
             registry = getattr(self, "tower_registry", None)
@@ -541,7 +621,11 @@ class NikkePlugin(Star):
                 yield result
             return
         if command_key in {"日程"}:
-            async for result in self.event_schedule(event):
+            try:
+                stream = self.event_schedule(event, arg1)
+            except TypeError:
+                stream = self.event_schedule(event)
+            async for result in stream:
                 yield result
             return
         if command_key in {"schedule"}:
@@ -549,49 +633,20 @@ class NikkePlugin(Star):
                 async for result in self.schedule(event, arg1):
                     yield result
                 return
-            async for result in self.event_schedule(event):
+            try:
+                stream = self.event_schedule(event, arg1)
+            except TypeError:
+                stream = self.event_schedule(event)
+            async for result in stream:
                 yield result
             return
         if command_key in {"公告", "news", "announcement"}:
-            announcement_action = arg1.strip().casefold()
             if arg1 in {"订阅", "取消订阅"}:
                 async for result in self.announcement_subscription(event, arg1):
                     yield result
                 return
-            if announcement_action in {"帮助", "help"}:
-                yield event.plain_result(
-                    "用法：/妮姬 公告；公告 语言 <en|ja|ko|th|de|fr>；"
-                    "公告 分类 <本地分类（如 活动、维护）>；公告 搜索 <关键词>；公告 诊断；"
-                    "公告 深度刷新 [语言]（仅管理员，公开只读）。"
-                )
-                return
-            if announcement_action in {"语言", "locale"}:
-                if not arg2:
-                    yield event.plain_result("用法：/妮姬 公告 语言 <en|ja|ko|th|de|fr>")
-                    return
-                async for result in self.announcements_view(event, locale=arg2):
-                    yield result
-                return
-            if announcement_action in {"分类", "category"}:
-                if not arg2:
-                    yield event.plain_result("用法：/妮姬 公告 分类 <本地分类>")
-                    return
-                async for result in self.announcements_view(event, category=arg2):
-                    yield result
-                return
-            if announcement_action in {"搜索", "search"}:
-                if not arg2:
-                    yield event.plain_result("用法：/妮姬 公告 搜索 <关键词>")
-                    return
-                async for result in self.announcements_view(event, query=arg2):
-                    yield result
-                return
-            if announcement_action in {"诊断", "diagnostic"}:
-                yield event.plain_result(self.announcements.format_diagnostic_text())
-                return
-            if announcement_action in {"深度刷新", "deep", "rescan"}:
-                async for result in self.announcement_deep_rescan(event, arg2 or "en"):
-                    yield result
+            if arg1:
+                yield event.plain_result("公告命令已简化，请使用：\n\n/妮姬 公告")
                 return
             async for result in self.announcements_view(event):
                 yield result
@@ -674,14 +729,26 @@ class NikkePlugin(Star):
         yield event.plain_result("用法：/妮姬 账号 [绑定|状态|解绑|汇总 开|关]")
 
     async def bind(self, event: AstrMessageEvent):
-        """兼容旧版英文绑定指令。"""
+        """生成一次性安全绑定链接及向导。"""
         if not event.is_private_chat() and not bool(self.config.get("allow_group_bind", False)):
             yield event.plain_result("为防止绑定链接被他人抢先使用，请私聊机器人发送 /妮姬 账号 绑定。")
             return
         token = secrets.token_urlsafe(36)
         self.store.create_bind_session(token, self._qq_id(event), 600)
         url = f"{self.public_base_url}/bind/{token}"
-        yield event.plain_result(f"安全绑定链接（10分钟、仅可使用一次）：\n{url}\n请勿转发。账号密码只在BlaBlaLink官网输入。")
+        message = (
+            "🔐 NIKKE · BlaBlaLink 安全绑定\n\n"
+            "绑定链接（10 分钟有效，仅可使用一次）：\n"
+            f"{url}\n\n"
+            "请勿转发此链接。\n\n"
+            "打开后请按照网页内的完整教程完成：\n"
+            "1. 安装 NIKKE QQ 安全绑定助手\n"
+            "2. 登录 BlaBlaLink\n"
+            "3. 点击扩展中的「已登录，提交绑定」\n\n"
+            "账号密码只在 BlaBlaLink 官方网站输入，\n"
+            "机器人不会接收或保存你的账号密码。"
+        )
+        yield event.plain_result(message)
 
     async def unbind(self, event: AstrMessageEvent):
         """解除自己的BlaBlaLink账号。"""
@@ -787,7 +854,9 @@ class NikkePlugin(Star):
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )
-            path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
+            path = await self._try_t2i("profile", dashboard)
+            if not path:
+                path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -952,7 +1021,42 @@ class NikkePlugin(Star):
         try:
             account = self._account_or_error(event)
             payload = await self.client.get_union_raid_data(account)
-            yield event.plain_result(format_ranking(build_ranking(payload)))
+            scope = "CURRENT_RESPONSE"
+            builder = getattr(self, "raid_builder", None)
+            if builder is None:
+                builder = UnionRaidBuilder()
+                self.raid_builder = builder
+            if not payload.get("participate_data"):
+                manager = payload.get("manager_info") or {}
+                raid_state = builder.resolve_raid_state(
+                    manager, payload.get("level_info"), seasons=builder._seasons
+                )
+                if raid_state == RaidState.OFFSEASON and builder._seasons:
+                    latest = max(
+                        (s for s in builder._seasons if s.get("end_ts", 0) <= time.time()),
+                        key=lambda x: x.get("id", 0),
+                        default=None,
+                    )
+                    if latest:
+                        s_id = str(latest.get("id"))
+                        try:
+                            overview = await self.client.get_union_raid_overview(account)
+                            guild_id = overview.get("guild_id")
+                            if guild_id:
+                                hist_data = await self.client.get_union_raid_season(
+                                    account, guild_id=str(guild_id), season_id=s_id, levels=False
+                                )
+                                if hist_data.get("participate_data"):
+                                    payload = hist_data
+                                    s_num = int(s_id) % 1000000 if s_id.isdigit() else s_id
+                                    scope = f"第 {s_num} 季 · LAST_SEASON_RESPONSE"
+                        except Exception as exc:
+                            logger.warning("[NIKKE] 回退上一赛季排名失败: %s", exc)
+            data = build_ranking(payload)
+            if scope != "CURRENT_RESPONSE":
+                data.scope = scope
+            path = await self._try_t2i("union_records", data)
+            yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
@@ -969,7 +1073,37 @@ class NikkePlugin(Star):
                 yield event.plain_result("当前账号缺少稳定联盟身份，暂不能安全筛选个人记录。")
                 return
             payload = await self.client.get_union_raid_data(account)
-            yield event.plain_result(format_ranking(build_member_ranking(payload, member_openid)))
+            builder = getattr(self, "raid_builder", None)
+            if builder is None:
+                builder = UnionRaidBuilder()
+                self.raid_builder = builder
+            if not payload.get("participate_data"):
+                manager = payload.get("manager_info") or {}
+                raid_state = builder.resolve_raid_state(
+                    manager, payload.get("level_info"), seasons=builder._seasons
+                )
+                if raid_state == RaidState.OFFSEASON and builder._seasons:
+                    latest = max(
+                        (s for s in builder._seasons if s.get("end_ts", 0) <= time.time()),
+                        key=lambda x: x.get("id", 0),
+                        default=None,
+                    )
+                    if latest:
+                        s_id = str(latest.get("id"))
+                        try:
+                            overview = await self.client.get_union_raid_overview(account)
+                            guild_id = overview.get("guild_id")
+                            if guild_id:
+                                hist_data = await self.client.get_union_raid_season(
+                                    account, guild_id=str(guild_id), season_id=s_id, levels=False
+                                )
+                                if hist_data.get("participate_data"):
+                                    payload = hist_data
+                        except Exception as exc:
+                            logger.warning("[NIKKE] 回退上一赛季个人记录失败: %s", exc)
+            data = build_member_ranking(payload, member_openid)
+            path = await self._try_t2i("union_member", data)
+            yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
@@ -984,13 +1118,49 @@ class NikkePlugin(Star):
         try:
             account = self._account_or_error(event)
             raw = await self.client.get_union_raid_overview(account)
-            data = self.raid_builder.build(
+            builder = getattr(self, "raid_builder", None)
+            if builder is None:
+                builder = UnionRaidBuilder()
+                self.raid_builder = builder
+            data = builder.build(
                 guild_name=raw["guild_name"],
                 level_info_payload=raw["level_info"],
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )
-            path = await asyncio.to_thread(self.raid_renderer.render_raid_overview, data)
+            if data.raid_state == RaidState.OFFSEASON and data.previous_season:
+                guild_id = raw.get("guild_id")
+                if guild_id and data.previous_season.season_id:
+                    try:
+                        hist_data = await self.client.get_union_raid_season(
+                            account,
+                            guild_id=str(guild_id),
+                            season_id=str(data.previous_season.season_id),
+                            levels=False,
+                        )
+                        attacks = hist_data.get("participate_data", [])
+                        if isinstance(attacks, list):
+                            tot_attacks = len(attacks)
+                            tot_damage = sum(
+                                int(x.get("total_damage", 0) or x.get("damage", 0) or 0)
+                                for x in attacks
+                            )
+                            prev = data.previous_season
+                            data.previous_season = PreviousSeasonSummary(
+                                season_id=prev.season_id,
+                                season_number=prev.season_number,
+                                start_at=prev.start_at,
+                                end_at=prev.end_at,
+                                settled_at=prev.settled_at,
+                                total_attacks=tot_attacks,
+                                total_damage=tot_damage,
+                                boss_progress=prev.boss_progress,
+                            )
+                    except Exception as exc:
+                        logger.warning("[NIKKE] 获取上一赛季突袭数据失败: %s", exc)
+            path = await self._try_t2i("union_overview", data)
+            if not path:
+                path = await asyncio.to_thread(self.raid_renderer.render_raid_overview, data)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -1084,7 +1254,9 @@ class NikkePlugin(Star):
                 fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
                 plugin_version=PLUGIN_VERSION,
             )
-            path = await asyncio.to_thread(self.character_renderer.render_character, card)
+            path = await self._try_t2i("character", card)
+            if not path:
+                path = await asyncio.to_thread(self.character_renderer.render_character, card)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -1643,7 +1815,7 @@ class NikkePlugin(Star):
             if record.status == ClearLineupStatus.ERROR:
                 yield event.plain_result(record.status_message)
                 return
-            path = await asyncio.to_thread(self.campaign_renderer.render_campaign_history, record)
+            path = await self._render_campaign_record(record)
             yield event.image_result(path)
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
@@ -1657,20 +1829,81 @@ class NikkePlugin(Star):
             if handle:
                 await handle.cancel()
 
-    async def event_schedule(self, event: AstrMessageEvent):
+    async def event_schedule(self, event: AstrMessageEvent, horizon: str = ""):
         """查询进行中与即将截止的官方活动日程。"""
-        fallback_error = ""
+        sub = str(horizon or "").strip().casefold()
+        if sub in {"刷新", "refresh", "rescan"}:
+            calendar = getattr(self, "calendar", None)
+            if calendar is not None:
+                if hasattr(calendar, "refresh_schedule_data"):
+                    ok, msg = await calendar.refresh_schedule_data()
+                else:
+                    ok, msg = await calendar.sync_from_source()
+                quality = getattr(calendar, "data_quality", "OK")
+                yield event.plain_result(
+                    f"【NIKKE 日程】数据刷新完成：{'成功' if ok else '失败（已保留旧快照）'} ({quality})\n"
+                    f"当前活动条目数：{calendar.activity_count()}"
+                    f"{f'，提示：{msg}' if msg != 'ok' else ''}"
+                )
+                return
+            yield event.plain_result("日程服务尚未就绪。")
+            return
+
+        try:
+            days = CalendarService.normalize_horizon(horizon)
+        except ValueError as exc:
+            yield event.plain_result(f"日程范围错误：{exc}\n用法：/妮姬 日程 [7|14|30] 或 /妮姬 日程 刷新")
+            return
+
+        calendar = getattr(self, "calendar", None)
+        if calendar is None:
+            fallback_error = ""
+            if self.announcements.record_count() == 0:
+                try:
+                    success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
+                    if not success:
+                        fallback_error = msg
+                except asyncio.TimeoutError:
+                    fallback_error = "同步公告超时"
+                except Exception as e:
+                    fallback_error = f"同步异常: {e}"
+            text = self.announcements.format_schedule_text(fallback_error=fallback_error)
+            yield event.plain_result(text)
+            return
+
+        calendar_error = ""
+        if not calendar.has_snapshot():
+            try:
+                success, msg = await asyncio.wait_for(calendar.sync_from_source(), timeout=4.0)
+                if not success:
+                    calendar_error = msg
+            except asyncio.TimeoutError:
+                calendar_error = "同步结构化日程超时"
+            except Exception as e:
+                calendar_error = f"同步结构化日程异常: {safe_exception_message(e)}"
+
+        if calendar.has_snapshot():
+            payload = CalendarT2IPayloadBuilder().build(calendar, days, warning=calendar_error)
+            path = await self._try_t2i("calendar_schedule", payload)
+            yield event.image_result(path) if path else event.plain_result(payload["fallback_text"])
+            return
+
+        announcement_error = ""
         if self.announcements.record_count() == 0:
             try:
                 success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
                 if not success:
-                    fallback_error = msg
+                    announcement_error = msg
             except asyncio.TimeoutError:
-                fallback_error = "同步公告超时"
+                announcement_error = "同步公告超时"
             except Exception as e:
-                fallback_error = f"同步异常: {e}"
-        text = self.announcements.format_schedule_text(fallback_error=fallback_error)
-        yield event.plain_result(text)
+                announcement_error = f"同步公告异常: {safe_exception_message(e)}"
+
+        announcement_text = self.announcements.format_schedule_text(fallback_error=announcement_error)
+        fallback_notice = "⚠️ 结构化日程不可用，已降级使用官方公告时间解析。"
+        if calendar_error:
+            fallback_notice += f"\n（结构化源错误: {calendar_error}）"
+        yield event.plain_result(f"{fallback_notice}\n\n{announcement_text}")
 
     async def announcements_view(
         self,

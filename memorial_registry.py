@@ -1,83 +1,128 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""遗失物分类注册表与官方映射。"""
+"""遗失物类别的证据驱动分组 registry。"""
 
 from __future__ import annotations
 
-from typing import Any
+import logging
+from typing import Callable, Iterable
+
+from .profile_models import MemorialCountData
 
 
-# 官方分类映射（经 BlaBlaLink 前端 index-BgvnrvAf.js 验证）
-# HandWriting -> 手机
-# CallLog -> 通话记录
-# 其余（Data, OldTales, UnbreakableSphere 等） -> 数据资料
-# Jukebox -> BGM
-OFFICIAL_MEMORIAL_MAP = {
-    "HandWriting": "手机",
-    "CallLog": "通话记录",
-    "Data": "数据资料",
-    "OldTales": "遗落传说",
-    "UnbreakableSphere": "奇迹之球",
-}
+logger = logging.getLogger("nikke.profile.memorial")
 
 
 class MemorialCategoryRegistry:
-    @staticmethod
-    def get_display_name(category: str | None) -> str:
-        if not category:
-            return "未知分类"
-        return OFFICIAL_MEMORIAL_MAP.get(category, category)
+    """按类别 key 映射最终四个 UI 格位，不使用数组顺序。"""
+
+    GROUP_NAMES = {
+        "phone": "手机",
+        "call_log": "通话记录",
+        "data": "数据资料",
+        "bgm": "BGM",
+    }
+    CATEGORY_TO_GROUP = {
+        "handwriting": "phone",
+        "calllog": "call_log",
+        "data": "data",
+        "oldtales": "data",
+        "unbreakablesphere": "data",
+    }
+    ORDER = ("phone", "call_log", "data", "bgm")
+
+    def __init__(self, diagnostics: Callable[[str], None] | None = None) -> None:
+        self.diagnostics = diagnostics
+
+    @classmethod
+    def group_for(cls, category: object) -> str | None:
+        if not isinstance(category, str) or not category.strip():
+            return None
+        return cls.CATEGORY_TO_GROUP.get(category.strip().casefold())
+
+    def _unknown(self, category: object) -> None:
+        text = str(category).strip() if isinstance(category, str) else "<invalid>"
+        message = f"未知遗失物分类未归类: {text[:80]}"
+        if self.diagnostics:
+            self.diagnostics(message)
+        else:
+            logger.warning(message)
+
+    def summarize(
+        self,
+        rows: Iterable[MemorialCountData] | None,
+        *,
+        jukebox_count: int | None,
+    ) -> tuple[list[MemorialCountData] | None, bool]:
+        if rows is None and jukebox_count is None:
+            return None, False
+        totals: dict[str, int] = {}
+        seen: set[str] = set()
+        partial = False
+        if rows is not None:
+            for row in rows:
+                group = self.group_for(row.category)
+                if group is None:
+                    self._unknown(row.category)
+                    partial = True
+                    continue
+                seen.add(group)
+                if row.count is None:
+                    partial = True
+                    continue
+                totals[group] = totals.get(group, 0) + row.count
+        if jukebox_count is not None:
+            totals["bgm"] = jukebox_count
+            seen.add("bgm")
+        if not seen:
+            # 全部是未知/空分类时不画四个“0”，避免把未知误报成已确认的零值。
+            return None, partial
+        result = [
+            MemorialCountData(
+                category=group,
+                count=totals.get(group) if group in seen else None,
+                display_name=self.GROUP_NAMES[group],
+                group=group,
+            )
+            for group in self.ORDER
+        ]
+        return result, partial
 
     @staticmethod
     def summarize_memorials(
-        memorial_counts: list[Any] | None,
+        memorial_counts: list[object] | None,
         jukebox_count: str | int | None = None,
     ) -> dict[str, int]:
-        """按 BlaBlaLink 前端规范汇总四格遗失物数据：
+        """提供旧 Profile DTO 所需的四格兼容摘要。
 
-        - 手机: HandWriting
-        - 通话记录: CallLog
-        - 数据资料: 其余所有分类之和 (Data, OldTales, UnbreakableSphere 等)
-        - BGM: jukebox_count
+        新路径使用 :meth:`summarize` 保留未知分类与部分状态；该方法仅用于
+        旧 fixture 的兼容字段，不能替代结构化摘要或作为完整性证明。
         """
-        notes = 0
-        callrecord = 0
-        data_count = 0
-
+        totals = {"手机": 0, "通话记录": 0, "数据资料": 0, "BGM": 0}
         if isinstance(memorial_counts, list):
             for item in memorial_counts:
-                cat = None
-                cnt = 0
                 if isinstance(item, dict):
-                    cat = item.get("category")
-                    try:
-                        cnt = int(item.get("count", 0))
-                    except (ValueError, TypeError):
-                        cnt = 0
-                elif hasattr(item, "category") and hasattr(item, "count"):
-                    cat = getattr(item, "category")
-                    c_val = getattr(item, "count")
-                    try:
-                        cnt = int(c_val) if c_val is not None else 0
-                    except (ValueError, TypeError):
-                        cnt = 0
-
-                if cat == "HandWriting":
-                    notes += cnt
-                elif cat == "CallLog":
-                    callrecord += cnt
-                elif cat:
-                    data_count += cnt
-
-        bgm = 0
+                    category = item.get("category")
+                    raw_count = item.get("count")
+                else:
+                    category = getattr(item, "category", None)
+                    raw_count = getattr(item, "count", None)
+                try:
+                    count = int(raw_count) if raw_count is not None else 0
+                except (TypeError, ValueError):
+                    count = 0
+                group = MemorialCategoryRegistry.group_for(category)
+                if group == "phone":
+                    totals["手机"] += count
+                elif group == "call_log":
+                    totals["通话记录"] += count
+                elif group == "data":
+                    totals["数据资料"] += count
         if jukebox_count is not None:
             try:
-                bgm = int(jukebox_count)
-            except (ValueError, TypeError):
-                bgm = 0
+                totals["BGM"] = int(jukebox_count)
+            except (TypeError, ValueError):
+                totals["BGM"] = 0
+        return totals
 
-        return {
-            "手机": notes,
-            "通话记录": callrecord,
-            "数据资料": data_count,
-            "BGM": bgm,
-        }
+
+__all__ = ["MemorialCategoryRegistry"]

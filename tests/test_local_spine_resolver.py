@@ -1,72 +1,108 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
-"""LocalSpineBundleResolver 单元测试。"""
-
 import tempfile
-import unittest
 from pathlib import Path
+from unittest import TestCase
 
-from astrbot_plugin_nikke.local_spine_resolver import LocalSpineBundleResolver, SpineBundle
+from PIL import Image
+
+from astrbot_plugin_nikke.local_spine_resolver import (
+    LocalSpineBundleResolver,
+    LocalSpineResolveError,
+)
 
 
-class LocalSpineBundleResolverTests(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name)
-        self.resolver = LocalSpineBundleResolver(self.root)
+class LocalSpineResolverTests(TestCase):
+    def make_bundle(self, root: Path, asset_id: str = "c010", version: str = "4.1") -> Path:
+        bundle = root / "l2d" / asset_id
+        bundle.mkdir(parents=True)
+        (bundle / f"{asset_id}_00.skel").write_bytes(b"12345678\x074.1.24" if version == "4.1" else b"12345678\x074.0.47")
+        Image.new("RGBA", (20, 20), "red").save(bundle / "one.png")
+        Image.new("RGBA", (24, 24), "blue").save(bundle / "two.png")
+        (bundle / f"{asset_id}_00.atlas").write_text(
+            "\ufeffone.png\nsize: 20, 20\n\n"
+            "two.png\nsize: 24, 24\n",
+            encoding="utf-8-sig",
+        )
+        return bundle
 
-    def tearDown(self):
-        self.tmp.cleanup()
+    def test_resolves_bom_multi_page_bundle_and_real_version(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_bundle(root)
+            result = LocalSpineBundleResolver(root).resolve("c010")
+            self.assertEqual(result.runtime_version, "4.1")
+            self.assertEqual([path.name for path in result.texture_paths], ["one.png", "two.png"])
+            self.assertEqual(result.as_spine_bundle().textures, result.texture_paths)
 
-    def test_path_traversal_protection(self):
-        self.assertIsNone(self.resolver.resolve_bundle("../etc/passwd"))
-        self.assertIsNone(self.resolver.resolve_bundle(".."))
-        self.assertIsNone(self.resolver.resolve_bundle("c010/../../something"))
+    def test_resolves_nested_atlas_texture_page(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = root / "l2d" / "c010"
+            bundle.mkdir(parents=True)
+            (bundle / "c010_00.skel").write_bytes(b"header 4.0.47")
+            nested = bundle / "textures"
+            nested.mkdir()
+            page = nested / "body.png"
+            Image.new("RGBA", (24, 16), "purple").save(page)
+            (bundle / "c010_00.atlas").write_text(
+                "\ufefftextures/body.png\nsize: 24, 16\n", encoding="utf-8-sig"
+            )
 
-    def test_missing_directory_returns_none(self):
-        self.assertIsNone(self.resolver.resolve_bundle("c999"))
+            result = LocalSpineBundleResolver(root).resolve("c010")
 
-    def test_successful_resolution_4_0(self):
-        char_dir = self.root / "l2d" / "c010"
-        char_dir.mkdir(parents=True)
-        # Skeleton binary with 4.0 header
-        skel_bytes = b"\x00\x00Spine 4.0.64\x00\x01\x02\x03" + b"\x00" * 50
-        (char_dir / "c010.skel").write_bytes(skel_bytes)
-        # Atlas declared texture page
-        (char_dir / "c010.atlas").write_text("\ufeffc010.png\nsize: 1024,1024\n", encoding="utf-8")
-        (char_dir / "c010.png").write_bytes(b"PNGDATA")
+            self.assertEqual(result.texture_paths, (page.resolve(),))
 
-        bundle = self.resolver.resolve_bundle("c010")
-        self.assertIsNotNone(bundle)
-        self.assertIsInstance(bundle, SpineBundle)
-        self.assertEqual(bundle.asset_id, "c010")
-        self.assertEqual(bundle.version, "4.0")
-        self.assertEqual(bundle.skel_path.name, "c010.skel")
-        self.assertEqual(bundle.atlas_path.name, "c010.atlas")
-        self.assertEqual(len(bundle.texture_paths), 1)
-        self.assertEqual(bundle.texture_paths[0].name, "c010.png")
+    def test_supports_40_without_guessing_from_character(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_bundle(root, "c999", version="4.0")
+            result = LocalSpineBundleResolver(root).resolve("c999")
+            self.assertEqual(result.runtime_version, "4.0")
 
-    def test_successful_resolution_4_1_multiple_textures(self):
-        char_dir = self.root / "c330"
-        char_dir.mkdir(parents=True)
-        skel_bytes = b"\x00\x00Spine 4.1.24\x00\x01\x02\x03" + b"\x00" * 50
-        (char_dir / "c330_00.skel").write_bytes(skel_bytes)
-        (char_dir / "c330_00.atlas").write_text("c330_00.png\nsize: 1024,1024\n\nc330_01.png\nsize: 1024,1024\n", encoding="utf-8")
-        (char_dir / "c330_00.png").write_bytes(b"PNG1")
-        (char_dir / "c330_01.png").write_bytes(b"PNG2")
+    def test_rejects_invalid_asset_id_and_atlas_escape(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_bundle(root)
+            with self.assertRaises(LocalSpineResolveError):
+                LocalSpineBundleResolver(root).resolve("../c010")
+            atlas = root / "l2d" / "c010" / "c010_00.atlas"
+            atlas.write_text("../outside.png\nsize: 20, 20\n", encoding="utf-8")
+            with self.assertRaises(LocalSpineResolveError):
+                LocalSpineBundleResolver(root).resolve("c010")
 
-        bundle = self.resolver.resolve_bundle("c330")
-        self.assertIsNotNone(bundle)
-        self.assertEqual(bundle.version, "4.1")
-        self.assertEqual(len(bundle.texture_paths), 2)
-        self.assertEqual([p.name for p in bundle.texture_paths], ["c330_00.png", "c330_01.png"])
+    def test_rejects_missing_or_corrupt_texture_and_unknown_runtime(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = self.make_bundle(root)
+            (bundle / "two.png").unlink()
+            with self.assertRaisesRegex(LocalSpineResolveError, "缺少 atlas 纹理页"):
+                LocalSpineBundleResolver(root).resolve("c010")
 
-    def test_missing_texture_fails_fast(self):
-        char_dir = self.root / "l2d" / "c017"
-        char_dir.mkdir(parents=True)
-        skel_bytes = b"\x00\x00Spine 4.0.64\x00\x01\x02\x03" + b"\x00" * 50
-        (char_dir / "c017.skel").write_bytes(skel_bytes)
-        (char_dir / "c017.atlas").write_text("c017.png\nsize: 1024,1024\n\nc017_2.png\n", encoding="utf-8")
-        (char_dir / "c017.png").write_bytes(b"PNG1")
-        # c017_2.png is missing!
+            self.make_bundle(root, "c011", version="4.1")
+            (root / "l2d" / "c011" / "c011_00.skel").write_bytes(b"no version header")
+            with self.assertRaisesRegex(LocalSpineResolveError, "版本未知"):
+                LocalSpineBundleResolver(root).resolve("c011")
 
-        self.assertIsNone(self.resolver.resolve_bundle("c017"))
+    def test_rejects_ambiguous_named_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = self.make_bundle(root)
+            (bundle / "c010.skel").write_bytes(b"header 4.1.24")
+            with self.assertRaisesRegex(LocalSpineResolveError, "歧义"):
+                LocalSpineBundleResolver(root).resolve("c010")
+
+    def test_symlink_escape_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = self.make_bundle(root)
+            outside = root.parent / f"{root.name}-outside.png"
+            Image.new("RGBA", (20, 20), "green").save(outside)
+            try:
+                (bundle / "one.png").unlink()
+                try:
+                    (bundle / "one.png").symlink_to(outside)
+                except (OSError, NotImplementedError):
+                    self.skipTest("当前环境不允许创建符号链接")
+                with self.assertRaisesRegex(LocalSpineResolveError, "路径越界"):
+                    LocalSpineBundleResolver(root).resolve("c010")
+            finally:
+                outside.unlink(missing_ok=True)

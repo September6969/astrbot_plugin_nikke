@@ -184,7 +184,8 @@ class CharacterCardRenderer(CardRenderer):
                 # 每个装备固定渲染 option1/2/3 三行，避免多 function 拆槽。
                 step = 30
                 yy = y + 80 + row * step
-                name = option.display_name if option.unit != "unknown" else "未识别词条"
+                # Builder 已保留未知 option 的原始 ID/key；renderer 不得再次吞掉它。
+                name = option.display_name
                 size = 26
                 self._text(draw, (x + 16, yy), name, size, theme.muted if option.unit == "empty" else theme.text, width=218)
                 self._text(draw, (x + 240, yy), self._option_value(option), size, theme.muted if option.unit in {"empty", "unknown"} else theme.primary, width=110, bold=True)

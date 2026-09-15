@@ -5,9 +5,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from PIL import Image
+
+
+@dataclass(frozen=True, slots=True)
+class CostumeSelection:
+    costume_id: int | str | None
+    source: str
+    kind: Literal["default", "alternate", "unknown"]
 
 
 @dataclass(slots=True)
@@ -95,6 +102,7 @@ class CharacterCardData:
     defense_source: str = "unavailable_missing_input"
     stat_calculation_reason: str | None = None
     spine_asset_id: str | None = None
+    costume_selection: CostumeSelection | None = None
 
 
 @dataclass(slots=True)

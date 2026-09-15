@@ -1,7 +1,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-data/
+/data/*
+!/data/nikke/
+/data/nikke/*
+!/data/nikke/blabla-assets/
+!/data/nikke/blabla-manifests/
 dist/
 *.zip
 artifacts/
@@ -9,3 +13,5 @@ output/playwright/
 .playwright-cli/
 cache/
 reports/
+preview/
+

@@ -1,0 +1,14 @@
+{% macro section_header(title, detail='') %}<div class="section-header"><span>{{ title }}</span>{% if detail in ['AVAILABLE','PARTIAL','UNAVAILABLE','UNKNOWN','EMPTY'] %}{{ status_badge(detail) }}{% else %}<span class="muted">{{ detail }}</span>{% endif %}</div>{% endmacro %}
+{% macro status_badge(text) %}<span class="badge state-{{ {'AVAILABLE':'available','PARTIAL':'partial','UNAVAILABLE':'unavailable','UNKNOWN':'unknown','EMPTY':'empty'}.get(text, 'neutral') }}">{{ text }}</span>{% endmacro %}
+{% macro mode_badge(text) %}<span class="badge mode">{{ text }}</span>{% endmacro %}
+{% macro metric(label, value) %}<div><div class="metric-label">{{ label }}</div><div class="metric-value">{{ value }}</div></div>{% endmacro %}
+{% macro divider() %}<div class="divider"></div>{% endmacro %}
+{% macro portrait_card(member) %}
+<article class="portrait-card"><div class="portrait"><span class="slot">{{ member.slot }}</span>
+{% if member.portrait_data_uri %}<img src="{{ member.portrait_data_uri }}" alt="{{ member.name }}">
+{% else %}<svg class="placeholder" viewBox="0 0 116 146" aria-label="头像不可用"><circle cx="58" cy="40" r="26" fill="currentColor"/><path d="M8 140V120C8 82 108 82 108 120V140Z" fill="currentColor"/><path d="M0 1H28M88 1H115V28M115 118V145H88M28 145H1V118" stroke="currentColor" fill="none"/></svg>{% endif %}
+</div><div class="portrait-info"><div class="level">{{ member.level }}</div><div class="character-name {{ 'long-name' if member.long_name else '' }}">{{ member.name }}</div><div class="combat">{{ member.combat }}</div></div></article>
+{% endmacro %}
+{% macro empty_state(title, message) %}<div class="empty-state"><h2>{{ title }}</h2><p>{{ message }}</p></div>{% endmacro %}
+{% macro unavailable_state(title, message) %}{{ empty_state(title, message) }}{% endmacro %}
+{% macro footer_meta(commander, updated, version) %}<footer class="footer-meta"><span class="commander">{{ commander }}</span><span>{% if updated %}UPDATED {{ updated }} · UTC+8{% endif %}</span><span>{{ version }}</span></footer>{% endmacro %}

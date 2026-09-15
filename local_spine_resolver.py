@@ -1,154 +1,165 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """本地 Nikke-db Spine bundle 解析器。
 
-负责从本地检出的 Nikke-db 仓库中定位 Spine 骨骼、图集与纹理文件，
-执行路径穿越防护、UTF-8-SIG 图集校验、多纹理页完整性检查与 4.0/4.1 版本探测。
-严格保证零网络、零外部进程。
+该模块只读取维护期已经 checkout 的文件，不包含 HTTP、Git 或 Worker 调用。
 """
 
 from __future__ import annotations
 
-import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
 
-logger = logging.getLogger("nikke.spine_resolver")
+from PIL import Image, ImageFile
 
-_SAFE_ID_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
-_VERSION_RE = re.compile(rb"(\d+\.\d+(?:\.\d+)?)")
+try:
+    from .spine_prerenderer import SpineBundle, SpineRenderError
+except ImportError:  # 允许维护脚本直接以文件路径运行
+    from spine_prerenderer import SpineBundle, SpineRenderError  # type: ignore[no-redef]
 
 
-@dataclass(slots=True)
-class SpineBundle:
-    asset_id: str
-    bundle_dir: Path
+class LocalSpineResolveError(SpineRenderError):
+    """本地 bundle 缺失、歧义或完整性校验失败。"""
+
+
+@dataclass(frozen=True, slots=True)
+class LocalSpineBundle:
+    """已通过本地路径、atlas 纹理和 skeleton 版本校验的 bundle。"""
+
+    bundle_root: Path
     skel_path: Path
     atlas_path: Path
-    texture_paths: list[Path]
-    version: str
+    texture_paths: tuple[Path, ...]
+    runtime_version: str
+
+    def as_spine_bundle(self) -> SpineBundle:
+        return SpineBundle(self.skel_path, self.atlas_path, self.texture_paths)
 
 
 class LocalSpineBundleResolver:
-    """本地 Spine Bundle 解析器，严格只读本地文件，绝不发起网络调用。"""
+    """按 canonical cXXX[_YY] 解析 vendor/nikke-db/l2d 下的唯一 bundle。"""
 
-    def __init__(self, local_root: str | Path):
-        self.local_root = Path(local_root).resolve()
+    DEFAULT_ROOT = Path("/AstrBot/data/vendor/nikke-db")
+    ASSET_ID = re.compile(r"^c[0-9]+(?:_[0-9]+)?$", re.ASCII)
+    PAGE_SUFFIXES = {".png", ".webp"}
+    MAX_TEXTURE_BYTES = 12 * 1024 * 1024
+    MAX_SKELETON_BYTES = 16 * 1024 * 1024
+    _VERSION = re.compile(rb"(?<![0-9])4\.[01](?:\.[0-9]+)?(?![0-9])")
 
-    def resolve_bundle(self, char_id: str) -> SpineBundle | None:
-        """解析指定角色的本地 Spine bundle。若文件缺失或不合规，返回 None。"""
-        if not char_id or not _SAFE_ID_RE.fullmatch(char_id):
-            logger.debug("非法 Spine 资产 ID: %r", char_id)
-            return None
-
-        # 检查候选目录（支持 l2d/{char_id} 或直接 {char_id}）
-        candidate_dirs = [
-            self.local_root / "l2d" / char_id,
-            self.local_root / char_id,
-        ]
-        target_dir: Path | None = None
-        for cd in candidate_dirs:
-            resolved_cd = cd.resolve()
-            # 严格路径穿越防护
-            try:
-                if not resolved_cd.is_relative_to(self.local_root):
-                    raise ValueError(f"Path traversal detected: {char_id}")
-            except AttributeError:
-                # Python < 3.9 compatibility
-                if not str(resolved_cd).startswith(str(self.local_root)):
-                    raise ValueError(f"Path traversal detected: {char_id}")
-            if resolved_cd.is_dir():
-                target_dir = resolved_cd
-                break
-
-        if target_dir is None:
-            return None
-
-        # 1. 动态定位 .skel 文件
-        skel_candidates = list(target_dir.glob("*.skel"))
-        if not skel_candidates:
-            logger.debug("[%s] 缺少 .skel 文件", char_id)
-            return None
-
-        # 优先匹配同名或 _00.skel
-        skel_path: Path | None = None
-        for name in (f"{char_id}.skel", f"{char_id}_00.skel"):
-            p = target_dir / name
-            if p.is_file():
-                skel_path = p
-                break
-        if skel_path is None:
-            skel_path = skel_candidates[0]
-
-        # 2. 动态定位 .atlas 文件
-        atlas_candidates = list(target_dir.glob("*.atlas"))
-        if not atlas_candidates:
-            logger.debug("[%s] 缺少 .atlas 文件", char_id)
-            return None
-
-        atlas_path: Path | None = None
-        for name in (f"{char_id}.atlas", f"{char_id}_00.atlas"):
-            p = target_dir / name
-            if p.is_file():
-                atlas_path = p
-                break
-        if atlas_path is None:
-            atlas_path = atlas_candidates[0]
-
-        # 3. 解析 atlas 文件（以 utf-8-sig 编码处理 BOM），提取并检查所有纹理页
+    def __init__(self, root: str | Path | None = None) -> None:
+        self.root = Path(root) if root is not None else self.DEFAULT_ROOT
         try:
-            atlas_text = atlas_path.read_text(encoding="utf-8-sig", errors="replace")
+            self.root = self.root.expanduser().resolve()
         except OSError as exc:
-            logger.debug("[%s] 读取 atlas 失败: %s", char_id, exc)
-            return None
+            raise LocalSpineResolveError("Nikke-db 本地根目录无法解析") from exc
 
-        declared_pages: list[str] = []
-        for line in atlas_text.splitlines():
-            line = line.strip().lstrip("\ufeff")
-            if line.lower().endswith(".png"):
-                if line not in declared_pages:
-                    declared_pages.append(line)
+    @classmethod
+    def _validate_asset_id(cls, asset_id: object) -> str:
+        if not isinstance(asset_id, str):
+            raise LocalSpineResolveError("Spine asset ID 必须是文本")
+        value = asset_id.strip().lower()
+        if not cls.ASSET_ID.fullmatch(value):
+            raise LocalSpineResolveError("Spine asset ID 含有非法路径字符")
+        return value
 
-        # 若 atlas 未显式声明纹理页，退化为同名或目录下的 png
-        if not declared_pages:
-            png_candidates = list(target_dir.glob("*.png"))
-            if not png_candidates:
-                logger.debug("[%s] 缺少 .png 纹理", char_id)
-                return None
-            declared_pages = [p.name for p in png_candidates]
-
-        texture_paths: list[Path] = []
-        for page_name in declared_pages:
-            tex_file = target_dir / page_name
-            if not tex_file.is_file() or tex_file.stat().st_size == 0:
-                logger.debug("[%s] 声明的纹理页不存在或为空: %s", char_id, page_name)
-                return None
-            texture_paths.append(tex_file)
-
-        # 4. 二进制头部版本探测 (4.0 vs 4.1)
+    def _ensure_inside(self, path: Path, *, label: str) -> Path:
         try:
-            header_bytes = skel_path.read_bytes()[:64]
-            match = _VERSION_RE.search(header_bytes)
-            if not match:
-                logger.debug("[%s] 无法在 skel 头部探测到版本", char_id)
-                return None
-            ver_str = match.group(1).decode("ascii", errors="replace")
-            if ver_str.startswith("4.0"):
-                version = "4.0"
-            elif ver_str.startswith("4.1"):
-                version = "4.1"
-            else:
-                logger.debug("[%s] 不受支持的 Spine 版本: %s", char_id, ver_str)
-                return None
-        except Exception as exc:
-            logger.debug("[%s] 读取 skel 头部失败: %s", char_id, exc)
-            return None
+            resolved = path.resolve()
+        except OSError as exc:
+            raise LocalSpineResolveError(f"{label} 路径无法解析") from exc
+        if not resolved.is_relative_to(self.root):
+            raise LocalSpineResolveError(f"{label} 路径越界")
+        return resolved
 
-        return SpineBundle(
-            asset_id=char_id,
-            bundle_dir=target_dir,
-            skel_path=skel_path,
-            atlas_path=atlas_path,
-            texture_paths=texture_paths,
-            version=version,
-        )
+    @staticmethod
+    def _choose_named(bundle_root: Path, asset_id: str, suffix: str) -> Path:
+        """只接受 canonical_00 或 canonical 两种已记录的命名合同。"""
+        exact = bundle_root / f"{asset_id}_00{suffix}"
+        legacy = bundle_root / f"{asset_id}{suffix}"
+        if exact.is_file() and legacy.is_file():
+            raise LocalSpineResolveError(f"存在歧义的 {suffix} bundle 文件: {asset_id}")
+        if exact.is_file():
+            return exact
+        if legacy.is_file():
+            return legacy
+        raise LocalSpineResolveError(f"缺少唯一 {suffix} bundle 文件: {asset_id}")
+
+    @classmethod
+    def _atlas_pages(cls, atlas_path: Path) -> list[str]:
+        try:
+            text = atlas_path.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError) as exc:
+            raise LocalSpineResolveError("atlas 无法按 UTF-8-SIG 读取") from exc
+        pages: list[str] = []
+        for block in re.split(r"\n\s*\n", text.strip()):
+            lines = [line.strip().lstrip("\ufeff") for line in block.splitlines() if line.strip()]
+            if not lines:
+                continue
+            candidate = lines[0]
+            if Path(candidate).suffix.lower() in cls.PAGE_SUFFIXES:
+                if candidate not in pages:
+                    pages.append(candidate)
+        if not pages:
+            raise LocalSpineResolveError("atlas 未声明纹理页")
+        return pages
+
+    def _validate_texture(self, bundle_root: Path, page: str) -> Path:
+        page_path = Path(page)
+        if (
+            page_path.is_absolute()
+            or page_path.drive
+            or "\\" in page
+            or re.match(r"^[A-Za-z]:", page)
+            or any(part in {"", ".", ".."} for part in page_path.parts)
+            or page_path.suffix.lower() not in self.PAGE_SUFFIXES
+        ):
+            raise LocalSpineResolveError(f"atlas 纹理页路径非法: {page}")
+        target = self._ensure_inside(bundle_root / page_path, label="纹理页")
+        try:
+            size = target.stat().st_size
+        except OSError as exc:
+            raise LocalSpineResolveError(f"缺少 atlas 纹理页: {page}") from exc
+        if not target.is_file() or size <= 0 or size > self.MAX_TEXTURE_BYTES:
+            raise LocalSpineResolveError(f"atlas 纹理页大小非法: {page}")
+        previous_truncated = ImageFile.LOAD_TRUNCATED_IMAGES
+        try:
+            ImageFile.LOAD_TRUNCATED_IMAGES = False
+            with Image.open(target) as image:
+                image.verify()
+        except (OSError, ValueError) as exc:
+            raise LocalSpineResolveError(f"atlas 纹理页不是有效图片: {page}") from exc
+        finally:
+            ImageFile.LOAD_TRUNCATED_IMAGES = previous_truncated
+        return target
+
+    @classmethod
+    def detect_runtime_version(cls, skel_path: Path) -> str:
+        try:
+            size = skel_path.stat().st_size
+            if size <= 0 or size > cls.MAX_SKELETON_BYTES:
+                raise LocalSpineResolveError("skeleton 大小非法")
+            header = skel_path.read_bytes()[:512]
+        except OSError as exc:
+            raise LocalSpineResolveError("skeleton 无法读取") from exc
+        match = cls._VERSION.search(header)
+        if match is None:
+            raise LocalSpineResolveError("skeleton 版本未知，拒绝猜测 runtime")
+        version = match.group(0).decode("ascii")
+        return version[:3]
+
+    def resolve(self, canonical_asset_id: str) -> LocalSpineBundle:
+        asset_id = self._validate_asset_id(canonical_asset_id)
+        bundle_root = self._ensure_inside(self.root / "l2d" / asset_id, label="bundle")
+        if not bundle_root.is_dir():
+            raise LocalSpineResolveError(f"本地 bundle 目录不存在: {asset_id}")
+        skel_path = self._ensure_inside(self._choose_named(bundle_root, asset_id, ".skel"), label="skeleton")
+        atlas_path = self._ensure_inside(self._choose_named(bundle_root, asset_id, ".atlas"), label="atlas")
+        pages = self._atlas_pages(atlas_path)
+        textures = tuple(self._validate_texture(bundle_root, page) for page in pages)
+        runtime_version = self.detect_runtime_version(skel_path)
+        return LocalSpineBundle(bundle_root, skel_path, atlas_path, textures, runtime_version)
+
+    resolve_bundle = resolve
+
+
+__all__ = ["LocalSpineBundle", "LocalSpineBundleResolver", "LocalSpineResolveError"]

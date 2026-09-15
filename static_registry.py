@@ -77,6 +77,76 @@ class StaticDataRegistry:
             return None
         return self._maps.get(kind, {}).get(key)
 
+    VERIFIED_CUBE_NAMES: dict[str, str] = {
+        "1000301": "遗迹突击魔方",
+        "1000302": "战术突击魔方",
+        "1000303": "遗迹巨熊魔方",
+        "1000304": "战术巨熊魔方",
+        "1000305": "遗迹促进魔方",
+        "1000306": "战术促进魔方",
+        "1000307": "遗迹量子魔方",
+        "1000308": "体力神器魔方",
+        "1000309": "遗迹强韧魔方",
+        "1000310": "遗迹治疗魔方",
+        "1000311": "遗迹回火魔方",
+        "1000312": "遗迹辅助魔方",
+        "1000313": "遗迹毁灭魔方",
+        "1000314": "遗迹穿透魔方",
+    }
+
+    VERIFIED_FAVORITE_ITEM_NAMES: dict[str, str] = {
+        # 收藏品 - R
+        "100101": "料理指挥官娃娃",
+        "100201": "购物指挥官娃娃",
+        "100301": "运动指挥官娃娃",
+        "100401": "战斗指挥官娃娃",
+        "100501": "咖啡指挥官娃娃",
+        "100601": "午睡指挥官娃娃",
+        # 收藏品 - SR 限量版
+        "100102": "料理指挥官娃娃（限量版）",
+        "100202": "购物指挥官娃娃（限量版）",
+        "100302": "运动指挥官娃娃（限量版）",
+        "100402": "战斗指挥官娃娃（限量版）",
+        "100502": "咖啡指挥官娃娃（限量版）",
+        "100602": "午睡指挥官娃娃（限量版）",
+        # 珍藏品 - SSR
+        "200101": "玩具火车套组",
+        "200201": "Gamekid EVO",
+        "200301": "心爱的枕头",
+        "200401": "《英雄三部曲》蓝光光盘",
+        "200501": "第一支手机和联络人记录簿",
+        "200601": "手写信",
+        "200701": "老旧的罗盘",
+        "200801": "反派模型",
+        "200901": "情侣马克杯",
+        "201001": "刑警手册",
+        "201101": "打火器",
+        "201201": "乐谱笔记",
+        "201301": "啦啦队鞋",
+        "201401": "中央政府特别勋章",
+        "201501": "四叶草书签",
+        "201601": "金属项链",
+        "201701": "牡丹花造型发簪",
+        "201801": "珍贵的面具们",
+        "201901": "共同制作的花盆",
+        "202001": "印章戒指",
+        "202101": "纪念钥匙圈",
+    }
+
+    @classmethod
+    def resolve_display_name(cls, kind: str, resource_id: str | int | None) -> str | None:
+        """解析魔方或收藏品/珍藏品的已验证中文名称，未知或未登记录返回 None。"""
+        if isinstance(resource_id, bool) or not isinstance(resource_id, (str, int)):
+            return None
+        key = str(resource_id).strip()
+        if not cls.ID_PATTERN.fullmatch(key):
+            return None
+        if kind == "cube":
+            return cls.VERIFIED_CUBE_NAMES.get(key)
+        if kind in ("favorite_item", "favorite"):
+            return cls.VERIFIED_FAVORITE_ITEM_NAMES.get(key)
+        return None
+
     @staticmethod
     def _reject_duplicate_keys(pairs):
         """拒绝 JSON 重复键，避免歧义映射被静默覆盖。"""
@@ -159,8 +229,8 @@ class StaticDataRegistry:
 
     @classmethod
     def _parse_costume_mapping(cls, data) -> dict[str, str]:
-        """解析 costume_id → canonical Spine identity 的 v2 清单。"""
-        if not isinstance(data, dict) or data.get("schema_version") != 2:
+        """解析 costume_id → canonical Spine identity 的 v2/v3 清单。"""
+        if not isinstance(data, dict) or data.get("schema_version") not in {2, 3}:
             raise RegistryValidationError("costume registry schema_version 无效")
         entries = data.get("entries")
         if not isinstance(entries, list):
@@ -169,12 +239,24 @@ class StaticDataRegistry:
         for row in entries:
             if not isinstance(row, dict):
                 raise RegistryValidationError("costume registry 条目无效")
-            required = ("costume_id", "character_resource_id", "spine_asset_id", "source", "source_sha256", "verified_at")
+            required = ("costume_id", "character_resource_id", "source", "source_sha256", "verified_at")
             if any(not isinstance(row.get(field), (str, int)) or not str(row[field]).strip() for field in required):
                 raise RegistryValidationError("costume registry 来源字段缺失")
             costume_id = str(row["costume_id"])
             owner = str(row["character_resource_id"])
-            asset_id = str(row["spine_asset_id"])
+            spine = row.get("spine")
+            if isinstance(spine, dict):
+                mode = spine.get("mode")
+                asset_id = str(spine.get("asset_id", ""))
+                skin_name = spine.get("skin_name")
+                if mode not in {"independent_asset", "shared_skin"}:
+                    raise RegistryValidationError("costume Spine mode 无效")
+                if mode == "independent_asset" and skin_name is not None:
+                    raise RegistryValidationError("independent costume 不得提供 skin_name")
+                if mode == "shared_skin" and (not isinstance(skin_name, str) or not skin_name.strip()):
+                    raise RegistryValidationError("shared costume 缺少 skin_name")
+            else:
+                asset_id = str(row.get("spine_asset_id", ""))
             if not cls.COSTUME_ID_PATTERN.fullmatch(costume_id):
                 raise RegistryValidationError(f"costume ID 无效: {costume_id!r}")
             if not re.fullmatch(r"(?:c\d+|\d+)", owner, re.IGNORECASE):
