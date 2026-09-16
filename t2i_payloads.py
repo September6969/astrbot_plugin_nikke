@@ -3,6 +3,29 @@ from .campaign_history_models import ClearLineupStatus, StageClearRecord
 from .t2i_assets import T2IAssetResolver
 
 
+def _normalize_equipment_icon(source):
+    """Trim transparent padding, then place equipment art into a stable 180×180 safe box.
+
+    This is presentation-only normalization: it never mutates source assets and it does not
+    affect equipment identity or game data.
+    """
+    from PIL import Image, ImageOps
+
+    if not isinstance(source, Image.Image):
+        return source
+    prepared = source.convert("RGBA")
+    bbox = prepared.getchannel("A").getbbox()
+    canvas = Image.new("RGBA", (180, 180), (0, 0, 0, 0))
+    if bbox is None:
+        return canvas
+    trimmed = prepared.crop(bbox)
+    fitted = ImageOps.contain(trimmed, (150, 150), Image.Resampling.LANCZOS)
+    x = (180 - fitted.width) // 2
+    y = (180 - fitted.height) // 2
+    canvas.alpha_composite(fitted, (x, y))
+    return canvas
+
+
 def display_number(value):
     return "Unknown" if value is None else f"{value:,}"
 
@@ -50,7 +73,7 @@ class CharacterT2IPayloadBuilder:
                              "semantic": "max" if tier == 15 else "high" if tier is not None and tier >= 12 else "neutral",
                              "state": "EMPTY" if option.unit == "empty" else "UNKNOWN" if option.unit not in ("flat", "percent") else "KNOWN"})
             equipment.append({"label": label, "status": f"LV.{item.level}" if item.equipped and item.level is not None else "已装备" if item.equipped else "未装备",
-                              "icon": self.resolver.encode(card_assets.equipment.get(slot), (180, 180)), "options": rows})
+                              "icon": self.resolver.encode(_normalize_equipment_icon(card_assets.equipment.get(slot)), (180, 180)), "options": rows})
         identities = []
         for key, value in (("corporation", data.corporation), ("element", data.element), ("weapon", data.weapon), ("burst", data.burst)):
             identities.append({"label": str(value) if value is not None else "Unknown", "icon": self.resolver.encode(getattr(card_assets, key), (120, 120))})

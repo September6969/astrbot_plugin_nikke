@@ -36,7 +36,8 @@ async def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     for entry in manifest["characters"].values():
-        source = (args.png_dir / entry["png_file"]).resolve()
+        png_name = entry.get("png_file") or Path(entry.get("local_relpath", "")).name
+        source = (args.png_dir / png_name).resolve()
         if not source.is_relative_to(args.png_dir.resolve()):
             raise ValueError("立绘路径越界")
         entry["sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
@@ -47,6 +48,7 @@ async def main():
     master = CharacterMasterResolver()
     cases = {}
     for key, rid, costume in (("snow-white", 471, 0), ("rapi", 10, 0), ("rapi-vacation", 10, 10005),
+                               ("rapi-promise", 10, 20001),
                                ("wide", 330, 0), ("tall", 234, 0), ("elysion", 17, 0), ("tetra", 352, 0)):
         person = master.resolve_resource_id(rid)
         card = replace(example_card(), name_cn=person.name_cn, name_en=person.name_en, name_code=str(person.name_code),
