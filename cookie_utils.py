@@ -1,23 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Cookie 解析工具（与凭据无关的纯文本操作）。"""
+"""兼容历史导入；正式模块已迁移至 core.cookie_utils。"""
+import importlib
+import sys
+import warnings
 
-from __future__ import annotations
+_real_mod = importlib.import_module(".core.cookie_utils", package=__package__ or "astrbot_plugin_nikke")
 
+# 导出符号以兼容 dir() 与直接属性读取
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
-def parse_cookie(cookie: str) -> dict[str, str]:
-    """将 Cookie 字符串解析为 name→value 字典。
+warnings.warn(
+    "Importing cookie_utils from root is deprecated, use astrbot_plugin_nikke.core.cookie_utils instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-    规则：
-    - 分号分隔键值对；
-    - 每对用第一个 '=' 拆分，忽略没有 '=' 的片段；
-    - 键名去除首尾空白，且不能为空。
-    """
-    result: dict[str, str] = {}
-    for part in cookie.split(";"):
-        if "=" not in part:
-            continue
-        name, value = part.strip().split("=", 1)
-        name = name.strip()
-        if name:
-            result[name] = value
-    return result
+sys.modules[__name__] = _real_mod
