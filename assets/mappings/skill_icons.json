@@ -1,0 +1,1656 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14T23:52:01.976853+00:00",
+  "source": "data/nikke/blabla-manifests/character_character_skill_map.json",
+  "total_characters": 206,
+  "characters": {
+    "10": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c010_ult"
+      },
+      "favorite": {}
+    },
+    "11": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c011_ult"
+      },
+      "favorite": {}
+    },
+    "12": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c012_ult"
+      },
+      "favorite": {}
+    },
+    "13": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c013_ult"
+      },
+      "favorite": {}
+    },
+    "14": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c014_ult"
+      },
+      "favorite": {}
+    },
+    "15": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c015_ult"
+      },
+      "favorite": {}
+    },
+    "16": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_stickyprojectile_01",
+        "burst": "icn_skill_c016_ult"
+      },
+      "favorite": {}
+    },
+    "17": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c017_ult"
+      },
+      "favorite": {}
+    },
+    "18": {
+      "normal": {
+        "s1": "icn_skill_debuffimmune_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c018_ult"
+      },
+      "favorite": {}
+    },
+    "20": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c020_ult"
+      },
+      "favorite": {}
+    },
+    "22": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c022_ult"
+      },
+      "favorite": {}
+    },
+    "23": {
+      "normal": {
+        "s1": "icn_skill_damagereductionup_01",
+        "s2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c023_ult"
+      },
+      "favorite": {}
+    },
+    "30": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c030_ult"
+      },
+      "favorite": {}
+    },
+    "32": {
+      "normal": {
+        "s1": "icn_skill_stataccuracycircle_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c032_ult"
+      },
+      "favorite": {}
+    },
+    "33": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c033_ult"
+      },
+      "favorite": {}
+    },
+    "40": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_burstgaugespeedup_01",
+        "burst": "icn_skill_c040_ult"
+      },
+      "favorite": {}
+    },
+    "41": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c041_ult"
+      },
+      "favorite": {}
+    },
+    "43": {
+      "normal": {
+        "s1": "icn_skill_statpenetration_01",
+        "s2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c043_ult"
+      },
+      "favorite": {}
+    },
+    "60": {
+      "normal": {
+        "s1": "icn_skill_statexplosion_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c060_ult"
+      },
+      "favorite": {}
+    },
+    "61": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c061_ult"
+      },
+      "favorite": {}
+    },
+    "62": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_burstgaugespeedup_01",
+        "burst": "icn_skill_c062_ult"
+      },
+      "favorite": {}
+    },
+    "70": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c070_ult"
+      },
+      "favorite": {}
+    },
+    "71": {
+      "normal": {
+        "s1": "icn_skill_rateoffire_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c071_ult"
+      },
+      "favorite": {}
+    },
+    "72": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c072_ult"
+      },
+      "favorite": {}
+    },
+    "73": {
+      "normal": {
+        "s1": "icn_skill_damagereductionup_01",
+        "s2": "icn_skill_damagereductionup_01",
+        "burst": "icn_skill_c073_ult"
+      },
+      "favorite": {}
+    },
+    "74": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c074_ult"
+      },
+      "favorite": {}
+    },
+    "75": {
+      "normal": {
+        "s1": "icn_skill_criticaldamage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c075_ult"
+      },
+      "favorite": {}
+    },
+    "80": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c080_ult"
+      },
+      "favorite": {}
+    },
+    "82": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c082_ult"
+      },
+      "favorite": {}
+    },
+    "90": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c090_ult"
+      },
+      "favorite": {}
+    },
+    "91": {
+      "normal": {
+        "s1": "icn_skill_statexplosion_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c091_ult"
+      },
+      "favorite": {}
+    },
+    "92": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_defdown_01",
+        "burst": "icn_skill_c092_ult"
+      },
+      "favorite": {}
+    },
+    "93": {
+      "normal": {
+        "s1": "icn_skill_damagereductionup_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c093_ult"
+      },
+      "favorite": {}
+    },
+    "94": {
+      "normal": {
+        "s1": "icn_skill_chargedamage_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c094_ult"
+      },
+      "favorite": {}
+    },
+    "95": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c095_ult"
+      },
+      "favorite": {}
+    },
+    "100": {
+      "normal": {
+        "s1": "icn_skill_statexplosion_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c100_ult"
+      },
+      "favorite": {}
+    },
+    "101": {
+      "normal": {
+        "s1": "icn_skill_stataccuracycircle_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c101_ult"
+      },
+      "favorite": {}
+    },
+    "102": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c102_ult"
+      },
+      "favorite": {}
+    },
+    "103": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c103_ult"
+      },
+      "favorite": {}
+    },
+    "104": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c104_ult"
+      },
+      "favorite": {}
+    },
+    "105": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c105_ult"
+      },
+      "favorite": {}
+    },
+    "110": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c110_ult"
+      },
+      "favorite": {}
+    },
+    "111": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c111_ult"
+      },
+      "favorite": {}
+    },
+    "112": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_stataccuracycircle_01",
+        "burst": "icn_skill_c112_ult"
+      },
+      "favorite": {}
+    },
+    "113": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c113_ult"
+      },
+      "favorite": {}
+    },
+    "120": {
+      "normal": {
+        "s1": "icn_skill_statammo_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c120_ult"
+      },
+      "favorite": {}
+    },
+    "121": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c121_ult"
+      },
+      "favorite": {}
+    },
+    "130": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c130_ult"
+      },
+      "favorite": {}
+    },
+    "131": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkdown_01",
+        "burst": "icn_skill_c131_ult"
+      },
+      "favorite": {}
+    },
+    "132": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c132_ult"
+      },
+      "favorite": {}
+    },
+    "140": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c140_ult"
+      },
+      "favorite": {}
+    },
+    "141": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c141_ult"
+      },
+      "favorite": {}
+    },
+    "142": {
+      "normal": {
+        "s1": "icn_skill_defdown_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c142_ult"
+      },
+      "favorite": {}
+    },
+    "143": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_penetrationdamage_01",
+        "burst": "icn_skill_c143_ult"
+      },
+      "favorite": {}
+    },
+    "150": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c150_ult"
+      },
+      "favorite": {}
+    },
+    "160": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c160_ult"
+      },
+      "favorite": {}
+    },
+    "161": {
+      "normal": {
+        "s1": "icn_skill_criticaldamage_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c161_ult"
+      },
+      "favorite": {}
+    },
+    "162": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c162_ult"
+      },
+      "favorite": {}
+    },
+    "170": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c170_ult"
+      },
+      "favorite": {}
+    },
+    "171": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c171_ult"
+      },
+      "favorite": {}
+    },
+    "172": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c172_ult"
+      },
+      "favorite": {}
+    },
+    "180": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c180_ult"
+      },
+      "favorite": {}
+    },
+    "181": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c181_ult"
+      },
+      "favorite": {}
+    },
+    "182": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c182_ult"
+      },
+      "favorite": {}
+    },
+    "183": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c183_ult"
+      },
+      "favorite": {}
+    },
+    "190": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c190_ult"
+      },
+      "favorite": {}
+    },
+    "191": {
+      "normal": {
+        "s1": "icn_skill_rateoffire_01",
+        "s2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c191_ult"
+      },
+      "favorite": {}
+    },
+    "192": {
+      "normal": {
+        "s1": "icn_skill_statammo_01",
+        "s2": "icn_skill_rateoffire_01",
+        "burst": "icn_skill_c192_ult"
+      },
+      "favorite": {}
+    },
+    "193": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c193_ult"
+      },
+      "favorite": {}
+    },
+    "194": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c194_ult"
+      },
+      "favorite": {}
+    },
+    "195": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c195_ult"
+      },
+      "favorite": {}
+    },
+    "200": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c200_ult"
+      },
+      "favorite": {}
+    },
+    "201": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c201_ult"
+      },
+      "favorite": {}
+    },
+    "202": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c202_ult"
+      },
+      "favorite": {}
+    },
+    "203": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c203_ult"
+      },
+      "favorite": {}
+    },
+    "210": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c210_ult"
+      },
+      "favorite": {}
+    },
+    "212": {
+      "normal": {
+        "s1": "icn_skill_defdown_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c212_ult"
+      },
+      "favorite": {}
+    },
+    "220": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c220_ult"
+      },
+      "favorite": {}
+    },
+    "221": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c221_ult"
+      },
+      "favorite": {}
+    },
+    "222": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c222_ult"
+      },
+      "favorite": {}
+    },
+    "223": {
+      "normal": {
+        "s1": "icn_skill_coredamage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c223_ult"
+      },
+      "favorite": {}
+    },
+    "224": {
+      "normal": {
+        "s1": "icn_skill_statammo_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c224_ult"
+      },
+      "favorite": {}
+    },
+    "225": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c225_ult"
+      },
+      "favorite": {}
+    },
+    "226": {
+      "normal": {
+        "s1": "icn_skill_barrier_01",
+        "s2": "icn_skill_healbarrier_01",
+        "burst": "icn_skill_c226_ult"
+      },
+      "favorite": {}
+    },
+    "230": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c230_ult"
+      },
+      "favorite": {}
+    },
+    "231": {
+      "normal": {
+        "s1": "icn_skill_criticaldamage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c231_ult"
+      },
+      "favorite": {}
+    },
+    "232": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c232_ult"
+      },
+      "favorite": {}
+    },
+    "233": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c233_ult"
+      },
+      "favorite": {}
+    },
+    "234": {
+      "normal": {
+        "s1": "icn_skill_statpenetration_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c234_ult"
+      },
+      "favorite": {}
+    },
+    "240": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c240_ult"
+      },
+      "favorite": {}
+    },
+    "241": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c241_ult"
+      },
+      "favorite": {}
+    },
+    "242": {
+      "normal": {
+        "s1": "icn_skill_barrier_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c242_ult"
+      },
+      "favorite": {}
+    },
+    "260": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_stataccuracycircle_01",
+        "burst": "icn_skill_c260_ult"
+      },
+      "favorite": {}
+    },
+    "261": {
+      "normal": {
+        "s1": "icn_skill_statexplosion_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c261_ult"
+      },
+      "favorite": {}
+    },
+    "262": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c262_ult"
+      },
+      "favorite": {}
+    },
+    "270": {
+      "normal": {
+        "s1": "icn_skill_barrier_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c270_ult"
+      },
+      "favorite": {}
+    },
+    "271": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c271_ult"
+      },
+      "favorite": {}
+    },
+    "272": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c272_ult"
+      },
+      "favorite": {}
+    },
+    "280": {
+      "normal": {
+        "s1": "icn_skill_criticaldamage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c280_ult"
+      },
+      "favorite": {}
+    },
+    "281": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c281_ult"
+      },
+      "favorite": {}
+    },
+    "282": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c282_ult"
+      },
+      "favorite": {}
+    },
+    "283": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c283_ult"
+      },
+      "favorite": {}
+    },
+    "284": {
+      "normal": {
+        "s1": "icn_skill_durationvaluechange_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c284_ult"
+      },
+      "favorite": {}
+    },
+    "290": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c290_ult"
+      },
+      "favorite": {}
+    },
+    "291": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c291_ult"
+      },
+      "favorite": {}
+    },
+    "300": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c300_ult"
+      },
+      "favorite": {}
+    },
+    "301": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c301_ult"
+      },
+      "favorite": {}
+    },
+    "302": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c302_ult"
+      },
+      "favorite": {}
+    },
+    "303": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c303_ult"
+      },
+      "favorite": {}
+    },
+    "304": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_atkdown_01",
+        "burst": "icn_skill_c304_ult"
+      },
+      "favorite": {}
+    },
+    "305": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c305_ult"
+      },
+      "favorite": {}
+    },
+    "306": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c306_ult"
+      },
+      "favorite": {}
+    },
+    "307": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c307_ult"
+      },
+      "favorite": {}
+    },
+    "308": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c308_ult"
+      },
+      "favorite": {}
+    },
+    "310": {
+      "normal": {
+        "s1": "icn_skill_debuffimmune_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c310_ult"
+      },
+      "favorite": {}
+    },
+    "311": {
+      "normal": {
+        "s1": "icn_skill_healcover_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c311_ult"
+      },
+      "favorite": {}
+    },
+    "312": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c312_ult"
+      },
+      "favorite": {}
+    },
+    "313": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c313_ult"
+      },
+      "favorite": {}
+    },
+    "314": {
+      "normal": {
+        "s1": "icn_skill_criticaldamage_01",
+        "s2": "icn_skill_incburstduration_01",
+        "burst": "icn_skill_c314_ult"
+      },
+      "favorite": {}
+    },
+    "315": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c315_ult"
+      },
+      "favorite": {}
+    },
+    "316": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c316_ult"
+      },
+      "favorite": {}
+    },
+    "321": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c321_ult"
+      },
+      "favorite": {}
+    },
+    "322": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c322_ult"
+      },
+      "favorite": {}
+    },
+    "330": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c330_ult"
+      },
+      "favorite": {}
+    },
+    "331": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c331_ult"
+      },
+      "favorite": {}
+    },
+    "350": {
+      "normal": {
+        "s1": "icn_skill_criticaldamage_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c350_ult"
+      },
+      "favorite": {}
+    },
+    "351": {
+      "normal": {
+        "s1": "icn_skill_attention_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c351_ult"
+      },
+      "favorite": {}
+    },
+    "352": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c352_ult"
+      },
+      "favorite": {}
+    },
+    "353": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c353_ult"
+      },
+      "favorite": {}
+    },
+    "354": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_sharedamageincrease",
+        "burst": "icn_skill_c354_ult"
+      },
+      "favorite": {}
+    },
+    "355": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c355_ult"
+      },
+      "favorite": {}
+    },
+    "361": {
+      "normal": {
+        "s1": "icn_skill_barrier_01",
+        "s2": "icn_skill_healbarrier_01",
+        "burst": "icn_skill_c361_ult"
+      },
+      "favorite": {}
+    },
+    "380": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c380_ult"
+      },
+      "favorite": {}
+    },
+    "381": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c381_ult"
+      },
+      "favorite": {}
+    },
+    "382": {
+      "normal": {
+        "s1": "icn_skill_bonusrange_01",
+        "s2": "icn_skill_statshotcount_01",
+        "burst": "icn_skill_c382_ult"
+      },
+      "favorite": {}
+    },
+    "390": {
+      "normal": {
+        "s1": "icn_skill_penetrationdamage_01",
+        "s2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c390_ult"
+      },
+      "favorite": {}
+    },
+    "391": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c391_ult"
+      },
+      "favorite": {}
+    },
+    "392": {
+      "normal": {
+        "s1": "icn_skill_burstgaugespeedup_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c392_ult"
+      },
+      "favorite": {}
+    },
+    "400": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c400_ult"
+      },
+      "favorite": {}
+    },
+    "401": {
+      "normal": {
+        "s1": "icn_skill_attention_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c401_ult"
+      },
+      "favorite": {}
+    },
+    "402": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c402_ult"
+      },
+      "favorite": {}
+    },
+    "403": {
+      "normal": {
+        "s1": "icn_skill_damageshareinstant",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c403_ult"
+      },
+      "favorite": {}
+    },
+    "411": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c411_ult"
+      },
+      "favorite": {}
+    },
+    "412": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c412_ult"
+      },
+      "favorite": {}
+    },
+    "430": {
+      "normal": {
+        "s1": "icn_skill_defup_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c430_ult"
+      },
+      "favorite": {}
+    },
+    "431": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c431_ult"
+      },
+      "favorite": {}
+    },
+    "432": {
+      "normal": {
+        "s1": "icn_skill_criticaldamage_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c432_ult"
+      },
+      "favorite": {}
+    },
+    "441": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c441_ult"
+      },
+      "favorite": {}
+    },
+    "450": {
+      "normal": {
+        "s1": "icn_skill_healcover_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c450_ult"
+      },
+      "favorite": {}
+    },
+    "451": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c451_ult"
+      },
+      "favorite": {}
+    },
+    "470": {
+      "normal": {
+        "s1": "icn_skill_chargedamage_01",
+        "s2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c470_ult"
+      },
+      "favorite": {}
+    },
+    "471": {
+      "normal": {
+        "s1": "icn_skill_damagereductionup_01",
+        "s2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c471_ult"
+      },
+      "favorite": {}
+    },
+    "500": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_burstgaugespeedup_01",
+        "burst": "icn_skill_c500_ult"
+      },
+      "favorite": {}
+    },
+    "501": {
+      "normal": {
+        "s1": "icn_skill_damageshareinstant",
+        "s2": "icn_skill_sharedamageincrease",
+        "burst": "icn_skill_c501_ult"
+      },
+      "favorite": {}
+    },
+    "502": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c502_ult"
+      },
+      "favorite": {}
+    },
+    "511": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c511_ult"
+      },
+      "favorite": {}
+    },
+    "513": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damagereductionup_01",
+        "burst": "icn_skill_c513_ult"
+      },
+      "favorite": {}
+    },
+    "514": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c514_ult"
+      },
+      "favorite": {}
+    },
+    "515": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_coredamage_01",
+        "burst": "icn_skill_c515_ult"
+      },
+      "favorite": {}
+    },
+    "520": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c520_ult"
+      },
+      "favorite": {}
+    },
+    "521": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_debuffremove_01",
+        "burst": "icn_skill_c521_ult"
+      },
+      "favorite": {}
+    },
+    "532": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_overhealsave_01",
+        "burst": "icn_skill_c532_ult"
+      },
+      "favorite": {}
+    },
+    "550": {
+      "normal": {
+        "s1": "icn_skill_damageshare_01",
+        "s2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c550_ult"
+      },
+      "favorite": {}
+    },
+    "551": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_debuffimmune_01",
+        "burst": "icn_skill_c551_ult"
+      },
+      "favorite": {}
+    },
+    "570": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c570_ult"
+      },
+      "favorite": {}
+    },
+    "580": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_sharedamageincrease",
+        "burst": "icn_skill_c580_ult"
+      },
+      "favorite": {}
+    },
+    "581": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c581_ult"
+      },
+      "favorite": {}
+    },
+    "582": {
+      "normal": {
+        "s1": "icn_skill_barrier_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c582_ult"
+      },
+      "favorite": {}
+    },
+    "583": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statshotcount_01",
+        "burst": "icn_skill_c583_ult"
+      },
+      "favorite": {}
+    },
+    "590": {
+      "normal": {
+        "s1": "icn_skill_barrier_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c590_ult"
+      },
+      "favorite": {}
+    },
+    "600": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c600_ult"
+      },
+      "favorite": {}
+    },
+    "601": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c601_ult"
+      },
+      "favorite": {}
+    },
+    "610": {
+      "normal": {
+        "s1": "icn_skill_c610_01",
+        "s2": "icn_skill_c610_02",
+        "burst": "icn_skill_c610_ult"
+      },
+      "favorite": {}
+    },
+    "620": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c620_ult"
+      },
+      "favorite": {}
+    },
+    "800": {
+      "normal": {
+        "s1": "icn_skill_statreloadtime_01",
+        "s2": "icn_skill_attention_01",
+        "burst": "icn_skill_c800_ult"
+      },
+      "favorite": {}
+    },
+    "801": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_statexplosion_01",
+        "burst": "icn_skill_c801_ult"
+      },
+      "favorite": {}
+    },
+    "802": {
+      "normal": {
+        "s1": "icn_skill_defdown_01",
+        "s2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c802_ult"
+      },
+      "favorite": {}
+    },
+    "810": {
+      "normal": {
+        "s1": "icn_skill_stathp_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c810_ult"
+      },
+      "favorite": {}
+    },
+    "811": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c811_ult"
+      },
+      "favorite": {}
+    },
+    "812": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c812_ult"
+      },
+      "favorite": {}
+    },
+    "820": {
+      "normal": {
+        "s1": "icn_skill_healshare_01",
+        "s2": "icn_skill_healshare_01",
+        "burst": "icn_skill_c820_ult"
+      },
+      "favorite": {}
+    },
+    "821": {
+      "normal": {
+        "s1": "icn_skill_chargedamage_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c821_ult"
+      },
+      "favorite": {}
+    },
+    "822": {
+      "normal": {
+        "s1": "icn_skill_atkdown_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c822_ult"
+      },
+      "favorite": {}
+    },
+    "830": {
+      "normal": {
+        "s1": "icn_skill_barrierdamage_01",
+        "s2": "icn_skill_coredamage_01",
+        "burst": "icn_skill_c830_ult"
+      },
+      "favorite": {}
+    },
+    "831": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_barrierdamage_01",
+        "burst": "icn_skill_c831_ult"
+      },
+      "favorite": {}
+    },
+    "832": {
+      "normal": {
+        "s1": "icn_skill_barrierdamage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c832_ult"
+      },
+      "favorite": {}
+    },
+    "833": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_barrierdamage_01",
+        "burst": "icn_skill_c833_ult"
+      },
+      "favorite": {}
+    },
+    "834": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c834_ult"
+      },
+      "favorite": {}
+    },
+    "835": {
+      "normal": {
+        "s1": "icn_skill_damagereductionup_01",
+        "s2": "icn_skill_heal_01",
+        "burst": "icn_skill_c835_ult"
+      },
+      "favorite": {}
+    },
+    "836": {
+      "normal": {
+        "s1": "icn_skill_damagereductionup_01",
+        "s2": "icn_skill_damagereductiondown_01",
+        "burst": "icn_skill_c836_ult"
+      },
+      "favorite": {}
+    },
+    "840": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c840_ult"
+      },
+      "favorite": {}
+    },
+    "841": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c841_ult"
+      },
+      "favorite": {}
+    },
+    "842": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c842_ult"
+      },
+      "favorite": {}
+    },
+    "850": {
+      "normal": {
+        "s1": "icn_skill_statcritical_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c850_ult"
+      },
+      "favorite": {}
+    },
+    "851": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c851_ult"
+      },
+      "favorite": {}
+    },
+    "852": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c852_ult"
+      },
+      "favorite": {}
+    },
+    "860": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c860_ult"
+      },
+      "favorite": {}
+    },
+    "861": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_damagereductionup_01",
+        "burst": "icn_skill_c861_ult"
+      },
+      "favorite": {}
+    },
+    "862": {
+      "normal": {
+        "s1": "icn_skill_damage_01",
+        "s2": "icn_skill_damage_01",
+        "burst": "icn_skill_c862_ult"
+      },
+      "favorite": {}
+    },
+    "870": {
+      "normal": {
+        "s1": "icn_skill_damageshareinstant",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c870_ult"
+      },
+      "favorite": {}
+    },
+    "871": {
+      "normal": {
+        "s1": "icn_skill_damageshareinstant",
+        "s2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c871_ult"
+      },
+      "favorite": {}
+    },
+    "872": {
+      "normal": {
+        "s1": "icn_skill_atkup_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c872_ult"
+      },
+      "favorite": {}
+    },
+    "901": {
+      "normal": {
+        "s1": "icn_skill_heal_01",
+        "s2": "icn_skill_defup_01",
+        "burst": "icn_skill_c901_ult"
+      },
+      "favorite": {}
+    },
+    "907": {
+      "normal": {
+        "s1": "icn_skill_c907_01",
+        "s2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c907_ult"
+      },
+      "favorite": {}
+    },
+    "993": {
+      "normal": {
+        "s1": "icn_skill_damagereductiondown_01",
+        "s2": "icn_skill_rateoffire_01",
+        "burst": "icn_skill_c993_ult"
+      },
+      "favorite": {}
+    },
+    "5006": {
+      "normal": {
+        "s1": null,
+        "s2": null,
+        "burst": null
+      },
+      "favorite": {}
+    }
+  }
+}

@@ -249,16 +249,28 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         plugin.announcement_delivery = SimpleNamespace(dispatch=AsyncMock())
         event = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
 
-        locale_reply = [item async for item in plugin.nikke(event, "公告", "语言", "ja")]
-        category_reply = [item async for item in plugin.nikke(event, "公告", "分类", "活动")]
-        query_reply = [item async for item in plugin.nikke(event, "公告", "搜索", "维护")]
-        diagnostic_reply = [item async for item in plugin.nikke(event, "公告", "诊断")]
+        # Simplified command: any extra argument yields simplification message
+        locale_cmd_reply = [item async for item in plugin.nikke(event, "公告", "语言", "ja")]
+        self.assertIn("公告命令已简化", locale_cmd_reply[0])
+
+        category_cmd_reply = [item async for item in plugin.nikke(event, "公告", "分类", "活动")]
+        self.assertIn("公告命令已简化", category_cmd_reply[0])
+
+        query_cmd_reply = [item async for item in plugin.nikke(event, "公告", "搜索", "维护")]
+        self.assertIn("公告命令已简化", query_cmd_reply[0])
+
+        diagnostic_cmd_reply = [item async for item in plugin.nikke(event, "公告", "诊断")]
+        self.assertIn("公告命令已简化", diagnostic_cmd_reply[0])
+
+        # Direct view filtering still functions without fetching or sending
+        locale_reply = [item async for item in plugin.announcements_view(event, locale="ja")]
+        category_reply = [item async for item in plugin.announcements_view(event, category="活动")]
+        query_reply = [item async for item in plugin.announcements_view(event, query="维护")]
 
         self.assertIn("维护告知", locale_reply[0])
         self.assertNotIn("Event Notice", locale_reply[0])
         self.assertIn("Event Notice", category_reply[0])
         self.assertIn("维护告知", query_reply[0])
-        self.assertIn("公开只读", diagnostic_reply[0])
         service.sync_from_source.assert_not_awaited()
         plugin.announcement_delivery.dispatch.assert_not_awaited()
 
@@ -270,12 +282,18 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
             plugin.announcement_delivery = SimpleNamespace()
             service.sync_from_source = AsyncMock(return_value=(True, "同步成功"))
             denied = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
-            denied_reply = [item async for item in plugin.nikke(denied, "公告", "深度刷新", "ja")]
+
+            # Command routing returns simplification message
+            denied_cmd_reply = [item async for item in plugin.nikke(denied, "公告", "深度刷新", "ja")]
+            self.assertIn("公告命令已简化", denied_cmd_reply[0])
+
+            # Direct method tests permission
+            denied_reply = [item async for item in plugin.announcement_deep_rescan(denied, "ja")]
             self.assertIn("仅机器人管理员", denied_reply[0])
             service.sync_from_source.assert_not_awaited()
 
             allowed = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: True)
-            allowed_reply = [item async for item in plugin.nikke(allowed, "公告", "深度刷新", "ja")]
+            allowed_reply = [item async for item in plugin.announcement_deep_rescan(allowed, "ja")]
             self.assertIn("公开只读", allowed_reply[0])
             service.sync_from_source.assert_awaited_once_with(locale="ja", deep=True)
 

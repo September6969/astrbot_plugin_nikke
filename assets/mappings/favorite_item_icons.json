@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14T23:52:27.402818+00:00",
+  "source": "assets/favorite_items.json",
+  "total_items": 33,
+  "items": {
+    "100101": {
+      "item_id": "100101",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "ar",
+      "icon": "si_favoriteitem_ar_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_ar_00.webp"
+    },
+    "100201": {
+      "item_id": "100201",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "mg",
+      "icon": "si_favoriteitem_mg_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_mg_00.webp"
+    },
+    "100301": {
+      "item_id": "100301",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "rl",
+      "icon": "si_favoriteitem_rl_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_rl_00.webp"
+    },
+    "100401": {
+      "item_id": "100401",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "sg",
+      "icon": "si_favoriteitem_sg_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_sg_00.webp"
+    },
+    "100501": {
+      "item_id": "100501",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "smg",
+      "icon": "si_favoriteitem_smg_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_smg_00.webp"
+    },
+    "100601": {
+      "item_id": "100601",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "sr",
+      "icon": "si_favoriteitem_sr_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_sr_00.webp"
+    },
+    "100102": {
+      "item_id": "100102",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "ar",
+      "icon": "si_favoriteitem_ar_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_ar_00.webp"
+    },
+    "100202": {
+      "item_id": "100202",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "mg",
+      "icon": "si_favoriteitem_mg_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_mg_00.webp"
+    },
+    "100302": {
+      "item_id": "100302",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "rl",
+      "icon": "si_favoriteitem_rl_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_rl_00.webp"
+    },
+    "100402": {
+      "item_id": "100402",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "sg",
+      "icon": "si_favoriteitem_sg_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_sg_00.webp"
+    },
+    "100502": {
+      "item_id": "100502",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "smg",
+      "icon": "si_favoriteitem_smg_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_smg_00.webp"
+    },
+    "100602": {
+      "item_id": "100602",
+      "item_type": "collection_item",
+      "character_resource_id": null,
+      "weapon": "sr",
+      "icon": "si_favoriteitem_sr_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_sr_00.webp"
+    },
+    "200101": {
+      "item_id": "200101",
+      "item_type": "favorite_item",
+      "character_resource_id": "72",
+      "weapon": null,
+      "icon": "si_favoriteitem_c072_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c072_00.webp"
+    },
+    "200201": {
+      "item_id": "200201",
+      "item_type": "favorite_item",
+      "character_resource_id": "210",
+      "weapon": null,
+      "icon": "si_favoriteitem_c210_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c210_00.webp"
+    },
+    "200301": {
+      "item_id": "200301",
+      "item_type": "favorite_item",
+      "character_resource_id": "142",
+      "weapon": null,
+      "icon": "si_favoriteitem_c142_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c142_00.webp"
+    },
+    "200401": {
+      "item_id": "200401",
+      "item_type": "favorite_item",
+      "character_resource_id": "100",
+      "weapon": null,
+      "icon": "si_favoriteitem_c100_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c100_00.webp"
+    },
+    "200501": {
+      "item_id": "200501",
+      "item_type": "favorite_item",
+      "character_resource_id": "112",
+      "weapon": null,
+      "icon": "si_favoriteitem_c112_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c112_00.webp"
+    },
+    "200601": {
+      "item_id": "200601",
+      "item_type": "favorite_item",
+      "character_resource_id": "32",
+      "weapon": null,
+      "icon": "si_favoriteitem_c032_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c032_00.webp"
+    },
+    "200701": {
+      "item_id": "200701",
+      "item_type": "favorite_item",
+      "character_resource_id": "352",
+      "weapon": null,
+      "icon": "si_favoriteitem_c352_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c352_00.webp"
+    },
+    "200801": {
+      "item_id": "200801",
+      "item_type": "favorite_item",
+      "character_resource_id": "101",
+      "weapon": null,
+      "icon": "si_favoriteitem_c101_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c101_00.webp"
+    },
+    "200901": {
+      "item_id": "200901",
+      "item_type": "favorite_item",
+      "character_resource_id": "141",
+      "weapon": null,
+      "icon": "si_favoriteitem_c141_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c141_00.webp"
+    },
+    "201001": {
+      "item_id": "201001",
+      "item_type": "favorite_item",
+      "character_resource_id": "30",
+      "weapon": null,
+      "icon": "si_favoriteitem_c030_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c030_00.webp"
+    },
+    "201101": {
+      "item_id": "201101",
+      "item_type": "favorite_item",
+      "character_resource_id": "192",
+      "weapon": null,
+      "icon": "si_favoriteitem_c192_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c192_00.webp"
+    },
+    "201201": {
+      "item_id": "201201",
+      "item_type": "favorite_item",
+      "character_resource_id": "150",
+      "weapon": null,
+      "icon": "si_favoriteitem_c150_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c150_00.webp"
+    },
+    "201301": {
+      "item_id": "201301",
+      "item_type": "favorite_item",
+      "character_resource_id": "550",
+      "weapon": null,
+      "icon": "si_favoriteitem_c550_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c550_00.webp"
+    },
+    "201401": {
+      "item_id": "201401",
+      "item_type": "favorite_item",
+      "character_resource_id": "170",
+      "weapon": null,
+      "icon": "si_favoriteitem_c170_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c170_00.webp"
+    },
+    "201501": {
+      "item_id": "201501",
+      "item_type": "favorite_item",
+      "character_resource_id": "390",
+      "weapon": null,
+      "icon": "si_favoriteitem_c390_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c390_00.webp"
+    },
+    "201601": {
+      "item_id": "201601",
+      "item_type": "favorite_item",
+      "character_resource_id": "80",
+      "weapon": null,
+      "icon": "si_favoriteitem_c080_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c080_00.webp"
+    },
+    "201701": {
+      "item_id": "201701",
+      "item_type": "favorite_item",
+      "character_resource_id": "281",
+      "weapon": null,
+      "icon": "si_favoriteitem_c281_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c281_00.webp"
+    },
+    "201801": {
+      "item_id": "201801",
+      "item_type": "favorite_item",
+      "character_resource_id": "580",
+      "weapon": null,
+      "icon": "si_favoriteitem_c580_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c580_00.webp"
+    },
+    "201901": {
+      "item_id": "201901",
+      "item_type": "favorite_item",
+      "character_resource_id": "411",
+      "weapon": null,
+      "icon": "si_favoriteitem_c411_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c411_00.webp"
+    },
+    "202001": {
+      "item_id": "202001",
+      "item_type": "favorite_item",
+      "character_resource_id": "280",
+      "weapon": null,
+      "icon": "si_favoriteitem_c280_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c280_00.webp"
+    },
+    "202101": {
+      "item_id": "202101",
+      "item_type": "favorite_item",
+      "character_resource_id": "140",
+      "weapon": null,
+      "icon": "si_favoriteitem_c140_00",
+      "relative_path": "icon/favoriteitem/si_favoriteitem_c140_00.webp"
+    }
+  }
+}

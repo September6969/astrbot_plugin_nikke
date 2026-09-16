@@ -87,5 +87,42 @@ class MemorialCategoryRegistry:
         ]
         return result, partial
 
+    @staticmethod
+    def summarize_memorials(
+        memorial_counts: list[object] | None,
+        jukebox_count: str | int | None = None,
+    ) -> dict[str, int]:
+        """提供旧 Profile DTO 所需的四格兼容摘要。
+
+        新路径使用 :meth:`summarize` 保留未知分类与部分状态；该方法仅用于
+        旧 fixture 的兼容字段，不能替代结构化摘要或作为完整性证明。
+        """
+        totals = {"手机": 0, "通话记录": 0, "数据资料": 0, "BGM": 0}
+        if isinstance(memorial_counts, list):
+            for item in memorial_counts:
+                if isinstance(item, dict):
+                    category = item.get("category")
+                    raw_count = item.get("count")
+                else:
+                    category = getattr(item, "category", None)
+                    raw_count = getattr(item, "count", None)
+                try:
+                    count = int(raw_count) if raw_count is not None else 0
+                except (TypeError, ValueError):
+                    count = 0
+                group = MemorialCategoryRegistry.group_for(category)
+                if group == "phone":
+                    totals["手机"] += count
+                elif group == "call_log":
+                    totals["通话记录"] += count
+                elif group == "data":
+                    totals["数据资料"] += count
+        if jukebox_count is not None:
+            try:
+                totals["BGM"] = int(jukebox_count)
+            except (TypeError, ValueError):
+                totals["BGM"] = 0
+        return totals
+
 
 __all__ = ["MemorialCategoryRegistry"]

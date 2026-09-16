@@ -452,11 +452,13 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
 
         # 2. Calendar snapshot available
         cal = CalendarService(Path(self.tmp_dir.name) / "cal")
+        now = datetime.now(timezone.utc)
         act = CalendarActivity(
             event_id="e1",
             title="Active Test Event",
-            start_at=datetime.now(timezone.utc) - timedelta(days=1),
-            end_at=datetime.now(timezone.utc) + timedelta(days=1),
+            # 使用相对当前时间的窗口，避免测试随日历推进而失效。
+            start_at=now - timedelta(hours=2),
+            end_at=now + timedelta(days=2),
         )
         await cal.sync_from_source(fetcher=lambda: [act])
         main_inst.calendar = cal

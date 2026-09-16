@@ -50,10 +50,13 @@ class CalendarService:
         data_dir: Path | str,
         *,
         visual_cache: CalendarVisualCache | None | bool = None,
+        announcement_service: Any = None,
+        **kwargs: Any,
     ) -> None:
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.cache_path = self.data_dir / "calendar_cache.json"
+        self.announcement_service = announcement_service
         if visual_cache is False:
             self.visual_cache = None
         elif isinstance(visual_cache, CalendarVisualCache):

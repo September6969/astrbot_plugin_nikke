@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 from aiohttp import web
 
 from ._version import PLUGIN_VERSION
-
+from .bind_template import render_bind_page
 from .client import BlaBlaClient, BlaBlaError
 from .log_privacy import sanitize_log_text
 from .storage import NikkeStore
@@ -160,16 +160,8 @@ class BindingWebService:
     async def bind_page(self, request: web.Request) -> web.Response:
         token = request.match_info["token"]
         session = self.store.get_bind_session(token) if TOKEN_RE.fullmatch(token) else None
-        valid = bool(session and session["expires_at"] >= int(time.time()) and session["used_at"] is None)
-        status = "链接有效，请在扩展中粘贴本页地址。" if valid else "链接无效、已使用或已过期。"
-        page = f"""<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1'><title>NIKKE 安全绑定</title>
-<style>*{{box-sizing:border-box}}body{{font:16px/1.7 system-ui,sans-serif;background:#111318;color:#f2f3f5;margin:0;padding:24px}}main{{max-width:720px;margin:6vh auto;padding:32px;background:#1a1e25;border:1px solid #343b46;border-top:3px solid #e9b85a;border-radius:12px}}h1{{font-size:clamp(22px,4vw,30px);line-height:1.4}}a{{color:#e9b85a;overflow-wrap:anywhere}}a:focus-visible{{outline:3px solid #e9b85a;outline-offset:4px}}li{{padding:8px 0}}.ok,.bad{{padding:16px;border-radius:8px;background:#222731}}.ok{{color:#8fbca2}}.bad{{color:#e9b85a}}.note{{color:#a9b2c0}}@media(max-width:480px){{body{{padding:16px}}main{{margin:16px auto;padding:20px}}}}</style></head>
-<body><main><h1>NIKKE · BlaBlaLink 安全绑定</h1><p class='{"ok" if valid else "bad"}'>{html.escape(status)}</p>
-<ol><li>安装辅助扩展。</li><li>点击扩展打开BlaBlaLink并完成官方登录。</li><li>回到扩展提交Cookie。</li></ol>
-<p>机器人不会接收或保存你的账号密码。</p>
-<p><a href='/download'>从绑定服务器下载扩展</a> · <a href='https://github.com/September6969/astrbot_plugin_nikke/releases'>GitHub备用下载</a></p>
-<p class='note'>绑定链接仅供本人使用，请勿转发或公开截图。有效链接可从浏览器地址栏复制到扩展；失效后请向机器人重新申请。</p></main></body></html>"""
+        site_origin = getattr(self, "site_origin", SITE_ORIGIN)
+        page = render_bind_page(token, session, site_origin)
         return web.Response(text=page, content_type="text/html")
 
     async def submit_cookies(self, request: web.Request) -> web.Response:
@@ -179,11 +171,27 @@ class BindingWebService:
         x_common_params = str(body.get("x_common_params", ""))
         user_agent = str(body.get("user_agent", ""))[:512]
         if not TOKEN_RE.fullmatch(token):
-            return web.json_response({"ok": False, "error": "绑定令牌格式错误"}, status=400)
+            return web.json_response(
+                {"ok": False, "code": "TOKEN_INVALID", "message": "绑定令牌格式错误", "error": "绑定令牌格式错误"},
+                status=400,
+            )
         session = self.store.get_bind_session(token)
         now = int(time.time())
-        if not session or session["expires_at"] < now or session["used_at"] is not None:
-            return web.json_response({"ok": False, "error": "绑定链接无效、已使用或已过期"}, status=410)
+        if not session:
+            return web.json_response(
+                {"ok": False, "code": "TOKEN_INVALID", "message": "绑定链接无效", "error": "绑定链接无效"},
+                status=410,
+            )
+        if session["used_at"] is not None:
+            return web.json_response(
+                {"ok": False, "code": "TOKEN_USED", "message": "此绑定链接已经使用", "error": "此绑定链接已经使用"},
+                status=410,
+            )
+        if session["expires_at"] < now:
+            return web.json_response(
+                {"ok": False, "code": "TOKEN_EXPIRED", "message": "绑定链接已过期", "error": "绑定链接已过期"},
+                status=410,
+            )
         parts: list[str] = []
         required_names: set[str] = set()
         if isinstance(cookies, list):
@@ -203,8 +211,9 @@ class BindingWebService:
                     required_names.add(name)
         missing = sorted(ALLOWED_COOKIE_NAMES - required_names)
         if missing:
+            msg = "缺少必要 Cookie：" + ", ".join(missing)
             return web.json_response(
-                {"ok": False, "error": "缺少必要 Cookie：" + ", ".join(missing)},
+                {"ok": False, "code": "MISSING_COOKIES", "message": msg, "error": msg},
                 status=400,
             )
         try:
@@ -216,8 +225,9 @@ class BindingWebService:
             or not str(x_common_data.get("openid", "")).strip()
             or len(x_common_params) > 8192
         ):
+            msg = "账号上下文缺失或不完整，请刷新BlaBlaLink个人主页后重试"
             return web.json_response(
-                {"ok": False, "error": "账号上下文缺失或不完整，请刷新BlaBlaLink个人主页后重试"},
+                {"ok": False, "code": "MISSING_CONTEXT", "message": msg, "error": msg},
                 status=400,
             )
         cookie = "; ".join(parts)
@@ -234,26 +244,56 @@ class BindingWebService:
                 x_common_params,
                 user_agent,
             )
-            return web.json_response({"ok": True, "qq_id": qq_id, "nickname": result.nickname})
+            return web.json_response({
+                "ok": True,
+                "code": "BOUND",
+                "data": {
+                    "nickname": result.nickname,
+                    "qq_id": qq_id,
+                },
+                "qq_id": qq_id,
+                "nickname": result.nickname,
+            })
         except (BlaBlaError, ValueError) as exc:
             error = public_error(exc)
             self.store.fail_bind_session(token, error)
-            return web.json_response({"ok": False, "error": error}, status=400)
+            return web.json_response(
+                {"ok": False, "code": "INVALID_COOKIE", "message": error, "error": error},
+                status=400,
+            )
         except Exception:
             self.store.fail_bind_session(token, "服务器验证失败")
-            return web.json_response({"ok": False, "error": "服务器验证失败，请稍后重试"}, status=502)
+            return web.json_response(
+                {"ok": False, "code": "SERVER_ERROR", "message": "服务器验证失败，请稍后重试", "error": "服务器验证失败，请稍后重试"},
+                status=502,
+            )
 
     async def bind_status(self, request: web.Request) -> web.Response:
         token = str(request.query.get("token", ""))
         session = self.store.get_bind_session(token) if TOKEN_RE.fullmatch(token) else None
         if not session:
             return web.json_response({"ok": False, "status": "missing"}, status=404)
+        now = int(time.time())
+        expired = session["expires_at"] < now
+        status = session["status"]
+        masked_qq = ""
+        qq_id = session.get("qq_id", "")
+        if qq_id:
+            masked_qq = f"********{qq_id[-4:]}" if len(qq_id) >= 4 else "********"
+        account = None
+        if status in ("success", "consumed") and qq_id:
+            account = self.store.get_account(qq_id, with_cookie=False)
+        nickname = account.get("nickname") if account else ""
+
         return web.json_response(
             {
                 "ok": True,
-                "status": session["status"],
-                "expired": session["expires_at"] < int(time.time()),
+                "status": status,
+                "expired": expired,
                 "error": session["error"],
+                "nickname": nickname,
+                "masked_qq": masked_qq,
+                "remaining_seconds": max(0, session["expires_at"] - now) if not expired else 0,
             }
         )
 

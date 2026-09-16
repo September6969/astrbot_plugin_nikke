@@ -12,6 +12,7 @@ artifacts/
 output/playwright/
 .playwright-cli/
 cache/
+reports/
 preview/
 
 
