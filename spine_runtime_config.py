@@ -1,71 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""根据插件配置创建可选的 Spine runtime 编排器。"""
+"""兼容历史导入；正式模块已迁移至 integrations.spine.config。"""
+import importlib
+import sys
+import warnings
 
-from __future__ import annotations
+_real_mod = importlib.import_module(".integrations.spine.config", package=__package__ or "astrbot_plugin_nikke")
 
-import logging
-from pathlib import Path
-from typing import Any, Mapping
+# 导出符号以兼容 dir() 与直接属性读取
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
-from .spine_prerenderer import SpineBundleFetcher, SpinePreRenderer
-from .spine_runtime_worker import SpineWorkerConfig, SpineWorkerRuntime
+warnings.warn(
+    "Importing spine_runtime_config from root is deprecated, use astrbot_plugin_nikke.integrations.spine.config instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-logger = logging.getLogger("nikke.spine.config")
-
-
-def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None = None) -> SpinePreRenderer:
-    """只有明确配置且存在 worker 时启用 runtime，否则使用中性占位图。"""
-
-    values = config if isinstance(config, Mapping) else {}
-    worker_value = values.get("spine_worker_path", "")
-    worker_path = Path(worker_value).expanduser() if isinstance(worker_value, str) and worker_value.strip() else None
-    root = Path(cache_dir)
-    bundle_root = root / "spine-bundles"
-    if worker_path is None:
-        return SpinePreRenderer(root)
-    try:
-        worker_path = worker_path.resolve()
-    except OSError:
-        logger.warning("Spine worker 路径无法解析，使用中性占位图")
-        return SpinePreRenderer(root)
-    if not worker_path.is_file():
-        logger.warning("Spine worker 不存在，使用中性占位图")
-        return SpinePreRenderer(root)
-    version = str(values.get("spine_runtime_version", "4.0")).strip() or "4.0"
-    timeout = values.get("spine_worker_timeout", 4)
-    runtimes: dict[str, SpineWorkerRuntime] = {}
-    try:
-        runtimes[version] = SpineWorkerRuntime(
-            SpineWorkerConfig(
-                executable=worker_path,
-                bundle_root=bundle_root,
-                timeout_seconds=float(timeout),
-            ),
-            version=version,
-        )
-    except (TypeError, ValueError, OSError):
-        logger.warning("Spine worker 配置无效，使用中性占位图")
-        return SpinePreRenderer(root)
-
-    # 可选配置 4.1 worker 路径（如独立的 spine 4.1 headless worker）
-    worker_41_value = values.get("spine_worker_path_4_1", "")
-    if isinstance(worker_41_value, str) and worker_41_value.strip():
-        try:
-            worker_41_path = Path(worker_41_value).expanduser().resolve()
-            if worker_41_path.is_file():
-                runtimes["4.1"] = SpineWorkerRuntime(
-                    SpineWorkerConfig(
-                        executable=worker_41_path,
-                        bundle_root=bundle_root,
-                        timeout_seconds=float(timeout),
-                    ),
-                    version="4.1",
-                )
-        except OSError:
-            pass
-
-    return SpinePreRenderer(
-        root,
-        runtime=runtimes,
-        fetcher=SpineBundleFetcher(bundle_root),
-    )
+sys.modules[__name__] = _real_mod
