@@ -455,8 +455,8 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         act = CalendarActivity(
             event_id="e1",
             title="Active Test Event",
-            start_at=datetime(2026, 9, 13, 10, 0, tzinfo=timezone.utc),
-            end_at=datetime(2026, 9, 15, 10, 0, tzinfo=timezone.utc),
+            start_at=datetime.now(timezone.utc) - timedelta(days=1),
+            end_at=datetime.now(timezone.utc) + timedelta(days=1),
         )
         await cal.sync_from_source(fetcher=lambda: [act])
         main_inst.calendar = cal

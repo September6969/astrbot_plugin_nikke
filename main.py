@@ -205,7 +205,11 @@ class NikkePlugin(Star):
 
     async def _try_t2i(self, page, data, **kwargs):
         """图片展示失败返回空信号，由命令使用已取得的数据安全回退。"""
-        if (getattr(self, "config", None) or {}).get("ui_renderer", "pillow") != "t2i":
+        config = getattr(self, "config", None) or {}
+        if page == "character":
+            if config.get("character_card_layout", "replica") == "classic":
+                return None
+        elif config.get("ui_renderer", "pillow") != "t2i":
             return None
         try:
             renderer = getattr(self, "campaign_t2i_renderer", None)

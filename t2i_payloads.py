@@ -28,15 +28,6 @@ class CharacterT2IPayloadBuilder:
         from .character_card_renderer import CharacterCardRenderer
         from PIL import Image
         portrait = card_assets.portrait
-        if isinstance(portrait, Image.Image):
-            from .character_crop import crop_and_fit_character_portrait, resolve_crop_key
-            crop_key = resolve_crop_key(
-                name_code=getattr(data, "name_code", None) if not isinstance(data, dict) else data.get("name_code"),
-                resource_id=getattr(data, "resource_id", None) if not isinstance(data, dict) else data.get("resource_id"),
-                costume_id=getattr(data, "costume_id", None) if not isinstance(data, dict) else data.get("costume_id"),
-                spine_asset_id=getattr(data, "spine_asset_id", None) if not isinstance(data, dict) else data.get("spine_asset_id"),
-            )
-            portrait = crop_and_fit_character_portrait(portrait, crop_key=crop_key)
         theme = character_theme(data.corporation, data.element, portrait)
         dom, sec, drk, sat = _extract_portrait_palette(portrait)
         if dom and sat:
@@ -55,22 +46,35 @@ class CharacterT2IPayloadBuilder:
                 option = options[index] if index < len(options) else EquipmentOption("empty", "空槽", 0, "empty")
                 tier = option.tier if type(option.tier) is int and 1 <= option.tier <= 15 else None
                 rows.append({"name": option.display_name, "value": CharacterCardRenderer._option_value(option),
-                             "tier": f"T{tier}" if tier is not None else "—",
+                             "tier": f"T{tier}" if tier is not None else "—", "replica_tier": f"{tier}阶" if tier is not None else "—",
                              "semantic": "max" if tier == 15 else "high" if tier is not None and tier >= 12 else "neutral",
                              "state": "EMPTY" if option.unit == "empty" else "UNKNOWN" if option.unit not in ("flat", "percent") else "KNOWN"})
             equipment.append({"label": label, "status": f"LV.{item.level}" if item.equipped and item.level is not None else "已装备" if item.equipped else "未装备",
-                              "icon": self.resolver.encode(card_assets.equipment.get(slot), (64, 64)), "options": rows})
+                              "icon": self.resolver.encode(card_assets.equipment.get(slot), (180, 180)), "options": rows})
         identities = []
         for key, value in (("corporation", data.corporation), ("element", data.element), ("weapon", data.weapon), ("burst", data.burst)):
-            identities.append({"label": str(value) if value is not None else "Unknown", "icon": self.resolver.encode(getattr(card_assets, key), (40, 40))})
+            identities.append({"label": str(value) if value is not None else "Unknown", "icon": self.resolver.encode(getattr(card_assets, key), (120, 120))})
         def item_payload(item, image):
             return {"name": item.display_name or "已装备 · 名称 Unknown" if item else "EMPTY / 未装备",
-                    "level": "LV." + display_number(item.level) if item else "—", "icon": self.resolver.encode(image, (48, 48))}
+                    "level": "LV." + display_number(item.level) if item else "—", "icon": self.resolver.encode(image, (100, 100))}
         corp_asset = getattr(card_assets, "corporation", None)
         watermark = self.resolver.encode(corp_asset, (260, 260)) if corp_asset else None
-        return {"name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
+        from .character_replica import build_summary, cache_identity, SHORT_NAMES, VERSION, replica_font, art_style
+        for gear in equipment:
+            for row in gear["options"]:
+                row["short_name"] = SHORT_NAMES.get(row["name"].strip("【】"), row["name"])
+        replica = build_summary(data)
+        return {"replica_summary": replica, "template_version": VERSION, "cache_identity": cache_identity(data),
+                "grade": data.grade, "core": data.core,
+                "skill_items": [{"label": label, "level": level,
+                                  "icon": self.resolver.encode(card_assets.skills.get(key), (110, 110))}
+                                 for key, label, level in (("skill1", "技能1", data.skill1_level),
+                                                           ("skill2", "技能2", data.skill2_level),
+                                                           ("burst", "爆裂", data.burst_skill_level))],
+                "replica_font": replica_font(), "art_style": art_style(data, portrait),
+                "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
-                "character_art_data_uri": self.resolver.encode(portrait, (700, 744)), "theme": asdict(theme), "identities": identities,
+                "character_art_data_uri": self.resolver.encode(portrait, (1600, 2400)), "theme": asdict(theme), "identities": identities,
                 "corporation_watermark": watermark, "bg_gradient": bg_grad,
                 "summary": [{"label": item.display_name, "value": CharacterCardRenderer._option_value(item), "tier": "—"} for item in data.option_totals],
                 "equipment": equipment, "skills": f"{data.skill1_level} / {data.skill2_level} / {data.burst_skill_level}",

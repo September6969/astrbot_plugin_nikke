@@ -28,6 +28,8 @@ class EquipmentOption:
     state_effect_id: str | None = None
     components: tuple["EquipmentOption", ...] = ()
     tier: int | None = None
+    effect_group_id: str | None = None
+    raw_value: int | None = None
 
 
 @dataclass(slots=True)
@@ -102,6 +104,9 @@ class CharacterCardData:
     stat_calculation_reason: str | None = None
     spine_asset_id: str | None = None
     costume_selection: CostumeSelection | None = None
+    base_ammo: int | None = None
+    base_charge_seconds: str | None = None
+    weapon_base_source: str | None = None
 
 
 @dataclass(slots=True)
@@ -114,5 +119,6 @@ class CharacterCardAssets:
     corporation: Image.Image
     weapon: Image.Image
     burst: Image.Image
+    skills: dict[str, Image.Image] = field(default_factory=dict)
 
 

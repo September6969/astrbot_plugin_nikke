@@ -175,19 +175,21 @@
       "costume_name": null,
       "is_costume": false,
       "local_relpath": "assets/spine-rendered/c471.png",
-      "sha256": "63bc619f215fc84544c9e185e4a005ecab8f5c1dac5eb06d9f47d2f959a6f5aa",
-      "width": 618,
-      "height": 887,
+      "sha256": "a19ec702ceae1de34a7144d16fdc146ad4c90c9cfa35b310a60828b7738eada0",
+      "width": 2474,
+      "height": 3548,
       "format": "png",
-      "file_size": 479770,
+      "file_size": 4903991,
       "alpha_bbox": [
-        219,
-        82,
-        805,
-        937
+        876,
+        328,
+        3222,
+        3748
       ],
       "runtime_version": "4.1",
-      "verification": "local_revalidated"
+      "verification": "offline_spine_webgl_4.1.56_idle_0",
+      "render_width": 4096,
+      "crop_padding": 64
     }
   }
 }

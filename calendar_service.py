@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """NIKKE 结构化活动日程服务。
 
-遵循 Calendar v0.4 规格：
+遵循 Calendar v0.5 规格：
 1. 维护本地结构化 activity snapshot，支持原子缓存写入；
 2. 规范化 7/14/30 天 horizon 过滤，默认 14 天；
 3. 输出互斥的【即将结束】、【进行中】、【即将开始】三组展示；
 4. 同步失败时绝不破坏现有缓存，保留旧快照并提供告警提示；
 5. list_reminder_deadlines 必须只返回 active 活动；
-6. 统一使用 timezone-aware UTC datetime 计算，CST (UTC+8) 展示。
+6. 统一使用 timezone-aware UTC datetime 计算，CST (UTC+8) 展示；
+7. 活动宣传图缓存失败不得影响结构化日程快照。
 """
 
 from __future__ import annotations
@@ -17,12 +18,14 @@ import inspect
 import json
 import logging
 import os
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from .calendar_models import CalendarActivity, _aware_utc
 from .calendar_sources import GameKeeNikkeScheduleSource
+from .calendar_visuals import CalendarVisualCache
 from .log_privacy import safe_exception_message
 
 logger = logging.getLogger("nikke.calendar.service")
@@ -33,6 +36,8 @@ CAT_LABELS = {
     "union_raid": "联盟突袭",
     "solo_raid": "单人突袭",
     "recruit": "招募",
+    "double_reward": "双倍",
+    "special_arena": "特殊竞技场",
     "maintenance": "维护",
     "update": "更新",
     "event": "活动",
@@ -40,17 +45,30 @@ CAT_LABELS = {
 
 
 class CalendarService:
-    def __init__(self, data_dir: Path | str) -> None:
+    def __init__(
+        self,
+        data_dir: Path | str,
+        *,
+        visual_cache: CalendarVisualCache | None | bool = None,
+    ) -> None:
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.cache_path = self.data_dir / "calendar_cache.json"
+        if visual_cache is False:
+            self.visual_cache = None
+        elif isinstance(visual_cache, CalendarVisualCache):
+            self.visual_cache = visual_cache
+        else:
+            self.visual_cache = CalendarVisualCache(self.data_dir)
 
         self._activities: dict[str, CalendarActivity] = {}
         self._has_snapshot: bool = False
         self.last_updated_at: str | None = None
         self.last_sync_report: dict[str, int] | None = None
+        self.last_visual_sync: dict[str, int] | None = None
         self.last_sync_error: str = ""
 
+        self._sync_lock = asyncio.Lock()
         self._load_cache()
 
     def has_snapshot(self) -> bool:
@@ -61,6 +79,12 @@ class CalendarService:
 
     def list_activities(self) -> list[CalendarActivity]:
         return list(self._activities.values())
+
+    def resolve_visual_path(self, activity: CalendarActivity | str) -> Path | None:
+        if self.visual_cache is None:
+            return None
+        event_id = activity if isinstance(activity, str) else activity.event_id
+        return self.visual_cache.resolve_path(event_id)
 
     @staticmethod
     def normalize_horizon(value: Any) -> int:
@@ -109,11 +133,11 @@ class CalendarService:
             self._activities = {}
             self._has_snapshot = False
 
-    def _save_cache(self) -> None:
+    def _save_cache(self, activities=None, updated_at=None) -> None:
         payload = {
-            "schema": 1,
-            "updated_at": self.last_updated_at or datetime.now(timezone.utc).isoformat(),
-            "activities": [act.to_dict() for act in self._activities.values()],
+            "schema": 2,
+            "updated_at": updated_at or self.last_updated_at or datetime.now(timezone.utc).isoformat(),
+            "activities": [act.to_dict() for act in (self._activities if activities is None else activities).values()],
         }
         tmp_path = self.cache_path.with_suffix(".json.tmp")
         content = json.dumps(payload, ensure_ascii=False, indent=2)
@@ -124,9 +148,14 @@ class CalendarService:
         tmp_path.replace(self.cache_path)
 
     async def sync_from_source(self, fetcher: Any = None) -> tuple[bool, str]:
+        async with self._sync_lock:
+            return await self._sync_from_source(fetcher)
+
+    async def _sync_from_source(self, fetcher: Any = None) -> tuple[bool, str]:
         """从上游数据源拉取活动并原子更新缓存。
 
-        若同步失败，绝不修改、清空现有快照或删除现有缓存。
+        若结构化数据同步失败，绝不修改、清空现有快照或删除现有缓存。
+        宣传图同步失败只记录日志，不回滚结构化数据。
         """
         if fetcher is None:
             fetcher = GameKeeNikkeScheduleSource()
@@ -144,7 +173,7 @@ class CalendarService:
             else:
                 incoming = res
 
-            if not isinstance(incoming, list):
+            if not isinstance(incoming, list) or any(not isinstance(act, CalendarActivity) for act in incoming):
                 raise ValueError(f"数据源返回必须是 CalendarActivity 列表: {type(incoming)}")
 
         except asyncio.CancelledError:
@@ -155,7 +184,6 @@ class CalendarService:
             logger.warning("[NIKKE] 日程数据同步失败: %s", err)
             return False, err
 
-        # 批次内按 event_id 去重
         deduped: dict[str, CalendarActivity] = {}
         for act in incoming:
             if not isinstance(act, CalendarActivity):
@@ -163,7 +191,6 @@ class CalendarService:
             if act.event_id not in deduped:
                 deduped[act.event_id] = act
 
-        # 版本控制：fingerprint 不变时继承旧版本，变化时递增
         merged: dict[str, CalendarActivity] = {}
         for eid, act in deduped.items():
             old = self._activities.get(eid)
@@ -174,18 +201,28 @@ class CalendarService:
                     v = old.version + 1
             else:
                 v = 1
-            object.__setattr__(act, "version", v)
-            merged[eid] = act
+            merged[eid] = replace(act, version=v)
 
+        updated_at = datetime.now(timezone.utc).isoformat()
+        try:
+            self._save_cache(merged, updated_at)
+        except Exception as exc:
+            self.last_sync_error = safe_exception_message(exc)
+            logger.error("[NIKKE] 日程缓存保存失败: %s", self.last_sync_error)
+            return False, self.last_sync_error
         self._activities = merged
         self._has_snapshot = True
         self.last_sync_error = ""
-        self.last_updated_at = datetime.now(timezone.utc).isoformat()
+        self.last_updated_at = updated_at
         self.last_sync_report = getattr(fetcher, "last_scan", None)
-        try:
-            self._save_cache()
-        except Exception as exc:
-            logger.error("[NIKKE] 日程缓存保存失败: %s", safe_exception_message(exc))
+
+        if self.visual_cache is not None:
+            try:
+                self.last_visual_sync = await self.visual_cache.sync(list(merged.values()))
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                logger.warning("[NIKKE] 活动宣传图缓存失败，保留结构化日程: %s", safe_exception_message(exc))
 
         return True, "ok"
 
@@ -233,7 +270,6 @@ class CalendarService:
         fallback_error: str = "",
     ) -> str:
         current = _aware_utc(now) if now else datetime.now(timezone.utc)
-        horizon = timedelta(days=days)
 
         if not self._has_snapshot:
             if fallback_error:

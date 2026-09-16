@@ -745,6 +745,15 @@ class AssetManager:
             ),
         }
 
+        from .character_weapon_bases import resolve
+        skill_names = resolve(data.resource_id).get("skills", {})
+        for key, name in skill_names.items():
+            if key in ("skill1", "skill2", "burst") and re.fullmatch(r"[A-Za-z0-9_]+", name):
+                tasks["skill_" + key] = (
+                    lambda name=name: self._load_cached(f"skills/{name}.webp"),
+                    lambda: None,
+                )
+
         results: dict[str, Image.Image] = {}
         future_map: dict[concurrent.futures.Future, str] = {}
 
@@ -802,6 +811,8 @@ class AssetManager:
             corporation=results.get("corporation") or tasks["corporation"][1](),
             weapon=results.get("weapon") or tasks["weapon"][1](),
             burst=results.get("burst") or tasks["burst"][1](),
+            skills={key: results["skill_" + key] for key in ("skill1", "skill2", "burst")
+                    if results.get("skill_" + key) is not None},
         )
 
     def close(self) -> None:

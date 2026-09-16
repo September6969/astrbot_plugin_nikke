@@ -22,6 +22,7 @@ class ReleaseMetadataTests(unittest.TestCase):
     def test_schema_defaults_and_configuration_document_are_complete(self):
         schema = json.loads((ROOT / "_conf_schema.json").read_text(encoding="utf-8"))
         expected = {
+            "character_card_layout": ("string", "replica"),
             "ui_renderer": ("string", "pillow"),
             "public_base_url": ("string", "https://nikke.irises777.xyz"),
             "web_host": ("string", "0.0.0.0"),

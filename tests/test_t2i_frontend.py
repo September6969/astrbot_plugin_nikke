@@ -211,7 +211,8 @@ async def test_character_slots_theme_and_assets(tmp_path):
     assert payload.get("corporation_watermark", "").startswith("data:image/png;base64,")
     template, _ = native.call_args.args
     html = Environment(autoescape=False).from_string(template).render(**payload)
-    assert 'class="corp-watermark"' in html
+    assert 'class="corp-watermark"' not in html
+    assert 'class="equipment-grid"' in html
     assets.close()
 
 
@@ -271,11 +272,12 @@ async def test_character_card_visual_polish(tmp_path):
     assert "bg_gradient" in payload
     assert payload["bg_gradient"].startswith("radial-gradient(")
     html = Environment(autoescape=False).from_string(template).render(**payload)
-    assert "--bg-gradient:" in html
-    assert "backdrop-filter:blur(12px)" in html
+    assert 'width:1600px;height:2400px' in html
+    assert "backdrop-filter:blur(22px)" in html
     assert "overflow:hidden" in html
-    assert "font-size:70px" in html
-    assert "font-size:62px" in html
+    assert "replica-1600x2400-v1" in html
+    assert '<footer' not in html
+    assert 'class="skill-strip"' in html
     assets.close()
 
 
