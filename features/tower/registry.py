@@ -84,8 +84,13 @@ class TowerRegistry:
     _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
     def __init__(self, path: Path):
+        p = Path(path)
+        if not p.is_file():
+            cand = p.parent / "data" / p.name
+            if cand.is_file():
+                p = cand
         data = json.loads(
-            path.read_text(encoding="utf-8"),
+            p.read_text(encoding="utf-8"),
             object_pairs_hook=self._reject_duplicate_keys,
         )
         self.source, self.updated_at, self.source_sha256, self.floors = self._parse_snapshot(data)

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NIKKE local Spine manifest v2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_repo",
+    "source_commit",
+    "generated_at",
+    "default_target_count",
+    "costume_target_count",
+    "unique_target_count",
+    "render_success",
+    "render_failed",
+    "render_missing",
+    "assets"
+  ],
+  "properties": {
+    "schema_version": {"const": 2},
+    "source_repo": {"type": "string", "format": "uri"},
+    "source_commit": {"type": "string", "pattern": "^(unknown|[0-9a-fA-F]{7,64})$"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "default_target_count": {"type": "integer", "minimum": 0},
+    "costume_target_count": {"type": "integer", "minimum": 0},
+    "unique_target_count": {"type": "integer", "minimum": 0},
+    "render_success": {"type": "integer", "minimum": 0},
+    "render_failed": {"type": "integer", "minimum": 0},
+    "render_missing": {"type": "integer", "minimum": 0},
+    "failed_ids": {"type": "array", "items": {"type": "string"}},
+    "missing_ids": {"type": "array", "items": {"type": "string"}},
+    "assets": {
+      "type": "object",
+      "patternProperties": {
+        "^c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?$": {
+          "type": "object",
+          "required": [
+            "asset_id",
+            "source_repo",
+            "source_commit",
+            "runtime_version",
+            "skel_relative_path",
+            "atlas_relative_path",
+            "texture_count",
+            "animation",
+            "rendered_png",
+            "width",
+            "height",
+            "alpha_bbox",
+            "sha256",
+            "updated_at"
+          ],
+          "properties": {
+            "asset_id": {"type": "string", "pattern": "^c[0-9]+(?:_[0-9]+)?$"},
+            "source_repo": {"type": "string", "format": "uri"},
+            "source_commit": {"type": "string", "pattern": "^(unknown|[0-9a-fA-F]{7,64})$"},
+            "runtime_version": {"type": "string", "pattern": "^4\\.[01]$"},
+            "skel_relative_path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+            "atlas_relative_path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+            "texture_count": {"type": "integer", "minimum": 1},
+            "animation": {"type": "string", "minLength": 1},
+            "rendered_png": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+\\.png$"},
+            "width": {"type": "integer", "minimum": 1},
+            "height": {"type": "integer", "minimum": 1},
+            "alpha_bbox": {
+              "type": "array",
+              "prefixItems": [
+                {"type": "integer", "minimum": 0},
+                {"type": "integer", "minimum": 0},
+                {"type": "integer", "minimum": 1},
+                {"type": "integer", "minimum": 1}
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+            "updated_at": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

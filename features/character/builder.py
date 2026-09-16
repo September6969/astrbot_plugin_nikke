@@ -154,12 +154,15 @@ class CharacterCardBuilder:
         stat_calculator: CharacterStatCalculator | None = None,
         unknown_ol_inventory_path: str | Path | None = None,
     ):
-        self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(
-            Path(__file__).resolve().parents[2] / "assets" / "state_effects.json"
-        )
-        self.overload_tier_registry = overload_tier_registry or OverloadTierRegistry.from_file(
-            Path(__file__).resolve().parents[2] / "assets" / "overload_tiers.json"
-        )
+        se_path = Path(__file__).resolve().parents[2] / "assets" / "data" / "state_effects.json"
+        if not se_path.is_file():
+            se_path = Path(__file__).resolve().parents[2] / "assets" / "state_effects.json"
+        self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(se_path)
+
+        ol_path = Path(__file__).resolve().parents[2] / "assets" / "data" / "overload_tiers.json"
+        if not ol_path.is_file():
+            ol_path = Path(__file__).resolve().parents[2] / "assets" / "overload_tiers.json"
+        self.overload_tier_registry = overload_tier_registry or OverloadTierRegistry.from_file(ol_path)
         self.stat_calculator = stat_calculator or CharacterStatCalculator()
         self.unknown_ol_inventory = (
             UnknownOlInventory(unknown_ol_inventory_path)

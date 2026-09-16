@@ -41,8 +41,13 @@ class OverloadTierRegistry:
 
     @classmethod
     def from_file(cls, path: str | Path) -> "OverloadTierRegistry":
+        p = Path(path)
+        if not p.is_file():
+            cand = p.parent / "data" / p.name
+            if cand.is_file():
+                p = cand
         try:
-            data = json.loads(Path(path).read_text(encoding="utf-8"))
+            data = json.loads(p.read_text(encoding="utf-8"))
             return cls(cls._parse(data))
         except (OSError, UnicodeError, json.JSONDecodeError, OverloadTierRegistryError) as exc:
             return cls(errors=[str(exc)])

@@ -66,6 +66,10 @@ class CampaignStageResolver:
     @classmethod
     def from_file(cls, path: str | Path) -> CampaignStageResolver:
         p = Path(path)
+        if not p.is_file():
+            cand = p.parent / "data" / p.name
+            if cand.is_file():
+                p = cand
         try:
             data = json.loads(p.read_text(encoding="utf-8"))
         except (OSError, ValueError):

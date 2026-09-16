@@ -24,11 +24,24 @@ class CardRenderer:
     def __init__(self, output_dir: str | Path, font_dir: str | Path):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        font_dir = Path(font_dir)
-        regular = font_dir / "NotoSansHans-Regular.otf"
-        medium = font_dir / "NotoSansHans-Medium.otf"
-        self.regular_path = str(regular if regular.exists() else "DejaVuSans.ttf")
-        self.medium_path = str(medium if medium.exists() else self.regular_path)
+        f_dir = Path(font_dir)
+
+        def _resolve(name: str) -> Path | None:
+            for cand in (
+                f_dir / name,
+                f_dir / "assets" / "fonts" / name,
+                f_dir / "fonts" / name,
+                f_dir.parent / "assets" / "fonts" / name,
+                f_dir.parent / "fonts" / name,
+            ):
+                if cand.is_file():
+                    return cand
+            return None
+
+        regular = _resolve("NotoSansHans-Regular.otf")
+        medium = _resolve("NotoSansHans-Medium.otf")
+        self.regular_path = str(regular if regular else "DejaVuSans.ttf")
+        self.medium_path = str(medium if medium else self.regular_path)
 
     def font(self, size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
         return _font(self.medium_path if bold else self.regular_path, size)

@@ -39,7 +39,12 @@ class VoiceMapRegistry:
     SPEECH_ID = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}$")
 
     def __init__(self, path: str | Path):
-        self.path = Path(path)
+        p = Path(path)
+        if not p.is_file():
+            cand = p.parent / "data" / p.name
+            if cand.is_file():
+                p = cand
+        self.path = p
         self.errors: list[str] = []
         self._entries: dict[tuple[str, str, str, str, int], VoiceMapping] = {}
         self._load()
