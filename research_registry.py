@@ -1,62 +1,20 @@
-"""循环研究 ID 映射，官网 QueryKeys 与公开静态表交叉确认。"""
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""兼容历史导入；正式模块已迁移至 features.character.registries.research。"""
+import importlib
+import sys
+import warnings
 
-# 来源与固定快照见 docs/evidence/overnight.md，未知 ID 不推断名称。
-RESEARCH_TYPES = {
-    "1001": ("General", "Personal"),
-    "1101": ("Attacker", "Class"),
-    "1102": ("Defender", "Class"),
-    "1103": ("Supporter", "Class"),
-    "1201": ("Elysion", "Corporation"),
-    "1202": ("Missilis", "Corporation"),
-    "1203": ("Tetra", "Corporation"),
-    "1204": ("Pilgrim", "Corporation"),
-    "1205": ("Abnormal", "Corporation"),
-}
+_real_mod = importlib.import_module(".features.character.registries.research", package=__package__ or "astrbot_plugin_nikke")
 
-RESEARCH_PRESENTATION_NAMES = {
-    "general": "通用研究",
-    "attacker": "火力型",
-    "defender": "防御型",
-    "supporter": "辅助型",
-    "elysion": "极乐净土",
-    "missilis": "米西里斯",
-    "tetra": "泰特拉",
-    "pilgrim": "朝圣者",
-    "abnormal": "反常",
-}
+# 导出公共和私有符号至全局空间以兼容静态工具与 dir()
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
+warnings.warn(
+    "Importing research_registry from root is deprecated, use astrbot_plugin_nikke.features.character.registries.research instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-RESEARCH_ZH_NAMES = {
-    "General": "通用研究",
-    "Attacker": "火力型",
-    "Defender": "防御型",
-    "Supporter": "辅助型",
-    "Elysion": "极乐净土",
-    "Missilis": "米西里斯",
-    "Tetra": "泰特拉",
-    "Pilgrim": "朝圣者",
-    "Abnormal": "反常",
-}
-
-RESEARCH_ZH_CATEGORIES = {
-    "Personal": "通用",
-    "Class": "职业",
-    "Corporation": "企业",
-}
-
-
-def research_labels(tid):
-    return RESEARCH_TYPES.get(str(tid), (None, None))
-
-
-def research_zh_name(display_name: str | None) -> str | None:
-    if not display_name:
-        return None
-    return RESEARCH_ZH_NAMES.get(display_name, display_name)
-
-
-def research_presentation_label(tid):
-    """把已确认的内部研究名转换为 UI 文案；未知 ID 不猜测。"""
-    display_name, _ = research_labels(tid)
-    return RESEARCH_PRESENTATION_NAMES.get(str(display_name or "").casefold())
-
+sys.modules[__name__] = _real_mod

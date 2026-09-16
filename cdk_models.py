@@ -1,24 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""CDK 兑换数据模型。"""
+"""兼容历史导入；正式模块已迁移至 features.cdk.models。"""
+import importlib
+import sys
+import warnings
 
-from __future__ import annotations
+_real_mod = importlib.import_module(".features.cdk.models", package=__package__ or "astrbot_plugin_nikke")
 
-from dataclasses import dataclass, field
+# 导出公共和私有符号至全局空间以兼容静态工具与 dir()
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
+warnings.warn(
+    "Importing cdk_models from root is deprecated, use astrbot_plugin_nikke.features.cdk.models instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-@dataclass(slots=True)
-class CdkRedeemResult:
-    code: str
-    success: bool
-    message: str | None = None
-    is_unknown: bool = False
-    is_rate_limited: bool = False
-    terminal: bool = True
-
-
-@dataclass(slots=True)
-class CdkBatchResult:
-    results: list[CdkRedeemResult] = field(default_factory=list)
-    stopped_by_rate_limit: bool = False
-    stopped_by_cookie: bool = False
-
+sys.modules[__name__] = _real_mod

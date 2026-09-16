@@ -1,46 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""战役历史通关阵容数据合同。"""
+"""兼容历史导入；正式模块已迁移至 features.campaign.models。"""
+import importlib
+import sys
+import warnings
 
-from __future__ import annotations
+_real_mod = importlib.import_module(".features.campaign.models", package=__package__ or "astrbot_plugin_nikke")
 
-from dataclasses import dataclass, field
-from enum import Enum
+# 导出公共和私有符号至全局空间以兼容静态工具与 dir()
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
+warnings.warn(
+    "Importing campaign_history_models from root is deprecated, use astrbot_plugin_nikke.features.campaign.models instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-class ClearLineupStatus(str, Enum):
-    AVAILABLE = "available"
-    UNAVAILABLE = "unavailable"
-    RATE_LIMITED = "rate_limited"
-    ERROR = "error"
-
-
-@dataclass(slots=True)
-class StageClearMember:
-    tid: int
-    level: int
-    combat: int
-    slot: int
-    name_cn: str = ""
-    name_en: str = ""
-    resource_id: str | None = None
-    costume_id: int | str | None = None
-    name_code: int | None = None
-
-
-@dataclass(slots=True)
-class StageClearRecord:
-    mode: str  # NORMAL / HARD
-    chapter: int
-    stage_name: str
-    stage_id: int
-    status: ClearLineupStatus = ClearLineupStatus.AVAILABLE
-    status_message: str = ""
-    members: list[StageClearMember] = field(default_factory=list)
-    commander_name: str = ""
-    fetched_at: str = ""
-    plugin_version: str = ""
-
-    @property
-    def total_combat(self) -> int:
-        return sum(member.combat for member in self.members)
-
+sys.modules[__name__] = _real_mod

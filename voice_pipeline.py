@@ -1,67 +1,20 @@
-"""下载与编码共享一次出卡预算；后台任务由管线统一回收。"""
-import asyncio
-import inspect
-import math
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""兼容历史导入；正式模块已迁移至 features.voice.pipeline。"""
+import importlib
+import sys
+import warnings
 
+_real_mod = importlib.import_module(".features.voice.pipeline", package=__package__ or "astrbot_plugin_nikke")
 
-class VoicePipeline:
-    def __init__(self, provider, encoder, *, max_pending=20):
-        if isinstance(max_pending, bool) or not isinstance(max_pending, int) or not 1 <= max_pending <= 20:
-            raise ValueError("语音任务数量超限")
-        self.provider, self.encoder = provider, encoder
-        self.max_pending = max_pending
-        self._tasks = {}
-        self._closed = False
+# 导出公共和私有符号至全局空间以兼容静态工具与 dir()
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
-    async def resolve(self, map_key, speech_id, locale, *, adapter="aiocqhttp", budget=4):
-        if self._closed or adapter != "aiocqhttp":
-            return None
-        if (
-            isinstance(budget, bool)
-            or not isinstance(budget, (int, float))
-            or not math.isfinite(float(budget))
-            or not 0 < budget <= 5
-        ):
-            raise ValueError("语音响应预算必须在 0 到 5 秒之间")
-        key = (map_key, speech_id, locale, adapter)
-        task = self._tasks.get(key)
-        if task is None:
-            if len(self._tasks) >= self.max_pending:
-                return None
-            task = asyncio.create_task(self._prepare(*key))
-            self._tasks[key] = task
-            def completed(done):
-                self._tasks.pop(key, None)
-                # 读取异常，避免请求已超时后产生未处理的后台异常。
-                if not done.cancelled():
-                    done.exception()
-            task.add_done_callback(completed)
-        try:
-            # 下载、排队与编码共用外层预算，超时后仅继续准备缓存。
-            return await asyncio.wait_for(asyncio.shield(task), budget)
-        except (asyncio.TimeoutError, OSError, ValueError):
-            return None
+warnings.warn(
+    "Importing voice_pipeline from root is deprecated, use astrbot_plugin_nikke.features.voice.pipeline instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-    async def _prepare(self, map_key, speech_id, locale, adapter):
-        async def work():
-            source = await self.provider.resolve(map_key, speech_id, locale, budget=30)
-            if source is None:
-                return None
-            return await self.encoder.encode(source, adapter=adapter)
-        # 后台预备也有上限，不能因编码排队永久占用任务槽。
-        return await asyncio.wait_for(work(), 35)
-
-    async def close(self):
-        self._closed = True
-        tasks = list(self._tasks.values())
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        for resource in (self.provider, self.encoder):
-            close = getattr(resource, "close", None)
-            if close is None:
-                continue
-            result = close()
-            if inspect.isawaitable(result):
-                await result
-        self._tasks.clear()
+sys.modules[__name__] = _real_mod
