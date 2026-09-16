@@ -9,7 +9,10 @@ from pathlib import Path
 @lru_cache(maxsize=1)
 def metadata():
     try:
-        data = json.loads((Path(__file__).parent / "assets/face_anchors.json").read_text(encoding="utf-8"))
+        cand = Path(__file__).parent / "assets" / "data" / "face_anchors.json"
+        if not cand.is_file():
+            cand = Path(__file__).parent / "assets" / "face_anchors.json"
+        data = json.loads(cand.read_text(encoding="utf-8"))
         return data.get("records", {}) if data.get("schema") == 1 else {}
     except (OSError, ValueError, AttributeError):
         return {}

@@ -104,18 +104,30 @@ class CharacterDirectoryResolver:
         self._user_alias_to_canonical: dict[str, str] = {}
 
         if catalog_path is not None:
-            self._load_catalog(Path(catalog_path))
+            p = Path(catalog_path)
+            if not p.is_file() and (p.parent / "data" / p.name).is_file():
+                p = p.parent / "data" / p.name
+            self._load_catalog(p)
+        elif alias_path is not None and (Path(alias_path).parent / "data" / "character_catalog.json").is_file():
+            self._load_catalog(Path(alias_path).parent / "data" / "character_catalog.json")
         elif alias_path is not None and (Path(alias_path).parent / "character_catalog.json").is_file():
             self._load_catalog(Path(alias_path).parent / "character_catalog.json")
         else:
-            default_cat = Path(__file__).resolve().parents[2] / "assets" / "character_catalog.json"
+            default_cat = Path(__file__).resolve().parents[2] / "assets" / "data" / "character_catalog.json"
+            if not default_cat.is_file():
+                default_cat = Path(__file__).resolve().parents[2] / "assets" / "character_catalog.json"
             if default_cat.is_file():
                 self._load_catalog(default_cat)
 
         if alias_path is not None:
-            self._load_aliases(Path(alias_path))
+            p = Path(alias_path)
+            if not p.is_file() and (p.parent / "data" / p.name).is_file():
+                p = p.parent / "data" / p.name
+            self._load_aliases(p)
         else:
-            default_alias = Path(__file__).resolve().parents[2] / "assets" / "character_aliases.json"
+            default_alias = Path(__file__).resolve().parents[2] / "assets" / "data" / "character_aliases.json"
+            if not default_alias.is_file():
+                default_alias = Path(__file__).resolve().parents[2] / "assets" / "character_aliases.json"
             if default_alias.is_file():
                 self._load_aliases(default_alias)
         if user_aliases:

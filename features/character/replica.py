@@ -102,7 +102,9 @@ def replica_font():
 def _font_uri():
     import base64
     from pathlib import Path
-    path = Path(__file__).resolve().parents[2] / "fonts/ReplicaSans.otf"
-    if not path.is_file():
+    cand = Path(__file__).resolve().parents[2] / "assets" / "fonts" / "ReplicaSans.otf"
+    if not cand.is_file():
+        cand = Path(__file__).resolve().parents[2] / "fonts" / "ReplicaSans.otf"
+    if not cand.is_file():
         return None
-    return "data:font/otf;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
+    return "data:font/otf;base64," + base64.b64encode(cand.read_bytes()).decode("ascii")

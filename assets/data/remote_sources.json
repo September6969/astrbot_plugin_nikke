@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "description": "NIKKE 统一资源层远程源模板与集中配置，URL 中使用占位符 {key} 或 {path}",
+  "sources": {
+    "skill": [
+      "https://sg-tools-cdn.blablalink.com/{path_hash}.webp",
+      "https://sg-tools-cdn.blablalink.com/{path_hash}.png"
+    ],
+    "costume": [
+      "https://sg-tools-cdn.blablalink.com/{path_hash}.webp"
+    ],
+    "cube": [
+      "https://sg-tools-cdn.blablalink.com/{path_hash}.webp"
+    ],
+    "favorite_item": [
+      "https://sg-tools-cdn.blablalink.com/{path_hash}.webp"
+    ]
+  },
+  "endpoints": {
+    "blablalink_cdn_base": "https://sg-tools-cdn.blablalink.com/",
+    "nikke_db_cdn_base": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/images"
+  }
+}

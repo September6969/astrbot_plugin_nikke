@@ -39,8 +39,16 @@ class CharacterMasterResolver:
 
     def __init__(self, master_path: str | Path | None = None):
         if master_path is None:
-            master_path = Path(__file__).resolve().parents[2] / "assets" / "character_master.json"
-        self._master_path = Path(master_path)
+            cand = Path(__file__).resolve().parents[2] / "assets" / "data" / "character_master.json"
+            if not cand.is_file():
+                cand = Path(__file__).resolve().parents[2] / "assets" / "character_master.json"
+            master_path = cand
+        p = Path(master_path)
+        if not p.is_file():
+            cand = p.parent / "data" / p.name
+            if cand.is_file():
+                p = cand
+        self._master_path = p
         self._characters: list[ResolvedCharacter] = []
         self._by_prefix: dict[int, ResolvedCharacter] = {}
         self._by_id: dict[int, ResolvedCharacter] = {}

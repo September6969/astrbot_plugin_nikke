@@ -1,0 +1,1605 @@
+{
+  "schema_version": 1,
+  "characters": [
+    {
+      "resource_id": 10,
+      "character_key": "rapi",
+      "name_en": "Rapi",
+      "name_zh_tw": "拉毗",
+      "spine_asset_id": "c010",
+      "name_code": 3001
+    },
+    {
+      "resource_id": 11,
+      "character_key": "neon",
+      "name_en": "Neon",
+      "name_zh_tw": "尼恩",
+      "spine_asset_id": "c011",
+      "name_code": 3002
+    },
+    {
+      "resource_id": 12,
+      "character_key": "anis",
+      "name_en": "Anis",
+      "name_zh_tw": "阿妮斯",
+      "spine_asset_id": "c012",
+      "name_code": 3005
+    },
+    {
+      "resource_id": 14,
+      "character_key": "neon_blue_ocean",
+      "name_en": "Neon: Blue Ocean",
+      "name_zh_tw": "尼恩：藍色海洋",
+      "spine_asset_id": "c014",
+      "name_code": 5071
+    },
+    {
+      "resource_id": 15,
+      "character_key": "anis_sparkling_summer",
+      "name_en": "Anis: Sparkling Summer",
+      "name_zh_tw": "阿妮斯：閃耀夏日",
+      "spine_asset_id": "c015",
+      "name_code": 5097
+    },
+    {
+      "resource_id": 16,
+      "character_key": "rapi_red_hood",
+      "name_en": "Rapi: Red Hood",
+      "name_zh_tw": "拉毗：小紅帽",
+      "spine_asset_id": "c016",
+      "name_code": 5129
+    },
+    {
+      "resource_id": 17,
+      "character_key": "anis_star",
+      "name_en": "Anis: Star",
+      "name_zh_tw": "阿妮斯：超級巨星",
+      "spine_asset_id": "c017",
+      "name_code": 5169
+    },
+    {
+      "resource_id": 18,
+      "character_key": "neon_vision_eye",
+      "name_en": "Neon: Vision Eye",
+      "name_zh_tw": "尼恩：透視之眼",
+      "spine_asset_id": "c018",
+      "name_code": 5170
+    },
+    {
+      "resource_id": 20,
+      "character_key": "delta",
+      "name_en": "Delta",
+      "name_zh_tw": "德爾塔",
+      "spine_asset_id": "c020",
+      "name_code": 3003
+    },
+    {
+      "resource_id": 22,
+      "character_key": "signal",
+      "name_en": "Signal",
+      "name_zh_tw": "西格娜",
+      "spine_asset_id": "c022",
+      "name_code": 5015
+    },
+    {
+      "resource_id": 23,
+      "character_key": "delta_ninja_thief",
+      "name_en": "Delta: Ninja Thief",
+      "name_zh_tw": "德爾塔：怪盜忍者",
+      "spine_asset_id": "c023",
+      "name_code": 5154
+    },
+    {
+      "resource_id": 30,
+      "character_key": "poli",
+      "name_en": "Poli",
+      "name_zh_tw": "波莉",
+      "spine_asset_id": "c030",
+      "name_code": 5016
+    },
+    {
+      "resource_id": 32,
+      "character_key": "miranda",
+      "name_en": "Miranda",
+      "name_zh_tw": "米蘭達",
+      "spine_asset_id": "c032",
+      "name_code": 5017
+    },
+    {
+      "resource_id": 33,
+      "character_key": "quiry",
+      "name_en": "Quiry",
+      "name_zh_tw": "基里",
+      "spine_asset_id": "c033",
+      "name_code": 5082
+    },
+    {
+      "resource_id": 40,
+      "character_key": "d",
+      "name_en": "D",
+      "name_zh_tw": "D",
+      "spine_asset_id": "c040",
+      "name_code": 1007
+    },
+    {
+      "resource_id": 41,
+      "character_key": "k",
+      "name_en": "K",
+      "name_zh_tw": "K",
+      "spine_asset_id": "c041",
+      "name_code": 5141
+    },
+    {
+      "resource_id": 43,
+      "character_key": "d_killer_wife",
+      "name_en": "D: Killer Wife",
+      "name_zh_tw": "D：殺手妻子",
+      "spine_asset_id": "c043",
+      "name_code": 5110
+    },
+    {
+      "resource_id": 60,
+      "character_key": "belorta",
+      "name_en": "Belorta",
+      "name_zh_tw": "貝洛塔",
+      "spine_asset_id": "c060",
+      "name_code": 3007
+    },
+    {
+      "resource_id": 61,
+      "character_key": "mica",
+      "name_en": "Mica",
+      "name_zh_tw": "米卡",
+      "spine_asset_id": "c061",
+      "name_code": 3008
+    },
+    {
+      "resource_id": 62,
+      "character_key": "mica_snow_buddy",
+      "name_en": "Mica: Snow Buddy",
+      "name_zh_tw": "米卡：雪地夥伴",
+      "spine_asset_id": "c062",
+      "name_code": 5104
+    },
+    {
+      "resource_id": 70,
+      "character_key": "brid",
+      "name_en": "Brid",
+      "name_zh_tw": "布麗德",
+      "spine_asset_id": "c070",
+      "name_code": 5018
+    },
+    {
+      "resource_id": 71,
+      "character_key": "soline",
+      "name_en": "Soline",
+      "name_zh_tw": "索林",
+      "spine_asset_id": "c071",
+      "name_code": 5019
+    },
+    {
+      "resource_id": 72,
+      "character_key": "diesel",
+      "name_en": "Diesel",
+      "name_zh_tw": "迪塞爾",
+      "spine_asset_id": "c072",
+      "name_code": 5020
+    },
+    {
+      "resource_id": 73,
+      "character_key": "brid_silent_track",
+      "name_en": "Brid: Silent Track",
+      "name_zh_tw": "布麗德：靜默軌道",
+      "spine_asset_id": "c073",
+      "name_code": 5160
+    },
+    {
+      "resource_id": 74,
+      "character_key": "soline_frost_ticket",
+      "name_en": "Soline: Frost Ticket",
+      "name_zh_tw": "索林：霜雪車票",
+      "spine_asset_id": "c074",
+      "name_code": 5158
+    },
+    {
+      "resource_id": 75,
+      "character_key": "diesel_winter_sweets",
+      "name_en": "Diesel: Winter Sweets",
+      "name_zh_tw": "迪塞爾：冬日甜心",
+      "spine_asset_id": "c075",
+      "name_code": 5159
+    },
+    {
+      "resource_id": 80,
+      "character_key": "centi",
+      "name_en": "Centi",
+      "name_zh_tw": "桑迪",
+      "spine_asset_id": "c080",
+      "name_code": 5021
+    },
+    {
+      "resource_id": 82,
+      "character_key": "liter",
+      "name_en": "Liter",
+      "name_zh_tw": "麗塔",
+      "spine_asset_id": "c082",
+      "name_code": 5011
+    },
+    {
+      "resource_id": 90,
+      "character_key": "emma",
+      "name_en": "Emma",
+      "name_zh_tw": "艾瑪",
+      "spine_asset_id": "c090",
+      "name_code": 5005
+    },
+    {
+      "resource_id": 91,
+      "character_key": "vesti",
+      "name_en": "Vesti",
+      "name_zh_tw": "貝斯蒂",
+      "spine_asset_id": "c091",
+      "name_code": 5022
+    },
+    {
+      "resource_id": 92,
+      "character_key": "eunhwa",
+      "name_en": "Eunhwa",
+      "name_zh_tw": "銀華",
+      "spine_asset_id": "c092",
+      "name_code": 5023
+    },
+    {
+      "resource_id": 93,
+      "character_key": "emma_tactical_upgrade",
+      "name_en": "Emma: Tactical Upgrade",
+      "name_zh_tw": "艾瑪：戰術升級",
+      "spine_asset_id": "c093",
+      "name_code": 5147
+    },
+    {
+      "resource_id": 94,
+      "character_key": "vesti_tactical_upgrade",
+      "name_en": "Vesti: Tactical Upgrade",
+      "name_zh_tw": "貝斯蒂：戰術升級",
+      "spine_asset_id": "c094",
+      "name_code": 5148
+    },
+    {
+      "resource_id": 95,
+      "character_key": "eunhwa_tactical_upgrade",
+      "name_en": "Eunhwa: Tactical Upgrade",
+      "name_zh_tw": "銀華：戰術升級",
+      "spine_asset_id": "c095",
+      "name_code": 5149
+    },
+    {
+      "resource_id": 100,
+      "character_key": "laplace",
+      "name_en": "Laplace",
+      "name_zh_tw": "拉普拉斯",
+      "spine_asset_id": "c100",
+      "name_code": 1010
+    },
+    {
+      "resource_id": 101,
+      "character_key": "drake",
+      "name_en": "Drake",
+      "name_zh_tw": "德雷克",
+      "spine_asset_id": "c101",
+      "name_code": 5024
+    },
+    {
+      "resource_id": 102,
+      "character_key": "maxwell",
+      "name_en": "Maxwell",
+      "name_zh_tw": "麥斯威爾",
+      "spine_asset_id": "c102",
+      "name_code": 5001
+    },
+    {
+      "resource_id": 103,
+      "character_key": "laplace_ultimate_hero",
+      "name_en": "Laplace: Ultimate Hero",
+      "name_zh_tw": "拉普拉斯：究極英雄",
+      "spine_asset_id": "c103",
+      "name_code": 5177
+    },
+    {
+      "resource_id": 104,
+      "character_key": "drake_great_villain",
+      "name_en": "Drake: Great Villain",
+      "name_zh_tw": "德雷克：終極反派",
+      "spine_asset_id": "c104",
+      "name_code": 5181
+    },
+    {
+      "resource_id": 105,
+      "character_key": "maxwell_ordinary_mechanic",
+      "name_en": "Maxwell: Ordinary Mechanic",
+      "name_zh_tw": "麥斯威爾：平凡技師",
+      "spine_asset_id": "c105",
+      "name_code": 5178
+    },
+    {
+      "resource_id": 110,
+      "character_key": "crow",
+      "name_en": "Crow",
+      "name_zh_tw": "克拉烏",
+      "spine_asset_id": "c110",
+      "name_code": 5025
+    },
+    {
+      "resource_id": 111,
+      "character_key": "jackal",
+      "name_en": "Jackal",
+      "name_zh_tw": "豺狼",
+      "spine_asset_id": "c111",
+      "name_code": 1020
+    },
+    {
+      "resource_id": 112,
+      "character_key": "viper",
+      "name_en": "Viper",
+      "name_zh_tw": "毒蛇",
+      "spine_asset_id": "c112",
+      "name_code": 1022
+    },
+    {
+      "resource_id": 113,
+      "character_key": "e_h",
+      "name_en": "E.H.",
+      "name_zh_tw": "E.H.",
+      "spine_asset_id": "c113",
+      "name_code": 5166
+    },
+    {
+      "resource_id": 120,
+      "character_key": "n102",
+      "name_en": "N102",
+      "name_zh_tw": "N102",
+      "spine_asset_id": "c120",
+      "name_code": 3009
+    },
+    {
+      "resource_id": 121,
+      "character_key": "anne_miracle_fairy",
+      "name_en": "Anne: Miracle Fairy",
+      "name_zh_tw": "安妮：奇蹟仙女",
+      "spine_asset_id": "c121",
+      "name_code": 5085
+    },
+    {
+      "resource_id": 130,
+      "character_key": "mary",
+      "name_en": "Mary",
+      "name_zh_tw": "梅里",
+      "spine_asset_id": "c130",
+      "name_code": 5026
+    },
+    {
+      "resource_id": 131,
+      "character_key": "pepper",
+      "name_en": "Pepper",
+      "name_zh_tw": "佩珀",
+      "spine_asset_id": "c131",
+      "name_code": 5027
+    },
+    {
+      "resource_id": 132,
+      "character_key": "mary_bay_goddess",
+      "name_en": "Mary: Bay Goddess",
+      "name_zh_tw": "梅里：海灣女神",
+      "spine_asset_id": "c132",
+      "name_code": 5064
+    },
+    {
+      "resource_id": 140,
+      "character_key": "sugar",
+      "name_en": "Sugar",
+      "name_zh_tw": "舒格",
+      "spine_asset_id": "c140",
+      "name_code": 5002
+    },
+    {
+      "resource_id": 141,
+      "character_key": "milk",
+      "name_en": "Milk",
+      "name_zh_tw": "米爾克",
+      "spine_asset_id": "c141",
+      "name_code": 5028
+    },
+    {
+      "resource_id": 142,
+      "character_key": "frima",
+      "name_en": "Frima",
+      "name_zh_tw": "普琳瑪",
+      "spine_asset_id": "c142",
+      "name_code": 5010
+    },
+    {
+      "resource_id": 143,
+      "character_key": "milk_blooming_bunny",
+      "name_en": "Milk: Blooming Bunny",
+      "name_zh_tw": "米爾克：花漾兔女郎",
+      "spine_asset_id": "c143",
+      "name_code": 5150
+    },
+    {
+      "resource_id": 150,
+      "character_key": "julia",
+      "name_en": "Julia",
+      "name_zh_tw": "尤莉亞",
+      "spine_asset_id": "c150",
+      "name_code": 5014
+    },
+    {
+      "resource_id": 160,
+      "character_key": "yuni",
+      "name_en": "Yuni",
+      "name_zh_tw": "尤妮",
+      "spine_asset_id": "c160",
+      "name_code": 5006
+    },
+    {
+      "resource_id": 161,
+      "character_key": "mihara",
+      "name_en": "Mihara",
+      "name_zh_tw": "米哈拉",
+      "spine_asset_id": "c161",
+      "name_code": 3006
+    },
+    {
+      "resource_id": 162,
+      "character_key": "mihara_bonding_chain",
+      "name_en": "Mihara: Bonding Chain",
+      "name_zh_tw": "米哈拉：羈絆鎖鏈",
+      "spine_asset_id": "c162",
+      "name_code": 5138
+    },
+    {
+      "resource_id": 170,
+      "character_key": "privaty",
+      "name_en": "Privaty",
+      "name_zh_tw": "普麗瓦蒂",
+      "spine_asset_id": "c170",
+      "name_code": 5007
+    },
+    {
+      "resource_id": 171,
+      "character_key": "yulha",
+      "name_en": "Yulha",
+      "name_zh_tw": "尤爾夏",
+      "spine_asset_id": "c171",
+      "name_code": 5029
+    },
+    {
+      "resource_id": 172,
+      "character_key": "admi",
+      "name_en": "Admi",
+      "name_zh_tw": "艾德米",
+      "spine_asset_id": "c172",
+      "name_code": 5030
+    },
+    {
+      "resource_id": 180,
+      "character_key": "guillotine",
+      "name_en": "Guillotine",
+      "name_zh_tw": "吉蘿婷",
+      "spine_asset_id": "c180",
+      "name_code": 5031
+    },
+    {
+      "resource_id": 181,
+      "character_key": "maiden",
+      "name_en": "Maiden",
+      "name_zh_tw": "梅登",
+      "spine_asset_id": "c181",
+      "name_code": 5032
+    },
+    {
+      "resource_id": 182,
+      "character_key": "guillotine_winter_slayer",
+      "name_en": "Guillotine: Winter Slayer",
+      "name_zh_tw": "吉蘿婷：寒冬殺手",
+      "spine_asset_id": "c182",
+      "name_code": 5128
+    },
+    {
+      "resource_id": 183,
+      "character_key": "maiden_ice_rose",
+      "name_en": "Maiden: Ice Rose",
+      "name_zh_tw": "梅登：冰玫瑰",
+      "spine_asset_id": "c183",
+      "name_code": 5127
+    },
+    {
+      "resource_id": 190,
+      "character_key": "ludmilla",
+      "name_en": "Ludmilla",
+      "name_zh_tw": "魯德米拉",
+      "spine_asset_id": "c190",
+      "name_code": 5033
+    },
+    {
+      "resource_id": 191,
+      "character_key": "alice",
+      "name_en": "Alice",
+      "name_zh_tw": "愛麗絲",
+      "spine_asset_id": "c191",
+      "name_code": 5004
+    },
+    {
+      "resource_id": 192,
+      "character_key": "tove",
+      "name_en": "Tove",
+      "name_zh_tw": "托比",
+      "spine_asset_id": "c192",
+      "name_code": 5081
+    },
+    {
+      "resource_id": 193,
+      "character_key": "neve",
+      "name_en": "Neve",
+      "name_zh_tw": "尼夫",
+      "spine_asset_id": "c193",
+      "name_code": 3011
+    },
+    {
+      "resource_id": 194,
+      "character_key": "ludmilla_winter_owner",
+      "name_en": "Ludmilla: Winter Owner",
+      "name_zh_tw": "魯德米拉：冬日之主",
+      "spine_asset_id": "c194",
+      "name_code": 5103
+    },
+    {
+      "resource_id": 195,
+      "character_key": "alice_wonderland_bunny",
+      "name_en": "Alice: Wonderland Bunny",
+      "name_zh_tw": "愛麗絲：仙境兔女郎",
+      "spine_asset_id": "c195",
+      "name_code": 5114
+    },
+    {
+      "resource_id": 200,
+      "character_key": "rupee",
+      "name_en": "Rupee",
+      "name_zh_tw": "露菲",
+      "spine_asset_id": "c200",
+      "name_code": 5034
+    },
+    {
+      "resource_id": 201,
+      "character_key": "yan",
+      "name_en": "Yan",
+      "name_zh_tw": "楊",
+      "spine_asset_id": "c201",
+      "name_code": 5035
+    },
+    {
+      "resource_id": 202,
+      "character_key": "dolla",
+      "name_en": "Dolla",
+      "name_zh_tw": "朵拉",
+      "spine_asset_id": "c202",
+      "name_code": 5036
+    },
+    {
+      "resource_id": 203,
+      "character_key": "rupee_winter_shopper",
+      "name_en": "Rupee: Winter Shopper",
+      "name_zh_tw": "露菲：冬日購物狂",
+      "spine_asset_id": "c203",
+      "name_code": 5087
+    },
+    {
+      "resource_id": 210,
+      "character_key": "exia",
+      "name_en": "Exia",
+      "name_zh_tw": "艾可希雅",
+      "spine_asset_id": "c210",
+      "name_code": 5003
+    },
+    {
+      "resource_id": 212,
+      "character_key": "novel",
+      "name_en": "Novel",
+      "name_zh_tw": "諾薇兒",
+      "spine_asset_id": "c212",
+      "name_code": 5037
+    },
+    {
+      "resource_id": 220,
+      "character_key": "snow_white",
+      "name_en": "Snow White",
+      "name_zh_tw": "白雪公主",
+      "spine_asset_id": "c220",
+      "name_code": 5012
+    },
+    {
+      "resource_id": 221,
+      "character_key": "rapunzel",
+      "name_en": "Rapunzel",
+      "name_zh_tw": "長髮公主",
+      "spine_asset_id": "c221",
+      "name_code": 5040
+    },
+    {
+      "resource_id": 222,
+      "character_key": "scarlet",
+      "name_en": "Scarlet",
+      "name_zh_tw": "紅蓮",
+      "spine_asset_id": "c222",
+      "name_code": 5041
+    },
+    {
+      "resource_id": 223,
+      "character_key": "nayuta",
+      "name_en": "Nayuta",
+      "name_zh_tw": "娜由塔",
+      "spine_asset_id": "c223",
+      "name_code": 5155
+    },
+    {
+      "resource_id": 224,
+      "character_key": "snow_white_innocent_days",
+      "name_en": "Snow White: Innocent Days",
+      "name_zh_tw": "白雪公主：純真年代",
+      "spine_asset_id": "c224",
+      "name_code": 5102
+    },
+    {
+      "resource_id": 225,
+      "character_key": "scarlet_black_shadow",
+      "name_en": "Scarlet: Black Shadow",
+      "name_zh_tw": "紅蓮：暗影",
+      "spine_asset_id": "c225",
+      "name_code": 5105
+    },
+    {
+      "resource_id": 226,
+      "character_key": "rapunzel_pure_grace",
+      "name_en": "Rapunzel: Pure Grace",
+      "name_zh_tw": "長髮公主：純潔恩典",
+      "spine_asset_id": "c226",
+      "name_code": 5123
+    },
+    {
+      "resource_id": 230,
+      "character_key": "harran",
+      "name_en": "Harran",
+      "name_zh_tw": "哈蘭",
+      "spine_asset_id": "c230",
+      "name_code": 5042
+    },
+    {
+      "resource_id": 231,
+      "character_key": "isabel",
+      "name_en": "Isabel",
+      "name_zh_tw": "伊莎貝爾",
+      "spine_asset_id": "c231",
+      "name_code": 5013
+    },
+    {
+      "resource_id": 232,
+      "character_key": "noah",
+      "name_en": "Noah",
+      "name_zh_tw": "諾雅",
+      "spine_asset_id": "c232",
+      "name_code": 5043
+    },
+    {
+      "resource_id": 233,
+      "character_key": "dorothy",
+      "name_en": "Dorothy",
+      "name_zh_tw": "桃樂絲",
+      "spine_asset_id": "c233",
+      "name_code": 5061
+    },
+    {
+      "resource_id": 234,
+      "character_key": "dorothy_serendipity",
+      "name_en": "Dorothy: Serendipity",
+      "name_zh_tw": "桃樂絲：機緣巧遇",
+      "spine_asset_id": "c234",
+      "name_code": 5145
+    },
+    {
+      "resource_id": 240,
+      "character_key": "rumani",
+      "name_en": "Rumani",
+      "name_zh_tw": "魯瑪妮",
+      "spine_asset_id": "c240",
+      "name_code": 3004
+    },
+    {
+      "resource_id": 241,
+      "character_key": "epinel",
+      "name_en": "Epinel",
+      "name_zh_tw": "艾菲涅爾",
+      "spine_asset_id": "c241",
+      "name_code": 5038
+    },
+    {
+      "resource_id": 242,
+      "character_key": "folkwang",
+      "name_en": "Folkwang",
+      "name_zh_tw": "富克旺",
+      "spine_asset_id": "c242",
+      "name_code": 5039
+    },
+    {
+      "resource_id": 260,
+      "character_key": "modernia",
+      "name_en": "Modernia",
+      "name_zh_tw": "神罰",
+      "spine_asset_id": "c260",
+      "name_code": 5044
+    },
+    {
+      "resource_id": 261,
+      "character_key": "nihilister",
+      "name_en": "Nihilister",
+      "name_zh_tw": "尼希利斯塔",
+      "spine_asset_id": "c261",
+      "name_code": 5056
+    },
+    {
+      "resource_id": 262,
+      "character_key": "liberalio",
+      "name_en": "Liberalio",
+      "name_zh_tw": "莉貝雷利奧",
+      "spine_asset_id": "c262",
+      "name_code": 5156
+    },
+    {
+      "resource_id": 270,
+      "character_key": "blanc",
+      "name_en": "Blanc",
+      "name_zh_tw": "布蘭兒",
+      "spine_asset_id": "c270",
+      "name_code": 5008
+    },
+    {
+      "resource_id": 271,
+      "character_key": "noir",
+      "name_en": "Noir",
+      "name_zh_tw": "諾亞爾",
+      "spine_asset_id": "c271",
+      "name_code": 5009
+    },
+    {
+      "resource_id": 272,
+      "character_key": "rouge",
+      "name_en": "Rouge",
+      "name_zh_tw": "露姬",
+      "spine_asset_id": "c272",
+      "name_code": 5049
+    },
+    {
+      "resource_id": 280,
+      "character_key": "rosanna",
+      "name_en": "Rosanna",
+      "name_zh_tw": "羅珊娜",
+      "spine_asset_id": "c280",
+      "name_code": 5045
+    },
+    {
+      "resource_id": 281,
+      "character_key": "moran",
+      "name_en": "Moran",
+      "name_zh_tw": "牡丹",
+      "spine_asset_id": "c281",
+      "name_code": 1021
+    },
+    {
+      "resource_id": 282,
+      "character_key": "sakura",
+      "name_en": "Sakura",
+      "name_zh_tw": "櫻花",
+      "spine_asset_id": "c282",
+      "name_code": 1012
+    },
+    {
+      "resource_id": 283,
+      "character_key": "rosanna_chic_ocean",
+      "name_en": "Rosanna: Chic Ocean",
+      "name_zh_tw": "羅珊娜：高雅海洋",
+      "spine_asset_id": "c283",
+      "name_code": 5116
+    },
+    {
+      "resource_id": 284,
+      "character_key": "sakura_bloom_in_summer",
+      "name_en": "Sakura: Bloom in Summer",
+      "name_zh_tw": "櫻花：夏日綻放",
+      "spine_asset_id": "c284",
+      "name_code": 5117
+    },
+    {
+      "resource_id": 290,
+      "character_key": "mana",
+      "name_en": "Mana",
+      "name_zh_tw": "瑪娜",
+      "spine_asset_id": "c290",
+      "name_code": 1019
+    },
+    {
+      "resource_id": 291,
+      "character_key": "ether",
+      "name_en": "Ether",
+      "name_zh_tw": "艾瑟兒",
+      "spine_asset_id": "c291",
+      "name_code": 3010
+    },
+    {
+      "resource_id": 300,
+      "character_key": "soldier_eg",
+      "name_en": "Soldier EG",
+      "name_zh_tw": "士兵E.G.",
+      "spine_asset_id": "c300",
+      "name_code": 1013
+    },
+    {
+      "resource_id": 301,
+      "character_key": "soldier_fa",
+      "name_en": "Soldier FA",
+      "name_zh_tw": "士兵F.A.",
+      "spine_asset_id": "c301",
+      "name_code": 1014
+    },
+    {
+      "resource_id": 302,
+      "character_key": "product_08",
+      "name_en": "Product 08",
+      "name_zh_tw": "產品08",
+      "spine_asset_id": "c302",
+      "name_code": 1015
+    },
+    {
+      "resource_id": 303,
+      "character_key": "product_12",
+      "name_en": "Product 12",
+      "name_zh_tw": "產品12",
+      "spine_asset_id": "c303",
+      "name_code": 1016
+    },
+    {
+      "resource_id": 304,
+      "character_key": "idoll_flower",
+      "name_en": "iDoll Flower",
+      "name_zh_tw": "iDoll花",
+      "spine_asset_id": "c304",
+      "name_code": 1017
+    },
+    {
+      "resource_id": 305,
+      "character_key": "idoll_ocean",
+      "name_en": "iDoll Ocean",
+      "name_zh_tw": "iDoll海",
+      "spine_asset_id": "c305",
+      "name_code": 1018
+    },
+    {
+      "resource_id": 306,
+      "character_key": "soldier_ow",
+      "name_en": "Soldier OW",
+      "name_zh_tw": "士兵O.W.",
+      "spine_asset_id": "c306",
+      "name_code": 1025
+    },
+    {
+      "resource_id": 307,
+      "character_key": "product_23",
+      "name_en": "Product 23",
+      "name_zh_tw": "產品23",
+      "spine_asset_id": "c307",
+      "name_code": 1024
+    },
+    {
+      "resource_id": 308,
+      "character_key": "idoll_sun",
+      "name_en": "iDoll Sun",
+      "name_zh_tw": "iDoll太陽",
+      "spine_asset_id": "c308",
+      "name_code": 1023
+    },
+    {
+      "resource_id": 310,
+      "character_key": "ade",
+      "name_en": "Ade",
+      "name_zh_tw": "愛德",
+      "spine_asset_id": "c310",
+      "name_code": 5046
+    },
+    {
+      "resource_id": 311,
+      "character_key": "cocoa",
+      "name_en": "Cocoa",
+      "name_zh_tw": "可可",
+      "spine_asset_id": "c311",
+      "name_code": 5050
+    },
+    {
+      "resource_id": 312,
+      "character_key": "soda",
+      "name_en": "Soda",
+      "name_zh_tw": "索達",
+      "spine_asset_id": "c312",
+      "name_code": 5051
+    },
+    {
+      "resource_id": 313,
+      "character_key": "privaty_unkind_maid",
+      "name_en": "Privaty: Unkind Maid",
+      "name_zh_tw": "普麗瓦蒂：不友善的女僕",
+      "spine_asset_id": "c313",
+      "name_code": 5106
+    },
+    {
+      "resource_id": 314,
+      "character_key": "soda_twinkling_bunny",
+      "name_en": "Soda: Twinkling Bunny",
+      "name_zh_tw": "索達：閃亮兔女郎",
+      "spine_asset_id": "c314",
+      "name_code": 5113
+    },
+    {
+      "resource_id": 315,
+      "character_key": "ade_agent_bunny",
+      "name_en": "Ade: Agent Bunny",
+      "name_zh_tw": "愛德：特務兔女郎",
+      "spine_asset_id": "c315",
+      "name_code": 5151
+    },
+    {
+      "resource_id": 316,
+      "character_key": "velvet",
+      "name_en": "Velvet",
+      "name_zh_tw": "薇爾維特",
+      "spine_asset_id": "c316",
+      "name_code": 5163
+    },
+    {
+      "resource_id": 321,
+      "character_key": "marciana",
+      "name_en": "Marciana",
+      "name_zh_tw": "瑪律恰那",
+      "spine_asset_id": "c321",
+      "name_code": 5048
+    },
+    {
+      "resource_id": 322,
+      "character_key": "marciana_marine_study",
+      "name_en": "Marciana: Marine Study",
+      "name_zh_tw": "瑪律恰那：海洋進修",
+      "spine_asset_id": "c322",
+      "name_code": 5176
+    },
+    {
+      "resource_id": 330,
+      "character_key": "crown",
+      "name_en": "Crown",
+      "name_zh_tw": "皇冠",
+      "spine_asset_id": "c330",
+      "name_code": 5065
+    },
+    {
+      "resource_id": 331,
+      "character_key": "chime",
+      "name_en": "Chime",
+      "name_zh_tw": "鐘鳴",
+      "spine_asset_id": "c331",
+      "name_code": 5157
+    },
+    {
+      "resource_id": 350,
+      "character_key": "mast",
+      "name_en": "Mast",
+      "name_zh_tw": "馬斯特",
+      "spine_asset_id": "c350",
+      "name_code": 5079
+    },
+    {
+      "resource_id": 351,
+      "character_key": "anchor",
+      "name_en": "Anchor",
+      "name_zh_tw": "安克",
+      "spine_asset_id": "c351",
+      "name_code": 5063
+    },
+    {
+      "resource_id": 352,
+      "character_key": "helm",
+      "name_en": "Helm",
+      "name_zh_tw": "海倫",
+      "spine_asset_id": "c352",
+      "name_code": 5066
+    },
+    {
+      "resource_id": 353,
+      "character_key": "helm_aquamarine",
+      "name_en": "Helm: Aquamarine",
+      "name_zh_tw": "海倫：海藍寶石",
+      "spine_asset_id": "c353",
+      "name_code": 5098
+    },
+    {
+      "resource_id": 354,
+      "character_key": "mast_romantic_maid",
+      "name_en": "Mast: Romantic Maid",
+      "name_zh_tw": "馬斯特：浪漫的女僕",
+      "spine_asset_id": "c354",
+      "name_code": 5130
+    },
+    {
+      "resource_id": 355,
+      "character_key": "anchor_innocent_maid",
+      "name_en": "Anchor: Innocent Maid",
+      "name_zh_tw": "安克：天真的女僕",
+      "spine_asset_id": "c355",
+      "name_code": 5131
+    },
+    {
+      "resource_id": 361,
+      "character_key": "kilo",
+      "name_en": "Kilo",
+      "name_zh_tw": "吉洛",
+      "spine_asset_id": "c361",
+      "name_code": 5053
+    },
+    {
+      "resource_id": 380,
+      "character_key": "nero",
+      "name_en": "Nero",
+      "name_zh_tw": "尼羅",
+      "spine_asset_id": "c380",
+      "name_code": 5068
+    },
+    {
+      "resource_id": 381,
+      "character_key": "biscuit",
+      "name_en": "Biscuit",
+      "name_zh_tw": "餅乾",
+      "spine_asset_id": "c381",
+      "name_code": 5054
+    },
+    {
+      "resource_id": 382,
+      "character_key": "leona",
+      "name_en": "Leona",
+      "name_zh_tw": "萊昂納",
+      "spine_asset_id": "c382",
+      "name_code": 5092
+    },
+    {
+      "resource_id": 390,
+      "character_key": "zwei",
+      "name_en": "Zwei",
+      "name_zh_tw": "茨瓦伊",
+      "spine_asset_id": "c390",
+      "name_code": 5088
+    },
+    {
+      "resource_id": 391,
+      "character_key": "ein",
+      "name_en": "Ein",
+      "name_zh_tw": "愛因",
+      "spine_asset_id": "c391",
+      "name_code": 5077
+    },
+    {
+      "resource_id": 392,
+      "character_key": "rei",
+      "name_en": "Rei",
+      "name_zh_tw": "萊伊",
+      "spine_asset_id": "c392",
+      "name_code": 5069
+    },
+    {
+      "resource_id": 400,
+      "character_key": "guilty",
+      "name_en": "Guilty",
+      "name_zh_tw": "吉爾提",
+      "spine_asset_id": "c400",
+      "name_code": 5055
+    },
+    {
+      "resource_id": 401,
+      "character_key": "sin",
+      "name_en": "Sin",
+      "name_zh_tw": "森",
+      "spine_asset_id": "c401",
+      "name_code": 5059
+    },
+    {
+      "resource_id": 402,
+      "character_key": "quency",
+      "name_en": "Quency",
+      "name_zh_tw": "坎西",
+      "spine_asset_id": "c402",
+      "name_code": 5078
+    },
+    {
+      "resource_id": 403,
+      "character_key": "quency_escape_queen",
+      "name_en": "Quency: Escape Queen",
+      "name_zh_tw": "坎西：逃生女王",
+      "spine_asset_id": "c403",
+      "name_code": 5121
+    },
+    {
+      "resource_id": 411,
+      "character_key": "flora",
+      "name_en": "Flora",
+      "name_zh_tw": "芙羅拉",
+      "spine_asset_id": "c411",
+      "name_code": 5126
+    },
+    {
+      "resource_id": 412,
+      "character_key": "trina",
+      "name_en": "Trina",
+      "name_zh_tw": "特蕾娜",
+      "spine_asset_id": "c412",
+      "name_code": 5134
+    },
+    {
+      "resource_id": 430,
+      "character_key": "noise",
+      "name_en": "Noise",
+      "name_zh_tw": "諾伊斯",
+      "spine_asset_id": "c430",
+      "name_code": 5074
+    },
+    {
+      "resource_id": 431,
+      "character_key": "volume",
+      "name_en": "Volume",
+      "name_zh_tw": "沃綸姆",
+      "spine_asset_id": "c431",
+      "name_code": 5075
+    },
+    {
+      "resource_id": 432,
+      "character_key": "aria",
+      "name_en": "Aria",
+      "name_zh_tw": "阿莉亞",
+      "spine_asset_id": "c432",
+      "name_code": 5070
+    },
+    {
+      "resource_id": 441,
+      "character_key": "avistar",
+      "name_en": "Avistar",
+      "name_zh_tw": "阿維斯塔",
+      "spine_asset_id": "c441",
+      "name_code": 5171
+    },
+    {
+      "resource_id": 450,
+      "character_key": "naga",
+      "name_en": "Naga",
+      "name_zh_tw": "娜嘉",
+      "spine_asset_id": "c450",
+      "name_code": 5099
+    },
+    {
+      "resource_id": 451,
+      "character_key": "tia",
+      "name_en": "Tia",
+      "name_zh_tw": "蒂亞",
+      "spine_asset_id": "c451",
+      "name_code": 5100
+    },
+    {
+      "resource_id": 470,
+      "character_key": "red_hood",
+      "name_en": "Red Hood",
+      "name_zh_tw": "小紅帽",
+      "spine_asset_id": "c470",
+      "name_code": 5101
+    },
+    {
+      "resource_id": 471,
+      "character_key": "snow_white_heavy_arms",
+      "name_en": "Snow White: Heavy Arms",
+      "name_zh_tw": "白雪公主：重型武裝",
+      "spine_asset_id": "c471",
+      "name_code": 5161
+    },
+    {
+      "resource_id": 500,
+      "character_key": "elegg",
+      "name_en": "Elegg",
+      "name_zh_tw": "伊萊格",
+      "spine_asset_id": "c500",
+      "name_code": 5107
+    },
+    {
+      "resource_id": 501,
+      "character_key": "trony",
+      "name_en": "Trony",
+      "name_zh_tw": "特羅尼",
+      "spine_asset_id": "c501",
+      "name_code": 5112
+    },
+    {
+      "resource_id": 502,
+      "character_key": "elegg_boom_and_shock",
+      "name_en": "Elegg: Boom and Shock",
+      "name_zh_tw": "伊萊格：BOOM與驚嚇",
+      "spine_asset_id": "c502",
+      "name_code": 5146
+    },
+    {
+      "resource_id": 511,
+      "character_key": "cinderella",
+      "name_en": "Cinderella",
+      "name_zh_tw": "灰姑娘",
+      "spine_asset_id": "c511",
+      "name_code": 5124
+    },
+    {
+      "resource_id": 513,
+      "character_key": "little_mermaid",
+      "name_en": "Little Mermaid",
+      "name_zh_tw": "小美人魚",
+      "spine_asset_id": "c513",
+      "name_code": 5137
+    },
+    {
+      "resource_id": 514,
+      "character_key": "grave",
+      "name_en": "Grave",
+      "name_zh_tw": "格拉維",
+      "spine_asset_id": "c514",
+      "name_code": 5125
+    },
+    {
+      "resource_id": 515,
+      "character_key": "cinderella_crystal_wave",
+      "name_en": "Cinderella: Crystal Wave",
+      "name_zh_tw": "灰姑娘：琉璃波光",
+      "spine_asset_id": "c515",
+      "name_code": 5175
+    },
+    {
+      "resource_id": 520,
+      "character_key": "bready",
+      "name_en": "Bready",
+      "name_zh_tw": "布蕾德",
+      "spine_asset_id": "c520",
+      "name_code": 5135
+    },
+    {
+      "resource_id": 521,
+      "character_key": "crust",
+      "name_en": "Crust",
+      "name_zh_tw": "克勞斯特",
+      "spine_asset_id": "c521",
+      "name_code": 5136
+    },
+    {
+      "resource_id": 532,
+      "character_key": "sora",
+      "name_en": "Sora",
+      "name_zh_tw": "索拉",
+      "spine_asset_id": "c532",
+      "name_code": 5144
+    },
+    {
+      "resource_id": 550,
+      "character_key": "bay",
+      "name_en": "Bay",
+      "name_zh_tw": "貝伊",
+      "spine_asset_id": "c550",
+      "name_code": 5111
+    },
+    {
+      "resource_id": 551,
+      "character_key": "clay",
+      "name_en": "Clay",
+      "name_zh_tw": "克雷伊",
+      "spine_asset_id": "c551",
+      "name_code": 5115
+    },
+    {
+      "resource_id": 570,
+      "character_key": "ark_ranger_black",
+      "name_en": "Ark Ranger Black",
+      "name_zh_tw": "方舟黑色遊俠",
+      "spine_asset_id": "c570",
+      "name_code": 5174
+    },
+    {
+      "resource_id": 580,
+      "character_key": "phantom",
+      "name_en": "Phantom",
+      "name_zh_tw": "潘托姆",
+      "spine_asset_id": "c580",
+      "name_code": 5122
+    },
+    {
+      "resource_id": 581,
+      "character_key": "arcana",
+      "name_en": "Arcana",
+      "name_zh_tw": "阿爾卡娜",
+      "spine_asset_id": "c581",
+      "name_code": 5140
+    },
+    {
+      "resource_id": 582,
+      "character_key": "label",
+      "name_en": "Label",
+      "name_zh_tw": "蕾貝兒",
+      "spine_asset_id": "c582",
+      "name_code": 5162
+    },
+    {
+      "resource_id": 583,
+      "character_key": "arcana_fortune_mate",
+      "name_en": "Arcana: Fortune Mate",
+      "name_zh_tw": "阿爾卡娜：命運伴侶",
+      "spine_asset_id": "c583",
+      "name_code": 5167
+    },
+    {
+      "resource_id": 590,
+      "character_key": "mori",
+      "name_en": "Mori",
+      "name_zh_tw": "莫莉",
+      "spine_asset_id": "c590",
+      "name_code": 5139
+    },
+    {
+      "resource_id": 600,
+      "character_key": "mint",
+      "name_en": "Mint",
+      "name_zh_tw": "敏特",
+      "spine_asset_id": "c600",
+      "name_code": 5172
+    },
+    {
+      "resource_id": 601,
+      "character_key": "prika",
+      "name_en": "Prika",
+      "name_zh_tw": "普莉卡",
+      "spine_asset_id": "c601",
+      "name_code": 5173
+    },
+    {
+      "resource_id": 620,
+      "character_key": "snow_crane",
+      "name_en": "Snow Crane",
+      "name_zh_tw": "白鶴",
+      "spine_asset_id": "c620",
+      "name_code": 5168
+    },
+    {
+      "resource_id": 800,
+      "character_key": "makima",
+      "name_en": "Makima",
+      "name_zh_tw": "真紀真",
+      "spine_asset_id": "c800",
+      "name_code": 5089
+    },
+    {
+      "resource_id": 801,
+      "character_key": "power",
+      "name_en": "Power",
+      "name_zh_tw": "帕瓦",
+      "spine_asset_id": "c801",
+      "name_code": 5090
+    },
+    {
+      "resource_id": 802,
+      "character_key": "himeno",
+      "name_en": "Himeno",
+      "name_zh_tw": "姬野",
+      "spine_asset_id": "c802",
+      "name_code": 3012
+    },
+    {
+      "resource_id": 810,
+      "character_key": "2b",
+      "name_en": "2B",
+      "name_zh_tw": "2B",
+      "spine_asset_id": "c810",
+      "name_code": 5094
+    },
+    {
+      "resource_id": 811,
+      "character_key": "a2",
+      "name_en": "A2",
+      "name_zh_tw": "A2",
+      "spine_asset_id": "c811",
+      "name_code": 5095
+    },
+    {
+      "resource_id": 812,
+      "character_key": "pascal",
+      "name_en": "Pascal",
+      "name_zh_tw": "帕斯卡",
+      "spine_asset_id": "c812",
+      "name_code": 5096
+    },
+    {
+      "resource_id": 820,
+      "character_key": "rem",
+      "name_en": "Rem",
+      "name_zh_tw": "雷姆",
+      "spine_asset_id": "c820",
+      "name_code": 5108
+    },
+    {
+      "resource_id": 821,
+      "character_key": "emilia",
+      "name_en": "Emilia",
+      "name_zh_tw": "愛蜜莉雅",
+      "spine_asset_id": "c821",
+      "name_code": 5109
+    },
+    {
+      "resource_id": 822,
+      "character_key": "ram",
+      "name_en": "Ram",
+      "name_zh_tw": "拉姆",
+      "spine_asset_id": "c822",
+      "name_code": 3013
+    },
+    {
+      "resource_id": 830,
+      "character_key": "asuka",
+      "name_en": "Asuka",
+      "name_zh_tw": "明日香",
+      "spine_asset_id": "c830",
+      "name_code": 5118
+    },
+    {
+      "resource_id": 831,
+      "character_key": "rei_abnormal",
+      "name_en": "Rei",
+      "name_zh_tw": "零",
+      "spine_asset_id": "c831",
+      "name_code": 5119
+    },
+    {
+      "resource_id": 832,
+      "character_key": "mari",
+      "name_en": "Mari",
+      "name_zh_tw": "真理",
+      "spine_asset_id": "c832",
+      "name_code": 5120
+    },
+    {
+      "resource_id": 833,
+      "character_key": "misato",
+      "name_en": "Misato",
+      "name_zh_tw": "美里",
+      "spine_asset_id": "c833",
+      "name_code": 3014
+    },
+    {
+      "resource_id": 834,
+      "character_key": "rei_tentative_name",
+      "name_en": "Rei (Tentative Name)",
+      "name_zh_tw": "零（暫稱）",
+      "spine_asset_id": "c834",
+      "name_code": 5132
+    },
+    {
+      "resource_id": 835,
+      "character_key": "asuka_wille",
+      "name_en": "Asuka: WILLE",
+      "name_zh_tw": "明日香：WILLE",
+      "spine_asset_id": "c835",
+      "name_code": 5133
+    },
+    {
+      "resource_id": 836,
+      "character_key": "sakura_abnormal",
+      "name_en": "Sakura",
+      "name_zh_tw": "櫻",
+      "spine_asset_id": "c836",
+      "name_code": 3015
+    },
+    {
+      "resource_id": 840,
+      "character_key": "ada",
+      "name_en": "Ada",
+      "name_zh_tw": "艾達",
+      "spine_asset_id": "c840",
+      "name_code": 5152
+    },
+    {
+      "resource_id": 841,
+      "character_key": "jill",
+      "name_en": "Jill",
+      "name_zh_tw": "吉兒",
+      "spine_asset_id": "c841",
+      "name_code": 5153
+    },
+    {
+      "resource_id": 842,
+      "character_key": "claire",
+      "name_en": "Claire",
+      "name_zh_tw": "克蕾兒",
+      "spine_asset_id": "c842",
+      "name_code": 3017
+    },
+    {
+      "resource_id": 850,
+      "character_key": "eve",
+      "name_en": "EVE",
+      "name_zh_tw": "伊芙",
+      "spine_asset_id": "c850",
+      "name_code": 5142
+    },
+    {
+      "resource_id": 851,
+      "character_key": "raven",
+      "name_en": "Raven",
+      "name_zh_tw": "蕾雯",
+      "spine_asset_id": "c851",
+      "name_code": 5143
+    },
+    {
+      "resource_id": 852,
+      "character_key": "lily",
+      "name_en": "Lily",
+      "name_zh_tw": "百合",
+      "spine_asset_id": "c852",
+      "name_code": 3016
+    },
+    {
+      "resource_id": 860,
+      "character_key": "chisato",
+      "name_en": "Chisato",
+      "name_zh_tw": "千束",
+      "spine_asset_id": "c860",
+      "name_code": 5164
+    },
+    {
+      "resource_id": 861,
+      "character_key": "takina",
+      "name_en": "Takina",
+      "name_zh_tw": "瀧奈",
+      "spine_asset_id": "c861",
+      "name_code": 5165
+    },
+    {
+      "resource_id": 862,
+      "character_key": "kurumi",
+      "name_en": "Kurumi",
+      "name_zh_tw": "胡桃",
+      "spine_asset_id": "c862",
+      "name_code": 3018
+    },
+    {
+      "resource_id": 870,
+      "character_key": "queen_makoto",
+      "name_en": "Queen (Makoto)",
+      "name_zh_tw": "QUEEN（真）",
+      "spine_asset_id": "c870",
+      "name_code": 5179
+    },
+    {
+      "resource_id": 871,
+      "character_key": "yukiko",
+      "name_en": "Yukiko",
+      "name_zh_tw": "雪子",
+      "spine_asset_id": "c871",
+      "name_code": 5180
+    },
+    {
+      "resource_id": 872,
+      "character_key": "aigis",
+      "name_en": "Aigis",
+      "name_zh_tw": "埃癸斯",
+      "spine_asset_id": "c872",
+      "name_code": 3019
+    }
+  ]
+}

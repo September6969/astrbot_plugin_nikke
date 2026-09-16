@@ -159,7 +159,10 @@ class StaticDataRegistry:
 
     def _load(self) -> None:
         try:
-            manifest_bytes = (self.asset_dir / self.MANIFEST).read_bytes()
+            manifest_path = (self.asset_dir / "data" / self.MANIFEST).resolve()
+            if not manifest_path.is_file():
+                manifest_path = (self.asset_dir / self.MANIFEST).resolve()
+            manifest_bytes = manifest_path.read_bytes()
             manifest = json.loads(
                 manifest_bytes.decode("utf-8"),
                 object_pairs_hook=self._reject_duplicate_keys,
@@ -177,8 +180,12 @@ class StaticDataRegistry:
             try:
                 entry = rows[kind]
                 metadata = self._parse_metadata(kind, entry, expected_path)
-                path = (self.asset_dir / metadata.path).resolve()
-                if not path.is_relative_to(self.asset_dir):
+                data_path = (self.asset_dir / "data" / metadata.path).resolve()
+                if data_path.is_file():
+                    path = data_path
+                else:
+                    path = (self.asset_dir / metadata.path).resolve()
+                if not (path.is_relative_to(self.asset_dir) or (self.asset_dir / "data").resolve() in path.parents):
                     raise RegistryValidationError(f"{kind} path 越界")
                 content = path.read_bytes()
                 # Git 在不同平台可能检出 CRLF；hash 合同统一使用 LF canonical bytes。

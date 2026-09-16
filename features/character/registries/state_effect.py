@@ -72,6 +72,10 @@ class StateEffectRegistry:
     @classmethod
     def from_file(cls, path: str | Path) -> "StateEffectRegistry":
         target = Path(path)
+        if not target.is_file():
+            cand = target.parent / "data" / target.name
+            if cand.is_file():
+                target = cand
         try:
             data = json.loads(
                 target.read_text(encoding="utf-8"),

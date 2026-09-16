@@ -99,7 +99,10 @@ class AssetManager:
         self.blabla_assets_dir = mirror
         self.lineup_portrait_resolver = LineupPortraitResolver(mirror, self.asset_dir)
         self.boss_asset_resolver = BossAssetResolver(mirror, self.asset_dir)
-        self.character_master = CharacterMasterResolver(self.asset_dir / "character_master.json")
+        master_path = self.asset_dir / "data" / "character_master.json"
+        if not master_path.is_file():
+            master_path = self.asset_dir / "character_master.json"
+        self.character_master = CharacterMasterResolver(master_path)
         self._failed: dict[str, float] = {}
         self._prefetch_slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._inflight_lock = threading.Lock()
@@ -120,8 +123,11 @@ class AssetManager:
         self._spine_manifest_schema: int | None = None
         self.refresh_spine_manifest()
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
+        sources_path = self.asset_dir / "data" / "sources.json"
+        if not sources_path.is_file():
+            sources_path = self.asset_dir / "sources.json"
         try:
-            self.sources = json.loads((self.asset_dir / "sources.json").read_text(encoding="utf-8"))
+            self.sources = json.loads(sources_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             self.sources = {}
         if not isinstance(self.sources, dict):
@@ -181,6 +187,7 @@ class AssetManager:
             candidates.append(self.spine_manifest_path)
         candidates.extend(
             [
+                self.asset_dir / "data" / "spine_manifest.json",
                 self.asset_dir / "spine_manifest.json",
                 self.cache_dir / "spine-manifest.json",
                 self.cache_dir / "spine_manifest.json",
@@ -380,6 +387,17 @@ class AssetManager:
             raw_candidates.append(relative[len("data/nikke/blabla-assets/"):])
         if relative.startswith("assets/"):
             raw_candidates.append(relative[len("assets/"):])
+        if relative.startswith("icons/"):
+            raw_candidates.append(relative[len("icons/"):])
+        else:
+            for icon_sub in ("cube/", "favorite/", "currency/"):
+                if relative.startswith(icon_sub):
+                    raw_candidates.insert(0, f"icons/{relative}")
+                    break
+        if relative.startswith("data/"):
+            raw_candidates.append(relative[len("data/"):])
+        else:
+            raw_candidates.append(f"data/{relative}")
 
         candidates = []
         for c in raw_candidates:
@@ -1091,16 +1109,17 @@ class AssetManager:
                 base_resolved = base.resolve()
             except OSError:
                 continue
-            for suffix in (".png", ".webp"):
-                try:
-                    path = (base / "currency" / f"{key}{suffix}").resolve()
-                    if not path.is_relative_to(base_resolved) or not path.is_file():
+            for prefix_dir in ("icons/currency", "currency"):
+                for suffix in (".png", ".webp"):
+                    try:
+                        path = (base / prefix_dir / f"{key}{suffix}").resolve()
+                        if not path.is_relative_to(base_resolved) or not path.is_file():
+                            continue
+                    except (OSError, RuntimeError, ValueError):
                         continue
-                except (OSError, RuntimeError, ValueError):
-                    continue
-                image = self._load_spine_image(path, entry)
-                if image is not None:
-                    return image
+                    image = self._load_spine_image(path, entry)
+                    if image is not None:
+                        return image
         return None
 
     def get_element_icon(self, element):

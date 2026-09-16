@@ -74,7 +74,9 @@ class NikkeDbProvider:
 
     def _load_master_resolver(self) -> CharacterMasterResolver | None:
         candidate_paths = [
+            self.asset_dir / "data" / "character_master.json",
             self.asset_dir / "character_master.json",
+            (Path(__file__).resolve().parents[2] / "assets" / "data" / "character_master.json") if (Path(__file__).resolve().parents[2] / "assets" / "data" / "character_master.json").exists() else (Path(__file__).resolve().parent / "assets" / "data" / "character_master.json"),
             (Path(__file__).resolve().parents[2] / "assets" / "character_master.json") if (Path(__file__).resolve().parents[2] / "assets" / "character_master.json").exists() else (Path(__file__).resolve().parent / "assets" / "character_master.json"),
         ]
         for p in candidate_paths:
@@ -98,7 +100,9 @@ class NikkeDbProvider:
 
     def _load_costume_map(self) -> dict[str, str]:
         """读取严格的已核验皮肤映射；坏条目不能进入运行时合同。"""
-        path = self.asset_dir / "costumes.json"
+        path = self.asset_dir / "data" / "costumes.json"
+        if not path.is_file():
+            path = self.asset_dir / "costumes.json"
         try:
             raw = json.loads(path.read_text(encoding="utf-8"))
         except FileNotFoundError:
