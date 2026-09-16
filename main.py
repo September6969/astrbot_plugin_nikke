@@ -29,30 +29,32 @@ from .calendar_service import CalendarService
 from .asset_manager import AssetManager
 from .campaign_history_builder import CampaignHistoryBuilder
 from .campaign_history_models import ClearLineupStatus
-from .campaign_history_renderer import CampaignHistoryRenderer
-from .t2i_renderer import T2IRenderer
+from .ui.renderers import (
+    CampaignHistoryRenderer,
+    CharacterCardRenderer,
+    ProfileCardRenderer,
+    T2IRenderer,
+    UnionRaidRenderer,
+)
+from .ui.primitives import CardRenderer
 from .t2i_payloads import CalendarT2IPayloadBuilder
 from .tarot_service import TarotDataError, TarotService
 from .campaign_stage_resolver import CampaignStageResolver
 from .card_builder import CharacterCardBuilder
 from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
 from .character_identity import CharacterDirectoryResolver
-from .character_card_renderer import CharacterCardRenderer
 from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
 from .character_stat_resources import CharacterStatResourceLoader, map_research_levels
 from .log_privacy import safe_exception_message
 from .daily_models import DailyTaskResult, DailyTaskStatus
 from .processing_feedback import DelayedFeedbackManager
 from .profile_builder import ProfileBuilder
-from .profile_card_renderer import ProfileCardRenderer
-from .renderer import CardRenderer
 from .runtime_health import collect_runtime_health, format_runtime_health
 from .runtime_config import normalize_runtime_config, read_schedule_clock
 from .spine_runtime_config import build_spine_renderer
 from .storage import NikkeStore
 from .union_raid_builder import UnionRaidBuilder
 from .union_raid_models import PreviousSeasonSummary, RaidState
-from .union_raid_renderer import UnionRaidRenderer
 from .costume_registry import CostumeRegistry
 from .tower_registry import TowerRegistry
 from .voice_character_resolver import VoiceCharacterResolver
