@@ -1,18 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""语音发送与 Adapter 兼容性解析。
+"""兼容历史导入；正式模块已迁移至 features.voice.feedback。"""
+import importlib
+import sys
+import warnings
 
-遵循 contracts/daily_voice_feedback.md：
-明确 Adapter 原生语音支持兼容性矩阵，未确认适配器不发送语音。
-"""
+_real_mod = importlib.import_module(".features.voice.feedback", package=__package__ or "astrbot_plugin_nikke")
 
-from __future__ import annotations
+# 导出公共和私有符号至全局空间以兼容静态工具与 dir()
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
+warnings.warn(
+    "Importing voice_feedback from root is deprecated, use astrbot_plugin_nikke.features.voice.feedback instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-class VoiceResolver:
-    # 已验证支持原生语音发送的 Adapter 矩阵
-    SUPPORTED_VOICE_ADAPTERS = {"aiocqhttp", "onebot_v11"}
-
-    @classmethod
-    def is_voice_supported(cls, adapter_name: str) -> bool:
-        return str(adapter_name or "").lower() in cls.SUPPORTED_VOICE_ADAPTERS
-
+sys.modules[__name__] = _real_mod

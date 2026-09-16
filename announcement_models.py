@@ -1,55 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""公告、活动与推送数据合同模型。
+"""兼容历史导入；正式模块已迁移至 features.announcement.models。"""
+import importlib
+import sys
+import warnings
 
-遵循 docs/contracts/ANNOUNCEMENT_V2_CONTRACT.md：
-1. 内容实体不保存全局 pushed 状态；
-2. 实体包含 content_id, body_hash, content_version, published_at, source_url；
-3. 投递去重键：target_id + content_id + content_version + push_type；
-4. Deadline 去重键：target_id + deadline_id + deadline_version + reminder_hour + push_type。
-"""
+_real_mod = importlib.import_module(".features.announcement.models", package=__package__ or "astrbot_plugin_nikke")
 
-from __future__ import annotations
+# 导出公共和私有符号至全局空间以兼容静态工具与 dir()
+for _k, _v in list(_real_mod.__dict__.items()):
+    if not _k.startswith("__"):
+        globals()[_k] = _v
 
-import hashlib
-from dataclasses import dataclass, field
+warnings.warn(
+    "Importing announcement_models from root is deprecated, use astrbot_plugin_nikke.features.announcement.models instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-
-@dataclass(slots=True)
-class AnnouncementRecord:
-    content_id: str
-    title: str
-    body: str
-    published_at: str
-    source_url: str = ""
-    content_version: int = 1
-    category: str = "general"  # maintenance / event / update / notice
-    deadline_at: str | None = None
-    deadline_version: int = 1
-    locale: str = "und"
-
-    @property
-    def body_hash(self) -> str:
-        return hashlib.sha256(self.body.encode("utf-8")).hexdigest()
-
-    @property
-    def content_fingerprint(self) -> str:
-        """用于版本与乱序回放判断的本地内容指纹。"""
-        fields = (self.title, self.body, self.category, self.locale)
-        return hashlib.sha256("\x1f".join(fields).encode("utf-8")).hexdigest()
-
-    def compute_push_key(self, target_id: str, push_type: str = "announcement") -> str:
-        """计算公告投递去重键。"""
-        return f"{target_id}:{self.content_id}:{self.content_version}:{push_type}"
-
-    def compute_deadline_key(
-        self,
-        target_id: str,
-        reminder_hour: int,
-        push_type: str = "deadline",
-    ) -> str:
-        """计算截止时间提醒投递去重键。"""
-        return (
-            f"{target_id}:{self.content_id}:{self.deadline_version}:"
-            f"{reminder_hour}:{push_type}"
-        )
-
+sys.modules[__name__] = _real_mod
