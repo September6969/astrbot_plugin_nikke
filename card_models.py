@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 from PIL import Image
@@ -28,6 +29,8 @@ class EquipmentOption:
     state_effect_id: str | None = None
     components: tuple["EquipmentOption", ...] = ()
     tier: int | None = None
+    effect_group_id: str | None = None
+    raw_value: int | None = None
 
 
 @dataclass(slots=True)
@@ -102,6 +105,9 @@ class CharacterCardData:
     stat_calculation_reason: str | None = None
     spine_asset_id: str | None = None
     costume_selection: CostumeSelection | None = None
+    base_ammo: int | None = None
+    base_charge_seconds: str | None = None
+    weapon_base_source: str | None = None
 
 
 @dataclass(slots=True)
@@ -114,5 +120,36 @@ class CharacterCardAssets:
     corporation: Image.Image
     weapon: Image.Image
     burst: Image.Image
+    skills: dict[str, Image.Image] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class SpineBundle:
+    """Spine 骨骼动画组合型资源契约。"""
+
+    skeleton: Path | str | None = None
+    atlas: Path | str | None = None
+    textures: list[Path | str] = field(default_factory=list)
+    format: str | None = None  # "json" or "skel"
+    bone_names: list[str] | None = None
+    slot_names: list[str] | None = None
+
+
+@dataclass(slots=True)
+class CharacterVisualAssets:
+    """角色视觉资产统一逻辑集合模型。"""
+
+    resource_id: str
+    character_id: str | None = None
+    costume_id: str | None = None
+
+    icon: str | None = None
+    portrait: str | None = None
+    fullbody: str | None = None
+
+    spine_skeleton: str | None = None
+    spine_atlas: str | None = None
+    spine_textures: list[str] | None = None
+
 
 

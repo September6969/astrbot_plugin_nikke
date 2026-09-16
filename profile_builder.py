@@ -11,7 +11,9 @@ from typing import Any
 from .campaign_stage_resolver import CampaignStageResolver
 from .currency_registry import CurrencyRegistry
 from .memorial_registry import MemorialCategoryRegistry
+from .tower_registry import TowerRegistry
 from .profile_models import (
+    CurrencyItem,
     DailyTowerInfo,
     MemorialCountData,
     ProfileDashboardData,
@@ -26,6 +28,97 @@ _MAX_INTEGER_DIGITS = 12
 _PROFILE_DISPLAY_TZ = timezone(timedelta(hours=8))
 _MIN_PROFILE_TIMESTAMP = datetime(1970, 1, 1, tzinfo=timezone.utc)
 _MAX_PROFILE_TIMESTAMP = datetime(2100, 1, 1, tzinfo=timezone.utc)
+
+CORE_CURRENCIES: list[tuple[int, str, str]] = [
+    (99, "珠宝", "jewel"),
+    (1000, "信用点", "credit"),
+    (2000, "战斗数据辑", "battle_data"),
+    (3000, "芯尘", "core_dust"),
+    (5100, "高级招募券", "advanced_ticket"),
+    (5200, "普通招募券", "recruit_ticket"),
+    (11000, "躯体标签", "body_label"),
+    (12000, "联盟芯片", "union_chip"),
+]
+
+
+def format_compact_number(value: int | float | None) -> str:
+    """格式化紧凑数字，如 26M, 130M, 10.5K, <1000 整数。"""
+    if value is None:
+        return "—"
+    try:
+        val = int(value)
+    except (ValueError, TypeError):
+        return "—"
+    if val < 0:
+        return str(val)
+    if val >= 1_000_000:
+        m_val = val / 1_000_000.0
+        if val % 1_000_000 == 0:
+            return f"{int(m_val)}M"
+        return f"{m_val:.1f}M"
+    elif val >= 1_000:
+        k_val = val / 1_000.0
+        if val % 1_000 == 0:
+            return f"{int(k_val)}K"
+        return f"{k_val:.1f}K"
+    else:
+        return f"{val:,}"
+
+
+def _parse_storage_fullness(value: Any) -> float | None:
+    """解析保管箱容量比例（0.059 -> 5.9%）。"""
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        f_val = float(value)
+    except (ValueError, TypeError):
+        return None
+    if f_val < 0:
+        return None
+    if f_val <= 1.0:
+        return round(f_val * 100.0, 1)
+    return round(f_val, 1)
+
+
+def _parse_sim_room_record(best_record: Any) -> str | None:
+    """解析模拟室每日最佳记录（如 difficulty: 5, chapter: 3 -> 5-C）。"""
+    if not isinstance(best_record, dict):
+        return None
+    diff = _optional_int(best_record.get("difficulty"))
+    chap = _optional_int(best_record.get("chapter"))
+    if diff is None:
+        return None
+    if chap is not None:
+        letter = chr(64 + chap) if 1 <= chap <= 26 else str(chap)
+        return f"{diff}-{letter}"
+    return str(diff)
+
+
+def _parse_currencies(currencies_raw: Any) -> list[CurrencyItem] | None:
+    """解析 8 格核心资源。"""
+    if not isinstance(currencies_raw, list):
+        return None
+    val_map: dict[int, int] = {}
+    for item in currencies_raw:
+        if isinstance(item, dict):
+            c_type = _optional_int(item.get("type"))
+            c_val = _optional_int(item.get("value"))
+            if c_type is not None and c_val is not None:
+                val_map[c_type] = c_val
+    items: list[CurrencyItem] = []
+    for c_type, name, icon_key in CORE_CURRENCIES:
+        val = val_map.get(c_type, 0)
+        items.append(
+            CurrencyItem(
+                type=c_type,
+                value=val,
+                display_name=name,
+                icon_key=icon_key,
+                compact_value=format_compact_number(val),
+            )
+        )
+    return items
+
 
 
 def _optional_int(value: Any) -> int | None:
@@ -233,10 +326,23 @@ def _parse_daily_tower(value: Any) -> tuple[list[DailyTowerInfo] | None, bool]:
             continue
         # serv 现场确认的字段合同：type / is_opened / remaining_count。
         # raw 是脱离账号身份的每日记录副本；renderer 不直接读取它。
-        display_name = _first_optional_str(item, "name", "tower_name")
-        tower_type = _optional_int(item.get("type"))
+        raw_type = item.get("type")
+        tower_type = _optional_int(raw_type)
         is_opened = item.get("is_opened") if isinstance(item.get("is_opened"), bool) else None
         remaining = _optional_int(item.get("remaining_count"))
+
+        # 优先级：
+        # 1. API 明确返回的 name / tower_name
+        # 2. 已核验的 TowerRegistry 名称
+        # 3. 未知塔 · TYPE {type}（若 type 缺失则回退为 未知塔）
+        display_name = _first_optional_str(item, "name", "tower_name")
+        if not display_name:
+            if raw_type is not None:
+                resolved = TowerRegistry.resolve_tower_name(raw_type)
+                display_name = resolved if resolved else f"未知塔 · TYPE {raw_type}"
+            else:
+                display_name = "未知塔"
+
         if any(key not in item for key in ("type", "is_opened", "remaining_count")):
             partial = True
         if tower_type is None or is_opened is None or remaining is None:
@@ -245,7 +351,7 @@ def _parse_daily_tower(value: Any) -> tuple[list[DailyTowerInfo] | None, bool]:
     return result, partial
 
 
-def _parse_sim_room_record(value: Any) -> tuple[SimulationRoomDailyRecord | None, bool]:
+def _parse_sim_room_record_structured(value: Any) -> tuple[SimulationRoomDailyRecord | None, bool]:
     if value is None:
         return None, False
     if not isinstance(value, dict):
@@ -308,7 +414,7 @@ def _parse_daily(value: Any) -> tuple[dict[str, Any], bool]:
         if source_key in value and fields[field_name] is None:
             partial = True
     tower, tower_partial = _parse_daily_tower(value.get("tower_daily_info_list"))
-    sim_room, sim_partial = _parse_sim_room_record(value.get("sim_room_daily_best_record"))
+    sim_room, sim_partial = _parse_sim_room_record_structured(value.get("sim_room_daily_best_record"))
     fields["tower_daily_info"] = tower
     fields["sim_room_daily_record"] = sim_room
     return fields, partial or tower_partial or sim_partial
@@ -424,6 +530,31 @@ class ProfileBuilder:
         currencies, currencies_partial = self.currency_registry.parse(basic.get("currencies"))
         daily_fields, daily_partial = _parse_daily(daily)
 
+        daily_dict = daily if isinstance(daily, dict) else {}
+        if daily_available and not daily_dict:
+            daily_partial = True
+
+        dispatch_completed = daily_fields.get("dispatch_completed")
+        dispatch_in_progress = daily_fields.get("dispatch_in_progress")
+        dispatch_total = (
+            dispatch_completed + dispatch_in_progress
+            if dispatch_completed is not None and dispatch_in_progress is not None
+            else None
+        )
+
+        tower_daily_list = daily_dict.get("tower_daily_info_list")
+        tower_daily_remaining: int | None = None
+        if isinstance(tower_daily_list, list):
+            tower_daily_remaining = sum(
+                _optional_int(t.get("remaining_count")) or 0
+                for t in tower_daily_list
+                if isinstance(t, dict)
+            )
+
+        memorial_summary_dict = MemorialCategoryRegistry.summarize_memorials(
+            outpost.get("memorial_counts"), jukebox_count
+        )
+
         return ProfileDashboardData(
             commander_name=commander_name,
             area_id=area_id,
@@ -453,10 +584,10 @@ class ProfileBuilder:
             memorial_counts=memorial_data,
             outpost_available=outpost_available,
             roster_available=roster_available,
+            daily_available=daily_available,
             roster_partial=roster_partial,
             research_partial=research_partial,
             memorial_partial=memorial_partial,
-            daily_available=daily_available,
             storage_fullness=daily_fields.get("storage_fullness"),
             intercept_remaining=daily_fields.get("intercept_remaining"),
             rookie_arena_remaining=daily_fields.get("rookie_arena_remaining"),
@@ -464,11 +595,14 @@ class ProfileBuilder:
             counsel_remaining=daily_fields.get("counsel_remaining"),
             dispatch_completed=daily_fields.get("dispatch_completed"),
             dispatch_in_progress=daily_fields.get("dispatch_in_progress"),
+            dispatch_total=dispatch_total,
             tower_daily_info=daily_fields.get("tower_daily_info"),
+            tower_daily_remaining=tower_daily_remaining,
             sim_room_daily_record=daily_fields.get("sim_room_daily_record"),
             sim_room_overclock_subseason=sim_room_overclock_score,
             sim_room_overclock_season=sim_room_overclock_season,
             currencies=currencies,
             currencies_partial=currencies_partial,
             daily_partial=daily_partial,
+            memorial_summary_dict=memorial_summary_dict,
         )

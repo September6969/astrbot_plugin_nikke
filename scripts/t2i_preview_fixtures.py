@@ -85,7 +85,8 @@ def character_cases():
     master = CharacterMasterResolver()
     result = {}
     for name, resource in (("c010", 10), ("c010_02", 10), ("c010_03", 10), ("c017", 17), ("c234", 234), ("c330", 330), ("c352", 352), ("c471", 471), ("representative-dark", 10), ("representative-light", 330), ("bright", 330), ("dark", 10), ("low-saturation", 352), ("wide-pose", 471),
-                           ("long-name", 330), ("missing-optional", 10), ("missing-art", 470), ("ol-max", 330)):
+                           ("long-name", 330), ("missing-optional", 10), ("missing-art", 470), ("ol-max", 330),
+                           ("nayuta", 223), ("low-ol", 10), ("max-ol", 330)):
         canonical = master.resolve_resource_id(resource)
         directory = {"resource_id": canonical.resource_id, "name_code": canonical.name_code, "name_cn": canonical.name_cn,
                      "name_en": canonical.name_en, "element": canonical.element, "weapon": canonical.weapon,
@@ -96,11 +97,52 @@ def character_cases():
         detail["name_code"] = roster["name_code"] = canonical.name_code
         detail.pop("costume_tid", None)
         detail["costume_id"] = {"c010_02": 20001, "c010_03": 10005}.get(name, 0)
+        effects = copy.deepcopy(fixture["state_effects"])
         if name == "missing-optional":
             detail["favorite_item_tid"] = detail["harmony_cube_tid"] = 0
+        elif name == "low-ol":
+            detail["torso_equip_option1_id"] = detail["torso_equip_option2_id"] = detail["torso_equip_option3_id"] = 0
+            detail["arm_equip_option1_id"] = detail["arm_equip_option2_id"] = detail["arm_equip_option3_id"] = 0
+            detail["leg_equip_option1_id"] = detail["leg_equip_option2_id"] = detail["leg_equip_option3_id"] = 0
+            detail["head_equip_option1_id"] = 7000813
+            detail["head_equip_option2_id"] = 7000508
+            detail["head_equip_option3_id"] = 0
+        elif name == "max-ol":
+            max_effects = [
+                {"id": "80001", "function_details": [{"function_type": "StatAtk", "function_value": 1181, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80002", "function_details": [{"function_type": "IncElementDmg", "function_value": 2356, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80003", "function_details": [{"function_type": "StatAmmoLoad", "function_value": 6893, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80004", "function_details": [{"function_type": "StatCriticalDamage", "function_value": 1422, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80005", "function_details": [{"function_type": "StatCriticalRate", "function_value": 560, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80006", "function_details": [{"function_type": "StatHitRate", "function_value": 1181, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80007", "function_details": [{"function_type": "StatChargeDamage", "function_value": 1181, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80008", "function_details": [{"function_type": "StatChargeTime", "function_value": -320, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80009", "function_details": [{"function_type": "StatDef", "function_value": 1181, "function_value_type": "Percent", "level": 11}]},
+                {"id": "80010", "function_details": [{"function_type": "CustomStatA", "function_value": 1000, "function_value_type": "Percent", "level": 10}]},
+                {"id": "80011", "function_details": [{"function_type": "CustomStatB", "function_value": 1200, "function_value_type": "Percent", "level": 10}]},
+            ]
+            effects.extend(max_effects)
+            detail["head_equip_option1_id"] = 80001
+            detail["head_equip_option2_id"] = 80002
+            detail["head_equip_option3_id"] = 80003
+            detail["torso_equip_option1_id"] = 80004
+            detail["torso_equip_option2_id"] = 80005
+            detail["torso_equip_option3_id"] = 80006
+            detail["arm_equip_option1_id"] = 80007
+            detail["arm_equip_option2_id"] = 80008
+            detail["arm_equip_option3_id"] = 80009
+            detail["leg_equip_option1_id"] = 80010
+            detail["leg_equip_option2_id"] = 80011
+            detail["leg_equip_option3_id"] = 0
         data = CharacterCardBuilder().build(account={"nickname": "合成练度 · 非真实账号"}, directory=directory,
-                                            payload={"roster_item": roster, "detail": detail, "state_effects": copy.deepcopy(fixture["state_effects"])},
+                                            payload={"roster_item": roster, "detail": detail, "state_effects": effects},
                                             fetched_at="2026-09-13 12:00", plugin_version="T2I PREVIEW")
+        if name == "max-ol":
+            from astrbot_plugin_nikke.card_models import OptionSummary
+            data.option_totals.extend([
+                OptionSummary(display_name="额外装弹数增加", unit="percent", value=20.0),
+                OptionSummary(display_name="额外攻击力增加", unit="percent", value=15.0),
+            ])
         result[name] = data
     return result
 
@@ -117,7 +159,13 @@ def profile_cases():
                    "recycle_room_researches": [{"tid": str(tid), "lv": 101, "exp": 0} for tid in (1101, 1102, 1103, 1201, 1202, 1203, 1204)]}
         daily = {"outpost_battle_storage_fullness": 0.72, "intercept_remaining_tickets": 3, "rookie_arena_remaining_count": 5,
                  "special_arena_remaining_count": 0, "counsel_remaining_count": 7, "dispatch_completed_count": 4, "dispatch_in_progress_count": 2,
-                 "sim_room_daily_best_record": {"chapter": 3, "difficulty": 5, "score": 12345}}
+                 "sim_room_daily_best_record": {"chapter": 3, "difficulty": 5, "score": 12345},
+                 "tower_daily_info_list": [
+                     {"type": 1, "is_opened": False, "remaining_count": 3},
+                     {"type": 2, "is_opened": False, "remaining_count": 3},
+                     {"type": 3, "is_opened": True, "remaining_count": 3},
+                     {"type": 4, "is_opened": False, "remaining_count": 3},
+                 ]}
         if name == "full-current-model":
             # 完整合成示例只使用当前 Builder 已验证的字段，不代表真实账号。
             basic.update(character_costume_count=87, progress_tribe_tower="318",
@@ -125,8 +173,12 @@ def profile_cases():
                          sim_room_overclock_latest_season_high_score="23456")
             outpost["memorial_counts"] = [{"category": key, "count": value} for key, value in
                                            (("handwriting", 72), ("calllog", 48), ("data", 120))]
-            daily["tower_daily_info_list"] = [{"type": 1, "name": "合成塔开放记录", "is_opened": True, "remaining_count": 3},
-                                              {"type": 2, "name": "合成塔关闭记录", "is_opened": False, "remaining_count": 0}]
+            daily["tower_daily_info_list"] = [
+                {"type": 1, "is_opened": False, "remaining_count": 3},
+                {"type": 2, "is_opened": False, "remaining_count": 3},
+                {"type": 3, "is_opened": True, "remaining_count": 3},
+                {"type": 4, "is_opened": False, "remaining_count": 3},
+            ]
         if name == "today-partial":
             daily["intercept_remaining_tickets"] = "unverified"
         if name == "resource-partial":
@@ -146,6 +198,7 @@ def profile_cases():
             for item in data.recycle_room_researches:
                 item.presentation_name = "合成长研究名称：同一行保留完整名称与等级"
         result[name] = data
+    result["partial"] = result["today-partial"]
     return result
 
 

@@ -12,5 +12,9 @@ artifacts/
 output/playwright/
 .playwright-cli/
 cache/
+reports/
 preview/
 
+
+# 本地取证与截图中间文件不进入源码提交。
+/output/

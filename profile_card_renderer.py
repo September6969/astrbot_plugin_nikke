@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw
 from .profile_models import ProfileDashboardData
 from .renderer import CardRenderer
 from .card_theme import UI_COLORS
+from .research_registry import research_zh_name
 
 
 PROFILE_THEME = {
@@ -152,7 +153,16 @@ class ProfileCardRenderer(CardRenderer):
                 )
             )
         )
-        modern_order = bool(data.memorial_summary is not None or data.currencies is not None or self._has_today(data))
+        # 旧的手工 fixture 仍使用 summary_dict 与字符串模拟室记录；保留其既有
+        # 标题顺序。正式 builder 输出结构化摘要后才使用 v0.4 合并面板顺序。
+        legacy_fixture = bool(
+            data.memorial_summary is None
+            and data.memorial_summary_dict is not None
+            and isinstance(data.sim_room_daily_record, str)
+        )
+        modern_order = not legacy_fixture and bool(
+            data.memorial_summary is not None or data.currencies is not None or self._has_today(data)
+        )
 
         if modern_order:
             # v0.4 画布采用横向合并面板，减少重复标题和纵向滚动长度。
@@ -174,11 +184,18 @@ class ProfileCardRenderer(CardRenderer):
                 sections.append(self._basic_info_section(data))
             if has_campaign:
                 sections.append(self._campaign_section(data))
+            if self._has_today(data):
+                sections.append(self._today_section(data))
             if has_outpost:
                 sections.append(self._outpost_section(data))
             if has_roster:
                 sections.append(self._roster_stats_section(data))
             collection_items = []
+            if data.memorial_summary_dict is not None:
+                collection_items.extend(
+                    (label, self._number(value))
+                    for label, value in data.memorial_summary_dict.items()
+                )
             if data.jukebox_count is not None:
                 collection_items.append(("点唱机收集", data.jukebox_count))
             if data.memorial_counts is not None:
@@ -186,13 +203,19 @@ class ProfileCardRenderer(CardRenderer):
                     (f"收藏分类 {i+1}", self._number(item.count))
                     for i, item in enumerate(data.memorial_counts)
                 ])
-            if data.jukebox_count is not None or data.memorial_counts is not None:
+            if (
+                data.jukebox_count is not None
+                or data.memorial_counts is not None
+                or data.memorial_summary_dict is not None
+            ):
                 collection_title = "COLLECTION / 收藏"
                 if data.memorial_partial:
                     collection_title += "（部分）"
                 sections.append(self._structured_section(collection_title, collection_items))
             if data.recycle_room_researches is not None:
                 sections.append(self._recycle_room_section(data))
+            if data.currencies is not None:
+                sections.append(self._resources_section(data))
 
         extra = self._extra_items(data)
         if extra:
@@ -330,6 +353,12 @@ class ProfileCardRenderer(CardRenderer):
         return draw_section, 82 + rows * 48
 
     def _today_section(self, data: ProfileDashboardData):
+        record = data.sim_room_daily_record
+        sim_room_label = (
+            record.display_label
+            if record is not None and hasattr(record, "display_label")
+            else str(record) if record not in (None, "") else "—"
+        )
         items = [
             ("拦截", self._daily_value(data.intercept_remaining)),
             ("新人竞技场", self._daily_value(data.rookie_arena_remaining)),
@@ -340,9 +369,7 @@ class ProfileCardRenderer(CardRenderer):
             ("无尽塔", self._tower_value(data)),
             (
                 "模拟室",
-                data.sim_room_daily_record.display_label
-                if data.sim_room_daily_record is not None
-                else "—",
+                sim_room_label,
             ),
             ("双周最高", data.sim_room_overclock_subseason or "—"),
             ("赛季最高", data.sim_room_overclock_season or "—"),
@@ -399,6 +426,11 @@ class ProfileCardRenderer(CardRenderer):
             (item.display_name or "未知分类", self._number(item.count))
             for item in (data.memorial_summary or [])
         ]
+        if not items and data.memorial_summary_dict is not None:
+            items = [
+                (label, self._number(value))
+                for label, value in data.memorial_summary_dict.items()
+            ]
         items = items[:4] or [("暂无记录", "—")]
 
         def draw_section(draw, box, fill):
@@ -487,7 +519,12 @@ class ProfileCardRenderer(CardRenderer):
             title += "（部分）"
         items = []
         for i, item in enumerate(data.recycle_room_researches or []):
-            label = item.presentation_name or item.display_name or f"研究项目 {i+1}"
+            label = (
+                item.presentation_name
+                or research_zh_name(item.display_name)
+                or item.display_name
+                or f"研究项目 {i+1}"
+            )
             level_str = f"Lv.{self._number(item.level)}"
             try:
                 exp_val = int(item.exp) if item.exp is not None else 0

@@ -1,0 +1,3359 @@
+{
+  "schema": 1,
+  "records": {
+    "18": {
+      "resource_id": "18",
+      "source_url": "https://sg-tools-cdn.blablalink.com/bh-25/d10d309686d380be1b95dea023b9280d.json",
+      "source_sha256": "e33550b382c2067772f3b617ce47b2f4eb5e10e0e329d6be5b26c244b2736593",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_debuffimmune_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c018_ult"
+      }
+    },
+    "80": {
+      "resource_id": "80",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qb-71/d2ad2b5f4d53f0475b8a7ed575435c82.json",
+      "source_sha256": "65274d91a6ee648aff0ecd68adc003ac13b31e99f2445b222ca88c913255e16a",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c080_ult"
+      }
+    },
+    "82": {
+      "resource_id": "82",
+      "source_url": "https://sg-tools-cdn.blablalink.com/cc-85/97581c6b2cc2952b24089b3e459dcb9c.json",
+      "source_sha256": "434f183e4af622a60de089de3674772bf097abcb40f7902a98c03551e9b9c6aa",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c082_ult"
+      }
+    },
+    "100": {
+      "resource_id": "100",
+      "source_url": "https://sg-tools-cdn.blablalink.com/eb-25/068f9308cabd193a222bae77a48168e8.json",
+      "source_sha256": "bcec685b74ab327892d03907a37dd65dc578d2d0e39aa634a6c3df2b1ee63a1c",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statexplosion_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c100_ult"
+      }
+    },
+    "101": {
+      "resource_id": "101",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oq-20/2bce25a619dd4d93e44de26bc6086e50.json",
+      "source_sha256": "58795d845a8af4c065e2ed193b1c8f8f99525a800253b9540ea18f9591797b86",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_stataccuracycircle_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c101_ult"
+      }
+    },
+    "102": {
+      "resource_id": "102",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zf-15/b83d783d3ec7ee14f25e6fc21577fb0f.json",
+      "source_sha256": "e188d2311029e84347d8554416fa7f7c0f201207fad247188c5b959f6f7326d1",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c102_ult"
+      }
+    },
+    "103": {
+      "resource_id": "103",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ar-34/9f7a64d4a8c90d1d2b48f05ec29bbd47.json",
+      "source_sha256": "be4d3efe99970418c36fe6d0af8af139a32ca5ea63050061b7806c8bb9877316",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c103_ult"
+      }
+    },
+    "104": {
+      "resource_id": "104",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zn-22/b3c44fd1ba4004d700ae76829ed1f6c7.json",
+      "source_sha256": "99e4da33a9c9b1e3b89c2aaf2ab7e753e4b5be923ca170ca8cb4ef3e4b1f9350",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c104_ult"
+      }
+    },
+    "105": {
+      "resource_id": "105",
+      "source_url": "https://sg-tools-cdn.blablalink.com/kc-17/67014d40cbf8bffccdde7bab0425c6cb.json",
+      "source_sha256": "a71cd456feb7c6f69d83ea23735759be55a15b79780b3f791ecbda73ea8672b9",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c105_ult"
+      }
+    },
+    "110": {
+      "resource_id": "110",
+      "source_url": "https://sg-tools-cdn.blablalink.com/kv-40/20c105abb500499ecd8552932f9d1fba.json",
+      "source_sha256": "24af26b4f81adc67acb1f235bfd7316547abbbb931886879a7c5ca4628946c90",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c110_ult"
+      }
+    },
+    "111": {
+      "resource_id": "111",
+      "source_url": "https://sg-tools-cdn.blablalink.com/mh-59/cf34ca08760c2bea120aed329fb10ba8.json",
+      "source_sha256": "1b5768fbfeaf4b84d70893597bb8ea8146c67f8bb270118c1782744a4ef83c6d",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c111_ult"
+      }
+    },
+    "120": {
+      "resource_id": "120",
+      "source_url": "https://sg-tools-cdn.blablalink.com/im-79/cd0cec219bf2919bbfd5ec4ef029b232.json",
+      "source_sha256": "b03c3c565214a33e1c5096ca0e40efa364a11cea9c5388e3e857e20b67954b51",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 150,
+      "skills": {
+        "skill1": "icn_skill_statammo_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c120_ult"
+      }
+    },
+    "121": {
+      "resource_id": "121",
+      "source_url": "https://sg-tools-cdn.blablalink.com/tb-74/26d1bb78c59c86f40e843c3fe4ce2b84.json",
+      "source_sha256": "c3af041cf962779e175af5d51a27a4449c896abaf3143554cb66ae62960240a0",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c121_ult"
+      }
+    },
+    "131": {
+      "resource_id": "131",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oc-82/ac9c97b43b97b8c53f95a67118f0fb2a.json",
+      "source_sha256": "0bbcd8e8e7005c704b96cd27fa7cec6cd468fdfb41dfea75f9867620412e1383",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkdown_01",
+        "burst": "icn_skill_c131_ult"
+      }
+    },
+    "150": {
+      "resource_id": "150",
+      "source_url": "https://sg-tools-cdn.blablalink.com/hy-42/d425f6e4dd46ba420f87afb7d50b6330.json",
+      "source_sha256": "25029f65d0525c170f6e4238d1325a86237634e1ee717b9a89742aed0f9848f2",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c150_ult"
+      }
+    },
+    "160": {
+      "resource_id": "160",
+      "source_url": "https://sg-tools-cdn.blablalink.com/os-57/597d9d9038b52c5256951bd6709874bf.json",
+      "source_sha256": "74350582034ab12b7a161c7014af2770646611c6f3c04ebf04f80023e51f17da",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 150,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c160_ult"
+      }
+    },
+    "161": {
+      "resource_id": "161",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zh-52/1166e83bac234657531d371a4883a683.json",
+      "source_sha256": "6a56057e86bd89d520b1e77f9b8e0b810c9faffd294b75447cc6c98f842c91e5",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_criticaldamage_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c161_ult"
+      }
+    },
+    "162": {
+      "resource_id": "162",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yd-40/8e74684599f52ed012f4d55d9ce1e401.json",
+      "source_sha256": "bf6acf1ad6a2eeabe73007c8becd617f5069c485d1ce7ee47d969243c05f375e",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c162_ult"
+      }
+    },
+    "172": {
+      "resource_id": "172",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vu-79/6c950b98fea31890a20fb1a86f30a2bd.json",
+      "source_sha256": "6cbb9cb90cc207178dd69e964629464bcd1b02678b92f55da75818aba8fd9dd0",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c172_ult"
+      }
+    },
+    "192": {
+      "resource_id": "192",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ji-10/e5163f482385bbce369a9996482694da.json",
+      "source_sha256": "5cf296bf80bd0ab115887364b8e17154e194c98778a003a09e9300871072f944",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statammo_01",
+        "skill2": "icn_skill_rateoffire_01",
+        "burst": "icn_skill_c192_ult"
+      }
+    },
+    "290": {
+      "resource_id": "290",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ao-06/b5f03d5cae9b6cd89c4b111b91c7e9b2.json",
+      "source_sha256": "b1d43b2ad55d8c8a5dd1ee7e834a8f82c9ae5377910a78ed51f9feb90b4006ff",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c290_ult"
+      }
+    },
+    "291": {
+      "resource_id": "291",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ld-01/8ea63f2f4d36695dc85aed7a9988b2df.json",
+      "source_sha256": "892d0cde8bfefbf8c0cbf43b22e128c3cb48d1d3dc481462d1b59d1ed80c8c01",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c291_ult"
+      }
+    },
+    "302": {
+      "resource_id": "302",
+      "source_url": "https://sg-tools-cdn.blablalink.com/dd-04/a00b8f879a0e23887daca39c0ab80476.json",
+      "source_sha256": "2ab7a292a3d85578ac8af6b46f08dc39415194a0426b7026bf2825e51e344f04",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c302_ult"
+      }
+    },
+    "303": {
+      "resource_id": "303",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ns-98/36984e9ce392cf6f9056f90ea0354e7a.json",
+      "source_sha256": "fea2778dd503509e4e964ec5118195991c554f183bdce40796062a46b96922b7",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c303_ult"
+      }
+    },
+    "307": {
+      "resource_id": "307",
+      "source_url": "https://sg-tools-cdn.blablalink.com/je-95/2b10e80d99cb798c0d8b09c983b05ab0.json",
+      "source_sha256": "eb8fd9aebf9c876c859911be890ae70b0d671513d5b5c21047d5dc5b3a728a1d",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c307_ult"
+      }
+    },
+    "361": {
+      "resource_id": "361",
+      "source_url": "https://sg-tools-cdn.blablalink.com/df-41/baf162a5365981cbb807288d5fec4806.json",
+      "source_sha256": "afeca5d36eb59ee2a42d6bc3c22bdc3f85eaa6e9b7da607e6459fd77ec60e9c3",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_barrier_01",
+        "skill2": "icn_skill_healbarrier_01",
+        "burst": "icn_skill_c361_ult"
+      }
+    },
+    "391": {
+      "resource_id": "391",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ok-11/6280a308b650ba8ce9e4e18cdd9a7865.json",
+      "source_sha256": "ae1e7f035470d9651dc76d046e9d72ac6cb98dfc8f9e159799200fe8c058727e",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c391_ult"
+      }
+    },
+    "400": {
+      "resource_id": "400",
+      "source_url": "https://sg-tools-cdn.blablalink.com/gc-07/18a608767a22df57c72b67072faab057.json",
+      "source_sha256": "43802929518bdf98fcf593ff71b7348f8507214106b12d557c12ca6258264e90",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c400_ult"
+      }
+    },
+    "401": {
+      "resource_id": "401",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ey-94/f61612fe6e5cfdefba944cb087514666.json",
+      "source_sha256": "6dfc9653a47f511f98f5f0b54c4647409db1572061628db73be29749e4cd5a06",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_attention_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c401_ult"
+      }
+    },
+    "402": {
+      "resource_id": "402",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pn-89/2f755702065e56591390fa33fae45be0.json",
+      "source_sha256": "1d35bba1edc5c95fc1087970bf6976aff62ed84055a850f1f7216538cfb17636",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c402_ult"
+      }
+    },
+    "403": {
+      "resource_id": "403",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ac-84/e0d02fbc76a6d58b171d86fe1013bbd4.json",
+      "source_sha256": "110a3622f30e6269f4d1ffda579a59a0150a4ced283a6972647d333477655be2",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damageshareinstant",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c403_ult"
+      }
+    },
+    "411": {
+      "resource_id": "411",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ls-10/954f74ae01df25f3009f69b2e27763de.json",
+      "source_sha256": "dc4c5d1c70d6c5d69151299852f15d0d7a5e464ee7694f89910f1bf9cf763f05",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c411_ult"
+      }
+    },
+    "412": {
+      "resource_id": "412",
+      "source_url": "https://sg-tools-cdn.blablalink.com/wh-05/2aa6b52ff73fc3618125fe2abd1f3318.json",
+      "source_sha256": "85d2098704c251db94f5c2c4c8535184c4ee4e1475af6dacf57ef5a1d86ab202",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c412_ult"
+      }
+    },
+    "450": {
+      "resource_id": "450",
+      "source_url": "https://sg-tools-cdn.blablalink.com/hj-92/42e73a524e34e3073f201b24e47f18cd.json",
+      "source_sha256": "7739128ce46ad67dc51409959f337221ccd54c25ca5fde79fd175c27b7dddb51",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_healcover_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c450_ult"
+      }
+    },
+    "451": {
+      "resource_id": "451",
+      "source_url": "https://sg-tools-cdn.blablalink.com/iv-12/6b8eb0470e62f6d34d684ec74fdf04a5.json",
+      "source_sha256": "17d561fb39ab6f72fea7e53c387c69dc713065fcfcd7c3a54b510136a8e5514d",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c451_ult"
+      }
+    },
+    "500": {
+      "resource_id": "500",
+      "source_url": "https://sg-tools-cdn.blablalink.com/sm-92/a5443430f77e189a4d0916a8dcfd5e0e.json",
+      "source_sha256": "a220016140575c5e58a498a29d6027dc740ddfeab805efff77aee073246c2182",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_burstgaugespeedup_01",
+        "burst": "icn_skill_c500_ult"
+      }
+    },
+    "501": {
+      "resource_id": "501",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ri-80/0f3c67d383de921075601c59f740f947.json",
+      "source_sha256": "dcd1787b770b0c0a5f83c5bf570b4b244e146bb312f2faf050c56b8e5ef3f86b",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_damageshareinstant",
+        "skill2": "icn_skill_sharedamageincrease",
+        "burst": "icn_skill_c501_ult"
+      }
+    },
+    "502": {
+      "resource_id": "502",
+      "source_url": "https://sg-tools-cdn.blablalink.com/bx-75/a423911c868cd6551113ef5dda0f3a3f.json",
+      "source_sha256": "959ff25b4393c5669b99b5606d2719bf3d763916ec629984f06abe0c8a7f4b8c",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c502_ult"
+      }
+    },
+    "590": {
+      "resource_id": "590",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qw-80/f72cbf00bffc40b30633468996d5444b.json",
+      "source_sha256": "d0c1c93d6ab917bac3543e13ae6b6189edf1b674a675adaec31d3cb7cba963dd",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_barrier_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c590_ult"
+      }
+    },
+    "620": {
+      "resource_id": "620",
+      "source_url": "https://sg-tools-cdn.blablalink.com/xo-26/5e67a6f73e6eeb011b393de61ce09b34.json",
+      "source_sha256": "713f3fcffc1fe82ca16c3cfd72074a6a10ca1e9eb18ddcecd652f97bf644e452",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c620_ult"
+      }
+    },
+    "10": {
+      "resource_id": "10",
+      "source_url": "https://sg-tools-cdn.blablalink.com/kj-31/cc9d142a19fe5d69d0d85d904a42f149.json",
+      "source_sha256": "2a896d2c36968832c65c67acd5b6c91ac1d63e03b71cf8f206a49d9dba9c5f46",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c010_ult"
+      }
+    },
+    "11": {
+      "resource_id": "11",
+      "source_url": "https://sg-tools-cdn.blablalink.com/uy-26/6d55c360e2bbbd03b3b380a7758ac4e3.json",
+      "source_sha256": "d70ddf0b814258ff25f0288616a70a0231545f4aafc85beecc817803c02fd527",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c011_ult"
+      }
+    },
+    "14": {
+      "resource_id": "14",
+      "source_url": "https://sg-tools-cdn.blablalink.com/fv-28/12e17e8f16016ed21b2978e37f07d6a4.json",
+      "source_sha256": "90b27450d98f32c263fd98affc000bd8df614607a19e3bc1ccfed93cae49538d",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c014_ult"
+      }
+    },
+    "16": {
+      "resource_id": "16",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pg-11/c8cc79fb04fb057ff8f8fa178cf7043a.json",
+      "source_sha256": "8dc31b03aaf8439df00353d951ee71d58b16ae9bebe340b1d38d2daf3f209efe",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_stickyprojectile_01",
+        "burst": "icn_skill_c016_ult"
+      }
+    },
+    "20": {
+      "resource_id": "20",
+      "source_url": "https://sg-tools-cdn.blablalink.com/rd-46/4b3d7d52a3d2bb54d406f3e429e72c02.json",
+      "source_sha256": "24133c2697c9e134b299445b75a26322470c2aa9e95bd9bd99034512768ca311",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c020_ult"
+      }
+    },
+    "22": {
+      "resource_id": "22",
+      "source_url": "https://sg-tools-cdn.blablalink.com/rl-53/9b1a54c8cdc9bf593a5cba91673ce6aa.json",
+      "source_sha256": "f5866727f99e0e555da4530662cdfa80c10028880880c7088565c0b254c3edb6",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c022_ult"
+      }
+    },
+    "30": {
+      "resource_id": "30",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ou-85/a911ebeb75c43f5bacb2abdcfca51316.json",
+      "source_sha256": "1af0d53279aeddcad1878d5af525b9ef4832052a1e5af9e47214aead3b7b9011",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c030_ult"
+      }
+    },
+    "32": {
+      "resource_id": "32",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yf-68/3824927de1f58ae8706c8de64967fb6b.json",
+      "source_sha256": "32b1188fd1a3fd4ac33e4ffde21321ec06648dc276235a94bcb252bc420c4a97",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_stataccuracycircle_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c032_ult"
+      }
+    },
+    "33": {
+      "resource_id": "33",
+      "source_url": "https://sg-tools-cdn.blablalink.com/iu-63/62c035fdf88e2b79f068eee68dd31328.json",
+      "source_sha256": "ef8cde728899cd5bf74ddcb655f5d28bdc714686490842945a915eea77743334",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c033_ult"
+      }
+    },
+    "40": {
+      "resource_id": "40",
+      "source_url": "https://sg-tools-cdn.blablalink.com/jv-93/5f1fada3b86e4751c17d305b409a9394.json",
+      "source_sha256": "2feed104595cdaa1661f37c5b7eda8cc6ccd508e4415da41fb05e060fbe55440",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_burstgaugespeedup_01",
+        "burst": "icn_skill_c040_ult"
+      }
+    },
+    "41": {
+      "resource_id": "41",
+      "source_url": "https://sg-tools-cdn.blablalink.com/uk-88/4aed7385a341a054d6e595103f3f6811.json",
+      "source_sha256": "d21f985c0a5353070a5af8be3c8c59aece55412d8bb48f47b2dc53128dea5599",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c041_ult"
+      }
+    },
+    "43": {
+      "resource_id": "43",
+      "source_url": "https://sg-tools-cdn.blablalink.com/gl-03/2bd6db325d254c517234fc017997af41.json",
+      "source_sha256": "b312f3a1c1d8c2415dbda1508a0cbc358e509167721f233bd5f97280178cd8d4",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statpenetration_01",
+        "skill2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c043_ult"
+      }
+    },
+    "70": {
+      "resource_id": "70",
+      "source_url": "https://sg-tools-cdn.blablalink.com/va-63/cc986a2c16c79904f01c4009b7733df2.json",
+      "source_sha256": "135134a2aeec9bd6bdf8965835cb0b0b424221a07813928eb21320acac06742a",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c070_ult"
+      }
+    },
+    "71": {
+      "resource_id": "71",
+      "source_url": "https://sg-tools-cdn.blablalink.com/tw-51/b37f88659d2facb48931b7943760c0dc.json",
+      "source_sha256": "709c4d3599dacb9a2eecdbb67ea6792c2a2cb97d554e05b4a30c7c0e8fd5940c",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_rateoffire_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c071_ult"
+      }
+    },
+    "72": {
+      "resource_id": "72",
+      "source_url": "https://sg-tools-cdn.blablalink.com/el-46/b287d47b10096e30a4afdeac3e7d8f42.json",
+      "source_sha256": "5bbc8d944a44a79b7210dc97a06fb9567c888f10021839ca43ff4c7f023aff1d",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c072_ult"
+      }
+    },
+    "73": {
+      "resource_id": "73",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pa-41/5ce344888effab4badcdd97bdfe3728c.json",
+      "source_sha256": "14aaa1bd21e97875408fdfc6700f5daa65e25b330d07fbfca14b374a20e7ad9d",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damagereductionup_01",
+        "skill2": "icn_skill_damagereductionup_01",
+        "burst": "icn_skill_c073_ult"
+      }
+    },
+    "74": {
+      "resource_id": "74",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qm-60/051504f22cc94abc9272a09fbe40e976.json",
+      "source_sha256": "ea792fcad8dd9ffb028ff124627fad3a0e0e45bca28e134779cb9c4c3ceeec0f",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c074_ult"
+      }
+    },
+    "75": {
+      "resource_id": "75",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pi-48/259b2758de8bb55d67e85707319f2d0d.json",
+      "source_sha256": "059057e8509c96e06ec63bae01f0864baa719dc353fc66291283c0e351a4e0ae",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_criticaldamage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c075_ult"
+      }
+    },
+    "90": {
+      "resource_id": "90",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ns-11/64e1bf8cc2ee3ce079259d9a8294e40a.json",
+      "source_sha256": "0c78bc8da54a15d79cbc2d7dfafd924b509461372d39b84fa1f023af01cf23c6",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c090_ult"
+      }
+    },
+    "91": {
+      "resource_id": "91",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yh-06/f9a5ee6ec1978bda419a0c748e0965b4.json",
+      "source_sha256": "52b24b69674b44ee5f3ba8a5e1a6604d5336a8388d4fb85eb74d910fa099557f",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statexplosion_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c091_ult"
+      }
+    },
+    "92": {
+      "resource_id": "92",
+      "source_url": "https://sg-tools-cdn.blablalink.com/iw-01/3698752c949b6723bc4f394e089ab581.json",
+      "source_sha256": "a3dc98f49e453e0270526d7b9ef94d1e682430c6c31352f600f85f254a8be03b",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_defdown_01",
+        "burst": "icn_skill_c092_ult"
+      }
+    },
+    "93": {
+      "resource_id": "93",
+      "source_url": "https://sg-tools-cdn.blablalink.com/hs-88/5820865387a27462148c95b6ff749e3f.json",
+      "source_sha256": "052cc9107869760b39380446d0bff634d11c46ccc19a8464ccf734a9f90c7f10",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damagereductionup_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c093_ult"
+      }
+    },
+    "94": {
+      "resource_id": "94",
+      "source_url": "https://sg-tools-cdn.blablalink.com/sh-83/7cd019429ad56fa230b0fcfe458c94d3.json",
+      "source_sha256": "329eeaa82bdf4b96feb25eea7b6f2eba73ad2e84f4f37797375719ab71d9e5d2",
+      "max_ammo": 8,
+      "charge_time_centiseconds": 200,
+      "skills": {
+        "skill1": "icn_skill_chargedamage_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c094_ult"
+      }
+    },
+    "95": {
+      "resource_id": "95",
+      "source_url": "https://sg-tools-cdn.blablalink.com/cw-78/7ee79dd2b5f3acff5a62dc13dea91f27.json",
+      "source_sha256": "f845fe7af918751456eef06bf13152f907d9093e41155f094c2a5159322c7d4c",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c095_ult"
+      }
+    },
+    "113": {
+      "resource_id": "113",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vs-42/ae36ec73ae47ce84af1e74bcc65028ad.json",
+      "source_sha256": "112fb50c6d2d17f0dedd85ce104e0ae99c461fb5a3af1e18bce4ffd92952066d",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c113_ult"
+      }
+    },
+    "170": {
+      "resource_id": "170",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vm-72/501d66066bbfa3de7019055002f83f3e.json",
+      "source_sha256": "dec42c45150faec75aeb55e01f50a520c935fcd962cf8091262d86978ce7cdbc",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c170_ult"
+      }
+    },
+    "180": {
+      "resource_id": "180",
+      "source_url": "https://sg-tools-cdn.blablalink.com/hk-05/743bce972b02ca33a8ac49c36b1a3a93.json",
+      "source_sha256": "6618cb0caf28c877e0fe9c0c345dc29a270d6fa1b64409c86a59ac40d3f8d0af",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c180_ult"
+      }
+    },
+    "181": {
+      "resource_id": "181",
+      "source_url": "https://sg-tools-cdn.blablalink.com/rz-00/39805b406429c76b5ca9aad371a117fc.json",
+      "source_sha256": "367a579699c0b46bef3aa373c982f514b10c78c2164a44978dad921a87b9c3b6",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c181_ult"
+      }
+    },
+    "182": {
+      "resource_id": "182",
+      "source_url": "https://sg-tools-cdn.blablalink.com/co-94/e953952d24c3a971abece0bf75521f89.json",
+      "source_sha256": "cba2f2d061eb03f81a18bc8bee5c3d0ecb5e5d97e4c6d5017c1a761a8a2c2114",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c182_ult"
+      }
+    },
+    "183": {
+      "resource_id": "183",
+      "source_url": "https://sg-tools-cdn.blablalink.com/nd-89/7999501a8c1ab5c5b7d7d90ac9b04b21.json",
+      "source_sha256": "ab38d02ceae8085d99bd025932807fab661bc30d7ad07e8e72e213ca114b3550",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c183_ult"
+      }
+    },
+    "280": {
+      "resource_id": "280",
+      "source_url": "https://sg-tools-cdn.blablalink.com/tu-90/8c88e0923f14ba0edc39af2680adca36.json",
+      "source_sha256": "ebb4f33970774deb4113fe8f746c43ce1c9af52b99a22ef4076cb0860ab0bd85",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_criticaldamage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c280_ult"
+      }
+    },
+    "300": {
+      "resource_id": "300",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ts-21/5cc802300c0760dfba80880e1d6c7b29.json",
+      "source_sha256": "8adb7689f2c8760a0df757eaaae6b07a652d5055a6f4726e701630bc7b7f8166",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c300_ult"
+      }
+    },
+    "301": {
+      "resource_id": "301",
+      "source_url": "https://sg-tools-cdn.blablalink.com/eh-16/2c34e8f09862930d870d183b40f1889b.json",
+      "source_sha256": "46e866f7737660b5acd90fb1ab9e8ac29f5da0aaa402928e51304331734f6835",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c301_ult"
+      }
+    },
+    "306": {
+      "resource_id": "306",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yp-01/5b447476b4866c21d2a6f5571aafeef7.json",
+      "source_sha256": "913bedc30aea1885bfa58ca563262bcda37cc1f5aa92d0a7f42777a202996d0a",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c306_ult"
+      }
+    },
+    "313": {
+      "resource_id": "313",
+      "source_url": "https://sg-tools-cdn.blablalink.com/um-14/aa0449ef1c0da2d6aa35ac87500bb466.json",
+      "source_sha256": "935a7fe9325a7f8b625458eca3cb312e221b70842f9bf4977843793457924468",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c313_ult"
+      }
+    },
+    "321": {
+      "resource_id": "321",
+      "source_url": "https://sg-tools-cdn.blablalink.com/gc-39/bf2827e120818d89259d69d1ee64a70d.json",
+      "source_sha256": "8a894d98f121f9bf14858c32ef0637cb0b07f8c9491deceb54e239383eb9a75e",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c321_ult"
+      }
+    },
+    "322": {
+      "resource_id": "322",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ho-58/8405e9343027f328928ddb8a7ddb3127.json",
+      "source_sha256": "d49cbbd5b3730d68c637c01df6d366825f92e2a5f2e3ccb1e8b7d563a6186c1d",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c322_ult"
+      }
+    },
+    "350": {
+      "resource_id": "350",
+      "source_url": "https://sg-tools-cdn.blablalink.com/gs-14/41e8aec41760b87b04bcb2053b1208f0.json",
+      "source_sha256": "40c540347bf9af2fc22895b0da1e6b70293271170aa0a1cdbaafe129aeddbfaa",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_criticaldamage_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c350_ult"
+      }
+    },
+    "351": {
+      "resource_id": "351",
+      "source_url": "https://sg-tools-cdn.blablalink.com/fo-02/98e07282146882970a68c28972cade77.json",
+      "source_sha256": "4acbc7a38048ea6fe9c6dbc627e2097a0a3fbc718c01151b4cb5585fa33aa6f1",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_attention_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c351_ult"
+      }
+    },
+    "352": {
+      "resource_id": "352",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qd-96/20bbfd65b0960e7aa819cfc0705bcfe2.json",
+      "source_sha256": "342f8a41b82f150c52bc89d6dbd02dc1a70f9007c7bc91c708dffa366d4ce6ac",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c352_ult"
+      }
+    },
+    "353": {
+      "resource_id": "353",
+      "source_url": "https://sg-tools-cdn.blablalink.com/rp-16/a7cbe6b6ffc8286c9662715ee2397de6.json",
+      "source_sha256": "09436ef3fe3584c4ba3795036213a300c17eb639cabd59dd5a2c9151a561ea42",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c353_ult"
+      }
+    },
+    "354": {
+      "resource_id": "354",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ce-11/64a343d8d271b3e787218973094eb6cc.json",
+      "source_sha256": "266a8e3f56ef150cf723fcdbbec46e315275456f0302b9dc794dab79149af03d",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_sharedamageincrease",
+        "burst": "icn_skill_c354_ult"
+      }
+    },
+    "355": {
+      "resource_id": "355",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ba-98/a64075100796cdcf1e435c7d765eab3a.json",
+      "source_sha256": "e2a3e35a21317632eb4dcabb2d7b73ee6009ca22184fce8f3854b11862cfa6ea",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c355_ult"
+      }
+    },
+    "390": {
+      "resource_id": "390",
+      "source_url": "https://sg-tools-cdn.blablalink.com/my-91/77c451c7b6be25a4ef35662bff7db59e.json",
+      "source_sha256": "4c3c28ad4a13c3c697154397b7d1fe5cafd572af13d37d9e905a157b51e5902a",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_penetrationdamage_01",
+        "skill2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c390_ult"
+      }
+    },
+    "441": {
+      "resource_id": "441",
+      "source_url": "https://sg-tools-cdn.blablalink.com/le-72/eb88df5860d5f33d9c9fdfe8c95eec00.json",
+      "source_sha256": "78782102f75a484a2b2285a2c0919f83383a70dd27f400b7401a37b1d56e8e67",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c441_ult"
+      }
+    },
+    "532": {
+      "resource_id": "532",
+      "source_url": "https://sg-tools-cdn.blablalink.com/bj-38/6e3d88d58dfdc44cb791698771d78bc7.json",
+      "source_sha256": "ba9fc27941242f65edfb65eac610a4bae88eeb887167745a7dbc611a55de7546",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_overhealsave_01",
+        "burst": "icn_skill_c532_ult"
+      }
+    },
+    "580": {
+      "resource_id": "580",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ey-48/14e19c64c478afbdaff979c698ca7fd0.json",
+      "source_sha256": "07cbff4cade08842aefb5fcb6da786f6d4a7eb44370710532d3b1ebb25062070",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_sharedamageincrease",
+        "burst": "icn_skill_c580_ult"
+      }
+    },
+    "581": {
+      "resource_id": "581",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ur-60/d6e42c27f488278f0f8d056a939479ef.json",
+      "source_sha256": "67e42c18cfdc9369cd6fc882c1d27ce4c5f27ceef183ab7b2490ee4896f097c1",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c581_ult"
+      }
+    },
+    "582": {
+      "resource_id": "582",
+      "source_url": "https://sg-tools-cdn.blablalink.com/fg-55/2a5f7d0a0bdf4ec249946fa61f1654a4.json",
+      "source_sha256": "a69fcc2748e5463b2c006d44735adbc0c9ef90f7ae3a83a87e16c4c5eb15c160",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_barrier_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c582_ult"
+      }
+    },
+    "583": {
+      "resource_id": "583",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pv-50/0171c3fdb24f916a15fdece3e6c5b198.json",
+      "source_sha256": "4727742ba275b7c958fa5676f00b74d453bbe2b6c4fa4d601c25283c920326eb",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statshotcount_01",
+        "burst": "icn_skill_c583_ult"
+      }
+    },
+    "12": {
+      "resource_id": "12",
+      "source_url": "https://sg-tools-cdn.blablalink.com/fn-21/faaff1e4eb5938d9e52b798c8aba791f.json",
+      "source_sha256": "a0aeb3efdc8f0d5b73793da0184b1919a236d22544689e3849ceafc047ec1eeb",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c012_ult"
+      }
+    },
+    "15": {
+      "resource_id": "15",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qk-23/380721da33ca467956542a3ca759f3d1.json",
+      "source_sha256": "d80b9e6244005706fc986759d853bc1cdd63aba1b48446a5ed7c58fcc9748195",
+      "max_ammo": 5,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c015_ult"
+      }
+    },
+    "17": {
+      "resource_id": "17",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zv-06/db96007e3b8df7139ac46e76f674cd00.json",
+      "source_sha256": "2c2baeeb5cef5cab59772ee5afaa76089c41ede286bddf8024fa279d5411f0f5",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c017_ult"
+      }
+    },
+    "60": {
+      "resource_id": "60",
+      "source_url": "https://sg-tools-cdn.blablalink.com/og-48/d4ff90c0d9ed8359b6fcdb056d8355eb.json",
+      "source_sha256": "2212bda6041a0d722c2a12d84790e7e07e16eb1b1195d2af8af4ab8a0abd60ca",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 150,
+      "skills": {
+        "skill1": "icn_skill_statexplosion_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c060_ult"
+      }
+    },
+    "61": {
+      "resource_id": "61",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yv-43/27262f8f78ceb9ba42a3aac9204d88c9.json",
+      "source_sha256": "97f3b7e21bdca56ee8ac1d08388ca2cc7e9d9c3c30fbb3e436a507f71402b890",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c061_ult"
+      }
+    },
+    "62": {
+      "resource_id": "62",
+      "source_url": "https://sg-tools-cdn.blablalink.com/xr-31/4f804a8951963982ffebb2915f7a67ef.json",
+      "source_sha256": "9b5ffc8ec7354b037e68bc64b57223a686ae664573fff908d7f19cef747f1d40",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_burstgaugespeedup_01",
+        "burst": "icn_skill_c062_ult"
+      }
+    },
+    "112": {
+      "resource_id": "112",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ww-54/d961db92a1e02cbbee7bac19f71aac22.json",
+      "source_sha256": "14bb94fab6e670ec44f77f118175b385e741a03155ef1ca360d4195bea4d7f2d",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_stataccuracycircle_01",
+        "burst": "icn_skill_c112_ult"
+      }
+    },
+    "130": {
+      "resource_id": "130",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pg-94/4b8d0de2fd28e2e4a4fd7442191c2177.json",
+      "source_sha256": "95c4a06c50aa13056dd06b65d9972de08d95e8e55ef2096eccfa81b754674ee1",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c130_ult"
+      }
+    },
+    "132": {
+      "resource_id": "132",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yr-77/859492cb1624301cde7a6268658a939d.json",
+      "source_sha256": "e6b86571fa7954ed5d82f1dc574e60c889e355eca3c137c43d91841793bb962f",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c132_ult"
+      }
+    },
+    "140": {
+      "resource_id": "140",
+      "source_url": "https://sg-tools-cdn.blablalink.com/kh-03/f9723f561aeec9fe9ac34f09e4aff094.json",
+      "source_sha256": "104386c1cdffb61c4d0644e78594bc5ab8559baf4609c6888109f269d1e21142",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c140_ult"
+      }
+    },
+    "141": {
+      "resource_id": "141",
+      "source_url": "https://sg-tools-cdn.blablalink.com/lt-22/8bf7e970a29d65319b0c36742de9bcdc.json",
+      "source_sha256": "d1bd82c5971894a251b0dd93ca5c58131cd5d3b9c0f63cae901463e2ca23dd04",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c141_ult"
+      }
+    },
+    "142": {
+      "resource_id": "142",
+      "source_url": "https://sg-tools-cdn.blablalink.com/wi-17/3574568b089c4e8ac706905e28cc25f5.json",
+      "source_sha256": "c5afafd3fe10504660b8082e87392f4d372589c8c318b60e41369f7bd66bd9d3",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defdown_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c142_ult"
+      }
+    },
+    "143": {
+      "resource_id": "143",
+      "source_url": "https://sg-tools-cdn.blablalink.com/gx-12/b8fa1f6610972e81fadc4d471ea5bc03.json",
+      "source_sha256": "4d619207fb2d15e16c43990d86ad85f0a1c003a2eb9f8b68bc717a95a61c1a7f",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_penetrationdamage_01",
+        "burst": "icn_skill_c143_ult"
+      }
+    },
+    "171": {
+      "resource_id": "171",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ui-60/b2f440180f210223a1662b5067b6c923.json",
+      "source_sha256": "c5cbb223004e58c106df9f71cc6f91edf0f60395d980ff2c8fcdbfd817d14bbb",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c171_ult"
+      }
+    },
+    "190": {
+      "resource_id": "190",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oe-20/b412268b6d354bb09cba7e99cfd480b2.json",
+      "source_sha256": "4e738409abb5440d1d955f06e9925a3a5c6ac01c8db8de64705152482a9d4dfc",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c190_ult"
+      }
+    },
+    "191": {
+      "resource_id": "191",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yt-15/d35c67e1f10f83a566dd5d92532af451.json",
+      "source_sha256": "8b3f6a6b7e0a1f2a6af261b3da0e72bd43c62856c934f5e9c7ac73c7feca2ccb",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 150,
+      "skills": {
+        "skill1": "icn_skill_rateoffire_01",
+        "skill2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c191_ult"
+      }
+    },
+    "193": {
+      "resource_id": "193",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ie-97/b1a4bd63f68ab78da45597017fef15d9.json",
+      "source_sha256": "696c8d894677a9e47eb43c00d72cb0940e2b5949343a803d640773a293712cab",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c193_ult"
+      }
+    },
+    "194": {
+      "resource_id": "194",
+      "source_url": "https://sg-tools-cdn.blablalink.com/jq-17/053fcbd7e1c96c0da3a7b029649bed4d.json",
+      "source_sha256": "97f0f1e5aeb5f0dde0970bc0063dcb3ec574c99a61983dd93cb969e69d95c006",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c194_ult"
+      }
+    },
+    "195": {
+      "resource_id": "195",
+      "source_url": "https://sg-tools-cdn.blablalink.com/uf-12/a9e1447570477fb62db027cace0043dd.json",
+      "source_sha256": "92a1afe2babea22390b02e5e6056f3c75197cd5922d6c8a3f3df5184c993ea6c",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c195_ult"
+      }
+    },
+    "200": {
+      "resource_id": "200",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ql-11/21472372b40a33f34bfb0dffb86c126f.json",
+      "source_sha256": "a4e988ba76b52a75ee86043ddf5dadb6e0a73795ed30a64504fd649cc9df07e7",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c200_ult"
+      }
+    },
+    "201": {
+      "resource_id": "201",
+      "source_url": "https://sg-tools-cdn.blablalink.com/rx-30/1825c04e29db70231109a96222ca2f16.json",
+      "source_sha256": "32927d9b2585a61e39bd515b1671ad675d84c89adce8c2dfb26ebc5cba2568ff",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 150,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c201_ult"
+      }
+    },
+    "202": {
+      "resource_id": "202",
+      "source_url": "https://sg-tools-cdn.blablalink.com/cm-25/6e1684368561fca5a0884e46b3a21ffc.json",
+      "source_sha256": "51fe922704f953b42d338c82203cd1bb68e9a7a38679efcde1141164e4bce40d",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c202_ult"
+      }
+    },
+    "203": {
+      "resource_id": "203",
+      "source_url": "https://sg-tools-cdn.blablalink.com/bi-13/284dc2aa47f77fb8ca18c78e7d56fe1e.json",
+      "source_sha256": "83f03c355cd1d28cdded979c2144747726e76b4dc30de68d01fa7090987defb3",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c203_ult"
+      }
+    },
+    "210": {
+      "resource_id": "210",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oc-50/033de9e7a6a4ea4c0ca3c2c50b5bd496.json",
+      "source_sha256": "f404f0b70cbd20e25d23d87957ac38e9c6ec49eb594e77a60a7217284c1227f3",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c210_ult"
+      }
+    },
+    "212": {
+      "resource_id": "212",
+      "source_url": "https://sg-tools-cdn.blablalink.com/xn-33/369ae078906bd3cf8356f2a920f365ec.json",
+      "source_sha256": "e397c6b1fdd1a108508b11e2bb74ae6ec68018f9e102e8b7f5711bf902f61963",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defdown_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c212_ult"
+      }
+    },
+    "240": {
+      "resource_id": "240",
+      "source_url": "https://sg-tools-cdn.blablalink.com/no-13/eece1fd7d7204a8ac974e47b98de93f2.json",
+      "source_sha256": "598a36e1cef3c83a3e219f6c0f664d71ade96c086d20a5b304a3b5dea8908e80",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c240_ult"
+      }
+    },
+    "241": {
+      "resource_id": "241",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yd-08/8a3ada6ccbbc988f5e2cbd09275e9c6c.json",
+      "source_sha256": "e6c3c99a6ec47a41846ae551967d3bca1ae3f9951c4af3fe1fe8413803daf3fb",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_criticaldamage_01",
+        "burst": "icn_skill_c241_ult"
+      }
+    },
+    "242": {
+      "resource_id": "242",
+      "source_url": "https://sg-tools-cdn.blablalink.com/is-03/5fd77735f01a3f7bbb88eb8ddf500eb4.json",
+      "source_sha256": "2bd936db64dafceccba973ad6b3fdeb4e7ba3f6a269be452026a658538cc28d1",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_barrier_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c242_ult"
+      }
+    },
+    "270": {
+      "resource_id": "270",
+      "source_url": "https://sg-tools-cdn.blablalink.com/wd-51/554f379e70649d36dc4a18ba251ee399.json",
+      "source_sha256": "72213399f7d7204960c1117d9102ae485777d6939e24efbfb0c84de0e6709304",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_barrier_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c270_ult"
+      }
+    },
+    "271": {
+      "resource_id": "271",
+      "source_url": "https://sg-tools-cdn.blablalink.com/xp-70/69059a008d294ff337523934c657198f.json",
+      "source_sha256": "d47198b621af86e0edaf07ba8284144e0a910ee5362ca8da5e12dc62aec6115b",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c271_ult"
+      }
+    },
+    "272": {
+      "resource_id": "272",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ie-65/a5a15b63f77c78c2d490baf7a67aa362.json",
+      "source_sha256": "65210441f568e1ee14af8542976cb5d220dd4131854115a5793214813bbf5d7d",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c272_ult"
+      }
+    },
+    "281": {
+      "resource_id": "281",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ej-85/d664e9af8dc61ff4f931efc4bd165495.json",
+      "source_sha256": "cf905e4b9cec8d29469b3c4b3dc1f2ba300d3a474667250c7017c81ac380a010",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c281_ult"
+      }
+    },
+    "282": {
+      "resource_id": "282",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oy-80/954ede50e7ce09380addc26470fca32a.json",
+      "source_sha256": "33cf92a4703cde8022d467f657b2b8b9bdb8315aae52f1faefd3822db248433e",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c282_ult"
+      }
+    },
+    "283": {
+      "resource_id": "283",
+      "source_url": "https://sg-tools-cdn.blablalink.com/nu-68/9c65a636681a3661f481a24b5009839b.json",
+      "source_sha256": "03e68fbf9ddafdc8b39ff9318fbaa13a45a2cb014d0e5b2befa0c60bc231377f",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c283_ult"
+      }
+    },
+    "284": {
+      "resource_id": "284",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pg-87/a929900995105ce47111dff8c0140c7c.json",
+      "source_sha256": "58b9e8cf18dc078a5e9e9e805dfc76210a201a7dfebb7f45ff4811cbfe621dd0",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_durationvaluechange_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c284_ult"
+      }
+    },
+    "304": {
+      "resource_id": "304",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yh-93/4384ac4e2fc88a275e1080375648ab49.json",
+      "source_sha256": "1b5fdc0312c6f37ddce833850c253222efa5f8b4be1ff571c49f854492c3d2ba",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_atkdown_01",
+        "burst": "icn_skill_c304_ult"
+      }
+    },
+    "305": {
+      "resource_id": "305",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zt-13/aedbaf2610e897d2839ec00549da83ec.json",
+      "source_sha256": "b193121ae5a7a4ae91b525f2ec55eb6e31d99a25824050a7a656b758283fe5d1",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c305_ult"
+      }
+    },
+    "308": {
+      "resource_id": "308",
+      "source_url": "https://sg-tools-cdn.blablalink.com/tt-90/8e127658931c3afb7efbabbb78ab751b.json",
+      "source_sha256": "de90886ff91d8eef1ca8ed586bef4af19d7b2bfcb85196d8caed981950a15952",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c308_ult"
+      }
+    },
+    "310": {
+      "resource_id": "310",
+      "source_url": "https://sg-tools-cdn.blablalink.com/am-36/ce9d7f09793bbd7a2b741d96058f7bf2.json",
+      "source_sha256": "8a938080c121e0ca652eb90f61b7bbdff6374f580267df10dcb5915b9078d32c",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_debuffimmune_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c310_ult"
+      }
+    },
+    "311": {
+      "resource_id": "311",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zi-24/1b4a903cb61738c2c96da8f9b5a0ea47.json",
+      "source_sha256": "2dedd84bf0142eee264d129dac08ef3f38da5080666ed62d2c42700250175d71",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_healcover_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c311_ult"
+      }
+    },
+    "312": {
+      "resource_id": "312",
+      "source_url": "https://sg-tools-cdn.blablalink.com/jx-19/4a86e0278ebdad6dcd8370d96ecd67f5.json",
+      "source_sha256": "903fc14ff1688fc4f07477e5c4fdab4afd046b1c09c64d7bc41691e5d9c718cd",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c312_ult"
+      }
+    },
+    "314": {
+      "resource_id": "314",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vy-33/2df0e94fa8064e8deab7da1de09c6b09.json",
+      "source_sha256": "9b29f8d2c6877cca4af24fc728b62a88adb43a03b3e131b29f8d44931430e483",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_criticaldamage_01",
+        "skill2": "icn_skill_incburstduration_01",
+        "burst": "icn_skill_c314_ult"
+      }
+    },
+    "315": {
+      "resource_id": "315",
+      "source_url": "https://sg-tools-cdn.blablalink.com/uu-21/503bd8b054f1758cee9636beffc66cdc.json",
+      "source_sha256": "3941c657a77e26501926fdbe8f718dec824a9b9ac5f6a5cd751576ac5feaa0da",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c315_ult"
+      }
+    },
+    "316": {
+      "resource_id": "316",
+      "source_url": "https://sg-tools-cdn.blablalink.com/fj-16/c647defb56367ef877f4246e3eaf67e9.json",
+      "source_sha256": "6228d38b94688f107903b6ba0940bbf647589d335ebfb94b18f0ef35f6d0e289",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c316_ult"
+      }
+    },
+    "380": {
+      "resource_id": "380",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ge-76/73521838f140891f0f538ddbc875c676.json",
+      "source_sha256": "7b0586591cca2b38c5fcb0aa20552838aadee1cb4a19dab9b579a8956d575c91",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c380_ult"
+      }
+    },
+    "381": {
+      "resource_id": "381",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qt-71/8d8e8ff7259697984e26e01d096364e6.json",
+      "source_sha256": "a3a6f8e971ac059f52051a1568964b5a46bcd95f74be0290ea7c735bbef3c4cc",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c381_ult"
+      }
+    },
+    "382": {
+      "resource_id": "382",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pp-59/6a882f11e44e92e2ff0217508315d053.json",
+      "source_sha256": "dadcf0b559a447041307c05c1cf662c6057716ae11783142081d90f04a3805fb",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_bonusrange_01",
+        "skill2": "icn_skill_statshotcount_01",
+        "burst": "icn_skill_c382_ult"
+      }
+    },
+    "392": {
+      "resource_id": "392",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ng-98/58d5c9f876ce10fcc7924a389d43e801.json",
+      "source_sha256": "e02e78ecd1509a3a2894bf1fa5c51105e60ca6518bc1c9d9b7b5d6ca68e39a8b",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_burstgaugespeedup_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c392_ult"
+      }
+    },
+    "430": {
+      "resource_id": "430",
+      "source_url": "https://sg-tools-cdn.blablalink.com/fo-69/564092342168c328f5a95e3aa7438656.json",
+      "source_sha256": "63f1e79939f4cf001b499a7015017ec722c54f3810d86ab99a5386124581cb44",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c430_ult"
+      }
+    },
+    "431": {
+      "resource_id": "431",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qd-64/533878eab3358987fd1f7d538e02ef11.json",
+      "source_sha256": "1bb31c08420ebc13305e61c675470e06182f84e7131d4db3df57950c4b6fde75",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statreloadtime_01",
+        "burst": "icn_skill_c431_ult"
+      }
+    },
+    "432": {
+      "resource_id": "432",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oz-52/60d044e8be7e44e7264e36424efff902.json",
+      "source_sha256": "a19054aff87391c74a71a988e2426eecca0ec6bd8c2dd43f593cf0c8ffcbc340",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_criticaldamage_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c432_ult"
+      }
+    },
+    "520": {
+      "resource_id": "520",
+      "source_url": "https://sg-tools-cdn.blablalink.com/le-40/8a3d68536d0f97dddc80c55e9fc31e7b.json",
+      "source_sha256": "e5cff1d8e217c264a014e47af75b859c0025ea20e8203a88d34567e0f9aaac70",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c520_ult"
+      }
+    },
+    "521": {
+      "resource_id": "521",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vt-35/ac39724da2b02b299a661da51c27fad3.json",
+      "source_sha256": "c190e2a8f1d6fc330aa4c519ab223bc7214017b3f649225080eb92af75eb6396",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_debuffremove_01",
+        "burst": "icn_skill_c521_ult"
+      }
+    },
+    "550": {
+      "resource_id": "550",
+      "source_url": "https://sg-tools-cdn.blablalink.com/kq-03/8a3775e42e502560e5b726ea651927e1.json",
+      "source_sha256": "4c91d4e8b491a9ffceb2286ed3aca4db18dafc775b7f50e570f4f087fe8d4909",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_damageshare_01",
+        "skill2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c550_ult"
+      }
+    },
+    "551": {
+      "resource_id": "551",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vf-97/6a1bff22277f0c57e037376b57ff9856.json",
+      "source_sha256": "917d8ca58b6d7342186c2f3fa38384d830a06fb2ffa00ca4dd7ef15ba38f3ea7",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_debuffimmune_01",
+        "burst": "icn_skill_c551_ult"
+      }
+    },
+    "570": {
+      "resource_id": "570",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ye-33/5fc3315f4c04bdcb170cb23d914404a5.json",
+      "source_sha256": "31bf86c43ea011fadc079a0eed937407121929770a3e57481acfc273be533194",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c570_ult"
+      }
+    },
+    "600": {
+      "resource_id": "600",
+      "source_url": "https://sg-tools-cdn.blablalink.com/td-71/7417f3f575cb1cad39262bac79c57589.json",
+      "source_sha256": "63229ad59cb4d7863fd3efeb574abc6a3e2ff8f590f6fe637c9881b1a2a107ea",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c600_ult"
+      }
+    },
+    "601": {
+      "resource_id": "601",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ds-66/37ed2a4f9a15c4078cbdb607a6a62a00.json",
+      "source_sha256": "60c8b19738f2fe14fac9f4a6cb7f2d5f4d80678b10ec44e6c1c5fd86d53e899e",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c601_ult"
+      }
+    },
+    "220": {
+      "resource_id": "220",
+      "source_url": "https://sg-tools-cdn.blablalink.com/uw-65/7003d5f8e2a79245e442b01353ac1dac.json",
+      "source_sha256": "8a0da95cf683775c58219d7a390c44a0b6fdfdb56f4719fcc71ee7af97b2e870",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statcritical_01",
+        "burst": "icn_skill_c220_ult"
+      }
+    },
+    "221": {
+      "resource_id": "221",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ts-53/4075f98a67f5a391fee80180bf25407f.json",
+      "source_sha256": "88fe1a294912ab00fbd93b1266b285a0c25876c28379e5719c9bfbe2bd87004d",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c221_ult"
+      }
+    },
+    "222": {
+      "resource_id": "222",
+      "source_url": "https://sg-tools-cdn.blablalink.com/eh-48/9bb8afae6ae082aecd1daa7e3e3813d2.json",
+      "source_sha256": "f6c9d7bdbb27665d0919a3a7f915e64154af53aebabcd3b84bf8cb50717a5fa4",
+      "max_ammo": 20,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c222_ult"
+      }
+    },
+    "223": {
+      "resource_id": "223",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ft-67/022b2c038744f5bcda2f031669934e29.json",
+      "source_sha256": "9478dd96861feac6a896573b06a0464b403065ce468ad4eaae5ee1dd9d13c6d5",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_coredamage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c223_ult"
+      }
+    },
+    "224": {
+      "resource_id": "224",
+      "source_url": "https://sg-tools-cdn.blablalink.com/qi-62/d3b260243fd43a67f0b5c46d30c5d23f.json",
+      "source_sha256": "526e226ca83d7eea7b695de57789b04bc25e5839c9649bee85f99accaed23fac",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statammo_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c224_ult"
+      }
+    },
+    "225": {
+      "resource_id": "225",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pe-50/d0dcad73d3576faf605f22c245d0e8a9.json",
+      "source_sha256": "f10df9082358100f438899c39e55a2ffde9a50469ec29c91ce0a28be36f0ed2e",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 30,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c225_ult"
+      }
+    },
+    "226": {
+      "resource_id": "226",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zt-45/de20749d7894f4890a3142397359ab17.json",
+      "source_sha256": "3b2e86e865a801d603f2de6ddd38362412f9f0ded86188a1a2acd696002814c2",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_barrier_01",
+        "skill2": "icn_skill_healbarrier_01",
+        "burst": "icn_skill_c226_ult"
+      }
+    },
+    "230": {
+      "resource_id": "230",
+      "source_url": "https://sg-tools-cdn.blablalink.com/px-73/a7dd9553e38be5f6f50d0b03c2cb5ad7.json",
+      "source_sha256": "e359572a019d6d8faf2dff21dbbd6c17871833ef28c79071e0d44688ef84d97d",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c230_ult"
+      }
+    },
+    "231": {
+      "resource_id": "231",
+      "source_url": "https://sg-tools-cdn.blablalink.com/am-68/12c321c09d592405a63930093fd2853d.json",
+      "source_sha256": "9e38ddb77c6f49b0405961a1d4cd9f6e83ed01357b77c3ab4b2f5ea731c419db",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_criticaldamage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c231_ult"
+      }
+    },
+    "232": {
+      "resource_id": "232",
+      "source_url": "https://sg-tools-cdn.blablalink.com/by-87/e443d568d786089b56dd773cfb4e288b.json",
+      "source_sha256": "dba9fd41257392407a78c08e560dd3f3a0d741441df81bf06adc6c0d1ced17a3",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defup_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c232_ult"
+      }
+    },
+    "233": {
+      "resource_id": "233",
+      "source_url": "https://sg-tools-cdn.blablalink.com/mn-82/25dc1696031bf9b723a1a35dd633f410.json",
+      "source_sha256": "08810a9453e542486b4c9e8cd8491d37dd7e220ef0daf65f0eb39cb0b11c2b1a",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c233_ult"
+      }
+    },
+    "234": {
+      "resource_id": "234",
+      "source_url": "https://sg-tools-cdn.blablalink.com/lj-70/f3e8f3e399ae009429bf6130afb4a663.json",
+      "source_sha256": "bbeee3f929ce8ce29a7f1984c0c8ecf179307b1503b8c0902d506410f94fa3b7",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statpenetration_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c234_ult"
+      }
+    },
+    "260": {
+      "resource_id": "260",
+      "source_url": "https://sg-tools-cdn.blablalink.com/bc-43/6740d438c7a73360677481539a8274df.json",
+      "source_sha256": "71d5025d106ba1da20cdc50c2353c0d07469c062e2b876e729779df89be7d14a",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_stataccuracycircle_01",
+        "burst": "icn_skill_c260_ult"
+      }
+    },
+    "261": {
+      "resource_id": "261",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zy-31/604dbab6ec58413dfb930ced4560e0e4.json",
+      "source_sha256": "6e6fc74b9dfaea3ab9e0a25b8a8318c6616740701c96ea2250e2b5c9284c7c95",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_statexplosion_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c261_ult"
+      }
+    },
+    "262": {
+      "resource_id": "262",
+      "source_url": "https://sg-tools-cdn.blablalink.com/bk-50/9d7b3cc8568d39dd98a614b14c2b25ef.json",
+      "source_sha256": "3be1862bf2a34c591be6b6d9aca92e05e27a8215495539075e3540443fd3bbbf",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 150,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c262_ult"
+      }
+    },
+    "330": {
+      "resource_id": "330",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ch-59/153f2dcecc9835389caa21d22afc9fbe.json",
+      "source_sha256": "b20a1c6c0d85e1083f32c32286e5e9d44f73fd25c6799b764a9dbf176f0f68b6",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c330_ult"
+      }
+    },
+    "331": {
+      "resource_id": "331",
+      "source_url": "https://sg-tools-cdn.blablalink.com/dt-78/5deb20010495bb0331434253acc41e36.json",
+      "source_sha256": "c1cd3b532caff7730ecce15c3826f1a4f60cf18b1973ce62acd98e1813dc8977",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c331_ult"
+      }
+    },
+    "470": {
+      "resource_id": "470",
+      "source_url": "https://sg-tools-cdn.blablalink.com/lu-47/d93100adca5e7b4b4ebcaaa786fb1aee.json",
+      "source_sha256": "ceefb88f8a57dfc66f3f4ad428ad03d3b11df966c8c295359df7d1791f5b9f80",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_chargedamage_01",
+        "skill2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c470_ult"
+      }
+    },
+    "471": {
+      "resource_id": "471",
+      "source_url": "https://sg-tools-cdn.blablalink.com/wj-42/251ca47af763aaf8efb601f47d028c58.json",
+      "source_sha256": "0013cce192942f965c513ac54c05738f50088ae55cc5b7398507521ace22ab5f",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 120,
+      "skills": {
+        "skill1": "icn_skill_damagereductionup_01",
+        "skill2": "icn_skill_statpenetration_01",
+        "burst": "icn_skill_c471_ult"
+      }
+    },
+    "511": {
+      "resource_id": "511",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oz-20/72fa6824d2d0e69adc7aace692678372.json",
+      "source_sha256": "23a1b629868b1a408b33ef83a6d86e2f516275ccc8b4850681789578bd08ba88",
+      "max_ammo": 24,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_stathp_01",
+        "burst": "icn_skill_c511_ult"
+      }
+    },
+    "513": {
+      "resource_id": "513",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yk-03/76d6c94cb2e636bcc4ce117bc064f2f3.json",
+      "source_sha256": "ce2c5ac66d196ecf25162ee2a76a13433059751e5fd13d7b0ea7ee952040e68c",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damagereductionup_01",
+        "burst": "icn_skill_c513_ult"
+      }
+    },
+    "514": {
+      "resource_id": "514",
+      "source_url": "https://sg-tools-cdn.blablalink.com/iz-97/aa9ff382be4b490290f983de712c4051.json",
+      "source_sha256": "9c38da6341ca5b48b36f860cff17ddf101cfdd432a8e5f6c09afb415d2dbd5b2",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c514_ult"
+      }
+    },
+    "515": {
+      "resource_id": "515",
+      "source_url": "https://sg-tools-cdn.blablalink.com/to-92/1c2d7fe59a404327c20418164773cc7b.json",
+      "source_sha256": "9ddd1391388d877aacc7ff23738b960a9325437f6f2a1c7e2b6f3f1a078f178f",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_coredamage_01",
+        "burst": "icn_skill_c515_ult"
+      }
+    },
+    "23": {
+      "resource_id": "23",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ca-48/aa069214b4bbcd64f556be3c5a4930b5.json",
+      "source_sha256": "6b4fb4d6ac4135dc617dbb9a8f506afd18630aca5d2b9ec9ac73d29a943a6144",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damagereductionup_01",
+        "skill2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c023_ult"
+      }
+    },
+    "800": {
+      "resource_id": "800",
+      "source_url": "https://sg-tools-cdn.blablalink.com/iu-67/7be3c0084a9fc4e4f0ea5018c23896f1.json",
+      "source_sha256": "46ad2d487f18e9c2b12e29b1f31ca32780ec655fb67cdf0363727d93e46b80c3",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statreloadtime_01",
+        "skill2": "icn_skill_attention_01",
+        "burst": "icn_skill_c800_ult"
+      }
+    },
+    "801": {
+      "resource_id": "801",
+      "source_url": "https://sg-tools-cdn.blablalink.com/tj-62/877354cf6707927f6e90ac5f572a0fe3.json",
+      "source_sha256": "f29b35568404d74468dec2521c5daa2a3d14945d83bd390f8d675f90b15d5d4f",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_statexplosion_01",
+        "burst": "icn_skill_c801_ult"
+      }
+    },
+    "802": {
+      "resource_id": "802",
+      "source_url": "https://sg-tools-cdn.blablalink.com/sf-50/d46f964f2cf79fc3e51199628a064539.json",
+      "source_sha256": "36b6525f2d2744f6848c3673f1b68366a589b36c87ce2e8f0b445edb4997c4f8",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_defdown_01",
+        "skill2": "icn_skill_statammo_01",
+        "burst": "icn_skill_c802_ult"
+      }
+    },
+    "810": {
+      "resource_id": "810",
+      "source_url": "https://sg-tools-cdn.blablalink.com/po-82/3bdd59456b31ecb0d601c4f4d26a6c40.json",
+      "source_sha256": "a77af7f9ad1d92cf288d6794384d5d2ab7b471cfea8ef3d11a229fcfd7289898",
+      "max_ammo": 90,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_stathp_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c810_ult"
+      }
+    },
+    "811": {
+      "resource_id": "811",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ok-70/f401ddd700621792773d59e0d03eb62b.json",
+      "source_sha256": "f06cfeb753db205277be887731c9e3db4528f76d66a4e5d900b819895870999e",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c811_ult"
+      }
+    },
+    "812": {
+      "resource_id": "812",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yz-65/cc9f07c6e0a257e8f7ce8bc642c9b67f.json",
+      "source_sha256": "2e4a5763e7f67ddb7e5eab3b4d8babf70f4e3266f11e1bfa9fd98e9b10d692e3",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c812_ult"
+      }
+    },
+    "820": {
+      "resource_id": "820",
+      "source_url": "https://sg-tools-cdn.blablalink.com/kp-90/e5e7434d35fc70b87663b418353eb5be.json",
+      "source_sha256": "d004687cfaa8bb899e4986d9d8d013ae17ed54967086e16633456d46f90a28af",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_healshare_01",
+        "skill2": "icn_skill_healshare_01",
+        "burst": "icn_skill_c820_ult"
+      }
+    },
+    "821": {
+      "resource_id": "821",
+      "source_url": "https://sg-tools-cdn.blablalink.com/mb-10/c2a901e0ee296733a880d2cbbeae24f2.json",
+      "source_sha256": "b060de82c42951ddf55303ee17f9ed426e1ae57364a335079242fd525607be53",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_chargedamage_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c821_ult"
+      }
+    },
+    "822": {
+      "resource_id": "822",
+      "source_url": "https://sg-tools-cdn.blablalink.com/wq-05/d2155413993172cedc5bba4abafc2f9b.json",
+      "source_sha256": "c48532ce166b2cacd29cebefe5a334b3243aa4485e91021d1dc41c0b96283a79",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkdown_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c822_ult"
+      }
+    },
+    "830": {
+      "resource_id": "830",
+      "source_url": "https://sg-tools-cdn.blablalink.com/ig-30/0b288de17106cb06d26477a5829072b3.json",
+      "source_sha256": "d51e0187e2698202cff41f46d9944f4bb0bc1825e675091a4ae43bfb2411688c",
+      "max_ammo": 20,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_barrierdamage_01",
+        "skill2": "icn_skill_coredamage_01",
+        "burst": "icn_skill_c830_ult"
+      }
+    },
+    "831": {
+      "resource_id": "831",
+      "source_url": "https://sg-tools-cdn.blablalink.com/sv-25/90c05a6c90be45cffa86df45dce11329.json",
+      "source_sha256": "e6c6ec0f6b125ae40544a2d9de921164b0878f904f9e0758a37741405f0f197e",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_barrierdamage_01",
+        "burst": "icn_skill_c831_ult"
+      }
+    },
+    "832": {
+      "resource_id": "832",
+      "source_url": "https://sg-tools-cdn.blablalink.com/dk-20/29f24d7114a4cc6205d4c94512d9f6fb.json",
+      "source_sha256": "19d36aa17a7551c973526b96c6231bce6a281136617cc65b8618302bac68c399",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_barrierdamage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c832_ult"
+      }
+    },
+    "833": {
+      "resource_id": "833",
+      "source_url": "https://sg-tools-cdn.blablalink.com/cg-08/d1c571ab097227d6bc3e3a50ff091b43.json",
+      "source_sha256": "87bf3cf8c0938ed77337375b18dd200240d71867aea3ac230c35109cc5d08aaa",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_barrierdamage_01",
+        "burst": "icn_skill_c833_ult"
+      }
+    },
+    "834": {
+      "resource_id": "834",
+      "source_url": "https://sg-tools-cdn.blablalink.com/mv-03/f0d0cb9dfdd48531949d997b5fb7b71f.json",
+      "source_sha256": "74fce190665b930d7e07f9bafd2d1bc5bfb920d930c67b33e7b07e391d347b47",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c834_ult"
+      }
+    },
+    "835": {
+      "resource_id": "835",
+      "source_url": "https://sg-tools-cdn.blablalink.com/oh-22/7ea7194fd5336e75892c1a4219ea2d12.json",
+      "source_sha256": "3f4c7ba7543c2bb41bd98a02ff283aae58511f5ece34a0ef5ad7d573a448267a",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damagereductionup_01",
+        "skill2": "icn_skill_heal_01",
+        "burst": "icn_skill_c835_ult"
+      }
+    },
+    "836": {
+      "resource_id": "836",
+      "source_url": "https://sg-tools-cdn.blablalink.com/nd-10/89dc4f0aecd92dc02bfd8bc7ce71ff4c.json",
+      "source_sha256": "4cf59e3be9caf12d70d608aca4726b2404ee4efac514a62a7c61d398ca1500fa",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damagereductionup_01",
+        "skill2": "icn_skill_damagereductiondown_01",
+        "burst": "icn_skill_c836_ult"
+      }
+    },
+    "840": {
+      "resource_id": "840",
+      "source_url": "https://sg-tools-cdn.blablalink.com/pa-45/d12d5776bed89a56713464ce37ddd46c.json",
+      "source_sha256": "8c4bb5a244194668fe80f15ff9862e1d8a893c7b34eba95adaae85331eca42fa",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c840_ult"
+      }
+    },
+    "841": {
+      "resource_id": "841",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zp-40/cd49a7ab629ce20a5bd692efd90ae0c9.json",
+      "source_sha256": "64ba2c772f4ffbc1026c48e5253f76ee18b9b44da9f20d359b3af7f818655477",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c841_ult"
+      }
+    },
+    "842": {
+      "resource_id": "842",
+      "source_url": "https://sg-tools-cdn.blablalink.com/yl-28/d4797ec1f860e65bd8a7fd99a421a19b.json",
+      "source_sha256": "587f09872c5bc87746dc5161c95705d58425e273035a3ca18a01c19c1fc828d9",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_heal_01",
+        "skill2": "icn_skill_barrier_01",
+        "burst": "icn_skill_c842_ult"
+      }
+    },
+    "850": {
+      "resource_id": "850",
+      "source_url": "https://sg-tools-cdn.blablalink.com/vu-60/d1cae9265a310e7cb9dadaace3dbda1b.json",
+      "source_sha256": "4ab760dbbe70bb79d482695f3360704e900eefdd64c8b94536866034ca4dbb05",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_statcritical_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c850_ult"
+      }
+    },
+    "851": {
+      "resource_id": "851",
+      "source_url": "https://sg-tools-cdn.blablalink.com/uq-48/ee7adbb81b3b0b8a953ad0da36547288.json",
+      "source_sha256": "5964e82c47bc009b0de219f7b2f2df08538f3f13234ef3f9a2cafc0abbf2a3fd",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c851_ult"
+      }
+    },
+    "852": {
+      "resource_id": "852",
+      "source_url": "https://sg-tools-cdn.blablalink.com/wc-67/c6395406a73a46c77576090d590e6665.json",
+      "source_sha256": "8977782ababae375e4f719193c1d49c895a3bdd6a5f5efeeb3907496b2cc0dfa",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_healcover_01",
+        "burst": "icn_skill_c852_ult"
+      }
+    },
+    "860": {
+      "resource_id": "860",
+      "source_url": "https://sg-tools-cdn.blablalink.com/hs-92/cf49b33b819ebdbe5bf8a601baaa1532.json",
+      "source_sha256": "d34da5570aaec77d9eb27e8f272640ac46770d03d7b55a92218acb2d3e3c39fb",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c860_ult"
+      }
+    },
+    "861": {
+      "resource_id": "861",
+      "source_url": "https://sg-tools-cdn.blablalink.com/sh-87/ee916e6e15fa343ba7067d124da92e94.json",
+      "source_sha256": "a18165c36740c1b1a2f23cbd5bba90b15a7637e7acd1c2a9265ccd21f2d58467",
+      "max_ammo": 6,
+      "charge_time_centiseconds": 100,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_damagereductionup_01",
+        "burst": "icn_skill_c861_ult"
+      }
+    },
+    "862": {
+      "resource_id": "862",
+      "source_url": "https://sg-tools-cdn.blablalink.com/cw-82/d9069089c620860c7b92148abdeed8fa.json",
+      "source_sha256": "74bddcbe6dff1a1866878154da34d3c810cebc4969420fd957aec96c2fb94b11",
+      "max_ammo": 60,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damage_01",
+        "skill2": "icn_skill_damage_01",
+        "burst": "icn_skill_c862_ult"
+      }
+    },
+    "870": {
+      "resource_id": "870",
+      "source_url": "https://sg-tools-cdn.blablalink.com/om-08/aca22375d9c45c83c572c6971585c2c0.json",
+      "source_sha256": "58c829267c51fa2d25106b8ab4a969c53e73a6d90786e737c0aa09c63905cd53",
+      "max_ammo": 9,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damageshareinstant",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c870_ult"
+      }
+    },
+    "871": {
+      "resource_id": "871",
+      "source_url": "https://sg-tools-cdn.blablalink.com/zb-03/14faaf2281bdff352c8f5bdffcb89874.json",
+      "source_sha256": "2b9a3c82ec101cac5848b2451c2bfa47b77d1b6f46f8b8f647cf6513c169a5d2",
+      "max_ammo": 300,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_damageshareinstant",
+        "skill2": "icn_skill_atkup_01",
+        "burst": "icn_skill_c871_ult"
+      }
+    },
+    "872": {
+      "resource_id": "872",
+      "source_url": "https://sg-tools-cdn.blablalink.com/jq-97/f555ad48fedac671c16a0c931920732f.json",
+      "source_sha256": "edbd42d864651599d9faa8103e95ea54c8028c962cf491aae73157907e92b400",
+      "max_ammo": 120,
+      "charge_time_centiseconds": 0,
+      "skills": {
+        "skill1": "icn_skill_atkup_01",
+        "skill2": "icn_skill_defup_01",
+        "burst": "icn_skill_c872_ult"
+      }
+    }
+  },
+  "icons": {
+    "icn_skill_atkdown_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hu-67/ts-23/vl-07/296dc0fe895b1471614b8218c8a7dc1c.webp",
+      "sha256": "06453b404bd277ce3575251c680aae86883e5a4432814f01a36836da3d37efac"
+    },
+    "icn_skill_atkup_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qm-06/gj-25/ve-74/0d86502ba7dc490f4095b706ae1e383d.webp",
+      "sha256": "48d78dfd8253dfcec656b93ccccae6c4cf91520be95cd78b3560ce7e4d520a63"
+    },
+    "icn_skill_attention_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/er-05/aj-41/dg-04/41361e6aa0e823c591a061b901fe6273.webp",
+      "sha256": "f4fb6206263a4ce6b917ca27f34132cc8ba66d2ec0ab507bf41d7b37bcd7c0b0"
+    },
+    "icn_skill_barrier_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/na-39/bn-15/dp-64/9e4b6f296d9dd0acebe9eb2d9438d130.webp",
+      "sha256": "e77c74cdbce9952ae76b1514abee805bac1f0fefe6ce707c2c93eb758cffc04a"
+    },
+    "icn_skill_barrierdamage_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/pm-76/rg-77/eu-87/0ad0e84cec7d1177854d4b3178b1784e.webp",
+      "sha256": "5919140a2beb7cb1c905fb7db5ad86831a436f2bcdb82bcccfdbf2fb2b6bc2b3"
+    },
+    "icn_skill_bonusrange_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ik-57/lh-09/jx-98/01ab44cf68892368aec38baf245d8988.webp",
+      "sha256": "52bc2eb175799129ee7b9a83e62f7ec52d9695acdfa45894ba1143a9478cb252"
+    },
+    "icn_skill_burstgaugespeedup_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uv-25/gc-36/oj-00/59707788e854c8b123ae14c47efab51a.webp",
+      "sha256": "7ec10dda3bd712a6b22432677a0529413e3f48efad3e4f49a4e75d260e8fee05"
+    },
+    "icn_skill_c010_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gh-96/mw-05/xe-97/d78870b353c22d3b6648b8b11ee850ca.webp",
+      "sha256": "a25b5ff2a584a344647a581f701e1521965bcb81dea7fa9160e125645b6dff6a"
+    },
+    "icn_skill_c011_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ww-01/kh-84/ul-37/0692636162654a36d81242078c030e67.webp",
+      "sha256": "92856d3225351e48d002b7e8ddb308cc3aff859f71c1ef327e65d8ebc99f498a"
+    },
+    "icn_skill_c012_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nl-05/hs-64/rs-76/1b1155174ba609db02bc3f8f5ec35a67.webp",
+      "sha256": "058fdb28cf562e471861c41cdd801852b39d0fc96b3edf4d51bbc1c7a5d4eca3"
+    },
+    "icn_skill_c014_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gi-20/ir-70/mg-55/373b6d093dbfa092b3dd151a5a68a78b.webp",
+      "sha256": "e0ba9384b7e854432734ff630890e63fce9a412d7359678728867ad1bbb1d290"
+    },
+    "icn_skill_c015_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wx-24/vm-72/jn-94/8c8e78586f29309fc3618d9e39edfae6.webp",
+      "sha256": "179f980530bf1dc571952f15a74a8906ec8de2109207f76a0ecf3f994a7dbf6a"
+    },
+    "icn_skill_c016_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zf-35/sx-52/gu-34/7b1379fe6cfa61771fc1619a12b66902.webp",
+      "sha256": "ed6a474b1f36f54a1bd98d4547ceb69f9baac4f100c678ab1c4e9fa89fe9b500"
+    },
+    "icn_skill_c017_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/pu-39/wl-78/eb-73/c141ebf368f80bcee0602939b66d3a4f.webp",
+      "sha256": "df21faf8645563e75cf8e8dbcc0548e4edadd8aadd3d4ffc882dfb7a7fb38840"
+    },
+    "icn_skill_c018_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gj-43/tw-58/bi-13/fe8582bbd783a94d284fc3937b3843fc.webp",
+      "sha256": "fda2b0d91820267ada18fbd4538174dea0c626667aec927fa27c7ec05e76f86e"
+    },
+    "icn_skill_c020_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ln-25/sd-32/hy-54/86e638a796ae5906a76ff6325aad6ed9.webp",
+      "sha256": "fac1dbaf5451a2effa868c18eecaca42654d9a184d4646186d1812f8aef067ee"
+    },
+    "icn_skill_c022_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ek-40/mz-91/cm-33/c027ef21773b99a00c85fada9c5b1b8a.webp",
+      "sha256": "65549a8a9f81b02c4937f39af4706a196d2c30c68f8f49c0c534d273d9b4867f"
+    },
+    "icn_skill_c023_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uz-44/qn-18/zt-72/e4f645e5c5879a30ae9d49f53ef1b59d.webp",
+      "sha256": "cc41ce4287b738e7cfa2a0206511c560410829dc71b27095f26479a680c2723d"
+    },
+    "icn_skill_c030_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zw-29/ia-37/bc-93/c89fdfdd030735e4a5be9d1776b6ffd6.webp",
+      "sha256": "62b11f5d98d553490929a2957be880559112c4d18d3150b5e266b607d29a6025"
+    },
+    "icn_skill_c032_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/st-44/yj-65/vq-72/b401548ddb3b29518ab53dccf85f68dd.webp",
+      "sha256": "d66ea5648fed8f8717db5b64b622c497e53e7546ec19b9da004d0c22c0cbc7e4"
+    },
+    "icn_skill_c033_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ji-48/vu-45/sx-12/ad22927fd7710a51d13208f752a0666d.webp",
+      "sha256": "cccaeb75e94de447440221de8c412970a31b98f4efc05f19a9c7fa4ed7fe6769"
+    },
+    "icn_skill_c040_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fc-57/nh-64/lw-50/64763a6ab80ed7185dfad5f631065bb8.webp",
+      "sha256": "b0007d80a11d62927bf51bb7dee30fdb05af44181f94a44ddd1178678cb6f249"
+    },
+    "icn_skill_c041_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hk-68/ks-44/jd-89/aa17e0e023bca6dd86d5b5e71cb3b64c.webp",
+      "sha256": "7a90b302573887b6f08d9f96a48b2b30b97aa764aa8a510df5750db2b293d15a"
+    },
+    "icn_skill_c043_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/oo-76/lr-50/dr-68/cb1a0e99dc0cbe28f24ffa45caeba415.webp",
+      "sha256": "e768ed8e81e5c9bbcf55f8ad1ebf92d6ca86ff2355f65749e7468774a694babd"
+    },
+    "icn_skill_c060_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kk-96/il-96/pu-46/3d95f39c2962895571631fa637ba482d.webp",
+      "sha256": "5215c7209f5c9698d896bad57f203ce01beed0c43a6078aee9c9688384e29a0c"
+    },
+    "icn_skill_c061_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/az-01/fw-76/nb-85/893e04d770670b7fc48737e818b86ced.webp",
+      "sha256": "3d76ce13ecad61549f80984f2a1071f64363534d8ffcf34d90829d8fe93b02f3"
+    },
+    "icn_skill_c062_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ro-05/jk-03/ki-25/9bb329261b4e9152cbfbdefd8016cef9.webp",
+      "sha256": "1865b6ff7c85ecef39bb2565f53fba918ac5c2e3e107629cf076dbf16cd95a86"
+    },
+    "icn_skill_c070_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/yt-01/ns-24/iy-85/b79999d9d497137600c3d97b44ac6be0.webp",
+      "sha256": "731f2dba738262dc12ce34c029059b4663fe6d743fcfc58e12201523373a2e20"
+    },
+    "icn_skill_c071_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/pi-05/rg-50/gf-25/e65e00186a1d24fd5c1d227527f54f37.webp",
+      "sha256": "65c5176f4fedfd6b259bdc2c32b54191c9c8de09cb95246cc6e1c3cba808b5c0"
+    },
+    "icn_skill_c072_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/rq-16/or-30/dm-64/cff3e88f4c15137275bebb045f5aff62.webp",
+      "sha256": "8b7b3b749c60bc358907dcac4f2dedf4fddd9309528bcee4d009a46f223c94a7"
+    },
+    "icn_skill_c073_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/if-20/mc-10/at-04/696605483bb3450d03fb542a50990e43.webp",
+      "sha256": "8014531baad300a8fb7d6171217d82a317226ce78148716b3f37a839cae9ee9a"
+    },
+    "icn_skill_c074_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/yu-24/jn-89/ya-43/beb8b38b45335b0b2707536bfe1a89c8.webp",
+      "sha256": "53e183f3a21b237f62148a084e83448187fddfcb6a14a4f30d5049e99d922319"
+    },
+    "icn_skill_c075_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/pj-28/nb-16/vh-82/8bda6510c12adfd269e9d09ade056e6e.webp",
+      "sha256": "6bea9fcb397974470ae2c20997b83d094872aa8d218a8f80cdda5f283e3c9176"
+    },
+    "icn_skill_c080_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/dz-29/dp-29/ts-42/a3508b8047bc3d519f1d9c1f4c2fe7a6.webp",
+      "sha256": "677e3c9d9e1c20cbffbe284507443f71a89ed06e509c38be60372449c54d82f2"
+    },
+    "icn_skill_c082_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ww-44/eo-35/og-21/87bea24d1eef36410d0c459cbccee2dc.webp",
+      "sha256": "6c0c5ed7141fc707d8e8e67a3ef08494bf65f702a12a4791a99c8686618c4752"
+    },
+    "icn_skill_c090_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/si-33/oz-03/mw-81/2a6e8ee29844315a3633be31fec1b110.webp",
+      "sha256": "8532a9798c6c9e9c4af9cf4a6e1cf16b067f6ecc498dfc6a3f3134fe1b777fed"
+    },
+    "icn_skill_c091_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uq-44/mk-82/kd-21/8057fdfe9e9bfbcc68695ee83c08379c.webp",
+      "sha256": "11d626301cb5f5d5bbb0cb0452bf59e5284fdcf53ad4c3bb5b2e4975783d4917"
+    },
+    "icn_skill_c092_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/lf-48/jv-62/hk-60/5b0ed6fcd26ebf2e6780171ee53ddab2.webp",
+      "sha256": "71e1ac768c49e13c63b6aac3e16bcbf1e52dbbe6422f66ea1c2c1a1f6c1bc119"
+    },
+    "icn_skill_c093_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/bu-52/hg-42/bo-56/76d06b9e38b532eb0cecbaddcce21601.webp",
+      "sha256": "f49d5d1001a50545a95824aeb4509faff95838d100d3cfe617bc9e3449feefdb"
+    },
+    "icn_skill_c094_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ec-63/ku-68/yv-95/aa4816822e3c86690eb2680ec6830f8b.webp",
+      "sha256": "ed2e01ffed6e56e4730091091e59d9363f8c473e631864b08e08e92482b80a3b"
+    },
+    "icn_skill_c095_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ur-67/if-48/wc-35/1154d0458375cf3f16f514a0dba28833.webp",
+      "sha256": "0ab414e758eef3d92b98c0bfe0688ab7713c65b1c05a6b89b08ff62e884a79fc"
+    },
+    "icn_skill_c100_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qu-80/vb-83/ev-89/6ca083957249c88ecdcec233e2523d07.webp",
+      "sha256": "91b2ec86db2c9d88e9d89e5c4eceab21b3fa76f79220ffea73921c093d134aec"
+    },
+    "icn_skill_c101_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tc-91/sm-63/cc-29/d8ce8e5c64708dd91819d647b68248cf.webp",
+      "sha256": "b3d5866bbbaafb2bea3fd81da8dcdd8b2ffc19ed55d661ca5b589ef3085c6cca"
+    },
+    "icn_skill_c102_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/jr-95/px-43/zj-68/75c7579cd78a3f7598c41091ff2ab246.webp",
+      "sha256": "dcaa9cfe669db3aca98abf2c3042e955db549afc058660ba105dceecf9c777e5"
+    },
+    "icn_skill_c103_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ag-00/tl-69/bx-47/47d91ae182e70a64b4d91e235e4f180c.webp",
+      "sha256": "f40368697cfb82cda1f44ebeb7ee0a5bc16ce1a2aea7501a46fb67b6a2183f1f"
+    },
+    "icn_skill_c104_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qv-04/qw-49/ze-86/1405b397e59f36d852c99da4571dedcb.webp",
+      "sha256": "2fc61f0213f9ec351ba94c68856ca9a56166efa6fada99d104ff5b5115ba78bc"
+    },
+    "icn_skill_c105_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/td-15/oh-29/wl-26/57b7c4181d36d68d84d750f801b3d26a.webp",
+      "sha256": "4751344aafc842b2c15c9699aac07208cc168ef5f6c337920d8e75b5ede064b2"
+    },
+    "icn_skill_c110_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fd-84/ai-11/xz-29/7b54f8004b355ca9221c1b50d973f7e2.webp",
+      "sha256": "9c55e8e9dac639d4c3fc75b3c070c1efd5a0347064d358f5a0750bbfa9bd28d5"
+    },
+    "icn_skill_c111_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hl-95/xt-90/vg-68/6513589ea92ab5552a12818e4c181632.webp",
+      "sha256": "764bdf0492027b4065a036b72bfe43b137346854f35a8b1308f0891f5de2ed28"
+    },
+    "icn_skill_c112_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ya-00/bh-17/pk-64/fb7107ecdb705556b68b4ea9a28398fe.webp",
+      "sha256": "13e07dba672cd0bfd540e142047ea2ccd592321f21c34522111d1c9ac86ee97c"
+    },
+    "icn_skill_c113_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/op-04/ys-96/mr-04/ed7fd503c2c411db8fb77c551f53580d.webp",
+      "sha256": "699779a1aa69cd2fec94d64ba4ed3791d6058530e43c88bfa81241906a4a4c21"
+    },
+    "icn_skill_c120_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wc-20/qf-16/oa-25/6feaa00c7a69add2a26ebf9287c9ff19.webp",
+      "sha256": "0c66162d20c0d4dbfe369f8a8d819835c3c916f3c473979b2715090ae237945d"
+    },
+    "icn_skill_c121_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/mr-24/nq-95/lh-64/b8ee9039870ec5c1a18e086a542ed677.webp",
+      "sha256": "50ce08f7aef0ba1965b196f7ca35cb85d4ad9b7190214aa5cc39fefec16dc7ff"
+    },
+    "icn_skill_c130_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kl-24/vm-43/yu-81/cc052b66f9f2e160e531dc9f4983e632.webp",
+      "sha256": "cb914bf6f7002c26e31a238649e3118a5bff8b7e024c0da2e7ac51d5fe961d66"
+    },
+    "icn_skill_c131_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ba-28/za-69/wb-21/d565232246fc759639d546780f0f8c20.webp",
+      "sha256": "0eacf34e1ecd27f137c64be07ef3f0c37b63f6562b41ce0d70c00c26f39774a0"
+    },
+    "icn_skill_c132_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/rp-32/wl-49/ti-60/6a5c886bf18cf432310eb30191ea49ed.webp",
+      "sha256": "0e774d5b914ea01c9dbabd175a94995b4d8e626217bbca62923ea4331c0b77e5"
+    },
+    "icn_skill_c140_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/pr-52/lj-48/ry-21/68dcca4234895d4645113db551aad2f9.webp",
+      "sha256": "04cf1534097b4150802d4fa2b2523d47870dd3ce6c8fb50c1b674180e5730272"
+    },
+    "icn_skill_c141_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gg-56/ox-74/pf-60/ba0a34a2b9ae35ae4ed4c66638172313.webp",
+      "sha256": "072a5d797da88964b707efc9a3e5007e5de6742b847c8bdf94c3b007f612e18f"
+    },
+    "icn_skill_c142_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/io-67/mi-54/mm-00/2a342ff7e229b136ea531fdaf5686fe4.webp",
+      "sha256": "6137ef8f6fcfc21a6af88b77a9239c9dd9d7849604c309c6ed7149e942550dac"
+    },
+    "icn_skill_c143_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zd-71/jt-34/jt-39/b38b6a8550d7e6cbfd397239880c5dc4.webp",
+      "sha256": "dbb087fe2e054be66bd6337b962f9f3087ff6793298c0a787c548a064a091bbc"
+    },
+    "icn_skill_c150_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ea-56/qq-75/cs-77/22ee66f4e78a798e7b965a99341e29a0.webp",
+      "sha256": "51e615fa5cc21543f9985157748058cbde929e39003cfd1dede9097910e58bae"
+    },
+    "icn_skill_c160_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/jg-84/gn-80/vw-17/8f161acd7fdc721a65eac3d2764171a9.webp",
+      "sha256": "7f0443c05e975bb31f8059d9df31862c9be97177d948abddd20bab415714f472"
+    },
+    "icn_skill_c161_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/lo-95/kb-07/td-56/693cc1b9f9ed3de156dcf5d328ceb4b9.webp",
+      "sha256": "2efc71a634be83b3681e79d724e974eca715aa0566de8133bf50b511292bf180"
+    },
+    "icn_skill_c162_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cd-00/hm-86/qk-95/16da22260dfdd36af62bba33963a36c6.webp",
+      "sha256": "9642d81b6eae6989269568040bb5ca4a3dc1ddd32b0ad2f86ee11c2b7294a159"
+    },
+    "icn_skill_c170_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/af-20/rx-54/gq-73/47f2fafb27a1e24c6ea664257989027a.webp",
+      "sha256": "3dbbd825efcc20b9a4b9b1a3400a1428fa6890b074b514dd185988a1fbb7082c"
+    },
+    "icn_skill_c171_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qu-24/pi-34/dx-13/c8037a7218f77c0820b134ac277db29a.webp",
+      "sha256": "3c22d7513b5eb6885a7ea7dff91ca7ab3779eb63db86aac8da251e3b0f126fab"
+    },
+    "icn_skill_c172_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hj-28/mt-14/be-52/f20818a6a7b4bd076ab015b7eb02879d.webp",
+      "sha256": "d11937cce8daff8d4d797cbbd332e6142ac506618e93d382029e8390bf9bce3e"
+    },
+    "icn_skill_c180_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/oo-24/hu-59/zu-13/3b9f13ed80734aa6e2ba2eb3386a9dee.webp",
+      "sha256": "ddbf52c286e69bd0a8ccd0ad3dc4ac90053c78e1e36b13e03e58e84780b48da2"
+    },
+    "icn_skill_c181_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fd-28/ff-39/xb-52/254a7bc0591567f39e7492899e60bab8.webp",
+      "sha256": "8fe3507c7ff239dd4cea6020eceba3b98ca91e75b4f47cf126ff3ee06cfd8e8e"
+    },
+    "icn_skill_c182_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/vs-32/cq-19/ui-91/6dcd5e503287fa37aab795099e274651.webp",
+      "sha256": "1d4f31f3de82774ffb4c2e523beb948cf88801c1b9bf068df780673c3fd5ab2f"
+    },
+    "icn_skill_c183_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ya-43/ab-98/rp-31/380cd3aaa8aeddfa8cd9530b0e07b253.webp",
+      "sha256": "228c73f1cc13925e5ac66f39b0c7f4eda022f9938fcf8d2b166724844636b58c"
+    },
+    "icn_skill_c190_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tu-52/nb-86/ko-69/61568e9b5fca38f3ed33ffd914b8f87c.webp",
+      "sha256": "ecc0570728458104ea2a08b97b88854af9ff72f27ebdc888eb85c97c5d41f933"
+    },
+    "icn_skill_c191_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kj-56/km-66/hv-09/07c18fcca41e342ffc1062aa4587553c.webp",
+      "sha256": "f71b5fd9b271447e661e77dde6e54a282c8c82ae4941089023f394c1c03f6346"
+    },
+    "icn_skill_c192_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/mr-67/hx-46/fc-48/2986dbcbc9fe06f2fe916f27f0f5c8ab.webp",
+      "sha256": "76079bbac9cf2e91a741096a33262d6ae7863f5a170bae456716117f8b5f6879"
+    },
+    "icn_skill_c193_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/dg-71/ll-72/cj-87/0a369d83e007f8643b0ec78947f2732f.webp",
+      "sha256": "727de98b78217d4b59b465e65870c23e113afe9dedd6b3fdc04bbec9fd675aec"
+    },
+    "icn_skill_c194_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tv-75/iw-52/zq-27/7e566cb9142d94af52dc347da7f5f794.webp",
+      "sha256": "22724e9b22b7ecb10f676d5879dbeaa76f532992d8388afa1fd01ff070c638d5"
+    },
+    "icn_skill_c195_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wd-86/gh-32/wx-66/b62b90139eab3f317b9224d09b610ba0.webp",
+      "sha256": "7d77649dc63e295a3deae68722eb3a9d7c01a31238d2aa0b1f78518e25d8a2f1"
+    },
+    "icn_skill_c200_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/bj-75/td-67/kx-60/b21510986578c5e09244a11c80b00aa7.webp",
+      "sha256": "984be2bb1d2a26365b85c55ffec90fa033590e40f08dd5bfadd5e52902b52b3b"
+    },
+    "icn_skill_c201_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ry-79/qo-47/ie-00/041ea287da58f1057242b6b4fd7e8f06.webp",
+      "sha256": "85353b8be48cbbc42dce904b0554bc68e74e9c2be1832dd9be6b97166d05d460"
+    },
+    "icn_skill_c202_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ug-90/uc-73/fl-39/fd51fe0692c8b976e2c0badda75353f9.webp",
+      "sha256": "077518fb757bcbf9fbc83a48e20df9b8d380f06169ea4370d14f51000faf2162"
+    },
+    "icn_skill_c203_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kv-94/rn-53/cs-78/0209aa1f645be40fb04528cda10c1f3f.webp",
+      "sha256": "49b17627f20f023ec0b48c70b87950ff6c778caa859cd77d82a092c7ed6812a3"
+    },
+    "icn_skill_c210_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gp-04/yk-94/vr-17/40e25915b6e7a1e8960b1492d0717877.webp",
+      "sha256": "011603baeba21cbf4c23a2f2d1042cf6d0a5c106240025890ffac9d5110974eb"
+    },
+    "icn_skill_c212_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zm-19/zj-01/qf-95/f8a2bac0ada91b67e3682b60cf54ec00.webp",
+      "sha256": "6650baee215bef8d8b25e873f2dbb63636f427d586632df17b5175ead9012f92"
+    },
+    "icn_skill_c220_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uy-08/oh-00/ov-56/184664c8d2550e94d62250b628c1b1ce.webp",
+      "sha256": "3b7f486d8f51adee56b192c5fc593585c7e7ee0db4a3532d996c8a0b5c75a060"
+    },
+    "icn_skill_c221_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/xg-19/rv-26/mc-95/1cbf475067e6e669b840ed8b90f50da2.webp",
+      "sha256": "f3ddfe0b4af1809c542d335d97711e399e2ac61a66337c6e7195361b20f0a7aa"
+    },
+    "icn_skill_c222_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nv-23/pg-06/jj-35/bb6cf6ff5601793e9747d6d42909c9d2.webp",
+      "sha256": "7a7c22136e293942ade8cd5a25279918c87752bf5184027b7788cae1a3090b46"
+    },
+    "icn_skill_c223_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ek-27/mr-85/gq-74/e472e27ddba35253867c09efda949541.webp",
+      "sha256": "cd2ba0b2d1d48f80f02348ff3a77d48409dfbfcfde791b3f51c1b9c74783dc04"
+    },
+    "icn_skill_c224_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gs-38/kc-65/dx-14/28f4accd125e2daecbac15ef876e2aaf.webp",
+      "sha256": "a06e020967a619f4f0fd8db5528085b745ccb5024e2c0689b1387a3aed6bcd9f"
+    },
+    "icn_skill_c225_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/xh-42/nq-91/be-53/cff90718f54e480c4de8ea0e13ff367b.webp",
+      "sha256": "9d64263ab0b4f1a94b87e9da341090406d601a9a1a3fd9f6d3e67977d0d863e5"
+    },
+    "icn_skill_c226_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nw-46/lb-71/yl-92/86faa606d8a7f150e57e027c0a6b5815.webp",
+      "sha256": "154733d00f4f18c477c4734e993d5f4a7716d129ee5a0fa4def7d220c4b17e41"
+    },
+    "icn_skill_c230_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/lx-43/zr-73/zp-13/a19759f62d786cf1a7569b6cafb4f678.webp",
+      "sha256": "a4b56dfcab3421047cc5f6ccf4b7176a0a31fee2793a1f6a4ddb0c6ebc7630d5"
+    },
+    "icn_skill_c231_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cm-47/xc-53/ww-52/7b21be93c88e8044ebaf7444b563cec1.webp",
+      "sha256": "a7d9c62f73a27c2259e3b6c055318704f22b0431e18b25db3ea686623d1d33c3"
+    },
+    "icn_skill_c232_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tb-51/un-33/ud-91/0bb8b12ecec3457a63c7665184f588c0.webp",
+      "sha256": "37619e87dd4bdd2f6fa3c39d6e3ce20e7c780e210e7d436d971ae23708360baf"
+    },
+    "icn_skill_c233_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/vj-62/ry-13/rk-31/b8580a7b364aa927095190e6b00e6ea1.webp",
+      "sha256": "d9a2e8827a47036af4393aea61d102ae4490678e4327c7512c2ccca6733c38db"
+    },
+    "icn_skill_c234_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ly-66/vm-39/or-70/fbda6fe5c922cee8779aaf8f553ea5cc.webp",
+      "sha256": "10b2b856a80fa9fe0944a3c7b4b917011e65d5bfbf43b5c7b32106eb0647d5e6"
+    },
+    "icn_skill_c240_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ag-47/po-78/st-52/aa5ab782f9fd3de2a71f20ef94879300.webp",
+      "sha256": "d9fc40ac7278555fbf8c5a81bb555bade79f8ea9a57d673e5e90470b3d5704fe"
+    },
+    "icn_skill_c241_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qv-51/mz-58/qa-91/2512d37d914f136d3ed85f25ce571290.webp",
+      "sha256": "8a75db6c456cb72296b6218b1e9e3941d99095167723150a84aa76a7987172a4"
+    },
+    "icn_skill_c242_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hk-55/kk-38/nh-31/ca71c247518e82c3a115465a525203fa.webp",
+      "sha256": "6cc00d6d35c6906ce6f474116701bc6df479cd69ab7f0a3e9cefae4bec0db0e3"
+    },
+    "icn_skill_c260_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tv-79/ks-11/wr-48/2511d5eafe4632f3456559abf0ecf033.webp",
+      "sha256": "c35dec71e63d92dcab26c98e8ba2ff45dbf00ed1dab0ec5b483fd3666a89e235"
+    },
+    "icn_skill_c261_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kk-83/id-90/ty-87/e2c3af16d18b72fd2e42a8955da16702.webp",
+      "sha256": "5d49b7d735fea6a3ecbc7aac383b0d1eb574d204e7208db31d6592f1e33dca30"
+    },
+    "icn_skill_c262_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ms-94/fo-70/rf-27/43fc294f3d72a8f5d449b11dabead625.webp",
+      "sha256": "448336b51a5633097e72263340775bcf958b7374ad18656afee5cd8f7f82ac69"
+    },
+    "icn_skill_c270_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zb-08/pz-38/hl-05/f93db936637d56d0d598de587ed41b81.webp",
+      "sha256": "38a792cc2ace5ef964d154d1c113ed68f983e1c3cc2ea7c30e73c4df83950aba"
+    },
+    "icn_skill_c271_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/bj-19/nk-18/es-44/3787bea11e5356ca5bf160fcc5e1ae47.webp",
+      "sha256": "6d2891b2fd083f0034bfd83f02bf3527969472b0d702e3e4ffc7c0d9a4c33097"
+    },
+    "icn_skill_c272_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ry-23/kv-97/bz-83/ad7e74166a8c007e826fda4b11e512fd.webp",
+      "sha256": "f23ea3b3450b9a3d16b494bc7c0051f4d66099f69b94cd0f1984ea837f888cd4"
+    },
+    "icn_skill_c280_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zd-19/fw-43/ap-44/68e415d1b984b6e4254054802ee40dfb.webp",
+      "sha256": "de8ac0592a995362347e6bc8e83b2bc92534688c959dbe556aed41431788127d"
+    },
+    "icn_skill_c281_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ps-23/dh-23/xw-83/db1a688664c4a2bba9390a9662544adf.webp",
+      "sha256": "14acde223a589aa40137afe962e83193115597533340ba3f1e2943bda68dbc90"
+    },
+    "icn_skill_c282_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gh-27/as-03/vd-23/6844474dedd88d569fdd399482f4db15.webp",
+      "sha256": "f5ef11c9d0983b3c054cc0508025d8dc5cbe09fb28e8d2eb02abf62cb91af496"
+    },
+    "icn_skill_c283_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ww-31/tq-51/sk-62/e85c3830e7fc68f4c5869aaa25f5af18.webp",
+      "sha256": "cb2c0757b92f62409c1bfb4280891f2bf30228aed6cbd21e5b5616778cbd007e"
+    },
+    "icn_skill_c284_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ze-42/rb-31/pr-02/859c42ebb2960b53f26e47dc664721ae.webp",
+      "sha256": "1b41b00e7dda4c36348a2c614f056c8d22418a0aa28670c6dbddd78d388b7c61"
+    },
+    "icn_skill_c290_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ej-47/ld-70/lj-01/579bce6c289ec93faa78f5480160aad1.webp",
+      "sha256": "65f8651c145a3495ac1b661cd25eaa0544ad68a9427a1b27ae16a3470f1931f0"
+    },
+    "icn_skill_c291_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uy-51/io-50/iq-40/6e5deae4a22befcfb9f3e6570b115699.webp",
+      "sha256": "8ccb19cd450e97d6193fddb518fd73736413dd7ea8125f711062ac5a993412ff"
+    },
+    "icn_skill_c300_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ly-70/rf-51/ls-91/97a793ecbb94f0a53e670ccbef8d3198.webp",
+      "sha256": "48d78dfd8253dfcec656b93ccccae6c4cf91520be95cd78b3560ce7e4d520a63"
+    },
+    "icn_skill_c301_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cn-74/ut-77/iz-31/79c52f159f170857255e9edc8ccd51aa.webp",
+      "sha256": "5acb3ccdd20c358ab55400fe9f5fc00b1653ccaf398b398e30318f1f700e87c1"
+    },
+    "icn_skill_c302_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tc-78/ho-79/gg-70/c7063b94c05a118971b0e57ab74435d5.webp",
+      "sha256": "48d78dfd8253dfcec656b93ccccae6c4cf91520be95cd78b3560ce7e4d520a63"
+    },
+    "icn_skill_c303_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/vk-89/ez-59/dn-10/6bc70bf46b9fe8a1818099504ded3441.webp",
+      "sha256": "48d78dfd8253dfcec656b93ccccae6c4cf91520be95cd78b3560ce7e4d520a63"
+    },
+    "icn_skill_c304_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/lz-93/in-85/au-49/89ac261d0015871eabc2b9bfc93d4917.webp",
+      "sha256": "f4fb6206263a4ce6b917ca27f34132cc8ba66d2ec0ab507bf41d7b37bcd7c0b0"
+    },
+    "icn_skill_c305_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/co-97/fy-65/yb-88/743502634b64112476f625b471f3a876.webp",
+      "sha256": "33577fa7abd2e1270a0b875870ef47a7d06534aceaff0e66a446720160f4c56a"
+    },
+    "icn_skill_c306_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/td-02/dj-45/vi-28/75116d64b163af800cdd9be2621e4998.webp",
+      "sha256": "3937a14a6c6ec8faa2472ce3cc40f907700e7287b53993262292793610be995c"
+    },
+    "icn_skill_c307_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/vl-13/au-25/sp-67/f680803481f669126dc74719e0aeac4b.webp",
+      "sha256": "6702be5c5e9c509a86759875f74f7f074e859ad9884bc63325fd469aa88220c2"
+    },
+    "icn_skill_c308_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ma-17/ei-51/pw-07/aa70e26d6eb92594ae592d111ddceefa.webp",
+      "sha256": "3937a14a6c6ec8faa2472ce3cc40f907700e7287b53993262292793610be995c"
+    },
+    "icn_skill_c310_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/re-98/cp-25/wm-48/431dcc679f06c3390c232cf0806e8512.webp",
+      "sha256": "89cee2b7cdf1796f326f0434fc4874bdcc4706f81efde5f5b52b82036daba626"
+    },
+    "icn_skill_c311_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ht-03/aa-05/tt-87/9f5cb94d4d6d0ddd931ca049d336eb3d.webp",
+      "sha256": "e49e10c9fa5d5da74bd59ee83291de7da34877800baf37ff715624d16345c18d"
+    },
+    "icn_skill_c312_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kb-14/xl-84/ra-27/0d90c5df3a8bfbe5d5996bc446f629a1.webp",
+      "sha256": "14863c00df2e1d0cfb03b748a4e508086cf3017e2d7b70159a7a64bd7869be3a"
+    },
+    "icn_skill_c313_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/aq-18/uw-64/oh-66/c971316f3f003fc79b45a8f10ca504ee.webp",
+      "sha256": "b4271fc2c9ae4e289880b451d1dbe0e72faae9d0c40b894e6fc41ae078579297"
+    },
+    "icn_skill_c314_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/rf-22/yk-90/lo-06/6492f4fdaf11004b9dded58f074f77f5.webp",
+      "sha256": "d3e84b775fb200cac7c366cbf1da6e62c61ede335a1198429f742f201672b9c3"
+    },
+    "icn_skill_c315_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hu-26/vv-70/iv-45/ee1fc0168741005cfe7a35abeea125f9.webp",
+      "sha256": "efe2c7dc7f4dbd81dffac70e2ba9951ff310bfa56ed8f9c193b63d47a31ec0d1"
+    },
+    "icn_skill_c316_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kc-37/tg-50/gc-84/0a5f23d3bbb9f417f1069f90d676bc95.webp",
+      "sha256": "40980d62610484183f50909f54e5394ad4b626c3a0fb30bf8302036ba8a2da99"
+    },
+    "icn_skill_c321_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wc-07/fh-32/mx-27/4648c1901a10a5fd820f9aa89aa39ff0.webp",
+      "sha256": "86b5e6f6bfb20d553eafec9305ab91b3da2678f2bd15615e0ab7e85e7a0de4b1"
+    },
+    "icn_skill_c322_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/yk-18/cs-12/ke-66/5a810d8b62cfabf967df1037178d4bbd.webp",
+      "sha256": "32a6afa120d1325e60c2cdeeda827378d6f0e15d1e9342578cb3cc1527be8f42"
+    },
+    "icn_skill_c330_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kt-31/xt-57/ak-44/604a907aebe46332e0b0dca1cab206cb.webp",
+      "sha256": "e48f6c9476969af0ff52eb171a0db28804a6efc90d8bb925c5f36fa27216ff8b"
+    },
+    "icn_skill_c331_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nb-42/ve-37/xr-83/e10d4cc97a8819bb2a1d68ce39a538e1.webp",
+      "sha256": "5607086d9628ef0ae4169bf673184cb207c0b6d6a5846fe30017ec158a63d9fa"
+    },
+    "icn_skill_c350_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qb-70/sx-89/ei-40/7f62e51e7b78a7d7c951bd5a5594dc0b.webp",
+      "sha256": "8a891556b4e6de4781439d9f6bc1afaf48a06710d62e7742611b98fff6b38a4f"
+    },
+    "icn_skill_c351_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gq-74/qi-69/bp-79/39c67ec9910f63e4836eddb992e04e14.webp",
+      "sha256": "dccb3faf5808095b355d98088ec24b8088efe6fb5bd37fd44a6ef8807298fe05"
+    },
+    "icn_skill_c352_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/xf-78/tw-95/yw-19/f14a6966f2cd8ba9ab046d742ea0295b.webp",
+      "sha256": "805c851433a19d576af71e109ca53e4e480463abd98c57baffd032a53f8dd4de"
+    },
+    "icn_skill_c353_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zn-89/rh-75/wd-58/67a6691d144e039e2b0608a1ec78f510.webp",
+      "sha256": "63f45ddb4e21a62dbc8a6a67bc75c6374f39372679ea4c0b119853f41b0a052a"
+    },
+    "icn_skill_c354_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qc-93/os-55/yr-37/aa4f845ce3f1a0bf29956b399096275c.webp",
+      "sha256": "a6a89f692226b011c769917ec2892fb296c4d6fb49cd50478b8f26f65f04ebb6"
+    },
+    "icn_skill_c355_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gr-97/md-35/vy-76/7599574d8eaf47231e015977391e26db.webp",
+      "sha256": "5bb303b9d3eb67a46e901cb561cd06660f7e1c2ed36ee84dd3b1a4bdbf139ff3"
+    },
+    "icn_skill_c361_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uz-78/vp-96/ut-19/a619529bf77ecb5ec404bcf8a605bb52.webp",
+      "sha256": "75d6cc6f3d1f8008f58262b060a8a45cf5289baf20cdc72903eacde5270224af"
+    },
+    "icn_skill_c380_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/xz-07/ti-49/yh-32/dfd9fb2f048f5958def7f21a7a0feb61.webp",
+      "sha256": "e1638f2dec89c0eafb390def31d762d025f00be1c5a8fbb033917d7c06fb2148"
+    },
+    "icn_skill_c381_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ah-18/ww-75/vo-71/895b2450d4943b575dd6d48cdf115b61.webp",
+      "sha256": "595093fcb0dcb85b126f08a1017540d340f33b2bd480c2bf18211ee33f3132ba"
+    },
+    "icn_skill_c382_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qw-22/uh-55/sv-11/32ff01acf358bc9e4076b3176d2f9169.webp",
+      "sha256": "52b76f3780705eb13c2f01aba3fbbccb3254aec994b6f194600839835ef40b85"
+    },
+    "icn_skill_c390_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/oy-42/jf-54/rl-71/81f5992887177f52e41040b35eba3ddf.webp",
+      "sha256": "18ddc085810e530227cfd2993d7fe1e921ba612e35aad7223a76f686d59af6c0"
+    },
+    "icn_skill_c391_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fn-46/mt-80/os-11/64f7cb4bbbd5f2be113e46cddf37aac5.webp",
+      "sha256": "58111b56dcd7cbac94b35139e647ef1f00192861af244f00ec2b2ae99b78e133"
+    },
+    "icn_skill_c392_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wc-50/ke-60/lz-50/f24a9cba4750e60d92c1d3d9778197eb.webp",
+      "sha256": "34ba053ee2d9b15779a7adc4e7b15675ea000070adce15825901d71aaecd1e67"
+    },
+    "icn_skill_c400_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ku-58/ku-04/jk-79/4aff043a05caf806e822eb2e1ad37240.webp",
+      "sha256": "f4311c526afccc29f6f509650d9796286a78bea73ffc013cee185c63dadc9962"
+    },
+    "icn_skill_c401_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nc-69/if-83/gr-19/82257f06f3eb73791a806e538896d94e.webp",
+      "sha256": "aea8ec03b30f59566098511bbd28e6bcba3429d0b93bace4eb5e60be8c5c6174"
+    },
+    "icn_skill_c402_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/dr-73/fq-63/dy-58/27d83c63c1b104348f2a65b6e5215d65.webp",
+      "sha256": "a6dd1a86bc8c1941c061c0b7cb081e9e0842ad9241db50e1833ce1d060a382bd"
+    },
+    "icn_skill_c403_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ld-02/je-89/bf-97/c640a2a6c2e1c610fc713684d492c909.webp",
+      "sha256": "0b887ae6d97c07b821e157607cc868b17b35bf8c40e55d0903d34cf6495b5820"
+    },
+    "icn_skill_c411_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/si-97/yc-88/zv-58/e541e9bee361cec17502531e71fe1230.webp",
+      "sha256": "b7d3294e125b8f1510a52424c83d1acb95ca5a859d87527ad63d2ba167b26999"
+    },
+    "icn_skill_c412_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ix-02/vn-68/xc-97/af1e2228b8e709c7c3238d9e4e306c18.webp",
+      "sha256": "df8cff7a7a0c37d4ba79eb74b6da655577e484bab1c6decdbb63ec9d821870a2"
+    },
+    "icn_skill_c430_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/vi-26/vv-41/gm-15/e738b9831b640d8f3e531c907c873072.webp",
+      "sha256": "e76c88f8401f2228f1726baed56798496b740060b65cb5e2b0bd2adfe4c4ab0f"
+    },
+    "icn_skill_c431_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/lx-30/tg-21/dt-54/e2ee7d82ba54f967858b442283f9eb41.webp",
+      "sha256": "79c661682aa6a0d19b82fef91d0655c0e5db7e2e5f5593689ebd58834adce5a1"
+    },
+    "icn_skill_c432_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/of-41/wu-47/ba-93/eae496bea6d1fe6e80925f722e9cf6b0.webp",
+      "sha256": "599fbaa9aa2d5a4a91d22f667260eac7b43b546dc5dfb581397b9812d88b9108"
+    },
+    "icn_skill_c441_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cw-65/eq-94/on-11/f451f409a2441a8db40fe22e97bc5739.webp",
+      "sha256": "9d095b7bfa5445482acc71404bb4f5dcb4bf5b31515830d20928f8f67311b139"
+    },
+    "icn_skill_c450_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ox-58/qz-73/kk-11/60f5ca9db7b7d6ca788e3c7f1c531965.webp",
+      "sha256": "e0e4689b049476ec6ce459c298eb785445414241dc9f301166e0596a7c77bdbf"
+    },
+    "icn_skill_c451_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/rf-69/un-00/hr-50/9cfb2f7a4ae8dd7d986e5498f643dd00.webp",
+      "sha256": "5cd11f676a3ccaa1c21bbd271cf94c2846ffcf8b1f1e741a657010b39194417f"
+    },
+    "icn_skill_c470_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uf-97/md-06/oi-07/8f926909428c293e98a4c9385ff22e23.webp",
+      "sha256": "0d0179af1d0c3df363546740e768d459275ab1932b96a661de72218c081cf0ef"
+    },
+    "icn_skill_c471_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ku-02/pr-32/lp-46/05667c2e2c04432771b5176a6898df4e.webp",
+      "sha256": "b3a034982fc85f915efdd61316cf87de6a2592cc124a13004959fb4f9404de8c"
+    },
+    "icn_skill_c500_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/mg-77/iw-87/kf-11/9aafd476ac18d6a280cff6f48c91ff13.webp",
+      "sha256": "8eea55e197c8ea1553654f55953215f76c17c222daf6d6c898256b3972b4c5b6"
+    },
+    "icn_skill_c501_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cv-81/gh-67/hm-50/1475663106c1a8f56dee3c45b1758c90.webp",
+      "sha256": "77e6e8dcca476699db06df7e320b5ec97a51eb3254d7b158312a16e29d78fe76"
+    },
+    "icn_skill_c502_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fd-92/jv-93/et-89/ddfe6fa682187151db18607e1aa6d02e.webp",
+      "sha256": "3b69c47165da04321b9e173dc591265842c67bbef82ec1c3292f011de1a4e807"
+    },
+    "icn_skill_c511_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cx-92/we-72/aq-89/f63e1be3e90718a11757301649250288.webp",
+      "sha256": "ed824cc7a19b9e3d9755244657a4aa10353b4c31bf940a1d9aa9fc07a881399b"
+    },
+    "icn_skill_c513_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kb-01/xd-78/ve-68/612b3f6123f2699a0e01543037448a7f.webp",
+      "sha256": "dc83260b5dc58d1ef2788c740d061149a55031a1b79e65129613dcdcc71bbcab"
+    },
+    "icn_skill_c514_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/mj-12/uo-58/sl-08/532f5ad2bac97053164c634cf180d0b8.webp",
+      "sha256": "0472239ef1a404c51375e443628ac3e673001def9a7058858c38716e5447900c"
+    },
+    "icn_skill_c515_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cy-16/rz-38/ps-47/dcde13dffe54c7e5280373c7bbe18c8b.webp",
+      "sha256": "f4676911256173549ea09fbedb09227fc1f39e4a9ce071fc4a5f225149824ab0"
+    },
+    "icn_skill_c520_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ro-17/ea-20/od-07/4123ec93f46c60ab839e4a3d385d423f.webp",
+      "sha256": "a12d08a8a83f3f59af7e9f6d517e210885e492cbdc2b7890c31a5017c885ae7e"
+    },
+    "icn_skill_c521_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/id-21/ho-46/lk-46/f9bb415ae37e22e54063c105eeb9f870.webp",
+      "sha256": "d3c30d916b7088db7df385ae99b24357b64569a09e18966203a5a1ff6da61f4f"
+    },
+    "icn_skill_c532_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nb-29/uw-31/bv-25/632b419720f2e80a771c8a81c2a7a865.webp",
+      "sha256": "4798044d5cd2df92d0c4a4a02ae480b2918ba9d6ea981fcd43a47dfcf35902b9"
+    },
+    "icn_skill_c550_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zm-53/ve-04/lf-42/704ee2b13a28180e596f4269638d30a7.webp",
+      "sha256": "5a11d5b691235ce77027cfbf284b23e24bd870b18b43d4d04432eac0d0358032"
+    },
+    "icn_skill_c551_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qb-57/sp-83/im-81/501c3dc9908ba1aed47387f284f475d8.webp",
+      "sha256": "124d75ec0797810e9bb544579a5bff556ff7ce32c40b621e58cfbdc82b01aa92"
+    },
+    "icn_skill_c570_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/eu-92/fs-58/pd-38/b8dedcf9907267f1b922b0caf28cd77d.webp",
+      "sha256": "f18b579ba10fc552dee599f71bc9f87b655efccf8240a2c603fcea947b25598a"
+    },
+    "icn_skill_c580_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ka-21/vp-63/zx-94/38d7a8fb3cbdfc67255d9d8eb25eb866.webp",
+      "sha256": "09843b74914a8083e9e62d86b0869afebc639a6b568cc61156f95285cce7fb0a"
+    },
+    "icn_skill_c581_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ap-25/ta-43/xe-34/43ca15c1585bef4236acad860924925b.webp",
+      "sha256": "9086ec85187cd316a30734d176cba5559523d9113fce0495085b3de6c73f75d6"
+    },
+    "icn_skill_c582_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/re-29/ql-23/ul-73/2c8c7d13647be9b3973cb9ca5e1d2936.webp",
+      "sha256": "7f04542ffb6344966540c274693d1dbb082e61e678c118f04c61cbd4d06a6f81"
+    },
+    "icn_skill_c583_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tm-40/tz-49/rs-13/ce554fbcf3df8963caef15cf6a4d5b70.webp",
+      "sha256": "9487ef9c6b7b6e9f0d0c1e1c9834a7dabcea2d6549c7c9606bc779102cd373ed"
+    },
+    "icn_skill_c590_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/yj-25/aw-90/tb-34/6453c1201ce70da1716e34a48e5aeec1.webp",
+      "sha256": "c3ba560e2181e74a673ba5af0a17cc6a4daea4aa288467cddb8d24d363b80c15"
+    },
+    "icn_skill_c600_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wv-72/gy-71/la-42/66d1808eac85f218c994226887f3b0c2.webp",
+      "sha256": "f2f33b7463cd3b7ad8dc56c83433ee378071a114819e55666e8befe92fbee315"
+    },
+    "icn_skill_c601_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nk-76/km-97/ih-81/62f409c0d10e756d53c7cb9e16be2df5.webp",
+      "sha256": "e0c562cbfd12e514346d2650961673ee2ee1ccecf3c75462f5c31f3d43060616"
+    },
+    "icn_skill_c620_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qk-05/if-50/oy-38/6b9e382a8af0dc1e97d3845cfa7590f3.webp",
+      "sha256": "59c6f4f7636bb489efed74f2fb2eaf9e0bf5b9592bb5fdd8c9d9b9b037d385e3"
+    },
+    "icn_skill_c800_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gg-55/jf-85/rx-44/a5f0901ee18fedba047908bd9c6e42b1.webp",
+      "sha256": "a53c64aa3fc5ce09b956ed37b7781bbe12c91ddd97d1785b6cfe857203c8e9b7"
+    },
+    "icn_skill_c801_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/io-66/gq-65/pe-83/2e97d2db193e8b09947e4eb9d4e459eb.webp",
+      "sha256": "0310bbe5c419cf649d92fbc7b09a9a9312efab910bc8a042e845ea63f4d7d56e"
+    },
+    "icn_skill_c802_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/zd-70/eb-45/ml-23/d2cbf9c125978a43adff4bae42e7106d.webp",
+      "sha256": "c139b93108b310df3b925d75734fefc61b6dbcc256ceb4e83050ea5154a74d93"
+    },
+    "icn_skill_c810_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/lm-83/om-13/cr-01/46c5c8981ca9281fa50e3747683d1710.webp",
+      "sha256": "ee332883a7ecf92c7382571d394c1c0d028692c9b8a3d0c9b3182934ab5635db"
+    },
+    "icn_skill_c811_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nu-94/lx-92/zy-40/015b87be94776a6c992d0b3e9778e30d.webp",
+      "sha256": "63df3f5a329ca7fb0974ce4cf98a2aed76dee4ef8502487db6bb6089461ded22"
+    },
+    "icn_skill_c812_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ej-98/pl-19/xf-79/0370adafd870088efe6e3e26d265393c.webp",
+      "sha256": "98d710d4fcbaeeab3aaa58c96f93bec73ac18ad43236f0dfec813701f7d635c1"
+    },
+    "icn_skill_c820_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/lo-94/ej-18/vv-40/8d0960ef438d5cf8404c93bf214e91d9.webp",
+      "sha256": "1ac8ace596514a14a0d1c6c2bb3473a1ed13d41c5563603c1929bace8663244c"
+    },
+    "icn_skill_c821_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/cd-98/bu-97/tc-79/9b179ae021687290d23e29e2897031a5.webp",
+      "sha256": "86ae809a469ab12d30e6fa257b5533746f147ba1dabd17beafe1bce236cb4e82"
+    },
+    "icn_skill_c822_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ss-03/us-46/qj-19/2d17310e43159de11e5c35f1673637fc.webp",
+      "sha256": "c5a33c4cf3db111284d709d18ee2dcaa448a0715f8153bc12d686cad33cc25a4"
+    },
+    "icn_skill_c830_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qu-23/jq-45/gp-96/1cd828ad577ddaf3ba823d82b29048c8.webp",
+      "sha256": "563f1a63c0473560991d1a2535060ca7f549d480795c1cbe2b73f8ee30b9ad89"
+    },
+    "icn_skill_c831_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hj-27/ne-71/dw-36/7acd8dd453a19e69c75b8b6ab757aaf5.webp",
+      "sha256": "4319362381ebf5bba7dd1aca365aec92d2d1016f19408d9a365ebcbbfbb8a7e6"
+    },
+    "icn_skill_c832_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/jr-38/kp-51/bd-75/69d5350eea1b5e60472681b5d1a44deb.webp",
+      "sha256": "1aa2743d810a7eab16bb63967aa919f3b2eb30d617d494714289efc8c6b415b4"
+    },
+    "icn_skill_c833_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ag-42/ia-31/yk-15/f22d26ba995c6d7eeb826f902925759e.webp",
+      "sha256": "22d917e74cbda9861a9c165c830b9a36008196ca7cc91f4e4d4bfae88c556bb0"
+    },
+    "icn_skill_c834_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qv-46/fl-11/vr-54/7059fce8ba57c43892f00d10f1efe6dc.webp",
+      "sha256": "edae058134d8d513badbec2b49d0831f1cb30657e023891984598d45328d1938"
+    },
+    "icn_skill_c835_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hk-50/iz-37/sy-93/4a25967ef0670e185ce89d492d3ae263.webp",
+      "sha256": "cc290319a80c01177025c9768b71a41744182d25a3ea05f21edf9538ff5afcdc"
+    },
+    "icn_skill_c836_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/js-61/gk-17/qf-33/b45b125c34e70d848787604ac9ef1ce4.webp",
+      "sha256": "e556808a5a5e3101070a66f083e3feed992606df4f2daefe8c9f3bf63d46c309"
+    },
+    "icn_skill_c840_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fd-27/va-19/zt-36/31c7f7b67915da461264dabdb013b13b.webp",
+      "sha256": "c98ac2cd3b33838892522bd82f5912a84c7fabf56a4a2e75979faeeb476753e6"
+    },
+    "icn_skill_c841_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/vs-31/sl-98/xa-75/8d4e1b0e2ad59b85b73d96d0c6f0beaf.webp",
+      "sha256": "6a542214293c60b970cd05bff902dda15c449746ade8d9ebb679523874cb35ff"
+    },
+    "icn_skill_c842_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ya-42/pw-78/uh-15/0c425f03e0ee530d9187c5f6e1135a86.webp",
+      "sha256": "7295131c3517f907b094d17c487c581dd6d5d5f9c065a1ae8abd24593a3e2c51"
+    },
+    "icn_skill_c850_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kj-55/kx-24/kn-92/a466328b489a6502aa96fc263aa0d2a0.webp",
+      "sha256": "85ed3971e24d784dea7ee43fc6ddd5a9aff68ff2e5ca1ea304f2bbdd8f1bfde5"
+    },
+    "icn_skill_c851_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/mr-66/ii-04/hu-32/aa8e3dce9ac34bbf426574747d7e04df.webp",
+      "sha256": "91972023072212f5f50c685032f8b156fbf493d45fb1de6d15fed9036c68e4c0"
+    },
+    "icn_skill_c852_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/dg-70/ft-83/fb-71/12b5fb7fc242c2bfdbdc384bfe729b9e.webp",
+      "sha256": "e448147f72e9c5de7c868c486a8a8adc56eb22708ffbd7c92428a4b38b815afd"
+    },
+    "icn_skill_c860_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ys-59/qe-51/dr-32/f34aee74e9d9af7ebef8218b85379af0.webp",
+      "sha256": "5712ff17e33b83b72ccef8d49614776719cb8568be09464b18128018326b3715"
+    },
+    "icn_skill_c861_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ba-70/np-31/ay-71/de1f72bc45dd177d762fa733e993a231.webp",
+      "sha256": "a9bbc62d6f3dcd941f30dd7737c5259c40a570d34f252701c34d9d9dfd899ac0"
+    },
+    "icn_skill_c862_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/rp-74/la-11/yf-11/1d819db63bdc927348b4f11046f4a7ef.webp",
+      "sha256": "5c1cfae76152c456eb6786f7a3ac8e743cb2ddde70a14a6fe60de8ae027c314d"
+    },
+    "icn_skill_c870_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/pr-94/gb-56/ol-88/c2f46bdb9b080a677997f67601bf5a76.webp",
+      "sha256": "595953b97d8582b64815fd40d66f5bba35d5ccaf7fc62bdf66beef7b561e9a7f"
+    },
+    "icn_skill_c871_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/gg-98/dm-36/ls-28/0f370830b8abf24bb4aa08b555e38ec0.webp",
+      "sha256": "a3510d4325a6cdca67ac4ac04e699690b302b33aadd3aa306cca83e0298fd4ce"
+    },
+    "icn_skill_c872_ult": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wv-03/ax-16/iz-67/c3f5a008d1c6d70c46bb65975d3e0be9.webp",
+      "sha256": "91420d39f461c466d4cfe18a696fe914a6c4b756a4ee42552c37596bb3315e4b"
+    },
+    "icn_skill_chargedamage_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/dm-08/fa-64/kt-39/cafb3a1aaa2a51ccede3e1974a246ee9.webp",
+      "sha256": "cd0d54425ed8cebd18f4714b25ce5dbe633b1b9d4c010d77e0dea17147006439"
+    },
+    "icn_skill_coredamage_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/dr-11/oc-39/rh-22/01d4f29441a7e677d18dfe236c7d4849.webp",
+      "sha256": "08863375aeeb110642d099073a7177bc81190f36fafe2268e609a011c01ffb12"
+    },
+    "icn_skill_criticaldamage_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ao-76/ho-35/wu-88/e92e0e3412ff02d744003a708316ec45.webp",
+      "sha256": "cb06ecb896e00888a6614991c39bda4c00c935d030b07bc37813c626a5cf36d8"
+    },
+    "icn_skill_damage_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ue-79/pr-15/vd-76/e1508cccb1cd6843ca2edd3c8743edeb.webp",
+      "sha256": "98cdcec6829c45ae8681c796944d0f1e7209060dfd5f80aa3e118cbf6ee3bd3d"
+    },
+    "icn_skill_damagereductiondown_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/go-69/bs-56/nt-41/bfcb728f5615e725de7b4bc69dffbaf5.webp",
+      "sha256": "6da7cb706112830db1fc4ce45467b6569d5c35f12cc361be396ded99c0ee2923"
+    },
+    "icn_skill_damagereductionup_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/jb-81/sf-44/la-71/b2e36898d0f753203f6fb755c5666144.webp",
+      "sha256": "98e690158fa4809617606e26c7e0e292b9733b4242a4dcf1bb3ceb3f3ee2484f"
+    },
+    "icn_skill_damageshare_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/un-46/om-98/bs-29/9e5aefc0cd4cbb9ad0143c171fd6dbe5.webp",
+      "sha256": "fcc2019f4908a42e93b2dd707dab3ba9682a4bd0576617741968f81af1d8c808"
+    },
+    "icn_skill_damageshareinstant": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/tq-32/bz-26/ur-55/38d393703ce98fa1301bd0a8c3f85327.webp",
+      "sha256": "11fc54db766f7a677d26fc8abb914e72a533e611c3fabc3a6a6d61936b6227ec"
+    },
+    "icn_skill_debuffimmune_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/qx-31/co-55/aa-23/5592ae6255c5745fe6362e0031641fa8.webp",
+      "sha256": "af98e54873cf2ea2509476a2170f010f0e86ea6a5ceaaf6a3226040dc98e28ae"
+    },
+    "icn_skill_debuffremove_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/my-01/ta-75/fc-57/6b2e31e04fd70037849738742deac4c6.webp",
+      "sha256": "d7023540fd5521e6190f7a35780669dfeee388879c77b58409c90b5d026777a9"
+    },
+    "icn_skill_defdown_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/at-20/iv-63/xx-38/4740485560004c1972d1efdfeb9df092.webp",
+      "sha256": "6702be5c5e9c509a86759875f74f7f074e859ad9884bc63325fd469aa88220c2"
+    },
+    "icn_skill_defup_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fl-00/oh-92/aw-91/5c5c6eb9d14bd27858530cd116b75095.webp",
+      "sha256": "a8e6773474257020e934d0f84fa517ecdcf943981d7cc9809df8c4e8e42eb206"
+    },
+    "icn_skill_durationvaluechange_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ow-51/vz-20/dz-79/d9154cc24016a14617cce3630a79b51d.webp",
+      "sha256": "a37e3a83f68b88b514f1e9612bbf9357249d022cad5a825750d7457af0b07324"
+    },
+    "icn_skill_heal_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ga-23/sg-62/fn-24/7478313f781569ef743c778e9b53325c.webp",
+      "sha256": "33577fa7abd2e1270a0b875870ef47a7d06534aceaff0e66a446720160f4c56a"
+    },
+    "icn_skill_healbarrier_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/mr-56/bq-88/oo-82/ee82d1ec6fe2d63280c8a63a495b016e.webp",
+      "sha256": "7c58d1674b583f3ead89430eb340b026c802f598a984fc9d3290ec8f5bd70a65"
+    },
+    "icn_skill_healcover_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ig-91/tq-77/qd-13/e2b0425ca4179218e88768694af955ba.webp",
+      "sha256": "3f3ab2492039c6bc9b73f89cb3d18a094d069248842e87cfd6f0728f13c6f390"
+    },
+    "icn_skill_healshare_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fo-06/nj-73/kd-79/0bd3035317fa298acdefc37027ac9011.webp",
+      "sha256": "08b8ff81b360c4c930ee10ecca693d6b06cff1ca0ab37aca3bea4480ea22e03b"
+    },
+    "icn_skill_incburstduration_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/wf-30/jx-75/hd-50/2843eb43b647196032735cf26fc0a3f2.webp",
+      "sha256": "58b784eb4471bcddc9f3ee610be9760c3471b0d491639bf98b03881e8edb13dc"
+    },
+    "icn_skill_overhealsave_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/rt-22/yt-57/mp-24/4c5930028de5ac02aed1b3995275ae8f.webp",
+      "sha256": "d8b4d9ee54dcafb799ba21bdde4571146a90126fa62755b2b478e1c282405e96"
+    },
+    "icn_skill_penetrationdamage_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/bf-67/xk-02/jm-95/f8bf93ca6ad39a70895dc1a3db852e75.webp",
+      "sha256": "a3de3480aa308160fa81a66c80be9515c02140abf881f1d0d9095535946b3cee"
+    },
+    "icn_skill_rateoffire_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/nl-38/dx-78/ma-14/0272aa2bc1df74377dcaef3f6a6d1d53.webp",
+      "sha256": "1aaf08c088e03dfddb092e75afbc0686ae25dc8ac7ba570a94a239840df65e2b"
+    },
+    "icn_skill_sharedamageincrease": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uz-38/kf-25/oj-58/c65ee5e526ba13dc808be47f49e266de.webp",
+      "sha256": "3b1bf2326853f04a94c961308d9005a57350c1b96c88f8d873e5604e5df9b077"
+    },
+    "icn_skill_stataccuracycircle_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/xf-45/le-11/jr-79/449d50f5e17b785634296d9a2679de99.webp",
+      "sha256": "6e97dd1451c14e04d970efb21fa0001f0da13690e3c5f7516c0ad313f3e82b91"
+    },
+    "icn_skill_statammo_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/kr-20/vx-13/md-77/734365b26a26252e243cc4de840cb337.webp",
+      "sha256": "3937a14a6c6ec8faa2472ce3cc40f907700e7287b53993262292793610be995c"
+    },
+    "icn_skill_statcritical_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/ko-51/ar-22/cm-81/51488d49f85f0e7ef7488e3b0da00cb0.webp",
+      "sha256": "e03f4ff37439df6412e932b39e5e45666b42f66d499f5a7f6b46a26aaf513a02"
+    },
+    "icn_skill_statexplosion_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/sy-67/ss-17/cx-08/0fa8a8465cb8a85274f00e018f077d13.webp",
+      "sha256": "e0d3a880f19708f1d5b55d4a7790afe809d6d7093a2e9c546a639a5bf9f26d72"
+    },
+    "icn_skill_stathp_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/fl-41/ie-25/je-84/91bf03332a0e74e9037bf6b27d8b07c0.webp",
+      "sha256": "5acb3ccdd20c358ab55400fe9f5fc00b1653ccaf398b398e30318f1f700e87c1"
+    },
+    "icn_skill_statpenetration_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/un-88/nl-21/dj-23/7bdfe0db3e527af8659eb581a1c4649f.webp",
+      "sha256": "57a9bed9f3ee0b9ef933ecce6263708ac7ef36639a53234a562d4712dacb8747"
+    },
+    "icn_skill_statreloadtime_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/xg-56/jk-60/lw-89/263af43939c0def5ef20f3380ca1416a.webp",
+      "sha256": "d72557fdab49967001c49a92e3237265fba8f20fc51d853502cef612718421aa"
+    },
+    "icn_skill_statshotcount_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/hk-88/eb-10/fl-27/394cc4e545e476d467e12186c008dd35.webp",
+      "sha256": "43fc21f798b7d79dc841de8d0ee92d2c334cfb9da504eacb4e4183e457c7e928"
+    },
+    "icn_skill_stickyprojectile_01": {
+      "source_url": "https://sg-tools-cdn.blablalink.com/uy-19/wf-05/bd-30/8b9449faa021c6dd67da60e640b403c9.webp",
+      "sha256": "dd824e631c6fbcc7c0d11eb6f4491f42e3fac7d2a3fd05c98451c47fb43391cb"
+    }
+  }
+}

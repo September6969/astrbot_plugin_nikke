@@ -365,6 +365,11 @@ class CharacterCardBuilder:
                     functions=functions,
                     position=index,
                 )
+                metadata = self.overload_tier_registry.resolve(effect_id)
+                option.effect_group_id = metadata.group_id if metadata else None
+                if len(functions) == 1 and isinstance(functions[0], dict):
+                    raw = functions[0].get("function_value")
+                    option.raw_value = raw if type(raw) is int else None
                 item.options.append(option)
                 if self.unknown_ol_inventory is not None:
                     for component in option.components or (option,):
@@ -395,7 +400,9 @@ class CharacterCardBuilder:
             roster=roster,
             detail=detail,
         )
+        from .character_weapon_bases import card_fields
         return CharacterCardData(
+            **card_fields(directory.get("resource_id")),
             commander_name=commander_name,
             fetched_at=fetched_at,
             plugin_version=plugin_version,

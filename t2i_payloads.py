@@ -3,8 +3,58 @@ from .campaign_history_models import ClearLineupStatus, StageClearRecord
 from .t2i_assets import T2IAssetResolver
 
 
+def _normalize_equipment_icon(source):
+    """Trim transparent padding, then place equipment art into a stable 180×180 safe box.
+
+    This is presentation-only normalization: it never mutates source assets and it does not
+    affect equipment identity or game data.
+    """
+    from PIL import Image, ImageOps
+
+    if not isinstance(source, Image.Image):
+        return source
+    prepared = source.convert("RGBA")
+    bbox = prepared.getchannel("A").getbbox()
+    canvas = Image.new("RGBA", (180, 180), (0, 0, 0, 0))
+    if bbox is None:
+        return canvas
+    trimmed = prepared.crop(bbox)
+    fitted = ImageOps.contain(trimmed, (150, 150), Image.Resampling.LANCZOS)
+    x = (180 - fitted.width) // 2
+    y = (180 - fitted.height) // 2
+    canvas.alpha_composite(fitted, (x, y))
+    return canvas
+
+
 def display_number(value):
     return "Unknown" if value is None else f"{value:,}"
+
+
+def format_compact_number(value):
+    """仅 Profile Resources 8 项使用的 compact 紧凑数字格式化（约 3 位有效数字）。"""
+    if value is None:
+        return "Unknown"
+    if isinstance(value, str):
+        try:
+            value = float(value)
+        except ValueError:
+            return value
+    if value < 0:
+        return "-" + format_compact_number(-value)
+    if value < 1000:
+        return str(int(round(value)))
+    for divisor, suffix in ((1_000_000_000, "B"), (1_000_000, "M"), (1_000, "K")):
+        if value >= divisor:
+            scaled = value / divisor
+            if round(scaled, 2) < 10:
+                return f"{scaled:.2f}{suffix}"
+            elif round(scaled, 1) < 100:
+                return f"{scaled:.1f}{suffix}"
+            elif round(scaled, 0) < 1000:
+                return f"{scaled:.0f}{suffix}"
+            else:
+                continue
+    return f"{value / 1_000_000_000:.0f}B"
 
 
 def section_state(available=None, partial=False, items=None):
@@ -26,17 +76,9 @@ class CharacterT2IPayloadBuilder:
         from .card_models import EquipmentData, EquipmentOption
         from .card_theme import character_theme, _extract_portrait_palette, _parse
         from .character_card_renderer import CharacterCardRenderer
+        from .static_registry import StaticDataRegistry
         from PIL import Image
         portrait = card_assets.portrait
-        if isinstance(portrait, Image.Image):
-            from .character_crop import crop_and_fit_character_portrait, resolve_crop_key
-            crop_key = resolve_crop_key(
-                name_code=getattr(data, "name_code", None) if not isinstance(data, dict) else data.get("name_code"),
-                resource_id=getattr(data, "resource_id", None) if not isinstance(data, dict) else data.get("resource_id"),
-                costume_id=getattr(data, "costume_id", None) if not isinstance(data, dict) else data.get("costume_id"),
-                spine_asset_id=getattr(data, "spine_asset_id", None) if not isinstance(data, dict) else data.get("spine_asset_id"),
-            )
-            portrait = crop_and_fit_character_portrait(portrait, crop_key=crop_key)
         theme = character_theme(data.corporation, data.element, portrait)
         dom, sec, drk, sat = _extract_portrait_palette(portrait)
         if dom and sat:
@@ -55,29 +97,50 @@ class CharacterT2IPayloadBuilder:
                 option = options[index] if index < len(options) else EquipmentOption("empty", "空槽", 0, "empty")
                 tier = option.tier if type(option.tier) is int and 1 <= option.tier <= 15 else None
                 rows.append({"name": option.display_name, "value": CharacterCardRenderer._option_value(option),
-                             "tier": f"T{tier}" if tier is not None else "—",
+                             "tier": f"T{tier}" if tier is not None else "—", "replica_tier": f"{tier}阶" if tier is not None else "—",
                              "semantic": "max" if tier == 15 else "high" if tier is not None and tier >= 12 else "neutral",
                              "state": "EMPTY" if option.unit == "empty" else "UNKNOWN" if option.unit not in ("flat", "percent") else "KNOWN"})
             equipment.append({"label": label, "status": f"LV.{item.level}" if item.equipped and item.level is not None else "已装备" if item.equipped else "未装备",
-                              "icon": self.resolver.encode(card_assets.equipment.get(slot), (64, 64)), "options": rows})
+                              "icon": self.resolver.encode(_normalize_equipment_icon(card_assets.equipment.get(slot)), (180, 180)), "options": rows})
         identities = []
         for key, value in (("corporation", data.corporation), ("element", data.element), ("weapon", data.weapon), ("burst", data.burst)):
-            identities.append({"label": str(value) if value is not None else "Unknown", "icon": self.resolver.encode(getattr(card_assets, key), (40, 40))})
-        def item_payload(item, image):
-            return {"name": item.display_name or "已装备 · 名称 Unknown" if item else "EMPTY / 未装备",
-                    "level": "LV." + display_number(item.level) if item else "—", "icon": self.resolver.encode(image, (48, 48))}
+            identities.append({"label": str(value) if value is not None else "Unknown", "icon": self.resolver.encode(getattr(card_assets, key), (120, 120))})
+        def item_payload(item, image, kind=None):
+            fallback_unworn = "未佩戴魔方" if kind == "cube" else "未装配珍藏品/收藏品" if kind in ("favorite", "favorite_item") else "EMPTY / 未装备"
+            if not item or not getattr(item, "tid", None) or item.tid in (0, "0"):
+                return {"name": fallback_unworn, "level": "—", "icon": self.resolver.encode(image, (100, 100))}
+            name = getattr(item, "display_name", None)
+            if not name and kind:
+                name = StaticDataRegistry.resolve_display_name(kind, item.tid)
+            return {"name": name or "已装备 · 名称 Unknown",
+                    "level": "LV." + display_number(item.level), "icon": self.resolver.encode(image, (100, 100))}
         corp_asset = getattr(card_assets, "corporation", None)
         watermark = self.resolver.encode(corp_asset, (260, 260)) if corp_asset else None
-        return {"name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
+        from .character_replica import build_summary, cache_identity, SHORT_NAMES, VERSION, replica_font, art_style
+        for gear in equipment:
+            for row in gear["options"]:
+                row["short_name"] = SHORT_NAMES.get(row["name"].strip("【】"), row["name"])
+        replica = build_summary(data)
+        skills_assets = getattr(card_assets, "skills", {}) or {}
+        return {"replica_summary": replica, "template_version": VERSION, "cache_identity": cache_identity(data),
+                "grade": data.grade, "core": data.core,
+                "skill_items": [{"label": label, "level": level,
+                                  "icon": self.resolver.encode(skills_assets.get(key), (110, 110))}
+                                 for key, label, level in (("skill1", "技1", data.skill1_level),
+                                                           ("skill2", "技2", data.skill2_level),
+                                                           ("burst", "爆", data.burst_skill_level))],
+                "replica_font": replica_font(), "art_style": art_style(data, portrait),
+                "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
-                "character_art_data_uri": self.resolver.encode(portrait, (700, 744)), "theme": asdict(theme), "identities": identities,
+                "character_art_data_uri": self.resolver.encode(portrait, (1600, 2400)), "theme": asdict(theme), "identities": identities,
                 "corporation_watermark": watermark, "bg_gradient": bg_grad,
                 "summary": [{"label": item.display_name, "value": CharacterCardRenderer._option_value(item), "tier": "—"} for item in data.option_totals],
                 "equipment": equipment, "skills": f"{data.skill1_level} / {data.skill2_level} / {data.burst_skill_level}",
-                "favorite": item_payload(data.favorite_item, card_assets.favorite_item), "cube": item_payload(data.cube, card_assets.cube),
+                "favorite": item_payload(data.favorite_item, card_assets.favorite_item, kind="favorite"),
+                "cube": item_payload(data.cube, card_assets.cube, kind="cube"),
                 "stats": [{"label": label, "value": display_number(value), "source": source} for label, value, source in
                           (("HP", data.hp, data.hp_source), ("ATK", data.attack, data.attack_source), ("DEF", data.defense, data.defense_source))],
-                "growth": f"突破 {data.grade} · 核心 +{data.core} · 好感 {display_number(data.bond_level)}",
+                "growth": f"突破 {data.grade} 星 · 核心 +{data.core} 阶 · 好感 {display_number(data.bond_level)}",
                 "commander": data.commander_name, "updated": data.fetched_at, "version": data.plugin_version}
 
 
@@ -100,8 +163,17 @@ class ProfileT2IPayloadBuilder:
                    "semantic": "strong-warning" if ratio is not None and ratio >= .95 else "warning" if ratio is not None and ratio >= .8 else "normal",
                    "scope": today_state}
         for tower in data.tower_daily_info or []:
-            today.extend(pairs([(tower.display_name or "塔记录", "未开放" if tower.is_opened is False else
+            tower_label = tower.display_name or (f"未知塔 · TYPE {tower.tower_type}" if tower.tower_type is not None else "未知塔")
+            today.extend(pairs([(tower_label, "未开放" if tower.is_opened is False else
                                  f"剩余 {display_number(tower.remaining)}" if tower.is_opened is True else "开放状态 Unknown")], today_state))
+        if data.daily_available is False:
+            simulation_state = "UNAVAILABLE"
+        elif data.daily_partial or (data.daily_available and data.sim_room_daily_record is None and not (data.sim_room_overclock_subseason or data.sim_room_overclock_season)):
+            simulation_state = "PARTIAL"
+        elif data.daily_available is True:
+            simulation_state = "AVAILABLE"
+        else:
+            simulation_state = "UNKNOWN"
         roster_state = section_state(data.roster_available, data.roster_partial)
         outpost_state = section_state(data.outpost_available)
         research_state = section_state(partial=data.research_partial, items=data.recycle_room_researches)
@@ -121,7 +193,8 @@ class ProfileT2IPayloadBuilder:
                     pass
             raw_label = item.display_name if item else definition.display_name
             label = "白银积分券" if raw_label == "躯体标签" else raw_label
-            resources.append({"label": label, "value": display_number(item.value) if item else "Unknown",
+            val = format_compact_number(item.value) if item and item.value is not None else "Unknown"
+            resources.append({"label": label, "value": val,
                               "scope": resource_state, "icon_data_uri": icon})
         extras = [{"label": "白银积分券" if item.display_name == "躯体标签" else item.display_name, "value": display_number(item.value), "scope": resource_state} for item in data.currencies or [] if id(item) not in used]
         researches = pairs([(item.presentation_name or item.display_name or "研究项目名称 Unknown",
@@ -131,11 +204,14 @@ class ProfileT2IPayloadBuilder:
                 "today": today, "today_state": today_state, "storage": storage,
                 "simulation": pairs([("模拟室每日最佳", data.sim_room_daily_record.display_label if data.sim_room_daily_record else None),
                                      ("每日最佳分数", display_number(data.sim_room_daily_record.score) if data.sim_room_daily_record else None),
-                                     ("双周最高", data.sim_room_overclock_subseason), ("赛季最高", data.sim_room_overclock_season)], today_state),
+                                     ("双周最高", data.sim_room_overclock_subseason), ("赛季最高", data.sim_room_overclock_season)], simulation_state),
+                "simulation_state": simulation_state,
                 "outpost": pairs([("同步器等级", display_number(data.synchro_level)), ("前哨战斗等级", display_number(data.outpost_battle_level)),
                                   ("基础核心", data.infra_core_level), ("普通主线", data.normal_campaign), ("困难主线", data.hard_campaign)], outpost_state),
+                "outpost_state": outpost_state,
                 "roster": pairs([("角色数量", display_number(data.character_count)), ("最高等级", display_number(data.max_level)),
                                  ("最高单体 CP", display_number(data.max_combat)), ("时装数量", display_number(data.character_costume_count))], roster_state),
+                "roster_state": roster_state,
                 "researches": researches, "research_state": research_state,
                 "collection": pairs([(item.display_name or "未知分类", display_number(item.count)) for item in data.memorial_summary or []], collection_state),
                 "collection_state": collection_state, "resources": resources, "extra_resources": extras, "resource_state": resource_state,
@@ -183,7 +259,70 @@ class UnionOverviewT2IPayloadBuilder:
         self.assets, self.resolver = assets, resolver or T2IAssetResolver()
 
     def build(self, data, now=None):
+        from datetime import datetime
         from .union_raid_renderer import UnionRaidRenderer
+        from .union_raid_models import RaidState
+        from .raid_participants import format_compact_number
+
+        raid_state = getattr(data, "raid_state", RaidState.UNKNOWN)
+        if isinstance(raid_state, RaidState):
+            state_str = raid_state.value
+        elif isinstance(raid_state, str):
+            state_str = raid_state
+        else:
+            state_str = "UNKNOWN"
+
+        previous_season = getattr(data, "previous_season", None)
+        prev_dict = None
+        if previous_season:
+            def _format_date(iso_str: str) -> str:
+                if not iso_str:
+                    return ""
+                try:
+                    dt = datetime.fromisoformat(iso_str)
+                    return dt.strftime("%m.%d %H:%M")
+                except Exception:
+                    return iso_str[:16].replace("T", " ")
+
+            start_fmt = _format_date(getattr(previous_season, "start_at", ""))
+            end_fmt = _format_date(getattr(previous_season, "end_at", ""))
+            date_range = f"{start_fmt} → {end_fmt}" if start_fmt and end_fmt else ""
+
+            total_dmg = getattr(previous_season, "total_damage", 0)
+            dmg_str = format_compact_number(total_dmg) if total_dmg else "0"
+
+            s_num = getattr(previous_season, "season_number", None)
+            s_name = f"第 {s_num} 季" if s_num is not None else str(getattr(previous_season, "season_id", ""))
+
+            prev_dict = {
+                "season_id": getattr(previous_season, "season_id", ""),
+                "season_number": s_num,
+                "season_name": s_name,
+                "date_range": date_range,
+                "total_attacks": getattr(previous_season, "total_attacks", 0),
+                "total_damage": total_dmg,
+                "total_damage_formatted": dmg_str,
+                "boss_progress": getattr(previous_season, "boss_progress", None),
+            }
+
+        if state_str in ("OFFSEASON", "SETTLEMENT"):
+            return {
+                "guild": data.guild_name,
+                "raid_state": state_str,
+                "difficulty": None,
+                "level": None,
+                "bosses": [],
+                "coverage": UnionRaidRenderer._coverage_text(data.response_coverage),
+                "partial": data.partial_boss_records,
+                "returned": 0,
+                "progress": None,
+                "remaining": None,
+                "updated": data.fetched_at,
+                "version": data.plugin_version,
+                "previous_season": prev_dict,
+                "current_season_name": getattr(data, "current_season_name", None),
+            }
+
         if len(data.bosses) > 5:
             raise ValueError("超过五个 Boss，使用原有完整记录展示")
         bosses = [{**boss_presentation(self.assets, self.resolver, boss.boss_id, boss.icon_id, boss.monster_model_id, boss.name), "hp": f"{display_number(boss.current_hp)} / {display_number(boss.max_hp)}",
@@ -192,11 +331,12 @@ class UnionOverviewT2IPayloadBuilder:
                    "status": boss.status.value, "elements": " / ".join(boss.elements) or "Unknown"} for boss in data.bosses]
         while len(bosses) < 5:
             bosses.append({"name": "未返回 Boss 记录", "hp": "Unknown", "percent": "Unknown", "bar": None, "status": "UNKNOWN", "elements": "Unknown"})
-        return {"guild": data.guild_name, "difficulty": display_number(data.difficulty), "level": display_number(data.level),
+        return {"guild": data.guild_name, "raid_state": state_str, "difficulty": display_number(data.difficulty), "level": display_number(data.level),
                 "bosses": bosses, "coverage": UnionRaidRenderer._coverage_text(data.response_coverage),
                 "partial": data.partial_boss_records, "returned": len(data.bosses),
                 "progress": f"{data.total_progress:.1%}" if data.total_progress is not None else "Unknown",
-                "remaining": display_remaining(data.season_end, now), "updated": data.fetched_at, "version": data.plugin_version}
+                "remaining": display_remaining(data.season_end, now), "updated": data.fetched_at, "version": data.plugin_version,
+                "previous_season": prev_dict, "current_season_name": getattr(data, "current_season_name", None)}
 
 
 class UnionRecordsT2IPayloadBuilder:

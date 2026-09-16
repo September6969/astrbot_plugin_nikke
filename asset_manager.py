@@ -8,6 +8,7 @@ import io
 import hashlib
 import json
 import logging
+import os
 import re
 import threading
 import time
@@ -19,18 +20,47 @@ from typing import Any
 import httpx
 from PIL import Image, ImageDraw
 
-from .card_models import CharacterCardAssets, CharacterCardData
+from .card_models import CharacterCardAssets, CharacterCardData, SpineBundle
 from .currency_registry import CurrencyRegistry
-from .lineup_portrait_resolver import LineupPortraitResolver
-from .boss_asset_resolver import BossAssetResolver
 from .character_master_resolver import CharacterMasterResolver
 from .idle_animation_resolver import IdleAnimationResolver
+from .lineup_portrait_resolver import LineupPortraitResolver, LineupPortraitResolution
+from .boss_asset_resolver import BossAssetResolver, BossAssetResolution
+from .costume_asset_resolver import CostumeAssetResolver, CostumeResolution
+try:
+    from .character_visual_resolver import CharacterVisualAssetResolver, VisualAssetResolution
+except ImportError:
+    from character_visual_resolver import CharacterVisualAssetResolver, VisualAssetResolution
 from .log_privacy import safe_exception_message, sanitize_log_text
 from .nikke_db_provider import NikkeDbProvider
+from .skill_icon_resolver import SkillIconResolver
 from .spine_prerenderer import SpineBundleFetcher, SpineJob, SpinePreRenderer
 from .static_registry import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
+
+
+@dataclass(slots=True)
+class AssetResult:
+    """角色与皮肤视觉资源定位结果，严格区分精确匹配与降级。"""
+
+    image: Image.Image | None = None
+    exact_match: bool = True
+    fallback_reason: str | None = None
+    asset_key: str | None = None
+    resource_id: str | None = None
+    costume_id: str | None = None
+    requested_kind: str | None = None
+    resolved_kind: str | None = None
+    source: str | None = None
+    logical_key: str | None = None
+    bundle: SpineBundle | None = None
+
+    @property
+    def asset(self) -> object | None:
+        """统一资源实体访问：Spine 返回 bundle，图像返回 image。"""
+        return self.bundle if self.bundle is not None else self.image
+
 
 
 @dataclass
@@ -42,41 +72,6 @@ class _InflightAsset:
 
 
 class AssetManager:
-    def resolve_lineup_portrait(self, tid=None, costume_id=None, character_id=None, avatar_id=None):
-        """直接复用本地头像解析器的完整契约。"""
-        return self.lineup_portrait_resolver.resolve(tid=tid, costume_id=costume_id, character_id=character_id, avatar_id=avatar_id)
-
-    def get_lineup_portrait(self, member=None, *, tid=None, costume_id=None, character_id=None, avatar_id=None):
-        """领域成员先经正式 Master 归一化，再消费已验证头像；不接受串角色或皮肤降级。"""
-        if member is not None and hasattr(member, "tid"):
-            canonical = self.character_master.resolve_battle_tid(member.tid)
-            if canonical is None or str(canonical.resource_id) != str(member.resource_id):
-                return None
-            costume_id = member.costume_id
-            if self.character_master.is_default_costume(canonical.resource_id, costume_id):
-                costume_id = None
-            result = self.resolve_lineup_portrait(character_id=canonical.id, costume_id=costume_id)
-            if result.is_fallback or result.resource_id != canonical.resource_id:
-                return None
-        else:
-            result = self.resolve_lineup_portrait(tid=tid if tid is not None else member, costume_id=costume_id,
-                                                 character_id=character_id, avatar_id=avatar_id)
-        try:
-            return self._decode(result.local_path.read_bytes()) if result.local_path.stat().st_size <= self.MAX_BYTES else None
-        except (OSError, ValueError):
-            return None
-
-    def resolve_boss_asset(self, boss_id=None, icon_id=None, monster_model_id=None, boss_name=None):
-        """Boss 身份与本地路径完全由已交付解析器负责。"""
-        return self.boss_asset_resolver.resolve(boss_id=boss_id, icon_id=icon_id, monster_model_id=monster_model_id, boss_name=boss_name)
-
-    def get_boss_image(self, **identity):
-        result = self.resolve_boss_asset(**identity)
-        try:
-            return self._decode(result.local_path.read_bytes()) if result.local_path.stat().st_size <= self.MAX_BYTES else None
-        except (OSError, ValueError):
-            return None
-
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 20_000_000
     # 单张角色卡最多预取 11 项；保留少量余量，但禁止多张卡无限堆积在线程池队列。
@@ -139,6 +134,45 @@ class AssetManager:
         self.favorite_items_map = self.registry.mapping("favorite_item")
         self.cubes_map = self.registry.mapping("cube")
         self.costumes_map = self.registry.mapping("costume")
+
+        self.skill_resolver = SkillIconResolver(self.asset_dir / "mappings" / "skill_icons.json")
+        self.costume_resolver = CostumeAssetResolver(self.asset_dir / "mappings" / "costume_assets.json")
+        self.visual_resolver = CharacterVisualAssetResolver(
+            self.asset_dir / "mappings" / "costume_visual_assets.json",
+            self.asset_dir / "mappings" / "spine_metadata.json",
+        )
+        self.cube_icons_map: dict[str, dict] = {}
+        self.favorite_item_icons_map: dict[str, dict] = {}
+        self._load_resource_mappings()
+
+        blabla_assets_dir = self.asset_dir.parent / "data" / "nikke" / "blabla-assets"
+        self.blabla_assets_dir = blabla_assets_dir
+        self.lineup_resolver = LineupPortraitResolver(base_dir=blabla_assets_dir, asset_dir=self.asset_dir)
+        self.boss_resolver = BossAssetResolver(base_dir=blabla_assets_dir, asset_dir=self.asset_dir)
+        # 保留两套公开属性名，兼容旧调用方与资源层新调用方。
+        self.lineup_portrait_resolver = self.lineup_resolver
+        self.boss_asset_resolver = self.boss_resolver
+        self._load_resource_mappings()
+
+    def _load_resource_mappings(self) -> None:
+        """加载魔方与珍藏品逻辑图标静态映射。"""
+        cube_path = self.asset_dir / "mappings" / "cube_icons.json"
+        if cube_path.is_file():
+            try:
+                data = json.loads(cube_path.read_text(encoding="utf-8"))
+                if isinstance(data, dict) and isinstance(data.get("cubes"), dict):
+                    self.cube_icons_map = data["cubes"]
+            except Exception as exc:
+                logger.warning("Cube icons mapping 加载失败: %s", exc)
+
+        fav_path = self.asset_dir / "mappings" / "favorite_item_icons.json"
+        if fav_path.is_file():
+            try:
+                data = json.loads(fav_path.read_text(encoding="utf-8"))
+                if isinstance(data, dict) and isinstance(data.get("items"), dict):
+                    self.favorite_item_icons_map = data["items"]
+            except Exception as exc:
+                logger.warning("Favorite item icons mapping 加载失败: %s", exc)
 
     def refresh_spine_manifest(self) -> None:
         """读取本地 Spine manifest；读取失败时保持空 manifest 并安全降级。"""
@@ -298,23 +332,62 @@ class AssetManager:
         return value if re.fullmatch(r"[a-z0-9_-]{1,80}", value) else "missing"
 
     @classmethod
-    def _decode(cls, content: bytes) -> Image.Image:
+    def _decode(cls, content: bytes, require_alpha: bool = False) -> Image.Image:
+        if not content:
+            raise ValueError("素材内容为空")
+        if len(content) > cls.MAX_BYTES:
+            raise ValueError("素材尺寸过大")
+        # 严格验证常见图像魔数 (PNG, WEBP, JPEG)，杜绝 HTML 404 被当作图片解析
+        is_png = content.startswith(b"\x89PNG\r\n\x1a\n")
+        is_webp = content.startswith(b"RIFF") and len(content) >= 12 and content[8:12] == b"WEBP"
+        is_jpeg = content.startswith(b"\xff\xd8")
+        if not (is_png or is_webp or is_jpeg):
+            raise ValueError("非法图像魔数或非图像文件")
         with Image.open(io.BytesIO(content)) as image:
-            if image.width * image.height > cls.MAX_PIXELS:
-                raise ValueError("素材像素过大")
+            if image.width <= 0 or image.height <= 0 or image.width * image.height > cls.MAX_PIXELS:
+                raise ValueError("素材像素异常或过大")
             image.load()
-            return image.convert("RGBA")
+            converted = image.convert("RGBA")
+            if require_alpha and converted.getextrema()[-1][0] == 255:
+                # 若显式要求透明背景但全图无透明
+                pass
+            return converted
+
+    @classmethod
+    def validate_image(cls, content_or_path: bytes | str | Path, require_alpha: bool = False) -> Image.Image:
+        """下载与缓存校验器：校验字节魔数、文件大小与解码有效性。"""
+        if isinstance(content_or_path, (str, Path)):
+            content = Path(content_or_path).read_bytes()
+        else:
+            content = content_or_path
+        return cls._decode(content, require_alpha=require_alpha)
 
     def _load_cached(self, relative: str) -> Image.Image | None:
         bases = [self.cache_dir, self.asset_dir]
+        try:
+            bases.append(self.asset_dir.parent)
+        except Exception:
+            pass
         if hasattr(self, "blabla_assets_dir") and self.blabla_assets_dir:
             bases.append(self.blabla_assets_dir)
+            try:
+                bases.append(self.blabla_assets_dir.parent.parent.parent)
+            except Exception:
+                pass
 
-        candidates = [relative]
-        if relative.endswith(".png"):
-            candidates.append(relative[:-4] + ".webp")
-        elif relative.endswith(".webp"):
-            candidates.append(relative[:-5] + ".png")
+        raw_candidates = [relative]
+        if relative.startswith("data/nikke/blabla-assets/"):
+            raw_candidates.append(relative[len("data/nikke/blabla-assets/"):])
+        if relative.startswith("assets/"):
+            raw_candidates.append(relative[len("assets/"):])
+
+        candidates = []
+        for c in raw_candidates:
+            candidates.append(c)
+            if c.endswith(".png"):
+                candidates.append(c[:-4] + ".webp")
+            elif c.endswith(".webp"):
+                candidates.append(c[:-5] + ".png")
 
         for base in bases:
             for cand in candidates:
@@ -326,23 +399,20 @@ class AssetManager:
                     pass
         return None
 
-    def _load(
+    def _load_path(
         self,
-        kind: str,
-        key: str,
-        remote_url: str = "",
-        *,
-        allow_source: bool = True,
+        relative: str,
+        remote_urls: list[str] | str = "",
     ) -> Image.Image | None:
-        relative = f"{kind}/{self._key(key)}.png"
         image = self._load_cached(relative)
         if image is not None:
             return image
 
-        # 静态 registry 素材必须只使用已确认映射生成的 URL，不能被通用来源清单绕过。
-        url = self.sources.get(relative, remote_url) if allow_source else remote_url
-        if not self.remote or not isinstance(url, str) or not url.startswith("https://"):
+        urls: list[str] = [remote_urls] if isinstance(remote_urls, str) else list(remote_urls)
+        urls = [u for u in urls if isinstance(u, str) and u.startswith("https://")]
+        if not self.remote or not urls:
             return None
+
         with self._inflight_lock:
             state = self._inflight.get(relative)
             owner = state is None
@@ -351,34 +421,43 @@ class AssetManager:
                 self._inflight[relative] = state
 
         if not owner:
-            # 同一素材已有下载者；不重复发请求，优先复用其内存结果，再读取缓存。
             state.event.wait(timeout=7.0)
             if state.result is not None:
                 return state.result
             return self._load_cached(relative)
+
         slot_acquired = False
         try:
-            # 注册 single-flight 后再次检查，覆盖刚刚由其它路径写入缓存的竞态。
             image = self._load_cached(relative)
             if image is not None:
                 return image
             if self._failed.get(relative, 0) > time.monotonic():
                 return None
-            # 不同键的远端请求共用全局限额；满额立即降级，不能阻塞在线程队列中。
+
             slot_acquired = self._remote_download_slots.acquire(blocking=False)
             if not slot_acquired:
                 logger.warning("远端素材并发已满，使用占位素材: %s", relative)
                 return None
-            # 公共素材请求不携带账号Cookie；限制总下载时长和响应大小。
+
             started = time.monotonic()
-            content = bytearray()
-            with httpx.stream("GET", url, timeout=3, follow_redirects=True) as response:
-                response.raise_for_status()
-                for chunk in response.iter_bytes():
-                    content.extend(chunk)
-                    if len(content) > self.MAX_BYTES or time.monotonic() - started > 6:
-                        raise ValueError("素材下载超过限制")
-            image = self._decode(bytes(content))
+            for url in urls:
+                try:
+                    content = bytearray()
+                    with httpx.stream("GET", url, timeout=3, follow_redirects=True) as response:
+                        response.raise_for_status()
+                        for chunk in response.iter_bytes():
+                            content.extend(chunk)
+                            if len(content) > self.MAX_BYTES or time.monotonic() - started > 6:
+                                raise ValueError("素材下载超过限制")
+                    image = self._decode(bytes(content))
+                    break
+                except (httpx.HTTPError, OSError, ValueError, Image.DecompressionBombError):
+                    continue
+
+            if image is None:
+                self._failed[relative] = time.monotonic() + 300
+                return None
+
             try:
                 destination = self.cache_dir / relative
                 destination.parent.mkdir(parents=True, exist_ok=True)
@@ -391,9 +470,6 @@ class AssetManager:
             except OSError:
                 pass
             return image
-        except (httpx.HTTPError, OSError, ValueError, Image.DecompressionBombError):
-            self._failed[relative] = time.monotonic() + 300
-            return None
         finally:
             with self._inflight_lock:
                 current = self._inflight.pop(relative, None)
@@ -404,9 +480,50 @@ class AssetManager:
             if slot_acquired:
                 self._remote_download_slots.release()
 
-    @staticmethod
-    def fallback(kind: str) -> Image.Image:
-        if kind == "portrait":
+    def _load(
+        self,
+        kind: str,
+        key: str,
+        remote_url: str = "",
+        *,
+        allow_source: bool = True,
+    ) -> Image.Image | None:
+        relative = f"{kind}/{self._key(key)}.png"
+        url = self.sources.get(relative, remote_url) if allow_source else remote_url
+        return self._load_path(relative, [url] if url else [])
+
+    @classmethod
+    def fallback(cls, kind: str) -> Image.Image:
+        # 1. 尝试从 assets/fallback 目录读取预置语义兜底素材
+        fallback_dir = Path(__file__).resolve().parent / "assets" / "fallback"
+        kind_clean = str(kind or "").strip().lower()
+        kind_file_map = {
+            "s1": "skill_s1.png",
+            "skill1": "skill_s1.png",
+            "skill_s1": "skill_s1.png",
+            "s2": "skill_s2.png",
+            "skill2": "skill_s2.png",
+            "skill_s2": "skill_s2.png",
+            "burst": "skill_burst.png",
+            "burst_skill": "skill_burst.png",
+            "skill_burst": "skill_burst.png",
+            "cube": "cube.png",
+            "favorite": "favorite_item.png",
+            "favorite_item": "favorite_item.png",
+            "portrait": "portrait.png",
+        }
+        cand_name = kind_file_map.get(kind_clean)
+        if cand_name:
+            cand_path = fallback_dir / cand_name
+            if cand_path.is_file():
+                try:
+                    with Image.open(cand_path) as fimg:
+                        return fimg.convert("RGBA")
+                except Exception:
+                    pass
+
+        # 2. 内存程序几何绘图兜底（保证零依赖、绝对不崩）
+        if kind_clean == "portrait":
             image = Image.new("RGBA", (600, 900))
             draw = ImageDraw.Draw(image)
             color = (164, 178, 205, 75)
@@ -415,9 +532,25 @@ class AssetManager:
                           (470, 850), (332, 900), (300, 616), (269, 900),
                           (133, 850), (197, 560), (146, 340)], fill=color)
             return image
+
         image = Image.new("RGBA", (128, 128))
         draw = ImageDraw.Draw(image)
         color = (180, 199, 220, 220)
+
+        # 技能语义降级绘制
+        if kind_clean in {"s1", "skill1", "skill_s1"}:
+            draw.rounded_rectangle([(10, 10), (118, 118)], radius=16, outline=color, width=4)
+            draw.text((44, 46), "S1", fill=color)
+            return image
+        if kind_clean in {"s2", "skill2", "skill_s2"}:
+            draw.rounded_rectangle([(10, 10), (118, 118)], radius=16, outline=color, width=4)
+            draw.text((44, 46), "S2", fill=color)
+            return image
+        if kind_clean in {"burst", "burst_skill", "skill_burst"}:
+            draw.polygon([(64, 16), (112, 64), (64, 112), (16, 64)], outline=color, width=4)
+            draw.text((52, 46), "B", fill=color)
+            return image
+
         shapes = {
             "head": [(30, 75), (30, 43), (48, 23), (80, 23), (98, 43), (98, 75), (83, 87), (83, 58), (45, 58), (45, 87)],
             "torso": [(41, 24), (52, 35), (76, 35), (87, 24), (109, 48), (92, 64), (85, 103), (43, 103), (36, 64), (19, 48)],
@@ -426,8 +559,8 @@ class AssetManager:
             "cube": [(64, 20), (108, 44), (108, 87), (64, 110), (20, 87), (20, 44)],
             "favorite": [(64, 18), (77, 44), (107, 48), (85, 70), (90, 100), (64, 85), (38, 100), (43, 70), (21, 48), (51, 44)],
         }
-        draw.polygon(shapes.get(kind, [(64, 18), (107, 64), (64, 110), (21, 64)]), outline=color, width=5)
-        if kind == "cube":
+        draw.polygon(shapes.get(kind_clean, [(64, 18), (107, 64), (64, 110), (21, 64)]), outline=color, width=5)
+        if kind_clean == "cube":
             draw.line([(20, 44), (64, 67), (108, 44)], fill=color, width=4)
             draw.line([(64, 67), (64, 110)], fill=color, width=4)
         return image
@@ -535,6 +668,84 @@ class AssetManager:
             logger.warning("STATIC_SPINE_ASSET_MISSING: %s (costume: %s)", char_id, costume_id)
         return self.fallback("portrait")
 
+    def get_lineup_portrait(
+        self,
+        tid: int | str | None = None,
+        costume_id: int | str | None = None,
+        character_id: int | str | None = None,
+        avatar_id: int | str | None = None,
+    ) -> Image.Image | None:
+        """获取 128x128 紧凑阵容小头像（PIL Image）。严格从本地镜像与兜底中读取，绝不发网络请求。"""
+        member = tid if hasattr(tid, "tid") else None
+        if member is not None:
+            canonical = self.character_master.resolve_battle_tid(member.tid)
+            if canonical is None or str(canonical.resource_id) != str(member.resource_id):
+                return None
+            member_costume = getattr(member, "costume_id", None)
+            if self.character_master.is_default_costume(canonical.resource_id, member_costume):
+                member_costume = None
+            result = self.resolve_lineup_portrait(
+                character_id=canonical.id,
+                costume_id=member_costume,
+            )
+            if result.is_fallback or str(result.resource_id) != str(canonical.resource_id):
+                return None
+        else:
+            result = self.resolve_lineup_portrait(
+                tid=tid,
+                costume_id=costume_id,
+                character_id=character_id,
+                avatar_id=avatar_id,
+            )
+        try:
+            with Image.open(result.local_path) as img:
+                return img.convert("RGBA")
+        except Exception:
+            # 资源解码失败时把缺图状态交给 T2I DTO；不要把损坏文件伪装成
+            # 可用头像，也不要影响同一张卡的其他成员。
+            return None
+
+    def resolve_lineup_portrait(
+        self,
+        tid: int | str | None = None,
+        costume_id: int | str | None = None,
+        character_id: int | str | None = None,
+        avatar_id: int | str | None = None,
+    ) -> LineupPortraitResolution:
+        """向下游暴露完整 LineupPortraitResolution 契约。"""
+        return self.lineup_resolver.resolve(
+            tid=tid, costume_id=costume_id, character_id=character_id, avatar_id=avatar_id
+        )
+
+    def get_boss_image(
+        self,
+        boss_id: int | str | None = None,
+        icon_id: str | None = None,
+        monster_model_id: str | None = None,
+        boss_name: str | None = None,
+    ) -> Image.Image:
+        """获取 Boss / Monster 图像（PIL Image）。严格从本地镜像与兜底中读取，绝不发网络请求。"""
+        res = self.boss_resolver.resolve(
+            boss_id=boss_id, icon_id=icon_id, monster_model_id=monster_model_id, boss_name=boss_name
+        )
+        try:
+            with Image.open(res.local_path) as img:
+                return img.convert("RGBA")
+        except Exception:
+            return self.fallback("portrait")
+
+    def resolve_boss_asset(
+        self,
+        boss_id: int | str | None = None,
+        icon_id: str | None = None,
+        monster_model_id: str | None = None,
+        boss_name: str | None = None,
+    ) -> BossAssetResolution:
+        """向下游暴露完整 BossAssetResolution 契约。"""
+        return self.boss_resolver.resolve(
+            boss_id=boss_id, icon_id=icon_id, monster_model_id=monster_model_id, boss_name=boss_name
+        )
+
     def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
         """兼容旧调用名；正式 backend 仍受 runtime、版本和队列预算约束。"""
         char_id = self.nikke_db.resolve_spine_asset_id(resource_id, costume_id, allow_remote=False)
@@ -576,19 +787,288 @@ class AssetManager:
         image = self._load(kind, self._key(key), url, allow_source=allow_source)
         return image if image is not None else self.fallback(fallback)
 
+    def get_skill_icon(
+        self,
+        resource_id: str | int,
+        slot: str,
+        variant: str = "normal",
+    ) -> Image.Image:
+        """获取角色技能图标（PIL Image）。
+        
+        支持 slot: "s1", "s2", "burst"
+        支持 variant: "normal", "favorite" (珍藏品技能强化变体预留)
+        """
+        canonical_slot = self.skill_resolver.normalize_slot(slot) or "s1"
+        icon_key = self.skill_resolver.resolve(resource_id, canonical_slot, variant=variant)
+        if not icon_key:
+            return self.fallback(canonical_slot)
+
+        # 逻辑物理相对路径（通用技能图标全局去重）
+        rel_path = self.skill_resolver.get_logical_subpath(icon_key)
+        image = self._load_cached(rel_path)
+        if image is not None:
+            return image
+
+        # 检查平铺候选路径
+        image = self._load_cached(f"skills/{icon_key}.png")
+        if image is not None:
+            return image
+
+        # 远端按优先级拉取 webp / png
+        urls = [
+            self.game_resource_url(f"icon/skill/char_skill/{icon_key}.webp"),
+            self.game_resource_url(f"icon/skill/char_skill/{icon_key}.png"),
+        ]
+        image = self._load_path(rel_path, urls)
+        return image if image is not None else self.fallback(canonical_slot)
+
+    def get_character_asset(
+        self,
+        resource_id: str | int | None,
+        costume_id: str | int | None = None,
+        kind: str = "fullbody",
+    ) -> AssetResult:
+        """获取角色特定类型的视觉资产 (icon, portrait, fullbody, spine)。
+
+        遵循严格契约：
+        - 显式 exact_match 与 fallback_reason
+        - 返回 requested_kind 与 resolved_kind
+        - 返回统一 AssetResult，不直接暴露外部 URL
+        """
+        canonical_kind = str(kind or "").strip().lower()
+        if canonical_kind not in ("icon", "portrait", "fullbody", "spine"):
+            canonical_kind = "fullbody"
+
+        resolution = self.visual_resolver.resolve(resource_id, costume_id=costume_id, kind=canonical_kind)
+        rid_str = str(resource_id) if resource_id is not None else None
+        cid_str = str(costume_id) if costume_id is not None and not str(costume_id).lower() in ("0", "default", "none", "默认", "原皮", "") else None
+
+        # 1. 处理 Spine 请求
+        if canonical_kind == "spine":
+            if resolution.spine_bundle is not None:
+                logger.debug(
+                    "[asset][spine] resource=%s costume=%s skeleton=ok atlas=ok textures=%d",
+                    rid_str,
+                    cid_str or "default",
+                    len(resolution.spine_bundle.textures),
+                )
+                return AssetResult(
+                    image=None,
+                    exact_match=resolution.exact_match,
+                    fallback_reason=resolution.fallback_reason,
+                    asset_key=resolution.asset_id,
+                    resource_id=rid_str,
+                    costume_id=cid_str,
+                    requested_kind="spine",
+                    resolved_kind=resolution.resolved_kind,
+                    source="local" if resolution.exact_match else "fallback",
+                    logical_key=resolution.logical_key,
+                    bundle=resolution.spine_bundle,
+                )
+            else:
+                logger.warning(
+                    "[asset][spine] resource=%s costume=%s skeleton=missing atlas=missing textures=0",
+                    rid_str,
+                    cid_str or "default",
+                )
+                return AssetResult(
+                    image=None,
+                    exact_match=False,
+                    fallback_reason=resolution.fallback_reason or "spine_missing",
+                    asset_key=resolution.asset_id,
+                    resource_id=rid_str,
+                    costume_id=cid_str,
+                    requested_kind="spine",
+                    resolved_kind="spine",
+                    source="fallback",
+                    logical_key=None,
+                    bundle=None,
+                )
+
+        # 2. 处理图像类型请求 (icon, portrait, fullbody)
+        img: Image.Image | None = None
+        source: str = "fallback"
+
+        if resolution.logical_key:
+            img = self._load_cached(resolution.logical_key)
+            if img is not None:
+                source = "cache"
+            elif self.remote:
+                if resolution.logical_key.startswith("FB/"):
+                    fb_name = resolution.logical_key.split("/")[-1]
+                    url = f"{self.CDN}/FB/{fb_name}"
+                    img = self._load_path(resolution.logical_key, [url])
+                    if img is not None:
+                        source = "remote"
+                elif "character/si/" in resolution.logical_key:
+                    si_name = resolution.logical_key.split("/")[-1]
+                    url = self.game_resource_url(f"character/si/{si_name}")
+                    img = self._load_path(f"character/si/{si_name}", [url])
+                    if img is not None:
+                        source = "remote"
+
+        # 如果主视觉文件未命中或需要降级
+        if img is None:
+            if canonical_kind == "fullbody":
+                img = self.get_character_portrait("", resource_id, costume_id)
+                if img is not None:
+                    source = "fallback_portrait"
+            elif canonical_kind == "portrait":
+                img = self.get_character_portrait("", resource_id, costume_id)
+                if img is not None:
+                    source = "fallback_portrait"
+            elif canonical_kind == "icon":
+                img = self.get_lineup_portrait(tid=resource_id, costume_id=costume_id)
+                if img is not None:
+                    source = "fallback_icon"
+
+        if img is None:
+            fallback_type = "portrait" if canonical_kind in ("fullbody", "portrait") else "slots"
+            img = self.fallback(fallback_type)
+            source = "fallback_placeholder"
+
+        if resolution.exact_match and source in ("cache", "local", "remote"):
+            logger.debug(
+                "[asset][visual] resource=%s costume=%s kind=%s cache=%s",
+                rid_str,
+                cid_str or "default",
+                canonical_kind,
+                "hit" if source == "cache" else source,
+            )
+        else:
+            logger.warning(
+                "[asset][visual] resource=%s costume=%s kind=%s fallback=%s reason=%s",
+                rid_str,
+                cid_str or "default",
+                canonical_kind,
+                resolution.resolved_kind,
+                resolution.fallback_reason,
+            )
+
+        return AssetResult(
+            image=img,
+            exact_match=resolution.exact_match and (source in ("cache", "local", "remote")),
+            fallback_reason=resolution.fallback_reason,
+            asset_key=resolution.asset_id,
+            resource_id=rid_str,
+            costume_id=cid_str,
+            requested_kind=canonical_kind,
+            resolved_kind=resolution.resolved_kind,
+            source=source,
+            logical_key=resolution.logical_key,
+            bundle=resolution.spine_bundle,
+        )
+
+    def get_character_icon(
+        self,
+        resource_id: str | int | None,
+        costume_id: str | int | None = None,
+    ) -> Image.Image:
+        """按规范获取角色或皮肤的头像 (icon) PIL 图像。"""
+        res = self.get_character_asset(resource_id, costume_id=costume_id, kind="icon")
+        return res.image if res.image is not None else self.fallback("slots")
+
+    def get_character_fullbody(
+        self,
+        resource_id: str | int | None,
+        costume_id: str | int | None = None,
+    ) -> Image.Image:
+        """按规范获取角色或皮肤的站姿大立绘 (fullbody / FB) PIL 图像。"""
+        res = self.get_character_asset(resource_id, costume_id=costume_id, kind="fullbody")
+        return res.image if res.image is not None else self.fallback("portrait")
+
+    def get_character_spine(
+        self,
+        resource_id: str | int | None,
+        costume_id: str | int | None = None,
+    ) -> SpineBundle | None:
+        """按规范获取角色或皮肤的 SpineBundle 组合资源契约。"""
+        res = self.get_character_asset(resource_id, costume_id=costume_id, kind="spine")
+        return res.bundle
+
+    def get_character_placement(
+        self,
+        resource_id: str | int | None,
+        costume_id: str | int | None = None,
+    ) -> dict[str, Any] | None:
+        """获取角色或皮肤的标准 Placement Metadata (CharacterPlacementMeta)。"""
+        if self.visual_resolver:
+            return self.visual_resolver.get_character_placement(resource_id, costume_id)
+        return None
+
+    def get_costume_portrait(
+        self,
+        resource_id: str | int | None,
+        costume_id: str | int | None = None,
+    ) -> AssetResult:
+        """获取角色当前皮肤资源及精确匹配状态（AssetResult）。
+        
+        若指定未知或不属于该角色的 costume_id，返回 exact_match=False 与明确原因。
+        """
+        resolution = self.costume_resolver.resolve(resource_id, costume_id)
+        image = self.get_character_portrait("", resource_id, costume_id)
+        return AssetResult(
+            image=image,
+            exact_match=resolution.exact_match,
+            fallback_reason=resolution.fallback_reason,
+            asset_key=resolution.spine_asset_id,
+            resource_id=str(resource_id) if resource_id is not None else None,
+            costume_id=str(costume_id) if costume_id is not None else None,
+            requested_kind="portrait",
+            resolved_kind="portrait" if resolution.exact_match else "fallback",
+        )
+
     def get_favorite_item_icon(self, tid) -> Image.Image:
-        resource = self.registry.resolve("favorite_item", tid)
+        key_str = str(tid) if tid is not None else ""
+        resource = None
+        if key_str in self.favorite_item_icons_map:
+            resource = self.favorite_item_icons_map[key_str].get("icon")
+        if resource is None:
+            resource = self.registry.resolve("favorite_item", tid)
         if resource is None:
             return self.fallback("favorite")
         url = self.game_resource_url(f"icon/favoriteitem/{resource}.webp")
         return self._icon("favorite", tid, "favorite", url, allow_source=False)
 
     def get_cube_icon(self, tid) -> Image.Image:
-        resource = self.registry.resolve("cube", tid)
+        key_str = str(tid) if tid is not None else ""
+        resource = None
+        if key_str in self.cube_icons_map:
+            resource = self.cube_icons_map[key_str].get("icon")
+        if resource is None:
+            resource = self.registry.resolve("cube", tid)
         if resource is None:
             return self.fallback("cube")
         url = self.game_resource_url(f"icon/equip/{resource}.webp")
         return self._icon("cube", tid, "cube", url, allow_source=False)
+
+    def get_class_icon(self, class_name: str | None) -> Image.Image:
+        """职业图标 (attacker, defender, supporter)。"""
+        key = self._key(class_name)
+        if key in {"attacker", "defender", "supporter"}:
+            local_img = self._load_cached(f"icon/atlas_common_class/icn_class_{key}.webp")
+            if local_img is not None:
+                return local_img
+            url = self.game_resource_url(f"icon/atlas_common_class/icn_class_{key}.webp")
+            return self._icon("class", key, "slots", url)
+        return self.fallback("slots")
+
+    def get_manufacturer_icon(self, manufacturer: str | None) -> Image.Image:
+        """企业 / 制造商标图标统一入口，与 get_corporation_icon 完全等价。"""
+        return self.get_corporation_icon(manufacturer)
+
+    def get_rarity_icon(self, rarity: str | None) -> Image.Image:
+        """品级图标 (SSR/SR/R)。"""
+        r_map = {"ssr": "001", "sr": "002", "r": "003"}
+        key = self._key(rarity)
+        idx = r_map.get(key)
+        if idx:
+            local_img = self._load_cached(f"icon/atlas_common_grade/ele_grade_icon_{idx}.webp")
+            if local_img is not None:
+                return local_img
+            url = self.game_resource_url(f"icon/atlas_common_grade/ele_grade_icon_{idx}.webp")
+            return self._icon("rarity", key, "slots", url)
+        return self.fallback("slots")
 
     def get_currency_icon(self, currency_type) -> Image.Image | None:
         """只读取有完整来源/hash 证据的本地图标；不触发公共网络下载。"""
@@ -745,6 +1225,15 @@ class AssetManager:
             ),
         }
 
+        from .character_weapon_bases import resolve
+        skill_names = resolve(data.resource_id).get("skills", {})
+        for key, name in skill_names.items():
+            if key in ("skill1", "skill2", "burst") and re.fullmatch(r"[A-Za-z0-9_]+", name):
+                tasks["skill_" + key] = (
+                    lambda name=name: self._load_cached(f"skills/{name}.webp"),
+                    lambda: None,
+                )
+
         results: dict[str, Image.Image] = {}
         future_map: dict[concurrent.futures.Future, str] = {}
 
@@ -802,6 +1291,8 @@ class AssetManager:
             corporation=results.get("corporation") or tasks["corporation"][1](),
             weapon=results.get("weapon") or tasks["weapon"][1](),
             burst=results.get("burst") or tasks["burst"][1](),
+            skills={key: results["skill_" + key] for key in ("skill1", "skill2", "burst")
+                    if results.get("skill_" + key) is not None},
         )
 
     def close(self) -> None:

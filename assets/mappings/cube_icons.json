@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14T23:52:27.402054+00:00",
+  "source": "assets/cubes.json",
+  "total_cubes": 14,
+  "cubes": {
+    "1000301": {
+      "cube_id": "1000301",
+      "name_en": "Assault Cube",
+      "name_cn": "强袭魔方",
+      "icon": "ie_10001",
+      "relative_path": "icon/equip/ie_10001.webp"
+    },
+    "1000302": {
+      "cube_id": "1000302",
+      "name_en": "Onslaught Cube",
+      "name_cn": "战术突击魔方",
+      "icon": "ie_10002",
+      "relative_path": "icon/equip/ie_10002.webp"
+    },
+    "1000303": {
+      "cube_id": "1000303",
+      "name_en": "Resilience Cube",
+      "name_cn": "强韧魔方",
+      "icon": "ie_10003",
+      "relative_path": "icon/equip/ie_10003.webp"
+    },
+    "1000304": {
+      "cube_id": "1000304",
+      "name_en": "Bastion Cube",
+      "name_cn": "战术魔方",
+      "icon": "ie_10004",
+      "relative_path": "icon/equip/ie_10004.webp"
+    },
+    "1000305": {
+      "cube_id": "1000305",
+      "name_en": "Adjutant Cube",
+      "name_cn": "副官魔方",
+      "icon": "ie_10005",
+      "relative_path": "icon/equip/ie_10005.webp"
+    },
+    "1000306": {
+      "cube_id": "1000306",
+      "name_en": "Wingman Cube",
+      "name_cn": "僚机魔方",
+      "icon": "ie_10006",
+      "relative_path": "icon/equip/ie_10006.webp"
+    },
+    "1000307": {
+      "cube_id": "1000307",
+      "name_en": "Quantum Cube",
+      "name_cn": "量子魔方",
+      "icon": "ie_11001",
+      "relative_path": "icon/equip/ie_11001.webp"
+    },
+    "1000308": {
+      "cube_id": "1000308",
+      "name_en": "Vigor Cube",
+      "name_cn": "活力魔方",
+      "icon": "ie_13001",
+      "relative_path": "icon/equip/ie_13001.webp"
+    },
+    "1000309": {
+      "cube_id": "1000309",
+      "name_en": "Endurance Cube",
+      "name_cn": "耐力魔方",
+      "icon": "ie_12001",
+      "relative_path": "icon/equip/ie_12001.webp"
+    },
+    "1000310": {
+      "cube_id": "1000310",
+      "name_en": "Healing Cube",
+      "name_cn": "治疗魔方",
+      "icon": "ie_13002",
+      "relative_path": "icon/equip/ie_13002.webp"
+    },
+    "1000311": {
+      "cube_id": "1000311",
+      "name_en": "Tempering Cube",
+      "name_cn": "淬炼魔方",
+      "icon": "ie_12002",
+      "relative_path": "icon/equip/ie_12002.webp"
+    },
+    "1000312": {
+      "cube_id": "1000312",
+      "name_en": "Relic Assist Cube",
+      "name_cn": "遗迹辅助魔方",
+      "icon": "ie_10009",
+      "relative_path": "icon/equip/ie_10009.webp"
+    },
+    "1000313": {
+      "cube_id": "1000313",
+      "name_en": "Destruction Cube",
+      "name_cn": "毁灭魔方",
+      "icon": "ie_10007",
+      "relative_path": "icon/equip/ie_10007.webp"
+    },
+    "1000314": {
+      "cube_id": "1000314",
+      "name_en": "Piercing Cube",
+      "name_cn": "穿透魔方",
+      "icon": "ie_10008",
+      "relative_path": "icon/equip/ie_10008.webp"
+    }
+  }
+}

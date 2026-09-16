@@ -20,7 +20,7 @@ class T2IAssetResolver:
     def encode(self, source: Image.Image | Path | None, size=(272, 236)) -> str | None:
         if source is None:
             return None
-        if not (0 < size[0] <= 1600 and 0 < size[1] <= 1000):
+        if not (0 < size[0] <= 1600 and 0 < size[1] <= 2400):
             raise ValueError("无效的目标图片尺寸")
         try:
             if isinstance(source, Path):

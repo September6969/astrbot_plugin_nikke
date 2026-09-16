@@ -512,7 +512,7 @@ class HelpTests(unittest.TestCase):
     def test_removed_placeholders_are_not_registered(self):
         root = Path(__file__).resolve().parents[1]
         source = (root / "main.py").read_text(encoding="utf-8")
-        self.assertIn('@filter.command("妮姬", alias={"nikke"})', source)
+        self.assertIn('@filter.command("妮姬", alias={"nikke", "#妮姬", "#nikke"})', source)
         for command in ("skill", "advise", "stage", "tower", "cube", "collection", "image", "export"):
             self.assertNotIn(f'command("nikke {command}")', source)
 

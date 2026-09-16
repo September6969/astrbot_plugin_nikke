@@ -94,10 +94,11 @@ class ProfileDashboardData:
     # None 表示调用方没有提供可选接口状态；False 表示请求或响应不可用。
     outpost_available: bool | None = None
     roster_available: bool | None = None
+    daily_available: bool | None = None
     roster_partial: bool = False
     research_partial: bool = False
     memorial_partial: bool = False
-    daily_available: bool | None = None
+    daily_partial: bool = False
     storage_fullness: float | None = None
     intercept_remaining: int | None = None
     rookie_arena_remaining: int | None = None
@@ -105,10 +106,13 @@ class ProfileDashboardData:
     counsel_remaining: int | None = None
     dispatch_completed: int | None = None
     dispatch_in_progress: int | None = None
+    dispatch_total: int | None = None
     tower_daily_info: list[DailyTowerInfo] | None = None
+    tower_daily_remaining: int | None = None
     sim_room_daily_record: SimulationRoomDailyRecord | None = None
     sim_room_overclock_subseason: str | None = None
     sim_room_overclock_season: str | None = None
     currencies: list[CurrencyItem] | None = None
     currencies_partial: bool = False
-    daily_partial: bool = False
+    memorial_summary_dict: dict[str, int] | None = None
+

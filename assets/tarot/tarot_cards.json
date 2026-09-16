@@ -1,0 +1,2805 @@
+{
+  "schema_version": 2,
+  "deck": "NIKKE Tarot",
+  "language": "zh-CN",
+  "spread_default": [
+    "situation",
+    "obstacle",
+    "advice"
+  ],
+  "spread_labels": {
+    "situation": "现状",
+    "obstacle": "阻碍",
+    "advice": "建议"
+  },
+  "notes": [
+    "牌义采用常见 Rider–Waite–Smith 解释框架。",
+    "NIKKE 角色仅作为视觉与主题映射，不改变标准塔罗核心牌义。",
+    "小阿尔卡那在 56 张图片全部存在前不会自动加入运行时牌池。",
+    "占卜内容仅供娱乐与自我反思，不替代医疗、法律、财务等专业判断。"
+  ],
+  "cards": [
+    {
+      "id": 0,
+      "roman": "0",
+      "name_zh": "愚者",
+      "name_en": "THE FOOL",
+      "character": "皇冠",
+      "upright": {
+        "keywords": [
+          "开始",
+          "自由",
+          "冒险",
+          "可能性"
+        ],
+        "meaning": "新的阶段正在展开。你未必掌握全部信息，但保持开放、好奇和行动意愿，会比过度犹豫更重要。",
+        "advice": "可以迈出第一步，但保留基本判断，不要把勇敢变成鲁莽。"
+      },
+      "reversed": {
+        "keywords": [
+          "鲁莽",
+          "犹豫",
+          "逃避现实",
+          "准备不足"
+        ],
+        "meaning": "你可能在两个极端之间摇摆：要么过于冲动，要么因为害怕未知而迟迟不动。",
+        "advice": "先确认风险与边界，再决定是否前进；不要为了证明自己而冒不必要的险。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前处于新起点或探索阶段，旧经验未必完全适用。",
+          "reversed": "当前局面缺少准备或方向感，行动容易受冲动与不确定性影响。"
+        },
+        "obstacle": {
+          "upright": "真正的阻碍可能是对未知的恐惧，或不愿接受新的可能性。",
+          "reversed": "阻碍来自冒进、计划不足，或反复犹豫导致错失时机。"
+        },
+        "advice": {
+          "upright": "保持开放，允许自己尝试新的路径，同时给自己留下纠错空间。",
+          "reversed": "先补足信息与准备，不要在冲动和退缩之间来回摆动。"
+        }
+      },
+      "key": "major:00",
+      "arcana": "major",
+      "slug": "the_fool",
+      "image": "assets/tarot/major_arcana/00_the_fool.png"
+    },
+    {
+      "id": 1,
+      "roman": "I",
+      "name_zh": "魔术师",
+      "name_en": "THE MAGICIAN",
+      "character": "潘托姆",
+      "upright": {
+        "keywords": [
+          "行动",
+          "资源",
+          "创造",
+          "掌控"
+        ],
+        "meaning": "你手上已经拥有推进事情所需的大部分资源。关键不是继续等待，而是把能力、信息和机会组合起来。",
+        "advice": "主动开始，把已有资源变成实际成果。"
+      },
+      "reversed": {
+        "keywords": [
+          "操控",
+          "分散",
+          "能力未发挥",
+          "自我怀疑"
+        ],
+        "meaning": "能力并非不存在，而是可能被分散、误用，或被不自信压住。也要警惕漂亮话与操控。",
+        "advice": "减少分心，确认目标与动机，避免用技巧代替真正的行动。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "你具备主动塑造局面的能力，资源与机会正在汇聚。",
+          "reversed": "当前能力没有被有效整合，或局面中存在信息包装与操控。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是你低估了自己的能力，迟迟没有真正开始。",
+          "reversed": "阻碍来自分心、虚张声势、自我怀疑或资源使用失当。"
+        },
+        "advice": {
+          "upright": "聚焦一个明确目标，马上用手头已有的资源推进。",
+          "reversed": "先整理资源和动机，避免承诺过多或依赖技巧性捷径。"
+        }
+      },
+      "key": "major:01",
+      "arcana": "major",
+      "slug": "the_magician",
+      "image": "assets/tarot/major_arcana/01_the_magician.png"
+    },
+    {
+      "id": 2,
+      "roman": "II",
+      "name_zh": "女祭司",
+      "name_en": "THE HIGH PRIESTESS",
+      "character": "D.E.E.P.",
+      "upright": {
+        "keywords": [
+          "直觉",
+          "秘密",
+          "洞察",
+          "等待"
+        ],
+        "meaning": "有些信息还没有完全浮出水面。现在更适合观察、倾听和整理内在感受，而不是急着下结论。",
+        "advice": "留意细节和直觉，等待关键事实出现。"
+      },
+      "reversed": {
+        "keywords": [
+          "忽视直觉",
+          "信息遮蔽",
+          "误判",
+          "封闭"
+        ],
+        "meaning": "你可能忽略了已经察觉到的异常，或者被不完整的信息带偏。",
+        "advice": "不要只相信表面解释，重新检查信息来源和自己的真实感受。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前仍有隐藏信息，局势需要观察而非仓促行动。",
+          "reversed": "当前信息混乱或被遮蔽，判断容易受偏见和误导影响。"
+        },
+        "obstacle": {
+          "upright": "阻碍来自信息不足，或你还没有真正听见自己的判断。",
+          "reversed": "阻碍是忽略直觉、误读信号，或过度封闭导致无法获得信息。"
+        },
+        "advice": {
+          "upright": "暂缓定论，收集更多证据，并相信经过验证的直觉。",
+          "reversed": "重新核对事实，不要把猜测当成直觉。"
+        }
+      },
+      "key": "major:02",
+      "arcana": "major",
+      "slug": "the_high_priestess",
+      "image": "assets/tarot/major_arcana/02_the_high_priestess.png"
+    },
+    {
+      "id": 3,
+      "roman": "III",
+      "name_zh": "皇后",
+      "name_en": "THE EMPRESS",
+      "character": "神罚",
+      "upright": {
+        "keywords": [
+          "丰饶",
+          "关怀",
+          "成长",
+          "创造"
+        ],
+        "meaning": "这是适合培养、积累和让事物自然成长的阶段。投入耐心与照料，往往会得到稳定回报。",
+        "advice": "优先滋养真正重要的人、关系或项目。"
+      },
+      "reversed": {
+        "keywords": [
+          "过度付出",
+          "停滞",
+          "依赖",
+          "忽视自己"
+        ],
+        "meaning": "照顾与投入可能失去平衡。你可能给得太多，或长期忽视自己的需求。",
+        "advice": "恢复边界和节奏，不要把照顾别人当成唯一价值。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前适合发展、培养和积累，事情具有成长空间。",
+          "reversed": "当前成长受阻，可能因资源失衡、过度依赖或缺乏照顾。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是缺少耐心，过早要求结果。",
+          "reversed": "阻碍来自过度付出、边界模糊或长期忽视自身需求。"
+        },
+        "advice": {
+          "upright": "持续投入，给事情足够时间和空间成熟。",
+          "reversed": "先恢复自己的资源与边界，再决定继续投入多少。"
+        }
+      },
+      "key": "major:03",
+      "arcana": "major",
+      "slug": "the_empress",
+      "image": "assets/tarot/major_arcana/03_the_empress.png"
+    },
+    {
+      "id": 4,
+      "roman": "IV",
+      "name_zh": "皇帝",
+      "name_en": "THE EMPEROR",
+      "character": "指挥官",
+      "upright": {
+        "keywords": [
+          "秩序",
+          "责任",
+          "领导",
+          "结构"
+        ],
+        "meaning": "局面需要清晰规则、责任分工和稳定执行。单靠情绪或临时发挥已经不够。",
+        "advice": "建立结构，明确边界，并承担应承担的责任。"
+      },
+      "reversed": {
+        "keywords": [
+          "控制过度",
+          "僵化",
+          "权威冲突",
+          "失序"
+        ],
+        "meaning": "规则可能已经变成束缚，或者原本应该负责的人没有真正承担责任。",
+        "advice": "区分秩序和控制；必要时重新分配权责。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前需要秩序、计划和稳定的领导。",
+          "reversed": "当前可能存在权责失衡、过度控制或缺乏有效管理。"
+        },
+        "obstacle": {
+          "upright": "阻碍是缺乏结构、规则不清或责任没有落实。",
+          "reversed": "阻碍来自僵化、控制欲或与权威的冲突。"
+        },
+        "advice": {
+          "upright": "制定规则与时间表，做可持续而明确的决定。",
+          "reversed": "减少不必要的控制，重新检查制度是否仍服务于目标。"
+        }
+      },
+      "key": "major:04",
+      "arcana": "major",
+      "slug": "the_emperor",
+      "image": "assets/tarot/major_arcana/04_the_emperor.png"
+    },
+    {
+      "id": 5,
+      "roman": "V",
+      "name_zh": "教皇",
+      "name_en": "THE HIEROPHANT",
+      "character": "安德森",
+      "upright": {
+        "keywords": [
+          "传统",
+          "学习",
+          "导师",
+          "制度"
+        ],
+        "meaning": "现阶段遵循成熟方法、向有经验的人学习，通常比完全从零试错更有效。",
+        "advice": "尊重已有规则，同时理解规则背后的原因。"
+      },
+      "reversed": {
+        "keywords": [
+          "质疑传统",
+          "教条",
+          "不合群",
+          "另辟路径"
+        ],
+        "meaning": "既有方法可能并不适合你，或者规则已经变成形式主义。",
+        "advice": "可以质疑传统，但要有充分理由和替代方案。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前适合借助制度、经验和导师资源推进。",
+          "reversed": "当前规则与实际需求存在冲突，传统方法未必有效。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是缺乏指导，或不愿接受成熟经验。",
+          "reversed": "阻碍来自教条、形式主义，或为了反叛而反叛。"
+        },
+        "advice": {
+          "upright": "先学习成熟方法，再决定哪些部分需要调整。",
+          "reversed": "保留有价值的原则，同时大胆删除失效的形式。"
+        }
+      },
+      "key": "major:05",
+      "arcana": "major",
+      "slug": "the_hierophant",
+      "image": "assets/tarot/major_arcana/05_the_hierophant.png"
+    },
+    {
+      "id": 6,
+      "roman": "VI",
+      "name_zh": "恋人",
+      "name_en": "THE LOVERS",
+      "character": "阿尔卡娜：命运伴侣",
+      "upright": {
+        "keywords": [
+          "关系",
+          "选择",
+          "契合",
+          "价值观"
+        ],
+        "meaning": "这张牌不仅代表感情，也代表重要选择。真正关键的是你的行动是否与核心价值观一致。",
+        "advice": "做出你愿意长期承担后果的选择。"
+      },
+      "reversed": {
+        "keywords": [
+          "失衡",
+          "价值冲突",
+          "关系裂痕",
+          "犹豫"
+        ],
+        "meaning": "关系或选择中存在不一致。表面吸引力与长期价值可能并不相同。",
+        "advice": "把真实需求说清楚，不要用拖延代替选择。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前核心议题是关系、合作或一项重要价值选择。",
+          "reversed": "当前存在价值冲突、关系失衡或难以做出决定。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是害怕承诺，或没有真正面对选择。",
+          "reversed": "阻碍来自沟通不清、立场不一致或只看短期吸引。"
+        },
+        "advice": {
+          "upright": "选择与你长期价值观一致的人或道路。",
+          "reversed": "先厘清底线和需求，再谈关系修复或重大决定。"
+        }
+      },
+      "key": "major:06",
+      "arcana": "major",
+      "slug": "the_lovers",
+      "image": "assets/tarot/major_arcana/06_the_lovers.png"
+    },
+    {
+      "id": 7,
+      "roman": "VII",
+      "name_zh": "战车",
+      "name_en": "THE CHARIOT",
+      "character": "尼希利斯塔",
+      "upright": {
+        "keywords": [
+          "推进",
+          "意志",
+          "胜利",
+          "控制"
+        ],
+        "meaning": "目标已经明确，接下来需要集中意志和持续推进。分散的力量必须被拉回同一方向。",
+        "advice": "控制节奏，不要让情绪和外部干扰改变方向。"
+      },
+      "reversed": {
+        "keywords": [
+          "失控",
+          "方向冲突",
+          "急躁",
+          "停滞"
+        ],
+        "meaning": "你可能很想前进，但力量并没有朝同一方向作用。急于加速反而可能失去控制。",
+        "advice": "先统一目标和节奏，再继续推进。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前具有强烈推进势能，只要方向一致就能快速进展。",
+          "reversed": "当前推进受阻，原因多半是方向冲突或控制力下降。"
+        },
+        "obstacle": {
+          "upright": "阻碍是犹豫、分心，或无法把资源集中到一个方向。",
+          "reversed": "阻碍来自急躁、失控和彼此拉扯的目标。"
+        },
+        "advice": {
+          "upright": "锁定目标，控制节奏，持续推进。",
+          "reversed": "先减速纠偏，解决内部冲突后再加速。"
+        }
+      },
+      "key": "major:07",
+      "arcana": "major",
+      "slug": "the_chariot",
+      "image": "assets/tarot/major_arcana/07_the_chariot.png"
+    },
+    {
+      "id": 8,
+      "roman": "VIII",
+      "name_zh": "力量",
+      "name_en": "STRENGTH",
+      "character": "吉尔提",
+      "upright": {
+        "keywords": [
+          "勇气",
+          "克制",
+          "韧性",
+          "温和力量"
+        ],
+        "meaning": "真正有效的力量不是压倒一切，而是能在压力下保持稳定，并有意识地控制自己的反应。",
+        "advice": "以耐心和自制处理问题，不必证明自己有多强。"
+      },
+      "reversed": {
+        "keywords": [
+          "自我怀疑",
+          "失控",
+          "消耗",
+          "压抑"
+        ],
+        "meaning": "你可能在强撑，或者把力量都用来压制情绪，导致内在越来越疲惫。",
+        "advice": "承认脆弱并不会削弱力量，先恢复再处理问题。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前需要稳定、克制和持续韧性，而非爆发式行动。",
+          "reversed": "当前自信和耐力下降，情绪或压力正在侵蚀控制力。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是过度依赖强硬手段，忽略耐心。",
+          "reversed": "阻碍来自自我怀疑、情绪失控或长期过度消耗。"
+        },
+        "advice": {
+          "upright": "用稳定和耐心解决问题，少用对抗，多用控制。",
+          "reversed": "减少硬撑，恢复体力和信心，再处理核心问题。"
+        }
+      },
+      "key": "major:08",
+      "arcana": "major",
+      "slug": "strength",
+      "image": "assets/tarot/major_arcana/08_strength.png"
+    },
+    {
+      "id": 9,
+      "roman": "IX",
+      "name_zh": "隐者",
+      "name_en": "THE HERMIT",
+      "character": "那由塔",
+      "upright": {
+        "keywords": [
+          "独处",
+          "反思",
+          "智慧",
+          "寻找"
+        ],
+        "meaning": "答案暂时不在外界噪音里。独立思考、回顾经验和减少干扰，会帮助你找到真正重要的问题。",
+        "advice": "给自己一段安静的时间，先把方向想清楚。"
+      },
+      "reversed": {
+        "keywords": [
+          "孤立",
+          "逃避",
+          "封闭",
+          "迷失"
+        ],
+        "meaning": "独处已经从反思变成隔绝，或者你一直思考却没有真正行动。",
+        "advice": "不要把退缩当成思考，必要时重新与可信的人建立联系。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前适合独立思考、整理经验和寻找长期方向。",
+          "reversed": "当前容易陷入封闭、孤立或反复思考却没有出口。"
+        },
+        "obstacle": {
+          "upright": "阻碍是外界噪音太多，缺少真正的独立判断。",
+          "reversed": "阻碍来自过度退缩、拒绝帮助或长期停在思考阶段。"
+        },
+        "advice": {
+          "upright": "减少干扰，独立梳理问题，再做决定。",
+          "reversed": "主动寻求外部反馈，不要独自困在同一个思路里。"
+        }
+      },
+      "key": "major:09",
+      "arcana": "major",
+      "slug": "the_hermit",
+      "image": "assets/tarot/major_arcana/09_the_hermit.png"
+    },
+    {
+      "id": 10,
+      "roman": "X",
+      "name_zh": "命运之轮",
+      "name_en": "WHEEL OF FORTUNE",
+      "character": "阿尔卡娜",
+      "upright": {
+        "keywords": [
+          "变化",
+          "周期",
+          "机会",
+          "转折"
+        ],
+        "meaning": "局势正在变化，有些因素不完全由你控制。重要的是识别趋势，并在窗口出现时及时行动。",
+        "advice": "接受变化，抓住新的机会，不要执着于维持旧状态。"
+      },
+      "reversed": {
+        "keywords": [
+          "反复",
+          "延迟",
+          "坏时机",
+          "抗拒变化"
+        ],
+        "meaning": "同一种问题可能再次出现，或者你正在逆着已经改变的环境继续用旧方法。",
+        "advice": "找出重复模式，停止对不可控变化的无效抵抗。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前处在明显转折期，外部条件正在重新排列。",
+          "reversed": "当前变化受阻，或旧问题再次循环出现。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是无法接受环境已经改变。",
+          "reversed": "阻碍来自重复旧模式、时机不佳或过度依赖运气。"
+        },
+        "advice": {
+          "upright": "顺势调整，在机会窗口出现时迅速行动。",
+          "reversed": "先打破重复模式，再等待更合适的时机。"
+        }
+      },
+      "key": "major:10",
+      "arcana": "major",
+      "slug": "wheel_of_fortune",
+      "image": "assets/tarot/major_arcana/10_wheel_of_fortune.png"
+    },
+    {
+      "id": 11,
+      "roman": "XI",
+      "name_zh": "正义",
+      "name_en": "JUSTICE",
+      "character": "牡丹",
+      "upright": {
+        "keywords": [
+          "公平",
+          "责任",
+          "事实",
+          "因果"
+        ],
+        "meaning": "问题需要基于事实、责任和长期后果来判断，而不是只看当下情绪。",
+        "advice": "诚实面对证据，也承担自己选择带来的结果。"
+      },
+      "reversed": {
+        "keywords": [
+          "偏见",
+          "逃避责任",
+          "不公",
+          "判断失衡"
+        ],
+        "meaning": "当前判断可能受到立场、情绪或不完整信息影响，也可能有人在逃避责任。",
+        "advice": "重新核查事实，避免只挑选支持自己观点的证据。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前需要客观判断、明确责任和公平处理。",
+          "reversed": "当前存在信息偏差、责任逃避或明显不公平。"
+        },
+        "obstacle": {
+          "upright": "阻碍是事实没有被充分看见，或责任划分不清。",
+          "reversed": "阻碍来自偏见、双重标准或不愿承担后果。"
+        },
+        "advice": {
+          "upright": "依据事实和原则做决定，并接受相应后果。",
+          "reversed": "重新审视证据和立场，纠正明显失衡。"
+        }
+      },
+      "key": "major:11",
+      "arcana": "major",
+      "slug": "justice",
+      "image": "assets/tarot/major_arcana/11_justice.png"
+    },
+    {
+      "id": 12,
+      "roman": "XII",
+      "name_zh": "倒吊人",
+      "name_en": "THE HANGED MAN",
+      "character": "E.H.",
+      "upright": {
+        "keywords": [
+          "暂停",
+          "牺牲",
+          "换角度",
+          "接受"
+        ],
+        "meaning": "继续用原来的方式强推可能没有意义。主动暂停、放弃部分控制，反而能看到新的解法。",
+        "advice": "暂时接受停顿，换一个角度重新理解问题。"
+      },
+      "reversed": {
+        "keywords": [
+          "拖延",
+          "无效牺牲",
+          "卡住",
+          "拒绝改变"
+        ],
+        "meaning": "停顿已经失去意义。你可能一直等待，却没有真正改变视角或行动方式。",
+        "advice": "确认自己是在等待时机，还是只是害怕做决定。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前处于必要的暂停期，强行推进收益有限。",
+          "reversed": "当前停滞过久，等待已经开始变成拖延。"
+        },
+        "obstacle": {
+          "upright": "阻碍是无法放下旧视角或对控制的执着。",
+          "reversed": "阻碍来自无效牺牲、犹豫和长期不愿改变。"
+        },
+        "advice": {
+          "upright": "主动暂停，重新定义问题，再决定下一步。",
+          "reversed": "停止无意义等待，选择一个可执行方向。"
+        }
+      },
+      "key": "major:12",
+      "arcana": "major",
+      "slug": "the_hanged_man",
+      "image": "assets/tarot/major_arcana/12_the_hanged_man.png"
+    },
+    {
+      "id": 13,
+      "roman": "XIII",
+      "name_zh": "死神",
+      "name_en": "DEATH",
+      "character": "哈兰",
+      "upright": {
+        "keywords": [
+          "结束",
+          "转变",
+          "告别",
+          "重生"
+        ],
+        "meaning": "一个阶段正在结束。真正的问题不是如何保住旧状态，而是如何完成告别并为新阶段腾出空间。",
+        "advice": "接受不可逆的变化，主动结束已经失去价值的部分。"
+      },
+      "reversed": {
+        "keywords": [
+          "抗拒结束",
+          "停滞",
+          "拖延转变",
+          "旧事纠缠"
+        ],
+        "meaning": "你可能知道某件事已经结束，却仍试图维持它，导致新的阶段无法开始。",
+        "advice": "识别你真正不愿放下的是什么，并完成必要的收尾。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前正经历明确的结束与转型。",
+          "reversed": "当前转型被拖延，旧状态仍在占据空间。"
+        },
+        "obstacle": {
+          "upright": "阻碍是对结束的恐惧，或不愿接受不可逆变化。",
+          "reversed": "阻碍来自抓住旧事不放，导致无法进入下一阶段。"
+        },
+        "advice": {
+          "upright": "完成告别，清理旧结构，为新阶段腾出位置。",
+          "reversed": "停止延长已经结束的事情，主动做收尾。"
+        }
+      },
+      "key": "major:13",
+      "arcana": "major",
+      "slug": "death",
+      "image": "assets/tarot/major_arcana/13_death.png"
+    },
+    {
+      "id": 14,
+      "roman": "XIV",
+      "name_zh": "节制",
+      "name_en": "TEMPERANCE",
+      "character": "鲁玛妮",
+      "upright": {
+        "keywords": [
+          "平衡",
+          "调和",
+          "耐心",
+          "整合"
+        ],
+        "meaning": "事情不需要极端处理。真正有效的方法是找到可持续的比例、节奏和资源配置。",
+        "advice": "放慢一点，把不同需求整合成长期可执行的方案。"
+      },
+      "reversed": {
+        "keywords": [
+          "失衡",
+          "过度",
+          "节奏混乱",
+          "不协调"
+        ],
+        "meaning": "资源、时间或情绪分配已经失去平衡，极端做法可能进一步放大问题。",
+        "advice": "减少过量投入，恢复基本节奏，再谈优化。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前需要协调多方因素，寻找稳定平衡。",
+          "reversed": "当前明显失衡，节奏、资源或情绪彼此冲突。"
+        },
+        "obstacle": {
+          "upright": "阻碍是缺乏耐心，或想用极端方案快速解决问题。",
+          "reversed": "阻碍来自过度、失衡和长期节奏混乱。"
+        },
+        "advice": {
+          "upright": "调整比例，建立一个能够长期维持的节奏。",
+          "reversed": "先停掉最失衡的一环，再逐步恢复稳定。"
+        }
+      },
+      "key": "major:14",
+      "arcana": "major",
+      "slug": "temperance",
+      "image": "assets/tarot/major_arcana/14_temperance.png"
+    },
+    {
+      "id": 15,
+      "roman": "XV",
+      "name_zh": "恶魔",
+      "name_en": "THE DEVIL",
+      "character": "克拉乌",
+      "upright": {
+        "keywords": [
+          "欲望",
+          "束缚",
+          "依赖",
+          "执念"
+        ],
+        "meaning": "你可能被某种欲望、习惯、关系或恐惧牵制。束缚真实存在，但往往并非完全无法挣脱。",
+        "advice": "先承认依赖或执念的存在，再决定是否继续让它控制你。"
+      },
+      "reversed": {
+        "keywords": [
+          "松绑",
+          "觉察",
+          "摆脱依赖",
+          "重新掌控"
+        ],
+        "meaning": "你开始看清某种控制关系或不健康模式，并有机会逐步脱离。",
+        "advice": "利用已经出现的清醒感，切断最关键的依赖环节。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前存在明显的依赖、诱惑、执念或控制关系。",
+          "reversed": "当前正在出现脱离束缚、恢复自主的机会。"
+        },
+        "obstacle": {
+          "upright": "阻碍是无法承认自己被什么控制，或短期快感压过长期利益。",
+          "reversed": "阻碍是虽然已经看清问题，却仍没有真正切断旧模式。"
+        },
+        "advice": {
+          "upright": "诚实识别束缚来源，减少它对选择的控制。",
+          "reversed": "继续执行脱离计划，不要因为短期不适又回到旧模式。"
+        }
+      },
+      "key": "major:15",
+      "arcana": "major",
+      "slug": "the_devil",
+      "image": "assets/tarot/major_arcana/15_the_devil.png"
+    },
+    {
+      "id": 16,
+      "roman": "XVI",
+      "name_zh": "高塔",
+      "name_en": "THE TOWER",
+      "character": "桃乐丝",
+      "upright": {
+        "keywords": [
+          "崩塌",
+          "突变",
+          "真相",
+          "重构"
+        ],
+        "meaning": "某个原本稳定的结构正在被现实击穿。虽然冲击强烈，但被揭开的往往是早已存在的问题。",
+        "advice": "先处理最紧急的损失，再基于真实情况重建。"
+      },
+      "reversed": {
+        "keywords": [
+          "延迟爆发",
+          "勉强维持",
+          "内在危机",
+          "避免改变"
+        ],
+        "meaning": "问题可能还没有完全爆发，但结构已经不稳。继续掩盖只会让未来代价更高。",
+        "advice": "主动处理裂缝，不要等它以更剧烈的方式爆发。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前正经历剧烈变化、真相暴露或结构性崩塌。",
+          "reversed": "当前危机尚未完全显现，但基础已经明显不稳。"
+        },
+        "obstacle": {
+          "upright": "阻碍是仍试图维持已经失效的结构。",
+          "reversed": "阻碍来自逃避问题、拖延修复或假装一切正常。"
+        },
+        "advice": {
+          "upright": "接受事实，优先处理核心问题，再重新建立结构。",
+          "reversed": "主动拆除最危险的隐患，避免被动爆发。"
+        }
+      },
+      "key": "major:16",
+      "arcana": "major",
+      "slug": "the_tower",
+      "image": "assets/tarot/major_arcana/16_the_tower.png"
+    },
+    {
+      "id": 17,
+      "roman": "XVII",
+      "name_zh": "星星",
+      "name_en": "THE STAR",
+      "character": "阿妮斯：超级巨星",
+      "upright": {
+        "keywords": [
+          "希望",
+          "疗愈",
+          "信心",
+          "方向"
+        ],
+        "meaning": "经历压力之后，方向正在重新变得清晰。恢复并不一定快速，但你已经重新看到值得坚持的东西。",
+        "advice": "保持稳定投入，让希望转化成具体而持续的行动。"
+      },
+      "reversed": {
+        "keywords": [
+          "失望",
+          "信心不足",
+          "迷茫",
+          "恢复缓慢"
+        ],
+        "meaning": "你可能暂时看不到结果，因此开始怀疑方向。问题未必是道路错误，也可能只是恢复需要更长时间。",
+        "advice": "降低对即时结果的要求，先恢复信心与基本节奏。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前正在恢复希望与方向感，长期前景比短期感受更积极。",
+          "reversed": "当前信心不足，容易因短期挫折否定长期可能性。"
+        },
+        "obstacle": {
+          "upright": "阻碍是缺乏耐心，无法相信缓慢但真实的恢复。",
+          "reversed": "阻碍来自失望、自我否定或对未来过度悲观。"
+        },
+        "advice": {
+          "upright": "继续做能长期积累的事情，让信心建立在行动上。",
+          "reversed": "先降低压力和预期，恢复基本稳定后再追求突破。"
+        }
+      },
+      "key": "major:17",
+      "arcana": "major",
+      "slug": "the_star",
+      "image": "assets/tarot/major_arcana/17_the_star.png"
+    },
+    {
+      "id": 18,
+      "roman": "XVIII",
+      "name_zh": "月亮",
+      "name_en": "THE MOON",
+      "character": "灰姑娘",
+      "upright": {
+        "keywords": [
+          "迷雾",
+          "潜意识",
+          "不安",
+          "幻象"
+        ],
+        "meaning": "当前信息不完整，情绪和想象会放大不确定性。你看到的未必是假的，但也未必是全部事实。",
+        "advice": "不要急着下结论，区分事实、推测和恐惧。"
+      },
+      "reversed": {
+        "keywords": [
+          "迷雾散去",
+          "真相显露",
+          "焦虑减弱",
+          "自我欺骗"
+        ],
+        "meaning": "混乱开始减少，但某些真相可能不舒服。也可能是你仍在试图用合理化掩盖已经察觉的问题。",
+        "advice": "把模糊感觉转化为可验证的信息。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前不确定性很高，情绪和潜意识正在影响判断。",
+          "reversed": "当前迷雾逐渐散去，部分事实开始显现。"
+        },
+        "obstacle": {
+          "upright": "阻碍是恐惧、猜测和事实混在一起。",
+          "reversed": "阻碍来自明知问题存在却仍试图自我解释。"
+        },
+        "advice": {
+          "upright": "核实信息，避免在情绪最强烈时做重大决定。",
+          "reversed": "接受已经显现的事实，并据此修正判断。"
+        }
+      },
+      "key": "major:18",
+      "arcana": "major",
+      "slug": "the_moon",
+      "image": "assets/tarot/major_arcana/18_the_moon.png"
+    },
+    {
+      "id": 19,
+      "roman": "XIX",
+      "name_zh": "太阳",
+      "name_en": "THE SUN",
+      "character": "爱丽丝",
+      "upright": {
+        "keywords": [
+          "成功",
+          "活力",
+          "清晰",
+          "快乐"
+        ],
+        "meaning": "局面整体明朗，努力更容易得到正向反馈。现在适合公开表达、主动行动和享受阶段性成果。",
+        "advice": "保持坦率和行动力，把优势转化成真实进展。"
+      },
+      "reversed": {
+        "keywords": [
+          "短暂低迷",
+          "过度乐观",
+          "延迟成功",
+          "信心波动"
+        ],
+        "meaning": "积极结果仍可能存在，但被疲惫、期望过高或短期挫折遮住。",
+        "advice": "调整预期，不要因为没有达到‘完美成功’就忽略已经取得的进展。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前局势清晰积极，成果和机会更容易被看见。",
+          "reversed": "当前仍有积极基础，但信心或结果受到短期阴影影响。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是过度谨慎，不敢充分发挥已有优势。",
+          "reversed": "阻碍来自过度乐观、疲惫或对结果要求过高。"
+        },
+        "advice": {
+          "upright": "主动展示成果，保持透明和直接。",
+          "reversed": "认可已有进展，修正不现实预期后继续推进。"
+        }
+      },
+      "key": "major:19",
+      "arcana": "major",
+      "slug": "the_sun",
+      "image": "assets/tarot/major_arcana/19_the_sun.png"
+    },
+    {
+      "id": 20,
+      "roman": "XX",
+      "name_zh": "审判",
+      "name_en": "JUDGEMENT",
+      "character": "D",
+      "upright": {
+        "keywords": [
+          "觉醒",
+          "审视",
+          "召唤",
+          "决定"
+        ],
+        "meaning": "过去的经验正在汇总成一个必须面对的结论。现在适合做出清醒、不可再拖延的重要决定。",
+        "advice": "基于过去的教训做最终判断，并承担新阶段的责任。"
+      },
+      "reversed": {
+        "keywords": [
+          "逃避决定",
+          "自我否定",
+          "迟疑",
+          "拒绝总结"
+        ],
+        "meaning": "你可能已经知道答案，却因为害怕承担后果而迟迟不做决定。",
+        "advice": "停止反复审判自己，区分反思和自我惩罚。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前来到总结与关键决定阶段，过去经验正在要求一个答案。",
+          "reversed": "当前关键决定被拖延，或自我怀疑影响判断。"
+        },
+        "obstacle": {
+          "upright": "阻碍是没有真正总结过去经验，导致无法进入下一阶段。",
+          "reversed": "阻碍来自害怕承担后果、自我否定或持续逃避决定。"
+        },
+        "advice": {
+          "upright": "总结经验，做出明确决定，并进入下一阶段。",
+          "reversed": "停止重复自责，依据事实做一次清晰选择。"
+        }
+      },
+      "key": "major:20",
+      "arcana": "major",
+      "slug": "judgement",
+      "image": "assets/tarot/major_arcana/20_judgement.png"
+    },
+    {
+      "id": 21,
+      "roman": "XXI",
+      "name_zh": "世界",
+      "name_en": "THE WORLD",
+      "character": "玛丽安",
+      "upright": {
+        "keywords": [
+          "完成",
+          "圆满",
+          "整合",
+          "成果"
+        ],
+        "meaning": "一个长期阶段正在完整收束。经验、成果和关系开始形成更成熟的整体。",
+        "advice": "确认已经完成的成果，再决定下一段旅程，而不是急着跳过收尾。"
+      },
+      "reversed": {
+        "keywords": [
+          "未完成",
+          "收尾不足",
+          "延迟完成",
+          "缺少整合"
+        ],
+        "meaning": "距离完成已经不远，但仍有一个关键环节没有闭合，导致你无法真正进入下一阶段。",
+        "advice": "找出最后一个未完成事项，优先完成闭环。"
+      },
+      "positions": {
+        "situation": {
+          "upright": "当前接近完整收尾、成果整合或阶段性圆满。",
+          "reversed": "当前大部分工作已经完成，但仍有关键缺口。"
+        },
+        "obstacle": {
+          "upright": "阻碍可能是没有意识到自己已经具备完成条件。",
+          "reversed": "阻碍来自收尾不足、遗漏细节或迟迟不愿结束阶段。"
+        },
+        "advice": {
+          "upright": "完成总结与交付，认可成果，再开启下一周期。",
+          "reversed": "优先补齐最后的缺口，不要再无限扩展任务。"
+        }
+      },
+      "key": "major:21",
+      "arcana": "major",
+      "slug": "the_world",
+      "image": "assets/tarot/major_arcana/21_the_world.png"
+    },
+    {
+      "id": 1,
+      "key": "minor:wands:ace",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "ace",
+      "name_zh": "权杖首牌",
+      "name_en": "ACE OF WANDS",
+      "character": "Drake",
+      "slug": "ace_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/ace_of_wands.png",
+      "upright": {
+        "keywords": [
+          "灵感",
+          "行动力",
+          "新开始",
+          "潜力"
+        ],
+        "meaning": "新的行动能量正在出现。一个想法、机会或冲动值得被认真尝试，但它仍需要实际行动才能成长。",
+        "advice": "抓住最有生命力的方向，先做出第一个可验证的行动。"
+      },
+      "reversed": {
+        "keywords": [
+          "延迟",
+          "缺乏动力",
+          "方向不明",
+          "错失机会"
+        ],
+        "meaning": "能量存在但没有顺利落地，可能因为犹豫、目标分散或准备不足而迟迟无法开始。",
+        "advice": "减少同时推进的目标，确认真正想做的事后再启动。"
+      }
+    },
+    {
+      "id": 2,
+      "key": "minor:wands:02",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "02",
+      "name_zh": "权杖二",
+      "name_en": "TWO OF WANDS",
+      "character": "Drake",
+      "slug": "02_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/two_of_wands.png",
+      "upright": {
+        "keywords": [
+          "规划",
+          "选择",
+          "远见",
+          "掌控"
+        ],
+        "meaning": "你已经越过最初的冲动，开始思考下一步该往哪里走。现在需要比较不同路线及其长期代价。",
+        "advice": "把愿景拆成具体路线，并主动选择一个优先方向。"
+      },
+      "reversed": {
+        "keywords": [
+          "害怕未知",
+          "计划不足",
+          "犹豫",
+          "视野受限"
+        ],
+        "meaning": "你可能知道需要前进，却因为害怕未知或缺乏计划而停在原地。",
+        "advice": "先补齐关键资料，再做一个足够好的决定，不必等待绝对确定。"
+      }
+    },
+    {
+      "id": 3,
+      "key": "minor:wands:03",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "03",
+      "name_zh": "权杖三",
+      "name_en": "THREE OF WANDS",
+      "character": "Drake",
+      "slug": "03_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/three_of_wands.png",
+      "upright": {
+        "keywords": [
+          "扩展",
+          "远见",
+          "进展",
+          "等待成果"
+        ],
+        "meaning": "前期投入已经开始向外延伸。适合扩大视野、等待已有计划产生回报，并为下一阶段预留空间。",
+        "advice": "继续推进已经验证有效的方向，同时关注远方的新机会。"
+      },
+      "reversed": {
+        "keywords": [
+          "延误",
+          "障碍",
+          "缺乏远见",
+          "计划受阻"
+        ],
+        "meaning": "预期中的进展可能延迟，或原有计划低估了外部阻力。",
+        "advice": "重新检查时间表和外部条件，不要把延迟误判为彻底失败。"
+      }
+    },
+    {
+      "id": 4,
+      "key": "minor:wands:04",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "04",
+      "name_zh": "权杖四",
+      "name_en": "FOUR OF WANDS",
+      "character": "Drake",
+      "slug": "04_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/four_of_wands.png",
+      "upright": {
+        "keywords": [
+          "庆祝",
+          "稳定",
+          "归属",
+          "阶段成果"
+        ],
+        "meaning": "一个阶段已经达到相对稳定的节点，适合确认成果、庆祝进展并巩固支持你的关系和环境。",
+        "advice": "先把已有成果稳住，再考虑下一轮扩张。"
+      },
+      "reversed": {
+        "keywords": [
+          "不稳定",
+          "关系紧张",
+          "过渡",
+          "缺乏归属"
+        ],
+        "meaning": "表面上的稳定可能并不牢固，团队、家庭或环境中仍有尚未处理的摩擦。",
+        "advice": "先修复基础关系与结构，不要急着用庆祝掩盖问题。"
+      }
+    },
+    {
+      "id": 5,
+      "key": "minor:wands:05",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "05",
+      "name_zh": "权杖五",
+      "name_en": "FIVE OF WANDS",
+      "character": "Drake",
+      "slug": "05_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/five_of_wands.png",
+      "upright": {
+        "keywords": [
+          "竞争",
+          "冲突",
+          "摩擦",
+          "试炼"
+        ],
+        "meaning": "不同目标和意见正在碰撞。冲突未必是坏事，它可以暴露真实差异并迫使各方提升能力。",
+        "advice": "把竞争变成明确规则下的较量，避免无意义内耗。"
+      },
+      "reversed": {
+        "keywords": [
+          "回避冲突",
+          "内在冲突",
+          "缓和",
+          "积怨"
+        ],
+        "meaning": "冲突可能被压下去但没有真正解决，或你正在自己内部反复拉扯。",
+        "advice": "区分值得解决的分歧和可以放下的小摩擦，主动谈清核心问题。"
+      }
+    },
+    {
+      "id": 6,
+      "key": "minor:wands:06",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "06",
+      "name_zh": "权杖六",
+      "name_en": "SIX OF WANDS",
+      "character": "Drake",
+      "slug": "06_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/six_of_wands.png",
+      "upright": {
+        "keywords": [
+          "胜利",
+          "认可",
+          "信心",
+          "进展"
+        ],
+        "meaning": "努力得到看见，阶段成果获得认可。现在可以借助信心和外部支持继续推进。",
+        "advice": "接受成果与肯定，但不要把一次胜利当成永久优势。"
+      },
+      "reversed": {
+        "keywords": [
+          "缺乏认可",
+          "自我怀疑",
+          "失利",
+          "骄傲受挫"
+        ],
+        "meaning": "结果可能没有得到预期认可，或你过度依赖他人的掌声来判断自己的价值。",
+        "advice": "把注意力拉回实际成果，确认什么是真正可持续的能力。"
+      }
+    },
+    {
+      "id": 7,
+      "key": "minor:wands:07",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "07",
+      "name_zh": "权杖七",
+      "name_en": "SEVEN OF WANDS",
+      "character": "Drake",
+      "slug": "07_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/seven_of_wands.png",
+      "upright": {
+        "keywords": [
+          "防守",
+          "坚持",
+          "立场",
+          "韧性"
+        ],
+        "meaning": "你已经占据一个位置，现在需要守住它。外部压力会增加，但主动防守比被动退让更有效。",
+        "advice": "明确底线，集中力量守住真正重要的部分。"
+      },
+      "reversed": {
+        "keywords": [
+          "压力过大",
+          "防御过度",
+          "疲惫",
+          "放弃"
+        ],
+        "meaning": "持续防守让你感到疲惫，或者你把所有反馈都当成攻击。",
+        "advice": "重新判断哪些战线值得守，必要时主动放弃低价值消耗。"
+      }
+    },
+    {
+      "id": 8,
+      "key": "minor:wands:08",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "08",
+      "name_zh": "权杖八",
+      "name_en": "EIGHT OF WANDS",
+      "character": "Drake",
+      "slug": "08_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/eight_of_wands.png",
+      "upright": {
+        "keywords": [
+          "速度",
+          "消息",
+          "推进",
+          "变化"
+        ],
+        "meaning": "事情进入快速推进期，信息、机会或行动可能接连到来。此时效率和响应速度很重要。",
+        "advice": "减少不必要的审批和犹豫，让已经明确的事项快速落地。"
+      },
+      "reversed": {
+        "keywords": [
+          "延迟",
+          "混乱",
+          "误传",
+          "节奏失控"
+        ],
+        "meaning": "本应快速推进的事情出现延迟、沟通错位或方向混乱。",
+        "advice": "先统一信息和优先级，再恢复速度。"
+      }
+    },
+    {
+      "id": 9,
+      "key": "minor:wands:09",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "09",
+      "name_zh": "权杖九",
+      "name_en": "NINE OF WANDS",
+      "character": "Drake",
+      "slug": "09_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/nine_of_wands.png",
+      "upright": {
+        "keywords": [
+          "韧性",
+          "警戒",
+          "坚持",
+          "边界"
+        ],
+        "meaning": "你已经经历不少消耗，但距离目标并不远。经验让你更谨慎，也提醒你保护自己的边界。",
+        "advice": "保留必要防线，同时给自己恢复空间。"
+      },
+      "reversed": {
+        "keywords": [
+          "疲惫",
+          "戒备过度",
+          "固执",
+          "接近耗尽"
+        ],
+        "meaning": "长期紧绷正在消耗判断力，你可能因为过去的伤害而对一切保持过度防御。",
+        "advice": "减少不必要的警戒，优先恢复体力和注意力。"
+      }
+    },
+    {
+      "id": 10,
+      "key": "minor:wands:10",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "10",
+      "name_zh": "权杖十",
+      "name_en": "TEN OF WANDS",
+      "character": "Drake",
+      "slug": "10_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/ten_of_wands.png",
+      "upright": {
+        "keywords": [
+          "负担",
+          "责任",
+          "过载",
+          "完成前压力"
+        ],
+        "meaning": "你承担了太多责任，虽然目标接近完成，但继续独自扛下所有事情会显著增加消耗。",
+        "advice": "区分必须亲自完成的任务和可以委托的任务。"
+      },
+      "reversed": {
+        "keywords": [
+          "卸下负担",
+          "倦怠",
+          "失控",
+          "拒绝求助"
+        ],
+        "meaning": "负担已经超过可持续范围，或者你明知需要放手却仍不愿分担。",
+        "advice": "主动削减任务、委托责任，避免在最后阶段彻底耗尽。"
+      }
+    },
+    {
+      "id": 11,
+      "key": "minor:wands:page",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "page",
+      "name_zh": "权杖侍从",
+      "name_en": "PAGE OF WANDS",
+      "character": "拉普拉斯",
+      "slug": "page_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/page_of_wands.png",
+      "upright": {
+        "keywords": [
+          "探索",
+          "热情",
+          "消息",
+          "新尝试"
+        ],
+        "meaning": "新的兴趣、消息或冒险邀请正在出现。重点是保持好奇，并允许自己从不熟练开始。",
+        "advice": "用小规模试验把热情变成经验。"
+      },
+      "reversed": {
+        "keywords": [
+          "缺乏方向",
+          "拖延",
+          "幼稚",
+          "热情消退"
+        ],
+        "meaning": "兴趣很多但缺乏持续行动，或者过于追求刺激而忽略现实条件。",
+        "advice": "选一个方向持续做一段时间，不要只停留在兴奋阶段。"
+      }
+    },
+    {
+      "id": 12,
+      "key": "minor:wands:knight",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "knight",
+      "name_zh": "权杖骑士",
+      "name_en": "KNIGHT OF WANDS",
+      "character": "舒格",
+      "slug": "knight_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/knight_of_wands.png",
+      "upright": {
+        "keywords": [
+          "行动",
+          "冒险",
+          "激情",
+          "冲锋"
+        ],
+        "meaning": "强烈的行动欲推动事情快速前进。勇气是优势，但速度需要方向。",
+        "advice": "快速行动，但给关键决定保留一次检查。"
+      },
+      "reversed": {
+        "keywords": [
+          "冲动",
+          "鲁莽",
+          "急躁",
+          "延误"
+        ],
+        "meaning": "过强的冲动可能造成返工、冲突或方向偏离。",
+        "advice": "先减速确认目标，再恢复推进。"
+      }
+    },
+    {
+      "id": 13,
+      "key": "minor:wands:queen",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "queen",
+      "name_zh": "权杖皇后",
+      "name_en": "QUEEN OF WANDS",
+      "character": "Volume",
+      "slug": "queen_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/queen_of_wands.png",
+      "upright": {
+        "keywords": [
+          "自信",
+          "魅力",
+          "独立",
+          "热情"
+        ],
+        "meaning": "你能够自然地表达热情并影响周围的人。真正的吸引力来自稳定自信，而不是证明自己。",
+        "advice": "相信自己的判断，并给别人留下发挥空间。"
+      },
+      "reversed": {
+        "keywords": [
+          "嫉妒",
+          "不安",
+          "自我中心",
+          "情绪化"
+        ],
+        "meaning": "自信可能被比较、嫉妒或外部评价动摇。",
+        "advice": "减少比较，把注意力放回自己的节奏与优势。"
+      }
+    },
+    {
+      "id": 14,
+      "key": "minor:wands:king",
+      "arcana": "minor",
+      "suit": "wands",
+      "rank": "king",
+      "name_zh": "权杖国王",
+      "name_en": "KING OF WANDS",
+      "character": "Red Hood",
+      "slug": "king_of_wands",
+      "image": "assets/tarot/minor_arcana/wands/king_of_wands.png",
+      "upright": {
+        "keywords": [
+          "领导",
+          "愿景",
+          "果断",
+          "创造力"
+        ],
+        "meaning": "你有能力把热情转化成方向，并带动别人共同推进。现在需要的是长期视野而非短期兴奋。",
+        "advice": "明确愿景、授权他人，并对最终方向负责。"
+      },
+      "reversed": {
+        "keywords": [
+          "专断",
+          "冲动",
+          "不切实际",
+          "控制欲"
+        ],
+        "meaning": "领导力可能变成强推，或愿景缺乏现实支撑。",
+        "advice": "让计划接受现实检验，并认真听取不同意见。"
+      }
+    },
+    {
+      "id": 1,
+      "key": "minor:cups:ace",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "ace",
+      "name_zh": "圣杯首牌",
+      "name_en": "ACE OF CUPS",
+      "character": "Mary",
+      "slug": "ace_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/ace_of_cups.png",
+      "upright": {
+        "keywords": [
+          "爱",
+          "情感开始",
+          "直觉",
+          "疗愈"
+        ],
+        "meaning": "新的情感流动正在出现，可能是关系、创作、理解或自我接纳的开始。",
+        "advice": "允许自己真实感受，并用行动回应重要的情感。"
+      },
+      "reversed": {
+        "keywords": [
+          "情感堵塞",
+          "空虚",
+          "压抑",
+          "自我封闭"
+        ],
+        "meaning": "感受被压住或难以表达，外表平静但内在可能缺少连接。",
+        "advice": "先承认自己的真实感受，再决定是否以及如何表达。"
+      }
+    },
+    {
+      "id": 2,
+      "key": "minor:cups:02",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "02",
+      "name_zh": "圣杯二",
+      "name_en": "TWO OF CUPS",
+      "character": "Mary",
+      "slug": "02_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/two_of_cups.png",
+      "upright": {
+        "keywords": [
+          "联结",
+          "互信",
+          "合作",
+          "吸引"
+        ],
+        "meaning": "双方之间存在真实的互相理解与回应，适合建立合作、关系或修复连接。",
+        "advice": "保持对等沟通，让承诺建立在真实理解上。"
+      },
+      "reversed": {
+        "keywords": [
+          "失衡",
+          "关系裂痕",
+          "沟通不畅",
+          "价值冲突"
+        ],
+        "meaning": "关系中的给予与回应失去平衡，或双方对同一件事的理解并不一致。",
+        "advice": "把期待和边界说清楚，不要只依赖默契。"
+      }
+    },
+    {
+      "id": 3,
+      "key": "minor:cups:03",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "03",
+      "name_zh": "圣杯三",
+      "name_en": "THREE OF CUPS",
+      "character": "Mary",
+      "slug": "03_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/three_of_cups.png",
+      "upright": {
+        "keywords": [
+          "友谊",
+          "庆祝",
+          "支持",
+          "共同体"
+        ],
+        "meaning": "来自朋友、团队或社群的支持值得被看见。共享成果会增强关系。",
+        "advice": "主动与可信的人分享进展和快乐。"
+      },
+      "reversed": {
+        "keywords": [
+          "过度社交",
+          "八卦",
+          "孤立",
+          "关系失衡"
+        ],
+        "meaning": "群体互动可能变得表面化、过度或带来消耗，也可能感到被排除。",
+        "advice": "减少低质量社交，把精力留给真正互相支持的关系。"
+      }
+    },
+    {
+      "id": 4,
+      "key": "minor:cups:04",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "04",
+      "name_zh": "圣杯四",
+      "name_en": "FOUR OF CUPS",
+      "character": "Mary",
+      "slug": "04_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/four_of_cups.png",
+      "upright": {
+        "keywords": [
+          "内省",
+          "冷淡",
+          "重新评估",
+          "停顿"
+        ],
+        "meaning": "你对眼前机会缺乏兴趣，可能因为疲惫，也可能因为真正需要重新确认自己想要什么。",
+        "advice": "暂时停下来可以，但不要忽略已经出现的新可能。"
+      },
+      "reversed": {
+        "keywords": [
+          "重新投入",
+          "觉察",
+          "机会重现",
+          "退缩"
+        ],
+        "meaning": "你开始重新看见机会，或相反地进一步封闭自己。",
+        "advice": "分辨自己是在恢复兴趣，还是继续逃避外界。"
+      }
+    },
+    {
+      "id": 5,
+      "key": "minor:cups:05",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "05",
+      "name_zh": "圣杯五",
+      "name_en": "FIVE OF CUPS",
+      "character": "Mary",
+      "slug": "05_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/five_of_cups.png",
+      "upright": {
+        "keywords": [
+          "失落",
+          "遗憾",
+          "悲伤",
+          "关注损失"
+        ],
+        "meaning": "注意力集中在已经失去的部分，因此容易忽略仍然保留下来的资源和关系。",
+        "advice": "允许悲伤存在，同时确认还有什么可以继续。"
+      },
+      "reversed": {
+        "keywords": [
+          "接受",
+          "疗愈",
+          "释怀",
+          "重新前进"
+        ],
+        "meaning": "你正在逐步接受损失，并把注意力转向恢复与剩余可能。",
+        "advice": "完成必要的告别，然后把精力投向仍然存在的支持。"
+      }
+    },
+    {
+      "id": 6,
+      "key": "minor:cups:06",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "06",
+      "name_zh": "圣杯六",
+      "name_en": "SIX OF CUPS",
+      "character": "Mary",
+      "slug": "06_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/six_of_cups.png",
+      "upright": {
+        "keywords": [
+          "回忆",
+          "纯真",
+          "过去",
+          "重逢"
+        ],
+        "meaning": "过去的经验、关系或记忆重新出现，带来温暖，也可能提醒你初心。",
+        "advice": "从过去提取有价值的部分，但不要停留在过去。"
+      },
+      "reversed": {
+        "keywords": [
+          "沉溺过去",
+          "不成熟",
+          "脱离现实",
+          "向前走"
+        ],
+        "meaning": "怀旧可能让你理想化过去，或你正努力摆脱旧经验的影响。",
+        "advice": "尊重记忆，但用当前事实决定下一步。"
+      }
+    },
+    {
+      "id": 7,
+      "key": "minor:cups:07",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "07",
+      "name_zh": "圣杯七",
+      "name_en": "SEVEN OF CUPS",
+      "character": "Mary",
+      "slug": "07_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/seven_of_cups.png",
+      "upright": {
+        "keywords": [
+          "选择",
+          "幻想",
+          "诱惑",
+          "可能性"
+        ],
+        "meaning": "选择很多，但并非每个选项都真实可行。想象力很丰富，判断力同样重要。",
+        "advice": "先排除明显不现实的选项，再比较真正可执行的道路。"
+      },
+      "reversed": {
+        "keywords": [
+          "清晰",
+          "选择困难",
+          "幻想破灭",
+          "聚焦"
+        ],
+        "meaning": "迷雾开始散去，或者过多选项已经造成决策疲劳。",
+        "advice": "缩小选择范围，以现实条件和核心价值做判断。"
+      }
+    },
+    {
+      "id": 8,
+      "key": "minor:cups:08",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "08",
+      "name_zh": "圣杯八",
+      "name_en": "EIGHT OF CUPS",
+      "character": "Mary",
+      "slug": "08_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/eight_of_cups.png",
+      "upright": {
+        "keywords": [
+          "离开",
+          "寻找意义",
+          "放下",
+          "转向"
+        ],
+        "meaning": "你意识到现有状态无法继续满足更深层需求，因此需要主动离开熟悉但不再合适的东西。",
+        "advice": "承认离开的成本，同时为真正重要的目标腾出空间。"
+      },
+      "reversed": {
+        "keywords": [
+          "害怕离开",
+          "徘徊",
+          "回避",
+          "没有方向"
+        ],
+        "meaning": "知道需要改变却迟迟无法离开，或不断在同一问题周围徘徊。",
+        "advice": "明确留下与离开的实际代价，停止无限拖延。"
+      }
+    },
+    {
+      "id": 9,
+      "key": "minor:cups:09",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "09",
+      "name_zh": "圣杯九",
+      "name_en": "NINE OF CUPS",
+      "character": "Mary",
+      "slug": "09_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/nine_of_cups.png",
+      "upright": {
+        "keywords": [
+          "满足",
+          "愿望",
+          "享受成果",
+          "自信"
+        ],
+        "meaning": "阶段愿望得到满足，你有理由享受成果并认可自己的努力。",
+        "advice": "享受已有成果，同时保持对长期目标的清醒。"
+      },
+      "reversed": {
+        "keywords": [
+          "不满足",
+          "过度享乐",
+          "空虚",
+          "愿望落空"
+        ],
+        "meaning": "外在条件看似不错，但内在仍感到不足，或把满足寄托在短期享受上。",
+        "advice": "重新确认真正让你感到满足的是什么。"
+      }
+    },
+    {
+      "id": 10,
+      "key": "minor:cups:10",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "10",
+      "name_zh": "圣杯十",
+      "name_en": "TEN OF CUPS",
+      "character": "Mary",
+      "slug": "10_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/ten_of_cups.png",
+      "upright": {
+        "keywords": [
+          "情感圆满",
+          "家庭",
+          "归属",
+          "和谐"
+        ],
+        "meaning": "关系与环境形成稳定的情感支持网络，适合珍惜共同生活和长期连接。",
+        "advice": "维护已经建立的信任，不把和谐视为理所当然。"
+      },
+      "reversed": {
+        "keywords": [
+          "关系失和",
+          "理想破裂",
+          "家庭矛盾",
+          "期待过高"
+        ],
+        "meaning": "理想中的和谐与现实出现落差，关系需要重新沟通和修复。",
+        "advice": "放下完美想象，处理具体分歧与真实需要。"
+      }
+    },
+    {
+      "id": 11,
+      "key": "minor:cups:page",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "page",
+      "name_zh": "圣杯侍从",
+      "name_en": "PAGE OF CUPS",
+      "character": "N102 / 安妮",
+      "slug": "page_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/page_of_cups.png",
+      "upright": {
+        "keywords": [
+          "敏感",
+          "直觉消息",
+          "好奇",
+          "情感萌芽"
+        ],
+        "meaning": "新的感受、创作灵感或情感消息正在出现，适合保持柔软和好奇。",
+        "advice": "认真对待细小但真实的情感信号。"
+      },
+      "reversed": {
+        "keywords": [
+          "情绪幼稚",
+          "不安",
+          "逃避",
+          "创意受阻"
+        ],
+        "meaning": "感受很多但缺乏成熟表达，容易把幻想当成事实。",
+        "advice": "先稳定情绪，再决定如何表达或行动。"
+      }
+    },
+    {
+      "id": 12,
+      "key": "minor:cups:knight",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "knight",
+      "name_zh": "圣杯骑士",
+      "name_en": "KNIGHT OF CUPS",
+      "character": "布兰儿",
+      "slug": "knight_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/knight_of_cups.png",
+      "upright": {
+        "keywords": [
+          "浪漫",
+          "邀请",
+          "理想",
+          "情感表达"
+        ],
+        "meaning": "你愿意主动表达感受、追求理想或向某段关系靠近。",
+        "advice": "用真诚行动表达情感，不只停留在想象。"
+      },
+      "reversed": {
+        "keywords": [
+          "情绪化",
+          "不切实际",
+          "嫉妒",
+          "承诺不稳"
+        ],
+        "meaning": "理想化或情绪波动可能让行动失去稳定性。",
+        "advice": "检查承诺是否现实，不要用浪漫包装逃避。"
+      }
+    },
+    {
+      "id": 13,
+      "key": "minor:cups:queen",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "queen",
+      "name_zh": "圣杯皇后",
+      "name_en": "QUEEN OF CUPS",
+      "character": "艾玛",
+      "slug": "queen_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/queen_of_cups.png",
+      "upright": {
+        "keywords": [
+          "共情",
+          "直觉",
+          "关怀",
+          "情绪成熟"
+        ],
+        "meaning": "你能够理解自己和他人的感受，并以温和但稳定的方式回应。",
+        "advice": "保持同理心，同时保留清楚的个人边界。"
+      },
+      "reversed": {
+        "keywords": [
+          "依赖",
+          "自我忽视",
+          "情绪不稳",
+          "边界模糊"
+        ],
+        "meaning": "过度吸收他人的情绪可能导致自我消耗。",
+        "advice": "把关怀的一部分重新留给自己。"
+      }
+    },
+    {
+      "id": 14,
+      "key": "minor:cups:king",
+      "arcana": "minor",
+      "suit": "cups",
+      "rank": "king",
+      "name_zh": "圣杯国王",
+      "name_en": "KING OF CUPS",
+      "character": "露德米拉",
+      "slug": "king_of_cups",
+      "image": "assets/tarot/minor_arcana/cups/king_of_cups.png",
+      "upright": {
+        "keywords": [
+          "情绪平衡",
+          "成熟",
+          "外交",
+          "包容"
+        ],
+        "meaning": "你能够在复杂情绪中保持稳定，并用成熟方式处理关系和冲突。",
+        "advice": "先稳定情绪，再做重要沟通和决定。"
+      },
+      "reversed": {
+        "keywords": [
+          "情绪操控",
+          "冷漠",
+          "压抑",
+          "反复无常"
+        ],
+        "meaning": "表面的冷静可能变成压抑或控制，也可能利用情绪影响他人。",
+        "advice": "诚实面对情绪，不用沉默或操控替代沟通。"
+      }
+    },
+    {
+      "id": 1,
+      "key": "minor:swords:ace",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "ace",
+      "name_zh": "宝剑首牌",
+      "name_en": "ACE OF SWORDS",
+      "character": "Exia",
+      "slug": "ace_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/ace_of_swords.png",
+      "upright": {
+        "keywords": [
+          "真相",
+          "清晰",
+          "突破",
+          "判断"
+        ],
+        "meaning": "新的理解或事实让局面变得清楚。适合切开混乱，直接面对核心问题。",
+        "advice": "依据事实做决定，并把复杂问题简化到关键矛盾。"
+      },
+      "reversed": {
+        "keywords": [
+          "混乱",
+          "误判",
+          "信息错误",
+          "沟通不清"
+        ],
+        "meaning": "信息不足或判断受到偏见影响，贸然下结论容易造成错误。",
+        "advice": "重新核查证据和定义，暂缓不可逆决定。"
+      }
+    },
+    {
+      "id": 2,
+      "key": "minor:swords:02",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "02",
+      "name_zh": "宝剑二",
+      "name_en": "TWO OF SWORDS",
+      "character": "Exia",
+      "slug": "02_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/two_of_swords.png",
+      "upright": {
+        "keywords": [
+          "僵局",
+          "抉择",
+          "回避",
+          "平衡"
+        ],
+        "meaning": "你面对两个难以兼顾的选择，暂时维持平衡，但拖延不会永久解决问题。",
+        "advice": "补齐最关键的信息，并设定做决定的期限。"
+      },
+      "reversed": {
+        "keywords": [
+          "优柔寡断",
+          "信息过载",
+          "压力",
+          "真相逼近"
+        ],
+        "meaning": "原本维持的僵局正在变得难以继续，过多信息反而使判断更困难。",
+        "advice": "减少噪音，明确不可妥协的标准。"
+      }
+    },
+    {
+      "id": 3,
+      "key": "minor:swords:03",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "03",
+      "name_zh": "宝剑三",
+      "name_en": "THREE OF SWORDS",
+      "character": "Exia",
+      "slug": "03_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/three_of_swords.png",
+      "upright": {
+        "keywords": [
+          "心痛",
+          "分离",
+          "悲伤",
+          "真相刺痛"
+        ],
+        "meaning": "某个事实或关系带来真实的伤痛。承认痛苦比假装无事发生更有助于恢复。",
+        "advice": "允许自己处理情绪，同时避免把一次伤害扩大成永久结论。"
+      },
+      "reversed": {
+        "keywords": [
+          "疗愈",
+          "释怀",
+          "恢复",
+          "旧伤"
+        ],
+        "meaning": "伤痛正在缓解，或旧问题再次被触发以便真正处理。",
+        "advice": "给恢复时间，并完成必要的沟通或告别。"
+      }
+    },
+    {
+      "id": 4,
+      "key": "minor:swords:04",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "04",
+      "name_zh": "宝剑四",
+      "name_en": "FOUR OF SWORDS",
+      "character": "Exia",
+      "slug": "04_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/four_of_swords.png",
+      "upright": {
+        "keywords": [
+          "休息",
+          "恢复",
+          "暂停",
+          "沉思"
+        ],
+        "meaning": "持续用脑和冲突之后，需要主动休息，让判断力恢复。",
+        "advice": "暂停非必要行动，先恢复睡眠、注意力和思考空间。"
+      },
+      "reversed": {
+        "keywords": [
+          "倦怠",
+          "坐立不安",
+          "过早复出",
+          "停滞"
+        ],
+        "meaning": "你可能休息不足就重新投入，或休息过久变成逃避。",
+        "advice": "根据真实精力调整节奏，不要用意志硬顶。"
+      }
+    },
+    {
+      "id": 5,
+      "key": "minor:swords:05",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "05",
+      "name_zh": "宝剑五",
+      "name_en": "FIVE OF SWORDS",
+      "character": "Exia",
+      "slug": "05_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/five_of_swords.png",
+      "upright": {
+        "keywords": [
+          "冲突",
+          "代价高的胜利",
+          "争执",
+          "自利"
+        ],
+        "meaning": "即使赢得争论，也可能损害更重要的关系或长期目标。",
+        "advice": "先问清楚这场胜利值不值得它的代价。"
+      },
+      "reversed": {
+        "keywords": [
+          "和解",
+          "余怨",
+          "结束争斗",
+          "自责"
+        ],
+        "meaning": "冲突有机会结束，但残留的不信任仍需要处理。",
+        "advice": "承认自己应承担的部分，避免继续翻旧账。"
+      }
+    },
+    {
+      "id": 6,
+      "key": "minor:swords:06",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "06",
+      "name_zh": "宝剑六",
+      "name_en": "SIX OF SWORDS",
+      "character": "Exia",
+      "slug": "06_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/six_of_swords.png",
+      "upright": {
+        "keywords": [
+          "过渡",
+          "离开困境",
+          "恢复",
+          "迁移"
+        ],
+        "meaning": "最困难的阶段正在过去，但过程可能仍然安静而缓慢。",
+        "advice": "继续向更稳定的环境移动，不必要求立刻恢复到最佳状态。"
+      },
+      "reversed": {
+        "keywords": [
+          "抗拒改变",
+          "停滞",
+          "旧包袱",
+          "难以离开"
+        ],
+        "meaning": "你想前进，但过去的问题仍被带在身上，或环境变化受到阻碍。",
+        "advice": "处理真正阻碍迁移的现实问题，而不是反复回顾。"
+      }
+    },
+    {
+      "id": 7,
+      "key": "minor:swords:07",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "07",
+      "name_zh": "宝剑七",
+      "name_en": "SEVEN OF SWORDS",
+      "character": "Exia",
+      "slug": "07_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/seven_of_swords.png",
+      "upright": {
+        "keywords": [
+          "策略",
+          "隐瞒",
+          "独立行动",
+          "机智"
+        ],
+        "meaning": "当前需要策略和信息优势，但也要留意隐瞒与不诚实的边界。",
+        "advice": "使用策略而不是蛮力，同时确认手段是否符合长期利益。"
+      },
+      "reversed": {
+        "keywords": [
+          "暴露",
+          "自欺",
+          "坦白",
+          "策略失败"
+        ],
+        "meaning": "隐藏的信息可能被发现，或你开始意识到自己也在回避事实。",
+        "advice": "尽早修正策略，必要时选择坦白。"
+      }
+    },
+    {
+      "id": 8,
+      "key": "minor:swords:08",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "08",
+      "name_zh": "宝剑八",
+      "name_en": "EIGHT OF SWORDS",
+      "character": "Exia",
+      "slug": "08_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/eight_of_swords.png",
+      "upright": {
+        "keywords": [
+          "束缚",
+          "自限",
+          "无力感",
+          "困境"
+        ],
+        "meaning": "你感觉选择很少，但部分限制来自对风险的想象或旧信念。",
+        "advice": "逐条区分真实限制与自我设限，从最小可行动空间开始。"
+      },
+      "reversed": {
+        "keywords": [
+          "解脱",
+          "新视角",
+          "重获力量",
+          "松绑"
+        ],
+        "meaning": "你开始发现并非完全无路可走，新的理解带来行动空间。",
+        "advice": "利用刚出现的自由做一个具体改变。"
+      }
+    },
+    {
+      "id": 9,
+      "key": "minor:swords:09",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "09",
+      "name_zh": "宝剑九",
+      "name_en": "NINE OF SWORDS",
+      "character": "Exia",
+      "slug": "09_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/nine_of_swords.png",
+      "upright": {
+        "keywords": [
+          "焦虑",
+          "噩梦",
+          "担忧",
+          "精神压力"
+        ],
+        "meaning": "担忧在夜晚或独处时被放大，真实问题与想象后果混在一起。",
+        "advice": "把担忧写成可验证的问题，并优先处理能控制的部分。"
+      },
+      "reversed": {
+        "keywords": [
+          "恢复",
+          "希望",
+          "深层焦虑",
+          "面对恐惧"
+        ],
+        "meaning": "焦虑可能开始缓解，也可能已经累积到必须正视的程度。",
+        "advice": "不要独自循环思考，必要时寻求支持和实际帮助。"
+      }
+    },
+    {
+      "id": 10,
+      "key": "minor:swords:10",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "10",
+      "name_zh": "宝剑十",
+      "name_en": "TEN OF SWORDS",
+      "character": "Exia",
+      "slug": "10_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/ten_of_swords.png",
+      "upright": {
+        "keywords": [
+          "痛苦终结",
+          "最低点",
+          "结束",
+          "不可继续"
+        ],
+        "meaning": "某个过程已经到达极限，继续维持旧状态没有意义。结束虽然痛苦，也意味着最坏阶段正在过去。",
+        "advice": "接受结束，停止继续投入已经无法挽回的部分。"
+      },
+      "reversed": {
+        "keywords": [
+          "恢复",
+          "拒绝结束",
+          "余痛",
+          "重新站起"
+        ],
+        "meaning": "你正在从低谷恢复，或仍试图拖延一个不可避免的结局。",
+        "advice": "把精力用于恢复和重建，而不是反复证明过去本可以不同。"
+      }
+    },
+    {
+      "id": 11,
+      "key": "minor:swords:page",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "page",
+      "name_zh": "宝剑侍从",
+      "name_en": "PAGE OF SWORDS",
+      "character": "诺薇儿",
+      "slug": "page_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/page_of_swords.png",
+      "upright": {
+        "keywords": [
+          "求知",
+          "警觉",
+          "消息",
+          "观察"
+        ],
+        "meaning": "好奇心和敏锐度很强，适合学习、调查和提出问题。",
+        "advice": "多观察、多验证，避免因为兴奋而过早传播结论。"
+      },
+      "reversed": {
+        "keywords": [
+          "流言",
+          "草率",
+          "沟通失误",
+          "注意力分散"
+        ],
+        "meaning": "信息很多但质量不一，容易出现误传或只会质疑却不行动。",
+        "advice": "确认来源，在表达观点前先完成基本核查。"
+      }
+    },
+    {
+      "id": 12,
+      "key": "minor:swords:knight",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "knight",
+      "name_zh": "宝剑骑士",
+      "name_en": "KNIGHT OF SWORDS",
+      "character": "普丽瓦蒂",
+      "slug": "knight_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/knight_of_swords.png",
+      "upright": {
+        "keywords": [
+          "果断",
+          "行动",
+          "野心",
+          "直接"
+        ],
+        "meaning": "思路已经转化成强烈行动力，适合快速突破明确障碍。",
+        "advice": "保持速度，但为关键事实留出检查空间。"
+      },
+      "reversed": {
+        "keywords": [
+          "攻击性",
+          "冲动",
+          "争强",
+          "耗竭"
+        ],
+        "meaning": "行动过快可能忽视后果，理性变成争胜工具。",
+        "advice": "降低攻击性，确认目标是否真的需要正面冲撞。"
+      }
+    },
+    {
+      "id": 13,
+      "key": "minor:swords:queen",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "queen",
+      "name_zh": "宝剑皇后",
+      "name_en": "QUEEN OF SWORDS",
+      "character": "Eunhwa",
+      "slug": "queen_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/queen_of_swords.png",
+      "upright": {
+        "keywords": [
+          "独立",
+          "清晰边界",
+          "客观",
+          "洞察"
+        ],
+        "meaning": "你能够用事实和经验做出清楚判断，也更愿意保护自己的边界。",
+        "advice": "保持坦率，但让清晰不等于冷酷。"
+      },
+      "reversed": {
+        "keywords": [
+          "尖刻",
+          "冷漠",
+          "偏见",
+          "积怨"
+        ],
+        "meaning": "过去的伤害可能让判断变得过度严厉或不信任。",
+        "advice": "区分保护边界和拒绝连接，重新检查自己的假设。"
+      }
+    },
+    {
+      "id": 14,
+      "key": "minor:swords:king",
+      "arcana": "minor",
+      "suit": "swords",
+      "rank": "king",
+      "name_zh": "宝剑国王",
+      "name_en": "KING OF SWORDS",
+      "character": "麦斯威尔",
+      "slug": "king_of_swords",
+      "image": "assets/tarot/minor_arcana/swords/king_of_swords.png",
+      "upright": {
+        "keywords": [
+          "理性权威",
+          "真相",
+          "策略",
+          "判断"
+        ],
+        "meaning": "成熟的分析能力和原则性能够帮助复杂局面获得秩序。",
+        "advice": "用一致标准做决定，并清楚解释理由。"
+      },
+      "reversed": {
+        "keywords": [
+          "滥用权力",
+          "操控",
+          "僵化",
+          "冷酷"
+        ],
+        "meaning": "逻辑和权威可能被用来压制不同意见，或规则凌驾于现实。",
+        "advice": "让决策接受质疑，避免把个人偏好包装成绝对理性。"
+      }
+    },
+    {
+      "id": 1,
+      "key": "minor:pentacles:ace",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "ace",
+      "name_zh": "星币首牌",
+      "name_en": "ACE OF PENTACLES",
+      "character": "Dolla",
+      "slug": "ace_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/ace_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "机会",
+          "资源",
+          "现实起点",
+          "繁荣潜力"
+        ],
+        "meaning": "一个具体可落地的机会出现，可能涉及资源、工作、学习或长期建设。",
+        "advice": "先确认现实条件，然后尽快建立第一项可持续投入。"
+      },
+      "reversed": {
+        "keywords": [
+          "错失机会",
+          "资源不足",
+          "计划不佳",
+          "短视"
+        ],
+        "meaning": "机会可能被忽略，或表面资源并没有稳定基础。",
+        "advice": "重新计算成本与收益，不要只看短期好处。"
+      }
+    },
+    {
+      "id": 2,
+      "key": "minor:pentacles:02",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "02",
+      "name_zh": "星币二",
+      "name_en": "TWO OF PENTACLES",
+      "character": "Dolla",
+      "slug": "02_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/two_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "平衡",
+          "周转",
+          "适应",
+          "多任务"
+        ],
+        "meaning": "你正在同时处理多个现实事项，灵活调整可以维持运转，但长期仍需排序。",
+        "advice": "明确优先级和时间预算，给变化留出缓冲。"
+      },
+      "reversed": {
+        "keywords": [
+          "失衡",
+          "过载",
+          "混乱",
+          "时间管理困难"
+        ],
+        "meaning": "任务和资源超过可控范围，持续救火正在降低整体效率。",
+        "advice": "减少并行事项，先稳定最重要的一条线。"
+      }
+    },
+    {
+      "id": 3,
+      "key": "minor:pentacles:03",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "03",
+      "name_zh": "星币三",
+      "name_en": "THREE OF PENTACLES",
+      "character": "Dolla",
+      "slug": "03_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/three_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "合作",
+          "技能",
+          "建设",
+          "专业认可"
+        ],
+        "meaning": "复杂成果需要不同能力协作。你的技能有机会在团队中被看见和提升。",
+        "advice": "明确分工，重视专业反馈和质量标准。"
+      },
+      "reversed": {
+        "keywords": [
+          "合作不良",
+          "能力不足",
+          "返工",
+          "目标不一致"
+        ],
+        "meaning": "团队缺乏统一标准，或个体能力与任务需求不匹配。",
+        "advice": "先对齐目标和验收标准，再继续投入资源。"
+      }
+    },
+    {
+      "id": 4,
+      "key": "minor:pentacles:04",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "04",
+      "name_zh": "星币四",
+      "name_en": "FOUR OF PENTACLES",
+      "character": "Dolla",
+      "slug": "04_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/four_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "安全",
+          "保有",
+          "控制",
+          "节制开支"
+        ],
+        "meaning": "你正在保护已有资源和成果，这能带来安全感，但过度抓紧也会限制流动。",
+        "advice": "保留必要储备，同时允许合理投资和分享。"
+      },
+      "reversed": {
+        "keywords": [
+          "贪婪",
+          "害怕失去",
+          "释放",
+          "资源失控"
+        ],
+        "meaning": "对失去的恐惧可能导致过度控制，也可能终于开始愿意放松。",
+        "advice": "建立明确安全底线，超过底线的资源才用于扩张。"
+      }
+    },
+    {
+      "id": 5,
+      "key": "minor:pentacles:05",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "05",
+      "name_zh": "星币五",
+      "name_en": "FIVE OF PENTACLES",
+      "character": "Dolla",
+      "slug": "05_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/five_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "匮乏",
+          "困难",
+          "孤立",
+          "现实压力"
+        ],
+        "meaning": "资源或支持不足带来明显压力，但帮助可能比你以为的更接近。",
+        "advice": "先处理基本需求，并主动寻找可用支持。"
+      },
+      "reversed": {
+        "keywords": [
+          "恢复",
+          "援助",
+          "改善",
+          "重建安全感"
+        ],
+        "meaning": "困难开始缓解，外部帮助或新的稳定来源正在出现。",
+        "advice": "把短期援助转化成长期恢复计划。"
+      }
+    },
+    {
+      "id": 6,
+      "key": "minor:pentacles:06",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "06",
+      "name_zh": "星币六",
+      "name_en": "SIX OF PENTACLES",
+      "character": "Dolla",
+      "slug": "06_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/six_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "给予",
+          "公平交换",
+          "资源分配",
+          "支持"
+        ],
+        "meaning": "资源正在流动，关键是分配是否公平、可持续且不制造新的依赖。",
+        "advice": "明确给予与接受的边界，让交换尽量透明。"
+      },
+      "reversed": {
+        "keywords": [
+          "附加条件",
+          "债务",
+          "不平等",
+          "资源控制"
+        ],
+        "meaning": "给予可能带着控制条件，或资源关系长期失衡。",
+        "advice": "检查权力差异，避免用帮助换取不合理服从。"
+      }
+    },
+    {
+      "id": 7,
+      "key": "minor:pentacles:07",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "07",
+      "name_zh": "星币七",
+      "name_en": "SEVEN OF PENTACLES",
+      "character": "Dolla",
+      "slug": "07_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/seven_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "耐心",
+          "投入评估",
+          "等待成果",
+          "长期视角"
+        ],
+        "meaning": "投入已经持续一段时间，现在适合评估成果和剩余潜力，而不是只因等待而继续投入。",
+        "advice": "比较继续投入与调整方向的长期回报。"
+      },
+      "reversed": {
+        "keywords": [
+          "回报不足",
+          "急躁",
+          "浪费投入",
+          "短期主义"
+        ],
+        "meaning": "你对进展不满，可能因为回报确实不足，也可能是时间尺度预期错误。",
+        "advice": "用数据重新评估，不要被沉没成本绑住。"
+      }
+    },
+    {
+      "id": 8,
+      "key": "minor:pentacles:08",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "08",
+      "name_zh": "星币八",
+      "name_en": "EIGHT OF PENTACLES",
+      "character": "Dolla",
+      "slug": "08_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/eight_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "勤奋",
+          "技能",
+          "工艺",
+          "持续练习"
+        ],
+        "meaning": "重复练习和质量意识正在形成可靠能力。进步来自稳定积累而非一次灵感。",
+        "advice": "继续刻意练习，并针对反馈改进细节。"
+      },
+      "reversed": {
+        "keywords": [
+          "敷衍",
+          "完美主义",
+          "重复无成长",
+          "质量下降"
+        ],
+        "meaning": "重复工作可能失去学习价值，或你陷入过度追求完美。",
+        "advice": "重新设定技能目标，让每轮练习都有具体改进点。"
+      }
+    },
+    {
+      "id": 9,
+      "key": "minor:pentacles:09",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "09",
+      "name_zh": "星币九",
+      "name_en": "NINE OF PENTACLES",
+      "character": "Dolla",
+      "slug": "09_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/nine_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "独立",
+          "富足",
+          "自给自足",
+          "成果享受"
+        ],
+        "meaning": "长期努力带来更高自主性，你可以在不依赖他人认可的情况下享受成果。",
+        "advice": "维护已经建立的独立能力，并适度享受成果。"
+      },
+      "reversed": {
+        "keywords": [
+          "依赖",
+          "过度工作",
+          "财务波动",
+          "表面富足"
+        ],
+        "meaning": "外表稳定但实际依赖某个单一来源，或为了维持成果付出过高代价。",
+        "advice": "检查真实成本和依赖关系，强化长期安全垫。"
+      }
+    },
+    {
+      "id": 10,
+      "key": "minor:pentacles:10",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "10",
+      "name_zh": "星币十",
+      "name_en": "TEN OF PENTACLES",
+      "character": "Dolla",
+      "slug": "10_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/ten_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "长期稳定",
+          "传承",
+          "体系",
+          "积累成果"
+        ],
+        "meaning": "个人成果开始进入更长期的结构，涉及家庭、团队、制度或可持续资产。",
+        "advice": "把短期成功转化成可传承、可维护的系统。"
+      },
+      "reversed": {
+        "keywords": [
+          "基础不稳",
+          "长期规划缺失",
+          "关系与资源冲突",
+          "短期主义"
+        ],
+        "meaning": "看似完整的体系存在结构性问题，或只重眼前利益忽视长期维护。",
+        "advice": "检查规则、继承与风险分配，优先修补基础。"
+      }
+    },
+    {
+      "id": 11,
+      "key": "minor:pentacles:page",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "page",
+      "name_zh": "星币侍从",
+      "name_en": "PAGE OF PENTACLES",
+      "character": "特罗尼",
+      "slug": "page_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/page_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "学习",
+          "现实机会",
+          "专注",
+          "技能起点"
+        ],
+        "meaning": "一个值得认真学习和投入的现实机会出现，成长来自持续实践。",
+        "advice": "制定具体学习计划，并尽快做出第一个成果。"
+      },
+      "reversed": {
+        "keywords": [
+          "拖延",
+          "缺乏进展",
+          "学习方法不佳",
+          "目标不实"
+        ],
+        "meaning": "想法停留在计划层面，或努力没有形成有效技能积累。",
+        "advice": "缩小目标，用可量化成果检验学习方法。"
+      }
+    },
+    {
+      "id": 12,
+      "key": "minor:pentacles:knight",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "knight",
+      "name_zh": "星币骑士",
+      "name_en": "KNIGHT OF PENTACLES",
+      "character": "Centi",
+      "slug": "knight_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/knight_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "可靠",
+          "勤勉",
+          "例行",
+          "坚持"
+        ],
+        "meaning": "稳定执行比快速变化更重要。你能够通过重复、责任感和耐心获得长期结果。",
+        "advice": "保持节奏，按计划完成承诺。"
+      },
+      "reversed": {
+        "keywords": [
+          "停滞",
+          "无聊",
+          "工作过度",
+          "固执"
+        ],
+        "meaning": "稳定可能变成机械重复，或你只会工作却不再评估方向。",
+        "advice": "保留可靠流程，同时定期检查它是否仍然有效。"
+      }
+    },
+    {
+      "id": 13,
+      "key": "minor:pentacles:queen",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "queen",
+      "name_zh": "星币皇后",
+      "name_en": "QUEEN OF PENTACLES",
+      "character": "卢菲",
+      "slug": "queen_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/queen_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "务实关怀",
+          "资源管理",
+          "富足",
+          "稳定"
+        ],
+        "meaning": "你能够把照顾、资源和现实安排结合起来，让环境变得更稳定舒适。",
+        "advice": "照顾他人时也维护自己的资源和边界。"
+      },
+      "reversed": {
+        "keywords": [
+          "自我忽视",
+          "物质焦虑",
+          "失衡",
+          "过度照顾"
+        ],
+        "meaning": "现实压力可能让你忽略自己，或把安全感完全绑定在物质控制上。",
+        "advice": "先恢复自己的基础资源，再承担额外照顾责任。"
+      }
+    },
+    {
+      "id": 14,
+      "key": "minor:pentacles:king",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "rank": "king",
+      "name_zh": "星币国王",
+      "name_en": "KING OF PENTACLES",
+      "character": "丽塔",
+      "slug": "king_of_pentacles",
+      "image": "assets/tarot/minor_arcana/pentacles/king_of_pentacles.png",
+      "upright": {
+        "keywords": [
+          "资源掌控",
+          "长期成功",
+          "管理",
+          "稳定"
+        ],
+        "meaning": "长期经验让你能够管理复杂资源并建立可持续成果。",
+        "advice": "以长期价值和稳健原则管理资源，不追逐短期波动。"
+      },
+      "reversed": {
+        "keywords": [
+          "贪婪",
+          "物质主义",
+          "固执",
+          "资源滥用"
+        ],
+        "meaning": "对成果和控制的执着可能让你忽视人的价值或环境变化。",
+        "advice": "重新评估什么值得守住，避免让资产反过来控制选择。"
+      }
+    }
+  ]
+}

@@ -1,0 +1,5456 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-15T04:45:02.153607+00:00",
+  "total_characters": 200,
+  "total_costumes": 178,
+  "characters": {
+    "18": {
+      "character_id": "101801",
+      "resource_id": "18",
+      "name_cn": "尼恩：透视之眼",
+      "name_en": "Neon: Vision Eye",
+      "default": {
+        "spine_asset_id": "c018",
+        "icon": "data/nikke/blabla-assets/character/si/si_c018_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "80": {
+      "character_id": "108001",
+      "resource_id": "80",
+      "name_cn": "桑迪",
+      "name_en": "Centi",
+      "default": {
+        "spine_asset_id": "c080",
+        "icon": "data/nikke/blabla-assets/character/si/si_c080_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c080_00.png",
+        "spine": {
+          "skeleton": "spine/c080/c080_00.skel",
+          "atlas": "spine/c080/c080_00.atlas",
+          "textures": [
+            "spine/c080/c080_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10012": {
+          "costume_id": "10012",
+          "costume_name": "Costume",
+          "spine_asset_id": "c080_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c080_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30012": {
+          "costume_id": "30012",
+          "costume_name": "Supreme Holiday",
+          "spine_asset_id": "c080_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c080_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c080_01/c080_01_00.skel",
+            "atlas": "spine/c080_01/c080_01_00.atlas",
+            "textures": [
+              "spine/c080_01/c080_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "82": {
+      "character_id": "108201",
+      "resource_id": "82",
+      "name_cn": "丽塔",
+      "name_en": "Liter",
+      "default": {
+        "spine_asset_id": "c082",
+        "icon": "data/nikke/blabla-assets/character/si/si_c082_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c082_00.png",
+        "spine": {
+          "skeleton": "spine/c082/c082_00.skel",
+          "atlas": "spine/c082/c082_00.atlas",
+          "textures": [
+            "spine/c082/c082_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10001": {
+          "costume_id": "10001",
+          "costume_name": "Guardfish",
+          "spine_asset_id": "c082_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c082_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c082_01/c082_01_00.skel",
+            "atlas": "spine/c082_01/c082_01_00.atlas",
+            "textures": [
+              "spine/c082_01/c082_01_00.png"
+            ]
+          }
+        },
+        "50008": {
+          "costume_id": "50008",
+          "costume_name": "Costume",
+          "spine_asset_id": "c082_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c082_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "100": {
+      "character_id": "110001",
+      "resource_id": "100",
+      "name_cn": "拉普拉斯",
+      "name_en": "Laplace",
+      "default": {
+        "spine_asset_id": "c100",
+        "icon": "data/nikke/blabla-assets/character/si/si_c100_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c100_00.png",
+        "spine": {
+          "skeleton": "spine/c100/c100_00.skel",
+          "atlas": "spine/c100/c100_00.atlas",
+          "textures": [
+            "spine/c100/c100_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "101": {
+      "character_id": "110101",
+      "resource_id": "101",
+      "name_cn": "德雷克",
+      "name_en": "Drake",
+      "default": {
+        "spine_asset_id": "c101",
+        "icon": "data/nikke/blabla-assets/character/si/si_c101_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c101_00.png",
+        "spine": {
+          "skeleton": "spine/c101/c101_00.skel",
+          "atlas": "spine/c101/c101_00.atlas",
+          "textures": [
+            "spine/c101/c101_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "60002": {
+          "costume_id": "60002",
+          "costume_name": "Costume",
+          "spine_asset_id": "c101_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c101_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "80001": {
+          "costume_id": "80001",
+          "costume_name": "Villain Racer",
+          "spine_asset_id": "c101_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c101_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c101_01/c101_01_00.skel",
+            "atlas": "spine/c101_01/c101_01_00.atlas",
+            "textures": [
+              "spine/c101_01/c101_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "102": {
+      "character_id": "110201",
+      "resource_id": "102",
+      "name_cn": "麦斯威尔",
+      "name_en": "Maxwell",
+      "default": {
+        "spine_asset_id": "c102",
+        "icon": "data/nikke/blabla-assets/character/si/si_c102_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c102_00.png",
+        "spine": {
+          "skeleton": "spine/c102/c102_00.skel",
+          "atlas": "spine/c102/c102_00.atlas",
+          "textures": [
+            "spine/c102/c102_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30004": {
+          "costume_id": "30004",
+          "costume_name": "Mechanic White",
+          "spine_asset_id": "c102_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c102_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c102_01/c102_01_00.skel",
+            "atlas": "spine/c102_01/c102_01_00.atlas",
+            "textures": [
+              "spine/c102_01/c102_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "103": {
+      "character_id": "110301",
+      "resource_id": "103",
+      "name_cn": "拉普拉斯：究极英雄",
+      "name_en": "Laplace: Ultimate Hero",
+      "default": {
+        "spine_asset_id": "c103",
+        "icon": "data/nikke/blabla-assets/character/si/si_c103_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30069": {
+          "costume_id": "30069",
+          "costume_name": "Costume",
+          "spine_asset_id": "c103_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c103_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "104": {
+      "character_id": "110401",
+      "resource_id": "104",
+      "name_cn": "德雷克：终极反派",
+      "name_en": "Drake: Great Villain",
+      "default": {
+        "spine_asset_id": "c104",
+        "icon": "data/nikke/blabla-assets/character/si/si_c104_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "105": {
+      "character_id": "110501",
+      "resource_id": "105",
+      "name_cn": "麦斯威尔：平凡技师",
+      "name_en": "Maxwell: Ordinary Mechanic",
+      "default": {
+        "spine_asset_id": "c105",
+        "icon": "data/nikke/blabla-assets/character/si/si_c105_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30070": {
+          "costume_id": "30070",
+          "costume_name": "Costume",
+          "spine_asset_id": "c105_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c105_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "110": {
+      "character_id": "111001",
+      "resource_id": "110",
+      "name_cn": "克拉乌",
+      "name_en": "Crow",
+      "default": {
+        "spine_asset_id": "c110",
+        "icon": "data/nikke/blabla-assets/character/si/si_c110_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c110_00.png",
+        "spine": {
+          "skeleton": "spine/c110/c110_00.skel",
+          "atlas": "spine/c110/c110_00.atlas",
+          "textures": [
+            "spine/c110/c110_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "111": {
+      "character_id": "111101",
+      "resource_id": "111",
+      "name_cn": "豺狼",
+      "name_en": "Jackal",
+      "default": {
+        "spine_asset_id": "c111",
+        "icon": "data/nikke/blabla-assets/character/si/si_c111_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c111_00.png",
+        "spine": {
+          "skeleton": "spine/c111/c111_00.skel",
+          "atlas": "spine/c111/c111_00.atlas",
+          "textures": [
+            "spine/c111/c111_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30054": {
+          "costume_id": "30054",
+          "costume_name": "Costume",
+          "spine_asset_id": "c111_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c111_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "120": {
+      "character_id": "112001",
+      "resource_id": "120",
+      "name_cn": "N102",
+      "name_en": "N102",
+      "default": {
+        "spine_asset_id": "c120",
+        "icon": "data/nikke/blabla-assets/character/si/si_c120_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c120_00.png",
+        "spine": {
+          "skeleton": "spine/c120/c120_00.skel",
+          "atlas": "spine/c120/c120_00.atlas",
+          "textures": [
+            "spine/c120/c120_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "121": {
+      "character_id": "112101",
+      "resource_id": "121",
+      "name_cn": "安妮：奇迹仙女",
+      "name_en": "Anne: Miracle Fairy",
+      "default": {
+        "spine_asset_id": "c121",
+        "icon": "data/nikke/blabla-assets/character/si/si_c121_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c121_00.png",
+        "spine": {
+          "skeleton": "spine/c121/c121_00.skel",
+          "atlas": "spine/c121/c121_00.atlas",
+          "textures": [
+            "spine/c121/c121_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "131": {
+      "character_id": "113101",
+      "resource_id": "131",
+      "name_cn": "佩珀",
+      "name_en": "Pepper",
+      "default": {
+        "spine_asset_id": "c131",
+        "icon": "data/nikke/blabla-assets/character/si/si_c131_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c131_00.png",
+        "spine": {
+          "skeleton": "spine/c131/c131_00.skel",
+          "atlas": "spine/c131/c131_00.atlas",
+          "textures": [
+            "spine/c131/c131_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10004": {
+          "costume_id": "10004",
+          "costume_name": "Ocean Vitamin",
+          "spine_asset_id": "c131_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c131_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c131_01/c131_01_00.skel",
+            "atlas": "spine/c131_01/c131_01_00.atlas",
+            "textures": [
+              "spine/c131_01/c131_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "150": {
+      "character_id": "115001",
+      "resource_id": "150",
+      "name_cn": "尤莉亚",
+      "name_en": "Julia",
+      "default": {
+        "spine_asset_id": "c150",
+        "icon": "data/nikke/blabla-assets/character/si/si_c150_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c150_00.png",
+        "spine": {
+          "skeleton": "spine/c150/c150_00.skel",
+          "atlas": "spine/c150/c150_00.atlas",
+          "textures": [
+            "spine/c150/c150_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30048": {
+          "costume_id": "30048",
+          "costume_name": "Costume",
+          "spine_asset_id": "c150_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c150_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50001": {
+          "costume_id": "50001",
+          "costume_name": "Mild Nocturne",
+          "spine_asset_id": "c150_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c150_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c150_01/c150_01_00.skel",
+            "atlas": "spine/c150_01/c150_01_00.atlas",
+            "textures": [
+              "spine/c150_01/c150_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "160": {
+      "character_id": "116001",
+      "resource_id": "160",
+      "name_cn": "尤妮",
+      "name_en": "Yuni",
+      "default": {
+        "spine_asset_id": "c160",
+        "icon": "data/nikke/blabla-assets/character/si/si_c160_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c160_00.png",
+        "spine": {
+          "skeleton": "spine/c160/c160_00.skel",
+          "atlas": "spine/c160/c160_00.atlas",
+          "textures": [
+            "spine/c160/c160_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30008": {
+          "costume_id": "30008",
+          "costume_name": "Pretty in Pink",
+          "spine_asset_id": "c160_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c160_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c160_01/c160_01_00.skel",
+            "atlas": "spine/c160_01/c160_01_00.atlas",
+            "textures": [
+              "spine/c160_01/c160_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "161": {
+      "character_id": "116101",
+      "resource_id": "161",
+      "name_cn": "米哈拉",
+      "name_en": "Mihara",
+      "default": {
+        "spine_asset_id": "c161",
+        "icon": "data/nikke/blabla-assets/character/si/si_c161_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c161_00.png",
+        "spine": {
+          "skeleton": "spine/c161/c161_00.skel",
+          "atlas": "spine/c161/c161_00.atlas",
+          "textures": [
+            "spine/c161/c161_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "162": {
+      "character_id": "116201",
+      "resource_id": "162",
+      "name_cn": "米哈拉：羁绊锁链",
+      "name_en": "Mihara: Bonding Chain",
+      "default": {
+        "spine_asset_id": "c162",
+        "icon": "data/nikke/blabla-assets/character/si/si_c162_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30043": {
+          "costume_id": "30043",
+          "costume_name": "Costume",
+          "spine_asset_id": "c162_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c162_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "172": {
+      "character_id": "117201",
+      "resource_id": "172",
+      "name_cn": "艾德米",
+      "name_en": "Admi",
+      "default": {
+        "spine_asset_id": "c172",
+        "icon": "data/nikke/blabla-assets/character/si/si_c172_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c172_00.png",
+        "spine": {
+          "skeleton": "spine/c172/c172_00.skel",
+          "atlas": "spine/c172/c172_00.atlas",
+          "textures": [
+            "spine/c172/c172_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "192": {
+      "character_id": "119201",
+      "resource_id": "192",
+      "name_cn": "托比",
+      "name_en": "Tove",
+      "default": {
+        "spine_asset_id": "c192",
+        "icon": "data/nikke/blabla-assets/character/si/si_c192_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "10013": {
+          "costume_id": "10013",
+          "costume_name": "Costume",
+          "spine_asset_id": "c192_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c192_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30032": {
+          "costume_id": "30032",
+          "costume_name": "Costume",
+          "spine_asset_id": "c192_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c192_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "290": {
+      "character_id": "129001",
+      "resource_id": "290",
+      "name_cn": "玛娜",
+      "name_en": "Mana",
+      "default": {
+        "spine_asset_id": "c290",
+        "icon": "data/nikke/blabla-assets/character/si/si_c290_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c290/c290_00.skel",
+          "atlas": "spine/c290/c290_00.atlas",
+          "textures": [
+            "spine/c290/c290_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "291": {
+      "character_id": "129101",
+      "resource_id": "291",
+      "name_cn": "艾瑟儿",
+      "name_en": "Ether",
+      "default": {
+        "spine_asset_id": "c291",
+        "icon": "data/nikke/blabla-assets/character/si/si_c291_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c291_00.png",
+        "spine": {
+          "skeleton": "spine/c291/c291_00.skel",
+          "atlas": "spine/c291/c291_00.atlas",
+          "textures": [
+            "spine/c291/c291_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "302": {
+      "character_id": "130201",
+      "resource_id": "302",
+      "name_cn": "产品08",
+      "name_en": "Product 08",
+      "default": {
+        "spine_asset_id": "c302",
+        "icon": "data/nikke/blabla-assets/character/si/si_c302_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c302_00.png",
+        "spine": {
+          "skeleton": "spine/c302/c302_00.skel",
+          "atlas": "spine/c302/c302_00.atlas",
+          "textures": [
+            "spine/c302/c302_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "303": {
+      "character_id": "130301",
+      "resource_id": "303",
+      "name_cn": "产品12",
+      "name_en": "Product 12",
+      "default": {
+        "spine_asset_id": "c303",
+        "icon": "data/nikke/blabla-assets/character/si/si_c303_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c303_00.png",
+        "spine": {
+          "skeleton": "spine/c303/c303_00.skel",
+          "atlas": "spine/c303/c303_00.atlas",
+          "textures": [
+            "spine/c303/c303_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "307": {
+      "character_id": "130701",
+      "resource_id": "307",
+      "name_cn": "产品23",
+      "name_en": "Product 23",
+      "default": {
+        "spine_asset_id": "c307",
+        "icon": "data/nikke/blabla-assets/character/si/si_c307_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c307_00.png",
+        "spine": {
+          "skeleton": "spine/c307/c307_00.skel",
+          "atlas": "spine/c307/c307_00.atlas",
+          "textures": [
+            "spine/c307/c307_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "361": {
+      "character_id": "136101",
+      "resource_id": "361",
+      "name_cn": "吉洛",
+      "name_en": "Kilo",
+      "default": {
+        "spine_asset_id": "c361",
+        "icon": "data/nikke/blabla-assets/character/si/si_c361_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c361/c361_00.skel",
+          "atlas": "spine/c361/c361_00.atlas",
+          "textures": [
+            "spine/c361/c361_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "391": {
+      "character_id": "139101",
+      "resource_id": "391",
+      "name_cn": "爱因",
+      "name_en": "Ein",
+      "default": {
+        "spine_asset_id": "c391",
+        "icon": "data/nikke/blabla-assets/character/si/si_c391_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c391/c391_00.skel",
+          "atlas": "spine/c391/c391_00.atlas",
+          "textures": [
+            "spine/c391/c391_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30035": {
+          "costume_id": "30035",
+          "costume_name": "Costume",
+          "spine_asset_id": "c391_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c391_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "400": {
+      "character_id": "140001",
+      "resource_id": "400",
+      "name_cn": "吉尔提",
+      "name_en": "Guilty",
+      "default": {
+        "spine_asset_id": "c400",
+        "icon": "data/nikke/blabla-assets/character/si/si_c400_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c400_00.png",
+        "spine": {
+          "skeleton": "spine/c400/c400_00.skel",
+          "atlas": "spine/c400/c400_00.atlas",
+          "textures": [
+            "spine/c400/c400_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10008": {
+          "costume_id": "10008",
+          "costume_name": "Costume",
+          "spine_asset_id": "c400_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c400_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "401": {
+      "character_id": "140101",
+      "resource_id": "401",
+      "name_cn": "森",
+      "name_en": "Sin",
+      "default": {
+        "spine_asset_id": "c401",
+        "icon": "data/nikke/blabla-assets/character/si/si_c401_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c401_00.png",
+        "spine": {
+          "skeleton": "spine/c401/c401_00.skel",
+          "atlas": "spine/c401/c401_00.atlas",
+          "textures": [
+            "spine/c401/c401_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "60004": {
+          "costume_id": "60004",
+          "costume_name": "Costume",
+          "spine_asset_id": "c401_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c401_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "402": {
+      "character_id": "140201",
+      "resource_id": "402",
+      "name_cn": "坎西",
+      "name_en": "Quency",
+      "default": {
+        "spine_asset_id": "c402",
+        "icon": "data/nikke/blabla-assets/character/si/si_c402_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c402_00.png",
+        "spine": {
+          "skeleton": "spine/c402/c402_00.skel",
+          "atlas": "spine/c402/c402_00.atlas",
+          "textures": [
+            "spine/c402/c402_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "403": {
+      "character_id": "140301",
+      "resource_id": "403",
+      "name_cn": "坎西：逃生女王",
+      "name_en": "Quency: Escape Queen",
+      "default": {
+        "spine_asset_id": "c403",
+        "icon": "data/nikke/blabla-assets/character/si/si_c403_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "50017": {
+          "costume_id": "50017",
+          "costume_name": "Costume",
+          "spine_asset_id": "c403_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c403_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "411": {
+      "character_id": "141101",
+      "resource_id": "411",
+      "name_cn": "芙罗拉",
+      "name_en": "Flora",
+      "default": {
+        "spine_asset_id": "c411",
+        "icon": "data/nikke/blabla-assets/character/si/si_c411_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "70009": {
+          "costume_id": "70009",
+          "costume_name": "Costume",
+          "spine_asset_id": "c411_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c411_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "412": {
+      "character_id": "141201",
+      "resource_id": "412",
+      "name_cn": "特蕾娜",
+      "name_en": "Trina",
+      "default": {
+        "spine_asset_id": "c412",
+        "icon": "data/nikke/blabla-assets/character/si/si_c412_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30067": {
+          "costume_id": "30067",
+          "costume_name": "Costume",
+          "spine_asset_id": "c412_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c412_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "450": {
+      "character_id": "145001",
+      "resource_id": "450",
+      "name_cn": "娜嘉",
+      "name_en": "Naga",
+      "default": {
+        "spine_asset_id": "c450",
+        "icon": "data/nikke/blabla-assets/character/si/si_c450_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c450/c450_00.skel",
+          "atlas": "spine/c450/c450_00.atlas",
+          "textures": [
+            "spine/c450/c450_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10015": {
+          "costume_id": "10015",
+          "costume_name": "Costume",
+          "spine_asset_id": "c450_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c450_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30027": {
+          "costume_id": "30027",
+          "costume_name": "Costume",
+          "spine_asset_id": "c450_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c450_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30036": {
+          "costume_id": "30036",
+          "costume_name": "Costume",
+          "spine_asset_id": "c450_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c450_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "451": {
+      "character_id": "145101",
+      "resource_id": "451",
+      "name_cn": "蒂亚",
+      "name_en": "Tia",
+      "default": {
+        "spine_asset_id": "c451",
+        "icon": "data/nikke/blabla-assets/character/si/si_c451_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c451/c451_00.skel",
+          "atlas": "spine/c451/c451_00.atlas",
+          "textures": [
+            "spine/c451/c451_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10017": {
+          "costume_id": "10017",
+          "costume_name": "Costume",
+          "spine_asset_id": "c451_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c451_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30028": {
+          "costume_id": "30028",
+          "costume_name": "Costume",
+          "spine_asset_id": "c451_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c451_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30039": {
+          "costume_id": "30039",
+          "costume_name": "Costume",
+          "spine_asset_id": "c451_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c451_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "500": {
+      "character_id": "150001",
+      "resource_id": "500",
+      "name_cn": "伊莱格",
+      "name_en": "Elegg",
+      "default": {
+        "spine_asset_id": "c500",
+        "icon": "data/nikke/blabla-assets/character/si/si_c500_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "501": {
+      "character_id": "150101",
+      "resource_id": "501",
+      "name_cn": "特罗尼",
+      "name_en": "Trony",
+      "default": {
+        "spine_asset_id": "c501",
+        "icon": "data/nikke/blabla-assets/character/si/si_c501_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "60003": {
+          "costume_id": "60003",
+          "costume_name": "Costume",
+          "spine_asset_id": "c501_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c501_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "502": {
+      "character_id": "150201",
+      "resource_id": "502",
+      "name_cn": "伊莱格：BOOM与惊吓",
+      "name_en": "Elegg: Boom and Shock",
+      "default": {
+        "spine_asset_id": "c502",
+        "icon": "data/nikke/blabla-assets/character/si/si_c502_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "590": {
+      "character_id": "159001",
+      "resource_id": "590",
+      "name_cn": "莫莉",
+      "name_en": "Mori",
+      "default": {
+        "spine_asset_id": "c590",
+        "icon": "data/nikke/blabla-assets/character/si/si_c590_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "620": {
+      "character_id": "162001",
+      "resource_id": "620",
+      "name_cn": "白鹤",
+      "name_en": "Snow Crane",
+      "default": {
+        "spine_asset_id": "c620",
+        "icon": "data/nikke/blabla-assets/character/si/si_c620_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "10": {
+      "character_id": "201001",
+      "resource_id": "10",
+      "name_cn": "拉毗",
+      "name_en": "Rapi",
+      "default": {
+        "spine_asset_id": "c010",
+        "icon": "data/nikke/blabla-assets/character/si/si_c010_00_s.webp",
+        "portrait": "assets/spine-rendered/c010.png",
+        "fullbody": "FB/c010_00.png",
+        "spine": {
+          "skeleton": "spine/c010/c010_00.skel",
+          "atlas": "spine/c010/c010_00.atlas",
+          "textures": [
+            "spine/c010/c010_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10005": {
+          "costume_id": "10005",
+          "costume_name": "Classic Vacation",
+          "spine_asset_id": "c010_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c010_02_s.webp",
+          "portrait": "assets/spine-rendered/c010_03.png",
+          "fullbody": "assets/spine-rendered/c010_03.png",
+          "spine": {
+            "skeleton": "spine/c010_03/c010_03_00.skel",
+            "atlas": "spine/c010_03/c010_03_00.atlas",
+            "textures": [
+              "spine/c010_03/c010_02.png"
+            ]
+          }
+        },
+        "20001": {
+          "costume_id": "20001",
+          "costume_name": "White Promise",
+          "spine_asset_id": "c010_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c010_01_s.webp",
+          "portrait": "assets/spine-rendered/c010_02.png",
+          "fullbody": "assets/spine-rendered/c010_02.png",
+          "spine": {
+            "skeleton": "spine/c010_02/c010_02_00.skel",
+            "atlas": "spine/c010_02/c010_02_00.atlas",
+            "textures": [
+              "spine/c010_02/c010_01.png"
+            ]
+          }
+        }
+      }
+    },
+    "11": {
+      "character_id": "201101",
+      "resource_id": "11",
+      "name_cn": "尼恩",
+      "name_en": "Neon",
+      "default": {
+        "spine_asset_id": "c011",
+        "icon": "data/nikke/blabla-assets/character/si/si_c011_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c011_00.png",
+        "spine": {
+          "skeleton": "spine/c011/c011_00.skel",
+          "atlas": "spine/c011/c011_00.atlas",
+          "textures": [
+            "spine/c011/c011_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30001": {
+          "costume_id": "30001",
+          "costume_name": "Bling Bullet",
+          "spine_asset_id": "c011_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c011_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c011_01/c011_01_00.skel",
+            "atlas": "spine/c011_01/c011_01_00.atlas",
+            "textures": [
+              "spine/c011_01/c011_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "14": {
+      "character_id": "201401",
+      "resource_id": "14",
+      "name_cn": "尼恩：蓝色海洋",
+      "name_en": "Neon: Blue Ocean",
+      "default": {
+        "spine_asset_id": "c014",
+        "icon": "data/nikke/blabla-assets/character/si/si_c014_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c014_00.png",
+        "spine": {
+          "skeleton": "spine/c014/c014_00.skel",
+          "atlas": "spine/c014/c014_00.atlas",
+          "textures": [
+            "spine/c014/c014_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "16": {
+      "character_id": "201601",
+      "resource_id": "16",
+      "name_cn": "拉毗：小红帽",
+      "name_en": "Rapi: Red Hood",
+      "default": {
+        "spine_asset_id": "c016",
+        "icon": "data/nikke/blabla-assets/character/si/si_c016_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "10014": {
+          "costume_id": "10014",
+          "costume_name": "Costume",
+          "spine_asset_id": "c016_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c016_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30050": {
+          "costume_id": "30050",
+          "costume_name": "Costume",
+          "spine_asset_id": "c016_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c016_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "130005": {
+          "costume_id": "130005",
+          "costume_name": "Costume",
+          "spine_asset_id": "c016_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c016_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "20": {
+      "character_id": "202001",
+      "resource_id": "20",
+      "name_cn": "德尔塔",
+      "name_en": "Delta",
+      "default": {
+        "spine_asset_id": "c020",
+        "icon": "data/nikke/blabla-assets/character/si/si_c020_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c020_00.png",
+        "spine": {
+          "skeleton": "spine/c020/c020_00.skel",
+          "atlas": "spine/c020/c020_00.atlas",
+          "textures": [
+            "spine/c020/c020_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "22": {
+      "character_id": "202201",
+      "resource_id": "22",
+      "name_cn": "西格娜",
+      "name_en": "Signal",
+      "default": {
+        "spine_asset_id": "c022",
+        "icon": "data/nikke/blabla-assets/character/si/si_c022_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c022_00.png",
+        "spine": {
+          "skeleton": "spine/c022/c022_00.skel",
+          "atlas": "spine/c022/c022_00.atlas",
+          "textures": [
+            "spine/c022/c022_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "60001": {
+          "costume_id": "60001",
+          "costume_name": "Dramatic Chocolate",
+          "spine_asset_id": "c022_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c022_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c022_01/c022_01_00.skel",
+            "atlas": "spine/c022_01/c022_01_00.atlas",
+            "textures": [
+              "spine/c022_01/c022_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "30": {
+      "character_id": "203001",
+      "resource_id": "30",
+      "name_cn": "波莉",
+      "name_en": "Poli",
+      "default": {
+        "spine_asset_id": "c030",
+        "icon": "data/nikke/blabla-assets/character/si/si_c030_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c030_00.png",
+        "spine": {
+          "skeleton": "spine/c030/c030_00.skel",
+          "atlas": "spine/c030/c030_00.atlas",
+          "textures": [
+            "spine/c030/c030_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30002": {
+          "costume_id": "30002",
+          "costume_name": "Sweet Holic",
+          "spine_asset_id": "c030_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c030_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c030_01/c030_01_00.skel",
+            "atlas": "spine/c030_01/c030_01_00.atlas",
+            "textures": [
+              "spine/c030_01/c030_01_00.png"
+            ]
+          }
+        },
+        "30025": {
+          "costume_id": "30025",
+          "costume_name": "Costume",
+          "spine_asset_id": "c030_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c030_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "32": {
+      "character_id": "203201",
+      "resource_id": "32",
+      "name_cn": "米兰达",
+      "name_en": "Miranda",
+      "default": {
+        "spine_asset_id": "c032",
+        "icon": "data/nikke/blabla-assets/character/si/si_c032_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c032_00.png",
+        "spine": {
+          "skeleton": "spine/c032/c032_00.skel",
+          "atlas": "spine/c032/c032_00.atlas",
+          "textures": [
+            "spine/c032/c032_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30031": {
+          "costume_id": "30031",
+          "costume_name": "Costume",
+          "spine_asset_id": "c032_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c032_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "33": {
+      "character_id": "203301",
+      "resource_id": "33",
+      "name_cn": "基里",
+      "name_en": "Quiry",
+      "default": {
+        "spine_asset_id": "c033",
+        "icon": "data/nikke/blabla-assets/character/si/si_c033_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "40": {
+      "character_id": "204001",
+      "resource_id": "40",
+      "name_cn": "D",
+      "name_en": "D",
+      "default": {
+        "spine_asset_id": "c040",
+        "icon": "data/nikke/blabla-assets/character/si/si_c040_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c040_00.png",
+        "spine": {
+          "skeleton": "spine/c040/c040_00.skel",
+          "atlas": "spine/c040/c040_00.atlas",
+          "textures": [
+            "spine/c040/c040_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "41": {
+      "character_id": "204101",
+      "resource_id": "41",
+      "name_cn": "K",
+      "name_en": "K",
+      "default": {
+        "spine_asset_id": "c041",
+        "icon": "data/nikke/blabla-assets/character/si/si_c041_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c041/c041_00.skel",
+          "atlas": "spine/c041/c041_00.atlas",
+          "textures": [
+            "spine/c041/c041_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "100002": {
+          "costume_id": "100002",
+          "costume_name": "Costume",
+          "spine_asset_id": "c041_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c041_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "43": {
+      "character_id": "204301",
+      "resource_id": "43",
+      "name_cn": "D：杀手妻子",
+      "name_en": "D: Killer Wife",
+      "default": {
+        "spine_asset_id": "c043",
+        "icon": "data/nikke/blabla-assets/character/si/si_c043_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "50013": {
+          "costume_id": "50013",
+          "costume_name": "Costume",
+          "spine_asset_id": "c043_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c043_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "100003": {
+          "costume_id": "100003",
+          "costume_name": "Costume",
+          "spine_asset_id": "c043_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c043_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "70": {
+      "character_id": "207001",
+      "resource_id": "70",
+      "name_cn": "布丽德",
+      "name_en": "Brid",
+      "default": {
+        "spine_asset_id": "c070",
+        "icon": "data/nikke/blabla-assets/character/si/si_c070_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c070_00.png",
+        "spine": {
+          "skeleton": "spine/c070/c070_00.skel",
+          "atlas": "spine/c070/c070_00.atlas",
+          "textures": [
+            "spine/c070/c070_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30003": {
+          "costume_id": "30003",
+          "costume_name": "Model Worker",
+          "spine_asset_id": "c070_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c070_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c070_01/c070_01_00.skel",
+            "atlas": "spine/c070_01/c070_01_00.atlas",
+            "textures": [
+              "spine/c070_01/c070_01_00.png"
+            ]
+          }
+        },
+        "30019": {
+          "costume_id": "30019",
+          "costume_name": "Black Moon",
+          "spine_asset_id": "c070_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c070_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c070_02/c070_02_00.skel",
+            "atlas": "spine/c070_02/c070_02_00.atlas",
+            "textures": [
+              "spine/c070_02/c070_02_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "71": {
+      "character_id": "207101",
+      "resource_id": "71",
+      "name_cn": "索林",
+      "name_en": "Soline",
+      "default": {
+        "spine_asset_id": "c071",
+        "icon": "data/nikke/blabla-assets/character/si/si_c071_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c071_00.png",
+        "spine": {
+          "skeleton": "spine/c071/c071_00.skel",
+          "atlas": "spine/c071/c071_00.atlas",
+          "textures": [
+            "spine/c071/c071_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "72": {
+      "character_id": "207201",
+      "resource_id": "72",
+      "name_cn": "迪塞尔",
+      "name_en": "Diesel",
+      "default": {
+        "spine_asset_id": "c072",
+        "icon": "data/nikke/blabla-assets/character/si/si_c072_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c072_00.png",
+        "spine": {
+          "skeleton": "spine/c072/c072_00.skel",
+          "atlas": "spine/c072/c072_00.atlas",
+          "textures": [
+            "spine/c072/c072_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30005": {
+          "costume_id": "30005",
+          "costume_name": "Costume",
+          "spine_asset_id": "c072_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c072_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c072_01/c072_01_00.skel",
+            "atlas": "spine/c072_01/c072_01_00.atlas",
+            "textures": [
+              "spine/c072_01/c072_01_00.png"
+            ]
+          }
+        },
+        "30006": {
+          "costume_id": "30006",
+          "costume_name": "Black Sunday",
+          "spine_asset_id": "c072_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c072_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c072_01/c072_01_00.skel",
+            "atlas": "spine/c072_01/c072_01_00.atlas",
+            "textures": [
+              "spine/c072_01/c072_01_00.png"
+            ]
+          }
+        },
+        "50011": {
+          "costume_id": "50011",
+          "costume_name": "Costume",
+          "spine_asset_id": "c072_04",
+          "icon": "data/nikke/blabla-assets/character/si/si_c072_04_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "73": {
+      "character_id": "207301",
+      "resource_id": "73",
+      "name_cn": "布丽德：静默轨道",
+      "name_en": "Brid: Silent Track",
+      "default": {
+        "spine_asset_id": "c073",
+        "icon": "data/nikke/blabla-assets/character/si/si_c073_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "74": {
+      "character_id": "207401",
+      "resource_id": "74",
+      "name_cn": "索林：霜雪车票",
+      "name_en": "Soline: Frost Ticket",
+      "default": {
+        "spine_asset_id": "c074",
+        "icon": "data/nikke/blabla-assets/character/si/si_c074_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "75": {
+      "character_id": "207501",
+      "resource_id": "75",
+      "name_cn": "迪塞尔：冬日甜心",
+      "name_en": "Diesel: Winter Sweets",
+      "default": {
+        "spine_asset_id": "c075",
+        "icon": "data/nikke/blabla-assets/character/si/si_c075_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "90": {
+      "character_id": "209001",
+      "resource_id": "90",
+      "name_cn": "艾玛",
+      "name_en": "Emma",
+      "default": {
+        "spine_asset_id": "c090",
+        "icon": "data/nikke/blabla-assets/character/si/si_c090_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c090_00.png",
+        "spine": {
+          "skeleton": "spine/c090/c090_00.skel",
+          "atlas": "spine/c090/c090_00.atlas",
+          "textures": [
+            "spine/c090/c090_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30016": {
+          "costume_id": "30016",
+          "costume_name": "Office Therapy",
+          "spine_asset_id": "c090_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c090_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c090_02/c090_02_00.skel",
+            "atlas": "spine/c090_02/c090_02_00.atlas",
+            "textures": [
+              "spine/c090_02/c090_02_00.png"
+            ]
+          }
+        },
+        "40001": {
+          "costume_id": "40001",
+          "costume_name": "Color me Red",
+          "spine_asset_id": "c090_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c090_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c090_01/c090_01_00.skel",
+            "atlas": "spine/c090_01/c090_01_00.atlas",
+            "textures": [
+              "spine/c090_01/c090_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "91": {
+      "character_id": "209101",
+      "resource_id": "91",
+      "name_cn": "贝斯蒂",
+      "name_en": "Vesti",
+      "default": {
+        "spine_asset_id": "c091",
+        "icon": "data/nikke/blabla-assets/character/si/si_c091_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c091_00.png",
+        "spine": {
+          "skeleton": "spine/c091/c091_00.skel",
+          "atlas": "spine/c091/c091_00.atlas",
+          "textures": [
+            "spine/c091/c091_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "130002": {
+          "costume_id": "130002",
+          "costume_name": "Costume",
+          "spine_asset_id": "c091_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c091_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "92": {
+      "character_id": "209201",
+      "resource_id": "92",
+      "name_cn": "银华",
+      "name_en": "Eunhwa",
+      "default": {
+        "spine_asset_id": "c092",
+        "icon": "data/nikke/blabla-assets/character/si/si_c092_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c092_00.png",
+        "spine": {
+          "skeleton": "spine/c092/c092_00.skel",
+          "atlas": "spine/c092/c092_00.atlas",
+          "textures": [
+            "spine/c092/c092_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "93": {
+      "character_id": "209301",
+      "resource_id": "93",
+      "name_cn": "艾玛：战术升级",
+      "name_en": "Emma: Tactical Upgrade",
+      "default": {
+        "spine_asset_id": "c093",
+        "icon": "data/nikke/blabla-assets/character/si/si_c093_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "50018": {
+          "costume_id": "50018",
+          "costume_name": "Costume",
+          "spine_asset_id": "c093_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c093_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "94": {
+      "character_id": "209401",
+      "resource_id": "94",
+      "name_cn": "贝斯蒂：战术升级",
+      "name_en": "Vesti: Tactical Upgrade",
+      "default": {
+        "spine_asset_id": "c094",
+        "icon": "data/nikke/blabla-assets/character/si/si_c094_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30060": {
+          "costume_id": "30060",
+          "costume_name": "Costume",
+          "spine_asset_id": "c094_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c094_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "95": {
+      "character_id": "209501",
+      "resource_id": "95",
+      "name_cn": "银华：战术升级",
+      "name_en": "Eunhwa: Tactical Upgrade",
+      "default": {
+        "spine_asset_id": "c095",
+        "icon": "data/nikke/blabla-assets/character/si/si_c095_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30049": {
+          "costume_id": "30049",
+          "costume_name": "Costume",
+          "spine_asset_id": "c095_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c095_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "113": {
+      "character_id": "211301",
+      "resource_id": "113",
+      "name_cn": "E.H.",
+      "name_en": "E.H.",
+      "default": {
+        "spine_asset_id": "c940",
+        "icon": "data/nikke/blabla-assets/character/si/si_c113_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c940/c940_00.skel",
+          "atlas": "spine/c940/c940_00.atlas",
+          "textures": [
+            "spine/c940/c940_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30068": {
+          "costume_id": "30068",
+          "costume_name": "Costume",
+          "spine_asset_id": "c113_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c113_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "170": {
+      "character_id": "217001",
+      "resource_id": "170",
+      "name_cn": "普丽瓦蒂",
+      "name_en": "Privaty",
+      "default": {
+        "spine_asset_id": "c170",
+        "icon": "data/nikke/blabla-assets/character/si/si_c170_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c170_00.png",
+        "spine": {
+          "skeleton": "spine/c170/c170_00.skel",
+          "atlas": "spine/c170/c170_00.atlas",
+          "textures": [
+            "spine/c170/c170_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30009": {
+          "costume_id": "30009",
+          "costume_name": "Government Grunt",
+          "spine_asset_id": "c170_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c170_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c170_01/c170_01_00.skel",
+            "atlas": "spine/c170_01/c170_01_00.atlas",
+            "textures": [
+              "spine/c170_01/c170_01_00.png"
+            ]
+          }
+        },
+        "30047": {
+          "costume_id": "30047",
+          "costume_name": "Costume",
+          "spine_asset_id": "c170_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c170_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30061": {
+          "costume_id": "30061",
+          "costume_name": "Costume",
+          "spine_asset_id": "c170_04",
+          "icon": "data/nikke/blabla-assets/character/si/si_c170_04_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50005": {
+          "costume_id": "50005",
+          "costume_name": "Costume",
+          "spine_asset_id": "c170_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c170_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "180": {
+      "character_id": "218001",
+      "resource_id": "180",
+      "name_cn": "吉萝婷",
+      "name_en": "Guillotine",
+      "default": {
+        "spine_asset_id": "c180",
+        "icon": "data/nikke/blabla-assets/character/si/si_c180_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c180_00.png",
+        "spine": {
+          "skeleton": "spine/c180/c180_00.skel",
+          "atlas": "spine/c180/c180_00.atlas",
+          "textures": [
+            "spine/c180/c180_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "50009": {
+          "costume_id": "50009",
+          "costume_name": "Costume",
+          "spine_asset_id": "c180_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c180_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "181": {
+      "character_id": "218101",
+      "resource_id": "181",
+      "name_cn": "梅登",
+      "name_en": "Maiden",
+      "default": {
+        "spine_asset_id": "c181",
+        "icon": "data/nikke/blabla-assets/character/si/si_c181_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c181_00.png",
+        "spine": {
+          "skeleton": "spine/c181/c181_00.skel",
+          "atlas": "spine/c181/c181_00.atlas",
+          "textures": [
+            "spine/c181/c181_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10007": {
+          "costume_id": "10007",
+          "costume_name": "Costume",
+          "spine_asset_id": "c181_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c181_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30007": {
+          "costume_id": "30007",
+          "costume_name": "Covert Nurse",
+          "spine_asset_id": "c181_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c181_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c181_01/c181_01_00.skel",
+            "atlas": "spine/c181_01/c181_01_00.atlas",
+            "textures": [
+              "spine/c181_01/c181_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "182": {
+      "character_id": "218201",
+      "resource_id": "182",
+      "name_cn": "吉萝婷：寒冬杀手",
+      "name_en": "Guillotine: Winter Slayer",
+      "default": {
+        "spine_asset_id": "c182",
+        "icon": "data/nikke/blabla-assets/character/si/si_c182_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "183": {
+      "character_id": "218301",
+      "resource_id": "183",
+      "name_cn": "梅登：冰玫瑰",
+      "name_en": "Maiden: Ice Rose",
+      "default": {
+        "spine_asset_id": "c183",
+        "icon": "data/nikke/blabla-assets/character/si/si_c183_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "280": {
+      "character_id": "228001",
+      "resource_id": "280",
+      "name_cn": "罗珊娜",
+      "name_en": "Rosanna",
+      "default": {
+        "spine_asset_id": "c280",
+        "icon": "data/nikke/blabla-assets/character/si/si_c280_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c280_00.png",
+        "spine": {
+          "skeleton": "spine/c280/c280_00.skel",
+          "atlas": "spine/c280/c280_00.atlas",
+          "textures": [
+            "spine/c280/c280_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30024": {
+          "costume_id": "30024",
+          "costume_name": "Costume",
+          "spine_asset_id": "c280_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c280_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "300": {
+      "character_id": "230001",
+      "resource_id": "300",
+      "name_cn": "士兵E.G.",
+      "name_en": "Soldier EG",
+      "default": {
+        "spine_asset_id": "c300",
+        "icon": "data/nikke/blabla-assets/character/si/si_c300_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c300_00.png",
+        "spine": {
+          "skeleton": "spine/c300/c300_00.skel",
+          "atlas": "spine/c300/c300_00.atlas",
+          "textures": [
+            "spine/c300/c300_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "301": {
+      "character_id": "230101",
+      "resource_id": "301",
+      "name_cn": "士兵F.A.",
+      "name_en": "Soldier FA",
+      "default": {
+        "spine_asset_id": "c301",
+        "icon": "data/nikke/blabla-assets/character/si/si_c301_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c301_00.png",
+        "spine": {
+          "skeleton": "spine/c301/c301_00.skel",
+          "atlas": "spine/c301/c301_00.atlas",
+          "textures": [
+            "spine/c301/c301_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "306": {
+      "character_id": "230601",
+      "resource_id": "306",
+      "name_cn": "士兵O.W.",
+      "name_en": "Soldier OW",
+      "default": {
+        "spine_asset_id": "c306",
+        "icon": "data/nikke/blabla-assets/character/si/si_c306_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c306_00.png",
+        "spine": {
+          "skeleton": "spine/c306/c306_00.skel",
+          "atlas": "spine/c306/c306_00.atlas",
+          "textures": [
+            "spine/c306/c306_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "313": {
+      "character_id": "231301",
+      "resource_id": "313",
+      "name_cn": "普丽瓦蒂：不友善的女仆",
+      "name_en": "Privaty: Unkind Maid",
+      "default": {
+        "spine_asset_id": "c313",
+        "icon": "data/nikke/blabla-assets/character/si/si_c313_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "321": {
+      "character_id": "232101",
+      "resource_id": "321",
+      "name_cn": "玛律恰那",
+      "name_en": "Marciana",
+      "default": {
+        "spine_asset_id": "c321",
+        "icon": "data/nikke/blabla-assets/character/si/si_c321_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c321/c321_00.skel",
+          "atlas": "spine/c321/c321_00.atlas",
+          "textures": [
+            "spine/c321/c321_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30029": {
+          "costume_id": "30029",
+          "costume_name": "Costume",
+          "spine_asset_id": "c321_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c321_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "322": {
+      "character_id": "232201",
+      "resource_id": "322",
+      "name_cn": "玛律恰那：海洋进修",
+      "name_en": "Marciana: Marine Study",
+      "default": {
+        "spine_asset_id": "c322",
+        "icon": "data/nikke/blabla-assets/character/si/si_c322_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "350": {
+      "character_id": "235001",
+      "resource_id": "350",
+      "name_cn": "马斯特",
+      "name_en": "Mast",
+      "default": {
+        "spine_asset_id": "c350",
+        "icon": "data/nikke/blabla-assets/character/si/si_c350_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c350_00.png",
+        "spine": {
+          "skeleton": "spine/c350/c350_00.skel",
+          "atlas": "spine/c350/c350_00.atlas",
+          "textures": [
+            "spine/c350/c350_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10006": {
+          "costume_id": "10006",
+          "costume_name": "A Pirate's Heart",
+          "spine_asset_id": "c350_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c350_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c350_01/c350_01_00.skel",
+            "atlas": "spine/c350_01/c350_01_00.atlas",
+            "textures": [
+              "spine/c350_01/c350_01_00.png"
+            ]
+          }
+        },
+        "10010": {
+          "costume_id": "10010",
+          "costume_name": "Costume",
+          "spine_asset_id": "c350_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c350_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "351": {
+      "character_id": "235101",
+      "resource_id": "351",
+      "name_cn": "安克",
+      "name_en": "Anchor",
+      "default": {
+        "spine_asset_id": "c351",
+        "icon": "data/nikke/blabla-assets/character/si/si_c351_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c351_00.png",
+        "spine": {
+          "skeleton": "spine/c351/c351_00.skel",
+          "atlas": "spine/c351/c351_00.atlas",
+          "textures": [
+            "spine/c351/c351_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10011": {
+          "costume_id": "10011",
+          "costume_name": "Costume",
+          "spine_asset_id": "c351_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c351_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "352": {
+      "character_id": "235201",
+      "resource_id": "352",
+      "name_cn": "海伦",
+      "name_en": "Helm",
+      "default": {
+        "spine_asset_id": "c352",
+        "icon": "data/nikke/blabla-assets/character/si/si_c352_00_s.webp",
+        "portrait": "assets/spine-rendered/c352.png",
+        "fullbody": "FB/c352_00.png",
+        "spine": {
+          "skeleton": "spine/c352/c352_00.skel",
+          "atlas": "spine/c352/c352_00.atlas",
+          "textures": [
+            "spine/c352/c352_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30037": {
+          "costume_id": "30037",
+          "costume_name": "Costume",
+          "spine_asset_id": "c352_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c352_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50003": {
+          "costume_id": "50003",
+          "costume_name": "Chandelier",
+          "spine_asset_id": "c352_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c352_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c352_01/c352_01_00.skel",
+            "atlas": "spine/c352_01/c352_01_00.atlas",
+            "textures": [
+              "spine/c352_01/c352_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "353": {
+      "character_id": "235301",
+      "resource_id": "353",
+      "name_cn": "海伦：海蓝宝石",
+      "name_en": "Helm: Aquamarine",
+      "default": {
+        "spine_asset_id": "c353",
+        "icon": "data/nikke/blabla-assets/character/si/si_c353_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c353_00.png",
+        "spine": {
+          "skeleton": "spine/c353/c353_00.skel",
+          "atlas": "spine/c353/c353_00.atlas",
+          "textures": [
+            "spine/c353/c353_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "354": {
+      "character_id": "235401",
+      "resource_id": "354",
+      "name_cn": "马斯特：浪漫的女仆",
+      "name_en": "Mast: Romantic Maid",
+      "default": {
+        "spine_asset_id": "c354",
+        "icon": "data/nikke/blabla-assets/character/si/si_c354_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30057": {
+          "costume_id": "30057",
+          "costume_name": "Costume",
+          "spine_asset_id": "c354_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c354_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "355": {
+      "character_id": "235501",
+      "resource_id": "355",
+      "name_cn": "安克：天真的女仆",
+      "name_en": "Anchor: Innocent Maid",
+      "default": {
+        "spine_asset_id": "c355",
+        "icon": "data/nikke/blabla-assets/character/si/si_c355_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "390": {
+      "character_id": "239001",
+      "resource_id": "390",
+      "name_cn": "茨瓦伊",
+      "name_en": "Zwei",
+      "default": {
+        "spine_asset_id": "c390",
+        "icon": "data/nikke/blabla-assets/character/si/si_c390_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c390/c390_00.skel",
+          "atlas": "spine/c390/c390_00.atlas",
+          "textures": [
+            "spine/c390/c390_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30034": {
+          "costume_id": "30034",
+          "costume_name": "Costume",
+          "spine_asset_id": "c390_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c390_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30058": {
+          "costume_id": "30058",
+          "costume_name": "Costume",
+          "spine_asset_id": "c390_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c390_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "441": {
+      "character_id": "244101",
+      "resource_id": "441",
+      "name_cn": "阿维斯塔",
+      "name_en": "Avistar",
+      "default": {
+        "spine_asset_id": "c441",
+        "icon": "data/nikke/blabla-assets/character/si/si_c441_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "532": {
+      "character_id": "253201",
+      "resource_id": "532",
+      "name_cn": "索拉",
+      "name_en": "Sora",
+      "default": {
+        "spine_asset_id": "c532",
+        "icon": "data/nikke/blabla-assets/character/si/si_c532_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30062": {
+          "costume_id": "30062",
+          "costume_name": "Costume",
+          "spine_asset_id": "c532_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c532_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "580": {
+      "character_id": "258001",
+      "resource_id": "580",
+      "name_cn": "潘托姆",
+      "name_en": "Phantom",
+      "default": {
+        "spine_asset_id": "c580",
+        "icon": "data/nikke/blabla-assets/character/si/si_c580_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "130006": {
+          "costume_id": "130006",
+          "costume_name": "Costume",
+          "spine_asset_id": "c580_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c580_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "581": {
+      "character_id": "258101",
+      "resource_id": "581",
+      "name_cn": "阿尔卡娜",
+      "name_en": "Arcana",
+      "default": {
+        "spine_asset_id": "c581",
+        "icon": "data/nikke/blabla-assets/character/si/si_c581_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "582": {
+      "character_id": "258201",
+      "resource_id": "582",
+      "name_cn": "蕾贝儿",
+      "name_en": "Label",
+      "default": {
+        "spine_asset_id": "c582",
+        "icon": "data/nikke/blabla-assets/character/si/si_c582_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "583": {
+      "character_id": "258301",
+      "resource_id": "583",
+      "name_cn": "阿尔卡娜：命运伴侣",
+      "name_en": "Arcana: Fortune Mate",
+      "default": {
+        "spine_asset_id": "c583",
+        "icon": "data/nikke/blabla-assets/character/si/si_c583_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "12": {
+      "character_id": "301201",
+      "resource_id": "12",
+      "name_cn": "阿妮斯",
+      "name_en": "Anis",
+      "default": {
+        "spine_asset_id": "c012",
+        "icon": "data/nikke/blabla-assets/character/si/si_c012_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c012_00.png",
+        "spine": {
+          "skeleton": "spine/c012/c012_00.skel",
+          "atlas": "spine/c012/c012_00.atlas",
+          "textures": [
+            "spine/c012/c012_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "15": {
+      "character_id": "301501",
+      "resource_id": "15",
+      "name_cn": "阿妮斯：闪耀夏日",
+      "name_en": "Anis: Sparkling Summer",
+      "default": {
+        "spine_asset_id": "c015",
+        "icon": "data/nikke/blabla-assets/character/si/si_c015_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c015_00.png",
+        "spine": {
+          "skeleton": "spine/c015/c015_00.skel",
+          "atlas": "spine/c015/c015_00.atlas",
+          "textures": [
+            "spine/c015/c015_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "17": {
+      "character_id": "301701",
+      "resource_id": "17",
+      "name_cn": "阿妮斯：超级巨星",
+      "name_en": "Anis: Star",
+      "default": {
+        "spine_asset_id": "c017",
+        "icon": "data/nikke/blabla-assets/character/si/si_c017_00_s.webp",
+        "portrait": "assets/spine-rendered/c017.png",
+        "fullbody": "assets/spine-rendered/c017.png",
+        "spine": null
+      },
+      "costumes": {
+        "30064": {
+          "costume_id": "30064",
+          "costume_name": "Costume",
+          "spine_asset_id": "c017_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c017_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "120004": {
+          "costume_id": "120004",
+          "costume_name": "Costume",
+          "spine_asset_id": "c017_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c017_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "60": {
+      "character_id": "306001",
+      "resource_id": "60",
+      "name_cn": "贝洛塔",
+      "name_en": "Belorta",
+      "default": {
+        "spine_asset_id": "c060",
+        "icon": "data/nikke/blabla-assets/character/si/si_c060_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c060_00.png",
+        "spine": {
+          "skeleton": "spine/c060/c060_00.skel",
+          "atlas": "spine/c060/c060_00.atlas",
+          "textures": [
+            "spine/c060/c060_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "61": {
+      "character_id": "306101",
+      "resource_id": "61",
+      "name_cn": "米卡",
+      "name_en": "Mica",
+      "default": {
+        "spine_asset_id": "c061",
+        "icon": "data/nikke/blabla-assets/character/si/si_c061_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c061_00.png",
+        "spine": {
+          "skeleton": "spine/c061/c061_00.skel",
+          "atlas": "spine/c061/c061_00.atlas",
+          "textures": [
+            "spine/c061/c061_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "62": {
+      "character_id": "306201",
+      "resource_id": "62",
+      "name_cn": "米卡：雪地伙伴",
+      "name_en": "Mica: Snow Buddy",
+      "default": {
+        "spine_asset_id": "c062",
+        "icon": "data/nikke/blabla-assets/character/si/si_c062_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "112": {
+      "character_id": "311201",
+      "resource_id": "112",
+      "name_cn": "毒蛇",
+      "name_en": "Viper",
+      "default": {
+        "spine_asset_id": "c112",
+        "icon": "data/nikke/blabla-assets/character/si/si_c112_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c112_00.png",
+        "spine": {
+          "skeleton": "spine/c112/c112_00.skel",
+          "atlas": "spine/c112/c112_00.atlas",
+          "textures": [
+            "spine/c112/c112_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10009": {
+          "costume_id": "10009",
+          "costume_name": "Costume",
+          "spine_asset_id": "c112_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c112_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30059": {
+          "costume_id": "30059",
+          "costume_name": "Costume",
+          "spine_asset_id": "c112_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c112_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "70001": {
+          "costume_id": "70001",
+          "costume_name": "Toxic Rabbit",
+          "spine_asset_id": "c112_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c112_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c112_01/c112_01_00.skel",
+            "atlas": "spine/c112_01/c112_01_00.atlas",
+            "textures": [
+              "spine/c112_01/c112_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "130": {
+      "character_id": "313001",
+      "resource_id": "130",
+      "name_cn": "梅里",
+      "name_en": "Mary",
+      "default": {
+        "spine_asset_id": "c130",
+        "icon": "data/nikke/blabla-assets/character/si/si_c130_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c130_00.png",
+        "spine": {
+          "skeleton": "spine/c130/c130_00.skel",
+          "atlas": "spine/c130/c130_00.atlas",
+          "textures": [
+            "spine/c130/c130_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "70004": {
+          "costume_id": "70004",
+          "costume_name": "Costume",
+          "spine_asset_id": "c130_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c130_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "132": {
+      "character_id": "313201",
+      "resource_id": "132",
+      "name_cn": "梅里：海湾女神",
+      "name_en": "Mary: Bay Goddess",
+      "default": {
+        "spine_asset_id": "c132",
+        "icon": "data/nikke/blabla-assets/character/si/si_c132_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c132_00.png",
+        "spine": {
+          "skeleton": "spine/c132/c132_00.skel",
+          "atlas": "spine/c132/c132_00.atlas",
+          "textures": [
+            "spine/c132/c132_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "140": {
+      "character_id": "314001",
+      "resource_id": "140",
+      "name_cn": "舒格",
+      "name_en": "Sugar",
+      "default": {
+        "spine_asset_id": "c140",
+        "icon": "data/nikke/blabla-assets/character/si/si_c140_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c140_00.png",
+        "spine": {
+          "skeleton": "spine/c140/c140_00.skel",
+          "atlas": "spine/c140/c140_00.atlas",
+          "textures": [
+            "spine/c140/c140_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30022": {
+          "costume_id": "30022",
+          "costume_name": "Costume",
+          "spine_asset_id": "c140_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c140_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50002": {
+          "costume_id": "50002",
+          "costume_name": "Hard-Boiled",
+          "spine_asset_id": "c140_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c140_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c140_01/c140_01_00.skel",
+            "atlas": "spine/c140_01/c140_01_00.atlas",
+            "textures": [
+              "spine/c140_01/c140_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "141": {
+      "character_id": "314101",
+      "resource_id": "141",
+      "name_cn": "米尔克",
+      "name_en": "Milk",
+      "default": {
+        "spine_asset_id": "c141",
+        "icon": "data/nikke/blabla-assets/character/si/si_c141_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c141_00.png",
+        "spine": {
+          "skeleton": "spine/c141/c141_00.skel",
+          "atlas": "spine/c141/c141_00.atlas",
+          "textures": [
+            "spine/c141/c141_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30011": {
+          "costume_id": "30011",
+          "costume_name": "Extreme Fighter",
+          "spine_asset_id": "c141_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c141_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c141_01/c141_01_00.skel",
+            "atlas": "spine/c141_01/c141_01_00.atlas",
+            "textures": [
+              "spine/c141_01/c141_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "142": {
+      "character_id": "314201",
+      "resource_id": "142",
+      "name_cn": "普琳玛",
+      "name_en": "Frima",
+      "default": {
+        "spine_asset_id": "c142",
+        "icon": "data/nikke/blabla-assets/character/si/si_c142_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c142_00.png",
+        "spine": {
+          "skeleton": "spine/c142/c142_00.skel",
+          "atlas": "spine/c142/c142_00.atlas",
+          "textures": [
+            "spine/c142/c142_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10002": {
+          "costume_id": "10002",
+          "costume_name": "Sea of Sloth",
+          "spine_asset_id": "c142_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c142_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c142_01/c142_01_00.skel",
+            "atlas": "spine/c142_01/c142_01_00.atlas",
+            "textures": [
+              "spine/c142_01/c142_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "143": {
+      "character_id": "314301",
+      "resource_id": "143",
+      "name_cn": "米尔克：花漾兔女郎",
+      "name_en": "Milk: Blooming Bunny",
+      "default": {
+        "spine_asset_id": "c143",
+        "icon": "data/nikke/blabla-assets/character/si/si_c143_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "171": {
+      "character_id": "317101",
+      "resource_id": "171",
+      "name_cn": "尤尔夏",
+      "name_en": "Yulha",
+      "default": {
+        "spine_asset_id": "c171",
+        "icon": "data/nikke/blabla-assets/character/si/si_c171_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c171_00.png",
+        "spine": {
+          "skeleton": "spine/c171/c171_00.skel",
+          "atlas": "spine/c171/c171_00.atlas",
+          "textures": [
+            "spine/c171/c171_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "190": {
+      "character_id": "319001",
+      "resource_id": "190",
+      "name_cn": "鲁德米拉",
+      "name_en": "Ludmilla",
+      "default": {
+        "spine_asset_id": "c190",
+        "icon": "data/nikke/blabla-assets/character/si/si_c190_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c190_00.png",
+        "spine": {
+          "skeleton": "spine/c190/c190_00.skel",
+          "atlas": "spine/c190/c190_00.atlas",
+          "textures": [
+            "spine/c190/c190_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "191": {
+      "character_id": "319101",
+      "resource_id": "191",
+      "name_cn": "爱丽丝",
+      "name_en": "Alice",
+      "default": {
+        "spine_asset_id": "c191",
+        "icon": "data/nikke/blabla-assets/character/si/si_c191_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c191_00.png",
+        "spine": {
+          "skeleton": "spine/c191/c191_00.skel",
+          "atlas": "spine/c191/c191_00.atlas",
+          "textures": [
+            "spine/c191/c191_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30015": {
+          "costume_id": "30015",
+          "costume_name": "Sweet Home",
+          "spine_asset_id": "c191_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c191_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c191_01/c191_01_00.skel",
+            "atlas": "spine/c191_01/c191_01_00.atlas",
+            "textures": [
+              "spine/c191_01/c191_01_00.png"
+            ]
+          }
+        },
+        "130003": {
+          "costume_id": "130003",
+          "costume_name": "Costume",
+          "spine_asset_id": "c191_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c191_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "193": {
+      "character_id": "319301",
+      "resource_id": "193",
+      "name_cn": "尼夫",
+      "name_en": "Neve",
+      "default": {
+        "spine_asset_id": "c193",
+        "icon": "data/nikke/blabla-assets/character/si/si_c193_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c193_00.png",
+        "spine": {
+          "skeleton": "spine/c193/c193_00.skel",
+          "atlas": "spine/c193/c193_00.atlas",
+          "textures": [
+            "spine/c193/c193_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "194": {
+      "character_id": "319401",
+      "resource_id": "194",
+      "name_cn": "鲁德米拉：冬日之主",
+      "name_en": "Ludmilla: Winter Owner",
+      "default": {
+        "spine_asset_id": "c194",
+        "icon": "data/nikke/blabla-assets/character/si/si_c194_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "195": {
+      "character_id": "319501",
+      "resource_id": "195",
+      "name_cn": "爱丽丝：仙境兔女郎",
+      "name_en": "Alice: Wonderland Bunny",
+      "default": {
+        "spine_asset_id": "c195",
+        "icon": "data/nikke/blabla-assets/character/si/si_c195_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "200": {
+      "character_id": "320001",
+      "resource_id": "200",
+      "name_cn": "露菲",
+      "name_en": "Rupee",
+      "default": {
+        "spine_asset_id": "c200",
+        "icon": "data/nikke/blabla-assets/character/si/si_c200_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c200_00.png",
+        "spine": {
+          "skeleton": "spine/c200/c200_00.skel",
+          "atlas": "spine/c200/c200_00.atlas",
+          "textures": [
+            "spine/c200/c200_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "70002": {
+          "costume_id": "70002",
+          "costume_name": "Rabbit Deluxe",
+          "spine_asset_id": "c200_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c200_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c200_01/c200_01_00.skel",
+            "atlas": "spine/c200_01/c200_01_00.atlas",
+            "textures": [
+              "spine/c200_01/c200_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "201": {
+      "character_id": "320101",
+      "resource_id": "201",
+      "name_cn": "杨",
+      "name_en": "Yan",
+      "default": {
+        "spine_asset_id": "c201",
+        "icon": "data/nikke/blabla-assets/character/si/si_c201_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c201_00.png",
+        "spine": {
+          "skeleton": "spine/c201/c201_00.skel",
+          "atlas": "spine/c201/c201_00.atlas",
+          "textures": [
+            "spine/c201/c201_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "10003": {
+          "costume_id": "10003",
+          "costume_name": "Sunrise Market",
+          "spine_asset_id": "c201_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c201_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c201_01/c201_01_00.skel",
+            "atlas": "spine/c201_01/c201_01_00.atlas",
+            "textures": [
+              "spine/c201_01/c201_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "202": {
+      "character_id": "320201",
+      "resource_id": "202",
+      "name_cn": "朵拉",
+      "name_en": "Dolla",
+      "default": {
+        "spine_asset_id": "c202",
+        "icon": "data/nikke/blabla-assets/character/si/si_c202_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c202_00.png",
+        "spine": {
+          "skeleton": "spine/c202/c202_00.skel",
+          "atlas": "spine/c202/c202_00.atlas",
+          "textures": [
+            "spine/c202/c202_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "50004": {
+          "costume_id": "50004",
+          "costume_name": "Dark Rose",
+          "spine_asset_id": "c202_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c202_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c202_01/c202_01_00.skel",
+            "atlas": "spine/c202_01/c202_01_00.atlas",
+            "textures": [
+              "spine/c202_01/c202_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "203": {
+      "character_id": "320301",
+      "resource_id": "203",
+      "name_cn": "露菲：冬日购物狂",
+      "name_en": "Rupee: Winter Shopper",
+      "default": {
+        "spine_asset_id": "c203",
+        "icon": "data/nikke/blabla-assets/character/si/si_c203_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c203_00.png",
+        "spine": {
+          "skeleton": "spine/c203/c203_00.skel",
+          "atlas": "spine/c203/c203_00.atlas",
+          "textures": [
+            "spine/c203/c203_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "210": {
+      "character_id": "321001",
+      "resource_id": "210",
+      "name_cn": "艾可希雅",
+      "name_en": "Exia",
+      "default": {
+        "spine_asset_id": "c210",
+        "icon": "data/nikke/blabla-assets/character/si/si_c210_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c210_00.png",
+        "spine": {
+          "skeleton": "spine/c210/c210_00.skel",
+          "atlas": "spine/c210/c210_00.atlas",
+          "textures": [
+            "spine/c210/c210_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30023": {
+          "costume_id": "30023",
+          "costume_name": "Costume",
+          "spine_asset_id": "c210_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c210_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "40002": {
+          "costume_id": "40002",
+          "costume_name": "Joy to the Nerds",
+          "spine_asset_id": "c210_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c210_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c210_01/c210_01_00.skel",
+            "atlas": "spine/c210_01/c210_01_00.atlas",
+            "textures": [
+              "spine/c210_01/c210_01_00.png"
+            ]
+          }
+        },
+        "70005": {
+          "costume_id": "70005",
+          "costume_name": "Costume",
+          "spine_asset_id": "c210_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c210_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "212": {
+      "character_id": "321201",
+      "resource_id": "212",
+      "name_cn": "诺薇儿",
+      "name_en": "Novel",
+      "default": {
+        "spine_asset_id": "c212",
+        "icon": "data/nikke/blabla-assets/character/si/si_c212_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c212_00.png",
+        "spine": {
+          "skeleton": "spine/c212/c212_00.skel",
+          "atlas": "spine/c212/c212_00.atlas",
+          "textures": [
+            "spine/c212/c212_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30010": {
+          "costume_id": "30010",
+          "costume_name": "Penguin Holmes",
+          "spine_asset_id": "c212_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c212_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c212_01/c212_01_00.skel",
+            "atlas": "spine/c212_01/c212_01_00.atlas",
+            "textures": [
+              "spine/c212_01/c212_01_00.png"
+            ]
+          }
+        },
+        "100001": {
+          "costume_id": "100001",
+          "costume_name": "Detective Nurse",
+          "spine_asset_id": "c212_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c212_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c212_02/c212_02_00.skel",
+            "atlas": "spine/c212_02/c212_02_00.atlas",
+            "textures": [
+              "spine/c212_02/c212_02_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "240": {
+      "character_id": "324001",
+      "resource_id": "240",
+      "name_cn": "鲁玛妮",
+      "name_en": "Rumani",
+      "default": {
+        "spine_asset_id": "c240",
+        "icon": "data/nikke/blabla-assets/character/si/si_c240_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c240_00.png",
+        "spine": {
+          "skeleton": "spine/c240/c240_00.skel",
+          "atlas": "spine/c240/c240_00.atlas",
+          "textures": [
+            "spine/c240/c240_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "241": {
+      "character_id": "324101",
+      "resource_id": "241",
+      "name_cn": "艾菲涅尔",
+      "name_en": "Epinel",
+      "default": {
+        "spine_asset_id": "c241",
+        "icon": "data/nikke/blabla-assets/character/si/si_c241_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c241_00.png",
+        "spine": {
+          "skeleton": "spine/c241/c241_00.skel",
+          "atlas": "spine/c241/c241_00.atlas",
+          "textures": [
+            "spine/c241/c241_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "242": {
+      "character_id": "324201",
+      "resource_id": "242",
+      "name_cn": "富克旺",
+      "name_en": "Folkwang",
+      "default": {
+        "spine_asset_id": "c242",
+        "icon": "data/nikke/blabla-assets/character/si/si_c242_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c242_00.png",
+        "spine": {
+          "skeleton": "spine/c242/c242_00.skel",
+          "atlas": "spine/c242/c242_00.atlas",
+          "textures": [
+            "spine/c242/c242_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "70003": {
+          "costume_id": "70003",
+          "costume_name": "Costume",
+          "spine_asset_id": "c242_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c242_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "270": {
+      "character_id": "327001",
+      "resource_id": "270",
+      "name_cn": "布兰儿",
+      "name_en": "Blanc",
+      "default": {
+        "spine_asset_id": "c270",
+        "icon": "data/nikke/blabla-assets/character/si/si_c270_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c270_00.png",
+        "spine": {
+          "skeleton": "spine/c270/c270_00.skel",
+          "atlas": "spine/c270/c270_00.atlas",
+          "textures": [
+            "spine/c270/c270_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30021": {
+          "costume_id": "30021",
+          "costume_name": "Costume",
+          "spine_asset_id": "c270_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c270_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30044": {
+          "costume_id": "30044",
+          "costume_name": "Costume",
+          "spine_asset_id": "c270_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c270_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30055": {
+          "costume_id": "30055",
+          "costume_name": "Costume",
+          "spine_asset_id": "c270_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c270_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "271": {
+      "character_id": "327101",
+      "resource_id": "271",
+      "name_cn": "诺亚尔",
+      "name_en": "Noir",
+      "default": {
+        "spine_asset_id": "c271",
+        "icon": "data/nikke/blabla-assets/character/si/si_c271_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c271_00.png",
+        "spine": {
+          "skeleton": "spine/c271/c271_00.skel",
+          "atlas": "spine/c271/c271_00.atlas",
+          "textures": [
+            "spine/c271/c271_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30020": {
+          "costume_id": "30020",
+          "costume_name": "Costume",
+          "spine_asset_id": "c271_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c271_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30045": {
+          "costume_id": "30045",
+          "costume_name": "Costume",
+          "spine_asset_id": "c271_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c271_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "272": {
+      "character_id": "327201",
+      "resource_id": "272",
+      "name_cn": "露姬",
+      "name_en": "Rouge",
+      "default": {
+        "spine_asset_id": "c272",
+        "icon": "data/nikke/blabla-assets/character/si/si_c272_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c272/c272_00.skel",
+          "atlas": "spine/c272/c272_00.atlas",
+          "textures": [
+            "spine/c272/c272_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "70006": {
+          "costume_id": "70006",
+          "costume_name": "Costume",
+          "spine_asset_id": "c272_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c272_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "281": {
+      "character_id": "328101",
+      "resource_id": "281",
+      "name_cn": "牡丹",
+      "name_en": "Moran",
+      "default": {
+        "spine_asset_id": "c281",
+        "icon": "data/nikke/blabla-assets/character/si/si_c281_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c281/c281_00.skel",
+          "atlas": "spine/c281/c281_00.atlas",
+          "textures": [
+            "spine/c281/c281_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30046": {
+          "costume_id": "30046",
+          "costume_name": "Costume",
+          "spine_asset_id": "c281_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c281_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50020": {
+          "costume_id": "50020",
+          "costume_name": "Costume",
+          "spine_asset_id": "c281_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c281_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "282": {
+      "character_id": "328201",
+      "resource_id": "282",
+      "name_cn": "樱花",
+      "name_en": "Sakura",
+      "default": {
+        "spine_asset_id": "c282",
+        "icon": "data/nikke/blabla-assets/character/si/si_c282_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c282_00.png",
+        "spine": {
+          "skeleton": "spine/c282/c282_00.skel",
+          "atlas": "spine/c282/c282_00.atlas",
+          "textures": [
+            "spine/c282/c282_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30017": {
+          "costume_id": "30017",
+          "costume_name": "Midnight Stealth",
+          "spine_asset_id": "c282_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c282_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c282_01/c282_01_00.skel",
+            "atlas": "spine/c282_01/c282_01_00.atlas",
+            "textures": [
+              "spine/c282_01/c282_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "283": {
+      "character_id": "328301",
+      "resource_id": "283",
+      "name_cn": "罗珊娜：高雅海洋",
+      "name_en": "Rosanna: Chic Ocean",
+      "default": {
+        "spine_asset_id": "c283",
+        "icon": "data/nikke/blabla-assets/character/si/si_c283_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "284": {
+      "character_id": "328401",
+      "resource_id": "284",
+      "name_cn": "樱花：夏日绽放",
+      "name_en": "Sakura: Bloom in Summer",
+      "default": {
+        "spine_asset_id": "c284",
+        "icon": "data/nikke/blabla-assets/character/si/si_c284_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "304": {
+      "character_id": "330401",
+      "resource_id": "304",
+      "name_cn": "iDoll花",
+      "name_en": "iDoll Flower",
+      "default": {
+        "spine_asset_id": "c304",
+        "icon": "data/nikke/blabla-assets/character/si/si_c304_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c304_00.png",
+        "spine": {
+          "skeleton": "spine/c304/c304_00.skel",
+          "atlas": "spine/c304/c304_00.atlas",
+          "textures": [
+            "spine/c304/c304_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "305": {
+      "character_id": "330501",
+      "resource_id": "305",
+      "name_cn": "iDoll海",
+      "name_en": "iDoll Ocean",
+      "default": {
+        "spine_asset_id": "c305",
+        "icon": "data/nikke/blabla-assets/character/si/si_c305_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c305_00.png",
+        "spine": {
+          "skeleton": "spine/c305/c305_00.skel",
+          "atlas": "spine/c305/c305_00.atlas",
+          "textures": [
+            "spine/c305/c305_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "308": {
+      "character_id": "330801",
+      "resource_id": "308",
+      "name_cn": "iDoll太阳",
+      "name_en": "iDoll Sun",
+      "default": {
+        "spine_asset_id": "c308",
+        "icon": "data/nikke/blabla-assets/character/si/si_c308_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c308_00.png",
+        "spine": {
+          "skeleton": "spine/c308/c308_00.skel",
+          "atlas": "spine/c308/c308_00.atlas",
+          "textures": [
+            "spine/c308/c308_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "310": {
+      "character_id": "331001",
+      "resource_id": "310",
+      "name_cn": "爱德",
+      "name_en": "Ade",
+      "default": {
+        "spine_asset_id": "c310",
+        "icon": "data/nikke/blabla-assets/character/si/si_c310_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c310/c310_00.skel",
+          "atlas": "spine/c310/c310_00.atlas",
+          "textures": [
+            "spine/c310/c310_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30040": {
+          "costume_id": "30040",
+          "costume_name": "Costume",
+          "spine_asset_id": "c310_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c310_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "311": {
+      "character_id": "331101",
+      "resource_id": "311",
+      "name_cn": "可可",
+      "name_en": "Cocoa",
+      "default": {
+        "spine_asset_id": "c311",
+        "icon": "data/nikke/blabla-assets/character/si/si_c311_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c311_00.png",
+        "spine": {
+          "skeleton": "spine/c311/c311_00.skel",
+          "atlas": "spine/c311/c311_00.atlas",
+          "textures": [
+            "spine/c311/c311_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "312": {
+      "character_id": "331201",
+      "resource_id": "312",
+      "name_cn": "索达",
+      "name_en": "Soda",
+      "default": {
+        "spine_asset_id": "c312",
+        "icon": "data/nikke/blabla-assets/character/si/si_c312_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c312_00.png",
+        "spine": {
+          "skeleton": "spine/c312/c312_00.skel",
+          "atlas": "spine/c312/c312_00.atlas",
+          "textures": [
+            "spine/c312/c312_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "314": {
+      "character_id": "331401",
+      "resource_id": "314",
+      "name_cn": "索达：闪亮兔女郎",
+      "name_en": "Soda: Twinkling Bunny",
+      "default": {
+        "spine_asset_id": "c314",
+        "icon": "data/nikke/blabla-assets/character/si/si_c314_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "315": {
+      "character_id": "331501",
+      "resource_id": "315",
+      "name_cn": "爱德：特务兔女郎",
+      "name_en": "Ade: Agent Bunny",
+      "default": {
+        "spine_asset_id": "c315",
+        "icon": "data/nikke/blabla-assets/character/si/si_c315_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "316": {
+      "character_id": "331601",
+      "resource_id": "316",
+      "name_cn": "薇尔维特",
+      "name_en": "Velvet",
+      "default": {
+        "spine_asset_id": "c316",
+        "icon": "data/nikke/blabla-assets/character/si/si_c316_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "70008": {
+          "costume_id": "70008",
+          "costume_name": "Costume",
+          "spine_asset_id": "c316_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c316_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "380": {
+      "character_id": "338001",
+      "resource_id": "380",
+      "name_cn": "尼罗",
+      "name_en": "Nero",
+      "default": {
+        "spine_asset_id": "c380",
+        "icon": "data/nikke/blabla-assets/character/si/si_c380_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c380_00.png",
+        "spine": {
+          "skeleton": "spine/c380/c380_00.skel",
+          "atlas": "spine/c380/c380_00.atlas",
+          "textures": [
+            "spine/c380/c380_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "381": {
+      "character_id": "338101",
+      "resource_id": "381",
+      "name_cn": "饼干",
+      "name_en": "Biscuit",
+      "default": {
+        "spine_asset_id": "c381",
+        "icon": "data/nikke/blabla-assets/character/si/si_c381_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c381_00.png",
+        "spine": {
+          "skeleton": "spine/c381/c381_00.skel",
+          "atlas": "spine/c381/c381_00.atlas",
+          "textures": [
+            "spine/c381/c381_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30038": {
+          "costume_id": "30038",
+          "costume_name": "Costume",
+          "spine_asset_id": "c381_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c381_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "382": {
+      "character_id": "338201",
+      "resource_id": "382",
+      "name_cn": "莱昂纳",
+      "name_en": "Leona",
+      "default": {
+        "spine_asset_id": "c382",
+        "icon": "data/nikke/blabla-assets/character/si/si_c382_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c382/c382_00.skel",
+          "atlas": "spine/c382/c382_00.atlas",
+          "textures": [
+            "spine/c382/c382_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30030": {
+          "costume_id": "30030",
+          "costume_name": "Costume",
+          "spine_asset_id": "c382_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c382_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "392": {
+      "character_id": "339201",
+      "resource_id": "392",
+      "name_cn": "莱伊",
+      "name_en": "Rei",
+      "default": {
+        "spine_asset_id": "c392",
+        "icon": "data/nikke/blabla-assets/character/si/si_c392_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c392_00.png",
+        "spine": {
+          "skeleton": "spine/c392/c392_00.skel",
+          "atlas": "spine/c392/c392_00.atlas",
+          "textures": [
+            "spine/c392/c392_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "430": {
+      "character_id": "343001",
+      "resource_id": "430",
+      "name_cn": "诺伊斯",
+      "name_en": "Noise",
+      "default": {
+        "spine_asset_id": "c430",
+        "icon": "data/nikke/blabla-assets/character/si/si_c430_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c430_00.png",
+        "spine": {
+          "skeleton": "spine/c430/c430_00.skel",
+          "atlas": "spine/c430/c430_00.atlas",
+          "textures": [
+            "spine/c430/c430_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30013": {
+          "costume_id": "30013",
+          "costume_name": "Cherry Blossom Stage",
+          "spine_asset_id": "c430_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c430_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c430_01/c430_01_00.skel",
+            "atlas": "spine/c430_01/c430_01_00.atlas",
+            "textures": [
+              "spine/c430_01/c430_01_00.png"
+            ]
+          }
+        },
+        "50010": {
+          "costume_id": "50010",
+          "costume_name": "Costume",
+          "spine_asset_id": "c430_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c430_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "431": {
+      "character_id": "343101",
+      "resource_id": "431",
+      "name_cn": "沃纶姆",
+      "name_en": "Volume",
+      "default": {
+        "spine_asset_id": "c431",
+        "icon": "data/nikke/blabla-assets/character/si/si_c431_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c431_00.png",
+        "spine": {
+          "skeleton": "spine/c431/c431_00.skel",
+          "atlas": "spine/c431/c431_00.atlas",
+          "textures": [
+            "spine/c431/c431_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "130001": {
+          "costume_id": "130001",
+          "costume_name": "Costume",
+          "spine_asset_id": "c431_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c431_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "432": {
+      "character_id": "343201",
+      "resource_id": "432",
+      "name_cn": "阿莉亚",
+      "name_en": "Aria",
+      "default": {
+        "spine_asset_id": "c432",
+        "icon": "data/nikke/blabla-assets/character/si/si_c432_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c432_00.png",
+        "spine": {
+          "skeleton": "spine/c432/c432_00.skel",
+          "atlas": "spine/c432/c432_00.atlas",
+          "textures": [
+            "spine/c432/c432_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "520": {
+      "character_id": "352001",
+      "resource_id": "520",
+      "name_cn": "布蕾德",
+      "name_en": "Bready",
+      "default": {
+        "spine_asset_id": "c520",
+        "icon": "data/nikke/blabla-assets/character/si/si_c520_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30056": {
+          "costume_id": "30056",
+          "costume_name": "Costume",
+          "spine_asset_id": "c520_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c520_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "521": {
+      "character_id": "352101",
+      "resource_id": "521",
+      "name_cn": "克劳斯特",
+      "name_en": "Crust",
+      "default": {
+        "spine_asset_id": "c521",
+        "icon": "data/nikke/blabla-assets/character/si/si_c521_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "550": {
+      "character_id": "355001",
+      "resource_id": "550",
+      "name_cn": "贝伊",
+      "name_en": "Bay",
+      "default": {
+        "spine_asset_id": "c550",
+        "icon": "data/nikke/blabla-assets/character/si/si_c550_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "70007": {
+          "costume_id": "70007",
+          "costume_name": "Costume",
+          "spine_asset_id": "c550_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c550_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "551": {
+      "character_id": "355101",
+      "resource_id": "551",
+      "name_cn": "克雷伊",
+      "name_en": "Clay",
+      "default": {
+        "spine_asset_id": "c551",
+        "icon": "data/nikke/blabla-assets/character/si/si_c551_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30063": {
+          "costume_id": "30063",
+          "costume_name": "Costume",
+          "spine_asset_id": "c551_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c551_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "570": {
+      "character_id": "357001",
+      "resource_id": "570",
+      "name_cn": "方舟黑色游侠",
+      "name_en": "Ark Ranger Black",
+      "default": {
+        "spine_asset_id": "c570",
+        "icon": "data/nikke/blabla-assets/character/si/si_c570_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "600": {
+      "character_id": "360001",
+      "resource_id": "600",
+      "name_cn": "敏特",
+      "name_en": "Mint",
+      "default": {
+        "spine_asset_id": "c600",
+        "icon": "data/nikke/blabla-assets/character/si/si_c600_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30065": {
+          "costume_id": "30065",
+          "costume_name": "Costume",
+          "spine_asset_id": "c600_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c600_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "601": {
+      "character_id": "360101",
+      "resource_id": "601",
+      "name_cn": "普莉卡",
+      "name_en": "Prika",
+      "default": {
+        "spine_asset_id": "c601",
+        "icon": "data/nikke/blabla-assets/character/si/si_c601_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30066": {
+          "costume_id": "30066",
+          "costume_name": "Costume",
+          "spine_asset_id": "c601_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c601_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "220": {
+      "character_id": "422001",
+      "resource_id": "220",
+      "name_cn": "白雪公主",
+      "name_en": "Snow White",
+      "default": {
+        "spine_asset_id": "c220",
+        "icon": "data/nikke/blabla-assets/character/si/si_c220_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c220_00.png",
+        "spine": {
+          "skeleton": "spine/c220/c220_00.skel",
+          "atlas": "spine/c220/c220_00.atlas",
+          "textures": [
+            "spine/c220/c220_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30026": {
+          "costume_id": "30026",
+          "costume_name": "Costume",
+          "spine_asset_id": "c220_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c220_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "221": {
+      "character_id": "422101",
+      "resource_id": "221",
+      "name_cn": "长发公主",
+      "name_en": "Rapunzel",
+      "default": {
+        "spine_asset_id": "c221",
+        "icon": "data/nikke/blabla-assets/character/si/si_c221_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c221_00.png",
+        "spine": {
+          "skeleton": "spine/c221/c221_00.skel",
+          "atlas": "spine/c221/c221_00.atlas",
+          "textures": [
+            "spine/c221/c221_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "222": {
+      "character_id": "422201",
+      "resource_id": "222",
+      "name_cn": "红莲",
+      "name_en": "Scarlet",
+      "default": {
+        "spine_asset_id": "c222",
+        "icon": "data/nikke/blabla-assets/character/si/si_c222_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c222_00.png",
+        "spine": {
+          "skeleton": "spine/c222/c222_00.skel",
+          "atlas": "spine/c222/c222_00.atlas",
+          "textures": [
+            "spine/c222/c222_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "110023": {
+          "costume_id": "110023",
+          "costume_name": "Costume",
+          "spine_asset_id": "c222_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c222_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "223": {
+      "character_id": "422301",
+      "resource_id": "223",
+      "name_cn": "娜由塔",
+      "name_en": "Nayuta",
+      "default": {
+        "spine_asset_id": "c223",
+        "icon": "data/nikke/blabla-assets/character/si/si_c223_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "120003": {
+          "costume_id": "120003",
+          "costume_name": "Costume",
+          "spine_asset_id": "c223_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c223_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "224": {
+      "character_id": "422401",
+      "resource_id": "224",
+      "name_cn": "白雪公主：纯真年代",
+      "name_en": "Snow White: Innocent Days",
+      "default": {
+        "spine_asset_id": "c224",
+        "icon": "data/nikke/blabla-assets/character/si/si_c224_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "225": {
+      "character_id": "422501",
+      "resource_id": "225",
+      "name_cn": "红莲：暗影",
+      "name_en": "Scarlet: Black Shadow",
+      "default": {
+        "spine_asset_id": "c225",
+        "icon": "data/nikke/blabla-assets/character/si/si_c225_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30033": {
+          "costume_id": "30033",
+          "costume_name": "Costume",
+          "spine_asset_id": "c225_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c225_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "226": {
+      "character_id": "422601",
+      "resource_id": "226",
+      "name_cn": "长发公主：纯洁恩典",
+      "name_en": "Rapunzel: Pure Grace",
+      "default": {
+        "spine_asset_id": "c226",
+        "icon": "data/nikke/blabla-assets/character/si/si_c226_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "230": {
+      "character_id": "423001",
+      "resource_id": "230",
+      "name_cn": "哈兰",
+      "name_en": "Harran",
+      "default": {
+        "spine_asset_id": "c230",
+        "icon": "data/nikke/blabla-assets/character/si/si_c230_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c230_00.png",
+        "spine": {
+          "skeleton": "spine/c230/c230_00.skel",
+          "atlas": "spine/c230/c230_00.atlas",
+          "textures": [
+            "spine/c230/c230_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "50006": {
+          "costume_id": "50006",
+          "costume_name": "Costume",
+          "spine_asset_id": "c230_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c230_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "231": {
+      "character_id": "423101",
+      "resource_id": "231",
+      "name_cn": "伊莎贝尔",
+      "name_en": "Isabel",
+      "default": {
+        "spine_asset_id": "c231",
+        "icon": "data/nikke/blabla-assets/character/si/si_c231_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c231_00.png",
+        "spine": {
+          "skeleton": "spine/c231/c231_00.skel",
+          "atlas": "spine/c231/c231_00.atlas",
+          "textures": [
+            "spine/c231/c231_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "50014": {
+          "costume_id": "50014",
+          "costume_name": "Costume",
+          "spine_asset_id": "c231_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c231_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "232": {
+      "character_id": "423201",
+      "resource_id": "232",
+      "name_cn": "诺雅",
+      "name_en": "Noah",
+      "default": {
+        "spine_asset_id": "c232",
+        "icon": "data/nikke/blabla-assets/character/si/si_c232_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c232_00.png",
+        "spine": {
+          "skeleton": "spine/c232/c232_00.skel",
+          "atlas": "spine/c232/c232_00.atlas",
+          "textures": [
+            "spine/c232/c232_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "233": {
+      "character_id": "423301",
+      "resource_id": "233",
+      "name_cn": "桃乐丝",
+      "name_en": "Dorothy",
+      "default": {
+        "spine_asset_id": "c233",
+        "icon": "data/nikke/blabla-assets/character/si/si_c233_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c233_00.png",
+        "spine": {
+          "skeleton": "spine/c233/c233_00.skel",
+          "atlas": "spine/c233/c233_00.atlas",
+          "textures": [
+            "spine/c233/c233_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "50007": {
+          "costume_id": "50007",
+          "costume_name": "Costume",
+          "spine_asset_id": "c233_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c233_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "130004": {
+          "costume_id": "130004",
+          "costume_name": "Costume",
+          "spine_asset_id": "c233_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c233_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "234": {
+      "character_id": "423401",
+      "resource_id": "234",
+      "name_cn": "桃乐丝：机缘巧遇",
+      "name_en": "Dorothy: Serendipity",
+      "default": {
+        "spine_asset_id": "c234",
+        "icon": "data/nikke/blabla-assets/character/si/si_c234_00_s.webp",
+        "portrait": "assets/spine-rendered/c234.png",
+        "fullbody": "assets/spine-rendered/c234.png",
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "260": {
+      "character_id": "426001",
+      "resource_id": "260",
+      "name_cn": "神罚",
+      "name_en": "Modernia",
+      "default": {
+        "spine_asset_id": "c260",
+        "icon": "data/nikke/blabla-assets/character/si/si_c260_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c260_00.png",
+        "spine": {
+          "skeleton": "spine/c260/c260_00.skel",
+          "atlas": "spine/c260/c260_00.atlas",
+          "textures": [
+            "spine/c260/c260_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30018": {
+          "costume_id": "30018",
+          "costume_name": "First Affection",
+          "spine_asset_id": "c260_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c260_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c260_01/c260_01_00.skel",
+            "atlas": "spine/c260_01/c260_01_00.atlas",
+            "textures": [
+              "spine/c260_01/c260_01_00.png"
+            ]
+          }
+        },
+        "120002": {
+          "costume_id": "120002",
+          "costume_name": "Costume",
+          "spine_asset_id": "c260_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c260_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "261": {
+      "character_id": "426101",
+      "resource_id": "261",
+      "name_cn": "尼希利斯塔",
+      "name_en": "Nihilister",
+      "default": {
+        "spine_asset_id": "c261",
+        "icon": "data/nikke/blabla-assets/character/si/si_c261_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c261_00.png",
+        "spine": {
+          "skeleton": "spine/c261/c261_00.skel",
+          "atlas": "spine/c261/c261_00.atlas",
+          "textures": [
+            "spine/c261/c261_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "262": {
+      "character_id": "426201",
+      "resource_id": "262",
+      "name_cn": "莉贝雷利奥",
+      "name_en": "Liberalio",
+      "default": {
+        "spine_asset_id": "c262",
+        "icon": "data/nikke/blabla-assets/character/si/si_c262_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c262/c262_00.skel",
+          "atlas": "spine/c262/c262_00.atlas",
+          "textures": [
+            "spine/c262/c262_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "50019": {
+          "costume_id": "50019",
+          "costume_name": "Costume",
+          "spine_asset_id": "c262_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c262_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "330": {
+      "character_id": "433001",
+      "resource_id": "330",
+      "name_cn": "皇冠",
+      "name_en": "Crown",
+      "default": {
+        "spine_asset_id": "c330",
+        "icon": "data/nikke/blabla-assets/character/si/si_c330_00_s.webp",
+        "portrait": "assets/spine-rendered/c330.png",
+        "fullbody": "assets/spine-rendered/c330.png",
+        "spine": {
+          "skeleton": "spine/c330/c330_00.skel",
+          "atlas": "spine/c330/c330_00.atlas",
+          "textures": [
+            "spine/c330/c330_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30052": {
+          "costume_id": "30052",
+          "costume_name": "Costume",
+          "spine_asset_id": "c330_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c330_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "120001": {
+          "costume_id": "120001",
+          "costume_name": "Costume",
+          "spine_asset_id": "c330_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c330_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "331": {
+      "character_id": "433101",
+      "resource_id": "331",
+      "name_cn": "钟鸣",
+      "name_en": "Chime",
+      "default": {
+        "spine_asset_id": "c331",
+        "icon": "data/nikke/blabla-assets/character/si/si_c331_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c331/c331_00.skel",
+          "atlas": "spine/c331/c331_00.atlas",
+          "textures": [
+            "spine/c331/c331_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "470": {
+      "character_id": "447001",
+      "resource_id": "470",
+      "name_cn": "小红帽",
+      "name_en": "Red Hood",
+      "default": {
+        "spine_asset_id": "c470",
+        "icon": "data/nikke/blabla-assets/character/si/si_c470_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c470/c470_00.skel",
+          "atlas": "spine/c470/c470_00.atlas",
+          "textures": [
+            "spine/c470/c470_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30051": {
+          "costume_id": "30051",
+          "costume_name": "Costume",
+          "spine_asset_id": "c470_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c470_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50012": {
+          "costume_id": "50012",
+          "costume_name": "Costume",
+          "spine_asset_id": "c470_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c470_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "471": {
+      "character_id": "447101",
+      "resource_id": "471",
+      "name_cn": "白雪公主：重型武装",
+      "name_en": "Snow White: Heavy Arms",
+      "default": {
+        "spine_asset_id": "c471",
+        "icon": "data/nikke/blabla-assets/character/si/si_c471_00_s.webp",
+        "portrait": "assets/spine-rendered/c471.png",
+        "fullbody": "assets/spine-rendered/c471.png",
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "511": {
+      "character_id": "451101",
+      "resource_id": "511",
+      "name_cn": "灰姑娘",
+      "name_en": "Cinderella",
+      "default": {
+        "spine_asset_id": "c511",
+        "icon": "data/nikke/blabla-assets/character/si/si_c511_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30042": {
+          "costume_id": "30042",
+          "costume_name": "Costume",
+          "spine_asset_id": "c511_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c511_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50015": {
+          "costume_id": "50015",
+          "costume_name": "Costume",
+          "spine_asset_id": "c511_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c511_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "513": {
+      "character_id": "451301",
+      "resource_id": "513",
+      "name_cn": "小美人鱼",
+      "name_en": "Little Mermaid",
+      "default": {
+        "spine_asset_id": "c513",
+        "icon": "data/nikke/blabla-assets/character/si/si_c513_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "10016": {
+          "costume_id": "10016",
+          "costume_name": "Costume",
+          "spine_asset_id": "c513_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c513_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "30053": {
+          "costume_id": "30053",
+          "costume_name": "Costume",
+          "spine_asset_id": "c513_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c513_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "50016": {
+          "costume_id": "50016",
+          "costume_name": "Costume",
+          "spine_asset_id": "c513_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c513_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "514": {
+      "character_id": "451401",
+      "resource_id": "514",
+      "name_cn": "格拉维",
+      "name_en": "Grave",
+      "default": {
+        "spine_asset_id": "c514",
+        "icon": "data/nikke/blabla-assets/character/si/si_c514_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "30041": {
+          "costume_id": "30041",
+          "costume_name": "Costume",
+          "spine_asset_id": "c514_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c514_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "515": {
+      "character_id": "451501",
+      "resource_id": "515",
+      "name_cn": "灰姑娘：琉璃波光",
+      "name_en": "Cinderella: Crystal Wave",
+      "default": {
+        "spine_asset_id": "c515",
+        "icon": "data/nikke/blabla-assets/character/si/si_c515_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "23": {
+      "character_id": "502301",
+      "resource_id": "23",
+      "name_cn": "德尔塔：怪盗忍者",
+      "name_en": "Delta: Ninja Thief",
+      "default": {
+        "spine_asset_id": "c023",
+        "icon": "data/nikke/blabla-assets/character/si/si_c023_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "800": {
+      "character_id": "580001",
+      "resource_id": "800",
+      "name_cn": "真纪真",
+      "name_en": "Makima",
+      "default": {
+        "spine_asset_id": "c800",
+        "icon": "data/nikke/blabla-assets/character/si/si_c800_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c800_00.png",
+        "spine": {
+          "skeleton": "spine/c800/c800_00.skel",
+          "atlas": "spine/c800/c800_00.atlas",
+          "textures": [
+            "spine/c800/c800_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "30014": {
+          "costume_id": "30014",
+          "costume_name": "Coat Off",
+          "spine_asset_id": "c800_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c800_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c800_01/c800_01_00.skel",
+            "atlas": "spine/c800_01/c800_01_00.atlas",
+            "textures": [
+              "spine/c800_01/c800_01_00.png"
+            ]
+          }
+        }
+      }
+    },
+    "801": {
+      "character_id": "580101",
+      "resource_id": "801",
+      "name_cn": "帕瓦",
+      "name_en": "Power",
+      "default": {
+        "spine_asset_id": "c801",
+        "icon": "data/nikke/blabla-assets/character/si/si_c801_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c801_00.png",
+        "spine": {
+          "skeleton": "spine/c801/c801_00.skel",
+          "atlas": "spine/c801/c801_00.atlas",
+          "textures": [
+            "spine/c801/c801_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "802": {
+      "character_id": "580201",
+      "resource_id": "802",
+      "name_cn": "姬野",
+      "name_en": "Himeno",
+      "default": {
+        "spine_asset_id": "c802",
+        "icon": "data/nikke/blabla-assets/character/si/si_c802_00_s.webp",
+        "portrait": null,
+        "fullbody": "FB/c802_00.png",
+        "spine": {
+          "skeleton": "spine/c802/c802_00.skel",
+          "atlas": "spine/c802/c802_00.atlas",
+          "textures": [
+            "spine/c802/c802_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "810": {
+      "character_id": "581001",
+      "resource_id": "810",
+      "name_cn": "2B",
+      "name_en": "2B",
+      "default": {
+        "spine_asset_id": "c810",
+        "icon": "data/nikke/blabla-assets/character/si/si_c810_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c810/c810_00.skel",
+          "atlas": "spine/c810/c810_00.atlas",
+          "textures": [
+            "spine/c810/c810_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "90001": {
+          "costume_id": "90001",
+          "costume_name": "Metamorphic Damage",
+          "spine_asset_id": "c810_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c810_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c810_01/c810_01_00.skel",
+            "atlas": "spine/c810_01/c810_01_00.atlas",
+            "textures": [
+              "spine/c810_01/c810_01_00.png"
+            ]
+          }
+        },
+        "90002": {
+          "costume_id": "90002",
+          "costume_name": "YoRHa Uniform 1",
+          "spine_asset_id": "c810_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c810_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c810_02/c810_02_00.skel",
+            "atlas": "spine/c810_02/c810_02_00.atlas",
+            "textures": [
+              "spine/c810_02/c810_02_00.png"
+            ]
+          }
+        },
+        "90005": {
+          "costume_id": "90005",
+          "costume_name": "Costume",
+          "spine_asset_id": "c810_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c810_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "811": {
+      "character_id": "581101",
+      "resource_id": "811",
+      "name_cn": "A2",
+      "name_en": "A2",
+      "default": {
+        "spine_asset_id": "c811",
+        "icon": "data/nikke/blabla-assets/character/si/si_c811_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c811/c811_00.skel",
+          "atlas": "spine/c811/c811_00.atlas",
+          "textures": [
+            "spine/c811/c811_00.png"
+          ]
+        }
+      },
+      "costumes": {
+        "90003": {
+          "costume_id": "90003",
+          "costume_name": "Metamorphic Damage",
+          "spine_asset_id": "c811_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c811_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c811_01/c811_01_00.skel",
+            "atlas": "spine/c811_01/c811_01_00.atlas",
+            "textures": [
+              "spine/c811_01/c811_01_00.png"
+            ]
+          }
+        },
+        "90004": {
+          "costume_id": "90004",
+          "costume_name": "YoRHa Uniform Prototype",
+          "spine_asset_id": "c811_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c811_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": {
+            "skeleton": "spine/c811_02/c811_02_00.skel",
+            "atlas": "spine/c811_02/c811_02_00.atlas",
+            "textures": [
+              "spine/c811_02/c811_02_00.png"
+            ]
+          }
+        },
+        "90006": {
+          "costume_id": "90006",
+          "costume_name": "Costume",
+          "spine_asset_id": "c811_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c811_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "812": {
+      "character_id": "581201",
+      "resource_id": "812",
+      "name_cn": "帕斯卡",
+      "name_en": "Pascal",
+      "default": {
+        "spine_asset_id": "c812",
+        "icon": "data/nikke/blabla-assets/character/si/si_c812_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": {
+          "skeleton": "spine/c812/c812_00.skel",
+          "atlas": "spine/c812/c812_00.atlas",
+          "textures": [
+            "spine/c812/c812_00.png"
+          ]
+        }
+      },
+      "costumes": {}
+    },
+    "820": {
+      "character_id": "582001",
+      "resource_id": "820",
+      "name_cn": "雷姆",
+      "name_en": "Rem",
+      "default": {
+        "spine_asset_id": "c820",
+        "icon": "data/nikke/blabla-assets/character/si/si_c820_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110001": {
+          "costume_id": "110001",
+          "costume_name": "Costume",
+          "spine_asset_id": "c820_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c820_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110002": {
+          "costume_id": "110002",
+          "costume_name": "Costume",
+          "spine_asset_id": "c820_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c820_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "821": {
+      "character_id": "582101",
+      "resource_id": "821",
+      "name_cn": "爱蜜莉雅",
+      "name_en": "Emilia",
+      "default": {
+        "spine_asset_id": "c821",
+        "icon": "data/nikke/blabla-assets/character/si/si_c821_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110003": {
+          "costume_id": "110003",
+          "costume_name": "Costume",
+          "spine_asset_id": "c821_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c821_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110004": {
+          "costume_id": "110004",
+          "costume_name": "Costume",
+          "spine_asset_id": "c821_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c821_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "822": {
+      "character_id": "582201",
+      "resource_id": "822",
+      "name_cn": "拉姆",
+      "name_en": "Ram",
+      "default": {
+        "spine_asset_id": "c822",
+        "icon": "data/nikke/blabla-assets/character/si/si_c822_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "830": {
+      "character_id": "583001",
+      "resource_id": "830",
+      "name_cn": "明日香",
+      "name_en": "Asuka",
+      "default": {
+        "spine_asset_id": "c830",
+        "icon": "data/nikke/blabla-assets/character/si/si_c830_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110005": {
+          "costume_id": "110005",
+          "costume_name": "Costume",
+          "spine_asset_id": "c830_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c830_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110008": {
+          "costume_id": "110008",
+          "costume_name": "Costume",
+          "spine_asset_id": "c830_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c830_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110011": {
+          "costume_id": "110011",
+          "costume_name": "Costume",
+          "spine_asset_id": "c830_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c830_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "831": {
+      "character_id": "583101",
+      "resource_id": "831",
+      "name_cn": "零",
+      "name_en": "Rei",
+      "default": {
+        "spine_asset_id": "c831",
+        "icon": "data/nikke/blabla-assets/character/si/si_c831_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110006": {
+          "costume_id": "110006",
+          "costume_name": "Costume",
+          "spine_asset_id": "c831_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c831_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110009": {
+          "costume_id": "110009",
+          "costume_name": "Costume",
+          "spine_asset_id": "c831_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c831_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "832": {
+      "character_id": "583201",
+      "resource_id": "832",
+      "name_cn": "真理",
+      "name_en": "Mari",
+      "default": {
+        "spine_asset_id": "c832",
+        "icon": "data/nikke/blabla-assets/character/si/si_c832_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110007": {
+          "costume_id": "110007",
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c832_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110010": {
+          "costume_id": "110010",
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c832_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110016": {
+          "costume_id": "110016",
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c832_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110017": {
+          "costume_id": "110017",
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_04",
+          "icon": "data/nikke/blabla-assets/character/si/si_c832_04_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "833": {
+      "character_id": "583301",
+      "resource_id": "833",
+      "name_cn": "美里",
+      "name_en": "Misato",
+      "default": {
+        "spine_asset_id": "c833",
+        "icon": "data/nikke/blabla-assets/character/si/si_c833_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "834": {
+      "character_id": "583401",
+      "resource_id": "834",
+      "name_cn": "零（暂称）",
+      "name_en": "Rei (Tentative Name)",
+      "default": {
+        "spine_asset_id": "c834",
+        "icon": "data/nikke/blabla-assets/character/si/si_c834_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110014": {
+          "costume_id": "110014",
+          "costume_name": "Costume",
+          "spine_asset_id": "c834_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c834_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110015": {
+          "costume_id": "110015",
+          "costume_name": "Costume",
+          "spine_asset_id": "c834_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c834_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "835": {
+      "character_id": "583501",
+      "resource_id": "835",
+      "name_cn": "明日香：WILLE",
+      "name_en": "Asuka: WILLE",
+      "default": {
+        "spine_asset_id": "c835",
+        "icon": "data/nikke/blabla-assets/character/si/si_c835_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110012": {
+          "costume_id": "110012",
+          "costume_name": "Costume",
+          "spine_asset_id": "c835_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c835_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110013": {
+          "costume_id": "110013",
+          "costume_name": "Costume",
+          "spine_asset_id": "c835_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c835_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "836": {
+      "character_id": "583601",
+      "resource_id": "836",
+      "name_cn": "樱",
+      "name_en": "Sakura",
+      "default": {
+        "spine_asset_id": "c836",
+        "icon": "data/nikke/blabla-assets/character/si/si_c836_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "840": {
+      "character_id": "584001",
+      "resource_id": "840",
+      "name_cn": "艾达",
+      "name_en": "Ada",
+      "default": {
+        "spine_asset_id": "c840",
+        "icon": "data/nikke/blabla-assets/character/si/si_c840_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110024": {
+          "costume_id": "110024",
+          "costume_name": "Costume",
+          "spine_asset_id": "c840_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c840_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110025": {
+          "costume_id": "110025",
+          "costume_name": "Costume",
+          "spine_asset_id": "c840_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c840_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "841": {
+      "character_id": "584101",
+      "resource_id": "841",
+      "name_cn": "吉儿",
+      "name_en": "Jill",
+      "default": {
+        "spine_asset_id": "c841",
+        "icon": "data/nikke/blabla-assets/character/si/si_c841_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110026": {
+          "costume_id": "110026",
+          "costume_name": "Costume",
+          "spine_asset_id": "c841_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c841_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110027": {
+          "costume_id": "110027",
+          "costume_name": "Costume",
+          "spine_asset_id": "c841_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c841_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "842": {
+      "character_id": "584201",
+      "resource_id": "842",
+      "name_cn": "克蕾儿",
+      "name_en": "Claire",
+      "default": {
+        "spine_asset_id": "c842",
+        "icon": "data/nikke/blabla-assets/character/si/si_c842_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "850": {
+      "character_id": "585001",
+      "resource_id": "850",
+      "name_cn": "伊芙",
+      "name_en": "EVE",
+      "default": {
+        "spine_asset_id": "c850",
+        "icon": "data/nikke/blabla-assets/character/si/si_c850_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110018": {
+          "costume_id": "110018",
+          "costume_name": "Costume",
+          "spine_asset_id": "c850_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c850_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110019": {
+          "costume_id": "110019",
+          "costume_name": "Costume",
+          "spine_asset_id": "c850_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c850_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110020": {
+          "costume_id": "110020",
+          "costume_name": "Costume",
+          "spine_asset_id": "c850_03",
+          "icon": "data/nikke/blabla-assets/character/si/si_c850_03_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "851": {
+      "character_id": "585101",
+      "resource_id": "851",
+      "name_cn": "蕾雯",
+      "name_en": "Raven",
+      "default": {
+        "spine_asset_id": "c851",
+        "icon": "data/nikke/blabla-assets/character/si/si_c851_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110021": {
+          "costume_id": "110021",
+          "costume_name": "Costume",
+          "spine_asset_id": "c851_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c851_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110022": {
+          "costume_id": "110022",
+          "costume_name": "Costume",
+          "spine_asset_id": "c851_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c851_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "852": {
+      "character_id": "585201",
+      "resource_id": "852",
+      "name_cn": "百合",
+      "name_en": "Lily",
+      "default": {
+        "spine_asset_id": "c852",
+        "icon": "data/nikke/blabla-assets/character/si/si_c852_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "860": {
+      "character_id": "586001",
+      "resource_id": "860",
+      "name_cn": "千束",
+      "name_en": "Chisato",
+      "default": {
+        "spine_asset_id": "c860",
+        "icon": "data/nikke/blabla-assets/character/si/si_c860_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110028": {
+          "costume_id": "110028",
+          "costume_name": "Costume",
+          "spine_asset_id": "c860_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c860_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110029": {
+          "costume_id": "110029",
+          "costume_name": "Costume",
+          "spine_asset_id": "c860_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c860_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "861": {
+      "character_id": "586101",
+      "resource_id": "861",
+      "name_cn": "泷奈",
+      "name_en": "Takina",
+      "default": {
+        "spine_asset_id": "c861",
+        "icon": "data/nikke/blabla-assets/character/si/si_c861_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110030": {
+          "costume_id": "110030",
+          "costume_name": "Costume",
+          "spine_asset_id": "c861_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c861_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110031": {
+          "costume_id": "110031",
+          "costume_name": "Costume",
+          "spine_asset_id": "c861_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c861_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "862": {
+      "character_id": "586201",
+      "resource_id": "862",
+      "name_cn": "胡桃",
+      "name_en": "Kurumi",
+      "default": {
+        "spine_asset_id": "c862",
+        "icon": "data/nikke/blabla-assets/character/si/si_c862_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    },
+    "870": {
+      "character_id": "587001",
+      "resource_id": "870",
+      "name_cn": "QUEEN（真）",
+      "name_en": "Queen (Makoto)",
+      "default": {
+        "spine_asset_id": "c870",
+        "icon": "data/nikke/blabla-assets/character/si/si_c870_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110032": {
+          "costume_id": "110032",
+          "costume_name": "Costume",
+          "spine_asset_id": "c870_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c870_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110033": {
+          "costume_id": "110033",
+          "costume_name": "Costume",
+          "spine_asset_id": "c870_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c870_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "871": {
+      "character_id": "587101",
+      "resource_id": "871",
+      "name_cn": "雪子",
+      "name_en": "Yukiko",
+      "default": {
+        "spine_asset_id": "c871",
+        "icon": "data/nikke/blabla-assets/character/si/si_c871_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {
+        "110034": {
+          "costume_id": "110034",
+          "costume_name": "Costume",
+          "spine_asset_id": "c871_01",
+          "icon": "data/nikke/blabla-assets/character/si/si_c871_01_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        },
+        "110035": {
+          "costume_id": "110035",
+          "costume_name": "Costume",
+          "spine_asset_id": "c871_02",
+          "icon": "data/nikke/blabla-assets/character/si/si_c871_02_s.webp",
+          "portrait": null,
+          "fullbody": null,
+          "spine": null
+        }
+      }
+    },
+    "872": {
+      "character_id": "587201",
+      "resource_id": "872",
+      "name_cn": "埃癸斯",
+      "name_en": "Aigis",
+      "default": {
+        "spine_asset_id": "c872",
+        "icon": "data/nikke/blabla-assets/character/si/si_c872_00_s.webp",
+        "portrait": null,
+        "fullbody": null,
+        "spine": null
+      },
+      "costumes": {}
+    }
+  }
+}

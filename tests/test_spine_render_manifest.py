@@ -308,9 +308,9 @@ class SpineRenderManifestTests(unittest.TestCase):
                 helm_img = manager.get_character_portrait(235201, "352")
                 self.assertEqual(helm_img.size, (657, 892))
 
-                # 6. Snow White: Heavy Arms (白雪公主：重型武装): resource_id 471 -> c471 (618x887)
+                # 白雪公主：重型武装使用离线重渲染的高清资源。
                 sw_img = manager.get_character_portrait(447101, "471")
-                self.assertEqual(sw_img.size, (618, 887))
+                self.assertEqual(sw_img.size, (2474, 3548))
             finally:
                 manager.close()
 

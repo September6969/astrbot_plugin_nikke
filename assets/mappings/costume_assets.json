@@ -1,0 +1,3743 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14T23:52:16.726425+00:00",
+  "source": "nikke_list_zh-TW_v2 + costumes.json",
+  "total_characters": 200,
+  "total_costumes": 178,
+  "characters": {
+    "10": {
+      "character_id": "201001",
+      "resource_id": "10",
+      "name_en": "Rapi",
+      "name_cn": "拉毗",
+      "default": {
+        "spine_asset_id": "c010",
+        "si_asset_key": "si_c010_00_s"
+      },
+      "costumes": {
+        "10005": {
+          "costume_id": "10005",
+          "costume_index": 2,
+          "costume_name": "Classic Vacation",
+          "spine_asset_id": "c010_03",
+          "si_asset_key": "si_c010_02_s",
+          "verified": true
+        },
+        "20001": {
+          "costume_id": "20001",
+          "costume_index": 1,
+          "costume_name": "White Promise",
+          "spine_asset_id": "c010_02",
+          "si_asset_key": "si_c010_01_s",
+          "verified": true
+        }
+      }
+    },
+    "11": {
+      "character_id": "201101",
+      "resource_id": "11",
+      "name_en": "Neon",
+      "name_cn": "尼恩",
+      "default": {
+        "spine_asset_id": "c011",
+        "si_asset_key": "si_c011_00_s"
+      },
+      "costumes": {
+        "30001": {
+          "costume_id": "30001",
+          "costume_index": 1,
+          "costume_name": "Bling Bullet",
+          "spine_asset_id": "c011_01",
+          "si_asset_key": "si_c011_01_s",
+          "verified": true
+        }
+      }
+    },
+    "12": {
+      "character_id": "301201",
+      "resource_id": "12",
+      "name_en": "Anis",
+      "name_cn": "阿妮斯",
+      "default": {
+        "spine_asset_id": "c012",
+        "si_asset_key": "si_c012_00_s"
+      },
+      "costumes": {}
+    },
+    "14": {
+      "character_id": "201401",
+      "resource_id": "14",
+      "name_en": "Neon: Blue Ocean",
+      "name_cn": "尼恩：蓝色海洋",
+      "default": {
+        "spine_asset_id": "c014",
+        "si_asset_key": "si_c014_00_s"
+      },
+      "costumes": {}
+    },
+    "15": {
+      "character_id": "301501",
+      "resource_id": "15",
+      "name_en": "Anis: Sparkling Summer",
+      "name_cn": "阿妮斯：闪耀夏日",
+      "default": {
+        "spine_asset_id": "c015",
+        "si_asset_key": "si_c015_00_s"
+      },
+      "costumes": {}
+    },
+    "16": {
+      "character_id": "201601",
+      "resource_id": "16",
+      "name_en": "Rapi: Red Hood",
+      "name_cn": "拉毗：小红帽",
+      "default": {
+        "spine_asset_id": "c016",
+        "si_asset_key": "si_c016_00_s"
+      },
+      "costumes": {
+        "10014": {
+          "costume_id": "10014",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c016_01",
+          "si_asset_key": "si_c016_01_s",
+          "verified": false
+        },
+        "30050": {
+          "costume_id": "30050",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c016_02",
+          "si_asset_key": "si_c016_02_s",
+          "verified": false
+        },
+        "130005": {
+          "costume_id": "130005",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c016_03",
+          "si_asset_key": "si_c016_03_s",
+          "verified": false
+        }
+      }
+    },
+    "17": {
+      "character_id": "301701",
+      "resource_id": "17",
+      "name_en": "Anis: Star",
+      "name_cn": "阿妮斯：超级巨星",
+      "default": {
+        "spine_asset_id": "c017",
+        "si_asset_key": "si_c017_00_s"
+      },
+      "costumes": {
+        "30064": {
+          "costume_id": "30064",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c017_02",
+          "si_asset_key": "si_c017_02_s",
+          "verified": false
+        },
+        "120004": {
+          "costume_id": "120004",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c017_01",
+          "si_asset_key": "si_c017_01_s",
+          "verified": false
+        }
+      }
+    },
+    "18": {
+      "character_id": "101801",
+      "resource_id": "18",
+      "name_en": "Neon: Vision Eye",
+      "name_cn": "尼恩：透视之眼",
+      "default": {
+        "spine_asset_id": "c018",
+        "si_asset_key": "si_c018_00_s"
+      },
+      "costumes": {}
+    },
+    "20": {
+      "character_id": "202001",
+      "resource_id": "20",
+      "name_en": "Delta",
+      "name_cn": "德尔塔",
+      "default": {
+        "spine_asset_id": "c020",
+        "si_asset_key": "si_c020_00_s"
+      },
+      "costumes": {}
+    },
+    "22": {
+      "character_id": "202201",
+      "resource_id": "22",
+      "name_en": "Signal",
+      "name_cn": "西格娜",
+      "default": {
+        "spine_asset_id": "c022",
+        "si_asset_key": "si_c022_00_s"
+      },
+      "costumes": {
+        "60001": {
+          "costume_id": "60001",
+          "costume_index": 1,
+          "costume_name": "Dramatic Chocolate",
+          "spine_asset_id": "c022_01",
+          "si_asset_key": "si_c022_01_s",
+          "verified": true
+        }
+      }
+    },
+    "23": {
+      "character_id": "502301",
+      "resource_id": "23",
+      "name_en": "Delta: Ninja Thief",
+      "name_cn": "德尔塔：怪盗忍者",
+      "default": {
+        "spine_asset_id": "c023",
+        "si_asset_key": "si_c023_00_s"
+      },
+      "costumes": {}
+    },
+    "30": {
+      "character_id": "203001",
+      "resource_id": "30",
+      "name_en": "Poli",
+      "name_cn": "波莉",
+      "default": {
+        "spine_asset_id": "c030",
+        "si_asset_key": "si_c030_00_s"
+      },
+      "costumes": {
+        "30002": {
+          "costume_id": "30002",
+          "costume_index": 1,
+          "costume_name": "Sweet Holic",
+          "spine_asset_id": "c030_01",
+          "si_asset_key": "si_c030_01_s",
+          "verified": true
+        },
+        "30025": {
+          "costume_id": "30025",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c030_02",
+          "si_asset_key": "si_c030_02_s",
+          "verified": false
+        }
+      }
+    },
+    "32": {
+      "character_id": "203201",
+      "resource_id": "32",
+      "name_en": "Miranda",
+      "name_cn": "米兰达",
+      "default": {
+        "spine_asset_id": "c032",
+        "si_asset_key": "si_c032_00_s"
+      },
+      "costumes": {
+        "30031": {
+          "costume_id": "30031",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c032_01",
+          "si_asset_key": "si_c032_01_s",
+          "verified": false
+        }
+      }
+    },
+    "33": {
+      "character_id": "203301",
+      "resource_id": "33",
+      "name_en": "Quiry",
+      "name_cn": "基里",
+      "default": {
+        "spine_asset_id": "c033",
+        "si_asset_key": "si_c033_00_s"
+      },
+      "costumes": {}
+    },
+    "40": {
+      "character_id": "204001",
+      "resource_id": "40",
+      "name_en": "D",
+      "name_cn": "D",
+      "default": {
+        "spine_asset_id": "c040",
+        "si_asset_key": "si_c040_00_s"
+      },
+      "costumes": {}
+    },
+    "41": {
+      "character_id": "204101",
+      "resource_id": "41",
+      "name_en": "K",
+      "name_cn": "K",
+      "default": {
+        "spine_asset_id": "c041",
+        "si_asset_key": "si_c041_00_s"
+      },
+      "costumes": {
+        "100002": {
+          "costume_id": "100002",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c041_01",
+          "si_asset_key": "si_c041_01_s",
+          "verified": false
+        }
+      }
+    },
+    "43": {
+      "character_id": "204301",
+      "resource_id": "43",
+      "name_en": "D: Killer Wife",
+      "name_cn": "D：杀手妻子",
+      "default": {
+        "spine_asset_id": "c043",
+        "si_asset_key": "si_c043_00_s"
+      },
+      "costumes": {
+        "50013": {
+          "costume_id": "50013",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c043_01",
+          "si_asset_key": "si_c043_01_s",
+          "verified": false
+        },
+        "100003": {
+          "costume_id": "100003",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c043_02",
+          "si_asset_key": "si_c043_02_s",
+          "verified": false
+        }
+      }
+    },
+    "60": {
+      "character_id": "306001",
+      "resource_id": "60",
+      "name_en": "Belorta",
+      "name_cn": "贝洛塔",
+      "default": {
+        "spine_asset_id": "c060",
+        "si_asset_key": "si_c060_00_s"
+      },
+      "costumes": {}
+    },
+    "61": {
+      "character_id": "306101",
+      "resource_id": "61",
+      "name_en": "Mica",
+      "name_cn": "米卡",
+      "default": {
+        "spine_asset_id": "c061",
+        "si_asset_key": "si_c061_00_s"
+      },
+      "costumes": {}
+    },
+    "62": {
+      "character_id": "306201",
+      "resource_id": "62",
+      "name_en": "Mica: Snow Buddy",
+      "name_cn": "米卡：雪地伙伴",
+      "default": {
+        "spine_asset_id": "c062",
+        "si_asset_key": "si_c062_00_s"
+      },
+      "costumes": {}
+    },
+    "70": {
+      "character_id": "207001",
+      "resource_id": "70",
+      "name_en": "Brid",
+      "name_cn": "布丽德",
+      "default": {
+        "spine_asset_id": "c070",
+        "si_asset_key": "si_c070_00_s"
+      },
+      "costumes": {
+        "30003": {
+          "costume_id": "30003",
+          "costume_index": 1,
+          "costume_name": "Model Worker",
+          "spine_asset_id": "c070_01",
+          "si_asset_key": "si_c070_01_s",
+          "verified": true
+        },
+        "30019": {
+          "costume_id": "30019",
+          "costume_index": 2,
+          "costume_name": "Black Moon",
+          "spine_asset_id": "c070_02",
+          "si_asset_key": "si_c070_02_s",
+          "verified": true
+        }
+      }
+    },
+    "71": {
+      "character_id": "207101",
+      "resource_id": "71",
+      "name_en": "Soline",
+      "name_cn": "索林",
+      "default": {
+        "spine_asset_id": "c071",
+        "si_asset_key": "si_c071_00_s"
+      },
+      "costumes": {}
+    },
+    "72": {
+      "character_id": "207201",
+      "resource_id": "72",
+      "name_en": "Diesel",
+      "name_cn": "迪塞尔",
+      "default": {
+        "spine_asset_id": "c072",
+        "si_asset_key": "si_c072_00_s"
+      },
+      "costumes": {
+        "30005": {
+          "costume_id": "30005",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c072_01",
+          "si_asset_key": "si_c072_01_s",
+          "verified": false
+        },
+        "30006": {
+          "costume_id": "30006",
+          "costume_index": 2,
+          "costume_name": "Black Sunday",
+          "spine_asset_id": "c072_01",
+          "si_asset_key": "si_c072_02_s",
+          "verified": true
+        },
+        "50011": {
+          "costume_id": "50011",
+          "costume_index": 4,
+          "costume_name": "Costume",
+          "spine_asset_id": "c072_04",
+          "si_asset_key": "si_c072_04_s",
+          "verified": false
+        }
+      }
+    },
+    "73": {
+      "character_id": "207301",
+      "resource_id": "73",
+      "name_en": "Brid: Silent Track",
+      "name_cn": "布丽德：静默轨道",
+      "default": {
+        "spine_asset_id": "c073",
+        "si_asset_key": "si_c073_00_s"
+      },
+      "costumes": {}
+    },
+    "74": {
+      "character_id": "207401",
+      "resource_id": "74",
+      "name_en": "Soline: Frost Ticket",
+      "name_cn": "索林：霜雪车票",
+      "default": {
+        "spine_asset_id": "c074",
+        "si_asset_key": "si_c074_00_s"
+      },
+      "costumes": {}
+    },
+    "75": {
+      "character_id": "207501",
+      "resource_id": "75",
+      "name_en": "Diesel: Winter Sweets",
+      "name_cn": "迪塞尔：冬日甜心",
+      "default": {
+        "spine_asset_id": "c075",
+        "si_asset_key": "si_c075_00_s"
+      },
+      "costumes": {}
+    },
+    "80": {
+      "character_id": "108001",
+      "resource_id": "80",
+      "name_en": "Centi",
+      "name_cn": "桑迪",
+      "default": {
+        "spine_asset_id": "c080",
+        "si_asset_key": "si_c080_00_s"
+      },
+      "costumes": {
+        "10012": {
+          "costume_id": "10012",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c080_02",
+          "si_asset_key": "si_c080_02_s",
+          "verified": false
+        },
+        "30012": {
+          "costume_id": "30012",
+          "costume_index": 1,
+          "costume_name": "Supreme Holiday",
+          "spine_asset_id": "c080_01",
+          "si_asset_key": "si_c080_01_s",
+          "verified": true
+        }
+      }
+    },
+    "82": {
+      "character_id": "108201",
+      "resource_id": "82",
+      "name_en": "Liter",
+      "name_cn": "丽塔",
+      "default": {
+        "spine_asset_id": "c082",
+        "si_asset_key": "si_c082_00_s"
+      },
+      "costumes": {
+        "10001": {
+          "costume_id": "10001",
+          "costume_index": 1,
+          "costume_name": "Guardfish",
+          "spine_asset_id": "c082_01",
+          "si_asset_key": "si_c082_01_s",
+          "verified": true
+        },
+        "50008": {
+          "costume_id": "50008",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c082_02",
+          "si_asset_key": "si_c082_02_s",
+          "verified": false
+        }
+      }
+    },
+    "90": {
+      "character_id": "209001",
+      "resource_id": "90",
+      "name_en": "Emma",
+      "name_cn": "艾玛",
+      "default": {
+        "spine_asset_id": "c090",
+        "si_asset_key": "si_c090_00_s"
+      },
+      "costumes": {
+        "30016": {
+          "costume_id": "30016",
+          "costume_index": 2,
+          "costume_name": "Office Therapy",
+          "spine_asset_id": "c090_02",
+          "si_asset_key": "si_c090_02_s",
+          "verified": true
+        },
+        "40001": {
+          "costume_id": "40001",
+          "costume_index": 1,
+          "costume_name": "Color me Red",
+          "spine_asset_id": "c090_01",
+          "si_asset_key": "si_c090_01_s",
+          "verified": true
+        }
+      }
+    },
+    "91": {
+      "character_id": "209101",
+      "resource_id": "91",
+      "name_en": "Vesti",
+      "name_cn": "贝斯蒂",
+      "default": {
+        "spine_asset_id": "c091",
+        "si_asset_key": "si_c091_00_s"
+      },
+      "costumes": {
+        "130002": {
+          "costume_id": "130002",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c091_01",
+          "si_asset_key": "si_c091_01_s",
+          "verified": false
+        }
+      }
+    },
+    "92": {
+      "character_id": "209201",
+      "resource_id": "92",
+      "name_en": "Eunhwa",
+      "name_cn": "银华",
+      "default": {
+        "spine_asset_id": "c092",
+        "si_asset_key": "si_c092_00_s"
+      },
+      "costumes": {}
+    },
+    "93": {
+      "character_id": "209301",
+      "resource_id": "93",
+      "name_en": "Emma: Tactical Upgrade",
+      "name_cn": "艾玛：战术升级",
+      "default": {
+        "spine_asset_id": "c093",
+        "si_asset_key": "si_c093_00_s"
+      },
+      "costumes": {
+        "50018": {
+          "costume_id": "50018",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c093_01",
+          "si_asset_key": "si_c093_01_s",
+          "verified": false
+        }
+      }
+    },
+    "94": {
+      "character_id": "209401",
+      "resource_id": "94",
+      "name_en": "Vesti: Tactical Upgrade",
+      "name_cn": "贝斯蒂：战术升级",
+      "default": {
+        "spine_asset_id": "c094",
+        "si_asset_key": "si_c094_00_s"
+      },
+      "costumes": {
+        "30060": {
+          "costume_id": "30060",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c094_01",
+          "si_asset_key": "si_c094_01_s",
+          "verified": false
+        }
+      }
+    },
+    "95": {
+      "character_id": "209501",
+      "resource_id": "95",
+      "name_en": "Eunhwa: Tactical Upgrade",
+      "name_cn": "银华：战术升级",
+      "default": {
+        "spine_asset_id": "c095",
+        "si_asset_key": "si_c095_00_s"
+      },
+      "costumes": {
+        "30049": {
+          "costume_id": "30049",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c095_01",
+          "si_asset_key": "si_c095_01_s",
+          "verified": false
+        }
+      }
+    },
+    "100": {
+      "character_id": "110001",
+      "resource_id": "100",
+      "name_en": "Laplace",
+      "name_cn": "拉普拉斯",
+      "default": {
+        "spine_asset_id": "c100",
+        "si_asset_key": "si_c100_00_s"
+      },
+      "costumes": {}
+    },
+    "101": {
+      "character_id": "110101",
+      "resource_id": "101",
+      "name_en": "Drake",
+      "name_cn": "德雷克",
+      "default": {
+        "spine_asset_id": "c101",
+        "si_asset_key": "si_c101_00_s"
+      },
+      "costumes": {
+        "60002": {
+          "costume_id": "60002",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c101_02",
+          "si_asset_key": "si_c101_02_s",
+          "verified": false
+        },
+        "80001": {
+          "costume_id": "80001",
+          "costume_index": 1,
+          "costume_name": "Villain Racer",
+          "spine_asset_id": "c101_01",
+          "si_asset_key": "si_c101_01_s",
+          "verified": true
+        }
+      }
+    },
+    "102": {
+      "character_id": "110201",
+      "resource_id": "102",
+      "name_en": "Maxwell",
+      "name_cn": "麦斯威尔",
+      "default": {
+        "spine_asset_id": "c102",
+        "si_asset_key": "si_c102_00_s"
+      },
+      "costumes": {
+        "30004": {
+          "costume_id": "30004",
+          "costume_index": 1,
+          "costume_name": "Mechanic White",
+          "spine_asset_id": "c102_01",
+          "si_asset_key": "si_c102_01_s",
+          "verified": true
+        }
+      }
+    },
+    "103": {
+      "character_id": "110301",
+      "resource_id": "103",
+      "name_en": "Laplace: Ultimate Hero",
+      "name_cn": "拉普拉斯：究极英雄",
+      "default": {
+        "spine_asset_id": "c103",
+        "si_asset_key": "si_c103_00_s"
+      },
+      "costumes": {
+        "30069": {
+          "costume_id": "30069",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c103_01",
+          "si_asset_key": "si_c103_01_s",
+          "verified": false
+        }
+      }
+    },
+    "104": {
+      "character_id": "110401",
+      "resource_id": "104",
+      "name_en": "Drake: Great Villain",
+      "name_cn": "德雷克：终极反派",
+      "default": {
+        "spine_asset_id": "c104",
+        "si_asset_key": "si_c104_00_s"
+      },
+      "costumes": {}
+    },
+    "105": {
+      "character_id": "110501",
+      "resource_id": "105",
+      "name_en": "Maxwell: Ordinary Mechanic",
+      "name_cn": "麦斯威尔：平凡技师",
+      "default": {
+        "spine_asset_id": "c105",
+        "si_asset_key": "si_c105_00_s"
+      },
+      "costumes": {
+        "30070": {
+          "costume_id": "30070",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c105_01",
+          "si_asset_key": "si_c105_01_s",
+          "verified": false
+        }
+      }
+    },
+    "110": {
+      "character_id": "111001",
+      "resource_id": "110",
+      "name_en": "Crow",
+      "name_cn": "克拉乌",
+      "default": {
+        "spine_asset_id": "c110",
+        "si_asset_key": "si_c110_00_s"
+      },
+      "costumes": {}
+    },
+    "111": {
+      "character_id": "111101",
+      "resource_id": "111",
+      "name_en": "Jackal",
+      "name_cn": "豺狼",
+      "default": {
+        "spine_asset_id": "c111",
+        "si_asset_key": "si_c111_00_s"
+      },
+      "costumes": {
+        "30054": {
+          "costume_id": "30054",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c111_01",
+          "si_asset_key": "si_c111_01_s",
+          "verified": false
+        }
+      }
+    },
+    "112": {
+      "character_id": "311201",
+      "resource_id": "112",
+      "name_en": "Viper",
+      "name_cn": "毒蛇",
+      "default": {
+        "spine_asset_id": "c112",
+        "si_asset_key": "si_c112_00_s"
+      },
+      "costumes": {
+        "10009": {
+          "costume_id": "10009",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c112_02",
+          "si_asset_key": "si_c112_02_s",
+          "verified": false
+        },
+        "30059": {
+          "costume_id": "30059",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c112_03",
+          "si_asset_key": "si_c112_03_s",
+          "verified": false
+        },
+        "70001": {
+          "costume_id": "70001",
+          "costume_index": 1,
+          "costume_name": "Toxic Rabbit",
+          "spine_asset_id": "c112_01",
+          "si_asset_key": "si_c112_01_s",
+          "verified": true
+        }
+      }
+    },
+    "113": {
+      "character_id": "211301",
+      "resource_id": "113",
+      "name_en": "E.H.",
+      "name_cn": "E.H.",
+      "default": {
+        "spine_asset_id": "c113",
+        "si_asset_key": "si_c113_00_s"
+      },
+      "costumes": {
+        "30068": {
+          "costume_id": "30068",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c113_01",
+          "si_asset_key": "si_c113_01_s",
+          "verified": false
+        }
+      }
+    },
+    "120": {
+      "character_id": "112001",
+      "resource_id": "120",
+      "name_en": "N102",
+      "name_cn": "N102",
+      "default": {
+        "spine_asset_id": "c120",
+        "si_asset_key": "si_c120_00_s"
+      },
+      "costumes": {}
+    },
+    "121": {
+      "character_id": "112101",
+      "resource_id": "121",
+      "name_en": "Anne: Miracle Fairy",
+      "name_cn": "安妮：奇迹仙女",
+      "default": {
+        "spine_asset_id": "c121",
+        "si_asset_key": "si_c121_00_s"
+      },
+      "costumes": {}
+    },
+    "130": {
+      "character_id": "313001",
+      "resource_id": "130",
+      "name_en": "Mary",
+      "name_cn": "梅里",
+      "default": {
+        "spine_asset_id": "c130",
+        "si_asset_key": "si_c130_00_s"
+      },
+      "costumes": {
+        "70004": {
+          "costume_id": "70004",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c130_01",
+          "si_asset_key": "si_c130_01_s",
+          "verified": false
+        }
+      }
+    },
+    "131": {
+      "character_id": "113101",
+      "resource_id": "131",
+      "name_en": "Pepper",
+      "name_cn": "佩珀",
+      "default": {
+        "spine_asset_id": "c131",
+        "si_asset_key": "si_c131_00_s"
+      },
+      "costumes": {
+        "10004": {
+          "costume_id": "10004",
+          "costume_index": 1,
+          "costume_name": "Ocean Vitamin",
+          "spine_asset_id": "c131_01",
+          "si_asset_key": "si_c131_01_s",
+          "verified": true
+        }
+      }
+    },
+    "132": {
+      "character_id": "313201",
+      "resource_id": "132",
+      "name_en": "Mary: Bay Goddess",
+      "name_cn": "梅里：海湾女神",
+      "default": {
+        "spine_asset_id": "c132",
+        "si_asset_key": "si_c132_00_s"
+      },
+      "costumes": {}
+    },
+    "140": {
+      "character_id": "314001",
+      "resource_id": "140",
+      "name_en": "Sugar",
+      "name_cn": "舒格",
+      "default": {
+        "spine_asset_id": "c140",
+        "si_asset_key": "si_c140_00_s"
+      },
+      "costumes": {
+        "30022": {
+          "costume_id": "30022",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c140_02",
+          "si_asset_key": "si_c140_02_s",
+          "verified": false
+        },
+        "50002": {
+          "costume_id": "50002",
+          "costume_index": 1,
+          "costume_name": "Hard-Boiled",
+          "spine_asset_id": "c140_01",
+          "si_asset_key": "si_c140_01_s",
+          "verified": true
+        }
+      }
+    },
+    "141": {
+      "character_id": "314101",
+      "resource_id": "141",
+      "name_en": "Milk",
+      "name_cn": "米尔克",
+      "default": {
+        "spine_asset_id": "c141",
+        "si_asset_key": "si_c141_00_s"
+      },
+      "costumes": {
+        "30011": {
+          "costume_id": "30011",
+          "costume_index": 1,
+          "costume_name": "Extreme Fighter",
+          "spine_asset_id": "c141_01",
+          "si_asset_key": "si_c141_01_s",
+          "verified": true
+        }
+      }
+    },
+    "142": {
+      "character_id": "314201",
+      "resource_id": "142",
+      "name_en": "Frima",
+      "name_cn": "普琳玛",
+      "default": {
+        "spine_asset_id": "c142",
+        "si_asset_key": "si_c142_00_s"
+      },
+      "costumes": {
+        "10002": {
+          "costume_id": "10002",
+          "costume_index": 1,
+          "costume_name": "Sea of Sloth",
+          "spine_asset_id": "c142_01",
+          "si_asset_key": "si_c142_01_s",
+          "verified": true
+        }
+      }
+    },
+    "143": {
+      "character_id": "314301",
+      "resource_id": "143",
+      "name_en": "Milk: Blooming Bunny",
+      "name_cn": "米尔克：花漾兔女郎",
+      "default": {
+        "spine_asset_id": "c143",
+        "si_asset_key": "si_c143_00_s"
+      },
+      "costumes": {}
+    },
+    "150": {
+      "character_id": "115001",
+      "resource_id": "150",
+      "name_en": "Julia",
+      "name_cn": "尤莉亚",
+      "default": {
+        "spine_asset_id": "c150",
+        "si_asset_key": "si_c150_00_s"
+      },
+      "costumes": {
+        "30048": {
+          "costume_id": "30048",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c150_02",
+          "si_asset_key": "si_c150_02_s",
+          "verified": false
+        },
+        "50001": {
+          "costume_id": "50001",
+          "costume_index": 1,
+          "costume_name": "Mild Nocturne",
+          "spine_asset_id": "c150_01",
+          "si_asset_key": "si_c150_01_s",
+          "verified": true
+        }
+      }
+    },
+    "160": {
+      "character_id": "116001",
+      "resource_id": "160",
+      "name_en": "Yuni",
+      "name_cn": "尤妮",
+      "default": {
+        "spine_asset_id": "c160",
+        "si_asset_key": "si_c160_00_s"
+      },
+      "costumes": {
+        "30008": {
+          "costume_id": "30008",
+          "costume_index": 1,
+          "costume_name": "Pretty in Pink",
+          "spine_asset_id": "c160_01",
+          "si_asset_key": "si_c160_01_s",
+          "verified": true
+        }
+      }
+    },
+    "161": {
+      "character_id": "116101",
+      "resource_id": "161",
+      "name_en": "Mihara",
+      "name_cn": "米哈拉",
+      "default": {
+        "spine_asset_id": "c161",
+        "si_asset_key": "si_c161_00_s"
+      },
+      "costumes": {}
+    },
+    "162": {
+      "character_id": "116201",
+      "resource_id": "162",
+      "name_en": "Mihara: Bonding Chain",
+      "name_cn": "米哈拉：羁绊锁链",
+      "default": {
+        "spine_asset_id": "c162",
+        "si_asset_key": "si_c162_00_s"
+      },
+      "costumes": {
+        "30043": {
+          "costume_id": "30043",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c162_01",
+          "si_asset_key": "si_c162_01_s",
+          "verified": false
+        }
+      }
+    },
+    "170": {
+      "character_id": "217001",
+      "resource_id": "170",
+      "name_en": "Privaty",
+      "name_cn": "普丽瓦蒂",
+      "default": {
+        "spine_asset_id": "c170",
+        "si_asset_key": "si_c170_00_s"
+      },
+      "costumes": {
+        "30009": {
+          "costume_id": "30009",
+          "costume_index": 1,
+          "costume_name": "Government Grunt",
+          "spine_asset_id": "c170_01",
+          "si_asset_key": "si_c170_01_s",
+          "verified": true
+        },
+        "30047": {
+          "costume_id": "30047",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c170_03",
+          "si_asset_key": "si_c170_03_s",
+          "verified": false
+        },
+        "30061": {
+          "costume_id": "30061",
+          "costume_index": 4,
+          "costume_name": "Costume",
+          "spine_asset_id": "c170_04",
+          "si_asset_key": "si_c170_04_s",
+          "verified": false
+        },
+        "50005": {
+          "costume_id": "50005",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c170_02",
+          "si_asset_key": "si_c170_02_s",
+          "verified": false
+        }
+      }
+    },
+    "171": {
+      "character_id": "317101",
+      "resource_id": "171",
+      "name_en": "Yulha",
+      "name_cn": "尤尔夏",
+      "default": {
+        "spine_asset_id": "c171",
+        "si_asset_key": "si_c171_00_s"
+      },
+      "costumes": {}
+    },
+    "172": {
+      "character_id": "117201",
+      "resource_id": "172",
+      "name_en": "Admi",
+      "name_cn": "艾德米",
+      "default": {
+        "spine_asset_id": "c172",
+        "si_asset_key": "si_c172_00_s"
+      },
+      "costumes": {}
+    },
+    "180": {
+      "character_id": "218001",
+      "resource_id": "180",
+      "name_en": "Guillotine",
+      "name_cn": "吉萝婷",
+      "default": {
+        "spine_asset_id": "c180",
+        "si_asset_key": "si_c180_00_s"
+      },
+      "costumes": {
+        "50009": {
+          "costume_id": "50009",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c180_01",
+          "si_asset_key": "si_c180_01_s",
+          "verified": false
+        }
+      }
+    },
+    "181": {
+      "character_id": "218101",
+      "resource_id": "181",
+      "name_en": "Maiden",
+      "name_cn": "梅登",
+      "default": {
+        "spine_asset_id": "c181",
+        "si_asset_key": "si_c181_00_s"
+      },
+      "costumes": {
+        "10007": {
+          "costume_id": "10007",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c181_02",
+          "si_asset_key": "si_c181_02_s",
+          "verified": false
+        },
+        "30007": {
+          "costume_id": "30007",
+          "costume_index": 1,
+          "costume_name": "Covert Nurse",
+          "spine_asset_id": "c181_01",
+          "si_asset_key": "si_c181_01_s",
+          "verified": true
+        }
+      }
+    },
+    "182": {
+      "character_id": "218201",
+      "resource_id": "182",
+      "name_en": "Guillotine: Winter Slayer",
+      "name_cn": "吉萝婷：寒冬杀手",
+      "default": {
+        "spine_asset_id": "c182",
+        "si_asset_key": "si_c182_00_s"
+      },
+      "costumes": {}
+    },
+    "183": {
+      "character_id": "218301",
+      "resource_id": "183",
+      "name_en": "Maiden: Ice Rose",
+      "name_cn": "梅登：冰玫瑰",
+      "default": {
+        "spine_asset_id": "c183",
+        "si_asset_key": "si_c183_00_s"
+      },
+      "costumes": {}
+    },
+    "190": {
+      "character_id": "319001",
+      "resource_id": "190",
+      "name_en": "Ludmilla",
+      "name_cn": "鲁德米拉",
+      "default": {
+        "spine_asset_id": "c190",
+        "si_asset_key": "si_c190_00_s"
+      },
+      "costumes": {}
+    },
+    "191": {
+      "character_id": "319101",
+      "resource_id": "191",
+      "name_en": "Alice",
+      "name_cn": "爱丽丝",
+      "default": {
+        "spine_asset_id": "c191",
+        "si_asset_key": "si_c191_00_s"
+      },
+      "costumes": {
+        "30015": {
+          "costume_id": "30015",
+          "costume_index": 1,
+          "costume_name": "Sweet Home",
+          "spine_asset_id": "c191_01",
+          "si_asset_key": "si_c191_01_s",
+          "verified": true
+        },
+        "130003": {
+          "costume_id": "130003",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c191_02",
+          "si_asset_key": "si_c191_02_s",
+          "verified": false
+        }
+      }
+    },
+    "192": {
+      "character_id": "119201",
+      "resource_id": "192",
+      "name_en": "Tove",
+      "name_cn": "托比",
+      "default": {
+        "spine_asset_id": "c192",
+        "si_asset_key": "si_c192_00_s"
+      },
+      "costumes": {
+        "10013": {
+          "costume_id": "10013",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c192_02",
+          "si_asset_key": "si_c192_02_s",
+          "verified": false
+        },
+        "30032": {
+          "costume_id": "30032",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c192_01",
+          "si_asset_key": "si_c192_01_s",
+          "verified": false
+        }
+      }
+    },
+    "193": {
+      "character_id": "319301",
+      "resource_id": "193",
+      "name_en": "Neve",
+      "name_cn": "尼夫",
+      "default": {
+        "spine_asset_id": "c193",
+        "si_asset_key": "si_c193_00_s"
+      },
+      "costumes": {}
+    },
+    "194": {
+      "character_id": "319401",
+      "resource_id": "194",
+      "name_en": "Ludmilla: Winter Owner",
+      "name_cn": "鲁德米拉：冬日之主",
+      "default": {
+        "spine_asset_id": "c194",
+        "si_asset_key": "si_c194_00_s"
+      },
+      "costumes": {}
+    },
+    "195": {
+      "character_id": "319501",
+      "resource_id": "195",
+      "name_en": "Alice: Wonderland Bunny",
+      "name_cn": "爱丽丝：仙境兔女郎",
+      "default": {
+        "spine_asset_id": "c195",
+        "si_asset_key": "si_c195_00_s"
+      },
+      "costumes": {}
+    },
+    "200": {
+      "character_id": "320001",
+      "resource_id": "200",
+      "name_en": "Rupee",
+      "name_cn": "露菲",
+      "default": {
+        "spine_asset_id": "c200",
+        "si_asset_key": "si_c200_00_s"
+      },
+      "costumes": {
+        "70002": {
+          "costume_id": "70002",
+          "costume_index": 1,
+          "costume_name": "Rabbit Deluxe",
+          "spine_asset_id": "c200_01",
+          "si_asset_key": "si_c200_01_s",
+          "verified": true
+        }
+      }
+    },
+    "201": {
+      "character_id": "320101",
+      "resource_id": "201",
+      "name_en": "Yan",
+      "name_cn": "杨",
+      "default": {
+        "spine_asset_id": "c201",
+        "si_asset_key": "si_c201_00_s"
+      },
+      "costumes": {
+        "10003": {
+          "costume_id": "10003",
+          "costume_index": 1,
+          "costume_name": "Sunrise Market",
+          "spine_asset_id": "c201_01",
+          "si_asset_key": "si_c201_01_s",
+          "verified": true
+        }
+      }
+    },
+    "202": {
+      "character_id": "320201",
+      "resource_id": "202",
+      "name_en": "Dolla",
+      "name_cn": "朵拉",
+      "default": {
+        "spine_asset_id": "c202",
+        "si_asset_key": "si_c202_00_s"
+      },
+      "costumes": {
+        "50004": {
+          "costume_id": "50004",
+          "costume_index": 1,
+          "costume_name": "Dark Rose",
+          "spine_asset_id": "c202_01",
+          "si_asset_key": "si_c202_01_s",
+          "verified": true
+        }
+      }
+    },
+    "203": {
+      "character_id": "320301",
+      "resource_id": "203",
+      "name_en": "Rupee: Winter Shopper",
+      "name_cn": "露菲：冬日购物狂",
+      "default": {
+        "spine_asset_id": "c203",
+        "si_asset_key": "si_c203_00_s"
+      },
+      "costumes": {}
+    },
+    "210": {
+      "character_id": "321001",
+      "resource_id": "210",
+      "name_en": "Exia",
+      "name_cn": "艾可希雅",
+      "default": {
+        "spine_asset_id": "c210",
+        "si_asset_key": "si_c210_00_s"
+      },
+      "costumes": {
+        "30023": {
+          "costume_id": "30023",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c210_02",
+          "si_asset_key": "si_c210_02_s",
+          "verified": false
+        },
+        "40002": {
+          "costume_id": "40002",
+          "costume_index": 1,
+          "costume_name": "Joy to the Nerds",
+          "spine_asset_id": "c210_01",
+          "si_asset_key": "si_c210_01_s",
+          "verified": true
+        },
+        "70005": {
+          "costume_id": "70005",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c210_03",
+          "si_asset_key": "si_c210_03_s",
+          "verified": false
+        }
+      }
+    },
+    "212": {
+      "character_id": "321201",
+      "resource_id": "212",
+      "name_en": "Novel",
+      "name_cn": "诺薇儿",
+      "default": {
+        "spine_asset_id": "c212",
+        "si_asset_key": "si_c212_00_s"
+      },
+      "costumes": {
+        "30010": {
+          "costume_id": "30010",
+          "costume_index": 1,
+          "costume_name": "Penguin Holmes",
+          "spine_asset_id": "c212_01",
+          "si_asset_key": "si_c212_01_s",
+          "verified": true
+        },
+        "100001": {
+          "costume_id": "100001",
+          "costume_index": 2,
+          "costume_name": "Detective Nurse",
+          "spine_asset_id": "c212_02",
+          "si_asset_key": "si_c212_02_s",
+          "verified": true
+        }
+      }
+    },
+    "220": {
+      "character_id": "422001",
+      "resource_id": "220",
+      "name_en": "Snow White",
+      "name_cn": "白雪公主",
+      "default": {
+        "spine_asset_id": "c220",
+        "si_asset_key": "si_c220_00_s"
+      },
+      "costumes": {
+        "30026": {
+          "costume_id": "30026",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c220_01",
+          "si_asset_key": "si_c220_01_s",
+          "verified": false
+        }
+      }
+    },
+    "221": {
+      "character_id": "422101",
+      "resource_id": "221",
+      "name_en": "Rapunzel",
+      "name_cn": "长发公主",
+      "default": {
+        "spine_asset_id": "c221",
+        "si_asset_key": "si_c221_00_s"
+      },
+      "costumes": {}
+    },
+    "222": {
+      "character_id": "422201",
+      "resource_id": "222",
+      "name_en": "Scarlet",
+      "name_cn": "红莲",
+      "default": {
+        "spine_asset_id": "c222",
+        "si_asset_key": "si_c222_00_s"
+      },
+      "costumes": {
+        "110023": {
+          "costume_id": "110023",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c222_01",
+          "si_asset_key": "si_c222_01_s",
+          "verified": false
+        }
+      }
+    },
+    "223": {
+      "character_id": "422301",
+      "resource_id": "223",
+      "name_en": "Nayuta",
+      "name_cn": "娜由塔",
+      "default": {
+        "spine_asset_id": "c223",
+        "si_asset_key": "si_c223_00_s"
+      },
+      "costumes": {
+        "120003": {
+          "costume_id": "120003",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c223_01",
+          "si_asset_key": "si_c223_01_s",
+          "verified": false
+        }
+      }
+    },
+    "224": {
+      "character_id": "422401",
+      "resource_id": "224",
+      "name_en": "Snow White: Innocent Days",
+      "name_cn": "白雪公主：纯真年代",
+      "default": {
+        "spine_asset_id": "c224",
+        "si_asset_key": "si_c224_00_s"
+      },
+      "costumes": {}
+    },
+    "225": {
+      "character_id": "422501",
+      "resource_id": "225",
+      "name_en": "Scarlet: Black Shadow",
+      "name_cn": "红莲：暗影",
+      "default": {
+        "spine_asset_id": "c225",
+        "si_asset_key": "si_c225_00_s"
+      },
+      "costumes": {
+        "30033": {
+          "costume_id": "30033",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c225_01",
+          "si_asset_key": "si_c225_01_s",
+          "verified": false
+        }
+      }
+    },
+    "226": {
+      "character_id": "422601",
+      "resource_id": "226",
+      "name_en": "Rapunzel: Pure Grace",
+      "name_cn": "长发公主：纯洁恩典",
+      "default": {
+        "spine_asset_id": "c226",
+        "si_asset_key": "si_c226_00_s"
+      },
+      "costumes": {}
+    },
+    "230": {
+      "character_id": "423001",
+      "resource_id": "230",
+      "name_en": "Harran",
+      "name_cn": "哈兰",
+      "default": {
+        "spine_asset_id": "c230",
+        "si_asset_key": "si_c230_00_s"
+      },
+      "costumes": {
+        "50006": {
+          "costume_id": "50006",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c230_01",
+          "si_asset_key": "si_c230_01_s",
+          "verified": false
+        }
+      }
+    },
+    "231": {
+      "character_id": "423101",
+      "resource_id": "231",
+      "name_en": "Isabel",
+      "name_cn": "伊莎贝尔",
+      "default": {
+        "spine_asset_id": "c231",
+        "si_asset_key": "si_c231_00_s"
+      },
+      "costumes": {
+        "50014": {
+          "costume_id": "50014",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c231_01",
+          "si_asset_key": "si_c231_01_s",
+          "verified": false
+        }
+      }
+    },
+    "232": {
+      "character_id": "423201",
+      "resource_id": "232",
+      "name_en": "Noah",
+      "name_cn": "诺雅",
+      "default": {
+        "spine_asset_id": "c232",
+        "si_asset_key": "si_c232_00_s"
+      },
+      "costumes": {}
+    },
+    "233": {
+      "character_id": "423301",
+      "resource_id": "233",
+      "name_en": "Dorothy",
+      "name_cn": "桃乐丝",
+      "default": {
+        "spine_asset_id": "c233",
+        "si_asset_key": "si_c233_00_s"
+      },
+      "costumes": {
+        "50007": {
+          "costume_id": "50007",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c233_01",
+          "si_asset_key": "si_c233_01_s",
+          "verified": false
+        },
+        "130004": {
+          "costume_id": "130004",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c233_02",
+          "si_asset_key": "si_c233_02_s",
+          "verified": false
+        }
+      }
+    },
+    "234": {
+      "character_id": "423401",
+      "resource_id": "234",
+      "name_en": "Dorothy: Serendipity",
+      "name_cn": "桃乐丝：机缘巧遇",
+      "default": {
+        "spine_asset_id": "c234",
+        "si_asset_key": "si_c234_00_s"
+      },
+      "costumes": {}
+    },
+    "240": {
+      "character_id": "324001",
+      "resource_id": "240",
+      "name_en": "Rumani",
+      "name_cn": "鲁玛妮",
+      "default": {
+        "spine_asset_id": "c240",
+        "si_asset_key": "si_c240_00_s"
+      },
+      "costumes": {}
+    },
+    "241": {
+      "character_id": "324101",
+      "resource_id": "241",
+      "name_en": "Epinel",
+      "name_cn": "艾菲涅尔",
+      "default": {
+        "spine_asset_id": "c241",
+        "si_asset_key": "si_c241_00_s"
+      },
+      "costumes": {}
+    },
+    "242": {
+      "character_id": "324201",
+      "resource_id": "242",
+      "name_en": "Folkwang",
+      "name_cn": "富克旺",
+      "default": {
+        "spine_asset_id": "c242",
+        "si_asset_key": "si_c242_00_s"
+      },
+      "costumes": {
+        "70003": {
+          "costume_id": "70003",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c242_01",
+          "si_asset_key": "si_c242_01_s",
+          "verified": false
+        }
+      }
+    },
+    "260": {
+      "character_id": "426001",
+      "resource_id": "260",
+      "name_en": "Modernia",
+      "name_cn": "神罚",
+      "default": {
+        "spine_asset_id": "c260",
+        "si_asset_key": "si_c260_00_s"
+      },
+      "costumes": {
+        "30018": {
+          "costume_id": "30018",
+          "costume_index": 1,
+          "costume_name": "First Affection",
+          "spine_asset_id": "c260_01",
+          "si_asset_key": "si_c260_01_s",
+          "verified": true
+        },
+        "120002": {
+          "costume_id": "120002",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c260_02",
+          "si_asset_key": "si_c260_02_s",
+          "verified": false
+        }
+      }
+    },
+    "261": {
+      "character_id": "426101",
+      "resource_id": "261",
+      "name_en": "Nihilister",
+      "name_cn": "尼希利斯塔",
+      "default": {
+        "spine_asset_id": "c261",
+        "si_asset_key": "si_c261_00_s"
+      },
+      "costumes": {}
+    },
+    "262": {
+      "character_id": "426201",
+      "resource_id": "262",
+      "name_en": "Liberalio",
+      "name_cn": "莉贝雷利奥",
+      "default": {
+        "spine_asset_id": "c262",
+        "si_asset_key": "si_c262_00_s"
+      },
+      "costumes": {
+        "50019": {
+          "costume_id": "50019",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c262_01",
+          "si_asset_key": "si_c262_01_s",
+          "verified": false
+        }
+      }
+    },
+    "270": {
+      "character_id": "327001",
+      "resource_id": "270",
+      "name_en": "Blanc",
+      "name_cn": "布兰儿",
+      "default": {
+        "spine_asset_id": "c270",
+        "si_asset_key": "si_c270_00_s"
+      },
+      "costumes": {
+        "30021": {
+          "costume_id": "30021",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c270_01",
+          "si_asset_key": "si_c270_01_s",
+          "verified": false
+        },
+        "30044": {
+          "costume_id": "30044",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c270_02",
+          "si_asset_key": "si_c270_02_s",
+          "verified": false
+        },
+        "30055": {
+          "costume_id": "30055",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c270_03",
+          "si_asset_key": "si_c270_03_s",
+          "verified": false
+        }
+      }
+    },
+    "271": {
+      "character_id": "327101",
+      "resource_id": "271",
+      "name_en": "Noir",
+      "name_cn": "诺亚尔",
+      "default": {
+        "spine_asset_id": "c271",
+        "si_asset_key": "si_c271_00_s"
+      },
+      "costumes": {
+        "30020": {
+          "costume_id": "30020",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c271_01",
+          "si_asset_key": "si_c271_01_s",
+          "verified": false
+        },
+        "30045": {
+          "costume_id": "30045",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c271_02",
+          "si_asset_key": "si_c271_02_s",
+          "verified": false
+        }
+      }
+    },
+    "272": {
+      "character_id": "327201",
+      "resource_id": "272",
+      "name_en": "Rouge",
+      "name_cn": "露姬",
+      "default": {
+        "spine_asset_id": "c272",
+        "si_asset_key": "si_c272_00_s"
+      },
+      "costumes": {
+        "70006": {
+          "costume_id": "70006",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c272_01",
+          "si_asset_key": "si_c272_01_s",
+          "verified": false
+        }
+      }
+    },
+    "280": {
+      "character_id": "228001",
+      "resource_id": "280",
+      "name_en": "Rosanna",
+      "name_cn": "罗珊娜",
+      "default": {
+        "spine_asset_id": "c280",
+        "si_asset_key": "si_c280_00_s"
+      },
+      "costumes": {
+        "30024": {
+          "costume_id": "30024",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c280_01",
+          "si_asset_key": "si_c280_01_s",
+          "verified": false
+        }
+      }
+    },
+    "281": {
+      "character_id": "328101",
+      "resource_id": "281",
+      "name_en": "Moran",
+      "name_cn": "牡丹",
+      "default": {
+        "spine_asset_id": "c281",
+        "si_asset_key": "si_c281_00_s"
+      },
+      "costumes": {
+        "30046": {
+          "costume_id": "30046",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c281_01",
+          "si_asset_key": "si_c281_01_s",
+          "verified": false
+        },
+        "50020": {
+          "costume_id": "50020",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c281_02",
+          "si_asset_key": "si_c281_02_s",
+          "verified": false
+        }
+      }
+    },
+    "282": {
+      "character_id": "328201",
+      "resource_id": "282",
+      "name_en": "Sakura",
+      "name_cn": "樱花",
+      "default": {
+        "spine_asset_id": "c282",
+        "si_asset_key": "si_c282_00_s"
+      },
+      "costumes": {
+        "30017": {
+          "costume_id": "30017",
+          "costume_index": 1,
+          "costume_name": "Midnight Stealth",
+          "spine_asset_id": "c282_01",
+          "si_asset_key": "si_c282_01_s",
+          "verified": true
+        }
+      }
+    },
+    "283": {
+      "character_id": "328301",
+      "resource_id": "283",
+      "name_en": "Rosanna: Chic Ocean",
+      "name_cn": "罗珊娜：高雅海洋",
+      "default": {
+        "spine_asset_id": "c283",
+        "si_asset_key": "si_c283_00_s"
+      },
+      "costumes": {}
+    },
+    "284": {
+      "character_id": "328401",
+      "resource_id": "284",
+      "name_en": "Sakura: Bloom in Summer",
+      "name_cn": "樱花：夏日绽放",
+      "default": {
+        "spine_asset_id": "c284",
+        "si_asset_key": "si_c284_00_s"
+      },
+      "costumes": {}
+    },
+    "290": {
+      "character_id": "129001",
+      "resource_id": "290",
+      "name_en": "Mana",
+      "name_cn": "玛娜",
+      "default": {
+        "spine_asset_id": "c290",
+        "si_asset_key": "si_c290_00_s"
+      },
+      "costumes": {}
+    },
+    "291": {
+      "character_id": "129101",
+      "resource_id": "291",
+      "name_en": "Ether",
+      "name_cn": "艾瑟儿",
+      "default": {
+        "spine_asset_id": "c291",
+        "si_asset_key": "si_c291_00_s"
+      },
+      "costumes": {}
+    },
+    "300": {
+      "character_id": "230001",
+      "resource_id": "300",
+      "name_en": "Soldier EG",
+      "name_cn": "士兵E.G.",
+      "default": {
+        "spine_asset_id": "c300",
+        "si_asset_key": "si_c300_00_s"
+      },
+      "costumes": {}
+    },
+    "301": {
+      "character_id": "230101",
+      "resource_id": "301",
+      "name_en": "Soldier FA",
+      "name_cn": "士兵F.A.",
+      "default": {
+        "spine_asset_id": "c301",
+        "si_asset_key": "si_c301_00_s"
+      },
+      "costumes": {}
+    },
+    "302": {
+      "character_id": "130201",
+      "resource_id": "302",
+      "name_en": "Product 08",
+      "name_cn": "产品08",
+      "default": {
+        "spine_asset_id": "c302",
+        "si_asset_key": "si_c302_00_s"
+      },
+      "costumes": {}
+    },
+    "303": {
+      "character_id": "130301",
+      "resource_id": "303",
+      "name_en": "Product 12",
+      "name_cn": "产品12",
+      "default": {
+        "spine_asset_id": "c303",
+        "si_asset_key": "si_c303_00_s"
+      },
+      "costumes": {}
+    },
+    "304": {
+      "character_id": "330401",
+      "resource_id": "304",
+      "name_en": "iDoll Flower",
+      "name_cn": "iDoll花",
+      "default": {
+        "spine_asset_id": "c304",
+        "si_asset_key": "si_c304_00_s"
+      },
+      "costumes": {}
+    },
+    "305": {
+      "character_id": "330501",
+      "resource_id": "305",
+      "name_en": "iDoll Ocean",
+      "name_cn": "iDoll海",
+      "default": {
+        "spine_asset_id": "c305",
+        "si_asset_key": "si_c305_00_s"
+      },
+      "costumes": {}
+    },
+    "306": {
+      "character_id": "230601",
+      "resource_id": "306",
+      "name_en": "Soldier OW",
+      "name_cn": "士兵O.W.",
+      "default": {
+        "spine_asset_id": "c306",
+        "si_asset_key": "si_c306_00_s"
+      },
+      "costumes": {}
+    },
+    "307": {
+      "character_id": "130701",
+      "resource_id": "307",
+      "name_en": "Product 23",
+      "name_cn": "产品23",
+      "default": {
+        "spine_asset_id": "c307",
+        "si_asset_key": "si_c307_00_s"
+      },
+      "costumes": {}
+    },
+    "308": {
+      "character_id": "330801",
+      "resource_id": "308",
+      "name_en": "iDoll Sun",
+      "name_cn": "iDoll太阳",
+      "default": {
+        "spine_asset_id": "c308",
+        "si_asset_key": "si_c308_00_s"
+      },
+      "costumes": {}
+    },
+    "310": {
+      "character_id": "331001",
+      "resource_id": "310",
+      "name_en": "Ade",
+      "name_cn": "爱德",
+      "default": {
+        "spine_asset_id": "c310",
+        "si_asset_key": "si_c310_00_s"
+      },
+      "costumes": {
+        "30040": {
+          "costume_id": "30040",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c310_01",
+          "si_asset_key": "si_c310_01_s",
+          "verified": false
+        }
+      }
+    },
+    "311": {
+      "character_id": "331101",
+      "resource_id": "311",
+      "name_en": "Cocoa",
+      "name_cn": "可可",
+      "default": {
+        "spine_asset_id": "c311",
+        "si_asset_key": "si_c311_00_s"
+      },
+      "costumes": {}
+    },
+    "312": {
+      "character_id": "331201",
+      "resource_id": "312",
+      "name_en": "Soda",
+      "name_cn": "索达",
+      "default": {
+        "spine_asset_id": "c312",
+        "si_asset_key": "si_c312_00_s"
+      },
+      "costumes": {}
+    },
+    "313": {
+      "character_id": "231301",
+      "resource_id": "313",
+      "name_en": "Privaty: Unkind Maid",
+      "name_cn": "普丽瓦蒂：不友善的女仆",
+      "default": {
+        "spine_asset_id": "c313",
+        "si_asset_key": "si_c313_00_s"
+      },
+      "costumes": {}
+    },
+    "314": {
+      "character_id": "331401",
+      "resource_id": "314",
+      "name_en": "Soda: Twinkling Bunny",
+      "name_cn": "索达：闪亮兔女郎",
+      "default": {
+        "spine_asset_id": "c314",
+        "si_asset_key": "si_c314_00_s"
+      },
+      "costumes": {}
+    },
+    "315": {
+      "character_id": "331501",
+      "resource_id": "315",
+      "name_en": "Ade: Agent Bunny",
+      "name_cn": "爱德：特务兔女郎",
+      "default": {
+        "spine_asset_id": "c315",
+        "si_asset_key": "si_c315_00_s"
+      },
+      "costumes": {}
+    },
+    "316": {
+      "character_id": "331601",
+      "resource_id": "316",
+      "name_en": "Velvet",
+      "name_cn": "薇尔维特",
+      "default": {
+        "spine_asset_id": "c316",
+        "si_asset_key": "si_c316_00_s"
+      },
+      "costumes": {
+        "70008": {
+          "costume_id": "70008",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c316_01",
+          "si_asset_key": "si_c316_01_s",
+          "verified": false
+        }
+      }
+    },
+    "321": {
+      "character_id": "232101",
+      "resource_id": "321",
+      "name_en": "Marciana",
+      "name_cn": "玛律恰那",
+      "default": {
+        "spine_asset_id": "c321",
+        "si_asset_key": "si_c321_00_s"
+      },
+      "costumes": {
+        "30029": {
+          "costume_id": "30029",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c321_01",
+          "si_asset_key": "si_c321_01_s",
+          "verified": false
+        }
+      }
+    },
+    "322": {
+      "character_id": "232201",
+      "resource_id": "322",
+      "name_en": "Marciana: Marine Study",
+      "name_cn": "玛律恰那：海洋进修",
+      "default": {
+        "spine_asset_id": "c322",
+        "si_asset_key": "si_c322_00_s"
+      },
+      "costumes": {}
+    },
+    "330": {
+      "character_id": "433001",
+      "resource_id": "330",
+      "name_en": "Crown",
+      "name_cn": "皇冠",
+      "default": {
+        "spine_asset_id": "c330",
+        "si_asset_key": "si_c330_00_s"
+      },
+      "costumes": {
+        "30052": {
+          "costume_id": "30052",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c330_02",
+          "si_asset_key": "si_c330_02_s",
+          "verified": false
+        },
+        "120001": {
+          "costume_id": "120001",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c330_01",
+          "si_asset_key": "si_c330_01_s",
+          "verified": false
+        }
+      }
+    },
+    "331": {
+      "character_id": "433101",
+      "resource_id": "331",
+      "name_en": "Chime",
+      "name_cn": "钟鸣",
+      "default": {
+        "spine_asset_id": "c331",
+        "si_asset_key": "si_c331_00_s"
+      },
+      "costumes": {}
+    },
+    "350": {
+      "character_id": "235001",
+      "resource_id": "350",
+      "name_en": "Mast",
+      "name_cn": "马斯特",
+      "default": {
+        "spine_asset_id": "c350",
+        "si_asset_key": "si_c350_00_s"
+      },
+      "costumes": {
+        "10006": {
+          "costume_id": "10006",
+          "costume_index": 1,
+          "costume_name": "A Pirate's Heart",
+          "spine_asset_id": "c350_01",
+          "si_asset_key": "si_c350_01_s",
+          "verified": true
+        },
+        "10010": {
+          "costume_id": "10010",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c350_02",
+          "si_asset_key": "si_c350_02_s",
+          "verified": false
+        }
+      }
+    },
+    "351": {
+      "character_id": "235101",
+      "resource_id": "351",
+      "name_en": "Anchor",
+      "name_cn": "安克",
+      "default": {
+        "spine_asset_id": "c351",
+        "si_asset_key": "si_c351_00_s"
+      },
+      "costumes": {
+        "10011": {
+          "costume_id": "10011",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c351_01",
+          "si_asset_key": "si_c351_01_s",
+          "verified": false
+        }
+      }
+    },
+    "352": {
+      "character_id": "235201",
+      "resource_id": "352",
+      "name_en": "Helm",
+      "name_cn": "海伦",
+      "default": {
+        "spine_asset_id": "c352",
+        "si_asset_key": "si_c352_00_s"
+      },
+      "costumes": {
+        "30037": {
+          "costume_id": "30037",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c352_02",
+          "si_asset_key": "si_c352_02_s",
+          "verified": false
+        },
+        "50003": {
+          "costume_id": "50003",
+          "costume_index": 1,
+          "costume_name": "Chandelier",
+          "spine_asset_id": "c352_01",
+          "si_asset_key": "si_c352_01_s",
+          "verified": true
+        }
+      }
+    },
+    "353": {
+      "character_id": "235301",
+      "resource_id": "353",
+      "name_en": "Helm: Aquamarine",
+      "name_cn": "海伦：海蓝宝石",
+      "default": {
+        "spine_asset_id": "c353",
+        "si_asset_key": "si_c353_00_s"
+      },
+      "costumes": {}
+    },
+    "354": {
+      "character_id": "235401",
+      "resource_id": "354",
+      "name_en": "Mast: Romantic Maid",
+      "name_cn": "马斯特：浪漫的女仆",
+      "default": {
+        "spine_asset_id": "c354",
+        "si_asset_key": "si_c354_00_s"
+      },
+      "costumes": {
+        "30057": {
+          "costume_id": "30057",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c354_01",
+          "si_asset_key": "si_c354_01_s",
+          "verified": false
+        }
+      }
+    },
+    "355": {
+      "character_id": "235501",
+      "resource_id": "355",
+      "name_en": "Anchor: Innocent Maid",
+      "name_cn": "安克：天真的女仆",
+      "default": {
+        "spine_asset_id": "c355",
+        "si_asset_key": "si_c355_00_s"
+      },
+      "costumes": {}
+    },
+    "361": {
+      "character_id": "136101",
+      "resource_id": "361",
+      "name_en": "Kilo",
+      "name_cn": "吉洛",
+      "default": {
+        "spine_asset_id": "c361",
+        "si_asset_key": "si_c361_00_s"
+      },
+      "costumes": {}
+    },
+    "380": {
+      "character_id": "338001",
+      "resource_id": "380",
+      "name_en": "Nero",
+      "name_cn": "尼罗",
+      "default": {
+        "spine_asset_id": "c380",
+        "si_asset_key": "si_c380_00_s"
+      },
+      "costumes": {}
+    },
+    "381": {
+      "character_id": "338101",
+      "resource_id": "381",
+      "name_en": "Biscuit",
+      "name_cn": "饼干",
+      "default": {
+        "spine_asset_id": "c381",
+        "si_asset_key": "si_c381_00_s"
+      },
+      "costumes": {
+        "30038": {
+          "costume_id": "30038",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c381_01",
+          "si_asset_key": "si_c381_01_s",
+          "verified": false
+        }
+      }
+    },
+    "382": {
+      "character_id": "338201",
+      "resource_id": "382",
+      "name_en": "Leona",
+      "name_cn": "莱昂纳",
+      "default": {
+        "spine_asset_id": "c382",
+        "si_asset_key": "si_c382_00_s"
+      },
+      "costumes": {
+        "30030": {
+          "costume_id": "30030",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c382_01",
+          "si_asset_key": "si_c382_01_s",
+          "verified": false
+        }
+      }
+    },
+    "390": {
+      "character_id": "239001",
+      "resource_id": "390",
+      "name_en": "Zwei",
+      "name_cn": "茨瓦伊",
+      "default": {
+        "spine_asset_id": "c390",
+        "si_asset_key": "si_c390_00_s"
+      },
+      "costumes": {
+        "30034": {
+          "costume_id": "30034",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c390_01",
+          "si_asset_key": "si_c390_01_s",
+          "verified": false
+        },
+        "30058": {
+          "costume_id": "30058",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c390_02",
+          "si_asset_key": "si_c390_02_s",
+          "verified": false
+        }
+      }
+    },
+    "391": {
+      "character_id": "139101",
+      "resource_id": "391",
+      "name_en": "Ein",
+      "name_cn": "爱因",
+      "default": {
+        "spine_asset_id": "c391",
+        "si_asset_key": "si_c391_00_s"
+      },
+      "costumes": {
+        "30035": {
+          "costume_id": "30035",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c391_01",
+          "si_asset_key": "si_c391_01_s",
+          "verified": false
+        }
+      }
+    },
+    "392": {
+      "character_id": "339201",
+      "resource_id": "392",
+      "name_en": "Rei",
+      "name_cn": "莱伊",
+      "default": {
+        "spine_asset_id": "c392",
+        "si_asset_key": "si_c392_00_s"
+      },
+      "costumes": {}
+    },
+    "400": {
+      "character_id": "140001",
+      "resource_id": "400",
+      "name_en": "Guilty",
+      "name_cn": "吉尔提",
+      "default": {
+        "spine_asset_id": "c400",
+        "si_asset_key": "si_c400_00_s"
+      },
+      "costumes": {
+        "10008": {
+          "costume_id": "10008",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c400_01",
+          "si_asset_key": "si_c400_01_s",
+          "verified": false
+        }
+      }
+    },
+    "401": {
+      "character_id": "140101",
+      "resource_id": "401",
+      "name_en": "Sin",
+      "name_cn": "森",
+      "default": {
+        "spine_asset_id": "c401",
+        "si_asset_key": "si_c401_00_s"
+      },
+      "costumes": {
+        "60004": {
+          "costume_id": "60004",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c401_01",
+          "si_asset_key": "si_c401_01_s",
+          "verified": false
+        }
+      }
+    },
+    "402": {
+      "character_id": "140201",
+      "resource_id": "402",
+      "name_en": "Quency",
+      "name_cn": "坎西",
+      "default": {
+        "spine_asset_id": "c402",
+        "si_asset_key": "si_c402_00_s"
+      },
+      "costumes": {}
+    },
+    "403": {
+      "character_id": "140301",
+      "resource_id": "403",
+      "name_en": "Quency: Escape Queen",
+      "name_cn": "坎西：逃生女王",
+      "default": {
+        "spine_asset_id": "c403",
+        "si_asset_key": "si_c403_00_s"
+      },
+      "costumes": {
+        "50017": {
+          "costume_id": "50017",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c403_01",
+          "si_asset_key": "si_c403_01_s",
+          "verified": false
+        }
+      }
+    },
+    "411": {
+      "character_id": "141101",
+      "resource_id": "411",
+      "name_en": "Flora",
+      "name_cn": "芙罗拉",
+      "default": {
+        "spine_asset_id": "c411",
+        "si_asset_key": "si_c411_00_s"
+      },
+      "costumes": {
+        "70009": {
+          "costume_id": "70009",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c411_01",
+          "si_asset_key": "si_c411_01_s",
+          "verified": false
+        }
+      }
+    },
+    "412": {
+      "character_id": "141201",
+      "resource_id": "412",
+      "name_en": "Trina",
+      "name_cn": "特蕾娜",
+      "default": {
+        "spine_asset_id": "c412",
+        "si_asset_key": "si_c412_00_s"
+      },
+      "costumes": {
+        "30067": {
+          "costume_id": "30067",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c412_01",
+          "si_asset_key": "si_c412_01_s",
+          "verified": false
+        }
+      }
+    },
+    "430": {
+      "character_id": "343001",
+      "resource_id": "430",
+      "name_en": "Noise",
+      "name_cn": "诺伊斯",
+      "default": {
+        "spine_asset_id": "c430",
+        "si_asset_key": "si_c430_00_s"
+      },
+      "costumes": {
+        "30013": {
+          "costume_id": "30013",
+          "costume_index": 1,
+          "costume_name": "Cherry Blossom Stage",
+          "spine_asset_id": "c430_01",
+          "si_asset_key": "si_c430_01_s",
+          "verified": true
+        },
+        "50010": {
+          "costume_id": "50010",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c430_02",
+          "si_asset_key": "si_c430_02_s",
+          "verified": false
+        }
+      }
+    },
+    "431": {
+      "character_id": "343101",
+      "resource_id": "431",
+      "name_en": "Volume",
+      "name_cn": "沃纶姆",
+      "default": {
+        "spine_asset_id": "c431",
+        "si_asset_key": "si_c431_00_s"
+      },
+      "costumes": {
+        "130001": {
+          "costume_id": "130001",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c431_01",
+          "si_asset_key": "si_c431_01_s",
+          "verified": false
+        }
+      }
+    },
+    "432": {
+      "character_id": "343201",
+      "resource_id": "432",
+      "name_en": "Aria",
+      "name_cn": "阿莉亚",
+      "default": {
+        "spine_asset_id": "c432",
+        "si_asset_key": "si_c432_00_s"
+      },
+      "costumes": {}
+    },
+    "441": {
+      "character_id": "244101",
+      "resource_id": "441",
+      "name_en": "Avistar",
+      "name_cn": "阿维斯塔",
+      "default": {
+        "spine_asset_id": "c441",
+        "si_asset_key": "si_c441_00_s"
+      },
+      "costumes": {}
+    },
+    "450": {
+      "character_id": "145001",
+      "resource_id": "450",
+      "name_en": "Naga",
+      "name_cn": "娜嘉",
+      "default": {
+        "spine_asset_id": "c450",
+        "si_asset_key": "si_c450_00_s"
+      },
+      "costumes": {
+        "10015": {
+          "costume_id": "10015",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c450_03",
+          "si_asset_key": "si_c450_03_s",
+          "verified": false
+        },
+        "30027": {
+          "costume_id": "30027",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c450_01",
+          "si_asset_key": "si_c450_01_s",
+          "verified": false
+        },
+        "30036": {
+          "costume_id": "30036",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c450_02",
+          "si_asset_key": "si_c450_02_s",
+          "verified": false
+        }
+      }
+    },
+    "451": {
+      "character_id": "145101",
+      "resource_id": "451",
+      "name_en": "Tia",
+      "name_cn": "蒂亚",
+      "default": {
+        "spine_asset_id": "c451",
+        "si_asset_key": "si_c451_00_s"
+      },
+      "costumes": {
+        "10017": {
+          "costume_id": "10017",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c451_03",
+          "si_asset_key": "si_c451_03_s",
+          "verified": false
+        },
+        "30028": {
+          "costume_id": "30028",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c451_01",
+          "si_asset_key": "si_c451_01_s",
+          "verified": false
+        },
+        "30039": {
+          "costume_id": "30039",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c451_02",
+          "si_asset_key": "si_c451_02_s",
+          "verified": false
+        }
+      }
+    },
+    "470": {
+      "character_id": "447001",
+      "resource_id": "470",
+      "name_en": "Red Hood",
+      "name_cn": "小红帽",
+      "default": {
+        "spine_asset_id": "c470",
+        "si_asset_key": "si_c470_00_s"
+      },
+      "costumes": {
+        "30051": {
+          "costume_id": "30051",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c470_02",
+          "si_asset_key": "si_c470_02_s",
+          "verified": false
+        },
+        "50012": {
+          "costume_id": "50012",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c470_01",
+          "si_asset_key": "si_c470_01_s",
+          "verified": false
+        }
+      }
+    },
+    "471": {
+      "character_id": "447101",
+      "resource_id": "471",
+      "name_en": "Snow White: Heavy Arms",
+      "name_cn": "白雪公主：重型武装",
+      "default": {
+        "spine_asset_id": "c471",
+        "si_asset_key": "si_c471_00_s"
+      },
+      "costumes": {}
+    },
+    "500": {
+      "character_id": "150001",
+      "resource_id": "500",
+      "name_en": "Elegg",
+      "name_cn": "伊莱格",
+      "default": {
+        "spine_asset_id": "c500",
+        "si_asset_key": "si_c500_00_s"
+      },
+      "costumes": {}
+    },
+    "501": {
+      "character_id": "150101",
+      "resource_id": "501",
+      "name_en": "Trony",
+      "name_cn": "特罗尼",
+      "default": {
+        "spine_asset_id": "c501",
+        "si_asset_key": "si_c501_00_s"
+      },
+      "costumes": {
+        "60003": {
+          "costume_id": "60003",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c501_01",
+          "si_asset_key": "si_c501_01_s",
+          "verified": false
+        }
+      }
+    },
+    "502": {
+      "character_id": "150201",
+      "resource_id": "502",
+      "name_en": "Elegg: Boom and Shock",
+      "name_cn": "伊莱格：BOOM与惊吓",
+      "default": {
+        "spine_asset_id": "c502",
+        "si_asset_key": "si_c502_00_s"
+      },
+      "costumes": {}
+    },
+    "511": {
+      "character_id": "451101",
+      "resource_id": "511",
+      "name_en": "Cinderella",
+      "name_cn": "灰姑娘",
+      "default": {
+        "spine_asset_id": "c511",
+        "si_asset_key": "si_c511_00_s"
+      },
+      "costumes": {
+        "30042": {
+          "costume_id": "30042",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c511_02",
+          "si_asset_key": "si_c511_02_s",
+          "verified": false
+        },
+        "50015": {
+          "costume_id": "50015",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c511_01",
+          "si_asset_key": "si_c511_01_s",
+          "verified": false
+        }
+      }
+    },
+    "513": {
+      "character_id": "451301",
+      "resource_id": "513",
+      "name_en": "Little Mermaid",
+      "name_cn": "小美人鱼",
+      "default": {
+        "spine_asset_id": "c513",
+        "si_asset_key": "si_c513_00_s"
+      },
+      "costumes": {
+        "10016": {
+          "costume_id": "10016",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c513_03",
+          "si_asset_key": "si_c513_03_s",
+          "verified": false
+        },
+        "30053": {
+          "costume_id": "30053",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c513_02",
+          "si_asset_key": "si_c513_02_s",
+          "verified": false
+        },
+        "50016": {
+          "costume_id": "50016",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c513_01",
+          "si_asset_key": "si_c513_01_s",
+          "verified": false
+        }
+      }
+    },
+    "514": {
+      "character_id": "451401",
+      "resource_id": "514",
+      "name_en": "Grave",
+      "name_cn": "格拉维",
+      "default": {
+        "spine_asset_id": "c514",
+        "si_asset_key": "si_c514_00_s"
+      },
+      "costumes": {
+        "30041": {
+          "costume_id": "30041",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c514_01",
+          "si_asset_key": "si_c514_01_s",
+          "verified": false
+        }
+      }
+    },
+    "515": {
+      "character_id": "451501",
+      "resource_id": "515",
+      "name_en": "Cinderella: Crystal Wave",
+      "name_cn": "灰姑娘：琉璃波光",
+      "default": {
+        "spine_asset_id": "c515",
+        "si_asset_key": "si_c515_00_s"
+      },
+      "costumes": {}
+    },
+    "520": {
+      "character_id": "352001",
+      "resource_id": "520",
+      "name_en": "Bready",
+      "name_cn": "布蕾德",
+      "default": {
+        "spine_asset_id": "c520",
+        "si_asset_key": "si_c520_00_s"
+      },
+      "costumes": {
+        "30056": {
+          "costume_id": "30056",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c520_01",
+          "si_asset_key": "si_c520_01_s",
+          "verified": false
+        }
+      }
+    },
+    "521": {
+      "character_id": "352101",
+      "resource_id": "521",
+      "name_en": "Crust",
+      "name_cn": "克劳斯特",
+      "default": {
+        "spine_asset_id": "c521",
+        "si_asset_key": "si_c521_00_s"
+      },
+      "costumes": {}
+    },
+    "532": {
+      "character_id": "253201",
+      "resource_id": "532",
+      "name_en": "Sora",
+      "name_cn": "索拉",
+      "default": {
+        "spine_asset_id": "c532",
+        "si_asset_key": "si_c532_00_s"
+      },
+      "costumes": {
+        "30062": {
+          "costume_id": "30062",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c532_01",
+          "si_asset_key": "si_c532_01_s",
+          "verified": false
+        }
+      }
+    },
+    "550": {
+      "character_id": "355001",
+      "resource_id": "550",
+      "name_en": "Bay",
+      "name_cn": "贝伊",
+      "default": {
+        "spine_asset_id": "c550",
+        "si_asset_key": "si_c550_00_s"
+      },
+      "costumes": {
+        "70007": {
+          "costume_id": "70007",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c550_01",
+          "si_asset_key": "si_c550_01_s",
+          "verified": false
+        }
+      }
+    },
+    "551": {
+      "character_id": "355101",
+      "resource_id": "551",
+      "name_en": "Clay",
+      "name_cn": "克雷伊",
+      "default": {
+        "spine_asset_id": "c551",
+        "si_asset_key": "si_c551_00_s"
+      },
+      "costumes": {
+        "30063": {
+          "costume_id": "30063",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c551_01",
+          "si_asset_key": "si_c551_01_s",
+          "verified": false
+        }
+      }
+    },
+    "570": {
+      "character_id": "357001",
+      "resource_id": "570",
+      "name_en": "Ark Ranger Black",
+      "name_cn": "方舟黑色游侠",
+      "default": {
+        "spine_asset_id": "c570",
+        "si_asset_key": "si_c570_00_s"
+      },
+      "costumes": {}
+    },
+    "580": {
+      "character_id": "258001",
+      "resource_id": "580",
+      "name_en": "Phantom",
+      "name_cn": "潘托姆",
+      "default": {
+        "spine_asset_id": "c580",
+        "si_asset_key": "si_c580_00_s"
+      },
+      "costumes": {
+        "130006": {
+          "costume_id": "130006",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c580_01",
+          "si_asset_key": "si_c580_01_s",
+          "verified": false
+        }
+      }
+    },
+    "581": {
+      "character_id": "258101",
+      "resource_id": "581",
+      "name_en": "Arcana",
+      "name_cn": "阿尔卡娜",
+      "default": {
+        "spine_asset_id": "c581",
+        "si_asset_key": "si_c581_00_s"
+      },
+      "costumes": {}
+    },
+    "582": {
+      "character_id": "258201",
+      "resource_id": "582",
+      "name_en": "Label",
+      "name_cn": "蕾贝儿",
+      "default": {
+        "spine_asset_id": "c582",
+        "si_asset_key": "si_c582_00_s"
+      },
+      "costumes": {}
+    },
+    "583": {
+      "character_id": "258301",
+      "resource_id": "583",
+      "name_en": "Arcana: Fortune Mate",
+      "name_cn": "阿尔卡娜：命运伴侣",
+      "default": {
+        "spine_asset_id": "c583",
+        "si_asset_key": "si_c583_00_s"
+      },
+      "costumes": {}
+    },
+    "590": {
+      "character_id": "159001",
+      "resource_id": "590",
+      "name_en": "Mori",
+      "name_cn": "莫莉",
+      "default": {
+        "spine_asset_id": "c590",
+        "si_asset_key": "si_c590_00_s"
+      },
+      "costumes": {}
+    },
+    "600": {
+      "character_id": "360001",
+      "resource_id": "600",
+      "name_en": "Mint",
+      "name_cn": "敏特",
+      "default": {
+        "spine_asset_id": "c600",
+        "si_asset_key": "si_c600_00_s"
+      },
+      "costumes": {
+        "30065": {
+          "costume_id": "30065",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c600_01",
+          "si_asset_key": "si_c600_01_s",
+          "verified": false
+        }
+      }
+    },
+    "601": {
+      "character_id": "360101",
+      "resource_id": "601",
+      "name_en": "Prika",
+      "name_cn": "普莉卡",
+      "default": {
+        "spine_asset_id": "c601",
+        "si_asset_key": "si_c601_00_s"
+      },
+      "costumes": {
+        "30066": {
+          "costume_id": "30066",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c601_01",
+          "si_asset_key": "si_c601_01_s",
+          "verified": false
+        }
+      }
+    },
+    "620": {
+      "character_id": "162001",
+      "resource_id": "620",
+      "name_en": "Snow Crane",
+      "name_cn": "白鹤",
+      "default": {
+        "spine_asset_id": "c620",
+        "si_asset_key": "si_c620_00_s"
+      },
+      "costumes": {}
+    },
+    "800": {
+      "character_id": "580001",
+      "resource_id": "800",
+      "name_en": "Makima",
+      "name_cn": "真纪真",
+      "default": {
+        "spine_asset_id": "c800",
+        "si_asset_key": "si_c800_00_s"
+      },
+      "costumes": {
+        "30014": {
+          "costume_id": "30014",
+          "costume_index": 1,
+          "costume_name": "Coat Off",
+          "spine_asset_id": "c800_01",
+          "si_asset_key": "si_c800_01_s",
+          "verified": true
+        }
+      }
+    },
+    "801": {
+      "character_id": "580101",
+      "resource_id": "801",
+      "name_en": "Power",
+      "name_cn": "帕瓦",
+      "default": {
+        "spine_asset_id": "c801",
+        "si_asset_key": "si_c801_00_s"
+      },
+      "costumes": {}
+    },
+    "802": {
+      "character_id": "580201",
+      "resource_id": "802",
+      "name_en": "Himeno",
+      "name_cn": "姬野",
+      "default": {
+        "spine_asset_id": "c802",
+        "si_asset_key": "si_c802_00_s"
+      },
+      "costumes": {}
+    },
+    "810": {
+      "character_id": "581001",
+      "resource_id": "810",
+      "name_en": "2B",
+      "name_cn": "2B",
+      "default": {
+        "spine_asset_id": "c810",
+        "si_asset_key": "si_c810_00_s"
+      },
+      "costumes": {
+        "90001": {
+          "costume_id": "90001",
+          "costume_index": 1,
+          "costume_name": "Metamorphic Damage",
+          "spine_asset_id": "c810_01",
+          "si_asset_key": "si_c810_01_s",
+          "verified": true
+        },
+        "90002": {
+          "costume_id": "90002",
+          "costume_index": 2,
+          "costume_name": "YoRHa Uniform 1",
+          "spine_asset_id": "c810_02",
+          "si_asset_key": "si_c810_02_s",
+          "verified": true
+        },
+        "90005": {
+          "costume_id": "90005",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c810_03",
+          "si_asset_key": "si_c810_03_s",
+          "verified": false
+        }
+      }
+    },
+    "811": {
+      "character_id": "581101",
+      "resource_id": "811",
+      "name_en": "A2",
+      "name_cn": "A2",
+      "default": {
+        "spine_asset_id": "c811",
+        "si_asset_key": "si_c811_00_s"
+      },
+      "costumes": {
+        "90003": {
+          "costume_id": "90003",
+          "costume_index": 1,
+          "costume_name": "Metamorphic Damage",
+          "spine_asset_id": "c811_01",
+          "si_asset_key": "si_c811_01_s",
+          "verified": true
+        },
+        "90004": {
+          "costume_id": "90004",
+          "costume_index": 2,
+          "costume_name": "YoRHa Uniform Prototype",
+          "spine_asset_id": "c811_02",
+          "si_asset_key": "si_c811_02_s",
+          "verified": true
+        },
+        "90006": {
+          "costume_id": "90006",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c811_03",
+          "si_asset_key": "si_c811_03_s",
+          "verified": false
+        }
+      }
+    },
+    "812": {
+      "character_id": "581201",
+      "resource_id": "812",
+      "name_en": "Pascal",
+      "name_cn": "帕斯卡",
+      "default": {
+        "spine_asset_id": "c812",
+        "si_asset_key": "si_c812_00_s"
+      },
+      "costumes": {}
+    },
+    "820": {
+      "character_id": "582001",
+      "resource_id": "820",
+      "name_en": "Rem",
+      "name_cn": "雷姆",
+      "default": {
+        "spine_asset_id": "c820",
+        "si_asset_key": "si_c820_00_s"
+      },
+      "costumes": {
+        "110001": {
+          "costume_id": "110001",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c820_01",
+          "si_asset_key": "si_c820_01_s",
+          "verified": false
+        },
+        "110002": {
+          "costume_id": "110002",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c820_02",
+          "si_asset_key": "si_c820_02_s",
+          "verified": false
+        }
+      }
+    },
+    "821": {
+      "character_id": "582101",
+      "resource_id": "821",
+      "name_en": "Emilia",
+      "name_cn": "爱蜜莉雅",
+      "default": {
+        "spine_asset_id": "c821",
+        "si_asset_key": "si_c821_00_s"
+      },
+      "costumes": {
+        "110003": {
+          "costume_id": "110003",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c821_01",
+          "si_asset_key": "si_c821_01_s",
+          "verified": false
+        },
+        "110004": {
+          "costume_id": "110004",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c821_02",
+          "si_asset_key": "si_c821_02_s",
+          "verified": false
+        }
+      }
+    },
+    "822": {
+      "character_id": "582201",
+      "resource_id": "822",
+      "name_en": "Ram",
+      "name_cn": "拉姆",
+      "default": {
+        "spine_asset_id": "c822",
+        "si_asset_key": "si_c822_00_s"
+      },
+      "costumes": {}
+    },
+    "830": {
+      "character_id": "583001",
+      "resource_id": "830",
+      "name_en": "Asuka",
+      "name_cn": "明日香",
+      "default": {
+        "spine_asset_id": "c830",
+        "si_asset_key": "si_c830_00_s"
+      },
+      "costumes": {
+        "110005": {
+          "costume_id": "110005",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c830_01",
+          "si_asset_key": "si_c830_01_s",
+          "verified": false
+        },
+        "110008": {
+          "costume_id": "110008",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c830_02",
+          "si_asset_key": "si_c830_02_s",
+          "verified": false
+        },
+        "110011": {
+          "costume_id": "110011",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c830_03",
+          "si_asset_key": "si_c830_03_s",
+          "verified": false
+        }
+      }
+    },
+    "831": {
+      "character_id": "583101",
+      "resource_id": "831",
+      "name_en": "Rei",
+      "name_cn": "零",
+      "default": {
+        "spine_asset_id": "c831",
+        "si_asset_key": "si_c831_00_s"
+      },
+      "costumes": {
+        "110006": {
+          "costume_id": "110006",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c831_01",
+          "si_asset_key": "si_c831_01_s",
+          "verified": false
+        },
+        "110009": {
+          "costume_id": "110009",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c831_02",
+          "si_asset_key": "si_c831_02_s",
+          "verified": false
+        }
+      }
+    },
+    "832": {
+      "character_id": "583201",
+      "resource_id": "832",
+      "name_en": "Mari",
+      "name_cn": "真理",
+      "default": {
+        "spine_asset_id": "c832",
+        "si_asset_key": "si_c832_00_s"
+      },
+      "costumes": {
+        "110007": {
+          "costume_id": "110007",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_01",
+          "si_asset_key": "si_c832_01_s",
+          "verified": false
+        },
+        "110010": {
+          "costume_id": "110010",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_02",
+          "si_asset_key": "si_c832_02_s",
+          "verified": false
+        },
+        "110016": {
+          "costume_id": "110016",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_03",
+          "si_asset_key": "si_c832_03_s",
+          "verified": false
+        },
+        "110017": {
+          "costume_id": "110017",
+          "costume_index": 4,
+          "costume_name": "Costume",
+          "spine_asset_id": "c832_04",
+          "si_asset_key": "si_c832_04_s",
+          "verified": false
+        }
+      }
+    },
+    "833": {
+      "character_id": "583301",
+      "resource_id": "833",
+      "name_en": "Misato",
+      "name_cn": "美里",
+      "default": {
+        "spine_asset_id": "c833",
+        "si_asset_key": "si_c833_00_s"
+      },
+      "costumes": {}
+    },
+    "834": {
+      "character_id": "583401",
+      "resource_id": "834",
+      "name_en": "Rei (Tentative Name)",
+      "name_cn": "零（暂称）",
+      "default": {
+        "spine_asset_id": "c834",
+        "si_asset_key": "si_c834_00_s"
+      },
+      "costumes": {
+        "110014": {
+          "costume_id": "110014",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c834_01",
+          "si_asset_key": "si_c834_01_s",
+          "verified": false
+        },
+        "110015": {
+          "costume_id": "110015",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c834_02",
+          "si_asset_key": "si_c834_02_s",
+          "verified": false
+        }
+      }
+    },
+    "835": {
+      "character_id": "583501",
+      "resource_id": "835",
+      "name_en": "Asuka: WILLE",
+      "name_cn": "明日香：WILLE",
+      "default": {
+        "spine_asset_id": "c835",
+        "si_asset_key": "si_c835_00_s"
+      },
+      "costumes": {
+        "110012": {
+          "costume_id": "110012",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c835_01",
+          "si_asset_key": "si_c835_01_s",
+          "verified": false
+        },
+        "110013": {
+          "costume_id": "110013",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c835_02",
+          "si_asset_key": "si_c835_02_s",
+          "verified": false
+        }
+      }
+    },
+    "836": {
+      "character_id": "583601",
+      "resource_id": "836",
+      "name_en": "Sakura",
+      "name_cn": "樱",
+      "default": {
+        "spine_asset_id": "c836",
+        "si_asset_key": "si_c836_00_s"
+      },
+      "costumes": {}
+    },
+    "840": {
+      "character_id": "584001",
+      "resource_id": "840",
+      "name_en": "Ada",
+      "name_cn": "艾达",
+      "default": {
+        "spine_asset_id": "c840",
+        "si_asset_key": "si_c840_00_s"
+      },
+      "costumes": {
+        "110024": {
+          "costume_id": "110024",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c840_01",
+          "si_asset_key": "si_c840_01_s",
+          "verified": false
+        },
+        "110025": {
+          "costume_id": "110025",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c840_02",
+          "si_asset_key": "si_c840_02_s",
+          "verified": false
+        }
+      }
+    },
+    "841": {
+      "character_id": "584101",
+      "resource_id": "841",
+      "name_en": "Jill",
+      "name_cn": "吉儿",
+      "default": {
+        "spine_asset_id": "c841",
+        "si_asset_key": "si_c841_00_s"
+      },
+      "costumes": {
+        "110026": {
+          "costume_id": "110026",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c841_01",
+          "si_asset_key": "si_c841_01_s",
+          "verified": false
+        },
+        "110027": {
+          "costume_id": "110027",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c841_02",
+          "si_asset_key": "si_c841_02_s",
+          "verified": false
+        }
+      }
+    },
+    "842": {
+      "character_id": "584201",
+      "resource_id": "842",
+      "name_en": "Claire",
+      "name_cn": "克蕾儿",
+      "default": {
+        "spine_asset_id": "c842",
+        "si_asset_key": "si_c842_00_s"
+      },
+      "costumes": {}
+    },
+    "850": {
+      "character_id": "585001",
+      "resource_id": "850",
+      "name_en": "EVE",
+      "name_cn": "伊芙",
+      "default": {
+        "spine_asset_id": "c850",
+        "si_asset_key": "si_c850_00_s"
+      },
+      "costumes": {
+        "110018": {
+          "costume_id": "110018",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c850_01",
+          "si_asset_key": "si_c850_01_s",
+          "verified": false
+        },
+        "110019": {
+          "costume_id": "110019",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c850_02",
+          "si_asset_key": "si_c850_02_s",
+          "verified": false
+        },
+        "110020": {
+          "costume_id": "110020",
+          "costume_index": 3,
+          "costume_name": "Costume",
+          "spine_asset_id": "c850_03",
+          "si_asset_key": "si_c850_03_s",
+          "verified": false
+        }
+      }
+    },
+    "851": {
+      "character_id": "585101",
+      "resource_id": "851",
+      "name_en": "Raven",
+      "name_cn": "蕾雯",
+      "default": {
+        "spine_asset_id": "c851",
+        "si_asset_key": "si_c851_00_s"
+      },
+      "costumes": {
+        "110021": {
+          "costume_id": "110021",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c851_01",
+          "si_asset_key": "si_c851_01_s",
+          "verified": false
+        },
+        "110022": {
+          "costume_id": "110022",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c851_02",
+          "si_asset_key": "si_c851_02_s",
+          "verified": false
+        }
+      }
+    },
+    "852": {
+      "character_id": "585201",
+      "resource_id": "852",
+      "name_en": "Lily",
+      "name_cn": "百合",
+      "default": {
+        "spine_asset_id": "c852",
+        "si_asset_key": "si_c852_00_s"
+      },
+      "costumes": {}
+    },
+    "860": {
+      "character_id": "586001",
+      "resource_id": "860",
+      "name_en": "Chisato",
+      "name_cn": "千束",
+      "default": {
+        "spine_asset_id": "c860",
+        "si_asset_key": "si_c860_00_s"
+      },
+      "costumes": {
+        "110028": {
+          "costume_id": "110028",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c860_01",
+          "si_asset_key": "si_c860_01_s",
+          "verified": false
+        },
+        "110029": {
+          "costume_id": "110029",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c860_02",
+          "si_asset_key": "si_c860_02_s",
+          "verified": false
+        }
+      }
+    },
+    "861": {
+      "character_id": "586101",
+      "resource_id": "861",
+      "name_en": "Takina",
+      "name_cn": "泷奈",
+      "default": {
+        "spine_asset_id": "c861",
+        "si_asset_key": "si_c861_00_s"
+      },
+      "costumes": {
+        "110030": {
+          "costume_id": "110030",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c861_01",
+          "si_asset_key": "si_c861_01_s",
+          "verified": false
+        },
+        "110031": {
+          "costume_id": "110031",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c861_02",
+          "si_asset_key": "si_c861_02_s",
+          "verified": false
+        }
+      }
+    },
+    "862": {
+      "character_id": "586201",
+      "resource_id": "862",
+      "name_en": "Kurumi",
+      "name_cn": "胡桃",
+      "default": {
+        "spine_asset_id": "c862",
+        "si_asset_key": "si_c862_00_s"
+      },
+      "costumes": {}
+    },
+    "870": {
+      "character_id": "587001",
+      "resource_id": "870",
+      "name_en": "Queen (Makoto)",
+      "name_cn": "QUEEN（真）",
+      "default": {
+        "spine_asset_id": "c870",
+        "si_asset_key": "si_c870_00_s"
+      },
+      "costumes": {
+        "110032": {
+          "costume_id": "110032",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c870_01",
+          "si_asset_key": "si_c870_01_s",
+          "verified": false
+        },
+        "110033": {
+          "costume_id": "110033",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c870_02",
+          "si_asset_key": "si_c870_02_s",
+          "verified": false
+        }
+      }
+    },
+    "871": {
+      "character_id": "587101",
+      "resource_id": "871",
+      "name_en": "Yukiko",
+      "name_cn": "雪子",
+      "default": {
+        "spine_asset_id": "c871",
+        "si_asset_key": "si_c871_00_s"
+      },
+      "costumes": {
+        "110034": {
+          "costume_id": "110034",
+          "costume_index": 1,
+          "costume_name": "Costume",
+          "spine_asset_id": "c871_01",
+          "si_asset_key": "si_c871_01_s",
+          "verified": false
+        },
+        "110035": {
+          "costume_id": "110035",
+          "costume_index": 2,
+          "costume_name": "Costume",
+          "spine_asset_id": "c871_02",
+          "si_asset_key": "si_c871_02_s",
+          "verified": false
+        }
+      }
+    },
+    "872": {
+      "character_id": "587201",
+      "resource_id": "872",
+      "name_en": "Aigis",
+      "name_cn": "埃癸斯",
+      "default": {
+        "spine_asset_id": "c872",
+        "si_asset_key": "si_c872_00_s"
+      },
+      "costumes": {}
+    }
+  }
+}
