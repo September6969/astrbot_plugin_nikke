@@ -3,9 +3,20 @@ from pathlib import Path
 
 def test_post_merge_entry_records_dated_a_b_completion_and_profile_boundary():
     root = Path(__file__).resolve().parents[1]
-    status = (root / "docs" / "POST_MERGE_STATUS.md").read_text(encoding="utf-8")
-    phase2 = (root / "docs" / "POST_MERGE_PHASE2_PLAN.md").read_text(encoding="utf-8")
-    acceptance = (root / "docs" / "PROFILE_V2_ACCEPTANCE.md").read_text(encoding="utf-8")
+    status_path = root / "docs" / "operations" / "POST_MERGE_STATUS.md"
+    if not status_path.exists():
+        status_path = root / "docs" / "POST_MERGE_STATUS.md"
+    status = status_path.read_text(encoding="utf-8")
+
+    phase2_path = root / "docs" / "architecture" / "POST_MERGE_PHASE2_PLAN.md"
+    if not phase2_path.exists():
+        phase2_path = root / "docs" / "POST_MERGE_PHASE2_PLAN.md"
+    phase2 = phase2_path.read_text(encoding="utf-8")
+
+    acceptance_path = root / "docs" / "acceptance" / "PROFILE_V2_ACCEPTANCE.md"
+    if not acceptance_path.exists():
+        acceptance_path = root / "docs" / "PROFILE_V2_ACCEPTANCE.md"
+    acceptance = acceptance_path.read_text(encoding="utf-8")
 
     for document in (status, phase2):
         assert "bada0b3aafcd7127d07ca40f554808b0433540f8" in document

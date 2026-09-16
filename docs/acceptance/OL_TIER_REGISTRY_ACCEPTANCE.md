@@ -12,7 +12,7 @@
 
 本主题闭合的是 OL 分组、标签和 1--15 阶级语义，不是每个账号的动态数值表。动态 `function_value` 只有在 function type、value type 和来源 registry 同时确认时才进入汇总；未知值继续显示安全 fallback。
 
-现场来源：[overload_tier_registry_live_20260909.json](evidence/overload_tier_registry_live_20260909.json)。
+现场来源：[overload_tier_registry_live_20260909.json](..\evidence\overload_tier_registry_live_20260909.json)。
 
 ## 测试
 

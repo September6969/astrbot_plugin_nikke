@@ -1,6 +1,6 @@
 # Post-Merge Phase 2 计划
 
-> 本文是 2026-09-06 接手计划的仓库入口和快照，不是实现完成声明。远端合并、CI、工作区和当前能力以 [POST_MERGE_STATUS.md](POST_MERGE_STATUS.md) 为准。
+> 本文是 2026-09-06 接手计划的仓库入口和快照，不是实现完成声明。远端合并、CI、工作区和当前能力以 [POST_MERGE_STATUS.md](..\operations\POST_MERGE_STATUS.md) 为准。
 
 ## 目标与顺序
 
@@ -13,7 +13,7 @@
 
 ## 完成快照（2026-09-07）
 
-A 已通过 PR #6 合并，B 已通过 PR #7 合并到 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。本计划的 A/B 段保留为实施合同和验收依据，不再表示当前待办；Profile 离线闭环的最终记录见 [Profile V2 验收](PROFILE_V2_ACCEPTANCE.md)，真实账号/部署证据仍须单独授权。
+A 已通过 PR #6 合并，B 已通过 PR #7 合并到 `origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`。本计划的 A/B 段保留为实施合同和验收依据，不再表示当前待办；Profile 离线闭环的最终记录见 [Profile V2 验收](..\acceptance\PROFILE_V2_ACCEPTANCE.md)，真实账号/部署证据仍须单独授权。
 
 ## A：Post-Merge Sync
 

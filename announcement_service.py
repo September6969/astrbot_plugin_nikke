@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """官方公告、活动日程与推送管理服务。
 
-遵循 docs/ANNOUNCEMENT_V2_CONTRACT.md：
+遵循 docs/contracts/ANNOUNCEMENT_V2_CONTRACT.md：
 1. AnnouncementRecord 包含 content_id, body_hash, content_version, published_at, source_url；
 2. 内容实体不保存全局 pushed: bool；
 3. 投递去重键：target_id + content_id + content_version + push_type；
