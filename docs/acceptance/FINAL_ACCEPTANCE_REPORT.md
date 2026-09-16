@@ -28,4 +28,4 @@
 
 ## 交接
 
-恢复工作时先重新 `fetch`、核验 main/open PR/CI/worktree，再按 [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) 选择最小现场动作。不得从旧 overnight 分支或合成 fixture 推断当前生产状态。
+恢复工作时先重新 `fetch`、核验 main/open PR/CI/worktree，再按 [RELEASE_CHECKLIST.md](..\operations\RELEASE_CHECKLIST.md) 选择最小现场动作。不得从旧 overnight 分支或合成 fixture 推断当前生产状态。

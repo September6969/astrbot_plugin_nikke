@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """公告、活动与推送数据合同模型。
 
-遵循 docs/ANNOUNCEMENT_V2_CONTRACT.md：
+遵循 docs/contracts/ANNOUNCEMENT_V2_CONTRACT.md：
 1. 内容实体不保存全局 pushed 状态；
 2. 实体包含 content_id, body_hash, content_version, published_at, source_url；
 3. 投递去重键：target_id + content_id + content_version + push_type；

@@ -1,6 +1,6 @@
 # 第二轮合并审查修复（历史记录，2026-09-06）
 
-> 本文记录合并前 overnight 工作分支上的审查修复，不是当前开发状态入口。PR #5 已将该分支合并到 `main`；当前远端基线、CI 和剩余能力见 [POST_MERGE_STATUS.md](POST_MERGE_STATUS.md)，下一阶段见 [POST_MERGE_PHASE2_PLAN.md](POST_MERGE_PHASE2_PLAN.md)。
+> 本文记录合并前 overnight 工作分支上的审查修复，不是当前开发状态入口。PR #5 已将该分支合并到 `main`；当前远端基线、CI 和剩余能力见 [POST_MERGE_STATUS.md](POST_MERGE_STATUS.md)，下一阶段见 [POST_MERGE_PHASE2_PLAN.md](..\architecture\POST_MERGE_PHASE2_PLAN.md)。
 
 起始 main：`deeef6277f09a42918d71b44f49170398a05558b`。
 本轮起始 HEAD：`470f16cfd4cc0a0a25456729187c3348c3cec273`。
@@ -25,7 +25,7 @@
 
 CDK 修复提交 `61e16d59b433bcea62918b3030b3f052ca285043` 的 [Actions](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34047280265) 已通过 Python 3.10/3.11/3.12 和 Node。
 
-语音增加独立的下载/编码管线，统一请求预算、共享任务和关闭回收；未接入真实发送。官方二创指引与 Spine 许可研究见 [证据记录](evidence/voice_licensing_and_pipeline.md)，没有将公开访问当作再分发授权。
+语音增加独立的下载/编码管线，统一请求预算、共享任务和关闭回收；未接入真实发送。官方二创指引与 Spine 许可研究见 [证据记录](..\evidence\voice_licensing_and_pipeline.md)，没有将公开访问当作再分发授权。
 
 语音管线提交 `9ba66d954d23669e66b093a75ec231f29fa3ee2e` 的 [Actions](https://github.com/September6969/astrbot_plugin_nikke/actions/runs/34047412675) 已全绿。
 

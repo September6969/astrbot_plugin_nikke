@@ -17,8 +17,8 @@
 
 证据：
 
-- [live_character_stats_20260909.json](evidence/live_character_stats_20260909.json)
-- [state_effect_function_inventory_live_20260909.json](evidence/state_effect_function_inventory_live_20260909.json)
+- [live_character_stats_20260909.json](..\evidence\live_character_stats_20260909.json)
+- [state_effect_function_inventory_live_20260909.json](..\evidence\state_effect_function_inventory_live_20260909.json)
 
 ## 验收测试
 

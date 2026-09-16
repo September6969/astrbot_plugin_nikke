@@ -2,7 +2,10 @@ from pathlib import Path
 
 
 def test_live_evidence_register_keeps_required_boundaries_and_actions():
-    document = (Path(__file__).resolve().parents[1] / "docs" / "LIVE_EVIDENCE_REGISTER.md").read_text(encoding="utf-8")
+    doc_path = Path(__file__).resolve().parents[1] / "docs" / "operations" / "LIVE_EVIDENCE_REGISTER.md"
+    if not doc_path.exists():
+        doc_path = Path(__file__).resolve().parents[1] / "docs" / "LIVE_EVIDENCE_REGISTER.md"
+    document = doc_path.read_text(encoding="utf-8")
 
     for record in (
         "E-PROFILE-01",

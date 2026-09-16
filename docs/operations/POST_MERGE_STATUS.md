@@ -6,7 +6,7 @@
 
 - 当次核验的远端基线：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`；该 SHA 是日期化证据，不是后续 session 可直接复用的“当前 main”。
 - PR #6（Post-Merge Sync）和 PR #7（Profile V2）均已合并；旧 `feat/overnight-backlog` 仅作历史恢复点。
-- `/妮姬 我的` 已完成命令→三请求 Dashboard→Builder→Renderer→PNG 的离线闭环；字段语义、分区去重、无 `CharacterDetails` N+1、行为测试和合成预览见 [Profile V2 验收](PROFILE_V2_ACCEPTANCE.md)。
+- `/妮姬 我的` 已完成命令→三请求 Dashboard→Builder→Renderer→PNG 的离线闭环；字段语义、分区去重、无 `CharacterDetails` N+1、行为测试和合成预览见 [Profile V2 验收](..\acceptance\PROFILE_V2_ACCEPTANCE.md)。
 - 上述 Profile 状态是 `READY_OFFLINE`，不是对真实账号、真实网络或部署环境的验收声明。
 - 后续主题必须从最新 `origin/main` 建立独立 worktree/branch/Draft PR；不直接改 main、不自动 merge、不访问未授权账号或执行账号写入/消息发送。
 
@@ -51,7 +51,7 @@ PR #5 已收口的审核修复包括 CDK stale-running 防重放、取消传播�
 
 当前没有已确认的永久技术阻塞。仍未完成的事项必须按证据状态处理，不能由合成数据、未接线模块或公开资源访问替代真实联调/资源授权：
 
-- Profile V2：真实账号字段兼容、真实 `/妮姬 我的` 与部署环境图片仍需授权现场证据；离线验收见 [Profile V2 验收](PROFILE_V2_ACCEPTANCE.md)。
+- Profile V2：真实账号字段兼容、真实 `/妮姬 我的` 与部署环境图片仍需授权现场证据；离线验收见 [Profile V2 验收](..\acceptance\PROFILE_V2_ACCEPTANCE.md)。
 - Raid 身份关联、多轮范围和剩余次数语义。
 - Daily 写入后的真实状态变化。
 - Voice 角色/皮肤映射、动态 Poke 接线和实际播放送达。

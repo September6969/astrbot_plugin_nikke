@@ -54,7 +54,10 @@ class ReleaseMetadataTests(unittest.TestCase):
             },
             expected,
         )
-        config_doc = (ROOT / "docs" / "CONFIGURATION_ACCEPTANCE.md").read_text(encoding="utf-8")
+        config_path = ROOT / "docs" / "acceptance" / "CONFIGURATION_ACCEPTANCE.md"
+        if not config_path.exists():
+            config_path = ROOT / "docs" / "CONFIGURATION_ACCEPTANCE.md"
+        config_doc = config_path.read_text(encoding="utf-8")
         for key, (_, default) in expected.items():
             with self.subTest(key=key):
                 self.assertIn(f"`{key}`", config_doc)

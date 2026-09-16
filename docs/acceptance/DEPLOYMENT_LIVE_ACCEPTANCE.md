@@ -12,7 +12,7 @@ The post-deploy smoke checks passed:
 - The database integrity check remained `ok` with schema 2, and the backup manifest remained present.
 - The last five minutes of AstrBot logs contained no checked secret markers or error lines.
 
-The complete machine-readable record is [`docs/evidence/deployment_live_20260909.json`](evidence/deployment_live_20260909.json).
+The complete machine-readable record is [`docs/evidence/deployment_live_20260909.json`](..\evidence\deployment_live_20260909.json).
 
 ## Remaining live gates
 

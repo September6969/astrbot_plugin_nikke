@@ -49,8 +49,15 @@ ALLOWED_STATUS_TOKENS = {
 }
 
 
+def _get_matrix_path() -> Path:
+    p = Path(__file__).resolve().parents[1] / "docs" / "operations" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    if not p.exists():
+        p = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    return p
+
+
 def test_requirement_matrix_contains_unique_complete_requirement_set() -> None:
-    path = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    path = _get_matrix_path()
     text = path.read_text(encoding="utf-8")
     found = re.findall(r"\| (REQ-[A-Z0-9-]+) \|", text)
 
@@ -61,7 +68,7 @@ def test_requirement_matrix_contains_unique_complete_requirement_set() -> None:
 
 
 def test_matrix_explicitly_preserves_evidence_boundaries() -> None:
-    path = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    path = _get_matrix_path()
     text = path.read_text(encoding="utf-8")
 
     assert "不视为已进入主线" in text
@@ -70,7 +77,7 @@ def test_matrix_explicitly_preserves_evidence_boundaries() -> None:
 
 
 def test_each_requirement_row_has_all_evidence_columns() -> None:
-    path = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    path = _get_matrix_path()
     rows = [line for line in path.read_text(encoding="utf-8").splitlines() if line.startswith("| REQ-")]
 
     assert len(rows) == len(REQUIRED_IDS)
@@ -83,7 +90,7 @@ def test_each_requirement_row_has_all_evidence_columns() -> None:
 
 
 def test_each_requirement_row_uses_declared_product_status_tokens() -> None:
-    path = Path(__file__).resolve().parents[1] / "docs" / "REQUIREMENT_EVIDENCE_MATRIX.md"
+    path = _get_matrix_path()
     rows = [line for line in path.read_text(encoding="utf-8").splitlines() if line.startswith("| REQ-")]
 
     for row in rows:

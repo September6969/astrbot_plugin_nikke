@@ -12,7 +12,7 @@
 
 ## UI AUDIT
 
-见 [初始审计](E:/DevCache/nikke-ui-polish-v0.3/docs/UI_AUDIT_V03.md)，覆盖 9 个主展示面和 6 类状态。
+见 [初始审计](UI_AUDIT_V03.md)，覆盖 9 个主展示面和 6 类状态。
 主要问题：人物下部遮挡、OL 数值栏过窄、Roster 名称重叠及页脚覆盖末行、各卡配色割裂、绑定页面正文回显秘密链接、扩展缺少独立标签和处理反馈。
 
 ## DESIGN SYSTEM
