@@ -428,55 +428,173 @@ class UnionMemberT2IPayloadBuilder:
                                  "returned": str(len(participant.attacks)), "rows": rows})
         return {"scope": data.scope, "participants": participants}
 
+CATEGORY_DISPLAY_MAP = {
+    "coop": "CO-OP",
+    "co_op": "CO-OP",
+    "story_event": "STORY EVENT",
+    "solo_raid": "SOLO RAID",
+    "union_raid": "UNION RAID",
+    "recruit": "PICKUP",
+    "pickup": "PICKUP",
+    "login": "LOGIN",
+    "event": "EVENT",
+    "maintenance": "MAINTENANCE",
+    "update": "UPDATE",
+    "double_reward": "DOUBLE REWARD",
+    "special_arena": "SPECIAL ARENA",
+}
+
 
 class CalendarT2IPayloadBuilder:
     def build(self, service, days=14, now=None, warning=""):
-        from datetime import datetime, timezone
+        from datetime import datetime, timedelta, timezone
         from astrbot_plugin_nikke.features.calendar.models import _aware_utc
-        from astrbot_plugin_nikke.features.calendar.service import CAT_LABELS, CST
+        from astrbot_plugin_nikke.features.calendar.service import CST
         current = _aware_utc(now) if now else datetime.now(timezone.utc)
         days = service.normalize_horizon(days)
-        groups = service.group_window(days, current)
-        updated = "Unknown"
+
+        updated = "—"
         if service.last_updated_at:
             try:
-                updated = _aware_utc(service.last_updated_at).astimezone(CST).strftime("%Y-%m-%d %H:%M")
+                updated = _aware_utc(service.last_updated_at).astimezone(CST).strftime("%H:%M")
             except (ValueError, TypeError):
                 pass
-        sync_warning = warning or service.last_sync_error
-        payload = {"horizon_days": days, "timezone_display": "UTC+8", "updated_at_display": updated,
-                   "is_stale": bool(sync_warning), "sync_warning": sync_warning,
-                   "available": service.has_snapshot(),
-                   "fallback_text": service.format_schedule_text(days, current, warning)}
-        for key, activities in groups.items():
-            items = []
-            for item in activities:
-                is_upcoming = (key == "upcoming")
-                if not is_upcoming:
-                    total_sec = max(1.0, (item.end_at - item.start_at).total_seconds())
-                    elapsed_sec = (current - item.start_at).total_seconds()
-                    clamped_pct = max(0.0, min(100.0, (elapsed_sec / total_sec) * 100.0))
-                    prog_val = round(clamped_pct, 1)
-                    if clamped_pct >= 99.5 and clamped_pct < 100.0:
-                        int_pct = 99
-                    elif clamped_pct > 0.0 and clamped_pct < 0.5:
-                        int_pct = 1
-                    else:
-                        int_pct = int(round(clamped_pct))
-                    prog_label = f"{int_pct}%"
+
+        available = service.has_snapshot()
+        sync_warning = warning or getattr(service, "last_sync_error", "")
+        if not available:
+            data_quality = "UNAVAILABLE"
+        elif getattr(service, "data_quality", None) in ("FRESH", "STALE", "PARTIAL", "UNAVAILABLE"):
+            data_quality = service.data_quality
+        elif sync_warning:
+            data_quality = "STALE"
+        else:
+            data_quality = "FRESH"
+
+        if data_quality == "UNAVAILABLE":
+            source_display = "SCHEDULE DATA UNAVAILABLE"
+            quality_badge_display = "DATA UNAVAILABLE"
+        elif data_quality == "STALE":
+            source_display = "GAMEKEE + OFFICIAL"
+            quality_badge_display = f"DATA STALE · UPDATED {updated}"
+        elif data_quality == "PARTIAL":
+            source_display = "GAMEKEE + OFFICIAL"
+            quality_badge_display = f"PARTIAL DATA · UPDATED {updated}"
+        else:
+            source_display = "GAMEKEE + OFFICIAL"
+            quality_badge_display = f"DATA OK · UPDATED {updated}"
+
+        if hasattr(service, "list_canonical"):
+            all_events = service.list_canonical()
+        else:
+            all_events = service.list_activities()
+
+        active_events = [act for act in all_events if act.is_active(current)]
+        active_events.sort(key=lambda e: e.end_at)
+
+        horizon = timedelta(days=days)
+        upcoming_events = [
+            act for act in all_events
+            if act.is_upcoming(current) and act.start_at <= current + horizon
+        ]
+        upcoming_events.sort(key=lambda e: e.start_at)
+
+        active_items = []
+        for idx, act in enumerate(active_events):
+            precision = getattr(act, "time_precision", "EXACT")
+            rem_sec = (act.end_at - current).total_seconds()
+            if rem_sec <= 3600:
+                urgency = "CRITICAL"
+            elif rem_sec <= 6 * 3600:
+                urgency = "URGENT"
+            elif rem_sec <= 24 * 3600:
+                urgency = "CLOSING"
+            else:
+                urgency = "NORMAL"
+
+            start_cst = act.start_at.astimezone(CST)
+            end_cst = act.end_at.astimezone(CST)
+
+            if precision == "EXACT":
+                start_str = start_cst.strftime("%m.%d %H:%M")
+                end_str = end_cst.strftime("%m.%d %H:%M")
+                time_range = f"{start_str} → {end_str}"
+                total_sec = max(0, int(rem_sec))
+                d = total_sec // 86400
+                h = (total_sec % 86400) // 3600
+                m = (total_sec % 3600) // 60
+                if d > 0:
+                    remaining = f"{d}D {h:02d}H"
+                elif h > 0:
+                    remaining = f"{h:02d}H {m:02d}M"
                 else:
-                    prog_val = 0.0
-                    prog_label = "未开始"
-                items.append({"title": item.title, "category": CAT_LABELS.get(item.category, "活动"),
-                              "remaining": item.remaining_display(current),
-                              "start": item.start_at.astimezone(CST).strftime("%m/%d %H:%M"),
-                              "end": item.end_at.astimezone(CST).strftime("%m/%d %H:%M"),
-                              "progress_percent": prog_val, "progress_label": prog_label,
-                              "is_upcoming": is_upcoming})
-            payload[key] = items
-        payload["groups"] = [{"title": title, "items": payload[key]} for key, title in
-                             (("ending_soon", "ENDING SOON / 即将结束"), ("active", "ACTIVE / 进行中"), ("upcoming", "UPCOMING / 即将开始"))]
-        return payload
+                    remaining = f"{max(1, m):02d}M"
+            else:
+                start_str = start_cst.strftime("%m.%d")
+                end_str = end_cst.strftime("%m.%d")
+                time_range = f"{start_str} → {end_str}"
+                remaining = f"{end_str} 截止"
+
+            cat_raw = getattr(act, "event_type", None) or getattr(act, "category", "event")
+            cat_key = cat_raw.lower() if isinstance(cat_raw, str) else "event"
+            cat_display = CATEGORY_DISPLAY_MAP.get(cat_key, cat_key.upper().replace("_", " "))
+
+            active_items.append({
+                "category": cat_display,
+                "title": act.title,
+                "start": start_str,
+                "end": end_str,
+                "time_range_display": time_range,
+                "remaining": remaining,
+                "urgency": urgency,
+                "is_next_ending": (idx == 0),
+            })
+
+        next_items = []
+        for act in upcoming_events:
+            precision = getattr(act, "time_precision", "EXACT")
+            start_cst = act.start_at.astimezone(CST)
+            start_sec = max(0, int((act.start_at - current).total_seconds()))
+            if precision == "EXACT":
+                start_str = start_cst.strftime("%m.%d %H:%M")
+                d = start_sec // 86400
+                h = (start_sec % 86400) // 3600
+                m = (start_sec % 3600) // 60
+                if d > 0:
+                    starts_in = f"STARTS IN {d}D"
+                elif h > 0:
+                    starts_in = f"STARTS IN {h}H"
+                else:
+                    starts_in = f"STARTS IN {max(1, m)}M"
+            else:
+                start_str = start_cst.strftime("%m.%d")
+                starts_in = f"{start_str} 开始"
+
+            cat_raw = getattr(act, "event_type", None) or getattr(act, "category", "event")
+            cat_key = cat_raw.lower() if isinstance(cat_raw, str) else "event"
+            cat_display = CATEGORY_DISPLAY_MAP.get(cat_key, cat_key.upper().replace("_", " "))
+
+            next_items.append({
+                "category": cat_display,
+                "title": act.title,
+                "start": start_str,
+                "starts_in": starts_in,
+            })
+
+        return {
+            "active_count": len(active_items),
+            "active_items": active_items,
+            "next_items": next_items,
+            "timezone_display": "UTC+8",
+            "updated_at_display": updated,
+            "data_quality": data_quality,
+            "source_display": source_display,
+            "quality_badge_display": quality_badge_display,
+            "available": available,
+            "has_active": bool(active_items),
+            "has_upcoming": bool(next_items),
+            "fallback_text": service.format_schedule_text(days, current, warning),
+        }
 
 
 class CampaignT2IPayloadBuilder:
