@@ -42,6 +42,15 @@ def test_character_template_has_calibrated_typography_and_badges():
     assert "grid-column:1 / 3" in template
 
 
+def test_rapi_red_hood_golden_sample_face_anchor_is_calibrated():
+    from astrbot_plugin_nikke.face_anchor import metadata
+    c010 = metadata().get("c010")
+    assert c010 is not None
+    assert "framing" in c010
+    assert c010["framing"]["target"] == [850, 620]
+    assert c010["framing"]["extent_width"] == 160.0
+
+
 def test_snow_white_face_anchor_is_calibrated():
     from astrbot_plugin_nikke.face_anchor import metadata
     c471 = metadata().get("c471")
@@ -49,4 +58,5 @@ def test_snow_white_face_anchor_is_calibrated():
     assert "framing" in c471
     assert c471["framing"]["target"] == [742, 540]
     assert c471["framing"]["extent_width"] == 248.4
+
 
