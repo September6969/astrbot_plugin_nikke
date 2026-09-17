@@ -19,7 +19,7 @@ def _normalize_equipment_icon(source):
     if bbox is None:
         return canvas
     trimmed = prepared.crop(bbox)
-    fitted = ImageOps.contain(trimmed, (150, 150), Image.Resampling.LANCZOS)
+    fitted = ImageOps.contain(trimmed, (172, 172), Image.Resampling.LANCZOS)
     x = (180 - fitted.width) // 2
     y = (180 - fitted.height) // 2
     canvas.alpha_composite(fitted, (x, y))
