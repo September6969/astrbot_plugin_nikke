@@ -108,7 +108,7 @@ def test_custom_webfonts_and_slot_geometry_in_template():
     assert ".icon-slot-6{left:1110px}" in template
 
     # Equipment icon size & placeholder grid
-    assert "width:168px;height:168px" in template
+    assert "width:184px;height:184px" in template
     assert "height:57px" in template
     assert "grid-column:1 / 3" in template
 
