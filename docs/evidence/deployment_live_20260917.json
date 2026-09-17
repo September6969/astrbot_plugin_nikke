@@ -1,0 +1,62 @@
+{
+  "status": "DEPLOYED_MAIN_LIVE_SMOKE",
+  "checked_at": "2026-09-17",
+  "main_commit": "b1cf4a3",
+  "target": "/opt/nikke-bot/astrbot/data/plugins/astrbot_plugin_nikke",
+  "backup_plugin_tree": "/opt/nikke-bot/backups/astrbot_plugin_nikke-predeploy-b1cf4a3-20260917_011053.tar.gz",
+  "backup_database": "/opt/nikke-bot/backups/nikke.sqlite3.bak_20260917_011053",
+  "preflight": {
+    "database_integrity": "ok",
+    "disk_free_gb": 5.4,
+    "containers_running": ["nikke-caddy", "napcat", "astrbot"],
+    "data_directory_preserved": true
+  },
+  "root_files": {
+    "total_py_files": 4,
+    "py_files": [
+      "__init__.py",
+      "_version.py",
+      "container.py",
+      "main.py"
+    ],
+    "legacy_root_shims_remaining": 0
+  },
+  "containers": {
+    "astrbot": "running",
+    "napcat": "running",
+    "nikke-caddy": "running"
+  },
+  "in_container_tests": {
+    "repository_integrity": {
+      "passed": 8,
+      "failed": 0,
+      "subtests_passed": 151
+    },
+    "key_domain_tests": {
+      "test_character_replica": "PASS",
+      "test_character_pixel_calibration": "PASS",
+      "test_face_anchor": "PASS",
+      "test_calendar_v05": "PASS",
+      "test_tarot_service": "PASS",
+      "test_union_raid_state": "PASS",
+      "passed": 40,
+      "failed": 0
+    },
+    "full_pytest_suite": {
+      "passed": 942,
+      "skipped": 2,
+      "failed": 0,
+      "subtests_passed": 656,
+      "duration_seconds": 75.82
+    }
+  },
+  "post_deploy_logs": {
+    "plugin_loaded": true,
+    "plugin_version": "0.2.0",
+    "binding_service_port": 6210,
+    "character_master_entries": 200,
+    "onebot_v11_connected": true,
+    "errors": 0
+  },
+  "secrets_persisted": false
+}

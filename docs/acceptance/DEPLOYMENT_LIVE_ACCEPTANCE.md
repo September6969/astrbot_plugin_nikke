@@ -1,4 +1,31 @@
+# Live Deployment Acceptance — 2026-09-17 (Repository Finalization & Architecture Closure)
+
+## Result
+
+The latest `origin/main` commit `b1cf4a3` (incorporating PR #92 Batch A shim cleanup, PR #93 Batch B root finalization, and AstrBot plugin loader sys.path bootstrap) was successfully deployed to the production `serv` installation.
+
+The previous plugin tree was retained at `/opt/nikke-bot/backups/astrbot_plugin_nikke-predeploy-b1cf4a3-20260917_011053.tar.gz` and `/opt/nikke-bot/backups/nikke.sqlite3.bak_20260917_011053`; the production database and `data/` directory were fully preserved and untouched.
+
+Post-deployment in-container verification results:
+- **Root Directory Files**: Exactly 4 `.py` files remain at root (`__init__.py`, `_version.py`, `container.py`, `main.py`). All 90 legacy root shims have been cleanly removed.
+- **In-Container Full Pytest Suite**: **942 passed, 2 skipped, 0 failed, 656 subtests passed** in 75.82s.
+- **In-Container Repository Integrity**: 8 passed, 0 failed, 151 subtests passed (`test_repository_integrity.py`).
+- **In-Container Key Domain Tests**: 40 passed, 0 failed (`test_character_replica.py`, `test_character_pixel_calibration.py`, `test_face_anchor.py`, `test_calendar_v05.py`, `test_tarot_service.py`, `test_union_raid_state.py`).
+- **Database Integrity**: `PRAGMA integrity_check;` returned `ok`.
+- **Containers**: `astrbot`, `napcat`, and `nikke-caddy` are all running and healthy.
+- **AstrBot Logs**:
+  - `Plugin astrbot_plugin_nikke (0.2.0) by September` loaded cleanly without errors.
+  - `[NIKKE] 绑定服务已监听 0.0.0.0:6210`
+  - `[NIKKE] 已载入 200 条妮姬目录`
+  - `[NIKKE] Exia/NIKKE 静态属性表已载入并缓存`
+  - OneBot v11 adapter connected and actively handling messages.
+
+Machine-readable evidence: [`docs/evidence/deployment_live_20260917.json`](..\evidence\deployment_live_20260917.json).
+
+---
+
 # Live Deployment Acceptance — 2026-09-09
+
 
 ## Result
 
