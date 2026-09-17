@@ -86,7 +86,9 @@ async def main():
     if args.reference:
         reference = Image.open(args.reference).convert("RGB").resize((1600, 2400))
         actual = Image.open(out / "snow-white.png").convert("RGB")
+        actual.save(out / "actual.png")
         Image.blend(reference, actual, .5).save(out / "overlay.png")
+        ImageChops.difference(reference, actual).save(out / "diff.png")
         comparison = Image.new("RGB", (3200, 2400))
         comparison.paste(reference, (0, 0)); comparison.paste(actual, (1600, 0)); comparison.save(out / "comparison.png")
         for name, box in (("header", (60, 60, 1540, 370)), ("equipment", (60, 1340, 1540, 2340))):

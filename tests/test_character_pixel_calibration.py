@@ -35,3 +35,18 @@ def test_character_template_has_calibrated_typography_and_badges():
     assert 'class="gear-status-badge"' in template
     assert "grid-template-columns:620px 470px 190px" in template
     assert "grid-template-columns:minmax(0,1fr) 132px 82px" in template
+    assert "radial-gradient(" in template
+    assert "backdrop-filter:blur(22px)" in template
+    assert 'class="ol-row empty empty-row"' in template
+    assert ".ol-row.empty .placeholder-label" in template
+    assert "grid-column:1 / 3" in template
+
+
+def test_snow_white_face_anchor_is_calibrated():
+    from astrbot_plugin_nikke.face_anchor import metadata
+    c471 = metadata().get("c471")
+    assert c471 is not None
+    assert "framing" in c471
+    assert c471["framing"]["target"] == [742, 540]
+    assert c471["framing"]["extent_width"] == 248.4
+
