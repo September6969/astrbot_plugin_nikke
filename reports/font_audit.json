@@ -1,136 +1,239 @@
 {
-  "font_checks": {
-    "status": "loaded",
-    "size": 3,
-    "checks": {
-      "32px \"Noto Sans SC\"": true,
-      "32px \"NikkeNotoSC\"": true,
-      "32px \"Barlow Condensed\"": true,
-      "32px \"NikkeBarlowCondensed\"": true,
-      "32px \"Rajdhani\"": true,
-      "32px \"NikkeRajdhani\"": true,
-      "32px \"Replica\"": true,
-      "32px \"Aire Exterior\"": true,
-      "32px \"Microsoft YaHei\"": true,
-      "32px sans-serif": true
+  "document_fonts_status": "loaded",
+  "document_fonts_count": 6,
+  "font_faces": [
+    {
+      "family": "NikkeNotoSC",
+      "weight": "100 900",
+      "style": "normal",
+      "status": "loaded",
+      "loaded": true
     },
-    "fontFaces": [
-      {
-        "family": "Replica",
-        "weight": "400 900",
-        "style": "normal",
-        "status": "loaded"
-      },
-      {
-        "family": "NikkeBarlowCondensed",
-        "weight": "600 800",
-        "style": "normal",
-        "status": "loaded"
-      },
-      {
-        "family": "NikkeRajdhani",
-        "weight": "600 800",
-        "style": "normal",
-        "status": "loaded"
-      }
-    ]
+    {
+      "family": "Replica",
+      "weight": "400 900",
+      "style": "normal",
+      "status": "loaded",
+      "loaded": true
+    },
+    {
+      "family": "NikkeBarlowCondensed",
+      "weight": "700 800",
+      "style": "normal",
+      "status": "loaded",
+      "loaded": true
+    },
+    {
+      "family": "NikkeBarlowCondensedSemiBold",
+      "weight": "600",
+      "style": "normal",
+      "status": "unloaded",
+      "loaded": false
+    },
+    {
+      "family": "NikkeRajdhani",
+      "weight": "700 800",
+      "style": "normal",
+      "status": "loaded",
+      "loaded": true
+    },
+    {
+      "family": "NikkeRajdhaniSemiBold",
+      "weight": "600",
+      "style": "normal",
+      "status": "unloaded",
+      "loaded": false
+    }
+  ],
+  "font_checks": {
+    "32px 'Noto Sans SC'": true,
+    "32px 'NikkeNotoSC'": true,
+    "800 67px 'NikkeNotoSC'": true,
+    "32px 'Barlow Condensed'": true,
+    "32px 'NikkeBarlowCondensed'": true,
+    "700 69px 'NikkeBarlowCondensed'": true,
+    "700 84px 'NikkeBarlowCondensed'": true,
+    "32px 'Rajdhani'": true,
+    "32px 'NikkeRajdhani'": true,
+    "700 36px 'NikkeRajdhani'": true,
+    "700 21px 'NikkeRajdhani'": true,
+    "32px 'Replica'": true
   },
   "element_styles": {
     "角色名": {
-      "fontFamily": "Replica, \"Noto Sans SC\", \"Microsoft YaHei\", sans-serif",
+      "selector": ".slot-character-name h1",
+      "text": "拉毗：小红帽",
+      "fontFamily": "NikkeNotoSC, Replica, \"Noto Sans SC\", sans-serif",
       "fontWeight": "800",
       "fontSize": "67px",
       "letterSpacing": "-1.5px",
       "lineHeight": "67px",
-      "color": "rgb(41, 41, 41)"
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 393,
+      "renderedHeight": 67
     },
-    "Lv.": {
-      "fontFamily": "NikkeRajdhani, BarlowCondensed, sans-serif",
+    "Lv.前缀": {
+      "selector": ".slot-level .lv-prefix",
+      "text": "Lv.",
+      "fontFamily": "NikkeRajdhani, sans-serif",
       "fontWeight": "700",
-      "fontSize": "38px",
+      "fontSize": "36px",
       "letterSpacing": "-0.5px",
-      "lineHeight": "38px",
-      "color": "rgb(41, 41, 41)"
+      "lineHeight": "36px",
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 38.86,
+      "renderedHeight": 36
     },
-    "695": {
+    "等级数值695": {
+      "selector": ".slot-level b",
+      "text": "695",
       "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
       "fontWeight": "700",
       "fontSize": "69px",
       "letterSpacing": "-1px",
       "lineHeight": "62.1px",
-      "color": "rgb(250, 115, 0)"
+      "color": "rgb(250, 115, 0)",
+      "renderedWidth": 100.09,
+      "renderedHeight": 62.09
     },
-    "442425": {
+    "战斗力数值442425": {
+      "selector": ".slot-battle-power b",
+      "text": "442425",
       "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
       "fontWeight": "700",
       "fontSize": "84px",
       "letterSpacing": "-1px",
       "lineHeight": "79.8px",
-      "color": "rgb(6, 6, 6)"
+      "color": "rgb(6, 6, 6)",
+      "renderedWidth": 245,
+      "renderedHeight": 79.8
     },
-    "BATTLE": {
-      "fontFamily": "NikkeRajdhani, BarlowCondensed, sans-serif",
+    "BATTLE标签": {
+      "selector": ".slot-battle-power small",
+      "text": "BATTLE",
+      "fontFamily": "NikkeRajdhani, sans-serif",
       "fontWeight": "700",
       "fontSize": "21px",
       "letterSpacing": "6px",
       "lineHeight": "21px",
-      "color": "rgb(41, 41, 41)"
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 97.45,
+      "renderedHeight": 21
     },
     "词条合计label": {
-      "fontFamily": "Replica, \"Noto Sans SC\", \"Microsoft YaHei\", sans-serif",
+      "selector": ".slot-total-pill .total-label",
+      "text": "词条合计:",
+      "fontFamily": "NikkeNotoSC, Replica, \"Noto Sans SC\", sans-serif",
       "fontWeight": "700",
       "fontSize": "34px",
       "letterSpacing": "normal",
       "lineHeight": "34px",
-      "color": "rgb(41, 41, 41)"
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 147.06,
+      "renderedHeight": 34
     },
     "词条合计value": {
+      "selector": ".slot-total-pill .total-value",
+      "text": "80",
       "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
       "fontWeight": "700",
       "fontSize": "64px",
       "letterSpacing": "-1px",
       "lineHeight": "57.6px",
-      "color": "rgb(7, 7, 7)"
+      "color": "rgb(7, 7, 7)",
+      "renderedWidth": 61.75,
+      "renderedHeight": 57.59
     },
     "词条合计unit": {
-      "fontFamily": "Replica, \"Noto Sans SC\", \"Microsoft YaHei\", sans-serif",
+      "selector": ".slot-total-pill .total-unit",
+      "text": "阶",
+      "fontFamily": "NikkeNotoSC, Replica, \"Noto Sans SC\", sans-serif",
       "fontWeight": "700",
       "fontSize": "30px",
       "letterSpacing": "normal",
       "lineHeight": "30px",
-      "color": "rgb(41, 41, 41)"
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 30,
+      "renderedHeight": 30
     },
-    "装备词条label": {
-      "fontFamily": "Replica, \"Noto Sans SC\", \"Microsoft YaHei\", sans-serif",
+    "总评第一行label": {
+      "selector": ".summary-row:nth-child(1) .label",
+      "text": "【蓄力速度增加】纸面合计",
+      "fontFamily": "NikkeNotoSC, Replica, \"Noto Sans SC\", sans-serif",
       "fontWeight": "700",
-      "fontSize": "33px",
-      "letterSpacing": "-0.8px",
-      "lineHeight": "33px",
-      "color": "rgb(41, 41, 41)"
+      "fontSize": "43px",
+      "letterSpacing": "-1.2px",
+      "lineHeight": "43px",
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 620,
+      "renderedHeight": 65.39
     },
-    "装备词条value": {
+    "总评第一行value": {
+      "selector": ".summary-row:nth-child(1) strong",
+      "text": "10.64%",
       "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
       "fontWeight": "600",
-      "fontSize": "35px",
+      "fontSize": "47px",
       "letterSpacing": "-0.5px",
-      "lineHeight": "35px",
-      "color": "rgb(41, 41, 41)"
+      "lineHeight": "47px",
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 470,
+      "renderedHeight": 47
     },
-    "装备词条tier": {
-      "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
-      "fontWeight": "700",
-      "fontSize": "29px",
-      "letterSpacing": "-0.4px",
-      "lineHeight": "29px",
-      "color": "rgb(85, 91, 97)"
-    },
-    "总评tier": {
+    "总评第一行tier": {
+      "selector": ".summary-row:nth-child(1) .summary-tier",
+      "text": "19阶",
       "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
       "fontWeight": "700",
       "fontSize": "36px",
       "letterSpacing": "-0.5px",
       "lineHeight": "36px",
-      "color": "rgb(74, 80, 86)"
+      "color": "rgb(74, 80, 86)",
+      "renderedWidth": 70.36,
+      "renderedHeight": 36
+    },
+    "装备词条short": {
+      "selector": ".ol-row:not(.empty) .short",
+      "text": "攻击",
+      "fontFamily": "NikkeNotoSC, Replica, \"Noto Sans SC\", sans-serif",
+      "fontWeight": "700",
+      "fontSize": "33px",
+      "letterSpacing": "-0.8px",
+      "lineHeight": "33px",
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 126,
+      "renderedHeight": 33
+    },
+    "装备词条value": {
+      "selector": ".ol-row:not(.empty) b",
+      "text": "9.00%",
+      "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
+      "fontWeight": "600",
+      "fontSize": "35px",
+      "letterSpacing": "-0.5px",
+      "lineHeight": "35px",
+      "color": "rgb(41, 41, 41)",
+      "renderedWidth": 132,
+      "renderedHeight": 35
+    },
+    "装备词条tier": {
+      "selector": ".ol-row:not(.empty) .option-tier",
+      "text": "7阶",
+      "fontFamily": "NikkeBarlowCondensed, \"Arial Narrow\", sans-serif",
+      "fontWeight": "700",
+      "fontSize": "29px",
+      "letterSpacing": "-0.4px",
+      "lineHeight": "29px",
+      "color": "rgb(85, 91, 97)",
+      "renderedWidth": 55,
+      "renderedHeight": 29
     }
+  },
+  "metric_checks": {
+    "name_noto_width": 402,
+    "name_replica_width": 402,
+    "num_barlow_condensed_width": 232.43,
+    "num_default_sans_width": 310.82,
+    "barlow_is_condensed": true
   }
 }

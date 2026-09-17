@@ -212,3 +212,105 @@ def test_character_font_audit_and_fallback():
     assert "@font-face{font-family:'NikkeRajdhaniSemiBold'" in rendered
     assert "--font-cn-title:'NikkeNotoSC'" in rendered
 
+    # Fallback resilience: when variable TTF is missing, noto_font still resolves from OTF
+    from astrbot_plugin_nikke.character_replica import _load_font_data_uri
+    assert _load_font_data_uri("NotoSansHans-Medium.otf").startswith("data:font/otf;base64,")
+
+
+import pytest
+
+@pytest.mark.asyncio
+async def test_browser_rendered_fonts_and_glyph_metrics():
+    """在真实 Chromium 运行态下验证字体真实加载、computed style 命中及字形度量。"""
+    from playwright.async_api import async_playwright
+    from jinja2 import Environment
+    from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
+    from astrbot_plugin_nikke.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.tests.test_character_replica import example_card
+    import types
+
+    card = example_card()
+    dummy_assets = types.SimpleNamespace(
+        portrait=None, equipment={}, corporation=None, element=None, weapon=None, burst=None,
+        skills={}, favorite_item=None, cube=None
+    )
+    payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, dummy_assets)
+    html = Environment().from_string(T2ITemplateLoader().load("character")).render(**payload)
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page(viewport={"width": 1600, "height": 2400})
+        await page.set_content(html, wait_until="load")
+        await page.evaluate("document.fonts.ready")
+
+        audit = await page.evaluate('''() => {
+            const faces = [];
+            for (const f of document.fonts) {
+                faces.push({ family: f.family, weight: f.weight, status: f.status });
+            }
+
+            const checkNoto = document.fonts.check("800 67px 'NikkeNotoSC'");
+            const checkBarlow = document.fonts.check("700 84px 'NikkeBarlowCondensed'");
+            const checkRajdhani = document.fonts.check("700 21px 'NikkeRajdhani'");
+
+            const nameEl = document.querySelector(".slot-character-name h1");
+            const nameStyle = window.getComputedStyle(nameEl);
+            const nameRect = nameEl.getBoundingClientRect();
+
+            const combatEl = document.querySelector(".slot-battle-power b");
+            const combatStyle = window.getComputedStyle(combatEl);
+
+            const lvEl = document.querySelector(".slot-level .lv-prefix");
+            const lvStyle = window.getComputedStyle(lvEl);
+
+            const levelNumEl = document.querySelector(".slot-level b");
+            const levelNumStyle = window.getComputedStyle(levelNumEl);
+
+            // Canvas glyph metrics: verify condensed ratio
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            ctx.font = "700 84px 'NikkeBarlowCondensed'";
+            const barlowWidth = ctx.measureText("442425").width;
+            ctx.font = "700 84px sans-serif";
+            const sansWidth = ctx.measureText("442425").width;
+
+            return {
+                faces,
+                checkNoto,
+                checkBarlow,
+                checkRajdhani,
+                nameFamily: nameStyle.fontFamily,
+                nameWeight: nameStyle.fontWeight,
+                nameWidth: nameRect.width,
+                combatFamily: combatStyle.fontFamily,
+                combatWeight: combatStyle.fontWeight,
+                lvFamily: lvStyle.fontFamily,
+                levelNumFamily: levelNumStyle.fontFamily,
+                barlowWidth,
+                sansWidth
+            };
+        }''')
+        await browser.close()
+
+    # 1. 验证字体已被 Chromium 加载
+    loaded_families = {f["family"] for f in audit["faces"] if f["status"] == "loaded"}
+    assert "NikkeNotoSC" in loaded_families
+    assert "NikkeBarlowCondensed" in loaded_families
+    assert "NikkeRajdhani" in loaded_families
+
+    # 2. 验证 document.fonts.check 通过
+    assert audit["checkNoto"] is True
+    assert audit["checkBarlow"] is True
+    assert audit["checkRajdhani"] is True
+
+    # 3. 验证真实 DOM 元素的 computed style 优先使用目标字体且字重正确
+    assert audit["nameFamily"].startswith("NikkeNotoSC")
+    assert audit["nameWeight"] == "800"
+    assert audit["combatFamily"].startswith("NikkeBarlowCondensed")
+    assert audit["combatWeight"] == "700"
+    assert audit["lvFamily"].startswith("NikkeRajdhani")
+    assert audit["levelNumFamily"].startswith("NikkeBarlowCondensed")
+
+    # 4. 验证真实字形度量（证明实际调用了压缩数字字体而不是默认非压缩字体）
+    assert audit["barlowWidth"] < audit["sansWidth"] * 0.85
+
