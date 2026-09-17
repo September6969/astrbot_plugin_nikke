@@ -37,7 +37,7 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
     attack = '<script>alert(1)</script></style><img src=x onerror=alert(1)>'
     data = next(iter(get_cases(page, tmp_path).values()))
     if page == "calendar_schedule":
-        data["groups"][0]["items"][0]["title"] = attack
+        data["active_items"][0]["title"] = attack
     elif page == "union_overview":
         data.guild_name = attack
     elif page in ("union_records", "union_member"):
@@ -105,15 +105,14 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
 
 def test_calendar_horizon_and_classification(tmp_path):
     cases = get_cases("calendar_schedule", tmp_path)
-    assert cases["normal"]["horizon_days"] == 14
-    assert cases["7-days"]["horizon_days"] == 7
-    assert cases["30-days"]["horizon_days"] == 30
-    assert len(cases["normal"]["ending_soon"]) == 1
-    assert len(cases["normal"]["active"]) == 1
-    assert len(cases["30-days"]["upcoming"]) > len(cases["7-days"]["upcoming"])
-    assert cases["stale"]["is_stale"]
+    assert cases["normal"]["active_count"] == 2
+    assert cases["normal"]["active_items"][0]["is_next_ending"] is True
+    assert cases["normal"]["active_items"][1]["is_next_ending"] is False
+    assert len(cases["30-days"]["next_items"]) > len(cases["7-days"]["next_items"])
+    assert cases["stale"]["data_quality"] == "STALE"
     assert not cases["unavailable"]["available"]
-    assert all(not group["items"] for group in cases["empty"]["groups"])
+    assert cases["empty"]["active_count"] == 0
+    assert not cases["empty"]["has_active"]
 
 
 @pytest.mark.asyncio
@@ -230,32 +229,22 @@ def test_profile_resource_silver_mileage_label(tmp_path):
     assert "躯体标签" not in html
 
 
-def test_calendar_progress_presentation(tmp_path):
+def test_calendar_operations_feed_presentation(tmp_path):
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("calendar_schedule", tmp_path)
     normal = cases["normal"]
-    assert len(normal["ending_soon"]) == 1
-    ending_item = normal["ending_soon"][0]
-    assert 0 <= ending_item["progress_percent"] <= 100
-    assert not ending_item["is_upcoming"]
-    assert ending_item["progress_label"].endswith("%")
-
-    assert len(normal["active"]) == 1
-    active_item = normal["active"][0]
-    assert 0 <= active_item["progress_percent"] <= 100
-    assert not active_item["is_upcoming"]
-    assert active_item["progress_label"].endswith("%")
-
-    assert len(normal["upcoming"]) > 0
-    upcoming_item = normal["upcoming"][0]
-    assert upcoming_item["progress_percent"] == 0.0
-    assert upcoming_item["is_upcoming"]
-    assert upcoming_item["progress_label"] == "未开始"
+    assert normal["active_count"] > 0
+    first_active = normal["active_items"][0]
+    assert first_active["is_next_ending"] is True
+    assert first_active["urgency"] in ("CRITICAL", "URGENT", "CLOSING", "NORMAL")
 
     html = Environment(autoescape=False).from_string(T2ITemplateLoader().load("calendar_schedule")).render(**normal)
-    assert "progress-track" in html
-    assert "progress-bar" in html
-    assert "未开始" in html
+    assert "ACTIVE OPERATIONS" in html
+    assert "NEXT ENDING" in html
+    assert "progress-track" not in html
+    assert "progress-bar" not in html
+    assert "ENDING SOON" not in html
+    assert "14 DAYS" not in html
 
 
 @pytest.mark.asyncio

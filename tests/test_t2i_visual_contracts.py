@@ -15,19 +15,20 @@ def render(page, data):
     return Environment().from_string(T2ITemplateLoader().load(page)).render(**data)
 
 
-def test_calendar_group_order_long_titles_and_single_footer(tmp_path):
+def test_calendar_operations_feed_layout_and_single_footer(tmp_path):
     cases = get_cases("calendar_schedule", tmp_path)
     data = cases["long-title"]
     html = render("calendar_schedule", data)
     assert html.count("<footer") == 1
-    assert html.index("ENDING SOON / 即将结束") < html.index("ACTIVE / 进行中") < html.index("UPCOMING / 即将开始")
-    assert 'schedule-group ending-soon' in html and 'schedule-group active' in html and 'schedule-group upcoming' in html
-    for group in data["groups"]:
-        for item in group["items"]:
-            assert item["title"] in html
-            assert item["remaining"] in html
+    assert "ACTIVE OPERATIONS" in html
+    assert "ENDING SOON" not in html
+    assert "UPCOMING" not in html
+    assert "14 DAYS" not in html
+    for item in data["active_items"]:
+        assert item["title"] in html
+        assert item["remaining"] in html
     many = cases["many-events"]
-    assert render("calendar_schedule", many).count('<article class="event">') == sum(len(g["items"]) for g in many["groups"])
+    assert render("calendar_schedule", many).count('<article class="op-card') == len(many["active_items"])
 
 
 @pytest.mark.parametrize("state", ["AVAILABLE", "PARTIAL", "UNAVAILABLE", "UNKNOWN", "EMPTY"])
