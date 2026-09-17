@@ -103,7 +103,7 @@ def test_custom_webfonts_and_slot_geometry_in_template():
     assert ".slot-level{position:absolute;left:715px;" in template
     assert ".slot-total-pill{position:absolute;right:50px;" in template
     assert ".slot-battle-power{position:absolute;left:50px;" in template
-    assert ".slot-rarity-stars{position:absolute;left:275px;" in template
+    assert ".slot-rarity-stars{position:absolute;left:248px;" in template
     assert ".icon-slot-1{left:420px}" in template
     assert ".icon-slot-6{left:1110px}" in template
 
