@@ -1,6 +1,8 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1600"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'none'"><style><!-- SHARED_CSS -->
 html,body{margin:0;width:1600px;background:#e8ebee}*{box-sizing:border-box}
-{% if font_noto %}@font-face{font-family:'NikkeNotoSC';src:url('{{ font_noto }}');font-style:normal;font-weight:100 900;font-display:block}{% endif %}
+{% if font_noto_700 %}@font-face{font-family:'NikkeNotoSC';src:url('{{ font_noto_700 }}') format('woff2');font-style:normal;font-weight:700;font-display:block}{% endif %}
+{% if font_noto_800 %}@font-face{font-family:'NikkeNotoSC';src:url('{{ font_noto_800 }}') format('woff2');font-style:normal;font-weight:800;font-display:block}{% endif %}
+{% if not font_noto_700 and not font_noto_800 and font_noto %}@font-face{font-family:'NikkeNotoSC';src:url('{{ font_noto }}');font-style:normal;font-weight:700 800;font-display:block}{% endif %}
 {% if replica_font %}@font-face{font-family:Replica;src:url('{{ replica_font }}');font-style:normal;font-weight:400 900;font-display:block}{% endif %}
 {% if font_barlow %}@font-face{font-family:'NikkeBarlowCondensed';src:url('{{ font_barlow }}') format('truetype');font-style:normal;font-weight:700 800;font-display:block}{% endif %}
 {% if font_barlow_sb %}@font-face{font-family:'NikkeBarlowCondensedSemiBold';src:url('{{ font_barlow_sb }}') format('truetype');font-style:normal;font-weight:600;font-display:block}{% endif %}
@@ -45,7 +47,7 @@ html,body{margin:0;width:1600px;background:#e8ebee}*{box-sizing:border-box}
     radial-gradient(ellipse 950px 720px at 48% 36%, rgba(255,255,255,0.72) 0%, rgba(240,243,246,0.32) 55%, transparent 100%),
     radial-gradient(ellipse 1600px 2400px at 50% 50%, transparent 65%, rgba(212,218,226,0.40) 100%),
     linear-gradient(180deg, #f2f4f7 0%, #eaedee 45%, #e1e5e9 100%);
-  font-family:var(--font-ui);font-weight:800;font-synthesis:weight;
+  font-family:var(--font-ui);font-weight:800;font-synthesis:none;
   font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;
 }
 /* Font profiles for A/B/C/D */

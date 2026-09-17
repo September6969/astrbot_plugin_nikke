@@ -84,7 +84,8 @@ class CharacterT2IPayloadBuilder:
         watermark = self.resolver.encode(corp_asset, (260, 260)) if corp_asset else None
         from .character_replica import (build_summary, cache_identity, SHORT_NAMES, VERSION,
                                 replica_font, barlow_font, barlow_semibold_font,
-                                rajdhani_font, rajdhani_semibold_font, noto_font, art_style)
+                                rajdhani_font, rajdhani_semibold_font, noto_font,
+                                noto_font_700, noto_font_800, art_style)
         for gear in equipment:
             for row in gear["options"]:
                 row["short_name"] = SHORT_NAMES.get(row["name"].strip("【】"), row["name"])
@@ -97,6 +98,7 @@ class CharacterT2IPayloadBuilder:
                                                            ("skill2", "技能2", data.skill2_level),
                                                            ("burst", "爆裂", data.burst_skill_level))],
                 "replica_font": replica_font(), "font_noto": noto_font(),
+                "font_noto_700": noto_font_700(), "font_noto_800": noto_font_800(),
                 "font_barlow": barlow_font(), "font_barlow_sb": barlow_semibold_font(),
                 "font_rajdhani": rajdhani_font(), "font_rajdhani_sb": rajdhani_semibold_font(),
                 "art_style": art_style(data, portrait),
