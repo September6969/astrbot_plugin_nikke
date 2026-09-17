@@ -547,6 +547,13 @@
         ],
         "crop_padding": 64
       },
+      "framing": {
+        "target": [
+          742,
+          540
+        ],
+        "extent_width": 248.4
+      },
       "variants": [
         {
           "schema": 1,
@@ -608,6 +615,13 @@
               937
             ],
             "crop_padding": 16
+          },
+          "framing": {
+            "target": [
+              742,
+              540
+            ],
+            "extent_width": 248.4
           }
         }
       ]
