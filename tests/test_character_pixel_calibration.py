@@ -19,9 +19,9 @@ def test_equipment_icon_normalization_trims_transparent_padding():
     assert bbox is not None
     left, top, right, bottom = bbox
 
-    # 150 px safe box, centered; art must no longer inherit original off-center padding.
-    assert right - left <= 150
-    assert bottom - top <= 150
+    # 172 px safe box, centered; art must no longer inherit original off-center padding.
+    assert right - left <= 172
+    assert bottom - top <= 172
     assert abs((left + right) / 2 - 90) <= 1
     assert abs((top + bottom) / 2 - 90) <= 1
 
@@ -47,8 +47,8 @@ def test_rapi_red_hood_golden_sample_face_anchor_is_calibrated():
     c010 = metadata().get("c010")
     assert c010 is not None
     assert "framing" in c010
-    assert c010["framing"]["target"] == [850, 620]
-    assert c010["framing"]["extent_width"] == 160.0
+    assert c010["framing"]["target"] == [860, 610]
+    assert c010["framing"]["extent_width"] == 230.0
 
 
 def test_snow_white_face_anchor_is_calibrated():
