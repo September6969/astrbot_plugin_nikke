@@ -43,7 +43,7 @@ class DirectoryContractTests(unittest.TestCase):
             async def get(self, url):
                 return Response(zh if url == NIKKE_DIRECTORY_ZH else en)
 
-        with patch("astrbot_plugin_nikke.client.httpx.AsyncClient", return_value=Client()):
+        with patch("astrbot_plugin_nikke.integrations.blablalink.client.httpx.AsyncClient", return_value=Client()):
             directory = asyncio.run(BlaBlaClient().get_directory())
 
         self.assertEqual(directory[0]["class"], "Supporter")

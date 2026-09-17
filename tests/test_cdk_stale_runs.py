@@ -39,7 +39,7 @@ class StaleRunTests(IsolatedAsyncioTestCase):
         for stale in (True, False):
             with self.subTest(stale=stale), tempfile.TemporaryDirectory() as directory:
                 store = NikkeStore(directory)
-                with patch('astrbot_plugin_nikke.storage.time.time', return_value=1000):
+                with patch('astrbot_plugin_nikke.core.storage.time.time', return_value=1000):
                     store.claim_run(key('FAKE-CODE'), 'synthetic-user', 'cdk')
                 plugin = NikkePlugin.__new__(NikkePlugin)
                 plugin.store = store
@@ -49,7 +49,7 @@ class StaleRunTests(IsolatedAsyncioTestCase):
                 event = SimpleNamespace(get_sender_id=lambda: 'synthetic-user', plain_result=lambda x: x)
                 async def consume():
                     return [result async for result in plugin.cdk(event, 'FAKE-CODE')]
-                with patch('astrbot_plugin_nikke.storage.time.time', return_value=1180 if stale else 1010):
+                with patch('astrbot_plugin_nikke.core.storage.time.time', return_value=1180 if stale else 1010):
                     await asyncio.gather(consume(), consume())
                 plugin.cdk_service.redeem_single.assert_not_awaited()
                 self.assertEqual(store.get_run(key('FAKE-CODE'))['status'], 'unknown' if stale else 'running')
@@ -58,11 +58,11 @@ class StaleRunTests(IsolatedAsyncioTestCase):
     async def test_batch_stale_skipped_but_new_code_continues(self):
         with tempfile.TemporaryDirectory() as directory:
             store = NikkeStore(directory)
-            with patch('astrbot_plugin_nikke.storage.time.time', return_value=1000):
+            with patch('astrbot_plugin_nikke.core.storage.time.time', return_value=1000):
                 store.claim_run(key('FAKE-A'), 'synthetic-user', 'cdk')
             client = AsyncMock()
             client.redeem_cdk.return_value = CdkRedemptionResult(True, True, 'ok')
-            with patch('astrbot_plugin_nikke.storage.time.time', return_value=1180), patch('astrbot_plugin_nikke.cdk_service.asyncio.sleep', new_callable=AsyncMock):
+            with patch('astrbot_plugin_nikke.core.storage.time.time', return_value=1180), patch('astrbot_plugin_nikke.features.cdk.service.asyncio.sleep', new_callable=AsyncMock):
                 result = await CdkService(client).redeem_batch({'game_uid': 'synthetic-game'}, ['FAKE-A', 'FAKE-B'], store=store, qq_id='synthetic-user')
             self.assertTrue(result.results[0].is_unknown)
             self.assertTrue(result.results[1].success)
@@ -73,9 +73,9 @@ class StaleRunTests(IsolatedAsyncioTestCase):
     async def test_atomic_transition_across_store_instances(self):
         with tempfile.TemporaryDirectory() as directory:
             stores = [NikkeStore(directory), NikkeStore(directory)]
-            with patch('astrbot_plugin_nikke.storage.time.time', return_value=1000):
+            with patch('astrbot_plugin_nikke.core.storage.time.time', return_value=1000):
                 stores[0].claim_run(key('FAKE-A'), 'synthetic-user', 'cdk')
-            with patch('astrbot_plugin_nikke.storage.time.time', return_value=1180), ThreadPoolExecutor(2) as pool:
+            with patch('astrbot_plugin_nikke.core.storage.time.time', return_value=1180), ThreadPoolExecutor(2) as pool:
                 results = list(pool.map(lambda store: store.mark_stale_running_unknown(key('FAKE-A'), stale_after=120, detail='结果未确认'), stores))
             self.assertEqual(sum(results), 1)
 

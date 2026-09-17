@@ -22,17 +22,9 @@ def test_ui_renderers_exports():
     assert hasattr(renderers, "T2IRenderer")
 
 
-def test_root_shims_backward_compatibility_and_identity():
-    import astrbot_plugin_nikke.card_theme as card_theme
-    import astrbot_plugin_nikke.renderer as renderer
-    import astrbot_plugin_nikke.campaign_history_renderer as campaign_history_renderer
-    import astrbot_plugin_nikke.character_card_renderer as character_card_renderer
-    import astrbot_plugin_nikke.profile_card_renderer as profile_card_renderer
-    import astrbot_plugin_nikke.union_raid_renderer as union_raid_renderer
-    import astrbot_plugin_nikke.t2i_renderer as t2i_renderer
-
-    import astrbot_plugin_nikke.ui.theme as ui_theme
-    import astrbot_plugin_nikke.ui.primitives as ui_primitives
+def test_ui_formal_contracts_and_root_isolation():
+    from astrbot_plugin_nikke.ui.theme import character_theme, UI_COLORS, CharacterTheme
+    from astrbot_plugin_nikke.ui.primitives import CardRenderer
     from astrbot_plugin_nikke.ui.renderers import (
         CampaignHistoryRenderer,
         CharacterCardRenderer,
@@ -41,11 +33,27 @@ def test_root_shims_backward_compatibility_and_identity():
         T2IRenderer,
     )
 
-    assert card_theme.character_theme is ui_theme.character_theme
-    assert card_theme.UI_COLORS == ui_theme.UI_COLORS
-    assert renderer.CardRenderer is ui_primitives.CardRenderer
-    assert campaign_history_renderer.CampaignHistoryRenderer is CampaignHistoryRenderer
-    assert character_card_renderer.CharacterCardRenderer is CharacterCardRenderer
-    assert profile_card_renderer.ProfileCardRenderer is ProfileCardRenderer
-    assert union_raid_renderer.UnionRaidRenderer is UnionRaidRenderer
-    assert t2i_renderer.T2IRenderer is T2IRenderer
+    assert CharacterTheme is not None
+    assert character_theme is not None
+    assert UI_COLORS is not None
+    assert CardRenderer is not None
+    assert CampaignHistoryRenderer is not None
+    assert CharacterCardRenderer is not None
+    assert ProfileCardRenderer is not None
+    assert UnionRaidRenderer is not None
+    assert T2IRenderer is not None
+
+    # 验证旧根目录垫片已被彻底收敛，不再暴露于包根
+    legacy_ui_shims = [
+        "card_theme",
+        "renderer",
+        "campaign_history_renderer",
+        "character_card_renderer",
+        "profile_card_renderer",
+        "union_raid_renderer",
+        "t2i_renderer",
+    ]
+    for shim in legacy_ui_shims:
+        with pytest.raises(ModuleNotFoundError):
+            __import__(f"astrbot_plugin_nikke.{shim}")
+

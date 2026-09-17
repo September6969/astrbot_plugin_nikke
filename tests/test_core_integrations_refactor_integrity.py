@@ -38,19 +38,23 @@ def test_integrations_modules_importable():
     assert SpineWorkerRuntime is not None
 
 
-def test_root_shims_core_integrations_identity():
-    import astrbot_plugin_nikke.asset_manager as am_shim
-    from astrbot_plugin_nikke.core.asset_manager import AssetManager
-    assert am_shim.AssetManager is AssetManager
+def test_core_integrations_root_isolation():
+    # 验证旧根目录垫片已被彻底收敛，不再暴露于包根
+    legacy_core_shims = [
+        "asset_manager",
+        "storage",
+        "client",
+        "spine_prerenderer",
+        "spine_renderer",
+        "spine_runtime",
+        "spine_runtime_config",
+        "runtime_config",
+        "runtime_health",
+        "cookie_utils",
+        "log_privacy",
+        "web_service",
+    ]
+    for shim in legacy_core_shims:
+        with pytest.raises(ModuleNotFoundError):
+            __import__(f"astrbot_plugin_nikke.{shim}")
 
-    import astrbot_plugin_nikke.storage as store_shim
-    from astrbot_plugin_nikke.core.storage import NikkeStore
-    assert store_shim.NikkeStore is NikkeStore
-
-    import astrbot_plugin_nikke.client as client_shim
-    from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient
-    assert client_shim.BlaBlaClient is BlaBlaClient
-
-    import astrbot_plugin_nikke.spine_prerenderer as spine_shim
-    from astrbot_plugin_nikke.integrations.spine.prerenderer import SpinePreRenderer
-    assert spine_shim.SpinePreRenderer is SpinePreRenderer

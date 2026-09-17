@@ -128,7 +128,7 @@ class SpineFormalBackendTests(TestCase):
                 context.__enter__.return_value = response
                 return context
 
-            with patch("astrbot_plugin_nikke.spine_prerenderer.httpx.stream", side_effect=open_stream):
+            with patch("astrbot_plugin_nikke.integrations.spine.prerenderer.httpx.stream", side_effect=open_stream):
                 bundle = fetcher.fetch(
                     {"skel": base + ".skel", "atlas": base + ".atlas", "png": base + ".png"},
                     "c191_default",

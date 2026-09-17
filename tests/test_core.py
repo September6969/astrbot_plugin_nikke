@@ -368,7 +368,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
 
         from unittest.mock import AsyncMock, patch
         client = RetryClient()
-        with patch("astrbot_plugin_nikke.client.asyncio.sleep", new=AsyncMock()):
+        with patch("astrbot_plugin_nikke.integrations.blablalink.client.asyncio.sleep", new=AsyncMock()):
             result = await client.validate_cookie(VALID_COOKIE)
         self.assertEqual(result.area_id, "3")
         self.assertEqual(client.count, 3)

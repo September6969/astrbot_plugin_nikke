@@ -34,27 +34,21 @@ def test_features_domains_importable():
     assert CalendarService is not None
 
 
-def test_root_shims_features_identity():
-    import astrbot_plugin_nikke.announcement_service as ann_svc
-    from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
-    assert ann_svc.AnnouncementService is AnnouncementService
+def test_features_root_isolation():
+    # 验证旧根目录垫片已被彻底收敛，不再暴露于包根
+    legacy_feature_shims = [
+        "announcement_service",
+        "card_builder",
+        "tarot_service",
+        "calendar_service",
+        "cdk_service",
+        "costume_registry",
+        "profile_builder",
+        "union_raid_builder",
+        "campaign_history_builder",
+        "daily_runner",
+    ]
+    for shim in legacy_feature_shims:
+        with pytest.raises(ModuleNotFoundError):
+            __import__(f"astrbot_plugin_nikke.{shim}")
 
-    import astrbot_plugin_nikke.card_builder as card_bld
-    from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
-    assert card_bld.CharacterCardBuilder is CharacterCardBuilder
-
-    import astrbot_plugin_nikke.tarot_service as tarot_svc
-    from astrbot_plugin_nikke.features.tarot.service import TarotService
-    assert tarot_svc.TarotService is TarotService
-
-    import astrbot_plugin_nikke.calendar_service as cal_svc
-    from astrbot_plugin_nikke.features.calendar.service import CalendarService
-    assert cal_svc.CalendarService is CalendarService
-
-    import astrbot_plugin_nikke.cdk_service as cdk_svc
-    from astrbot_plugin_nikke.features.cdk.service import CdkService
-    assert cdk_svc.CdkService is CdkService
-
-    import astrbot_plugin_nikke.costume_registry as cos_reg
-    from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
-    assert cos_reg.CostumeRegistry is CostumeRegistry
