@@ -71,6 +71,13 @@
           942
         ],
         "crop_padding": 16
+      },
+      "framing": {
+        "target": [
+          850,
+          620
+        ],
+        "extent_width": 160.0
       }
     },
     "c010_02": {

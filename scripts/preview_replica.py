@@ -51,7 +51,8 @@ async def main():
                                ("rapi-promise", 10, 20001),
                                ("wide", 330, 0), ("tall", 234, 0), ("elysion", 17, 0), ("tetra", 352, 0)):
         person = master.resolve_resource_id(rid)
-        card = replace(example_card(), name_cn=person.name_cn, name_en=person.name_en, name_code=str(person.name_code),
+        name_cn = "拉毗：小红帽" if key == "rapi" else person.name_cn
+        card = replace(example_card(), name_cn=name_cn, name_en=person.name_en, name_code=str(person.name_code),
                        resource_id=str(rid), costume_id=costume, spine_asset_id=person.spine_asset_id,
                        costume_selection=CostumeSelection(costume, "preview", "default" if not costume else "alternate"),
                        corporation=person.corporation, element=person.element, weapon=person.weapon, burst=person.burst,
@@ -85,7 +86,7 @@ async def main():
     manager.close()
     if args.reference:
         reference = Image.open(args.reference).convert("RGB").resize((1600, 2400))
-        actual = Image.open(out / "snow-white.png").convert("RGB")
+        actual = Image.open(out / "rapi.png").convert("RGB")
         actual.save(out / "actual.png")
         Image.blend(reference, actual, .5).save(out / "overlay.png")
         ImageChops.difference(reference, actual).save(out / "diff.png")
