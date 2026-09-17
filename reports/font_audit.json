@@ -1,10 +1,17 @@
 {
   "document_fonts_status": "loaded",
-  "document_fonts_count": 6,
+  "document_fonts_count": 7,
   "font_faces": [
     {
       "family": "NikkeNotoSC",
-      "weight": "100 900",
+      "weight": "700",
+      "style": "normal",
+      "status": "loaded",
+      "loaded": true
+    },
+    {
+      "family": "NikkeNotoSC",
+      "weight": "800",
       "style": "normal",
       "status": "loaded",
       "loaded": true
@@ -46,8 +53,7 @@
     }
   ],
   "font_checks": {
-    "32px 'Noto Sans SC'": true,
-    "32px 'NikkeNotoSC'": true,
+    "700 32px 'NikkeNotoSC'": true,
     "800 67px 'NikkeNotoSC'": true,
     "32px 'Barlow Condensed'": true,
     "32px 'NikkeBarlowCondensed'": true,
@@ -235,5 +241,14 @@
     "num_barlow_condensed_width": 232.43,
     "num_default_sans_width": 310.82,
     "barlow_is_condensed": true
+  },
+  "raster_checks": {
+    "sample_text": "拉毗：小红帽",
+    "noto_font": "800 67px 'NikkeNotoSC'",
+    "fallback_font": "800 67px 'Replica'",
+    "total_pixels": 60000,
+    "different_pixels": 5420,
+    "difference_percent": 9.03,
+    "is_distinct_raster": true
   }
 }

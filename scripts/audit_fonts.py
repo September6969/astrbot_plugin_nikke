@@ -86,8 +86,7 @@ async def audit():
             }
 
             const checks = {
-                "32px 'Noto Sans SC'": document.fonts.check("32px 'Noto Sans SC'"),
-                "32px 'NikkeNotoSC'": document.fonts.check("32px 'NikkeNotoSC'"),
+                "700 32px 'NikkeNotoSC'": document.fonts.check("700 32px 'NikkeNotoSC'"),
                 "800 67px 'NikkeNotoSC'": document.fonts.check("800 67px 'NikkeNotoSC'"),
                 "32px 'Barlow Condensed'": document.fonts.check("32px 'Barlow Condensed'"),
                 "32px 'NikkeBarlowCondensed'": document.fonts.check("32px 'NikkeBarlowCondensed'"),
@@ -154,6 +153,42 @@ async def audit():
             ctx.font = "700 84px sans-serif";
             const numSansWidth = ctx.measureText("442425").width;
 
+            // Chinese glyph raster buffer comparison:
+            // Render "拉毗：小红帽" on two separate 500x120 canvases with white text on black background
+            const w = 500, h = 120;
+            const c1 = document.createElement("canvas");
+            c1.width = w; c1.height = h;
+            const ctx1 = c1.getContext("2d");
+            ctx1.fillStyle = "#000000";
+            ctx1.fillRect(0, 0, w, h);
+            ctx1.font = "800 67px 'NikkeNotoSC'";
+            ctx1.fillStyle = "#ffffff";
+            ctx1.textBaseline = "top";
+            ctx1.fillText("拉毗：小红帽", 10, 10);
+            const imgData1 = ctx1.getImageData(0, 0, w, h).data;
+
+            const c2 = document.createElement("canvas");
+            c2.width = w; c2.height = h;
+            const ctx2 = c2.getContext("2d");
+            ctx2.fillStyle = "#000000";
+            ctx2.fillRect(0, 0, w, h);
+            ctx2.font = "800 67px 'Replica'";
+            ctx2.fillStyle = "#ffffff";
+            ctx2.textBaseline = "top";
+            ctx2.fillText("拉毗：小红帽", 10, 10);
+            const imgData2 = ctx2.getImageData(0, 0, w, h).data;
+
+            let diffPixels = 0;
+            const totalPixels = w * h;
+            for (let i = 0; i < imgData1.length; i += 4) {
+                const diffR = Math.abs(imgData1[i] - imgData2[i]);
+                const diffG = Math.abs(imgData1[i+1] - imgData2[i+1]);
+                const diffB = Math.abs(imgData1[i+2] - imgData2[i+2]);
+                if (diffR > 20 || diffG > 20 || diffB > 20) {
+                    diffPixels++;
+                }
+            }
+
             const metricChecks = {
                 "name_noto_width": Math.round(nameNotoWidth * 100) / 100,
                 "name_replica_width": Math.round(nameReplicaWidth * 100) / 100,
@@ -162,13 +197,24 @@ async def audit():
                 "barlow_is_condensed": numBarlowWidth < (numSansWidth * 0.85)
             };
 
+            const rasterChecks = {
+                "sample_text": "拉毗：小红帽",
+                "noto_font": "800 67px 'NikkeNotoSC'",
+                "fallback_font": "800 67px 'Replica'",
+                "total_pixels": totalPixels,
+                "different_pixels": diffPixels,
+                "difference_percent": Math.round((diffPixels / totalPixels) * 10000) / 100,
+                "is_distinct_raster": diffPixels > 100
+            };
+
             return {
                 document_fonts_status: document.fonts.status,
                 document_fonts_count: document.fonts.size,
                 font_faces: fontFaces,
                 font_checks: checks,
                 element_styles: elementStyles,
-                metric_checks: metricChecks
+                metric_checks: metricChecks,
+                raster_checks: rasterChecks
             };
         }''')
 
@@ -189,6 +235,9 @@ async def audit():
             print(f"  {name}: {item['fontFamily']} | weight: {item['fontWeight']} | size: {item['fontSize']} | width: {item['renderedWidth']}px")
     print("Metric Checks:")
     for k, v in audit_data["metric_checks"].items():
+        print(f"  {k}: {v}")
+    print("Raster Proof Checks:")
+    for k, v in audit_data["raster_checks"].items():
         print(f"  {k}: {v}")
 
 

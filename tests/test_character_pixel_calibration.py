@@ -67,7 +67,7 @@ def test_custom_webfonts_and_slot_geometry_in_template():
     noto_uri = noto_font()
     assert barlow_uri is not None and barlow_uri.startswith("data:font/ttf;base64,")
     assert rajdhani_uri is not None and rajdhani_uri.startswith("data:font/ttf;base64,")
-    assert noto_uri is not None and noto_uri.startswith("data:font/ttf;base64,")
+    assert noto_uri is not None and noto_uri.startswith("data:font/woff2;base64,")
 
     template = T2ITemplateLoader().load("character")
     # Registered @font-face families
@@ -171,21 +171,30 @@ def test_character_font_audit_and_fallback():
     from jinja2 import Environment
     from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
     from astrbot_plugin_nikke.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
     from astrbot_plugin_nikke.character_replica import (
-        noto_font, barlow_font, barlow_semibold_font,
+        noto_font, noto_font_700, noto_font_800,
+        barlow_font, barlow_semibold_font,
         rajdhani_font, rajdhani_semibold_font, replica_font
     )
 
     fonts_dir = Path(__file__).resolve().parents[1] / "fonts"
-    assert (fonts_dir / "NotoSansSC-wght.ttf").exists()
+    assert (fonts_dir / "NotoSansSC-ReplicaSubset-700.woff2").exists()
+    assert (fonts_dir / "NotoSansSC-ReplicaSubset-800.woff2").exists()
     assert (fonts_dir / "BarlowCondensed-Bold.ttf").exists()
     assert (fonts_dir / "BarlowCondensed-SemiBold.ttf").exists()
     assert (fonts_dir / "Rajdhani-Bold.ttf").exists()
     assert (fonts_dir / "Rajdhani-SemiBold.ttf").exists()
+    assert (fonts_dir / "OFL-NotoSansSC.txt").exists()
+    assert (fonts_dir / "OFL-BarlowCondensed.txt").exists()
+    assert (fonts_dir / "OFL-Rajdhani.txt").exists()
+    assert (fonts_dir / "README.md").exists()
 
     # Base64 cache resolution
-    assert noto_font().startswith("data:font/ttf;base64,")
+    assert noto_font_700().startswith("data:font/woff2;base64,")
+    assert noto_font_800().startswith("data:font/woff2;base64,")
+    assert noto_font().startswith("data:font/woff2;base64,")
     assert barlow_font().startswith("data:font/ttf;base64,")
     assert barlow_semibold_font().startswith("data:font/ttf;base64,")
     assert rajdhani_font().startswith("data:font/ttf;base64,")
@@ -199,20 +208,33 @@ def test_character_font_audit_and_fallback():
         skills={}, favorite_item=None, cube=None
     )
     payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, dummy_assets)
-    for font_key in ("font_noto", "font_barlow", "font_barlow_sb", "font_rajdhani", "font_rajdhani_sb"):
+    for font_key in ("font_noto", "font_noto_700", "font_noto_800", "font_barlow", "font_barlow_sb", "font_rajdhani", "font_rajdhani_sb"):
         assert font_key in payload
-        assert payload[font_key].startswith("data:font/ttf;base64,")
+        assert payload[font_key].startswith("data:font/")
 
     # Rendered HTML audit
     rendered = Environment().from_string(T2ITemplateLoader().load("character")).render(**payload)
-    assert "@font-face{font-family:'NikkeNotoSC'" in rendered
+    assert "@font-face{font-family:'NikkeNotoSC';src:url('data:font/woff2;base64," in rendered
+    assert "format('woff2')" in rendered
+    assert "font-weight:700" in rendered
+    assert "font-weight:800" in rendered
     assert "@font-face{font-family:'NikkeBarlowCondensed'" in rendered
     assert "@font-face{font-family:'NikkeBarlowCondensedSemiBold'" in rendered
     assert "@font-face{font-family:'NikkeRajdhani'" in rendered
     assert "@font-face{font-family:'NikkeRajdhaniSemiBold'" in rendered
     assert "--font-cn-title:'NikkeNotoSC'" in rendered
+    assert "font-synthesis:none;" in rendered
+    assert 'class="long"' not in rendered
 
-    # Fallback resilience: when variable TTF is missing, noto_font still resolves from OTF
+    # Long name contract test
+    long_card = example_card()
+    long_card.name_cn = "这是用于验证中英文超长角色名称的练度卡 Long Character Name"
+    long_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(long_card, dummy_assets)
+    assert long_payload["long_name"] is True
+    long_rendered = Environment().from_string(T2ITemplateLoader().load("character")).render(**long_payload)
+    assert 'class="long"' in long_rendered
+
+    # Fallback resilience: when WOFF2 is missing, noto_font still resolves from OTF
     from astrbot_plugin_nikke.character_replica import _load_font_data_uri
     assert _load_font_data_uri("NotoSansHans-Medium.otf").startswith("data:font/otf;base64,")
 
@@ -221,11 +243,12 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_browser_rendered_fonts_and_glyph_metrics():
-    """在真实 Chromium 运行态下验证字体真实加载、computed style 命中及字形度量。"""
+    """在真实 Chromium 运行态下验证字体真实加载、computed style 命中、字形度量及光栅缓冲区差异。"""
     from playwright.async_api import async_playwright
     from jinja2 import Environment
     from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
     from astrbot_plugin_nikke.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
     import types
 
@@ -249,7 +272,8 @@ async def test_browser_rendered_fonts_and_glyph_metrics():
                 faces.push({ family: f.family, weight: f.weight, status: f.status });
             }
 
-            const checkNoto = document.fonts.check("800 67px 'NikkeNotoSC'");
+            const checkNoto700 = document.fonts.check("700 32px 'NikkeNotoSC'");
+            const checkNoto800 = document.fonts.check("800 67px 'NikkeNotoSC'");
             const checkBarlow = document.fonts.check("700 84px 'NikkeBarlowCondensed'");
             const checkRajdhani = document.fonts.check("700 21px 'NikkeRajdhani'");
 
@@ -274,9 +298,44 @@ async def test_browser_rendered_fonts_and_glyph_metrics():
             ctx.font = "700 84px sans-serif";
             const sansWidth = ctx.measureText("442425").width;
 
+            // Canvas Chinese glyph raster buffer comparison:
+            const w = 500, h = 120;
+            const c1 = document.createElement("canvas");
+            c1.width = w; c1.height = h;
+            const ctx1 = c1.getContext("2d");
+            ctx1.fillStyle = "#000000";
+            ctx1.fillRect(0, 0, w, h);
+            ctx1.font = "800 67px 'NikkeNotoSC'";
+            ctx1.fillStyle = "#ffffff";
+            ctx1.textBaseline = "top";
+            ctx1.fillText("拉毗：小红帽", 10, 10);
+            const imgData1 = ctx1.getImageData(0, 0, w, h).data;
+
+            const c2 = document.createElement("canvas");
+            c2.width = w; c2.height = h;
+            const ctx2 = c2.getContext("2d");
+            ctx2.fillStyle = "#000000";
+            ctx2.fillRect(0, 0, w, h);
+            ctx2.font = "800 67px 'Replica'";
+            ctx2.fillStyle = "#ffffff";
+            ctx2.textBaseline = "top";
+            ctx2.fillText("拉毗：小红帽", 10, 10);
+            const imgData2 = ctx2.getImageData(0, 0, w, h).data;
+
+            let diffPixels = 0;
+            for (let i = 0; i < imgData1.length; i += 4) {
+                const diffR = Math.abs(imgData1[i] - imgData2[i]);
+                const diffG = Math.abs(imgData1[i+1] - imgData2[i+1]);
+                const diffB = Math.abs(imgData1[i+2] - imgData2[i+2]);
+                if (diffR > 20 || diffG > 20 || diffB > 20) {
+                    diffPixels++;
+                }
+            }
+
             return {
                 faces,
-                checkNoto,
+                checkNoto700,
+                checkNoto800,
                 checkBarlow,
                 checkRajdhani,
                 nameFamily: nameStyle.fontFamily,
@@ -287,7 +346,8 @@ async def test_browser_rendered_fonts_and_glyph_metrics():
                 lvFamily: lvStyle.fontFamily,
                 levelNumFamily: levelNumStyle.fontFamily,
                 barlowWidth,
-                sansWidth
+                sansWidth,
+                diffPixels
             };
         }''')
         await browser.close()
@@ -298,8 +358,9 @@ async def test_browser_rendered_fonts_and_glyph_metrics():
     assert "NikkeBarlowCondensed" in loaded_families
     assert "NikkeRajdhani" in loaded_families
 
-    # 2. 验证 document.fonts.check 通过
-    assert audit["checkNoto"] is True
+    # 2. 验证 document.fonts.check 通过 (同时验证 700 和 800 字重)
+    assert audit["checkNoto700"] is True
+    assert audit["checkNoto800"] is True
     assert audit["checkBarlow"] is True
     assert audit["checkRajdhani"] is True
 
@@ -313,4 +374,8 @@ async def test_browser_rendered_fonts_and_glyph_metrics():
 
     # 4. 验证真实字形度量（证明实际调用了压缩数字字体而不是默认非压缩字体）
     assert audit["barlowWidth"] < audit["sansWidth"] * 0.85
+
+    # 5. 验证中文字符光栅级独立渲染证明（证明真实使用了 NikkeNotoSC 而非回退到 Replica）
+    assert audit["diffPixels"] > 100
+
 
