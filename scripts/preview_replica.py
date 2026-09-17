@@ -82,17 +82,59 @@ async def main():
             with Image.open(out / f"{name}.png") as image:
                 for scale in (50, 30):
                     image.resize((1600 * scale // 100, 2400 * scale // 100), Image.Resampling.LANCZOS).save(out / f"{name}-{scale}.png")
+        # Render Typography A/B cases for Rapi
+        rapi_card = cases["rapi"]
+        rapi_assets = await asyncio.to_thread(manager.resolve_character_assets, rapi_card)
+        template_content = T2ITemplateLoader().load("character")
+        for typo_mode in ("typo-current", "typo-set-b", "typo-set-c"):
+            t_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(rapi_card, rapi_assets)
+            t_payload["typo_set"] = typo_mode
+            t_html = Environment().from_string(template_content).render(**t_payload)
+            (out / f"rapi_{typo_mode}.html").write_text(t_html, encoding="utf-8")
+            await page.set_content(t_html, wait_until="load")
+            await page.evaluate("document.fonts.ready")
+            await page.screenshot(path=str(out / f"rapi_{typo_mode}.png"), full_page=True)
+
+            img = Image.open(out / f"rapi_{typo_mode}.png").convert("RGB")
+            c1 = img.crop((60, 60, 1540, 370))
+            c2 = img.crop((60, 1390, 1540, 1620))
+            typo_comp = Image.new("RGB", (1480, 540), (232, 235, 238))
+            typo_comp.paste(c1, (0, 0))
+            typo_comp.paste(c2, (0, 310))
+            typo_map = {
+                "typo-current": "typography_current.png",
+                "typo-set-b": "typography_set_b.png",
+                "typo-set-c": "typography_set_c.png",
+            }
+            typo_comp.save(out / typo_map[typo_mode])
         await browser.close()
     manager.close()
     if args.reference:
         reference = Image.open(args.reference).convert("RGB").resize((1600, 2400))
+        reference.save(out / "reference.png")
         actual = Image.open(out / "rapi.png").convert("RGB")
         actual.save(out / "actual.png")
         Image.blend(reference, actual, .5).save(out / "overlay.png")
         ImageChops.difference(reference, actual).save(out / "diff.png")
         comparison = Image.new("RGB", (3200, 2400))
         comparison.paste(reference, (0, 0)); comparison.paste(actual, (1600, 0)); comparison.save(out / "comparison.png")
-        for name, box in (("header", (60, 60, 1540, 370)), ("equipment", (60, 1340, 1540, 2340))):
+
+        header_box = (60, 60, 1540, 370)
+        equip_box = (60, 1340, 1540, 2340)
+
+        hdr_ref = reference.crop(header_box)
+        hdr_act = actual.crop(header_box)
+        hdr_ref.save(out / "header_reference.png")
+        hdr_act.save(out / "header_actual.png")
+        Image.blend(hdr_ref, hdr_act, .5).save(out / "header_overlay.png")
+
+        eq_ref = reference.crop(equip_box)
+        eq_act = actual.crop(equip_box)
+        eq_ref.save(out / "equipment_reference.png")
+        eq_act.save(out / "equipment_actual.png")
+        Image.blend(eq_ref, eq_act, .5).save(out / "equipment_overlay.png")
+
+        for name, box in (("header", header_box), ("equipment", equip_box)):
             actual.crop(box).save(out / f"detail-{name}.png")
     (out / "layout-audit.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(results, ensure_ascii=False))

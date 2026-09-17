@@ -95,14 +95,29 @@ def art_style(data, portrait):
 
 
 def replica_font():
-    return _font_uri()
+    return _load_font_data_uri("ReplicaSans.otf")
 
 
-@lru_cache(maxsize=1)
-def _font_uri():
+def barlow_font():
+    return _load_font_data_uri("BarlowCondensed-Bold.ttf")
+
+
+def rajdhani_font():
+    return _load_font_data_uri("Rajdhani-Bold.ttf")
+
+
+@lru_cache(maxsize=4)
+def _load_font_data_uri(filename: str = "ReplicaSans.otf"):
     import base64
     from pathlib import Path
-    path = Path(__file__).parent / "fonts/ReplicaSans.otf"
+    path = Path(__file__).parent / "fonts" / filename
     if not path.is_file():
         return None
-    return "data:font/otf;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
+    ext = path.suffix.lstrip(".").lower()
+    mime = "font/otf" if ext == "otf" else "font/ttf"
+    return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode("ascii")
+
+
+def _font_uri():
+    return replica_font()
+
