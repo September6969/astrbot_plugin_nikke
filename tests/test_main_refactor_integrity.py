@@ -55,18 +55,16 @@ class MainRefactorIntegrityTests(unittest.TestCase):
         self.assertEqual(res_generic.status, DailyTaskStatus.FAILED)
         self.assertIn("失败：ValueError", res_generic.detail)
 
-    def test_legacy_shims(self):
+    def test_root_entrypoints_and_isolation(self):
         import warnings
 
         with warnings.catch_warnings(record=True) as recorded:
             warnings.simplefilter("always")
             import astrbot_plugin_nikke.container as root_container
-            import astrbot_plugin_nikke.daily_runner as root_daily_runner
-
             self.assertTrue(hasattr(root_container, "create_container"))
-            self.assertTrue(hasattr(root_daily_runner, "DailyRunner"))
-            deprecation_warnings = [w for w in recorded if issubclass(w.category, DeprecationWarning)]
-            self.assertGreaterEqual(len(deprecation_warnings), 2)
+
+        with self.assertRaises(ModuleNotFoundError):
+            import astrbot_plugin_nikke.daily_runner
 
 
 if __name__ == "__main__":

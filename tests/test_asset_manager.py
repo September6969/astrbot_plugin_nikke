@@ -36,7 +36,7 @@ class AssetManagerTests(unittest.TestCase):
     def test_missing_ids_and_network_errors_return_images(self):
         with tempfile.TemporaryDirectory() as td:
             manager = AssetManager(td, td, remote=True)
-            with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=httpx.ConnectError("offline")) as request:
+            with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=httpx.ConnectError("offline")) as request:
                 for _ in range(2):
                     image = manager.get_character_portrait("unknown", "999999")
                     self.assertEqual(image.mode, "RGBA")
@@ -56,7 +56,7 @@ class AssetManagerTests(unittest.TestCase):
             (cache / "portraits").mkdir(parents=True, exist_ok=True)
             Image.new("RGBA", (30, 50), "green").save(cache / "portraits" / f"{key}.png")
             try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                     self.assertEqual(manager.get_character_portrait("5004", "191").size, (30, 50))
                     stream.assert_not_called()
             finally:
@@ -67,7 +67,7 @@ class AssetManagerTests(unittest.TestCase):
             manager = AssetManager(td, td, remote=True)
             manager.nikke_db.COSTUME_OVERRIDES.update({"skin_01": "c191_01", "skin_02": "c191_02"})
             try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                     first = manager.get_character_portrait("5004", "191", "skin_01")
                     second = manager.get_character_portrait("5004", "191", "skin_02")
                 self.assertEqual(first.size, (600, 900))
@@ -82,7 +82,7 @@ class AssetManagerTests(unittest.TestCase):
             (Path(td) / "portraits").mkdir(parents=True, exist_ok=True)
             Image.new("RGBA", (20, 20), "green").save(Path(td) / "portraits/191.png")
             try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                     unknown = manager.get_character_portrait("5004", "191", "unknown_skin")
                     invalid = manager.get_character_portrait("5004", "191", True)
                 self.assertNotEqual(unknown.getpixel((0, 0)), (0, 128, 0, 255))
@@ -114,7 +114,7 @@ class AssetManagerTests(unittest.TestCase):
 
             try:
                 with patch.object(AssetManager, "_remote_download_slots", threading.BoundedSemaphore(1)):
-                    with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=lambda *_args, **_kwargs: BlockingStream()) as stream:
+                    with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=lambda *_args, **_kwargs: BlockingStream()) as stream:
                         with ThreadPoolExecutor(max_workers=1) as executor:
                             future = executor.submit(first._load, "portraits", "first", "https://example.com/first")
                             self.assertTrue(entered.wait(2.0))
@@ -141,7 +141,7 @@ class AssetManagerTests(unittest.TestCase):
                 with patch.object(AssetManager, "_remote_download_slots", threading.BoundedSemaphore(1)) as slots:
                     self.assertTrue(slots.acquire(blocking=False))
                     try:
-                        with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                        with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                             image = manager._load("portraits", "cached", "https://example.com/cached")
                         self.assertEqual(image.getpixel((0, 0)), (0, 0, 255, 255))
                         stream.assert_not_called()
@@ -166,7 +166,7 @@ class AssetManagerTests(unittest.TestCase):
             try:
                 with patch.object(AssetManager, "_remote_download_slots", threading.BoundedSemaphore(1)):
                     with patch(
-                        "astrbot_plugin_nikke.asset_manager.httpx.stream",
+                        "astrbot_plugin_nikke.core.asset_manager.httpx.stream",
                         side_effect=[httpx.ConnectError("offline"), success_context],
                     ) as stream:
                         self.assertIsNone(manager._load("portraits", "failed", "https://example.com/failed"))
@@ -181,7 +181,7 @@ class AssetManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             manager = AssetManager(td, td, remote=True)
             try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                     with ThreadPoolExecutor(max_workers=5) as executor:
                         futures = [executor.submit(manager.get_character_portrait, "5004", "191") for _ in range(5)]
                         images = [future.result(timeout=3.0) for future in futures]
@@ -213,7 +213,7 @@ class AssetManagerTests(unittest.TestCase):
                 return context
 
             try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=open_stream) as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=open_stream) as stream:
                     with ThreadPoolExecutor(max_workers=2) as executor:
                         futures = [
                             executor.submit(manager.get_element_icon, element)
@@ -260,7 +260,7 @@ class AssetManagerTests(unittest.TestCase):
                 Image.new("RGBA", (45, 50), "yellow").save(buffer, "PNG")
                 response = httpx.Response(200, content=buffer.getvalue(), request=httpx.Request("GET", "https://example.com"))
 
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                     stream.return_value.__enter__.return_value = response
                     fav_img = manager.get_favorite_item_icon(100602)
                     self.assertEqual(fav_img.size, (45, 50))
@@ -311,7 +311,7 @@ class AssetManagerTests(unittest.TestCase):
                                 context = MagicMock()
                                 context.__enter__.return_value = response
                                 effect = context
-                            with patch("astrbot_plugin_nikke.asset_manager.httpx.stream", side_effect=[effect] if failure != "timeout" else effect):
+                            with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=[effect] if failure != "timeout" else effect):
                                 image = method(tid)
                             self.assertEqual(image.mode, "RGBA")
                             self.assertEqual(image.size, (128, 128))
@@ -376,7 +376,7 @@ class AssetManagerTests(unittest.TestCase):
                     "favorite/999999.png": "https://example.com/favorite.png",
                     "cube/999999.png": "https://example.com/cube.png",
                 })
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                     equipment = manager.get_equipment_icon("head", 999999)
                     favorite = manager.get_favorite_item_icon(999999)
                     cube = manager.get_cube_icon(999999)
@@ -561,7 +561,7 @@ class AssetManagerTests(unittest.TestCase):
 
             manager = AssetManager(cache, assets, remote=True)
             try:
-                with patch("astrbot_plugin_nikke.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
                     portrait = manager.get_character_portrait(5065, "330")
                     self.assertEqual(portrait.size, (150, 250))
                     # 绝对不能触发网络

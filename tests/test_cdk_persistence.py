@@ -51,7 +51,7 @@ class PersistenceTests(IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             await service.redeem_batch({}, ["FAKE"] * 11)
         client.redeem_cdk.assert_not_awaited()
-        with patch("astrbot_plugin_nikke.cdk_service.asyncio.sleep", new_callable=AsyncMock) as sleep:
+        with patch("astrbot_plugin_nikke.features.cdk.service.asyncio.sleep", new_callable=AsyncMock) as sleep:
             await service.redeem_batch({}, ["FAKE-1", "FAKE-2"], delay=0)
             sleep.assert_awaited_once_with(1.0)
 

@@ -140,3 +140,15 @@
 - 目标：完成根目录终态收敛。
 - 范围：二次审计确认剩余 shim，除核心入口 (`main.py`, `__init__.py`, `_version.py`, `container.py`) 外，清理全部无公开价值的残余 shim。
 - 门禁：更新 `test_repository_integrity.py`，加入 `forbidden_legacy_root_modules` 白名单/黑名单校验，确保根目录保持干净。
+
+---
+
+## 四、执行结果总结 (Execution Status)
+
+| 阶段 | PR / 动作 | 涉及模块数 | 结果 | 门禁验证 |
+| :---: | :--- | :---: | :---: | :--- |
+| **Phase 2** | 16 个遗留实现沉降至各领域包 | 16 | 已完成并经回归测试验证 | 编译通过，全量引用就地解耦 |
+| **Phase 3** | PR A (`#92`): 首批根目录存根清理 | 61 | 已合并至 `main` | 941 passed, 2 skipped, 0 failed |
+| **Phase 4** | PR B: 根目录终态收敛 (清理剩余 29 个存根) | 29 | 已完成并经回归测试验证 | 942 passed, 2 skipped, 0 failed |
+| **终态** | 根目录只保留 4 个核心入口文件 | 4 (`main.py`, `__init__.py`, `_version.py`, `container.py`) | 达到目标终态 | 4/4 仅留必要入口，`FORBIDDEN_LEGACY_ROOT_MODULES` 全绿 |
+

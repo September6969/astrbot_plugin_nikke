@@ -87,7 +87,7 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             root = Path(directory)
             (root / "nikke.sqlite3").write_bytes(b"synthetic-db")
             (root / "secret.key").write_bytes(b"synthetic-key")
-            with patch("astrbot_plugin_nikke.runtime_health.shutil.disk_usage") as disk_usage:
+            with patch("astrbot_plugin_nikke.core.health.shutil.disk_usage") as disk_usage:
                 disk_usage.return_value = SimpleNamespace(free=-1, total=1024)
 
                 snapshot = collect_runtime_health(root, min_free_bytes=0)
@@ -100,7 +100,7 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
     def test_unrepresentable_disk_usage_is_unknown_and_attention(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            with patch("astrbot_plugin_nikke.runtime_health.shutil.disk_usage") as disk_usage:
+            with patch("astrbot_plugin_nikke.core.health.shutil.disk_usage") as disk_usage:
                 disk_usage.return_value = SimpleNamespace(free=10**1000, total=10**1001)
 
                 snapshot = collect_runtime_health(root, min_free_bytes=0)
@@ -140,7 +140,7 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             plugin.config = {"enable_daily_actions": False, "enable_cdk_redemption": False}
             event = SimpleNamespace(is_admin=lambda: True, plain_result=lambda text: text)
 
-            with patch("astrbot_plugin_nikke.runtime_health.shutil.disk_usage") as disk_usage:
+            with patch("astrbot_plugin_nikke.core.health.shutil.disk_usage") as disk_usage:
                 disk_usage.return_value = SimpleNamespace(free=2 * 1024**3, total=4 * 1024**3)
                 result = [item async for item in plugin.health(event)]
 
