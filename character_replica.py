@@ -94,6 +94,10 @@ def art_style(data, portrait):
     return framing(data, portrait)["style"]
 
 
+def noto_font():
+    return _load_font_data_uri("NotoSansSC-wght.ttf")
+
+
 def replica_font():
     return _load_font_data_uri("ReplicaSans.otf")
 
@@ -102,11 +106,19 @@ def barlow_font():
     return _load_font_data_uri("BarlowCondensed-Bold.ttf")
 
 
+def barlow_semibold_font():
+    return _load_font_data_uri("BarlowCondensed-SemiBold.ttf")
+
+
 def rajdhani_font():
     return _load_font_data_uri("Rajdhani-Bold.ttf")
 
 
-@lru_cache(maxsize=4)
+def rajdhani_semibold_font():
+    return _load_font_data_uri("Rajdhani-SemiBold.ttf")
+
+
+@lru_cache(maxsize=16)
 def _load_font_data_uri(filename: str = "ReplicaSans.otf"):
     import base64
     from pathlib import Path

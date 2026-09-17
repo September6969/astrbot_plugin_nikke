@@ -82,7 +82,9 @@ class CharacterT2IPayloadBuilder:
                     "level": "LV." + display_number(item.level) if item else "—", "icon": self.resolver.encode(image, (100, 100))}
         corp_asset = getattr(card_assets, "corporation", None)
         watermark = self.resolver.encode(corp_asset, (260, 260)) if corp_asset else None
-        from .character_replica import build_summary, cache_identity, SHORT_NAMES, VERSION, replica_font, barlow_font, rajdhani_font, art_style
+        from .character_replica import (build_summary, cache_identity, SHORT_NAMES, VERSION,
+                                replica_font, barlow_font, barlow_semibold_font,
+                                rajdhani_font, rajdhani_semibold_font, noto_font, art_style)
         for gear in equipment:
             for row in gear["options"]:
                 row["short_name"] = SHORT_NAMES.get(row["name"].strip("【】"), row["name"])
@@ -94,7 +96,10 @@ class CharacterT2IPayloadBuilder:
                                  for key, label, level in (("skill1", "技能1", data.skill1_level),
                                                            ("skill2", "技能2", data.skill2_level),
                                                            ("burst", "爆裂", data.burst_skill_level))],
-                "replica_font": replica_font(), "font_barlow": barlow_font(), "font_rajdhani": rajdhani_font(), "art_style": art_style(data, portrait),
+                "replica_font": replica_font(), "font_noto": noto_font(),
+                "font_barlow": barlow_font(), "font_barlow_sb": barlow_semibold_font(),
+                "font_rajdhani": rajdhani_font(), "font_rajdhani_sb": rajdhani_semibold_font(),
+                "art_style": art_style(data, portrait),
                 "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
                 "character_art_data_uri": self.resolver.encode(portrait, (1600, 2400)), "theme": asdict(theme), "identities": identities,
