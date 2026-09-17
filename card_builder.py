@@ -35,6 +35,7 @@ OPTION_NAMES = {
     "statchargetime": ("蓄力速度增加", "percent"),
     "stathitrate": ("命中率增加", "percent"),
     "stataccuracy": ("命中率增加", "percent"),
+    "stataccuracycircle": ("命中率增加", "percent"),
     "statchargedamage": ("蓄力伤害增加", "percent"),
     "chargedamage": ("蓄力伤害增加", "percent"),
     "statcritical": ("暴击率增加", "percent"),
