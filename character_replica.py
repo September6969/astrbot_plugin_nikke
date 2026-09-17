@@ -95,7 +95,9 @@ def art_style(data, portrait):
 
 
 def noto_font():
-    return _load_font_data_uri("NotoSansSC-wght.ttf")
+    return (_load_font_data_uri("NotoSansSC-wght.ttf")
+            or _load_font_data_uri("NotoSansHans-Medium.otf")
+            or _load_font_data_uri("NotoSansHans-Regular.otf"))
 
 
 def replica_font():
