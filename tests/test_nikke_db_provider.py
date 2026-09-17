@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.nikke_db_provider import NikkeDbProvider
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 
 
 class NikkeDbProviderTests(unittest.TestCase):

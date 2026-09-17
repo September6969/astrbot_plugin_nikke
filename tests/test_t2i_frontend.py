@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from jinja2 import Environment
 
-from astrbot_plugin_nikke.t2i_renderer import T2IRenderer
+from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 
 
@@ -14,7 +14,7 @@ from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 async def test_page_fixtures(page, tmp_path):
     native = AsyncMock(return_value="preview.png")
     from pathlib import Path
-    from astrbot_plugin_nikke.asset_manager import AssetManager
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
     assets = AssetManager(tmp_path / "cache", Path(__file__).resolve().parents[1] / "assets", remote=False)
     renderer = T2IRenderer(native, assets)
     for name, data in get_cases(page, tmp_path).items():
@@ -32,7 +32,7 @@ async def test_page_fixtures(page, tmp_path):
 @pytest.mark.parametrize("page", ["calendar_schedule", "union_overview", "union_records", "union_member", "profile", "character"])
 async def test_each_page_autoescape_and_failure(page, tmp_path):
     from pathlib import Path
-    from astrbot_plugin_nikke.asset_manager import AssetManager
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
     from astrbot_plugin_nikke.main import NikkePlugin
     attack = '<script>alert(1)</script></style><img src=x onerror=alert(1)>'
     data = next(iter(get_cases(page, tmp_path).values()))
@@ -119,7 +119,7 @@ def test_calendar_horizon_and_classification(tmp_path):
 @pytest.mark.asyncio
 async def test_calendar_command_fallback_same_snapshot(tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
-    from astrbot_plugin_nikke.calendar_service import CalendarService
+    from astrbot_plugin_nikke.features.calendar.service import CalendarService
     plugin = NikkePlugin.__new__(NikkePlugin)
     plugin.config = {"ui_renderer": "t2i"}
     plugin.calendar = CalendarService(tmp_path)
@@ -133,8 +133,8 @@ async def test_calendar_command_fallback_same_snapshot(tmp_path):
 
 
 def test_union_scopes_and_exact_values(tmp_path):
-    from astrbot_plugin_nikke.t2i_payloads import UnionOverviewT2IPayloadBuilder, UnionRecordsT2IPayloadBuilder, UnionMemberT2IPayloadBuilder
-    from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
+    from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder, UnionRecordsT2IPayloadBuilder, UnionMemberT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
     overview = get_cases("union_overview", tmp_path)
     partial = UnionOverviewT2IPayloadBuilder().build(overview["partial-hp"])
     assert partial["progress"] == "Unknown"
@@ -169,8 +169,8 @@ async def test_union_command_failure_no_refetch(page, command):
 
 
 def test_profile_structure_and_unknowns(tmp_path):
-    from astrbot_plugin_nikke.t2i_payloads import ProfileT2IPayloadBuilder
-    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.ui.t2i_payloads import ProfileT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("profile", tmp_path)
     builder = ProfileT2IPayloadBuilder()
     partial = builder.build(cases["resource-partial"])
@@ -190,7 +190,7 @@ def test_profile_structure_and_unknowns(tmp_path):
 @pytest.mark.asyncio
 async def test_character_slots_theme_and_assets(tmp_path):
     from pathlib import Path
-    from astrbot_plugin_nikke.asset_manager import AssetManager
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
     native = AsyncMock(return_value="card.png")
     assets = AssetManager(tmp_path / "cache", Path(__file__).resolve().parents[1] / "assets", remote=False)
     renderer = T2IRenderer(native, assets)
@@ -217,8 +217,8 @@ async def test_character_slots_theme_and_assets(tmp_path):
 
 
 def test_profile_resource_silver_mileage_label(tmp_path):
-    from astrbot_plugin_nikke.t2i_payloads import ProfileT2IPayloadBuilder
-    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.ui.t2i_payloads import ProfileT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("profile", tmp_path)
     builder = ProfileT2IPayloadBuilder()
     payload = builder.build(cases["full"])
@@ -231,7 +231,7 @@ def test_profile_resource_silver_mileage_label(tmp_path):
 
 
 def test_calendar_progress_presentation(tmp_path):
-    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("calendar_schedule", tmp_path)
     normal = cases["normal"]
     assert len(normal["ending_soon"]) == 1
@@ -260,8 +260,8 @@ def test_calendar_progress_presentation(tmp_path):
 
 @pytest.mark.asyncio
 async def test_character_card_visual_polish(tmp_path):
-    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
-    from astrbot_plugin_nikke.asset_manager import AssetManager
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
     from pathlib import Path
     assets = AssetManager(tmp_path / "cache", Path(__file__).resolve().parents[1] / "assets", remote=False)
     native = AsyncMock(return_value="preview.png")
@@ -282,8 +282,8 @@ async def test_character_card_visual_polish(tmp_path):
 
 
 def test_union_records_no_attack_summary(tmp_path):
-    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
-    from astrbot_plugin_nikke.t2i_payloads import UnionRecordsT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.ui.t2i_payloads import UnionRecordsT2IPayloadBuilder
     cases = get_cases("union_records", tmp_path)
     builder = UnionRecordsT2IPayloadBuilder()
     template = T2ITemplateLoader().load("union_records")

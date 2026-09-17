@@ -3,8 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.character_identity import CharacterDirectoryResolver, parse_user_aliases
-from astrbot_plugin_nikke.voice_character_resolver import VoiceCharacterResolver
+from astrbot_plugin_nikke.features.character.identity import CharacterDirectoryResolver, parse_user_aliases
+from astrbot_plugin_nikke.features.voice.character_resolver import VoiceCharacterResolver
 
 
 class CharacterDirectoryResolverTests(unittest.TestCase):
@@ -93,7 +93,7 @@ class CharacterDirectoryResolverTests(unittest.TestCase):
 
     def test_full_200_catalog_data_driven_audit(self):
         """全量 200 角色数据驱动核验：TC、SC别名、EN、name_code 统一解析且 SC 无繁体残留。"""
-        from astrbot_plugin_nikke.voice_character_resolver import VoiceCharacterResolver
+        from astrbot_plugin_nikke.features.voice.character_resolver import VoiceCharacterResolver
 
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
         catalog_path = assets_dir / "character_catalog.json"

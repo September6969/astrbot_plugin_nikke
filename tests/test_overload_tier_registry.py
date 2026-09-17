@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from overload_tier_registry import OverloadTierRegistry
+from astrbot_plugin_nikke.features.character.registries.overload import OverloadTierRegistry
 
 
 ROOT = Path(__file__).resolve().parents[1]

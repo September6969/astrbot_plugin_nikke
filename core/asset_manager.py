@@ -20,22 +20,22 @@ from typing import Any
 import httpx
 from PIL import Image, ImageDraw
 
-from ..card_models import CharacterCardAssets, CharacterCardData, SpineBundle
-from ..currency_registry import CurrencyRegistry
-from ..character_master_resolver import CharacterMasterResolver
-from ..idle_animation_resolver import IdleAnimationResolver
-from ..lineup_portrait_resolver import LineupPortraitResolver, LineupPortraitResolution
-from ..boss_asset_resolver import BossAssetResolver, BossAssetResolution
-from ..costume_asset_resolver import CostumeAssetResolver, CostumeResolution
+from astrbot_plugin_nikke.features.character.models import CharacterCardAssets, CharacterCardData, SpineBundle
+from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegistry
+from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
+from astrbot_plugin_nikke.integrations.spine.idle_resolver import IdleAnimationResolver
+from astrbot_plugin_nikke.features.character.lineup_portrait_resolver import LineupPortraitResolver, LineupPortraitResolution
+from astrbot_plugin_nikke.features.raid.boss_resolver import BossAssetResolver, BossAssetResolution
+from astrbot_plugin_nikke.features.character.costume_asset_resolver import CostumeAssetResolver, CostumeResolution
 try:
-    from ..character_visual_resolver import CharacterVisualAssetResolver, VisualAssetResolution
+    from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver, VisualAssetResolution
 except ImportError:
-    from character_visual_resolver import CharacterVisualAssetResolver, VisualAssetResolution
+    from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver, VisualAssetResolution
 from .privacy import safe_exception_message, sanitize_log_text
-from ..nikke_db_provider import NikkeDbProvider
-from ..skill_icon_resolver import SkillIconResolver
-from ..spine_prerenderer import SpineBundleFetcher, SpineJob, SpinePreRenderer
-from ..static_registry import StaticDataRegistry
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
+from astrbot_plugin_nikke.features.character.skill_icon_resolver import SkillIconResolver
+from astrbot_plugin_nikke.integrations.spine.prerenderer import SpineBundleFetcher, SpineJob, SpinePreRenderer
+from astrbot_plugin_nikke.features.character.registries.static import StaticDataRegistry
 
 logger = logging.getLogger("nikke.asset_manager")
 
@@ -1244,7 +1244,7 @@ class AssetManager:
             ),
         }
 
-        from ..character_weapon_bases import resolve
+        from astrbot_plugin_nikke.features.character.weapon_bases import resolve
         skill_names = resolve(data.resource_id).get("skills", {})
         for key, name in skill_names.items():
             if key in ("skill1", "skill2", "burst") and re.fullmatch(r"[A-Za-z0-9_]+", name):

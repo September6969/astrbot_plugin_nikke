@@ -12,11 +12,11 @@ from unittest.mock import AsyncMock
 
 import httpx
 
-from astrbot_plugin_nikke.announcement_delivery import AnnouncementDelivery
-from astrbot_plugin_nikke.calendar_models import CalendarActivity, _aware_utc
-from astrbot_plugin_nikke.calendar_service import CalendarService
-from astrbot_plugin_nikke.calendar_sources import GameKeeNikkeScheduleSource, _canonical_int
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+from astrbot_plugin_nikke.features.calendar.models import CalendarActivity, _aware_utc
+from astrbot_plugin_nikke.features.calendar.service import CalendarService
+from astrbot_plugin_nikke.features.calendar.sources import GameKeeNikkeScheduleSource, _canonical_int
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class TestCalendarModels(IsolatedAsyncioTestCase):
@@ -435,8 +435,8 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         self.addCleanup(self.tmp_dir.cleanup)
 
     async def test_event_schedule_command_horizon_and_fallback(self):
-        from astrbot_plugin_nikke.announcement_models import AnnouncementRecord
-        from astrbot_plugin_nikke.announcement_service import AnnouncementService
+        from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
+        from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
         from astrbot_plugin_nikke.main import NikkePlugin
 
         class DummyEvent:
@@ -497,7 +497,7 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         self.assertIn("Official Maintenance Notice", results[0])
 
     def test_deadline_reminders_for_delivery_selector(self):
-        from astrbot_plugin_nikke.announcement_service import AnnouncementService, GameDeadline
+        from astrbot_plugin_nikke.features.announcement.service import AnnouncementService, GameDeadline
         from astrbot_plugin_nikke.main import NikkePlugin
 
         main_inst = NikkePlugin.__new__(NikkePlugin)

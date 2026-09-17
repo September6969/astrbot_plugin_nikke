@@ -9,8 +9,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from astrbot_plugin_nikke.client import BlaBlaClient, OUTPOST, PROFILE
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, OUTPOST, PROFILE
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 def sanitize(value: Any) -> Any:

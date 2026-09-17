@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from PIL import Image
 
-from astrbot_plugin_nikke.nikke_db_provider import NikkeDbProvider
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 
 
 def get_manifest_assets() -> tuple[dict[str, Any] | None, Path | None]:

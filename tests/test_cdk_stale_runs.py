@@ -8,10 +8,10 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, patch
 
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.storage import NikkeStore
-from astrbot_plugin_nikke.client import CdkRedemptionResult
-from astrbot_plugin_nikke.cdk_service import CdkService
-from astrbot_plugin_nikke.cdk_models import CdkRedeemResult
+from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.integrations.blablalink.client import CdkRedemptionResult
+from astrbot_plugin_nikke.features.cdk.service import CdkService
+from astrbot_plugin_nikke.features.cdk.models import CdkRedeemResult
 
 
 def key(code):

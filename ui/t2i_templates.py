@@ -4,7 +4,7 @@ from pathlib import Path
 
 class T2ITemplateLoader:
     def __init__(self, root: Path | None = None):
-        self.root = root or Path(__file__).parent / "templates" / "t2i"
+        self.root = root or Path(__file__).resolve().parent.parent / "templates" / "t2i"
 
     def load(self, page: str = "campaign") -> str:
         if page not in {"campaign", "calendar_schedule", "union_overview", "union_records", "union_member", "profile", "character"}:

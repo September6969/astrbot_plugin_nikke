@@ -2,7 +2,7 @@
 """Truth-table unit tests for costume selection precedence and semantics."""
 
 import pytest
-from astrbot_plugin_nikke.card_builder import resolve_equipped_costume
+from astrbot_plugin_nikke.features.character.builder import resolve_equipped_costume
 
 
 def test_costume_selection_precedence():

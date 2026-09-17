@@ -10,10 +10,10 @@ from typing import Callable
 
 from PIL import Image, ImageDraw
 
-from ...profile_models import ProfileDashboardData
+from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
 from ..primitives import CardRenderer
 from ..theme import UI_COLORS
-from ...research_registry import research_zh_name
+from astrbot_plugin_nikke.features.character.registries.research import research_zh_name
 
 
 PROFILE_THEME = {

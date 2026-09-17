@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from unittest import TestCase
 from astrbot_plugin_nikke.scripts.import_campaign_stages import build_mapping
-from astrbot_plugin_nikke.campaign_stage_resolver import CampaignStageResolver
+from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
 
 
 class StageImportTests(TestCase):

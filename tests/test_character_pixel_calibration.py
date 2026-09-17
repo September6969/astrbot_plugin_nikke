@@ -4,8 +4,8 @@ import base64
 from PIL import Image
 from jinja2 import Environment
 
-from astrbot_plugin_nikke.t2i_payloads import _normalize_equipment_icon
-from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+from astrbot_plugin_nikke.ui.t2i_payloads import _normalize_equipment_icon
+from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 
 def test_equipment_icon_normalization_trims_transparent_padding():

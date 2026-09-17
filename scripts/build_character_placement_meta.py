@@ -14,8 +14,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from spine_placement import compute_placement_meta, CharacterPlacementMeta, Point, Rect
-from spine_runtime import SpineSkeletonParser
+from astrbot_plugin_nikke.integrations.spine.placement import compute_placement_meta, CharacterPlacementMeta, Point, Rect
+from astrbot_plugin_nikke.integrations.spine.runtime import SpineSkeletonParser
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s")
 logger = logging.getLogger("build_character_placement_meta")

@@ -12,12 +12,12 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 
-from astrbot_plugin_nikke.canonical_models import (
+from astrbot_plugin_nikke.features.calendar.canonical_models import (
     CanonicalEvent,
     quality_badge,
     CST,
 )
-from astrbot_plugin_nikke.fetch_client import (
+from astrbot_plugin_nikke.integrations.blablalink.fetch_client import (
     CircuitBreaker,
     CircuitBreakerOpenError,
     FetchClient,
@@ -26,12 +26,12 @@ from astrbot_plugin_nikke.fetch_client import (
     FetchTimeoutError,
     _sanitize_url,
 )
-from astrbot_plugin_nikke.schedule_adapters import (
+from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
     GameKeeScheduleAdapter,
     ManualOverrideScheduleAdapter,
     OfficialAnnouncementScheduleAdapter,
 )
-from astrbot_plugin_nikke.schedule_service import (
+from astrbot_plugin_nikke.features.calendar.schedule_service import (
     ScheduleService,
     _is_same_event,
     _merge_two_events,

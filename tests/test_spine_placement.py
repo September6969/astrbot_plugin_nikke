@@ -3,15 +3,15 @@
 
 from unittest import TestCase
 
-from astrbot_plugin_nikke.spine_placement import (
+from astrbot_plugin_nikke.integrations.spine.placement import (
     Point,
     Rect,
     SkeletonAnchorSet,
     compute_clamped_visual_anchor,
     compute_placement_meta,
 )
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.character_visual_resolver import CharacterVisualAssetResolver
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver
 
 
 class SpinePlacementTests(TestCase):

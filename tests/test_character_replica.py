@@ -2,8 +2,8 @@
 from dataclasses import replace
 from decimal import Decimal
 
-from astrbot_plugin_nikke.card_models import EquipmentData, EquipmentOption
-from astrbot_plugin_nikke.character_replica import build_summary, rounded_gain, cache_identity
+from astrbot_plugin_nikke.features.character.models import EquipmentData, EquipmentOption
+from astrbot_plugin_nikke.features.character.replica import build_summary, rounded_gain, cache_identity
 from astrbot_plugin_nikke.tests.test_card_builder import build_card
 
 

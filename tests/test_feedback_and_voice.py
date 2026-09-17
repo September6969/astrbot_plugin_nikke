@@ -3,8 +3,8 @@
 import asyncio
 import unittest
 
-from astrbot_plugin_nikke.processing_feedback import DelayedFeedbackManager
-from astrbot_plugin_nikke.voice_feedback import VoiceResolver
+from astrbot_plugin_nikke.core.feedback import DelayedFeedbackManager
+from astrbot_plugin_nikke.features.voice.feedback import VoiceResolver
 
 
 class DelayedFeedbackManagerTests(unittest.IsolatedAsyncioTestCase):

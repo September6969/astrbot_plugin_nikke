@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.runtime_config import normalize_runtime_config, read_schedule_clock
+from astrbot_plugin_nikke.core.config import normalize_runtime_config, read_schedule_clock
 
 
 class RuntimeConfigTests(unittest.TestCase):

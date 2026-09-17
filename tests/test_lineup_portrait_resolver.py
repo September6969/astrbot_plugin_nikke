@@ -8,7 +8,7 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from astrbot_plugin_nikke.lineup_portrait_resolver import (
+from astrbot_plugin_nikke.features.character.lineup_portrait_resolver import (
     LineupPortraitResolver,
     LineupPortraitResolution,
 )

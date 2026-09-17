@@ -1,7 +1,7 @@
 """签到写后不确定结果不能自动重发。"""
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
-from astrbot_plugin_nikke.client import BlaBlaClient, BlaBlaTimeoutError, BlaBlaNetworkError, UnknownAfterAction
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaTimeoutError, BlaBlaNetworkError, UnknownAfterAction
 
 
 class DailySafetyTests(IsolatedAsyncioTestCase):

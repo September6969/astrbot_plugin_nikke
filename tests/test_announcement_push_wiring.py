@@ -4,9 +4,9 @@ from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, Mock
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.announcement_delivery import AnnouncementDelivery
-from astrbot_plugin_nikke.announcement_service import AnnouncementService
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class PushWiringTests(IsolatedAsyncioTestCase):

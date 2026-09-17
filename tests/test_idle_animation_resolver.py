@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from astrbot_plugin_nikke.idle_animation_resolver import IdleAnimationResolver
+from astrbot_plugin_nikke.integrations.spine.idle_resolver import IdleAnimationResolver
 
 
 class IdleAnimationResolverTests(TestCase):

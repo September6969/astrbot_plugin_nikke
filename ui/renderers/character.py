@@ -9,8 +9,8 @@ from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 
-from ...asset_manager import AssetManager
-from ...card_models import CharacterCardAssets, CharacterCardData, EquipmentData, EquipmentOption
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.character.models import CharacterCardAssets, CharacterCardData, EquipmentData, EquipmentOption
 from ..theme import character_theme
 from ..primitives import CardRenderer
 

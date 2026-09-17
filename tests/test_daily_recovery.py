@@ -3,8 +3,8 @@ from __future__ import annotations
 import asyncio
 from unittest import IsolatedAsyncioTestCase
 
-from astrbot_plugin_nikke.client import CookieExpired
-from astrbot_plugin_nikke.daily_models import DailyTaskStatus
+from astrbot_plugin_nikke.integrations.blablalink.client import CookieExpired
+from astrbot_plugin_nikke.features.daily.models import DailyTaskStatus
 from astrbot_plugin_nikke.main import NikkePlugin
 
 

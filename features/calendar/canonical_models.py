@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 from typing import Any
 
-from .calendar_models import CalendarActivity, _aware_utc
+from .models import CalendarActivity, _aware_utc
 
 CST = timezone(timedelta(hours=8))
 

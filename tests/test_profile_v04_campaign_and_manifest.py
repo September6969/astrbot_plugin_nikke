@@ -10,13 +10,13 @@ from unittest.mock import AsyncMock, patch
 
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.client import BlaBlaClient, BlaBlaError, DAILY_CONTENTS_PROGRESS, PROFILE
-from astrbot_plugin_nikke.currency_registry import CurrencyDefinition, CurrencyRegistry
-from astrbot_plugin_nikke.profile_builder import ProfileBuilder
-from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
-from astrbot_plugin_nikke.profile_models import ProfileDashboardData
-from astrbot_plugin_nikke.spine_prerenderer import SpinePreRenderer
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaError, DAILY_CONTENTS_PROGRESS, PROFILE
+from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyDefinition, CurrencyRegistry
+from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
+from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
+from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
+from astrbot_plugin_nikke.integrations.spine.prerenderer import SpinePreRenderer
 from astrbot_plugin_nikke.scripts import capture_campaign_history as capture
 from astrbot_plugin_nikke.scripts import sync_spine_assets as sync
 

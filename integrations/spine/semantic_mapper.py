@@ -22,7 +22,7 @@ from typing import Mapping
 try:
     from .runtime import ParsedSkeleton
 except ImportError:
-    from spine_runtime import ParsedSkeleton
+    from astrbot_plugin_nikke.integrations.spine.runtime import ParsedSkeleton
 
 logger = logging.getLogger("nikke.spine.semantics")
 

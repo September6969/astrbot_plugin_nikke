@@ -25,7 +25,7 @@ from typing import Any
 import httpx
 
 from .models import AnnouncementRecord
-from ...log_privacy import safe_exception_message
+from astrbot_plugin_nikke.core.privacy import safe_exception_message
 
 logger = logging.getLogger("nikke.announcements")
 CST = timezone(timedelta(hours=8))

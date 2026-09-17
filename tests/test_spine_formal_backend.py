@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 
 from PIL import Image, ImageDraw
 
-from astrbot_plugin_nikke.spine_prerenderer import (
+from astrbot_plugin_nikke.integrations.spine.prerenderer import (
     SpineBundle,
     SpineBundleFetcher,
     SpineJob,

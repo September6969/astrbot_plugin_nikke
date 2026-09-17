@@ -19,8 +19,8 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from astrbot_plugin_nikke.lineup_portrait_resolver import LineupPortraitResolver
-from astrbot_plugin_nikke.boss_asset_resolver import BossAssetResolver
+from astrbot_plugin_nikke.features.character.lineup_portrait_resolver import LineupPortraitResolver
+from astrbot_plugin_nikke.features.raid.boss_resolver import BossAssetResolver
 
 OUT_DIR = Path("docs/evidence/blabla_static_assets")
 ASSET_BASE = Path("data/nikke/blabla-assets")

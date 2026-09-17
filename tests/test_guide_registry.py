@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from datetime import date
 from unittest import TestCase
-from astrbot_plugin_nikke.guide_registry import GuideRegistry
+from astrbot_plugin_nikke.features.guide.registry import GuideRegistry
 
 
 class GuideTests(TestCase):

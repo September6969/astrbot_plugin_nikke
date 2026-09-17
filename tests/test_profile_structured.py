@@ -3,8 +3,8 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
-from astrbot_plugin_nikke.profile_builder import ProfileBuilder
-from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
+from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
+from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 
 
 class StructuredProfileTests(TestCase):

@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.static_registry import StaticDataRegistry
+from astrbot_plugin_nikke.features.character.registries.static import StaticDataRegistry
 
 
 class StaticDataRegistryTests(unittest.TestCase):

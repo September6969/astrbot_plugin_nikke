@@ -20,9 +20,9 @@ from .models import (
 )
 from .identity import CharacterDirectoryResolver
 from .stat_calculator import CharacterStatCalculator
-from ...log_privacy import sanitize_log_text
+from astrbot_plugin_nikke.core.privacy import sanitize_log_text
 from .registries.overload import OverloadTierRegistry
-from ...ol_unknown_inventory import UnknownOlInventory
+from astrbot_plugin_nikke.features.character.ol_unknown_inventory import UnknownOlInventory
 from .registries.state_effect import StateEffectRegistry
 
 
@@ -403,7 +403,7 @@ class CharacterCardBuilder:
             roster=roster,
             detail=detail,
         )
-        from ...character_weapon_bases import card_fields
+        from astrbot_plugin_nikke.features.character.weapon_bases import card_fields
         return CharacterCardData(
             **card_fields(directory.get("resource_id")),
             commander_name=commander_name,

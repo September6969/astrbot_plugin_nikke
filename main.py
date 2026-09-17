@@ -25,12 +25,12 @@ from astrbot.api.star import Context, Star
 from ._version import PLUGIN_VERSION
 from .core.container import create_container
 from .features.daily.runner import DailyRunner
-from .announcement_service import AnnouncementService
-from .announcement_delivery import AnnouncementDelivery
-from .calendar_service import CalendarService
-from .asset_manager import AssetManager
-from .campaign_history_builder import CampaignHistoryBuilder
-from .campaign_history_models import ClearLineupStatus
+from .features.announcement.service import AnnouncementService
+from .features.announcement.delivery import AnnouncementDelivery
+from .features.calendar.service import CalendarService
+from .core.asset_manager import AssetManager
+from .features.campaign.builder import CampaignHistoryBuilder
+from .features.campaign.models import ClearLineupStatus
 from .ui.renderers import (
     CampaignHistoryRenderer,
     CharacterCardRenderer,
@@ -39,33 +39,33 @@ from .ui.renderers import (
     UnionRaidRenderer,
 )
 from .ui.primitives import CardRenderer
-from .t2i_payloads import CalendarT2IPayloadBuilder
-from .tarot_service import TarotDataError, TarotService
-from .campaign_stage_resolver import CampaignStageResolver
-from .card_builder import CharacterCardBuilder
-from .cdk_service import CDK_PATTERN, CdkInputParser, CdkService
-from .character_identity import CharacterDirectoryResolver
-from .client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
-from .character_stat_resources import CharacterStatResourceLoader, map_research_levels
-from .log_privacy import safe_exception_message
-from .daily_models import DailyTaskResult, DailyTaskStatus
-from .processing_feedback import DelayedFeedbackManager
-from .profile_builder import ProfileBuilder
-from .runtime_health import collect_runtime_health, format_runtime_health
-from .runtime_config import normalize_runtime_config, read_schedule_clock
-from .spine_runtime_config import build_spine_renderer
-from .storage import NikkeStore
-from .union_raid_builder import UnionRaidBuilder
-from .union_raid_models import PreviousSeasonSummary, RaidState
-from .costume_registry import CostumeRegistry
-from .tower_registry import TowerRegistry
-from .voice_character_resolver import VoiceCharacterResolver
-from .voice_audio import VoiceAudioCache, VoicePreference, is_self_poke
-from .voice_encoder import VoiceEncoder
-from .voice_mapping import VoiceMapRegistry
-from .voice_pipeline import VoicePipeline
-from .voice_resource_provider import VoiceResourceProvider
-from .web_service import BindingWebService
+from .ui.t2i_payloads import CalendarT2IPayloadBuilder
+from .features.tarot.service import TarotDataError, TarotService
+from .features.campaign.stage_resolver import CampaignStageResolver
+from .features.character.builder import CharacterCardBuilder
+from .features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
+from .features.character.identity import CharacterDirectoryResolver
+from .integrations.blablalink.client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
+from .features.character.stat_resources import CharacterStatResourceLoader, map_research_levels
+from .core.privacy import safe_exception_message
+from .features.daily.models import DailyTaskResult, DailyTaskStatus
+from .core.feedback import DelayedFeedbackManager
+from .features.profile.builder import ProfileBuilder
+from .core.health import collect_runtime_health, format_runtime_health
+from .core.config import normalize_runtime_config, read_schedule_clock
+from .integrations.spine.config import build_spine_renderer
+from .core.storage import NikkeStore
+from .features.raid.builder import UnionRaidBuilder
+from .features.raid.models import PreviousSeasonSummary, RaidState
+from .features.character.registries.costume import CostumeRegistry
+from .features.tower.registry import TowerRegistry
+from .features.voice.character_resolver import VoiceCharacterResolver
+from .features.voice.audio import VoiceAudioCache, VoicePreference, is_self_poke
+from .features.voice.encoder import VoiceEncoder
+from .features.voice.mapping import VoiceMapRegistry
+from .features.voice.pipeline import VoicePipeline
+from .features.voice.provider import VoiceResourceProvider
+from .integrations.web.service import BindingWebService
 
 
 def normalize_nikke_prefix(text: str) -> str:
@@ -922,7 +922,7 @@ class NikkePlugin(Star):
 
     async def voice_settings(self, event: AstrMessageEvent, action: str = "", value: str = ""):
         """保存明确的语音偏好，音频需管理员在本地登记授权来源。"""
-        from .voice_audio import VoicePreference
+        from .features.voice.audio import VoicePreference
         key = f"{event.get_platform_name()}:{self._qq_id(event)}"
         preference = VoicePreference.load(self.store, key)
         action_clean = str(action or "").strip()
@@ -1038,7 +1038,7 @@ class NikkePlugin(Star):
 
     async def union_raid_ranking(self, event: AstrMessageEvent):
         """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""
-        from .raid_participants import build_ranking, format_ranking
+        from .features.raid.participants import build_ranking, format_ranking
         try:
             account = self._account_or_error(event)
             payload = await self.client.get_union_raid_data(account)
@@ -1086,7 +1086,7 @@ class NikkePlugin(Star):
 
     async def union_raid_my(self, event: AstrMessageEvent):
         """展示当前响应中与当前账号稳定 openid 精确匹配的突袭记录。"""
-        from .raid_participants import build_member_ranking, format_ranking
+        from .features.raid.participants import build_member_ranking, format_ranking
         try:
             account = self._account_or_error(event)
             member_openid = str(account.get("game_openid") or "").strip()
@@ -1865,7 +1865,7 @@ class NikkePlugin(Star):
             yield event.plain_result("页码应为正整数，例如：/妮姬 攻略 练度 2")
             return
         page_number = int(page)
-        from .guide_registry import GuideRegistry
+        from .features.guide.registry import GuideRegistry
         try:
             registry = GuideRegistry(self.plugin_dir / "assets" / "guides")
             entries = registry.page(folder_name, page=page_number)

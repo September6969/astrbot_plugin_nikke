@@ -27,13 +27,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT.parent) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT.parent))
 try:
-    from astrbot_plugin_nikke.local_spine_resolver import (
+    from astrbot_plugin_nikke.integrations.spine.local_resolver import (
         LocalSpineBundle,
         LocalSpineBundleResolver,
         LocalSpineResolveError,
     )
 except ImportError:
-    from local_spine_resolver import (  # type: ignore[no-redef]
+    from astrbot_plugin_nikke.integrations.spine.local_resolver import (  # type: ignore[no-redef]
         LocalSpineBundle,
         LocalSpineBundleResolver,
         LocalSpineResolveError,

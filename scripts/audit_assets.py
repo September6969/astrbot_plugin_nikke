@@ -17,9 +17,9 @@ if str(base_dir.parent) not in sys.path:
 if str(base_dir) not in sys.path:
     sys.path.insert(0, str(base_dir))
 
-from astrbot_plugin_nikke.skill_icon_resolver import SkillIconResolver
-from astrbot_plugin_nikke.costume_asset_resolver import CostumeAssetResolver
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.character.skill_icon_resolver import SkillIconResolver
+from astrbot_plugin_nikke.features.character.costume_asset_resolver import CostumeAssetResolver
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s")
 logger = logging.getLogger("audit_assets")

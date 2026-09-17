@@ -8,7 +8,7 @@ import unittest
 
 from cryptography.fernet import Fernet
 
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class StorageLifecycleTests(unittest.TestCase):

@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
-from astrbot_plugin_nikke.tower_registry import TowerRegistry
+from astrbot_plugin_nikke.features.tower.registry import TowerRegistry
 from astrbot_plugin_nikke.main import NikkePlugin
 
 

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from character_detail_diagnostic import summarize_character_details
+from astrbot_plugin_nikke.features.character.diagnostic import summarize_character_details
 
 
 def main() -> int:

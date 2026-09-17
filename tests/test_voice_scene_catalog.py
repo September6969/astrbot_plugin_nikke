@@ -1,6 +1,6 @@
 """只保留字段关系的合成剧情样例。"""
 from unittest import TestCase
-from astrbot_plugin_nikke.voice_scene_catalog import audit_story_voice_mapping, parse_scene_voices
+from astrbot_plugin_nikke.features.voice.scene_catalog import audit_story_voice_mapping, parse_scene_voices
 
 
 class SceneVoiceTests(TestCase):

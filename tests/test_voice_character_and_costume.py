@@ -7,11 +7,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from astrbot_plugin_nikke.costume_registry import CostumeRegistry
+from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.storage import NikkeStore
-from astrbot_plugin_nikke.voice_audio import VoicePreference
-from astrbot_plugin_nikke.voice_character_resolver import VoiceCharacterResolver
+from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.features.voice.audio import VoicePreference
+from astrbot_plugin_nikke.features.voice.character_resolver import VoiceCharacterResolver
 
 
 class VoiceCharacterAndCostumeTests(unittest.TestCase):
@@ -253,7 +253,7 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_text_poke_dialogue_is_completely_removed(self):
         """测试纯文本 /妮姬 戳一戳 指令与伪造台词已被彻底移除。"""
-        from astrbot_plugin_nikke.voice_feedback import VoiceResolver
+        from astrbot_plugin_nikke.features.voice.feedback import VoiceResolver
         event = self._event()
 
         # 1. CHARACTER_LINES 已从 VoiceResolver 彻底删除

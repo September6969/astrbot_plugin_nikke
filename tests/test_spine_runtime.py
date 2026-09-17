@@ -8,15 +8,15 @@ from unittest import TestCase
 
 from PIL import Image
 
-from astrbot_plugin_nikke.spine_runtime import (
+from astrbot_plugin_nikke.integrations.spine.runtime import (
     SpineBundle,
     SpineSkeletonParser,
     SpineMemoryCache,
     RenderedCharacter,
     detect_spine_version,
 )
-from astrbot_plugin_nikke.spine_renderer import SpineRenderer
-from astrbot_plugin_nikke.spine_prerenderer import SpineRenderError
+from astrbot_plugin_nikke.integrations.spine.renderer import SpineRenderer
+from astrbot_plugin_nikke.integrations.spine.prerenderer import SpineRenderError
 
 
 class SpineRuntimeTests(TestCase):

@@ -2,7 +2,7 @@
 import json
 from dataclasses import asdict
 from unittest import TestCase
-from astrbot_plugin_nikke.raid_participants import build_member_ranking, build_ranking, format_ranking, format_compact_number
+from astrbot_plugin_nikke.features.raid.participants import build_member_ranking, build_ranking, format_ranking, format_compact_number
 
 
 

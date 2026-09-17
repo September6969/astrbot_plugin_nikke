@@ -8,8 +8,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 
-from astrbot_plugin_nikke.announcement_models import AnnouncementRecord
-from astrbot_plugin_nikke.announcement_service import AnnouncementService
+from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
+from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
 
 
 NOW = datetime(2026, 9, 6, tzinfo=timezone.utc)

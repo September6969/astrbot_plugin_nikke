@@ -1,7 +1,7 @@
 """拒绝不相关日期拼接，并支持明确英文年月日。"""
 from datetime import datetime, timezone
 from unittest import TestCase
-from astrbot_plugin_nikke.announcement_service import DeadlineParser
+from astrbot_plugin_nikke.features.announcement.service import DeadlineParser
 
 
 class DeadlineRangeTests(TestCase):

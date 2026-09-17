@@ -5,10 +5,10 @@ import unittest
 from pathlib import Path
 from PIL import Image
 
-from astrbot_plugin_nikke.campaign_history_builder import CampaignHistoryBuilder
-from astrbot_plugin_nikke.campaign_history_models import ClearLineupStatus, StageClearMember, StageClearRecord
-from astrbot_plugin_nikke.campaign_history_renderer import CampaignHistoryRenderer
-from astrbot_plugin_nikke.campaign_stage_resolver import CampaignStage, CampaignStageResolver
+from astrbot_plugin_nikke.features.campaign.builder import CampaignHistoryBuilder
+from astrbot_plugin_nikke.features.campaign.models import ClearLineupStatus, StageClearMember, StageClearRecord
+from astrbot_plugin_nikke.ui.renderers.campaign import CampaignHistoryRenderer
+from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStage, CampaignStageResolver
 
 
 class CampaignStageResolverTests(unittest.TestCase):
@@ -510,7 +510,7 @@ class CampaignHistoryRendererTests(unittest.TestCase):
 class CampaignClientToBuilderIntegrationTests(unittest.IsolatedAsyncioTestCase):
     async def test_client_to_builder_with_full_official_response(self):
         from unittest.mock import AsyncMock
-        from astrbot_plugin_nikke.client import BlaBlaClient
+        from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient
 
         client = BlaBlaClient()
         official_response = {

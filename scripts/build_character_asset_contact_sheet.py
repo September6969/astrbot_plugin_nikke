@@ -25,7 +25,7 @@ if str(base_dir.parent) not in sys.path:
 if str(base_dir) not in sys.path:
     sys.path.insert(0, str(base_dir))
 
-from astrbot_plugin_nikke.character_visual_resolver import CharacterVisualAssetResolver
+from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s")
 logger = logging.getLogger("build_contact_sheet")

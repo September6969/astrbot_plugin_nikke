@@ -5,9 +5,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.card_builder import CharacterCardBuilder
-from astrbot_plugin_nikke.character_card_renderer import CharacterCardRenderer
-from astrbot_plugin_nikke.ol_unknown_inventory import UnknownOlInventory
+from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
+from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
+from astrbot_plugin_nikke.features.character.ol_unknown_inventory import UnknownOlInventory
 
 
 class UnknownOlInventoryTests(unittest.TestCase):

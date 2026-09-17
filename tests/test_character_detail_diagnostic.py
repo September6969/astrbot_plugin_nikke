@@ -1,6 +1,6 @@
 import unittest
 
-from astrbot_plugin_nikke.character_detail_diagnostic import summarize_character_details
+from astrbot_plugin_nikke.features.character.diagnostic import summarize_character_details
 
 
 class CharacterDetailDiagnosticTests(unittest.TestCase):

@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from scripts.rebuild_spine_render_manifest import (
     audit_spine_assets,
     build_manifest_dict,

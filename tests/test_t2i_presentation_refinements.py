@@ -3,19 +3,19 @@ from pathlib import Path
 import pytest
 from jinja2 import Environment
 
-from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
-from astrbot_plugin_nikke.t2i_payloads import (
+from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+from astrbot_plugin_nikke.ui.t2i_payloads import (
     format_compact_number,
     display_number,
     CharacterT2IPayloadBuilder,
     ProfileT2IPayloadBuilder,
     T2IAssetResolver,
 )
-from astrbot_plugin_nikke.static_registry import StaticDataRegistry
-from astrbot_plugin_nikke.profile_builder import ProfileBuilder
-from astrbot_plugin_nikke.currency_registry import CurrencyRegistry
-from astrbot_plugin_nikke.tower_registry import TowerRegistry
-from astrbot_plugin_nikke.card_models import (
+from astrbot_plugin_nikke.features.character.registries.static import StaticDataRegistry
+from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
+from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegistry
+from astrbot_plugin_nikke.features.tower.registry import TowerRegistry
+from astrbot_plugin_nikke.features.character.models import (
     CharacterCardData,
     EquipmentData,
     EquipmentOption,

@@ -2,8 +2,8 @@
 import unittest
 from unittest.mock import AsyncMock
 
-from astrbot_plugin_nikke.client import BlaBlaClient, BlaBlaError
-from astrbot_plugin_nikke.union_raid_builder import UnionRaidBuilder
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaError
+from astrbot_plugin_nikke.features.raid.builder import UnionRaidBuilder
 
 
 class ContractTests(unittest.IsolatedAsyncioTestCase):

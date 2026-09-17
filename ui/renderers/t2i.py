@@ -1,9 +1,9 @@
 """通过注入的 AstrBot 原生异步接口渲染，不拥有浏览器。"""
 import asyncio
 
-from ...t2i_assets import T2IAssetResolver
-from ...t2i_payloads import CampaignT2IPayloadBuilder
-from ...t2i_templates import T2ITemplateLoader
+from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+from astrbot_plugin_nikke.ui.t2i_payloads import CampaignT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 
 class T2IRenderer:
@@ -29,12 +29,12 @@ class T2IRenderer:
 
     async def render_view(self, page, data, **kwargs):
         if page == "character":
-            from ...t2i_payloads import CharacterT2IPayloadBuilder
+            from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
             # 只在线程中准备既有本地资产；原生 HTML 渲染仍为直接异步调用。
             assets = await asyncio.to_thread(self.payload_builder.assets.resolve_character_assets, data)
             payload = CharacterT2IPayloadBuilder(self.payload_builder.resolver).build(data, assets)
             return await self.render_payload(page, payload)
-        from ...t2i_payloads import UnionOverviewT2IPayloadBuilder, UnionRecordsT2IPayloadBuilder, UnionMemberT2IPayloadBuilder, ProfileT2IPayloadBuilder
+        from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder, UnionRecordsT2IPayloadBuilder, UnionMemberT2IPayloadBuilder, ProfileT2IPayloadBuilder
         builders = {"profile": ProfileT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver), "union_overview": UnionOverviewT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver), "union_records": UnionRecordsT2IPayloadBuilder(),
                     "union_member": UnionMemberT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver)}
         if page in builders:

@@ -23,9 +23,9 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from .card_models import SpineBundle
+    from .models import SpineBundle
 except ImportError:
-    from card_models import SpineBundle
+    from .models import SpineBundle
 
 logger = logging.getLogger("nikke.visual_resolver")
 
@@ -63,7 +63,7 @@ class CharacterVisualAssetResolver:
         spine_metadata_path: str | Path | None = None,
         placement_meta_path: str | Path | None = None,
     ):
-        base = Path(__file__).resolve().parent
+        base = Path(__file__).resolve().parents[2]
         if visual_catalog_path is None:
             self.visual_catalog_path = base / "assets" / "mappings" / "costume_visual_assets.json"
         else:

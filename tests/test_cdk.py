@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 
-from astrbot_plugin_nikke.cdk_models import CdkBatchResult, CdkRedeemResult
-from astrbot_plugin_nikke.cdk_service import CDK_PATTERN, CdkInputParser, CdkService
-from astrbot_plugin_nikke.client import BlaBlaClient, BlaBlaError, CdkRedemptionResult, CookieExpired
+from astrbot_plugin_nikke.features.cdk.models import CdkBatchResult, CdkRedeemResult
+from astrbot_plugin_nikke.features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaError, CdkRedemptionResult, CookieExpired
 
 
 class CdkInputParserTests(unittest.TestCase):
@@ -144,7 +144,7 @@ class CdkServiceTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("请求过频", batch.results[1].message)
 
     async def test_single_blabla_timeout_error_marks_unknown(self):
-        from astrbot_plugin_nikke.client import BlaBlaTimeoutError
+        from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaTimeoutError
         client = AsyncMock(spec=BlaBlaClient)
         client.redeem_cdk.side_effect = BlaBlaTimeoutError("RedeemCdk 请求超时", endpoint="RedeemCdk")
         service = CdkService(client)
@@ -183,7 +183,7 @@ class CdkServiceTests(unittest.IsolatedAsyncioTestCase):
 
 class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
     async def test_client_get_cdk_redemption_unpacks_nested_data(self):
-        from astrbot_plugin_nikke.client import GET_CDK_REDEMPTION
+        from astrbot_plugin_nikke.integrations.blablalink.client import GET_CDK_REDEMPTION
         client = BlaBlaClient()
         account = {"cookie": "game_uid=1", "game_openid": "openid"}
 
@@ -214,7 +214,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(items[0]["cdkey"], "ALT1")
 
     async def test_client_get_cdk_redemption_history_unpacks_nested_data(self):
-        from astrbot_plugin_nikke.client import GET_CDK_REDEMPTION_HISTORY
+        from astrbot_plugin_nikke.integrations.blablalink.client import GET_CDK_REDEMPTION_HISTORY
         client = BlaBlaClient()
         account = {"cookie": "game_uid=1", "game_openid": "openid"}
 
@@ -235,7 +235,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_client_get_cdk_redemption_history_unpacks_cdk_redemption_list(self):
-        from astrbot_plugin_nikke.client import GET_CDK_REDEMPTION_HISTORY
+        from astrbot_plugin_nikke.integrations.blablalink.client import GET_CDK_REDEMPTION_HISTORY
         client = BlaBlaClient()
         account = {"cookie": "game_uid=1", "game_openid": "openid"}
 

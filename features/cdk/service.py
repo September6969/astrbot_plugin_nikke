@@ -20,7 +20,7 @@ from typing import Any
 import httpx
 
 from .models import CdkBatchResult, CdkRedeemResult
-from ...client import (
+from astrbot_plugin_nikke.integrations.blablalink.client import (
     BlaBlaClient,
     BlaBlaError,
     BlaBlaNetworkError,

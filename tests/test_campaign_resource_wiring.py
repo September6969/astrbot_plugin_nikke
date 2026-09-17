@@ -5,8 +5,8 @@ from unittest.mock import Mock, call, patch, sentinel
 
 from PIL import Image
 
-from astrbot_plugin_nikke.campaign_history_models import ClearLineupStatus, StageClearMember, StageClearRecord
-from astrbot_plugin_nikke.campaign_history_renderer import CampaignHistoryRenderer
+from astrbot_plugin_nikke.features.campaign.models import ClearLineupStatus, StageClearMember, StageClearRecord
+from astrbot_plugin_nikke.ui.renderers.campaign import CampaignHistoryRenderer
 from astrbot_plugin_nikke.main import NikkePlugin
 
 

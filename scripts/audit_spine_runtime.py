@@ -24,7 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from spine_runtime import SpineBundle, detect_spine_version
+from astrbot_plugin_nikke.integrations.spine.runtime import SpineBundle, detect_spine_version
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s")
 logger = logging.getLogger("audit_spine_runtime")

@@ -127,8 +127,8 @@ def audit_spine_assets(
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
 
-    from character_master_resolver import CharacterMasterResolver
-    from costume_registry import CostumeRegistry
+    from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
+    from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
 
     master_resolver = CharacterMasterResolver(character_master_path)
     costume_registry = CostumeRegistry(costumes_path.parent)

@@ -5,10 +5,10 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.card_models import EquipmentOption, OptionSummary
-from astrbot_plugin_nikke.character_card_renderer import CharacterCardRenderer
-from astrbot_plugin_nikke.card_theme import character_theme
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.character.models import EquipmentOption, OptionSummary
+from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
+from astrbot_plugin_nikke.ui.theme import character_theme
 from astrbot_plugin_nikke.tests.test_card_builder import build_card
 
 

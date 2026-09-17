@@ -9,9 +9,9 @@ from pathlib import Path
 @lru_cache(maxsize=1)
 def metadata():
     try:
-        cand = Path(__file__).parent / "assets" / "data" / "face_anchors.json"
+        cand = Path(__file__).resolve().parents[2] / "assets" / "data" / "face_anchors.json"
         if not cand.is_file():
-            cand = Path(__file__).parent / "assets" / "face_anchors.json"
+            cand = Path(__file__).resolve().parents[2] / "assets" / "face_anchors.json"
         data = json.loads(cand.read_text(encoding="utf-8"))
         return data.get("records", {}) if data.get("schema") == 1 else {}
     except (OSError, ValueError, AttributeError):
@@ -58,6 +58,6 @@ def framing(data, portrait):
 
 @lru_cache(maxsize=1)
 def identity_resolver():
-    from .nikke_db_provider import NikkeDbProvider
-    assets = Path(__file__).parent / "assets"
+    from ...integrations.nikke_db.provider import NikkeDbProvider
+    assets = Path(__file__).resolve().parents[2] / "assets"
     return NikkeDbProvider(assets, assets, remote=False)

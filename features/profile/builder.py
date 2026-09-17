@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any
 
 from ..campaign.stage_resolver import CampaignStageResolver
-from ...currency_registry import CurrencyRegistry
+from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegistry
 from ..character.registries.memorial import MemorialCategoryRegistry
 from ..tower.registry import TowerRegistry
 from .models import (

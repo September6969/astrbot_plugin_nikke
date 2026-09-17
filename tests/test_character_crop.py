@@ -4,7 +4,7 @@
 import pytest
 from PIL import Image
 
-from astrbot_plugin_nikke.character_crop import (
+from astrbot_plugin_nikke.features.character.crop import (
     CROP_OVERRIDES,
     CropConfig,
     calculate_head_center_of_mass,

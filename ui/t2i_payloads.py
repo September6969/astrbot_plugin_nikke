@@ -1,6 +1,6 @@
 """只适配已经建立的领域 DTO，不解析接口或推断身份。"""
-from .campaign_history_models import ClearLineupStatus, StageClearRecord
-from .t2i_assets import T2IAssetResolver
+from ..features.campaign.models import ClearLineupStatus, StageClearRecord
+from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 
 
 def _normalize_equipment_icon(source):
@@ -73,10 +73,10 @@ class CharacterT2IPayloadBuilder:
 
     def build(self, data, card_assets):
         from dataclasses import asdict
-        from .card_models import EquipmentData, EquipmentOption
-        from .card_theme import character_theme, _extract_portrait_palette, _parse
-        from .character_card_renderer import CharacterCardRenderer
-        from .static_registry import StaticDataRegistry
+        from astrbot_plugin_nikke.features.character.models import EquipmentData, EquipmentOption
+        from astrbot_plugin_nikke.ui.theme import character_theme, _extract_portrait_palette, _parse
+        from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
+        from astrbot_plugin_nikke.features.character.registries.static import StaticDataRegistry
         from PIL import Image
         portrait = card_assets.portrait
         theme = character_theme(data.corporation, data.element, portrait)
@@ -116,7 +116,7 @@ class CharacterT2IPayloadBuilder:
                     "level": "LV." + display_number(item.level), "icon": self.resolver.encode(image, (100, 100))}
         corp_asset = getattr(card_assets, "corporation", None)
         watermark = self.resolver.encode(corp_asset, (260, 260)) if corp_asset else None
-        from .character_replica import build_summary, cache_identity, SHORT_NAMES, VERSION, replica_font, art_style
+        from astrbot_plugin_nikke.features.character.replica import build_summary, cache_identity, SHORT_NAMES, VERSION, replica_font, art_style
         for gear in equipment:
             for row in gear["options"]:
                 row["short_name"] = SHORT_NAMES.get(row["name"].strip("【】"), row["name"])
@@ -150,7 +150,7 @@ class ProfileT2IPayloadBuilder:
         self.resolver = resolver or T2IAssetResolver()
 
     def build(self, data):
-        from .currency_registry import CurrencyRegistry
+        from ..features.profile.currency_registry import CurrencyRegistry
         def pairs(items, state=""):
             return [{"label": label, "value": "Unknown" if value is None else str(value), "scope": state} for label, value in items]
         today_state = section_state(data.daily_available, data.daily_partial)
@@ -260,9 +260,9 @@ class UnionOverviewT2IPayloadBuilder:
 
     def build(self, data, now=None):
         from datetime import datetime
-        from .union_raid_renderer import UnionRaidRenderer
-        from .union_raid_models import RaidState
-        from .raid_participants import format_compact_number
+        from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
+        from astrbot_plugin_nikke.features.raid.models import RaidState
+        from astrbot_plugin_nikke.features.raid.participants import format_compact_number
 
         raid_state = getattr(data, "raid_state", RaidState.UNKNOWN)
         if isinstance(raid_state, RaidState):
@@ -396,8 +396,8 @@ class UnionMemberT2IPayloadBuilder:
         self.assets, self.resolver = assets, resolver
 
     def build(self, data):
-        from .character_master_resolver import CharacterMasterResolver
-        from .campaign_history_models import StageClearMember
+        from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
+        from astrbot_plugin_nikke.features.campaign.models import StageClearMember
         if data.scope != "CURRENT_RESPONSE_MEMBER":
             raise ValueError("个人报告要求明确的当前成员响应范围")
         master = CharacterMasterResolver()
@@ -432,8 +432,8 @@ class UnionMemberT2IPayloadBuilder:
 class CalendarT2IPayloadBuilder:
     def build(self, service, days=14, now=None, warning=""):
         from datetime import datetime, timezone
-        from .calendar_models import _aware_utc
-        from .calendar_service import CAT_LABELS, CST
+        from astrbot_plugin_nikke.features.calendar.models import _aware_utc
+        from astrbot_plugin_nikke.features.calendar.service import CAT_LABELS, CST
         current = _aware_utc(now) if now else datetime.now(timezone.utc)
         days = service.normalize_horizon(days)
         groups = service.group_window(days, current)

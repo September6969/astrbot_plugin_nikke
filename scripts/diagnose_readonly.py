@@ -41,8 +41,8 @@ def summarize(bundle):
 
 
 async def live_bundle(data_dir):
-    from astrbot_plugin_nikke.client import BlaBlaClient
-    from astrbot_plugin_nikke.storage import NikkeStore
+    from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient
+    from astrbot_plugin_nikke.core.storage import NikkeStore
     accounts = NikkeStore(data_dir).list_accounts(with_cookie=True)
     if len(accounts) != 1:
         raise ValueError("需要恰好一个绑定账号的诊断目录，避免错误选择账号")

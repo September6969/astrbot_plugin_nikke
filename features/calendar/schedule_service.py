@@ -24,15 +24,15 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Sequence
 
-from .calendar_models import CalendarActivity, _aware_utc
-from .canonical_models import (
+from .models import CalendarActivity, _aware_utc
+from astrbot_plugin_nikke.features.calendar.canonical_models import (
     CanonicalEvent,
     quality_badge,
     CST,
 )
-from .fetch_client import FetchClient
-from .log_privacy import safe_exception_message
-from .schedule_adapters import (
+from ...integrations.blablalink.fetch_client import FetchClient
+from ...core.privacy import safe_exception_message
+from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
     BaseScheduleAdapter,
     GameKeeScheduleAdapter,
     OfficialAnnouncementScheduleAdapter,

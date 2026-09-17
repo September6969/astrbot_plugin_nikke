@@ -2,7 +2,7 @@
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.character_visual_resolver import CharacterVisualAssetResolver
+from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver
 
 
 class CharacterVisualAssetResolverTests(unittest.TestCase):
