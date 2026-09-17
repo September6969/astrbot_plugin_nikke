@@ -69,7 +69,7 @@ python -m astrbot_plugin_nikke.scripts.backup_nikke_data \
 
 若绑定域名在本地代理下出现 `SSL_connect error 5`，可从 [GitHub Releases](https://github.com/September6969/astrbot_plugin_nikke/releases) 下载同一扩展包；不要关闭浏览器证书校验。
 
-仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。示例默认关闭 Caddy access log，因为绑定 URL 路径包含一次性令牌；反代配置边界见 [Caddy 验收记录](docs/CADDY_ACCEPTANCE.md)。
+仓库中的 `deploy/Caddyfile` 和 `deploy/docker-compose.caddy.yml` 是示例。Caddy 与 AstrBot 必须加入同一个 Docker 网络；这种布局下插件在容器内监听 `0.0.0.0:6210`，但宿主机不发布该端口。示例默认关闭 Caddy access log，因为绑定 URL 路径包含一次性令牌；反代配置边界见 [Caddy 验收记录](docs/acceptance/CADDY_ACCEPTANCE.md)。
 
 最小 Caddy 配置：
 
@@ -93,12 +93,12 @@ nikke.example.com {
 - `/妮姬 语音 开` 或 `关`；`/妮姬 语音 语言 en`；`/妮姬 语音 角色 rapi`。
   语音默认为关，`assets/voices/registry.json` 与 Poke 动态映射默认没有登记项；只使用管理员有权使用的本地音频，动态资源必须先有精确角色/服装/语言来源证据。
 
-研究来源和限制见 [证据记录](docs/evidence/overnight.md)，阶段结果与诊断方式见 [夜间开发报告](docs/OVERNIGHT_REPORT.md)。
+研究来源和限制见 [证据记录](docs/evidence/overnight.md)，阶段结果与诊断方式见 [夜间开发报告](docs/reports/OVERNIGHT_REPORT.md)。
 
- 完整需求、命令接线、离线测试、现场证据和授权边界见 [需求证据矩阵](docs/REQUIREMENT_EVIDENCE_MATRIX.md)。矩阵严格区分当前 `main`、独立 Draft PR 和真实环境未验收项。
-版本记录见 [CHANGELOG.md](CHANGELOG.md)，配置键、默认值和安全边界见 [配置合同](docs/CONFIGURATION_ACCEPTANCE.md)。
+完整需求、命令接线、离线测试、现场证据和授权边界见 [需求证据矩阵](docs/architecture/REQUIREMENT_EVIDENCE_MATRIX.md)。矩阵严格区分当前 `main`、独立 Draft PR 和真实环境未验收项。
+版本记录见 [CHANGELOG.md](CHANGELOG.md)，配置键、默认值和安全边界见 [配置合同](docs/acceptance/CONFIGURATION_ACCEPTANCE.md)。
 
-缓存清理的边界与验收见 [缓存清理验收记录](docs/CACHE_CLEANUP_ACCEPTANCE.md)。
+缓存清理的边界与验收见 [缓存清理验收记录](docs/acceptance/CACHE_CLEANUP_ACCEPTANCE.md)。
 
 - `/妮姬 帮助 [账号|查询|日常]`：查看精简菜单。
 - `/妮姬 账号 [绑定|状态|解绑|汇总 开|关]`：管理自己的账号。
@@ -133,19 +133,32 @@ nikke.example.com {
 
 必须同时迁移 `data/nikke/nikke.sqlite3` 和 `data/nikke/secret.key`。密钥应保持 `600` 权限，丢失后旧 Cookie 无法恢复，只能让用户重新绑定。
 
-升级或回滚前可运行只读前置检查：`python scripts/upgrade_preflight.py --data-dir data/nikke`。它只检查存储成对存在、SQLite 完整性、字段合同、可选备份集和磁盘余量，不执行迁移、复制、删除、覆盖或生产写入。验收边界见 [`docs/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md`](docs/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md)。
+升级或回滚前可运行只读前置检查：`python scripts/upgrade_preflight.py --data-dir data/nikke`。它只检查存储成对存在、SQLite 完整性、字段合同、可选备份集和磁盘余量，不执行迁移、复制、删除、覆盖或生产写入。验收边界见 [`docs/acceptance/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md`](docs/acceptance/UPGRADE_ROLLBACK_PREFLIGHT_ACCEPTANCE.md)。
 
-## 测试
+## 架构与分层
+
+插件在经过 Issue #82 重构后采用领域模块化设计，根目录平铺业务代码均已收敛至分层包中，并通过根目录存根（Compatibility Shims）实现 100% 向后兼容：
+
+- `ui/`：主题令牌、通用卡片基元及各领域专用渲染器（`ui/renderers/`）。
+- `features/`：13 个高内聚领域业务模块（`character`, `profile`, `raid`, `campaign`, `daily`, `tarot`, `cdk`, `voice`, `calendar`, `announcement`, `tower`, `guide` 等）。
+- `core/`：核心底层设施（`ServiceContainer`, `AssetManager`, `NikkeStore`, `DelayedFeedbackManager`, 配置规范化与隐私脱敏等）。
+- `integrations/`：外部依赖隔离层（`blablalink`, `spine`, `nikke_db`, `web` 服务）。
+- `assets/`：静态资源分流与多级回退（`data/` 结构化表、`icons/` 图标、`fonts/` 字体）。
+- `docs/`：7 大功能目录分层文档（`architecture/`, `acceptance/`, `evidence/`, `reports/` 等），索引详见 [docs/README.md](docs/README.md)。
+
+## 测试与质量保证
+
+全套回归套件支持 Pytest 与 Node.js 合同测试：
 
 ```bash
-python -m unittest discover -s tests -v
+# 运行全量 Python 单元测试与契约测试
+python -m pytest -v
+
+# 运行浏览器扩展契约测试
+node tests/extension.test.cjs
 ```
 
-测试覆盖令牌超时与单次消费、Cookie 加密、来源过滤、跨站 CORS、账号隔离基础行为、`game_openid`/正式 `intl_openid` 恢复、单角色定向查询、四槽装备词条解析、1800×1000 单角色卡、资源缓存和缺图回退、日志异常文本脱敏，以及 25 人汇总卡。模拟测试不能替代授权账号的真实端到端验收。
-
-单角色卡的图片缓存位于 `data/nikke/cache/`，自定义图片与来源配置见 [素材说明](assets/README.md)。首次查询可能需要下载立绘；下载失败仍生成占位卡。总览与“我的”卡片沿用原模板。
-
-在插件父目录运行 `python -m astrbot_plugin_nikke.scripts.preview_character_cards --output <预览目录> --remote`，可用脱敏样例生成爱丽丝、小红帽和缺图预览，不访问真实账号。
+测试套件覆盖 930+ 个用例，包括令牌生命周期、Cookie 加密、账号作用域隔离、Replica 1600×2400 像素级排版校准、Spine 离线面部锚点与渲染、Tarot 78 张标准牌义、每日签到状态机与并发幂等锁、资源回退容错等。
 
 ## 许可证与来源
 
