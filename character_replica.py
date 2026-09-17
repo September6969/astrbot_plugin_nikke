@@ -94,10 +94,17 @@ def art_style(data, portrait):
     return framing(data, portrait)["style"]
 
 
+def noto_font_700():
+    return _load_font_data_uri("NotoSansSC-ReplicaSubset-700.woff2")
+
+
+def noto_font_800():
+    return _load_font_data_uri("NotoSansSC-ReplicaSubset-800.woff2")
+
+
 def noto_font():
-    return (_load_font_data_uri("NotoSansSC-wght.ttf")
-            or _load_font_data_uri("NotoSansHans-Medium.otf")
-            or _load_font_data_uri("NotoSansHans-Regular.otf"))
+    """向后兼容：默认返回 800 ExtraBold WOFF2 子集。"""
+    return noto_font_800() or noto_font_700()
 
 
 def replica_font():
@@ -128,7 +135,13 @@ def _load_font_data_uri(filename: str = "ReplicaSans.otf"):
     if not path.is_file():
         return None
     ext = path.suffix.lstrip(".").lower()
-    mime = "font/otf" if ext == "otf" else "font/ttf"
+    mime_map = {
+        "otf": "font/otf",
+        "ttf": "font/ttf",
+        "woff": "font/woff",
+        "woff2": "font/woff2",
+    }
+    mime = mime_map.get(ext, "font/ttf")
     return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode("ascii")
 
 
