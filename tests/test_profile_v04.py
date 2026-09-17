@@ -7,22 +7,22 @@ from pathlib import Path
 from unittest.mock import patch
 from PIL import Image
 
-from astrbot_plugin_nikke.memorial_registry import MemorialCategoryRegistry
-from astrbot_plugin_nikke.profile_builder import (
+from astrbot_plugin_nikke.features.character.registries.memorial import MemorialCategoryRegistry
+from astrbot_plugin_nikke.features.profile.builder import (
     ProfileBuilder,
     format_compact_number,
     _parse_storage_fullness,
     _parse_sim_room_record,
     _parse_currencies,
 )
-from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
-from astrbot_plugin_nikke.profile_models import (
+from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
+from astrbot_plugin_nikke.features.profile.models import (
     CurrencyItem,
     MemorialCountData,
     ProfileDashboardData,
     RecycleResearchData,
 )
-from astrbot_plugin_nikke.research_registry import research_zh_name
+from astrbot_plugin_nikke.features.character.registries.research import research_zh_name
 
 
 class ProfileV04UnitTests(unittest.TestCase):

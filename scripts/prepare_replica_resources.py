@@ -15,7 +15,7 @@ if "astrbot_plugin_nikke" not in sys.modules:
     package = types.ModuleType("astrbot_plugin_nikke")
     package.__path__ = [str(ROOT)]
     sys.modules[package.__name__] = package
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 
 def main():

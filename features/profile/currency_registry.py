@@ -7,8 +7,8 @@ import re
 from dataclasses import dataclass
 from typing import Any, Iterable
 
-from .profile_models import CurrencyItem
-from .raid_participants import format_compact_number
+from .models import CurrencyItem
+from ..raid.participants import format_compact_number
 
 
 @dataclass(frozen=True, slots=True)

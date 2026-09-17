@@ -6,14 +6,14 @@ from unittest.mock import Mock
 import pytest
 from jinja2 import Environment
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.scripts.preview_t2i_ui import fixture_record
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
-from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
-from astrbot_plugin_nikke.t2i_payloads import (CampaignT2IPayloadBuilder, UnionOverviewT2IPayloadBuilder,
+from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+from astrbot_plugin_nikke.ui.t2i_payloads import (CampaignT2IPayloadBuilder, UnionOverviewT2IPayloadBuilder,
                                              UnionMemberT2IPayloadBuilder, ProfileT2IPayloadBuilder,
                                              CharacterT2IPayloadBuilder)
-from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 ROOT = Path(__file__).resolve().parents[1]
 

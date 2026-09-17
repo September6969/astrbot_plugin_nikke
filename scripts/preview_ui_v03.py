@@ -22,19 +22,19 @@ package = types.ModuleType("astrbot_plugin_nikke")
 package.__path__ = [str(ROOT)]
 sys.modules[package.__name__] = package
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.card_models import EquipmentOption, OptionSummary
-from astrbot_plugin_nikke.character_card_renderer import CharacterCardRenderer
-from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
-from astrbot_plugin_nikke.profile_models import ProfileDashboardData
-from astrbot_plugin_nikke.campaign_history_models import StageClearRecord, StageClearMember, ClearLineupStatus
-from astrbot_plugin_nikke.campaign_history_renderer import CampaignHistoryRenderer
-from astrbot_plugin_nikke.union_raid_models import UnionRaidOverviewData, RaidBossData, BossStatus, RaidResponseCoverage
-from astrbot_plugin_nikke.union_raid_renderer import UnionRaidRenderer
-from astrbot_plugin_nikke.renderer import CardRenderer
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.character.models import EquipmentOption, OptionSummary
+from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
+from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
+from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
+from astrbot_plugin_nikke.features.campaign.models import StageClearRecord, StageClearMember, ClearLineupStatus
+from astrbot_plugin_nikke.ui.renderers.campaign import CampaignHistoryRenderer
+from astrbot_plugin_nikke.features.raid.models import UnionRaidOverviewData, RaidBossData, BossStatus, RaidResponseCoverage
+from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
+from astrbot_plugin_nikke.ui.primitives import CardRenderer
 from astrbot_plugin_nikke.tests.test_card_builder import build_card
-from astrbot_plugin_nikke.web_service import BindingWebService
-from astrbot_plugin_nikke.guide_registry import GuideRegistry
+from astrbot_plugin_nikke.integrations.web.service import BindingWebService
+from astrbot_plugin_nikke.features.guide.registry import GuideRegistry
 
 
 def main():

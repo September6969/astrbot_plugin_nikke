@@ -8,9 +8,9 @@ import pytest
 from jinja2 import Environment
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
-from astrbot_plugin_nikke.t2i_renderer import T2IRenderer
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("campaign_preview", ROOT / "scripts" / "preview_t2i_ui.py")

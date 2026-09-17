@@ -4,10 +4,10 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
-from astrbot_plugin_nikke.announcement_delivery import AnnouncementDelivery
-from astrbot_plugin_nikke.announcement_models import AnnouncementRecord
-from astrbot_plugin_nikke.announcement_service import GameDeadline
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
+from astrbot_plugin_nikke.features.announcement.service import GameDeadline
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class DeliveryTests(IsolatedAsyncioTestCase):

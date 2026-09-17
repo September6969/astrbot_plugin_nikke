@@ -4,8 +4,8 @@ import asyncio
 import unittest
 from types import SimpleNamespace
 
-from astrbot_plugin_nikke.announcement_service import AnnouncementService
-from astrbot_plugin_nikke.log_privacy import safe_exception_message, sanitize_log_text
+from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
+from astrbot_plugin_nikke.core.privacy import safe_exception_message, sanitize_log_text
 from astrbot_plugin_nikke.main import NikkePlugin
 
 

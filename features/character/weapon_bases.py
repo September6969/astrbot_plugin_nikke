@@ -8,9 +8,9 @@ import re
 @lru_cache(maxsize=1)
 def records():
     try:
-        cand = Path(__file__).parent / "assets" / "data" / "character_weapon_bases.json"
+        cand = Path(__file__).resolve().parents[2] / "assets" / "data" / "character_weapon_bases.json"
         if not cand.is_file():
-            cand = Path(__file__).parent / "assets" / "character_weapon_bases.json"
+            cand = Path(__file__).resolve().parents[2] / "assets" / "character_weapon_bases.json"
         payload = json.loads(cand.read_text(encoding="utf-8"))
         return payload.get("records", {}) if payload.get("schema") == 1 else {}
     except (OSError, ValueError, AttributeError):

@@ -7,13 +7,13 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 from astrbot_plugin_nikke.main import NikkePlugin, normalize_nikke_prefix
-from astrbot_plugin_nikke.union_raid_builder import UnionRaidBuilder
-from astrbot_plugin_nikke.union_raid_models import (
+from astrbot_plugin_nikke.features.raid.builder import UnionRaidBuilder
+from astrbot_plugin_nikke.features.raid.models import (
     PreviousSeasonSummary,
     RaidState,
     UnionRaidOverviewData,
 )
-from astrbot_plugin_nikke.t2i_payloads import UnionOverviewT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder
 
 
 class UnionRaidStateResolutionTests(unittest.TestCase):

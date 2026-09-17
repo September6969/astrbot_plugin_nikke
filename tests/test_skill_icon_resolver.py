@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.skill_icon_resolver import SkillIconResolver
+from astrbot_plugin_nikke.features.character.skill_icon_resolver import SkillIconResolver
 
 
 class SkillIconResolverTests(unittest.TestCase):

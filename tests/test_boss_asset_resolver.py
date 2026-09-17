@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from astrbot_plugin_nikke.boss_asset_resolver import (
+from astrbot_plugin_nikke.features.raid.boss_resolver import (
     BossAssetResolver,
     BossAssetResolution,
 )

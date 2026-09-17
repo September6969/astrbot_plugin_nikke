@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from astrbot_plugin_nikke.client import (
+from astrbot_plugin_nikke.integrations.blablalink.client import (
     CHARACTERS,
     OUTPOST,
     PROFILE,
@@ -16,9 +16,9 @@ from astrbot_plugin_nikke.client import (
     BlaBlaError,
     CookieExpired,
 )
-from astrbot_plugin_nikke.profile_builder import ProfileBuilder
-from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
-from astrbot_plugin_nikke.profile_models import (
+from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
+from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
+from astrbot_plugin_nikke.features.profile.models import (
     MemorialCountData,
     ProfileDashboardData,
     RecycleResearchData,

@@ -6,9 +6,9 @@ NOW = datetime(2026, 9, 13, 4, tzinfo=timezone.utc)
 
 
 def calendar_cases(directory):
-    from astrbot_plugin_nikke.calendar_models import CalendarActivity
-    from astrbot_plugin_nikke.calendar_service import CalendarService
-    from astrbot_plugin_nikke.t2i_payloads import CalendarT2IPayloadBuilder
+    from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
+    from astrbot_plugin_nikke.features.calendar.service import CalendarService
+    from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
     result = {}
     for name in ("normal", "7-days", "30-days", "stale", "long-title", "many-events", "empty", "unavailable"):
         service = CalendarService(Path(directory) / name)
@@ -43,7 +43,7 @@ def get_cases(page, directory):
 
 
 def union_overview_cases():
-    from astrbot_plugin_nikke.union_raid_builder import UnionRaidBuilder
+    from astrbot_plugin_nikke.features.raid.builder import UnionRaidBuilder
     result = {}
     for name in ("normal", "defeated", "missing-asset", "partial-hp", "unknown-coverage", "long-name", "empty"):
         bosses = [{"boss_id": str(index + 1), "name_localvalues": {"zh-cn": "合成测试 Boss " + str(index + 1)},
@@ -63,7 +63,7 @@ def union_overview_cases():
         result[name] = UnionRaidBuilder().build(guild_name="合成联盟 · 非真实数据", level_info_payload=payload,
                                                fetched_at="2026-09-13 12:00", plugin_version="T2I PREVIEW")
     import copy
-    from astrbot_plugin_nikke.boss_asset_resolver import BossAssetResolver
+    from astrbot_plugin_nikke.features.raid.boss_resolver import BossAssetResolver
     records = BossAssetResolver(Path(__file__).resolve().parents[1] / "data/nikke/blabla-assets").manifest_records
     known = copy.deepcopy(result["normal"])
     unique = list({item["icon_id"]: item for item in records if item.get("season_id") == "1000035"}.values())
@@ -78,8 +78,8 @@ def union_overview_cases():
 def character_cases():
     import json
     import copy
-    from astrbot_plugin_nikke.card_builder import CharacterCardBuilder
-    from astrbot_plugin_nikke.character_master_resolver import CharacterMasterResolver
+    from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
+    from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
     root = Path(__file__).resolve().parents[1]
     fixture = json.loads((root / "tests" / "fixtures" / "character_details_sanitized.json").read_text(encoding="utf-8"))
     master = CharacterMasterResolver()
@@ -138,7 +138,7 @@ def character_cases():
                                             payload={"roster_item": roster, "detail": detail, "state_effects": effects},
                                             fetched_at="2026-09-13 12:00", plugin_version="T2I PREVIEW")
         if name == "max-ol":
-            from astrbot_plugin_nikke.card_models import OptionSummary
+            from astrbot_plugin_nikke.features.character.models import OptionSummary
             data.option_totals.extend([
                 OptionSummary(display_name="额外装弹数增加", unit="percent", value=20.0),
                 OptionSummary(display_name="额外攻击力增加", unit="percent", value=15.0),
@@ -148,8 +148,8 @@ def character_cases():
 
 
 def profile_cases():
-    from astrbot_plugin_nikke.profile_builder import ProfileBuilder
-    from astrbot_plugin_nikke.currency_registry import CurrencyRegistry
+    from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
+    from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegistry
     result = {}
     for name in ("full", "full-current-model", "today-partial", "resource-partial", "research-long-names", "zero-empty", "unavailable", "long-commander"):
         basic = {"nickname": "合成指挥官 · 非真实账号", "lv": 382, "team_combat": 1286600, "character_count": 187,
@@ -203,7 +203,7 @@ def profile_cases():
 
 
 def union_records_cases(page):
-    from astrbot_plugin_nikke.raid_participants import build_ranking, build_member_ranking
+    from astrbot_plugin_nikke.features.raid.participants import build_ranking, build_member_ranking
     result = {}
     cases = ("normal", "long-name", "tie-rank", "many-members", "unattacked-members", "all-attacked", "empty") if page == "union_records" else ("with-portraits", "1-record", "2-records", "3-records", "many-records", "empty")
     for name in cases:

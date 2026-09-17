@@ -9,7 +9,7 @@ from pathlib import Path
 
 from cryptography.fernet import Fernet
 
-from astrbot_plugin_nikke.storage import NikkeStore, SCHEMA_NAME, SCHEMA_VERSION
+from astrbot_plugin_nikke.core.storage import NikkeStore, SCHEMA_NAME, SCHEMA_VERSION
 
 
 class StorageMigrationTests(unittest.TestCase):

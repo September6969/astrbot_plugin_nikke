@@ -2,8 +2,8 @@ import hashlib
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.card_builder import CharacterCardBuilder
-from astrbot_plugin_nikke.state_effect_registry import StateEffectRegistry
+from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
+from astrbot_plugin_nikke.features.character.registries.state_effect import StateEffectRegistry
 from astrbot_plugin_nikke.tests.test_card_builder import load_fixture
 
 

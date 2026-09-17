@@ -107,7 +107,7 @@ def resolve_crop_key(
         return nc_map[nc_str]
 
     try:
-        from .character_master_resolver import CharacterMasterResolver
+        from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
         cmr = CharacterMasterResolver()
         if resource_id:
             try:

@@ -2,7 +2,7 @@
 
 import unittest
 
-from astrbot_plugin_nikke.card_theme import (
+from astrbot_plugin_nikke.ui.theme import (
     CharacterTheme,
     character_theme,
     _extract_portrait_colors,
@@ -10,9 +10,9 @@ from astrbot_plugin_nikke.card_theme import (
     _darken,
     _lighten,
 )
-from astrbot_plugin_nikke.profile_builder import ProfileBuilder
-from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
-from astrbot_plugin_nikke.profile_models import ProfileDashboardData
+from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
+from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
+from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
 from PIL import Image
 import tempfile
 

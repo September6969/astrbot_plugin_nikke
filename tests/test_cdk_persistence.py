@@ -5,10 +5,10 @@ from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
 from unittest.mock import patch
-from astrbot_plugin_nikke.storage import NikkeStore
-from astrbot_plugin_nikke.client import CdkRedemptionResult, BlaBlaTimeoutError
-from astrbot_plugin_nikke.cdk_service import CdkService
-from astrbot_plugin_nikke.cdk_models import CdkBatchResult, CdkRedeemResult
+from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.integrations.blablalink.client import CdkRedemptionResult, BlaBlaTimeoutError
+from astrbot_plugin_nikke.features.cdk.service import CdkService
+from astrbot_plugin_nikke.features.cdk.models import CdkBatchResult, CdkRedeemResult
 from astrbot_plugin_nikke.main import NikkePlugin
 
 

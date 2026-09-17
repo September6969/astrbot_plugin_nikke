@@ -1,6 +1,6 @@
 """真实面板样本的离线回放；不是测试期间执行账号访问。"""
 
-from astrbot_plugin_nikke.character_stat_calculator import CharacterStatCalculator, CharacterStatTables
+from astrbot_plugin_nikke.features.character.stat_calculator import CharacterStatCalculator, CharacterStatTables
 
 
 def test_arcana_level_526_matches_user_game_panel():

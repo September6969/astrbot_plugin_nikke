@@ -19,7 +19,7 @@ import httpx
 try:
     from ...features.character.master_resolver import CharacterMasterResolver
 except ImportError:
-    from character_master_resolver import CharacterMasterResolver
+    from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
 
 logger = logging.getLogger("nikke.nikke_db")
 

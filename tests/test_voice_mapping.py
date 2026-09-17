@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from astrbot_plugin_nikke.voice_mapping import VoiceMapRegistry
+from astrbot_plugin_nikke.features.voice.mapping import VoiceMapRegistry
 
 
 class VoiceMappingTests(TestCase):

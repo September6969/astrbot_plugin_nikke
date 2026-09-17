@@ -9,10 +9,10 @@ import httpx
 from PIL import Image
 import pytest
 
-from astrbot_plugin_nikke.calendar_models import CalendarActivity
-from astrbot_plugin_nikke.calendar_sources import GameKeeNikkeScheduleSource, _extract_image_urls
-from astrbot_plugin_nikke.calendar_service import CalendarService
-from astrbot_plugin_nikke.calendar_visuals import CalendarVisualCache
+from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
+from astrbot_plugin_nikke.features.calendar.sources import GameKeeNikkeScheduleSource, _extract_image_urls
+from astrbot_plugin_nikke.features.calendar.service import CalendarService
+from astrbot_plugin_nikke.features.calendar.visuals import CalendarVisualCache
 
 NOW = datetime(2026, 9, 15, tzinfo=timezone.utc)
 

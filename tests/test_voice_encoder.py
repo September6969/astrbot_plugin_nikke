@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, patch
-from astrbot_plugin_nikke.voice_encoder import VoiceEncoder
+from astrbot_plugin_nikke.features.voice.encoder import VoiceEncoder
 
 
 class VoiceEncoderTests(IsolatedAsyncioTestCase):

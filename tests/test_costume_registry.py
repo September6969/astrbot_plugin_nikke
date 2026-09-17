@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from astrbot_plugin_nikke.costume_registry import CostumeRegistry
-from astrbot_plugin_nikke.nikke_db_provider import NikkeDbProvider
+from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 
 
 ASSETS = Path(__file__).resolve().parents[1] / "assets"

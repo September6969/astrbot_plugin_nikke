@@ -7,9 +7,9 @@ from pathlib import Path
 
 from PIL import Image
 
-from astrbot_plugin_nikke.card_builder import CharacterCardBuilder
-from astrbot_plugin_nikke.character_card_renderer import CharacterCardRenderer
-from astrbot_plugin_nikke.client import BlaBlaClient, CHARACTER_DETAILS
+from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
+from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, CHARACTER_DETAILS
 from astrbot_plugin_nikke._version import PLUGIN_VERSION
 
 

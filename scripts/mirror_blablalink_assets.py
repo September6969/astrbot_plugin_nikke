@@ -29,7 +29,7 @@ import httpx
 from PIL import Image
 import io
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 logging.basicConfig(
     level=logging.INFO,

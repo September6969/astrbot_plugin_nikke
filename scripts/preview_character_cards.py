@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT.parent) not in sys.path:
     sys.path.insert(0, str(ROOT.parent))
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.character_card_renderer import CharacterCardRenderer
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
 from astrbot_plugin_nikke.tests.test_card_builder import build_card
 
 

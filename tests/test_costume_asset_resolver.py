@@ -2,7 +2,7 @@
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.costume_asset_resolver import CostumeAssetResolver
+from astrbot_plugin_nikke.features.character.costume_asset_resolver import CostumeAssetResolver
 
 
 class CostumeAssetResolverTests(unittest.TestCase):

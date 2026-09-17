@@ -4,8 +4,8 @@ from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
 
-from astrbot_plugin_nikke.client import BlaBlaError, CookieExpired, UnknownAfterAction
-from astrbot_plugin_nikke.daily_models import DailyTaskResult, DailyTaskStatus
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaError, CookieExpired, UnknownAfterAction
+from astrbot_plugin_nikke.features.daily.models import DailyTaskResult, DailyTaskStatus
 from astrbot_plugin_nikke.main import NikkePlugin
 
 

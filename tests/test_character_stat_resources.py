@@ -4,12 +4,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.character_stat_resources import (
+from astrbot_plugin_nikke.features.character.stat_resources import (
     BASE_RESOURCE_SPECS,
     CharacterStatResourceLoader,
     map_research_levels,
 )
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 
 def _level_stats():

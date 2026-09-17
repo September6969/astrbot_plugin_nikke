@@ -5,7 +5,7 @@ import unittest
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
-from astrbot_plugin_nikke.web_service import BindingWebService
+from astrbot_plugin_nikke.integrations.web.service import BindingWebService
 
 ROOT = Path(__file__).resolve().parents[1]
 

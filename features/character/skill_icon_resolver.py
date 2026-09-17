@@ -40,7 +40,7 @@ class SkillIconResolver:
 
     def __init__(self, mapping_path: str | Path | None = None):
         if mapping_path is None:
-            self.mapping_path = Path(__file__).resolve().parent / "assets" / "mappings" / "skill_icons.json"
+            self.mapping_path = Path(__file__).resolve().parents[2] / "assets" / "mappings" / "skill_icons.json"
         else:
             self.mapping_path = Path(mapping_path).resolve()
 

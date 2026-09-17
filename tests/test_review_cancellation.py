@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class CancellationTests(IsolatedAsyncioTestCase):

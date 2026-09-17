@@ -11,12 +11,12 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 
-from astrbot_plugin_nikke.announcement_delivery import AnnouncementDelivery
-from astrbot_plugin_nikke.announcement_models import AnnouncementRecord
-from astrbot_plugin_nikke.announcement_sources import InformationFeedsSource
-from astrbot_plugin_nikke.announcement_service import AnnouncementService
+from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
+from astrbot_plugin_nikke.features.announcement.sources import InformationFeedsSource
+from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 NOW = datetime(2026, 9, 6, tzinfo=timezone.utc)
@@ -96,8 +96,8 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
 
     async def test_deep_fetch_primary_does_not_use_legacy_fallback(self) -> None:
         with patch(
-            "astrbot_plugin_nikke.announcement_sources.InformationFeedsSource.fetch",
-            new=AsyncMock(side_effect=RuntimeError("主源不可用")),
+            "astrbot_plugin_nikke.features.announcement.sources.InformationFeedsSource.fetch",
+            new=AsyncMock(side_effect=RuntimeError("主源故障")),
         ), patch.object(
             AnnouncementService,
             "fetch_official",
@@ -174,7 +174,7 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
             kwargs["transport"] = httpx.MockTransport(handler)
             return real_client(*args, **kwargs)
 
-        with patch("astrbot_plugin_nikke.announcement_service.httpx.AsyncClient", client_factory):
+        with patch("astrbot_plugin_nikke.features.announcement.service.httpx.AsyncClient", client_factory):
             records = await AnnouncementService.fetch_official()
         self.assertEqual([item.content_id for item in records], ["a", "b"])
         self.assertEqual([item.locale for item in records], ["und", "und"])

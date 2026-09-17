@@ -8,8 +8,8 @@ from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 
-from ...asset_manager import AssetManager
-from ...campaign_history_models import ClearLineupStatus, StageClearRecord
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.campaign.models import ClearLineupStatus, StageClearRecord
 from ..primitives import CardRenderer
 from ..theme import UI_COLORS
 

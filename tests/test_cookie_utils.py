@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import unittest
 
-from astrbot_plugin_nikke.cookie_utils import parse_cookie
+from astrbot_plugin_nikke.core.cookie_utils import parse_cookie
 
 
 class CookieUtilsTests(unittest.TestCase):

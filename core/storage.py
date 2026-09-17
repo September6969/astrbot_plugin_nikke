@@ -18,7 +18,7 @@ from typing import Any, Iterator
 
 from cryptography.fernet import Fernet, InvalidToken
 
-from .cookie_utils import parse_cookie
+from astrbot_plugin_nikke.core.cookie_utils import parse_cookie
 
 
 SCHEMA_NAME = "nikke"

@@ -8,8 +8,8 @@ import time
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 import httpx
-from astrbot_plugin_nikke.voice_resource_provider import VoiceResourceProvider
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.voice.provider import VoiceResourceProvider
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 
 class VoiceResourceTests(IsolatedAsyncioTestCase):

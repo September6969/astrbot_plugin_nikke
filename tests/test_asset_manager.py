@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 
 class AssetManagerTests(unittest.TestCase):

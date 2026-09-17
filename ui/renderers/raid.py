@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 
 from ..primitives import CardRenderer
 from ..theme import UI_COLORS
-from ...union_raid_models import BossStatus, RaidResponseCoverage, UnionRaidOverviewData
+from astrbot_plugin_nikke.features.raid.models import BossStatus, RaidResponseCoverage, UnionRaidOverviewData
 
 RAID_THEME = {
     **UI_COLORS,

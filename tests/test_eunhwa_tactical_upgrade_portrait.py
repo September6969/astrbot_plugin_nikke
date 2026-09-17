@@ -9,10 +9,10 @@ from pathlib import Path
 
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.card_models import CharacterCardData
-from astrbot_plugin_nikke.character_master_resolver import CharacterMasterResolver
-from astrbot_plugin_nikke.nikke_db_provider import NikkeDbProvider
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.character.models import CharacterCardData
+from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 
 
 ASSETS_DIR = Path(__file__).resolve().parents[1] / "assets"

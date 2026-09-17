@@ -9,8 +9,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT.parent))
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.t2i_renderer import T2IRenderer
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 
 

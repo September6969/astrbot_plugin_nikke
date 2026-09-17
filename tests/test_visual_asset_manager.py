@@ -5,8 +5,8 @@ from pathlib import Path
 
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager, AssetResult
-from astrbot_plugin_nikke.card_models import SpineBundle
+from astrbot_plugin_nikke.core.asset_manager import AssetManager, AssetResult
+from astrbot_plugin_nikke.features.character.models import SpineBundle
 
 
 class VisualAssetManagerTests(unittest.TestCase):

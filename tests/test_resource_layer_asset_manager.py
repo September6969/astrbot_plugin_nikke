@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 from PIL import Image
 
-from astrbot_plugin_nikke.asset_manager import AssetManager, AssetResult
+from astrbot_plugin_nikke.core.asset_manager import AssetManager, AssetResult
 
 
 class ResourceLayerAssetManagerTests(unittest.TestCase):

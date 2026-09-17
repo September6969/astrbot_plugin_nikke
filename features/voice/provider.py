@@ -8,7 +8,7 @@ import time
 import uuid
 from pathlib import Path
 import httpx
-from ...asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 
 class VoiceResourceProvider:

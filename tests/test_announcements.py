@@ -3,8 +3,8 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 
-from astrbot_plugin_nikke.announcement_models import AnnouncementRecord
-from astrbot_plugin_nikke.announcement_service import AnnouncementService, DeadlineParser, GameDeadline
+from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
+from astrbot_plugin_nikke.features.announcement.service import AnnouncementService, DeadlineParser, GameDeadline
 
 
 class AnnouncementModelsTests(unittest.TestCase):

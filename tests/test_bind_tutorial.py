@@ -12,10 +12,10 @@ from unittest.mock import AsyncMock
 
 from aiohttp.test_utils import TestClient, TestServer
 
-from astrbot_plugin_nikke.bind_template import render_bind_page
-from astrbot_plugin_nikke.client import BlaBlaClient, ValidationResult
-from astrbot_plugin_nikke.storage import NikkeStore
-from astrbot_plugin_nikke.web_service import BindingWebService
+from astrbot_plugin_nikke.integrations.web.bind_template import render_bind_page
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, ValidationResult
+from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.integrations.web.service import BindingWebService
 
 
 class TestBindTutorialPage(IsolatedAsyncioTestCase):

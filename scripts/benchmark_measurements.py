@@ -20,10 +20,10 @@ for p in (PROJECTS_DIR, REPO_ROOT, CURRENT_DIR):
         sys.path.insert(0, str(p))
 
 from cryptography.fernet import Fernet
-from astrbot_plugin_nikke.character_identity import CharacterDirectoryResolver
-from astrbot_plugin_nikke.storage import NikkeStore
-from astrbot_plugin_nikke.voice_audio import VoiceAudioCache
-from astrbot_plugin_nikke.voice_resource_provider import VoiceResourceProvider
+from astrbot_plugin_nikke.features.character.identity import CharacterDirectoryResolver
+from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.features.voice.audio import VoiceAudioCache
+from astrbot_plugin_nikke.features.voice.provider import VoiceResourceProvider
 
 
 def percentile(data, p):

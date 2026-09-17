@@ -9,7 +9,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch
 
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.runtime_health import RuntimeHealth, collect_runtime_health, format_runtime_health
+from astrbot_plugin_nikke.core.health import RuntimeHealth, collect_runtime_health, format_runtime_health
 
 
 class RuntimeHealthTests(IsolatedAsyncioTestCase):

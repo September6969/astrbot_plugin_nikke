@@ -14,7 +14,7 @@ from urllib.parse import urljoin, urlparse
 import httpx
 
 from .models import CalendarActivity
-from ...log_privacy import safe_exception_message
+from astrbot_plugin_nikke.core.privacy import safe_exception_message
 
 logger = logging.getLogger("nikke.calendar.sources")
 

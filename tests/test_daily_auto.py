@@ -7,8 +7,8 @@ from pathlib import Path
 from unittest.mock import AsyncMock
 
 from astrbot_plugin_nikke.main import NikkePlugin
-from astrbot_plugin_nikke.daily_models import DailyTaskResult, DailyTaskStatus
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.features.daily.models import DailyTaskResult, DailyTaskStatus
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class DailyAutoStoreTests(unittest.TestCase):

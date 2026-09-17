@@ -1,7 +1,7 @@
 """请求来自公开 union 前端，返回结构仍需线上只读验证。"""
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
-from astrbot_plugin_nikke.client import BlaBlaClient, BlaBlaError
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaError
 
 
 class SeasonTests(IsolatedAsyncioTestCase):

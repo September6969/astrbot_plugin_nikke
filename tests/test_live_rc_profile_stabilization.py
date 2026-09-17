@@ -4,9 +4,9 @@ from pathlib import Path
 
 from PIL import Image
 
-from astrbot_plugin_nikke.campaign_stage_resolver import CampaignStageResolver
-from astrbot_plugin_nikke.profile_builder import ProfileBuilder, parse_profile_created_at
-from astrbot_plugin_nikke.profile_card_renderer import ProfileCardRenderer
+from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
+from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder, parse_profile_created_at
+from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 
 
 class CampaignProfileReverseLookupTests(unittest.TestCase):

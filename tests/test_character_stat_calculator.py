@@ -1,6 +1,6 @@
 import unittest
 
-from astrbot_plugin_nikke.character_stat_calculator import (
+from astrbot_plugin_nikke.features.character.stat_calculator import (
     CharacterStatCalculator,
     CharacterStatTables,
 )

@@ -10,10 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT.parent))
 
-from astrbot_plugin_nikke.asset_manager import AssetManager
-from astrbot_plugin_nikke.campaign_history_builder import CampaignHistoryBuilder
-from astrbot_plugin_nikke.campaign_stage_resolver import CampaignStageResolver
-from astrbot_plugin_nikke.t2i_renderer import T2IRenderer
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.features.campaign.builder import CampaignHistoryBuilder
+from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
+from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 
 
 def fixture_record(name):

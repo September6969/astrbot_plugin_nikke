@@ -9,8 +9,8 @@ from pathlib import Path
 
 from PIL import Image
 
-from astrbot_plugin_nikke.tarot_models import DrawnTarotCard
-from astrbot_plugin_nikke.tarot_service import TarotDeckRepository, TarotService
+from astrbot_plugin_nikke.features.tarot.models import DrawnTarotCard
+from astrbot_plugin_nikke.features.tarot.service import TarotDeckRepository, TarotService
 
 
 SOURCE_DATA = Path(__file__).resolve().parents[1] / "assets" / "tarot" / "tarot_cards.json"

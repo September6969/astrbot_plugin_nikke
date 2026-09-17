@@ -7,9 +7,9 @@ import unittest
 from pathlib import Path
 from PIL import Image
 
-from astrbot_plugin_nikke.union_raid_models import BossStatus, RaidBossData, UnionRaidOverviewData
-from astrbot_plugin_nikke.union_raid_builder import UnionRaidBuilder
-from astrbot_plugin_nikke.union_raid_renderer import UnionRaidRenderer
+from astrbot_plugin_nikke.features.raid.models import BossStatus, RaidBossData, UnionRaidOverviewData
+from astrbot_plugin_nikke.features.raid.builder import UnionRaidBuilder
+from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
 
 
 class UnionRaidBuilderTests(unittest.TestCase):
@@ -371,7 +371,7 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
 if __name__ == "__main__":
     unittest.main()
 
-from astrbot_plugin_nikke.client import BlaBlaClient, MY_GUILD_INFO, UNION_RAID_LEVEL_INFO
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, MY_GUILD_INFO, UNION_RAID_LEVEL_INFO
 from unittest.mock import AsyncMock
 
 class UnionRaidClientTests(unittest.IsolatedAsyncioTestCase):

@@ -46,7 +46,7 @@ class BossAssetResolver:
             self.base_dir = Path(base_dir)
 
         if asset_dir is None:
-            self.asset_dir = Path("assets")
+            self.asset_dir = Path(__file__).resolve().parents[2] / "assets"
         else:
             self.asset_dir = Path(asset_dir)
 

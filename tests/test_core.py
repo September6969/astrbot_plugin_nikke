@@ -8,16 +8,16 @@ import time
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.client import (
+from astrbot_plugin_nikke.integrations.blablalink.client import (
     BlaBlaClient,
     BlaBlaError,
     CdkRedemptionResult,
     CookieExpired,
 )
-from astrbot_plugin_nikke.renderer import CardRenderer
-from astrbot_plugin_nikke.storage import NikkeStore
-from astrbot_plugin_nikke.web_service import BindingWebService
-from astrbot_plugin_nikke.web_service import public_error
+from astrbot_plugin_nikke.ui.primitives import CardRenderer
+from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.integrations.web.service import BindingWebService
+from astrbot_plugin_nikke.integrations.web.service import public_error
 
 
 VALID_COOKIE = "game_token=secret-token; game_uid=12345; game_openid=67890"
@@ -98,7 +98,7 @@ class BindingApiTests(unittest.IsolatedAsyncioTestCase):
 
             async def validate_cookie(self, cookie):
                 self.cookie = cookie
-                from astrbot_plugin_nikke.client import ValidationResult
+                from astrbot_plugin_nikke.integrations.blablalink.client import ValidationResult
                 return ValidationResult(True, "12345", "67890", "角色", "昵称", "3")
 
         with tempfile.TemporaryDirectory() as td:
@@ -287,7 +287,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([call[0] for call in client.calls], ["GET"])
 
     async def test_cdk_redeem_uses_official_endpoint_once(self):
-        from astrbot_plugin_nikke.client import CDK_REDEEM
+        from astrbot_plugin_nikke.integrations.blablalink.client import CDK_REDEEM
 
         client = CdkClient()
         result = await client.redeem_cdk(self._community_account(), "TESTCODE")
@@ -342,10 +342,10 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_cookie_expired_is_preserved(self):
         class ExpiredClient(BlaBlaClient):
             async def _post(self, path, cookie, payload):
-                from astrbot_plugin_nikke.client import CookieExpired
+                from astrbot_plugin_nikke.integrations.blablalink.client import CookieExpired
                 raise CookieExpired("expired", "401", path.rsplit("/", 1)[-1])
 
-        from astrbot_plugin_nikke.client import CookieExpired
+        from astrbot_plugin_nikke.integrations.blablalink.client import CookieExpired
         with self.assertRaises(CookieExpired):
             await ExpiredClient(5).validate_cookie(VALID_COOKIE)
 
@@ -356,7 +356,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
                 self.count = 0
 
             async def _post(self, path, cookie, payload):
-                from astrbot_plugin_nikke.client import PLAYER_INFO, PROFILE
+                from astrbot_plugin_nikke.integrations.blablalink.client import PLAYER_INFO, PROFILE
                 if path == PLAYER_INFO:
                     self.count += 1
                     if self.count < 3:
@@ -376,7 +376,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_two_accounts_keep_cookie_isolated(self):
         class IsolationClient(BlaBlaClient):
             async def _post(self, path, cookie, payload):
-                from astrbot_plugin_nikke.client import PLAYER_INFO, PROFILE
+                from astrbot_plugin_nikke.integrations.blablalink.client import PLAYER_INFO, PROFILE
                 uid = self.parse_cookie(cookie)["game_uid"]
                 if path == PLAYER_INFO:
                     await asyncio.sleep(0)
@@ -411,7 +411,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.nickname, "正式账号")
 
     async def test_validation_and_profile(self):
-        from astrbot_plugin_nikke.client import CHECK_LOGIN, PLAYER_INFO, PROFILE
+        from astrbot_plugin_nikke.integrations.blablalink.client import CHECK_LOGIN, PLAYER_INFO, PROFILE
 
         client = FakeClient(
             {
@@ -598,7 +598,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_profile_rows_with_campaign_resolver(self):
         from astrbot_plugin_nikke.main import NikkePlugin
-        from astrbot_plugin_nikke.campaign_stage_resolver import CampaignStageResolver
+        from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
 
         resolver = CampaignStageResolver({
             "NORMAL": {"46": {"46-40": 6046044}},

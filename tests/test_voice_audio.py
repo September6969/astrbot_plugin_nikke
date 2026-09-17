@@ -3,8 +3,8 @@ import json
 import tempfile
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
-from astrbot_plugin_nikke.voice_audio import VoiceAudioCache, VoicePreference, is_self_poke
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.features.voice.audio import VoiceAudioCache, VoicePreference, is_self_poke
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class VoiceAudioTests(IsolatedAsyncioTestCase):
@@ -84,7 +84,7 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
         from types import SimpleNamespace
         from unittest.mock import AsyncMock, Mock
         from astrbot_plugin_nikke.main import NikkePlugin
-        from astrbot_plugin_nikke.voice_mapping import VoiceMapping
+        from astrbot_plugin_nikke.features.voice.mapping import VoiceMapping
         with tempfile.TemporaryDirectory() as directory:
             plugin = NikkePlugin.__new__(NikkePlugin)
             plugin.store = NikkeStore(directory)

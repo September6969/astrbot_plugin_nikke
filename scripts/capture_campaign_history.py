@@ -55,19 +55,19 @@ def _load_current_worktree_package() -> None:
 
 _load_current_worktree_package()
 
-from astrbot_plugin_nikke.campaign_history_builder import CampaignHistoryBuilder
-from astrbot_plugin_nikke.campaign_history_models import ClearLineupStatus
-from astrbot_plugin_nikke.campaign_stage_resolver import CampaignStage, CampaignStageResolver
-from astrbot_plugin_nikke.character_master_resolver import CharacterMasterResolver
-from astrbot_plugin_nikke.client import (
+from astrbot_plugin_nikke.features.campaign.builder import CampaignHistoryBuilder
+from astrbot_plugin_nikke.features.campaign.models import ClearLineupStatus
+from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStage, CampaignStageResolver
+from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
+from astrbot_plugin_nikke.integrations.blablalink.client import (
     BlaBlaClient,
     BlaBlaError,
     BlaBlaNetworkError,
     BlaBlaTimeoutError,
     CookieExpired,
 )
-from astrbot_plugin_nikke.costume_registry import CostumeRegistry
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 NORMAL_SNAPSHOT = "campaign_capture_normal.jsonl"

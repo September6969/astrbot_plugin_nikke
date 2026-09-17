@@ -44,10 +44,10 @@ from ..ui.renderers import (
     ProfileCardRenderer,
     UnionRaidRenderer,
 )
-from .asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from .feedback import DelayedFeedbackManager
 from .privacy import safe_exception_message
-from .storage import NikkeStore
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 logger = logging.getLogger("astrbot_plugin_nikke")
 

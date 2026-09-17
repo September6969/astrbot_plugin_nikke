@@ -16,9 +16,9 @@ from pathlib import Path
 from typing import Any
 import json
 
-from .canonical_models import CanonicalEvent
-from .fetch_client import FetchClient
-from .log_privacy import safe_exception_message
+from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent
+from ...integrations.blablalink.fetch_client import FetchClient
+from ...core.privacy import safe_exception_message
 
 logger = logging.getLogger("nikke.schedule.adapters")
 

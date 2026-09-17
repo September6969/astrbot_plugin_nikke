@@ -13,7 +13,7 @@ from typing import Any, Callable, Mapping
 
 import httpx
 
-from ...asset_manager import AssetManager
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from .stat_calculator import CharacterStatTables, StatCalculationError
 
 

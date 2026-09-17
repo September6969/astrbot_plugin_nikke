@@ -11,8 +11,8 @@ from typing import Any
 
 import httpx
 
-from astrbot_plugin_nikke.client import API_BASE
-from astrbot_plugin_nikke.storage import NikkeStore
+from astrbot_plugin_nikke.integrations.blablalink.client import API_BASE
+from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.scripts.raid_evidence import semantic_sanitize
 
 

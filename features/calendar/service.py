@@ -26,7 +26,7 @@ from typing import Any
 from .models import CalendarActivity, _aware_utc
 from .sources import GameKeeNikkeScheduleSource
 from .visuals import CalendarVisualCache
-from ...log_privacy import safe_exception_message
+from astrbot_plugin_nikke.core.privacy import safe_exception_message
 
 logger = logging.getLogger("nikke.calendar.service")
 CST = timezone(timedelta(hours=8))

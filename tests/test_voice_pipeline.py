@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
 
-from astrbot_plugin_nikke.voice_pipeline import VoicePipeline
+from astrbot_plugin_nikke.features.voice.pipeline import VoicePipeline
 
 
 class VoicePipelineTests(IsolatedAsyncioTestCase):

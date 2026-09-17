@@ -23,10 +23,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from spine_runtime import SpineBundle, SpineSkeletonParser
-from spine_renderer import SpineRenderer
-from spine_semantic_mapper import SpineSemanticMapper
-from spine_placement import compute_placement_meta
+from astrbot_plugin_nikke.integrations.spine.runtime import SpineBundle, SpineSkeletonParser
+from astrbot_plugin_nikke.integrations.spine.renderer import SpineRenderer
+from astrbot_plugin_nikke.integrations.spine.semantic_mapper import SpineSemanticMapper
+from astrbot_plugin_nikke.integrations.spine.placement import compute_placement_meta
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s")
 logger = logging.getLogger("benchmark_spine_placement")

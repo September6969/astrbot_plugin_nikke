@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from PIL import Image
 
-from astrbot_plugin_nikke.local_spine_resolver import (
+from astrbot_plugin_nikke.integrations.spine.local_resolver import (
     LocalSpineBundleResolver,
     LocalSpineResolveError,
 )

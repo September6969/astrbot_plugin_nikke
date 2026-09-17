@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 import httpx
-from astrbot_plugin_nikke.announcement_sources import InformationFeedsSource
+from astrbot_plugin_nikke.features.announcement.sources import InformationFeedsSource
 
 
 class InformationFeedsTests(IsolatedAsyncioTestCase):

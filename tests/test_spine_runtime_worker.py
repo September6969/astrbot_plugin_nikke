@@ -10,9 +10,9 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from astrbot_plugin_nikke import spine_runtime_worker as worker_module
-from astrbot_plugin_nikke.spine_prerenderer import SpineBundle, SpineRenderError
-from astrbot_plugin_nikke.spine_runtime_worker import SpineWorkerConfig, SpineWorkerRuntime
+from astrbot_plugin_nikke.integrations.spine import worker_caller as worker_module
+from astrbot_plugin_nikke.integrations.spine.prerenderer import SpineBundle, SpineRenderError
+from astrbot_plugin_nikke.integrations.spine.worker_caller import SpineWorkerConfig, SpineWorkerRuntime
 
 
 class SpineWorkerRuntimeTests(TestCase):

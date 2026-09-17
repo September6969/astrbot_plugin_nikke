@@ -6,8 +6,8 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from astrbot_plugin_nikke.spine_runtime import ParsedBone, ParsedSkeleton
-from astrbot_plugin_nikke.spine_semantic_mapper import SpineSemanticMapper, SemanticBoneMatch
+from astrbot_plugin_nikke.integrations.spine.runtime import ParsedBone, ParsedSkeleton
+from astrbot_plugin_nikke.integrations.spine.semantic_mapper import SpineSemanticMapper, SemanticBoneMatch
 
 
 def make_mock_skeleton() -> ParsedSkeleton:

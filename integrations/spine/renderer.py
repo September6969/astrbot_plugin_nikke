@@ -26,7 +26,7 @@ try:
         SpineSkeletonParser,
     )
 except ImportError:
-    from spine_runtime import (
+    from astrbot_plugin_nikke.integrations.spine.runtime import (
         ParsedSkeleton,
         RenderedCharacter,
         SpineBundle,
@@ -102,7 +102,7 @@ class SpineRenderer:
                 try:
                     from .prerenderer import SpineBundle as LegacyBundle
                 except ImportError:
-                    from spine_prerenderer import SpineBundle as LegacyBundle
+                    from astrbot_plugin_nikke.integrations.spine.prerenderer import SpineBundle as LegacyBundle
 
                 legacy_b = LegacyBundle(bundle.skeleton, bundle.atlas, bundle.textures)
                 image = worker.render(legacy_b, animation=anim_name, skin=skin)

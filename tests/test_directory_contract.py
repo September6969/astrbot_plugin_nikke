@@ -2,7 +2,7 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from astrbot_plugin_nikke.client import BlaBlaClient, NIKKE_DIRECTORY_EN, NIKKE_DIRECTORY_ZH
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, NIKKE_DIRECTORY_EN, NIKKE_DIRECTORY_ZH
 
 
 class DirectoryContractTests(unittest.TestCase):

@@ -5,7 +5,7 @@ import threading
 from pathlib import Path
 from unittest import TestCase
 
-from astrbot_plugin_nikke.spine_prerenderer import (
+from astrbot_plugin_nikke.integrations.spine.prerenderer import (
     SPINE_VERSION_UNKNOWN,
     SpineJob,
     SpinePreRenderer,

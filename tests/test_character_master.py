@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.character_master_resolver import CharacterMasterResolver, ResolvedCharacter
+from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver, ResolvedCharacter
 
 
 class CharacterMasterTests(unittest.TestCase):

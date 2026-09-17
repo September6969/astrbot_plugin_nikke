@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from astrbot_plugin_nikke.spine_runtime_config import build_spine_renderer
+from astrbot_plugin_nikke.integrations.spine.config import build_spine_renderer
 
 
 class SpineRuntimeConfigTests(TestCase):

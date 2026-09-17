@@ -33,8 +33,8 @@ if "astrbot_plugin_nikke" not in sys.modules:
     pkg.__path__ = [str(repo_root)]
     sys.modules["astrbot_plugin_nikke"] = pkg
 
-from astrbot_plugin_nikke.nikke_db_provider import NikkeDbProvider
-from astrbot_plugin_nikke.card_builder import resolve_equipped_costume
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
+from astrbot_plugin_nikke.features.character.builder import resolve_equipped_costume
 
 
 logger = logging.getLogger("spine_audit")

@@ -90,7 +90,7 @@ def cache_identity(data):
 
 
 def art_style(data, portrait):
-    from ...face_anchor import framing
+    from astrbot_plugin_nikke.features.character.face_anchor import framing
     return framing(data, portrait)["style"]
 
 
