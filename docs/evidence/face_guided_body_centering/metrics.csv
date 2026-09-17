@@ -1,0 +1,9 @@
+﻿render_id,character_name,character_name_en,anchor_kind,portrait_width,portrait_height,scale,face_point_portrait,face_card_before,face_card_after,confidence,bootstrap_reliable,terminated_early,shift_x,shift_y,reason,over_40px,face_safe
+c010,拉毗：小红帽,Rapi,eye_attachment,425,891,3.0901,"[236.87043345443783, 126.89138063277824]","[860, 610]","[852.26, 610.0]",0.9806,True,False,-7.74,-0.0,ok,False,True
+c010_02,拉毗,Rapi,eye_attachment,426,892,3.4394,"[237.87043345443783, 127.89138063277824]","[760, 550]","[824.26, 550.0]",0.9793,True,False,64.26,-0.0,ok,True,True
+c010_03,拉毗,Rapi,eye_attachment,467,892,3.3278,"[245.09322714154428, 106.87385137424496]","[760, 550]","[740.29, 550.0]",0.9809,True,False,-19.71,-0.0,ok,False,True
+c017,爱丽丝,Anis: Star,eye_attachment,348,891,3.888,"[185.22893383212352, 135.41948886800128]","[760, 550]","[781.8, 550.0]",0.9716,True,False,21.8,-0.0,ok,False,True
+c234,迪塞尔,Dorothy: Serendipity,eye_attachment,602,891,4.0102,"[284.87966190429086, 196.35972095722434]","[760, 550]","[687.29, 550.0]",0.9632,True,False,-72.71,-0.0,ok,True,True
+c330,桃乐丝,Crown,eye_attachment,794,885,3.8161,"[448.01620447231835, 129.69669353779705]","[760, 550]","[687.36, 550.0]",0.9792,True,False,-72.64,-0.0,ok,True,True
+c352,布兰儿,Helm,eye_attachment,657,892,4.4606,"[329.8477022167955, 117.8550639570251]","[760, 550]","[765.39, 550.0]",0.9241,True,False,5.39,-0.0,ok,False,True
+c471,白雪公主：纯真年代,Snow White: Heavy Arms,eye_attachment,2474,3548,1.2949,"[1492.174684041518, 1187.070841410796]","[742, 540]","[828.12, 540.0]",0.9527,True,False,86.12,-0.0,ok,True,True

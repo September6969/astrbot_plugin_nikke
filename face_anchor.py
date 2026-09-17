@@ -3,7 +3,17 @@ from functools import lru_cache
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
+
+
+_TRUTHY = {"1", "true", "yes", "on", "preview"}
+
+
+def body_centering_requested(explicit):
+    if explicit is not None:
+        return bool(explicit)
+    return os.getenv("NIKKE_FACE_GUIDED_CENTERING", "").strip().lower() in _TRUTHY
 
 
 @lru_cache(maxsize=1)
@@ -15,7 +25,7 @@ def metadata():
         return {}
 
 
-def framing(data, portrait):
+def framing(data, portrait, *, body_centering=None):
     from PIL import Image
     if not isinstance(portrait, Image.Image):
         return {"style": "", "source": "unavailable"}
@@ -49,8 +59,36 @@ def framing(data, portrait):
     scale = min(scale, 7200 / max(portrait.size))
     width, height = portrait.width * scale, portrait.height * scale
     left, top = target[0] - point[0] * scale, target[1] - point[1] * scale
-    return {"style": f"width:{width:.3f}px;height:{height:.3f}px;left:{left:.3f}px;top:{top:.3f}px;object-fit:contain",
-            "source": row["anchor_kind"], "render_id": key}
+
+    diagnostics = None
+    if body_centering_requested(body_centering):
+        from .face_guided_centering import (
+            FrameTransform,
+            center_after_face_anchor,
+        )
+        base = FrameTransform(scale=scale, left=left, top=top)
+        result = center_after_face_anchor(portrait, face_point=point, base=base)
+        left = result.transform.left
+        top = result.transform.top
+        analysis = result.analysis
+        diagnostics = {
+            "mode": "face_guided_v5",
+            "reason": result.reason,
+            "confidence": None if analysis is None else analysis.confidence,
+            "shift_x": result.applied_shift[0],
+            "shift_y": result.applied_shift[1],
+            "bootstrap_reliable": None if analysis is None else analysis.bootstrap_reliable,
+            "terminated_early": None if analysis is None else analysis.terminated_early,
+        }
+
+    ret = {
+        "style": f"width:{width:.3f}px;height:{height:.3f}px;left:{left:.3f}px;top:{top:.3f}px;object-fit:contain",
+        "source": row["anchor_kind"],
+        "render_id": key,
+    }
+    if diagnostics is not None:
+        ret["body_centering"] = diagnostics
+    return ret
 
 
 @lru_cache(maxsize=1)

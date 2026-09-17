@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "samples": [
+    {
+      "render_id": "c010",
+      "character_name": "拉毗：小红帽",
+      "character_name_en": "Rapi",
+      "description": "Rapi: Red Hood (Golden sample)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 425,
+      "portrait_height": 891,
+      "scale": 3.0901,
+      "face_point_portrait": [
+        236.87043345443783,
+        126.89138063277824
+      ],
+      "face_card_before": [
+        860,
+        610
+      ],
+      "face_card_after": [
+        852.26,
+        610.0
+      ],
+      "confidence": 0.9806,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": -7.74,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false,
+      "face_safe": true
+    },
+    {
+      "render_id": "c010_02",
+      "character_name": "拉毗",
+      "character_name_en": "Rapi",
+      "description": "Rapi: White Promise (Alternate costume)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 426,
+      "portrait_height": 892,
+      "scale": 3.4394,
+      "face_point_portrait": [
+        237.87043345443783,
+        127.89138063277824
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        824.26,
+        550.0
+      ],
+      "confidence": 0.9793,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": 64.26,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true,
+      "face_safe": true
+    },
+    {
+      "render_id": "c010_03",
+      "character_name": "拉毗",
+      "character_name_en": "Rapi",
+      "description": "Rapi: Classic Vacation (Summer costume)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 467,
+      "portrait_height": 892,
+      "scale": 3.3278,
+      "face_point_portrait": [
+        245.09322714154428,
+        106.87385137424496
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        740.29,
+        550.0
+      ],
+      "confidence": 0.9809,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": -19.71,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false,
+      "face_safe": true
+    },
+    {
+      "render_id": "c017",
+      "character_name": "爱丽丝",
+      "character_name_en": "Anis: Star",
+      "description": "Alice (Mandatory sample)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 348,
+      "portrait_height": 891,
+      "scale": 3.888,
+      "face_point_portrait": [
+        185.22893383212352,
+        135.41948886800128
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        781.8,
+        550.0
+      ],
+      "confidence": 0.9716,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": 21.8,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false,
+      "face_safe": true
+    },
+    {
+      "render_id": "c234",
+      "character_name": "迪塞尔",
+      "character_name_en": "Dorothy: Serendipity",
+      "description": "Diesel (Long hair / uniform / asymmetric)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 602,
+      "portrait_height": 891,
+      "scale": 4.0102,
+      "face_point_portrait": [
+        284.87966190429086,
+        196.35972095722434
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        687.29,
+        550.0
+      ],
+      "confidence": 0.9632,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": -72.71,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true,
+      "face_safe": true
+    },
+    {
+      "render_id": "c330",
+      "character_name": "桃乐丝",
+      "character_name_en": "Crown",
+      "description": "Dorothy (Large dress / hair / wings silhouette)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 794,
+      "portrait_height": 885,
+      "scale": 3.8161,
+      "face_point_portrait": [
+        448.01620447231835,
+        129.69669353779705
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        687.36,
+        550.0
+      ],
+      "confidence": 0.9792,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": -72.64,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true,
+      "face_safe": true
+    },
+    {
+      "render_id": "c352",
+      "character_name": "布兰儿",
+      "character_name_en": "Helm",
+      "description": "Blanc (Compact silhouette)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 657,
+      "portrait_height": 892,
+      "scale": 4.4606,
+      "face_point_portrait": [
+        329.8477022167955,
+        117.8550639570251
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        765.39,
+        550.0
+      ],
+      "confidence": 0.9241,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": 5.39,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false,
+      "face_safe": true
+    },
+    {
+      "render_id": "c471",
+      "character_name": "白雪公主：纯真年代",
+      "character_name_en": "Snow White: Heavy Arms",
+      "description": "Snow White: Innocent Days (Huge anti-ship rifle)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2474,
+      "portrait_height": 3548,
+      "scale": 1.2949,
+      "face_point_portrait": [
+        1492.174684041518,
+        1187.070841410796
+      ],
+      "face_card_before": [
+        742,
+        540
+      ],
+      "face_card_after": [
+        828.12,
+        540.0
+      ],
+      "confidence": 0.9527,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": 86.12,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true,
+      "face_safe": true
+    }
+  ]
+}
