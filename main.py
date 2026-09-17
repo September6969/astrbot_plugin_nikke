@@ -23,6 +23,8 @@ from astrbot.api.message_components import Image, Plain
 from astrbot.api.star import Context, Star
 
 from ._version import PLUGIN_VERSION
+from .core.container import create_container
+from .features.daily.runner import DailyRunner
 from .announcement_service import AnnouncementService
 from .announcement_delivery import AnnouncementDelivery
 from .calendar_service import CalendarService
@@ -87,103 +89,45 @@ class NikkePlugin(Star):
         self.config = normalize_runtime_config(config)
         self.plugin_dir = Path(__file__).resolve().parent
         self.data_dir = Path("data") / "nikke"
-        self.data_dir.mkdir(parents=True, exist_ok=True)
-        self.extension_zip = self.data_dir / "nikke-bind-extension.zip"
-        self.store = NikkeStore(self.data_dir)
-        self.character_stat_resources = CharacterStatResourceLoader(
-            self.data_dir / "cache" / "character-stats"
-        )
-        self.client = BlaBlaClient(
-            int(self.config.get("request_timeout", 20)),
-            lambda message: logger.info(f"[NIKKE诊断] {message}"),
-        )
-        self.renderer = CardRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
-        self.character_builder = CharacterCardBuilder(
-            unknown_ol_inventory_path=self.data_dir / "ol_unknown_inventory.json",
-        )
-        user_aliases = (self.config or {}).get("custom_character_aliases")
-        try:
-            self.character_identity = CharacterDirectoryResolver(
-                self.plugin_dir / "assets" / "character_aliases.json",
-                user_aliases=user_aliases,
-            )
-        except ValueError as err:
-            logger.error("[NIKKE] 用户自定义别名配置错误，已忽略自定义别名：%s", err)
-            self.character_identity = CharacterDirectoryResolver(
-                self.plugin_dir / "assets" / "character_aliases.json",
-            )
-        spine_budget = (self.config or {}).get("spine_budget_seconds", 20.0)
-        self.asset_manager = AssetManager(
-            self.data_dir / "cache",
-            self.plugin_dir / "assets",
-            remote=True,
-            spine_renderer=build_spine_renderer(self.data_dir / "cache", self.config),
-            spine_budget_seconds=float(spine_budget) if isinstance(spine_budget, (int, float)) and spine_budget > 0 else 20.0,
-            spine_manifest_path=self.data_dir / "spine-manifest.json",
-            spine_rendered_dir=self.data_dir / "spine-rendered",
-        )
-        self.character_renderer = CharacterCardRenderer(
-            self.data_dir / "cards",
-            self.plugin_dir / "fonts",
-            self.asset_manager,
-        )
-        self.campaign_resolver = CampaignStageResolver.from_file(self.plugin_dir / "assets" / "campaign_stages.json")
-        self.profile_builder = ProfileBuilder(campaign_resolver=self.campaign_resolver)
-        self.profile_renderer = ProfileCardRenderer(
-            self.data_dir / "cards",
-            self.plugin_dir / "fonts",
-            currency_icon_provider=self.asset_manager.get_currency_icon,
-        )
-        self.raid_builder = UnionRaidBuilder()
-        self.raid_renderer = UnionRaidRenderer(self.data_dir / "cards", self.plugin_dir / "fonts")
-        self.campaign_builder = CampaignHistoryBuilder()
-        self.campaign_renderer = self._build_campaign_renderer()
-        self.cdk_service = CdkService(self.client)
-        self.feedback_manager = DelayedFeedbackManager(1.5)
-        self.voice_mapping = VoiceMapRegistry(self.plugin_dir / "assets" / "voice_poke_map.json")
-        for error in self.voice_mapping.errors:
-            logger.warning("[NIKKE] 语音映射清单校验失败：%s", error)
-        try:
-            self.voice_character_resolver = VoiceCharacterResolver(
-                self.plugin_dir / "assets",
-                user_aliases=user_aliases,
-            )
-        except ValueError as err:
-            logger.error("[NIKKE] 语音用户自定义别名配置错误，已忽略自定义别名：%s", err)
-            self.voice_character_resolver = VoiceCharacterResolver(
-                self.plugin_dir / "assets",
-            )
-        self.costume_registry = CostumeRegistry(self.plugin_dir / "assets")
-        self._voice_audio = VoiceAudioCache(self.plugin_dir / "assets" / "voices", self.data_dir / "voice_cache")
-        self.voice_provider = VoiceResourceProvider(self.data_dir / "voice_cache")
-        ffmpeg = shutil.which("ffmpeg")
-        ffprobe = shutil.which("ffprobe")
-        self.voice_encoder = VoiceEncoder(self.data_dir / "voice_cache", ffmpeg, ffprobe) if ffmpeg and ffprobe else None
-        self.voice_pipeline = VoicePipeline(self.voice_provider, self.voice_encoder) if self.voice_encoder else None
-        self.announcements = AnnouncementService(self.data_dir / "announcements")
-        self.announcement_delivery = AnnouncementDelivery(self.store)
-        self.calendar = CalendarService(self.data_dir / "calendar", announcement_service=self.announcements)
-        try:
-            self.tarot = TarotService(
-                self.plugin_dir,
-                self.data_dir / "tarot",
-                deck_mode="auto",
-                rotate_reversed=True,
-            )
-        except (OSError, ValueError, TarotDataError) as exc:
-            logger.warning("[NIKKE] 塔罗服务初始化失败：%s", safe_exception_message(exc))
-            self.tarot = None
-        self.tower_registry: TowerRegistry | None = None
+        self.container = create_container(self.plugin_dir, self.data_dir, self.config)
+
+        # 映射容器属性到 self，保留 100% 既有公开调用与测试字段契约
+        self.extension_zip = self.container.extension_zip
+        self.store = self.container.store
+        self.character_stat_resources = self.container.character_stat_resources
+        self.client = self.container.client
+        self.renderer = self.container.renderer
+        self.character_builder = self.container.character_builder
+        self.character_identity = self.container.character_identity
+        self.asset_manager = self.container.asset_manager
+        self.character_renderer = self.container.character_renderer
+        self.campaign_resolver = self.container.campaign_resolver
+        self.profile_builder = self.container.profile_builder
+        self.profile_renderer = self.container.profile_renderer
+        self.raid_builder = self.container.raid_builder
+        self.raid_renderer = self.container.raid_renderer
+        self.campaign_builder = self.container.campaign_builder
+        self.campaign_renderer = self.container.campaign_renderer
+        self.cdk_service = self.container.cdk_service
+        self.feedback_manager = self.container.feedback_manager
+        self.voice_mapping = self.container.voice_mapping
+        self.voice_character_resolver = self.container.voice_character_resolver
+        self.costume_registry = self.container.costume_registry
+        self._voice_audio = self.container.voice_audio
+        self.voice_provider = self.container.voice_provider
+        self.voice_encoder = self.container.voice_encoder
+        self.voice_pipeline = self.container.voice_pipeline
+        self.announcements = self.container.announcements
+        self.announcement_delivery = self.container.announcement_delivery
+        self.calendar = self.container.calendar
+        self.tarot = self.container.tarot
+        self.tower_registry = self.container.tower_registry
+        self.daily_runner = self.container.daily_runner
+        self.web = self.container.web
+
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
         ).rstrip("/")
-        self.web = BindingWebService(
-            self.store,
-            self.client,
-            self.extension_zip,
-            str(self.config.get("binding_api_key", "")),
-            public_base_url=self.public_base_url,
-        )
         self.web_host = str(self.config.get("web_host", "0.0.0.0"))
         self.web_port = int(self.config.get("web_port", 6210))
         self._directory: list[dict] = []
@@ -1376,213 +1320,50 @@ class NikkePlugin(Star):
     @staticmethod
     def _daily_error_result(account_name: str, prefix: str, exc: Exception) -> DailyTaskResult:
         """把异常映射到保守状态，避免所有异常都显示为泛化失败。"""
-        message = str(exc)
-        code = str(getattr(exc, "code", ""))
-        if code in {"212000", "429"} or "请求过频" in message or "限流" in message:
-            return DailyTaskResult(account_name, DailyTaskStatus.RATE_LIMITED, f"{prefix}请求受到频控，请稍后再试")
-        return DailyTaskResult(account_name, DailyTaskStatus.FAILED, f"{prefix}失败：{type(exc).__name__}")
+        return DailyRunner.daily_error_result(account_name, prefix, exc)
+
+    @property
+    def daily_runner(self) -> DailyRunner:
+        runner = getattr(self, "_daily_runner", None)
+        if runner is None:
+            runner = DailyRunner(
+                client=getattr(self, "client", None),
+                store=getattr(self, "store", None),
+                config=getattr(self, "config", {}),
+            )
+            self._daily_runner = runner
+        else:
+            if hasattr(self, "client"):
+                runner.client = self.client
+            if hasattr(self, "store"):
+                runner.store = self.store
+            if hasattr(self, "config"):
+                runner.config = self.config
+        return runner
+
+    @daily_runner.setter
+    def daily_runner(self, runner: DailyRunner) -> None:
+        self._daily_runner = runner
 
     async def _read_only_daily_recovery(self, account: dict, account_name: str) -> DailyTaskResult:
         """恢复未决任务时只读核验，绝不重放签到写操作。"""
-        await self.client.get_profile(account)
-        status = await self.client.get_daily_signin(account)
-        if status.get("completed"):
-            return DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "登录有效；今日已经签到（恢复核验）")
-        return DailyTaskResult(
-            account_name,
-            DailyTaskStatus.UNKNOWN_AFTER_ACTION,
-            "登录有效；签到结果未确认，未自动重发",
-        )
+        return await self.daily_runner.read_only_daily_recovery(account, account_name)
 
     @staticmethod
     def _daily_identity(account: dict) -> str:
         """构造不依赖 QQ 的稳定游戏账号作用域。"""
-        game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
-        area_id = str(account.get("area_id") or "").strip()
-        platform = str(account.get("platform") or "global").strip().casefold()
-        if not game_uid or not area_id or not platform:
-            return ""
-        return f"{platform}:{area_id}:{game_uid}"
+        return DailyRunner.daily_identity(account)
 
     @classmethod
     def _daily_run_key(cls, day: str, account: dict, action: str) -> str:
-        identity = cls._daily_identity(account)
-        digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
-        return f"{day}:game:{digest}:{action}"
+        return DailyRunner.daily_run_key(day, account, action)
 
     def _legacy_daily_guard(self, day: str, qq_id: str, action: str, account_name: str) -> DailyTaskResult | None:
         """发现旧 QQ 作用域记录时显式阻断，不把它静默当成新账号结果。"""
-        legacy_key = f"{day}:{qq_id}:{action}"
-        legacy = self.store.get_run(legacy_key)
-        if not legacy:
-            return None
-        status = str(legacy.get("status", ""))
-        return DailyTaskResult(
-            account_name,
-            DailyTaskStatus.UNKNOWN_AFTER_ACTION if status in {"running", "unknown"} else DailyTaskStatus.UNAVAILABLE,
-            "发现旧版 QQ 作用域记录，未据此判定今日结果，也未执行写操作；请先完成账号作用域迁移",
-        )
+        return self.daily_runner.legacy_daily_guard(day, qq_id, action, account_name)
 
     async def _run_daily_for_account(self, account: dict, day: str) -> DailyTaskResult:
-        qq_id = str(account["qq_id"])
-        account_name = str(account.get("nickname") or qq_id)
-        if not self._daily_identity(account):
-            return DailyTaskResult(
-                account_name,
-                DailyTaskStatus.UNAVAILABLE,
-                "账号缺少稳定游戏 UID、区服或平台身份，未执行日常写操作",
-            )
-        legacy_daily = self._legacy_daily_guard(day, qq_id, "daily", account_name)
-        if legacy_daily:
-            return legacy_daily
-        run_key = self._daily_run_key(day, account, "daily")
-        if not self.store.claim_run(run_key, qq_id, "daily"):
-            existing = self.store.get_run(run_key)
-            existing_status = str(existing.get("status", "")) if existing else ""
-            if existing_status in {"running", "unknown"}:
-                try:
-                    result = await self._read_only_daily_recovery(account, account_name)
-                except CookieExpired:
-                    self.store.mark_cookie_invalid(qq_id)
-                    result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
-                except asyncio.CancelledError:
-                    raise
-                except Exception:
-                    result = DailyTaskResult(
-                        account_name,
-                        DailyTaskStatus.UNKNOWN_AFTER_ACTION,
-                        "今日签到结果未确认，请先查询状态；未自动重发",
-                    )
-                self.store.finish_run(run_key, result.run_status, result.detail)
-                return result
-            if existing_status in {"failed", "expired"}:
-                return DailyTaskResult(
-                    account_name,
-                    DailyTaskStatus.FAILED,
-                    "今日签到已有失败记录，未自动重发",
-                )
-            if existing_status in {"pending", "unavailable"}:
-                if not self.store.retry_run(run_key, {"pending", "unavailable"}):
-                    return DailyTaskResult(
-                        account_name,
-                        DailyTaskStatus.UNKNOWN_AFTER_ACTION,
-                        "今日签到正在重新检查，请稍后查询；未自动重发",
-                    )
-            else:
-                return DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "今日已执行")
-        legacy_signin = self._legacy_daily_guard(day, qq_id, "signin", account_name)
-        if legacy_signin:
-            self.store.finish_run(run_key, legacy_signin.run_status, legacy_signin.detail)
-            return legacy_signin
-        signin_key = self._daily_run_key(day, account, "signin")
-        signin_owned = False
-        signin_finished = False
-        if bool(self.config.get("enable_daily_actions", False)):
-            signin_owned = self.store.claim_run(signin_key, qq_id, "signin")
-            if not signin_owned:
-                existing_signin = self.store.get_run(signin_key) or {}
-                signin_status = str(existing_signin.get("status", ""))
-                if signin_status in {"pending", "unavailable"}:
-                    signin_owned = self.store.retry_run(signin_key, {"pending", "unavailable"})
-                    if not signin_owned:
-                        result = DailyTaskResult(
-                            account_name,
-                            DailyTaskStatus.UNAVAILABLE,
-                            "签到任务仍在重新检查，未执行写操作",
-                        )
-                        self.store.finish_run(run_key, result.run_status, result.detail)
-                        return result
-                elif signin_status == "success":
-                    result = DailyTaskResult(
-                        account_name,
-                        DailyTaskStatus.ALREADY_DONE,
-                        str(existing_signin.get("detail") or "登录有效；今日已经签到"),
-                    )
-                elif signin_status in {"running", "unknown"}:
-                    try:
-                        result = await self._read_only_daily_recovery(account, account_name)
-                    except CookieExpired:
-                        self.store.mark_cookie_invalid(qq_id)
-                        result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
-                    except asyncio.CancelledError:
-                        raise
-                    except Exception:
-                        result = DailyTaskResult(
-                            account_name,
-                            DailyTaskStatus.UNKNOWN_AFTER_ACTION,
-                            "登录有效；签到结果未确认，未自动重发",
-                        )
-                    self.store.finish_run(signin_key, result.run_status, result.detail)
-                    signin_finished = True
-                elif signin_status == "expired":
-                    result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
-                elif signin_status == "failed":
-                    result = DailyTaskResult(account_name, DailyTaskStatus.FAILED, "今日签到已有失败记录，未自动重发")
-                else:
-                    result = DailyTaskResult(
-                        account_name,
-                        DailyTaskStatus.UNKNOWN_AFTER_ACTION,
-                        "登录有效；签到已执行或正在执行，结果未确认；未自动重发",
-                    )
-                if not signin_owned:
-                    self.store.finish_run(run_key, result.run_status, result.detail)
-                    return result
-        result: DailyTaskResult
-        try:
-            await self.client.get_profile(account)
-            status = await self.client.get_daily_signin(account)
-            if not status["found"]:
-                result = DailyTaskResult(account_name, DailyTaskStatus.UNAVAILABLE, "登录有效；未找到签到任务")
-            elif status["completed"]:
-                result = DailyTaskResult(account_name, DailyTaskStatus.ALREADY_DONE, "登录有效；今日已经签到")
-            elif not bool(self.config.get("enable_daily_actions", False)):
-                result = DailyTaskResult(
-                    account_name,
-                    DailyTaskStatus.PENDING,
-                    "登录有效；自动签到未启用；当前今日待签到",
-                )
-            else:
-                try:
-                    detail = "登录有效；" + await self.client.perform_daily_signin(account)
-                    self.store.finish_run(signin_key, "success", detail)
-                    signin_finished = True
-                    result = DailyTaskResult(account_name, DailyTaskStatus.SUCCESS, detail)
-                except UnknownAfterAction:
-                    self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
-                    signin_finished = True
-                    result = DailyTaskResult(
-                        account_name,
-                        DailyTaskStatus.UNKNOWN_AFTER_ACTION,
-                        "签到结果未确认，请稍后查询状态；未自动重发",
-                    )
-                except CookieExpired:
-                    self.store.finish_run(signin_key, "expired", "登录状态已失效")
-                    signin_finished = True
-                    raise
-                except Exception as exc:
-                    mapped = self._daily_error_result(account_name, "登录有效；签到", exc)
-                    self.store.finish_run(signin_key, mapped.run_status, mapped.detail)
-                    signin_finished = True
-                    result = mapped
-        except asyncio.CancelledError:
-            existing_signin = self.store.get_run(signin_key) or {}
-            if str(existing_signin.get("status", "")) in {"running", "unknown"}:
-                self.store.finish_run(signin_key, "unknown", "签到已取消，结果未确认，未自动重发")
-            self.store.finish_run(run_key, "unknown", "日常任务已取消，结果未确认，未自动重发")
-            raise
-        except CookieExpired:
-            self.store.mark_cookie_invalid(qq_id)
-            existing_signin = self.store.get_run(signin_key) or {}
-            if str(existing_signin.get("status", "")) in {"running", "unknown"}:
-                self.store.finish_run(signin_key, "expired", "登录状态已失效")
-                signin_finished = True
-            result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
-        except Exception as exc:
-            result = self._daily_error_result(account_name, "登录状态检查", exc)
-        if signin_owned and not signin_finished:
-            self.store.finish_run(signin_key, result.run_status, result.detail)
-        self.store.finish_run(run_key, result.run_status, result.detail)
-        return result
+        return await self.daily_runner.run_daily_for_account(account, day)
 
     async def _run_all_daily(
         self,
@@ -1590,24 +1371,7 @@ class NikkePlugin(Star):
         stagger: bool = False,
         automatic: bool = False,
     ) -> list[DailyTaskResult]:
-        accounts = self.store.list_accounts(
-            push_only=True,
-            with_cookie=True,
-            auto_daily_only=automatic,
-        )
-        semaphore = asyncio.Semaphore(max(1, int(self.config.get("max_concurrency", 2))))
-
-        async def run(account):
-            if stagger:
-                await asyncio.sleep(random.uniform(0, 15 * 60))
-            async with semaphore:
-                return await self._run_daily_for_account(account, day)
-
-        results = await asyncio.gather(*(run(account) for account in accounts))
-        # 管理员手动批次不能污染自动汇总的数据源，避免绕过账号自动签到偏好。
-        scope = "automatic" if automatic else "manual"
-        self.store.set_setting(f"daily_results:{day}:{scope}", [result.to_storage() for result in results])
-        return results
+        return await self.daily_runner.run_all_daily(day, stagger=stagger, automatic=automatic)
 
     async def _send_summary(self, day: str) -> None:
         group_umo = self.store.get_setting("summary_group_umo", "")
