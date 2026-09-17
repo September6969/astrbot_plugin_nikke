@@ -102,7 +102,7 @@ class CharacterT2IPayloadBuilder:
                 "font_barlow": barlow_font(), "font_barlow_sb": barlow_semibold_font(),
                 "font_rajdhani": rajdhani_font(), "font_rajdhani_sb": rajdhani_semibold_font(),
                 "art_style": art_style(data, portrait),
-                "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
+                "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 11,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
                 "character_art_data_uri": self.resolver.encode(portrait, (1600, 2400)), "theme": asdict(theme), "identities": identities,
                 "corporation_watermark": watermark, "bg_gradient": bg_grad,
