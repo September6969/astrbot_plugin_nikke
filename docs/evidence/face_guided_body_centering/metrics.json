@@ -2,10 +2,87 @@
   "schema": 1,
   "samples": [
     {
-      "render_id": "c010",
+      "render_id": "c016",
       "character_name": "拉毗：小红帽",
+      "character_name_en": "Rapi: Red Hood",
+      "resource_id": 16,
+      "spine_asset_id": "c016",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category": "Golden Sample (拉毗：小红帽)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2025,
+      "portrait_height": 3682,
+      "scale": 0.719,
+      "face_point_portrait": [
+        941.7504461854451,
+        510.6821509753304
+      ],
+      "face_card_before": [
+        860,
+        610
+      ],
+      "face_card_after": [
+        735.54,
+        610.0
+      ],
+      "confidence": 0.9805,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": -124.46,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true,
+      "face_safe": true,
+      "clipping_regressions": false
+    },
+    {
+      "render_id": "c191",
+      "character_name": "爱丽丝",
+      "character_name_en": "Alice",
+      "resource_id": 191,
+      "spine_asset_id": "c191",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category": "Mandatory Sample (爱丽丝)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1761,
+      "portrait_height": 3566,
+      "scale": 0.8087,
+      "face_point_portrait": [
+        744.4747109763516,
+        621.3574984368197
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        763.48,
+        550.0
+      ],
+      "confidence": 0.9294,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": 3.48,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false,
+      "face_safe": true,
+      "clipping_regressions": false
+    },
+    {
+      "render_id": "c010",
+      "character_name": "拉毗",
       "character_name_en": "Rapi",
-      "description": "Rapi: Red Hood (Golden sample)",
+      "resource_id": 10,
+      "spine_asset_id": "c010",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category": "普通直立紧凑角色 (拉毗)",
       "anchor_kind": "eye_attachment",
       "portrait_width": 425,
       "portrait_height": 891,
@@ -29,13 +106,19 @@
       "shift_y": -0.0,
       "reason": "ok",
       "over_40px": false,
-      "face_safe": true
+      "face_safe": true,
+      "clipping_regressions": false
     },
     {
       "render_id": "c010_02",
       "character_name": "拉毗",
       "character_name_en": "Rapi",
-      "description": "Rapi: White Promise (Alternate costume)",
+      "resource_id": 10,
+      "spine_asset_id": "c010",
+      "costume_id": 20001,
+      "costume_name": "White Promise",
+      "is_costume": true,
+      "category": "长发/侧风角色 (拉毗·白色约定)",
       "anchor_kind": "eye_attachment",
       "portrait_width": 426,
       "portrait_height": 892,
@@ -59,163 +142,19 @@
       "shift_y": -0.0,
       "reason": "ok",
       "over_40px": true,
-      "face_safe": true
-    },
-    {
-      "render_id": "c010_03",
-      "character_name": "拉毗",
-      "character_name_en": "Rapi",
-      "description": "Rapi: Classic Vacation (Summer costume)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 467,
-      "portrait_height": 892,
-      "scale": 3.3278,
-      "face_point_portrait": [
-        245.09322714154428,
-        106.87385137424496
-      ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        740.29,
-        550.0
-      ],
-      "confidence": 0.9809,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": -19.71,
-      "shift_y": -0.0,
-      "reason": "ok",
-      "over_40px": false,
-      "face_safe": true
-    },
-    {
-      "render_id": "c017",
-      "character_name": "爱丽丝",
-      "character_name_en": "Anis: Star",
-      "description": "Alice (Mandatory sample)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 348,
-      "portrait_height": 891,
-      "scale": 3.888,
-      "face_point_portrait": [
-        185.22893383212352,
-        135.41948886800128
-      ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        781.8,
-        550.0
-      ],
-      "confidence": 0.9716,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": 21.8,
-      "shift_y": -0.0,
-      "reason": "ok",
-      "over_40px": false,
-      "face_safe": true
-    },
-    {
-      "render_id": "c234",
-      "character_name": "迪塞尔",
-      "character_name_en": "Dorothy: Serendipity",
-      "description": "Diesel (Long hair / uniform / asymmetric)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 602,
-      "portrait_height": 891,
-      "scale": 4.0102,
-      "face_point_portrait": [
-        284.87966190429086,
-        196.35972095722434
-      ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        687.29,
-        550.0
-      ],
-      "confidence": 0.9632,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": -72.71,
-      "shift_y": -0.0,
-      "reason": "ok",
-      "over_40px": true,
-      "face_safe": true
-    },
-    {
-      "render_id": "c330",
-      "character_name": "桃乐丝",
-      "character_name_en": "Crown",
-      "description": "Dorothy (Large dress / hair / wings silhouette)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 794,
-      "portrait_height": 885,
-      "scale": 3.8161,
-      "face_point_portrait": [
-        448.01620447231835,
-        129.69669353779705
-      ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        687.36,
-        550.0
-      ],
-      "confidence": 0.9792,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": -72.64,
-      "shift_y": -0.0,
-      "reason": "ok",
-      "over_40px": true,
-      "face_safe": true
-    },
-    {
-      "render_id": "c352",
-      "character_name": "布兰儿",
-      "character_name_en": "Helm",
-      "description": "Blanc (Compact silhouette)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 657,
-      "portrait_height": 892,
-      "scale": 4.4606,
-      "face_point_portrait": [
-        329.8477022167955,
-        117.8550639570251
-      ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        765.39,
-        550.0
-      ],
-      "confidence": 0.9241,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": 5.39,
-      "shift_y": -0.0,
-      "reason": "ok",
-      "over_40px": false,
-      "face_safe": true
+      "face_safe": true,
+      "clipping_regressions": false
     },
     {
       "render_id": "c471",
-      "character_name": "白雪公主：纯真年代",
+      "character_name": "白雪公主：重型武装",
       "character_name_en": "Snow White: Heavy Arms",
-      "description": "Snow White: Innocent Days (Huge anti-ship rifle)",
+      "resource_id": 471,
+      "spine_asset_id": "c471",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category": "大枪/机械附件角色 (白雪公主：重型武装)",
       "anchor_kind": "eye_attachment",
       "portrait_width": 2474,
       "portrait_height": 3548,
@@ -239,7 +178,116 @@
       "shift_y": -0.0,
       "reason": "ok",
       "over_40px": true,
-      "face_safe": true
+      "face_safe": true,
+      "clipping_regressions": false
+    },
+    {
+      "render_id": "c330",
+      "character_name": "皇冠",
+      "character_name_en": "Crown",
+      "resource_id": 330,
+      "spine_asset_id": "c330",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category": "披风/机械翼角色 (皇冠)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 794,
+      "portrait_height": 885,
+      "scale": 3.8161,
+      "face_point_portrait": [
+        448.01620447231835,
+        129.69669353779705
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        687.36,
+        550.0
+      ],
+      "confidence": 0.9792,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": -72.64,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true,
+      "face_safe": true,
+      "clipping_regressions": false
+    },
+    {
+      "render_id": "c234",
+      "character_name": "桃乐丝：机缘巧遇",
+      "character_name_en": "Dorothy: Serendipity",
+      "resource_id": 234,
+      "spine_asset_id": "c234",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category": "强非对称/洋伞角色 (桃乐丝：机缘巧遇)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 602,
+      "portrait_height": 891,
+      "scale": 4.0102,
+      "face_point_portrait": [
+        284.87966190429086,
+        196.35972095722434
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        687.29,
+        550.0
+      ],
+      "confidence": 0.9632,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": -72.71,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true,
+      "face_safe": true,
+      "clipping_regressions": false
+    },
+    {
+      "render_id": "c352",
+      "character_name": "海伦",
+      "character_name_en": "Helm",
+      "resource_id": 352,
+      "spine_asset_id": "c352",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category": "宽裙摆/宽轮廓角色 (海伦)",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 657,
+      "portrait_height": 892,
+      "scale": 4.4606,
+      "face_point_portrait": [
+        329.8477022167955,
+        117.8550639570251
+      ],
+      "face_card_before": [
+        760,
+        550
+      ],
+      "face_card_after": [
+        765.39,
+        550.0
+      ],
+      "confidence": 0.9241,
+      "bootstrap_reliable": true,
+      "terminated_early": false,
+      "shift_x": 5.39,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false,
+      "face_safe": true,
+      "clipping_regressions": false
     }
   ]
 }

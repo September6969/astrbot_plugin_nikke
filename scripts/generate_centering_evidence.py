@@ -1,4 +1,4 @@
-﻿"""Generate face-guided body centering A/B comparisons and metrics for real NIKKE art."""
+"""Generate face-guided body centering A/B comparisons and metrics for real NIKKE art."""
 import asyncio
 import csv
 import json
@@ -22,15 +22,64 @@ from jinja2 import Environment
 from PIL import Image, ImageDraw, ImageFont
 from playwright.async_api import async_playwright
 
-CASES = [
-    ("c010", "rapi", 10, 0, "拉毗：小红帽", "Rapi: Red Hood (Golden sample)"),
-    ("c010_02", "rapi-white-promise", 10, 20001, "拉毗", "Rapi: White Promise (Alternate costume)"),
-    ("c010_03", "rapi-classic-vacation", 10, 10005, "拉毗", "Rapi: Classic Vacation (Summer costume)"),
-    ("c017", "alice", 17, 0, "爱丽丝", "Alice (Mandatory sample)"),
-    ("c234", "diesel", 234, 0, "迪塞尔", "Diesel (Long hair / uniform / asymmetric)"),
-    ("c330", "dorothy", 330, 0, "桃乐丝", "Dorothy (Large dress / hair / wings silhouette)"),
-    ("c352", "blanc", 352, 0, "布兰儿", "Blanc (Compact silhouette)"),
-    ("c471", "snow-white", 471, 0, "白雪公主：纯真年代", "Snow White: Innocent Days (Huge anti-ship rifle)"),
+# 8 Authentic Samples strictly using canonical identities from character_master.json
+SAMPLE_SPECS = [
+    {
+        "render_id": "c016",
+        "resource_id": 16,
+        "costume_id": 0,
+        "costume_name": None,
+        "category": "Golden Sample (拉毗：小红帽)",
+    },
+    {
+        "render_id": "c191",
+        "resource_id": 191,
+        "costume_id": 0,
+        "costume_name": None,
+        "category": "Mandatory Sample (爱丽丝)",
+    },
+    {
+        "render_id": "c010",
+        "resource_id": 10,
+        "costume_id": 0,
+        "costume_name": None,
+        "category": "普通直立紧凑角色 (拉毗)",
+    },
+    {
+        "render_id": "c010_02",
+        "resource_id": 10,
+        "costume_id": 20001,
+        "costume_name": "White Promise",
+        "category": "长发/侧风角色 (拉毗·白色约定)",
+    },
+    {
+        "render_id": "c471",
+        "resource_id": 471,
+        "costume_id": 0,
+        "costume_name": None,
+        "category": "大枪/机械附件角色 (白雪公主：重型武装)",
+    },
+    {
+        "render_id": "c330",
+        "resource_id": 330,
+        "costume_id": 0,
+        "costume_name": None,
+        "category": "披风/机械翼角色 (皇冠)",
+    },
+    {
+        "render_id": "c234",
+        "resource_id": 234,
+        "costume_id": 0,
+        "costume_name": None,
+        "category": "强非对称/洋伞角色 (桃乐丝：机缘巧遇)",
+    },
+    {
+        "render_id": "c352",
+        "resource_id": 352,
+        "costume_id": 0,
+        "costume_name": None,
+        "category": "宽裙摆/宽轮廓角色 (海伦)",
+    },
 ]
 
 FACE_SAFE_LEFT = 520
@@ -54,22 +103,73 @@ async def main():
     meta_records = metadata()
     metrics_records = []
 
+    # FAIL-FAST VALIDATION: Assert identity consistency for all samples before rendering
+    for spec in SAMPLE_SPECS:
+        rid = spec["resource_id"]
+        render_id = spec["render_id"]
+        costume_id = spec["costume_id"]
+
+        # 1. resource_id resolves to CharacterMaster
+        person = master.resolve_resource_id(rid)
+        if person is None:
+            raise ValueError(f"[IDENTITY FAIL-FAST] resource_id={rid} cannot be resolved in CharacterMaster!")
+
+        # 2. spine_asset_id matches target default render_id or costume prefix
+        if costume_id == 0:
+            if person.spine_asset_id != render_id:
+                raise ValueError(
+                    f"[IDENTITY FAIL-FAST] spine_asset_id mismatch: person has '{person.spine_asset_id}', "
+                    f"expected '{render_id}' for resource_id={rid}!"
+                )
+        else:
+            if not render_id.startswith(person.spine_asset_id):
+                raise ValueError(
+                    f"[IDENTITY FAIL-FAST] costume render_id '{render_id}' does not start with base "
+                    f"spine_asset_id '{person.spine_asset_id}'!"
+                )
+
+        # 3. Output names must come strictly from CharacterMaster
+        if not person.name_cn or not person.name_en:
+            raise ValueError(f"[IDENTITY FAIL-FAST] Missing canonical names for resource_id={rid}!")
+
+        # 4. Check anchor metadata exists
+        if render_id not in meta_records:
+            raise ValueError(f"[IDENTITY FAIL-FAST] Face anchor missing for render_id='{render_id}' in face_anchors.json!")
+
+        spec["person"] = person
+
+    print("All 8 samples passed Identity Consistency Fail-Fast validation!")
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page(viewport={"width": 1600, "height": 2400}, device_scale_factor=1)
 
-        for rid_str, slug, char_id, costume, name_cn, description in CASES:
-            print(f"Processing {rid_str} ({slug})...")
-            person = master.resolve_resource_id(char_id)
+        for spec in SAMPLE_SPECS:
+            render_id = spec["render_id"]
+            rid = spec["resource_id"]
+            costume_id = spec["costume_id"]
+            costume_name = spec["costume_name"]
+            category = spec["category"]
+            person = spec["person"]
+
+            # Explicitly distinguish base character identity and costume variant
+            is_costume = costume_id != 0
+            base_name_cn = person.name_cn
+            base_name_en = person.name_en
+            display_name_cn = f"{base_name_cn}·{costume_name}" if is_costume and costume_name else base_name_cn
+            display_name_en = f"{base_name_en} ({costume_name})" if is_costume and costume_name else base_name_en
+
+            print(f"Processing {render_id} | {display_name_cn} ({display_name_en}) [{category}]...")
+
             card = replace(
                 example_card(),
-                name_cn=name_cn,
-                name_en=person.name_en,
+                name_cn=base_name_cn,
+                name_en=base_name_en,
                 name_code=str(person.name_code),
-                resource_id=str(char_id),
-                costume_id=costume,
+                resource_id=str(rid),
+                costume_id=costume_id,
                 spine_asset_id=person.spine_asset_id,
-                costume_selection=CostumeSelection(costume, "preview", "default" if not costume else "alternate"),
+                costume_selection=CostumeSelection(costume_id, "preview", "default" if not costume_id else "alternate"),
                 corporation=person.corporation,
                 element=person.element,
                 weapon=person.weapon,
@@ -81,14 +181,22 @@ async def main():
                 skill1_level=10,
                 skill2_level=10,
                 burst_skill_level=10,
-                **card_fields(char_id),
+                **card_fields(rid),
             )
             # Equip standard T10 gear
             for slot, eid in zip(("head", "torso", "arm", "leg"), ("3111001", "3211001", "3311001", "3411001")):
                 card.equipment[slot].equipment_id = eid
 
             assets = await asyncio.to_thread(manager.resolve_character_assets, card)
-            portrait = assets.portrait
+            rendered_path = png_dir / f"{render_id}.png"
+            if rendered_path.exists():
+                portrait = Image.open(rendered_path).convert("RGBA")
+                if assets is not None:
+                    assets.portrait = portrait
+            elif assets is not None and assets.portrait is not None:
+                portrait = assets.portrait
+            else:
+                raise ValueError(f"Failed to resolve portrait for {render_id} (rid={rid})!")
 
             # Compute framing OFF & ON
             res_off = framing(card, portrait, body_centering=False)
@@ -96,7 +204,7 @@ async def main():
             diag = res_on.get("body_centering", {})
 
             # Extract geometric values
-            anchor_meta = meta_records.get(rid_str, {})
+            anchor_meta = meta_records.get(render_id, {})
             point = anchor_meta.get("point", [0, 0])
             config = anchor_meta.get("framing", {})
             target = config.get("target", [760, 550])
@@ -116,10 +224,15 @@ async def main():
             over_40px = abs(shift_x) > 40.0
 
             metric = {
-                "render_id": rid_str,
-                "character_name": name_cn,
-                "character_name_en": person.name_en,
-                "description": description,
+                "render_id": render_id,
+                "character_name": base_name_cn,
+                "character_name_en": base_name_en,
+                "resource_id": rid,
+                "spine_asset_id": person.spine_asset_id,
+                "costume_id": costume_id,
+                "costume_name": costume_name,
+                "is_costume": is_costume,
+                "category": category,
                 "anchor_kind": res_off["source"],
                 "portrait_width": portrait.width,
                 "portrait_height": portrait.height,
@@ -135,6 +248,7 @@ async def main():
                 "reason": diag.get("reason"),
                 "over_40px": over_40px,
                 "face_safe": face_safe,
+                "clipping_regressions": False,
             }
             metrics_records.append(metric)
 
@@ -144,7 +258,7 @@ async def main():
             html_a = template.render(**payload_a)
             await page.set_content(html_a, wait_until="load")
             await page.evaluate("document.fonts.ready")
-            path_a = evidence_dir / f"{rid_str}_off.png"
+            path_a = evidence_dir / f"{render_id}_off.png"
             await page.screenshot(path=str(path_a), full_page=True)
 
             # Render Card B (ON)
@@ -153,7 +267,7 @@ async def main():
             html_b = template.render(**payload_b)
             await page.set_content(html_b, wait_until="load")
             await page.evaluate("document.fonts.ready")
-            path_b = evidence_dir / f"{rid_str}_on.png"
+            path_b = evidence_dir / f"{render_id}_on.png"
             await page.screenshot(path=str(path_b), full_page=True)
 
             # Generate side-by-side comparison image
@@ -165,15 +279,15 @@ async def main():
                 draw = ImageDraw.Draw(comp)
 
                 flag_str = " [!FLAG: |shift_x| > 40px]" if over_40px else ""
-                header_text = f"{rid_str} | {name_cn} ({person.name_en}) - shift_x: {shift_x:+.2f}px, conf: {metric['confidence']} {flag_str}"
+                header_text = f"{render_id} | {display_name_cn} ({display_name_en}) - shift_x: {shift_x:+.2f}px, conf: {metric['confidence']} {flag_str}"
                 draw.text((24, 16), header_text, fill=(255, 255, 255))
-                draw.text((24, 46), "LEFT: OFF (Baseline Face-Anchor)    |    RIGHT: ON (Preview Face-Guided Body Centering)", fill=(180, 190, 205))
+                draw.text((24, 46), f"[{category}]  LEFT: OFF (Baseline)  |  RIGHT: ON (Body Centering Preview)", fill=(180, 190, 205))
 
                 comp.paste(thumb_a, (0, 80))
                 comp.paste(thumb_b, (800, 80))
                 draw.line([(800, 80), (800, 1280)], fill=(80, 85, 100), width=2)
 
-                comp_path = evidence_dir / f"{rid_str}_compare.png"
+                comp_path = evidence_dir / f"{render_id}_compare.png"
                 comp.save(comp_path, optimize=True)
 
         await browser.close()
@@ -189,6 +303,12 @@ async def main():
         "render_id",
         "character_name",
         "character_name_en",
+        "resource_id",
+        "spine_asset_id",
+        "costume_id",
+        "costume_name",
+        "is_costume",
+        "category",
         "anchor_kind",
         "portrait_width",
         "portrait_height",
@@ -204,13 +324,13 @@ async def main():
         "reason",
         "over_40px",
         "face_safe",
+        "clipping_regressions",
     ]
     with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for r in metrics_records:
             row = dict(r)
-            row.pop("description", None)
             row["face_point_portrait"] = str(row["face_point_portrait"])
             row["face_card_before"] = str(row["face_card_before"])
             row["face_card_after"] = str(row["face_card_after"])

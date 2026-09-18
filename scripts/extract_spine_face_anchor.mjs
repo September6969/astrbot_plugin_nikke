@@ -2,10 +2,21 @@
 import fs from 'node:fs';
 import {pathToFileURL} from 'node:url';
 import crypto from 'node:crypto';
+import vm from 'node:vm';
 
 const [runtime, skelPath, atlasPath, renderId, animation, output] = process.argv.slice(2);
 if (!output) throw new Error('参数：runtime/index.js skeleton atlas render_id animation output.json');
-const spine = await import(pathToFileURL(runtime).href);
+let spine;
+try {
+  const mod = await import(pathToFileURL(runtime).href);
+  spine = mod.TextureAtlas ? mod : (mod.default?.TextureAtlas ? mod.default : null);
+} catch (e) {}
+if (!spine || !spine.TextureAtlas) {
+  const code = fs.readFileSync(runtime, 'utf8');
+  const context = { globalThis, console };
+  vm.runInNewContext(code, context);
+  spine = context.spine;
+}
 const atlas = new spine.TextureAtlas(fs.readFileSync(atlasPath, 'utf8'));
 // 几何计算只需要 atlas 页尺寸；不下载或解码纹理。
 for (const page of atlas.pages) page.setTexture({getImage: () => ({width: page.width, height: page.height}),

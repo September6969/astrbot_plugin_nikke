@@ -195,3 +195,60 @@ def test_ambiguity_band_scale_sweep_obeys_only_global_safety():
     assert shifts[0] < shifts[1] < shifts[2]
 
 
+def test_c016_and_c191_real_anchors():
+    """Verify authentic Spine offline anchors for c016 and c191."""
+    from pathlib import Path
+    plugin_root = Path(__file__).parent.parent
+    c016_path = plugin_root / "assets" / "spine-rendered" / "c016.png"
+    c191_path = plugin_root / "assets" / "spine-rendered" / "c191.png"
+
+    assert c016_path.exists(), f"Missing {c016_path}"
+    assert c191_path.exists(), f"Missing {c191_path}"
+
+    c016_img = Image.open(c016_path)
+    c191_img = Image.open(c191_path)
+
+    card_c016 = example_card()
+    card_c016.resource_id = "16"
+    card_c016.costume_id = 0
+    card_c016.costume_selection = CostumeSelection(0, "default", "default")
+
+    card_c191 = example_card()
+    card_c191.resource_id = "191"
+    card_c191.costume_id = 0
+    card_c191.costume_selection = CostumeSelection(0, "default", "default")
+
+    # c016: Rapi: Red Hood
+    off_c016 = framing(card_c016, c016_img, body_centering=False)
+    assert off_c016["source"] == "eye_attachment"
+    assert off_c016["render_id"] == "c016"
+    assert "body_centering" not in off_c016
+
+    on_c016 = framing(card_c016, c016_img, body_centering=True)
+    assert on_c016["source"] == "eye_attachment"
+    assert on_c016["render_id"] == "c016"
+    assert "body_centering" in on_c016
+    bc_c016 = on_c016["body_centering"]
+    assert bc_c016["reason"] == "ok"
+    assert bc_c016["bootstrap_reliable"] is True
+    # Cape and heavy weapon shift silhouette right, pulling body centering left by > 40px
+    assert bc_c016["shift_x"] < -40.0
+    assert abs(bc_c016["shift_x"]) > 40.0
+
+    # c191: Alice
+    off_c191 = framing(card_c191, c191_img, body_centering=False)
+    assert off_c191["source"] == "eye_attachment"
+    assert off_c191["render_id"] == "c191"
+    assert "body_centering" not in off_c191
+
+    on_c191 = framing(card_c191, c191_img, body_centering=True)
+    assert on_c191["source"] == "eye_attachment"
+    assert on_c191["render_id"] == "c191"
+    assert "body_centering" in on_c191
+    bc_c191 = on_c191["body_centering"]
+    assert bc_c191["reason"] == "ok"
+    assert bc_c191["bootstrap_reliable"] is True
+    # Alice has relatively balanced silhouette, shift is small (< 40px)
+    assert abs(bc_c191["shift_x"]) < 40.0
+
+

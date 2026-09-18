@@ -21,3 +21,6 @@ preview/
 # 大型原版字体源文件（本地生成子集用，不追踪入库）
 fonts/NotoSansSC-wght.ttf
 
+# 本地审计与分析中间产物
+reports/
+
