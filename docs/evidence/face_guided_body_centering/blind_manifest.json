@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "description": "Deterministic mapping from blind Candidate 1-4 to candidate policy B/C/D/E for each render_id.",
+  "samples": {
+    "c010": {
+      "candidate_1": "D",
+      "candidate_2": "B",
+      "candidate_3": "C",
+      "candidate_4": "E"
+    },
+    "c191": {
+      "candidate_1": "E",
+      "candidate_2": "C",
+      "candidate_3": "D",
+      "candidate_4": "B"
+    },
+    "c011": {
+      "candidate_1": "D",
+      "candidate_2": "C",
+      "candidate_3": "B",
+      "candidate_4": "E"
+    },
+    "c012": {
+      "candidate_1": "C",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c070": {
+      "candidate_1": "C",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c072": {
+      "candidate_1": "C",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c080": {
+      "candidate_1": "D",
+      "candidate_2": "E",
+      "candidate_3": "B",
+      "candidate_4": "C"
+    },
+    "c082": {
+      "candidate_1": "C",
+      "candidate_2": "D",
+      "candidate_3": "E",
+      "candidate_4": "B"
+    },
+    "c120": {
+      "candidate_1": "C",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c172": {
+      "candidate_1": "C",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c170": {
+      "candidate_1": "B",
+      "candidate_2": "E",
+      "candidate_3": "D",
+      "candidate_4": "C"
+    },
+    "c221": {
+      "candidate_1": "E",
+      "candidate_2": "D",
+      "candidate_3": "B",
+      "candidate_4": "C"
+    },
+    "c270": {
+      "candidate_1": "E",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "C"
+    },
+    "c010_02": {
+      "candidate_1": "D",
+      "candidate_2": "C",
+      "candidate_3": "B",
+      "candidate_4": "E"
+    },
+    "c016": {
+      "candidate_1": "C",
+      "candidate_2": "D",
+      "candidate_3": "B",
+      "candidate_4": "E"
+    },
+    "c471": {
+      "candidate_1": "C",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c100": {
+      "candidate_1": "C",
+      "candidate_2": "E",
+      "candidate_3": "B",
+      "candidate_4": "D"
+    },
+    "c102": {
+      "candidate_1": "E",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "C"
+    },
+    "c220": {
+      "candidate_1": "E",
+      "candidate_2": "B",
+      "candidate_3": "C",
+      "candidate_4": "D"
+    },
+    "c330": {
+      "candidate_1": "C",
+      "candidate_2": "E",
+      "candidate_3": "D",
+      "candidate_4": "B"
+    },
+    "c101": {
+      "candidate_1": "C",
+      "candidate_2": "E",
+      "candidate_3": "B",
+      "candidate_4": "D"
+    },
+    "c180": {
+      "candidate_1": "E",
+      "candidate_2": "B",
+      "candidate_3": "C",
+      "candidate_4": "D"
+    },
+    "c352": {
+      "candidate_1": "C",
+      "candidate_2": "D",
+      "candidate_3": "B",
+      "candidate_4": "E"
+    },
+    "c181": {
+      "candidate_1": "D",
+      "candidate_2": "B",
+      "candidate_3": "E",
+      "candidate_4": "C"
+    },
+    "c233": {
+      "candidate_1": "D",
+      "candidate_2": "C",
+      "candidate_3": "B",
+      "candidate_4": "E"
+    },
+    "c310": {
+      "candidate_1": "E",
+      "candidate_2": "B",
+      "candidate_3": "C",
+      "candidate_4": "D"
+    },
+    "c161": {
+      "candidate_1": "D",
+      "candidate_2": "B",
+      "candidate_3": "E",
+      "candidate_4": "C"
+    },
+    "c222": {
+      "candidate_1": "D",
+      "candidate_2": "E",
+      "candidate_3": "B",
+      "candidate_4": "C"
+    },
+    "c234": {
+      "candidate_1": "E",
+      "candidate_2": "C",
+      "candidate_3": "D",
+      "candidate_4": "B"
+    },
+    "c110": {
+      "candidate_1": "D",
+      "candidate_2": "C",
+      "candidate_3": "E",
+      "candidate_4": "B"
+    },
+    "c111": {
+      "candidate_1": "D",
+      "candidate_2": "C",
+      "candidate_3": "E",
+      "candidate_4": "B"
+    },
+    "c140": {
+      "candidate_1": "C",
+      "candidate_2": "B",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c400": {
+      "candidate_1": "B",
+      "candidate_2": "C",
+      "candidate_3": "D",
+      "candidate_4": "E"
+    },
+    "c010_03": {
+      "candidate_1": "C",
+      "candidate_2": "E",
+      "candidate_3": "D",
+      "candidate_4": "B"
+    },
+    "c017": {
+      "candidate_1": "D",
+      "candidate_2": "E",
+      "candidate_3": "C",
+      "candidate_4": "B"
+    },
+    "c224": {
+      "candidate_1": "C",
+      "candidate_2": "E",
+      "candidate_3": "B",
+      "candidate_4": "D"
+    }
+  }
+}

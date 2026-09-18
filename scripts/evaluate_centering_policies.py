@@ -1,10 +1,12 @@
 """Evaluate Card-space Correction Policies offline across 36 authentic samples."""
 import asyncio
 import csv
+import hashlib
 from io import BytesIO
 import json
 import math
 from pathlib import Path
+import random
 import re
 import sys
 from dataclasses import replace
@@ -13,7 +15,8 @@ from PIL import Image, ImageDraw, ImageFont
 from playwright.async_api import async_playwright
 from jinja2 import Environment
 
-ROOT = Path("d:/download/Compressed/nikke_docs/astrbot_plugin_nikke")
+# Fully portable root resolution without hardcoded paths
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT.parent))
 
 from astrbot_plugin_nikke.asset_manager import AssetManager
@@ -57,6 +60,48 @@ def percentile(data: list[float], p: float) -> float:
     return s[lower] * (upper - idx) + s[upper] * (idx - lower)
 
 
+def get_font(size: int, *, bold: bool = False) -> ImageFont.ImageFont:
+    """Portable font loader with project fonts and safe fallbacks.
+    
+    Failure to load a specific font will NEVER crash or affect policy calculations.
+    """
+    candidate_paths = [
+        ROOT / "fonts" / ("NotoSansHans-Medium.otf" if bold else "NotoSansHans-Regular.otf"),
+        ROOT / "fonts" / "NotoSansHans-Medium.otf",
+        ROOT / "fonts" / "NotoSansHans-Regular.otf",
+        ROOT / "fonts" / ("BarlowCondensed-Bold.ttf" if bold else "BarlowCondensed-SemiBold.ttf"),
+    ]
+    system_fallbacks = [
+        Path("C:/Windows/Fonts/msyh.ttc"),
+        Path("C:/Windows/Fonts/simhei.ttf"),
+        Path("C:/Windows/Fonts/arial.ttf"),
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+        Path("/System/Library/Fonts/PingFang.ttc"),
+        Path("/Library/Fonts/Arial Unicode.ttf"),
+    ]
+    for p in candidate_paths + system_fallbacks:
+        try:
+            if p.exists():
+                return ImageFont.truetype(str(p), size)
+        except Exception:
+            continue
+    try:
+        return ImageFont.load_default()
+    except Exception:
+        return None
+
+
+def get_deterministic_permutation(render_id: str) -> list[str]:
+    """Derive deterministic pseudo-random permutation of candidate policies ['B', 'C', 'D', 'E']."""
+    salt = f"nikke_blind_review_salt_2026_{render_id}"
+    h = hashlib.sha256(salt.encode("utf-8")).hexdigest()
+    rng = random.Random(int(h[:16], 16))
+    candidates = ["B", "C", "D", "E"]
+    rng.shuffle(candidates)
+    return candidates
+
+
 async def main():
     evidence_dir = ROOT / "docs" / "evidence" / "face_guided_body_centering"
     evidence_dir.mkdir(parents=True, exist_ok=True)
@@ -77,13 +122,15 @@ async def main():
     template_content = T2ITemplateLoader().load("character")
     template = Environment().from_string(template_content)
 
-    font_large = ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 22)
-    font_mid = ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 14)
-    font_col = ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 16)
-    font_sub = ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 13)
+    font_large = get_font(22, bold=True)
+    font_mid = get_font(14, bold=False)
+    font_col = get_font(16, bold=True)
+    font_sub = get_font(13, bold=False)
 
     policy_metrics_records = []
     review_rows = []
+    blind_review_rows = []
+    blind_manifest = {}
 
     # Prepare browser for rendering needed candidate variations
     async with async_playwright() as p:
@@ -240,22 +287,23 @@ async def main():
                         buf = await page.screenshot(full_page=True)
                         images[pol_id] = Image.open(BytesIO(buf))
 
-            # Compose 5-column comparison image
+            # -------------------------------------------------------------
+            # 1. Compose 5-column Engineering Comparison Image
+            # -------------------------------------------------------------
             col_w, col_h = 480, 720
             header_h = 130
             total_w = col_w * 5
             total_h = col_h + header_h
 
-            comp = Image.new("RGB", (total_w, total_h), (18, 20, 26))
-            draw = ImageDraw.Draw(comp)
+            comp_eng = Image.new("RGB", (total_w, total_h), (18, 20, 26))
+            draw_eng = ImageDraw.Draw(comp_eng)
 
-            # Header info
             display_title = f"{render_id} | {canonical_name} ({char_en}) - Card-space Correction Policy Evaluation"
-            draw.text((24, 16), display_title, fill=(255, 255, 255), font=font_large)
+            draw_eng.text((24, 16), display_title, fill=(255, 255, 255), font=font_large)
             semantics_note = f"Category: [{category}]  |  tracking_confidence: {conf} (Note: Indicates alpha path geometric stability, NOT composition correctness)"
-            draw.text((24, 48), semantics_note, fill=(170, 185, 205), font=font_mid)
+            draw_eng.text((24, 48), semantics_note, fill=(170, 185, 205), font=font_mid)
 
-            col_defs = [
+            col_defs_eng = [
                 ("A", "Baseline (Face Anchor)", shifts["A"], "Shift: 0.0px (Reference)"),
                 ("B", "Raw v5 (Uncapped)", shifts["B"], f"Shift: {shifts['B']:+.1f}px (Diff: 0.0px)"),
                 ("C", "Policy C (Soft 20/40)", shifts["C"], f"Shift: {shifts['C']:+.1f}px (Diff: {shifts['C']-shifts['B']:+.1f}px)"),
@@ -266,38 +314,85 @@ async def main():
             scale_thumb = col_w / 1600.0
             x_baseline_thumb = face_before[0] * scale_thumb
 
-            for idx, (cid, title, s_val, sub_text) in enumerate(col_defs):
+            for idx, (cid, title, s_val, sub_text) in enumerate(col_defs_eng):
                 cx = idx * col_w
-                # Column header box
-                draw.rectangle([(cx + 4, 76), (cx + col_w - 4, 122)], fill=(28, 32, 42))
+                draw_eng.rectangle([(cx + 4, 76), (cx + col_w - 4, 122)], fill=(28, 32, 42))
                 col_title_color = (0, 255, 140) if cid == "A" else ((255, 100, 100) if cid == "B" else (100, 200, 255))
-                draw.text((cx + 12, 80), f"[{cid}] {title}", fill=col_title_color, font=font_col)
-                draw.text((cx + 12, 102), sub_text, fill=(200, 210, 225), font=font_sub)
+                draw_eng.text((cx + 12, 80), f"[{cid}] {title}", fill=col_title_color, font=font_col)
+                draw_eng.text((cx + 12, 102), sub_text, fill=(200, 210, 225), font=font_sub)
 
-                # Thumbnail image
                 im = images[cid].resize((col_w, col_h), Image.Resampling.LANCZOS)
                 draw_im = ImageDraw.Draw(im)
 
-                # Baseline reference line
                 draw_im.line([(x_baseline_thumb, 0), (x_baseline_thumb, col_h)], fill=(0, 255, 140, 100), width=1)
 
-                # Candidate shifted line & marker
                 x_shift_thumb = (face_before[0] + s_val) * scale_thumb
                 col_mark = (0, 255, 140) if cid == "A" else (255, 40, 140)
                 draw_im.line([(x_shift_thumb, 0), (x_shift_thumb, col_h)], fill=col_mark, width=2)
                 y_face_thumb = face_before[1] * scale_thumb
                 draw_im.rectangle([(x_shift_thumb - 4, y_face_thumb - 4), (x_shift_thumb + 4, y_face_thumb + 4)], fill=col_mark)
 
-                comp.paste(im, (cx, header_h))
-
-                # Vertical separator
+                comp_eng.paste(im, (cx, header_h))
                 if idx > 0:
-                    draw.line([(cx, 76), (cx, total_h)], fill=(50, 55, 70), width=2)
+                    draw_eng.line([(cx, 76), (cx, total_h)], fill=(50, 55, 70), width=2)
 
-            comp_path = evidence_dir / f"{render_id}_policy_compare.png"
-            comp.save(comp_path, optimize=True)
+            comp_eng_path = evidence_dir / f"{render_id}_policy_compare.png"
+            comp_eng.save(comp_eng_path, optimize=True)
 
-            # Build review row
+            # -------------------------------------------------------------
+            # 2. Compose 5-column Blind Review Image (Reference + 4 Candidates)
+            # -------------------------------------------------------------
+            perm = get_deterministic_permutation(render_id)
+            blind_manifest[render_id] = {
+                "candidate_1": perm[0],
+                "candidate_2": perm[1],
+                "candidate_3": perm[2],
+                "candidate_4": perm[3],
+            }
+
+            comp_blind = Image.new("RGB", (total_w, total_h), (18, 20, 26))
+            draw_blind = ImageDraw.Draw(comp_blind)
+
+            blind_title = f"{render_id} | {canonical_name} ({char_en}) - Blind Visual Evaluation"
+            draw_blind.text((24, 16), blind_title, fill=(255, 255, 255), font=font_large)
+            blind_sub = f"Category: [{category}]  |  Compare Candidates 1-4 against Reference Baseline (Unbiased Review)"
+            draw_blind.text((24, 48), blind_sub, fill=(170, 185, 205), font=font_mid)
+
+            col_defs_blind = [
+                ("Reference", images["A"], shifts["A"], "Baseline (Standard Framing)"),
+                ("Candidate 1", images[perm[0]], shifts[perm[0]], "Blind Evaluation Option 1"),
+                ("Candidate 2", images[perm[1]], shifts[perm[1]], "Blind Evaluation Option 2"),
+                ("Candidate 3", images[perm[2]], shifts[perm[2]], "Blind Evaluation Option 3"),
+                ("Candidate 4", images[perm[3]], shifts[perm[3]], "Blind Evaluation Option 4"),
+            ]
+
+            for idx, (col_label, col_img, s_val, sub_label) in enumerate(col_defs_blind):
+                cx = idx * col_w
+                draw_blind.rectangle([(cx + 4, 76), (cx + col_w - 4, 122)], fill=(28, 32, 42))
+                header_color = (0, 255, 140) if idx == 0 else (210, 225, 255)
+                draw_blind.text((cx + 12, 80), col_label, fill=header_color, font=font_col)
+                draw_blind.text((cx + 12, 102), sub_label, fill=(160, 175, 195), font=font_sub)
+
+                im_blind = col_img.resize((col_w, col_h), Image.Resampling.LANCZOS)
+                draw_col_blind = ImageDraw.Draw(im_blind)
+
+                # Reference position indicator
+                draw_col_blind.line([(x_baseline_thumb, 0), (x_baseline_thumb, col_h)], fill=(0, 255, 140, 80), width=1)
+                # Subtle actual center line without shift magnitude text
+                x_blind_thumb = (face_before[0] + s_val) * scale_thumb
+                line_color = (0, 255, 140) if idx == 0 else (120, 180, 255)
+                draw_col_blind.line([(x_blind_thumb, 0), (x_blind_thumb, col_h)], fill=line_color, width=2)
+                y_blind_thumb = face_before[1] * scale_thumb
+                draw_col_blind.rectangle([(x_blind_thumb - 3, y_blind_thumb - 3), (x_blind_thumb + 3, y_blind_thumb + 3)], fill=line_color)
+
+                comp_blind.paste(im_blind, (cx, header_h))
+                if idx > 0:
+                    draw_blind.line([(cx, 76), (cx, total_h)], fill=(50, 55, 70), width=2)
+
+            comp_blind_path = evidence_dir / f"{render_id}_policy_blind.png"
+            comp_blind.save(comp_blind_path, optimize=True)
+
+            # Build review rows
             review_rows.append({
                 "render_id": render_id,
                 "canonical_name": canonical_name,
@@ -307,6 +402,28 @@ async def main():
                 "baseline_vs_D": "unreviewed",
                 "baseline_vs_E": "unreviewed",
                 "reviewer_note": "",
+            })
+
+            blind_review_rows.append({
+                "render_id": render_id,
+                "canonical_name": canonical_name,
+                "category": category,
+                "candidate_1": "unreviewed",
+                "candidate_2": "unreviewed",
+                "candidate_3": "unreviewed",
+                "candidate_4": "unreviewed",
+                "candidate_1_direction": "unreviewed",
+                "candidate_1_magnitude": "unreviewed",
+                "candidate_1_note": "",
+                "candidate_2_direction": "unreviewed",
+                "candidate_2_magnitude": "unreviewed",
+                "candidate_2_note": "",
+                "candidate_3_direction": "unreviewed",
+                "candidate_3_magnitude": "unreviewed",
+                "candidate_3_note": "",
+                "candidate_4_direction": "unreviewed",
+                "candidate_4_magnitude": "unreviewed",
+                "candidate_4_note": "",
             })
 
         await browser.close()
@@ -339,6 +456,33 @@ async def main():
         for r in review_rows:
             writer.writerow(r)
     print(f"Saved policy review CSV to {review_csv_path}")
+
+    # Save blind_manifest.json (DO NOT expose mapping in blind_review.csv)
+    blind_manifest_path = evidence_dir / "blind_manifest.json"
+    with open(blind_manifest_path, "w", encoding="utf-8") as f:
+        json.dump({
+            "schema": 1,
+            "description": "Deterministic mapping from blind Candidate 1-4 to candidate policy B/C/D/E for each render_id.",
+            "samples": blind_manifest
+        }, f, indent=2, ensure_ascii=False)
+    print(f"Saved blind manifest JSON to {blind_manifest_path}")
+
+    # Save blind_review.csv
+    blind_review_csv_path = evidence_dir / "blind_review.csv"
+    blind_review_fields = [
+        "render_id", "canonical_name", "category",
+        "candidate_1", "candidate_2", "candidate_3", "candidate_4",
+        "candidate_1_direction", "candidate_1_magnitude", "candidate_1_note",
+        "candidate_2_direction", "candidate_2_magnitude", "candidate_2_note",
+        "candidate_3_direction", "candidate_3_magnitude", "candidate_3_note",
+        "candidate_4_direction", "candidate_4_magnitude", "candidate_4_note",
+    ]
+    with open(blind_review_csv_path, "w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=blind_review_fields)
+        writer.writeheader()
+        for r in blind_review_rows:
+            writer.writerow(r)
+    print(f"Saved blind review CSV to {blind_review_csv_path}")
 
     # Task 6: Compute geometric shift statistics for each candidate policy
     stats = {}

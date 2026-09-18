@@ -84,8 +84,45 @@ $$\text{SoftCap}(\Delta x) = \begin{cases}
 
 ---
 
-## 五、复核与后续决策流程
+## 五、盲审机制与人工复核规范 (Blind Review Protocol)
 
-1. **由美术/产品/Astra 评审人** 审阅 36 份 `{rid}_policy_compare.png`。
-2. 填写 `policy_review.csv`，对各策略相对于 Baseline 的视觉观感标注 `better` / `same` / `worse`，并记录备注。
-3. 结合人工复核结果与边缘裁切风险，再行决定是否将最佳 Policy 的阻尼参数收敛至生产逻辑中。
+为消除评审人对算法名称（如“Raw v5”）、截断数值（如“40px”）以及追踪置信度的心理锚定偏差（Anchoring Bias），系统独立生成了**完全盲审套件**：
+
+### 1. 盲审制品清单
+* **`{render_id}_policy_blind.png` (共 36 份)**:
+  * 采用 5 列并排盲审看板：`Reference | Candidate 1 | Candidate 2 | Candidate 3 | Candidate 4`。
+  * **严格盲审脱敏**：彻底隐去所有策略代号（B/C/D/E）、Raw v5 标识、截断参数（Knee/Cap）、像素位移数值及 `tracking_confidence`，仅保留纯净构图与中性几何参考。
+* **`blind_manifest.json` (钥匙清单)**:
+  * 采用基于固定盐值与 `render_id` 的确定性随机排列，记录每张盲审卡片中 `Candidate 1~4` 与实际策略 `B/C/D/E` 的唯一对应关系。
+  * **该映射严格独立存放于 JSON 中，在评审人使用的 CSV 中绝不暴露。**
+* **`blind_review.csv` (评审表单)**:
+  * 表头包含各 Candidate 的优劣判断、修正方向、修正幅度及备注：
+    ```csv
+    render_id,canonical_name,category,candidate_1,candidate_2,candidate_3,candidate_4,candidate_1_direction,candidate_1_magnitude,candidate_1_note,candidate_2_direction,candidate_2_magnitude,candidate_2_note,candidate_3_direction,candidate_3_magnitude,candidate_3_note,candidate_4_direction,candidate_4_magnitude,candidate_4_note
+    ```
+  * 初始状态全量设为 `unreviewed`。
+
+### 2. 人工盲审判定维度规范
+
+评审人需对照 `Reference`，对每个 `Candidate` 进行以下三维独立审视并填写 CSV：
+
+1. **整体观感 (`candidate_N`)**：
+   * `better`: 相对于 Reference 基准，卡面构图更均衡、人物与信息区视觉从属感更强。
+   * `same`: 与 Reference 视觉感知无显著差异（如位移极小）。
+   * `worse`: 构图劣于 Reference（例如过度偏移导致身体贴边、脸部被遮挡或割裂感增强）。
+2. **修正方向 (`candidate_N_direction`)**：
+   * `correct`: 人物中轴朝着使整体画面更协调、更居中的正确方向移动。
+   * `neutral`: 几乎未移动，或无法判断明显方向差异。
+   * `wrong`: 移动方向错误（例如把本已偏向一侧的人物进一步拉向同侧极端）。
+3. **修正幅度 (`candidate_N_magnitude`)**：
+   * `insufficient`: 方向正确，但幅度过小，改善效果不明显。
+   * `appropriate`: 幅度适中，既达成了居中平衡，又未破坏原有头部焦点与卡面留白。
+   * `excessive`: 修正过冲，产生严重漂移、贴边或面部跑出舒适区。
+
+---
+
+## 六、决策与收敛路线
+
+1. 评审团队依据 `{render_id}_policy_blind.png` 独立打标并完成 `blind_review.csv`。
+2. 评审完成后，通过脚本自动对照 `blind_manifest.json` 解盲，统计 B、C、D、E 各策略在真实审美维度的胜率（Win Rate）、正确方向比率与适度幅度比率。
+3. 结合解盲打标结果与边缘裁切回归率，再行决策是否采纳某种连续阻尼策略并收敛至生产逻辑中。
