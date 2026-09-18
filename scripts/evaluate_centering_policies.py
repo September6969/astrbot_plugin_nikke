@@ -404,8 +404,6 @@ async def main():
 
             blind_review_rows.append({
                 "render_id": render_id,
-                "canonical_name": canonical_name,
-                "category": category,
                 "candidate_1": "unreviewed",
                 "candidate_2": "unreviewed",
                 "candidate_3": "unreviewed",
@@ -479,7 +477,7 @@ async def main():
     # Save blind_review.csv into blind_review_package
     blind_review_csv_path = blind_package_dir / "blind_review.csv"
     blind_review_fields = [
-        "render_id", "canonical_name", "category",
+        "render_id",
         "candidate_1", "candidate_2", "candidate_3", "candidate_4",
         "candidate_1_direction", "candidate_1_magnitude", "candidate_1_note",
         "candidate_2_direction", "candidate_2_magnitude", "candidate_2_note",
