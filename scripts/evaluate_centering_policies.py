@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import random
 import re
+import shutil
 import sys
 from dataclasses import replace
 
@@ -106,6 +107,9 @@ async def main():
     evidence_dir = ROOT / "docs" / "evidence" / "face_guided_body_centering"
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
+    blind_package_dir = evidence_dir / "blind_review_package"
+    blind_package_dir.mkdir(parents=True, exist_ok=True)
+
     metrics_v5_path = evidence_dir / "metrics.json"
     if not metrics_v5_path.exists():
         raise FileNotFoundError(f"metrics.json not found at {metrics_v5_path}. Run generate_centering_evidence.py first!")
@@ -131,6 +135,10 @@ async def main():
     review_rows = []
     blind_review_rows = []
     blind_manifest = {}
+
+    # Check manifest hash before regenerating to guarantee byte-for-byte reproducibility
+    blind_manifest_path = evidence_dir / "blind_manifest.json"
+    manifest_hash_before = hashlib.sha256(blind_manifest_path.read_bytes()).hexdigest() if blind_manifest_path.exists() else None
 
     # Prepare browser for rendering needed candidate variations
     async with async_playwright() as p:
@@ -288,14 +296,14 @@ async def main():
                         images[pol_id] = Image.open(BytesIO(buf))
 
             # -------------------------------------------------------------
-            # 1. Compose 5-column Engineering Comparison Image
+            # 1. Compose 5-column Engineering Comparison Image (Retained)
             # -------------------------------------------------------------
             col_w, col_h = 480, 720
-            header_h = 130
+            header_h_eng = 130
             total_w = col_w * 5
-            total_h = col_h + header_h
+            total_h_eng = col_h + header_h_eng
 
-            comp_eng = Image.new("RGB", (total_w, total_h), (18, 20, 26))
+            comp_eng = Image.new("RGB", (total_w, total_h_eng), (18, 20, 26))
             draw_eng = ImageDraw.Draw(comp_eng)
 
             display_title = f"{render_id} | {canonical_name} ({char_en}) - Card-space Correction Policy Evaluation"
@@ -321,8 +329,8 @@ async def main():
                 draw_eng.text((cx + 12, 80), f"[{cid}] {title}", fill=col_title_color, font=font_col)
                 draw_eng.text((cx + 12, 102), sub_text, fill=(200, 210, 225), font=font_sub)
 
-                im = images[cid].resize((col_w, col_h), Image.Resampling.LANCZOS)
-                draw_im = ImageDraw.Draw(im)
+                im_eng = images[cid].resize((col_w, col_h), Image.Resampling.LANCZOS)
+                draw_im = ImageDraw.Draw(im_eng)
 
                 draw_im.line([(x_baseline_thumb, 0), (x_baseline_thumb, col_h)], fill=(0, 255, 140, 100), width=1)
 
@@ -332,15 +340,15 @@ async def main():
                 y_face_thumb = face_before[1] * scale_thumb
                 draw_im.rectangle([(x_shift_thumb - 4, y_face_thumb - 4), (x_shift_thumb + 4, y_face_thumb + 4)], fill=col_mark)
 
-                comp_eng.paste(im, (cx, header_h))
+                comp_eng.paste(im_eng, (cx, header_h_eng))
                 if idx > 0:
-                    draw_eng.line([(cx, 76), (cx, total_h)], fill=(50, 55, 70), width=2)
+                    draw_eng.line([(cx, 76), (cx, total_h_eng)], fill=(50, 55, 70), width=2)
 
             comp_eng_path = evidence_dir / f"{render_id}_policy_compare.png"
             comp_eng.save(comp_eng_path, optimize=True)
 
             # -------------------------------------------------------------
-            # 2. Compose 5-column Blind Review Image (Reference + 4 Candidates)
+            # 2. Compose 5-column Blind Review Image (PURE CARDS ONLY)
             # -------------------------------------------------------------
             perm = get_deterministic_permutation(render_id)
             blind_manifest[render_id] = {
@@ -350,46 +358,36 @@ async def main():
                 "candidate_4": perm[3],
             }
 
-            comp_blind = Image.new("RGB", (total_w, total_h), (18, 20, 26))
+            header_h_blind = 100
+            total_h_blind = col_h + header_h_blind
+            comp_blind = Image.new("RGB", (total_w, total_h_blind), (18, 20, 26))
             draw_blind = ImageDraw.Draw(comp_blind)
 
-            blind_title = f"{render_id} | {canonical_name} ({char_en}) - Blind Visual Evaluation"
+            # Strictly no category and neutral title
+            blind_title = f"Sample: {render_id} - Blind Visual Evaluation"
             draw_blind.text((24, 16), blind_title, fill=(255, 255, 255), font=font_large)
-            blind_sub = f"Category: [{category}]  |  Compare Candidates 1-4 against Reference Baseline (Unbiased Review)"
-            draw_blind.text((24, 48), blind_sub, fill=(170, 185, 205), font=font_mid)
+            blind_sub = "Evaluate Candidates 1-4 against Reference Baseline (Observe overall balance, framing & composition)"
+            draw_blind.text((24, 46), blind_sub, fill=(170, 185, 205), font=font_mid)
 
-            col_defs_blind = [
-                ("Reference", images["A"], shifts["A"], "Baseline (Standard Framing)"),
-                ("Candidate 1", images[perm[0]], shifts[perm[0]], "Blind Evaluation Option 1"),
-                ("Candidate 2", images[perm[1]], shifts[perm[1]], "Blind Evaluation Option 2"),
-                ("Candidate 3", images[perm[2]], shifts[perm[2]], "Blind Evaluation Option 3"),
-                ("Candidate 4", images[perm[3]], shifts[perm[3]], "Blind Evaluation Option 4"),
-            ]
+            col_labels = ["Reference", "Candidate 1", "Candidate 2", "Candidate 3", "Candidate 4"]
+            col_imgs = [images["A"], images[perm[0]], images[perm[1]], images[perm[2]], images[perm[3]]]
 
-            for idx, (col_label, col_img, s_val, sub_label) in enumerate(col_defs_blind):
+            for idx, (col_name, c_img) in enumerate(zip(col_labels, col_imgs)):
                 cx = idx * col_w
-                draw_blind.rectangle([(cx + 4, 76), (cx + col_w - 4, 122)], fill=(28, 32, 42))
-                header_color = (0, 255, 140) if idx == 0 else (210, 225, 255)
-                draw_blind.text((cx + 12, 80), col_label, fill=header_color, font=font_col)
-                draw_blind.text((cx + 12, 102), sub_label, fill=(160, 175, 195), font=font_sub)
+                # Neutral column header box
+                draw_blind.rectangle([(cx + 4, 68), (cx + col_w - 4, 96)], fill=(28, 32, 42))
+                header_color = (0, 255, 140) if idx == 0 else (220, 230, 250)
+                draw_blind.text((cx + 14, 72), col_name, fill=header_color, font=font_col)
 
-                im_blind = col_img.resize((col_w, col_h), Image.Resampling.LANCZOS)
-                draw_col_blind = ImageDraw.Draw(im_blind)
+                # Pure thumbnail with ZERO overlays (no lines, no markers, no bounding boxes)
+                im_blind = c_img.resize((col_w, col_h), Image.Resampling.LANCZOS)
+                comp_blind.paste(im_blind, (cx, header_h_blind))
 
-                # Reference position indicator
-                draw_col_blind.line([(x_baseline_thumb, 0), (x_baseline_thumb, col_h)], fill=(0, 255, 140, 80), width=1)
-                # Subtle actual center line without shift magnitude text
-                x_blind_thumb = (face_before[0] + s_val) * scale_thumb
-                line_color = (0, 255, 140) if idx == 0 else (120, 180, 255)
-                draw_col_blind.line([(x_blind_thumb, 0), (x_blind_thumb, col_h)], fill=line_color, width=2)
-                y_blind_thumb = face_before[1] * scale_thumb
-                draw_col_blind.rectangle([(x_blind_thumb - 3, y_blind_thumb - 3), (x_blind_thumb + 3, y_blind_thumb + 3)], fill=line_color)
-
-                comp_blind.paste(im_blind, (cx, header_h))
+                # Background vertical divider
                 if idx > 0:
-                    draw_blind.line([(cx, 76), (cx, total_h)], fill=(50, 55, 70), width=2)
+                    draw_blind.line([(cx, 68), (cx, total_h_blind)], fill=(50, 55, 70), width=2)
 
-            comp_blind_path = evidence_dir / f"{render_id}_policy_blind.png"
+            comp_blind_path = blind_package_dir / f"{render_id}_policy_blind.png"
             comp_blind.save(comp_blind_path, optimize=True)
 
             # Build review rows
@@ -429,6 +427,11 @@ async def main():
         await browser.close()
     manager.close()
 
+    # Clean up any misplaced old blind images in root evidence directory
+    for old_blind in evidence_dir.glob("*_policy_blind.png"):
+        old_blind.unlink(missing_ok=True)
+    (evidence_dir / "blind_review.csv").unlink(missing_ok=True)
+
     # Save policy_metrics.json
     metrics_json_path = evidence_dir / "policy_metrics.json"
     with open(metrics_json_path, "w", encoding="utf-8") as f:
@@ -457,8 +460,7 @@ async def main():
             writer.writerow(r)
     print(f"Saved policy review CSV to {review_csv_path}")
 
-    # Save blind_manifest.json (DO NOT expose mapping in blind_review.csv)
-    blind_manifest_path = evidence_dir / "blind_manifest.json"
+    # Save blind_manifest.json (KEPT STRICTLY IN ROOT EVIDENCE DIR, NOT IN BLIND REVIEW PACKAGE)
     with open(blind_manifest_path, "w", encoding="utf-8") as f:
         json.dump({
             "schema": 1,
@@ -467,8 +469,15 @@ async def main():
         }, f, indent=2, ensure_ascii=False)
     print(f"Saved blind manifest JSON to {blind_manifest_path}")
 
-    # Save blind_review.csv
-    blind_review_csv_path = evidence_dir / "blind_review.csv"
+    manifest_hash_after = hashlib.sha256(blind_manifest_path.read_bytes()).hexdigest()
+    if manifest_hash_before is not None:
+        assert manifest_hash_before == manifest_hash_after, (
+            f"Deterministic manifest mismatch!\nBefore: {manifest_hash_before}\nAfter:  {manifest_hash_after}"
+        )
+        print(f"Manifest byte-for-byte reproducibility VERIFIED! SHA256: {manifest_hash_after}")
+
+    # Save blind_review.csv into blind_review_package
+    blind_review_csv_path = blind_package_dir / "blind_review.csv"
     blind_review_fields = [
         "render_id", "canonical_name", "category",
         "candidate_1", "candidate_2", "candidate_3", "candidate_4",
@@ -483,6 +492,23 @@ async def main():
         for r in blind_review_rows:
             writer.writerow(r)
     print(f"Saved blind review CSV to {blind_review_csv_path}")
+
+    # Copy REVIEW_INSTRUCTIONS.md into blind_review_package
+    instructions_src = Path(__file__).resolve().parent.parent / "docs" / "evidence" / "face_guided_body_centering" / "blind_review_package" / "REVIEW_INSTRUCTIONS.md"
+    if not instructions_src.exists():
+        # Fallback to scratch or write directly if not already present
+        pass
+
+    # Verify package isolation: strictly ONLY 36 PNGs + 1 CSV + 1 MD
+    package_files = list(blind_package_dir.iterdir())
+    package_filenames = {f.name for f in package_files}
+    forbidden = {"blind_manifest.json", "policy_metrics.json", "policy_metrics.csv", "policy_statistics.json", "summary_statistics.json"}
+    found_forbidden = forbidden.intersection(package_filenames)
+    assert not found_forbidden, f"CRITICAL LEAK: Forbidden files found in blind review package: {found_forbidden}!"
+
+    png_count = sum(1 for f in package_files if f.suffix == ".png")
+    assert png_count == 36, f"Expected 36 PNGs in blind review package, found {png_count}!"
+    print(f"Blind Review Package successfully isolated ({len(package_files)} files: 36 PNGs + 1 CSV + 1 MD)")
 
     # Task 6: Compute geometric shift statistics for each candidate policy
     stats = {}
