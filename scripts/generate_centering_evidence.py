@@ -388,9 +388,9 @@ async def main():
                                   (x_b + 4, face_card_after[1] * scale_thumb + 4)], fill=(255, 40, 140))
 
                 flag_str = " [!FLAG: |shift_x| > 40px]" if over_40px else ""
-                header_text = f"{render_id} | {display_name_cn} ({display_name_en}) - shift_x: {shift_x:+.2f}px, conf: {metric['confidence']} {flag_str}"
+                header_text = f"{render_id} | {display_name_cn} ({display_name_en}) - shift_x: {shift_x:+.2f}px, tracking_conf: {metric['confidence']} {flag_str}"
                 draw.text((24, 16), header_text, fill=(255, 255, 255))
-                draw.text((24, 46), f"[{category}]  LEFT: OFF (Baseline)  |  RIGHT: ON (Body Centering Preview)", fill=(180, 190, 205))
+                draw.text((24, 46), f"[{category}]  LEFT: OFF (Baseline)  |  RIGHT: ON (Body Centering Preview)  [Note: tracking_conf = alpha path stability, not composition correctness]", fill=(180, 190, 205))
 
                 comp.paste(thumb_a, (0, 80))
                 comp.paste(thumb_b, (800, 80))
