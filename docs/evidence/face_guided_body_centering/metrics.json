@@ -1,293 +1,3102 @@
 {
   "schema": 1,
+  "total_samples": 36,
   "samples": [
     {
-      "render_id": "c016",
-      "character_name": "拉毗：小红帽",
-      "character_name_en": "Rapi: Red Hood",
-      "resource_id": 16,
-      "spine_asset_id": "c016",
+      "render_id": "c010",
+      "resource_id": 10,
+      "canonical_name": "拉毗",
+      "character_name_en": "Rapi",
       "costume_id": 0,
       "costume_name": null,
       "is_costume": false,
-      "category": "Golden Sample (拉毗：小红帽)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 2025,
-      "portrait_height": 3682,
-      "scale": 0.719,
-      "face_point_portrait": [
-        941.7504461854451,
-        510.6821509753304
-      ],
-      "face_card_before": [
-        860,
-        610
-      ],
-      "face_card_after": [
-        735.54,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (拉毗)",
+      "scale": 3.0901,
+      "body_axis_x": 221.0,
+      "visual_center_x": 221.0,
+      "bootstrap_width": 134.5,
+      "trusted_width": 219.47,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 58,
+      "bootstrap_clean_rows": 147,
+      "bootstrap_clean_fraction": 0.9423,
+      "bootstrap_half_balance": 0.691,
+      "bootstrap_contaminated_rows": 7,
+      "confidence": 0.9806,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9714,
+      "path_ambiguity": 0.9986,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": -10.96,
+      "applied_shift_x": -7.74,
+      "clamped": false,
+      "face_before": [
+        860.0,
         610.0
       ],
-      "confidence": 0.9805,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": -124.46,
-      "shift_y": -0.0,
-      "reason": "ok",
-      "over_40px": true,
+      "face_after": [
+        852.26,
+        610.0
+      ],
       "face_safe": true,
-      "clipping_regressions": false
-    },
-    {
-      "render_id": "c191",
-      "character_name": "爱丽丝",
-      "character_name_en": "Alice",
-      "resource_id": 191,
-      "spine_asset_id": "c191",
-      "costume_id": 0,
-      "costume_name": null,
-      "is_costume": false,
-      "category": "Mandatory Sample (爱丽丝)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 1761,
-      "portrait_height": 3566,
-      "scale": 0.8087,
-      "face_point_portrait": [
-        744.4747109763516,
-        621.3574984368197
+      "off_artwork_card_bbox": [
+        177.48,
+        267.33,
+        1391.9,
+        2921.75
       ],
-      "face_card_before": [
-        760,
-        550
+      "on_artwork_card_bbox": [
+        169.75,
+        267.33,
+        1384.16,
+        2921.75
       ],
-      "face_card_after": [
-        763.48,
-        550.0
-      ],
-      "confidence": 0.9294,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": 3.48,
-      "shift_y": -0.0,
-      "reason": "ok",
-      "over_40px": false,
-      "face_safe": true,
-      "clipping_regressions": false
-    },
-    {
-      "render_id": "c010",
-      "character_name": "拉毗",
-      "character_name_en": "Rapi",
-      "resource_id": 10,
-      "spine_asset_id": "c010",
-      "costume_id": 0,
-      "costume_name": null,
-      "is_costume": false,
-      "category": "普通直立紧凑角色 (拉毗)",
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
       "anchor_kind": "eye_attachment",
       "portrait_width": 425,
       "portrait_height": 891,
-      "scale": 3.0901,
       "face_point_portrait": [
         236.87043345443783,
         126.89138063277824
       ],
-      "face_card_before": [
-        860,
-        610
-      ],
-      "face_card_after": [
-        852.26,
-        610.0
-      ],
-      "confidence": 0.9806,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
       "shift_x": -7.74,
       "shift_y": -0.0,
       "reason": "ok",
-      "over_40px": false,
+      "over_40px": false
+    },
+    {
+      "render_id": "c191",
+      "resource_id": 191,
+      "canonical_name": "爱丽丝",
+      "character_name_en": "Alice",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (爱丽丝)",
+      "scale": 0.8087,
+      "body_axis_x": 787.5,
+      "visual_center_x": 787.5,
+      "bootstrap_width": 509.0,
+      "trusted_width": 587.39,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 158,
+      "bootstrap_clean_rows": 480,
+      "bootstrap_clean_fraction": 0.7792,
+      "bootstrap_half_balance": 0.6677,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9294,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9324,
+      "path_ambiguity": 0.9987,
+      "width_reliability": 0.9582,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 328.0,
+      "raw_shift_x": 5.21,
+      "applied_shift_x": 3.48,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        763.48,
+        550.0
+      ],
       "face_safe": true,
-      "clipping_regressions": false
+      "off_artwork_card_bbox": [
+        209.7,
+        99.26,
+        1530.31,
+        2879.6
+      ],
+      "on_artwork_card_bbox": [
+        213.18,
+        99.26,
+        1533.8,
+        2879.6
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1761,
+      "portrait_height": 3566,
+      "face_point_portrait": [
+        744.4747109763516,
+        621.3574984368197
+      ],
+      "shift_x": 3.48,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c011",
+      "resource_id": 11,
+      "canonical_name": "尼恩",
+      "character_name_en": "Neon",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (尼恩)",
+      "scale": 1.338,
+      "body_axis_x": 870.0,
+      "visual_center_x": 870.0,
+      "bootstrap_width": 561.0,
+      "trusted_width": 498.29,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 253,
+      "bootstrap_clean_rows": 253,
+      "bootstrap_clean_fraction": 0.4061,
+      "bootstrap_half_balance": 0.382,
+      "bootstrap_contaminated_rows": 370,
+      "confidence": 0.9393,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9245,
+      "path_ambiguity": 0.999,
+      "width_reliability": 0.9821,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 153.0,
+      "raw_shift_x": 162.19,
+      "applied_shift_x": 109.69,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        869.69,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -440.59,
+        14.38,
+        1639.94,
+        4615.61
+      ],
+      "on_artwork_card_bbox": [
+        -330.89,
+        14.38,
+        1749.63,
+        4615.61
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1683,
+      "portrait_height": 3567,
+      "face_point_portrait": [
+        961.3266730582191,
+        464.32981235140824
+      ],
+      "shift_x": 109.69,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c012",
+      "resource_id": 12,
+      "canonical_name": "阿妮斯",
+      "character_name_en": "Anis",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (阿妮斯)",
+      "scale": 1.0341,
+      "body_axis_x": 799.5,
+      "visual_center_x": 799.5,
+      "bootstrap_width": 578.0,
+      "trusted_width": 545.8,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 146,
+      "bootstrap_clean_rows": 386,
+      "bootstrap_clean_fraction": 0.6338,
+      "bootstrap_half_balance": 0.6485,
+      "bootstrap_contaminated_rows": 223,
+      "confidence": 0.9867,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9816,
+      "path_ambiguity": 0.9976,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 45.36,
+      "applied_shift_x": 32.22,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        792.22,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -5.92,
+        102.8,
+        1682.73,
+        3658.99
+      ],
+      "on_artwork_card_bbox": [
+        26.3,
+        102.8,
+        1714.95,
+        3658.99
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1761,
+      "portrait_height": 3567,
+      "face_point_portrait": [
+        804.6785299601008,
+        496.4650926759996
+      ],
+      "shift_x": 32.22,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c070",
+      "resource_id": 70,
+      "canonical_name": "布丽德",
+      "character_name_en": "Brid",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (布丽德)",
+      "scale": 0.9349,
+      "body_axis_x": 1295.5,
+      "visual_center_x": 1295.5,
+      "bootstrap_width": 402.0,
+      "trusted_width": 1489.84,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 163,
+      "bootstrap_clean_rows": 541,
+      "bootstrap_clean_fraction": 0.8768,
+      "bootstrap_half_balance": 0.6831,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9177,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9386,
+      "path_ambiguity": 0.9535,
+      "width_reliability": 0.9743,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 225.0,
+      "raw_shift_x": 219.19,
+      "applied_shift_x": 128.47,
+      "clamped": true,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        888.47,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -570.52,
+        171.19,
+        2246.34,
+        3384.45
+      ],
+      "on_artwork_card_bbox": [
+        -442.04,
+        171.19,
+        2374.82,
+        3384.45
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 3141,
+      "portrait_height": 3565,
+      "face_point_portrait": [
+        1487.1622167322942,
+        469.1863672408913
+      ],
+      "shift_x": 128.47,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c072",
+      "resource_id": 72,
+      "canonical_name": "迪塞尔",
+      "character_name_en": "Diesel",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (迪塞尔)",
+      "scale": 0.9645,
+      "body_axis_x": 959.0,
+      "visual_center_x": 959.0,
+      "bootstrap_width": 504.0,
+      "trusted_width": 804.62,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 390,
+      "bootstrap_clean_rows": 595,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.885,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9874,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9818,
+      "path_ambiguity": 0.9986,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 10.59,
+      "applied_shift_x": 7.53,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        767.53,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -73.81,
+        163.35,
+        1998.88,
+        3480.23
+      ],
+      "on_artwork_card_bbox": [
+        -66.28,
+        163.35,
+        2006.41,
+        3480.23
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2277,
+      "portrait_height": 3567,
+      "face_point_portrait": [
+        928.5042503543382,
+        464.886722482996
+      ],
+      "shift_x": 7.53,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c080",
+      "resource_id": 80,
+      "canonical_name": "桑迪",
+      "character_name_en": "Centi",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (桑迪)",
+      "scale": 1.1256,
+      "body_axis_x": 707.5,
+      "visual_center_x": 707.5,
+      "bootstrap_width": 429.0,
+      "trusted_width": 1005.42,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 291,
+      "bootstrap_clean_rows": 615,
+      "bootstrap_clean_fraction": 0.9824,
+      "bootstrap_half_balance": 0.7188,
+      "bootstrap_contaminated_rows": 11,
+      "confidence": 0.9778,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9845,
+      "path_ambiguity": 0.9795,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 136.46,
+      "applied_shift_x": 96.07,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        856.07,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -60.81,
+        205.55,
+        1663.67,
+        4074.38
+      ],
+      "on_artwork_card_bbox": [
+        35.26,
+        205.55,
+        1759.74,
+        4074.38
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1660,
+      "portrait_height": 3565,
+      "face_point_portrait": [
+        793.1950667536087,
+        370.0017479198882
+      ],
+      "shift_x": 96.07,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c082",
+      "resource_id": 82,
+      "canonical_name": "丽塔",
+      "character_name_en": "Liter",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (丽塔)",
+      "scale": 0.6613,
+      "body_axis_x": 1172.5,
+      "visual_center_x": 1172.5,
+      "bootstrap_width": 675.0,
+      "trusted_width": 634.2,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 199,
+      "bootstrap_clean_rows": 296,
+      "bootstrap_clean_fraction": 0.4744,
+      "bootstrap_half_balance": 0.4669,
+      "bootstrap_contaminated_rows": 12,
+      "confidence": 0.9644,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9536,
+      "path_ambiguity": 0.9906,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": -50.15,
+      "applied_shift_x": -34.82,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        725.18,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        117.09,
+        216.75,
+        1296.86,
+        2489.65
+      ],
+      "on_artwork_card_bbox": [
+        82.27,
+        216.75,
+        1262.04,
+        2489.65
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1912,
+      "portrait_height": 3565,
+      "face_point_portrait": [
+        1036.1799417938164,
+        567.9329633435759
+      ],
+      "shift_x": -34.82,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c120",
+      "resource_id": 120,
+      "canonical_name": "N102",
+      "character_name_en": "N102",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (N102)",
+      "scale": 0.7775,
+      "body_axis_x": 594.0,
+      "visual_center_x": 594.0,
+      "bootstrap_width": 641.0,
+      "trusted_width": 742.76,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 636,
+      "bootstrap_clean_rows": 636,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.8196,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9932,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9903,
+      "path_ambiguity": 0.9991,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 0.11,
+      "applied_shift_x": 0.08,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        760.08,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        387.8,
+        164.56,
+        1225.98,
+        2837.71
+      ],
+      "on_artwork_card_bbox": [
+        387.88,
+        164.56,
+        1226.05,
+        2837.71
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1206,
+      "portrait_height": 3566,
+      "face_point_portrait": [
+        542.697199269717,
+        559.719726807833
+      ],
+      "shift_x": 0.08,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c172",
+      "resource_id": 172,
+      "canonical_name": "艾德米",
+      "character_name_en": "Admi",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "A",
+      "category": "A 普通直立/紧凑 (艾德米)",
+      "scale": 0.8495,
+      "body_axis_x": 581.0,
+      "visual_center_x": 581.0,
+      "bootstrap_width": 598.0,
+      "trusted_width": 379.85,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 439,
+      "bootstrap_clean_rows": 546,
+      "bootstrap_clean_fraction": 0.9286,
+      "bootstrap_half_balance": 0.7311,
+      "bootstrap_contaminated_rows": 42,
+      "confidence": 0.9763,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9666,
+      "path_ambiguity": 0.9966,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 91.98,
+      "applied_shift_x": 64.65,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        824.65,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        268.82,
+        61.65,
+        1458.15,
+        2982.31
+      ],
+      "on_artwork_card_bbox": [
+        333.47,
+        61.65,
+        1522.81,
+        2982.31
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1528,
+      "portrait_height": 3566,
+      "face_point_portrait": [
+        642.1839161480132,
+        638.8530203302689
+      ],
+      "shift_x": 64.65,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c170",
+      "resource_id": 170,
+      "canonical_name": "普丽瓦蒂",
+      "character_name_en": "Privaty",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "B",
+      "category": "B 长发 (普丽瓦蒂)",
+      "scale": 0.8649,
+      "body_axis_x": 1182.0,
+      "visual_center_x": 1182.0,
+      "bootstrap_width": 509.0,
+      "trusted_width": 460.87,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 170,
+      "bootstrap_clean_rows": 585,
+      "bootstrap_clean_fraction": 0.9606,
+      "bootstrap_half_balance": 0.7747,
+      "bootstrap_contaminated_rows": 24,
+      "confidence": 0.9591,
+      "path_coverage": 1.0,
+      "path_continuity": 0.957,
+      "path_ambiguity": 0.9777,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 57.85,
+      "applied_shift_x": 39.94,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        799.94,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -224.82,
+        164.94,
+        1456.57,
+        3139.37
+      ],
+      "on_artwork_card_bbox": [
+        -184.87,
+        164.94,
+        1496.51,
+        3139.37
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2072,
+      "portrait_height": 3567,
+      "face_point_portrait": [
+        1202.6332026933483,
+        509.20574245968965
+      ],
+      "shift_x": 39.94,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c221",
+      "resource_id": 221,
+      "canonical_name": "长发公主",
+      "character_name_en": "Rapunzel",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "B",
+      "category": "B 长发 (长发公主)",
+      "scale": 1.0713,
+      "body_axis_x": 1439.5,
+      "visual_center_x": 1439.5,
+      "bootstrap_width": 1887.0,
+      "trusted_width": 1115.37,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 544,
+      "bootstrap_clean_rows": 544,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.8357,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.974,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9772,
+      "path_ambiguity": 0.9811,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 131.55,
+      "applied_shift_x": 92.26,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        852.26,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -805.14,
+        -172.69,
+        2432.36,
+        3501.92
+      ],
+      "on_artwork_card_bbox": [
+        -712.89,
+        -172.69,
+        2524.62,
+        3501.92
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 3150,
+      "portrait_height": 3558,
+      "face_point_portrait": [
+        1524.9583129126008,
+        738.5828865816002
+      ],
+      "shift_x": 92.26,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c270",
+      "resource_id": 270,
+      "canonical_name": "布兰儿",
+      "character_name_en": "Blanc",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "B",
+      "category": "B 长发 (布兰儿)",
+      "scale": 1.1768,
+      "body_axis_x": 1347.5,
+      "visual_center_x": 1347.5,
+      "bootstrap_width": 414.0,
+      "trusted_width": 358.89,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 315,
+      "bootstrap_clean_rows": 571,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.6894,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9419,
+      "path_coverage": 0.9861,
+      "path_continuity": 0.9366,
+      "path_ambiguity": 0.9867,
+      "width_reliability": 1.0,
+      "terminated_early": true,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 52.54,
+      "applied_shift_x": 35.63,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        795.63,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -763.0,
+        -171.52,
+        2172.01,
+        3967.38
+      ],
+      "on_artwork_card_bbox": [
+        -727.37,
+        -171.52,
+        2207.64,
+        3967.38
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2622,
+      "portrait_height": 3645,
+      "face_point_portrait": [
+        1358.1569218915397,
+        677.1080409892293
+      ],
+      "shift_x": 35.63,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
     },
     {
       "render_id": "c010_02",
-      "character_name": "拉毗",
-      "character_name_en": "Rapi",
       "resource_id": 10,
-      "spine_asset_id": "c010",
+      "canonical_name": "拉毗",
+      "character_name_en": "Rapi",
       "costume_id": 20001,
-      "costume_name": "White Promise",
+      "costume_name": "白色约定",
       "is_costume": true,
-      "category": "长发/侧风角色 (拉毗·白色约定)",
+      "category_code": "B",
+      "category": "B 长发 (拉毗·白色约定)",
+      "scale": 3.4394,
+      "body_axis_x": 223.0,
+      "visual_center_x": 223.0,
+      "bootstrap_width": 134.5,
+      "trusted_width": 216.87,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 58,
+      "bootstrap_clean_rows": 147,
+      "bootstrap_clean_fraction": 0.9423,
+      "bootstrap_half_balance": 0.69,
+      "bootstrap_contaminated_rows": 7,
+      "confidence": 0.9793,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9696,
+      "path_ambiguity": 0.9984,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 91.15,
+      "applied_shift_x": 64.26,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        824.26,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -3.11,
+        165.16,
+        1352.03,
+        3123.08
+      ],
+      "on_artwork_card_bbox": [
+        61.15,
+        165.16,
+        1416.29,
+        3123.08
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
       "anchor_kind": "eye_attachment",
       "portrait_width": 426,
       "portrait_height": 892,
-      "scale": 3.4394,
       "face_point_portrait": [
         237.87043345443783,
         127.89138063277824
       ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        824.26,
-        550.0
-      ],
-      "confidence": 0.9793,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
       "shift_x": 64.26,
       "shift_y": -0.0,
       "reason": "ok",
-      "over_40px": true,
-      "face_safe": true,
-      "clipping_regressions": false
+      "over_40px": true
     },
     {
-      "render_id": "c471",
-      "character_name": "白雪公主：重型武装",
-      "character_name_en": "Snow White: Heavy Arms",
-      "resource_id": 471,
-      "spine_asset_id": "c471",
+      "render_id": "c016",
+      "resource_id": 16,
+      "canonical_name": "拉毗：小红帽",
+      "character_name_en": "Rapi: Red Hood",
       "costume_id": 0,
       "costume_name": null,
       "is_costume": false,
-      "category": "大枪/机械附件角色 (白雪公主：重型武装)",
+      "category_code": "C",
+      "category": "C 长枪/背包 (拉毗：小红帽)",
+      "scale": 0.719,
+      "body_axis_x": 1103.5,
+      "visual_center_x": 1103.5,
+      "bootstrap_width": 587.0,
+      "trusted_width": 1074.6,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 288,
+      "bootstrap_clean_rows": 631,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.7227,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9805,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9747,
+      "path_ambiguity": 0.9948,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": -176.29,
+      "applied_shift_x": -124.46,
+      "clamped": false,
+      "face_before": [
+        860.0,
+        610.0
+      ],
+      "face_after": [
+        735.54,
+        610.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        228.94,
+        288.86,
+        1592.8,
+        2844.02
+      ],
+      "on_artwork_card_bbox": [
+        104.48,
+        288.86,
+        1468.34,
+        2844.02
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2025,
+      "portrait_height": 3682,
+      "face_point_portrait": [
+        941.7504461854451,
+        510.6821509753304
+      ],
+      "shift_x": -124.46,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c471",
+      "resource_id": 471,
+      "canonical_name": "白雪公主：重型武装",
+      "character_name_en": "Snow White: Heavy Arms",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "C",
+      "category": "C 长枪/背包 (白雪公主：重型武装)",
+      "scale": 1.2949,
+      "body_axis_x": 1440.0,
+      "visual_center_x": 1440.0,
+      "bootstrap_width": 1749.0,
+      "trusted_width": 1614.47,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 343,
+      "bootstrap_clean_rows": 343,
+      "bootstrap_clean_fraction": 0.6114,
+      "bootstrap_half_balance": 0.6856,
+      "bootstrap_contaminated_rows": 218,
+      "confidence": 0.9527,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9765,
+      "path_ambiguity": 0.9458,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 125.56,
+      "applied_shift_x": 86.12,
+      "clamped": false,
+      "face_before": [
+        742.0,
+        540.0
+      ],
+      "face_after": [
+        828.12,
+        540.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -1107.32,
+        -914.25,
+        1930.48,
+        3514.26
+      ],
+      "on_artwork_card_bbox": [
+        -1021.2,
+        -914.25,
+        2016.6,
+        3514.26
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
       "anchor_kind": "eye_attachment",
       "portrait_width": 2474,
       "portrait_height": 3548,
-      "scale": 1.2949,
       "face_point_portrait": [
         1492.174684041518,
         1187.070841410796
       ],
-      "face_card_before": [
-        742,
-        540
-      ],
-      "face_card_after": [
-        828.12,
-        540.0
-      ],
-      "confidence": 0.9527,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
       "shift_x": 86.12,
       "shift_y": -0.0,
       "reason": "ok",
-      "over_40px": true,
-      "face_safe": true,
-      "clipping_regressions": false
+      "over_40px": true
     },
     {
-      "render_id": "c330",
-      "character_name": "皇冠",
-      "character_name_en": "Crown",
-      "resource_id": 330,
-      "spine_asset_id": "c330",
+      "render_id": "c100",
+      "resource_id": 100,
+      "canonical_name": "拉普拉斯",
+      "character_name_en": "Laplace",
       "costume_id": 0,
       "costume_name": null,
       "is_costume": false,
-      "category": "披风/机械翼角色 (皇冠)",
+      "category_code": "C",
+      "category": "C 长枪/背包 (拉普拉斯)",
+      "scale": 0.7947,
+      "body_axis_x": 932.5,
+      "visual_center_x": 932.5,
+      "bootstrap_width": 925.5,
+      "trusted_width": 1436.5,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 414,
+      "bootstrap_clean_rows": 584,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.724,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9932,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9897,
+      "path_ambiguity": 0.9999,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 16.36,
+      "applied_shift_x": 11.7,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        771.7,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        93.42,
+        213.15,
+        1578.76,
+        2948.59
+      ],
+      "on_artwork_card_bbox": [
+        105.12,
+        213.15,
+        1590.46,
+        2948.59
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1997,
+      "portrait_height": 3570,
+      "face_point_portrait": [
+        902.7547679692336,
+        487.85933345620106
+      ],
+      "shift_x": 11.7,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c102",
+      "resource_id": 102,
+      "canonical_name": "麦斯威尔",
+      "character_name_en": "Maxwell",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "C",
+      "category": "C 长枪/背包 (麦斯威尔)",
+      "scale": 1.1064,
+      "body_axis_x": 1384.77,
+      "visual_center_x": 1384.77,
+      "bootstrap_width": 438.0,
+      "trusted_width": 239.84,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 349,
+      "bootstrap_clean_rows": 546,
+      "bootstrap_clean_fraction": 0.9207,
+      "bootstrap_half_balance": 0.6837,
+      "bootstrap_contaminated_rows": 47,
+      "confidence": 0.6844,
+      "path_coverage": 1.0,
+      "path_continuity": 0.8358,
+      "path_ambiguity": 0.9848,
+      "width_reliability": 0.9123,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 603.0,
+      "raw_shift_x": 172.52,
+      "applied_shift_x": 85.02,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        845.02,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -833.77,
+        156.01,
+        2655.71,
+        3957.49
+      ],
+      "on_artwork_card_bbox": [
+        -748.76,
+        156.01,
+        2740.72,
+        3957.49
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 3282,
+      "portrait_height": 3564,
+      "face_point_portrait": [
+        1504.5464446111082,
+        420.10859489845143
+      ],
+      "shift_x": 85.02,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c220",
+      "resource_id": 220,
+      "canonical_name": "白雪公主",
+      "character_name_en": "Snow White",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "C",
+      "category": "C 长枪/背包 (白雪公主)",
+      "scale": 1.4043,
+      "body_axis_x": 1893.0,
+      "visual_center_x": 1893.0,
+      "bootstrap_width": 443.0,
+      "trusted_width": 1726.93,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 184,
+      "bootstrap_clean_rows": 460,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.5619,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.8951,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9064,
+      "path_ambiguity": 0.9856,
+      "width_reliability": 0.9406,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 385.0,
+      "raw_shift_x": 168.23,
+      "applied_shift_x": 108.42,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        868.42,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -1936.73,
+        3.23,
+        2840.76,
+        3980.26
+      ],
+      "on_artwork_card_bbox": [
+        -1828.31,
+        3.23,
+        2949.18,
+        3980.26
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 3530,
+      "portrait_height": 2960,
+      "face_point_portrait": [
+        1984.3101464930824,
+        453.3488985697709
+      ],
+      "shift_x": 108.42,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c330",
+      "resource_id": 330,
+      "canonical_name": "皇冠",
+      "character_name_en": "Crown",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "D",
+      "category": "D 机械翼/披风 (皇冠)",
+      "scale": 3.8161,
+      "body_axis_x": 485.5,
+      "visual_center_x": 485.5,
+      "bootstrap_width": 163.0,
+      "trusted_width": 512.91,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 65,
+      "bootstrap_clean_rows": 91,
+      "bootstrap_clean_fraction": 0.6364,
+      "bootstrap_half_balance": 0.5633,
+      "bootstrap_contaminated_rows": 29,
+      "confidence": 0.9792,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9781,
+      "path_ambiguity": 0.9888,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": -103.04,
+      "applied_shift_x": -72.64,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        687.36,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -888.6,
+        116.13,
+        2019.24,
+        3371.22
+      ],
+      "on_artwork_card_bbox": [
+        -961.24,
+        116.13,
+        1946.59,
+        3371.22
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
       "anchor_kind": "eye_attachment",
       "portrait_width": 794,
       "portrait_height": 885,
-      "scale": 3.8161,
       "face_point_portrait": [
         448.01620447231835,
         129.69669353779705
       ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        687.36,
-        550.0
-      ],
-      "confidence": 0.9792,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
       "shift_x": -72.64,
       "shift_y": -0.0,
       "reason": "ok",
-      "over_40px": true,
-      "face_safe": true,
-      "clipping_regressions": false
+      "over_40px": true
     },
     {
-      "render_id": "c234",
-      "character_name": "桃乐丝：机缘巧遇",
-      "character_name_en": "Dorothy: Serendipity",
-      "resource_id": 234,
-      "spine_asset_id": "c234",
+      "render_id": "c101",
+      "resource_id": 101,
+      "canonical_name": "德雷克",
+      "character_name_en": "Drake",
       "costume_id": 0,
       "costume_name": null,
       "is_costume": false,
-      "category": "强非对称/洋伞角色 (桃乐丝：机缘巧遇)",
-      "anchor_kind": "eye_attachment",
-      "portrait_width": 602,
-      "portrait_height": 891,
-      "scale": 4.0102,
-      "face_point_portrait": [
-        284.87966190429086,
-        196.35972095722434
-      ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        687.29,
+      "category_code": "D",
+      "category": "D 机械翼/披风 (德雷克)",
+      "scale": 0.7949,
+      "body_axis_x": 707.0,
+      "visual_center_x": 707.0,
+      "bootstrap_width": 531.0,
+      "trusted_width": 917.77,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 199,
+      "bootstrap_clean_rows": 533,
+      "bootstrap_clean_fraction": 0.9049,
+      "bootstrap_half_balance": 0.8898,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9645,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9762,
+      "path_ambiguity": 0.9661,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 61.22,
+      "applied_shift_x": 42.51,
+      "clamped": false,
+      "face_before": [
+        760.0,
         550.0
       ],
-      "confidence": 0.9632,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
-      "shift_x": -72.71,
+      "face_after": [
+        802.51,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        227.64,
+        294.35,
+        1229.25,
+        2940.67
+      ],
+      "on_artwork_card_bbox": [
+        270.15,
+        294.35,
+        1271.77,
+        2940.67
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1388,
+      "portrait_height": 3457,
+      "face_point_portrait": [
+        733.6935106691826,
+        385.606247329541
+      ],
+      "shift_x": 42.51,
       "shift_y": -0.0,
       "reason": "ok",
-      "over_40px": true,
+      "over_40px": true
+    },
+    {
+      "render_id": "c180",
+      "resource_id": 180,
+      "canonical_name": "吉萝婷",
+      "character_name_en": "Guillotine",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "D",
+      "category": "D 机械翼/披风 (吉洛霆)",
+      "scale": 0.5425,
+      "body_axis_x": 909.0,
+      "visual_center_x": 909.0,
+      "bootstrap_width": 639.5,
+      "trusted_width": 499.39,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 496,
+      "bootstrap_clean_rows": 571,
+      "bootstrap_clean_fraction": 1.0,
+      "bootstrap_half_balance": 0.8053,
+      "bootstrap_contaminated_rows": 0,
+      "confidence": 0.9679,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9605,
+      "path_ambiguity": 0.9891,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 46.88,
+      "applied_shift_x": 32.67,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        792.67,
+        550.0
+      ],
       "face_safe": true,
-      "clipping_regressions": false
+      "off_artwork_card_bbox": [
+        294.7,
+        376.24,
+        1372.66,
+        2243.02
+      ],
+      "on_artwork_card_bbox": [
+        327.37,
+        376.24,
+        1405.34,
+        2243.02
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2115,
+      "portrait_height": 3569,
+      "face_point_portrait": [
+        921.68475872559,
+        384.2850125583291
+      ],
+      "shift_x": 32.67,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
     },
     {
       "render_id": "c352",
-      "character_name": "海伦",
-      "character_name_en": "Helm",
       "resource_id": 352,
-      "spine_asset_id": "c352",
+      "canonical_name": "海伦",
+      "character_name_en": "Helm",
       "costume_id": 0,
       "costume_name": null,
       "is_costume": false,
-      "category": "宽裙摆/宽轮廓角色 (海伦)",
+      "category_code": "E",
+      "category": "E 宽裙摆 (海伦)",
+      "scale": 4.4606,
+      "body_axis_x": 337.0,
+      "visual_center_x": 337.0,
+      "bootstrap_width": 114.0,
+      "trusted_width": 296.9,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 71,
+      "bootstrap_clean_rows": 95,
+      "bootstrap_clean_fraction": 0.6209,
+      "bootstrap_half_balance": 0.54,
+      "bootstrap_contaminated_rows": 25,
+      "confidence": 0.9241,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9555,
+      "path_ambiguity": 0.9469,
+      "width_reliability": 0.9737,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 30.0,
+      "raw_shift_x": 8.1,
+      "applied_shift_x": 5.39,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        765.39,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -639.94,
+        95.67,
+        2147.92,
+        3931.76
+      ],
+      "on_artwork_card_bbox": [
+        -634.55,
+        95.67,
+        2153.3,
+        3931.76
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
       "anchor_kind": "eye_attachment",
       "portrait_width": 657,
       "portrait_height": 892,
-      "scale": 4.4606,
       "face_point_portrait": [
         329.8477022167955,
         117.8550639570251
       ],
-      "face_card_before": [
-        760,
-        550
-      ],
-      "face_card_after": [
-        765.39,
-        550.0
-      ],
-      "confidence": 0.9241,
-      "bootstrap_reliable": true,
-      "terminated_early": false,
       "shift_x": 5.39,
       "shift_y": -0.0,
       "reason": "ok",
-      "over_40px": false,
+      "over_40px": false
+    },
+    {
+      "render_id": "c181",
+      "resource_id": 181,
+      "canonical_name": "梅登",
+      "character_name_en": "Maiden",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "E",
+      "category": "E 宽裙摆 (梅登)",
+      "scale": 0.9238,
+      "body_axis_x": 1425.0,
+      "visual_center_x": 1425.0,
+      "bootstrap_width": 528.0,
+      "trusted_width": 1978.03,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 389,
+      "bootstrap_clean_rows": 389,
+      "bootstrap_clean_fraction": 0.6837,
+      "bootstrap_half_balance": 0.5602,
+      "bootstrap_contaminated_rows": 180,
+      "confidence": 0.9203,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9333,
+      "path_ambiguity": 0.9691,
+      "width_reliability": 0.9696,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 240.0,
+      "raw_shift_x": 129.25,
+      "applied_shift_x": 85.65,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        845.65,
+        550.0
+      ],
       "face_safe": true,
-      "clipping_regressions": false
+      "off_artwork_card_bbox": [
+        -586.59,
+        162.09,
+        1903.14,
+        3338.24
+      ],
+      "on_artwork_card_bbox": [
+        -500.95,
+        162.09,
+        1988.79,
+        3338.24
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2823,
+      "portrait_height": 3566,
+      "face_point_portrait": [
+        1521.6129338267538,
+        483.88964440125756
+      ],
+      "shift_x": 85.65,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c233",
+      "resource_id": 233,
+      "canonical_name": "桃乐丝",
+      "character_name_en": "Dorothy",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "E",
+      "category": "E 宽裙摆 (桃乐丝)",
+      "scale": 1.4467,
+      "body_axis_x": 863.0,
+      "visual_center_x": 863.0,
+      "bootstrap_width": 642.0,
+      "trusted_width": 1094.89,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 245,
+      "bootstrap_clean_rows": 317,
+      "bootstrap_clean_fraction": 0.5319,
+      "bootstrap_half_balance": 0.5014,
+      "bootstrap_contaminated_rows": 279,
+      "confidence": 0.9404,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9734,
+      "path_ambiguity": 0.9282,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": -130.2,
+      "applied_shift_x": -88.16,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        671.84,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -225.71,
+        96.13,
+        2563.52,
+        5069.88
+      ],
+      "on_artwork_card_bbox": [
+        -313.87,
+        96.13,
+        2475.36,
+        5069.88
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2056,
+      "portrait_height": 3566,
+      "face_point_portrait": [
+        745.3542008512054,
+        377.7292974310126
+      ],
+      "shift_x": -88.16,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c310",
+      "resource_id": 310,
+      "canonical_name": "爱德",
+      "character_name_en": "Ade",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "E",
+      "category": "E 宽裙摆 (艾德)",
+      "scale": 0.8774,
+      "body_axis_x": 1540.7,
+      "visual_center_x": 1540.7,
+      "bootstrap_width": 659.5,
+      "trusted_width": 2034.78,
+      "bootstrap_reliable": false,
+      "bootstrap_support_rows": 512,
+      "bootstrap_clean_rows": 513,
+      "bootstrap_clean_fraction": 0.8536,
+      "bootstrap_half_balance": 0.8827,
+      "bootstrap_contaminated_rows": 88,
+      "confidence": 0.1686,
+      "path_coverage": 1.0,
+      "path_continuity": 0.8852,
+      "path_ambiguity": 0.9748,
+      "width_reliability": 0.8847,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 928.0,
+      "raw_shift_x": -129.09,
+      "applied_shift_x": 0.0,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        760.0,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -366.53,
+        51.58,
+        2130.48,
+        3354.91
+      ],
+      "on_artwork_card_bbox": [
+        -366.53,
+        51.58,
+        2130.48,
+        3354.91
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2974,
+      "portrait_height": 3893,
+      "face_point_portrait": [
+        1347.9773163941659,
+        632.080520013375
+      ],
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "reason": "low_confidence",
+      "over_40px": false
+    },
+    {
+      "render_id": "c161",
+      "resource_id": 161,
+      "canonical_name": "米哈拉",
+      "character_name_en": "Mihara",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "F",
+      "category": "F 偏头/侧脸 (米哈拉)",
+      "scale": 0.8925,
+      "body_axis_x": 1009.0,
+      "visual_center_x": 1009.0,
+      "bootstrap_width": 681.5,
+      "trusted_width": 1333.3,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 326,
+      "bootstrap_clean_rows": 332,
+      "bootstrap_clean_fraction": 0.5561,
+      "bootstrap_half_balance": 0.6054,
+      "bootstrap_contaminated_rows": 265,
+      "confidence": 0.9826,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9775,
+      "path_ambiguity": 0.9953,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 35.42,
+      "applied_shift_x": 25.06,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        785.06,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -78.85,
+        252.99,
+        1642.83,
+        3382.18
+      ],
+      "on_artwork_card_bbox": [
+        -53.8,
+        252.99,
+        1667.88,
+        3382.18
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2057,
+      "portrait_height": 3634,
+      "face_point_portrait": [
+        1003.8649256371539,
+        396.7715660157455
+      ],
+      "shift_x": 25.06,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c222",
+      "resource_id": 222,
+      "canonical_name": "红莲",
+      "character_name_en": "Scarlet",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "F",
+      "category": "F 偏头/侧脸 (红莲)",
+      "scale": 1.1193,
+      "body_axis_x": 1314.0,
+      "visual_center_x": 1314.0,
+      "bootstrap_width": 498.0,
+      "trusted_width": 292.23,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 456,
+      "bootstrap_clean_rows": 456,
+      "bootstrap_clean_fraction": 0.8,
+      "bootstrap_half_balance": 0.6988,
+      "bootstrap_contaminated_rows": 114,
+      "confidence": 0.7098,
+      "path_coverage": 1.0,
+      "path_continuity": 0.874,
+      "path_ambiguity": 0.9844,
+      "width_reliability": 0.9256,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 378.0,
+      "raw_shift_x": 161.03,
+      "applied_shift_x": 82.29,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        842.29,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -760.19,
+        -298.09,
+        2653.75,
+        3553.5
+      ],
+      "on_artwork_card_bbox": [
+        -677.89,
+        -298.09,
+        2736.04,
+        3553.5
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 3178,
+      "portrait_height": 3569,
+      "face_point_portrait": [
+        1422.1287552993072,
+        821.6832960241804
+      ],
+      "shift_x": 82.29,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c234",
+      "resource_id": 234,
+      "canonical_name": "桃乐丝：机缘巧遇",
+      "character_name_en": "Dorothy: Serendipity",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "G",
+      "category": "G 强非对称姿势 (桃乐丝：机缘巧遇)",
+      "scale": 4.0102,
+      "body_axis_x": 321.0,
+      "visual_center_x": 321.0,
+      "bootstrap_width": 253.0,
+      "trusted_width": 364.45,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 62,
+      "bootstrap_clean_rows": 132,
+      "bootstrap_clean_fraction": 0.8627,
+      "bootstrap_half_balance": 0.6365,
+      "bootstrap_contaminated_rows": 10,
+      "confidence": 0.9632,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9668,
+      "path_ambiguity": 0.974,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": -104.85,
+      "applied_shift_x": -72.71,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        687.29,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -318.25,
+        -173.27,
+        1967.54,
+        3271.46
+      ],
+      "on_artwork_card_bbox": [
+        -390.96,
+        -173.27,
+        1894.83,
+        3271.46
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": true,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 602,
+      "portrait_height": 891,
+      "face_point_portrait": [
+        284.87966190429086,
+        196.35972095722434
+      ],
+      "shift_x": -72.71,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c110",
+      "resource_id": 110,
+      "canonical_name": "克拉乌",
+      "character_name_en": "Crow",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "G",
+      "category": "G 强非对称姿势 (克拉乌)",
+      "scale": 1.561,
+      "body_axis_x": 1030.11,
+      "visual_center_x": 1030.11,
+      "bootstrap_width": 450.0,
+      "trusted_width": 569.33,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 91,
+      "bootstrap_clean_rows": 187,
+      "bootstrap_clean_fraction": 0.3555,
+      "bootstrap_half_balance": 0.3806,
+      "bootstrap_contaminated_rows": 130,
+      "confidence": 0.6682,
+      "path_coverage": 1.0,
+      "path_continuity": 0.8521,
+      "path_ambiguity": 0.9495,
+      "width_reliability": 0.8919,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 738.0,
+      "raw_shift_x": 8.75,
+      "applied_shift_x": 4.21,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        764.21,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -716.89,
+        109.22,
+        1652.78,
+        5477.67
+      ],
+      "on_artwork_card_bbox": [
+        -712.68,
+        109.22,
+        1656.99,
+        5477.67
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1646,
+      "portrait_height": 3567,
+      "face_point_portrait": [
+        1010.0892605852555,
+        346.36096662547243
+      ],
+      "shift_x": 4.21,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c111",
+      "resource_id": 111,
+      "canonical_name": "豺狼",
+      "character_name_en": "Jackal",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "G",
+      "category": "G 强非对称姿势 (豺狼)",
+      "scale": 0.6638,
+      "body_axis_x": 871.34,
+      "visual_center_x": 871.34,
+      "bootstrap_width": 440.0,
+      "trusted_width": 286.56,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 49,
+      "bootstrap_clean_rows": 641,
+      "bootstrap_clean_fraction": 0.9683,
+      "bootstrap_half_balance": 0.7847,
+      "bootstrap_contaminated_rows": 21,
+      "confidence": 0.7141,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9261,
+      "path_ambiguity": 0.9984,
+      "width_reliability": 0.8704,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 1044.0,
+      "raw_shift_x": 32.36,
+      "applied_shift_x": 16.64,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        776.64,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        231.77,
+        177.85,
+        1332.94,
+        2641.7
+      ],
+      "on_artwork_card_bbox": [
+        248.41,
+        177.85,
+        1349.57,
+        2641.7
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1787,
+      "portrait_height": 3840,
+      "face_point_portrait": [
+        859.8188897327273,
+        624.6740594473081
+      ],
+      "shift_x": 16.64,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c140",
+      "resource_id": 140,
+      "canonical_name": "舒格",
+      "character_name_en": "Sugar",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "G",
+      "category": "G 强非对称姿势 (舒格)",
+      "scale": 1.1366,
+      "body_axis_x": 1227.5,
+      "visual_center_x": 1227.5,
+      "bootstrap_width": 519.0,
+      "trusted_width": 527.09,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 171,
+      "bootstrap_clean_rows": 239,
+      "bootstrap_clean_fraction": 0.4587,
+      "bootstrap_half_balance": 0.4612,
+      "bootstrap_contaminated_rows": 282,
+      "confidence": 0.6203,
+      "path_coverage": 1.0,
+      "path_continuity": 0.7758,
+      "path_ambiguity": 0.99,
+      "width_reliability": 0.8321,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 664.0,
+      "raw_shift_x": 151.64,
+      "applied_shift_x": 67.72,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        827.72,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -674.04,
+        183.02,
+        3227.82,
+        3608.65
+      ],
+      "on_artwork_card_bbox": [
+        -606.32,
+        183.02,
+        3295.54,
+        3608.65
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": null,
+      "clipping_review": "manual_required",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 3561,
+      "portrait_height": 3142,
+      "face_point_portrait": [
+        1325.7237509311874,
+        386.8838545568551
+      ],
+      "shift_x": 67.72,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c400",
+      "resource_id": 400,
+      "canonical_name": "吉尔提",
+      "character_name_en": "Guilty",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "G",
+      "category": "G 强非对称姿势 (吉尔提)",
+      "scale": 0.9997,
+      "body_axis_x": 969.0,
+      "visual_center_x": 969.0,
+      "bootstrap_width": 823.5,
+      "trusted_width": 293.6,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 372,
+      "bootstrap_clean_rows": 384,
+      "bootstrap_clean_fraction": 0.6,
+      "bootstrap_half_balance": 0.5296,
+      "bootstrap_contaminated_rows": 256,
+      "confidence": 0.933,
+      "path_coverage": 0.9882,
+      "path_continuity": 0.9286,
+      "path_ambiguity": 0.9786,
+      "width_reliability": 0.999,
+      "terminated_early": true,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 9.0,
+      "raw_shift_x": 400.98,
+      "applied_shift_x": 130.62,
+      "clamped": true,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        890.62,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -505.67,
+        82.95,
+        1478.66,
+        3638.73
+      ],
+      "on_artwork_card_bbox": [
+        -375.05,
+        82.95,
+        1609.27,
+        3638.73
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": true,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": true,
+        "bottom": false
+      },
+      "has_new_edge_clipping": true,
+      "clipping_regressions": true,
+      "clipping_review": "regression_detected",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 2113,
+      "portrait_height": 3685,
+      "face_point_portrait": [
+        1330.0988336312703,
+        531.2135553574717
+      ],
+      "shift_x": 130.62,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": true
+    },
+    {
+      "render_id": "c010_03",
+      "resource_id": 10,
+      "canonical_name": "拉毗",
+      "character_name_en": "Rapi",
+      "costume_id": 10005,
+      "costume_name": "经典假期",
+      "is_costume": true,
+      "category_code": "H",
+      "category": "H costume variants (拉毗·经典假期)",
+      "scale": 3.3278,
+      "body_axis_x": 265.5,
+      "visual_center_x": 265.5,
+      "bootstrap_width": 139.0,
+      "trusted_width": 203.89,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 61,
+      "bootstrap_clean_rows": 149,
+      "bootstrap_clean_fraction": 0.9551,
+      "bootstrap_half_balance": 0.6964,
+      "bootstrap_contaminated_rows": 7,
+      "confidence": 0.9809,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9737,
+      "path_ambiguity": 0.9967,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": -27.91,
+      "applied_shift_x": -19.71,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        740.29,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -2.38,
+        247.59,
+        1445.22,
+        3109.5
+      ],
+      "on_artwork_card_bbox": [
+        -22.09,
+        247.59,
+        1425.51,
+        3109.5
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 467,
+      "portrait_height": 892,
+      "face_point_portrait": [
+        245.09322714154428,
+        106.87385137424496
+      ],
+      "shift_x": -19.71,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c017",
+      "resource_id": 17,
+      "canonical_name": "阿妮斯：超级巨星",
+      "character_name_en": "Anis: Star",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "H",
+      "category": "H costume variants (阿妮斯：超级巨星)",
+      "scale": 3.888,
+      "body_axis_x": 187.5,
+      "visual_center_x": 187.5,
+      "bootstrap_width": 152.0,
+      "trusted_width": 175.42,
+      "bootstrap_reliable": true,
+      "bootstrap_support_rows": 100,
+      "bootstrap_clean_rows": 134,
+      "bootstrap_clean_fraction": 0.8933,
+      "bootstrap_half_balance": 0.7726,
+      "bootstrap_contaminated_rows": 16,
+      "confidence": 0.9716,
+      "path_coverage": 1.0,
+      "path_continuity": 0.962,
+      "path_ambiguity": 0.9936,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 31.17,
+      "applied_shift_x": 21.8,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        781.8,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        102.05,
+        85.7,
+        1330.64,
+        3425.45
+      ],
+      "on_artwork_card_bbox": [
+        123.85,
+        85.7,
+        1352.44,
+        3425.45
+      ],
+      "off_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 348,
+      "portrait_height": 891,
+      "face_point_portrait": [
+        185.22893383212352,
+        135.41948886800128
+      ],
+      "shift_x": 21.8,
+      "shift_y": -0.0,
+      "reason": "ok",
+      "over_40px": false
+    },
+    {
+      "render_id": "c224",
+      "resource_id": 224,
+      "canonical_name": "白雪公主：纯真年代",
+      "character_name_en": "Snow White: Innocent Days",
+      "costume_id": 0,
+      "costume_name": null,
+      "is_costume": false,
+      "category_code": "H",
+      "category": "H costume variants (白雪公主：纯真年代)",
+      "scale": 0.9809,
+      "body_axis_x": 819.5,
+      "visual_center_x": 819.5,
+      "bootstrap_width": 645.78,
+      "trusted_width": 602.27,
+      "bootstrap_reliable": false,
+      "bootstrap_support_rows": 0,
+      "bootstrap_clean_rows": 0,
+      "bootstrap_clean_fraction": 0.0,
+      "bootstrap_half_balance": 0.3025,
+      "bootstrap_contaminated_rows": 584,
+      "confidence": 0.1961,
+      "path_coverage": 1.0,
+      "path_continuity": 0.9761,
+      "path_ambiguity": 0.9931,
+      "width_reliability": 1.0,
+      "terminated_early": false,
+      "max_vertical_gap": 0.0,
+      "max_untrusted_span": 0.0,
+      "raw_shift_x": 409.9,
+      "applied_shift_x": 0.0,
+      "clamped": false,
+      "face_before": [
+        760.0,
+        550.0
+      ],
+      "face_after": [
+        760.0,
+        550.0
+      ],
+      "face_safe": true,
+      "off_artwork_card_bbox": [
+        -350.95,
+        -172.98,
+        1410.71,
+        3203.21
+      ],
+      "on_artwork_card_bbox": [
+        -350.95,
+        -172.98,
+        1410.71,
+        3203.21
+      ],
+      "off_clipping": {
+        "left": true,
+        "top": true,
+        "right": false,
+        "bottom": true
+      },
+      "on_clipping": {
+        "left": true,
+        "top": true,
+        "right": false,
+        "bottom": true
+      },
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "clipping_regressions": false,
+      "clipping_review": "clean",
+      "anchor_kind": "eye_attachment",
+      "portrait_width": 1924,
+      "portrait_height": 3570,
+      "face_point_portrait": [
+        1196.6094314072438,
+        801.0764344254658
+      ],
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "reason": "low_confidence",
+      "over_40px": false
     }
   ]
 }
