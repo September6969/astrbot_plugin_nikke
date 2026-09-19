@@ -42,6 +42,8 @@ class CalendarActivity:
     tag: str = ""
     activity_kind: str = ""
     version: int = 1
+    start_precision: str = "EXACT"
+    end_precision: str = "EXACT"
 
     def __post_init__(self) -> None:
         if not isinstance(self.event_id, str) or not self.event_id.strip():
@@ -104,6 +106,10 @@ class CalendarActivity:
         current = _aware_utc(now) if now else datetime.now(timezone.utc)
         if current > self.end_at:
             return "已结束"
+        if getattr(self, "end_precision", "EXACT") != "EXACT":
+            from datetime import timedelta
+            CST = timezone(timedelta(hours=8))
+            return f"{self.end_at.astimezone(CST).strftime('%m.%d')} 截止"
         if current < self.start_at:
             diff = self.start_at - current
             days = diff.days
@@ -164,6 +170,8 @@ class CalendarActivity:
             "tag": self.tag,
             "activity_kind": self.activity_kind,
             "version": self.version,
+            "start_precision": self.start_precision,
+            "end_precision": self.end_precision,
         }
 
     @classmethod
@@ -192,4 +200,14 @@ class CalendarActivity:
             tag=str(data.get("tag", "")),
             activity_kind=str(data.get("activity_kind", "")),
             version=data.get("version", 1),
+            start_precision=str(data.get("start_precision", data.get("time_precision", "EXACT"))),
+            end_precision=str(data.get("end_precision", data.get("time_precision", "EXACT"))),
         )
+
+
+def __getattr__(name: str) -> Any:
+    if name == "TimePrecision":
+        from .canonical_models import TimePrecision
+        return TimePrecision
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+

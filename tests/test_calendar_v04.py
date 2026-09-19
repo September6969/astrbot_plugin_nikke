@@ -474,27 +474,12 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         self.assertIn("未来 30 天", results[0])
         self.assertIn("Active Test Event", results[0])
 
-        # 3. Calendar fails and has no snapshot -> falls back to announcements with warning banner
+        # 3. Calendar has no snapshot -> returns immediate notice without awaiting remote network
         cal_empty = CalendarService(Path(self.tmp_dir.name) / "cal_empty")
         main_inst.calendar = cal_empty
 
-        async def fail_sync():
-            return False, "网络连接拒绝"
-
-        cal_empty.sync_from_source = fail_sync
-
-        rec = AnnouncementRecord(
-            content_id="a1",
-            title="Official Maintenance Notice",
-            body="活动时间：2026.09.01 18:00 ~ 2026.09.20 18:00",
-            published_at="2026-09-01 10:00",
-        )
-        main_inst.announcements.add_or_update(rec)
-
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "14")]
-        self.assertIn("⚠️ 结构化日程不可用，已降级使用官方公告时间解析。", results[0])
-        self.assertIn("网络连接拒绝", results[0])
-        self.assertIn("Official Maintenance Notice", results[0])
+        self.assertIn("日程数据尚未就绪，正在后台同步，请稍后重试。", results[0])
 
     def test_deadline_reminders_for_delivery_selector(self):
         from astrbot_plugin_nikke.features.announcement.service import AnnouncementService, GameDeadline

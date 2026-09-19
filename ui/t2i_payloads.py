@@ -430,53 +430,413 @@ class UnionMemberT2IPayloadBuilder:
 
 
 class CalendarT2IPayloadBuilder:
+    """Operations Feed T2I 渲染数据组装器。
+
+    支持：
+    1. 基于 Runtime Status Resolver 与起止时间精度的活动数据分类；
+    2. 基于固定画布 (1600x900) 与毛玻璃面板 (1180x730) 的高度预算自动分页；
+    3. 单项超页降级与标题视觉截断策略 (保留完整 full_title)；
+    4. 本地 Key Visual 背景探测与 Data URI 编码；
+    5. 全局状态与页面状态分离 (NO ACTIVE OPERATIONS 仅在全局无活动时出现)；
+    6. 彻底移除旧版 progress 进度条契约，对旧版测试保持数据键向后兼容。
+    """
+
+    CANVAS_W = 1600
+    CANVAS_H = 900
+    PANEL_W = 1180
+    PANEL_H = 730
+
+    # 面板固定高度 730px，内部上下内边距 32+24=56px，Header 80px，Footer 48px，主内容可用净预算 516px
+    CONTENT_BUDGET = 516
+
+    ACTIVE_SECTION_HEADER_COST = 36
+    NEXT_SECTION_HEADER_COST = 36
+    SECTION_GAP = 16
+
+    ACTIVE_NORMAL_H = 96
+    ACTIVE_LONG_H = 124
+
+    NEXT_NORMAL_H = 46
+    NEXT_LONG_H = 64
+
+    EMPTY_STATE_H = 60
+
+    def __init__(self, resolver: T2IAssetResolver | None = None):
+        self.resolver = resolver or T2IAssetResolver()
+
+    def _resolve_background(self, service, active_events, upcoming_events) -> str | None:
+        vc = getattr(service, "visual_cache", None)
+        if not vc or not hasattr(vc, "resolve_path"):
+            return None
+
+        candidate_ids = []
+        # 优先级 1：进行中主活动
+        main_categories = {"event", "solo_raid", "union_raid"}
+        for ev in active_events:
+            if ev.category in main_categories:
+                candidate_ids.append(ev.event_id)
+        # 优先级 2：其余进行中活动
+        for ev in active_events:
+            if ev.event_id not in candidate_ids:
+                candidate_ids.append(ev.event_id)
+        # 优先级 3：预告活动
+        for ev in upcoming_events:
+            if ev.event_id not in candidate_ids:
+                candidate_ids.append(ev.event_id)
+        # 优先级 4：本地清单内已有任意 KV
+        manifest = getattr(vc, "_manifest", {})
+        if isinstance(manifest, dict):
+            for eid in manifest:
+                if eid not in candidate_ids:
+                    candidate_ids.append(str(eid))
+
+        for eid in candidate_ids:
+            path = vc.resolve_path(eid)
+            if path is not None and path.is_file():
+                try:
+                    uri = self.resolver.encode(path, size=(1600, 900))
+                    if uri:
+                        return uri
+                except Exception:
+                    continue
+        return None
+
+    def _paginate(self, active_items: list[dict], next_items: list[dict], global_has_active: bool) -> list[dict]:
+        pages = []
+        rem_active = list(active_items)
+        rem_next = list(next_items)
+
+        if not rem_active and not rem_next:
+            return [{
+                "page_number": 1,
+                "page_total": 1,
+                "active_items": [],
+                "next_items": [],
+                "page_active_items": [],
+                "page_next_items": [],
+                "show_active_header": True,
+                "show_next_header": False,
+            }]
+
+        page_idx = 1
+        while rem_active or rem_next:
+            budget = self.CONTENT_BUDGET
+            p_active = []
+            p_next = []
+
+            # 1. 放置 Active 任务
+            if rem_active:
+                budget -= self.ACTIVE_SECTION_HEADER_COST
+                while rem_active:
+                    item = rem_active[0]
+                    cost = self.ACTIVE_LONG_H if item.get("is_long_title") else self.ACTIVE_NORMAL_H
+                    if cost > budget:
+                        if not p_active:
+                            # 单项超页处理：独占当前页
+                            item["is_oversize"] = True
+                            p_active.append(rem_active.pop(0))
+                            budget = 0
+                        break
+                    p_active.append(rem_active.pop(0))
+                    budget -= cost
+            elif not pages and not global_has_active:
+                # 仅在全局没有 Active 时，Page 1 扣除空状态与标题预算
+                budget -= (self.ACTIVE_SECTION_HEADER_COST + self.EMPTY_STATE_H)
+
+            # 2. 放置 Next 预告任务
+            if rem_next:
+                gap = self.SECTION_GAP if (p_active or (not pages and not global_has_active)) else 0
+                header_cost = self.NEXT_SECTION_HEADER_COST
+                min_next_cost = self.NEXT_NORMAL_H
+                if budget >= gap + header_cost + min_next_cost:
+                    budget -= (gap + header_cost)
+                    while rem_next:
+                        n_item = rem_next[0]
+                        cost = self.NEXT_LONG_H if n_item.get("is_long_title") else self.NEXT_NORMAL_H
+                        if cost > budget:
+                            if not p_active and not p_next:
+                                # 单项超页处理
+                                n_item["is_oversize"] = True
+                                p_next.append(rem_next.pop(0))
+                                budget = 0
+                            break
+                        p_next.append(rem_next.pop(0))
+                        budget -= cost
+
+            # 紧急保底：确保循环单向推进
+            if not p_active and not p_next:
+                if rem_active:
+                    rem_active[0]["is_oversize"] = True
+                    p_active.append(rem_active.pop(0))
+                elif rem_next:
+                    rem_next[0]["is_oversize"] = True
+                    p_next.append(rem_next.pop(0))
+
+            pages.append({
+                "page_number": page_idx,
+                "page_total": 0,
+                "active_items": p_active,
+                "next_items": p_next,
+                "page_active_items": p_active,
+                "page_next_items": p_next,
+                "show_active_header": bool(p_active or (page_idx == 1 and not global_has_active)),
+                "show_next_header": bool(p_next),
+            })
+            page_idx += 1
+
+        total_pages = len(pages)
+        for p in pages:
+            p["page_total"] = total_pages
+
+        return pages
+
     def build(self, service, days=14, now=None, warning=""):
-        from datetime import datetime, timezone
-        from astrbot_plugin_nikke.features.calendar.models import _aware_utc
-        from astrbot_plugin_nikke.features.calendar.service import CAT_LABELS, CST
-        current = _aware_utc(now) if now else datetime.now(timezone.utc)
-        days = service.normalize_horizon(days)
-        groups = service.group_window(days, current)
-        updated = "Unknown"
-        if service.last_updated_at:
+        from datetime import datetime, timedelta, timezone
+        from astrbot_plugin_nikke.features.calendar.models import _aware_utc, TimePrecision
+        from astrbot_plugin_nikke.features.calendar.canonical_models import (
+            CanonicalEvent,
+            resolve_event_status,
+            EventStatus,
+            Freshness,
+            Coverage,
+            active_sort_key,
+            resolve_next_ending,
+        )
+        from astrbot_plugin_nikke.features.calendar.schedule_service import CAT_LABELS, CST
+
+        # 1. 冻结 QueryContext
+        if hasattr(service, "freeze_query_context"):
+            ctx = service.freeze_query_context(now=now)
+            current = ctx.now
+            events = ctx.events
+            snapshot_ver = ctx.snapshot_version
+            freshness = ctx.freshness
+            coverage = ctx.coverage
+            source_health = ctx.source_health
+        else:
+            current = _aware_utc(now) if now else datetime.now(timezone.utc)
+            events = [act.to_canonical() for act in getattr(service, "list_activities", lambda: [])()]
+            snapshot_ver = "1.0.0"
+            freshness = Freshness.FRESH
+            coverage = Coverage.COMPLETE
+            source_health = {}
+
+        days = service.normalize_horizon(days) if hasattr(service, "normalize_horizon") else days
+
+        # 2. 运行时状态推导与地平线过滤
+        active_canonical: list[CanonicalEvent] = []
+        upcoming_canonical: list[CanonicalEvent] = []
+        for ev in events:
+            st = resolve_event_status(ev, current)
+            if st == EventStatus.ACTIVE:
+                active_canonical.append(ev)
+            elif st == EventStatus.UPCOMING:
+                if ev.start_at is None or ev.start_at <= current + timedelta(days=days):
+                    upcoming_canonical.append(ev)
+
+        # 稳定排序
+        active_canonical.sort(key=active_sort_key)
+        upcoming_canonical.sort(key=lambda e: (e.start_at is None, e.start_at, e.identity_key))
+
+        next_ending_ev = resolve_next_ending(active_canonical, now=current)
+        next_ending_id = next_ending_ev.event_id if next_ending_ev else None
+
+        # 3. 构造 Active Items
+        active_items: list[dict] = []
+        for ev in active_canonical:
+            is_long = len(ev.title) > 26
+            is_oversize = len(ev.title) > 65
+
+            start_prec = ev.start_precision.value if hasattr(ev.start_precision, "value") else str(ev.start_precision)
+            end_prec = ev.end_precision.value if hasattr(ev.end_precision, "value") else str(ev.end_precision)
+
+            if ev.start_at and ev.end_at:
+                if start_prec == "DATE_ONLY" and end_prec == "DATE_ONLY":
+                    time_range = f"{ev.start_at.astimezone(CST).strftime('%m.%d')} → {ev.end_at.astimezone(CST).strftime('%m.%d')} · UTC+8"
+                else:
+                    s_fmt = "%m.%d %H:%M" if start_prec == "EXACT" else "%m.%d"
+                    e_fmt = "%m.%d %H:%M" if end_prec == "EXACT" else "%m.%d"
+                    time_range = f"{ev.start_at.astimezone(CST).strftime(s_fmt)} → {ev.end_at.astimezone(CST).strftime(e_fmt)} · UTC+8"
+            elif ev.start_at:
+                s_fmt = "%m.%d %H:%M" if start_prec == "EXACT" else "%m.%d"
+                time_range = f"{ev.start_at.astimezone(CST).strftime(s_fmt)} 起 · UTC+8"
+            elif ev.end_at:
+                e_fmt = "%m.%d %H:%M" if end_prec == "EXACT" else "%m.%d"
+                time_range = f"{ev.end_at.astimezone(CST).strftime(e_fmt)} 截止 · UTC+8"
+            else:
+                time_range = "时间未定 · UTC+8"
+
+            remaining_str = ev.remaining_display(current)
+
+            # 紧急度：严格限制只有 EXACT precision 参与小时级紧迫度
+            urgency = "NORMAL"
+            if end_prec == "EXACT" and ev.end_at and ev.end_at > current:
+                diff_sec = (ev.end_at - current).total_seconds()
+                if diff_sec <= 3600:
+                    urgency = "CRITICAL"
+                elif diff_sec <= 21600:
+                    urgency = "URGENT"
+                elif diff_sec <= 86400:
+                    urgency = "CLOSING"
+            elif end_prec != "EXACT":
+                urgency = ""
+
+            display_title = ev.title
+            if is_oversize and len(display_title) > 90:
+                display_title = display_title[:87] + "..."
+
+            card = {
+                "event_id": ev.event_id,
+                "title": display_title,
+                "full_title": ev.title,
+                "category": CAT_LABELS.get(ev.category, "活动"),
+                "category_code": ev.category,
+                "time_range": time_range,
+                "start": ev.start_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.start_at else "未知",
+                "end": ev.end_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.end_at else "未知",
+                "remaining": remaining_str,
+                "is_next_ending": (ev.event_id == next_ending_id),
+                "urgency": urgency,
+                "is_long_title": is_long,
+                "is_oversize": is_oversize,
+                "end_precision": end_prec,
+            }
+            active_items.append(card)
+
+        # 4. 构造 Next Items
+        next_items: list[dict] = []
+        for ev in upcoming_canonical:
+            is_long = len(ev.title) > 30
+            is_oversize = len(ev.title) > 65
+            start_prec = ev.start_precision.value if hasattr(ev.start_precision, "value") else str(ev.start_precision)
+
+            if ev.start_at:
+                s_fmt = "%m.%d %H:%M" if start_prec == "EXACT" else "%m.%d"
+                start_time_display = ev.start_at.astimezone(CST).strftime(s_fmt)
+                if start_prec == "EXACT":
+                    diff = ev.start_at - current
+                    days_diff = diff.days
+                    hours_diff = diff.seconds // 3600
+                    if days_diff >= 3:
+                        starts_in = f"STARTS IN {days_diff}D"
+                    elif days_diff > 0:
+                        starts_in = f"STARTS IN {days_diff}D {hours_diff}H"
+                    elif hours_diff > 0:
+                        starts_in = f"STARTS IN {hours_diff}H"
+                    else:
+                        mins_diff = max(1, diff.seconds // 60)
+                        starts_in = f"STARTS IN {mins_diff}M"
+                elif start_prec == "DATE_ONLY":
+                    diff_days = max(1, (ev.start_at.date() - current.date()).days)
+                    starts_in = f"STARTS IN {diff_days}D"
+                else:
+                    starts_in = "即将开始"
+            else:
+                start_time_display = "时间待定"
+                starts_in = "即将开始"
+
+            display_title = ev.title
+            if is_oversize and len(display_title) > 90:
+                display_title = display_title[:87] + "..."
+
+            nrow = {
+                "event_id": ev.event_id,
+                "title": display_title,
+                "full_title": ev.title,
+                "category": CAT_LABELS.get(ev.category, "活动"),
+                "category_code": ev.category,
+                "start_time_display": start_time_display,
+                "starts_in": starts_in,
+                "is_long_title": is_long,
+                "is_oversize": is_oversize,
+                "start": ev.start_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.start_at else "未知",
+                "end": ev.end_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.end_at else "未知",
+                "remaining": starts_in,
+            }
+            next_items.append(nrow)
+
+        global_has_active = bool(active_items)
+        active_count_total = len(active_items)
+
+        # 5. 背景 Key Visual 解析
+        background_data_uri = self._resolve_background(service, active_canonical, upcoming_canonical)
+
+        # 6. 分页计算
+        pages = self._paginate(active_items, next_items, global_has_active)
+
+        # 7. 元数据准备
+        updated_str = "Unknown"
+        if getattr(service, "last_updated_at", None):
             try:
-                updated = _aware_utc(service.last_updated_at).astimezone(CST).strftime("%Y-%m-%d %H:%M")
+                updated_str = _aware_utc(service.last_updated_at).astimezone(CST).strftime("%Y-%m-%d %H:%M")
             except (ValueError, TypeError):
                 pass
-        sync_warning = warning or service.last_sync_error
-        payload = {"horizon_days": days, "timezone_display": "UTC+8", "updated_at_display": updated,
-                   "is_stale": bool(sync_warning), "sync_warning": sync_warning,
-                   "available": service.has_snapshot(),
-                   "fallback_text": service.format_schedule_text(days, current, warning)}
-        for key, activities in groups.items():
-            items = []
-            for item in activities:
-                is_upcoming = (key == "upcoming")
-                if not is_upcoming:
-                    total_sec = max(1.0, (item.end_at - item.start_at).total_seconds())
-                    elapsed_sec = (current - item.start_at).total_seconds()
-                    clamped_pct = max(0.0, min(100.0, (elapsed_sec / total_sec) * 100.0))
-                    prog_val = round(clamped_pct, 1)
-                    if clamped_pct >= 99.5 and clamped_pct < 100.0:
-                        int_pct = 99
-                    elif clamped_pct > 0.0 and clamped_pct < 0.5:
-                        int_pct = 1
-                    else:
-                        int_pct = int(round(clamped_pct))
-                    prog_label = f"{int_pct}%"
-                else:
-                    prog_val = 0.0
-                    prog_label = "未开始"
-                items.append({"title": item.title, "category": CAT_LABELS.get(item.category, "活动"),
-                              "remaining": item.remaining_display(current),
-                              "start": item.start_at.astimezone(CST).strftime("%m/%d %H:%M"),
-                              "end": item.end_at.astimezone(CST).strftime("%m/%d %H:%M"),
-                              "progress_percent": prog_val, "progress_label": prog_label,
-                              "is_upcoming": is_upcoming})
-            payload[key] = items
-        payload["groups"] = [{"title": title, "items": payload[key]} for key, title in
-                             (("ending_soon", "ENDING SOON / 即将结束"), ("active", "ACTIVE / 进行中"), ("upcoming", "UPCOMING / 即将开始"))]
-        return payload
+
+        fresh_str = freshness.value if hasattr(freshness, "value") else str(freshness)
+        cov_str = coverage.value if hasattr(coverage, "value") else str(coverage)
+
+        sync_warning = warning or getattr(service, "last_sync_error", "")
+        is_stale = (fresh_str == "STALE") or bool(sync_warning)
+
+        # 直接消费 QueryContext 冻结的健康与来源展示
+        if hasattr(service, "freeze_query_context"):
+            health_display = ctx.health_display
+            source_display = ctx.source_display
+            if not source_display or source_display == "UNKNOWN":
+                source_display = "LOCAL SNAPSHOT"
+        else:
+            from astrbot_plugin_nikke.features.calendar.canonical_models import compute_health_badge
+            health_display = compute_health_badge(fresh_str, cov_str)
+            sources_present = set()
+            if source_health:
+                for s_name in source_health:
+                    sources_present.add(s_name.upper())
+            if not sources_present:
+                source_display = "LOCAL SNAPSHOT"
+            else:
+                ordered = [s for s in ("GAMEKEE", "OFFICIAL", "MANUAL_OVERRIDE") if s in sources_present]
+                for s in sorted(sources_present):
+                    if s not in ordered:
+                        ordered.append(s)
+                source_display = " + ".join(ordered)
+
+        fallback_text = (
+            service.format_schedule_text(days, current, warning)
+            if hasattr(service, "format_schedule_text")
+            else ""
+        )
+
+        bundle = {
+            "snapshot_version": snapshot_ver,
+            "query_now": current.isoformat(),
+            "canvas": {"width": self.CANVAS_W, "height": self.CANVAS_H},
+            "background_data_uri": background_data_uri,
+            "freshness": fresh_str,
+            "coverage": cov_str,
+            "health_display": health_display,
+            "source_display": source_display,
+            "timezone_display": "UTC+8",
+            "updated_at_display": updated_str,
+            "horizon_days": days,
+            "is_stale": is_stale,
+            "sync_warning": sync_warning,
+            "available": service.has_snapshot() if hasattr(service, "has_snapshot") else bool(events),
+            "fallback_text": fallback_text,
+            "global_has_active": global_has_active,
+            "active_count_total": active_count_total,
+            "pages": pages,
+            # Top-level direct access (Page 1)
+            "page_number": pages[0]["page_number"] if pages else 1,
+            "page_total": len(pages),
+            "active_items": pages[0]["active_items"] if pages else [],
+            "next_items": pages[0]["next_items"] if pages else [],
+            "page_active_items": pages[0]["active_items"] if pages else [],
+            "page_next_items": pages[0]["next_items"] if pages else [],
+            "show_active_header": pages[0]["show_active_header"] if pages else True,
+            "show_next_header": pages[0]["show_next_header"] if pages else False,
+        }
+        return bundle
+
 
 
 class CampaignT2IPayloadBuilder:

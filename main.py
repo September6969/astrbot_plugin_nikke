@@ -161,6 +161,8 @@ class NikkePlugin(Star):
         if getattr(self, "_closing", False):
             coro.close()
             return None
+        if not hasattr(self, "_background_tasks"):
+            self._background_tasks = []
         task = asyncio.create_task(coro)
         self._background_tasks.append(task)
         def done(completed):
@@ -1707,53 +1709,36 @@ class NikkePlugin(Star):
 
         calendar = getattr(self, "calendar", None)
         if calendar is None:
-            fallback_error = ""
-            if self.announcements.record_count() == 0:
-                try:
-                    success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
-                    if not success:
-                        fallback_error = msg
-                except asyncio.TimeoutError:
-                    fallback_error = "同步公告超时"
-                except Exception as e:
-                    fallback_error = f"同步异常: {e}"
-            text = self.announcements.format_schedule_text(fallback_error=fallback_error)
-            yield event.plain_result(text)
+            if hasattr(self, "_spawn_background_task"):
+                if hasattr(self, "_sync_announcements_background"):
+                    self._spawn_background_task(self._sync_announcements_background())
+                elif hasattr(self, "announcements") and hasattr(self.announcements, "sync_from_source"):
+                    self._spawn_background_task(self.announcements.sync_from_source())
+            yield event.plain_result("日程服务尚未就绪，正在后台同步，请稍后重试。")
             return
 
-        calendar_error = ""
         if not calendar.has_snapshot():
-            try:
-                success, msg = await asyncio.wait_for(calendar.sync_from_source(), timeout=4.0)
-                if not success:
-                    calendar_error = msg
-            except asyncio.TimeoutError:
-                calendar_error = "同步结构化日程超时"
-            except Exception as e:
-                calendar_error = f"同步结构化日程异常: {safe_exception_message(e)}"
-
-        if calendar.has_snapshot():
-            payload = CalendarT2IPayloadBuilder().build(calendar, days, warning=calendar_error)
-            path = await self._try_t2i("calendar_schedule", payload)
-            yield event.image_result(path) if path else event.plain_result(payload["fallback_text"])
+            if hasattr(self, "_spawn_background_task"):
+                if hasattr(self, "_sync_calendar_background"):
+                    self._spawn_background_task(self._sync_calendar_background())
+                elif hasattr(calendar, "refresh_schedule_data"):
+                    self._spawn_background_task(calendar.refresh_schedule_data())
+                elif hasattr(calendar, "sync_from_source"):
+                    self._spawn_background_task(calendar.sync_from_source())
+            yield event.plain_result("日程数据尚未就绪，正在后台同步，请稍后重试。")
             return
 
-        announcement_error = ""
-        if self.announcements.record_count() == 0:
-            try:
-                success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
-                if not success:
-                    announcement_error = msg
-            except asyncio.TimeoutError:
-                announcement_error = "同步公告超时"
-            except Exception as e:
-                announcement_error = f"同步公告异常: {safe_exception_message(e)}"
-
-        announcement_text = self.announcements.format_schedule_text(fallback_error=announcement_error)
-        fallback_notice = "⚠️ 结构化日程不可用，已降级使用官方公告时间解析。"
-        if calendar_error:
-            fallback_notice += f"\n（结构化源错误: {calendar_error}）"
-        yield event.plain_result(f"{fallback_notice}\n\n{announcement_text}")
+        payload = CalendarT2IPayloadBuilder().build(calendar, days)
+        path_or_paths = await self._try_t2i("calendar_schedule", payload)
+        if isinstance(path_or_paths, (list, tuple)):
+            for p in path_or_paths:
+                if p:
+                    yield event.image_result(p)
+        elif path_or_paths:
+            yield event.image_result(path_or_paths)
+        else:
+            yield event.plain_result(payload["fallback_text"])
+        return
 
     async def announcements_view(
         self,

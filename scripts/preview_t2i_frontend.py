@@ -59,12 +59,15 @@ async def main():
         if args.fixture != "all" and current_name not in args.fixture.split(","):
             continue
         path = await renderer.render_view(args.page, data)
-        target = output / f"{current_name}.png"
-        shutil.copyfile(path, target)
-        with Image.open(target) as image:
-            for percent in (50, 30):
-                image.resize((image.width * percent // 100, image.height * percent // 100), Image.Resampling.LANCZOS).save(output / f"{current_name}-{percent}.png")
-            print(f"{args.page}/{current_name}: {image.size}", flush=True)
+        paths = path if isinstance(path, (list, tuple)) else [path]
+        for p_idx, p in enumerate(paths, 1):
+            suffix = f"-p{p_idx}" if len(paths) > 1 else ""
+            target = output / f"{current_name}{suffix}.png"
+            shutil.copyfile(p, target)
+            with Image.open(target) as image:
+                for percent in (50, 30):
+                    image.resize((image.width * percent // 100, image.height * percent // 100), Image.Resampling.LANCZOS).save(output / f"{current_name}{suffix}-{percent}.png")
+                print(f"{args.page}/{current_name}{suffix}: {image.size}", flush=True)
     assets.close()
 
 
