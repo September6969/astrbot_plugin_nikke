@@ -22,6 +22,7 @@
 18. same title, different scope -> 独立 identity，不误合并
 """
 
+import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, AsyncMock
@@ -336,8 +337,9 @@ async def test_per_source_lkg_gamekee_success_official_failure(tmp_path):
     # Official 的活动不得被误删，保留在合并集合中
     assert "off:1" in service._events
     assert "gk:1" in service._events
-    assert service.coverage == Coverage.PARTIAL.value
-    assert service.data_quality == "PARTIAL DATA"
+    # Official 为补充源 (required_for_complete=False)，其失败不把 COMPLETE 变成 PARTIAL
+    assert service.coverage == Coverage.COMPLETE.value
+    assert service.data_quality == "DATA OK"
 
 
 @pytest.mark.asyncio
@@ -866,3 +868,181 @@ def test_compatible_sorting_with_none_datetimes(tmp_path):
     groups = service.group_window(14, now=NOW)
     assert "active" in groups
     assert "upcoming" in groups
+
+
+@pytest.mark.asyncio
+async def test_required_for_complete_governs_coverage(tmp_path):
+    """验证 required_for_complete 真正参与 Coverage 计算：
+    - Scenario A: GameKee success, Official failure -> Coverage == COMPLETE
+    - Scenario B: GameKee failure, Official cache/success -> Coverage != COMPLETE (PARTIAL)
+    - Scenario C: Manual success only -> Coverage != COMPLETE (PARTIAL)
+    """
+    ev_gk = CanonicalEvent(id="gk:1", title="GK Event", event_type="event", start_at=NOW, end_at=NOW + timedelta(days=2), primary_source="gamekee")
+    ev_off = CanonicalEvent(id="off:1", title="OFF Event", event_type="event", start_at=NOW, end_at=NOW + timedelta(days=2), primary_source="official")
+
+    # Scenario A: GameKee 成功，Official 失败 -> COMPLETE
+    service_a = ScheduleService(tmp_path / "sa")
+    class GKSuccess(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "gamekee"
+        @property
+        def required_for_complete(self) -> bool:
+            return True
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.SUCCESS_DATA, events=[ev_gk], source="gamekee")
+
+    class OffFail(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "official"
+        @property
+        def required_for_complete(self) -> bool:
+            return False
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.REQUEST_FAILED, error_message="Network error", source="official")
+
+    service_a.adapters = [GKSuccess(), OffFail()]
+    ok, _ = await service_a.refresh_schedule_data()
+    assert ok
+    assert service_a.coverage == Coverage.COMPLETE.value
+
+    # Scenario B: GameKee 失败，Official 成功/有缓存 -> PARTIAL (不得为 COMPLETE)
+    service_b = ScheduleService(tmp_path / "sb")
+    class GKFail(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "gamekee"
+        @property
+        def required_for_complete(self) -> bool:
+            return True
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.REQUEST_FAILED, error_message="GK Down", source="gamekee")
+
+    class OffSuccess(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "official"
+        @property
+        def required_for_complete(self) -> bool:
+            return False
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.SUCCESS_DATA, events=[ev_off], source="official")
+
+    service_b.adapters = [GKFail(), OffSuccess()]
+    await service_b.refresh_schedule_data()
+    assert service_b.coverage != Coverage.COMPLETE.value
+    assert service_b.coverage == Coverage.PARTIAL.value
+
+    # Scenario C: 仅 Manual 成功 -> PARTIAL (不得为 COMPLETE)
+    service_c = ScheduleService(tmp_path / "sc")
+    ev_man = CanonicalEvent(id="gk:1", title="Manual Title", event_type="event", start_at=NOW, end_at=NOW + timedelta(days=2), primary_source="manual")
+    service_c._events = {"gk:1": ev_man}
+    service_c._source_datasets = {"manual": [ev_man]}
+    service_c._update_health_state()
+    assert service_c.coverage != Coverage.COMPLETE.value
+    assert service_c.coverage == Coverage.PARTIAL.value
+
+
+@pytest.mark.asyncio
+async def test_official_local_cache_does_not_refresh_freshness(tmp_path):
+    """验证 Official 本地缓存读取成功不能刷新 Calendar 的全局 Freshness。"""
+    service = ScheduleService(tmp_path)
+    now = datetime.now(timezone.utc)
+    old_success = now - timedelta(hours=10)
+    service.last_success_at = old_success
+
+    ev_off = CanonicalEvent(id="off:1", title="Official Deadline", event_type="event", start_at=now, end_at=now + timedelta(days=2), primary_source="official")
+
+    class FailingGK(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "gamekee"
+        @property
+        def contributes_to_freshness(self) -> bool:
+            return True
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.REQUEST_FAILED, error_message="Timeout", source="gamekee")
+
+    class LocalCacheOff(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "official"
+        @property
+        def contributes_to_freshness(self) -> bool:
+            return False
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.SUCCESS_DATA, events=[ev_off], source="official")
+
+    class EmptyManual(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "manual"
+        @property
+        def contributes_to_freshness(self) -> bool:
+            return False
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.SUCCESS_EMPTY, events=[], source="manual")
+
+    service.adapters = [EmptyManual(), FailingGK(), LocalCacheOff()]
+    ok, _ = await service.refresh_schedule_data()
+
+    # Calendar.last_success_at 必须保持 old_success，不能变成当前时间
+    assert service.last_success_at == old_success
+    # Freshness 根据 10 小时前的 old_success 推导应为 STALE，不得被刷成 FRESH
+    assert service.freshness == Freshness.STALE.value
+
+
+@pytest.mark.asyncio
+async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
+    """验证 /妮姬 日程 在无 snapshot 时立即返回提示，不同步 await 远程网络。"""
+    from astrbot_plugin_nikke.main import NikkePlugin
+    from unittest.mock import Mock, AsyncMock
+
+    plugin = NikkePlugin.__new__(NikkePlugin)
+    mock_cal = Mock()
+    mock_cal.has_snapshot.return_value = False
+    mock_cal.sync_from_source = AsyncMock()
+    mock_cal.refresh_schedule_data = AsyncMock()
+    plugin.calendar = mock_cal
+
+    spawn_mock = Mock(side_effect=lambda coro: coro.close() if asyncio.iscoroutine(coro) else None)
+    plugin._spawn_background_task = spawn_mock
+
+    dummy_event = Mock()
+    dummy_event.plain_result = lambda text: text
+
+    replies = [r async for r in plugin.event_schedule(dummy_event)]
+    assert len(replies) == 1
+    assert "日程数据尚未就绪，正在后台同步，请稍后重试。" in replies[0]
+
+    # 关键断言：绝对没有同步 await 任何远程刷新方法
+    mock_cal.sync_from_source.assert_not_awaited()
+    mock_cal.refresh_schedule_data.assert_not_awaited()
+    # 验证后台任务已被触发登记
+    spawn_mock.assert_called_once()
+
+
+def test_source_roles_and_freshness_completeness_contract():
+    """验证各数据源的 SourceRole、contributes_to_freshness 与 required_for_complete 契约规范。"""
+    from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
+        GameKeeScheduleAdapter,
+        OfficialAnnouncementScheduleAdapter,
+        ManualOverrideScheduleAdapter,
+    )
+    from astrbot_plugin_nikke.features.calendar.canonical_models import SourceRole
+
+    gk = GameKeeScheduleAdapter()
+    assert gk.source_role == SourceRole.PRIMARY
+    assert gk.contributes_to_freshness is True
+    assert gk.required_for_complete is True
+
+    off = OfficialAnnouncementScheduleAdapter()
+    assert off.source_role == SourceRole.AUTHORITATIVE_SUPPLEMENT
+    assert off.contributes_to_freshness is False
+    assert off.required_for_complete is False
+
+    man = ManualOverrideScheduleAdapter()
+    assert man.source_role == SourceRole.LOCAL_OVERRIDE
+    assert man.contributes_to_freshness is False
+    assert man.required_for_complete is False

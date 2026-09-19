@@ -97,7 +97,7 @@ class BaseScheduleAdapter(ABC):
 
     @property
     def contributes_to_freshness(self) -> bool:
-        return self.source_role != SourceRole.LOCAL_OVERRIDE
+        return self.source_role not in (SourceRole.LOCAL_OVERRIDE, SourceRole.AUTHORITATIVE_SUPPLEMENT)
 
     @property
     def required_for_complete(self) -> bool:
@@ -354,11 +354,11 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
 
     @property
     def contributes_to_freshness(self) -> bool:
-        return True
+        return False
 
     @property
     def required_for_complete(self) -> bool:
-        return True
+        return False
 
     @property
     def response_mode(self) -> ResponseMode:

@@ -490,21 +490,34 @@ class ScheduleService:
         """评估 Freshness 和 Coverage 两轴。"""
         now = datetime.now(timezone.utc)
 
-        # Coverage
+        # Coverage: 仅由 required_for_complete 来源决定
+        required_adapters = [ad for ad in self.adapters if getattr(ad, "required_for_complete", False)]
+        if not required_adapters:
+            required_adapters = [ad for ad in self.adapters if getattr(ad, "source_role", None) != SourceRole.LOCAL_OVERRIDE]
+
         if not self._events and not self._source_datasets:
             self.coverage = Coverage.UNAVAILABLE.value
         else:
-            # 仅检查当前适配器中的源
-            has_failure = False
-            for ad in self.adapters:
+            has_required_failure = False
+            for ad in required_adapters:
                 h = self._source_health.get(ad.source_name)
                 if h and h.consecutive_failures > 0:
-                    has_failure = True
+                    has_required_failure = True
                     break
-            if has_failure:
-                self.coverage = Coverage.PARTIAL.value
+
+            if has_required_failure:
+                has_usable_lkg = bool(self._events) or any(self._source_datasets.get(ad.source_name) for ad in required_adapters)
+                if has_usable_lkg:
+                    self.coverage = Coverage.PARTIAL.value
+                else:
+                    self.coverage = Coverage.UNAVAILABLE.value
             else:
-                self.coverage = Coverage.COMPLETE.value
+                # 若仅有 Manual 覆盖层而无任何主源/补充源/外部源数据，不得判定为 COMPLETE
+                non_manual_sources = [k for k in self._source_datasets.keys() if k not in ("manual", "override", "manual_override")]
+                if not non_manual_sources and not any(self._source_health.get(ad.source_name) and self._source_health[ad.source_name].last_success_at for ad in required_adapters):
+                    self.coverage = Coverage.PARTIAL.value
+                else:
+                    self.coverage = Coverage.COMPLETE.value
 
         # Freshness
         if self.last_success_at is None:

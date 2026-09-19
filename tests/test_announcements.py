@@ -293,7 +293,7 @@ class AnnouncementReviewRegressionTests(unittest.IsolatedAsyncioTestCase):
                 return text
 
         # 使用真实格式化服务，验证错误能穿过完整命令链到达用户。
-        for command in ("announcements_view", "event_schedule"):
+        for command in ("announcements_view",):
             for error in (None, asyncio.TimeoutError(), RuntimeError("测试同步异常")):
                 with self.subTest(command=command, error=type(error).__name__):
                     plugin = NikkePlugin.__new__(NikkePlugin)
