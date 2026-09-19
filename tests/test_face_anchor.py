@@ -252,3 +252,121 @@ def test_c016_and_c191_real_anchors():
     assert abs(bc_c191["shift_x"]) < 40.0
 
 
+def test_face_y_offset_behavior_and_contracts():
+    """Requirement 7: Comprehensive verification of face Y offset behavior.
+    - default face-anchor top is +16px compared to raw baseline without offset
+    - left unchanged
+    - width unchanged
+    - height unchanged
+    - scale unchanged
+    - body-centering ON/OFF both maintain identical +16px Y offset
+    - vertical_gain remains 0.0
+    - fallback / unknown / hash mismatch behavior completely untouched
+    - render-specific override can override global default
+    - character-specific override works with proper priority
+    """
+    import re
+    from unittest.mock import patch
+    from astrbot_plugin_nikke.face_anchor import (
+        DEFAULT_FACE_Y_OFFSET,
+        FACE_Y_OFFSET_OVERRIDES,
+        framing,
+    )
+    from astrbot_plugin_nikke.face_guided_centering import DEFAULT_CENTERING_CONFIG
+
+    assert DEFAULT_CENTERING_CONFIG.vertical_gain == 0.0
+    assert DEFAULT_FACE_Y_OFFSET == 16.0
+
+    card = example_card()
+    card.resource_id, card.costume_id = "471", 0
+    card.costume_selection = CostumeSelection(0, "test", "default")
+
+    image = Image.new("RGBA", (100, 200), (0, 0, 0, 0))
+    from PIL import ImageDraw
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((50, 35, 82, 185), fill=(255, 255, 255, 255))
+    cx = (50 + 82) // 2
+    draw.ellipse((cx - 10, 15, cx + 10, 45), fill=(255, 255, 255, 255))
+    face = [61, 30]
+
+    digest = hashlib.sha256(image.convert("RGBA").tobytes()).hexdigest()
+    row = {
+        "pixel_sha256": digest,
+        "image_size": [100, 200],
+        "point": face,
+        "extent": [40, 20],
+        "anchor_kind": "eye_attachment",
+        "framing": {"target": [860, 500], "extent_width": 160},
+    }
+
+    def parse_style(s):
+        w = float(re.search(r"width:([\d.]+)px", s).group(1))
+        h = float(re.search(r"height:([\d.]+)px", s).group(1))
+        l = float(re.search(r"left:([-\d.]+)px", s).group(1))
+        t = float(re.search(r"top:([-\d.]+)px", s).group(1))
+        return l, t, w, h
+
+    with patch("astrbot_plugin_nikke.face_anchor.metadata", return_value={"c471": row}):
+        # Baseline with zero Y offset
+        with patch("astrbot_plugin_nikke.face_anchor.DEFAULT_FACE_Y_OFFSET", 0.0), \
+             patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {}, clear=True):
+            res_zero_off = framing(card, image, body_centering=False)
+            res_zero_on = framing(card, image, body_centering=True)
+            l0_off, t0_off, w0_off, h0_off = parse_style(res_zero_off["style"])
+            l0_on, t0_on, w0_on, h0_on = parse_style(res_zero_on["style"])
+
+        # Default (+16px Y offset)
+        with patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {}, clear=True):
+            res_def_off = framing(card, image, body_centering=False)
+            res_def_on = framing(card, image, body_centering=True)
+            l_off, t_off, w_off, h_off = parse_style(res_def_off["style"])
+            l_on, t_on, w_on, h_on = parse_style(res_def_on["style"])
+
+        # 1. Top is shifted by exactly +16px compared to baseline
+        assert round(t_off - t0_off, 3) == 16.0
+        assert round(t_on - t0_on, 3) == 16.0
+
+        # 2. Left, Width, Height are strictly unchanged
+        assert l_off == l0_off
+        assert l_on == l0_on
+        assert w_off == w0_off
+        assert h_off == h0_off
+        assert w_on == w0_on
+        assert h_on == h0_on
+
+        # 3. body-centering ON/OFF both maintain identical +16px Y offset
+        assert t_off == t_on
+        assert round(t_off - t0_off, 3) == round(t_on - t0_on, 3) == 16.0
+        assert res_def_on["body_centering"]["shift_y"] == 0.0
+
+        # 4. Fail-safe: Fallback / unknown / hash mismatch untouched
+        card_unknown = example_card()
+        card_unknown.costume_selection = CostumeSelection("unknown", "test", "unknown")
+        assert framing(card_unknown, image)["style"] == "object-fit:contain"
+        assert framing(card_unknown, image)["source"] == "identity_unknown"
+
+        wrong_img = Image.new("RGBA", (100, 200), (99, 99, 99, 255))
+        assert framing(card, wrong_img)["style"] == "object-fit:contain;object-position:50% 35%"
+        assert framing(card, wrong_img)["source"] == "anchor_unavailable"
+
+        # 5. Render-specific override overrides global default
+        with patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {"c471": 24.0}):
+            res_custom = framing(card, image, body_centering=False)
+            _, t_custom, _, _ = parse_style(res_custom["style"])
+            assert round(t_custom - t0_off, 3) == 24.0
+
+        # Dict style override
+        with patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {"c471": {"face_y_offset_px": 8.0}}):
+            res_custom8 = framing(card, image, body_centering=False)
+            _, t_custom8, _, _ = parse_style(res_custom8["style"])
+            assert round(t_custom8 - t0_off, 3) == 8.0
+
+        # 6. Metadata row override takes priority as render-specific
+        row_with_override = dict(row, framing=dict(row["framing"], face_y_offset_px=12.0))
+        with patch("astrbot_plugin_nikke.face_anchor.metadata", return_value={"c471": row_with_override}):
+            res_meta = framing(card, image, body_centering=False)
+            _, t_meta, _, _ = parse_style(res_meta["style"])
+            assert round(t_meta - t0_off, 3) == 12.0
+
+
+

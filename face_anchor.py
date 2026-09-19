@@ -25,6 +25,74 @@ def metadata():
         return {}
 
 
+DEFAULT_FACE_Y_OFFSET: float = 16.0
+FACE_Y_OFFSET_OVERRIDES: dict[str, float | dict[str, float]] = {}
+
+
+def resolve_face_y_offset(
+    render_id: str | None = None,
+    char_id: str | None = None,
+    row: dict | None = None,
+) -> float:
+    """Resolve card-space vertical offset (px) applied after Face Anchor framing.
+
+    Priority:
+      1. costume/render-specific override:
+         - row metadata framing["face_y_offset_px"] or row["face_y_offset_px"]
+         - FACE_Y_OFFSET_OVERRIDES.get(render_id)
+      2. character-specific override:
+         - FACE_Y_OFFSET_OVERRIDES.get(char_id)
+         - character metadata in metadata().get(char_id) framing["face_y_offset_px"] or ["face_y_offset_px"]
+      3. global default: DEFAULT_FACE_Y_OFFSET (16.0)
+    """
+    def _extract_offset(val):
+        if val is None:
+            return None
+        if isinstance(val, (int, float)) and math.isfinite(val):
+            return float(val)
+        if isinstance(val, dict):
+            inner = val.get("face_y_offset_px")
+            if isinstance(inner, (int, float)) and math.isfinite(inner):
+                return float(inner)
+        return None
+
+    # 1. Render-specific override
+    if isinstance(row, dict):
+        framing_cfg = row.get("framing")
+        if isinstance(framing_cfg, dict):
+            v = _extract_offset(framing_cfg.get("face_y_offset_px"))
+            if v is not None:
+                return v
+        v = _extract_offset(row.get("face_y_offset_px"))
+        if v is not None:
+            return v
+
+    if render_id and render_id != "missing":
+        v = _extract_offset(FACE_Y_OFFSET_OVERRIDES.get(render_id))
+        if v is not None:
+            return v
+
+    # 2. Character-specific override
+    if char_id and char_id != "missing":
+        v = _extract_offset(FACE_Y_OFFSET_OVERRIDES.get(char_id))
+        if v is not None:
+            return v
+        if char_id != render_id:
+            base_row = metadata().get(char_id)
+            if isinstance(base_row, dict):
+                framing_cfg = base_row.get("framing")
+                if isinstance(framing_cfg, dict):
+                    v = _extract_offset(framing_cfg.get("face_y_offset_px"))
+                    if v is not None:
+                        return v
+                v = _extract_offset(base_row.get("face_y_offset_px"))
+                if v is not None:
+                    return v
+
+    # 3. Global default
+    return float(DEFAULT_FACE_Y_OFFSET)
+
+
 def framing(data, portrait, *, body_centering=None):
     from PIL import Image
     if not isinstance(portrait, Image.Image):
@@ -102,6 +170,9 @@ def framing(data, portrait, *, body_centering=None):
             "max_vertical_gap": None if analysis is None else analysis.max_vertical_gap,
             "max_untrusted_span": None if analysis is None else analysis.max_untrusted_span,
         }
+
+    char_id = identity_resolver().resolve_character_id(data.resource_id)
+    top += resolve_face_y_offset(render_id=key, char_id=char_id, row=row)
 
     ret = {
         "style": f"width:{width:.3f}px;height:{height:.3f}px;left:{left:.3f}px;top:{top:.3f}px;object-fit:contain",
