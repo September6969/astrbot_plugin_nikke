@@ -77,8 +77,8 @@ def test_cache_identity_changes_with_costume_and_numbers():
 def test_all_135_overload_tier_ids_and_affixes_coverage():
     import json
     from pathlib import Path
-    from astrbot_plugin_nikke.card_builder import CharacterCardBuilder
-    from astrbot_plugin_nikke.character_replica import SHORT_NAMES, CANONICAL_LABELS
+    from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
+    from astrbot_plugin_nikke.features.character.replica import SHORT_NAMES, CANONICAL_LABELS
 
     tiers_path = Path(__file__).resolve().parent.parent / "assets" / "overload_tiers.json"
     data = json.loads(tiers_path.read_text(encoding="utf-8"))

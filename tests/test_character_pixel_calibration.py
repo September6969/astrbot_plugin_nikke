@@ -43,7 +43,7 @@ def test_character_template_has_calibrated_typography_and_badges():
 
 
 def test_rapi_red_hood_golden_sample_face_anchor_is_calibrated():
-    from astrbot_plugin_nikke.face_anchor import metadata
+    from astrbot_plugin_nikke.features.character.face_anchor import metadata
     c010 = metadata().get("c010")
     assert c010 is not None
     assert "framing" in c010
@@ -52,7 +52,7 @@ def test_rapi_red_hood_golden_sample_face_anchor_is_calibrated():
 
 
 def test_snow_white_face_anchor_is_calibrated():
-    from astrbot_plugin_nikke.face_anchor import metadata
+    from astrbot_plugin_nikke.features.character.face_anchor import metadata
     c471 = metadata().get("c471")
     assert c471 is not None
     assert "framing" in c471
@@ -61,7 +61,7 @@ def test_snow_white_face_anchor_is_calibrated():
 
 
 def test_custom_webfonts_and_slot_geometry_in_template():
-    from astrbot_plugin_nikke.character_replica import barlow_font, rajdhani_font, noto_font
+    from astrbot_plugin_nikke.features.character.replica import barlow_font, rajdhani_font, noto_font
     barlow_uri = barlow_font()
     rajdhani_uri = rajdhani_font()
     noto_uri = noto_font()
@@ -114,8 +114,8 @@ def test_custom_webfonts_and_slot_geometry_in_template():
 
 
 def test_face_anchor_eight_real_samples_and_three_fallbacks():
-    from astrbot_plugin_nikke.face_anchor import metadata, framing, identity_resolver
-    from astrbot_plugin_nikke.card_models import CostumeSelection
+    from astrbot_plugin_nikke.features.character.face_anchor import metadata, framing, identity_resolver
+    from astrbot_plugin_nikke.features.character.models import CostumeSelection
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
     from PIL import Image
 
@@ -169,11 +169,11 @@ def test_face_anchor_eight_real_samples_and_three_fallbacks():
 def test_character_font_audit_and_fallback():
     from pathlib import Path
     from jinja2 import Environment
-    from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
-    from astrbot_plugin_nikke.t2i_payloads import CharacterT2IPayloadBuilder
-    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+    from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
-    from astrbot_plugin_nikke.character_replica import (
+    from astrbot_plugin_nikke.features.character.replica import (
         noto_font, noto_font_700, noto_font_800,
         barlow_font, barlow_semibold_font,
         rajdhani_font, rajdhani_semibold_font, replica_font
@@ -235,7 +235,7 @@ def test_character_font_audit_and_fallback():
     assert 'class="long"' in long_rendered
 
     # Fallback resilience: when WOFF2 is missing, noto_font still resolves from OTF
-    from astrbot_plugin_nikke.character_replica import _load_font_data_uri
+    from astrbot_plugin_nikke.features.character.replica import _load_font_data_uri
     assert _load_font_data_uri("NotoSansHans-Medium.otf").startswith("data:font/otf;base64,")
 
 
@@ -246,9 +246,9 @@ async def test_browser_rendered_fonts_and_glyph_metrics():
     """在真实 Chromium 运行态下验证字体真实加载、computed style 命中、字形度量及光栅缓冲区差异。"""
     from playwright.async_api import async_playwright
     from jinja2 import Environment
-    from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
-    from astrbot_plugin_nikke.t2i_payloads import CharacterT2IPayloadBuilder
-    from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+    from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
     import types
 

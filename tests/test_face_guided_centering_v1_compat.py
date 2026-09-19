@@ -7,7 +7,7 @@ from dataclasses import replace
 
 from PIL import Image, ImageDraw
 
-from astrbot_plugin_nikke.face_guided_centering import (
+from astrbot_plugin_nikke.features.character.face_guided_centering import (
     CenteringConfig,
     FrameTransform,
     analyze_face_guided_silhouette,

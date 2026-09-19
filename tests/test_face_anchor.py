@@ -69,7 +69,7 @@ def test_body_centering_activation_and_contracts():
         "framing": {"target": [860, 500], "extent_width": 160},
     }
 
-    with patch("astrbot_plugin_nikke.face_anchor.metadata", return_value={"c471": row}):
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
         # 1. No flag / environment => byte-equivalent base style (default OFF)
         with patch.dict("os.environ", {}, clear=True):
             base_result = framing(card, image)
@@ -121,7 +121,7 @@ def test_body_centering_activation_and_contracts():
         blank_image = Image.new("RGBA", (100, 200), (0, 0, 0, 0))
         blank_digest = hashlib.sha256(blank_image.convert("RGBA").tobytes()).hexdigest()
         blank_row = dict(row, pixel_sha256=blank_digest, point=[50, 30])
-        with patch("astrbot_plugin_nikke.face_anchor.metadata", return_value={"c471": blank_row}):
+        with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": blank_row}):
             blank_base = framing(card, blank_image, body_centering=False)
             blank_preview = framing(card, blank_image, body_centering=True)
             assert blank_preview["style"] == blank_base["style"]
@@ -136,7 +136,7 @@ def test_body_centering_activation_and_contracts():
         lc_draw.rectangle((60, 20, 75, 195), fill="white")
         lc_digest = hashlib.sha256(low_conf_image.convert("RGBA").tobytes()).hexdigest()
         lc_row = dict(row, pixel_sha256=lc_digest, image_size=[140, 210], point=[50, 28])
-        with patch("astrbot_plugin_nikke.face_anchor.metadata", return_value={"c471": lc_row}):
+        with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": lc_row}):
             lc_base = framing(card, low_conf_image, body_centering=False)
             lc_preview = framing(card, low_conf_image, body_centering=True)
             assert lc_preview["style"] == lc_base["style"]
@@ -159,7 +159,7 @@ def test_body_centering_activation_and_contracts():
 def test_ambiguity_band_scale_sweep_obeys_only_global_safety():
     # 8. Ambiguity-band scale sweep (4, 8, 12) does not assert <20px;
     # it asserts that shift stays within global max_shift_x and face stays in safe box.
-    from astrbot_plugin_nikke.face_guided_centering import (
+    from astrbot_plugin_nikke.features.character.face_guided_centering import (
         CenteringConfig,
         FrameTransform,
         center_after_face_anchor,
@@ -267,12 +267,12 @@ def test_face_y_offset_behavior_and_contracts():
     """
     import re
     from unittest.mock import patch
-    from astrbot_plugin_nikke.face_anchor import (
+    from astrbot_plugin_nikke.features.character.face_anchor import (
         DEFAULT_FACE_Y_OFFSET,
         FACE_Y_OFFSET_OVERRIDES,
         framing,
     )
-    from astrbot_plugin_nikke.face_guided_centering import DEFAULT_CENTERING_CONFIG
+    from astrbot_plugin_nikke.features.character.face_guided_centering import DEFAULT_CENTERING_CONFIG
 
     assert DEFAULT_CENTERING_CONFIG.vertical_gain == 0.0
     assert DEFAULT_FACE_Y_OFFSET == 16.0
@@ -306,17 +306,17 @@ def test_face_y_offset_behavior_and_contracts():
         t = float(re.search(r"top:([-\d.]+)px", s).group(1))
         return l, t, w, h
 
-    with patch("astrbot_plugin_nikke.face_anchor.metadata", return_value={"c471": row}):
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
         # Baseline with zero Y offset
-        with patch("astrbot_plugin_nikke.face_anchor.DEFAULT_FACE_Y_OFFSET", 0.0), \
-             patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {}, clear=True):
+        with patch("astrbot_plugin_nikke.features.character.face_anchor.DEFAULT_FACE_Y_OFFSET", 0.0), \
+             patch.dict("astrbot_plugin_nikke.features.character.face_anchor.FACE_Y_OFFSET_OVERRIDES", {}, clear=True):
             res_zero_off = framing(card, image, body_centering=False)
             res_zero_on = framing(card, image, body_centering=True)
             l0_off, t0_off, w0_off, h0_off = parse_style(res_zero_off["style"])
             l0_on, t0_on, w0_on, h0_on = parse_style(res_zero_on["style"])
 
         # Default (+16px Y offset)
-        with patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {}, clear=True):
+        with patch.dict("astrbot_plugin_nikke.features.character.face_anchor.FACE_Y_OFFSET_OVERRIDES", {}, clear=True):
             res_def_off = framing(card, image, body_centering=False)
             res_def_on = framing(card, image, body_centering=True)
             l_off, t_off, w_off, h_off = parse_style(res_def_off["style"])
@@ -350,20 +350,20 @@ def test_face_y_offset_behavior_and_contracts():
         assert framing(card, wrong_img)["source"] == "anchor_unavailable"
 
         # 5. Render-specific override overrides global default
-        with patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {"c471": 24.0}):
+        with patch.dict("astrbot_plugin_nikke.features.character.face_anchor.FACE_Y_OFFSET_OVERRIDES", {"c471": 24.0}):
             res_custom = framing(card, image, body_centering=False)
             _, t_custom, _, _ = parse_style(res_custom["style"])
             assert round(t_custom - t0_off, 3) == 24.0
 
         # Dict style override
-        with patch.dict("astrbot_plugin_nikke.face_anchor.FACE_Y_OFFSET_OVERRIDES", {"c471": {"face_y_offset_px": 8.0}}):
+        with patch.dict("astrbot_plugin_nikke.features.character.face_anchor.FACE_Y_OFFSET_OVERRIDES", {"c471": {"face_y_offset_px": 8.0}}):
             res_custom8 = framing(card, image, body_centering=False)
             _, t_custom8, _, _ = parse_style(res_custom8["style"])
             assert round(t_custom8 - t0_off, 3) == 8.0
 
         # 6. Metadata row override takes priority as render-specific
         row_with_override = dict(row, framing=dict(row["framing"], face_y_offset_px=12.0))
-        with patch("astrbot_plugin_nikke.face_anchor.metadata", return_value={"c471": row_with_override}):
+        with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row_with_override}):
             res_meta = framing(card, image, body_centering=False)
             _, t_meta, _, _ = parse_style(res_meta["style"])
             assert round(t_meta - t0_off, 3) == 12.0

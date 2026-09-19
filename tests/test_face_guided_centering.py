@@ -4,7 +4,7 @@ from dataclasses import replace
 import pytest
 from PIL import Image, ImageDraw, ImageOps
 
-from astrbot_plugin_nikke.face_guided_centering import (
+from astrbot_plugin_nikke.features.character.face_guided_centering import (
     CenteringConfig,
     FrameTransform,
     _safe_delta_bounds,
