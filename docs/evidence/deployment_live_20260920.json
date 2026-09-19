@@ -1,0 +1,58 @@
+{
+  "status": "DEPLOYED_MAIN_LIVE_SMOKE",
+  "checked_at": "2026-09-20",
+  "main_commit": "a527740",
+  "feature_commit": "78a90b4",
+  "pr": "https://github.com/September6969/astrbot_plugin_nikke/pull/94",
+  "target": "/opt/nikke-bot/astrbot/data/plugins/astrbot_plugin_nikke",
+  "backup_plugin_tree": "/opt/nikke-bot/backups/astrbot_plugin_nikke-predeploy-a527740-20260920_050515.tar.gz",
+  "backup_database": "/opt/nikke-bot/backups/nikke.sqlite3.bak_20260920_050515",
+  "deploy_method": "git-archive + rsync (data/ excluded, preserved)",
+  "preflight": {
+    "data_directory_preserved": true,
+    "containers_running": ["nikke-caddy", "napcat", "astrbot"]
+  },
+  "containers": {
+    "astrbot": "running",
+    "napcat": "running",
+    "nikke-caddy": "running"
+  },
+  "healthz": {
+    "ok": true,
+    "service": "nikke-binding",
+    "storage": "ready",
+    "version": "0.2.0"
+  },
+  "post_deploy_logs": {
+    "plugin_loaded": true,
+    "plugin_version": "0.2.0",
+    "binding_service_port": 6210,
+    "character_master_entries": 202,
+    "announcement_cache_loaded": 22,
+    "calendar_events_migrated": 123,
+    "onebot_v11_connected": true,
+    "errors": 0
+  },
+  "log_privacy": {
+    "window": "2m",
+    "secret_marker_lines": 0,
+    "error_lines": 0
+  },
+  "calendar_module": {
+    "gate_a": "PASS",
+    "gate_b": "PASS",
+    "gate_c": "PASS",
+    "pr_ci_checks": "6/6 PASS",
+    "local_regression_before_merge": {
+      "passed": 988,
+      "skipped": 2,
+      "failed": 0
+    },
+    "post_merge_regression_on_main": {
+      "passed": 988,
+      "skipped": 2,
+      "failed": 0
+    }
+  },
+  "secrets_persisted": false
+}

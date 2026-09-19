@@ -1,3 +1,34 @@
+# Live Deployment Acceptance — 2026-09-20 (Calendar / Schedule Module)
+
+## Result
+
+The latest `origin/main` commit `a527740` (PR #94: Calendar / Schedule module — Gate A + Gate B + Gate C complete) was successfully deployed to the production `serv` installation.
+
+The previous plugin tree was retained at `/opt/nikke-bot/backups/astrbot_plugin_nikke-predeploy-a527740-20260920_050515.tar.gz` and `/opt/nikke-bot/backups/nikke.sqlite3.bak_20260920_050515`; the production database and `data/` directory were fully preserved and untouched.
+
+Post-deployment verification results:
+- **Plugin Loaded**: `astrbot_plugin_nikke (0.2.0) by September` loaded cleanly without errors.
+- **Binding Service**: `[NIKKE] 绑定服务已监听 0.0.0.0:6210`
+- **Character Catalog**: `[NIKKE] 已载入 202 条妮姬目录`
+- **Static Stats**: `[NIKKE] Exia/NIKKE 静态属性表已载入并缓存`
+- **Announcement Cache**: `已成功从本地磁盘缓存加载 22 条公告数据`
+- **Calendar Migration**: `成功从旧 calendar_cache.json 迁移载入 123 条活动`
+- **healthz**: `{"ok": true, "service": "nikke-binding", "version": "0.2.0", "storage": "ready"}`
+- **Containers**: `astrbot`, `napcat`, and `nikke-caddy` all running.
+- **OneBot v11**: adapter connected.
+- **Log Privacy**: 0 secret marker lines in 2-minute post-deploy window.
+
+CI verification (GitHub Actions, run 35468485641):
+- Extension (Node): PASS
+- Spine 4.0 headless worker build: PASS
+- Test (Python 3.10 / 3.11 / 3.12 / 3.13): PASS (all 4)
+
+Local regression on merged main (`a527740`): **988 passed, 2 skipped, 0 failed**.
+
+Machine-readable evidence: [`docs/evidence/deployment_live_20260920.json`](../evidence/deployment_live_20260920.json).
+
+---
+
 # Live Deployment Acceptance — 2026-09-17 (Repository Finalization & Architecture Closure)
 
 ## Result
