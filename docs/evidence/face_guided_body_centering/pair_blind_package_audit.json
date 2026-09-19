@@ -1,0 +1,9 @@
+{
+  "candidate_count": 144,
+  "control_count": 12,
+  "total_count": 156,
+  "unique_review_ids": 156,
+  "minimum_same_render_gap": 8,
+  "manifest_sha256": "9f765176e82eed233b7aab152de380d9ce50b0acf4cd27a75df6fab45f9836d0",
+  "package_file_count": 158
+}
