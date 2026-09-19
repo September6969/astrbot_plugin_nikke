@@ -850,6 +850,13 @@ class AnnouncementService:
         active.sort(key=lambda dl: dl.end_at)
         return active
 
+    def list_deadlines(self, now: datetime | None = None) -> list[GameDeadline]:
+        """返回所有未结束（ACTIVE 或 UPCOMING）的结构化日程活动。"""
+        current = now or datetime.now(timezone.utc)
+        deadlines = [dl for dl in self._deadlines.values() if not dl.is_ended(current)]
+        deadlines.sort(key=lambda dl: (dl.start_at is None, dl.start_at or dl.end_at, dl.end_at))
+        return deadlines
+
     def should_deliver(self, push_key: str) -> bool:
         """检查指定投递去重键是否已投递。"""
         return push_key not in self._delivery_log

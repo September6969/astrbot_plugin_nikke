@@ -23,6 +23,7 @@ from astrbot_plugin_nikke.features.calendar.canonical_models import (
     FieldEvidence,
     FetchOutcome,
     ResponseMode,
+    SourceRole,
     TimePrecision,
     ManualOverride,
 )
@@ -319,7 +320,7 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
 
     @property
     def source_timezone(self) -> str:
-        return "Asia/Shanghai"
+        return "UTC"
 
     async def fetch_result(self) -> FetchResult:
         if self.announcement_service is None:
@@ -330,11 +331,15 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                 response_mode=self.response_mode,
             )
 
+        deadlines: list[Any] = []
         try:
-            records = self.announcement_service.list_announcements(limit=50)
+            if hasattr(self.announcement_service, "list_deadlines"):
+                deadlines = self.announcement_service.list_deadlines()
+            elif hasattr(self.announcement_service, "list_active_deadlines"):
+                deadlines = self.announcement_service.list_active_deadlines()
         except Exception as exc:
             err = safe_exception_message(exc)
-            logger.debug("[NIKKE] 官方公告读取异常: %s", err)
+            logger.debug("[NIKKE] 官方公告日程读取异常: %s", err)
             return FetchResult(
                 outcome=FetchOutcome.REQUEST_FAILED,
                 error_message=err,
@@ -342,7 +347,32 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                 response_mode=self.response_mode,
             )
 
-        if not records:
+        records_map: dict[str, Any] = {}
+        if hasattr(self.announcement_service, "_records") and isinstance(self.announcement_service._records, dict):
+            records_map = self.announcement_service._records
+        elif hasattr(self.announcement_service, "list_announcements"):
+            try:
+                rec_list = self.announcement_service.list_announcements(limit=50)
+                records_map = {getattr(r, "content_id", str(i)): r for i, r in enumerate(rec_list)}
+            except Exception:
+                pass
+
+        # 若无现成 GameDeadline，则尝试从公告正文提取
+        if not deadlines and records_map:
+            from ..announcement.service import DeadlineParser
+            for rec in records_map.values():
+                title = getattr(rec, "title", "")
+                body = getattr(rec, "body", "") or getattr(rec, "content", "")
+                cid = getattr(rec, "content_id", "")
+                cat = getattr(rec, "category", "event")
+                if title and body:
+                    try:
+                        parsed = DeadlineParser.parse_deadlines(title, body, cid, cat)
+                        deadlines.extend(parsed)
+                    except Exception:
+                        pass
+
+        if not deadlines:
             return FetchResult(
                 outcome=FetchOutcome.SUCCESS_EMPTY,
                 events=[],
@@ -351,34 +381,56 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             )
 
         events: list[CanonicalEvent] = []
-        for rec in records:
-            start_at = getattr(rec, "activity_start_at", None) or getattr(rec, "created_at", None)
-            end_at = getattr(rec, "activity_end_at", None)
-            title = getattr(rec, "title", "")
+        for dl in deadlines:
+            title = getattr(dl, "name", "") or getattr(dl, "title", "")
             if not title:
                 continue
 
-            event_id = f"official:{getattr(rec, 'content_id', title)}"
-            banner = getattr(rec, "banner_url", None)
-            detail = getattr(rec, "detail_url", None)
+            start_at = getattr(dl, "start_at", None)
+            end_at = getattr(dl, "end_at", None)
+            cid = getattr(dl, "source_content_id", "") or getattr(dl, "event_id", title)
+            rec = records_map.get(cid)
 
-            category = _classify_category(title, getattr(rec, "category", ""))
-            is_date_only = getattr(rec, "is_date_only", False)
-            precision = TimePrecision.DATE_ONLY.value if is_date_only else TimePrecision.EXACT.value
+            event_id = f"official:{getattr(dl, 'event_id', cid)}"
+            detail_url = getattr(dl, "source_url", "") or (getattr(rec, "source_url", "") if rec else "")
+            cat_raw = getattr(dl, "category", "") or (getattr(rec, "category", "") if rec else "")
+            category = _classify_category(title, cat_raw)
 
-            # 检查是否有明确取消或延期标志
-            raw_text = f"{title} {getattr(rec, 'content', '')}".casefold()
-            is_cancelled = any(k in raw_text for k in ("取消", "中止", "活动延期", "停止开放", "cancel"))
+            # 严格时区保证为 aware UTC
+            if start_at is not None:
+                start_at = _aware_utc(start_at)
+            if end_at is not None:
+                end_at = _aware_utc(end_at)
 
-            # 证据
+            start_prec = TimePrecision.EXACT.value if start_at else TimePrecision.UNKNOWN.value
+            end_prec = TimePrecision.EXACT.value if end_at else TimePrecision.UNKNOWN.value
+
+            # 基于正文 body 和标题的多维度取消检测
+            body_text = getattr(rec, "body", "") if rec else ""
+            cancel_target = f"{title} {body_text}".casefold()
+            is_cancelled = any(k in cancel_target for k in ("取消", "中止", "活动延期", "停止开放", "cancel"))
+
+            # 置信度评估：双时间且有上下文为 0.95，单结束时间为 0.90，弱上下文为 0.75
+            explicit_confidence = getattr(dl, "confidence", None)
+            if explicit_confidence is not None:
+                confidence = float(explicit_confidence)
+            elif start_at and end_at:
+                confidence = 0.95
+            elif end_at:
+                confidence = 0.90
+            else:
+                confidence = 0.70
+
             evidence = {
-                "title": [FieldEvidence(title, "official", confidence=0.95).to_dict()],
+                "title": [FieldEvidence(title, "official", confidence=confidence).to_dict()],
                 "cancellation": [FieldEvidence(is_cancelled, "official", confidence=1.0, is_cancelled=is_cancelled).to_dict()] if is_cancelled else [],
             }
             if start_at:
-                evidence["start"] = [FieldEvidence(start_at, "official", confidence=0.95, precision=precision, source_timezone=self.source_timezone).to_dict()]
+                evidence["start"] = [FieldEvidence(start_at, "official", confidence=confidence, precision=start_prec).to_dict()]
             if end_at:
-                evidence["end"] = [FieldEvidence(end_at, "official", confidence=0.95, precision=precision, source_timezone=self.source_timezone).to_dict()]
+                evidence["end"] = [FieldEvidence(end_at, "official", confidence=confidence, precision=end_prec).to_dict()]
+            if detail_url:
+                evidence["detail_url"] = [FieldEvidence(detail_url, "official", confidence=confidence).to_dict()]
 
             is_valid = True
             if start_at and end_at and end_at <= start_at:
@@ -391,14 +443,14 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                     event_type=category,
                     start_at=start_at,
                     end_at=end_at,
-                    start_precision=precision,
-                    end_precision=precision,
-                    server_scope=getattr(rec, "server_scope", "GLOBAL") or "GLOBAL",
-                    banner_url=banner,
-                    detail_url=detail,
+                    start_precision=start_prec,
+                    end_precision=end_prec,
+                    server_scope="GLOBAL",
+                    banner_url=None,
+                    detail_url=detail_url or None,
                     sources=["official"],
                     primary_source="official",
-                    confidence=0.95,
+                    confidence=confidence,
                     is_cancelled=is_cancelled,
                     is_valid_interval=is_valid,
                     field_evidence=evidence,
