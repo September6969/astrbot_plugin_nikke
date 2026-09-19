@@ -778,36 +778,27 @@ class CalendarT2IPayloadBuilder:
         sync_warning = warning or getattr(service, "last_sync_error", "")
         is_stale = (fresh_str == "STALE") or bool(sync_warning)
 
-        if cov_str == "UNAVAILABLE":
-            health_display = "UNAVAILABLE // 暂无可用快照"
-        elif is_stale:
-            health_display = "STALE SNAPSHOT // 同步延迟，展示本地最新快照"
-        elif cov_str == "PARTIAL":
-            health_display = "PARTIAL OK // 部分来源降级为历史快照"
+        # 直接消费 QueryContext 冻结的健康与来源展示
+        if hasattr(service, "freeze_query_context"):
+            health_display = ctx.health_display
+            source_display = ctx.source_display
+            if not source_display or source_display == "UNKNOWN":
+                source_display = "LOCAL SNAPSHOT"
         else:
-            health_display = "DATA OK // 全部来源数据已同步"
-
-        sources_present = set()
-        if source_health:
-            for s_name in source_health:
-                sources_present.add(s_name.upper())
-        if not sources_present:
-            source_display = "GAMEKEE + OFFICIAL"
-        else:
-            ordered = [s for s in ("GAMEKEE", "OFFICIAL", "MANUAL_OVERRIDE") if s in sources_present]
-            for s in sorted(sources_present):
-                if s not in ordered:
-                    ordered.append(s)
-            source_display = " + ".join(ordered)
-
-        # 8. 向后兼容数据结构维护
-        ending_soon_list = []
-        active_list = []
-        for item in active_items:
-            if item.get("urgency") in ("CRITICAL", "URGENT", "CLOSING"):
-                ending_soon_list.append(item)
+            from astrbot_plugin_nikke.features.calendar.canonical_models import compute_health_badge
+            health_display = compute_health_badge(fresh_str, cov_str)
+            sources_present = set()
+            if source_health:
+                for s_name in source_health:
+                    sources_present.add(s_name.upper())
+            if not sources_present:
+                source_display = "LOCAL SNAPSHOT"
             else:
-                active_list.append(item)
+                ordered = [s for s in ("GAMEKEE", "OFFICIAL", "MANUAL_OVERRIDE") if s in sources_present]
+                for s in sorted(sources_present):
+                    if s not in ordered:
+                        ordered.append(s)
+                source_display = " + ".join(ordered)
 
         fallback_text = (
             service.format_schedule_text(days, current, warning)
@@ -843,15 +834,6 @@ class CalendarT2IPayloadBuilder:
             "page_next_items": pages[0]["next_items"] if pages else [],
             "show_active_header": pages[0]["show_active_header"] if pages else True,
             "show_next_header": pages[0]["show_next_header"] if pages else False,
-            # 向后兼容键
-            "ending_soon": ending_soon_list,
-            "active": active_list,
-            "upcoming": next_items,
-            "groups": [
-                {"title": "ENDING SOON / 即将结束", "items": ending_soon_list},
-                {"title": "ACTIVE / 进行中", "items": active_list},
-                {"title": "UPCOMING / 即将开始", "items": next_items},
-            ],
         }
         return bundle
 

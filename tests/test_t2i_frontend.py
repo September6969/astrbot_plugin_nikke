@@ -38,7 +38,8 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
     attack = '<script>alert(1)</script></style><img src=x onerror=alert(1)>'
     data = next(iter(get_cases(page, tmp_path).values()))
     if page == "calendar_schedule":
-        data["groups"][0]["items"][0]["title"] = attack
+        data["active_items"][0]["title"] = attack
+        data["pages"][0]["active_items"][0]["title"] = attack
     elif page == "union_overview":
         data.guild_name = attack
     elif page in ("union_records", "union_member"):
@@ -109,12 +110,12 @@ def test_calendar_horizon_and_classification(tmp_path):
     assert cases["normal"]["horizon_days"] == 14
     assert cases["7-days"]["horizon_days"] == 7
     assert cases["30-days"]["horizon_days"] == 30
-    assert len(cases["normal"]["ending_soon"]) == 1
-    assert len(cases["normal"]["active"]) == 1
-    assert len(cases["30-days"]["upcoming"]) > len(cases["7-days"]["upcoming"])
+    assert len(cases["normal"]["active_items"]) == 2
+    assert len(cases["30-days"]["next_items"]) > len(cases["7-days"]["next_items"])
     assert cases["stale"]["is_stale"]
     assert not cases["unavailable"]["available"]
-    assert all(not group["items"] for group in cases["empty"]["groups"])
+    assert len(cases["empty"]["active_items"]) == 0
+    assert len(cases["empty"]["next_items"]) == 0
 
 
 @pytest.mark.asyncio
