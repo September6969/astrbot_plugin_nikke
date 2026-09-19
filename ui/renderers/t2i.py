@@ -34,11 +34,34 @@ class T2IRenderer:
             assets = await asyncio.to_thread(self.payload_builder.assets.resolve_character_assets, data)
             payload = CharacterT2IPayloadBuilder(self.payload_builder.resolver).build(data, assets)
             return await self.render_payload(page, payload)
-        from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder, UnionRecordsT2IPayloadBuilder, UnionMemberT2IPayloadBuilder, ProfileT2IPayloadBuilder
-        builders = {"profile": ProfileT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver), "union_overview": UnionOverviewT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver), "union_records": UnionRecordsT2IPayloadBuilder(),
-                    "union_member": UnionMemberT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver)}
+        from astrbot_plugin_nikke.ui.t2i_payloads import (
+            UnionOverviewT2IPayloadBuilder,
+            UnionRecordsT2IPayloadBuilder,
+            UnionMemberT2IPayloadBuilder,
+            ProfileT2IPayloadBuilder,
+        )
+        builders = {
+            "profile": ProfileT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver),
+            "union_overview": UnionOverviewT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver),
+            "union_records": UnionRecordsT2IPayloadBuilder(),
+            "union_member": UnionMemberT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver),
+        }
         if page in builders:
             data = builders[page].build(data, **kwargs)
-        elif page != "calendar_schedule":
+        elif page == "calendar_schedule":
+            pages = data.get("pages") if isinstance(data, dict) else None
+            if pages and isinstance(pages, list):
+                bundle_meta = {k: v for k, v in data.items() if k != "pages"}
+                if len(pages) > 1:
+                    results = []
+                    for p in pages:
+                        page_payload = {**bundle_meta, **p}
+                        results.append(await self.render_payload(page, page_payload))
+                    return results
+                elif len(pages) == 1:
+                    page_payload = {**bundle_meta, **pages[0]}
+                    return await self.render_payload(page, page_payload)
+            return await self.render_payload(page, data)
+        else:
             raise ValueError("尚未支持该展示页面")
         return await self.render_payload(page, data)

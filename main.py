@@ -1734,8 +1734,15 @@ class NikkePlugin(Star):
 
         if calendar.has_snapshot():
             payload = CalendarT2IPayloadBuilder().build(calendar, days, warning=calendar_error)
-            path = await self._try_t2i("calendar_schedule", payload)
-            yield event.image_result(path) if path else event.plain_result(payload["fallback_text"])
+            path_or_paths = await self._try_t2i("calendar_schedule", payload)
+            if isinstance(path_or_paths, (list, tuple)):
+                for p in path_or_paths:
+                    if p:
+                        yield event.image_result(p)
+            elif path_or_paths:
+                yield event.image_result(path_or_paths)
+            else:
+                yield event.plain_result(payload["fallback_text"])
             return
 
         announcement_error = ""

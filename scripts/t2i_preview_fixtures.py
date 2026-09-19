@@ -8,23 +8,190 @@ NOW = datetime(2026, 9, 13, 4, tzinfo=timezone.utc)
 def calendar_cases(directory):
     from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
+    from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent, TimePrecision, SourceHealth, FetchOutcome
     from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+
+    case_names = (
+        "normal", "7-days", "30-days", "stale", "long-title", "many-events", "empty", "unavailable",
+        "2-active-2-next", "5-active", "8-active-paged", "12-active-paged", "4-active-8-next",
+        "next-only", "unknown-end", "date-only", "critical", "partial", "no-background", "oversize-title"
+    )
     result = {}
-    for name in ("normal", "7-days", "30-days", "stale", "long-title", "many-events", "empty", "unavailable"):
+    for name in case_names:
         service = CalendarService(Path(directory) / name)
         service._has_snapshot = name != "unavailable"
         service.last_updated_at = NOW.isoformat()
         service.last_sync_error = "合成同步失败示例" if name == "stale" else ""
+
+        if name == "partial":
+            service._source_health["gamekee"] = SourceHealth(source="gamekee", last_attempt_at=NOW, last_success_at=NOW, last_outcome=FetchOutcome.SUCCESS_DATA.value)
+            service._source_health["official"] = SourceHealth(source="official", last_attempt_at=NOW, last_success_at=None, last_outcome=FetchOutcome.REQUEST_FAILED.value, last_error_type="502 Bad Gateway")
+
         if name not in ("empty", "unavailable"):
-            for index in range(24 if name == "many-events" else 5):
-                start = NOW - timedelta(days=2) if index < 2 else NOW + timedelta(days=index * 3)
-                end = NOW + timedelta(hours=8) if index == 0 else start + timedelta(days=7)
-                if name == "many-events":
+            if name in ("normal", "7-days", "30-days", "stale", "no-background"):
+                for index in range(5):
+                    start = NOW - timedelta(days=2) if index < 2 else NOW + timedelta(days=index * 3)
+                    end = NOW + timedelta(hours=8) if index == 0 else start + timedelta(days=7)
+                    event = CalendarActivity(
+                        str(index), f"合成活动 {index + 1}", start, end,
+                        category=["coop", "union_raid", "solo_raid", "recruit", "event"][index % 5],
+                        banner_url="https://invalid.example/banner.png",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "many-events":
+                for index in range(24):
                     start, end = NOW - timedelta(days=1), NOW + timedelta(days=index + 1)
-                event = CalendarActivity(str(index), ("合成活动：长标题与完整说明，不应截断或隐藏活动 " * 4) if name == "long-title" else f"合成活动 {index + 1}", start, end,
-                                         category=["coop", "union_raid", "solo_raid", "recruit", "event"][index % 5], banner_url="https://invalid.example/banner.png")
-                service._activities[event.event_id] = event
-        result[name] = CalendarT2IPayloadBuilder().build(service, 7 if name == "7-days" else 30 if name == "30-days" else 14, NOW)
+                    event = CalendarActivity(
+                        str(index), f"合成活动 {index + 1}", start, end,
+                        category=["coop", "union_raid", "solo_raid", "recruit", "event"][index % 5],
+                        banner_url="https://invalid.example/banner.png",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "2-active-2-next":
+                # 2 active, 2 next
+                for index in range(2):
+                    start = NOW - timedelta(days=2)
+                    end = NOW + timedelta(days=3 + index * 2)
+                    event = CalendarActivity(
+                        f"act-{index}", f"进行中任务 {index + 1}", start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                for index in range(2):
+                    start = NOW + timedelta(days=2 + index * 3)
+                    end = start + timedelta(days=5)
+                    event = CalendarActivity(
+                        f"nxt-{index}", f"预告任务 {index + 1}", start, end,
+                        category="union_raid", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "5-active":
+                for index in range(5):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        str(index), f"单页进行中作战 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "8-active-paged":
+                for index in range(8):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        str(index), f"两页进行中作战 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "12-active-paged":
+                for index in range(12):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        str(index), f"三页进行中作战 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "4-active-8-next":
+                for index in range(4):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 3)
+                    event = CalendarActivity(
+                        f"act-{index}", f"混合活动-进行中 {index + 1}", start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                for index in range(8):
+                    start = NOW + timedelta(days=1 + index)
+                    end = start + timedelta(days=5)
+                    event = CalendarActivity(
+                        f"nxt-{index}", f"混合活动-预告 {index + 1}", start, end,
+                        category="union_raid", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "next-only":
+                for index in range(5):
+                    start = NOW + timedelta(days=2 + index * 2)
+                    end = start + timedelta(days=7)
+                    event = CalendarActivity(
+                        str(index), f"仅预告活动 {index + 1}", start, end,
+                        category="recruit", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "unknown-end":
+                for index in range(3):
+                    ev = CanonicalEvent(
+                        id=f"unk-{index}",
+                        title=f"未知截止活动 {index + 1}",
+                        event_type="event",
+                        start_at=NOW - timedelta(days=2),
+                        end_at=None,
+                        start_precision="EXACT",
+                        end_precision="UNKNOWN",
+                    )
+                    service._events[ev.id] = ev
+            elif name == "date-only":
+                for index in range(3):
+                    start = NOW - timedelta(days=2)
+                    end = NOW + timedelta(days=3 + index)
+                    event = CalendarActivity(
+                        str(index), f"日期级活动 {index + 1}", start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.DATE_ONLY, end_precision=TimePrecision.DATE_ONLY
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "critical":
+                # 1 item ending in 30 minutes (critical urgency)
+                event0 = CalendarActivity(
+                    "crit-0", "紧急截止突袭任务", NOW - timedelta(days=2), NOW + timedelta(minutes=30),
+                    category="solo_raid", banner_url="",
+                    start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                )
+                service._activities[event0.event_id] = event0
+                event1 = CalendarActivity(
+                    "norm-1", "普通进行中活动", NOW - timedelta(days=1), NOW + timedelta(days=4),
+                    category="event", banner_url="",
+                    start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                )
+                service._activities[event1.event_id] = event1
+            elif name == "long-title":
+                for index in range(4):
+                    start = NOW - timedelta(days=2) if index < 2 else NOW + timedelta(days=index * 2)
+                    end = NOW + timedelta(hours=8) if index == 0 else start + timedelta(days=5)
+                    title = f"合成活动：较长标题与完整说明测试文本第{index + 1}号活动"
+                    event = CalendarActivity(
+                        str(index), title, start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "oversize-title":
+                huge_title = "超规格长标题测试作战：这是一个异常超长的活动标题，旨在检验固定高度毛玻璃面板在极端长标题情况下的单项超页与两行视觉截断降级策略，不应该突破固定Panel边框，同时完整标题应当妥善保留在full_title中"
+                event0 = CalendarActivity(
+                    "over-0", huge_title, NOW - timedelta(days=1), NOW + timedelta(days=3),
+                    category="event", banner_url="",
+                    start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                )
+                service._activities[event0.event_id] = event0
+                event1 = CalendarActivity(
+                    "norm-1", "常规活动", NOW - timedelta(days=1), NOW + timedelta(days=4),
+                    category="event", banner_url="",
+                    start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                )
+                service._activities[event1.event_id] = event1
+
+        days_val = 7 if name == "7-days" else 30 if name == "30-days" else 14
+        result[name] = CalendarT2IPayloadBuilder().build(service, days_val, NOW)
     return result
 
 
