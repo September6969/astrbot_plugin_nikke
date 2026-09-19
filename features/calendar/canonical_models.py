@@ -161,6 +161,137 @@ class ResolvedField:
     candidates: list[FieldEvidence] = field(default_factory=list)
 
 
+def resolve_field(
+    field_name: str,
+    candidates: Sequence[FieldEvidence | dict[str, Any]],
+    default: Any = None,
+) -> ResolvedField:
+    """统一字段级证据仲裁器。
+
+    仲裁规则：
+    - title: Manual > GameKee (地道中文) > Official > 其他
+    - banner_url / detail_url: Manual > GameKee (CDN 图床优先) > Official > 其他
+    - start / end: 必须分别独立仲裁！
+      Manual > Official (confidence >= 0.90) > Specialized > GameKee > Official (<0.90) > 其他
+    - cancellation: Manual > Official (explicit cancellation) > Specialized > 其他
+    - event_type: Manual > Official (非通用 'event') > GameKee > Official > 其他
+    """
+    parsed_candidates: list[FieldEvidence] = []
+    for c in candidates:
+        if isinstance(c, FieldEvidence):
+            parsed_candidates.append(c)
+        elif isinstance(c, dict):
+            try:
+                parsed_candidates.append(FieldEvidence.from_dict(c))
+            except Exception:
+                pass
+
+    if not parsed_candidates:
+        return ResolvedField(value=default, selected_evidence=None, candidates=[])
+
+    name = field_name.lower()
+
+    if name == "title":
+        valid = [c for c in parsed_candidates if c.value]
+        if not valid:
+            return ResolvedField(value=default, selected_evidence=None, candidates=parsed_candidates)
+        def _title_rank(c: FieldEvidence) -> tuple[int, float]:
+            src = (c.source or "").lower()
+            if src == "manual":
+                return (4, c.confidence or 1.0)
+            if src == "gamekee":
+                return (3, c.confidence or 0.85)
+            if src == "official":
+                return (2, c.confidence or 0.90)
+            return (1, c.confidence or 0.5)
+        valid.sort(key=_title_rank, reverse=True)
+        selected = valid[0]
+        return ResolvedField(value=selected.value, selected_evidence=selected, candidates=parsed_candidates)
+
+    if name in ("banner_url", "detail_url"):
+        valid = [c for c in parsed_candidates if c.value]
+        if not valid:
+            return ResolvedField(value=default, selected_evidence=None, candidates=parsed_candidates)
+        def _url_rank(c: FieldEvidence) -> tuple[int, float]:
+            src = (c.source or "").lower()
+            if src == "manual":
+                return (4, c.confidence or 1.0)
+            if src == "gamekee":
+                return (3, c.confidence or 0.85)
+            if src == "official":
+                return (2, c.confidence or 0.90)
+            return (1, c.confidence or 0.5)
+        valid.sort(key=_url_rank, reverse=True)
+        selected = valid[0]
+        return ResolvedField(value=selected.value, selected_evidence=selected, candidates=parsed_candidates)
+
+    if name in ("start", "start_at", "end", "end_at"):
+        valid = [c for c in parsed_candidates if c.value is not None]
+        if not valid:
+            return ResolvedField(value=default, selected_evidence=None, candidates=parsed_candidates)
+        def _time_rank(c: FieldEvidence) -> tuple[int, float]:
+            src = (c.source or "").lower()
+            conf = c.confidence or 0.0
+            if src == "manual":
+                return (5, conf)
+            if src == "official" and conf >= 0.90:
+                return (4, conf)
+            if src in ("specialized", "raid", "coop"):
+                return (3, conf)
+            if src == "gamekee":
+                return (2, conf)
+            if src == "official":
+                return (1, conf)
+            return (0, conf)
+        valid.sort(key=_time_rank, reverse=True)
+        selected = valid[0]
+        return ResolvedField(value=selected.value, selected_evidence=selected, candidates=parsed_candidates)
+
+    if name in ("cancellation", "is_cancelled"):
+        def _cancel_rank(c: FieldEvidence) -> tuple[int, float]:
+            src = (c.source or "").lower()
+            is_canc = bool(c.is_cancelled or c.value)
+            if not is_canc:
+                return (0, 0.0)
+            if src == "manual":
+                return (3, 1.0)
+            if src == "official":
+                return (2, 1.0)
+            return (1, c.confidence or 0.8)
+        parsed_candidates.sort(key=_cancel_rank, reverse=True)
+        selected = parsed_candidates[0]
+        val = bool(selected.is_cancelled or selected.value)
+        return ResolvedField(value=val, selected_evidence=selected if val else None, candidates=parsed_candidates)
+
+    if name in ("event_type", "category"):
+        valid = [c for c in parsed_candidates if c.value]
+        if not valid:
+            return ResolvedField(value=default or "event", selected_evidence=None, candidates=parsed_candidates)
+        def _type_rank(c: FieldEvidence) -> tuple[int, float]:
+            src = (c.source or "").lower()
+            val = str(c.value or "").lower()
+            if src == "manual":
+                return (4, c.confidence or 1.0)
+            if src == "official" and val not in ("event", "general"):
+                return (3, c.confidence or 0.95)
+            if src == "gamekee":
+                return (2, c.confidence or 0.85)
+            if src == "official":
+                return (1, c.confidence or 0.90)
+            return (0, c.confidence or 0.5)
+        valid.sort(key=_type_rank, reverse=True)
+        selected = valid[0]
+        return ResolvedField(value=selected.value, selected_evidence=selected, candidates=parsed_candidates)
+
+    # 默认通用仲裁
+    valid = [c for c in parsed_candidates if c.value is not None]
+    if not valid:
+        return ResolvedField(value=default, selected_evidence=None, candidates=parsed_candidates)
+    valid.sort(key=lambda c: c.confidence or 0.0, reverse=True)
+    selected = valid[0]
+    return ResolvedField(value=selected.value, selected_evidence=selected, candidates=parsed_candidates)
+
+
 @dataclass
 class ManualOverride:
     """手动配置覆盖记录。"""
@@ -634,6 +765,13 @@ def active_sort_key(event: CanonicalEvent, now: datetime | None = None) -> tuple
     if event.end_precision == TimePrecision.DATE_ONLY.value:
         return (1, event.end_at, event.identity_key)
     return (0, event.end_at, event.identity_key)
+
+
+def safe_datetime_key(dt: datetime | None, default_max: bool = True) -> datetime:
+    """安全的 datetime 排序键，将 None 映射为最小或最大 datetime，防止 TypeError。"""
+    if dt is not None:
+        return dt
+    return datetime.max.replace(tzinfo=timezone.utc) if default_max else datetime.min.replace(tzinfo=timezone.utc)
 
 
 def sort_active_events(events: Sequence[CanonicalEvent], now: datetime | None = None) -> list[CanonicalEvent]:

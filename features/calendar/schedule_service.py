@@ -31,6 +31,9 @@ from .visuals import CalendarVisualCache
 from astrbot_plugin_nikke.features.calendar.canonical_models import (
     CanonicalEvent,
     FieldEvidence,
+    ResolvedField,
+    resolve_field,
+    SourceRole,
     FetchOutcome,
     ResponseMode,
     TimePrecision,
@@ -43,6 +46,7 @@ from astrbot_plugin_nikke.features.calendar.canonical_models import (
     resolve_event_status,
     active_sort_key,
     sort_active_events,
+    safe_datetime_key,
     resolve_next_ending,
     compute_health_badge,
     quality_badge,
@@ -173,81 +177,83 @@ _is_same_event = _is_same_identity
 
 def _merge_two_events(base: CanonicalEvent, incoming: CanonicalEvent) -> CanonicalEvent:
     """字段级多源仲裁合并：
-    - title: GameKee (地道中文) > Official > 其他
-    - banner_url / detail_url: GameKee > Official > 其他
-    - start / end / precision: Official (置信度高) > GameKee
+    - title: resolve_field("title", ...) -> GameKee (地道中文) > Official > 其他
+    - banner_url / detail_url: resolve_field(...) -> GameKee > Official > 其他
+    - start / end: 分别独立调用 resolve_field("start", ...) 和 resolve_field("end", ...)
+      Official (置信度 >= 0.90) > GameKee > Official (< 0.90)
     - cancellation: 取消证据高优先级
-    - started_evidence: 任一可靠来源证实已开始即保留
+    - event_type: Official (非通用 event) > GameKee > 其他
+    - 记录合并后的完整证据链
     """
-    events = [base, incoming]
-    by_source: dict[str, CanonicalEvent] = {}
-    for ev in events:
-        by_source[ev.primary_source] = ev
+    merged_evidence: dict[str, list[dict[str, Any]]] = {k: list(v) for k, v in base.field_evidence.items()}
+    for field_name, ev_list in incoming.field_evidence.items():
+        merged_evidence.setdefault(field_name, []).extend(ev_list)
 
-    official = by_source.get("official")
-    gamekee = by_source.get("gamekee")
+    def _collect_candidates(field_name: str, attr_name: str | None = None) -> list[Any]:
+        attr = attr_name or field_name
+        cands = list(merged_evidence.get(field_name, []))
+        if not cands:
+            for ev in (base, incoming):
+                val = getattr(ev, attr, None)
+                if val is not None and val != "":
+                    src = ev.primary_source or (ev.sources[0] if ev.sources else "unknown")
+                    conf = ev.confidence or 0.8
+                    prec = getattr(ev, f"{field_name}_precision", None) or getattr(ev, f"{attr}_precision", None)
+                    cands.append(FieldEvidence(
+                        value=val,
+                        source=src,
+                        confidence=conf,
+                        precision=prec,
+                    ).to_dict())
+        return cands
 
-    # title: GameKee 标题更地道友好
-    if gamekee and gamekee.title:
-        title = gamekee.title
-    elif official and official.title:
-        title = official.title
+    # 1. 标题仲裁
+    title_res = resolve_field("title", _collect_candidates("title"), default=incoming.title or base.title)
+    title = title_res.value or incoming.title or base.title
+
+    # 2. 宣传图与详情页仲裁
+    banner_res = resolve_field("banner_url", _collect_candidates("banner_url"), default=incoming.banner_url or base.banner_url)
+    banner = banner_res.value
+
+    detail_res = resolve_field("detail_url", _collect_candidates("detail_url"), default=incoming.detail_url or base.detail_url)
+    detail = detail_res.value
+
+    # 3. 起止时间独立仲裁 (严格杜绝单端覆写造成缺失)
+    start_res = resolve_field("start", _collect_candidates("start", "start_at"), default=base.start_at or incoming.start_at)
+    end_res = resolve_field("end", _collect_candidates("end", "end_at"), default=base.end_at or incoming.end_at)
+
+    start_at = start_res.value
+    end_at = end_res.value
+
+    # 精度决胜
+    if start_res.selected_evidence and start_res.selected_evidence.precision:
+        start_prec = start_res.selected_evidence.precision
     else:
-        title = incoming.title or base.title
+        start_prec = incoming.start_precision if incoming.start_at == start_at else base.start_precision
 
-    # banner_url: GameKee 图床优先
-    banner = (gamekee.banner_url if gamekee and gamekee.banner_url else None) or (
-        official.banner_url if official and official.banner_url else None
-    ) or incoming.banner_url or base.banner_url
-
-    # detail_url
-    detail = (gamekee.detail_url if gamekee and gamekee.detail_url else None) or (
-        official.detail_url if official and official.detail_url else None
-    ) or incoming.detail_url or base.detail_url
-
-    # 时间与精度仲裁：Official 权威时间优先 (confidence >= 0.90)
-    if official and official.confidence and official.confidence >= 0.90 and official.end_at:
-        start_at = official.start_at
-        end_at = official.end_at
-        start_prec = official.start_precision
-        end_prec = official.end_precision
-    elif gamekee and gamekee.end_at:
-        start_at = gamekee.start_at
-        end_at = gamekee.end_at
-        start_prec = gamekee.start_precision
-        end_prec = gamekee.end_precision
+    if end_res.selected_evidence and end_res.selected_evidence.precision:
+        end_prec = end_res.selected_evidence.precision
     else:
-        start_at = incoming.start_at or base.start_at
-        end_at = incoming.end_at or base.end_at
-        start_prec = incoming.start_precision or base.start_precision
-        end_prec = incoming.end_precision or base.end_precision
+        end_prec = incoming.end_precision if incoming.end_at == end_at else base.end_precision
 
-    # event_type
-    if official and official.event_type and official.event_type != "event":
-        event_type = official.event_type
-    elif gamekee and gamekee.event_type:
-        event_type = gamekee.event_type
-    else:
-        event_type = incoming.event_type or base.event_type
+    # 4. 事件类型仲裁
+    type_res = resolve_field("event_type", _collect_candidates("event_type"), default=incoming.event_type or base.event_type)
+    event_type = type_res.value or incoming.event_type or base.event_type
 
-    # 取消状态与独立开始证据
-    is_cancelled = base.is_cancelled or incoming.is_cancelled
+    # 5. 取消状态与独立开始证据
+    cancel_res = resolve_field("cancellation", _collect_candidates("cancellation", "is_cancelled"), default=base.is_cancelled or incoming.is_cancelled)
+    is_cancelled = bool(cancel_res.value)
     has_started = base.has_started_evidence or incoming.has_started_evidence
 
-    # 区间合法性
+    # 6. 区间合法性
     is_valid = True
     if start_at and end_at and end_at <= start_at:
         is_valid = False
 
     combined_sources = list(dict.fromkeys(base.sources + incoming.sources))
-    primary_source = "official" if official else "gamekee"
+    primary_source = "gamekee" if "gamekee" in combined_sources else ("official" if "official" in combined_sources else (base.primary_source or incoming.primary_source or "unknown"))
     confidence = max(base.confidence or 0.0, incoming.confidence or 0.0)
-    event_id = (gamekee.id if gamekee else None) or (official.id if official else None) or incoming.id
-
-    # 合并字段级证据
-    merged_evidence = dict(base.field_evidence)
-    for field_name, ev_list in incoming.field_evidence.items():
-        merged_evidence.setdefault(field_name, []).extend(ev_list)
+    event_id = base.id if base.primary_source == "gamekee" else (incoming.id if incoming.primary_source == "gamekee" else (base.id or incoming.id))
 
     merged = CanonicalEvent(
         id=event_id,
@@ -548,6 +554,7 @@ class ScheduleService:
                         by_source.setdefault(src, []).append(ev)
                     self._source_datasets = by_source
                     self.migrated_from_merged_snapshot = True
+
                 self._last_batch_hash = data.get("fingerprint", "")
                 self.content_updated_at = _aware_utc(data["content_updated_at"]) if data.get("content_updated_at") else None
                 events_loaded = True
@@ -583,6 +590,7 @@ class ScheduleService:
                     by_source.setdefault(src, []).append(ev)
 
                 self._source_datasets = by_source
+                self.migrated_from_merged_snapshot = True
                 up_str = data.get("updated_at")
                 if up_str:
                     up_dt = _aware_utc(up_str)
@@ -857,8 +865,9 @@ class ScheduleService:
         for ev in self._events.values():
             used_sources.update(ev.sources)
         if not used_sources:
-            used_sources = {"GAMEKEE"}
-        source_display = " + ".join(sorted(s.upper() for s in used_sources))
+            source_display = "LOCAL SNAPSHOT"
+        else:
+            source_display = " + ".join(sorted(s.upper() for s in used_sources))
 
         return QueryContext(
             now=current,
@@ -888,7 +897,7 @@ class ScheduleService:
                 if ev.start_at and ev.start_at <= ctx.now + horizon:
                     results.append(ev.to_calendar_activity())
 
-        results.sort(key=lambda a: (a.start_at, a.end_at))
+        results.sort(key=lambda a: (safe_datetime_key(a.start_at), safe_datetime_key(a.end_at), a.event_id))
         return results
 
     def list_reminder_deadlines(self, now: datetime | None = None) -> list[CalendarActivity]:
@@ -915,7 +924,7 @@ class ScheduleService:
             object.__setattr__(act, "end_precision", ev.end_precision)
             valid_acts.append(act)
 
-        valid_acts.sort(key=lambda a: a.end_at)
+        valid_acts.sort(key=lambda a: (safe_datetime_key(a.end_at), a.event_id))
         return valid_acts
 
     def group_window(self, days: int = 14, now: datetime | None = None) -> dict[str, list[CalendarActivity]]:
@@ -936,9 +945,9 @@ class ScheduleService:
                 if ev.start_at and ev.start_at <= ctx.now + horizon:
                     upcoming.append(ev.to_calendar_activity())
 
-        soon.sort(key=lambda a: a.end_at)
-        active.sort(key=lambda a: a.end_at)
-        upcoming.sort(key=lambda a: a.start_at)
+        soon.sort(key=lambda a: (safe_datetime_key(a.end_at), a.event_id))
+        active.sort(key=lambda a: (safe_datetime_key(a.end_at), a.event_id))
+        upcoming.sort(key=lambda a: (safe_datetime_key(a.start_at), a.event_id))
         return {"ending_soon": soon, "active": active, "upcoming": upcoming}
 
     def format_schedule_text(
