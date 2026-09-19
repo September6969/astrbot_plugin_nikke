@@ -24,6 +24,7 @@
 
 import json
 from datetime import datetime, timedelta, timezone
+from unittest.mock import Mock, AsyncMock
 from pathlib import Path
 
 import pytest
@@ -488,3 +489,380 @@ def test_same_title_different_scope_not_merged():
         end_at=NOW + timedelta(days=3),
     )
     assert e1.identity_key != e2.identity_key
+
+
+@pytest.mark.asyncio
+async def test_official_adapter_reads_real_announcement_deadlines():
+    """P0-1: Official 适配器真实消费 AnnouncementService.list_deadlines() / DeadlineParser，返回结构化时间。"""
+    from astrbot_plugin_nikke.features.announcement.service import GameDeadline
+    from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
+
+    mock_announcement = Mock()
+    dl1 = GameDeadline(
+        name="冠军竞技场开启",
+        start_at=NOW,
+        end_at=NOW + timedelta(days=7),
+        event_id="ann_champion_arena",
+        category="coop",
+        source_url="https://nikke-en.com/news/1",
+    )
+    mock_announcement.list_deadlines = Mock(return_value=[dl1])
+
+    adapter = OfficialAnnouncementScheduleAdapter(announcement_service=mock_announcement)
+    res = await adapter.fetch_result()
+
+    assert res.outcome == FetchOutcome.SUCCESS_DATA
+    assert len(res.events) == 1
+    ev = res.events[0]
+    assert ev.id == "official:ann_champion_arena"
+    assert ev.title == "冠军竞技场开启"
+    assert ev.start_at == NOW
+    assert ev.end_at == NOW + timedelta(days=7)
+    assert ev.start_precision == TimePrecision.EXACT.value
+    assert ev.end_precision == TimePrecision.EXACT.value
+    assert ev.confidence == 0.95
+    assert ev.primary_source == "official"
+
+
+@pytest.mark.asyncio
+async def test_official_timezone_utc9_conversion():
+    """P0-1: Official UTC+9 时间解析后统一转为 aware UTC，并在 CST 场景下输出精确对应时间。"""
+    from astrbot_plugin_nikke.features.announcement.service import GameDeadline
+    from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
+    from astrbot_plugin_nikke.features.calendar.canonical_models import CST
+
+    # 构造东九区时间：2026-09-20 18:00:00+09:00 -> UTC 为 2026-09-20 09:00:00+00:00 -> CST 为 2026-09-20 17:00:00+08:00
+    tz_utc9 = timezone(timedelta(hours=9))
+    t_start_utc9 = datetime(2026, 9, 20, 18, 0, 0, tzinfo=tz_utc9)
+    t_end_utc9 = datetime(2026, 9, 27, 23, 59, 59, tzinfo=tz_utc9)
+
+    mock_ann = Mock()
+    dl = GameDeadline(
+        name="联合作战公告",
+        start_at=t_start_utc9,
+        end_at=t_end_utc9,
+        event_id="ann_utc9_test",
+        category="event",
+    )
+    mock_ann.list_deadlines = Mock(return_value=[dl])
+
+    adapter = OfficialAnnouncementScheduleAdapter(announcement_service=mock_ann)
+    res = await adapter.fetch_result()
+    assert res.outcome == FetchOutcome.SUCCESS_DATA
+    ev = res.events[0]
+
+    assert ev.start_at.tzinfo == timezone.utc
+    assert ev.start_at == datetime(2026, 9, 20, 9, 0, 0, tzinfo=timezone.utc)
+    # CST 转换
+    assert ev.start_at.astimezone(CST).hour == 17
+    assert ev.start_at.astimezone(CST).minute == 0
+
+
+def test_official_confidence_field_arbitration():
+    """P0-4: 官方置信度 0.95 成功覆写 GameKee 错误时间；0.75 低置信度不覆写 GameKee 权威时间。"""
+    from astrbot_plugin_nikke.features.calendar.schedule_service import _merge_two_events
+
+    t_gk_start = NOW
+    t_gk_end = NOW + timedelta(days=2)
+    t_off_end = NOW + timedelta(days=5)
+
+    ev_gk = CanonicalEvent(
+        id="gamekee:101",
+        title="协同作战",
+        event_type="coop",
+        start_at=t_gk_start,
+        end_at=t_gk_end,
+        confidence=0.85,
+        primary_source="gamekee",
+        sources=["gamekee"],
+        field_evidence={
+            "title": [FieldEvidence("协同作战", "gamekee", 0.85).to_dict()],
+            "start": [FieldEvidence(t_gk_start, "gamekee", 0.85).to_dict()],
+            "end": [FieldEvidence(t_gk_end, "gamekee", 0.85).to_dict()],
+        }
+    )
+
+    # 1. 官方置信度 0.95 -> 成功覆写 end_at 为 t_off_end，保留 GameKee 中文标题
+    ev_off_high = CanonicalEvent(
+        id="official:101",
+        title="Coordinated Operation Notice",
+        event_type="coop",
+        start_at=t_gk_start,
+        end_at=t_off_end,
+        confidence=0.95,
+        primary_source="official",
+        sources=["official"],
+        field_evidence={
+            "title": [FieldEvidence("Coordinated Operation Notice", "official", 0.95).to_dict()],
+            "start": [FieldEvidence(t_gk_start, "official", 0.95).to_dict()],
+            "end": [FieldEvidence(t_off_end, "official", 0.95).to_dict()],
+        }
+    )
+    merged_high = _merge_two_events(ev_gk, ev_off_high)
+    assert merged_high.end_at == t_off_end
+    assert merged_high.title == "协同作战"
+
+    # 2. 官方置信度 0.75 -> 保持 GameKee 原 end_at
+    ev_off_low = CanonicalEvent(
+        id="official:101",
+        title="Coordinated Operation Notice",
+        event_type="coop",
+        start_at=t_gk_start,
+        end_at=t_off_end,
+        confidence=0.75,
+        primary_source="official",
+        sources=["official"],
+        field_evidence={
+            "title": [FieldEvidence("Coordinated Operation Notice", "official", 0.75).to_dict()],
+            "start": [FieldEvidence(t_gk_start, "official", 0.75).to_dict()],
+            "end": [FieldEvidence(t_off_end, "official", 0.75).to_dict()],
+        }
+    )
+    merged_low = _merge_two_events(ev_gk, ev_off_low)
+    assert merged_low.end_at == t_gk_end
+    assert merged_low.title == "协同作战"
+
+
+def test_field_evidence_independent_start_end_arbitration():
+    """P0-4: 官方仅提供 end_at 时，与 GameKee 合并后保留 GameKee 的 start_at 和官方的 end_at，互不破坏。"""
+    from astrbot_plugin_nikke.features.calendar.schedule_service import _merge_two_events
+
+    t_start = NOW - timedelta(days=1)
+    t_end_gk = NOW + timedelta(days=3)
+    t_end_off = NOW + timedelta(days=4)
+
+    ev_gk = CanonicalEvent(
+        id="gamekee:201",
+        title="单人突袭 第10期",
+        event_type="solo_raid",
+        start_at=t_start,
+        end_at=t_end_gk,
+        start_precision="EXACT",
+        end_precision="EXACT",
+        confidence=0.85,
+        primary_source="gamekee",
+        sources=["gamekee"],
+        field_evidence={
+            "title": [FieldEvidence("单人突袭 第10期", "gamekee", 0.85).to_dict()],
+            "start": [FieldEvidence(t_start, "gamekee", 0.85, precision="EXACT").to_dict()],
+            "end": [FieldEvidence(t_end_gk, "gamekee", 0.85, precision="EXACT").to_dict()],
+        }
+    )
+
+    # 官方只提供截止时间公告（start_at 为 None），置信度 0.95
+    ev_off = CanonicalEvent(
+        id="official:201",
+        title="Solo Raid Season 10 Deadline",
+        event_type="solo_raid",
+        start_at=None,
+        end_at=t_end_off,
+        start_precision="UNKNOWN",
+        end_precision="EXACT",
+        confidence=0.95,
+        primary_source="official",
+        sources=["official"],
+        field_evidence={
+            "title": [FieldEvidence("Solo Raid Season 10 Deadline", "official", 0.95).to_dict()],
+            "end": [FieldEvidence(t_end_off, "official", 0.95, precision="EXACT").to_dict()],
+        }
+    )
+
+    merged = _merge_two_events(ev_gk, ev_off)
+    # start_at 保留 GameKee，绝不因为官方为空抹除
+    assert merged.start_at == t_start
+    assert merged.start_precision == "EXACT"
+    # end_at 采用官方高置信度时间
+    assert merged.end_at == t_end_off
+    assert merged.end_precision == "EXACT"
+    assert merged.title == "单人突袭 第10期"
+
+
+@pytest.mark.asyncio
+async def test_per_source_lkg_restart_persistence(tmp_path):
+    """P0-2: Schema 4 格式写入及重启恢复：gamekee 和 official 在 schedule_events.json 中独立保存并成功还原为各源独立数据集。"""
+    service1 = ScheduleService(tmp_path)
+    ev_gk = CanonicalEvent(
+        id="gamekee:301",
+        title="GK Event",
+        event_type="event",
+        start_at=NOW,
+        end_at=NOW + timedelta(days=2),
+        primary_source="gamekee",
+        sources=["gamekee"],
+    )
+    ev_off = CanonicalEvent(
+        id="official:301",
+        title="Official Event",
+        event_type="update",
+        start_at=NOW + timedelta(days=1),
+        end_at=NOW + timedelta(days=3),
+        primary_source="official",
+        sources=["official"],
+    )
+
+    service1._source_datasets = {
+        "gamekee": [ev_gk],
+        "official": [ev_off],
+    }
+    service1.content_updated_at = NOW
+    service1.last_success_at = NOW
+    effective = service1._merge_datasets()
+    service1._sync_internal_stores(effective)
+    service1._save_cache(force_events=True)
+
+    # 验证磁盘持久化为 Schema 4
+    data = json.loads((tmp_path / "schedule_events.json").read_text(encoding="utf-8"))
+    assert data["schema"] == 4
+    assert "source_datasets" in data
+    assert len(data["source_datasets"]["gamekee"]) == 1
+    assert len(data["source_datasets"]["official"]) == 1
+    assert data["source_datasets"]["gamekee"][0]["id"] == "gamekee:301"
+    assert data["source_datasets"]["official"][0]["id"] == "official:301"
+
+    # 重启新实例读取缓存
+    service2 = ScheduleService(tmp_path)
+    assert not service2.migrated_from_merged_snapshot
+    assert "gamekee" in service2._source_datasets
+    assert "official" in service2._source_datasets
+    assert len(service2._source_datasets["gamekee"]) == 1
+    assert len(service2._source_datasets["official"]) == 1
+    assert service2.has_snapshot()
+
+
+def test_manual_override_not_baked_and_restorable(tmp_path):
+    """P0-2 & P0-3: Manual Override 仅作为动态覆盖层存在，不污染 Base 数据；当移除 Override 后，Base 数据完好恢复。"""
+    service = ScheduleService(tmp_path)
+    t_base_end = NOW + timedelta(days=2)
+    t_override_end = NOW + timedelta(days=10)
+
+    base_ev = CanonicalEvent(
+        id="gk:401",
+        title="Base Title",
+        event_type="event",
+        start_at=NOW,
+        end_at=t_base_end,
+        primary_source="gamekee",
+    )
+    service._source_datasets = {"gamekee": [base_ev]}
+    service._merge_datasets()
+    service._sync_internal_stores(service._base_events)
+
+    # 1. 写入 Manual Override
+    overrides_file = tmp_path / "schedule_overrides.json"
+    overrides_file.write_text(json.dumps([
+        {"event_id": "gk:401", "field": "end_at", "value": t_override_end.isoformat()}
+    ]), encoding="utf-8")
+
+    service.reload_overrides()
+    assert service._events["gk:401"].end_at == t_override_end
+    # Base 数据集本身未被篡改
+    assert service._base_events["gk:401"].end_at == t_base_end
+
+    # 2. 移除 Manual Override，无网络请求下重载
+    overrides_file.unlink()
+    service.reload_overrides()
+    assert service._events["gk:401"].end_at == t_base_end
+
+
+@pytest.mark.asyncio
+async def test_manual_empty_does_not_refresh_freshness(tmp_path):
+    """P0-3: Manual 覆盖层返回 SUCCESS_EMPTY 时，不将 last_success_at 刷新为当前时间（保持不变）。"""
+    service = ScheduleService(tmp_path)
+    t_old = NOW - timedelta(hours=10)
+    service.last_success_at = t_old
+
+    class FailingRemoteAdapter(BaseScheduleAdapter):
+        @property
+        def source_name(self) -> str:
+            return "gamekee"
+        async def fetch_result(self) -> FetchResult:
+            return FetchResult(outcome=FetchOutcome.REQUEST_FAILED, error_message="Net error", source="gamekee")
+
+    # 手动覆盖层返回 SUCCESS_EMPTY，远端源失败
+    service.adapters = [service.manual_adapter, FailingRemoteAdapter()]
+    ok, msg = await service.refresh_schedule_data()
+
+    assert not ok
+    # last_success_at 绝不能被手动空覆盖层刷新为当前时间
+    assert service.last_success_at == t_old
+
+
+def test_t2i_payload_purged_legacy_groups(tmp_path):
+    """P0-6: CalendarT2IPayloadBuilder 返回的字典中彻底不存在 groups, ending_soon, active, upcoming 键。"""
+    from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+
+    service = ScheduleService(tmp_path)
+    ev = CanonicalEvent(
+        id="gk:501",
+        title="Active Event",
+        event_type="event",
+        start_at=NOW - timedelta(days=1),
+        end_at=NOW + timedelta(days=2),
+    )
+    service._source_datasets = {"gamekee": [ev]}
+    service._merge_datasets()
+    service._sync_internal_stores(service._base_events)
+    service._has_snapshot = True
+
+    builder = CalendarT2IPayloadBuilder()
+    payload = builder.build(service, days=14, now=NOW)
+
+    # 严格断言已净化移除旧版键
+    assert "groups" not in payload
+    assert "ending_soon" not in payload
+    assert "active" not in payload
+    assert "upcoming" not in payload
+
+    # 严格断言保留规范键
+    assert "pages" in payload
+    assert "page_number" in payload
+    assert "page_total" in payload
+    assert "active_items" in payload
+    assert "next_items" in payload
+    assert "global_has_active" in payload
+    assert "health_display" in payload
+    assert "source_display" in payload
+
+
+def test_compatible_sorting_with_none_datetimes(tmp_path):
+    """P0-7: 当存在 start_at 或 end_at 为 None 的活动时，group_window / list_window / list_reminder_deadlines 排序不抛出 TypeError。"""
+    service = ScheduleService(tmp_path)
+    e1 = CanonicalEvent(
+        id="none:1",
+        title="No End Event",
+        event_type="event",
+        start_at=NOW - timedelta(days=1),
+        end_at=None,
+        end_precision="UNKNOWN",
+    )
+    e2 = CanonicalEvent(
+        id="none:2",
+        title="No Start Event",
+        event_type="event",
+        start_at=None,
+        end_at=NOW + timedelta(days=2),
+        has_started_evidence=True,
+    )
+    e3 = CanonicalEvent(
+        id="normal:3",
+        title="Normal Event",
+        event_type="event",
+        start_at=NOW - timedelta(days=1),
+        end_at=NOW + timedelta(days=3),
+    )
+
+    service._source_datasets = {"gamekee": [e1, e2, e3]}
+    service._merge_datasets()
+    service._sync_internal_stores(service._base_events)
+    service._has_snapshot = True
+
+    # 均不应抛出 TypeError
+    win = service.list_window(14, now=NOW)
+    assert len(win) >= 1
+
+    reminders = service.list_reminder_deadlines(now=NOW)
+    assert isinstance(reminders, list)
+
+    groups = service.group_window(14, now=NOW)
+    assert "active" in groups
+    assert "upcoming" in groups
