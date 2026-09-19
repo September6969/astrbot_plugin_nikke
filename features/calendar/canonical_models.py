@@ -77,6 +77,13 @@ class ServerScope(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class SourceRole(str, Enum):
+    PRIMARY = "PRIMARY"
+    AUTHORITATIVE_SUPPLEMENT = "AUTHORITATIVE_SUPPLEMENT"
+    OPTIONAL = "OPTIONAL"
+    LOCAL_OVERRIDE = "LOCAL_OVERRIDE"
+
+
 VALID_PRECISIONS = frozenset({p.value for p in TimePrecision})
 VALID_STATUSES = frozenset({s.value for s in EventStatus})
 VALID_FRESHNESS = frozenset({f.value for f in Freshness})

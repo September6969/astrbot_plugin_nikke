@@ -82,6 +82,28 @@ class BaseScheduleAdapter(ABC):
         pass
 
     @property
+    def source_role(self) -> SourceRole:
+        try:
+            name = self.source_name.lower()
+        except Exception:
+            return SourceRole.OPTIONAL
+        if name == "gamekee":
+            return SourceRole.PRIMARY
+        if name == "official":
+            return SourceRole.AUTHORITATIVE_SUPPLEMENT
+        if name in ("manual", "override", "manual_override"):
+            return SourceRole.LOCAL_OVERRIDE
+        return SourceRole.OPTIONAL
+
+    @property
+    def contributes_to_freshness(self) -> bool:
+        return self.source_role != SourceRole.LOCAL_OVERRIDE
+
+    @property
+    def required_for_complete(self) -> bool:
+        return self.source_role == SourceRole.PRIMARY
+
+    @property
     def response_mode(self) -> ResponseMode:
         return ResponseMode.COMPLETE_SNAPSHOT
 
@@ -120,6 +142,18 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
     @property
     def source_name(self) -> str:
         return "gamekee"
+
+    @property
+    def source_role(self) -> SourceRole:
+        return SourceRole.PRIMARY
+
+    @property
+    def contributes_to_freshness(self) -> bool:
+        return True
+
+    @property
+    def required_for_complete(self) -> bool:
+        return True
 
     @property
     def response_mode(self) -> ResponseMode:
@@ -315,6 +349,18 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
         return "official"
 
     @property
+    def source_role(self) -> SourceRole:
+        return SourceRole.AUTHORITATIVE_SUPPLEMENT
+
+    @property
+    def contributes_to_freshness(self) -> bool:
+        return True
+
+    @property
+    def required_for_complete(self) -> bool:
+        return True
+
+    @property
     def response_mode(self) -> ResponseMode:
         return ResponseMode.INCREMENTAL
 
@@ -477,6 +523,18 @@ class ManualOverrideScheduleAdapter(BaseScheduleAdapter):
     @property
     def source_name(self) -> str:
         return "manual"
+
+    @property
+    def source_role(self) -> SourceRole:
+        return SourceRole.LOCAL_OVERRIDE
+
+    @property
+    def contributes_to_freshness(self) -> bool:
+        return False
+
+    @property
+    def required_for_complete(self) -> bool:
+        return False
 
     @property
     def response_mode(self) -> ResponseMode:

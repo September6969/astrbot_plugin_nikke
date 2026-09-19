@@ -317,6 +317,7 @@ class ScheduleService:
         self._events: dict[str, CanonicalEvent] = {}
         self._activities: _ActivitiesDict = _ActivitiesDict(self)
         self._has_snapshot: bool = False
+        self.migrated_from_merged_snapshot: bool = False
 
         # 时间戳与版本分离
         self.content_updated_at: datetime | None = None
@@ -404,6 +405,15 @@ class ScheduleService:
         parts = [e.fingerprint for e in sorted(events, key=lambda x: x.id)]
         return hashlib.sha256("".join(parts).encode("utf-8")).hexdigest()
 
+    def reload_overrides(self) -> None:
+        """重新载入手动覆盖层并重新应用到 Base 数据集，不消耗网络请求。"""
+        self._manual_overrides = self.manual_adapter.load_overrides()
+        if self._base_events:
+            effective = self._apply_manual_overrides(self._base_events)
+            self._sync_internal_stores(effective)
+            self._has_snapshot = bool(effective)
+            self._update_health_state()
+
     def _apply_manual_overrides(self, base_events: dict[str, CanonicalEvent]) -> dict[str, CanonicalEvent]:
         """应用手动覆盖层：Base Evidence -> Base Resolved -> Manual Override -> Effective Event。
 
@@ -478,7 +488,13 @@ class ScheduleService:
         if not self._events and not self._source_datasets:
             self.coverage = Coverage.UNAVAILABLE.value
         else:
-            has_failure = any(h.consecutive_failures > 0 for h in self._source_health.values())
+            # 仅检查当前适配器中的源
+            has_failure = False
+            for ad in self.adapters:
+                h = self._source_health.get(ad.source_name)
+                if h and h.consecutive_failures > 0:
+                    has_failure = True
+                    break
             if has_failure:
                 self.coverage = Coverage.PARTIAL.value
             else:
@@ -496,30 +512,42 @@ class ScheduleService:
             else:
                 self.freshness = Freshness.EXPIRED.value
 
-        all_failed = bool(self.adapters) and all(
+        # 若所有可贡献新鲜度的主源均失败但存在本地快照，置为 STALE
+        active_freshness_adapters = [ad for ad in self.adapters if getattr(ad, "contributes_to_freshness", True)]
+        if active_freshness_adapters and all(
             self._source_health.get(ad.source_name) and self._source_health[ad.source_name].consecutive_failures > 0
-            for ad in self.adapters
-        )
-        if all_failed and (self._events or self._source_datasets):
+            for ad in active_freshness_adapters
+        ) and (self._events or self._source_datasets):
             self.freshness = Freshness.STALE.value
 
     def _load_cache(self) -> None:
         """载入本地数据并支持新旧 schema 平滑自动迁移。"""
         self._manual_overrides = self.manual_adapter.load_overrides()
+        self.migrated_from_merged_snapshot = False
 
         events_loaded = False
         if self.events_path.is_file():
             try:
                 content = self.events_path.read_text(encoding="utf-8")
                 data = json.loads(content)
-                raw_events = data.get("events", [])
-                by_source: dict[str, list[CanonicalEvent]] = {}
-                for item in raw_events:
-                    ev = CanonicalEvent.from_dict(item)
-                    src = ev.primary_source or (ev.sources[0] if ev.sources else "gamekee")
-                    by_source.setdefault(src, []).append(ev)
+                schema_version = int(data.get("schema", 1))
 
-                self._source_datasets = by_source
+                if schema_version >= 4 and "source_datasets" in data:
+                    raw_sources = data.get("source_datasets", {})
+                    by_source: dict[str, list[CanonicalEvent]] = {}
+                    for src, raw_list in raw_sources.items():
+                        by_source[src] = [CanonicalEvent.from_dict(item) for item in raw_list]
+                    self._source_datasets = by_source
+                    self.migrated_from_merged_snapshot = False
+                else:
+                    raw_events = data.get("events", []) or data.get("merged_snapshot", [])
+                    by_source = {}
+                    for item in raw_events:
+                        ev = CanonicalEvent.from_dict(item)
+                        src = ev.primary_source or (ev.sources[0] if ev.sources else "gamekee")
+                        by_source.setdefault(src, []).append(ev)
+                    self._source_datasets = by_source
+                    self.migrated_from_merged_snapshot = True
                 self._last_batch_hash = data.get("fingerprint", "")
                 self.content_updated_at = _aware_utc(data["content_updated_at"]) if data.get("content_updated_at") else None
                 events_loaded = True
@@ -598,9 +626,14 @@ class ScheduleService:
         # 2. schedule_events.json 与 calendar_cache.json
         if force_events or not self.events_path.is_file():
             events_payload = {
-                "schema": 3,
+                "schema": 4,
                 "content_updated_at": self.content_updated_at.isoformat() if self.content_updated_at else datetime.now(timezone.utc).isoformat(),
                 "fingerprint": self._last_batch_hash,
+                "source_datasets": {
+                    src: [ev.to_dict() for ev in ev_list]
+                    for src, ev_list in self._source_datasets.items()
+                },
+                "merged_snapshot": [ev.to_dict() for ev in self._events.values()],
                 "events": [ev.to_dict() for ev in self._events.values()],
             }
             tmp_events = self.events_path.with_suffix(".json.tmp")
@@ -665,24 +698,29 @@ class ScheduleService:
 
             health.last_outcome = res.outcome.value
 
+            contributes = getattr(adapter, "contributes_to_freshness", True)
+
             if res.outcome == FetchOutcome.SUCCESS_DATA:
                 self._source_datasets[src] = res.events
                 health.last_success_at = now_utc
                 health.consecutive_failures = 0
                 health.last_error_type = ""
-                any_success = True
+                if contributes:
+                    any_success = True
             elif res.outcome == FetchOutcome.SUCCESS_EMPTY:
                 if adapter.response_mode == ResponseMode.COMPLETE_SNAPSHOT:
                     self._source_datasets[src] = []
                 health.last_success_at = now_utc
                 health.consecutive_failures = 0
                 health.last_error_type = ""
-                any_success = True
+                if contributes:
+                    any_success = True
             elif res.outcome == FetchOutcome.NOT_MODIFIED:
                 health.last_success_at = now_utc
                 health.consecutive_failures = 0
                 health.last_error_type = ""
-                any_success = True
+                if contributes:
+                    any_success = True
             else:
                 health.consecutive_failures += 1
                 health.last_error_type = res.error_message or res.outcome.value
