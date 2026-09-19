@@ -19,7 +19,7 @@ def _normalize_equipment_icon(source):
     if bbox is None:
         return canvas
     trimmed = prepared.crop(bbox)
-    fitted = ImageOps.contain(trimmed, (150, 150), Image.Resampling.LANCZOS)
+    fitted = ImageOps.contain(trimmed, (172, 172), Image.Resampling.LANCZOS)
     x = (180 - fitted.width) // 2
     y = (180 - fitted.height) // 2
     canvas.alpha_composite(fitted, (x, y))
@@ -116,7 +116,12 @@ class CharacterT2IPayloadBuilder:
                     "level": "LV." + display_number(item.level), "icon": self.resolver.encode(image, (100, 100))}
         corp_asset = getattr(card_assets, "corporation", None)
         watermark = self.resolver.encode(corp_asset, (260, 260)) if corp_asset else None
-        from astrbot_plugin_nikke.features.character.replica import build_summary, cache_identity, SHORT_NAMES, VERSION, replica_font, art_style
+        from astrbot_plugin_nikke.features.character.replica import (
+            build_summary, cache_identity, SHORT_NAMES, VERSION,
+            replica_font, barlow_font, barlow_semibold_font,
+            rajdhani_font, rajdhani_semibold_font, noto_font,
+            noto_font_700, noto_font_800, art_style,
+        )
         for gear in equipment:
             for row in gear["options"]:
                 row["short_name"] = SHORT_NAMES.get(row["name"].strip("【】"), row["name"])
@@ -126,11 +131,15 @@ class CharacterT2IPayloadBuilder:
                 "grade": data.grade, "core": data.core,
                 "skill_items": [{"label": label, "level": level,
                                   "icon": self.resolver.encode(skills_assets.get(key), (110, 110))}
-                                 for key, label, level in (("skill1", "技1", data.skill1_level),
-                                                           ("skill2", "技2", data.skill2_level),
-                                                           ("burst", "爆", data.burst_skill_level))],
-                "replica_font": replica_font(), "art_style": art_style(data, portrait),
-                "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 16,
+                                 for key, label, level in (("skill1", "技能1", data.skill1_level),
+                                                           ("skill2", "技能2", data.skill2_level),
+                                                           ("burst", "爆裂", data.burst_skill_level))],
+                "replica_font": replica_font(), "font_noto": noto_font(),
+                "font_noto_700": noto_font_700(), "font_noto_800": noto_font_800(),
+                "font_barlow": barlow_font(), "font_barlow_sb": barlow_semibold_font(),
+                "font_rajdhani": rajdhani_font(), "font_rajdhani_sb": rajdhani_semibold_font(),
+                "art_style": art_style(data, portrait),
+                "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 11,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
                 "character_art_data_uri": self.resolver.encode(portrait, (1600, 2400)), "theme": asdict(theme), "identities": identities,
                 "corporation_watermark": watermark, "bg_gradient": bg_grad,

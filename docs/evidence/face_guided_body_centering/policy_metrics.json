@@ -1,0 +1,3606 @@
+{
+  "schema": 1,
+  "total_records": 180,
+  "records": [
+    {
+      "render_id": "c010",
+      "canonical_name": "拉毗",
+      "category": "A 普通直立/紧凑 (拉毗)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": -7.74,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 7.74,
+      "face_x_after": 860.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9806
+    },
+    {
+      "render_id": "c010",
+      "canonical_name": "拉毗",
+      "category": "A 普通直立/紧凑 (拉毗)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": -7.74,
+      "candidate_shift": -7.74,
+      "difference_from_v5": 0.0,
+      "face_x_after": 852.26,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9806
+    },
+    {
+      "render_id": "c010",
+      "canonical_name": "拉毗",
+      "category": "A 普通直立/紧凑 (拉毗)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": -7.74,
+      "candidate_shift": -7.74,
+      "difference_from_v5": 0.0,
+      "face_x_after": 852.26,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9806
+    },
+    {
+      "render_id": "c010",
+      "canonical_name": "拉毗",
+      "category": "A 普通直立/紧凑 (拉毗)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": -7.74,
+      "candidate_shift": -7.74,
+      "difference_from_v5": 0.0,
+      "face_x_after": 852.26,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9806
+    },
+    {
+      "render_id": "c010",
+      "canonical_name": "拉毗",
+      "category": "A 普通直立/紧凑 (拉毗)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": -7.74,
+      "candidate_shift": -7.74,
+      "difference_from_v5": 0.0,
+      "face_x_after": 852.26,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9806
+    },
+    {
+      "render_id": "c191",
+      "canonical_name": "爱丽丝",
+      "category": "A 普通直立/紧凑 (爱丽丝)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 3.48,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -3.48,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9294
+    },
+    {
+      "render_id": "c191",
+      "canonical_name": "爱丽丝",
+      "category": "A 普通直立/紧凑 (爱丽丝)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 3.48,
+      "candidate_shift": 3.48,
+      "difference_from_v5": 0.0,
+      "face_x_after": 763.48,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9294
+    },
+    {
+      "render_id": "c191",
+      "canonical_name": "爱丽丝",
+      "category": "A 普通直立/紧凑 (爱丽丝)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 3.48,
+      "candidate_shift": 3.48,
+      "difference_from_v5": 0.0,
+      "face_x_after": 763.48,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9294
+    },
+    {
+      "render_id": "c191",
+      "canonical_name": "爱丽丝",
+      "category": "A 普通直立/紧凑 (爱丽丝)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 3.48,
+      "candidate_shift": 3.48,
+      "difference_from_v5": 0.0,
+      "face_x_after": 763.48,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9294
+    },
+    {
+      "render_id": "c191",
+      "canonical_name": "爱丽丝",
+      "category": "A 普通直立/紧凑 (爱丽丝)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 3.48,
+      "candidate_shift": 3.48,
+      "difference_from_v5": 0.0,
+      "face_x_after": 763.48,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9294
+    },
+    {
+      "render_id": "c011",
+      "canonical_name": "尼恩",
+      "category": "A 普通直立/紧凑 (尼恩)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 109.69,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -109.69,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9393
+    },
+    {
+      "render_id": "c011",
+      "canonical_name": "尼恩",
+      "category": "A 普通直立/紧凑 (尼恩)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 109.69,
+      "candidate_shift": 109.69,
+      "difference_from_v5": 0.0,
+      "face_x_after": 869.69,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9393
+    },
+    {
+      "render_id": "c011",
+      "canonical_name": "尼恩",
+      "category": "A 普通直立/紧凑 (尼恩)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 109.69,
+      "candidate_shift": 39.99,
+      "difference_from_v5": -69.7,
+      "face_x_after": 799.99,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9393
+    },
+    {
+      "render_id": "c011",
+      "canonical_name": "尼恩",
+      "category": "A 普通直立/紧凑 (尼恩)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 109.69,
+      "candidate_shift": 32.0,
+      "difference_from_v5": -77.69,
+      "face_x_after": 792.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9393
+    },
+    {
+      "render_id": "c011",
+      "canonical_name": "尼恩",
+      "category": "A 普通直立/紧凑 (尼恩)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 109.69,
+      "candidate_shift": 47.96,
+      "difference_from_v5": -61.73,
+      "face_x_after": 807.96,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9393
+    },
+    {
+      "render_id": "c012",
+      "canonical_name": "阿妮斯",
+      "category": "A 普通直立/紧凑 (阿妮斯)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 32.22,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -32.22,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9867
+    },
+    {
+      "render_id": "c012",
+      "canonical_name": "阿妮斯",
+      "category": "A 普通直立/紧凑 (阿妮斯)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 32.22,
+      "candidate_shift": 32.22,
+      "difference_from_v5": 0.0,
+      "face_x_after": 792.22,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9867
+    },
+    {
+      "render_id": "c012",
+      "canonical_name": "阿妮斯",
+      "category": "A 普通直立/紧凑 (阿妮斯)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 32.22,
+      "candidate_shift": 30.9,
+      "difference_from_v5": -1.32,
+      "face_x_after": 790.9,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9867
+    },
+    {
+      "render_id": "c012",
+      "canonical_name": "阿妮斯",
+      "category": "A 普通直立/紧凑 (阿妮斯)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 32.22,
+      "candidate_shift": 28.28,
+      "difference_from_v5": -3.94,
+      "face_x_after": 788.28,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9867
+    },
+    {
+      "render_id": "c012",
+      "canonical_name": "阿妮斯",
+      "category": "A 普通直立/紧凑 (阿妮斯)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 32.22,
+      "candidate_shift": 31.91,
+      "difference_from_v5": -0.31,
+      "face_x_after": 791.91,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9867
+    },
+    {
+      "render_id": "c070",
+      "canonical_name": "布丽德",
+      "category": "A 普通直立/紧凑 (布丽德)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 128.47,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -128.47,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9177
+    },
+    {
+      "render_id": "c070",
+      "canonical_name": "布丽德",
+      "category": "A 普通直立/紧凑 (布丽德)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 128.47,
+      "candidate_shift": 128.47,
+      "difference_from_v5": 0.0,
+      "face_x_after": 888.47,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9177
+    },
+    {
+      "render_id": "c070",
+      "canonical_name": "布丽德",
+      "category": "A 普通直立/紧凑 (布丽德)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 128.47,
+      "candidate_shift": 40.0,
+      "difference_from_v5": -88.47,
+      "face_x_after": 800.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9177
+    },
+    {
+      "render_id": "c070",
+      "canonical_name": "布丽德",
+      "category": "A 普通直立/紧凑 (布丽德)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 128.47,
+      "candidate_shift": 32.0,
+      "difference_from_v5": -96.47,
+      "face_x_after": 792.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9177
+    },
+    {
+      "render_id": "c070",
+      "canonical_name": "布丽德",
+      "category": "A 普通直立/紧凑 (布丽德)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 128.47,
+      "candidate_shift": 47.99,
+      "difference_from_v5": -80.48,
+      "face_x_after": 807.99,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9177
+    },
+    {
+      "render_id": "c072",
+      "canonical_name": "迪塞尔",
+      "category": "A 普通直立/紧凑 (迪塞尔)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 7.53,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -7.53,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9874
+    },
+    {
+      "render_id": "c072",
+      "canonical_name": "迪塞尔",
+      "category": "A 普通直立/紧凑 (迪塞尔)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 7.53,
+      "candidate_shift": 7.53,
+      "difference_from_v5": 0.0,
+      "face_x_after": 767.53,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9874
+    },
+    {
+      "render_id": "c072",
+      "canonical_name": "迪塞尔",
+      "category": "A 普通直立/紧凑 (迪塞尔)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 7.53,
+      "candidate_shift": 7.53,
+      "difference_from_v5": 0.0,
+      "face_x_after": 767.53,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9874
+    },
+    {
+      "render_id": "c072",
+      "canonical_name": "迪塞尔",
+      "category": "A 普通直立/紧凑 (迪塞尔)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 7.53,
+      "candidate_shift": 7.53,
+      "difference_from_v5": 0.0,
+      "face_x_after": 767.53,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9874
+    },
+    {
+      "render_id": "c072",
+      "canonical_name": "迪塞尔",
+      "category": "A 普通直立/紧凑 (迪塞尔)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 7.53,
+      "candidate_shift": 7.53,
+      "difference_from_v5": 0.0,
+      "face_x_after": 767.53,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9874
+    },
+    {
+      "render_id": "c080",
+      "canonical_name": "桑迪",
+      "category": "A 普通直立/紧凑 (桑迪)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 96.07,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -96.07,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9778
+    },
+    {
+      "render_id": "c080",
+      "canonical_name": "桑迪",
+      "category": "A 普通直立/紧凑 (桑迪)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 96.07,
+      "candidate_shift": 96.07,
+      "difference_from_v5": 0.0,
+      "face_x_after": 856.07,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9778
+    },
+    {
+      "render_id": "c080",
+      "canonical_name": "桑迪",
+      "category": "A 普通直立/紧凑 (桑迪)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 96.07,
+      "candidate_shift": 39.98,
+      "difference_from_v5": -56.09,
+      "face_x_after": 799.98,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9778
+    },
+    {
+      "render_id": "c080",
+      "canonical_name": "桑迪",
+      "category": "A 普通直立/紧凑 (桑迪)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 96.07,
+      "candidate_shift": 32.0,
+      "difference_from_v5": -64.07,
+      "face_x_after": 792.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9778
+    },
+    {
+      "render_id": "c080",
+      "canonical_name": "桑迪",
+      "category": "A 普通直立/紧凑 (桑迪)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 96.07,
+      "candidate_shift": 47.88,
+      "difference_from_v5": -48.19,
+      "face_x_after": 807.88,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9778
+    },
+    {
+      "render_id": "c082",
+      "canonical_name": "丽塔",
+      "category": "A 普通直立/紧凑 (丽塔)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": -34.82,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 34.82,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9644
+    },
+    {
+      "render_id": "c082",
+      "canonical_name": "丽塔",
+      "category": "A 普通直立/紧凑 (丽塔)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": -34.82,
+      "candidate_shift": -34.82,
+      "difference_from_v5": 0.0,
+      "face_x_after": 725.18,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9644
+    },
+    {
+      "render_id": "c082",
+      "canonical_name": "丽塔",
+      "category": "A 普通直立/紧凑 (丽塔)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": -34.82,
+      "candidate_shift": -32.59,
+      "difference_from_v5": 2.23,
+      "face_x_after": 727.41,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9644
+    },
+    {
+      "render_id": "c082",
+      "canonical_name": "丽塔",
+      "category": "A 普通直立/紧凑 (丽塔)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": -34.82,
+      "candidate_shift": -29.22,
+      "difference_from_v5": 5.6,
+      "face_x_after": 730.78,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9644
+    },
+    {
+      "render_id": "c082",
+      "canonical_name": "丽塔",
+      "category": "A 普通直立/紧凑 (丽塔)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": -34.82,
+      "candidate_shift": -34.14,
+      "difference_from_v5": 0.68,
+      "face_x_after": 725.86,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9644
+    },
+    {
+      "render_id": "c120",
+      "canonical_name": "N102",
+      "category": "A 普通直立/紧凑 (N102)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 0.08,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -0.08,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c120",
+      "canonical_name": "N102",
+      "category": "A 普通直立/紧凑 (N102)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 0.08,
+      "candidate_shift": 0.08,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.08,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c120",
+      "canonical_name": "N102",
+      "category": "A 普通直立/紧凑 (N102)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 0.08,
+      "candidate_shift": 0.08,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.08,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c120",
+      "canonical_name": "N102",
+      "category": "A 普通直立/紧凑 (N102)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 0.08,
+      "candidate_shift": 0.08,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.08,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c120",
+      "canonical_name": "N102",
+      "category": "A 普通直立/紧凑 (N102)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 0.08,
+      "candidate_shift": 0.08,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.08,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c172",
+      "canonical_name": "艾德米",
+      "category": "A 普通直立/紧凑 (艾德米)",
+      "category_code": "A",
+      "policy": "A",
+      "original_v5_shift": 64.65,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -64.65,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9763
+    },
+    {
+      "render_id": "c172",
+      "canonical_name": "艾德米",
+      "category": "A 普通直立/紧凑 (艾德米)",
+      "category_code": "A",
+      "policy": "B",
+      "original_v5_shift": 64.65,
+      "candidate_shift": 64.65,
+      "difference_from_v5": 0.0,
+      "face_x_after": 824.65,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9763
+    },
+    {
+      "render_id": "c172",
+      "canonical_name": "艾德米",
+      "category": "A 普通直立/紧凑 (艾德米)",
+      "category_code": "A",
+      "policy": "C",
+      "original_v5_shift": 64.65,
+      "candidate_shift": 39.55,
+      "difference_from_v5": -25.1,
+      "face_x_after": 799.55,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9763
+    },
+    {
+      "render_id": "c172",
+      "canonical_name": "艾德米",
+      "category": "A 普通直立/紧凑 (艾德米)",
+      "category_code": "A",
+      "policy": "D",
+      "original_v5_shift": 64.65,
+      "candidate_shift": 31.93,
+      "difference_from_v5": -32.72,
+      "face_x_after": 791.93,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9763
+    },
+    {
+      "render_id": "c172",
+      "canonical_name": "艾德米",
+      "category": "A 普通直立/紧凑 (艾德米)",
+      "category_code": "A",
+      "policy": "E",
+      "original_v5_shift": 64.65,
+      "candidate_shift": 46.43,
+      "difference_from_v5": -18.22,
+      "face_x_after": 806.43,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9763
+    },
+    {
+      "render_id": "c170",
+      "canonical_name": "普丽瓦蒂",
+      "category": "B 长发 (普丽瓦蒂)",
+      "category_code": "B",
+      "policy": "A",
+      "original_v5_shift": 39.94,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -39.94,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9591
+    },
+    {
+      "render_id": "c170",
+      "canonical_name": "普丽瓦蒂",
+      "category": "B 长发 (普丽瓦蒂)",
+      "category_code": "B",
+      "policy": "B",
+      "original_v5_shift": 39.94,
+      "candidate_shift": 39.94,
+      "difference_from_v5": 0.0,
+      "face_x_after": 799.94,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9591
+    },
+    {
+      "render_id": "c170",
+      "canonical_name": "普丽瓦蒂",
+      "category": "B 长发 (普丽瓦蒂)",
+      "category_code": "B",
+      "policy": "C",
+      "original_v5_shift": 39.94,
+      "candidate_shift": 35.21,
+      "difference_from_v5": -4.73,
+      "face_x_after": 795.21,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9591
+    },
+    {
+      "render_id": "c170",
+      "canonical_name": "普丽瓦蒂",
+      "category": "B 长发 (普丽瓦蒂)",
+      "category_code": "B",
+      "policy": "D",
+      "original_v5_shift": 39.94,
+      "candidate_shift": 30.47,
+      "difference_from_v5": -9.47,
+      "face_x_after": 790.47,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9591
+    },
+    {
+      "render_id": "c170",
+      "canonical_name": "普丽瓦蒂",
+      "category": "B 长发 (普丽瓦蒂)",
+      "category_code": "B",
+      "policy": "E",
+      "original_v5_shift": 39.94,
+      "candidate_shift": 37.95,
+      "difference_from_v5": -1.99,
+      "face_x_after": 797.95,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9591
+    },
+    {
+      "render_id": "c221",
+      "canonical_name": "长发公主",
+      "category": "B 长发 (长发公主)",
+      "category_code": "B",
+      "policy": "A",
+      "original_v5_shift": 92.26,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -92.26,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.974
+    },
+    {
+      "render_id": "c221",
+      "canonical_name": "长发公主",
+      "category": "B 长发 (长发公主)",
+      "category_code": "B",
+      "policy": "B",
+      "original_v5_shift": 92.26,
+      "candidate_shift": 92.26,
+      "difference_from_v5": 0.0,
+      "face_x_after": 852.26,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.974
+    },
+    {
+      "render_id": "c221",
+      "canonical_name": "长发公主",
+      "category": "B 长发 (长发公主)",
+      "category_code": "B",
+      "policy": "C",
+      "original_v5_shift": 92.26,
+      "candidate_shift": 39.97,
+      "difference_from_v5": -52.29,
+      "face_x_after": 799.97,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.974
+    },
+    {
+      "render_id": "c221",
+      "canonical_name": "长发公主",
+      "category": "B 长发 (长发公主)",
+      "category_code": "B",
+      "policy": "D",
+      "original_v5_shift": 92.26,
+      "candidate_shift": 32.0,
+      "difference_from_v5": -60.26,
+      "face_x_after": 792.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.974
+    },
+    {
+      "render_id": "c221",
+      "canonical_name": "长发公主",
+      "category": "B 长发 (长发公主)",
+      "category_code": "B",
+      "policy": "E",
+      "original_v5_shift": 92.26,
+      "candidate_shift": 47.84,
+      "difference_from_v5": -44.42,
+      "face_x_after": 807.84,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.974
+    },
+    {
+      "render_id": "c270",
+      "canonical_name": "布兰儿",
+      "category": "B 长发 (布兰儿)",
+      "category_code": "B",
+      "policy": "A",
+      "original_v5_shift": 35.63,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -35.63,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9419
+    },
+    {
+      "render_id": "c270",
+      "canonical_name": "布兰儿",
+      "category": "B 长发 (布兰儿)",
+      "category_code": "B",
+      "policy": "B",
+      "original_v5_shift": 35.63,
+      "candidate_shift": 35.63,
+      "difference_from_v5": 0.0,
+      "face_x_after": 795.63,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9419
+    },
+    {
+      "render_id": "c270",
+      "canonical_name": "布兰儿",
+      "category": "B 长发 (布兰儿)",
+      "category_code": "B",
+      "policy": "C",
+      "original_v5_shift": 35.63,
+      "candidate_shift": 33.07,
+      "difference_from_v5": -2.56,
+      "face_x_after": 793.07,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9419
+    },
+    {
+      "render_id": "c270",
+      "canonical_name": "布兰儿",
+      "category": "B 长发 (布兰儿)",
+      "category_code": "B",
+      "policy": "D",
+      "original_v5_shift": 35.63,
+      "candidate_shift": 29.47,
+      "difference_from_v5": -6.16,
+      "face_x_after": 789.47,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9419
+    },
+    {
+      "render_id": "c270",
+      "canonical_name": "布兰儿",
+      "category": "B 长发 (布兰儿)",
+      "category_code": "B",
+      "policy": "E",
+      "original_v5_shift": 35.63,
+      "candidate_shift": 34.8,
+      "difference_from_v5": -0.83,
+      "face_x_after": 794.8,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9419
+    },
+    {
+      "render_id": "c010_02",
+      "canonical_name": "拉毗",
+      "category": "B 长发 (拉毗·白色约定)",
+      "category_code": "B",
+      "policy": "A",
+      "original_v5_shift": 64.26,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -64.26,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9793
+    },
+    {
+      "render_id": "c010_02",
+      "canonical_name": "拉毗",
+      "category": "B 长发 (拉毗·白色约定)",
+      "category_code": "B",
+      "policy": "B",
+      "original_v5_shift": 64.26,
+      "candidate_shift": 64.26,
+      "difference_from_v5": 0.0,
+      "face_x_after": 824.26,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9793
+    },
+    {
+      "render_id": "c010_02",
+      "canonical_name": "拉毗",
+      "category": "B 长发 (拉毗·白色约定)",
+      "category_code": "B",
+      "policy": "C",
+      "original_v5_shift": 64.26,
+      "candidate_shift": 39.53,
+      "difference_from_v5": -24.73,
+      "face_x_after": 799.53,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9793
+    },
+    {
+      "render_id": "c010_02",
+      "canonical_name": "拉毗",
+      "category": "B 长发 (拉毗·白色约定)",
+      "category_code": "B",
+      "policy": "D",
+      "original_v5_shift": 64.26,
+      "candidate_shift": 31.92,
+      "difference_from_v5": -32.34,
+      "face_x_after": 791.92,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9793
+    },
+    {
+      "render_id": "c010_02",
+      "canonical_name": "拉毗",
+      "category": "B 长发 (拉毗·白色约定)",
+      "category_code": "B",
+      "policy": "E",
+      "original_v5_shift": 64.26,
+      "candidate_shift": 46.38,
+      "difference_from_v5": -17.88,
+      "face_x_after": 806.38,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9793
+    },
+    {
+      "render_id": "c016",
+      "canonical_name": "拉毗：小红帽",
+      "category": "C 长枪/背包 (拉毗：小红帽)",
+      "category_code": "C",
+      "policy": "A",
+      "original_v5_shift": -124.46,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 124.46,
+      "face_x_after": 860.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9805
+    },
+    {
+      "render_id": "c016",
+      "canonical_name": "拉毗：小红帽",
+      "category": "C 长枪/背包 (拉毗：小红帽)",
+      "category_code": "C",
+      "policy": "B",
+      "original_v5_shift": -124.46,
+      "candidate_shift": -124.46,
+      "difference_from_v5": 0.0,
+      "face_x_after": 735.54,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9805
+    },
+    {
+      "render_id": "c016",
+      "canonical_name": "拉毗：小红帽",
+      "category": "C 长枪/背包 (拉毗：小红帽)",
+      "category_code": "C",
+      "policy": "C",
+      "original_v5_shift": -124.46,
+      "candidate_shift": -40.0,
+      "difference_from_v5": 84.46,
+      "face_x_after": 820.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9805
+    },
+    {
+      "render_id": "c016",
+      "canonical_name": "拉毗：小红帽",
+      "category": "C 长枪/背包 (拉毗：小红帽)",
+      "category_code": "C",
+      "policy": "D",
+      "original_v5_shift": -124.46,
+      "candidate_shift": -32.0,
+      "difference_from_v5": 92.46,
+      "face_x_after": 828.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9805
+    },
+    {
+      "render_id": "c016",
+      "canonical_name": "拉毗：小红帽",
+      "category": "C 长枪/背包 (拉毗：小红帽)",
+      "category_code": "C",
+      "policy": "E",
+      "original_v5_shift": -124.46,
+      "candidate_shift": -47.99,
+      "difference_from_v5": 76.47,
+      "face_x_after": 812.01,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9805
+    },
+    {
+      "render_id": "c471",
+      "canonical_name": "白雪公主：重型武装",
+      "category": "C 长枪/背包 (白雪公主：重型武装)",
+      "category_code": "C",
+      "policy": "A",
+      "original_v5_shift": 86.12,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -86.12,
+      "face_x_after": 742.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9527
+    },
+    {
+      "render_id": "c471",
+      "canonical_name": "白雪公主：重型武装",
+      "category": "C 长枪/背包 (白雪公主：重型武装)",
+      "category_code": "C",
+      "policy": "B",
+      "original_v5_shift": 86.12,
+      "candidate_shift": 86.12,
+      "difference_from_v5": 0.0,
+      "face_x_after": 828.12,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9527
+    },
+    {
+      "render_id": "c471",
+      "canonical_name": "白雪公主：重型武装",
+      "category": "C 长枪/背包 (白雪公主：重型武装)",
+      "category_code": "C",
+      "policy": "C",
+      "original_v5_shift": 86.12,
+      "candidate_shift": 39.95,
+      "difference_from_v5": -46.17,
+      "face_x_after": 781.95,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9527
+    },
+    {
+      "render_id": "c471",
+      "canonical_name": "白雪公主：重型武装",
+      "category": "C 长枪/背包 (白雪公主：重型武装)",
+      "category_code": "C",
+      "policy": "D",
+      "original_v5_shift": 86.12,
+      "candidate_shift": 32.0,
+      "difference_from_v5": -54.12,
+      "face_x_after": 774.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9527
+    },
+    {
+      "render_id": "c471",
+      "canonical_name": "白雪公主：重型武装",
+      "category": "C 长枪/背包 (白雪公主：重型武装)",
+      "category_code": "C",
+      "policy": "E",
+      "original_v5_shift": 86.12,
+      "candidate_shift": 47.73,
+      "difference_from_v5": -38.39,
+      "face_x_after": 789.73,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9527
+    },
+    {
+      "render_id": "c100",
+      "canonical_name": "拉普拉斯",
+      "category": "C 长枪/背包 (拉普拉斯)",
+      "category_code": "C",
+      "policy": "A",
+      "original_v5_shift": 11.7,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -11.7,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c100",
+      "canonical_name": "拉普拉斯",
+      "category": "C 长枪/背包 (拉普拉斯)",
+      "category_code": "C",
+      "policy": "B",
+      "original_v5_shift": 11.7,
+      "candidate_shift": 11.7,
+      "difference_from_v5": 0.0,
+      "face_x_after": 771.7,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c100",
+      "canonical_name": "拉普拉斯",
+      "category": "C 长枪/背包 (拉普拉斯)",
+      "category_code": "C",
+      "policy": "C",
+      "original_v5_shift": 11.7,
+      "candidate_shift": 11.7,
+      "difference_from_v5": 0.0,
+      "face_x_after": 771.7,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c100",
+      "canonical_name": "拉普拉斯",
+      "category": "C 长枪/背包 (拉普拉斯)",
+      "category_code": "C",
+      "policy": "D",
+      "original_v5_shift": 11.7,
+      "candidate_shift": 11.7,
+      "difference_from_v5": 0.0,
+      "face_x_after": 771.7,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c100",
+      "canonical_name": "拉普拉斯",
+      "category": "C 长枪/背包 (拉普拉斯)",
+      "category_code": "C",
+      "policy": "E",
+      "original_v5_shift": 11.7,
+      "candidate_shift": 11.7,
+      "difference_from_v5": 0.0,
+      "face_x_after": 771.7,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9932
+    },
+    {
+      "render_id": "c102",
+      "canonical_name": "麦斯威尔",
+      "category": "C 长枪/背包 (麦斯威尔)",
+      "category_code": "C",
+      "policy": "A",
+      "original_v5_shift": 85.02,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -85.02,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6844
+    },
+    {
+      "render_id": "c102",
+      "canonical_name": "麦斯威尔",
+      "category": "C 长枪/背包 (麦斯威尔)",
+      "category_code": "C",
+      "policy": "B",
+      "original_v5_shift": 85.02,
+      "candidate_shift": 85.02,
+      "difference_from_v5": 0.0,
+      "face_x_after": 845.02,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6844
+    },
+    {
+      "render_id": "c102",
+      "canonical_name": "麦斯威尔",
+      "category": "C 长枪/背包 (麦斯威尔)",
+      "category_code": "C",
+      "policy": "C",
+      "original_v5_shift": 85.02,
+      "candidate_shift": 39.94,
+      "difference_from_v5": -45.08,
+      "face_x_after": 799.94,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6844
+    },
+    {
+      "render_id": "c102",
+      "canonical_name": "麦斯威尔",
+      "category": "C 长枪/背包 (麦斯威尔)",
+      "category_code": "C",
+      "policy": "D",
+      "original_v5_shift": 85.02,
+      "candidate_shift": 31.99,
+      "difference_from_v5": -53.03,
+      "face_x_after": 791.99,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6844
+    },
+    {
+      "render_id": "c102",
+      "canonical_name": "麦斯威尔",
+      "category": "C 长枪/背包 (麦斯威尔)",
+      "category_code": "C",
+      "policy": "E",
+      "original_v5_shift": 85.02,
+      "candidate_shift": 47.7,
+      "difference_from_v5": -37.32,
+      "face_x_after": 807.7,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6844
+    },
+    {
+      "render_id": "c220",
+      "canonical_name": "白雪公主",
+      "category": "C 长枪/背包 (白雪公主)",
+      "category_code": "C",
+      "policy": "A",
+      "original_v5_shift": 108.42,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -108.42,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.8951
+    },
+    {
+      "render_id": "c220",
+      "canonical_name": "白雪公主",
+      "category": "C 长枪/背包 (白雪公主)",
+      "category_code": "C",
+      "policy": "B",
+      "original_v5_shift": 108.42,
+      "candidate_shift": 108.42,
+      "difference_from_v5": 0.0,
+      "face_x_after": 868.42,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.8951
+    },
+    {
+      "render_id": "c220",
+      "canonical_name": "白雪公主",
+      "category": "C 长枪/背包 (白雪公主)",
+      "category_code": "C",
+      "policy": "C",
+      "original_v5_shift": 108.42,
+      "candidate_shift": 39.99,
+      "difference_from_v5": -68.43,
+      "face_x_after": 799.99,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.8951
+    },
+    {
+      "render_id": "c220",
+      "canonical_name": "白雪公主",
+      "category": "C 长枪/背包 (白雪公主)",
+      "category_code": "C",
+      "policy": "D",
+      "original_v5_shift": 108.42,
+      "candidate_shift": 32.0,
+      "difference_from_v5": -76.42,
+      "face_x_after": 792.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.8951
+    },
+    {
+      "render_id": "c220",
+      "canonical_name": "白雪公主",
+      "category": "C 长枪/背包 (白雪公主)",
+      "category_code": "C",
+      "policy": "E",
+      "original_v5_shift": 108.42,
+      "candidate_shift": 47.96,
+      "difference_from_v5": -60.46,
+      "face_x_after": 807.96,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.8951
+    },
+    {
+      "render_id": "c330",
+      "canonical_name": "皇冠",
+      "category": "D 机械翼/披风 (皇冠)",
+      "category_code": "D",
+      "policy": "A",
+      "original_v5_shift": -72.64,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 72.64,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9792
+    },
+    {
+      "render_id": "c330",
+      "canonical_name": "皇冠",
+      "category": "D 机械翼/披风 (皇冠)",
+      "category_code": "D",
+      "policy": "B",
+      "original_v5_shift": -72.64,
+      "candidate_shift": -72.64,
+      "difference_from_v5": 0.0,
+      "face_x_after": 687.36,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9792
+    },
+    {
+      "render_id": "c330",
+      "canonical_name": "皇冠",
+      "category": "D 机械翼/披风 (皇冠)",
+      "category_code": "D",
+      "policy": "C",
+      "original_v5_shift": -72.64,
+      "candidate_shift": -39.79,
+      "difference_from_v5": 32.85,
+      "face_x_after": 720.21,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9792
+    },
+    {
+      "render_id": "c330",
+      "canonical_name": "皇冠",
+      "category": "D 机械翼/披风 (皇冠)",
+      "category_code": "D",
+      "policy": "D",
+      "original_v5_shift": -72.64,
+      "candidate_shift": -31.97,
+      "difference_from_v5": 40.67,
+      "face_x_after": 728.03,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9792
+    },
+    {
+      "render_id": "c330",
+      "canonical_name": "皇冠",
+      "category": "D 机械翼/披风 (皇冠)",
+      "category_code": "D",
+      "policy": "E",
+      "original_v5_shift": -72.64,
+      "candidate_shift": -47.18,
+      "difference_from_v5": 25.46,
+      "face_x_after": 712.82,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9792
+    },
+    {
+      "render_id": "c101",
+      "canonical_name": "德雷克",
+      "category": "D 机械翼/披风 (德雷克)",
+      "category_code": "D",
+      "policy": "A",
+      "original_v5_shift": 42.51,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -42.51,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9645
+    },
+    {
+      "render_id": "c101",
+      "canonical_name": "德雷克",
+      "category": "D 机械翼/披风 (德雷克)",
+      "category_code": "D",
+      "policy": "B",
+      "original_v5_shift": 42.51,
+      "candidate_shift": 42.51,
+      "difference_from_v5": 0.0,
+      "face_x_after": 802.51,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9645
+    },
+    {
+      "render_id": "c101",
+      "canonical_name": "德雷克",
+      "category": "D 机械翼/披风 (德雷克)",
+      "category_code": "D",
+      "policy": "C",
+      "original_v5_shift": 42.51,
+      "candidate_shift": 36.19,
+      "difference_from_v5": -6.32,
+      "face_x_after": 796.19,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9645
+    },
+    {
+      "render_id": "c101",
+      "canonical_name": "德雷克",
+      "category": "D 机械翼/披风 (德雷克)",
+      "category_code": "D",
+      "policy": "D",
+      "original_v5_shift": 42.51,
+      "candidate_shift": 30.88,
+      "difference_from_v5": -11.63,
+      "face_x_after": 790.88,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9645
+    },
+    {
+      "render_id": "c101",
+      "canonical_name": "德雷克",
+      "category": "D 机械翼/披风 (德雷克)",
+      "category_code": "D",
+      "policy": "E",
+      "original_v5_shift": 42.51,
+      "candidate_shift": 39.54,
+      "difference_from_v5": -2.97,
+      "face_x_after": 799.54,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9645
+    },
+    {
+      "render_id": "c180",
+      "canonical_name": "吉萝婷",
+      "category": "D 机械翼/披风 (吉洛霆)",
+      "category_code": "D",
+      "policy": "A",
+      "original_v5_shift": 32.67,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -32.67,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9679
+    },
+    {
+      "render_id": "c180",
+      "canonical_name": "吉萝婷",
+      "category": "D 机械翼/披风 (吉洛霆)",
+      "category_code": "D",
+      "policy": "B",
+      "original_v5_shift": 32.67,
+      "candidate_shift": 32.67,
+      "difference_from_v5": 0.0,
+      "face_x_after": 792.67,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9679
+    },
+    {
+      "render_id": "c180",
+      "canonical_name": "吉萝婷",
+      "category": "D 机械翼/披风 (吉洛霆)",
+      "category_code": "D",
+      "policy": "C",
+      "original_v5_shift": 32.67,
+      "candidate_shift": 31.21,
+      "difference_from_v5": -1.46,
+      "face_x_after": 791.21,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9679
+    },
+    {
+      "render_id": "c180",
+      "canonical_name": "吉萝婷",
+      "category": "D 机械翼/披风 (吉洛霆)",
+      "category_code": "D",
+      "policy": "D",
+      "original_v5_shift": 32.67,
+      "candidate_shift": 28.46,
+      "difference_from_v5": -4.21,
+      "face_x_after": 788.46,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9679
+    },
+    {
+      "render_id": "c180",
+      "canonical_name": "吉萝婷",
+      "category": "D 机械翼/披风 (吉洛霆)",
+      "category_code": "D",
+      "policy": "E",
+      "original_v5_shift": 32.67,
+      "candidate_shift": 32.31,
+      "difference_from_v5": -0.36,
+      "face_x_after": 792.31,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9679
+    },
+    {
+      "render_id": "c352",
+      "canonical_name": "海伦",
+      "category": "E 宽裙摆 (海伦)",
+      "category_code": "E",
+      "policy": "A",
+      "original_v5_shift": 5.39,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -5.39,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9241
+    },
+    {
+      "render_id": "c352",
+      "canonical_name": "海伦",
+      "category": "E 宽裙摆 (海伦)",
+      "category_code": "E",
+      "policy": "B",
+      "original_v5_shift": 5.39,
+      "candidate_shift": 5.39,
+      "difference_from_v5": 0.0,
+      "face_x_after": 765.39,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9241
+    },
+    {
+      "render_id": "c352",
+      "canonical_name": "海伦",
+      "category": "E 宽裙摆 (海伦)",
+      "category_code": "E",
+      "policy": "C",
+      "original_v5_shift": 5.39,
+      "candidate_shift": 5.39,
+      "difference_from_v5": 0.0,
+      "face_x_after": 765.39,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9241
+    },
+    {
+      "render_id": "c352",
+      "canonical_name": "海伦",
+      "category": "E 宽裙摆 (海伦)",
+      "category_code": "E",
+      "policy": "D",
+      "original_v5_shift": 5.39,
+      "candidate_shift": 5.39,
+      "difference_from_v5": 0.0,
+      "face_x_after": 765.39,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9241
+    },
+    {
+      "render_id": "c352",
+      "canonical_name": "海伦",
+      "category": "E 宽裙摆 (海伦)",
+      "category_code": "E",
+      "policy": "E",
+      "original_v5_shift": 5.39,
+      "candidate_shift": 5.39,
+      "difference_from_v5": 0.0,
+      "face_x_after": 765.39,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9241
+    },
+    {
+      "render_id": "c181",
+      "canonical_name": "梅登",
+      "category": "E 宽裙摆 (梅登)",
+      "category_code": "E",
+      "policy": "A",
+      "original_v5_shift": 85.65,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -85.65,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9203
+    },
+    {
+      "render_id": "c181",
+      "canonical_name": "梅登",
+      "category": "E 宽裙摆 (梅登)",
+      "category_code": "E",
+      "policy": "B",
+      "original_v5_shift": 85.65,
+      "candidate_shift": 85.65,
+      "difference_from_v5": 0.0,
+      "face_x_after": 845.65,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9203
+    },
+    {
+      "render_id": "c181",
+      "canonical_name": "梅登",
+      "category": "E 宽裙摆 (梅登)",
+      "category_code": "E",
+      "policy": "C",
+      "original_v5_shift": 85.65,
+      "candidate_shift": 39.94,
+      "difference_from_v5": -45.71,
+      "face_x_after": 799.94,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9203
+    },
+    {
+      "render_id": "c181",
+      "canonical_name": "梅登",
+      "category": "E 宽裙摆 (梅登)",
+      "category_code": "E",
+      "policy": "D",
+      "original_v5_shift": 85.65,
+      "candidate_shift": 31.99,
+      "difference_from_v5": -53.66,
+      "face_x_after": 791.99,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9203
+    },
+    {
+      "render_id": "c181",
+      "canonical_name": "梅登",
+      "category": "E 宽裙摆 (梅登)",
+      "category_code": "E",
+      "policy": "E",
+      "original_v5_shift": 85.65,
+      "candidate_shift": 47.72,
+      "difference_from_v5": -37.93,
+      "face_x_after": 807.72,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9203
+    },
+    {
+      "render_id": "c233",
+      "canonical_name": "桃乐丝",
+      "category": "E 宽裙摆 (桃乐丝)",
+      "category_code": "E",
+      "policy": "A",
+      "original_v5_shift": -88.16,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 88.16,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9404
+    },
+    {
+      "render_id": "c233",
+      "canonical_name": "桃乐丝",
+      "category": "E 宽裙摆 (桃乐丝)",
+      "category_code": "E",
+      "policy": "B",
+      "original_v5_shift": -88.16,
+      "candidate_shift": -88.16,
+      "difference_from_v5": 0.0,
+      "face_x_after": 671.84,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9404
+    },
+    {
+      "render_id": "c233",
+      "canonical_name": "桃乐丝",
+      "category": "E 宽裙摆 (桃乐丝)",
+      "category_code": "E",
+      "policy": "C",
+      "original_v5_shift": -88.16,
+      "candidate_shift": -39.96,
+      "difference_from_v5": 48.2,
+      "face_x_after": 720.04,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9404
+    },
+    {
+      "render_id": "c233",
+      "canonical_name": "桃乐丝",
+      "category": "E 宽裙摆 (桃乐丝)",
+      "category_code": "E",
+      "policy": "D",
+      "original_v5_shift": -88.16,
+      "candidate_shift": -32.0,
+      "difference_from_v5": 56.16,
+      "face_x_after": 728.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9404
+    },
+    {
+      "render_id": "c233",
+      "canonical_name": "桃乐丝",
+      "category": "E 宽裙摆 (桃乐丝)",
+      "category_code": "E",
+      "policy": "E",
+      "original_v5_shift": -88.16,
+      "candidate_shift": -47.77,
+      "difference_from_v5": 40.39,
+      "face_x_after": 712.23,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9404
+    },
+    {
+      "render_id": "c310",
+      "canonical_name": "爱德",
+      "category": "E 宽裙摆 (艾德)",
+      "category_code": "E",
+      "policy": "A",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1686
+    },
+    {
+      "render_id": "c310",
+      "canonical_name": "爱德",
+      "category": "E 宽裙摆 (艾德)",
+      "category_code": "E",
+      "policy": "B",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1686
+    },
+    {
+      "render_id": "c310",
+      "canonical_name": "爱德",
+      "category": "E 宽裙摆 (艾德)",
+      "category_code": "E",
+      "policy": "C",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1686
+    },
+    {
+      "render_id": "c310",
+      "canonical_name": "爱德",
+      "category": "E 宽裙摆 (艾德)",
+      "category_code": "E",
+      "policy": "D",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1686
+    },
+    {
+      "render_id": "c310",
+      "canonical_name": "爱德",
+      "category": "E 宽裙摆 (艾德)",
+      "category_code": "E",
+      "policy": "E",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1686
+    },
+    {
+      "render_id": "c161",
+      "canonical_name": "米哈拉",
+      "category": "F 偏头/侧脸 (米哈拉)",
+      "category_code": "F",
+      "policy": "A",
+      "original_v5_shift": 25.06,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -25.06,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9826
+    },
+    {
+      "render_id": "c161",
+      "canonical_name": "米哈拉",
+      "category": "F 偏头/侧脸 (米哈拉)",
+      "category_code": "F",
+      "policy": "B",
+      "original_v5_shift": 25.06,
+      "candidate_shift": 25.06,
+      "difference_from_v5": 0.0,
+      "face_x_after": 785.06,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9826
+    },
+    {
+      "render_id": "c161",
+      "canonical_name": "米哈拉",
+      "category": "F 偏头/侧脸 (米哈拉)",
+      "category_code": "F",
+      "policy": "C",
+      "original_v5_shift": 25.06,
+      "candidate_shift": 24.95,
+      "difference_from_v5": -0.11,
+      "face_x_after": 784.95,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9826
+    },
+    {
+      "render_id": "c161",
+      "canonical_name": "米哈拉",
+      "category": "F 偏头/侧脸 (米哈拉)",
+      "category_code": "F",
+      "policy": "D",
+      "original_v5_shift": 25.06,
+      "candidate_shift": 24.2,
+      "difference_from_v5": -0.86,
+      "face_x_after": 784.2,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9826
+    },
+    {
+      "render_id": "c161",
+      "canonical_name": "米哈拉",
+      "category": "F 偏头/侧脸 (米哈拉)",
+      "category_code": "F",
+      "policy": "E",
+      "original_v5_shift": 25.06,
+      "candidate_shift": 25.06,
+      "difference_from_v5": -0.0,
+      "face_x_after": 785.06,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9826
+    },
+    {
+      "render_id": "c222",
+      "canonical_name": "红莲",
+      "category": "F 偏头/侧脸 (红莲)",
+      "category_code": "F",
+      "policy": "A",
+      "original_v5_shift": 82.29,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -82.29,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7098
+    },
+    {
+      "render_id": "c222",
+      "canonical_name": "红莲",
+      "category": "F 偏头/侧脸 (红莲)",
+      "category_code": "F",
+      "policy": "B",
+      "original_v5_shift": 82.29,
+      "candidate_shift": 82.29,
+      "difference_from_v5": 0.0,
+      "face_x_after": 842.29,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7098
+    },
+    {
+      "render_id": "c222",
+      "canonical_name": "红莲",
+      "category": "F 偏头/侧脸 (红莲)",
+      "category_code": "F",
+      "policy": "C",
+      "original_v5_shift": 82.29,
+      "candidate_shift": 39.92,
+      "difference_from_v5": -42.37,
+      "face_x_after": 799.92,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7098
+    },
+    {
+      "render_id": "c222",
+      "canonical_name": "红莲",
+      "category": "F 偏头/侧脸 (红莲)",
+      "category_code": "F",
+      "policy": "D",
+      "original_v5_shift": 82.29,
+      "candidate_shift": 31.99,
+      "difference_from_v5": -50.3,
+      "face_x_after": 791.99,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7098
+    },
+    {
+      "render_id": "c222",
+      "canonical_name": "红莲",
+      "category": "F 偏头/侧脸 (红莲)",
+      "category_code": "F",
+      "policy": "E",
+      "original_v5_shift": 82.29,
+      "candidate_shift": 47.63,
+      "difference_from_v5": -34.66,
+      "face_x_after": 807.63,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7098
+    },
+    {
+      "render_id": "c234",
+      "canonical_name": "桃乐丝：机缘巧遇",
+      "category": "G 强非对称姿势 (桃乐丝：机缘巧遇)",
+      "category_code": "G",
+      "policy": "A",
+      "original_v5_shift": -72.71,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 72.71,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9632
+    },
+    {
+      "render_id": "c234",
+      "canonical_name": "桃乐丝：机缘巧遇",
+      "category": "G 强非对称姿势 (桃乐丝：机缘巧遇)",
+      "category_code": "G",
+      "policy": "B",
+      "original_v5_shift": -72.71,
+      "candidate_shift": -72.71,
+      "difference_from_v5": 0.0,
+      "face_x_after": 687.29,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9632
+    },
+    {
+      "render_id": "c234",
+      "canonical_name": "桃乐丝：机缘巧遇",
+      "category": "G 强非对称姿势 (桃乐丝：机缘巧遇)",
+      "category_code": "G",
+      "policy": "C",
+      "original_v5_shift": -72.71,
+      "candidate_shift": -39.8,
+      "difference_from_v5": 32.91,
+      "face_x_after": 720.2,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9632
+    },
+    {
+      "render_id": "c234",
+      "canonical_name": "桃乐丝：机缘巧遇",
+      "category": "G 强非对称姿势 (桃乐丝：机缘巧遇)",
+      "category_code": "G",
+      "policy": "D",
+      "original_v5_shift": -72.71,
+      "candidate_shift": -31.97,
+      "difference_from_v5": 40.74,
+      "face_x_after": 728.03,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9632
+    },
+    {
+      "render_id": "c234",
+      "canonical_name": "桃乐丝：机缘巧遇",
+      "category": "G 强非对称姿势 (桃乐丝：机缘巧遇)",
+      "category_code": "G",
+      "policy": "E",
+      "original_v5_shift": -72.71,
+      "candidate_shift": -47.19,
+      "difference_from_v5": 25.52,
+      "face_x_after": 712.81,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9632
+    },
+    {
+      "render_id": "c110",
+      "canonical_name": "克拉乌",
+      "category": "G 强非对称姿势 (克拉乌)",
+      "category_code": "G",
+      "policy": "A",
+      "original_v5_shift": 4.21,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -4.21,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6682
+    },
+    {
+      "render_id": "c110",
+      "canonical_name": "克拉乌",
+      "category": "G 强非对称姿势 (克拉乌)",
+      "category_code": "G",
+      "policy": "B",
+      "original_v5_shift": 4.21,
+      "candidate_shift": 4.21,
+      "difference_from_v5": 0.0,
+      "face_x_after": 764.21,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6682
+    },
+    {
+      "render_id": "c110",
+      "canonical_name": "克拉乌",
+      "category": "G 强非对称姿势 (克拉乌)",
+      "category_code": "G",
+      "policy": "C",
+      "original_v5_shift": 4.21,
+      "candidate_shift": 4.21,
+      "difference_from_v5": 0.0,
+      "face_x_after": 764.21,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6682
+    },
+    {
+      "render_id": "c110",
+      "canonical_name": "克拉乌",
+      "category": "G 强非对称姿势 (克拉乌)",
+      "category_code": "G",
+      "policy": "D",
+      "original_v5_shift": 4.21,
+      "candidate_shift": 4.21,
+      "difference_from_v5": 0.0,
+      "face_x_after": 764.21,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6682
+    },
+    {
+      "render_id": "c110",
+      "canonical_name": "克拉乌",
+      "category": "G 强非对称姿势 (克拉乌)",
+      "category_code": "G",
+      "policy": "E",
+      "original_v5_shift": 4.21,
+      "candidate_shift": 4.21,
+      "difference_from_v5": 0.0,
+      "face_x_after": 764.21,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6682
+    },
+    {
+      "render_id": "c111",
+      "canonical_name": "豺狼",
+      "category": "G 强非对称姿势 (豺狼)",
+      "category_code": "G",
+      "policy": "A",
+      "original_v5_shift": 16.64,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -16.64,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7141
+    },
+    {
+      "render_id": "c111",
+      "canonical_name": "豺狼",
+      "category": "G 强非对称姿势 (豺狼)",
+      "category_code": "G",
+      "policy": "B",
+      "original_v5_shift": 16.64,
+      "candidate_shift": 16.64,
+      "difference_from_v5": 0.0,
+      "face_x_after": 776.64,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7141
+    },
+    {
+      "render_id": "c111",
+      "canonical_name": "豺狼",
+      "category": "G 强非对称姿势 (豺狼)",
+      "category_code": "G",
+      "policy": "C",
+      "original_v5_shift": 16.64,
+      "candidate_shift": 16.64,
+      "difference_from_v5": 0.0,
+      "face_x_after": 776.64,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7141
+    },
+    {
+      "render_id": "c111",
+      "canonical_name": "豺狼",
+      "category": "G 强非对称姿势 (豺狼)",
+      "category_code": "G",
+      "policy": "D",
+      "original_v5_shift": 16.64,
+      "candidate_shift": 16.64,
+      "difference_from_v5": -0.0,
+      "face_x_after": 776.64,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7141
+    },
+    {
+      "render_id": "c111",
+      "canonical_name": "豺狼",
+      "category": "G 强非对称姿势 (豺狼)",
+      "category_code": "G",
+      "policy": "E",
+      "original_v5_shift": 16.64,
+      "candidate_shift": 16.64,
+      "difference_from_v5": 0.0,
+      "face_x_after": 776.64,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.7141
+    },
+    {
+      "render_id": "c140",
+      "canonical_name": "舒格",
+      "category": "G 强非对称姿势 (舒格)",
+      "category_code": "G",
+      "policy": "A",
+      "original_v5_shift": 67.72,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -67.72,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6203
+    },
+    {
+      "render_id": "c140",
+      "canonical_name": "舒格",
+      "category": "G 强非对称姿势 (舒格)",
+      "category_code": "G",
+      "policy": "B",
+      "original_v5_shift": 67.72,
+      "candidate_shift": 67.72,
+      "difference_from_v5": 0.0,
+      "face_x_after": 827.72,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6203
+    },
+    {
+      "render_id": "c140",
+      "canonical_name": "舒格",
+      "category": "G 强非对称姿势 (舒格)",
+      "category_code": "G",
+      "policy": "C",
+      "original_v5_shift": 67.72,
+      "candidate_shift": 39.66,
+      "difference_from_v5": -28.06,
+      "face_x_after": 799.66,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6203
+    },
+    {
+      "render_id": "c140",
+      "canonical_name": "舒格",
+      "category": "G 强非对称姿势 (舒格)",
+      "category_code": "G",
+      "policy": "D",
+      "original_v5_shift": 67.72,
+      "candidate_shift": 31.95,
+      "difference_from_v5": -35.77,
+      "face_x_after": 791.95,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6203
+    },
+    {
+      "render_id": "c140",
+      "canonical_name": "舒格",
+      "category": "G 强非对称姿势 (舒格)",
+      "category_code": "G",
+      "policy": "E",
+      "original_v5_shift": 67.72,
+      "candidate_shift": 46.78,
+      "difference_from_v5": -20.94,
+      "face_x_after": 806.78,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.6203
+    },
+    {
+      "render_id": "c400",
+      "canonical_name": "吉尔提",
+      "category": "G 强非对称姿势 (吉尔提)",
+      "category_code": "G",
+      "policy": "A",
+      "original_v5_shift": 130.62,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -130.62,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.933
+    },
+    {
+      "render_id": "c400",
+      "canonical_name": "吉尔提",
+      "category": "G 强非对称姿势 (吉尔提)",
+      "category_code": "G",
+      "policy": "B",
+      "original_v5_shift": 130.62,
+      "candidate_shift": 130.62,
+      "difference_from_v5": 0.0,
+      "face_x_after": 890.62,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": true,
+        "bottom": false
+      },
+      "has_new_edge_clipping": true,
+      "tracking_confidence": 0.933
+    },
+    {
+      "render_id": "c400",
+      "canonical_name": "吉尔提",
+      "category": "G 强非对称姿势 (吉尔提)",
+      "category_code": "G",
+      "policy": "C",
+      "original_v5_shift": 130.62,
+      "candidate_shift": 40.0,
+      "difference_from_v5": -90.62,
+      "face_x_after": 800.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.933
+    },
+    {
+      "render_id": "c400",
+      "canonical_name": "吉尔提",
+      "category": "G 强非对称姿势 (吉尔提)",
+      "category_code": "G",
+      "policy": "D",
+      "original_v5_shift": 130.62,
+      "candidate_shift": 32.0,
+      "difference_from_v5": -98.62,
+      "face_x_after": 792.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.933
+    },
+    {
+      "render_id": "c400",
+      "canonical_name": "吉尔提",
+      "category": "G 强非对称姿势 (吉尔提)",
+      "category_code": "G",
+      "policy": "E",
+      "original_v5_shift": 130.62,
+      "candidate_shift": 47.99,
+      "difference_from_v5": -82.63,
+      "face_x_after": 807.99,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.933
+    },
+    {
+      "render_id": "c010_03",
+      "canonical_name": "拉毗",
+      "category": "H costume variants (拉毗·经典假期)",
+      "category_code": "H",
+      "policy": "A",
+      "original_v5_shift": -19.71,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 19.71,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9809
+    },
+    {
+      "render_id": "c010_03",
+      "canonical_name": "拉毗",
+      "category": "H costume variants (拉毗·经典假期)",
+      "category_code": "H",
+      "policy": "B",
+      "original_v5_shift": -19.71,
+      "candidate_shift": -19.71,
+      "difference_from_v5": 0.0,
+      "face_x_after": 740.29,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9809
+    },
+    {
+      "render_id": "c010_03",
+      "canonical_name": "拉毗",
+      "category": "H costume variants (拉毗·经典假期)",
+      "category_code": "H",
+      "policy": "C",
+      "original_v5_shift": -19.71,
+      "candidate_shift": -19.71,
+      "difference_from_v5": 0.0,
+      "face_x_after": 740.29,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9809
+    },
+    {
+      "render_id": "c010_03",
+      "canonical_name": "拉毗",
+      "category": "H costume variants (拉毗·经典假期)",
+      "category_code": "H",
+      "policy": "D",
+      "original_v5_shift": -19.71,
+      "candidate_shift": -19.64,
+      "difference_from_v5": 0.07,
+      "face_x_after": 740.36,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9809
+    },
+    {
+      "render_id": "c010_03",
+      "canonical_name": "拉毗",
+      "category": "H costume variants (拉毗·经典假期)",
+      "category_code": "H",
+      "policy": "E",
+      "original_v5_shift": -19.71,
+      "candidate_shift": -19.71,
+      "difference_from_v5": 0.0,
+      "face_x_after": 740.29,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9809
+    },
+    {
+      "render_id": "c017",
+      "canonical_name": "阿妮斯：超级巨星",
+      "category": "H costume variants (阿妮斯：超级巨星)",
+      "category_code": "H",
+      "policy": "A",
+      "original_v5_shift": 21.8,
+      "candidate_shift": 0.0,
+      "difference_from_v5": -21.8,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9716
+    },
+    {
+      "render_id": "c017",
+      "canonical_name": "阿妮斯：超级巨星",
+      "category": "H costume variants (阿妮斯：超级巨星)",
+      "category_code": "H",
+      "policy": "B",
+      "original_v5_shift": 21.8,
+      "candidate_shift": 21.8,
+      "difference_from_v5": 0.0,
+      "face_x_after": 781.8,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9716
+    },
+    {
+      "render_id": "c017",
+      "canonical_name": "阿妮斯：超级巨星",
+      "category": "H costume variants (阿妮斯：超级巨星)",
+      "category_code": "H",
+      "policy": "C",
+      "original_v5_shift": 21.8,
+      "candidate_shift": 21.8,
+      "difference_from_v5": -0.0,
+      "face_x_after": 781.8,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9716
+    },
+    {
+      "render_id": "c017",
+      "canonical_name": "阿妮斯：超级巨星",
+      "category": "H costume variants (阿妮斯：超级巨星)",
+      "category_code": "H",
+      "policy": "D",
+      "original_v5_shift": 21.8,
+      "candidate_shift": 21.56,
+      "difference_from_v5": -0.24,
+      "face_x_after": 781.56,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9716
+    },
+    {
+      "render_id": "c017",
+      "canonical_name": "阿妮斯：超级巨星",
+      "category": "H costume variants (阿妮斯：超级巨星)",
+      "category_code": "H",
+      "policy": "E",
+      "original_v5_shift": 21.8,
+      "candidate_shift": 21.8,
+      "difference_from_v5": 0.0,
+      "face_x_after": 781.8,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.9716
+    },
+    {
+      "render_id": "c224",
+      "canonical_name": "白雪公主：纯真年代",
+      "category": "H costume variants (白雪公主：纯真年代)",
+      "category_code": "H",
+      "policy": "A",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1961
+    },
+    {
+      "render_id": "c224",
+      "canonical_name": "白雪公主：纯真年代",
+      "category": "H costume variants (白雪公主：纯真年代)",
+      "category_code": "H",
+      "policy": "B",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1961
+    },
+    {
+      "render_id": "c224",
+      "canonical_name": "白雪公主：纯真年代",
+      "category": "H costume variants (白雪公主：纯真年代)",
+      "category_code": "H",
+      "policy": "C",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1961
+    },
+    {
+      "render_id": "c224",
+      "canonical_name": "白雪公主：纯真年代",
+      "category": "H costume variants (白雪公主：纯真年代)",
+      "category_code": "H",
+      "policy": "D",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1961
+    },
+    {
+      "render_id": "c224",
+      "canonical_name": "白雪公主：纯真年代",
+      "category": "H costume variants (白雪公主：纯真年代)",
+      "category_code": "H",
+      "policy": "E",
+      "original_v5_shift": 0.0,
+      "candidate_shift": 0.0,
+      "difference_from_v5": 0.0,
+      "face_x_after": 760.0,
+      "face_safe": true,
+      "new_edge_clipping": {
+        "left": false,
+        "top": false,
+        "right": false,
+        "bottom": false
+      },
+      "has_new_edge_clipping": false,
+      "tracking_confidence": 0.1961
+    }
+  ]
+}

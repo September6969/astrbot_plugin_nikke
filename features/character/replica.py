@@ -6,9 +6,33 @@ import hashlib
 import json
 
 VERSION = "replica-1600x2400-v1"
-SHORT_NAMES = {"攻击力增加": "攻击", "防御力增加": "防御", "最大装弹数增加": "装弹",
-               "蓄力速度增加": "蓄速", "优越代码伤害增加": "优越", "暴击率增加": "暴率",
-               "暴击伤害增加": "暴伤", "命中率增加": "命中", "蓄力伤害增加": "蓄伤"}
+SHORT_NAMES = {
+    # 简体官方全称
+    "攻击力增加": "攻击", "防御力增加": "防御", "最大装弹数增加": "装弹",
+    "蓄力速度增加": "蓄速", "优越代码伤害增加": "优越", "暴击率增加": "暴率",
+    "暴击伤害增加": "暴伤", "命中率增加": "命中", "蓄力伤害增加": "蓄伤",
+    # 繁体全称（兼容 overload_tiers.json 上游数据）
+    "攻擊力增加": "攻击", "防禦力增加": "防御", "最大裝彈數增加": "装弹",
+    "優越代碼傷害增加": "优越", "暴擊率增加": "暴率", "暴擊傷害增加": "暴伤",
+    "蓄力傷害增加": "蓄伤",
+    # 简称自身回退
+    "攻击": "攻击", "攻擊": "攻击", "防御": "防御", "防禦": "防御",
+    "装弹": "装弹", "裝彈": "装弹", "蓄速": "蓄速", "优越": "优越", "優越": "优越",
+    "暴率": "暴率", "暴擊": "暴率", "暴伤": "暴伤", "暴傷": "暴伤",
+    "命中": "命中", "蓄伤": "蓄伤", "蓄傷害": "蓄伤",
+}
+
+CANONICAL_LABELS = {
+    "攻擊力增加": "攻击力增加",
+    "防禦力增加": "防御力增加",
+    "最大裝彈數增加": "最大装弹数增加",
+    "蓄力速度增加": "蓄力速度增加",
+    "優越代碼傷害增加": "优越代码伤害增加",
+    "暴擊率增加": "暴击率增加",
+    "暴擊傷害增加": "暴击伤害增加",
+    "命中率增加": "命中率增加",
+    "蓄力傷害增加": "蓄力伤害增加",
+}
 
 
 def tier_of(option):
@@ -52,7 +76,9 @@ def build_summary(data):
             if not key or option.unit not in ("flat", "percent"):
                 complete = False
                 continue
-            group = groups.setdefault((key, option.unit), {"key": key, "label": option.display_name.strip("【】"),
+            raw_label = option.display_name.strip("【】")
+            label = CANONICAL_LABELS.get(raw_label, raw_label)
+            group = groups.setdefault((key, option.unit), {"key": key, "label": label,
                                       "options": [], "tier_sum": 0, "complete": True})
             group["options"].append(option)
             group["tier_sum"] += tier or 0
@@ -65,13 +91,13 @@ def build_summary(data):
         # 没有来源证明的基础值不进入有效收益计算。
         trusted = bool(data.weapon_base_source)
         raw_types = {option.raw_type.casefold() for option in options}
-        if "statchargetime" in raw_types:
+        if key == "100600" or "statchargetime" in raw_types:
             base = Decimal(str(data.base_charge_seconds or 0))
             if trusted and base.is_finite() and base > 0 and group["complete"]:
                 value = rounded_gain(options, base, Decimal("0.01")) / base
             else:
                 note = "纸面合计"
-        elif "statammoload" in raw_types:
+        elif key == "100300" or "statammoload" in raw_types:
             if trusted and type(data.base_ammo) is int and data.base_ammo > 0 and group["complete"]:
                 gain = rounded_gain(options, Decimal(data.base_ammo), Decimal("1"))
                 extra = f" (+{gain})"
@@ -94,17 +120,59 @@ def art_style(data, portrait):
     return framing(data, portrait)["style"]
 
 
+def noto_font_700():
+    return _load_font_data_uri("NotoSansSC-ReplicaSubset-700.woff2")
+
+
+def noto_font_800():
+    return _load_font_data_uri("NotoSansSC-ReplicaSubset-800.woff2")
+
+
+def noto_font():
+    """向后兼容：默认返回 800 ExtraBold WOFF2 子集。"""
+    return noto_font_800() or noto_font_700()
+
+
 def replica_font():
-    return _font_uri()
+    return _load_font_data_uri("ReplicaSans.otf")
 
 
-@lru_cache(maxsize=1)
-def _font_uri():
+def barlow_font():
+    return _load_font_data_uri("BarlowCondensed-Bold.ttf")
+
+
+def barlow_semibold_font():
+    return _load_font_data_uri("BarlowCondensed-SemiBold.ttf")
+
+
+def rajdhani_font():
+    return _load_font_data_uri("Rajdhani-Bold.ttf")
+
+
+def rajdhani_semibold_font():
+    return _load_font_data_uri("Rajdhani-SemiBold.ttf")
+
+
+@lru_cache(maxsize=16)
+def _load_font_data_uri(filename: str = "ReplicaSans.otf"):
     import base64
     from pathlib import Path
-    cand = Path(__file__).resolve().parents[2] / "assets" / "fonts" / "ReplicaSans.otf"
-    if not cand.is_file():
-        cand = Path(__file__).resolve().parents[2] / "fonts" / "ReplicaSans.otf"
-    if not cand.is_file():
+    plugin_root = Path(__file__).resolve().parents[2]
+    path = plugin_root / "fonts" / filename
+    if not path.is_file():
+        path = plugin_root / "assets" / "fonts" / filename
+    if not path.is_file():
         return None
-    return "data:font/otf;base64," + base64.b64encode(cand.read_bytes()).decode("ascii")
+    ext = path.suffix.lstrip(".").lower()
+    mime_map = {
+        "otf": "font/otf",
+        "ttf": "font/ttf",
+        "woff": "font/woff",
+        "woff2": "font/woff2",
+    }
+    mime = mime_map.get(ext, "font/ttf")
+    return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode("ascii")
+
+
+def _font_uri():
+    return replica_font()

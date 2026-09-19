@@ -1,0 +1,51 @@
+{
+  "sample_count": 36,
+  "policies": {
+    "A": {
+      "median_abs_shift": 0.0,
+      "p75": 0.0,
+      "p90": 0.0,
+      "max": 0.0,
+      "gt_20": 0,
+      "gt_40": 0,
+      "gt_80": 0
+    },
+    "B": {
+      "median_abs_shift": 41.22,
+      "p75": 85.77,
+      "p90": 109.06,
+      "max": 130.62,
+      "gt_20": 25,
+      "gt_40": 18,
+      "gt_80": 12
+    },
+    "C": {
+      "median_abs_shift": 35.7,
+      "p75": 39.94,
+      "p90": 39.99,
+      "max": 40.0,
+      "gt_20": 25,
+      "gt_40": 0,
+      "gt_80": 0
+    },
+    "D": {
+      "median_abs_shift": 30.67,
+      "p75": 31.99,
+      "p90": 32.0,
+      "max": 32.0,
+      "gt_20": 25,
+      "gt_40": 0,
+      "gt_80": 0
+    },
+    "E": {
+      "median_abs_shift": 38.75,
+      "p75": 47.72,
+      "p90": 47.96,
+      "max": 47.99,
+      "gt_20": 25,
+      "gt_40": 17,
+      "gt_80": 0
+    }
+  },
+  "note": "Before human review is completed, only geometric statistics are reported. No winner should be chosen based on geometric metrics alone."
+}

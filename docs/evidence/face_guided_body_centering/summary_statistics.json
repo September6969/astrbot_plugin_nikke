@@ -1,0 +1,68 @@
+{
+  "sample_count": 36,
+  "no_op_count": 2,
+  "bins": {
+    "le_10": 6,
+    "10_to_20": 3,
+    "20_to_40": 7,
+    "40_to_80": 6,
+    "gt_80": 12
+  },
+  "distribution": {
+    "median_shift": 41.22,
+    "p75_shift": 85.77,
+    "p90_shift": 109.06,
+    "max_shift": 130.62
+  },
+  "category_breakdown": {
+    "A": {
+      "count": 10,
+      "median_shift": 34.82,
+      "max_shift": 128.47,
+      "over_40px_count": 4
+    },
+    "B": {
+      "count": 4,
+      "median_shift": 64.26,
+      "max_shift": 92.26,
+      "over_40px_count": 2
+    },
+    "C": {
+      "count": 5,
+      "median_shift": 86.12,
+      "max_shift": 124.46,
+      "over_40px_count": 4
+    },
+    "D": {
+      "count": 3,
+      "median_shift": 42.51,
+      "max_shift": 72.64,
+      "over_40px_count": 2
+    },
+    "E": {
+      "count": 4,
+      "median_shift": 85.65,
+      "max_shift": 88.16,
+      "over_40px_count": 2
+    },
+    "F": {
+      "count": 2,
+      "median_shift": 82.29,
+      "max_shift": 82.29,
+      "over_40px_count": 1
+    },
+    "G": {
+      "count": 5,
+      "median_shift": 67.72,
+      "max_shift": 130.62,
+      "over_40px_count": 3
+    },
+    "H": {
+      "count": 3,
+      "median_shift": 19.71,
+      "max_shift": 21.8,
+      "over_40px_count": 0
+    }
+  },
+  "disclaimer": "Sample selection is targeted across 8 specific visual archetypes and is not an unbiased random population sample of all NIKKE artwork."
+}
