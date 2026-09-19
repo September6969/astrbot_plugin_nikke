@@ -168,6 +168,9 @@ def _is_same_identity(a: CanonicalEvent, b: CanonicalEvent) -> bool:
     return similarity >= 0.65
 
 
+_is_same_event = _is_same_identity
+
+
 def _merge_two_events(base: CanonicalEvent, incoming: CanonicalEvent) -> CanonicalEvent:
     """字段级多源仲裁合并：
     - title: GameKee (地道中文) > Official > 其他
@@ -493,6 +496,13 @@ class ScheduleService:
             else:
                 self.freshness = Freshness.EXPIRED.value
 
+        all_failed = bool(self.adapters) and all(
+            self._source_health.get(ad.source_name) and self._source_health[ad.source_name].consecutive_failures > 0
+            for ad in self.adapters
+        )
+        if all_failed and (self._events or self._source_datasets):
+            self.freshness = Freshness.STALE.value
+
     def _load_cache(self) -> None:
         """载入本地数据并支持新旧 schema 平滑自动迁移。"""
         self._manual_overrides = self.manual_adapter.load_overrides()
@@ -631,14 +641,26 @@ class ScheduleService:
             health.last_attempt_at = now_utc
 
             try:
-                res = await adapter.fetch_result()
+                res = None
+                if hasattr(adapter, "fetch_result"):
+                    res = await adapter.fetch_result()
+                if not isinstance(res, FetchResult):
+                    if hasattr(adapter, "fetch"):
+                        events = await adapter.fetch()
+                        res = FetchResult(
+                            outcome=FetchOutcome.SUCCESS_DATA,
+                            events=events,
+                            source=src,
+                        )
+                    else:
+                        raise RuntimeError(f"Adapter {src} has neither valid fetch_result nor fetch")
             except Exception as exc:
                 err = safe_exception_message(exc)
                 res = FetchResult(
                     outcome=FetchOutcome.REQUEST_FAILED,
                     error_message=err,
                     source=src,
-                    response_mode=adapter.response_mode,
+                    response_mode=getattr(adapter, "response_mode", ResponseMode.COMPLETE_SNAPSHOT),
                 )
 
             health.last_outcome = res.outcome.value
@@ -667,12 +689,6 @@ class ScheduleService:
                 source_errors.append(f"{src}: {health.last_error_type}")
                 logger.warning("[NIKKE] 数据源 %s 同步失败，保留历史 LKG: %s", src, health.last_error_type)
 
-        if not any_success and not self._source_datasets:
-            err = "; ".join(source_errors) or "全部数据源抓取失败且无历史快照"
-            self.last_sync_error = err
-            self._update_health_state()
-            return False, err
-
         if any_success:
             self.last_success_at = now_utc
 
@@ -700,6 +716,11 @@ class ScheduleService:
             self._save_cache(force_events=content_changed)
         except Exception as exc:
             logger.error("[NIKKE] 日程持久化失败: %s", safe_exception_message(exc))
+
+        if not any_success:
+            err = "; ".join(source_errors) or "全部数据源抓取失败"
+            self.last_sync_error = err
+            return False, err
 
         if self.visual_cache is not None:
             try:

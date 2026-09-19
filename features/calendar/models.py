@@ -203,3 +203,11 @@ class CalendarActivity:
             start_precision=str(data.get("start_precision", data.get("time_precision", "EXACT"))),
             end_precision=str(data.get("end_precision", data.get("time_precision", "EXACT"))),
         )
+
+
+def __getattr__(name: str) -> Any:
+    if name == "TimePrecision":
+        from .canonical_models import TimePrecision
+        return TimePrecision
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+

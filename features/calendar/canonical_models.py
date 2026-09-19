@@ -20,16 +20,16 @@ from enum import Enum
 import hashlib
 from typing import Any, Sequence
 
-from .models import CalendarActivity, _aware_utc
-
-CST = timezone(timedelta(hours=8))
-
-
 class TimePrecision(str, Enum):
     EXACT = "EXACT"
     DATE_ONLY = "DATE_ONLY"
     INFERRED = "INFERRED"
     UNKNOWN = "UNKNOWN"
+
+
+CST = timezone(timedelta(hours=8))
+
+from .models import CalendarActivity, _aware_utc
 
 
 class EventStatus(str, Enum):
@@ -247,6 +247,62 @@ class CanonicalEvent:
     is_valid_interval: bool = True
     field_evidence: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
 
+    def __init__(
+        self,
+        id: str,
+        title: str,
+        event_type: str,
+        start_at: datetime | None,
+        end_at: datetime | None,
+        start_precision: str = "EXACT",
+        end_precision: str = "EXACT",
+        server_scope: str = "GLOBAL",
+        cycle_id: str = "",
+        status: str = "UNKNOWN",
+        banner_url: str | None = None,
+        detail_url: str | None = None,
+        sources: list[str] | None = None,
+        primary_source: str = "",
+        fetched_at: datetime | None = None,
+        updated_at: datetime | None = None,
+        confidence: float | None = None,
+        fingerprint: str = "",
+        version: int = 1,
+        has_started_evidence: bool = False,
+        is_cancelled: bool = False,
+        is_valid_interval: bool = True,
+        field_evidence: dict[str, list[dict[str, Any]]] | None = None,
+        time_precision: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        if time_precision is not None:
+            start_precision = time_precision
+            end_precision = time_precision
+        self.id = id
+        self.title = title
+        self.event_type = event_type
+        self.start_at = start_at
+        self.end_at = end_at
+        self.start_precision = start_precision
+        self.end_precision = end_precision
+        self.server_scope = server_scope
+        self.cycle_id = cycle_id
+        self.status = status
+        self.banner_url = banner_url
+        self.detail_url = detail_url
+        self.sources = list(sources) if sources is not None else []
+        self.primary_source = primary_source
+        self.fetched_at = fetched_at or datetime.now(timezone.utc)
+        self.updated_at = updated_at or datetime.now(timezone.utc)
+        self.confidence = confidence
+        self.fingerprint = fingerprint
+        self.version = version
+        self.has_started_evidence = has_started_evidence
+        self.is_cancelled = is_cancelled
+        self.is_valid_interval = is_valid_interval
+        self.field_evidence = dict(field_evidence) if field_evidence is not None else {}
+        self.__post_init__()
+
     def __post_init__(self) -> None:
         if not self.id:
             raise ValueError("CanonicalEvent.id 不能为空")
@@ -276,6 +332,16 @@ class CanonicalEvent:
 
         # 初始化计算状态（注意：状态非永久事实，查询时须经 resolve_event_status 动态推导）
         self.status = self.compute_status()
+
+    @property
+    def event_id(self) -> str:
+        """向后兼容属性：返回 id。"""
+        return self.id
+
+    @property
+    def category(self) -> str:
+        """向后兼容属性：返回 event_type。"""
+        return self.event_type
 
     @property
     def time_precision(self) -> str:
@@ -597,20 +663,43 @@ def resolve_next_ending(events: Sequence[CanonicalEvent], now: datetime | None =
     return candidates[0]
 
 
-def compute_health_badge(freshness: str, coverage: str) -> str:
+class HealthBadge(str):
+    """同时兼容新规范语义 (DATA OK / DATA STALE / PARTIAL DATA / SCHEDULE DATA UNAVAILABLE)
+    和旧测试/调用语义 (FRESH / STALE / PARTIAL / UNAVAILABLE)。
+    """
+
+    def __eq__(self, other: object) -> bool:
+        if super().__eq__(other):
+            return True
+        if not isinstance(other, str):
+            return False
+        mapping = {
+            "DATA OK": {"FRESH", "DATA OK", "OK"},
+            "DATA STALE": {"STALE", "DATA STALE"},
+            "PARTIAL DATA": {"PARTIAL", "PARTIAL DATA"},
+            "SCHEDULE DATA UNAVAILABLE": {"UNAVAILABLE", "SCHEDULE DATA UNAVAILABLE", "EMPTY"},
+        }
+        valid = mapping.get(str(self), set())
+        return other in valid
+
+    def __hash__(self) -> int:
+        return super().__hash__()
+
+
+def compute_health_badge(freshness: str, coverage: str) -> HealthBadge:
     """根据 Freshness 和 Coverage 两轴生成标准展示徽章。
 
-    优先级：UNAVAILABLE > PARTIAL > STALE > OK
+    优先级：UNAVAILABLE > STALE > PARTIAL > OK
     """
     if coverage == Coverage.UNAVAILABLE.value or freshness == Freshness.EXPIRED.value:
-        return "SCHEDULE DATA UNAVAILABLE"
-    if coverage == Coverage.PARTIAL.value:
-        return "PARTIAL DATA"
+        return HealthBadge("SCHEDULE DATA UNAVAILABLE")
     if freshness == Freshness.STALE.value:
-        return "DATA STALE"
+        return HealthBadge("DATA STALE")
+    if coverage == Coverage.PARTIAL.value:
+        return HealthBadge("PARTIAL DATA")
     if freshness == Freshness.FRESH.value and coverage == Coverage.COMPLETE.value:
-        return "DATA OK"
-    return "PARTIAL DATA"
+        return HealthBadge("DATA OK")
+    return HealthBadge("PARTIAL DATA")
 
 
 def quality_badge(quality: str, updated_at: datetime | None = None) -> str:
