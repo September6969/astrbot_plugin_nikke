@@ -14,14 +14,20 @@ def calendar_cases(directory):
     case_names = (
         "normal", "7-days", "30-days", "stale", "long-title", "many-events", "empty", "unavailable",
         "2-active-2-next", "5-active",
-        "8-active",              # 单页 8 条（原 8-active-paged，已更名）
-        "8-active-paged",        # 保留旧名供旧测试兼容（同 8-active 数据）
-        "9-active",              # 9 条 → 8+1
-        "12-active-paged",       # 12 条 → 8+4（原 5+5+2，已更新）
-        "16-active",             # 16 条 → 8+8
-        "17-active",             # 17 条 → 8+8+1
-        "8-active-with-progress",# 8 条均带 EXACT 精度 → 全部显示 progress_pct
-        "8-active-mixed-long",   # 含长标题，验证预算仍然准确
+        "8-active",              # 单页 8 条
+        "8-active-paged",        # 兼容旧测试名
+        "9-active",              # 9 条（动态高度单页）
+        "12-active-paged",       # 12 条（动态高度单页）
+        "16-active",             # 16 条
+        "17-active",             # 17 条
+        "8-active-with-progress",# 8 条均带 EXACT 精度
+        "8-active-mixed-long",   # 含长标题
+        "dynamic-short",         # 2 active -> canvas.height == 900
+        "dynamic-7-active-4-next",# 7 active + 4 next -> 单页！~1044px
+        "dynamic-10-active",     # 10 active -> 单页！~988px
+        "dynamic-12-active-6-next",# 12 active + 6 next -> 单页！~1436px
+        "dynamic-20-active",     # 20 active -> 多页 (16 + 4)
+        "dynamic-long-titles",   # 多条长标题，验证预算不溢出
         "4-active-8-next",
         "next-only", "unknown-end", "date-only", "critical", "partial", "no-background", "oversize-title"
     )
@@ -171,6 +177,86 @@ def calendar_cases(directory):
                     start = NOW - timedelta(days=1)
                     end = NOW + timedelta(days=index + 7)
                     long_title = f"混合测试：较长标题活动验证预算精确度第{index + 1}号"
+                    event = CalendarActivity(
+                        f"long-{index}", long_title, start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+
+            elif name == "dynamic-short":
+                for index in range(2):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        f"act-{index}", f"进行中任务 {index + 1}", start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "dynamic-7-active-4-next":
+                for index in range(7):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        f"act-{index}", f"进行中任务 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                for index in range(4):
+                    start = NOW + timedelta(days=1 + index)
+                    end = start + timedelta(days=5)
+                    event = CalendarActivity(
+                        f"nxt-{index}", f"预告任务 {index + 1}", start, end,
+                        category="union_raid", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "dynamic-10-active":
+                for index in range(10):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        f"act-{index}", f"进行中任务 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "dynamic-12-active-6-next":
+                for index in range(12):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        f"act-{index}", f"进行中任务 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                for index in range(6):
+                    start = NOW + timedelta(days=1 + index)
+                    end = start + timedelta(days=5)
+                    event = CalendarActivity(
+                        f"nxt-{index}", f"预告任务 {index + 1}", start, end,
+                        category="union_raid", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "dynamic-20-active":
+                for index in range(20):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        f"act-{index}", f"进行中任务 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "dynamic-long-titles":
+                for index in range(8):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    long_title = f"长标题动态测试作战：第{index + 1}号深度调查与重点收缴特别行动项目"
                     event = CalendarActivity(
                         f"long-{index}", long_title, start, end,
                         category="event", banner_url="",

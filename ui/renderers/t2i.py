@@ -21,8 +21,14 @@ class T2IRenderer:
         return await self.render_payload("campaign", payload)
 
     async def render_payload(self, page, payload) -> str:
+        options = dict(self.OPTIONS)
+        if isinstance(payload, dict) and "canvas" in payload and isinstance(payload["canvas"], dict):
+            c_w = payload["canvas"].get("width")
+            c_h = payload["canvas"].get("height")
+            if c_w and c_h:
+                options["viewport"] = {"width": int(c_w), "height": int(c_h)}
         result = await asyncio.wait_for(self._html_render(self.loader.load(page), payload,
-                                                         options=dict(self.OPTIONS)), self.timeout)
+                                                         options=options), self.timeout)
         if not isinstance(result, str) or not result.strip():
             raise ValueError("原生渲染器未返回图片")
         return result

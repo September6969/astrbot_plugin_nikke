@@ -1,10 +1,14 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1600"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'"><style><!-- SHARED_CSS -->
+{% set c_w = canvas.width if canvas is defined and canvas.width is defined else 1600 %}
+{% set c_h = canvas.height if canvas is defined and canvas.height is defined else 900 %}
+{% set p_w = panel.width if panel is defined and panel.width is defined else 1180 %}
+{% set p_h = panel.height if panel is defined and panel.height is defined else 730 %}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   margin: 0;
   padding: 0;
-  width: 1600px;
-  height: 900px;
+  width: {{ c_w }}px;
+  height: {{ c_h }}px;
   overflow: hidden;
   position: relative;
   background: #0b0f17;
@@ -15,7 +19,7 @@ html, body {
 .canvas-bg {
   position: absolute;
   top: 0; left: 0;
-  width: 1600px; height: 900px;
+  width: {{ c_w }}px; height: {{ c_h }}px;
   background-size: cover;
   background-position: center;
   filter: brightness(0.62) saturate(0.78) blur(3px);
@@ -28,7 +32,7 @@ html, body {
 }
 .canvas-overlay {
   position: absolute;
-  top: 0; left: 0; width: 1600px; height: 900px;
+  top: 0; left: 0; width: {{ c_w }}px; height: {{ c_h }}px;
   background: radial-gradient(circle at 50% 45%, rgba(14, 18, 26, 0.45) 0%, rgba(10, 12, 18, 0.88) 100%),
               linear-gradient(180deg, rgba(10, 12, 18, 0.25) 0%, rgba(8, 10, 15, 0.65) 100%);
   z-index: 1;
@@ -38,8 +42,8 @@ html, body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 1180px;
-  height: 730px;
+  width: {{ p_w }}px;
+  height: {{ p_h }}px;
   background: rgba(20, 24, 32, 0.68);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);

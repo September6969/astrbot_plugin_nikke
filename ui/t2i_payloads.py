@@ -451,34 +451,105 @@ class CalendarT2IPayloadBuilder:
 
     CANVAS_W = 1600
     CANVAS_H = 900
+    MIN_CANVAS_H = 900
+    MAX_CANVAS_H = 1600
+
     PANEL_W = 1180
     PANEL_H = 730
+    MIN_PANEL_H = 730
+    CANVAS_VERTICAL_MARGIN = 170  # panel_h = canvas_h - CANVAS_VERTICAL_MARGIN
+    MAX_PANEL_H = MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN  # 1430
 
-    # 面板固定高度 730px，header 70px，footer 44px，body padding top/bottom 10+6px，可用净预算 516px
-    CONTENT_BUDGET = 516
+    HEADER_H = 70
+    FOOTER_H = 44
+    PANEL_TOP_PADDING = 28
+    PANEL_BOTTOM_PADDING = 20
+    BODY_TOP_PADDING = 10
+    BODY_BOTTOM_PADDING = 6
+    PANEL_OVERHEAD = (
+        PANEL_TOP_PADDING
+        + HEADER_H
+        + BODY_TOP_PADDING
+        + BODY_BOTTOM_PADDING
+        + FOOTER_H
+        + PANEL_BOTTOM_PADDING
+    )  # 178
 
-    ACTIVE_SECTION_HEADER_COST = 32
+    MAX_CONTENT_BUDGET = MAX_PANEL_H - PANEL_OVERHEAD  # 1252
+    CONTENT_BUDGET = MAX_CONTENT_BUDGET
+
+    ACTIVE_SECTION_HEADER_COST = 40
     NEXT_SECTION_HEADER_COST = 36
     SECTION_GAP = 16
 
-    # item height 含 gap（4px）：累计计算无须单独追踪 gap 计数
-    ACTIVE_NORMAL_H = 60   # 56px card + 4px gap
-    ACTIVE_LONG_H = 72     # 68px card + 4px gap
+    # item height 全部表示 item actual height + following gap
+    ACTIVE_NORMAL_H = 60    # 56px card + 4px gap
+    ACTIVE_LONG_H = 72      # 68px card + 4px gap
+    ACTIVE_OVERSIZE_H = 80  # 76px card + 4px gap
 
-    NEXT_NORMAL_H = 46
-    NEXT_LONG_H = 64
+    NEXT_NORMAL_H = 46      # 38px row + 6px gap + 2px
+    NEXT_LONG_H = 64        # 56px row + 6px gap + 2px
 
     EMPTY_STATE_H = 60
 
-    # 单页活动数量上限：与高度预算双重约束（先满足预算，再受此上限）
-    ACTIVE_MAX_PER_PAGE = 8
-
-
+    # 安全上限：正常由 MAX_CONTENT_BUDGET 分页，保留极高 safety cap 避免单页失控
+    SAFETY_MAX_ACTIVE_PER_PAGE = 16
 
     def __init__(self, resolver: T2IAssetResolver | None = None):
         self.resolver = resolver or T2IAssetResolver()
 
-    def _resolve_background(self, service, active_events, upcoming_events) -> str | None:
+    @classmethod
+    def active_item_cost(cls, item: dict) -> int:
+        if item.get("is_oversize"):
+            return cls.ACTIVE_OVERSIZE_H
+        if item.get("is_long_title"):
+            return cls.ACTIVE_LONG_H
+        return cls.ACTIVE_NORMAL_H
+
+    @classmethod
+    def next_item_cost(cls, item: dict) -> int:
+        if item.get("is_oversize") or item.get("is_long_title"):
+            return cls.NEXT_LONG_H
+        return cls.NEXT_NORMAL_H
+
+    @classmethod
+    def measure_page_content(
+        cls,
+        active_items: list[dict],
+        next_items: list[dict],
+        global_has_active: bool = True,
+        is_first_page: bool = False,
+    ) -> int:
+        content_h = 0
+        if active_items:
+            content_h += cls.ACTIVE_SECTION_HEADER_COST
+            for item in active_items:
+                content_h += cls.active_item_cost(item)
+        elif is_first_page and not global_has_active:
+            content_h += cls.ACTIVE_SECTION_HEADER_COST + cls.EMPTY_STATE_H
+
+        if (active_items or (is_first_page and not global_has_active)) and next_items:
+            content_h += cls.SECTION_GAP
+
+        if next_items:
+            content_h += cls.NEXT_SECTION_HEADER_COST
+            for item in next_items:
+                content_h += cls.next_item_cost(item)
+
+        return content_h
+
+    @classmethod
+    def compute_canvas_height(cls, content_h: int) -> int:
+        canvas_h_required = cls.PANEL_OVERHEAD + cls.CANVAS_VERTICAL_MARGIN + content_h
+        return max(cls.MIN_CANVAS_H, min(cls.MAX_CANVAS_H, canvas_h_required))
+
+    @classmethod
+    def compute_panel_height(cls, canvas_h: int) -> int:
+        return canvas_h - cls.CANVAS_VERTICAL_MARGIN
+
+    def _resolve_background(
+        self, service, active_events, upcoming_events, canvas_height: int = 900
+    ) -> str | None:
         vc = getattr(service, "visual_cache", None)
         if not vc or not hasattr(vc, "resolve_path"):
             return None
@@ -508,20 +579,25 @@ class CalendarT2IPayloadBuilder:
             path = vc.resolve_path(eid)
             if path is not None and path.is_file():
                 try:
-                    uri = self.resolver.encode(path, size=(1600, 900), crop_16_9=True)
+                    uri = self.resolver.encode(
+                        path, size=(self.CANVAS_W, canvas_height), cover_crop=True
+                    )
                     if uri:
                         return uri
                 except Exception:
                     continue
         return None
 
-
-    def _paginate(self, active_items: list[dict], next_items: list[dict], global_has_active: bool) -> list[dict]:
+    def _paginate(
+        self, active_items: list[dict], next_items: list[dict], global_has_active: bool
+    ) -> list[dict]:
         pages = []
         rem_active = list(active_items)
         rem_next = list(next_items)
 
         if not rem_active and not rem_next:
+            canvas_h = self.MIN_CANVAS_H
+            panel_h = self.MIN_PANEL_H
             return [{
                 "page_number": 1,
                 "page_total": 1,
@@ -531,55 +607,54 @@ class CalendarT2IPayloadBuilder:
                 "page_next_items": [],
                 "show_active_header": True,
                 "show_next_header": False,
+                "canvas": {"width": self.CANVAS_W, "height": canvas_h},
+                "panel": {"width": self.PANEL_W, "height": panel_h},
             }]
 
         page_idx = 1
         while rem_active or rem_next:
-            budget = self.CONTENT_BUDGET
             p_active = []
             p_next = []
+            is_p1 = (page_idx == 1)
 
-            # 1. 放置 Active 任务
-            if rem_active:
-                budget -= self.ACTIVE_SECTION_HEADER_COST
-                while rem_active and len(p_active) < self.ACTIVE_MAX_PER_PAGE:
-                    item = rem_active[0]
-                    cost = self.ACTIVE_LONG_H if item.get("is_long_title") else self.ACTIVE_NORMAL_H
-                    if cost > budget:
-                        if not p_active:
-                            # 单项超页处理：独占当前页
-                            item["is_oversize"] = True
-                            p_active.append(rem_active.pop(0))
-                            budget = 0
-                        break
-                    p_active.append(rem_active.pop(0))
-                    budget -= cost
+            # 1. 优先尝试放入 Active 任务
+            while rem_active:
+                if len(p_active) >= self.SAFETY_MAX_ACTIVE_PER_PAGE:
+                    break
+                candidate = rem_active[0]
+                tentative = p_active + [candidate]
+                tentative_h = self.measure_page_content(
+                    tentative,
+                    [],
+                    global_has_active=global_has_active,
+                    is_first_page=is_p1,
+                )
+                if tentative_h > self.MAX_CONTENT_BUDGET:
+                    if not p_active:
+                        # 单项超页处理：独占当前页
+                        candidate["is_oversize"] = True
+                        p_active.append(rem_active.pop(0))
+                    break
+                p_active.append(rem_active.pop(0))
 
-            elif not pages and not global_has_active:
-                # 仅在全局没有 Active 时，Page 1 扣除空状态与标题预算
-                budget -= (self.ACTIVE_SECTION_HEADER_COST + self.EMPTY_STATE_H)
-
-            # 2. 放置 Next 预告任务
-            if rem_next:
-                gap = self.SECTION_GAP if (p_active or (not pages and not global_has_active)) else 0
-                header_cost = self.NEXT_SECTION_HEADER_COST
-                min_next_cost = self.NEXT_NORMAL_H
-                if budget >= gap + header_cost + min_next_cost:
-                    budget -= (gap + header_cost)
-                    while rem_next:
-                        n_item = rem_next[0]
-                        cost = self.NEXT_LONG_H if n_item.get("is_long_title") else self.NEXT_NORMAL_H
-                        if cost > budget:
-                            if not p_active and not p_next:
-                                # 单项超页处理
-                                n_item["is_oversize"] = True
-                                p_next.append(rem_next.pop(0))
-                                budget = 0
-                            break
+            # 2. 尝试放入 Next 预告任务
+            while rem_next:
+                candidate = rem_next[0]
+                tentative = p_next + [candidate]
+                tentative_h = self.measure_page_content(
+                    p_active,
+                    tentative,
+                    global_has_active=global_has_active,
+                    is_first_page=is_p1,
+                )
+                if tentative_h > self.MAX_CONTENT_BUDGET:
+                    if not p_active and not p_next:
+                        candidate["is_oversize"] = True
                         p_next.append(rem_next.pop(0))
-                        budget -= cost
+                    break
+                p_next.append(rem_next.pop(0))
 
-            # 紧急保底：确保循环单向推进
+            # 紧急保底推进
             if not p_active and not p_next:
                 if rem_active:
                     rem_active[0]["is_oversize"] = True
@@ -587,6 +662,16 @@ class CalendarT2IPayloadBuilder:
                 elif rem_next:
                     rem_next[0]["is_oversize"] = True
                     p_next.append(rem_next.pop(0))
+
+            # 计算本页真实高度
+            actual_content_h = self.measure_page_content(
+                p_active,
+                p_next,
+                global_has_active=global_has_active,
+                is_first_page=is_p1,
+            )
+            page_canvas_h = self.compute_canvas_height(actual_content_h)
+            page_panel_h = self.compute_panel_height(page_canvas_h)
 
             pages.append({
                 "page_number": page_idx,
@@ -597,6 +682,8 @@ class CalendarT2IPayloadBuilder:
                 "page_next_items": p_next,
                 "show_active_header": bool(p_active or (page_idx == 1 and not global_has_active)),
                 "show_next_header": bool(p_next),
+                "canvas": {"width": self.CANVAS_W, "height": page_canvas_h},
+                "panel": {"width": self.PANEL_W, "height": page_panel_h},
             })
             page_idx += 1
 
@@ -790,11 +877,19 @@ class CalendarT2IPayloadBuilder:
         global_has_active = bool(active_items)
         active_count_total = len(active_items)
 
-        # 5. 背景 Key Visual 解析
-        background_data_uri = self._resolve_background(service, active_canonical, upcoming_canonical)
-
-        # 6. 分页计算
+        # 5. 分页计算（先增长后分页，每页包含独立的 canvas/panel 尺寸）
         pages = self._paginate(active_items, next_items, global_has_active)
+
+        # 6. 背景 Key Visual 解析（按每页 canvas.height 做 cover-crop）
+        for p in pages:
+            p_canvas_h = p["canvas"]["height"]
+            p["background_data_uri"] = self._resolve_background(
+                service, active_canonical, upcoming_canonical, canvas_height=p_canvas_h
+            )
+
+        top_canvas = pages[0]["canvas"] if pages else {"width": self.CANVAS_W, "height": self.MIN_CANVAS_H}
+        top_panel = pages[0]["panel"] if pages else {"width": self.PANEL_W, "height": self.MIN_PANEL_H}
+        top_bg = pages[0]["background_data_uri"] if pages else None
 
         # 7. 元数据准备
         updated_str = "Unknown"
@@ -841,8 +936,9 @@ class CalendarT2IPayloadBuilder:
         bundle = {
             "snapshot_version": snapshot_ver,
             "query_now": current.isoformat(),
-            "canvas": {"width": self.CANVAS_W, "height": self.CANVAS_H},
-            "background_data_uri": background_data_uri,
+            "canvas": top_canvas,
+            "panel": top_panel,
+            "background_data_uri": top_bg,
             "freshness": fresh_str,
             "coverage": cov_str,
             "health_display": health_display,

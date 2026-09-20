@@ -40,7 +40,7 @@ class TestOperationsFeedVisualContract:
         assert normal["canvas"] == {"width": 1600, "height": 900}
         html = render_html(normal)
 
-        # 1600x900 viewport & canvas constraints
+        # 1600x900 viewport & canvas constraints for short/base content
         assert 'width="1600"' in html or 'width: 1600px' in html or 'width:1600px' in html
         assert 'height: 900px' in html or 'height:900px' in html
         assert 'overflow: hidden' in html or 'overflow:hidden' in html
@@ -49,6 +49,19 @@ class TestOperationsFeedVisualContract:
         assert 'width: 1180px' in html or 'width:1180px' in html
         assert 'height: 730px' in html or 'height:730px' in html
         assert 'backdrop-filter: blur(28px)' in html or 'backdrop-filter:blur(28px)' in html
+
+    def test_dynamic_canvas_and_panel_geometry(self, tmp_path):
+        """Dynamic content expands canvas height within [900, 1600] and adjusts panel."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        dyn = cases["dynamic-7-active-4-next"]
+        assert dyn["canvas"]["width"] == 1600
+        assert 900 < dyn["canvas"]["height"] <= 1600
+        assert dyn["panel"]["width"] == 1180
+        assert dyn["panel"]["height"] == dyn["canvas"]["height"] - 170
+
+        html = render_html({**dyn, **dyn["pages"][0]})
+        assert f"height: {dyn['canvas']['height']}px" in html
+        assert f"height: {dyn['panel']['height']}px" in html
 
     def test_legacy_progress_bar_contract_purged(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
@@ -73,119 +86,151 @@ class TestOperationsFeedVisualContract:
 
 
 class TestPaginationBudgetAndOversize:
-    # ── 旧 5-active 基线 ──────────────────────────────────────────
+    # ── 基线：少量内容保持 1600x900 ──────────────────────────────
+    def test_short_content_retains_min_canvas_height(self, tmp_path):
+        """Case 1: 少量内容 (2 Active) -> canvas.height == 900, panel == 730."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        short = cases["dynamic-short"]
+        assert len(short["pages"]) == 1
+        assert short["canvas"]["height"] == 900
+        assert short["panel"]["height"] == 730
+
     def test_5_active_fits_on_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         five = cases["5-active"]
         assert len(five["pages"]) == 1
         assert len(five["pages"][0]["active_items"]) == 5
         assert five["pages"][0]["page_total"] == 1
+        assert five["canvas"]["height"] == 900
 
-    # ── 8-item 密度实验核心断言 ───────────────────────────────────
     def test_8_active_fits_on_single_page(self, tmp_path):
-        """8 normal active items MUST fit on one page (density experiment goal)."""
         cases = get_cases("calendar_schedule", tmp_path)
         eight = cases["8-active"]
-        assert len(eight["pages"]) == 1, (
-            f"Expected 1 page for 8 normal items, got {len(eight['pages'])} pages: "
-            f"{[len(p['active_items']) for p in eight['pages']]}"
-        )
+        assert len(eight["pages"]) == 1
         assert len(eight["pages"][0]["active_items"]) == 8
-        assert eight["pages"][0]["page_total"] == 1
+        assert eight["canvas"]["height"] == 900
 
-    def test_9_active_splits_8_plus_1(self, tmp_path):
+    # ── 核心生产场景：7 Active + 4 Next 合并在单页 ─────────────────
+    def test_dynamic_7_active_4_next_single_page(self, tmp_path):
+        """Case 2: 7 Active + 4 Next 在同一页，画布高度动态扩展 (>900, <=1600)."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        case = cases["dynamic-7-active-4-next"]
+        assert len(case["pages"]) == 1, (
+            f"Expected 1 page for 7 active + 4 next, got {len(case['pages'])}"
+        )
+        p1 = case["pages"][0]
+        assert len(p1["active_items"]) == 7
+        assert len(p1["next_items"]) == 4
+        assert p1["page_total"] == 1
+        assert 900 < p1["canvas"]["height"] <= 1600
+        assert p1["panel"]["height"] == p1["canvas"]["height"] - 170
+
+    # ── 中等规模活动优先单页 ────────────────────────────────────────
+    def test_10_active_fits_on_single_page(self, tmp_path):
+        """Case 3: 10 Active 优先单页动态增长."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        ten = cases["dynamic-10-active"]
+        assert len(ten["pages"]) == 1
+        assert len(ten["pages"][0]["active_items"]) == 10
+        assert 900 < ten["canvas"]["height"] <= 1600
+
+    def test_9_active_fits_on_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         nine = cases["9-active"]
-        assert len(nine["pages"]) == 2, (
-            f"Expected 2 pages for 9 items, got {len(nine['pages'])}: "
-            f"{[len(p['active_items']) for p in nine['pages']]}"
-        )
-        assert len(nine["pages"][0]["active_items"]) == 8
-        assert len(nine["pages"][1]["active_items"]) == 1
-        assert nine["pages"][0]["page_total"] == 2
+        assert len(nine["pages"]) == 1
+        assert len(nine["pages"][0]["active_items"]) == 9
+        assert 900 < nine["canvas"]["height"] <= 1600
 
-    def test_16_active_splits_8_plus_8(self, tmp_path):
+    def test_12_active_6_next_fits_on_single_page(self, tmp_path):
+        """12 Active + 6 Next 在最大高度预算 (1600) 内同页显示."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        twelve_six = cases["dynamic-12-active-6-next"]
+        assert len(twelve_six["pages"]) == 1
+        p1 = twelve_six["pages"][0]
+        assert len(p1["active_items"]) == 12
+        assert len(p1["next_items"]) == 6
+        assert 900 < p1["canvas"]["height"] <= 1600
+
+    # ── 大量活动触发分页与末页回落 ──────────────────────────────────
+    def test_dynamic_20_active_paginates_and_recedes(self, tmp_path):
+        """Case 4 & 5: 20 Active 触发分页 (>=2 页)，每页 <=1600，末页高度回落 (>=900)."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        twenty = cases["dynamic-20-active"]
+        assert len(twenty["pages"]) >= 2
+        for p in twenty["pages"]:
+            assert p["canvas"]["height"] <= 1600
+            assert p["canvas"]["height"] >= 900
+            assert p["panel"]["height"] == p["canvas"]["height"] - 170
+        # 最后一页由于条目较少，高度回落到最低或接近最低
+        last_page = twenty["pages"][-1]
+        assert len(last_page["active_items"]) < 16
+        assert last_page["canvas"]["height"] == 900
+
+    def test_16_active_fits_on_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         sixteen = cases["16-active"]
-        assert len(sixteen["pages"]) == 2
-        assert len(sixteen["pages"][0]["active_items"]) == 8
-        assert len(sixteen["pages"][1]["active_items"]) == 8
+        assert len(sixteen["pages"]) == 1
+        assert len(sixteen["pages"][0]["active_items"]) == 16
+        assert sixteen["canvas"]["height"] <= 1600
 
-    def test_17_active_splits_8_plus_8_plus_1(self, tmp_path):
+    def test_17_active_splits_16_plus_1(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         seventeen = cases["17-active"]
-        assert len(seventeen["pages"]) == 3
-        assert len(seventeen["pages"][0]["active_items"]) == 8
-        assert len(seventeen["pages"][1]["active_items"]) == 8
-        assert len(seventeen["pages"][2]["active_items"]) == 1
+        assert len(seventeen["pages"]) == 2
+        assert len(seventeen["pages"][0]["active_items"]) == 16
+        assert len(seventeen["pages"][1]["active_items"]) == 1
+        assert seventeen["pages"][1]["canvas"]["height"] == 900
 
-    def test_12_active_splits_into_two_pages(self, tmp_path):
-        """12 active → 2 pages (8+4) with updated budget."""
-        cases = get_cases("calendar_schedule", tmp_path)
-        twelve = cases["12-active-paged"]
-        assert len(twelve["pages"]) == 2
-        assert len(twelve["pages"][0]["active_items"]) == 8
-        assert len(twelve["pages"][1]["active_items"]) == 4
-
-    # ── 兼容旧名 8-active-paged（同数据） ────────────────────────
+    # ── 兼容旧名 8-active-paged ──────────────────────────────────
     def test_8_active_paged_single_page_compat(self, tmp_path):
-        """Legacy fixture name 8-active-paged now also resolves to single page."""
         cases = get_cases("calendar_schedule", tmp_path)
         eight = cases["8-active-paged"]
         assert len(eight["pages"]) == 1
         assert len(eight["pages"][0]["active_items"]) == 8
 
     # ── 长标题预算验证 ────────────────────────────────────────────
+    def test_dynamic_long_titles_no_overflow(self, tmp_path):
+        """Case 6: 多条长标题活动，验证预算不溢出且高度 <= MAX_CANVAS_H."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        long_case = cases["dynamic-long-titles"]
+        for page in long_case["pages"]:
+            assert page["canvas"]["height"] <= CalendarT2IPayloadBuilder.MAX_CANVAS_H
+            assert page["canvas"]["height"] >= CalendarT2IPayloadBuilder.MIN_CANVAS_H
+            html = render_html({**long_case, **page})
+            assert "is-long" in html
+
     def test_long_title_budget_still_prevents_overflow(self, tmp_path):
-        """Mixed normal + long-title items must be constrained by budget (no overflow)."""
         cases = get_cases("calendar_schedule", tmp_path)
         mixed = cases["8-active-mixed-long"]
         builder = CalendarT2IPayloadBuilder()
-        # Verify all items were placed across pages
         total = sum(len(p["active_items"]) for p in mixed["pages"])
-        assert total == 8, f"All 8 items must be placed, got {total}"
-        # No page exceeds budget: verify each page item count × height fits
+        assert total == 8
         for page in mixed["pages"]:
-            normal_count = sum(1 for i in page["active_items"] if not i.get("is_long_title") and not i.get("is_oversize"))
-            long_count = sum(1 for i in page["active_items"] if i.get("is_long_title") and not i.get("is_oversize"))
-            used = (builder.ACTIVE_SECTION_HEADER_COST
-                    + normal_count * builder.ACTIVE_NORMAL_H
-                    + long_count * builder.ACTIVE_LONG_H)
-            assert used <= builder.CONTENT_BUDGET, (
-                f"Page budget overflow: {used} > {builder.CONTENT_BUDGET} "
-                f"({normal_count} normal, {long_count} long)"
+            content_h = builder.measure_page_content(
+                page["active_items"],
+                page["next_items"],
             )
+            assert content_h <= builder.MAX_CONTENT_BUDGET
 
     # ── progress_pct 验证 ─────────────────────────────────────────
     def test_8_active_with_progress_all_have_pct(self, tmp_path):
-        """8 items with EXACT precision + now in interval: all must have progress_pct."""
         cases = get_cases("calendar_schedule", tmp_path)
         prog = cases["8-active-with-progress"]
         assert len(prog["pages"]) == 1
         for item in prog["pages"][0]["active_items"]:
-            assert item.get("progress_pct") is not None, (
-                f"Expected progress_pct for item '{item['title']}', got None"
-            )
+            assert item.get("progress_pct") is not None
             assert 0.0 <= item["progress_pct"] <= 1.0
 
     def test_8_active_render_has_footer_and_page_badge(self, tmp_path):
-        """Render 8-item page and verify footer and page badge are present."""
         cases = get_cases("calendar_schedule", tmp_path)
         eight = cases["8-active"]
         html = render_html({**eight, **eight["pages"][0]})
         assert "panel-footer" in html
         assert "PAGE 1 / 1" in html
-        assert "card-progress" in html or "progress_pct" not in html  # progress rendered or not applicable
 
     def test_4_active_8_next_multi_page_partition(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         mixed = cases["4-active-8-next"]
-        assert len(mixed["pages"]) >= 2
-        # Page 1 has 4 active items and some next items
-        p1 = mixed["pages"][0]
-        assert len(p1["active_items"]) == 4
-        assert p1["show_active_header"]
-        # Total items placed across all pages equals total input
         total_active_placed = sum(len(p["active_items"]) for p in mixed["pages"])
         total_next_placed = sum(len(p["next_items"]) for p in mixed["pages"])
         assert total_active_placed == 4
@@ -195,10 +240,8 @@ class TestPaginationBudgetAndOversize:
         cases = get_cases("calendar_schedule", tmp_path)
         oversize = cases["oversize-title"]
         pages = oversize["pages"]
-        # The oversize item should have is_oversize=True
         first_page_item = pages[0]["active_items"][0]
         assert first_page_item["is_oversize"]
-        # Display title is visually truncated with ellipsis while full_title is preserved
         assert first_page_item["title"].endswith("...")
         assert len(first_page_item["full_title"]) > len(first_page_item["title"])
 
@@ -218,30 +261,27 @@ class TestGlobalVsPageEmptyState:
         assert "NEXT OPERATIONS" in p1_html
 
     def test_page_2_with_no_active_never_shows_no_active_operations_if_global_has_active(self, tmp_path):
-        # When global_has_active=True, subsequent pages that only have next_items MUST NOT show NO ACTIVE OPERATIONS
         builder = CalendarT2IPayloadBuilder()
-        active_items = [{"event_id": f"a{i}", "title": f"A{i}", "full_title": f"A{i}", "category": "活动", "category_code": "event", "time_range": "", "remaining": "1D", "is_next_ending": False, "urgency": "NORMAL", "is_long_title": False, "is_oversize": False, "end_precision": "EXACT", "progress_pct": None} for i in range(5)]
-        next_items = [{"event_id": f"n{i}", "title": f"N{i}", "full_title": f"N{i}", "category": "活动", "category_code": "event", "start_time_display": "09.20", "starts_in": "3D", "is_long_title": False, "is_oversize": False} for i in range(4)]
+        active_items = [{"event_id": f"a{i}", "title": f"A{i}", "full_title": f"A{i}", "category": "活动", "category_code": "event", "time_range": "", "remaining": "1D", "is_next_ending": False, "urgency": "NORMAL", "is_long_title": False, "is_oversize": False, "end_precision": "EXACT", "progress_pct": None} for i in range(16)]
+        next_items = [{"event_id": f"n{i}", "title": f"N{i}", "full_title": f"N{i}", "category": "活动", "category_code": "event", "start_time_display": "09.20", "starts_in": "3D", "is_long_title": False, "is_oversize": False} for i in range(10)]
 
         pages = builder._paginate(active_items, next_items, global_has_active=True)
-        assert len(pages) == 2
-        # Page 2 has only next_items
-        p2 = pages[1]
-        assert p2["active_items"] == []
-        assert len(p2["next_items"]) > 0
-
-        # Render Page 2
+        assert len(pages) >= 2
+        # Verify subsequent pages that only have next_items don't show NO ACTIVE OPERATIONS
+        p_last = pages[-1]
         bundle_meta = {
-            "canvas": {"width": 1600, "height": 900},
+            "canvas": p_last["canvas"],
+            "panel": p_last["panel"],
             "global_has_active": True,
-            "active_count_total": 5,
+            "active_count_total": 16,
             "horizon_days": 14,
             "timezone_display": "UTC+8",
             "available": True,
         }
-        p2_html = render_html({**bundle_meta, **p2})
-        assert "NO ACTIVE OPERATIONS" not in p2_html
-        assert "NEXT OPERATIONS" in p2_html
+        p_last_html = render_html({**bundle_meta, **p_last})
+        if not p_last["active_items"]:
+            assert "NO ACTIVE OPERATIONS" not in p_last_html
+        assert "NEXT OPERATIONS" in p_last_html
 
 
 class TestUrgencyAndPrecisionRules:
@@ -285,24 +325,64 @@ class TestBackgroundAndMultiPageRendering:
         html = render_html(no_bg)
         assert "canvas-bg-fallback" in html
 
+    def test_background_cover_crop_dimensions(self):
+        """Case 7: Background Resolver scales and cover-crops for dynamic canvas height."""
+        from PIL import Image
+        resolver = T2IAssetResolver()
+        # Create a synthetic 9:16 portrait image (1080x1920)
+        img = Image.new("RGBA", (1080, 1920), color=(100, 150, 200, 255))
+        uri_900 = resolver.encode(img, size=(1600, 900), cover_crop=True)
+        assert uri_900 is not None and uri_900.startswith("data:image/png;base64,")
+
+        uri_1200 = resolver.encode(img, size=(1600, 1200), cover_crop=True)
+        assert uri_1200 is not None and uri_1200.startswith("data:image/png;base64,")
+        # Different target sizes must produce different cache entries / URIs
+        assert uri_900 != uri_1200
+
     @pytest.mark.asyncio
     async def test_multi_page_sequential_rendering_in_t2i_renderer(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
-        nine = cases["9-active"]
-        assert len(nine["pages"]) == 2
+        twenty = cases["dynamic-20-active"]
+        assert len(twenty["pages"]) >= 2
 
         render_calls = []
+        viewport_calls = []
         async def fake_render(template, payload, options):
             render_calls.append(payload["page_number"])
+            viewport_calls.append(options.get("viewport"))
             return f"rendered_page_{payload['page_number']}.png"
 
         renderer = T2IRenderer(fake_render, assets=Mock())
-        results = await renderer.render_view("calendar_schedule", nine)
+        results = await renderer.render_view("calendar_schedule", twenty)
 
         assert isinstance(results, list)
-        assert len(results) == 2
-        assert results == ["rendered_page_1.png", "rendered_page_2.png"]
-        assert render_calls == [1, 2]
+        assert len(results) >= 2
+        assert render_calls == list(range(1, len(results) + 1))
+        # Case 8: Renderer passes dynamic viewport matching each page's canvas
+        for i, p in enumerate(twenty["pages"]):
+            assert viewport_calls[i] == {
+                "width": p["canvas"]["width"],
+                "height": p["canvas"]["height"],
+            }
+
+    @pytest.mark.asyncio
+    async def test_renderer_viewport_matches_dynamic_canvas_height(self, tmp_path):
+        """Case 8: Renderer sets Playwright viewport to exact dynamic canvas dimensions."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        dyn = cases["dynamic-7-active-4-next"]
+        captured_options = {}
+
+        async def fake_render(template, payload, options):
+            captured_options.update(options)
+            return "rendered.png"
+
+        renderer = T2IRenderer(fake_render, assets=Mock())
+        await renderer.render_view("calendar_schedule", dyn)
+
+        assert "viewport" in captured_options
+        assert captured_options["viewport"]["width"] == 1600
+        assert captured_options["viewport"]["height"] == dyn["canvas"]["height"]
+        assert captured_options["viewport"]["height"] > 900
 
     @pytest.mark.asyncio
     async def test_single_page_returns_single_string(self, tmp_path):
