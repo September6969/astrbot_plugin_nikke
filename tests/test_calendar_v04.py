@@ -484,7 +484,7 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         rec = AnnouncementRecord(
             content_id="a1",
             title="Official Maintenance Notice",
-            body="活动时间：2026.09.01 18:00 ~ 2026.09.20 18:00",
+            body="活动时间：2026.09.01 18:00 ~ 2027.09.20 18:00",
             published_at="2026-09-01 10:00",
         )
         main_inst.announcements.add_or_update(rec)

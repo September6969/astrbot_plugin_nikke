@@ -52,6 +52,7 @@
         74.4305700509125,
         35.50393287528017
       ],
+      "core_axis_reason": "breast_unavailable",
       "pixel_sha256": "47b2eba3214bc32ed5184f84278c893bd841d61d8ceeb04f24f511d3bcd6078e",
       "png_sha256": "fb05dccee549af72da59b33d6181d2f47d19302caf98ed364e3d216e2c21a0c3",
       "image_size": [
@@ -131,6 +132,7 @@
         74.4305700509125,
         35.50393287528017
       ],
+      "core_axis_reason": "breast_unavailable",
       "pixel_sha256": "ae4a02d27bae2f63e2171e2bb7c8549360092cb42d67baa3260b44319a189d64",
       "png_sha256": "623ec249fce5441f19f4b181556410ce6c0f3f6c1b738730f4319e2eb7571258",
       "image_size": [
@@ -203,6 +205,20 @@
         76.92758433106454,
         36.69787628127228
       ],
+      "core_axis": {
+        "eye_point": [
+          245.09322714154428,
+          106.87385137424496
+        ],
+        "head_top_y": 50.586988963499834,
+        "breast_point": [
+          285.26703242617725,
+          225.7311986868591
+        ],
+        "head_top_source": "head_attachment:head/face",
+        "breast_source": "pair:boob_l+boob_r"
+      },
+      "core_axis_reason": "ok",
       "pixel_sha256": "489d0f68d9a550d63bd8b941df6a65c899611747850ca7c075cf022eaf5a324a",
       "png_sha256": "0ef8d58e0484b687f72c6e19f3cf91e470bac08f735cc1bc1ef78f0117f7dbeb",
       "image_size": [
@@ -268,6 +284,7 @@
         65.84437848617785,
         21.110806739961177
       ],
+      "core_axis_reason": "ambiguous_head_attachment",
       "pixel_sha256": "0cb3c4e58edda68d9696ea41b89abc40d64848e99e75e0a8f61c5ac14c9d8cbc",
       "png_sha256": "0f031045cf1268526ecc5ae6b59bb5236489e1325e5999d4f6d220009eda6886",
       "image_size": [
@@ -332,6 +349,7 @@
         63.837788862371546,
         45.94797689335691
       ],
+      "core_axis_reason": "breast_unavailable",
       "pixel_sha256": "154ef413d5a06a838e657d19006ccfda9282af3491498bd67eb7fd1b8898a6c0",
       "png_sha256": "ddf9e9f84fff65f0e16f1559808c2e414ee1ff5d37169dbc58a18f0338b6e3b4",
       "image_size": [
@@ -402,6 +420,7 @@
         67.085067586138,
         38.68246263699326
       ],
+      "core_axis_reason": "ambiguous_head_attachment",
       "pixel_sha256": "cb09d5c79931335638d6fc2a58193d6783b77ca3ba8df3c276225672747bfb90",
       "png_sha256": "3b42e870819fb81278caad9401b42b1b699558a2f51f566b4d31e85ae1609dbe",
       "image_size": [
@@ -472,6 +491,20 @@
         57.391772885202165,
         42.572589692286925
       ],
+      "core_axis": {
+        "eye_point": [
+          329.8477022167955,
+          117.8550639570251
+        ],
+        "head_top_y": 70.76127509024161,
+        "breast_point": [
+          323.2838421429345,
+          304.08810166871547
+        ],
+        "head_top_source": "head_attachment:head/head",
+        "breast_source": "single:chest"
+      },
+      "core_axis_reason": "ok",
       "pixel_sha256": "ca959b27007acd7b1297c852d845495ad917dd5dd1938715131f45e98144f7f0",
       "png_sha256": "0a817a46efbd864c456afbe6f34d6fbe4ce2cd022e2a517ebbc1f1dd15804b0f",
       "image_size": [
@@ -534,6 +567,7 @@
         191.83190961094326,
         81.07964940725236
       ],
+      "core_axis_reason": "breast_unavailable",
       "pixel_sha256": "54ce68f37a321401be16cff84317cf417808577dc618f79de4a6583f0ae5559b",
       "png_sha256": "a19ec702ceae1de34a7144d16fdc146ad4c90c9cfa35b310a60828b7738eada0",
       "image_size": [
