@@ -23,16 +23,18 @@ def calendar_cases(directory):
         "8-active-with-progress",# 8 条均带 EXACT 精度
         "8-active-mixed-long",   # 含长标题
         "dynamic-short",         # 2 active -> canvas.height == 900
-        "dynamic-7-active-4-next",# 7 active + 4 next -> 单页！~1044px
+        "dynamic-7-active-4-next",# 7 active + 4 next -> 单页，按 DOM 几何动态增长
+        "realistic-7-active-4-next",  # 生产形态：进度、NEXT ENDING、维护与长英文标题
+        "large-font-long-title-mix",  # 大字体回归：长中文/英文标题与分页候选
         "dynamic-10-active",     # 10 active -> 单页！~988px
         "dynamic-12-active-6-next",# 12 active + 6 next -> 单页！~1436px
-        "dynamic-20-active",     # 20 active -> 单页（~1588px）
+        "dynamic-20-active",     # 20 active -> 按 1600px 上限动态分页
         "dynamic-long-titles",   # 多条长标题，验证预算不溢出
-        "portrait-kv-20-active", # 20 active + 1080x1920 KV -> 1 page (~1588px)
-        "portrait-kv-30-active", # 30 active + 1080x1920 KV -> 1 page (~2188px)
+        "portrait-kv-20-active", # 20 active + 1080x1920 KV -> 源扩展高度预算
+        "portrait-kv-30-active", # 30 active + 1080x1920 KV -> 源扩展高度预算
         "portrait-kv-overflow",  # 45 active + 1080x1920 KV -> 2 pages
-        "landscape-kv-7-active-4-next", # 7 active + 4 next + 1920x1080 KV -> 1 page (~1044px)
-        "landscape-kv-20-active",# 20 active + 1920x1080 KV -> 1 page (~1588px)
+        "landscape-kv-7-active-4-next", # 7 active + 4 next + 1920x1080 KV -> 单页
+        "landscape-kv-20-active",# 20 active + 1920x1080 KV -> 按基础预算
         "landscape-kv-25-active",# 25 active + 1920x1080 KV -> 2 pages (1600px base cap)
         "no-kv-overflow",        # 25 active + no KV -> 2 pages (1600px fallback cap)
         "4-active-8-next",
@@ -217,6 +219,54 @@ def calendar_cases(directory):
                     event = CalendarActivity(
                         f"nxt-{index}", f"预告任务 {index + 1}", start, end,
                         category="union_raid", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name in ("realistic-7-active-4-next", "large-font-long-title-mix"):
+                if name == "realistic-7-active-4-next":
+                    active_specs = [
+                        ("特殊招募：ELEGANT MAID // 招募活动", "recruit"),
+                        ("联合突袭：SEASON 45 // FINAL BOSS WINDOW", "union_raid"),
+                        ("协同作战：Cinderella / Burning Shot", "coop"),
+                        ("活动故事：OLD TALES — Chapter 2", "event"),
+                        ("SERVER MAINTENANCE NOTICE / GLOBAL UTC+8", "maintenance"),
+                        ("竞技场赛季结算与奖励发放", "solo_raid"),
+                        ("LONG ENGLISH OPERATIONS TITLE // SPECIAL RECRUIT FINAL CHECKPOINT BEFORE GLOBAL SERVER MAINTENANCE", "recruit"),
+                    ]
+                    next_specs = [
+                        ("NEXT OPERATIONS // Special Recruit: ELEGANT MAID", "recruit"),
+                        ("Union Raid Season 46 — Preparation Window", "union_raid"),
+                        ("活动故事：OLD TALES — Chapter 3", "event"),
+                        ("GLOBAL SERVER MAINTENANCE / UTC+8 03:00–05:00", "maintenance"),
+                    ]
+                else:
+                    active_specs = [
+                        ("长标题验证：大字体下仍保留完整活动语义", "event"),
+                        ("SPECIAL RECRUIT // ELEGANT MAID FINAL CHECKPOINT", "recruit"),
+                        ("NIKKE Anniversary Operation: LAST KINGDOM — Phase II", "event"),
+                        ("服务器维护公告 / GLOBAL UPDATE WINDOW", "maintenance"),
+                        ("LONG ENGLISH TITLE // FINAL OPERATIONS CHECKPOINT BEFORE RESET", "union_raid"),
+                    ]
+                    next_specs = [
+                        ("NEXT: Special Recruit — ELEGANT MAID", "recruit"),
+                        ("NEXT: GLOBAL SERVER MAINTENANCE / UTC+8", "maintenance"),
+                        ("次回活动：长标题分页与可见性回归", "event"),
+                    ]
+                for index, (title, category) in enumerate(active_specs):
+                    start = NOW - timedelta(hours=6)
+                    end = NOW + timedelta(hours=8 + index * 6)
+                    event = CalendarActivity(
+                        f"real-active-{index}", title, start, end,
+                        category=category, banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                for index, (title, category) in enumerate(next_specs):
+                    start = NOW + timedelta(days=1 + index)
+                    end = start + timedelta(days=5)
+                    event = CalendarActivity(
+                        f"real-next-{index}", title, start, end,
+                        category=category, banner_url="",
                         start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
                     )
                     service._activities[event.event_id] = event

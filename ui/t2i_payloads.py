@@ -450,8 +450,9 @@ class CalendarT2IPayloadBuilder:
     - effective_max_canvas_h = min(max(FALLBACK_MAX_CANVAS_H, scaled_source_h), ABSOLUTE_MAX_CANVAS_H)
       即：Calendar 默认允许增长至 1600px；当 KV 提供更多纵向空间时（如竖版图），上限随 KV 延长，最高 2400px；横版图绝不会将上限压至 900px。
     - 垂直外边距: CANVAS_VERTICAL_MARGIN = 170px (上下各 85px 居中)
-    - 面板固定开销: PANEL_OVERHEAD = 178px
-    - 动态内容净预算: effective_max_canvas_h - 170 - 178
+    - 面板固定开销: PANEL_OVERHEAD = 180px
+      （包含 panel 上下 1px 边框，以及 body 的上下 padding；CSS 全部使用 border-box）
+    - 动态内容净预算: effective_max_canvas_h - 170 - 180
     """
 
     CANVAS_W = 1600
@@ -473,6 +474,7 @@ class CalendarT2IPayloadBuilder:
     PANEL_BOTTOM_PADDING = 20
     BODY_TOP_PADDING = 10
     BODY_BOTTOM_PADDING = 6
+    PANEL_BORDER_H = 2
     PANEL_OVERHEAD = (
         PANEL_TOP_PADDING
         + HEADER_H
@@ -480,22 +482,23 @@ class CalendarT2IPayloadBuilder:
         + BODY_BOTTOM_PADDING
         + FOOTER_H
         + PANEL_BOTTOM_PADDING
-    )  # 178
+        + PANEL_BORDER_H
+    )  # 180
 
-    MAX_CONTENT_BUDGET = FALLBACK_MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN - PANEL_OVERHEAD  # 1252
+    MAX_CONTENT_BUDGET = FALLBACK_MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN - PANEL_OVERHEAD  # 1250
     CONTENT_BUDGET = MAX_CONTENT_BUDGET
 
-    ACTIVE_SECTION_HEADER_COST = 40
-    NEXT_SECTION_HEADER_COST = 36
-    SECTION_GAP = 16
-
-    # item height 全部表示 item actual height + following gap
-    ACTIVE_NORMAL_H = 60    # 56px card + 4px gap
-    ACTIVE_LONG_H = 72      # 68px card + 4px gap
-    ACTIVE_OVERSIZE_H = 80  # 76px card + 4px gap
-
-    NEXT_NORMAL_H = 46      # 38px row + 6px gap + 2px
-    NEXT_LONG_H = 64        # 56px row + 6px gap + 2px
+    # 以下常量必须与 calendar_schedule.html 的 border-box 几何保持一一对应。
+    SECTION_HEADER_H = 32
+    SECTION_HEADER_BOTTOM_GAP = 8
+    NEXT_SECTION_TOP_GAP = 12
+    ACTIVE_CARD_GAP = 5
+    NEXT_ROW_GAP = 7
+    ACTIVE_CARD_NORMAL_H = 68
+    ACTIVE_CARD_LONG_H = 80
+    ACTIVE_CARD_OVERSIZE_H = 92
+    NEXT_ROW_NORMAL_H = 44
+    NEXT_ROW_LONG_H = 58
 
     EMPTY_STATE_H = 60
 
@@ -506,18 +509,42 @@ class CalendarT2IPayloadBuilder:
         self.resolver = resolver or T2IAssetResolver()
 
     @classmethod
-    def active_item_cost(cls, item: dict) -> int:
+    def active_card_height(cls, item: dict) -> int:
         if item.get("is_oversize"):
-            return cls.ACTIVE_OVERSIZE_H
+            return cls.ACTIVE_CARD_OVERSIZE_H
         if item.get("is_long_title"):
-            return cls.ACTIVE_LONG_H
-        return cls.ACTIVE_NORMAL_H
+            return cls.ACTIVE_CARD_LONG_H
+        return cls.ACTIVE_CARD_NORMAL_H
 
     @classmethod
-    def next_item_cost(cls, item: dict) -> int:
+    def next_row_height(cls, item: dict) -> int:
         if item.get("is_oversize") or item.get("is_long_title"):
-            return cls.NEXT_LONG_H
-        return cls.NEXT_NORMAL_H
+            return cls.NEXT_ROW_LONG_H
+        return cls.NEXT_ROW_NORMAL_H
+
+    @classmethod
+    def measure_active_section(cls, items: list[dict]) -> int:
+        """精确测量 Active section，不把相邻 item gap 嵌进 item 高度。"""
+        if not items:
+            return 0
+        return (
+            cls.SECTION_HEADER_H
+            + cls.SECTION_HEADER_BOTTOM_GAP
+            + sum(cls.active_card_height(item) for item in items)
+            + max(0, len(items) - 1) * cls.ACTIVE_CARD_GAP
+        )
+
+    @classmethod
+    def measure_next_section(cls, items: list[dict]) -> int:
+        """精确测量 Next section，不把相邻 row gap 嵌进 item 高度。"""
+        if not items:
+            return 0
+        return (
+            cls.SECTION_HEADER_H
+            + cls.SECTION_HEADER_BOTTOM_GAP
+            + sum(cls.next_row_height(item) for item in items)
+            + max(0, len(items) - 1) * cls.NEXT_ROW_GAP
+        )
 
     @classmethod
     def measure_page_content(
@@ -529,19 +556,15 @@ class CalendarT2IPayloadBuilder:
     ) -> int:
         content_h = 0
         if active_items:
-            content_h += cls.ACTIVE_SECTION_HEADER_COST
-            for item in active_items:
-                content_h += cls.active_item_cost(item)
+            content_h += cls.measure_active_section(active_items)
         elif is_first_page and not global_has_active:
-            content_h += cls.ACTIVE_SECTION_HEADER_COST + cls.EMPTY_STATE_H
+            content_h += cls.SECTION_HEADER_H + cls.SECTION_HEADER_BOTTOM_GAP + cls.EMPTY_STATE_H
 
         if (active_items or (is_first_page and not global_has_active)) and next_items:
-            content_h += cls.SECTION_GAP
+            content_h += cls.NEXT_SECTION_TOP_GAP
 
         if next_items:
-            content_h += cls.NEXT_SECTION_HEADER_COST
-            for item in next_items:
-                content_h += cls.next_item_cost(item)
+            content_h += cls.measure_next_section(next_items)
 
         return content_h
 
