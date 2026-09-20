@@ -249,3 +249,10 @@
 - 正式 registry 为 178 条独立 Spine asset，Costume ID、owner 与 render ID 均唯一；临时挂载新 registry 的服务器审计结果为默认 200/200、Costume 178/178、fallback risk 0。378 项结构视觉审计 suspect 0。
 - 提交 `103ebd3f3a881da51acaff7255dec57d370d2268` 的最终 HEAD CI 已全绿；生产插件 registry 已在备份后原子切换并重启。生产 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，启动日志无 registry 错误。用户 QQ 抽样前 PR 状态保持 `PARTIAL`，禁止 merge。
 - 2026-09-12 用户确认最终 QQ Costume 卡片抽样 PASS；脱敏 evidence 记录 5 个关键路径与 3 个追加样本，并明确区分用户视觉确认和仅能证明命令接收的运行日志。PR 只剩最新 evidence HEAD 自身 CI gate，全部 required checks 通过后允许正常 merge。
+
+## Character Card Layout Module v2（2026-09-20）
+
+- 按 character_card_layout_module_v2.zip 的包文档，从精确基线 feat/character-card-pixel-calibration-v1@fc751fefbce898b1be9611b9df8434793b23e74d 建立独立分支 feat/character-card-layout-v2，实现提交 016148fe6609c1410210858952ea5cc65e0d3aa2；不修改 main，不部署。
+- 完成严格 breast/head/eye core-axis 合同、summary 0–4 动态布局、四槽中性 empty state、vertical_gain=0 保持和离线 face-anchor 重建。8 个显式 manifest 记录更新、28 个非 manifest 记录保留；c010_03、c352 有实际 core axis，其余保持 fail-closed 原因，未猜测 c016/c191。
+- 实际查看 11 个角色卡离线预览及 c016/c191 Y-offset 对照图，全部无 overflow；离线单次预览墙钟对照为基线 22,845 ms、v2 21,059 ms，不作为生产吞吐或 live evidence。
+- 定向套件 109 passed、3 subtests；最终唯一一次 full pytest 892 passed、491 subtests、1 warning。完整验收记录见 docs/evidence/character_card_layout_v2_20260920.md。真实账号、QQ、Signin、生产部署和资源授权仍未在此主题执行。

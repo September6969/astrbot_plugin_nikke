@@ -60,3 +60,10 @@
 - 服务器数据盘维护后可用空间约 12,269,004 KiB，仍高于 5 GiB 门禁；Nikke-db vendor 约 4,651,740 KiB，渲染目录约 9,740 KiB。
 - 只读 Campaign 输出目录为 `/AstrBot/data/nikke/campaign-capture/`；Chapter 1 smoke 已完成，full capture 继续后台运行，快照不回写仓库。
 - 证据文件：`docs/evidence/pr79_live_runtime_v03_20260912.json`；其中区分 `READY_OFFLINE`、`READY_FOR_RETEST`、`PARTIAL` 与 `NEEDS_LIVE_EVIDENCE`，不记录 Cookie、Token、OpenID 或 QQ ID。
+
+## 2026-09-20 角色练度卡布局 v2
+
+- 独立 worktree：E:\_codex_work\character-card-layout-v2-worktree\astrbot_plugin_nikke；分支 feat/character-card-layout-v2；按包要求从 feat/character-card-pixel-calibration-v1@fc751fef 建立，不把 Calendar PR #95 或旧 worktree 当作父分支。
+- 实现提交：016148fe6609c1410210858952ea5cc65e0d3aa2；状态 READY_OFFLINE。显式 manifest 8 条重建、28 条旧记录保留，严格 core-axis selector 和 summary 0–4 布局已通过离线验证。
+- 已实际查看角色卡、非默认服装、空装备、宽/高角色、长名和 c016/c191 before/after 合成预览；未执行真实账号、QQ、部署或 main 合并。
+- 最终本地 full pytest：892 passed / 491 subtests / 1 warning；验收文档：docs/evidence/character_card_layout_v2_20260920.md。
