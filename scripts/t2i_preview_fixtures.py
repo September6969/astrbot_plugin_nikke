@@ -13,7 +13,16 @@ def calendar_cases(directory):
 
     case_names = (
         "normal", "7-days", "30-days", "stale", "long-title", "many-events", "empty", "unavailable",
-        "2-active-2-next", "5-active", "8-active-paged", "12-active-paged", "4-active-8-next",
+        "2-active-2-next", "5-active",
+        "8-active",              # 单页 8 条（原 8-active-paged，已更名）
+        "8-active-paged",        # 保留旧名供旧测试兼容（同 8-active 数据）
+        "9-active",              # 9 条 → 8+1
+        "12-active-paged",       # 12 条 → 8+4（原 5+5+2，已更新）
+        "16-active",             # 16 条 → 8+8
+        "17-active",             # 17 条 → 8+8+1
+        "8-active-with-progress",# 8 条均带 EXACT 精度 → 全部显示 progress_pct
+        "8-active-mixed-long",   # 含长标题，验证预算仍然准确
+        "4-active-8-next",
         "next-only", "unknown-end", "date-only", "critical", "partial", "no-background", "oversize-title"
     )
     result = {}
@@ -79,26 +88,96 @@ def calendar_cases(directory):
                         banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
                     )
                     service._activities[event.event_id] = event
-            elif name == "8-active-paged":
+            elif name in ("8-active", "8-active-paged"):
+                # 新：8 条 normal → 单页 8 个（已更新预算）
+                # 8-active-paged 保持同数据供旧测试兼容
                 for index in range(8):
                     start = NOW - timedelta(days=1)
                     end = NOW + timedelta(days=index + 2)
                     event = CalendarActivity(
-                        str(index), f"两页进行中作战 {index + 1}", start, end,
+                        str(index), f"单页进行中作战 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "9-active":
+                # 9 条 → 8+1 两页
+                for index in range(9):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        str(index), f"9条作战 {index + 1}", start, end,
                         category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
                         banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
                     )
                     service._activities[event.event_id] = event
             elif name == "12-active-paged":
+                # 12 条 → 8+4 两页（旧 5+5+2，已随预算更新）
                 for index in range(12):
                     start = NOW - timedelta(days=1)
                     end = NOW + timedelta(days=index + 2)
                     event = CalendarActivity(
-                        str(index), f"三页进行中作战 {index + 1}", start, end,
+                        str(index), f"多页进行中作战 {index + 1}", start, end,
                         category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
                         banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
                     )
                     service._activities[event.event_id] = event
+            elif name == "16-active":
+                # 16 条 → 8+8
+                for index in range(16):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        str(index), f"16条作战 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "17-active":
+                # 17 条 → 8+8+1
+                for index in range(17):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        str(index), f"17条作战 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "8-active-with-progress":
+                # 8 条均满足 EXACT+now in interval → 全部有 progress_pct
+                for index in range(8):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(hours=12 + index * 6)
+                    event = CalendarActivity(
+                        f"prog-{index}", f"进度可见作战 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+            elif name == "8-active-mixed-long":
+                # 5 normal + 3 long title → 预算仍应容纳（5×60 + 3×72 + 32 = 548 > 516）
+                # 实际按高度预算会分成两页；此 fixture 验证预算不溢出
+                for index in range(5):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        f"norm-{index}", f"普通标题作战 {index + 1}", start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                for index in range(3):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 7)
+                    long_title = f"混合测试：较长标题活动验证预算精确度第{index + 1}号"
+                    event = CalendarActivity(
+                        f"long-{index}", long_title, start, end,
+                        category="event", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+
             elif name == "4-active-8-next":
                 for index in range(4):
                     start = NOW - timedelta(days=1)

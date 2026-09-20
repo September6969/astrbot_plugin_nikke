@@ -434,11 +434,19 @@ class CalendarT2IPayloadBuilder:
 
     支持：
     1. 基于 Runtime Status Resolver 与起止时间精度的活动数据分类；
-    2. 基于固定画布 (1600x900) 与毛玻璃面板 (1180x730) 的高度预算自动分页；
+    2. 基于固定画布 (1600×900) 与毛玻璃面板 (1180×730) 的高度预算自动分页；
     3. 单项超页降级与标题视觉截断策略 (保留完整 full_title)；
-    4. 本地 Key Visual 背景探测与 Data URI 编码；
+    4. 本地 Key Visual 背景探测与 Data URI 编码（9:16 竖版素材自动中央裁切为 16:9）；
     5. 全局状态与页面状态分离 (NO ACTIVE OPERATIONS 仅在全局无活动时出现)；
-    6. 彻底移除旧版 progress 进度条契约，对旧版测试保持数据键向后兼容。
+    6. 移除旧版生命周期主视觉 progress contract；
+       仅保留基于 EXACT 起止时间的辅助 timeline progress_pct 字段。
+
+    高度预算模型（实验性 8-item 密度）：
+    - CONTENT_BUDGET = 516px（730 panel - 70 header - 44 footer - 10 top padding - 6 bottom padding - ≈84 misc）
+    - ACTIVE_SECTION_HEADER_COST = 32px（含与第一个卡片的间距）
+    - ACTIVE_NORMAL_H = 60px（56px 卡片 + 4px gap，包含 gap 使累计计算准确）
+    - ACTIVE_LONG_H = 72px（68px 卡片 + 4px gap）
+    - 8 normal items: 32 + 8×60 = 512px ≤ 516px ✓
     """
 
     CANVAS_W = 1600
@@ -446,23 +454,25 @@ class CalendarT2IPayloadBuilder:
     PANEL_W = 1180
     PANEL_H = 730
 
-    # 面板固定高度 730px，内部上下内边距 32+24=56px，Header 80px，Footer 48px，主内容可用净预算 516px
+    # 面板固定高度 730px，header 70px，footer 44px，body padding top/bottom 10+6px，可用净预算 516px
     CONTENT_BUDGET = 516
 
-    ACTIVE_SECTION_HEADER_COST = 36
+    ACTIVE_SECTION_HEADER_COST = 32
     NEXT_SECTION_HEADER_COST = 36
     SECTION_GAP = 16
 
-    ACTIVE_NORMAL_H = 96
-    ACTIVE_LONG_H = 124
+    # item height 含 gap（4px）：累计计算无须单独追踪 gap 计数
+    ACTIVE_NORMAL_H = 60   # 56px card + 4px gap
+    ACTIVE_LONG_H = 72     # 68px card + 4px gap
 
     NEXT_NORMAL_H = 46
     NEXT_LONG_H = 64
 
     EMPTY_STATE_H = 60
 
-    # 实验性：单页最多 8 个活动（高度降低以适配）
+    # 单页活动数量上限：与高度预算双重约束（先满足预算，再受此上限）
     ACTIVE_MAX_PER_PAGE = 8
+
 
 
     def __init__(self, resolver: T2IAssetResolver | None = None):

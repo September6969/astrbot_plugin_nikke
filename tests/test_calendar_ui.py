@@ -73,6 +73,7 @@ class TestOperationsFeedVisualContract:
 
 
 class TestPaginationBudgetAndOversize:
+    # ── 旧 5-active 基线 ──────────────────────────────────────────
     def test_5_active_fits_on_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         five = cases["5-active"]
@@ -80,22 +81,101 @@ class TestPaginationBudgetAndOversize:
         assert len(five["pages"][0]["active_items"]) == 5
         assert five["pages"][0]["page_total"] == 1
 
-    def test_8_active_splits_into_two_pages(self, tmp_path):
+    # ── 8-item 密度实验核心断言 ───────────────────────────────────
+    def test_8_active_fits_on_single_page(self, tmp_path):
+        """8 normal active items MUST fit on one page (density experiment goal)."""
         cases = get_cases("calendar_schedule", tmp_path)
-        eight = cases["8-active-paged"]
-        assert len(eight["pages"]) == 2
-        assert len(eight["pages"][0]["active_items"]) == 5
-        assert len(eight["pages"][1]["active_items"]) == 3
-        assert eight["pages"][0]["page_total"] == 2
-        assert eight["pages"][1]["page_total"] == 2
+        eight = cases["8-active"]
+        assert len(eight["pages"]) == 1, (
+            f"Expected 1 page for 8 normal items, got {len(eight['pages'])} pages: "
+            f"{[len(p['active_items']) for p in eight['pages']]}"
+        )
+        assert len(eight["pages"][0]["active_items"]) == 8
+        assert eight["pages"][0]["page_total"] == 1
 
-    def test_12_active_splits_into_three_pages(self, tmp_path):
+    def test_9_active_splits_8_plus_1(self, tmp_path):
+        cases = get_cases("calendar_schedule", tmp_path)
+        nine = cases["9-active"]
+        assert len(nine["pages"]) == 2, (
+            f"Expected 2 pages for 9 items, got {len(nine['pages'])}: "
+            f"{[len(p['active_items']) for p in nine['pages']]}"
+        )
+        assert len(nine["pages"][0]["active_items"]) == 8
+        assert len(nine["pages"][1]["active_items"]) == 1
+        assert nine["pages"][0]["page_total"] == 2
+
+    def test_16_active_splits_8_plus_8(self, tmp_path):
+        cases = get_cases("calendar_schedule", tmp_path)
+        sixteen = cases["16-active"]
+        assert len(sixteen["pages"]) == 2
+        assert len(sixteen["pages"][0]["active_items"]) == 8
+        assert len(sixteen["pages"][1]["active_items"]) == 8
+
+    def test_17_active_splits_8_plus_8_plus_1(self, tmp_path):
+        cases = get_cases("calendar_schedule", tmp_path)
+        seventeen = cases["17-active"]
+        assert len(seventeen["pages"]) == 3
+        assert len(seventeen["pages"][0]["active_items"]) == 8
+        assert len(seventeen["pages"][1]["active_items"]) == 8
+        assert len(seventeen["pages"][2]["active_items"]) == 1
+
+    def test_12_active_splits_into_two_pages(self, tmp_path):
+        """12 active → 2 pages (8+4) with updated budget."""
         cases = get_cases("calendar_schedule", tmp_path)
         twelve = cases["12-active-paged"]
-        assert len(twelve["pages"]) == 3
-        assert len(twelve["pages"][0]["active_items"]) == 5
-        assert len(twelve["pages"][1]["active_items"]) == 5
-        assert len(twelve["pages"][2]["active_items"]) == 2
+        assert len(twelve["pages"]) == 2
+        assert len(twelve["pages"][0]["active_items"]) == 8
+        assert len(twelve["pages"][1]["active_items"]) == 4
+
+    # ── 兼容旧名 8-active-paged（同数据） ────────────────────────
+    def test_8_active_paged_single_page_compat(self, tmp_path):
+        """Legacy fixture name 8-active-paged now also resolves to single page."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        eight = cases["8-active-paged"]
+        assert len(eight["pages"]) == 1
+        assert len(eight["pages"][0]["active_items"]) == 8
+
+    # ── 长标题预算验证 ────────────────────────────────────────────
+    def test_long_title_budget_still_prevents_overflow(self, tmp_path):
+        """Mixed normal + long-title items must be constrained by budget (no overflow)."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        mixed = cases["8-active-mixed-long"]
+        builder = CalendarT2IPayloadBuilder()
+        # Verify all items were placed across pages
+        total = sum(len(p["active_items"]) for p in mixed["pages"])
+        assert total == 8, f"All 8 items must be placed, got {total}"
+        # No page exceeds budget: verify each page item count × height fits
+        for page in mixed["pages"]:
+            normal_count = sum(1 for i in page["active_items"] if not i.get("is_long_title") and not i.get("is_oversize"))
+            long_count = sum(1 for i in page["active_items"] if i.get("is_long_title") and not i.get("is_oversize"))
+            used = (builder.ACTIVE_SECTION_HEADER_COST
+                    + normal_count * builder.ACTIVE_NORMAL_H
+                    + long_count * builder.ACTIVE_LONG_H)
+            assert used <= builder.CONTENT_BUDGET, (
+                f"Page budget overflow: {used} > {builder.CONTENT_BUDGET} "
+                f"({normal_count} normal, {long_count} long)"
+            )
+
+    # ── progress_pct 验证 ─────────────────────────────────────────
+    def test_8_active_with_progress_all_have_pct(self, tmp_path):
+        """8 items with EXACT precision + now in interval: all must have progress_pct."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        prog = cases["8-active-with-progress"]
+        assert len(prog["pages"]) == 1
+        for item in prog["pages"][0]["active_items"]:
+            assert item.get("progress_pct") is not None, (
+                f"Expected progress_pct for item '{item['title']}', got None"
+            )
+            assert 0.0 <= item["progress_pct"] <= 1.0
+
+    def test_8_active_render_has_footer_and_page_badge(self, tmp_path):
+        """Render 8-item page and verify footer and page badge are present."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        eight = cases["8-active"]
+        html = render_html({**eight, **eight["pages"][0]})
+        assert "panel-footer" in html
+        assert "PAGE 1 / 1" in html
+        assert "card-progress" in html or "progress_pct" not in html  # progress rendered or not applicable
 
     def test_4_active_8_next_multi_page_partition(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
@@ -140,7 +220,7 @@ class TestGlobalVsPageEmptyState:
     def test_page_2_with_no_active_never_shows_no_active_operations_if_global_has_active(self, tmp_path):
         # When global_has_active=True, subsequent pages that only have next_items MUST NOT show NO ACTIVE OPERATIONS
         builder = CalendarT2IPayloadBuilder()
-        active_items = [{"event_id": f"a{i}", "title": f"A{i}", "full_title": f"A{i}", "category": "活动", "category_code": "event", "time_range": "", "remaining": "1D", "is_next_ending": False, "urgency": "NORMAL", "is_long_title": False, "is_oversize": False, "end_precision": "EXACT"} for i in range(5)]
+        active_items = [{"event_id": f"a{i}", "title": f"A{i}", "full_title": f"A{i}", "category": "活动", "category_code": "event", "time_range": "", "remaining": "1D", "is_next_ending": False, "urgency": "NORMAL", "is_long_title": False, "is_oversize": False, "end_precision": "EXACT", "progress_pct": None} for i in range(5)]
         next_items = [{"event_id": f"n{i}", "title": f"N{i}", "full_title": f"N{i}", "category": "活动", "category_code": "event", "start_time_display": "09.20", "starts_in": "3D", "is_long_title": False, "is_oversize": False} for i in range(4)]
 
         pages = builder._paginate(active_items, next_items, global_has_active=True)
@@ -208,8 +288,8 @@ class TestBackgroundAndMultiPageRendering:
     @pytest.mark.asyncio
     async def test_multi_page_sequential_rendering_in_t2i_renderer(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
-        eight = cases["8-active-paged"]
-        assert len(eight["pages"]) == 2
+        nine = cases["9-active"]
+        assert len(nine["pages"]) == 2
 
         render_calls = []
         async def fake_render(template, payload, options):
@@ -217,7 +297,7 @@ class TestBackgroundAndMultiPageRendering:
             return f"rendered_page_{payload['page_number']}.png"
 
         renderer = T2IRenderer(fake_render, assets=Mock())
-        results = await renderer.render_view("calendar_schedule", eight)
+        results = await renderer.render_view("calendar_schedule", nine)
 
         assert isinstance(results, list)
         assert len(results) == 2
@@ -227,14 +307,14 @@ class TestBackgroundAndMultiPageRendering:
     @pytest.mark.asyncio
     async def test_single_page_returns_single_string(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
-        five = cases["5-active"]
-        assert len(five["pages"]) == 1
+        eight = cases["8-active"]
+        assert len(eight["pages"]) == 1
 
         async def fake_render(template, payload, options):
             return "single_page.png"
 
         renderer = T2IRenderer(fake_render, assets=Mock())
-        result = await renderer.render_view("calendar_schedule", five)
+        result = await renderer.render_view("calendar_schedule", eight)
 
         assert isinstance(result, str)
         assert result == "single_page.png"
