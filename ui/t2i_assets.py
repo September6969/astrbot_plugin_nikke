@@ -17,7 +17,7 @@ class T2IAssetResolver:
         self._bytes = 0
         self._lock = Lock()
 
-    def encode(self, source: Image.Image | Path | None, size=(272, 236)) -> str | None:
+    def encode(self, source: Image.Image | Path | None, size=(272, 236), crop_16_9: bool = False) -> str | None:
         if source is None:
             return None
         if not (0 < size[0] <= 1600 and 0 < size[1] <= 2400):
@@ -36,12 +36,22 @@ class T2IAssetResolver:
                 prepared = source.convert("RGBA")
             else:
                 return None
-            key = (hashlib.sha256(prepared.tobytes()).digest(), prepared.size, size, "PNG")
+
+            # 9:16 → 16:9 居中裁切：若源图为纵向（宽高比 < 1.0），
+            # 从垂直中心裁出与目标比例对应的区域，再缩放到 size。
+            if crop_16_9 and prepared.width < prepared.height:
+                target_ratio = size[0] / size[1]          # 16/9 ≈ 1.778
+                crop_h = int(prepared.width / target_ratio)
+                if 0 < crop_h <= prepared.height:
+                    top = (prepared.height - crop_h) // 2
+                    prepared = prepared.crop((0, top, prepared.width, top + crop_h))
+
+            key = (hashlib.sha256(prepared.tobytes()).digest(), prepared.size, size, crop_16_9, "PNG")
             with self._lock:
                 if key in self._cache:
                     self._cache.move_to_end(key)
                     return self._cache[key]
-            prepared = ImageOps.contain(prepared, size, Image.Resampling.LANCZOS)
+            prepared = ImageOps.fit(prepared, size, Image.Resampling.LANCZOS) if crop_16_9 else ImageOps.contain(prepared, size, Image.Resampling.LANCZOS)
             output = io.BytesIO()
             prepared.save(output, format="PNG")
             uri = "data:image/png;base64," + base64.b64encode(output.getvalue()).decode("ascii")
@@ -55,3 +65,4 @@ class T2IAssetResolver:
             return uri
         except (OSError, ValueError, Image.DecompressionBombError):
             return None
+

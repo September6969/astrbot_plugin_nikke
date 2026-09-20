@@ -110,7 +110,7 @@ class AnnouncementServiceTests(unittest.IsolatedAsyncioTestCase):
             rec = AnnouncementRecord(
                 content_id="cms_persistence",
                 title="持久化测试公告",
-                body="测试内容 2026.09.01 10:00 ~ 2026.09.20 12:00",
+                body="测试内容 2026.09.01 10:00 ~ 2099.12.31 23:59",
                 published_at="2026-09-05 12:00",
                 category="update",
             )

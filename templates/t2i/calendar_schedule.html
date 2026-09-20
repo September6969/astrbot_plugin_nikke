@@ -390,6 +390,30 @@ html, body {
   padding: 3px 10px;
   border-radius: 4px;
 }
+/* ── 进度条（辅助，低调） ── */
+.card-progress-wrap {
+  margin-top: 5px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(148, 163, 184, 0.15);
+  overflow: hidden;
+}
+.card-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: rgba(56, 189, 248, 0.65);
+  transition: none;
+}
+.active-card.is-next-ending .card-progress-fill,
+.active-card.urgency-closing .card-progress-fill {
+  background: rgba(245, 158, 11, 0.65);
+}
+.active-card.urgency-urgent .card-progress-fill {
+  background: rgba(249, 115, 22, 0.65);
+}
+.active-card.urgency-critical .card-progress-fill {
+  background: rgba(239, 68, 68, 0.65);
+}
 </style></head><body>
 {% if background_data_uri %}
 <div class="canvas-bg" style="background-image: url('{{ background_data_uri }}');"></div>
@@ -443,7 +467,14 @@ html, body {
             </div>
             <h2 class="card-title" title="{{ item.full_title }}">{{ item.title }}</h2>
             <div class="card-time">{{ item.time_range }}</div>
+            {% if item.progress_pct is defined and item.progress_pct != None %}
+            <div class="card-progress-wrap">
+              <div class="card-progress-fill" style="width: {{ (item.progress_pct * 100) | round(1) }}%"></div>
+            </div>
+            {% endif %}
+
           </div>
+
           <div class="card-side">
             <div class="remaining-label">REMAINING</div>
             <div class="remaining-val {{ 'urgency-text-' + item.urgency.lower() if item.urgency else '' }}">{{ item.remaining }}</div>

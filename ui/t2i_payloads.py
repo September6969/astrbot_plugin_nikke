@@ -461,6 +461,10 @@ class CalendarT2IPayloadBuilder:
 
     EMPTY_STATE_H = 60
 
+    # 实验性：单页最多 8 个活动（高度降低以适配）
+    ACTIVE_MAX_PER_PAGE = 8
+
+
     def __init__(self, resolver: T2IAssetResolver | None = None):
         self.resolver = resolver or T2IAssetResolver()
 
@@ -494,12 +498,13 @@ class CalendarT2IPayloadBuilder:
             path = vc.resolve_path(eid)
             if path is not None and path.is_file():
                 try:
-                    uri = self.resolver.encode(path, size=(1600, 900))
+                    uri = self.resolver.encode(path, size=(1600, 900), crop_16_9=True)
                     if uri:
                         return uri
                 except Exception:
                     continue
         return None
+
 
     def _paginate(self, active_items: list[dict], next_items: list[dict], global_has_active: bool) -> list[dict]:
         pages = []
@@ -527,7 +532,7 @@ class CalendarT2IPayloadBuilder:
             # 1. 放置 Active 任务
             if rem_active:
                 budget -= self.ACTIVE_SECTION_HEADER_COST
-                while rem_active:
+                while rem_active and len(p_active) < self.ACTIVE_MAX_PER_PAGE:
                     item = rem_active[0]
                     cost = self.ACTIVE_LONG_H if item.get("is_long_title") else self.ACTIVE_NORMAL_H
                     if cost > budget:
@@ -539,6 +544,7 @@ class CalendarT2IPayloadBuilder:
                         break
                     p_active.append(rem_active.pop(0))
                     budget -= cost
+
             elif not pages and not global_has_active:
                 # 仅在全局没有 Active 时，Page 1 扣除空状态与标题预算
                 budget -= (self.ACTIVE_SECTION_HEADER_COST + self.EMPTY_STATE_H)
@@ -685,6 +691,20 @@ class CalendarT2IPayloadBuilder:
             if is_oversize and len(display_title) > 90:
                 display_title = display_title[:87] + "..."
 
+            # 进度计算：严格条件，禁止伪造
+            progress_pct: float | None = None
+            if (
+                ev.start_at is not None
+                and ev.end_at is not None
+                and start_prec == "EXACT"
+                and end_prec == "EXACT"
+                and ev.end_at > ev.start_at
+                and ev.start_at <= current <= ev.end_at
+            ):
+                span = (ev.end_at - ev.start_at).total_seconds()
+                elapsed = (current - ev.start_at).total_seconds()
+                progress_pct = max(0.0, min(1.0, elapsed / span))
+
             card = {
                 "event_id": ev.event_id,
                 "title": display_title,
@@ -700,8 +720,10 @@ class CalendarT2IPayloadBuilder:
                 "is_long_title": is_long,
                 "is_oversize": is_oversize,
                 "end_precision": end_prec,
+                "progress_pct": progress_pct,          # None → 不显示进度条
             }
             active_items.append(card)
+
 
         # 4. 构造 Next Items
         next_items: list[dict] = []
