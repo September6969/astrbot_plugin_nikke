@@ -24,6 +24,12 @@
 - 只把实际运行的测试、CI、合成预览和已查来源写入台账；缺少 live evidence 时明确标为缺口。
 - 当前路线图授权最小现场范围；环境可用时执行真实账号只读、最小必要写入、QQ/NapCat、Voice、Spine 与部署验证；不采集秘密、不修改 ruleset。GitHub 合并仍按独立 PR、exact-head CI 全绿和自审执行，不直接改 main、不 force push、不删分支。
 
+## 2026-09-20 当前新增工作树
+
+| 范围 | 状态 | 备注 |
+| --- | --- | --- |
+| Calendar Content Quality v1 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\calendar-content-quality-v1-worktree\astrbot_plugin_nikke` / `feat/calendar-content-quality-v1`；从已部署 UI 基线 `origin/feat/calendar-pixel-contract-v1@ecc5495` 建立，P0 parser/classifier/relevance/identity/official prefilter 已接线；新增 13、旧 Calendar/合并 66、UI 46 定向测试通过，最终 full pytest 1031 passed/2 skipped；未部署、未修改 main、未发送 QQ 消息 |
+
 ## 当前新增工作树
 
 | 范围 | 状态 | 备注 |

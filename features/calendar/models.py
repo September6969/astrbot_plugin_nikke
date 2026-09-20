@@ -44,6 +44,8 @@ class CalendarActivity:
     version: int = 1
     start_precision: str = "EXACT"
     end_precision: str = "EXACT"
+    display_score: int = 0
+    display_tier: str = "META"
 
     def __post_init__(self) -> None:
         if not isinstance(self.event_id, str) or not self.event_id.strip():
@@ -172,6 +174,8 @@ class CalendarActivity:
             "version": self.version,
             "start_precision": self.start_precision,
             "end_precision": self.end_precision,
+            "display_score": self.display_score,
+            "display_tier": self.display_tier,
         }
 
     @classmethod
@@ -202,6 +206,8 @@ class CalendarActivity:
             version=data.get("version", 1),
             start_precision=str(data.get("start_precision", data.get("time_precision", "EXACT"))),
             end_precision=str(data.get("end_precision", data.get("time_precision", "EXACT"))),
+            display_score=int(data.get("display_score", 0) or 0),
+            display_tier=str(data.get("display_tier", "META") or "META"),
         )
 
 

@@ -249,3 +249,11 @@
 - 正式 registry 为 178 条独立 Spine asset，Costume ID、owner 与 render ID 均唯一；临时挂载新 registry 的服务器审计结果为默认 200/200、Costume 178/178、fallback risk 0。378 项结构视觉审计 suspect 0。
 - 提交 `103ebd3f3a881da51acaff7255dec57d370d2268` 的最终 HEAD CI 已全绿；生产插件 registry 已在备份后原子切换并重启。生产 probe 为默认 200/200、Costume 178/178、失败 0、fallback risk 0，启动日志无 registry 错误。用户 QQ 抽样前 PR 状态保持 `PARTIAL`，禁止 merge。
 - 2026-09-12 用户确认最终 QQ Costume 卡片抽样 PASS；脱敏 evidence 记录 5 个关键路径与 3 个追加样本，并明确区分用户视觉确认和仅能证明命令接收的运行日志。PR 只剩最新 evidence HEAD 自身 CI gate，全部 required checks 通过后允许正常 merge。
+
+## Calendar Content Quality v1（2026-09-20，当前独立主题）
+
+- 从已部署的 `origin/feat/calendar-pixel-contract-v1@ecc5495` 建立独立 worktree/branch `feat/calendar-content-quality-v1`，不把旧 Calendar UI worktree 当作当前实现分支，也未修改 main。
+- P0 已完成：`gamekee_parser.py` 统一两个入口的 row 解析、URL 安全、递归图像候选上限、字段失败桶和未来字段兼容；`content_quality.py` 统一分类别名、DisplayRelevance、保守 IdentityMatch 和官方截止日期廉价前置过滤。
+- CanonicalEvent 增加向后兼容 metadata；旧缓存载入时补算 display relevance。Operations Feed 只调整 active/upcoming 排序，不从 canonical dataset 删除 META，也不改变 runtime status/LKG/Reminder。
+- 本机公开 GameKee 只读诊断：123/123 valid、0 malformed、0 duplicate、123 visual；类别 event 95、pass 20、recruit 7、double_reward 1。完整响应、header、账号信息未保存。
+- 定向测试：新增 13 项通过；Calendar/adapter/service/P0 旧回归 66 项通过；Calendar UI 定向 46 项通过。最终唯一 full pytest 为 `1031 passed, 2 skipped, 653 subtests passed, 1 warning`；`compileall`、Node 两个 extension `--check` 和 `git diff --check` 均通过。状态为 `READY_OFFLINE`，等待远端 CI/review；未部署、未发送消息、未自动合并。

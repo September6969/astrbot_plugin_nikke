@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import _aware_utc
+from .content_quality import apply_display_relevance, classify_category, should_parse_deadlines
 from astrbot_plugin_nikke.features.calendar.canonical_models import (
     CanonicalEvent,
     FieldEvidence,
@@ -27,6 +28,7 @@ from astrbot_plugin_nikke.features.calendar.canonical_models import (
     TimePrecision,
     ManualOverride,
 )
+from .gamekee_parser import ParseFailure, parse_gamekee_row
 from ...integrations.blablalink.fetch_client import FetchClient
 from ...core.privacy import safe_exception_message
 
@@ -44,22 +46,9 @@ def _canonical_int(value: Any) -> int | None:
     return None
 
 
-def _classify_category(title: str, tag: str = "", activity_kind: str = "") -> str:
-    """确定性分类标签映射。"""
-    text = f"{title} {tag} {activity_kind}".casefold()
-    if any(k in text for k in ("协同", "co-op", "coop", "coordinated operation")):
-        return "coop"
-    if any(k in text for k in ("联盟突袭", "union raid")):
-        return "union_raid"
-    if any(k in text for k in ("单人突袭", "solo raid")):
-        return "solo_raid"
-    if any(k in text for k in ("招募", "recruit", "pick up", "pickup")):
-        return "recruit"
-    if any(k in text for k in ("维护", "maintenance", "停服")):
-        return "maintenance"
-    if any(k in text for k in ("更新", "update", "版本")):
-        return "update"
-    return "event"
+def _classify_category(title: str, tag: str = "", activity_kind: str = "", description: str = "") -> str:
+    """旧 API 兼容包装，实际分类只保留一份实现。"""
+    return classify_category(title, tag, activity_kind, description)
 
 
 @dataclass
@@ -73,6 +62,7 @@ class FetchResult:
     source: str = ""
     response_mode: ResponseMode = ResponseMode.COMPLETE_SNAPSHOT
     observed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    diagnostics: dict[str, Any] = field(default_factory=dict)
 
 
 class BaseScheduleAdapter(ABC):
@@ -132,11 +122,12 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
 
     def __init__(self, fetch_client: FetchClient | None = None):
         self.client = fetch_client or FetchClient()
-        self.last_scan: dict[str, int] = {
+        self.last_scan: dict[str, Any] = {
             "rows": 0,
             "valid": 0,
             "malformed": 0,
             "duplicates": 0,
+            "with_visual": 0,
         }
 
     @property
@@ -219,104 +210,87 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
 
         rows_count = len(data)
         if rows_count == 0:
-            self.last_scan = {"rows": 0, "valid": 0, "malformed": 0, "duplicates": 0}
+            self.last_scan = {
+                "rows": 0,
+                "valid": 0,
+                "malformed": 0,
+                "duplicates": 0,
+                "with_visual": 0,
+                "malformed_reasons": {},
+            }
             return FetchResult(
                 outcome=FetchOutcome.SUCCESS_EMPTY,
                 events=[],
                 source=self.source_name,
                 response_mode=self.response_mode,
+                diagnostics={"gamekee_rows": 0, "gamekee_valid": 0},
             )
 
         valid_events: list[CanonicalEvent] = []
         seen_ids: set[str] = set()
         malformed_count = 0
         duplicate_count = 0
+        visual_count = 0
+        malformed_reasons: dict[str, int] = {}
 
-        for row in data:
-            if not isinstance(row, dict):
+        for row_index, row in enumerate(data):
+            parsed = parse_gamekee_row(row, row_index=row_index)
+            if isinstance(parsed, ParseFailure):
                 malformed_count += 1
+                malformed_reasons[parsed.reason] = malformed_reasons.get(parsed.reason, 0) + 1
                 continue
 
-            row_id = _canonical_int(row.get("id"))
-            title = str(row.get("title") or "").strip()
-            begin_at = _canonical_int(row.get("begin_at"))
-            end_at = _canonical_int(row.get("end_at"))
-
-            if (
-                row_id is None
-                or row_id <= 0
-                or not title
-                or begin_at is None
-                or end_at is None
-                or begin_at < 0
-            ):
-                malformed_count += 1
-                continue
-
-            event_id = f"gamekee:{row_id}"
+            event_id = f"gamekee:{parsed.source_id}"
             if event_id in seen_ids:
                 duplicate_count += 1
                 continue
             seen_ids.add(event_id)
 
-            try:
-                start_dt = datetime.fromtimestamp(begin_at, tz=timezone.utc)
-                end_dt = datetime.fromtimestamp(end_at, tz=timezone.utc)
-            except (ValueError, OSError, OverflowError):
-                malformed_count += 1
-                continue
-
-            # 非法时间区间校验
-            is_valid = (end_dt > start_dt)
-
-            big_picture = str(row.get("big_picture") or "").strip()
-            picture = str(row.get("picture") or "").strip()
-            banner_url = big_picture or picture or None
-
-            link_url = str(row.get("link_url") or "").strip()
-            detail_url = link_url or "https://www.gamekee.com/nikke/"
-
-            tag = str(row.get("tag") or "").strip()
-            category = _classify_category(title, tag)
+            if parsed.visual_candidates:
+                visual_count += 1
 
             # 字段级证据
             evidence = {
-                "title": [FieldEvidence(title, "gamekee", confidence=0.85, scope="GLOBAL").to_dict()],
-                "start": [FieldEvidence(start_dt, "gamekee", confidence=0.85, precision="EXACT", source_timezone=self.source_timezone).to_dict()],
-                "end": [FieldEvidence(end_dt, "gamekee", confidence=0.85, precision="EXACT", source_timezone=self.source_timezone).to_dict()],
-                "banner_url": [FieldEvidence(banner_url, "gamekee", confidence=0.85).to_dict()] if banner_url else [],
-                "detail_url": [FieldEvidence(detail_url, "gamekee", confidence=0.85).to_dict()],
+                "title": [FieldEvidence(parsed.title, "gamekee", confidence=0.85, scope="GLOBAL").to_dict()],
+                "start": [FieldEvidence(parsed.start_at, "gamekee", confidence=0.85, precision="EXACT", source_timezone=self.source_timezone).to_dict()],
+                "end": [FieldEvidence(parsed.end_at, "gamekee", confidence=0.85, precision="EXACT", source_timezone=self.source_timezone).to_dict()],
+                "banner_url": [FieldEvidence(parsed.banner_url, "gamekee", confidence=0.85).to_dict()] if parsed.banner_url else [],
+                "detail_url": [FieldEvidence(parsed.detail_url, "gamekee", confidence=0.85).to_dict()],
             }
 
             try:
                 event = CanonicalEvent(
                     id=event_id,
-                    title=title,
-                    event_type=category,
-                    start_at=start_dt,
-                    end_at=end_dt,
+                    title=parsed.title,
+                    event_type=parsed.category,
+                    start_at=parsed.start_at,
+                    end_at=parsed.end_at,
                     start_precision="EXACT",
                     end_precision="EXACT",
                     server_scope="GLOBAL",
-                    banner_url=banner_url,
-                    detail_url=detail_url,
+                    banner_url=parsed.banner_url or None,
+                    detail_url=parsed.detail_url or None,
                     sources=["gamekee"],
                     primary_source="gamekee",
                     confidence=0.85,
-                    is_valid_interval=is_valid,
                     field_evidence=evidence,
+                    metadata=parsed.to_metadata(),
                     version=1,
                 )
+                apply_display_relevance(event)
                 valid_events.append(event)
             except Exception as exc:
                 logger.debug("[NIKKE] GameKee 条目解析失败: %s", safe_exception_message(exc))
                 malformed_count += 1
+                malformed_reasons["model"] = malformed_reasons.get("model", 0) + 1
 
         self.last_scan = {
             "rows": rows_count,
             "valid": len(valid_events),
             "malformed": malformed_count,
             "duplicates": duplicate_count,
+            "with_visual": visual_count,
+            "malformed_reasons": malformed_reasons,
         }
 
         # Schema drift 保护：返回了数据但全部无法解析
@@ -328,6 +302,14 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
                 error_message=err,
                 source=self.source_name,
                 response_mode=self.response_mode,
+                diagnostics={
+                    "gamekee_rows": rows_count,
+                    "gamekee_valid": 0,
+                    "gamekee_malformed": malformed_count,
+                    "gamekee_duplicates": duplicate_count,
+                    "with_visual": visual_count,
+                    "malformed_reasons": malformed_reasons,
+                },
             )
 
         return FetchResult(
@@ -335,6 +317,14 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
             events=valid_events,
             source=self.source_name,
             response_mode=self.response_mode,
+            diagnostics={
+                "gamekee_rows": rows_count,
+                "gamekee_valid": len(valid_events),
+                "gamekee_malformed": malformed_count,
+                "gamekee_duplicates": duplicate_count,
+                "with_visual": visual_count,
+                "malformed_reasons": malformed_reasons,
+            },
         )
 
 
@@ -378,11 +368,19 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             )
 
         deadlines: list[Any] = []
+        diagnostics: dict[str, Any] = {
+            "official_deadlines_seen": 0,
+            "official_deadlines_filtered": 0,
+            "official_deadlines_parsed": 0,
+        }
         try:
             if hasattr(self.announcement_service, "list_deadlines"):
                 deadlines = self.announcement_service.list_deadlines()
+                diagnostics["official_deadlines_parsed"] = len(deadlines) if isinstance(deadlines, list) else 0
             elif hasattr(self.announcement_service, "list_active_deadlines"):
                 deadlines = self.announcement_service.list_active_deadlines()
+                diagnostics["official_deadlines_parsed"] = len(deadlines) if isinstance(deadlines, list) else 0
+            diagnostics["official_deadlines_seen"] = len(deadlines) if isinstance(deadlines, list) else 0
         except Exception as exc:
             err = safe_exception_message(exc)
             logger.debug("[NIKKE] 官方公告日程读取异常: %s", err)
@@ -411,12 +409,20 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                 body = getattr(rec, "body", "") or getattr(rec, "content", "")
                 cid = getattr(rec, "content_id", "")
                 cat = getattr(rec, "category", "event")
-                if title and body:
-                    try:
-                        parsed = DeadlineParser.parse_deadlines(title, body, cid, cat)
-                        deadlines.extend(parsed)
-                    except Exception:
-                        pass
+                diagnostics["official_deadlines_seen"] += 1
+                if not title or not body or not should_parse_deadlines(title, body):
+                    diagnostics["official_deadlines_filtered"] += 1
+                    continue
+                try:
+                    parsed = DeadlineParser.parse_deadlines(title, body, cid, cat)
+                    deadlines.extend(parsed)
+                    diagnostics["official_deadlines_parsed"] += len(parsed)
+                except Exception:
+                    continue
+
+        if diagnostics["official_deadlines_seen"] == 0 and deadlines:
+            diagnostics["official_deadlines_seen"] = len(deadlines)
+            diagnostics["official_deadlines_parsed"] = len(deadlines)
 
         if not deadlines:
             return FetchResult(
@@ -424,6 +430,7 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                 events=[],
                 source=self.source_name,
                 response_mode=self.response_mode,
+                diagnostics=diagnostics,
             )
 
         events: list[CanonicalEvent] = []
@@ -440,7 +447,8 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             event_id = f"official:{getattr(dl, 'event_id', cid)}"
             detail_url = getattr(dl, "source_url", "") or (getattr(rec, "source_url", "") if rec else "")
             cat_raw = getattr(dl, "category", "") or (getattr(rec, "category", "") if rec else "")
-            category = _classify_category(title, cat_raw)
+            body_text = (getattr(rec, "body", "") or getattr(rec, "content", "")) if rec else ""
+            category = _classify_category(title, cat_raw, description=body_text)
 
             # 严格时区保证为 aware UTC
             if start_at is not None:
@@ -452,7 +460,6 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             end_prec = TimePrecision.EXACT.value if end_at else TimePrecision.UNKNOWN.value
 
             # 基于正文 body 和标题的多维度取消检测
-            body_text = getattr(rec, "body", "") if rec else ""
             cancel_target = f"{title} {body_text}".casefold()
             is_cancelled = any(k in cancel_target for k in ("取消", "中止", "活动延期", "停止开放", "cancel"))
 
@@ -500,8 +507,14 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                     is_cancelled=is_cancelled,
                     is_valid_interval=is_valid,
                     field_evidence=evidence,
+                    metadata={
+                        "description": str(body_text or ""),
+                        "tag": str(cat_raw or ""),
+                        "activity_kind": "official_deadline",
+                    },
                     version=1,
                 )
+                apply_display_relevance(event)
                 events.append(event)
             except Exception as exc:
                 logger.debug("[NIKKE] 官方日程条目构造跳过: %s", safe_exception_message(exc))
@@ -511,6 +524,7 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             events=events,
             source=self.source_name,
             response_mode=self.response_mode,
+            diagnostics=diagnostics,
         )
 
 

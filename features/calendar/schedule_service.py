@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import asyncio
-import difflib
 import hashlib
 import json
 import logging
@@ -28,6 +27,15 @@ from typing import Any, Sequence
 
 from .models import CalendarActivity, _aware_utc
 from .visuals import CalendarVisualCache
+from .content_quality import (
+    DisplayTier,
+    IdentityDecision,
+    apply_display_relevance,
+    get_display_relevance,
+    score_identity,
+    sort_display_events,
+    title_similarity,
+)
 from astrbot_plugin_nikke.features.calendar.canonical_models import (
     CanonicalEvent,
     FieldEvidence,
@@ -108,21 +116,8 @@ class _ActivitiesDict(dict):
 
 
 def _title_similarity(a: str, b: str) -> float:
-    """计算两个活动标题的相似度。"""
-    ca = "".join(c for c in a.casefold() if c.isalnum() or '\u4e00' <= c <= '\u9fff')
-    cb = "".join(c for c in b.casefold() if c.isalnum() or '\u4e00' <= c <= '\u9fff')
-    if not ca or not cb:
-        return 0.0
-    if ca == cb or ca in cb or cb in ca:
-        return 1.0
-
-    seq_ratio = difflib.SequenceMatcher(None, ca, cb).ratio()
-    set_a, set_b = set(ca), set(cb)
-    char_overlap = len(set_a & set_b) / max(1, min(len(set_a), len(set_b)))
-    ba = {ca[i:i+2] for i in range(len(ca)-1)}
-    bb = {cb[i:i+2] for i in range(len(cb)-1)}
-    jaccard = (len(ba & bb) / len(ba | bb)) if (ba and bb) else 0.0
-    return max(seq_ratio, char_overlap, jaccard)
+    """旧 API 兼容包装；标题身份统一由 content_quality 计算。"""
+    return title_similarity(a, b)
 
 
 def _build_identity_key(ev: CanonicalEvent) -> str:
@@ -139,37 +134,8 @@ def _build_identity_key(ev: CanonicalEvent) -> str:
 
 
 def _is_same_identity(a: CanonicalEvent, b: CanonicalEvent) -> bool:
-    """跨源身份匹配：
-    1. Scope 必须一致；
-    2. 若两方均有 cycle_id，cycle_id 必须相同；
-    3. 类型兼容（或一方为通用 event）；
-    4. 时间窗口吻合且标题相似度 >= 0.35，或标题高度相似 >= 0.65。
-    """
-    scope_a = a.server_scope or "GLOBAL"
-    scope_b = b.server_scope or "GLOBAL"
-    if scope_a != scope_b and "UNKNOWN" not in (scope_a, scope_b):
-        return False
-
-    if a.cycle_id and b.cycle_id and a.cycle_id != b.cycle_id:
-        return False
-
-    if a.event_type != b.event_type and "event" not in (a.event_type, b.event_type):
-        return False
-
-    time_matched = False
-    if a.start_at and b.start_at and a.end_at and b.end_at:
-        start_diff = abs((a.start_at - b.start_at).total_seconds())
-        end_diff = abs((a.end_at - b.end_at).total_seconds())
-        if start_diff <= 7200 and end_diff <= 7200:
-            time_matched = True
-        else:
-            return False
-
-    similarity = _title_similarity(a.title, b.title)
-    if time_matched and similarity >= 0.35:
-        return True
-
-    return similarity >= 0.65
+    """兼容旧调用点；AMBIGUOUS 永不自动合并。"""
+    return score_identity(a, b).decision == IdentityDecision.MATCH
 
 
 _is_same_event = _is_same_identity
@@ -255,6 +221,24 @@ def _merge_two_events(base: CanonicalEvent, incoming: CanonicalEvent) -> Canonic
     confidence = max(base.confidence or 0.0, incoming.confidence or 0.0)
     event_id = base.id if base.primary_source == "gamekee" else (incoming.id if incoming.primary_source == "gamekee" else (base.id or incoming.id))
 
+    merged_metadata: dict[str, Any] = {}
+    for event in (base, incoming):
+        if not isinstance(event.metadata, dict):
+            continue
+        for key, value in event.metadata.items():
+            if key in ("visual_candidates", "image_urls"):
+                old_values = merged_metadata.setdefault(key, [])
+                if not isinstance(old_values, list):
+                    old_values = []
+                    merged_metadata[key] = old_values
+                if isinstance(value, (list, tuple)):
+                    for item in value:
+                        if item not in old_values:
+                            old_values.append(item)
+            elif value not in (None, "", [], {}):
+                merged_metadata[key] = value
+    merged_metadata.pop("display_relevance", None)
+
     merged = CanonicalEvent(
         id=event_id,
         title=title,
@@ -274,6 +258,7 @@ def _merge_two_events(base: CanonicalEvent, incoming: CanonicalEvent) -> Canonic
         has_started_evidence=has_started,
         is_valid_interval=is_valid,
         field_evidence=merged_evidence,
+        metadata=merged_metadata,
         version=max(base.version, incoming.version),
     )
     return merged
@@ -339,6 +324,27 @@ class ScheduleService:
         self.last_sync_error: str = ""
         self.last_sync_report: dict[str, int] | None = None
         self.last_visual_sync: dict[str, int] | None = None
+        self.quality_diagnostics: dict[str, Any] = {
+            "gamekee_rows": 0,
+            "gamekee_valid": 0,
+            "gamekee_malformed": 0,
+            "gamekee_duplicates": 0,
+            "with_visual": 0,
+            "canonical_total": 0,
+            "identity_matches": 0,
+            "identity_ambiguous": 0,
+            "identity_distinct": 0,
+            "official_deadlines_seen": 0,
+            "official_deadlines_filtered": 0,
+            "official_deadlines_parsed": 0,
+            "official_enriched_existing": 0,
+            "official_created_new": 0,
+            "relevance_core": 0,
+            "relevance_supporting": 0,
+            "relevance_meta": 0,
+            "display_selected": 0,
+            "display_deprioritized": 0,
+        }
 
         self._sync_lock = asyncio.Lock()
 
@@ -405,6 +411,8 @@ class ScheduleService:
         dict.clear(self._activities)
         self._events = dict(events)
         for eid, ev in self._events.items():
+            # 旧缓存没有 display_relevance 时在载入/同步阶段补算，绝不删除旧事件。
+            apply_display_relevance(ev)
             dict.__setitem__(self._activities, eid, ev.to_calendar_activity())
 
     def _compute_batch_hash(self, events: Sequence[CanonicalEvent]) -> str:
@@ -456,6 +464,14 @@ class ScheduleService:
 
     def _merge_datasets(self) -> dict[str, CanonicalEvent]:
         """将各源独立的 LKG 数据集聚合并去重仲裁。"""
+        for key in (
+            "identity_matches",
+            "identity_ambiguous",
+            "identity_distinct",
+            "official_enriched_existing",
+            "official_created_new",
+        ):
+            self.quality_diagnostics[key] = 0
         all_events: list[CanonicalEvent] = []
         for src, events in self._source_datasets.items():
             all_events.extend(events)
@@ -463,15 +479,31 @@ class ScheduleService:
         merged_list: list[CanonicalEvent] = []
         for incoming in all_events:
             matched_idx = -1
+            ambiguous_seen = False
             for idx, existing in enumerate(merged_list):
-                if existing.id == incoming.id or _is_same_identity(existing, incoming):
+                identity = score_identity(existing, incoming)
+                if identity.decision == IdentityDecision.MATCH:
                     matched_idx = idx
+                    self.quality_diagnostics["identity_matches"] = self.quality_diagnostics.get("identity_matches", 0) + 1
+                    if "official" in {str(item).casefold() for item in incoming.sources}:
+                        self.quality_diagnostics["official_enriched_existing"] += 1
                     break
+                if identity.decision == IdentityDecision.AMBIGUOUS:
+                    ambiguous_seen = True
 
             if matched_idx >= 0:
                 merged_list[matched_idx] = _merge_two_events(merged_list[matched_idx], incoming)
             else:
+                counter = "identity_ambiguous" if ambiguous_seen else "identity_distinct"
+                self.quality_diagnostics[counter] = self.quality_diagnostics.get(counter, 0) + 1
+                if ambiguous_seen and isinstance(incoming.metadata, dict):
+                    incoming.metadata["identity_match"] = {
+                        "decision": IdentityDecision.AMBIGUOUS.value,
+                        "reason": "candidate identity requires human/source evidence",
+                    }
                 merged_list.append(incoming)
+                if not ambiguous_seen and "official" in {str(item).casefold() for item in incoming.sources}:
+                    self.quality_diagnostics["official_created_new"] += 1
 
         base_dict: dict[str, CanonicalEvent] = {}
         for ev in merged_list:
@@ -481,8 +513,19 @@ class ScheduleService:
             else:
                 v = max(1, ev.version)
             object.__setattr__(ev, "version", v)
+            apply_display_relevance(ev)
             base_dict[ev.id] = ev
 
+        self.quality_diagnostics["canonical_total"] = len(base_dict)
+        relevance_counts = {DisplayTier.CORE: 0, DisplayTier.SUPPORTING: 0, DisplayTier.META: 0}
+        for event in base_dict.values():
+            relevance_counts[get_display_relevance(event).tier] += 1
+        self.quality_diagnostics["relevance_core"] = relevance_counts[DisplayTier.CORE]
+        self.quality_diagnostics["relevance_supporting"] = relevance_counts[DisplayTier.SUPPORTING]
+        self.quality_diagnostics["relevance_meta"] = relevance_counts[DisplayTier.META]
+        # 本阶段不丢弃 META；selected 表示进入 feed，deprioritized 表示排在核心内容之后。
+        self.quality_diagnostics["display_selected"] = len(base_dict)
+        self.quality_diagnostics["display_deprioritized"] = relevance_counts[DisplayTier.META]
         self._base_events = base_dict
         return self._apply_manual_overrides(base_dict)
 
@@ -719,6 +762,23 @@ class ScheduleService:
 
             health.last_outcome = res.outcome.value
 
+            if src == "gamekee":
+                scan = res.diagnostics or getattr(adapter, "last_scan", {}) or {}
+                for key in ("gamekee_rows", "gamekee_valid", "gamekee_malformed", "gamekee_duplicates"):
+                    scan_key = key.removeprefix("gamekee_")
+                    if scan_key in scan:
+                        self.quality_diagnostics[key] = int(scan.get(scan_key, 0) or 0)
+                if "with_visual" in scan:
+                    self.quality_diagnostics["with_visual"] = int(scan.get("with_visual", 0) or 0)
+            elif src == "official":
+                for key in (
+                    "official_deadlines_seen",
+                    "official_deadlines_filtered",
+                    "official_deadlines_parsed",
+                ):
+                    if key in res.diagnostics:
+                        self.quality_diagnostics[key] = int(res.diagnostics.get(key, 0) or 0)
+
             contributes = getattr(adapter, "contributes_to_freshness", True)
 
             if res.outcome == FetchOutcome.SUCCESS_DATA:
@@ -770,6 +830,28 @@ class ScheduleService:
         self._has_snapshot = bool(merged_effective)
         self.last_sync_error = "; ".join(source_errors) if source_errors else ""
         self._update_health_state()
+
+        summary_keys = (
+            "gamekee_rows", "gamekee_valid", "gamekee_malformed", "gamekee_duplicates",
+            "with_visual", "canonical_total", "identity_matches", "identity_ambiguous",
+            "identity_distinct", "official_deadlines_seen", "official_deadlines_filtered",
+            "official_deadlines_parsed", "official_enriched_existing", "official_created_new",
+            "relevance_core", "relevance_supporting", "relevance_meta", "display_selected",
+            "display_deprioritized",
+        )
+        logger.info(
+            "[NIKKE] 日程内容质量摘要: %s",
+            json.dumps({key: self.quality_diagnostics.get(key, 0) for key in summary_keys}, ensure_ascii=False, sort_keys=True),
+        )
+        for event in merged_effective.values():
+            relevance = get_display_relevance(event)
+            logger.debug(
+                "[NIKKE] 日程展示相关性 id=%s tier=%s score=%s reasons=%s",
+                event.id,
+                relevance.tier.value,
+                relevance.score,
+                ",".join(relevance.reasons),
+            )
 
         try:
             self._save_cache(force_events=content_changed)
@@ -901,17 +983,19 @@ class ScheduleService:
         ctx = self.freeze_query_context(now)
         horizon = timedelta(days=days)
 
-        results: list[CalendarActivity] = []
+        active_events: list[CanonicalEvent] = []
+        upcoming_events: list[CanonicalEvent] = []
         for ev in ctx.events:
             status = resolve_event_status(ev, ctx.now)
             if status == EventStatus.ACTIVE.value:
-                results.append(ev.to_calendar_activity())
+                active_events.append(ev)
             elif status == EventStatus.UPCOMING.value:
                 if ev.start_at and ev.start_at <= ctx.now + horizon:
-                    results.append(ev.to_calendar_activity())
+                    upcoming_events.append(ev)
 
-        results.sort(key=lambda a: (safe_datetime_key(a.start_at), safe_datetime_key(a.end_at), a.event_id))
-        return results
+        ordered = sort_display_events(active_events, EventStatus.ACTIVE.value)
+        ordered.extend(sort_display_events(upcoming_events, EventStatus.UPCOMING.value))
+        return [event.to_calendar_activity() for event in ordered]
 
     def list_reminder_deadlines(self, now: datetime | None = None) -> list[CalendarActivity]:
         """返回当前处于 ACTIVE 且具备 EXACT 截止时间的活动用于截止提醒。
@@ -944,23 +1028,24 @@ class ScheduleService:
         """向后兼容分组接口。"""
         ctx = self.freeze_query_context(now)
         horizon = timedelta(days=self.normalize_horizon(days))
-        soon, active, upcoming = [], [], []
+        soon_events: list[CanonicalEvent] = []
+        active_events: list[CanonicalEvent] = []
+        upcoming_events: list[CanonicalEvent] = []
 
         for ev in ctx.events:
             status = resolve_event_status(ev, ctx.now)
             if status == EventStatus.ACTIVE.value:
-                act = ev.to_calendar_activity()
                 if ev.end_at and ev.end_precision == TimePrecision.EXACT.value and (ev.end_at - ctx.now <= timedelta(hours=24)):
-                    soon.append(act)
+                    soon_events.append(ev)
                 else:
-                    active.append(act)
+                    active_events.append(ev)
             elif status == EventStatus.UPCOMING.value:
                 if ev.start_at and ev.start_at <= ctx.now + horizon:
-                    upcoming.append(ev.to_calendar_activity())
+                    upcoming_events.append(ev)
 
-        soon.sort(key=lambda a: (safe_datetime_key(a.end_at), a.event_id))
-        active.sort(key=lambda a: (safe_datetime_key(a.end_at), a.event_id))
-        upcoming.sort(key=lambda a: (safe_datetime_key(a.start_at), a.event_id))
+        soon = [event.to_calendar_activity() for event in sort_display_events(soon_events, EventStatus.ACTIVE.value)]
+        active = [event.to_calendar_activity() for event in sort_display_events(active_events, EventStatus.ACTIVE.value)]
+        upcoming = [event.to_calendar_activity() for event in sort_display_events(upcoming_events, EventStatus.UPCOMING.value)]
         return {"ending_soon": soon, "active": active, "upcoming": upcoming}
 
     def format_schedule_text(

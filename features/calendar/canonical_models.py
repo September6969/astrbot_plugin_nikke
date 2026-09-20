@@ -384,6 +384,7 @@ class CanonicalEvent:
     is_cancelled: bool = False
     is_valid_interval: bool = True
     field_evidence: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __init__(
         self,
@@ -410,6 +411,7 @@ class CanonicalEvent:
         is_cancelled: bool = False,
         is_valid_interval: bool = True,
         field_evidence: dict[str, list[dict[str, Any]]] | None = None,
+        metadata: dict[str, Any] | None = None,
         time_precision: str | None = None,
         **kwargs: Any,
     ) -> None:
@@ -439,6 +441,7 @@ class CanonicalEvent:
         self.is_cancelled = is_cancelled
         self.is_valid_interval = is_valid_interval
         self.field_evidence = dict(field_evidence) if field_evidence is not None else {}
+        self.metadata = dict(metadata) if metadata is not None else {}
         self.__post_init__()
 
     def __post_init__(self) -> None:
@@ -580,6 +583,21 @@ class CanonicalEvent:
         if end <= start:
             end = start + timedelta(hours=1)
 
+        metadata = self.metadata if isinstance(self.metadata, dict) else {}
+        raw_images = metadata.get("visual_candidates") or metadata.get("image_urls") or ()
+        if not isinstance(raw_images, (list, tuple)):
+            raw_images = ()
+        try:
+            importance = int(metadata.get("importance", 0) or 0)
+        except (TypeError, ValueError):
+            importance = 0
+        relevance = metadata.get("display_relevance") if isinstance(metadata.get("display_relevance"), dict) else {}
+        try:
+            display_score = int(relevance.get("score", 0) or 0)
+        except (TypeError, ValueError):
+            display_score = 0
+        display_tier = str(relevance.get("tier", "META") or "META")
+
         act = CalendarActivity(
             event_id=self.id,
             title=self.title,
@@ -587,13 +605,20 @@ class CanonicalEvent:
             end_at=end,
             category=self.event_type,
             source=self.primary_source or (self.sources[0] if self.sources else "unknown"),
-            source_id=self.id,
+            source_id=str(metadata.get("source_id", self.id) or self.id),
             source_url=self.detail_url or "",
             banner_url=self.banner_url or "",
-            description="",
-            importance=0,
-            tag=self.event_type,
+            key_visual_url=str(metadata.get("key_visual_url", "") or self.banner_url or ""),
+            image_urls=tuple(str(url) for url in raw_images if isinstance(url, str) and url),
+            description=str(metadata.get("description", "") or ""),
+            importance=importance,
+            tag=str(metadata.get("tag", "") or self.event_type),
+            activity_kind=str(metadata.get("activity_kind", "") or ""),
             version=self.version,
+            start_precision=self.start_precision,
+            end_precision=self.end_precision,
+            display_score=display_score,
+            display_tier=display_tier,
         )
         return act
 
@@ -613,6 +638,20 @@ class CanonicalEvent:
             sources=[act.source] if act.source else ["gamekee"],
             primary_source=act.source or "gamekee",
             version=act.version,
+            metadata={
+                "source_id": act.source_id,
+                "description": act.description,
+                "importance": act.importance,
+                "tag": act.tag,
+                "activity_kind": act.activity_kind,
+                "key_visual_url": act.key_visual_url,
+                "image_urls": list(act.image_urls),
+                "visual_candidates": list(act.visual_candidates),
+                "display_relevance": {
+                    "score": act.display_score,
+                    "tier": act.display_tier,
+                },
+            },
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -639,6 +678,7 @@ class CanonicalEvent:
             "is_cancelled": self.is_cancelled,
             "is_valid_interval": self.is_valid_interval,
             "field_evidence": self.field_evidence,
+            "metadata": self.metadata,
             "fingerprint": self.fingerprint,
             "version": self.version,
         }
@@ -672,6 +712,7 @@ class CanonicalEvent:
             is_cancelled=bool(data.get("is_cancelled", False)),
             is_valid_interval=bool(data.get("is_valid_interval", True)),
             field_evidence=dict(data.get("field_evidence", {})),
+            metadata=dict(data.get("metadata", {})) if isinstance(data.get("metadata", {}), dict) else {},
             fingerprint=str(data.get("fingerprint", "")),
             version=int(data.get("version", 1)),
         )
