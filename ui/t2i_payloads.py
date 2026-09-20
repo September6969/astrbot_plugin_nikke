@@ -1,4 +1,5 @@
 """只适配已经建立的领域 DTO，不解析接口或推断身份。"""
+from pathlib import Path
 from ..features.campaign.models import ClearLineupStatus, StageClearRecord
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 
@@ -434,31 +435,36 @@ class CalendarT2IPayloadBuilder:
 
     支持：
     1. 基于 Runtime Status Resolver 与起止时间精度的活动数据分类；
-    2. 基于固定画布 (1600×900) 与毛玻璃面板 (1180×730) 的高度预算自动分页；
-    3. 单项超页降级与标题视觉截断策略 (保留完整 full_title)；
-    4. 本地 Key Visual 背景探测与 Data URI 编码（9:16 竖版素材自动中央裁切为 16:9）；
+    2. 基于固定宽度 (1600) + 宣传图纵向长度驱动的动态画布高度 (900px ~ 2400px)；
+    3. 每次 Query 共享同一背景源文件，按各页实际画布高度做高质量 Cover-Crop；
+    4. 单项超页降级与标题视觉截断策略 (保留完整 full_title)；
     5. 全局状态与页面状态分离 (NO ACTIVE OPERATIONS 仅在全局无活动时出现)；
-    6. 移除旧版生命周期主视觉 progress contract；
-       仅保留基于 EXACT 起止时间的辅助 timeline progress_pct 字段。
+    6. 仅保留基于 EXACT 起止时间的辅助 timeline progress_pct 字段。
 
-    高度预算模型（实验性 8-item 密度）：
-    - CONTENT_BUDGET = 516px（730 panel - 70 header - 44 footer - 10 top padding - 6 bottom padding - ≈84 misc）
-    - ACTIVE_SECTION_HEADER_COST = 32px（含与第一个卡片的间距）
-    - ACTIVE_NORMAL_H = 60px（56px 卡片 + 4px gap，包含 gap 使累计计算准确）
-    - ACTIVE_LONG_H = 72px（68px 卡片 + 4px gap）
-    - 8 normal items: 32 + 8×60 = 512px ≤ 516px ✓
+    高度预算与动态上限模型：
+    - CANVAS_W = 1600px（固定宽度）
+    - MIN_CANVAS_H = 900px（底线高度）
+    - ABSOLUTE_MAX_CANVAS_H = 2400px（绝对安全上限）
+    - FALLBACK_MAX_CANVAS_H = 1600px（无背景图时的回退上限）
+    - 有背景 KV 时: scaled_h = round(1600 * source_h / source_w)
+      effective_max_canvas_h = clamp(scaled_h, 900, 2400)
+    - 垂直外边距: CANVAS_VERTICAL_MARGIN = 170px (上下各 85px 居中)
+    - 面板固定开销: PANEL_OVERHEAD = 178px
+    - 动态内容净预算: effective_max_canvas_h - 170 - 178
     """
 
     CANVAS_W = 1600
     CANVAS_H = 900
     MIN_CANVAS_H = 900
-    MAX_CANVAS_H = 1600
+    FALLBACK_MAX_CANVAS_H = 1600
+    ABSOLUTE_MAX_CANVAS_H = 2400
+    MAX_CANVAS_H = FALLBACK_MAX_CANVAS_H  # 向后兼容
 
     PANEL_W = 1180
     PANEL_H = 730
     MIN_PANEL_H = 730
     CANVAS_VERTICAL_MARGIN = 170  # panel_h = canvas_h - CANVAS_VERTICAL_MARGIN
-    MAX_PANEL_H = MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN  # 1430
+    MAX_PANEL_H = ABSOLUTE_MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN  # 2230
 
     HEADER_H = 70
     FOOTER_H = 44
@@ -475,7 +481,7 @@ class CalendarT2IPayloadBuilder:
         + PANEL_BOTTOM_PADDING
     )  # 178
 
-    MAX_CONTENT_BUDGET = MAX_PANEL_H - PANEL_OVERHEAD  # 1252
+    MAX_CONTENT_BUDGET = FALLBACK_MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN - PANEL_OVERHEAD  # 1252
     CONTENT_BUDGET = MAX_CONTENT_BUDGET
 
     ACTIVE_SECTION_HEADER_COST = 40
@@ -492,8 +498,8 @@ class CalendarT2IPayloadBuilder:
 
     EMPTY_STATE_H = 60
 
-    # 安全上限：正常由 MAX_CONTENT_BUDGET 分页，保留极高 safety cap 避免单页失控
-    SAFETY_MAX_ACTIVE_PER_PAGE = 16
+    # 安全上限：防止异常无限增长（单页 Active + Next 总项数安全上限）
+    SAFETY_MAX_ITEMS_PER_PAGE = 40
 
     def __init__(self, resolver: T2IAssetResolver | None = None):
         self.resolver = resolver or T2IAssetResolver()
@@ -539,17 +545,23 @@ class CalendarT2IPayloadBuilder:
         return content_h
 
     @classmethod
-    def compute_canvas_height(cls, content_h: int) -> int:
+    def compute_max_content_budget(cls, max_canvas_height: int) -> int:
+        panel_h = max_canvas_height - cls.CANVAS_VERTICAL_MARGIN
+        return panel_h - cls.PANEL_OVERHEAD
+
+    @classmethod
+    def compute_canvas_height(cls, content_h: int, max_canvas_height: int | None = None) -> int:
+        max_h = max_canvas_height or cls.FALLBACK_MAX_CANVAS_H
         canvas_h_required = cls.PANEL_OVERHEAD + cls.CANVAS_VERTICAL_MARGIN + content_h
-        return max(cls.MIN_CANVAS_H, min(cls.MAX_CANVAS_H, canvas_h_required))
+        return max(cls.MIN_CANVAS_H, min(max_h, canvas_h_required))
 
     @classmethod
     def compute_panel_height(cls, canvas_h: int) -> int:
         return canvas_h - cls.CANVAS_VERTICAL_MARGIN
 
-    def _resolve_background(
-        self, service, active_events, upcoming_events, canvas_height: int = 900
-    ) -> str | None:
+    def _resolve_background_source(
+        self, service, active_events, upcoming_events
+    ) -> Path | None:
         vc = getattr(service, "visual_cache", None)
         if not vc or not hasattr(vc, "resolve_path"):
             return None
@@ -577,20 +589,70 @@ class CalendarT2IPayloadBuilder:
 
         for eid in candidate_ids:
             path = vc.resolve_path(eid)
-            if path is not None and path.is_file():
-                try:
-                    uri = self.resolver.encode(
-                        path, size=(self.CANVAS_W, canvas_height), cover_crop=True
-                    )
-                    if uri:
-                        return uri
-                except Exception:
-                    continue
+            if path is not None and isinstance(path, Path) and path.is_file():
+                return path
         return None
 
+    @classmethod
+    def _get_background_dimensions(cls, path: Path | None) -> tuple[int, int] | None:
+        if path is None:
+            return None
+        try:
+            from PIL import Image
+            with Image.open(path) as image:
+                return image.size  # (width, height)
+        except Exception:
+            return None
+
+    @classmethod
+    def _compute_effective_max_canvas_height(
+        cls, dimensions: tuple[int, int] | None
+    ) -> tuple[int, int | None, int | None, int | None]:
+        """计算有效最大画布高度。
+
+        返回: (effective_max_h, source_w, source_h, scaled_source_h)
+        """
+        if dimensions is None:
+            return cls.FALLBACK_MAX_CANVAS_H, None, None, None
+        source_w, source_h = dimensions
+        if source_w <= 0 or source_h <= 0:
+            return cls.FALLBACK_MAX_CANVAS_H, source_w, source_h, None
+
+        scaled_source_h = round(cls.CANVAS_W * source_h / source_w)
+        effective_max_h = min(
+            max(cls.MIN_CANVAS_H, scaled_source_h),
+            cls.ABSOLUTE_MAX_CANVAS_H,
+        )
+        return effective_max_h, source_w, source_h, scaled_source_h
+
+    def _encode_background(
+        self, path: Path | None, canvas_height: int = 900
+    ) -> str | None:
+        if path is None:
+            return None
+        try:
+            return self.resolver.encode(
+                path, size=(self.CANVAS_W, canvas_height), cover_crop=True
+            )
+        except Exception:
+            return None
+
+    def _resolve_background(
+        self, service, active_events, upcoming_events, canvas_height: int = 900
+    ) -> str | None:
+        source_path = self._resolve_background_source(service, active_events, upcoming_events)
+        return self._encode_background(source_path, canvas_height=canvas_height)
+
     def _paginate(
-        self, active_items: list[dict], next_items: list[dict], global_has_active: bool
+        self,
+        active_items: list[dict],
+        next_items: list[dict],
+        global_has_active: bool,
+        max_canvas_height: int | None = None,
     ) -> list[dict]:
+        max_canvas_h = max_canvas_height or self.FALLBACK_MAX_CANVAS_H
+        max_content_budget = self.compute_max_content_budget(max_canvas_h)
+
         pages = []
         rem_active = list(active_items)
         rem_next = list(next_items)
@@ -619,7 +681,7 @@ class CalendarT2IPayloadBuilder:
 
             # 1. 优先尝试放入 Active 任务
             while rem_active:
-                if len(p_active) >= self.SAFETY_MAX_ACTIVE_PER_PAGE:
+                if len(p_active) + len(p_next) >= self.SAFETY_MAX_ITEMS_PER_PAGE:
                     break
                 candidate = rem_active[0]
                 tentative = p_active + [candidate]
@@ -629,7 +691,7 @@ class CalendarT2IPayloadBuilder:
                     global_has_active=global_has_active,
                     is_first_page=is_p1,
                 )
-                if tentative_h > self.MAX_CONTENT_BUDGET:
+                if tentative_h > max_content_budget:
                     if not p_active:
                         # 单项超页处理：独占当前页
                         candidate["is_oversize"] = True
@@ -639,6 +701,8 @@ class CalendarT2IPayloadBuilder:
 
             # 2. 尝试放入 Next 预告任务
             while rem_next:
+                if len(p_active) + len(p_next) >= self.SAFETY_MAX_ITEMS_PER_PAGE:
+                    break
                 candidate = rem_next[0]
                 tentative = p_next + [candidate]
                 tentative_h = self.measure_page_content(
@@ -647,7 +711,7 @@ class CalendarT2IPayloadBuilder:
                     global_has_active=global_has_active,
                     is_first_page=is_p1,
                 )
-                if tentative_h > self.MAX_CONTENT_BUDGET:
+                if tentative_h > max_content_budget:
                     if not p_active and not p_next:
                         candidate["is_oversize"] = True
                         p_next.append(rem_next.pop(0))
@@ -663,14 +727,14 @@ class CalendarT2IPayloadBuilder:
                     rem_next[0]["is_oversize"] = True
                     p_next.append(rem_next.pop(0))
 
-            # 计算本页真实高度
+            # 计算本页真实高度（以 max_canvas_h 为上限，按实际内容计算）
             actual_content_h = self.measure_page_content(
                 p_active,
                 p_next,
                 global_has_active=global_has_active,
                 is_first_page=is_p1,
             )
-            page_canvas_h = self.compute_canvas_height(actual_content_h)
+            page_canvas_h = self.compute_canvas_height(actual_content_h, max_canvas_height=max_canvas_h)
             page_panel_h = self.compute_panel_height(page_canvas_h)
 
             pages.append({
@@ -877,21 +941,39 @@ class CalendarT2IPayloadBuilder:
         global_has_active = bool(active_items)
         active_count_total = len(active_items)
 
-        # 5. 分页计算（先增长后分页，每页包含独立的 canvas/panel 尺寸）
-        pages = self._paginate(active_items, next_items, global_has_active)
+        # 5. 背景源探测与有效最大画布高度推导
+        source_path = self._resolve_background_source(service, active_canonical, upcoming_canonical)
+        bg_dims = self._get_background_dimensions(source_path)
+        effective_max_canvas_h, bg_w, bg_h, scaled_source_h = self._compute_effective_max_canvas_height(bg_dims)
 
-        # 6. 背景 Key Visual 解析（按每页 canvas.height 做 cover-crop）
+        # 6. 分页计算（以 effective_max_canvas_h 作为最大高度预算）
+        pages = self._paginate(
+            active_items, next_items, global_has_active, max_canvas_height=effective_max_canvas_h
+        )
+
+        # 7. 背景图按每页实际 canvas.height 编码（所有页面共享相同背景源）
         for p in pages:
             p_canvas_h = p["canvas"]["height"]
-            p["background_data_uri"] = self._resolve_background(
-                service, active_canonical, upcoming_canonical, canvas_height=p_canvas_h
+            p["background_data_uri"] = self._encode_background(
+                source_path, canvas_height=p_canvas_h
             )
 
         top_canvas = pages[0]["canvas"] if pages else {"width": self.CANVAS_W, "height": self.MIN_CANVAS_H}
         top_panel = pages[0]["panel"] if pages else {"width": self.PANEL_W, "height": self.MIN_PANEL_H}
         top_bg = pages[0]["background_data_uri"] if pages else None
 
-        # 7. 元数据准备
+        layout_limits = {
+            "min_canvas_height": self.MIN_CANVAS_H,
+            "effective_max_canvas_height": effective_max_canvas_h,
+            "absolute_max_canvas_height": self.ABSOLUTE_MAX_CANVAS_H,
+            "fallback_max_canvas_height": self.FALLBACK_MAX_CANVAS_H,
+            "background_source_width": bg_w,
+            "background_source_height": bg_h,
+            "background_scaled_height": scaled_source_h,
+            "background_limited": bool(source_path and effective_max_canvas_h < self.ABSOLUTE_MAX_CANVAS_H),
+        }
+
+        # 8. 元数据准备
         updated_str = "Unknown"
         if getattr(service, "last_updated_at", None):
             try:
@@ -938,6 +1020,7 @@ class CalendarT2IPayloadBuilder:
             "query_now": current.isoformat(),
             "canvas": top_canvas,
             "panel": top_panel,
+            "layout_limits": layout_limits,
             "background_data_uri": top_bg,
             "freshness": fresh_str,
             "coverage": cov_str,
