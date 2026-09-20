@@ -31,7 +31,9 @@ def calendar_cases(directory):
         "portrait-kv-20-active", # 20 active + 1080x1920 KV -> 1 page (~1588px)
         "portrait-kv-30-active", # 30 active + 1080x1920 KV -> 1 page (~2188px)
         "portrait-kv-overflow",  # 45 active + 1080x1920 KV -> 2 pages
-        "landscape-kv-20-active",# 20 active + 1920x1080 KV -> 3 pages (900px cap)
+        "landscape-kv-7-active-4-next", # 7 active + 4 next + 1920x1080 KV -> 1 page (~1044px)
+        "landscape-kv-20-active",# 20 active + 1920x1080 KV -> 1 page (~1588px)
+        "landscape-kv-25-active",# 25 active + 1920x1080 KV -> 2 pages (1600px base cap)
         "no-kv-overflow",        # 25 active + no KV -> 2 pages (1600px fallback cap)
         "4-active-8-next",
         "next-only", "unknown-end", "date-only", "critical", "partial", "no-background", "oversize-title"
@@ -285,9 +287,35 @@ def calendar_cases(directory):
                     if not kv_path.is_file():
                         Image.new("RGBA", (1080, 1920), color=(50, 80, 120, 255)).save(kv_path, format="WEBP")
                     service.visual_cache._manifest["act-0"] = {"filename": "kv_portrait.webp"}
-            elif name == "landscape-kv-20-active":
+            elif name == "landscape-kv-7-active-4-next":
                 from PIL import Image
-                for index in range(20):
+                for index in range(7):
+                    start = NOW - timedelta(days=1)
+                    end = NOW + timedelta(days=index + 2)
+                    event = CalendarActivity(
+                        f"act-{index}", f"进行中任务 {index + 1}", start, end,
+                        category=["event", "solo_raid", "coop", "recruit", "event"][index % 5],
+                        banner_url="", start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                for index in range(4):
+                    start = NOW + timedelta(days=1 + index)
+                    end = start + timedelta(days=5)
+                    event = CalendarActivity(
+                        f"nxt-{index}", f"预告任务 {index + 1}", start, end,
+                        category="union_raid", banner_url="",
+                        start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
+                    )
+                    service._activities[event.event_id] = event
+                if service.visual_cache is not None:
+                    kv_path = service.visual_cache.visual_dir / "kv_landscape.webp"
+                    if not kv_path.is_file():
+                        Image.new("RGBA", (1920, 1080), color=(80, 120, 50, 255)).save(kv_path, format="WEBP")
+                    service.visual_cache._manifest["act-0"] = {"filename": "kv_landscape.webp"}
+            elif name in ("landscape-kv-20-active", "landscape-kv-25-active"):
+                from PIL import Image
+                count = 20 if name == "landscape-kv-20-active" else 25
+                for index in range(count):
                     start = NOW - timedelta(days=1)
                     end = NOW + timedelta(days=index + 2)
                     event = CalendarActivity(

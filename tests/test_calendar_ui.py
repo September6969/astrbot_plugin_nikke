@@ -394,31 +394,76 @@ class TestBackgroundAndMultiPageRendering:
 
 
 class TestSourceBoundedDynamicCanvasHeight:
-    """Case 1~9: 宣传图纵向长度驱动的动态画布高度与分页合约测试。"""
+    """Base-bounded (1600) + Source-extended (最高2400) 动态画布高度与分页合约测试。"""
 
-    def test_case_1_standard_9_16_portrait_kv(self):
-        """Case 1: 标准 9:16 KV (1080x1920) -> scaled ~2844, effective_max == 2400."""
-        effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1080, 1920))
-        assert scaled_h == 2844
-        assert effective_max == 2400
+    def test_landscape_kv_uses_base_max_height(self):
+        """16:9 landscape (1920x1080) -> scaled 900, 但保持 base max == 1600 (绝不压缩至 900)."""
+        effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1920, 1080))
+        assert scaled_h == 900
+        assert effective_max == 1600
 
-    def test_case_2_portrait_4_3_kv(self):
-        """Case 2: 4:3-ish portrait (1440x1920) -> scaled 2133, effective_max == 2133."""
+    def test_square_kv_uses_base_or_source_height(self):
+        """1600x1600 square -> scaled 1600, effective == 1600."""
+        effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1600, 1600))
+        assert scaled_h == 1600
+        assert effective_max == 1600
+
+    def test_portrait_1440_1920_extends_max(self):
+        """4:3-ish portrait (1440x1920) -> scaled 2133, effective_max == 2133 (成功扩展基础高度)."""
         effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1440, 1920))
         assert scaled_h == 2133
         assert effective_max == 2133
 
-    def test_case_3_landscape_16_9_kv(self):
-        """Case 3: 16:9 landscape (1920x1080) -> scaled 900, effective_max == 900."""
-        effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1920, 1080))
-        assert scaled_h == 900
-        assert effective_max == 900
+    def test_portrait_1080_1920_hits_absolute_cap(self):
+        """标准 9:16 KV (1080x1920) -> scaled ~2844, 命中 absolute cap == 2400."""
+        effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1080, 1920))
+        assert scaled_h == 2844
+        assert effective_max == 2400
 
-    def test_case_4_no_background_fallback(self):
-        """Case 4: no background -> effective_max == 1600 (FALLBACK_MAX_CANVAS_H)."""
+    def test_no_kv_uses_base_max(self):
+        """no background -> effective_max == 1600 (FALLBACK_MAX_CANVAS_H)."""
         effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height(None)
         assert effective_max == 1600
         assert scaled_h is None
+
+    def test_7_active_4_next_landscape_kv_fits_on_single_page(self, tmp_path):
+        """真实生产场景回归：7 Active + 4 Next 在横版 KV 下必须保持单页容纳 (~1044px)."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        c = cases["landscape-kv-7-active-4-next"]
+        assert len(c["pages"]) == 1
+        assert c["page_total"] == 1
+        p1 = c["pages"][0]
+        assert len(p1["active_items"]) == 7
+        assert len(p1["next_items"]) == 4
+        assert 900 < p1["canvas"]["height"] <= 1600
+        assert p1["canvas"]["height"] == 1044
+        assert c["layout_limits"]["effective_max_canvas_height"] == 1600
+        assert c["layout_limits"]["height_policy"] == "base"
+
+    def test_20_active_landscape_kv_fits_on_single_page(self, tmp_path):
+        """20 Active + landscape KV 在基础 1600 预算内单页容纳 (~1588px <= 1600)."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        c = cases["landscape-kv-20-active"]
+        assert len(c["pages"]) == 1
+        assert c["page_total"] == 1
+        p1 = c["pages"][0]
+        assert len(p1["active_items"]) == 20
+        assert p1["canvas"]["height"] == 1588
+        assert p1["canvas"]["height"] <= 1600
+        assert c["layout_limits"]["effective_max_canvas_height"] == 1600
+        assert c["layout_limits"]["height_policy"] == "base"
+
+    def test_25_active_landscape_kv_paginates_at_1600_base_max(self, tmp_path):
+        """25 Active + landscape KV 超过 1600 基础预算时正常触发分页 (20 + 5)."""
+        cases = get_cases("calendar_schedule", tmp_path)
+        c = cases["landscape-kv-25-active"]
+        assert len(c["pages"]) == 2
+        assert c["page_total"] == 2
+        assert c["layout_limits"]["effective_max_canvas_height"] == 1600
+        assert len(c["pages"][0]["active_items"]) == 20
+        assert len(c["pages"][1]["active_items"]) == 5
+        assert c["pages"][0]["canvas"]["height"] == 1588
+        assert c["pages"][1]["canvas"]["height"] == 900
 
     def test_case_5_20_normal_active_portrait_kv_single_page(self, tmp_path):
         """Case 5: 20 normal Active + 9:16 KV -> 1 page (canvas height 1588 <= 2400)."""
@@ -430,7 +475,7 @@ class TestSourceBoundedDynamicCanvasHeight:
         assert p1["canvas"]["height"] == 1588
         assert p1["canvas"]["height"] <= 2400
         assert c["layout_limits"]["effective_max_canvas_height"] == 2400
-        assert c["layout_limits"]["background_limited"] is False
+        assert c["layout_limits"]["height_policy"] == "absolute_capped"
 
     def test_case_6_30_normal_active_portrait_kv_single_page(self, tmp_path):
         """Case 6: 30 normal Active + 9:16 KV -> 1 page (canvas height 2188 <= 2400)."""
@@ -442,6 +487,7 @@ class TestSourceBoundedDynamicCanvasHeight:
         assert p1["canvas"]["height"] == 2188
         assert p1["canvas"]["height"] <= 2400
         assert c["layout_limits"]["effective_max_canvas_height"] == 2400
+        assert c["layout_limits"]["height_policy"] == "absolute_capped"
 
     def test_case_7_45_active_portrait_kv_overflow_paginates(self, tmp_path):
         """Case 7: 45 Active + 9:16 KV -> page_total >= 2, 每页 <= effective_max_canvas_h (2400)."""
@@ -456,19 +502,6 @@ class TestSourceBoundedDynamicCanvasHeight:
         assert len(c["pages"][1]["active_items"]) == 12
         assert c["pages"][0]["canvas"]["height"] == 2368
         assert c["pages"][1]["canvas"]["height"] == 1108
-
-    def test_case_8_20_active_landscape_kv_paginates(self, tmp_path):
-        """Case 8: 20 Active + landscape KV -> 必须分页 (3 页，各 900px 高)，证明由背景决定上限。"""
-        cases = get_cases("calendar_schedule", tmp_path)
-        c = cases["landscape-kv-20-active"]
-        assert len(c["pages"]) == 3
-        assert c["layout_limits"]["effective_max_canvas_height"] == 900
-        assert c["layout_limits"]["background_limited"] is True
-        for page in c["pages"]:
-            assert page["canvas"]["height"] == 900
-        assert len(c["pages"][0]["active_items"]) == 8
-        assert len(c["pages"][1]["active_items"]) == 8
-        assert len(c["pages"][2]["active_items"]) == 4
 
     def test_case_9_same_background_source_across_pages(self, tmp_path):
         """Case 9: 多页时所有 pages 使用同一个 source background，且各自包含有效 data URI。"""
@@ -485,6 +518,7 @@ class TestSourceBoundedDynamicCanvasHeight:
         c = cases["no-kv-overflow"]
         assert len(c["pages"]) == 2
         assert c["layout_limits"]["effective_max_canvas_height"] == 1600
+        assert c["layout_limits"]["height_policy"] == "base"
         assert c["pages"][0]["canvas"]["height"] == 1588
         assert c["pages"][1]["canvas"]["height"] == 900
         assert len(c["pages"][0]["active_items"]) == 20

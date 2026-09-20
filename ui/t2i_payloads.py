@@ -441,13 +441,14 @@ class CalendarT2IPayloadBuilder:
     5. 全局状态与页面状态分离 (NO ACTIVE OPERATIONS 仅在全局无活动时出现)；
     6. 仅保留基于 EXACT 起止时间的辅助 timeline progress_pct 字段。
 
-    高度预算与动态上限模型：
+    高度预算与动态上限模型（Base-bounded + Source-extended）：
     - CANVAS_W = 1600px（固定宽度）
     - MIN_CANVAS_H = 900px（底线高度）
+    - FALLBACK_MAX_CANVAS_H = 1600px（基础最大高度：无KV或横版KV时基础上限均允许生长至 1600px）
     - ABSOLUTE_MAX_CANVAS_H = 2400px（绝对安全上限）
-    - FALLBACK_MAX_CANVAS_H = 1600px（无背景图时的回退上限）
-    - 有背景 KV 时: scaled_h = round(1600 * source_h / source_w)
-      effective_max_canvas_h = clamp(scaled_h, 900, 2400)
+    - scaled_source_h = round(1600 * source_h / source_w)
+    - effective_max_canvas_h = min(max(FALLBACK_MAX_CANVAS_H, scaled_source_h), ABSOLUTE_MAX_CANVAS_H)
+      即：Calendar 默认允许增长至 1600px；当 KV 提供更多纵向空间时（如竖版图），上限随 KV 延长，最高 2400px；横版图绝不会将上限压至 900px。
     - 垂直外边距: CANVAS_VERTICAL_MARGIN = 170px (上下各 85px 居中)
     - 面板固定开销: PANEL_OVERHEAD = 178px
     - 动态内容净预算: effective_max_canvas_h - 170 - 178
@@ -620,7 +621,7 @@ class CalendarT2IPayloadBuilder:
 
         scaled_source_h = round(cls.CANVAS_W * source_h / source_w)
         effective_max_h = min(
-            max(cls.MIN_CANVAS_H, scaled_source_h),
+            max(cls.FALLBACK_MAX_CANVAS_H, scaled_source_h),
             cls.ABSOLUTE_MAX_CANVAS_H,
         )
         return effective_max_h, source_w, source_h, scaled_source_h
@@ -962,6 +963,13 @@ class CalendarT2IPayloadBuilder:
         top_panel = pages[0]["panel"] if pages else {"width": self.PANEL_W, "height": self.MIN_PANEL_H}
         top_bg = pages[0]["background_data_uri"] if pages else None
 
+        if scaled_source_h is None or scaled_source_h <= self.FALLBACK_MAX_CANVAS_H:
+            height_policy = "base"
+        elif scaled_source_h < self.ABSOLUTE_MAX_CANVAS_H:
+            height_policy = "source_extended"
+        else:
+            height_policy = "absolute_capped"
+
         layout_limits = {
             "min_canvas_height": self.MIN_CANVAS_H,
             "effective_max_canvas_height": effective_max_canvas_h,
@@ -970,6 +978,7 @@ class CalendarT2IPayloadBuilder:
             "background_source_width": bg_w,
             "background_source_height": bg_h,
             "background_scaled_height": scaled_source_h,
+            "height_policy": height_policy,
             "background_limited": bool(source_path and effective_max_canvas_h < self.ABSOLUTE_MAX_CANVAS_H),
         }
 
