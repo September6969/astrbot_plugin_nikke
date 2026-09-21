@@ -12,6 +12,7 @@
 - 当前 `origin/main`：`bde290f2eebcba22270c940fa68290078584b04d`。
 - 旧 Character Card v2 分支来源：`bef2d3b1d5928f030f28b4cd41324f78e0035df8`。
 - Calendar 与模块化 Character Card 基线合并提交：`fa18979`。
+- 集成分支最终提交：`8f4fe8a`；仅补 CI 的 Playwright/Chromium 测试依赖安装，不改变插件运行时依赖。
 
 旧分支包含已经淘汰的根目录架构，直接 merge 会删除当前 `features/`、`ui/` 和 `integrations/` 模块。因此本轮只移植 v2 的可验证增量，未把旧架构整体带入：
 
@@ -59,11 +60,12 @@
 - Node Spine surface semantics：`4 passed`。
 - `git diff --check`：通过。
 - Python/Node 语法检查：通过。
+- PR #97 GitHub CI run `35619830726`：Node 扩展、Spine 4.0 headless、Python 3.10/3.11/3.12/3.13 全部通过。
 - Issue #73 的 `.1322 → 13.22%` / `.8537 → 85.37%` 合同测试仍在既有 UI 回归中通过；本轮未改数值 formatter 或后端数据合同。
 - 最终 full pytest 已按约束只执行一次：`1119 passed, 2 skipped, 653 subtests passed, 17 failed`。其中 16 项来自被旧集成分支带入、但不在当前 `origin/main` 的 `tests/test_calendar_operations_feed.py`；删除该 stale test 后，当前 Calendar v04/v05/Content Quality/P0/UI 定向套件为 `125 passed`。剩余 1 项是本地 worktree 目录名不是 `astrbot_plugin_nikke`，注册测试子进程因此加载了旁边旧 worktree；标准 GitHub checkout 目录与 CI 环境不受此问题影响。按执行约束不重复 full pytest，跨版本结果以 GitHub CI 为准。
 
 ## 未完成与边界
 
 - 未合并 `main`，未 force push，未部署服务器。
-- 尚未取得本轮集成分支的 GitHub CI 结果。
+- GitHub CI 已全绿；等待按集成顺序执行 PR #97 的正常合并。
 - 预览使用仓库已有静态 Spine PNG 和合成 fixture，不代表真实账号数据、QQ/NapCat 送达或生产资源许可。
