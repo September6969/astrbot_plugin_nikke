@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import {pathToFileURL} from 'node:url';
 import crypto from 'node:crypto';
 import vm from 'node:vm';
+import {classifySurfaceSemantics} from './spine_surface_semantics.mjs';
 
 const [runtime, skelPath, atlasPath, renderId, animation, output] = process.argv.slice(2);
 if (!output) throw new Error('args: runtime/index.js skeleton atlas render_id animation output.json');
@@ -128,22 +129,20 @@ const anatomyBones1024 = skeleton.bones
 // anchor selection. Strict token matching prevents hair/headwear from being
 // treated as the semantic head surface.
 const headSurfaceCandidates1024 = [];
-const tokenized = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 for (const slot of skeleton.drawOrder) {
   const attachment = slot.getAttachment();
   if (!attachment || slot.color.a === 0 || attachment.color?.a === 0 || !slot.bone.active) continue;
   const name = `${slot.data.name}/${attachment.name}`;
-  const token = tokenized(name);
-  let kind = null;
-  if (/(^|_)head(_|$)/.test(token) && !/(^|_)(hair|headwear|headset|helmet|hat)(_|$)/.test(token)) {
-    kind = 'head_attachment';
-  } else if (/(^|_)face(_|$)/.test(token)) {
-    kind = 'face_attachment';
-  }
-  if (!kind) continue;
+  const semantic = classifySurfaceSemantics(slot.data.name, attachment.name);
+  if (!semantic.kind) continue;
   const box = worldVertices(slot, attachment);
   if (!box) continue;
-  headSurfaceCandidates1024.push({name, kind, box: boxTo1024(box)});
+  headSurfaceCandidates1024.push({
+    name,
+    kind: semantic.kind,
+    semantic_source: semantic.source,
+    box: boxTo1024(box),
+  });
 }
 
 const result = {

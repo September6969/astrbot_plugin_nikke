@@ -215,7 +215,7 @@
           285.26703242617725,
           225.7311986868591
         ],
-        "head_top_source": "head_attachment:head/face",
+        "head_top_source": "face_attachment:head/face",
         "breast_source": "pair:boob_l+boob_r"
       },
       "core_axis_reason": "ok",

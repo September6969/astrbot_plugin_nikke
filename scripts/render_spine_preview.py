@@ -13,6 +13,7 @@ from playwright.async_api import async_playwright
 async def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runtime", type=Path, required=True)
+    parser.add_argument("--webgl-runtime", type=Path, required=True)
     parser.add_argument("--bundle-dir", type=Path, required=True)
     parser.add_argument("--render-id", required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -36,6 +37,7 @@ async def main():
         page = await browser.new_page(viewport={"width": 4096, "height": 4096})
         await page.set_content('<html><body style="margin:0"><canvas width="4096" height="4096"></canvas></body></html>')
         await page.add_script_tag(path=str(args.runtime))
+        await page.add_script_tag(path=str(args.webgl_runtime))
         result = await page.evaluate('''async ({atlas, skel, textures}) => {
           const canvas = document.querySelector('canvas');
           const gl = canvas.getContext('webgl', {alpha:true, premultipliedAlpha:true, preserveDrawingBuffer:true});

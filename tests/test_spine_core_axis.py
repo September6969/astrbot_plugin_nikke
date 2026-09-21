@@ -88,6 +88,7 @@ def test_face_surface_is_fallback_when_unique_head_is_absent():
     ])
     assert reason == "ok"
     assert selected.y == 30.0
+    assert selected.source == "face_attachment:face/main"
 
 
 def test_axis_order_validation():

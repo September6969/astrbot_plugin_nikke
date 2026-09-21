@@ -128,6 +128,8 @@ jobs:
           node-version: "22"
       - name: Run extension contract tests
         run: node --test tests/extension.test.cjs
+      - name: Run Spine surface semantics tests
+        run: node --test tests/spine_surface_semantics.test.mjs
 
   test:
     name: Test (Python ${{ matrix.python-version }})

@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "captured_at": "2026-09-21",
+  "status": "READY_OFFLINE",
+  "formal_registry": "assets/character_master.json",
+  "upstream": {
+    "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+    "license_or_distribution_authorization": "not claimed; public source evidence only"
+  },
+  "roles": {
+    "sin": {
+      "name_cn": "森",
+      "name_en": "Sin",
+      "id": 140101,
+      "resource_id": 401,
+      "character_key": "sin",
+      "spine_asset_id": "c401",
+      "costume_id": 0,
+      "source": {
+        "skel": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c401/c401_00.skel",
+        "atlas": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c401/c401_00.atlas",
+        "texture": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c401/c401_00.png",
+        "skel_sha256": "3616119c7aaa9b5a1be350b45255e3b808d5f435ff4f2451d6ccf7f13576e844",
+        "atlas_sha256": "b1675a545b65dc2417ca17bad24eb02c95b1f97a497da67ba14f7d4729aa61d0",
+        "texture_sha256": "118066ff679474194ab1c75d13950433b1543c18c5542c221d15178e16e26d77"
+      },
+      "spine_validation": {
+        "data_version": "4.0.47",
+        "animation": "idle",
+        "time": 0,
+        "anchor_kind": "eye_attachment",
+        "head_surface": "head/head",
+        "head_surface_kind": "head_attachment",
+        "head_surface_source": "attachment",
+        "head_selection": "ok",
+        "breast_selection": "breast_unavailable",
+        "core_axis": false,
+        "framing": "legacy_fallback",
+        "reason": "strict breast selector found no explicit breast/bust/boob or accepted chest anchor"
+      },
+      "rendered_spine_png": {
+        "path": "docs/evidence/character_card_layout_v2_20260920/real_problem_roles/sin_c401_spine_render.png",
+        "size": [1745, 3567],
+        "sha256": "3c8d99ca53ca48fbcaace5499832f182ba583ba4062de95d056f956b19c7f993"
+      },
+      "card_artifacts": {
+        "before": "docs/evidence/character_card_layout_v2_20260920/real_problem_roles/sin_c401_before.png",
+        "after": "docs/evidence/character_card_layout_v2_20260920/real_problem_roles/sin_c401_after.png",
+        "canvas": [1600, 2400],
+        "before_sha256": "7c4252fcdf87b8c039c7f096410beff8805950cb2957496a575f333476ee8f71",
+        "after_sha256": "7c4252fcdf87b8c039c7f096410beff8805950cb2957496a575f333476ee8f71",
+        "overflow": []
+      }
+    },
+    "arcana": {
+      "name_cn": "阿尔卡娜",
+      "name_en": "Arcana",
+      "id": 258101,
+      "resource_id": 581,
+      "character_key": "arcana",
+      "spine_asset_id": "c581",
+      "costume_id": 0,
+      "source": {
+        "skel": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c581/c581_00.skel",
+        "atlas": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c581/c581_00.atlas",
+        "texture": "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c581/c581_00.png",
+        "skel_sha256": "d4d95833deb15a2656ade2b9b029c5e81968f60900ef05100cd493190cc7e504",
+        "atlas_sha256": "7f3df9b03eed0a660c0ba9ccd6dc201e19284901108ced9b5e8020f7319c65c3",
+        "texture_sha256": "2ed3d0bebd1779c457edaa92a92d7d32fe30e7bc2c25ccc999a1a5fd8682d676"
+      },
+      "spine_validation": {
+        "data_version": "4.1.20",
+        "animation": "idle",
+        "time": 0,
+        "anchor_kind": "eye_attachment",
+        "head_surface": "face1/face",
+        "head_surface_kind": "face_attachment",
+        "head_surface_source": "attachment",
+        "head_selection": "ok",
+        "breast_selection": "breast_unavailable",
+        "core_axis": false,
+        "framing": "legacy_fallback",
+        "reason": "strict breast selector found no explicit breast/bust/boob or accepted chest anchor"
+      },
+      "rendered_spine_png": {
+        "path": "docs/evidence/character_card_layout_v2_20260920/real_problem_roles/arcana_c581_spine_render.png",
+        "size": [1320, 3724],
+        "sha256": "10ef6067bf2653de47d1fce6c21990a3dc929d65afd9ff9ada6238f818ad992c"
+      },
+      "card_artifacts": {
+        "before": "docs/evidence/character_card_layout_v2_20260920/real_problem_roles/arcana_c581_before.png",
+        "after": "docs/evidence/character_card_layout_v2_20260920/real_problem_roles/arcana_c581_after.png",
+        "canvas": [1600, 2400],
+        "before_sha256": "7e27b884cea7aca90dc38d882db1ca4bf3e0414e74d8e0e6fafee92e3eb3dc07",
+        "after_sha256": "7e27b884cea7aca90dc38d882db1ca4bf3e0414e74d8e0e6fafee92e3eb3dc07",
+        "overflow": []
+      }
+    }
+  },
+  "interpretation": "Both roles were rendered from verified formal IDs and real public Spine bundles at idle t=0. Neither has a strict head-eye-breast core axis, so the implementation deliberately remains on the legacy fallback. Identical before/after card hashes are expected and are not evidence of a core-axis improvement."
+}

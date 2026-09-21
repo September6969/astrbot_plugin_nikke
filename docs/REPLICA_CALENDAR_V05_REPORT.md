@@ -51,7 +51,7 @@
 ```powershell
 # 匹配版本官方 Spine Core 仅在离线脚本中使用。
 python scripts/prepare_face_anchors.py --manifest assets/spine_manifest.json --png-dir assets/spine-rendered --bundle-dir <骨架目录> --runtime-40 <4.0/index.js> --runtime-41 <4.1/index.js>
-python scripts/render_spine_preview.py --runtime <spine-webgl.js> --bundle-dir <骨架目录> --render-id c471 --output <输出PNG路径>
+python scripts/render_spine_preview.py --runtime <spine-core.js> --webgl-runtime <spine-webgl.js> --bundle-dir <骨架目录> --render-id c471 --output <输出PNG路径>
 # 截图环境需要本地 Playwright 和 Chromium。
 python scripts/preview_replica.py --manifest output/high-resolution/spine_manifest.json --png-dir output/high-resolution --reference <用户案例.jpg>
 ```

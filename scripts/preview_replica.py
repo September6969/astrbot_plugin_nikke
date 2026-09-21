@@ -49,7 +49,8 @@ async def main():
     cases = {}
     for key, rid, costume in (("snow-white", 471, 0), ("rapi", 10, 0), ("rapi-vacation", 10, 10005),
                                ("rapi-promise", 10, 20001),
-                               ("wide", 330, 0), ("tall", 234, 0), ("elysion", 17, 0), ("tetra", 352, 0)):
+                               ("wide", 330, 0), ("tall", 234, 0), ("elysion", 17, 0), ("tetra", 352, 0),
+                               ("sin-real", 401, 0), ("arcana-real", 581, 0)):
         person = master.resolve_resource_id(rid)
         name_cn = "拉毗：小红帽" if key == "rapi" else person.name_cn
         card = replace(example_card(), name_cn=name_cn, name_en=person.name_en, name_code=str(person.name_code),

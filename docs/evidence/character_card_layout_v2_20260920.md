@@ -35,9 +35,31 @@
 - 未生成伪造映射；unavailable：空。
 - 原因统计：ok=2、breast_unavailable=4、ambiguous_head_attachment=2。
 - 实际生成 core axis：c010_03、c352。
-- c016（Mori）与 c191（Arcana）不在本轮显式 manifest，未猜测新的 core axis；继续使用现有 legacy face anchor/framing fallback。
+- c016 是拉毗：小红帽（Rapi: Red Hood），c191 是爱丽丝（Alice）；两者都不是 Mori/Arcana。它们不在本轮显式 manifest，未猜测新的 core axis；继续使用现有 legacy face anchor/framing fallback。
 
-c010_03 使用 head_attachment:head/face 与 pair:boob_l+boob_r；c352 使用 head_attachment:head/head 与 single:chest。其余条目只保留明确的失败原因，后续需要新输入时再重建。
+c010_03 使用 face_attachment:head/face（face-only fallback）与 pair:boob_l+boob_r；c352 使用 head_attachment:head/head 与 single:chest。其余条目只保留明确的失败原因，后续需要新输入时再重建。
+
+## Real problem-character validation
+
+本轮按 `assets/character_master.json` 的正式数据核验了两个此前被旧证据误标的角色：
+
+| 正式角色 | formal id | resource id | canonical Spine | 实际结果 |
+| --- | ---: | ---: | --- | --- |
+| 森（Sin） | 140101 | 401 | c401 | `head_attachment` 可用，但严格 breast selector 为 `breast_unavailable`，`core_axis=false`，legacy fallback |
+| 阿尔卡娜（Arcana） | 258101 | 581 | c581 | `face_attachment` 仅作 face-only fallback，严格 breast selector 为 `breast_unavailable`，`core_axis=false`，legacy fallback |
+
+两项均使用 Nikke-DB 公共原始 bundle，读取真实 Spine 版本并在 `idle @ t=0` 离线提取：c401 数据版本 `4.0.47`，c581 数据版本 `4.1.20`。源 URL、骨架/atlas/纹理 SHA-256、语义候选、失败原因和渲染 PNG 哈希见：
+
+- `docs/evidence/character_card_layout_v2_20260920/real_problem_roles.json`
+
+公共上游只作为资源来源证据，不声明本项目拥有游戏美术或上游 runtime 的分发授权。c401/c581 的实际 WebGL idle 渲染已用于卡面合成；没有把纹理 atlas 当作角色立绘。
+
+1600×2400 合成卡面已实际查看，且浏览器布局审计 `overflow=[]`：
+
+- 森：`real_problem_roles/sin_c401_before.png` / `sin_c401_after.png`
+- 阿尔卡娜：`real_problem_roles/arcana_c581_before.png` / `arcana_c581_after.png`
+
+由于两名角色均严格 fail-closed 到 legacy fallback，本轮 before/after 文件哈希相同是预期结果；它证明真实角色不会被错误 core-axis 推动，不证明这两个角色已经获得 core-axis 校准。
 
 ## 视觉验收
 
@@ -54,7 +76,7 @@ c010_03 使用 head_attachment:head/face 与 pair:boob_l+boob_r；c352 使用 he
 - E:\_codex_work\character-card-layout-v2-worktree\astrbot_plugin_nikke\docs\evidence\face_guided_body_centering\c016_y_offset_compare.png
 - E:\_codex_work\character-card-layout-v2-worktree\astrbot_plugin_nikke\docs\evidence\face_guided_body_centering\c191_y_offset_compare.png
 
-preview_replica.py 生成的 11 个样本均为 overflow=[]；长名会换行，非默认立绘可见，空装备保持中性，宽/高比例与企业样本未出现裁切越界。c016/c191 的 before/after 图只证明 legacy Y offset 的离线视觉变化，不证明真实账号或生产送达。
+preview_replica.py 生成的 13 个样本均为 overflow=[]；除既有 11 个样本外，新增森（c401）与阿尔卡娜（c581）的真实 Spine idle 合成卡面。c016/c191 的 before/after 图只证明 legacy Y offset 的离线视觉变化，不证明真实账号或生产送达。
 
 core-axis 诊断覆盖 summary 0–4：c010_03 各摘要档位经 safe-area clamp 后满足 head/eye/breast 轴；c352 的 summary 0–3 满足轴，summary 4 按 6% 尺度限制返回 scale_limited，不强行缩放破坏卡面比例。
 
@@ -75,6 +97,8 @@ core-axis 诊断覆盖 summary 0–4：c010_03 各摘要档位经 safe-area clam
 - 最终唯一一次 full pytest：892 passed、491 subtests passed、1 warning，用时 52.53s。
 - python -m compileall -q .：通过。
 - node --check scripts/extract_spine_face_anchor.mjs：通过。
+- node --check scripts/spine_surface_semantics.mjs：通过。
+- node --test tests/spine_surface_semantics.test.mjs：5 passed。
 - node --check extension/background.js：通过。
 - node --check extension/popup.js：通过。
 - git diff --check：通过；Git 仅报告 LF 在 Windows 全局配置下未来可能转 CRLF 的提示，没有 whitespace error。
@@ -86,13 +110,19 @@ core-axis 诊断覆盖 summary 0–4：c010_03 各摘要档位经 safe-area clam
 本实现提交包含：
 
 ~~~text
+.github/workflows/ci.yml
 assets/face_anchors.json
 character_card_layout.py
 character_replica.py
 docs/evidence/face_guided_body_centering/c016_y_offset_compare.png
 docs/evidence/face_guided_body_centering/c191_y_offset_compare.png
+docs/evidence/character_card_layout_v2_20260920/real_problem_roles.json
+docs/evidence/character_card_layout_v2_20260920/real_problem_roles/*.png
+docs/REPLICA_CALENDAR_V05_REPORT.md
 face_anchor.py
 scripts/extract_spine_face_anchor.mjs
+scripts/spine_surface_semantics.mjs
+scripts/render_spine_preview.py
 scripts/prepare_face_anchors.py
 spine_core_axis.py
 t2i_payloads.py
@@ -102,6 +132,7 @@ tests/test_calendar_v04.py
 tests/test_character_card_layout_v2.py
 tests/test_face_anchor_core_axis_v2.py
 tests/test_prepare_face_anchors.py
+tests/spine_surface_semantics.test.mjs
 tests/test_spine_core_axis.py
 tests/test_t2i_frontend.py
 ~~~
@@ -110,6 +141,6 @@ character_replica.py、face_anchor.py、t2i_payloads.py、模板和两个新布�
 
 ## 未完成与后续边界
 
-- 未执行生产部署、真实 QQ/NapCat 送达、Signin、真实账号读写或现场 Spine runtime 验证。
-- 未为 c016/c191 制造缺乏安全证据的 core axis，也未扩大 Costume 映射；这些仍按现有 fallback/证据合同处理。
+- 未执行生产部署、真实 QQ/NapCat 送达、Signin、真实账号读写或生产现场 Spine runtime 验证；本轮 real problem-character 仅完成本地官方 bundle 的离线 Spine/WebGL 验证。
+- 未为 c016/c191 或 c401/c581 制造缺乏安全证据的 core axis，也未扩大 Costume 映射；这些仍按现有 fallback/证据合同处理。
 - 本分支是包指定 baseline 上的独立 UI/布局 PR；如需并入更晚的 Calendar/main 演进，应在评审后单独 rebase/解决冲突，不在本次自动完成。
