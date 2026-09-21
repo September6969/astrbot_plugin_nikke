@@ -1,10 +1,10 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-12。当前核验的远端基线为 `origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；下表是历史与当前工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-21。当前核验的远端基线为 `origin/main@bde290f2eebcba22270c940fa68290078584b04d`；下表是历史与当前工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
-| `main` | 仅通过 GitHub PR 合并推进 | 本轮未直接修改本地 main、未 force push；当前核验基线 `origin/main@e4a9ff9` |
+| `main` | 仅通过 GitHub PR 合并推进 | 本轮未直接修改本地 main、未 force push；当前核验基线 `origin/main@bde290f2` |
 | 已合并代码 worktree | 历史/独立分支 | 保留，不删除；其旧 HEAD 不代表当前 main |
 | 资源子系统 worktree | 已完成并入 main | #16、#17、#37、#38 按 campaign → single-flight → 全局槽位 → 预取生命周期顺序整合 |
 | 日常/存储 worktree | 已完成并入 main | #18、#19、#24、#35、#36 依赖顺序整合并经 CI 验证 |
@@ -29,6 +29,8 @@
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
 | Calendar Content Quality v1 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\calendar-content-quality-v1-worktree\astrbot_plugin_nikke` / `feat/calendar-content-quality-v1`；从已部署 UI 基线 `origin/feat/calendar-pixel-contract-v1@ecc5495` 建立，P0 parser/classifier/relevance/identity/official prefilter 已接线；新增 13、旧 Calendar/合并 66、UI 46 定向测试通过，最终 full pytest 1031 passed/2 skipped；未部署、未修改 main、未发送 QQ 消息 |
+
+| 2026-09-21 Character Card main integration | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\character-card-main-integration` / `integration/character-card-main`；从 `origin/main@bde290f2` 建立，先保留 Calendar 两项提交，再以模块化方式移植 `feat/character-card-layout-v2@bef2d3b1`；定向 Python 70 passed/22 subtests、Node 4 passed，预览与 before/after 证据已记录；最终 full pytest、CI、main 合并与部署待后续门禁 |
 
 ## 当前新增工作树
 

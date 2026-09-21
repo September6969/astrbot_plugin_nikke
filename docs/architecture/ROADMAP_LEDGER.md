@@ -257,3 +257,10 @@
 - CanonicalEvent 增加向后兼容 metadata；旧缓存载入时补算 display relevance。Operations Feed 只调整 active/upcoming 排序，不从 canonical dataset 删除 META，也不改变 runtime status/LKG/Reminder。
 - 本机公开 GameKee 只读诊断：123/123 valid、0 malformed、0 duplicate、123 visual；类别 event 95、pass 20、recruit 7、double_reward 1。完整响应、header、账号信息未保存。
 - 定向测试：新增 13 项通过；Calendar/adapter/service/P0 旧回归 66 项通过；Calendar UI 定向 46 项通过。最终唯一 full pytest 为 `1031 passed, 2 skipped, 653 subtests passed, 1 warning`；`compileall`、Node 两个 extension `--check` 和 `git diff --check` 均通过。状态为 `READY_OFFLINE`，等待远端 CI/review；未部署、未发送消息、未自动合并。
+
+## Calendar → Character Card main integration（2026-09-21，当前独立主题）
+
+- 已按 `ecc54955` → `bde290f2` 更新顺序把 Calendar pixel contract 与 Content Quality 合入当前 `origin/main@bde290f2eebcba22270c940fa68290078584b04d`；从该 main 建立 `integration/character-card-main`。
+- 旧 `feat/character-card-layout-v2@bef2d3b1` 直接合并会引入已淘汰的根目录架构并删除现有模块，因此改为只移植模块化 v2 增量：动态摘要布局、核心轴安全构图、Spine 表面语义、离线 metadata 保留、装备空槽视觉与 v2 模板版本。
+- 定向回归为 Python `70 passed`（含 `22 subtests`）与 Node `4 passed`；11 个角色卡合成样本实际查看，overflow 全部为空；before/after 预览和性能数据记录在 `docs/evidence/character_card_layout_v2_integration_20260921.md`。
+- 当前状态：`READY_OFFLINE`。最终 full pytest 尚未执行；尚未推送/创建集成 PR、尚未合并 main、未部署、未发送 QQ 消息。完成代码与台账后按一次性规则执行最终 full pytest，再等待 GitHub CI。

@@ -277,7 +277,7 @@ async def test_character_card_visual_polish(tmp_path):
     assert 'width:1600px;height:2400px' in html
     assert "backdrop-filter:blur(22px)" in html
     assert "overflow:hidden" in html
-    assert "replica-1600x2400-v1" in html
+    assert "replica-1600x2400-v2" in html
     assert '<footer' not in html
     assert 'class="skill-strip"' in html
     assets.close()

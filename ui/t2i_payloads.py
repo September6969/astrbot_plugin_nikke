@@ -127,6 +127,21 @@ class CharacterT2IPayloadBuilder:
             for row in gear["options"]:
                 row["short_name"] = SHORT_NAMES.get(row["name"].strip("【】"), row["name"])
         replica = build_summary(data)
+        from astrbot_plugin_nikke.features.character.layout import summary_layout
+        replica_layout = summary_layout(len(replica["rows"]))
+        summary_panel_style = (
+            f"top:{replica_layout.local_top:.3f}px;height:{replica_layout.height:.3f}px"
+            if replica_layout.visible else ""
+        )
+        character_layout = {
+            "summary_count": replica_layout.count,
+            "summary_height": replica_layout.height,
+            "summary_top": replica_layout.card_top,
+            "summary_bottom": replica_layout.card_bottom,
+            "gear_top": replica_layout.gear_top,
+            "safe_top": replica_layout.safe_top,
+            "safe_bottom": replica_layout.safe_bottom,
+        }
         skills_assets = getattr(card_assets, "skills", {}) or {}
         return {"replica_summary": replica, "template_version": VERSION, "cache_identity": cache_identity(data),
                 "grade": data.grade, "core": data.core,
@@ -139,7 +154,8 @@ class CharacterT2IPayloadBuilder:
                 "font_noto_700": noto_font_700(), "font_noto_800": noto_font_800(),
                 "font_barlow": barlow_font(), "font_barlow_sb": barlow_semibold_font(),
                 "font_rajdhani": rajdhani_font(), "font_rajdhani_sb": rajdhani_semibold_font(),
-                "art_style": art_style(data, portrait),
+                "art_style": art_style(data, portrait, summary_count=replica_layout.count),
+                "summary_panel_style": summary_panel_style, "character_layout": character_layout,
                 "name": data.name_cn, "english": data.name_en, "long_name": len(data.name_cn) > 11,
                 "combat": display_number(data.combat), "level": str(data.level), "rarity": data.rarity or "Unknown",
                 "character_art_data_uri": self.resolver.encode(portrait, (1600, 2400)), "theme": asdict(theme), "identities": identities,

@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import hashlib
 import json
 
-VERSION = "replica-1600x2400-v1"
+VERSION = "replica-1600x2400-v2"
 SHORT_NAMES = {
     # 简体官方全称
     "攻击力增加": "攻击", "防御力增加": "防御", "最大装弹数增加": "装弹",
@@ -115,9 +115,9 @@ def cache_identity(data):
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
-def art_style(data, portrait):
+def art_style(data, portrait, *, summary_count=None):
     from astrbot_plugin_nikke.features.character.face_anchor import framing
-    return framing(data, portrait)["style"]
+    return framing(data, portrait, summary_count=summary_count)["style"]
 
 
 def noto_font_700():
