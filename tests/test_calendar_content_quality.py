@@ -12,7 +12,10 @@ from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEve
 from astrbot_plugin_nikke.features.calendar.content_quality import (
     DisplayTier,
     IdentityDecision,
+    canonical_identity_match,
+    classify_explicit_title,
     classify_category,
+    canonical_event_title,
     get_display_relevance,
     normalize_title,
     score_display_relevance,
@@ -123,6 +126,20 @@ def test_category_aliases_and_description_guard():
     assert classify_category("Rewards", description="updated rewards are available") == "event"
 
 
+def test_explicit_title_taxonomy_wins_over_wrong_supporting_fields():
+    assert classify_explicit_title("Limited Costume: Viper - Toxic Rabbit")[0] == "limited_costume"
+    assert classify_category(
+        "Limited Costume: Viper - Toxic Rabbit",
+        tag="coop",
+        activity_kind="coordinated operation",
+    ) == "limited_costume"
+    assert classify_category("Costume Gacha: Sugar - Killer Rabbit", tag="recruit") == "costume_gacha"
+    assert classify_category("Mini Game: THREE COMPANY RUMBLE", tag="coop") == "mini_game"
+    assert classify_category("September Mission Pass", tag="coop") == "pass"
+    assert classify_category("SSR Guilty: Mighty Bunny", tag="coop") == "recruit"
+    assert classify_category("[限时通关] Trail Marker", tag="coop") == "limited_stage"
+
+
 def test_title_normalization_keeps_season_and_numbers():
     normalized = normalize_title("[NEW] 单人突袭 第10期 Deadline")
     assert "solo_raid" in normalized
@@ -130,6 +147,65 @@ def test_title_normalization_keeps_season_and_numbers():
     assert "10" in normalized
     assert "new" not in normalized
     assert "deadline" not in normalized
+
+
+def test_canonical_event_title_removes_packaging_without_erasing_identity():
+    assert canonical_event_title("[活动PASS] LET'S DRINK PASS") == "let s drink pass"
+    assert canonical_event_title("LET'S DRINK PASS") == "let s drink pass"
+    assert canonical_event_title("Trail Marker Event") == "trail marker"
+    assert canonical_event_title("[限时通关] Trail Marker") == "trail marker"
+    assert canonical_event_title("SSR Anne: Miracle Fairy") != canonical_event_title("SSR Mica: Snow Buddy")
+    assert canonical_event_title("Limited Costume: Alice - Sweet Home") != canonical_event_title(
+        "Limited Costume: Mary - Medical Rabbit"
+    )
+    assert canonical_event_title("Simulation Room Overclock Mode Season 10") != canonical_event_title(
+        "Simulation Room Overclock Mode Season 11"
+    )
+
+
+def test_canonical_identity_matches_packaging_variants_without_relaxing_gate():
+    left = _event(
+        "gk:7828",
+        "[活动PASS] LET'S DRINK PASS",
+        "pass",
+        detail_url="https://www.gamekee.com/nikke/721020.html",
+    )
+    right = _event(
+        "official:pass",
+        "LET'S DRINK PASS",
+        "event",
+        primary_source="official",
+        sources=["official"],
+        detail_url="https://official.example/lets-drink-pass",
+    )
+
+    assert score_identity(left, right).decision != IdentityDecision.MATCH
+    result = canonical_identity_match(left, right)
+    assert result is not None
+    assert result.decision == IdentityDecision.MATCH
+    assert "canonical_title_exact:+100" in result.reasons
+
+
+def test_explicit_identity_conflict_blocks_same_window_detail_reuse():
+    alice = _event(
+        "gk:alice",
+        "SSR Anne: Miracle Fairy",
+        "recruit",
+        detail_url="https://example.test/shared-detail",
+    )
+    mica = _event(
+        "official:mica",
+        "SSR Mica: Snow Buddy",
+        "recruit",
+        primary_source="official",
+        sources=["official"],
+        detail_url="https://example.test/shared-detail",
+    )
+
+    result = score_identity(alice, mica)
+
+    assert result.decision == IdentityDecision.DISTINCT
+    assert "explicit_identity_conflict:-100" in result.reasons
 
 
 def test_relevance_tiers_and_relative_ordering():
@@ -275,6 +351,31 @@ def test_merge_datasets_does_not_reduce_simultaneous_different_events(tmp_path):
 
     assert len(merged) == 2
     assert service.quality_diagnostics["identity_matches"] == 0
+
+
+def test_merge_datasets_uses_canonical_title_evidence_for_packaging_variants(tmp_path):
+    service = ScheduleService(tmp_path, visual_cache=False)
+    left = _event(
+        "gk:7828",
+        "[活动PASS] LET'S DRINK PASS",
+        "pass",
+        detail_url="https://www.gamekee.com/nikke/721020.html",
+    )
+    right = _event(
+        "official:pass",
+        "LET'S DRINK PASS",
+        "event",
+        primary_source="official",
+        sources=["official"],
+        detail_url="https://official.example/lets-drink-pass",
+    )
+    service._source_datasets = {"gamekee": [left], "official": [right]}
+
+    merged = service._merge_datasets()
+
+    assert len(merged) == 1
+    assert service.quality_diagnostics["identity_matches"] == 1
+    assert service.quality_diagnostics["canonical_title_matches"] == 1
 
 
 def test_canonical_dataset_is_lossless_while_feed_can_deprioritize_meta(tmp_path):

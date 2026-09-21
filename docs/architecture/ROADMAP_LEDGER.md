@@ -264,3 +264,11 @@
 - 旧 `feat/character-card-layout-v2@bef2d3b1` 直接合并会引入已淘汰的根目录架构并删除现有模块，因此改为只移植模块化 v2 增量：动态摘要布局、核心轴安全构图、Spine 表面语义、离线 metadata 保留、装备空槽视觉与 v2 模板版本。
 - 定向回归为 Python `70 passed`（含 `22 subtests`）与 Node `4 passed`；11 个角色卡合成样本实际查看，overflow 全部为空；before/after 预览和性能数据记录在 `docs/evidence/character_card_layout_v2_integration_20260921.md`。
 - 当前状态：`READY_OFFLINE`，PR #97 最终提交为 `8f4fe8a`。最终 full pytest 已按一次性规则执行：`1119 passed, 2 skipped, 653 subtests passed, 17 failed`；16 项为旧 Calendar Operations Feed 测试文件误随历史分支带入，已删除并由当前 Calendar 定向 `125 passed` 覆盖；另 1 项为本地 worktree 名称导致注册测试子进程加载旁边旧树。未重复 full pytest；GitHub CI run `35619830726` 已在标准 checkout 目录通过 Node、Spine 与 Python 3.10–3.13 全量回归。尚未合并 main、未部署、未发送 QQ 消息。
+
+## Calendar Operations Feed v2（2026-09-21，当前独立主题）
+
+- 从 `origin/main@d79650ae442c7c31e740b281e1332da640b31409` 建立独立 worktree `E:\_codex_work\calendar-feed-normalization-v2` 与分支 `feat/calendar-feed-normalization-v2`；不复用旧 Calendar/Character Card worktree，不修改 main。
+- 已完成标题优先分类、canonical title 身份证据、兼容分类族、META 保留、Operations Feed 分组/时间/精度/稳定身份排序；服务文本、旧查询接口和 T2I payload 共用排序契约，`active_sort_key`/`resolve_next_ending` 未改。
+- 公开 GameKee 只读复核为 123/123 valid、0 malformed、0 duplicate、123 visual；当前快照分类为 event 76、pass 20、costume_gacha 18、recruit 6、double_reward 1、mini_game 1、limited_stage 1。单条活动不追加网络请求。
+- 定向测试已通过：内容质量/身份/展示排序 26，Schedule/P0 39，Calendar UI/v04/v05/T2I 115，合计 180。公开 page-1 与合成分页 page-1/page-2 已实际查看；详情和 hash 见 `docs/acceptance/CALENDAR_FEED_NORMALIZATION_V2.md` 与 `docs/evidence/calendar_feed_normalization_v2_20260921.json`。
+- 当前状态为 `READY_OFFLINE`；最终 `compileall`、`git diff --check`、一次性 full pytest、远端 CI、Draft PR 尚未完成；未部署、未访问真实账号、未发送 QQ 消息、未合并 main。
