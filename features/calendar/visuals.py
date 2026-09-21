@@ -6,12 +6,14 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import io
+import ipaddress
 import json
 import os
+import socket
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import httpx
 from PIL import Image, ImageOps
@@ -27,6 +29,7 @@ class CalendarVisualCache:
 
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 30_000_000
+    MAX_REDIRECT_HOPS = 3
 
     def __init__(
         self,
@@ -56,9 +59,67 @@ class CalendarVisualCache:
     def _safe_url(value: str) -> bool:
         try:
             parsed = urlparse(value)
+            hostname = parsed.hostname
+            # 访问凭据、控制字符和异常端口都不属于视觉素材 URL 合同。
+            if any(ord(char) < 0x20 for char in str(value)):
+                return False
+            if parsed.username is not None or parsed.password is not None:
+                return False
+            _ = parsed.port
         except (TypeError, ValueError):
             return False
-        return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc or not hostname:
+            return False
+        host = hostname.rstrip(".").casefold()
+        if host == "localhost" or host.endswith(".localhost"):
+            return False
+        try:
+            address = ipaddress.ip_address(host)
+        except ValueError:
+            return True
+        # is_global 为 False 覆盖 loopback/private/link-local/multicast/
+        # reserved/unspecified 及共享地址段，避免把 URL parser 当作网络边界。
+        return address.is_global
+
+    async def _validate_remote_url(self, value: str) -> bool:
+        """校验 URL 及解析后的每个地址，防止下载器成为 SSRF 跳板。"""
+        if not self._safe_url(value):
+            return False
+        parsed = urlparse(value)
+        hostname = (parsed.hostname or "").rstrip(".").casefold()
+        try:
+            address = ipaddress.ip_address(hostname)
+        except ValueError:
+            address = None
+        if address is not None:
+            return address.is_global
+
+        # 注入传输层只用于离线 MockTransport/测试服务器；它不会建立真实
+        # socket，因此交给测试传输层解析主机名，但仍保留上面的 IP/localhost
+        # 硬拒绝。生产客户端 transport=None，必须继续执行 DNS 校验。
+        if self.transport is not None:
+            return True
+
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        try:
+            records = await asyncio.to_thread(
+                socket.getaddrinfo,
+                hostname,
+                port,
+                type=socket.SOCK_STREAM,
+            )
+        except (OSError, socket.gaierror):
+            # MockTransport 是离线行为测试边界；真实客户端不得把 DNS 失败
+            # 当作可访问，避免测试例域名的例外泄漏到生产路径。
+            return self.transport is not None
+
+        resolved = {str(item[4][0]) for item in records if item and item[4]}
+        if not resolved:
+            return False
+        try:
+            return all(ipaddress.ip_address(item).is_global for item in resolved)
+        except ValueError:
+            return False
 
     def _load_manifest(self) -> None:
         try:
@@ -120,18 +181,34 @@ class CalendarVisualCache:
             "game-alias": "nikke",
             "user-agent": "astrbot-plugin-nikke/calendar-visual",
         }
-        async with client.stream("GET", url, headers=headers) as response:
-            response.raise_for_status()
-            content_type = response.headers.get("content-type", "").lower()
-            if content_type and not content_type.startswith("image/") and "octet-stream" not in content_type:
-                raise ValueError(f"活动视觉素材不是图片 Content-Type: {content_type}")
-            chunks: list[bytes] = []
-            total = 0
-            async for chunk in response.aiter_bytes():
-                total += len(chunk)
-                if total > self.MAX_BYTES:
-                    raise ValueError("活动视觉素材超过大小限制")
-                chunks.append(chunk)
+        current_url = url
+        redirect_hops = 0
+        while True:
+            if not await self._validate_remote_url(current_url):
+                raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
+            async with client.stream("GET", current_url, headers=headers) as response:
+                if response.status_code in (301, 302, 303, 307, 308):
+                    if redirect_hops >= self.MAX_REDIRECT_HOPS:
+                        raise ValueError("活动视觉素材重定向次数超过限制")
+                    location = response.headers.get("location")
+                    if not location:
+                        raise ValueError("活动视觉素材重定向缺少 Location")
+                    current_url = urljoin(current_url, location)
+                    redirect_hops += 1
+                    continue
+
+                response.raise_for_status()
+                content_type = response.headers.get("content-type", "").lower()
+                if content_type and not content_type.startswith("image/"):
+                    raise ValueError(f"活动视觉素材不是图片 Content-Type: {content_type}")
+                chunks: list[bytes] = []
+                total = 0
+                async for chunk in response.aiter_bytes():
+                    total += len(chunk)
+                    if total > self.MAX_BYTES:
+                        raise ValueError("活动视觉素材超过大小限制")
+                    chunks.append(chunk)
+                break
         raw = b"".join(chunks)
         if not raw:
             raise ValueError("活动视觉素材为空")
@@ -275,7 +352,8 @@ class CalendarVisualCache:
         async with httpx.AsyncClient(
             transport=self.transport,
             timeout=self.timeout,
-            follow_redirects=True,
+            follow_redirects=False,
+            trust_env=False,
         ) as client:
             results = await asyncio.gather(
                 *(self._ensure_one(client, semaphore, act) for act in selected)

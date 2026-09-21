@@ -186,6 +186,8 @@ def normalize_title(value: Any) -> str:
         ("union raid", "union_raid"),
         ("special arena", "special_arena"),
         ("special recruit", "recruit"),
+        ("特殊招募", "recruit"),
+        ("招募", "recruit"),
         ("recruitment", "recruit"),
         ("pick up", "recruit"),
         ("pickup", "recruit"),
@@ -398,6 +400,10 @@ def score_identity(left: Any, right: Any) -> IdentityMatch:
 
     score = 0
     reasons: list[str] = []
+    explicit_same_source = False
+    cycle_exact = False
+    detail_exact = False
+    exact_time_window = False
     left_scope = str(getattr(left, "server_scope", "GLOBAL") or "GLOBAL")
     right_scope = str(getattr(right, "server_scope", "GLOBAL") or "GLOBAL")
     if left_scope != right_scope and "UNKNOWN" not in (left_scope, right_scope):
@@ -408,6 +414,7 @@ def score_identity(left: Any, right: Any) -> IdentityMatch:
     if left_cycle and right_cycle:
         if left_cycle == right_cycle:
             score += 45
+            cycle_exact = True
             reasons.append("cycle_exact:+45")
         else:
             return IdentityMatch(-100, IdentityDecision.DISTINCT, ("cycle_conflict:-100",))
@@ -424,12 +431,14 @@ def score_identity(left: Any, right: Any) -> IdentityMatch:
         return IdentityMatch(-100, IdentityDecision.DISTINCT, ("same_source_id_conflict:-100",))
     if getattr(left, "id", None) == getattr(right, "id", None) and left_sources & right_sources:
         score += 100
+        explicit_same_source = True
         reasons.append("explicit_same_source:+100")
 
     left_detail = str(getattr(left, "detail_url", "") or "")
     right_detail = str(getattr(right, "detail_url", "") or "")
     if left_detail and right_detail and left_detail == right_detail:
         score += 50
+        detail_exact = True
         reasons.append("detail_reference:+50")
 
     left_type = str(getattr(left, "event_type", "event") or "event")
@@ -486,9 +495,24 @@ def score_identity(left: Any, right: Any) -> IdentityMatch:
             elif start_diff <= 600 and end_diff <= 600:
                 # 两端都精确对齐时，足以抵消跨语言/官方公告标题改写造成的低相似度。
                 score += 10
+                exact_time_window = True
                 reasons.append("exact_time_window:+10")
 
-    if score >= 75:
+    # 仅靠“同类别 + 同时间 + 标题看起来相似”不能覆盖两个不同角色的同时活动。
+    # 自动合并必须拥有可解释的强身份证据：同源同 ID、同一周期、同一详情页，
+    # 或标题高度相似且类别与完整时间窗口同时对齐。否则最高只能是 AMBIGUOUS。
+    strong_title_time = title_score >= 0.85 and left_type == right_type and exact_time_window
+    strong_evidence = explicit_same_source or cycle_exact or detail_exact or strong_title_time
+    if strong_title_time:
+        reasons.append("strong_title_time")
+    if not strong_evidence:
+        reasons.append("strong_identity_gate:missing")
+
+    if strong_evidence and score >= 75:
+        decision = IdentityDecision.MATCH
+    elif strong_evidence and score >= 50:
+        # 周期/详情引用等强证据允许略低于标题时间窗的总分，但仍不能越过
+        # 前面的 scope/cycle/source ID 冲突早退保护。
         decision = IdentityDecision.MATCH
     elif score >= 50:
         decision = IdentityDecision.AMBIGUOUS

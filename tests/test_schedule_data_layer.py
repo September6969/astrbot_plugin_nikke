@@ -215,6 +215,7 @@ class TestScheduleServiceDataLayer(IsolatedAsyncioTestCase):
             event_type="event",
             start_at=self.now,
             end_at=self.now + timedelta(days=7),
+            cycle_id="eva_2026",
             banner_url="https://gamekee.com/eva_banner.png",
             detail_url="https://gamekee.com/eva",
             sources=["gamekee"],
@@ -228,6 +229,7 @@ class TestScheduleServiceDataLayer(IsolatedAsyncioTestCase):
             event_type="event",
             start_at=self.now + timedelta(minutes=5),  # 稍微校准
             end_at=self.now + timedelta(days=7),
+            cycle_id="eva_2026",
             banner_url="https://official.com/eva.png",
             detail_url="https://official.com/notice_999",
             sources=["official"],

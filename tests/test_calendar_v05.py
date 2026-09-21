@@ -35,6 +35,68 @@ def test_url_text_and_nested_json():
     assert _extract_image_urls(json.dumps([{"src": urls[0]}, {"nested": {"image": urls[1]}}])) == urls
 
 
+def test_visual_url_rejects_local_network_targets_and_credentials():
+    assert CalendarVisualCache._safe_url("https://cdn.example/image.png")
+    for value in (
+        "http://localhost/image.png",
+        "http://127.0.0.1/image.png",
+        "http://169.254.169.254/latest/meta-data",
+        "http://10.0.0.5/image.png",
+        "http://192.168.1.10/image.png",
+        "http://[::1]/image.png",
+        "https://user:pass@cdn.example/image.png",
+        "file:///tmp/image.png",
+    ):
+        assert not CalendarVisualCache._safe_url(value), value
+
+
+@pytest.mark.asyncio
+async def test_visual_redirect_to_private_target_is_rejected(tmp_path):
+    seen = []
+
+    def respond(request):
+        seen.append(str(request.url))
+        return httpx.Response(302, headers={"location": "http://127.0.0.1/private.png"})
+
+    cache = CalendarVisualCache(tmp_path, transport=httpx.MockTransport(respond))
+    result = await cache.sync([activity(key_visual_url="https://example.test/start")], now=NOW)
+
+    assert result["failed"] == 1
+    assert seen == ["https://example.test/start"]
+
+
+@pytest.mark.asyncio
+async def test_visual_public_redirect_is_followed_with_manual_validation(tmp_path):
+    seen = []
+
+    def respond(request):
+        seen.append(request.url.path)
+        if request.url.path == "/start":
+            return httpx.Response(302, headers={"location": "/good.png"})
+        return httpx.Response(200, content=png(), headers={"content-type": "image/png"})
+
+    cache = CalendarVisualCache(tmp_path, transport=httpx.MockTransport(respond))
+    result = await cache.sync([activity(key_visual_url="https://example.test/start")], now=NOW)
+
+    assert result["downloaded"] == 1
+    assert seen == ["/start", "/good.png"]
+
+
+@pytest.mark.asyncio
+async def test_visual_non_image_content_type_is_rejected(tmp_path):
+    cache = CalendarVisualCache(
+        tmp_path,
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(200, content=png(), headers={"content-type": "text/html"})
+        ),
+    )
+
+    result = await cache.sync([activity(key_visual_url="https://example.test/not-image")], now=NOW)
+
+    assert result["failed"] == 1
+    assert cache.resolve_path("one") is None
+
+
 @pytest.mark.asyncio
 async def test_real_candidate_chain_and_retry(tmp_path):
     count = 0

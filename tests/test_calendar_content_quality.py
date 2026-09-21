@@ -172,6 +172,111 @@ def test_identity_match_ambiguous_and_distinct():
     assert score_identity(distinct_left, distinct_right).decision == IdentityDecision.DISTINCT
 
 
+def test_identity_gate_keeps_different_named_same_window_events_distinct():
+    alice = _event(
+        "gk:alice",
+        "Special Recruit Alice",
+        "recruit",
+        start_at=START,
+        end_at=START + timedelta(days=2),
+    )
+    rapi = _event(
+        "official:rapi",
+        "Special Recruit Rapi",
+        "recruit",
+        primary_source="official",
+        sources=["official"],
+        start_at=START,
+        end_at=START + timedelta(days=2),
+    )
+
+    result = score_identity(alice, rapi)
+
+    assert result.decision != IdentityDecision.MATCH
+    assert "strong_identity_gate:missing" in result.reasons
+
+
+def test_identity_gate_accepts_similar_bilingual_title_with_exact_window():
+    left = _event(
+        "gk:alice",
+        "Special Recruit Alice",
+        "recruit",
+        start_at=START,
+        end_at=START + timedelta(days=2),
+    )
+    right = _event(
+        "official:alice",
+        "特殊招募 Alice 公告",
+        "recruit",
+        primary_source="official",
+        sources=["official"],
+        start_at=START + timedelta(minutes=5),
+        end_at=START + timedelta(days=2),
+    )
+
+    result = score_identity(left, right)
+
+    assert result.decision == IdentityDecision.MATCH
+    assert "strong_title_time" in result.reasons
+
+
+def test_identity_gate_accepts_exact_cycle_even_when_titles_are_rewritten():
+    left = _event("gk:season-9", "Solo Raid Season 9", "solo_raid", cycle_id="season_9")
+    right = _event(
+        "official:season-9",
+        "Season 9 battle notice",
+        "solo_raid",
+        cycle_id="season_9",
+        primary_source="official",
+        sources=["official"],
+    )
+
+    result = score_identity(left, right)
+
+    assert result.decision == IdentityDecision.MATCH
+    assert "cycle_exact:+45" in result.reasons
+
+
+def test_identity_gate_accepts_exact_detail_reference():
+    left = _event("gk:1", "Alice recruit", "recruit", detail_url="https://example.test/activity/1")
+    right = _event(
+        "official:1",
+        "Character notice",
+        "event",
+        detail_url="https://example.test/activity/1",
+        primary_source="official",
+        sources=["official"],
+        start_at=None,
+        end_at=None,
+    )
+
+    result = score_identity(left, right)
+
+    assert result.decision == IdentityDecision.MATCH
+    assert "detail_reference:+50" in result.reasons
+
+
+def test_merge_datasets_does_not_reduce_simultaneous_different_events(tmp_path):
+    service = ScheduleService(tmp_path, visual_cache=False)
+    service._source_datasets = {
+        "gamekee": [_event("gk:alice", "Special Recruit Alice", "recruit")],
+        "official": [
+            _event(
+                "official:rapi",
+                "Special Recruit Rapi",
+                "recruit",
+                primary_source="official",
+                sources=["official"],
+            )
+        ],
+    }
+
+    merged = service._merge_datasets()
+
+    assert len(merged) == 2
+    assert service.quality_diagnostics["identity_matches"] == 0
+
+
 def test_canonical_dataset_is_lossless_while_feed_can_deprioritize_meta(tmp_path):
     service = ScheduleService(tmp_path, visual_cache=False)
     events = []
