@@ -76,7 +76,17 @@
     "content_quality_and_display_sort": "26 passed",
     "schedule_data_layer_and_p0": "39 passed",
     "calendar_ui_v04_v05_t2i": "115 passed",
-    "targeted_total": "180 passed"
+    "targeted_total": "180 passed",
+    "compileall": "passed",
+    "git_diff_check": "passed",
+    "final_full_pytest_once": {
+      "result": "1117 passed, 2 skipped, 648 subtests passed, 16 failed",
+      "calendar_failures": 0,
+      "environmental_failures": 16,
+      "failure_scope": "11 BossAssetResolver + 5 LineupPortraitResolver; relative data/nikke/blabla-assets path was resolved from the validation parent directory rather than the checkout root",
+      "not_repeated": true
+    }
   },
+  "implementation_commit": "9ec94b79f85c8d13880438d13262a3674dc88906",
   "live_account_or_deployment": false
 }
