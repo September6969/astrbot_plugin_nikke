@@ -263,4 +263,4 @@
 - 已按 `ecc54955` → `bde290f2` 更新顺序把 Calendar pixel contract 与 Content Quality 合入当前 `origin/main@bde290f2eebcba22270c940fa68290078584b04d`；从该 main 建立 `integration/character-card-main`。
 - 旧 `feat/character-card-layout-v2@bef2d3b1` 直接合并会引入已淘汰的根目录架构并删除现有模块，因此改为只移植模块化 v2 增量：动态摘要布局、核心轴安全构图、Spine 表面语义、离线 metadata 保留、装备空槽视觉与 v2 模板版本。
 - 定向回归为 Python `70 passed`（含 `22 subtests`）与 Node `4 passed`；11 个角色卡合成样本实际查看，overflow 全部为空；before/after 预览和性能数据记录在 `docs/evidence/character_card_layout_v2_integration_20260921.md`。
-- 当前状态：`READY_OFFLINE`。最终 full pytest 尚未执行；尚未推送/创建集成 PR、尚未合并 main、未部署、未发送 QQ 消息。完成代码与台账后按一次性规则执行最终 full pytest，再等待 GitHub CI。
+- 当前状态：`READY_OFFLINE`。最终 full pytest 已按一次性规则执行：`1119 passed, 2 skipped, 653 subtests passed, 17 failed`；16 项为旧 Calendar Operations Feed 测试文件误随历史分支带入，已删除并由当前 Calendar 定向 `125 passed` 覆盖；另 1 项为本地 worktree 名称导致注册测试子进程加载旁边旧树。未重复 full pytest，待推送后由 GitHub CI 在标准 checkout 目录完成最终跨版本验证；尚未合并 main、未部署、未发送 QQ 消息。

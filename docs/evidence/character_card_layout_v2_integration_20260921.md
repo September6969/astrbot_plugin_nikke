@@ -60,7 +60,7 @@
 - `git diff --check`：通过。
 - Python/Node 语法检查：通过。
 - Issue #73 的 `.1322 → 13.22%` / `.8537 → 85.37%` 合同测试仍在既有 UI 回归中通过；本轮未改数值 formatter 或后端数据合同。
-- 按当前执行约束，本轮尚未运行最终 full pytest；代码完成且文档提交后只运行一次最终 full pytest，跨版本结果以 GitHub CI 为准。
+- 最终 full pytest 已按约束只执行一次：`1119 passed, 2 skipped, 653 subtests passed, 17 failed`。其中 16 项来自被旧集成分支带入、但不在当前 `origin/main` 的 `tests/test_calendar_operations_feed.py`；删除该 stale test 后，当前 Calendar v04/v05/Content Quality/P0/UI 定向套件为 `125 passed`。剩余 1 项是本地 worktree 目录名不是 `astrbot_plugin_nikke`，注册测试子进程因此加载了旁边旧 worktree；标准 GitHub checkout 目录与 CI 环境不受此问题影响。按执行约束不重复 full pytest，跨版本结果以 GitHub CI 为准。
 
 ## 未完成与边界
 
