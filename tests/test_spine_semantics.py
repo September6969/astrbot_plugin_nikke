@@ -93,3 +93,46 @@ class SpineSemanticTests(TestCase):
             # 没覆盖的 chest 依然保持自动推断
             self.assertEqual(matches["chest"].bone_name, "c_breast_belt")
             self.assertEqual(matches["chest"].source, "auto-name")
+
+    def test_structured_attachment_override_is_not_coerced_to_a_bone(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "overrides.json"
+            p.write_text(
+                json.dumps({
+                    "entries": {
+                        "test_char:default": {
+                            "upper_torso": {
+                                "kind": "attachment",
+                                "slot": "body_total",
+                                "attachment": "body_total",
+                            }
+                        }
+                    }
+                }),
+                encoding="utf-8",
+            )
+            mapper = SpineSemanticMapper(overrides_path=p)
+            matches = mapper.get_semantic_mapping("test_char:default", make_mock_skeleton())
+
+            self.assertNotIn("upper_torso", matches)
+
+    def test_structured_semantic_entry_is_not_coerced_to_an_empty_bone(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "semantics.json"
+            p.write_text(
+                json.dumps({
+                    "entries": {
+                        "test_char:default": {
+                            "upper_torso": {
+                                "kind": "bone_pair",
+                                "bones": ["chest_l", "chest_r"],
+                            }
+                        }
+                    }
+                }),
+                encoding="utf-8",
+            )
+            mapper = SpineSemanticMapper(semantics_catalog_path=p)
+            matches = mapper.get_semantic_mapping("test_char:default")
+
+            self.assertNotIn("upper_torso", matches)

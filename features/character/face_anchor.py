@@ -115,15 +115,15 @@ def _finite_point(value):
 
 
 def _validated_core_axis(row: dict, portrait, point: list[float]):
-    """严格校验离线生成的头顶、眼睛、胸部轴，不猜测缺失坐标。"""
+    """严格校验离线生成的头顶、眼睛、上躯干轴，不猜测缺失坐标。"""
     axis = row.get("core_axis")
     if not isinstance(axis, dict):
         return None, "core_axis_unavailable"
 
     eye = axis.get("eye_point")
-    breast = axis.get("breast_point")
+    torso = axis.get("torso_point") or axis.get("breast_point")
     head_top_y = axis.get("head_top_y")
-    if not _finite_point(eye) or not _finite_point(breast):
+    if not _finite_point(eye) or not _finite_point(torso):
         return None, "invalid_axis"
     if (
         not isinstance(head_top_y, (int, float))
@@ -141,18 +141,22 @@ def _validated_core_axis(row: dict, portrait, point: list[float]):
 
     if not (
         0 <= head_top_y <= portrait.height
-        and 0 <= breast[0] <= portrait.width
-        and 0 <= breast[1] <= portrait.height
-        and head_top_y <= point[1] < breast[1]
+        and 0 <= torso[0] <= portrait.width
+        and 0 <= torso[1] <= portrait.height
+        and head_top_y <= point[1] < torso[1]
     ):
         return None, "invalid_axis"
 
     return {
         "eye_point": [float(point[0]), float(point[1])],
         "head_top_y": float(head_top_y),
-        "breast_point": [float(breast[0]), float(breast[1])],
+        "torso_point": [float(torso[0]), float(torso[1])],
+        "torso_source": axis.get("torso_source", axis.get("breast_source", "unknown")),
+        "torso_confidence": axis.get("torso_confidence"),
+        # 兼容旧 metadata 与旧诊断消费者。
+        "breast_point": [float(torso[0]), float(torso[1])],
         "head_top_source": axis.get("head_top_source", "unknown"),
-        "breast_source": axis.get("breast_source", "unknown"),
+        "breast_source": axis.get("breast_source", axis.get("torso_source", "unknown")),
     }, "ok"
 
 
@@ -296,6 +300,9 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
             "summary_count": normalized_count,
             "head_top_portrait_y": core["head_top_y"],
             "eye_portrait": core["eye_point"],
+            "torso_portrait": core["torso_point"],
+            "torso_source": core["torso_source"],
+            "torso_confidence": core["torso_confidence"],
             "breast_portrait": core["breast_point"],
             "head_top_source": core["head_top_source"],
             "breast_source": core["breast_source"],
@@ -325,7 +332,7 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
                 scale=scale,
                 head_top_y=core["head_top_y"],
                 eye_y=core["eye_point"][1],
-                breast_y=core["breast_point"][1],
+                torso_y=core["torso_point"][1],
                 safe_top=layout.safe_top,
                 safe_bottom=layout.safe_bottom,
             )
@@ -343,7 +350,7 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
                     candidate_scale, fit_reason = fitted_scale(
                         original_scale=scale,
                         head_top_y=core["head_top_y"],
-                        breast_y=core["breast_point"][1],
+                        torso_y=core["torso_point"][1],
                         safe_top=layout.safe_top,
                         safe_bottom=layout.safe_bottom,
                         min_ratio=MIN_AUTO_SCALE_RATIO,
@@ -356,7 +363,7 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
                             scale=scale,
                             head_top_y=core["head_top_y"],
                             eye_y=core["eye_point"][1],
-                            breast_y=core["breast_point"][1],
+                            torso_y=core["torso_point"][1],
                             safe_top=layout.safe_top,
                             safe_bottom=layout.safe_bottom,
                         )
@@ -394,9 +401,11 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
                     "correction_y": final_top - desired_top,
                     "head_top_card_before": desired_top + core["head_top_y"] * scale,
                     "eye_card_before": desired_top + core["eye_point"][1] * scale,
+                    "torso_card_before": desired_top + core["torso_point"][1] * scale,
                     "breast_card_before": desired_top + core["breast_point"][1] * scale,
                     "head_top_card_after": final_top + core["head_top_y"] * scale,
                     "eye_card_after": final_top + core["eye_point"][1] * scale,
+                    "torso_card_after": final_top + core["torso_point"][1] * scale,
                     "breast_card_after": final_top + core["breast_point"][1] * scale,
                 }
             )

@@ -16,8 +16,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(ROOT))
 from inspect_spine_bundle import _binary_spine_version
 from features.character.spine_core_axis import (
-    select_breast_anchor,
     select_head_top,
+    select_upper_torso_anchor,
     validate_axis_order,
 )
 
@@ -34,6 +34,37 @@ def merge_records(old_records, rebuilt_records):
     return merged, len(preserved)
 
 
+def _load_entries(path: Path) -> dict:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError):
+        return {}
+    entries = raw.get("entries", raw) if isinstance(raw, dict) else {}
+    return entries if isinstance(entries, dict) else {}
+
+
+def _registry_key(render_id: str, manifest_entry: dict) -> str | None:
+    """从正式资源身份得到 resource:costume registry key；不按序号猜服装。"""
+    if isinstance(manifest_entry, dict):
+        resource_id = manifest_entry.get("resource_id") or manifest_entry.get("character_resource_id")
+        if resource_id is not None:
+            costume_id = manifest_entry.get("costume_id")
+            return f"{resource_id}:{costume_id if costume_id is not None else 'default'}"
+    match = re.fullmatch(r"c(\d+)(?:_(\d+))?", str(render_id or ""))
+    if not match or match.group(2) is not None:
+        return None
+    return f"{int(match.group(1))}:default"
+
+
+def _role_override(entry: dict | None):
+    if not isinstance(entry, dict):
+        return None
+    if "upper_torso" in entry:
+        return entry["upper_torso"]
+    # 兼容旧 schema 的 chest: "bone" 覆盖。
+    return entry.get("chest")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
@@ -46,6 +77,8 @@ def main():
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))["characters"]
     args.bundle_dir.mkdir(parents=True, exist_ok=True)
+    semantic_entries = _load_entries(ROOT / "assets/mappings/spine_bone_semantics.json")
+    override_entries = _load_entries(ROOT / "assets/mappings/spine_bone_overrides.json")
 
     def one(pair):
         key, entry = pair
@@ -80,8 +113,14 @@ def main():
                 timeout=45,
             )
             record = json.loads(sidecar.read_text(encoding="utf-8"))
-            breast, breast_reason = select_breast_anchor(
-                record.get("anatomy_bones_1024", [])
+            registry_key = _registry_key(key, entry)
+            semantic_entry = semantic_entries.get(registry_key) if registry_key else None
+            override_entry = override_entries.get(registry_key) if registry_key else None
+            torso, torso_reason = select_upper_torso_anchor(
+                record.get("anatomy_bones_1024", []),
+                existing_override=_role_override(override_entry),
+                semantic_entry=semantic_entry,
+                attachment_candidates=record.get("attachment_candidates_1024", []),
             )
             head_top, head_reason = select_head_top(
                 record.get("head_surface_candidates_1024", [])
@@ -124,31 +163,36 @@ def main():
                     if record["extent_1024"]
                     else None
                 )
-                if breast is not None and head_top is not None:
-                    breast_point = crop_point(list(breast.point))
+                record.pop("core_axis", None)
+                if torso is not None and head_top is not None:
+                    torso_point = crop_point(list(torso.point))
                     head_top_y = crop_y(head_top.y)
                     if validate_axis_order(
                         head_top_y=head_top_y,
                         eye_y=record["point"][1],
-                        breast_y=breast_point[1],
+                        torso_y=torso_point[1],
                     ) and (
                         0 <= head_top_y <= rgba.height
-                        and 0 <= breast_point[0] <= rgba.width
-                        and 0 <= breast_point[1] <= rgba.height
+                        and 0 <= torso_point[0] <= rgba.width
+                        and 0 <= torso_point[1] <= rgba.height
                     ):
                         record["core_axis"] = {
                             "eye_point": list(record["point"]),
                             "head_top_y": head_top_y,
-                            "breast_point": breast_point,
+                            "torso_point": torso_point,
+                            "torso_source": torso.source,
+                            "torso_confidence": torso.confidence,
+                            # 旧 metadata 的读取方保持兼容；新代码使用 torso_point。
+                            "breast_point": torso_point,
                             "head_top_source": head_top.source,
-                            "breast_source": breast.source,
+                            "breast_source": torso.source,
                         }
                         record["core_axis_reason"] = "ok"
                     else:
                         record["core_axis_reason"] = "invalid_axis_order"
                 else:
                     record["core_axis_reason"] = (
-                        breast_reason if breast is None else head_reason
+                        torso_reason if torso is None else head_reason
                     )
                 record["pixel_sha256"] = hashlib.sha256(rgba.tobytes()).hexdigest()
                 record["png_sha256"] = hashlib.sha256(png.read_bytes()).hexdigest()
@@ -163,6 +207,7 @@ def main():
                 record.pop("candidates", None)
                 record.pop("anatomy_bones_1024", None)
                 record.pop("head_surface_candidates_1024", None)
+                record.pop("attachment_candidates_1024", None)
                 return key, record
         except (OSError, ValueError, httpx.HTTPError, subprocess.SubprocessError) as exc:
             return key, {"error": type(exc).__name__, "reason": str(exc)[:200]}

@@ -112,3 +112,23 @@ def test_stale_axis_eye_is_rejected_without_moving_card():
 
     assert result["style"] == prior["style"]
     assert result["core_axis"]["reason"] == "axis_eye_mismatch"
+
+
+def test_new_torso_metadata_is_consumed_without_legacy_breast_field():
+    card = make_card()
+    image = Image.new("RGBA", (100, 200), "white")
+    row = make_row(image, point=(50, 30), extent=(40, 20))
+    row["core_axis"] = {
+        "eye_point": [50, 30],
+        "head_top_y": 5,
+        "torso_point": [50, 100],
+        "torso_source": "verified-test",
+        "torso_confidence": 0.91,
+        "head_top_source": "test-head",
+    }
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
+        result = framing(card, image, body_centering=False, summary_count=4)
+
+    assert result["core_axis"]["torso_source"] == "verified-test"
+    assert result["core_axis"]["torso_confidence"] == 0.91
+    assert result["core_axis"]["torso_card_after"] <= result["core_axis"]["safe_bottom"]

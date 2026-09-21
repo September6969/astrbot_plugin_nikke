@@ -60,7 +60,7 @@ class SpineSemanticMapper:
         self.semantics_path = Path(semantics_catalog_path) if semantics_catalog_path else None
         self.overrides_path = Path(overrides_path) if overrides_path else None
         self._cached_semantics: dict[str, dict[str, dict]] = self._load_json(self.semantics_path)
-        self._cached_overrides: dict[str, dict[str, str]] = self._load_json(self.overrides_path)
+        self._cached_overrides: dict[str, dict[str, object]] = self._load_json(self.overrides_path)
 
     @staticmethod
     def _load_json(path: Path | None) -> dict:
@@ -89,9 +89,14 @@ class SpineSemanticMapper:
             entry = self._cached_semantics[character_key]
             for sem, data in entry.items():
                 if isinstance(data, dict):
+                    # 结构化 pair/attachment/surface 记录属于上躯干选择器，
+                    # 不能在旧的单骨骼 mapper 中伪造空骨骼匹配。
+                    bone_name = data.get("bone")
+                    if not isinstance(bone_name, str) or not bone_name:
+                        continue
                     results[sem] = SemanticBoneMatch(
                         semantic=sem,
-                        bone_name=str(data.get("bone", "")),
+                        bone_name=bone_name,
                         confidence=float(data.get("confidence", 0.9)),
                         source=str(data.get("source", "cached")),
                     )
@@ -112,8 +117,15 @@ class SpineSemanticMapper:
 
         # 3. 手工覆盖（最高绝对优先级）
         if character_key in self._cached_overrides:
-            for sem, b_name in self._cached_overrides[character_key].items():
-                if b_name:
+            for sem, raw_value in self._cached_overrides[character_key].items():
+                b_name = raw_value
+                if isinstance(raw_value, dict):
+                    # 结构化 attachment/bone_pair 供上躯干选择器使用，
+                    # 旧的 bone mapper 不把它误读成单根骨骼。
+                    if raw_value.get("kind") not in {None, "bone"}:
+                        continue
+                    b_name = raw_value.get("bone")
+                if isinstance(b_name, str) and b_name:
                     results[sem] = SemanticBoneMatch(
                         semantic=sem,
                         bone_name=b_name,

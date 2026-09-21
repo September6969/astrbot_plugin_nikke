@@ -68,3 +68,9 @@
 - 服务器数据盘维护后可用空间约 12,269,004 KiB，仍高于 5 GiB 门禁；Nikke-db vendor 约 4,651,740 KiB，渲染目录约 9,740 KiB。
 - 只读 Campaign 输出目录为 `/AstrBot/data/nikke/campaign-capture/`；Chapter 1 smoke 已完成，full capture 继续后台运行，快照不回写仓库。
 - 证据文件：`docs/evidence/pr79_live_runtime_v03_20260912.json`；其中区分 `READY_OFFLINE`、`READY_FOR_RETEST`、`PARTIAL` 与 `NEEDS_LIVE_EVIDENCE`，不记录 Cookie、Token、OpenID 或 QQ ID。
+
+## 2026-09-21 当前新增工作树（Character Card v2 Spine semantic anchor v2）
+
+| 范围 | 状态 | 备注 |
+| --- | --- | --- |
+| Character Card v2 Spine semantic anchor v2 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\spine-semantic-anchor-v2` / `feat/spine-semantic-anchor-v2`；基线实时核验为 `origin/main@d79650ae442c7c31e740b281e1332da640b31409`，仅处理 c401/c581 上躯干语义锚点与兼容合同；定向 Python 30、Node 6 通过，最终 full pytest 1130 passed/2 skipped/1 个旁边旧 worktree 环境失败；真实 skeleton/atlas 只读审计证据已记录，未部署、未访问真实账号、未发送 QQ 消息 |
