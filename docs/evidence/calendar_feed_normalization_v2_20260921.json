@@ -88,5 +88,18 @@
     }
   },
   "implementation_commit": "9ec94b79f85c8d13880438d13262a3674dc88906",
+  "draft_pr": 99,
+  "github_ci": {
+    "run_id": 35640293133,
+    "status": "success",
+    "checks": [
+      "Extension (Node)",
+      "Spine 4.0 headless worker build",
+      "Test (Python 3.10)",
+      "Test (Python 3.11)",
+      "Test (Python 3.12)",
+      "Test (Python 3.13)"
+    ]
+  },
   "live_account_or_deployment": false
 }

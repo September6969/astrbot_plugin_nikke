@@ -271,4 +271,4 @@
 - 已完成标题优先分类、canonical title 身份证据、兼容分类族、META 保留、Operations Feed 分组/时间/精度/稳定身份排序；服务文本、旧查询接口和 T2I payload 共用排序契约，`active_sort_key`/`resolve_next_ending` 未改。
 - 公开 GameKee 只读复核为 123/123 valid、0 malformed、0 duplicate、123 visual；当前快照分类为 event 76、pass 20、costume_gacha 18、recruit 6、double_reward 1、mini_game 1、limited_stage 1。单条活动不追加网络请求。
 - 定向测试已通过：内容质量/身份/展示排序 26，Schedule/P0 39，Calendar UI/v04/v05/T2I 115，合计 180。公开 page-1 与合成分页 page-1/page-2 已实际查看；详情和 hash 见 `docs/acceptance/CALENDAR_FEED_NORMALIZATION_V2.md` 与 `docs/evidence/calendar_feed_normalization_v2_20260921.json`。
-- 当前状态为 `READY_OFFLINE`；`compileall` 与 `git diff --check` 已通过，最终 full pytest 仅执行一次并记录为 `1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项均为既有 Boss/Lineup resolver 的相对素材路径环境问题，Calendar 无失败；未重复 full pytest。远端 CI 与 Draft PR 待完成；未部署、未访问真实账号、未发送 QQ 消息、未合并 main。
+- 当前状态为 `READY_OFFLINE`；`compileall` 与 `git diff --check` 已通过，最终 full pytest 仅执行一次并记录为 `1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项均为既有 Boss/Lineup resolver 的相对素材路径环境问题，Calendar 无失败；未重复 full pytest。Draft PR #99 的 GitHub CI run `35640293133`（Node、Spine 4.0、Python 3.10–3.13）已全绿；未部署、未访问真实账号、未发送 QQ 消息、未合并 main。

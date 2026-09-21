@@ -54,7 +54,9 @@
 - Calendar UI/v04/v05/T2I visual/frontend：`115 passed`。
 - 定向合计：`180 passed`，另有既有依赖弃用 warning。
 
-最终 `compileall` 与 `git diff --check` 已通过。最终 full pytest 已按规则只执行一次：`1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项全部属于既有 Raid/阵容资产 resolver（Boss 11 项、Lineup 5 项），原因是本次干净验证 checkout 从其父目录启动，既有 resolver 使用相对路径 `data/nikke/blabla-assets`，因此没有命中 checkout 内的已跟踪素材；Calendar 定向套件没有失败。没有为此重复 full pytest；GitHub CI 将在标准仓库根目录负责 Python 3.10–3.13 与 Node 跨版本回归。
+最终 `compileall` 与 `git diff --check` 已通过。最终 full pytest 已按规则只执行一次：`1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项全部属于既有 Raid/阵容资产 resolver（Boss 11 项、Lineup 5 项），原因是本次干净验证 checkout 从其父目录启动，既有 resolver 使用相对路径 `data/nikke/blabla-assets`，因此没有命中 checkout 内的已跟踪素材；Calendar 定向套件没有失败。没有为此重复 full pytest。
+
+Draft PR #99 的 GitHub CI run `35640293133` 已全绿：Node、Spine 4.0、Python 3.10、3.11、3.12、3.13 全部通过。
 
 当前分支尚未合并 main、未部署、未发送 QQ 消息；上述 full pytest 环境问题已作为明确交接项保留，不把本地失败伪报为全绿。
 
