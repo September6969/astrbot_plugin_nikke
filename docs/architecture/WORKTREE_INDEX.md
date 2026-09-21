@@ -73,4 +73,4 @@
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
-| Character Card v2 Spine semantic anchor v2 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\spine-semantic-anchor-v2` / `feat/spine-semantic-anchor-v2`；基线实时核验为 `origin/main@d79650ae442c7c31e740b281e1332da640b31409`，仅处理 c401/c581 上躯干语义锚点与兼容合同；定向 Python 30、Node 6 通过，最终 full pytest 1130 passed/2 skipped/1 个旁边旧 worktree 环境失败；真实 skeleton/atlas 只读审计证据已记录，未部署、未访问真实账号、未发送 QQ 消息 |
+| Character Card v2 Spine semantic anchor v2 | Draft PR #98，`READY_OFFLINE` | `E:\_codex_work\spine-semantic-anchor-v2` / `feat/spine-semantic-anchor-v2`；基线实时核验为 `origin/main@d79650ae442c7c31e740b281e1332da640b31409`，仅处理 c401/c581 上躯干语义锚点与兼容合同；定向 Python 30、Node 6 通过，最终 full pytest 1130 passed/2 skipped/1 个旁边旧 worktree 环境失败；CI run 35635088655 全绿；真实 skeleton/atlas 只读审计证据已记录，未部署、未访问真实账号、未发送 QQ 消息 |

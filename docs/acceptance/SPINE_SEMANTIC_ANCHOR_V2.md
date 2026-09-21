@@ -42,6 +42,6 @@
 - `git diff --check`：通过；Git 的 LF→CRLF 提示不是 diff 错误。
 - 最终唯一 full pytest：`1130 passed, 2 skipped, 653 subtests passed, 1 failed`。失败为既有 `tests/test_registration_api.py::test_import_uses_star_auto_registration_without_deprecated_decorator` 的子进程环境问题：测试经 `Path.resolve()` 取到当前 worktree 的父目录后，父目录中同名的旧 `E:\_codex_work\astrbot_plugin_nikke` worktree 抢先被导入；错误 traceback 已指向该旁边旧树的 `main.py`。未修改该旧树，也未重复 full pytest。
 - 使用临时包别名隔离当前分支后，等价自动注册导入核验通过，输出 `astrbot_plugin_nikke.main`；当前分支 `main.py` 不含已弃用装饰器。
-- GitHub CI 作为跨版本最终回归依据；本次提交尚未创建 PR，因此 CI 状态待 Draft PR 创建后记录。
+- GitHub CI run `35635088655`：Extension (Node)、Spine 4.0 headless worker、Python 3.10、3.11、3.12、3.13 全部通过。
 
 缺少生产 runtime、账号、QQ 或部署证据时保持 `READY_OFFLINE`，不升级为 live 完成。

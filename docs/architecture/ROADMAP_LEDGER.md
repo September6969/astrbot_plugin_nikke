@@ -272,4 +272,5 @@
 - `c401` 使用真实 4.0 skeleton 的 `body_total/body_total` attachment（`move3`，父级 `move2`，confidence `0.98`）；`c581` 使用真实 4.1 skeleton 的 `chest_l + chest_r`（共同父级 `pelvis7`，confidence `0.96`）。idle `t=0` 与 `t=0.5` 采样、运行时版本、数量和 SHA-256 记录在 `docs/evidence/spine_semantics/c401_c581_idle_audit_20260921.*`。
 - runtime metadata 只保留已选择的 torso point；`attachment_candidates_1024` 只留在 discovery sidecar。`torso_y`/`upper_torso_y` 为新内部命名，同时保留 `breast_y`、`breast_point` 与 `breast_source` 兼容合同。完整验收说明见 `docs/acceptance/SPINE_SEMANTIC_ANCHOR_V2.md`。
 - 定向 Python `30 passed`、Node `6 passed`；`compileall`、Node `--check`、JSON 校验和 `git diff --check` 通过。最终唯一 full pytest 为 `1130 passed, 2 skipped, 653 subtests passed, 1 failed`：唯一失败是既有注册测试子进程从 `E:\_codex_work\astrbot_plugin_nikke` 旁边旧 worktree 加载 `main.py`，不是当前分支代码；隔离当前分支的等价自动注册导入核验通过，未重复 full pytest。
-- 状态：`READY_OFFLINE`。本轮不部署、不访问真实账号、不发送 QQ 消息；Draft PR 与 GitHub CI 待本次提交后建立和记录。
+- GitHub CI run `35635088655` 已通过 Node、Spine 4.0 headless worker 与 Python 3.10–3.13；Draft PR #98 已建立，未合并。
+- 状态：`READY_OFFLINE`。本轮不部署、不访问真实账号、不发送 QQ 消息。
