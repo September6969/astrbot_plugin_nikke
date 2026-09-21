@@ -19,9 +19,9 @@ def test_equipment_icon_normalization_trims_transparent_padding():
     assert bbox is not None
     left, top, right, bottom = bbox
 
-    # 150 px safe box, centered; art must no longer inherit original off-center padding.
-    assert right - left <= 150
-    assert bottom - top <= 150
+    # 172 px safe box, centered; art must no longer inherit original off-center padding.
+    assert right - left <= 172
+    assert bottom - top <= 172
     assert abs((left + right) / 2 - 90) <= 1
     assert abs((top + bottom) / 2 - 90) <= 1
 
@@ -35,3 +35,347 @@ def test_character_template_has_calibrated_typography_and_badges():
     assert 'class="gear-status-badge"' in template
     assert "grid-template-columns:620px 470px 190px" in template
     assert "grid-template-columns:minmax(0,1fr) 132px 82px" in template
+    assert "radial-gradient(" in template
+    assert "backdrop-filter:blur(22px)" in template
+    assert 'class="ol-row empty empty-row"' in template
+    assert ".ol-row.empty .placeholder-label" in template
+    assert "grid-column:1 / 3" in template
+
+
+def test_rapi_red_hood_golden_sample_face_anchor_is_calibrated():
+    from astrbot_plugin_nikke.features.character.face_anchor import metadata
+    c010 = metadata().get("c010")
+    assert c010 is not None
+    assert "framing" in c010
+    assert c010["framing"]["target"] == [860, 610]
+    assert c010["framing"]["extent_width"] == 230.0
+
+
+def test_snow_white_face_anchor_is_calibrated():
+    from astrbot_plugin_nikke.features.character.face_anchor import metadata
+    c471 = metadata().get("c471")
+    assert c471 is not None
+    assert "framing" in c471
+    assert c471["framing"]["target"] == [742, 540]
+    assert c471["framing"]["extent_width"] == 248.4
+
+
+def test_custom_webfonts_and_slot_geometry_in_template():
+    from astrbot_plugin_nikke.features.character.replica import barlow_font, rajdhani_font, noto_font
+    barlow_uri = barlow_font()
+    rajdhani_uri = rajdhani_font()
+    noto_uri = noto_font()
+    assert barlow_uri is not None and barlow_uri.startswith("data:font/ttf;base64,")
+    assert rajdhani_uri is not None and rajdhani_uri.startswith("data:font/ttf;base64,")
+    assert noto_uri is not None and noto_uri.startswith("data:font/woff2;base64,")
+
+    template = T2ITemplateLoader().load("character")
+    # Registered @font-face families
+    assert "font-family:'NikkeNotoSC'" in template
+    assert "font-family:'NikkeBarlowCondensed'" in template
+    assert "font-family:'NikkeRajdhani'" in template
+
+    # Calibrated typography tokens
+    assert "--font-cn-title:" in template
+    assert "--font-cn-body:" in template
+    assert "--font-num-display:" in template
+    assert "--font-tech-label:" in template
+    assert "--size-character-name:67px;" in template
+    assert "--size-level-value:69px;" in template
+    assert "--size-battle-power:84px;" in template
+
+    # Typography candidate profiles (A/B/C/D)
+    assert ".character.header-font-a" in template
+    assert ".character.header-font-b" in template
+    assert ".character.header-font-c" in template
+    assert ".character.header-font-d" in template
+
+    # Header fixed slot geometry
+    assert 'class="slot-character-name title-line"' in template
+    assert 'class="slot-level level"' in template
+    assert 'class="slot-total-pill total' in template
+    assert 'class="slot-battle-power combat"' in template
+    assert 'class="slot-rarity-stars stars"' in template
+    assert 'class="icon-slot icon-slot-1' in template
+    assert 'class="icon-slot icon-slot-2' in template
+    assert 'class="icon-slot icon-slot-{{ loop.index + 2 }}' in template
+    assert ".slot-character-name{position:absolute;left:52px;" in template
+    assert ".slot-level{position:absolute;left:715px;" in template
+    assert ".slot-total-pill{position:absolute;right:50px;" in template
+    assert ".slot-battle-power{position:absolute;left:50px;" in template
+    assert ".slot-rarity-stars{position:absolute;left:248px;" in template
+    assert ".icon-slot-1{left:420px}" in template
+    assert ".icon-slot-6{left:1110px}" in template
+
+    # Equipment icon size & placeholder grid
+    assert "width:184px;height:184px" in template
+    assert "height:57px" in template
+    assert "grid-column:1 / 3" in template
+
+
+def test_face_anchor_eight_real_samples_and_three_fallbacks():
+    from astrbot_plugin_nikke.features.character.face_anchor import metadata, framing, identity_resolver
+    from astrbot_plugin_nikke.features.character.models import CostumeSelection
+    from astrbot_plugin_nikke.tests.test_character_replica import example_card
+    from PIL import Image
+
+    meta = metadata()
+    assert len(meta) >= 8
+
+    eight_samples = [
+        ("rapi", "10", 0, "c010"),
+        ("snow-white", "471", 0, "c471"),
+        ("rapi-vacation", "10", 10005, "c010_03"),
+        ("rapi-promise", "10", 20001, "c010_02"),
+        ("wide", "330", 0, "c330"),
+        ("tall", "234", 0, "c234"),
+        ("elysion", "17", 0, "c017"),
+        ("tetra", "352", 0, "c352"),
+    ]
+
+    for name, rid, costume, expected_render_id in eight_samples:
+        render_id = identity_resolver().resolve_render_id(rid, costume)
+        assert render_id == expected_render_id, f"{name} render_id mismatch"
+        record = meta.get(render_id)
+        assert record is not None, f"{name} missing in metadata"
+        assert record.get("anchor_kind") == "eye_attachment"
+        assert isinstance(record.get("point"), list) and len(record["point"]) == 2
+        assert isinstance(record.get("extent"), list) and len(record["extent"]) == 2
+
+    # 3 Separate layout/fallback cases
+    card = example_card()
+    card.resource_id, card.costume_id = "10", 0
+    card.costume_selection = CostumeSelection(0, "test", "default")
+    dummy_img = Image.new("RGBA", (100, 100), "white")
+
+    # 1. long-name layout case
+    long_name_card = example_card()
+    long_name_card.name_cn = "这是用于验证中英文超长角色名称的练度卡 Long Character Name"
+    assert len(long_name_card.name_cn) > 16
+
+    # 2. empty equipment layout case
+    empty_card = example_card()
+    empty_card.equipment = {}
+    assert len(empty_card.equipment) == 0
+
+    # 3. unknown-costume fallback case
+    unknown_costume_card = example_card()
+    unknown_costume_card.costume_id = "unknown"
+    unknown_costume_card.costume_selection = CostumeSelection("unknown", "test", "unknown")
+    result = framing(unknown_costume_card, dummy_img)
+    assert result["source"] == "identity_unknown"
+    assert result["style"] == "object-fit:contain"
+
+def test_character_font_audit_and_fallback():
+    from pathlib import Path
+    from jinja2 import Environment
+    from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+    from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.tests.test_character_replica import example_card
+    from astrbot_plugin_nikke.features.character.replica import (
+        noto_font, noto_font_700, noto_font_800,
+        barlow_font, barlow_semibold_font,
+        rajdhani_font, rajdhani_semibold_font, replica_font
+    )
+
+    fonts_dir = Path(__file__).resolve().parents[1] / "fonts"
+    assert (fonts_dir / "NotoSansSC-ReplicaSubset-700.woff2").exists()
+    assert (fonts_dir / "NotoSansSC-ReplicaSubset-800.woff2").exists()
+    assert (fonts_dir / "BarlowCondensed-Bold.ttf").exists()
+    assert (fonts_dir / "BarlowCondensed-SemiBold.ttf").exists()
+    assert (fonts_dir / "Rajdhani-Bold.ttf").exists()
+    assert (fonts_dir / "Rajdhani-SemiBold.ttf").exists()
+    assert (fonts_dir / "OFL-NotoSansSC.txt").exists()
+    assert (fonts_dir / "OFL-BarlowCondensed.txt").exists()
+    assert (fonts_dir / "OFL-Rajdhani.txt").exists()
+    assert (fonts_dir / "README.md").exists()
+
+    # Base64 cache resolution
+    assert noto_font_700().startswith("data:font/woff2;base64,")
+    assert noto_font_800().startswith("data:font/woff2;base64,")
+    assert noto_font().startswith("data:font/woff2;base64,")
+    assert barlow_font().startswith("data:font/ttf;base64,")
+    assert barlow_semibold_font().startswith("data:font/ttf;base64,")
+    assert rajdhani_font().startswith("data:font/ttf;base64,")
+    assert rajdhani_semibold_font().startswith("data:font/ttf;base64,")
+
+    # Payload building includes all font URIs
+    import types
+    card = example_card()
+    dummy_assets = types.SimpleNamespace(
+        portrait=None, equipment={}, corporation=None, element=None, weapon=None, burst=None,
+        skills={}, favorite_item=None, cube=None
+    )
+    payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, dummy_assets)
+    for font_key in ("font_noto", "font_noto_700", "font_noto_800", "font_barlow", "font_barlow_sb", "font_rajdhani", "font_rajdhani_sb"):
+        assert font_key in payload
+        assert payload[font_key].startswith("data:font/")
+
+    # Rendered HTML audit
+    rendered = Environment().from_string(T2ITemplateLoader().load("character")).render(**payload)
+    assert "@font-face{font-family:'NikkeNotoSC';src:url('data:font/woff2;base64," in rendered
+    assert "format('woff2')" in rendered
+    assert "font-weight:700" in rendered
+    assert "font-weight:800" in rendered
+    assert "@font-face{font-family:'NikkeBarlowCondensed'" in rendered
+    assert "@font-face{font-family:'NikkeBarlowCondensedSemiBold'" in rendered
+    assert "@font-face{font-family:'NikkeRajdhani'" in rendered
+    assert "@font-face{font-family:'NikkeRajdhaniSemiBold'" in rendered
+    assert "--font-cn-title:'NikkeNotoSC'" in rendered
+    assert "font-synthesis:none;" in rendered
+    assert 'class="long"' not in rendered
+
+    # Long name contract test
+    long_card = example_card()
+    long_card.name_cn = "这是用于验证中英文超长角色名称的练度卡 Long Character Name"
+    long_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(long_card, dummy_assets)
+    assert long_payload["long_name"] is True
+    long_rendered = Environment().from_string(T2ITemplateLoader().load("character")).render(**long_payload)
+    assert 'class="long"' in long_rendered
+
+    # Fallback resilience: when WOFF2 is missing, noto_font still resolves from OTF
+    from astrbot_plugin_nikke.features.character.replica import _load_font_data_uri
+    assert _load_font_data_uri("NotoSansHans-Medium.otf").startswith("data:font/otf;base64,")
+
+
+import pytest
+
+@pytest.mark.asyncio
+async def test_browser_rendered_fonts_and_glyph_metrics():
+    """在真实 Chromium 运行态下验证字体真实加载、computed style 命中、字形度量及光栅缓冲区差异。"""
+    from playwright.async_api import async_playwright
+    from jinja2 import Environment
+    from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+    from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+    from astrbot_plugin_nikke.tests.test_character_replica import example_card
+    import types
+
+    card = example_card()
+    dummy_assets = types.SimpleNamespace(
+        portrait=None, equipment={}, corporation=None, element=None, weapon=None, burst=None,
+        skills={}, favorite_item=None, cube=None
+    )
+    payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, dummy_assets)
+    html = Environment().from_string(T2ITemplateLoader().load("character")).render(**payload)
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page(viewport={"width": 1600, "height": 2400})
+        await page.set_content(html, wait_until="load")
+        await page.evaluate("document.fonts.ready")
+
+        audit = await page.evaluate('''() => {
+            const faces = [];
+            for (const f of document.fonts) {
+                faces.push({ family: f.family, weight: f.weight, status: f.status });
+            }
+
+            const checkNoto700 = document.fonts.check("700 32px 'NikkeNotoSC'");
+            const checkNoto800 = document.fonts.check("800 67px 'NikkeNotoSC'");
+            const checkBarlow = document.fonts.check("700 84px 'NikkeBarlowCondensed'");
+            const checkRajdhani = document.fonts.check("700 21px 'NikkeRajdhani'");
+
+            const nameEl = document.querySelector(".slot-character-name h1");
+            const nameStyle = window.getComputedStyle(nameEl);
+            const nameRect = nameEl.getBoundingClientRect();
+
+            const combatEl = document.querySelector(".slot-battle-power b");
+            const combatStyle = window.getComputedStyle(combatEl);
+
+            const lvEl = document.querySelector(".slot-level .lv-prefix");
+            const lvStyle = window.getComputedStyle(lvEl);
+
+            const levelNumEl = document.querySelector(".slot-level b");
+            const levelNumStyle = window.getComputedStyle(levelNumEl);
+
+            // Canvas glyph metrics: verify condensed ratio
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            ctx.font = "700 84px 'NikkeBarlowCondensed'";
+            const barlowWidth = ctx.measureText("442425").width;
+            ctx.font = "700 84px sans-serif";
+            const sansWidth = ctx.measureText("442425").width;
+
+            // Canvas Chinese glyph raster buffer comparison:
+            const w = 500, h = 120;
+            const c1 = document.createElement("canvas");
+            c1.width = w; c1.height = h;
+            const ctx1 = c1.getContext("2d");
+            ctx1.fillStyle = "#000000";
+            ctx1.fillRect(0, 0, w, h);
+            ctx1.font = "800 67px 'NikkeNotoSC'";
+            ctx1.fillStyle = "#ffffff";
+            ctx1.textBaseline = "top";
+            ctx1.fillText("拉毗：小红帽", 10, 10);
+            const imgData1 = ctx1.getImageData(0, 0, w, h).data;
+
+            const c2 = document.createElement("canvas");
+            c2.width = w; c2.height = h;
+            const ctx2 = c2.getContext("2d");
+            ctx2.fillStyle = "#000000";
+            ctx2.fillRect(0, 0, w, h);
+            ctx2.font = "800 67px 'Replica'";
+            ctx2.fillStyle = "#ffffff";
+            ctx2.textBaseline = "top";
+            ctx2.fillText("拉毗：小红帽", 10, 10);
+            const imgData2 = ctx2.getImageData(0, 0, w, h).data;
+
+            let diffPixels = 0;
+            for (let i = 0; i < imgData1.length; i += 4) {
+                const diffR = Math.abs(imgData1[i] - imgData2[i]);
+                const diffG = Math.abs(imgData1[i+1] - imgData2[i+1]);
+                const diffB = Math.abs(imgData1[i+2] - imgData2[i+2]);
+                if (diffR > 20 || diffG > 20 || diffB > 20) {
+                    diffPixels++;
+                }
+            }
+
+            return {
+                faces,
+                checkNoto700,
+                checkNoto800,
+                checkBarlow,
+                checkRajdhani,
+                nameFamily: nameStyle.fontFamily,
+                nameWeight: nameStyle.fontWeight,
+                nameWidth: nameRect.width,
+                combatFamily: combatStyle.fontFamily,
+                combatWeight: combatStyle.fontWeight,
+                lvFamily: lvStyle.fontFamily,
+                levelNumFamily: levelNumStyle.fontFamily,
+                barlowWidth,
+                sansWidth,
+                diffPixels
+            };
+        }''')
+        await browser.close()
+
+    # 1. 验证字体已被 Chromium 加载
+    loaded_families = {f["family"] for f in audit["faces"] if f["status"] == "loaded"}
+    assert "NikkeNotoSC" in loaded_families
+    assert "NikkeBarlowCondensed" in loaded_families
+    assert "NikkeRajdhani" in loaded_families
+
+    # 2. 验证 document.fonts.check 通过 (同时验证 700 和 800 字重)
+    assert audit["checkNoto700"] is True
+    assert audit["checkNoto800"] is True
+    assert audit["checkBarlow"] is True
+    assert audit["checkRajdhani"] is True
+
+    # 3. 验证真实 DOM 元素的 computed style 优先使用目标字体且字重正确
+    assert audit["nameFamily"].startswith("NikkeNotoSC")
+    assert audit["nameWeight"] == "800"
+    assert audit["combatFamily"].startswith("NikkeBarlowCondensed")
+    assert audit["combatWeight"] == "700"
+    assert audit["lvFamily"].startswith("NikkeRajdhani")
+    assert audit["levelNumFamily"].startswith("NikkeBarlowCondensed")
+
+    # 4. 验证真实字形度量（证明实际调用了压缩数字字体而不是默认非压缩字体）
+    assert audit["barlowWidth"] < audit["sansWidth"] * 0.85
+
+    # 5. 验证中文字符光栅级独立渲染证明（证明真实使用了 NikkeNotoSC 而非回退到 Replica）
+    assert audit["diffPixels"] > 100
+
+

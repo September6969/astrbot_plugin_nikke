@@ -1,0 +1,786 @@
+{
+  "schema": 1,
+  "seed": "nikke_review_ids_seed",
+  "samples": {
+    "X9DET6": {
+      "type": "candidate",
+      "render_id": "c221",
+      "policy": "D"
+    },
+    "DUJ6YM": {
+      "type": "candidate",
+      "render_id": "c400",
+      "policy": "B"
+    },
+    "QHTOFD": {
+      "type": "candidate",
+      "render_id": "c224",
+      "policy": "D"
+    },
+    "1Y63GR": {
+      "type": "candidate",
+      "render_id": "c010_02",
+      "policy": "C"
+    },
+    "4DNDDG": {
+      "type": "candidate",
+      "render_id": "c222",
+      "policy": "D"
+    },
+    "LFJCMD": {
+      "type": "candidate",
+      "render_id": "c017",
+      "policy": "D"
+    },
+    "YNKI1O": {
+      "type": "candidate",
+      "render_id": "c352",
+      "policy": "C"
+    },
+    "IJ0B52": {
+      "type": "candidate",
+      "render_id": "c191",
+      "policy": "E"
+    },
+    "7PXG3M": {
+      "type": "candidate",
+      "render_id": "c170",
+      "policy": "C"
+    },
+    "M1JV5W": {
+      "type": "candidate",
+      "render_id": "c011",
+      "policy": "E"
+    },
+    "0GKIU3": {
+      "type": "candidate",
+      "render_id": "c220",
+      "policy": "C"
+    },
+    "S2B4DT": {
+      "type": "candidate",
+      "render_id": "c012",
+      "policy": "B"
+    },
+    "63XGP9": {
+      "type": "candidate",
+      "render_id": "c012",
+      "policy": "E"
+    },
+    "SG78BQ": {
+      "type": "candidate",
+      "render_id": "c016",
+      "policy": "E"
+    },
+    "1P99HW": {
+      "type": "candidate",
+      "render_id": "c010_03",
+      "policy": "C"
+    },
+    "Q3636P": {
+      "type": "candidate",
+      "render_id": "c100",
+      "policy": "D"
+    },
+    "QTJ1XK": {
+      "type": "candidate",
+      "render_id": "c400",
+      "policy": "E"
+    },
+    "0V8V71": {
+      "type": "candidate",
+      "render_id": "c010",
+      "policy": "D"
+    },
+    "DV2H7E": {
+      "type": "candidate",
+      "render_id": "c172",
+      "policy": "B"
+    },
+    "S5K32D": {
+      "type": "candidate",
+      "render_id": "c072",
+      "policy": "E"
+    },
+    "02R7GL": {
+      "type": "control",
+      "render_id": "c010",
+      "policy": "A"
+    },
+    "UCBNR4": {
+      "type": "candidate",
+      "render_id": "c234",
+      "policy": "E"
+    },
+    "O3LD51": {
+      "type": "candidate",
+      "render_id": "c191",
+      "policy": "D"
+    },
+    "YO44MF": {
+      "type": "candidate",
+      "render_id": "c140",
+      "policy": "D"
+    },
+    "YZ366O": {
+      "type": "candidate",
+      "render_id": "c110",
+      "policy": "E"
+    },
+    "XLPGPE": {
+      "type": "candidate",
+      "render_id": "c172",
+      "policy": "E"
+    },
+    "CG2Z00": {
+      "type": "candidate",
+      "render_id": "c102",
+      "policy": "C"
+    },
+    "1E85MD": {
+      "type": "candidate",
+      "render_id": "c270",
+      "policy": "D"
+    },
+    "2IONRP": {
+      "type": "candidate",
+      "render_id": "c010",
+      "policy": "E"
+    },
+    "XC5RDQ": {
+      "type": "candidate",
+      "render_id": "c172",
+      "policy": "C"
+    },
+    "QL94M2": {
+      "type": "candidate",
+      "render_id": "c082",
+      "policy": "E"
+    },
+    "MHEIXP": {
+      "type": "candidate",
+      "render_id": "c101",
+      "policy": "B"
+    },
+    "WMQOPI": {
+      "type": "candidate",
+      "render_id": "c080",
+      "policy": "C"
+    },
+    "TFKMZV": {
+      "type": "candidate",
+      "render_id": "c082",
+      "policy": "C"
+    },
+    "JCHP48": {
+      "type": "candidate",
+      "render_id": "c140",
+      "policy": "C"
+    },
+    "RBAEWT": {
+      "type": "candidate",
+      "render_id": "c102",
+      "policy": "D"
+    },
+    "LVCI3A": {
+      "type": "candidate",
+      "render_id": "c310",
+      "policy": "C"
+    },
+    "17D40E": {
+      "type": "candidate",
+      "render_id": "c181",
+      "policy": "D"
+    },
+    "6J405S": {
+      "type": "candidate",
+      "render_id": "c161",
+      "policy": "D"
+    },
+    "ANZKAI": {
+      "type": "candidate",
+      "render_id": "c233",
+      "policy": "E"
+    },
+    "5GUJ8O": {
+      "type": "candidate",
+      "render_id": "c111",
+      "policy": "D"
+    },
+    "W7X6EQ": {
+      "type": "candidate",
+      "render_id": "c220",
+      "policy": "D"
+    },
+    "GJ4EH9": {
+      "type": "candidate",
+      "render_id": "c170",
+      "policy": "D"
+    },
+    "MIDTDW": {
+      "type": "candidate",
+      "render_id": "c471",
+      "policy": "B"
+    },
+    "YCIV13": {
+      "type": "candidate",
+      "render_id": "c072",
+      "policy": "B"
+    },
+    "JZIZOJ": {
+      "type": "candidate",
+      "render_id": "c102",
+      "policy": "B"
+    },
+    "KTBDGP": {
+      "type": "candidate",
+      "render_id": "c070",
+      "policy": "D"
+    },
+    "K04M5D": {
+      "type": "candidate",
+      "render_id": "c220",
+      "policy": "E"
+    },
+    "856Z9C": {
+      "type": "control",
+      "render_id": "c352",
+      "policy": "A"
+    },
+    "L9TX2A": {
+      "type": "candidate",
+      "render_id": "c233",
+      "policy": "B"
+    },
+    "GYD867": {
+      "type": "candidate",
+      "render_id": "c222",
+      "policy": "E"
+    },
+    "TVL1QF": {
+      "type": "candidate",
+      "render_id": "c181",
+      "policy": "C"
+    },
+    "X1BIRT": {
+      "type": "candidate",
+      "render_id": "c221",
+      "policy": "B"
+    },
+    "U32Q3O": {
+      "type": "candidate",
+      "render_id": "c270",
+      "policy": "B"
+    },
+    "0EKAFB": {
+      "type": "candidate",
+      "render_id": "c222",
+      "policy": "B"
+    },
+    "6SJ8YP": {
+      "type": "candidate",
+      "render_id": "c222",
+      "policy": "C"
+    },
+    "7KJR3A": {
+      "type": "candidate",
+      "render_id": "c102",
+      "policy": "E"
+    },
+    "S16MTD": {
+      "type": "candidate",
+      "render_id": "c224",
+      "policy": "B"
+    },
+    "22T5RK": {
+      "type": "candidate",
+      "render_id": "c161",
+      "policy": "C"
+    },
+    "UE0OZ0": {
+      "type": "control",
+      "render_id": "c012",
+      "policy": "A"
+    },
+    "14EQH4": {
+      "type": "candidate",
+      "render_id": "c180",
+      "policy": "B"
+    },
+    "EZ2QD3": {
+      "type": "candidate",
+      "render_id": "c191",
+      "policy": "C"
+    },
+    "H7BUCR": {
+      "type": "candidate",
+      "render_id": "c011",
+      "policy": "C"
+    },
+    "QY5681": {
+      "type": "candidate",
+      "render_id": "c170",
+      "policy": "E"
+    },
+    "U5AQBL": {
+      "type": "candidate",
+      "render_id": "c181",
+      "policy": "B"
+    },
+    "C3A6EO": {
+      "type": "candidate",
+      "render_id": "c082",
+      "policy": "D"
+    },
+    "878JKA": {
+      "type": "candidate",
+      "render_id": "c180",
+      "policy": "D"
+    },
+    "KSY076": {
+      "type": "candidate",
+      "render_id": "c101",
+      "policy": "D"
+    },
+    "66Q09J": {
+      "type": "candidate",
+      "render_id": "c010_03",
+      "policy": "D"
+    },
+    "9B4AH1": {
+      "type": "candidate",
+      "render_id": "c471",
+      "policy": "D"
+    },
+    "QQ4GU3": {
+      "type": "candidate",
+      "render_id": "c070",
+      "policy": "E"
+    },
+    "Z6KUCL": {
+      "type": "candidate",
+      "render_id": "c111",
+      "policy": "B"
+    },
+    "2UNJ3A": {
+      "type": "candidate",
+      "render_id": "c330",
+      "policy": "E"
+    },
+    "BXQBXW": {
+      "type": "control",
+      "render_id": "c170",
+      "policy": "A"
+    },
+    "37MLM9": {
+      "type": "candidate",
+      "render_id": "c234",
+      "policy": "D"
+    },
+    "YCO2JK": {
+      "type": "candidate",
+      "render_id": "c111",
+      "policy": "C"
+    },
+    "0O09JJ": {
+      "type": "candidate",
+      "render_id": "c120",
+      "policy": "E"
+    },
+    "YMPXJQ": {
+      "type": "candidate",
+      "render_id": "c234",
+      "policy": "B"
+    },
+    "CHH1PX": {
+      "type": "candidate",
+      "render_id": "c016",
+      "policy": "D"
+    },
+    "D98CQD": {
+      "type": "candidate",
+      "render_id": "c233",
+      "policy": "C"
+    },
+    "4BV5BE": {
+      "type": "candidate",
+      "render_id": "c017",
+      "policy": "C"
+    },
+    "ZDXJMI": {
+      "type": "candidate",
+      "render_id": "c111",
+      "policy": "E"
+    },
+    "XFDH7Y": {
+      "type": "candidate",
+      "render_id": "c110",
+      "policy": "C"
+    },
+    "5T7LOD": {
+      "type": "candidate",
+      "render_id": "c191",
+      "policy": "B"
+    },
+    "YQ7ZLQ": {
+      "type": "candidate",
+      "render_id": "c234",
+      "policy": "C"
+    },
+    "JEL26D": {
+      "type": "candidate",
+      "render_id": "c101",
+      "policy": "E"
+    },
+    "9KHSRE": {
+      "type": "candidate",
+      "render_id": "c140",
+      "policy": "B"
+    },
+    "2C05R4": {
+      "type": "control",
+      "render_id": "c100",
+      "policy": "A"
+    },
+    "4I8ABE": {
+      "type": "candidate",
+      "render_id": "c100",
+      "policy": "B"
+    },
+    "EWC51J": {
+      "type": "candidate",
+      "render_id": "c181",
+      "policy": "E"
+    },
+    "J19IPJ": {
+      "type": "candidate",
+      "render_id": "c180",
+      "policy": "E"
+    },
+    "6IYVUM": {
+      "type": "candidate",
+      "render_id": "c161",
+      "policy": "E"
+    },
+    "N53CJC": {
+      "type": "candidate",
+      "render_id": "c017",
+      "policy": "B"
+    },
+    "WVZJ8P": {
+      "type": "candidate",
+      "render_id": "c310",
+      "policy": "E"
+    },
+    "XNP253": {
+      "type": "candidate",
+      "render_id": "c330",
+      "policy": "B"
+    },
+    "E8RDYW": {
+      "type": "candidate",
+      "render_id": "c180",
+      "policy": "C"
+    },
+    "DTL43L": {
+      "type": "control",
+      "render_id": "c310",
+      "policy": "A"
+    },
+    "IKCRM7": {
+      "type": "candidate",
+      "render_id": "c352",
+      "policy": "E"
+    },
+    "OXRT0P": {
+      "type": "control",
+      "render_id": "c010_03",
+      "policy": "A"
+    },
+    "MA4JFX": {
+      "type": "candidate",
+      "render_id": "c010_02",
+      "policy": "B"
+    },
+    "2WD64C": {
+      "type": "candidate",
+      "render_id": "c224",
+      "policy": "E"
+    },
+    "WBVN9X": {
+      "type": "candidate",
+      "render_id": "c221",
+      "policy": "C"
+    },
+    "G3F62H": {
+      "type": "candidate",
+      "render_id": "c070",
+      "policy": "B"
+    },
+    "BDZU5Z": {
+      "type": "candidate",
+      "render_id": "c011",
+      "policy": "B"
+    },
+    "0JESQN": {
+      "type": "candidate",
+      "render_id": "c221",
+      "policy": "E"
+    },
+    "6PPATP": {
+      "type": "candidate",
+      "render_id": "c270",
+      "policy": "C"
+    },
+    "LZKSEU": {
+      "type": "candidate",
+      "render_id": "c012",
+      "policy": "C"
+    },
+    "C9RKTZ": {
+      "type": "candidate",
+      "render_id": "c010",
+      "policy": "B"
+    },
+    "DQYER8": {
+      "type": "candidate",
+      "render_id": "c080",
+      "policy": "D"
+    },
+    "CQJF1O": {
+      "type": "candidate",
+      "render_id": "c100",
+      "policy": "C"
+    },
+    "IF4I0I": {
+      "type": "candidate",
+      "render_id": "c012",
+      "policy": "D"
+    },
+    "DIA8GW": {
+      "type": "candidate",
+      "render_id": "c110",
+      "policy": "D"
+    },
+    "ZZGR46": {
+      "type": "candidate",
+      "render_id": "c120",
+      "policy": "D"
+    },
+    "KX005P": {
+      "type": "control",
+      "render_id": "c330",
+      "policy": "A"
+    },
+    "GSZB50": {
+      "type": "candidate",
+      "render_id": "c224",
+      "policy": "C"
+    },
+    "GYQGU6": {
+      "type": "candidate",
+      "render_id": "c330",
+      "policy": "D"
+    },
+    "I0I966": {
+      "type": "candidate",
+      "render_id": "c170",
+      "policy": "B"
+    },
+    "DSYTD5": {
+      "type": "candidate",
+      "render_id": "c016",
+      "policy": "C"
+    },
+    "1ZAHGB": {
+      "type": "candidate",
+      "render_id": "c100",
+      "policy": "E"
+    },
+    "QVZXD5": {
+      "type": "control",
+      "render_id": "c080",
+      "policy": "A"
+    },
+    "CFO3QH": {
+      "type": "candidate",
+      "render_id": "c017",
+      "policy": "E"
+    },
+    "7YF7R4": {
+      "type": "candidate",
+      "render_id": "c072",
+      "policy": "C"
+    },
+    "UVPUS8": {
+      "type": "control",
+      "render_id": "c110",
+      "policy": "A"
+    },
+    "BPVRM0": {
+      "type": "candidate",
+      "render_id": "c270",
+      "policy": "E"
+    },
+    "ZPMZPB": {
+      "type": "candidate",
+      "render_id": "c352",
+      "policy": "D"
+    },
+    "H2O9AJ": {
+      "type": "candidate",
+      "render_id": "c110",
+      "policy": "B"
+    },
+    "HWQTZ8": {
+      "type": "candidate",
+      "render_id": "c101",
+      "policy": "C"
+    },
+    "HO4UTY": {
+      "type": "candidate",
+      "render_id": "c471",
+      "policy": "E"
+    },
+    "YFZR7Q": {
+      "type": "candidate",
+      "render_id": "c140",
+      "policy": "E"
+    },
+    "GVUD3D": {
+      "type": "candidate",
+      "render_id": "c220",
+      "policy": "B"
+    },
+    "6JQPFH": {
+      "type": "candidate",
+      "render_id": "c016",
+      "policy": "B"
+    },
+    "OKFIZ0": {
+      "type": "candidate",
+      "render_id": "c400",
+      "policy": "D"
+    },
+    "XPSKI1": {
+      "type": "candidate",
+      "render_id": "c120",
+      "policy": "B"
+    },
+    "CLO31Z": {
+      "type": "candidate",
+      "render_id": "c352",
+      "policy": "B"
+    },
+    "1MAQBK": {
+      "type": "candidate",
+      "render_id": "c471",
+      "policy": "C"
+    },
+    "6KQGFY": {
+      "type": "control",
+      "render_id": "c234",
+      "policy": "A"
+    },
+    "AR4X5G": {
+      "type": "candidate",
+      "render_id": "c072",
+      "policy": "D"
+    },
+    "326NI1": {
+      "type": "candidate",
+      "render_id": "c080",
+      "policy": "B"
+    },
+    "1RW264": {
+      "type": "candidate",
+      "render_id": "c011",
+      "policy": "D"
+    },
+    "0LA7Z4": {
+      "type": "candidate",
+      "render_id": "c400",
+      "policy": "C"
+    },
+    "QGPDX5": {
+      "type": "candidate",
+      "render_id": "c310",
+      "policy": "B"
+    },
+    "93LEZS": {
+      "type": "candidate",
+      "render_id": "c330",
+      "policy": "C"
+    },
+    "E5YU4J": {
+      "type": "candidate",
+      "render_id": "c233",
+      "policy": "D"
+    },
+    "23KKCS": {
+      "type": "control",
+      "render_id": "c017",
+      "policy": "A"
+    },
+    "MCPR9T": {
+      "type": "candidate",
+      "render_id": "c082",
+      "policy": "B"
+    },
+    "JLMUKF": {
+      "type": "candidate",
+      "render_id": "c010_03",
+      "policy": "E"
+    },
+    "IZ5OFT": {
+      "type": "candidate",
+      "render_id": "c070",
+      "policy": "C"
+    },
+    "D9U620": {
+      "type": "candidate",
+      "render_id": "c010_03",
+      "policy": "B"
+    },
+    "M9S53M": {
+      "type": "candidate",
+      "render_id": "c120",
+      "policy": "C"
+    },
+    "7TWEDM": {
+      "type": "candidate",
+      "render_id": "c310",
+      "policy": "D"
+    },
+    "Q2D8OF": {
+      "type": "candidate",
+      "render_id": "c010",
+      "policy": "C"
+    },
+    "B89XVF": {
+      "type": "candidate",
+      "render_id": "c010_02",
+      "policy": "E"
+    },
+    "3OES08": {
+      "type": "candidate",
+      "render_id": "c161",
+      "policy": "B"
+    },
+    "5HD3EB": {
+      "type": "candidate",
+      "render_id": "c010_02",
+      "policy": "D"
+    },
+    "UNINTP": {
+      "type": "candidate",
+      "render_id": "c172",
+      "policy": "D"
+    },
+    "F7RNRV": {
+      "type": "candidate",
+      "render_id": "c080",
+      "policy": "E"
+    }
+  }
+}
