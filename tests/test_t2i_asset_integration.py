@@ -10,12 +10,21 @@ from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.scripts.preview_t2i_ui import fixture_record
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-from astrbot_plugin_nikke.ui.t2i_payloads import (CampaignT2IPayloadBuilder, UnionOverviewT2IPayloadBuilder,
-                                             UnionMemberT2IPayloadBuilder, ProfileT2IPayloadBuilder,
-                                             CharacterT2IPayloadBuilder)
+from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.t2i_payloads import (
+    CampaignT2IPayloadBuilder as LegacyCampaignT2IPayloadBuilder,
+    CharacterT2IPayloadBuilder,
+    ProfileT2IPayloadBuilder,
+    UnionMemberT2IPayloadBuilder,
+    UnionOverviewT2IPayloadBuilder,
+)
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_campaign_payload_legacy_import_points_to_canonical_module():
+    assert LegacyCampaignT2IPayloadBuilder is CampaignT2IPayloadBuilder
 
 
 @pytest.fixture

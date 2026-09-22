@@ -19,6 +19,7 @@ from ..features.account.application import AccountApplication
 from ..features.announcement.delivery import AnnouncementDelivery
 from ..features.announcement.service import AnnouncementService
 from ..features.calendar.service import CalendarService
+from ..features.campaign.application import CampaignApplication
 from ..features.campaign.builder import CampaignHistoryBuilder
 from ..features.campaign.stage_resolver import CampaignStageResolver
 from ..features.cdk.service import CdkService
@@ -27,11 +28,12 @@ from ..features.character.identity import CharacterDirectoryResolver
 from ..features.character.registries.costume import CostumeRegistry
 from ..features.character.stat_resources import CharacterStatResourceLoader
 from ..features.daily.runner import DailyRunner
+from ..features.guide.application import GuideApplication
 from ..features.profile.builder import ProfileBuilder
 from ..features.profile.application import ProfileApplication
 from ..features.raid.builder import UnionRaidBuilder
 from ..features.tarot.service import TarotDataError, TarotService
-from ..features.tower.registry import TowerRegistry
+from ..features.tower.application import TowerApplication
 from ..features.voice.audio import VoiceAudioCache
 from ..features.voice.character_resolver import VoiceCharacterResolver
 from ..features.voice.encoder import VoiceEncoder
@@ -81,6 +83,7 @@ class ServiceContainer:
     raid_renderer: UnionRaidRenderer
     campaign_builder: CampaignHistoryBuilder
     campaign_renderer: CampaignHistoryRenderer
+    campaign_application: CampaignApplication
     cdk_service: CdkService
     feedback_manager: DelayedFeedbackManager
     voice_mapping: VoiceMapRegistry
@@ -94,9 +97,10 @@ class ServiceContainer:
     announcement_delivery: AnnouncementDelivery
     calendar: CalendarService
     tarot: TarotService | None
+    guide_application: GuideApplication
     web: BindingWebService
     daily_runner: DailyRunner
-    tower_registry: TowerRegistry | None = None
+    tower_application: TowerApplication
 
 
 def create_container(
@@ -168,6 +172,14 @@ def create_container(
         plugin_dir / "fonts",
         asset_manager,
     )
+    campaign_application = CampaignApplication(
+        resolver=campaign_resolver,
+        gateway=client,
+        account_reader=store,
+        builder=campaign_builder,
+        clock=lambda: datetime.now(timezone(timedelta(hours=8))),
+        plugin_version=PLUGIN_VERSION,
+    )
     cdk_service = CdkService(client)
     feedback_manager = DelayedFeedbackManager(1.5)
     voice_mapping = VoiceMapRegistry(plugin_dir / "assets" / "voice_poke_map.json")
@@ -217,6 +229,10 @@ def create_container(
         public_base_url=public_base_url,
     )
     daily_runner = DailyRunner(client=client, store=store, config=config)
+    guide_application = GuideApplication(plugin_dir / "assets" / "guides")
+    tower_application = TowerApplication(
+        plugin_dir / "assets" / "tower_floors.json"
+    )
 
     return ServiceContainer(
         plugin_dir=plugin_dir,
@@ -240,6 +256,7 @@ def create_container(
         raid_renderer=raid_renderer,
         campaign_builder=campaign_builder,
         campaign_renderer=campaign_renderer,
+        campaign_application=campaign_application,
         cdk_service=cdk_service,
         feedback_manager=feedback_manager,
         voice_mapping=voice_mapping,
@@ -253,7 +270,8 @@ def create_container(
         announcement_delivery=announcement_delivery,
         calendar=calendar,
         tarot=tarot,
+        guide_application=guide_application,
         web=web,
         daily_runner=daily_runner,
-        tower_registry=None,
+        tower_application=tower_application,
     )

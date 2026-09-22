@@ -68,6 +68,8 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
 
     from astrbot_plugin_nikke.features.tarot.service import TarotService
     from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+    from astrbot_plugin_nikke.application.commands.guide import GuideCommandHandler
+    from astrbot_plugin_nikke.features.guide.application import GuideApplication
     from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
     from astrbot_plugin_nikke.main import NikkePlugin
 
@@ -119,6 +121,8 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     plugin.plugin_dir = tmp_path
     plugin.data_dir = tmp_path / "runtime"
     plugin.tarot = TarotService(tmp_path, plugin.data_dir / "tarot")
+    plugin.guide_application = GuideApplication(guide_root)
+    plugin.guide_command_handler = GuideCommandHandler(plugin.guide_application)
 
     class AccountReader:
         @staticmethod

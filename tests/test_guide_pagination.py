@@ -4,14 +4,25 @@ import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from astrbot_plugin_nikke.application.commands.guide import GuideCommandHandler
+from astrbot_plugin_nikke.features.guide.application import GuideApplication
 from astrbot_plugin_nikke.main import NikkePlugin
 
 
 class GuidePaginationTests(IsolatedAsyncioTestCase):
+    @staticmethod
+    def _plugin(plugin_dir: Path) -> NikkePlugin:
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.plugin_dir = plugin_dir
+        plugin.guide_application = GuideApplication(plugin_dir / "assets" / "guides")
+        plugin.guide_command_handler = GuideCommandHandler(plugin.guide_application)
+        plugin.command_adapter = AstrBotCommandAdapter()
+        return plugin
+
     async def test_unregistered_directory_is_not_sent(self):
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.plugin_dir = Path(directory)
+            plugin = self._plugin(Path(directory))
             root = plugin.plugin_dir / "assets/guides/progression"
             root.mkdir(parents=True)
             (root / "unregistered.png").write_bytes(b"synthetic")
@@ -21,8 +32,7 @@ class GuidePaginationTests(IsolatedAsyncioTestCase):
 
     async def test_command_second_page_and_invalid_page(self):
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.plugin_dir = Path(directory)
+            plugin = self._plugin(Path(directory))
             root = plugin.plugin_dir / "assets/guides"
             root.mkdir(parents=True)
             (root / "synthetic.png").write_bytes(b"synthetic")
@@ -39,8 +49,7 @@ class GuidePaginationTests(IsolatedAsyncioTestCase):
 
     async def test_six_categories_and_link_output_order(self):
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.plugin_dir = Path(directory)
+            plugin = self._plugin(Path(directory))
             root = plugin.plugin_dir / "assets/guides"
             root.mkdir(parents=True)
             image = root / "one.png"

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 import shutil
 import tempfile
 import unittest
@@ -49,6 +50,23 @@ class TarotBackendTests(unittest.TestCase):
         )
         self.assertTrue(all(item.orientation in {"upright", "reversed"} for item in reading.cards))
 
+    def test_injected_random_source_makes_draws_reproducible(self) -> None:
+        first = TarotService(
+            self.root,
+            self.runtime / "first",
+            random_source=random.Random(2026),
+        ).draw_three()
+        second = TarotService(
+            self.root,
+            self.runtime / "second",
+            random_source=random.Random(2026),
+        ).draw_three()
+
+        self.assertEqual(
+            [(item.card.key, item.orientation) for item in first.cards],
+            [(item.card.key, item.orientation) for item in second.cards],
+        )
+
     def test_daily_draw_is_stable_and_persisted(self) -> None:
         when = datetime(2026, 9, 14, 3, 0, tzinfo=timezone.utc)
         service1 = TarotService(self.root, self.runtime)
@@ -57,6 +75,18 @@ class TarotBackendTests(unittest.TestCase):
         two = service2.draw_daily("aiocqhttp:123456", now=when)
         self.assertEqual(one.cards[0].card.key, two.cards[0].card.key)
         self.assertEqual(one.cards[0].orientation, two.cards[0].orientation)
+
+    def test_daily_draw_uses_injected_clock_in_china_timezone(self) -> None:
+        fixed_now = datetime(2026, 9, 14, 16, 0, tzinfo=timezone.utc)
+        service = TarotService(
+            self.root,
+            self.runtime,
+            clock=lambda: fixed_now,
+        )
+
+        reading = service.draw_daily("aiocqhttp:clock")
+
+        self.assertEqual(reading.date_key, "2026-09-15")
 
     def test_daily_draw_uses_utc8_date_boundary(self) -> None:
         service = TarotService(self.root, self.runtime)

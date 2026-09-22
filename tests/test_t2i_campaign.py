@@ -88,24 +88,42 @@ def test_asset_entrypoint_never_uses_spine(tmp_path):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("failure", [RuntimeError("fail"), asyncio.TimeoutError()])
 async def test_handler_fallback_same_dto_without_second_fetch(failure):
+    from datetime import datetime, timezone
+
+    from astrbot_plugin_nikke.features.campaign.application import CampaignApplication
+    from astrbot_plugin_nikke.features.campaign.builder import CampaignHistoryBuilder
+    from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
     from astrbot_plugin_nikke.main import NikkePlugin
+
     plugin = NikkePlugin.__new__(NikkePlugin)
     plugin.config = {"ui_renderer": "t2i"}
-    record = preview.fixture_record("normal")
-    plugin.campaign_builder = Mock()
-    plugin.campaign_builder._directory_by_tid = {}
-    plugin.campaign_builder.build.return_value = record
-    plugin.campaign_resolver = Mock()
-    plugin.campaign_resolver.resolve_query.return_value = Mock(stage_id=record.stage_id)
-    plugin._directory = []
-    plugin._account_or_error = Mock(return_value={})
-    plugin.client = Mock(get_main_quest_clear_lineup=AsyncMock(return_value={}))
+    plugin.client = Mock(
+        get_main_quest_clear_lineup=AsyncMock(
+            return_value={"code": 1300017, "msg": "no historical lineup"}
+        )
+    )
+    account_reader = Mock()
+    account_reader.get_account.return_value = {"area_id": 7, "nickname": "test"}
+    plugin.campaign_application = CampaignApplication(
+        resolver=CampaignStageResolver.from_file(ROOT / "assets" / "campaign_stages.json"),
+        gateway=plugin.client,
+        account_reader=account_reader,
+        builder=CampaignHistoryBuilder(),
+        clock=lambda: datetime(2026, 9, 22, 18, 0, tzinfo=timezone.utc),
+        plugin_version="test-version",
+    )
+    plugin.store = Mock()
     plugin.campaign_t2i_renderer = Mock(render_campaign_history=AsyncMock(side_effect=failure))
     plugin.campaign_renderer = Mock(render_campaign_history=Mock(return_value="fallback.png"))
-    event = Mock(image_result=lambda path: path)
+    event = Mock(
+        image_result=lambda path: path,
+        plain_result=lambda text: text,
+        get_sender_id=lambda: "qq-123",
+    )
     assert [result async for result in plugin.campaign(event, "46-40")] == ["fallback.png"]
     plugin.client.get_main_quest_clear_lineup.assert_awaited_once()
-    plugin.campaign_t2i_renderer.render_campaign_history.assert_awaited_once_with(record)
+    plugin.campaign_t2i_renderer.render_campaign_history.assert_awaited_once()
+    record = plugin.campaign_t2i_renderer.render_campaign_history.await_args.args[0]
     plugin.campaign_renderer.render_campaign_history.assert_called_once_with(record)
 
 

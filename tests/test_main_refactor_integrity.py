@@ -8,6 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 from astrbot_plugin_nikke.core.container import ServiceContainer, create_container
 from astrbot_plugin_nikke.features.daily.models import DailyTaskResult, DailyTaskStatus
 from astrbot_plugin_nikke.features.daily.runner import DailyRunner
+from astrbot_plugin_nikke.features.campaign.application import CampaignApplication
+from astrbot_plugin_nikke.features.guide.application import GuideApplication
+from astrbot_plugin_nikke.features.tower.application import TowerApplication
 
 
 class MainRefactorIntegrityTests(unittest.TestCase):
@@ -30,6 +33,11 @@ class MainRefactorIntegrityTests(unittest.TestCase):
             self.assertIsNotNone(container.renderer)
             self.assertIsNotNone(container.daily_runner)
             self.assertIsNotNone(container.web)
+            self.assertIsInstance(container.campaign_application, CampaignApplication)
+            self.assertIs(container.campaign_application._account_reader, container.store)
+            self.assertIs(container.campaign_application._gateway, container.client)
+            self.assertIsInstance(container.guide_application, GuideApplication)
+            self.assertIsInstance(container.tower_application, TowerApplication)
 
     def test_daily_runner_identity_and_keys(self):
         account = {

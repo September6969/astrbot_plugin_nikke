@@ -1,8 +1,6 @@
 """攻略目录查询用例，不依赖聊天框架。"""
 
-from pathlib import Path
-
-from ...features.guide.registry import GuideRegistry
+from ...features.guide.application import GuideApplication
 from .contracts import CommandContext, CommandResult, ImageReply, TextReply
 
 
@@ -31,8 +29,8 @@ class GuideCommandHandler:
         "竞技场配队": "pvp",
     }
 
-    def __init__(self, registry_root: Path):
-        self.registry_root = registry_root
+    def __init__(self, application: GuideApplication):
+        self.application = application
 
     async def handle(self, context: CommandContext) -> CommandResult:
         category = context.parameters.get("category", "")
@@ -62,29 +60,26 @@ class GuideCommandHandler:
 
         page_number = int(page)
         try:
-            registry = GuideRegistry(self.registry_root)
-            entries = registry.page(folder_name, page=page_number)
+            page_result = self.application.page(folder_name, page_number=page_number)
         except (ValueError, OSError):
             return CommandResult(
                 (TextReply("攻略索引暂不可用，请管理员核对授权和文件配置。"),)
             )
 
-        if entries:
+        if page_result.entries:
             messages = [
                 TextReply(
-                    f"【{category}】第 {page_number}/{(sum(entry.category == folder_name for entry in registry.entries) + 2) // 3} 页；"
+                    f"【{category}】第 {page_result.page_number}/{page_result.total_pages} 页；"
                     f"使用 /妮姬 攻略 {category} <页码> 翻页。"
                 )
             ]
-            for entry in entries:
-                messages.append(TextReply(entry.caption()))
+            for entry in page_result.entries:
+                messages.append(TextReply(entry.caption(now=page_result.current_date)))
                 messages.extend(ImageReply(str(image)) for image in entry.files[:10])
                 messages.extend(TextReply(link) for link in entry.links)
             return CommandResult(tuple(messages))
 
-        if page_number > 1 or any(
-            entry.category == folder_name for entry in registry.entries
-        ):
+        if page_number > 1 or page_result.total_entries:
             return CommandResult((TextReply("该攻略页不存在。"),))
         return CommandResult(
             (TextReply(f"暂未收录【{category}】攻略图，当前保留占位，等待后续登记素材。"),)

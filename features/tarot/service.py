@@ -16,7 +16,7 @@ import secrets
 import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from PIL import Image as PILImage
 
@@ -296,6 +296,8 @@ class TarotService:
         *,
         deck_mode: str = "auto",
         rotate_reversed: bool = True,
+        random_source: random.Random | None = None,
+        clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.plugin_dir = Path(plugin_dir)
         self.runtime_dir = Path(data_dir)
@@ -307,7 +309,10 @@ class TarotService:
             self.runtime_dir / "reversed_cache",
             rotate_reversed=rotate_reversed,
         )
-        self._random = secrets.SystemRandom()
+        self._random = (
+            random_source if random_source is not None else secrets.SystemRandom()
+        )
+        self._clock = clock if clock is not None else lambda: datetime.now(CHINA_TZ)
 
     @staticmethod
     def _draw_orientation(rng: random.Random | secrets.SystemRandom) -> str:
@@ -342,7 +347,7 @@ class TarotService:
         *,
         now: datetime | None = None,
     ) -> TarotReading:
-        current = now.astimezone(CHINA_TZ) if now else datetime.now(CHINA_TZ)
+        current = now.astimezone(CHINA_TZ) if now else self._clock().astimezone(CHINA_TZ)
         date_key = current.strftime("%Y-%m-%d")
         cards = self._active()
         saved = self.daily_store.get(date_key, user_key)

@@ -32,9 +32,11 @@ from astrbot.api.star import Context, Star
 
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
+from .application.commands.campaign import CampaignCommandHandler
 from .application.commands.guide import GuideCommandHandler
 from .application.commands.profile import ProfileCommandHandler
 from .application.commands.tarot import TarotCommandHandler
+from .application.commands.tower import TowerCommandHandler
 from ._version import PLUGIN_VERSION
 from .core.container import create_container
 from .features.daily.runner import DailyRunner
@@ -42,8 +44,6 @@ from .features.announcement.service import AnnouncementService
 from .features.announcement.delivery import AnnouncementDelivery
 from .features.calendar.service import CalendarService
 from .core.asset_manager import AssetManager
-from .features.campaign.builder import CampaignHistoryBuilder
-from .features.campaign.models import ClearLineupStatus
 from .ui.renderers import (
     CampaignHistoryRenderer,
     CharacterCardRenderer,
@@ -67,7 +67,6 @@ from .core.storage import NikkeStore
 from .features.raid.builder import UnionRaidBuilder
 from .features.raid.models import PreviousSeasonSummary, RaidState
 from .features.character.registries.costume import CostumeRegistry
-from .features.tower.registry import TowerRegistry
 from .features.voice.character_resolver import VoiceCharacterResolver
 from .features.voice.audio import VoiceAudioCache, VoicePreference, is_self_poke
 from .features.voice.encoder import VoiceEncoder
@@ -110,12 +109,11 @@ class NikkePlugin(Star):
         self.character_identity = self.container.character_identity
         self.asset_manager = self.container.asset_manager
         self.character_renderer = self.container.character_renderer
-        self.campaign_resolver = self.container.campaign_resolver
+        self.campaign_application = self.container.campaign_application
         self.profile_application = self.container.profile_application
         self.profile_renderer = self.container.profile_renderer
         self.raid_builder = self.container.raid_builder
         self.raid_renderer = self.container.raid_renderer
-        self.campaign_builder = self.container.campaign_builder
         self.campaign_renderer = self.container.campaign_renderer
         self.cdk_service = self.container.cdk_service
         self.feedback_manager = self.container.feedback_manager
@@ -130,10 +128,19 @@ class NikkePlugin(Star):
         self.announcement_delivery = self.container.announcement_delivery
         self.calendar = self.container.calendar
         self.tarot = self.container.tarot
-        self.tower_registry = self.container.tower_registry
+        self.tower_application = self.container.tower_application
         self.daily_runner = self.container.daily_runner
         self.web = self.container.web
         self.command_adapter = AstrBotCommandAdapter()
+        self.tower_command_handler = TowerCommandHandler(self.tower_application)
+        self.tarot_command_handler = TarotCommandHandler(
+            self.tarot,
+            self.plugin_dir,
+            self.data_dir,
+            on_service_created=lambda service: setattr(self, "tarot", service),
+        )
+        self.guide_application = self.container.guide_application
+        self.guide_command_handler = GuideCommandHandler(self.guide_application)
         self.profile_command_handler = ProfileCommandHandler(
             account_reader=self.store,
             application=self.profile_application,
@@ -248,9 +255,7 @@ class NikkePlugin(Star):
         except Exception as exc:
             logger.warning("[NIKKE] 浏览器扩展打包跳过: %s", safe_exception_message(exc))
         try:
-            self.tower_registry = await asyncio.to_thread(
-                TowerRegistry, self.plugin_dir / "assets" / "tower_floors.json"
-            )
+            await self.tower_application.preload()
         except Exception as exc:
             logger.warning("[NIKKE] 塔层静态资料预热失败: %s", safe_exception_message(exc))
         try:
@@ -260,7 +265,7 @@ class NikkePlugin(Star):
             logger.error("[NIKKE] 绑定服务启动失败: %s", safe_exception_message(exc))
         try:
             self._directory = await self.client.get_directory()
-            self.campaign_builder.update_directory(self._directory)
+            self.campaign_application.update_directory(self._directory)
             logger.info(f"[NIKKE] 已载入 {len(self._directory)} 条妮姬目录")
         except Exception as exc:
             logger.warning("[NIKKE] 妮姬目录载入失败: %s", safe_exception_message(exc))
@@ -578,23 +583,13 @@ class NikkePlugin(Star):
             arg2 = parts[3] if len(parts) > 3 else ""
         command_key = command.strip().casefold()
         if command_key in {"塔层", "tower"}:
-            registry = getattr(self, "tower_registry", None)
-            if registry is None:
-                try:
-                    registry = await asyncio.to_thread(
-                        TowerRegistry, self.plugin_dir / "assets" / "tower_floors.json"
-                    )
-                    self.tower_registry = registry
-                except Exception:
-                    registry = None
-            if registry is not None:
-                try:
-                    result = registry.describe(arg1, arg2)
-                except (OSError, ValueError, KeyError, TypeError):
-                    result = "塔层静态资料暂不可用。"
-            else:
-                result = "塔层静态资料暂不可用。"
-            yield event.plain_result(result)
+            async for result in self.command_adapter.dispatch(
+                event,
+                self.tower_command_handler,
+                tower=arg1,
+                floor=arg2,
+            ):
+                yield result
             return
         if command_key in {"语音", "voice"}:
             async for result in self.voice_settings(event, arg1, arg2):
@@ -739,13 +734,16 @@ class NikkePlugin(Star):
         value: str = "",
     ):
         """NIKKE 塔罗：单抽、三张牌阵与每日固定抽牌。"""
-        handler = TarotCommandHandler(
-            getattr(self, "tarot", None),
-            self.plugin_dir,
-            self.data_dir,
-            on_service_created=lambda service: setattr(self, "tarot", service),
-        )
-        async for result in AstrBotCommandAdapter().dispatch(
+        handler = getattr(self, "tarot_command_handler", None)
+        if handler is None:
+            handler = TarotCommandHandler(
+                getattr(self, "tarot", None),
+                self.plugin_dir,
+                self.data_dir,
+                on_service_created=lambda service: setattr(self, "tarot", service),
+            )
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
             event, handler, action=action, value=value
         ):
             yield result
@@ -1539,50 +1537,25 @@ class NikkePlugin(Star):
 
     async def campaign(self, event: AstrMessageEvent, stage_str: str = "", mode_str: str = ""):
         """查询主线战役关卡的历史通关阵容。"""
-        query = f"{stage_str} {mode_str}".strip()
-        if not query:
-            yield event.plain_result("用法：/妮姬 战役 [普通/困难] <关卡名>（例如：46-40、困难 35-36）")
-            return
-        stage = self.campaign_resolver.resolve_query(query)
-        if not stage:
-            yield event.plain_result(f"未找到关卡：{query}。目前仅支持已收录关卡（如普通46章、困难35章）。")
-            return
-        handle = self.feedback_manager.start_delayed_feedback(
-            lambda: self._send_delayed_notice(event, "正在查询战役通关阵容...")
-        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
-        try:
-            account = self._account_or_error(event)
-            raw = await self.client.get_main_quest_clear_lineup(
-                account, stage_id=stage.stage_id, area_id=account.get("area_id", 0)
+        feedback_manager = getattr(self, "feedback_manager", None)
+        start_feedback = None
+        if feedback_manager is not None:
+            start_feedback = lambda: feedback_manager.start_delayed_feedback(
+                lambda: self._send_delayed_notice(
+                    event, "正在查询战役通关阵容..."
+                )
             )
-            if self._directory and not self.campaign_builder._directory_by_tid:
-                self.campaign_builder.update_directory(self._directory)
-            record = self.campaign_builder.build(
-                stage=stage,
-                response=raw,
-                commander_name=account.get("nickname") or account.get("role_name") or "指挥官",
-                fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-                plugin_version=PLUGIN_VERSION,
-            )
-            if record.status == ClearLineupStatus.RATE_LIMITED:
-                yield event.plain_result(record.status_message)
-                return
-            if record.status == ClearLineupStatus.ERROR:
-                yield event.plain_result(record.status_message)
-                return
-            path = await self._render_campaign_record(record)
-            yield event.image_result(path)
-        except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
-            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except (BlaBlaError, ValueError, RuntimeError) as exc:
-            yield event.plain_result(f"战役查询失败：{safe_exception_message(exc)}")
-        except Exception as exc:
-            logger.error("[NIKKE] 战役查询异常: %s", safe_exception_message(exc))
-            yield event.plain_result(f"战役查询异常：{safe_exception_message(exc)}")
-        finally:
-            if handle:
-                await handle.cancel()
+        handler = CampaignCommandHandler(
+            application=self.campaign_application,
+            present=self._render_campaign_record,
+            invalidate_cookie=lambda qq_id: self.store.mark_cookie_invalid(qq_id),
+            start_feedback=start_feedback,
+        )
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event, handler, stage=stage_str, mode=mode_str
+        ):
+            yield result
 
     async def event_schedule(self, event: AstrMessageEvent, horizon: str = ""):
         """查询进行中与即将截止的官方活动日程。"""
@@ -1719,9 +1692,11 @@ class NikkePlugin(Star):
 
     async def guide(self, event: AstrMessageEvent, category: str = "", page: str = "1"):
         """查看或发送常用攻略图。"""
-        handler = GuideCommandHandler(self.plugin_dir / "assets" / "guides")
-        async for result in AstrBotCommandAdapter().dispatch(
-            event, handler, category=category, page=page
+        async for result in self.command_adapter.dispatch(
+            event,
+            self.guide_command_handler,
+            category=category,
+            page=page,
         ):
             yield result
 
