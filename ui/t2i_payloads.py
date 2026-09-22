@@ -815,9 +815,9 @@ class CalendarT2IPayloadBuilder:
             EventStatus,
             Freshness,
             Coverage,
-            active_sort_key,
             resolve_next_ending,
         )
+        from astrbot_plugin_nikke.features.calendar.content_quality import sort_operations_display_events
         from astrbot_plugin_nikke.features.calendar.schedule_service import CAT_LABELS, CST
 
         # 1. 冻结 QueryContext
@@ -850,9 +850,9 @@ class CalendarT2IPayloadBuilder:
                 if ev.start_at is None or ev.start_at <= current + timedelta(days=days):
                     upcoming_canonical.append(ev)
 
-        # 稳定排序
-        active_canonical.sort(key=active_sort_key)
-        upcoming_canonical.sort(key=lambda e: (e.start_at is None, e.start_at, e.identity_key))
+        # 展示排序与文本/旧查询接口共用 Operations Feed v2 契约。
+        active_canonical = sort_operations_display_events(active_canonical, EventStatus.ACTIVE.value)
+        upcoming_canonical = sort_operations_display_events(upcoming_canonical, EventStatus.UPCOMING.value)
 
         next_ending_ev = resolve_next_ending(active_canonical, now=current)
         next_ending_id = next_ending_ev.event_id if next_ending_ev else None

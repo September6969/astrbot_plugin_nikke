@@ -1,0 +1,106 @@
+{
+  "status": "READY_OFFLINE",
+  "branch": "feat/calendar-feed-normalization-v2",
+  "base": "origin/main@d79650ae442c7c31e740b281e1332da640b31409",
+  "source": "GameKee public activity page-list via existing production adapter",
+  "request_policy": "one adapter fetch_result call; no account or private endpoint",
+  "outcome": "SUCCESS_DATA",
+  "scan": {
+    "rows": 123,
+    "valid": 123,
+    "malformed": 0,
+    "duplicates": 0,
+    "with_visual": 123
+  },
+  "canonical_total": 123,
+  "category_counts": {
+    "costume_gacha": 18,
+    "double_reward": 1,
+    "event": 76,
+    "limited_stage": 1,
+    "mini_game": 1,
+    "pass": 20,
+    "recruit": 6
+  },
+  "selected_actual_rows": [
+    {
+      "source_id": "7828",
+      "title": "【活动PASS】LET'S DRINK PASS",
+      "category": "pass",
+      "tag": "",
+      "activity_kind": "",
+      "start": "2026-09-16T16:00:00+00:00",
+      "end": "2026-10-07T16:00:00+00:00",
+      "detail_url": "https://www.gamekee.com/nikke/721020.html"
+    },
+    {
+      "source_id": "7827",
+      "title": "【转盘】KILLER BUNNY",
+      "category": "costume_gacha",
+      "tag": "",
+      "activity_kind": "",
+      "start": "2026-09-16T16:00:00+00:00",
+      "end": "2026-10-07T16:00:00+00:00",
+      "detail_url": "https://www.gamekee.com/nikke/721020.html"
+    },
+    {
+      "source_id": "7639",
+      "title": "【限时通关】Trail Marker",
+      "category": "limited_stage",
+      "tag": "",
+      "activity_kind": "",
+      "start": "2026-08-12T16:00:00+00:00",
+      "end": "2026-10-07T20:59:00+00:00",
+      "detail_url": "https://www.gamekee.com/nikke/716193.html"
+    }
+  ],
+  "live_preview": {
+    "path": "E:/DevCache/nikke-calendar-feed-v2-preview-20260921/page-1.png",
+    "size": [1600, 900],
+    "sha256": "6A5FE426D60CA50FFEA3183DD83AE6EB9DED779D4596CFC93315B3C46CE4100B",
+    "page_count": 1,
+    "active": 4,
+    "upcoming": 0,
+    "synthetic": false
+  },
+  "synthetic_pagination_preview": {
+    "path_page_1": "E:/DevCache/nikke-calendar-feed-v2-preview-20260921/synthetic-page-1.png",
+    "path_page_2": "E:/DevCache/nikke-calendar-feed-v2-preview-20260921/synthetic-page-2.png",
+    "sha256_page_1": "8CE01FE95D6A87E877E8F29C126F4E97CA6386838C42ED1A47311F4606C73A74",
+    "sha256_page_2": "1D5082F75014DD1D890547F506C139D36F1783061C8FCAB485EF2EBEE7D02AB9",
+    "page_count": 2,
+    "synthetic_preview": true,
+    "account_data": false
+  },
+  "tests": {
+    "content_quality_and_display_sort": "27 passed",
+    "bracket_wrapper_regression": "3 assertions passed",
+    "schedule_data_layer_and_p0": "39 passed",
+    "calendar_ui_v04_v05_t2i": "115 passed",
+    "targeted_total": "181 passed",
+    "compileall": "passed",
+    "git_diff_check": "passed",
+    "final_full_pytest_once": {
+      "result": "1117 passed, 2 skipped, 648 subtests passed, 16 failed",
+      "calendar_failures": 0,
+      "environmental_failures": 16,
+      "failure_scope": "11 BossAssetResolver + 5 LineupPortraitResolver; relative data/nikke/blabla-assets path was resolved from the validation parent directory rather than the checkout root",
+      "not_repeated": true
+    }
+  },
+  "implementation_commit": "9ec94b79f85c8d13880438d13262a3674dc88906",
+  "draft_pr": 99,
+  "github_ci": {
+    "run_id": 35640293133,
+    "status": "success",
+    "checks": [
+      "Extension (Node)",
+      "Spine 4.0 headless worker build",
+      "Test (Python 3.10)",
+      "Test (Python 3.11)",
+      "Test (Python 3.12)",
+      "Test (Python 3.13)"
+    ]
+  },
+  "live_account_or_deployment": false
+}

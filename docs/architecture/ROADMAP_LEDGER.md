@@ -267,10 +267,18 @@
 
 ## Character Card v2 Spine semantic anchor v2（2026-09-21）
 
-- 已从实时核验的 `origin/main@d79650ae442c7c31e740b281e1332da640b31409` 建立独立 worktree `E:\_codex_work\spine-semantic-anchor-v2` 与分支 `feat/spine-semantic-anchor-v2`；不使用旧 overnight 或历史 worktree 作为基线，未修改 main。
+- 历史开发起点为实时核验的 `origin/main@d79650ae442c7c31e740b281e1332da640b31409`；本次对齐将最新 `origin/main@e177026edffe36ea10211df9df4380792ebf426d` 合并进独立 worktree `E:\_codex_work\spine-semantic-anchor-v2` 与分支 `feat/spine-semantic-anchor-v2`，不使用旧 overnight 或历史 worktree 作为基线。
 - 本轮仅处理 `c401` 与 `c581` 的上躯干语义锚点：扩展 `bone`/`bone_pair`/`attachment`/`attachment_pair`/`surface` 证据选择器、保守 generic fallback 与 fail-closed；结构化语义不会被旧单骨骼 mapper 误读。`op*`、位置猜测、任意平均、发饰/外套/武器/特效均不作为上躯干证据。
 - `c401` 使用真实 4.0 skeleton 的 `body_total/body_total` attachment（`move3`，父级 `move2`，confidence `0.98`）；`c581` 使用真实 4.1 skeleton 的 `chest_l + chest_r`（共同父级 `pelvis7`，confidence `0.96`）。idle `t=0` 与 `t=0.5` 采样、运行时版本、数量和 SHA-256 记录在 `docs/evidence/spine_semantics/c401_c581_idle_audit_20260921.*`。
 - runtime metadata 只保留已选择的 torso point；`attachment_candidates_1024` 只留在 discovery sidecar。`torso_y`/`upper_torso_y` 为新内部命名，同时保留 `breast_y`、`breast_point` 与 `breast_source` 兼容合同。完整验收说明见 `docs/acceptance/SPINE_SEMANTIC_ANCHOR_V2.md`。
 - 定向 Python `30 passed`、Node `6 passed`；`compileall`、Node `--check`、JSON 校验和 `git diff --check` 通过。最终唯一 full pytest 为 `1130 passed, 2 skipped, 653 subtests passed, 1 failed`：唯一失败是既有注册测试子进程从 `E:\_codex_work\astrbot_plugin_nikke` 旁边旧 worktree 加载 `main.py`，不是当前分支代码；隔离当前分支的等价自动注册导入核验通过，未重复 full pytest。
 - GitHub CI run `35635088655` 已通过 Node、Spine 4.0 headless worker 与 Python 3.10–3.13；Draft PR #98 已建立，未合并。
 - 状态：`READY_OFFLINE`。本轮不部署、不访问真实账号、不发送 QQ 消息。
+
+## Calendar Operations Feed v2（2026-09-21，已进入 main）
+
+- 从 `origin/main@d79650ae442c7c31e740b281e1332da640b31409` 建立独立 worktree `E:\_codex_work\calendar-feed-normalization-v2` 与分支 `feat/calendar-feed-normalization-v2`；不复用旧 Calendar/Character Card worktree，不修改 main；历史开发起点保留作审计记录。
+- 已完成标题优先分类、canonical title 身份证据、兼容分类族、META 保留、Operations Feed 分组/时间/精度/稳定身份排序；服务文本、旧查询接口和 T2I payload 共用排序契约，`active_sort_key`/`resolve_next_ending` 未改。
+- 公开 GameKee 只读复核为 123/123 valid、0 malformed、0 duplicate、123 visual；当前快照分类为 event 76、pass 20、costume_gacha 18、recruit 6、double_reward 1、mini_game 1、limited_stage 1。单条活动不追加网络请求。
+- 定向测试已通过：内容质量/身份/展示排序 27（含 bracket wrapper 三类回归断言），Schedule/P0 39，Calendar UI/v04/v05/T2I 115，合计 181。公开 page-1 与合成分页 page-1/page-2 已实际查看；详情和 hash 见 `docs/acceptance/CALENDAR_FEED_NORMALIZATION_V2.md` 与 `docs/evidence/calendar_feed_normalization_v2_20260921.json`。
+- 当前状态为 `READY_OFFLINE`；`compileall` 与 `git diff --check` 已通过，最终 full pytest 仅执行一次并记录为 `1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项均为既有 Boss/Lineup resolver 的相对素材路径环境问题，Calendar 无失败；未重复 full pytest。review blocker 修复后的 PR CI run `35686354953` 与合并后的 main push CI run `35686712265` 均全绿，PR #99 已以 `e177026edffe36ea10211df9df4380792ebf426d` 合并；未部署、未访问真实账号、未发送 QQ 消息。

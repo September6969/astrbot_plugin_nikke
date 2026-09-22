@@ -1,6 +1,6 @@
 # NIKKE 工作树索引
 
-更新时间：2026-09-21。当前核验的远端基线为 `origin/main@bde290f2eebcba22270c940fa68290078584b04d`；下表是历史与当前工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
+更新时间：2026-09-21。当前核验的远端基线为 `origin/main@d79650ae442c7c31e740b281e1332da640b31409`；下表是历史与当前工作索引。工作树可能继续变化，恢复前必须运行 `git worktree list`、逐树 `git status`，并以远端 PR/CI 为权威。
 
 | 范围 | 状态 | 备注 |
 | --- | --- | --- |
@@ -31,6 +31,7 @@
 | Calendar Content Quality v1 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\calendar-content-quality-v1-worktree\astrbot_plugin_nikke` / `feat/calendar-content-quality-v1`；从已部署 UI 基线 `origin/feat/calendar-pixel-contract-v1@ecc5495` 建立，P0 parser/classifier/relevance/identity/official prefilter 已接线；新增 13、旧 Calendar/合并 66、UI 46 定向测试通过，最终 full pytest 1031 passed/2 skipped；未部署、未修改 main、未发送 QQ 消息 |
 
 | 2026-09-21 Character Card main integration | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\character-card-main-integration` / `integration/character-card-main`；从 `origin/main@bde290f2` 建立，先保留 Calendar 两项提交，再以模块化方式移植 `feat/character-card-layout-v2@bef2d3b1`；定向 Python 70 passed/22 subtests、Node 4 passed，预览与 before/after 证据已记录；最终 full pytest、CI、main 合并与部署待后续门禁 |
+| Calendar Operations Feed v2 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\calendar-feed-normalization-v2` / `feat/calendar-feed-normalization-v2`；从 `origin/main@d79650ae` 建立，标题优先分类、canonical identity、META 保留与 Operations Feed 分组排序已接线；公开只读 123/123 valid，定向 181 passed（含 bracket wrapper 回归），预览已查看；最终 full pytest 单次记录 1117 passed/2 skipped/648 subtests/16 个既有 resolver 相对路径环境失败，PR #99 新 review fix 后等待 CI，未部署、未发 QQ、未合并 |
 
 ## 当前新增工作树
 

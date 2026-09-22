@@ -31,9 +31,10 @@ from .content_quality import (
     DisplayTier,
     IdentityDecision,
     apply_display_relevance,
+    canonical_identity_match,
     get_display_relevance,
     score_identity,
-    sort_display_events,
+    sort_operations_display_events,
     title_similarity,
 )
 from astrbot_plugin_nikke.features.calendar.canonical_models import (
@@ -52,8 +53,6 @@ from astrbot_plugin_nikke.features.calendar.canonical_models import (
     ManualOverride,
     QueryContext,
     resolve_event_status,
-    active_sort_key,
-    sort_active_events,
     safe_datetime_key,
     resolve_next_ending,
     compute_health_badge,
@@ -76,9 +75,18 @@ CAT_LABELS = {
     "coop": "协同",
     "union_raid": "联盟突袭",
     "solo_raid": "单人突袭",
+    "special_arena": "特殊竞技场",
+    "mini_game": "小游戏",
+    "limited_stage": "限时通关",
+    "double_reward": "活动",
     "recruit": "招募",
+    "pass": "活动",
+    "costume_gacha": "转盘时装",
+    "limited_costume": "限定时装",
     "maintenance": "维护",
     "update": "更新",
+    "announcement": "公告",
+    "package": "礼包",
     "event": "活动",
 }
 
@@ -135,7 +143,10 @@ def _build_identity_key(ev: CanonicalEvent) -> str:
 
 def _is_same_identity(a: CanonicalEvent, b: CanonicalEvent) -> bool:
     """兼容旧调用点；AMBIGUOUS 永不自动合并。"""
-    return score_identity(a, b).decision == IdentityDecision.MATCH
+    identity = score_identity(a, b)
+    if identity.decision == IdentityDecision.MATCH:
+        return True
+    return canonical_identity_match(a, b) is not None
 
 
 _is_same_event = _is_same_identity
@@ -332,6 +343,7 @@ class ScheduleService:
             "with_visual": 0,
             "canonical_total": 0,
             "identity_matches": 0,
+            "canonical_title_matches": 0,
             "identity_ambiguous": 0,
             "identity_distinct": 0,
             "official_deadlines_seen": 0,
@@ -468,6 +480,7 @@ class ScheduleService:
             "identity_matches",
             "identity_ambiguous",
             "identity_distinct",
+            "canonical_title_matches",
             "official_enriched_existing",
             "official_created_new",
         ):
@@ -482,9 +495,18 @@ class ScheduleService:
             ambiguous_seen = False
             for idx, existing in enumerate(merged_list):
                 identity = score_identity(existing, incoming)
+                canonical_match = None
+                if identity.decision != IdentityDecision.MATCH:
+                    canonical_match = canonical_identity_match(existing, incoming)
+                    if canonical_match is not None:
+                        identity = canonical_match
                 if identity.decision == IdentityDecision.MATCH:
                     matched_idx = idx
                     self.quality_diagnostics["identity_matches"] = self.quality_diagnostics.get("identity_matches", 0) + 1
+                    if canonical_match is not None:
+                        self.quality_diagnostics["canonical_title_matches"] = self.quality_diagnostics.get("canonical_title_matches", 0) + 1
+                        if isinstance(incoming.metadata, dict):
+                            incoming.metadata["identity_match"] = canonical_match.to_dict()
                     if "official" in {str(item).casefold() for item in incoming.sources}:
                         self.quality_diagnostics["official_enriched_existing"] += 1
                     break
@@ -833,7 +855,7 @@ class ScheduleService:
 
         summary_keys = (
             "gamekee_rows", "gamekee_valid", "gamekee_malformed", "gamekee_duplicates",
-            "with_visual", "canonical_total", "identity_matches", "identity_ambiguous",
+            "with_visual", "canonical_total", "identity_matches", "canonical_title_matches", "identity_ambiguous",
             "identity_distinct", "official_deadlines_seen", "official_deadlines_filtered",
             "official_deadlines_parsed", "official_enriched_existing", "official_created_new",
             "relevance_core", "relevance_supporting", "relevance_meta", "display_selected",
@@ -993,8 +1015,8 @@ class ScheduleService:
                 if ev.start_at and ev.start_at <= ctx.now + horizon:
                     upcoming_events.append(ev)
 
-        ordered = sort_display_events(active_events, EventStatus.ACTIVE.value)
-        ordered.extend(sort_display_events(upcoming_events, EventStatus.UPCOMING.value))
+        ordered = sort_operations_display_events(active_events, EventStatus.ACTIVE.value)
+        ordered.extend(sort_operations_display_events(upcoming_events, EventStatus.UPCOMING.value))
         return [event.to_calendar_activity() for event in ordered]
 
     def list_reminder_deadlines(self, now: datetime | None = None) -> list[CalendarActivity]:
@@ -1043,9 +1065,9 @@ class ScheduleService:
                 if ev.start_at and ev.start_at <= ctx.now + horizon:
                     upcoming_events.append(ev)
 
-        soon = [event.to_calendar_activity() for event in sort_display_events(soon_events, EventStatus.ACTIVE.value)]
-        active = [event.to_calendar_activity() for event in sort_display_events(active_events, EventStatus.ACTIVE.value)]
-        upcoming = [event.to_calendar_activity() for event in sort_display_events(upcoming_events, EventStatus.UPCOMING.value)]
+        soon = [event.to_calendar_activity() for event in sort_operations_display_events(soon_events, EventStatus.ACTIVE.value)]
+        active = [event.to_calendar_activity() for event in sort_operations_display_events(active_events, EventStatus.ACTIVE.value)]
+        upcoming = [event.to_calendar_activity() for event in sort_operations_display_events(upcoming_events, EventStatus.UPCOMING.value)]
         return {"ending_soon": soon, "active": active, "upcoming": upcoming}
 
     def format_schedule_text(
@@ -1072,9 +1094,6 @@ class ScheduleService:
             elif status == EventStatus.UPCOMING.value:
                 if ev.start_at and ev.start_at <= ctx.now + horizon:
                     upcoming_events.append(ev)
-
-        active_sorted = sort_active_events(active_events, ctx.now)
-        upcoming_events.sort(key=lambda e: (e.start_at or datetime.max.replace(tzinfo=timezone.utc), e.identity_key))
 
         lines: list[str] = [f"【NIKKE 近期日程 · 未来 {days} 天】"]
         if self.content_updated_at:
