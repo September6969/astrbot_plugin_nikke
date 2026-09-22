@@ -1,11 +1,12 @@
 # 配置合同与安全边界
 
-配置 schema 位于 `_conf_schema.json`。下表与 schema 的 22 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
+配置 schema 位于 `_conf_schema.json`。下表与 schema 的 23 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
 
 | 配置键 | 默认值 | 作用与边界 |
 | --- | --- | --- |
 | `character_card_layout` | `replica` | 单角色卡使用案例竖版 T2I；`classic` 使用原 Pillow 布局。 |
 | `ui_renderer` | `pillow` | Campaign、日程、联盟总览/记录/成员、Profile 支持 `pillow` / `t2i`；缺失或未知值使用 Pillow。T2I 注入 AstrBot 原生 html_render，30 秒超时或失败后使用同一 DTO 回退 Pillow（记录、成员和日程回退原文本），不再次请求 API。原生渲染策略与端点由 AstrBot 管理。 |
+| `profile_application_enabled` | `false` | Profile application 切片开关；默认走兼容入口，只有明确布尔 `true` 才切换新 application 路径；两条路径共享 Cookie 失效、延迟提示和渲染回退责任。 |
 | `public_base_url` | `https://nikke.irises777.xyz` | 绑定公网 HTTPS 地址；必须是无账号、路径、查询参数的站点地址。 |
 | `web_host` | `0.0.0.0` | 容器内监听地址；不代表应将端口直接暴露到公网。 |
 | `web_port` | `6210` | 绑定服务容器端口；公网访问应经过 HTTPS 反向代理。 |
@@ -24,7 +25,7 @@
 | `custom_character_aliases` | 空字符串 | 用户自定义角色别名，支持JSON对象或多行“角色名=别名1,别名2”格式；与内置别名合并。 |
 | `max_concurrency` | `2` | 每日账号任务最大并发数；应按上游频控和部署容量调整。 |
 | `enable_daily_actions` | `false` | 社区签到/领奖写操作开关；未完成真实授权验收前保持关闭。 |
-| `enable_announcement_push` | `false` | 公告推送总开关；开启也不代表已完成真实消息发送验收。 |
+| `enable_announcement_push` | `false` | 公告推送总开关；开启也不代表已完成真实消息发送验收。发送前持久化 `DISPATCH_INTENT`，未知结果进入 `UNKNOWN_AFTER_ACTION` 且不自动重发；公告调度当前按单实例使用，未提供外部共享租约时不支持多实例并行推送。 |
 | `enable_cdk_redemption` | `false` | 国际服 CDK 真实兑换开关；群聊会公开兑换码，必须由管理员明确开启。 |
 
 ## 迁移与发布边界

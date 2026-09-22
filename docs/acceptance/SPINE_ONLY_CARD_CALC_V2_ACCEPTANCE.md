@@ -9,7 +9,7 @@
 - OL rows retain three positions per equipment slot and now render a tier badge: neutral T1–T11, blue-emphasis T12–T14, and dark high-contrast T15.
 - `CharacterStatCalculator` ports the verified ExiaInvasion calculation order and fails closed. It returns `calculated_verified` only when the complete verified static-table bundle and all player inputs are present; otherwise all three values are `None` with `unavailable_missing_input`.
 - Direct `CharacterDetails.hp`, `attack`, and `defense` fields are intentionally ignored as unverified values.
-- Voice mappings accept the same canonical Spine identity as a required skin key; the current map remains empty because no exact Poke voice evidence is registered.
+- Voice mappings accept the same canonical Spine identity as a required skin key; the current schema v3 map contains source-annotated entries, while exact Poke playback and resource authorization remain unverified.
 
 ## Verification
 

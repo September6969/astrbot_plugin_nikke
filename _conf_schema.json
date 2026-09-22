@@ -13,6 +13,12 @@
     "hint": "默认 Pillow。t2i 使用 AstrBot 原生 html_render，七页可用；失败或 30 秒超时后使用同一数据回退原有 Pillow 或文本。",
     "default": "pillow"
   },
+  "profile_application_enabled": {
+    "description": "启用 Profile application 路径",
+    "type": "bool",
+    "hint": "默认关闭。开启后 /妮姬 我 的读取通过新的 Profile application；关闭时保留兼容路径。",
+    "default": false
+  },
   "public_base_url": {
     "description": "绑定服务公网地址",
     "type": "string",

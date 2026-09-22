@@ -4,6 +4,7 @@ import json
 import shutil
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -56,6 +57,38 @@ class TarotBackendTests(unittest.TestCase):
         two = service2.draw_daily("aiocqhttp:123456", now=when)
         self.assertEqual(one.cards[0].card.key, two.cards[0].card.key)
         self.assertEqual(one.cards[0].orientation, two.cards[0].orientation)
+
+    def test_daily_draw_uses_utc8_date_boundary(self) -> None:
+        service = TarotService(self.root, self.runtime)
+        before_midnight = datetime(2026, 9, 14, 15, 59, tzinfo=timezone.utc)
+        after_midnight = datetime(2026, 9, 14, 16, 0, tzinfo=timezone.utc)
+
+        first = service.draw_daily("aiocqhttp:date-boundary", now=before_midnight)
+        second = service.draw_daily("aiocqhttp:date-boundary", now=after_midnight)
+
+        self.assertEqual(first.date_key, "2026-09-14")
+        self.assertEqual(second.date_key, "2026-09-15")
+        saved = json.loads((self.runtime / "daily_draws.json").read_text(encoding="utf-8"))
+        self.assertEqual(set(saved), {"2026-09-14", "2026-09-15"})
+
+    def test_daily_draw_concurrent_calls_keep_one_subject_record(self) -> None:
+        service = TarotService(self.root, self.runtime)
+        when = datetime(2026, 9, 14, 3, 0, tzinfo=timezone.utc)
+
+        def draw_once(_: int):
+            return service.draw_daily("aiocqhttp:concurrent", now=when)
+
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            readings = list(pool.map(draw_once, range(16)))
+
+        results = {
+            (reading.date_key, reading.cards[0].card.key, reading.cards[0].orientation)
+            for reading in readings
+        }
+        self.assertEqual(results, {("2026-09-14", readings[0].cards[0].card.key, readings[0].cards[0].orientation)})
+        saved = json.loads((self.runtime / "daily_draws.json").read_text(encoding="utf-8"))
+        self.assertEqual(set(saved), {"2026-09-14"})
+        self.assertEqual(len(saved["2026-09-14"]), 1)
 
     def test_minor_arcana_activates_only_when_all_56_images_exist(self) -> None:
         payload = json.loads(SOURCE_DATA.read_text(encoding="utf-8"))
@@ -194,6 +227,18 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         results2 = [r async for r in plugin.tarot_command(event, "今日")]
         self.assertEqual(results1[-1][1], results2[-1][1])
         self.assertIn("【今日塔罗】", results1[-1][1])
+
+    async def test_tarot_command_daily_emits_one_text_result(self) -> None:
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.plugin_dir = self.root
+        plugin.data_dir = self.runtime
+        plugin.tarot = TarotService(self.root, self.runtime)
+
+        results = [r async for r in plugin.tarot_command(DummyTarotEvent("single-message"), "今日")]
+        self.assertEqual(sum(result[0] == "plain" for result in results), 1)
+        self.assertEqual(results[-1][0], "plain")
 
     async def test_tarot_command_unknown_action(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin

@@ -112,6 +112,7 @@ class NikkePlugin(Star):
         self.character_renderer = self.container.character_renderer
         self.campaign_resolver = self.container.campaign_resolver
         self.profile_builder = self.container.profile_builder
+        self.profile_application = self.container.profile_application
         self.profile_renderer = self.container.profile_renderer
         self.raid_builder = self.container.raid_builder
         self.raid_renderer = self.container.raid_renderer
@@ -381,6 +382,33 @@ class NikkePlugin(Star):
         if not account:
             raise ValueError("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
         return account
+
+    def _profile_application_enabled(self) -> bool:
+        """只接受明确的布尔开关，避免损坏配置意外切换新 Profile 路径。"""
+        config = getattr(self, "config", None) or {}
+        return config.get("profile_application_enabled", False) is True
+
+    async def _build_profile_dashboard(self, account: dict[str, Any]):
+        """在请求开始固定 Profile 路径；单次请求只进入一条 gateway 链路。"""
+        if self._profile_application_enabled():
+            application = getattr(self, "profile_application", None)
+            if application is None:
+                raise RuntimeError("Profile application 未装配")
+            return await application.build_dashboard(account)
+
+        data = await self.client.get_profile_dashboard(account)
+        return self.profile_builder.build(
+            account=account,
+            basic=data["basic"],
+            outpost=data["outpost"],
+            roster=data["roster"],
+            outpost_available=data.get("outpost_available"),
+            roster_available=data.get("roster_available"),
+            daily=data.get("daily"),
+            daily_available=data.get("daily_available"),
+            fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
+            plugin_version=PLUGIN_VERSION,
+        )
 
     def _name_map(self) -> dict[str, str]:
         """按实际目录内容生成 name_code -> display_name 映射。
@@ -873,19 +901,7 @@ class NikkePlugin(Star):
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
             account = self._account_or_error(event)
-            data = await self.client.get_profile_dashboard(account)
-            dashboard = self.profile_builder.build(
-                account=account,
-                basic=data["basic"],
-                outpost=data["outpost"],
-                roster=data["roster"],
-                outpost_available=data.get("outpost_available"),
-                roster_available=data.get("roster_available"),
-                daily=data.get("daily"),
-                daily_available=data.get("daily_available"),
-                fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-                plugin_version=PLUGIN_VERSION,
-            )
+            dashboard = await self._build_profile_dashboard(account)
             path = await self._try_t2i("profile", dashboard)
             if not path:
                 path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)

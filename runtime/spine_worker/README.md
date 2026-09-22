@@ -14,7 +14,7 @@ Xvfb 上下文提供无桌面 RenderTexture，worker 不能访问账号上下文
 
 ## 版本与许可
 
-构建默认锁定 Spine runtime commit `77a5db0ec6d16331f5efbaa7662bba9355bd3424`，
+构建默认锁定 Spine runtime commit `425ce416bb218b28caeec47b317aa57cd7140375`，
 对应官方 4.0 runtime。使用、集成、分发前必须按官方
 [Spine Runtimes License](https://esotericsoftware.com/spine-runtimes-license) 与
 [Editor License](https://esotericsoftware.com/spine-editor-license) 核验；

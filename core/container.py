@@ -10,9 +10,11 @@ from __future__ import annotations
 import logging
 import shutil
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from .._version import PLUGIN_VERSION
 from ..features.announcement.delivery import AnnouncementDelivery
 from ..features.announcement.service import AnnouncementService
 from ..features.calendar.service import CalendarService
@@ -25,6 +27,7 @@ from ..features.character.registries.costume import CostumeRegistry
 from ..features.character.stat_resources import CharacterStatResourceLoader
 from ..features.daily.runner import DailyRunner
 from ..features.profile.builder import ProfileBuilder
+from ..features.profile.application import ProfileApplication
 from ..features.raid.builder import UnionRaidBuilder
 from ..features.tarot.service import TarotDataError, TarotService
 from ..features.tower.registry import TowerRegistry
@@ -70,6 +73,7 @@ class ServiceContainer:
     character_renderer: CharacterCardRenderer
     campaign_resolver: CampaignStageResolver
     profile_builder: ProfileBuilder
+    profile_application: ProfileApplication
     profile_renderer: ProfileCardRenderer
     raid_builder: UnionRaidBuilder
     raid_renderer: UnionRaidRenderer
@@ -142,6 +146,12 @@ def create_container(
     )
     campaign_resolver = CampaignStageResolver.from_file(plugin_dir / "assets" / "campaign_stages.json")
     profile_builder = ProfileBuilder(campaign_resolver=campaign_resolver)
+    profile_application = ProfileApplication(
+        gateway=client,
+        builder=profile_builder,
+        clock=lambda: datetime.now(timezone(timedelta(hours=8))),
+        plugin_version=PLUGIN_VERSION,
+    )
     profile_renderer = ProfileCardRenderer(
         data_dir / "cards",
         plugin_dir / "fonts",
@@ -220,6 +230,7 @@ def create_container(
         character_renderer=character_renderer,
         campaign_resolver=campaign_resolver,
         profile_builder=profile_builder,
+        profile_application=profile_application,
         profile_renderer=profile_renderer,
         raid_builder=raid_builder,
         raid_renderer=raid_renderer,

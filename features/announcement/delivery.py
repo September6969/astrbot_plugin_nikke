@@ -31,13 +31,118 @@ class PlannedPush:
 
 class AnnouncementDelivery:
     SETTING = "announcement_delivery_v1"
+    DISPATCH_INTENT = "DISPATCH_INTENT"
+    CONFIRMED_SUCCESS = "CONFIRMED_SUCCESS"
+    CONFIRMED_FAILURE = "CONFIRMED_FAILURE"
+    UNKNOWN_AFTER_ACTION = "UNKNOWN_AFTER_ACTION"
 
     def __init__(self, store):
         self.store = store
         self._dispatch_lock = asyncio.Lock()
 
     def _state(self):
-        return self.store.get_setting(self.SETTING, {"targets": {}, "delivered": {}})
+        state = self.store.get_setting(
+            self.SETTING,
+            {"targets": {}, "delivered": {}, "dispatch_intents": {}, "retry_after": {}},
+        )
+        if not isinstance(state, dict):
+            raise ValueError("公告投递状态损坏")
+        # 新字段采用 additive 方式，旧设置在下一次写入时自然补齐。
+        for field in ("targets", "delivered", "dispatch_intents", "retry_after"):
+            if field not in state:
+                state[field] = {}
+            if not isinstance(state[field], dict):
+                raise ValueError(f"公告投递状态字段损坏: {field}")
+        return state
+
+    @classmethod
+    def _intent_record(cls, push, current):
+        record = asdict(push)
+        record.pop("text")
+        record.update({"status": cls.DISPATCH_INTENT, "intent_at": current.isoformat()})
+        return record
+
+    def _persist_intent(self, push, current):
+        state = self._state()
+        if push.key in state["delivered"] or push.key in state["dispatch_intents"]:
+            return False
+        state["dispatch_intents"][push.key] = self._intent_record(push, current)
+        # 没有持久化 intent 就不能调用外部 sender；这是发送前的 fail-closed 闸门。
+        self.store.set_setting(self.SETTING, state)
+        return True
+
+    def _mark_unknown(self, push_key, current, reason):
+        state = self._state()
+        intent = state["dispatch_intents"].get(push_key)
+        if not isinstance(intent, dict):
+            return False
+        intent["status"] = self.UNKNOWN_AFTER_ACTION
+        intent["unknown_at"] = current.isoformat()
+        intent["detail"] = str(reason)[:500]
+        state["retry_after"].pop(push_key, None)
+        try:
+            self.store.set_setting(self.SETTING, state)
+        except Exception:
+            # 原有 DISPATCH_INTENT 仍然存在时同样禁止重放；不能为了写诊断再冒险发送。
+            return False
+        return True
+
+    def _commit_failure(self, push_key, current):
+        state = self._state()
+        intent = state["dispatch_intents"].get(push_key)
+        if not isinstance(intent, dict):
+            return False
+        intent["status"] = self.CONFIRMED_FAILURE
+        intent["resolved_at"] = current.isoformat()
+        state["dispatch_intents"].pop(push_key, None)
+        state["retry_after"][push_key] = (current + timedelta(minutes=5)).isoformat()
+        self.store.set_setting(self.SETTING, state)
+        return True
+
+    def _commit_success(self, push, current):
+        state = self._state()
+        intent = state["dispatch_intents"].get(push.key)
+        if not isinstance(intent, dict):
+            return False
+        record = {key: value for key, value in intent.items() if key not in {"status", "detail"}}
+        record["status"] = self.CONFIRMED_SUCCESS
+        record["pushed_at"] = current.isoformat()
+        state["delivered"][push.key] = record
+        state["dispatch_intents"].pop(push.key, None)
+        state["retry_after"].pop(push.key, None)
+        self.store.set_setting(self.SETTING, state)
+        return True
+
+    def reconcile_unknown(self, push_key, outcome, *, now=None):
+        """只接受人工/上游幂等对账，不替未知投递自动选择重发。"""
+        if outcome not in {self.CONFIRMED_SUCCESS, self.CONFIRMED_FAILURE}:
+            raise ValueError("未知投递只能对账为 CONFIRMED_SUCCESS 或 CONFIRMED_FAILURE")
+        current = aware(now or datetime.now(timezone.utc))
+        state = self._state()
+        intent = state["dispatch_intents"].get(push_key)
+        if not isinstance(intent, dict) or intent.get("status") not in {
+            self.DISPATCH_INTENT,
+            self.UNKNOWN_AFTER_ACTION,
+        }:
+            return False
+        if outcome == self.CONFIRMED_SUCCESS:
+            record = {
+                key: value
+                for key, value in intent.items()
+                if key not in {"status", "detail"}
+            }
+            record.update(
+                {
+                    "status": self.CONFIRMED_SUCCESS,
+                    "pushed_at": intent.get("intent_at", current.isoformat()),
+                    "reconciled_at": current.isoformat(),
+                }
+            )
+            state["delivered"][push_key] = record
+        state["dispatch_intents"].pop(push_key, None)
+        state["retry_after"].pop(push_key, None)
+        self.store.set_setting(self.SETTING, state)
+        return True
 
     def subscribe(self, target, records, *, now=None, reminder_hours=(24, 6, 1)):
         if not isinstance(target, str) or not target.strip():
@@ -110,7 +215,7 @@ class AnnouncementDelivery:
                         continue
                 push = PlannedPush(target, record.content_id, record.content_version, "announcement",
                     f"【官方公告】{record.title}\n{record.source_url}")
-                if push.key not in state["delivered"]:
+                if push.key not in state["delivered"] and push.key not in state["dispatch_intents"]:
                     planned[push.key] = push
             for deadline in deadlines:
                 end = aware(deadline.end_at)
@@ -126,18 +231,18 @@ class AnnouncementDelivery:
                         continue
                     push = PlannedPush(target, deadline.event_id, deadline.deadline_version, "deadline",
                         f"【截止提醒】{deadline.name}\n{deadline.remaining_display(now)}\n{deadline.source_url}", hour)
-                    if push.key not in state["delivered"]:
+                    if push.key not in state["delivered"] and push.key not in state["dispatch_intents"]:
                         planned[push.key] = push
         return list(planned.values())
 
     async def dispatch(self, records, deadlines, sender, *, now=None, limit=20):
-        """sender(target, text) 必须显式返回 True；只有确认成功才保存 PushRecord。"""
+        """先持久化发送意图；未知结果保留并禁止自动重放。"""
         if not 1 <= limit <= 100:
             raise ValueError("单轮投递数量超限")
         async with self._dispatch_lock:
             current = aware(now or datetime.now(timezone.utc))
             self.cleanup(now=current)
-            succeeded = failed = 0
+            succeeded = failed = unknown = 0
             attempted = 0
             for push in self.plan(records, deadlines, now=current):
                 if attempted >= limit:
@@ -148,23 +253,33 @@ class AnnouncementDelivery:
                 if not self._state()["targets"].get(push.target, {}).get("enabled"):
                     continue
                 attempted += 1
+                if not self._persist_intent(push, current):
+                    # 其他实例或同一轮状态变化已经持有该键时，绝不能越过 intent 再发送。
+                    continue
                 try:
                     accepted = await sender(push.target, push.text)
-                except Exception:
-                    accepted = False
+                except asyncio.CancelledError:
+                    self._mark_unknown(push.key, current, "sender cancelled after dispatch intent")
+                    unknown += 1
+                    raise
+                except Exception as exc:
+                    self._mark_unknown(push.key, current, f"sender exception: {type(exc).__name__}")
+                    unknown += 1
+                    continue
                 if accepted is not True:
-                    # 失败不是 PushRecord，单独持久化退避，避免重启后立刻重复尝试。
-                    state = self._state()
-                    state.setdefault("retry_after", {})[push.key] = (current + timedelta(minutes=5)).isoformat()
-                    self.store.set_setting(self.SETTING, state)
+                    try:
+                        self._commit_failure(push.key, current)
+                    except Exception as exc:
+                        self._mark_unknown(push.key, current, f"failure state commit: {type(exc).__name__}")
+                        unknown += 1
+                        continue
                     failed += 1
                     continue
-                state = self._state()
-                record = asdict(push)
-                record.pop("text")
-                record["pushed_at"] = datetime.now(timezone.utc).isoformat()
-                state["delivered"][push.key] = record
-                state.setdefault("retry_after", {}).pop(push.key, None)
-                self.store.set_setting(self.SETTING, state)
+                try:
+                    self._commit_success(push, current)
+                except Exception as exc:
+                    self._mark_unknown(push.key, current, f"success state commit: {type(exc).__name__}")
+                    unknown += 1
+                    continue
                 succeeded += 1
-            return {"succeeded": succeeded, "failed": failed}
+            return {"succeeded": succeeded, "failed": failed, "unknown": unknown}
