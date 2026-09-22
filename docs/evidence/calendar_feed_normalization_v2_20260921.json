@@ -73,10 +73,11 @@
     "account_data": false
   },
   "tests": {
-    "content_quality_and_display_sort": "26 passed",
+    "content_quality_and_display_sort": "27 passed",
+    "bracket_wrapper_regression": "3 assertions passed",
     "schedule_data_layer_and_p0": "39 passed",
     "calendar_ui_v04_v05_t2i": "115 passed",
-    "targeted_total": "180 passed",
+    "targeted_total": "181 passed",
     "compileall": "passed",
     "git_diff_check": "passed",
     "final_full_pytest_once": {

@@ -27,6 +27,7 @@
 2. 新增 `canonical_event_title()` 与 `canonical_identity_match()`。只在 canonical title 完全相同、分类族兼容、起止时间均在 10 分钟容差内、server scope/cycle/source ID 无冲突时合并；证据写入 `identity_match`，不削弱原有 `score_identity()` / `strong_identity_gate`。
 3. 对 `SSR Anne`/`SSR Mica`、不同限定时装角色等明确身份冲突增加 fail-closed 保护，即使详情页被复用也不跨角色合并。
 4. 新增独立 `operations_display_group` 与 `sort_operations_display_events`：活动族 → 招募 → 转盘时装 → 限定时装 → META；ACTIVE 组内为 EXACT 结束时间、DATE_ONLY、UNKNOWN、相关性、稳定身份，UPCOMING 组内为开始时间、稳定身份。
+5. 修正 bracket wrapper 已先被剥离时的 canonical title 循环判断，按本轮 prefix 是否实际改变文本决定停止；`[活动]`、`[招募]`、`[时装]` 三类包装标题现在与未包装标题 canonical exact match。
 5. 服务文本查询、旧分组接口和 Calendar T2I payload 共用新排序；`resolve_next_ending()` 和 `canonical_models.active_sort_key` 保持未改。
 6. `CAT_LABELS` 补齐全部新分类，META 仍保留在 canonical/feed 数据集，不静默丢弃。
 
@@ -49,10 +50,10 @@
 
 本轮已完成的定向测试：
 
-- Content quality + canonical identity + display sort：`26 passed`。
+- Content quality + canonical identity + display sort：`27 passed`（含 bracket wrapper 三类回归断言）。
 - Schedule data layer + P0 semantics：`39 passed`。
 - Calendar UI/v04/v05/T2I visual/frontend：`115 passed`。
-- 定向合计：`180 passed`，另有既有依赖弃用 warning。
+- 定向合计：`181 passed`，另有既有依赖弃用 warning。
 
 最终 `compileall` 与 `git diff --check` 已通过。最终 full pytest 已按规则只执行一次：`1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项全部属于既有 Raid/阵容资产 resolver（Boss 11 项、Lineup 5 项），原因是本次干净验证 checkout 从其父目录启动，既有 resolver 使用相对路径 `data/nikke/blabla-assets`，因此没有命中 checkout 内的已跟踪素材；Calendar 定向套件没有失败。没有为此重复 full pytest。
 

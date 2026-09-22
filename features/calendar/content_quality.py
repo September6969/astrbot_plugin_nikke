@@ -361,9 +361,10 @@ def canonical_event_title(value: Any) -> str:
         "special recruit",
     )
     for prefix in wrapper_prefixes:
+        before = text
         pattern = rf"^{re.escape(_fold(prefix))}(?:\s*[:：-]\s*|\s+)"
         text = re.sub(pattern, "", text, count=1)
-        if text != _fold(value):
+        if text != before:
             break
 
     # Event/Activity 是包装后缀；核心名称内的同名词不在这里处理。

@@ -163,6 +163,18 @@ def test_canonical_event_title_removes_packaging_without_erasing_identity():
     )
 
 
+def test_canonical_event_title_keeps_bracketed_wrapper_variants_equal():
+    assert canonical_event_title("[活动] Mission Pass Foo") == canonical_event_title(
+        "Mission Pass Foo"
+    )
+    assert canonical_event_title("[招募] SSR Anne: Miracle Fairy") == canonical_event_title(
+        "SSR Anne: Miracle Fairy"
+    )
+    assert canonical_event_title("[时装] Limited Costume: Alice - Sweet Home") == canonical_event_title(
+        "Limited Costume: Alice - Sweet Home"
+    )
+
+
 def test_canonical_identity_matches_packaging_variants_without_relaxing_gate():
     left = _event(
         "gk:7828",
