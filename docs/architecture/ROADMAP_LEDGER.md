@@ -271,9 +271,9 @@
 - 本轮仅处理 `c401` 与 `c581` 的上躯干语义锚点：扩展 `bone`/`bone_pair`/`attachment`/`attachment_pair`/`surface` 证据选择器、保守 generic fallback 与 fail-closed；结构化语义不会被旧单骨骼 mapper 误读。`op*`、位置猜测、任意平均、发饰/外套/武器/特效均不作为上躯干证据。
 - `c401` 使用真实 4.0 skeleton 的 `body_total/body_total` attachment（`move3`，父级 `move2`，confidence `0.98`）；`c581` 使用真实 4.1 skeleton 的 `chest_l + chest_r`（共同父级 `pelvis7`，confidence `0.96`）。idle `t=0` 与 `t=0.5` 采样、运行时版本、数量和 SHA-256 记录在 `docs/evidence/spine_semantics/c401_c581_idle_audit_20260921.*`。
 - runtime metadata 只保留已选择的 torso point；`attachment_candidates_1024` 只留在 discovery sidecar。`torso_y`/`upper_torso_y` 为新内部命名，同时保留 `breast_y`、`breast_point` 与 `breast_source` 兼容合同。完整验收说明见 `docs/acceptance/SPINE_SEMANTIC_ANCHOR_V2.md`。
-- 定向 Python `30 passed`、Node `6 passed`；`compileall`、Node `--check`、JSON 校验和 `git diff --check` 通过。最终唯一 full pytest 为 `1130 passed, 2 skipped, 653 subtests passed, 1 failed`：唯一失败是既有注册测试子进程从 `E:\_codex_work\astrbot_plugin_nikke` 旁边旧 worktree 加载 `main.py`，不是当前分支代码；隔离当前分支的等价自动注册导入核验通过，未重复 full pytest。
-- GitHub CI run `35635088655` 已通过 Node、Spine 4.0 headless worker 与 Python 3.10–3.13；Draft PR #98 已建立，未合并。
-- 状态：`READY_OFFLINE`。本轮不部署、不访问真实账号、不发送 QQ 消息。
+- 对齐后定向 Python Character/Spine/T2I `86 passed`、Node sidecar/surface `6 passed`、Calendar smoke `27 passed`；`compileall`、两个 Node `--check`、JSON 校验和 `git diff --check` 通过。最终唯一 full pytest 为 `1128 passed, 2 skipped, 648 subtests passed, 17 failed`：11 个 Boss resolver、5 个 Lineup resolver 为既有相对素材路径/镜像环境问题，另 1 个注册测试子进程从 `E:\_codex_work\astrbot_plugin_nikke` 旁边旧 worktree 加载 deprecated decorator；Character/Spine/Calendar 无失败，未修改业务代码迎合环境，也未重复 full pytest。
+- 旧 GitHub CI run `35635088655` 仅作历史记录；对齐后的 PR #98 必须取得新 push 后 CI，Node、Spine 4.0 headless worker 与 Python 3.10–3.13 全部通过后才可 Ready/Merge。
+- 当前对齐状态：`READY_OFFLINE`；通过 PR CI、合并与 main push CI 后为 `READY_FOR_LIVE_DEPLOYMENT`。本轮不部署、不访问真实账号、不发送 QQ 消息。
 
 ## Calendar Operations Feed v2（2026-09-21，已进入 main）
 
