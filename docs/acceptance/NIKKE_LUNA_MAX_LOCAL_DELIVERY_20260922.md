@@ -2,7 +2,7 @@
 
 ## 当前结论
 
-当前状态：`LOCAL_IMPLEMENTATION_COMPLETE`。
+当前状态：`LOCAL_IMPLEMENTATION_COMPLETE`（审核后 A74 重工及最终本地回归已完成）。
 
 这表示计划中所有本地任务已经完成或以证据保留，当前隔离工作树通过适用的本地回归，并且遗留的外部门槛已经单独列出。它不表示 `RELEASE_READY`、`DEPLOYED` 或 `MIGRATION_COMPLETE`。
 
@@ -29,20 +29,23 @@
 
 ### 回归与证据
 
-- A74 重工后完整 pytest：`1170 passed, 2 skipped, 654 subtests passed in 175.91s`。
+- A74 审核后完整行为回归（单列并排除既存架构门禁）：`1199 passed, 2 skipped, 658 subtests passed`。
+- 架构门禁单独复核：`6 failed, 4 passed`；失败仍为已登记的热点大小、main 处理器、依赖方向、AssetManager 所有者、空转发模块与 Calendar 导入环，不把它们描述为通过。
+- A74 投递窄测：`12 passed`；A74 影响组：`243 passed, 85 subtests passed`。
 - presentation 合同：`68 passed, 2 skipped`；Node 扩展/Spine 表面：`10 passed`。
-- `compileall`、包导入、`git diff --check` 均通过。
-- 公告/证据矩阵最终复核组：`191 passed, 51 subtests passed`；Node `10 passed`。
-- 当前未提交工作树的正式源码指纹见 `E:/DevCache/nikke-luna-max-runs/20260922T101830Z-2356cfe3/source_manifest.json`；最终 hash 以该文件和 `state.json.source_manifest` 为准。
+- Python 3.14 的 `compileall`、包导入、`git diff --check` 均通过；Python 3.10 `compileall` 通过。Node `10 passed`。
+- Python 3.10/3.13 环境未安装 pytest；上述 pytest 结果来自 Python 3.14，不替代 CI 支持矩阵。
+- 当前正式源码指纹见 `E:/DevCache/nikke-luna-max-runs/20260922T101830Z-2356cfe3/source_manifest.json` 和 `state.json.source_manifest`，覆盖基线至当前 checkpoint 的源码差异。
 - Voice registry、缓存音频校验、账号列表、角色名 map 的固定输入 before/after median/P95 已记录；关闭耗时和 `tracemalloc` 峰值已记录。
 - 详细证据：[F90_final_local_verification.md](../../../../evidence/F90_final_local_verification.md)。
 
 ### 当前 patch/提交状态
 
-- 本次没有创建 checkpoint commit；当前 `HEAD` 仍是基线 SHA，改动保留在隔离工作树中供人工审查。
+- 当前本地 checkpoint：`116a50957941c76733ecb9b96b6ec647814217ad`（公告硬退出后孤儿发送意图恢复）；工作树干净。该提交仅在隔离分支本地存在。
 - 没有修改 `E:/NIKKE_Luna_Max_Project/source/astrbot_plugin_nikke` 主工作区。
 - 没有 push、创建 PR、merge、部署、修改远端 ruleset、读取真实账号、写真实数据库、发送真实 QQ 消息或触发真实 CDK/签到动作。
-- 当前工作树的 `git status` 和运行台账 `state.json` 是 patch 范围的事实来源；不要从旧报告中的历史 PR、旧 SHA 或旧 voice map 结论推断本次 patch。
+- 审核后正式 `source_manifest.json` 已重新生成并逐文件自校验；不要用旧 patch hash `b7dcbebd...` 或旧 manifest `7604f27c...` 代表当前源码。
+- 没有 push、创建 PR、merge、部署、修改远端 ruleset、读取真实账号、写真实数据库、发送真实 QQ 消息或触发真实 CDK/签到动作。
 - 运行模型与推理强度没有宿主可独立核验的标识；本报告不把计划中的 `gpt-5.6-luna/max` 写成已证实执行事实。
 
 ## 架构决策与兼容边界
@@ -57,8 +60,8 @@
 ## 回退与恢复
 
 - 本次没有部署，因此不存在需要执行的生产回退；真实数据库、密钥、Cookie、token 和 QQ 状态均未触碰。
-- 若本地审查拒绝 patch：保留运行台账和日志，另从基线创建新的隔离工作树进行对照；不要对主工作区执行强制 reset、清理或覆盖。
-- 若维护者批准 checkpoint：先人工复核 `state.json`、`git status`、测试日志和本报告，再由维护者决定是否提交。提交后应把提交 SHA、CI 链接和可回退的备份/恢复证据补入本报告。
+- 若本地审查拒绝 patch：保留运行台账和日志，可另从基线创建新的隔离工作树进行对照；不要对主工作区执行强制 reset、清理或覆盖。
+- 当前 checkpoint 尚未推送或提交 PR。若维护者之后要求建立 PR/触发 G01，应先复核当前 `state.json`、manifest、自检日志及目标提交，再单独执行获准的外部动作。
 - 若外部部署后需要回退：必须使用部署前保存的应用 SHA、`nikke.sqlite3` 与 `secret.key` 成对备份及目标环境的健康/日志证据；写入未知状态不得通过重新运行 V1 动作来“补偿”。
 - 任何删除 V1、删除兼容 shim、删除旧资源或清理运行台账的动作，都需要单独的人工范围确认，不属于本地实现完成的默认步骤。
 
