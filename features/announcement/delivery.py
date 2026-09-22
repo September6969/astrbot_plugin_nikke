@@ -87,6 +87,22 @@ class AnnouncementDelivery:
             return False
         return True
 
+    def _recover_orphaned_intents(self, current):
+        """重启后显式标记未决意图为未知，并继续阻止自动重放。"""
+        state = self._state()
+        recovered = 0
+        for intent in state["dispatch_intents"].values():
+            if not isinstance(intent, dict) or intent.get("status") != self.DISPATCH_INTENT:
+                continue
+            intent["status"] = self.UNKNOWN_AFTER_ACTION
+            intent["unknown_at"] = current.isoformat()
+            intent["detail"] = "recovered unresolved dispatch intent"
+            recovered += 1
+        if recovered:
+            # 恢复状态未能落盘时直接失败，不能继续调用外部 sender。
+            self.store.set_setting(self.SETTING, state)
+        return recovered
+
     def _commit_failure(self, push_key, current):
         state = self._state()
         intent = state["dispatch_intents"].get(push_key)
@@ -241,8 +257,9 @@ class AnnouncementDelivery:
             raise ValueError("单轮投递数量超限")
         async with self._dispatch_lock:
             current = aware(now or datetime.now(timezone.utc))
+            unknown = self._recover_orphaned_intents(current)
             self.cleanup(now=current)
-            succeeded = failed = unknown = 0
+            succeeded = failed = 0
             attempted = 0
             for push in self.plan(records, deadlines, now=current):
                 if attempted >= limit:

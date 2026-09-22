@@ -153,6 +153,34 @@ class DeliveryTests(IsolatedAsyncioTestCase):
         self.assertIn(key, restarted._state()["delivered"])
         self.assertEqual(restarted.plan([self.record()], now=self.now), [])
 
+    async def test_recovered_orphaned_intent_becomes_unknown_without_replay(self):
+        self.service.subscribe("fake", [], now=self.now)
+
+        class SimulatedProcessExit(BaseException):
+            pass
+
+        def exit_after_sender(_push, _current):
+            raise SimulatedProcessExit()
+
+        self.service._commit_success = exit_after_sender
+        sender = AsyncMock(return_value=True)
+        with self.assertRaises(SimulatedProcessExit):
+            await self.service.dispatch([self.record()], [], sender, now=self.now)
+
+        sender.assert_awaited_once()
+        state = self.store.get_setting(self.service.SETTING)
+        key = next(iter(state["dispatch_intents"]))
+        self.assertEqual(state["dispatch_intents"][key]["status"], "DISPATCH_INTENT")
+
+        restarted = AnnouncementDelivery(self.store)
+        retry_sender = AsyncMock(return_value=True)
+        result = await restarted.dispatch([self.record()], [], retry_sender, now=self.now)
+
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 1})
+        retry_sender.assert_not_awaited()
+        recovered = restarted._state()["dispatch_intents"][key]
+        self.assertEqual(recovered["status"], "UNKNOWN_AFTER_ACTION")
+
     async def test_dispatch_intent_is_persisted_before_sender(self):
         self.service.subscribe("fake", [], now=self.now)
         push = self.service.plan([self.record()], now=self.now)[0]
