@@ -4,7 +4,7 @@ import base64
 from PIL import Image
 from jinja2 import Environment
 
-from astrbot_plugin_nikke.ui.t2i_payloads import _normalize_equipment_icon
+from astrbot_plugin_nikke.ui.payloads.character import _normalize_equipment_icon
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 
@@ -170,7 +170,7 @@ def test_character_font_audit_and_fallback():
     from pathlib import Path
     from jinja2 import Environment
     from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-    from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
     from astrbot_plugin_nikke.features.character.replica import (
@@ -247,7 +247,7 @@ async def test_browser_rendered_fonts_and_glyph_metrics():
     from playwright.async_api import async_playwright
     from jinja2 import Environment
     from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-    from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
     import types

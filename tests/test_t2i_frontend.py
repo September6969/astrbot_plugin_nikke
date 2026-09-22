@@ -98,14 +98,16 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         command, args, request = plugin.union_raid, (), plugin.raid_application.overview
     else:
         plugin._directory = [{"name_code": "5065"}]
-        plugin.character_identity = Mock(find=Mock(return_value=plugin._directory))
-        plugin.client = Mock(get_character_detail=AsyncMock(return_value={}))
-        plugin._get_profile_for_stat_calculation = AsyncMock(return_value={})
-        plugin.character_stat_resources = Mock(prepare_payload=Mock(return_value={}))
-        plugin.character_builder = Mock(build=Mock(return_value=data))
+        plugin.character_application = Mock(
+            character_card=AsyncMock(return_value=data)
+        )
         fallback = Mock(return_value="fallback.png")
         plugin.character_renderer = Mock(render_character=fallback)
-        command, args, request = plugin.character, ("皇冠",), plugin.client.get_character_detail
+        command, args, request = (
+            plugin.character,
+            ("皇冠",),
+            plugin.character_application.character_card,
+        )
     event = Mock(image_result=lambda path: path)
     assert [result async for result in command(event, *args)] == ["fallback.png"]
     request.assert_awaited_once()

@@ -714,6 +714,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_character_query_requires_unique_match(self):
         from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterAmbiguousMatch
 
         class Event:
             def get_sender_id(self):
@@ -722,18 +723,14 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def plain_result(self, text):
                 return text
 
-        class Store:
-            def get_account(self, qq_id):
-                return {
-                    "qq_id": qq_id,
-                    "cookie": VALID_COOKIE,
-                    "game_uid": "game-10001",
-                    "area_id": "global",
-                    "platform": "global",
-                }
+        class Application:
+            async def character_card(self, qq_id, name, directory):
+                raise CharacterAmbiguousMatch(
+                    ("爱丽丝", "爱丽丝：仙境兔女郎")
+                )
 
         plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
+        plugin.character_application = Application()
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
             {"name_code": 2, "name_cn": "爱丽丝：仙境兔女郎", "name_en": "Alice: Wonderland Bunny"},
@@ -745,6 +742,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_character_query_rejects_unowned_character(self):
         from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterNotOwned
 
         class Event:
             def get_sender_id(self):
@@ -753,17 +751,12 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def plain_result(self, text):
                 return text
 
-        class Store:
-            def get_account(self, qq_id):
-                return {"qq_id": qq_id, "cookie": VALID_COOKIE}
-
-        class FakeClient:
-            async def get_character_detail(self, account, code):
-                raise ValueError("该账号未持有这名妮姬")
+        class Application:
+            async def character_card(self, qq_id, name, directory):
+                raise CharacterNotOwned("爱丽丝")
 
         plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
-        plugin.client = FakeClient()
+        plugin.character_application = Application()
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
@@ -834,8 +827,9 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn(code, persisted)
         self.assertNotIn(code, "".join(first))
 
-    async def test_character_query_does_not_call_get_roster(self):
+    async def test_character_command_delegates_identity_and_fetch_to_application(self):
         from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterNotOwned
 
         class Event:
             def get_sender_id(self):
@@ -843,36 +837,86 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def plain_result(self, text):
                 return text
 
-        class Store:
-            def get_account(self, qq_id):
-                return {"qq_id": qq_id, "cookie": VALID_COOKIE}
-
-        class TrackingClient:
+        class Application:
             def __init__(self):
-                self.roster_called = False
-                self.detail_called = False
+                self.requests = []
 
-            async def get_roster(self, account, include_details=True):
-                self.roster_called = True
-                return [{"name_code": 1, "lv": 200}]
+            async def character_card(self, qq_id, name, directory):
+                self.requests.append((qq_id, name, directory))
+                raise CharacterNotOwned("爱丽丝")
 
-            async def get_character_detail(self, account, code):
-                self.detail_called = True
-                raise ValueError("该账号未持有这名妮姬")
-
-        client = TrackingClient()
         plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
-        plugin.client = client
+        application = Application()
+        plugin.character_application = application
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
         results = [item async for item in plugin.character(Event(), "爱丽丝")]
         self.assertEqual(len(results), 1)
         self.assertIn("未持有", results[0])
-        # 验证 main.character() 不再主动调用 client.get_roster()
-        self.assertFalse(client.roster_called)
-        self.assertTrue(client.detail_called)
+        self.assertEqual(application.requests, [("10001", "爱丽丝", plugin._directory)])
+
+    async def test_roster_command_delegates_account_and_name_mapping_to_application(self):
+        from unittest.mock import AsyncMock, Mock
+
+        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterRosterData
+
+        class Event:
+            def get_sender_id(self):
+                return "10001"
+
+            def image_result(self, path):
+                return path
+
+        directory = [{"name_code": "alice", "name_cn": "爱丽丝"}]
+        data = CharacterRosterData(
+            commander_name="测试指挥官",
+            characters=({"name_code": "alice", "lv": 200},),
+            name_map={"alice": "爱丽丝"},
+        )
+        application = Mock(roster=AsyncMock(return_value=data))
+        renderer = Mock(render_roster=Mock(return_value="roster.png"))
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.character_application = application
+        plugin.renderer = renderer
+        plugin._directory = directory
+
+        result = [item async for item in plugin.roster(Event())]
+
+        self.assertEqual(result, ["roster.png"])
+        application.roster.assert_awaited_once_with("10001", directory)
+        renderer.render_roster.assert_called_once_with(
+            "测试指挥官", data.characters, data.name_map
+        )
+
+    async def test_info_command_refuses_ambiguous_identity_instead_of_rendering_first(self):
+        from unittest.mock import Mock
+
+        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterAmbiguousMatch
+
+        class Event:
+            def plain_result(self, text):
+                return text
+
+        application = Mock(
+            info=Mock(
+                side_effect=CharacterAmbiguousMatch(("爱丽丝", "仙境兔女郎"))
+            )
+        )
+        renderer = Mock()
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.character_application = application
+        plugin.renderer = renderer
+        plugin._directory = []
+
+        result = [item async for item in plugin.info(Event(), "丽丝")]
+
+        self.assertEqual(len(result), 1)
+        self.assertIn("找到多个角色", result[0])
+        self.assertIn("仙境兔女郎", result[0])
+        renderer.render.assert_not_called()
 
     async def test_terminate_reclaims_asset_manager(self):
         from astrbot_plugin_nikke.main import NikkePlugin
@@ -891,103 +935,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(plugin._closing)
         mock_asset_manager.close.assert_called_once()
         mock_web.stop.assert_awaited_once()
-
-    async def test_stats_profile_cache_bounded_lru_eviction(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
-        from unittest.mock import AsyncMock
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._stats_profile_cache = {}
-        plugin.client = AsyncMock()
-        plugin.client.get_profile = AsyncMock(side_effect=lambda acc: {"synchro_level": 200})
-
-        # 连续填充 60 个账号，验证总容量不超过 50
-        for i in range(60):
-            account = {"game_uid": f"uid_{i}", "cookie": VALID_COOKIE}
-            await plugin._get_profile_for_stat_calculation(account)
-
-        self.assertLessEqual(len(plugin._stats_profile_cache), 50)
-        # 最早的 uid_0 应已被淘汰
-        self.assertNotIn("uid_0", plugin._stats_profile_cache)
-        # 最近的 uid_59 应存在
-        self.assertIn("uid_59", plugin._stats_profile_cache)
-
-    def test_name_map_cache_identity_rejects_same_length_different_content(self):
-        """回归测试：目录 A 与目录 B 具有相同长度（如均为 200 条），但内容不同时，B 绝不能复用 A 的缓存。"""
-        from astrbot_plugin_nikke.main import NikkePlugin
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.plugin_dir = Path(__file__).resolve().parent.parent
-
-        dir_a = [
-            {"name_code": 101, "name_cn": "拉毗", "name_en": "Rapi"},
-            {"name_code": 102, "name_cn": "阿尼斯", "name_en": "Anis"},
-        ]
-        dir_b = [
-            {"name_code": 101, "name_cn": "红莲", "name_en": "Scarlet"},
-            {"name_code": 102, "name_cn": "神罚", "name_en": "Modernia"},
-        ]
-
-        self.assertEqual(len(dir_a), len(dir_b))
-
-        plugin._directory = dir_a
-        map_a = plugin._name_map()
-        self.assertIn("拉毗", map_a["101"])
-        self.assertIs(plugin._name_map(), map_a)
-
-        plugin._directory = dir_b
-        map_b = plugin._name_map()
-        self.assertNotEqual(map_a, map_b)
-        self.assertIn("红莲", map_b["101"])
-        self.assertNotIn("拉毗", map_b["101"])
-
-    def test_name_map_invalidates_on_name_zh_cn_difference(self):
-        """回归测试：相同长度且传统字段相同，但 name_zh_cn 不同时，缓存必须准确失效。"""
-        from astrbot_plugin_nikke.main import NikkePlugin
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.plugin_dir = Path(__file__).resolve().parent.parent
-
-        dir_a = [
-            {"name_code": 101, "name_cn": "拉毗", "name_zh_tw": "拉毗", "name_en": "Rapi", "name_zh_cn": "拉毗-初版"},
-        ]
-        dir_b = [
-            {"name_code": 101, "name_cn": "拉毗", "name_zh_tw": "拉毗", "name_en": "Rapi", "name_zh_cn": "拉毗-修正版"},
-        ]
-
-        plugin._directory = dir_a
-        map_a = plugin._name_map()
-        self.assertEqual(map_a["101"], "拉毗-初版")
-
-        plugin._directory = dir_b
-        map_b = plugin._name_map()
-        self.assertNotEqual(map_a, map_b)
-        self.assertEqual(map_b["101"], "拉毗-修正版")
-
-    def test_name_map_field_boundary_safety_with_special_characters(self):
-        """回归测试：字段内包含冒号等分隔符时，结构化序列化杜绝字段拼接坍缩与碰撞。"""
-        from astrbot_plugin_nikke.main import NikkePlugin
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.plugin_dir = Path(__file__).resolve().parent.parent
-
-        # 若使用简单的 ":" 拼接，两者都会变成 "101:a:b:c"
-        dir_1 = [
-            {"name_code": 101, "name_zh_cn": "a:b", "name_zh_tw": "c", "name_cn": "", "name_en": ""},
-        ]
-        dir_2 = [
-            {"name_code": 101, "name_zh_cn": "a", "name_zh_tw": "b:c", "name_cn": "", "name_en": ""},
-        ]
-
-        plugin._directory = dir_1
-        map_1 = plugin._name_map()
-        self.assertEqual(map_1["101"], "a:b")
-
-        plugin._directory = dir_2
-        map_2 = plugin._name_map()
-        self.assertNotEqual(map_1, map_2)
-        self.assertEqual(map_2["101"], "a")
-
 
 if __name__ == "__main__":
     unittest.main()

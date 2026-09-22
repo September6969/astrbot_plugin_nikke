@@ -52,11 +52,13 @@ from .ui.renderers import (
 )
 from .ui.primitives import CardRenderer
 from .ui.t2i_payloads import CalendarT2IPayloadBuilder
-from .features.character.builder import CharacterCardBuilder
+from .features.character.application import (
+    CharacterAmbiguousMatch,
+    CharacterNotFound,
+    CharacterNotOwned,
+)
 from .features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
-from .features.character.identity import CharacterDirectoryResolver
 from .integrations.blablalink.client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
-from .features.character.stat_resources import CharacterStatResourceLoader, map_research_levels
 from .core.privacy import safe_exception_message
 from .features.daily.models import DailyTaskResult, DailyTaskStatus
 from .core.feedback import DelayedFeedbackManager
@@ -97,14 +99,12 @@ class NikkePlugin(Star):
         self.data_dir = Path("data") / "nikke"
         self.container = create_container(self.plugin_dir, self.data_dir, self.config)
 
-        # 映射公开组件到插件门面；Profile 用例由正式 handler 编排。
+        # 映射公开组件到插件门面；Profile 与 Character 用例由应用边界编排。
         self.extension_zip = self.container.extension_zip
         self.store = self.container.store
-        self.character_stat_resources = self.container.character_stat_resources
+        self.character_application = self.container.character_application
         self.client = self.container.client
         self.renderer = self.container.renderer
-        self.character_builder = self.container.character_builder
-        self.character_identity = self.container.character_identity
         self.asset_manager = self.container.asset_manager
         self.character_renderer = self.container.character_renderer
         self.campaign_application = self.container.campaign_application
@@ -160,8 +160,6 @@ class NikkePlugin(Star):
             runtime_health=self._account_runtime_health_details,
             render_manual_summary=self._render_manual_daily_summary,
         )
-        self._name_map_cache: tuple[str, dict[str, str]] | None = None
-        self._stats_profile_cache: dict[str, tuple[float, dict[str, object]]] = {}
         self._voice_poke_cooldowns: dict[tuple, float] = {}
         self._termination_lock = asyncio.Lock()
         self._background_tasks: list[asyncio.Task] = []
@@ -275,7 +273,7 @@ class NikkePlugin(Star):
             logger.debug("[NIKKE] L2D 索引预热跳过: %s", safe_exception_message(exc))
         try:
             # Exia 静态表只在服务启动时统一预热；角色卡只读取缓存，不逐字段请求网络。
-            await asyncio.to_thread(self.character_stat_resources.load_base)
+            await self.character_application.preload_stat_resources()
             logger.info("[NIKKE] Exia/NIKKE 静态属性表已载入并缓存")
         except Exception as exc:
             logger.warning("[NIKKE] 静态属性表预热失败，角色卡将保留 —：%s", safe_exception_message(exc))
@@ -301,33 +299,6 @@ class NikkePlugin(Star):
                 await self.context.send_message(event.unified_msg_origin, MessageChain([Plain(text)]))
         except Exception as exc:
             logger.debug("[NIKKE] 延迟提示发送跳过: %s", safe_exception_message(exc))
-
-    async def _get_profile_for_stat_calculation(self, account: dict[str, Any]) -> dict[str, Any]:
-        """缓存一次 Outpost 研究快照，避免每张卡重复请求同一账号。"""
-        cache_key = str(account.get("game_uid") or account.get("qq_id") or "account")
-        now = time.monotonic()
-        cached = self._stats_profile_cache.get(cache_key)
-        if cached and now - cached[0] < 300:
-            return cached[1]
-        try:
-            profile = await self.client.get_profile(account)
-        except CookieExpired:
-            raise
-        except Exception as exc:
-            logger.warning("[NIKKE] 研究快照读取失败：%s", safe_exception_message(exc))
-            profile = {}
-        if not isinstance(profile, dict):
-            profile = {}
-        # 限制缓存条目上限（最多 50 个账号），先淘汰过期条目，再淘汰最旧条目
-        if len(self._stats_profile_cache) >= 50:
-            expired = [k for k, v in self._stats_profile_cache.items() if now - v[0] >= 300]
-            for k in expired:
-                self._stats_profile_cache.pop(k, None)
-            while len(self._stats_profile_cache) >= 50:
-                oldest_k = min(self._stats_profile_cache, key=lambda k: self._stats_profile_cache[k][0])
-                self._stats_profile_cache.pop(oldest_k, None)
-        self._stats_profile_cache[cache_key] = (now, profile)
-        return profile
 
     async def _scheduler_loop(self) -> None:
         last_daily = ""
@@ -439,46 +410,14 @@ class NikkePlugin(Star):
             raise ValueError("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
         return account
 
-    def _name_map(self) -> dict[str, str]:
-        """按实际目录内容生成 name_code -> display_name 映射。
-        包含所有影响 display_name 与 enrich 的本地化字段：
-        name_code, name_zh_cn, name_zh_tw, name_cn, name_en。
-        采用确定性结构化 JSON 序列化杜绝字段边界歧义，以 SHA-256 建立指纹。
-        """
-        directory = getattr(self, "_directory", ()) or ()
-        if not directory:
-            return {}
-
-        entries = [
-            (
-                str(item.get("name_code", "")),
-                str(item.get("name_zh_cn", "")),
-                str(item.get("name_zh_tw", "")),
-                str(item.get("name_cn", "")),
-                str(item.get("name_en", "")),
-            )
-            for item in directory
-            if isinstance(item, dict)
-        ]
-        payload = json.dumps(entries, ensure_ascii=False, separators=(",", ":"))
-        fingerprint = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-        cached = getattr(self, "_name_map_cache", None)
-        if cached is not None and cached[0] == fingerprint:
-            return cached[1]
-
-        resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
-        mapping = {
-            str(item.get("name_code", "")): resolver.display_name(resolver.enrich(item))
-            for item in directory
-            if isinstance(item, dict)
-        }
-        self._name_map_cache = (fingerprint, mapping)
-        return mapping
-
-    def _find_directory(self, query: str) -> list[dict]:
-        resolver = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
-        return resolver.find(self._directory, query)
+    @staticmethod
+    def _ambiguous_character_message(error: CharacterAmbiguousMatch) -> str:
+        candidates = "\n".join(
+            f"{index}. {candidate}"
+            for index, candidate in enumerate(error.candidates, 1)
+        )
+        suffix = "\n候选过多，请继续补全名称。" if error.too_many else ""
+        return "找到多个角色，请输入更完整的名称：\n\n" + candidates + suffix
 
     def resolve_voice_character(self, query: str) -> str | None:
         resolver = getattr(self, "voice_character_resolver", None)
@@ -1002,12 +941,13 @@ class NikkePlugin(Star):
     async def roster(self, event: AstrMessageEvent):
         """生成自己的妮姬练度表。"""
         try:
-            account = self._account_or_error(event)
-            characters = await self.client.get_roster(account, True)
+            data = await self.character_application.roster(
+                self._qq_id(event), self._directory
+            )
             path = self.renderer.render_roster(
-                account.get("nickname") or account.get("role_name") or "指挥官",
-                characters,
-                self._name_map(),
+                data.commander_name,
+                data.characters,
+                data.name_map,
             )
             yield event.image_result(path)
         except CookieExpired:
@@ -1031,58 +971,19 @@ class NikkePlugin(Star):
             lambda: self._send_delayed_notice(event, "正在查询与渲染角色卡片...")
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
-            account = self._account_or_error(event)
-            identity = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
-            matches = identity.find(self._directory, name)
-            if not matches:
-                raise ValueError("没有找到该妮姬")
-            if len(matches) > 1:
-                candidates = "\n".join(
-                    f"{index}. {identity.display_name(item)}"
-                    for index, item in enumerate(matches[:10], 1)
-                )
-                suffix = "\n候选过多，请继续补全名称。" if len(matches) > 10 else ""
-                yield event.plain_result(
-                    "找到多个角色，请输入更完整的名称：\n\n"
-                    + candidates
-                    + suffix
-                )
-                return
-            target = matches[0]
-            code = str(target.get("name_code", ""))
-            try:
-                payload = await self.client.get_character_detail(account, code)
-            except ValueError as exc:
-                if "未持有" in str(exc):
-                    yield event.plain_result(
-                        f"你未持有该妮姬：{identity.display_name(target)}"
-                    )
-                    return
-                raise
-            profile = await self._get_profile_for_stat_calculation(account)
-            outpost = profile.get("outpost", {}) if isinstance(profile, dict) else {}
-            account_for_card = dict(account)
-            account_for_card["research_levels"] = map_research_levels(
-                outpost.get("recycle_room_researches") if isinstance(outpost, dict) else None
-            )
-            try:
-                payload = await asyncio.to_thread(
-                    self.character_stat_resources.prepare_payload,
-                    payload,
-                )
-            except Exception as exc:
-                logger.warning("[NIKKE] 角色静态属性资源准备失败：%s", safe_exception_message(exc))
-            card = self.character_builder.build(
-                account=account_for_card,
-                directory=target,
-                payload=payload,
-                fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-                plugin_version=PLUGIN_VERSION,
+            card = await self.character_application.character_card(
+                self._qq_id(event), name, self._directory
             )
             path = await self._try_t2i("character", card)
             if not path:
                 path = await asyncio.to_thread(self.character_renderer.render_character, card)
             yield event.image_result(path)
+        except CharacterAmbiguousMatch as exc:
+            yield event.plain_result(self._ambiguous_character_message(exc))
+        except CharacterNotFound:
+            yield event.plain_result("查询失败：没有找到该妮姬")
+        except CharacterNotOwned as exc:
+            yield event.plain_result(str(exc))
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
@@ -1100,25 +1001,15 @@ class NikkePlugin(Star):
         if not name.strip():
             yield event.plain_result("用法：/妮姬 查询 资料 <角色名>")
             return
-        matches = self._find_directory(name)
-        if not matches:
+        try:
+            data = self.character_application.info(name, self._directory)
+        except CharacterNotFound:
             yield event.plain_result("没有找到该妮姬。")
             return
-        item = matches[0]
-        identity = getattr(self, "character_identity", None) or CharacterDirectoryResolver()
-        item = identity.enrich(item)
-        names = identity.display_name(item)
-        zh_tw = item.get("name_zh_tw") or item.get("name_cn") or "未知"
-        name_suffix = f"{names} / {zh_tw} / {item.get('name_en') or '未知'}"
-        rows = [
-            ("名称（简体别名 / 繁中 / 英文）", name_suffix),
-            ("稀有度", str(item.get("rare") or "未知")),
-            ("属性", str(item.get("element") or "未知")),
-            ("武器", str(item.get("weapon") or "未知")),
-            ("爆裂阶段", str(item.get("burst") or "未知")),
-            ("企业", str(item.get("corporation") or "未知")),
-        ]
-        path = self.renderer.render(names or name, "妮姬基础资料", rows)
+        except CharacterAmbiguousMatch as exc:
+            yield event.plain_result(self._ambiguous_character_message(exc))
+            return
+        path = self.renderer.render(data.name, data.title, data.rows)
         yield event.image_result(path)
 
     @staticmethod

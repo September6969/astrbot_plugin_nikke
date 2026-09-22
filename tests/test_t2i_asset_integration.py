@@ -13,9 +13,9 @@ from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_payloads import (
     CampaignT2IPayloadBuilder as LegacyCampaignT2IPayloadBuilder,
-    CharacterT2IPayloadBuilder,
     ProfileT2IPayloadBuilder,
 )
+from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder

@@ -39,7 +39,7 @@ class T2IRenderer:
 
     async def render_view(self, page, data, **kwargs):
         if page == "character":
-            from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+            from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
             # 只在线程中准备既有本地资产；原生 HTML 渲染仍为直接异步调用。
             assets = await asyncio.to_thread(self.payload_builder.assets.resolve_character_assets, data)
             payload = CharacterT2IPayloadBuilder(self.payload_builder.resolver).build(data, assets)

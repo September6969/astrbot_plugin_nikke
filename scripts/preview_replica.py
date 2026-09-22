@@ -17,7 +17,7 @@ from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
 from astrbot_plugin_nikke.features.character.models import CostumeSelection
 from astrbot_plugin_nikke.features.character.weapon_bases import card_fields
-from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 from astrbot_plugin_nikke.tests.test_character_replica import example_card

@@ -23,6 +23,7 @@ from ..features.campaign.application import CampaignApplication
 from ..features.campaign.builder import CampaignHistoryBuilder
 from ..features.campaign.stage_resolver import CampaignStageResolver
 from ..features.cdk.service import CdkService
+from ..features.character.application import CharacterApplication
 from ..features.character.builder import CharacterCardBuilder
 from ..features.character.identity import CharacterDirectoryResolver
 from ..features.character.registries.costume import CostumeRegistry
@@ -69,6 +70,7 @@ class ServiceContainer:
     extension_zip: Path
     store: NikkeStore
     account_application: AccountApplication
+    character_application: CharacterApplication
     character_stat_resources: CharacterStatResourceLoader
     client: BlaBlaClient
     renderer: CardRenderer
@@ -137,6 +139,15 @@ def create_container(
         character_identity = CharacterDirectoryResolver(
             plugin_dir / "assets" / "character_aliases.json",
         )
+    character_application = CharacterApplication(
+        account_reader=store,
+        gateway=client,
+        identity=character_identity,
+        stat_resources=character_stat_resources,
+        card_builder=character_builder,
+        clock=lambda: datetime.now(timezone(timedelta(hours=8))),
+        plugin_version=PLUGIN_VERSION,
+    )
 
     spine_budget = (config or {}).get("spine_budget_seconds", 20.0)
     asset_manager = AssetManager(
@@ -250,6 +261,7 @@ def create_container(
         extension_zip=extension_zip,
         store=store,
         account_application=account_application,
+        character_application=character_application,
         character_stat_resources=character_stat_resources,
         client=client,
         renderer=renderer,
