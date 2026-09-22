@@ -64,8 +64,6 @@ from .core.health import collect_runtime_health, format_runtime_health
 from .core.config import normalize_runtime_config, read_schedule_clock
 from .integrations.spine.config import build_spine_renderer
 from .core.storage import NikkeStore
-from .features.raid.builder import UnionRaidBuilder
-from .features.raid.models import PreviousSeasonSummary, RaidState
 from .features.character.registries.costume import CostumeRegistry
 from .features.voice.character_resolver import VoiceCharacterResolver
 from .features.voice.audio import VoiceAudioCache, VoicePreference, is_self_poke
@@ -113,6 +111,7 @@ class NikkePlugin(Star):
         self.profile_application = self.container.profile_application
         self.profile_renderer = self.container.profile_renderer
         self.raid_builder = self.container.raid_builder
+        self.raid_application = self.container.raid_application
         self.raid_renderer = self.container.raid_renderer
         self.campaign_renderer = self.container.campaign_renderer
         self.cdk_service = self.container.cdk_service
@@ -950,44 +949,9 @@ class NikkePlugin(Star):
 
     async def union_raid_ranking(self, event: AstrMessageEvent):
         """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""
-        from .features.raid.participants import build_ranking, format_ranking
+        from .features.raid.participants import format_ranking
         try:
-            account = self._account_or_error(event)
-            payload = await self.client.get_union_raid_data(account)
-            scope = "CURRENT_RESPONSE"
-            builder = getattr(self, "raid_builder", None)
-            if builder is None:
-                builder = UnionRaidBuilder()
-                self.raid_builder = builder
-            if not payload.get("participate_data"):
-                manager = payload.get("manager_info") or {}
-                raid_state = builder.resolve_raid_state(
-                    manager, payload.get("level_info"), seasons=builder._seasons
-                )
-                if raid_state == RaidState.OFFSEASON and builder._seasons:
-                    latest = max(
-                        (s for s in builder._seasons if s.get("end_ts", 0) <= time.time()),
-                        key=lambda x: x.get("id", 0),
-                        default=None,
-                    )
-                    if latest:
-                        s_id = str(latest.get("id"))
-                        try:
-                            overview = await self.client.get_union_raid_overview(account)
-                            guild_id = overview.get("guild_id")
-                            if guild_id:
-                                hist_data = await self.client.get_union_raid_season(
-                                    account, guild_id=str(guild_id), season_id=s_id, levels=False
-                                )
-                                if hist_data.get("participate_data"):
-                                    payload = hist_data
-                                    s_num = int(s_id) % 1000000 if s_id.isdigit() else s_id
-                                    scope = f"第 {s_num} 季 · LAST_SEASON_RESPONSE"
-                        except Exception as exc:
-                            logger.warning("[NIKKE] 回退上一赛季排名失败: %s", exc)
-            data = build_ranking(payload)
-            if scope != "CURRENT_RESPONSE":
-                data.scope = scope
+            data = await self.raid_application.ranking(self._qq_id(event))
             path = await self._try_t2i("union_records", data)
             yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
@@ -998,48 +962,17 @@ class NikkePlugin(Star):
 
     async def union_raid_my(self, event: AstrMessageEvent):
         """展示当前响应中与当前账号稳定 openid 精确匹配的突袭记录。"""
-        from .features.raid.participants import build_member_ranking, format_ranking
+        from .features.raid.application import RaidMemberIdentityUnavailable
+        from .features.raid.participants import format_ranking
         try:
-            account = self._account_or_error(event)
-            member_openid = str(account.get("game_openid") or "").strip()
-            if not member_openid:
-                yield event.plain_result("当前账号缺少稳定联盟身份，暂不能安全筛选个人记录。")
-                return
-            payload = await self.client.get_union_raid_data(account)
-            builder = getattr(self, "raid_builder", None)
-            if builder is None:
-                builder = UnionRaidBuilder()
-                self.raid_builder = builder
-            if not payload.get("participate_data"):
-                manager = payload.get("manager_info") or {}
-                raid_state = builder.resolve_raid_state(
-                    manager, payload.get("level_info"), seasons=builder._seasons
-                )
-                if raid_state == RaidState.OFFSEASON and builder._seasons:
-                    latest = max(
-                        (s for s in builder._seasons if s.get("end_ts", 0) <= time.time()),
-                        key=lambda x: x.get("id", 0),
-                        default=None,
-                    )
-                    if latest:
-                        s_id = str(latest.get("id"))
-                        try:
-                            overview = await self.client.get_union_raid_overview(account)
-                            guild_id = overview.get("guild_id")
-                            if guild_id:
-                                hist_data = await self.client.get_union_raid_season(
-                                    account, guild_id=str(guild_id), season_id=s_id, levels=False
-                                )
-                                if hist_data.get("participate_data"):
-                                    payload = hist_data
-                        except Exception as exc:
-                            logger.warning("[NIKKE] 回退上一赛季个人记录失败: %s", exc)
-            data = build_member_ranking(payload, member_openid)
+            data = await self.raid_application.member(self._qq_id(event))
             path = await self._try_t2i("union_member", data)
             yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
+        except RaidMemberIdentityUnavailable as exc:
+            yield event.plain_result(str(exc))
         except (BlaBlaError, ValueError):
             yield event.plain_result("我的突袭记录暂不可用：数据不完整或请求失败，请稍后重试。")
 
@@ -1049,48 +982,7 @@ class NikkePlugin(Star):
             lambda: self._send_delayed_notice(event, "正在查询联盟突袭战况...")
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
-            account = self._account_or_error(event)
-            raw = await self.client.get_union_raid_overview(account)
-            builder = getattr(self, "raid_builder", None)
-            if builder is None:
-                builder = UnionRaidBuilder()
-                self.raid_builder = builder
-            data = builder.build(
-                guild_name=raw["guild_name"],
-                level_info_payload=raw["level_info"],
-                fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-                plugin_version=PLUGIN_VERSION,
-            )
-            if data.raid_state == RaidState.OFFSEASON and data.previous_season:
-                guild_id = raw.get("guild_id")
-                if guild_id and data.previous_season.season_id:
-                    try:
-                        hist_data = await self.client.get_union_raid_season(
-                            account,
-                            guild_id=str(guild_id),
-                            season_id=str(data.previous_season.season_id),
-                            levels=False,
-                        )
-                        attacks = hist_data.get("participate_data", [])
-                        if isinstance(attacks, list):
-                            tot_attacks = len(attacks)
-                            tot_damage = sum(
-                                int(x.get("total_damage", 0) or x.get("damage", 0) or 0)
-                                for x in attacks
-                            )
-                            prev = data.previous_season
-                            data.previous_season = PreviousSeasonSummary(
-                                season_id=prev.season_id,
-                                season_number=prev.season_number,
-                                start_at=prev.start_at,
-                                end_at=prev.end_at,
-                                settled_at=prev.settled_at,
-                                total_attacks=tot_attacks,
-                                total_damage=tot_damage,
-                                boss_progress=prev.boss_progress,
-                            )
-                    except Exception as exc:
-                        logger.warning("[NIKKE] 获取上一赛季突袭数据失败: %s", exc)
+            data = await self.raid_application.overview(self._qq_id(event))
             path = await self._try_t2i("union_overview", data)
             if not path:
                 path = await asyncio.to_thread(self.raid_renderer.render_raid_overview, data)

@@ -92,11 +92,10 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         )
         command, args, request = plugin.me, (), plugin.profile_application.build_dashboard
     elif page == "union_overview":
-        plugin.client = Mock(get_union_raid_overview=AsyncMock(return_value={"guild_name": "synthetic", "level_info": {}}))
-        plugin.raid_builder = Mock(build=Mock(return_value=data))
+        plugin.raid_application = Mock(overview=AsyncMock(return_value=data))
         fallback = Mock(return_value="fallback.png")
         plugin.raid_renderer = Mock(render_raid_overview=fallback)
-        command, args, request = plugin.union_raid, (), plugin.client.get_union_raid_overview
+        command, args, request = plugin.union_raid, (), plugin.raid_application.overview
     else:
         plugin._directory = [{"name_code": "5065"}]
         plugin.character_identity = Mock(find=Mock(return_value=plugin._directory))
@@ -144,7 +143,9 @@ async def test_calendar_command_fallback_same_snapshot(tmp_path):
 
 
 def test_union_scopes_and_exact_values(tmp_path):
-    from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder, UnionRecordsT2IPayloadBuilder, UnionMemberT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
     overview = get_cases("union_overview", tmp_path)
     partial = UnionOverviewT2IPayloadBuilder().build(overview["partial-hp"])
@@ -169,14 +170,17 @@ def test_union_scopes_and_exact_values(tmp_path):
 @pytest.mark.parametrize("page,command", [("union_records", "union_raid_ranking"), ("union_member", "union_raid_my")])
 async def test_union_command_failure_no_refetch(page, command):
     from astrbot_plugin_nikke.main import NikkePlugin
+    from astrbot_plugin_nikke.features.raid.participants import RaidRankingData
     plugin = NikkePlugin.__new__(NikkePlugin)
     plugin.config = {"ui_renderer": "t2i"}
-    plugin._account_or_error = Mock(return_value={"game_openid": "synthetic-member"})
-    plugin.client = Mock(get_union_raid_data=AsyncMock(return_value={"participate_data": []}))
+    application_call = "ranking" if page == "union_records" else "member"
+    plugin.raid_application = Mock(
+        **{application_call: AsyncMock(return_value=RaidRankingData([]))}
+    )
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
     results = [result async for result in getattr(plugin, command)(Mock(plain_result=lambda text: text))]
     assert "当前响应" in results[0]
-    plugin.client.get_union_raid_data.assert_awaited_once()
+    getattr(plugin.raid_application, application_call).assert_awaited_once()
 
 
 def test_profile_structure_and_unknowns(tmp_path):
@@ -294,7 +298,7 @@ async def test_character_card_visual_polish(tmp_path):
 
 def test_union_records_no_attack_summary(tmp_path):
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
-    from astrbot_plugin_nikke.ui.t2i_payloads import UnionRecordsT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
     cases = get_cases("union_records", tmp_path)
     builder = UnionRecordsT2IPayloadBuilder()
     template = T2ITemplateLoader().load("union_records")

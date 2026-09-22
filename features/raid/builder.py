@@ -32,6 +32,30 @@ class UnionRaidBuilder:
                 except Exception:
                     pass
 
+    def resolve_response_state(self, payload: Any, *, now: datetime) -> RaidState:
+        """根据同一查询时钟解析当前 API 响应状态。"""
+        response = payload if isinstance(payload, dict) else {}
+        manager = response.get("manager_info")
+        levels = response.get("level_info")
+        return self.resolve_raid_state(
+            manager,
+            levels,
+            now.timestamp(),
+            self._seasons,
+        )
+
+    def latest_completed_season_id(self, *, now: datetime) -> str | None:
+        """返回时钟时刻前最近已结束且有明确 ID 的赛季。"""
+        latest = max(
+            (season for season in self._seasons if season.get("end_ts", 0) <= now.timestamp()),
+            key=lambda season: season.get("id", 0),
+            default=None,
+        )
+        if latest is None:
+            return None
+        season_id = self._identifier(latest.get("id"))
+        return season_id or None
+
     @classmethod
     def resolve_raid_state(
         cls,

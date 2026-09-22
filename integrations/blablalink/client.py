@@ -424,9 +424,13 @@ class BlaBlaClient:
             "level_info": level_data,
         }
 
+    async def get_union_raid_snapshot(self, account: dict[str, Any]) -> dict[str, Any]:
+        """一次采集联盟身份与攻击响应，供休赛期回退复用明确 guild_id。"""
+        return await self.get_union_raid_overview(account, attacks=True)
+
     async def get_union_raid_data(self, account: dict[str, Any]) -> dict[str, Any]:
         """复用联盟上下文，仅请求已确认的攻击列表接口。"""
-        response = await self.get_union_raid_overview(account, attacks=True)
+        response = await self.get_union_raid_snapshot(account)
         return response["level_info"]
 
     async def get_union_raid_season(self, account: dict[str, Any], *, guild_id: str, season_id: str, levels: bool = False) -> dict[str, Any]:

@@ -31,6 +31,7 @@ from ..features.daily.runner import DailyRunner
 from ..features.guide.application import GuideApplication
 from ..features.profile.builder import ProfileBuilder
 from ..features.profile.application import ProfileApplication
+from ..features.raid.application import RaidApplication
 from ..features.raid.builder import UnionRaidBuilder
 from ..features.tarot.service import TarotDataError, TarotService
 from ..features.tower.application import TowerApplication
@@ -80,6 +81,7 @@ class ServiceContainer:
     profile_application: ProfileApplication
     profile_renderer: ProfileCardRenderer
     raid_builder: UnionRaidBuilder
+    raid_application: RaidApplication
     raid_renderer: UnionRaidRenderer
     campaign_builder: CampaignHistoryBuilder
     campaign_renderer: CampaignHistoryRenderer
@@ -165,6 +167,13 @@ def create_container(
         currency_icon_provider=asset_manager.get_currency_icon,
     )
     raid_builder = UnionRaidBuilder()
+    raid_application = RaidApplication(
+        account_reader=store,
+        gateway=client,
+        builder=raid_builder,
+        clock=lambda: datetime.now(timezone(timedelta(hours=8))),
+        plugin_version=PLUGIN_VERSION,
+    )
     raid_renderer = UnionRaidRenderer(data_dir / "cards", plugin_dir / "fonts")
     campaign_builder = CampaignHistoryBuilder()
     campaign_renderer = CampaignHistoryRenderer(
@@ -253,6 +262,7 @@ def create_container(
         profile_application=profile_application,
         profile_renderer=profile_renderer,
         raid_builder=raid_builder,
+        raid_application=raid_application,
         raid_renderer=raid_renderer,
         campaign_builder=campaign_builder,
         campaign_renderer=campaign_renderer,

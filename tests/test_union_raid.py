@@ -375,6 +375,21 @@ from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, MY
 from unittest.mock import AsyncMock
 
 class UnionRaidClientTests(unittest.IsolatedAsyncioTestCase):
+    async def test_attack_snapshot_keeps_guild_identity_with_one_overview_call(self):
+        client = BlaBlaClient()
+        account = {"cookie": "synthetic-cookie", "area_id": 81}
+        snapshot = {
+            "guild_id": "synthetic-guild",
+            "guild_name": "synthetic-union",
+            "level_info": {"participate_data": []},
+        }
+        client.get_union_raid_overview = AsyncMock(return_value=snapshot)
+
+        result = await client.get_union_raid_snapshot(account)
+
+        self.assertIs(result, snapshot)
+        client.get_union_raid_overview.assert_awaited_once_with(account, attacks=True)
+
     async def test_get_union_raid_overview_payload_contracts(self):
         client = BlaBlaClient()
         account = {"cookie": "dummy", "area_id": "81", "game_openid": "abc-def-ghi"}

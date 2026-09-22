@@ -13,7 +13,7 @@ from astrbot_plugin_nikke.features.raid.models import (
     RaidState,
     UnionRaidOverviewData,
 )
-from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
 
 
 class UnionRaidStateResolutionTests(unittest.TestCase):

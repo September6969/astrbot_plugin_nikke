@@ -15,9 +15,10 @@ from astrbot_plugin_nikke.ui.t2i_payloads import (
     CampaignT2IPayloadBuilder as LegacyCampaignT2IPayloadBuilder,
     CharacterT2IPayloadBuilder,
     ProfileT2IPayloadBuilder,
-    UnionMemberT2IPayloadBuilder,
-    UnionOverviewT2IPayloadBuilder,
 )
+from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +26,26 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_campaign_payload_legacy_import_points_to_canonical_module():
     assert LegacyCampaignT2IPayloadBuilder is CampaignT2IPayloadBuilder
+
+
+def test_union_payload_builders_are_owned_by_page_modules():
+    import ast
+
+    assert UnionMemberT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_member"
+    assert UnionOverviewT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_overview"
+    assert UnionRecordsT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_records"
+
+    source = (ROOT / "ui" / "t2i_payloads.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    assert not any(
+        isinstance(node, ast.ClassDef)
+        and node.name in {
+            "UnionMemberT2IPayloadBuilder",
+            "UnionOverviewT2IPayloadBuilder",
+            "UnionRecordsT2IPayloadBuilder",
+        }
+        for node in ast.walk(tree)
+    )
 
 
 @pytest.fixture
