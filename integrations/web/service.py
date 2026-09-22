@@ -18,9 +18,9 @@ from aiohttp import web
 
 from ..._version import PLUGIN_VERSION
 from .bind_template import render_bind_page
+from .ports import BindingSessionStore
 from ..blablalink.client import BlaBlaClient, BlaBlaError
 from ...core.privacy import sanitize_log_text
-from ...core.storage import NikkeStore
 
 
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{32,128}$")
@@ -53,7 +53,14 @@ def public_error(exc: Exception) -> str:
 
 
 class BindingWebService:
-    def __init__(self, store: NikkeStore, client: BlaBlaClient, extension_zip: Path, api_key: str = "", public_base_url: str = SITE_ORIGIN):
+    def __init__(
+        self,
+        store: BindingSessionStore,
+        client: BlaBlaClient,
+        extension_zip: Path,
+        api_key: str = "",
+        public_base_url: str = SITE_ORIGIN,
+    ):
         parsed = urlsplit(public_base_url)
         if (parsed.scheme != "https" or not parsed.hostname or parsed.username
                 or parsed.password or parsed.path not in ("", "/") or parsed.query or parsed.fragment):

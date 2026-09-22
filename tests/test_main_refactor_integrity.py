@@ -23,6 +23,8 @@ class MainRefactorIntegrityTests(unittest.TestCase):
 
             self.assertIsInstance(container, ServiceContainer)
             self.assertIsNotNone(container.store)
+            self.assertIs(container.account_application._store, container.store)
+            self.assertIs(container.web.store, container.store)
             self.assertIsNotNone(container.client)
             self.assertIsNotNone(container.asset_manager)
             self.assertIsNotNone(container.renderer)

@@ -18,7 +18,6 @@ import json
 import os
 import random
 import re
-import secrets
 import shutil
 import time
 import zipfile
@@ -32,6 +31,7 @@ from astrbot.api.message_components import Image, Plain
 from astrbot.api.star import Context, Star
 
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
 from .application.commands.guide import GuideCommandHandler
 from .application.commands.profile import ProfileCommandHandler
 from .application.commands.tarot import TarotCommandHandler
@@ -146,6 +146,14 @@ class NikkePlugin(Star):
         self.web_host = str(self.config.get("web_host", "0.0.0.0"))
         self.web_port = int(self.config.get("web_port", 6210))
         self._directory: list[dict] = []
+        self.account_application = self.container.account_application
+        self.account_command_handler = AccountCommandHandler(
+            application=self.account_application,
+            public_base_url=self.public_base_url,
+            allow_group_bind=bool(self.config.get("allow_group_bind", False)),
+            runtime_health=self._account_runtime_health_details,
+            render_manual_summary=self._render_manual_daily_summary,
+        )
         self._name_map_cache: tuple[str, dict[str, str]] | None = None
         self._stats_profile_cache: dict[str, tuple[float, dict[str, object]]] = {}
         self._voice_poke_cooldowns: dict[tuple, float] = {}
@@ -381,6 +389,45 @@ class NikkePlugin(Star):
     @staticmethod
     def _is_admin(event: AstrMessageEvent) -> bool:
         return bool(event.is_admin())
+
+    def _account_runtime_health_details(self) -> RuntimeHealthDetails:
+        """收集命令展示所需的宿主运行时信息。"""
+        return RuntimeHealthDetails(
+            plugin_version=PLUGIN_VERSION,
+            directory_count=len(self._directory),
+            web_host=self.web_host,
+            web_port=self.web_port,
+            daily_actions_enabled=bool(self.config.get("enable_daily_actions", False)),
+            cdk_redemption_enabled=bool(self.config.get("enable_cdk_redemption", False)),
+            diagnostics=format_runtime_health(collect_runtime_health(self.data_dir)),
+        )
+
+    async def _render_manual_daily_summary(self) -> str:
+        """执行一次管理员手动日常汇总并返回展示图片。"""
+        day = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
+        results = await self._run_all_daily(day)
+        return self.renderer.render_summary(results)
+
+    async def _dispatch_account_command(
+        self,
+        event: AstrMessageEvent,
+        *,
+        operation: str,
+        action: str = "",
+        value: str = "",
+        state: str = "",
+    ):
+        """将平台事件转成账号命令上下文并返回已适配结果。"""
+        async for result in self.command_adapter.dispatch(
+            event,
+            self.account_command_handler,
+            operation=operation,
+            action=action,
+            value=value,
+            state=state,
+            unified_msg_origin=str(getattr(event, "unified_msg_origin", "") or ""),
+        ):
+            yield result
 
     def _account_or_error(self, event: AstrMessageEvent) -> dict:
         account = self.store.get_account(self._qq_id(event))
@@ -709,68 +756,25 @@ class NikkePlugin(Star):
 
     async def account(self, event: AstrMessageEvent, action: str = "", value: str = ""):
         """管理账号绑定、状态和每日汇总。"""
-        action_key = action.strip().casefold()
-        if action_key in {"", "状态", "status"}:
-            async for result in self.status(event):
-                yield result
-            return
-        if action_key in {"绑定", "bind"}:
-            async for result in self.bind(event):
-                yield result
-            return
-        if action_key in {"解绑", "unbind"}:
-            async for result in self.unbind(event):
-                yield result
-            return
-        if action_key in {"汇总", "push"}:
-            if not value:
-                yield event.plain_result("用法：/妮姬 账号 汇总 开|关")
-                return
-            async for result in self.push(event, value):
-                yield result
-            return
-        yield event.plain_result("用法：/妮姬 账号 [绑定|状态|解绑|汇总 开|关]")
+        async for result in self._dispatch_account_command(
+            event, operation="account", action=action, value=value
+        ):
+            yield result
 
     async def bind(self, event: AstrMessageEvent):
         """生成一次性安全绑定链接及向导。"""
-        if not event.is_private_chat() and not bool(self.config.get("allow_group_bind", False)):
-            yield event.plain_result("为防止绑定链接被他人抢先使用，请私聊机器人发送 /妮姬 账号 绑定。")
-            return
-        token = secrets.token_urlsafe(36)
-        self.store.create_bind_session(token, self._qq_id(event), 600)
-        url = f"{self.public_base_url}/bind/{token}"
-        message = (
-            "🔐 NIKKE · BlaBlaLink 安全绑定\n\n"
-            "绑定链接（10 分钟有效，仅可使用一次）：\n"
-            f"{url}\n\n"
-            "请勿转发此链接。\n\n"
-            "打开后请按照网页内的完整教程完成：\n"
-            "1. 安装 NIKKE QQ 安全绑定助手\n"
-            "2. 登录 BlaBlaLink\n"
-            "3. 点击扩展中的「已登录，提交绑定」\n\n"
-            "账号密码只在 BlaBlaLink 官方网站输入，\n"
-            "机器人不会接收或保存你的账号密码。"
-        )
-        yield event.plain_result(message)
+        async for result in self._dispatch_account_command(event, operation="bind"):
+            yield result
 
     async def unbind(self, event: AstrMessageEvent):
         """解除自己的BlaBlaLink账号。"""
-        removed = self.store.delete_account(self._qq_id(event))
-        yield event.plain_result("已解除绑定。" if removed else "当前QQ尚未绑定。")
+        async for result in self._dispatch_account_command(event, operation="unbind"):
+            yield result
 
     async def status(self, event: AstrMessageEvent):
         """检查绑定和Cookie状态。"""
-        account = self.store.get_account(self._qq_id(event), with_cookie=False)
-        if not account:
-            yield event.plain_result("未绑定，请私聊发送 /妮姬 账号 绑定。")
-            return
-        state = "有效" if account["cookie_valid"] else "已失效，请重新绑定"
-        yield event.plain_result(
-            f"已绑定：{account['nickname'] or account['role_name'] or '未命名指挥官'}\n"
-            f"区服ID：{account['area_id'] or '待识别'}\nCookie：{state}\n"
-            f"每日汇总：{'开启' if account['push_enabled'] else '关闭'}\n"
-            f"自动签到：{'开启' if account.get('auto_daily_enabled') else '关闭'}"
-        )
+        async for result in self._dispatch_account_command(event, operation="status"):
+            yield result
 
     async def _render_profile_dashboard(self, dashboard):
         """优先使用 T2I，失败时以同一 DTO 回退 Pillow。"""
@@ -1723,110 +1727,48 @@ class NikkePlugin(Star):
 
     async def push(self, event: AstrMessageEvent, state: str):
         """开启或关闭每日群汇总。"""
-        enabled = state.lower() in {"on", "开", "开启", "1"}
-        if state.lower() not in {"on", "off", "开", "关", "开启", "关闭", "1", "0"}:
-            yield event.plain_result("用法：/妮姬 账号 汇总 开|关")
-            return
-        changed = self.store.set_push(self._qq_id(event), enabled)
-        yield event.plain_result(("每日汇总已开启。" if enabled else "每日汇总已关闭。") if changed else "请先绑定账号。")
+        async for result in self._dispatch_account_command(
+            event, operation="push", state=state
+        ):
+            yield result
 
     async def admin(self, event: AstrMessageEvent, action: str = "", value: str = ""):
         """管理员配置与运行入口。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅管理员可使用管理指令。")
-            return
-        action_key = action.strip().casefold()
-        if action_key in {"设群", "group"}:
-            async for result in self.group_set(event):
-                yield result
-            return
-        if action_key in {"任务时间", "schedule"}:
-            async for result in self.schedule(event, value):
-                yield result
-            return
-        if action_key in {"汇总时间", "summary"}:
-            async for result in self.summary(event, value):
-                yield result
-            return
-        if action_key in {"执行", "run"}:
-            async for result in self.run(event):
-                yield result
-            return
-        if action_key in {"健康", "health"}:
-            async for result in self.health(event):
-                yield result
-            return
-        yield event.plain_result("用法：/妮姬 管理 [设群|任务时间 HH:MM|汇总时间 HH:MM|执行|健康]")
+        async for result in self._dispatch_account_command(
+            event, operation="admin", action=action, value=value
+        ):
+            yield result
 
     async def group_set(self, event: AstrMessageEvent, action: str = "set"):
         """管理员将当前会话设为每日汇总目标。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅管理员可配置汇总群。")
-            return
-        if action.strip().casefold() not in {"", "set", "设群"}:
-            yield event.plain_result("用法：/妮姬 管理 设群")
-            return
-        self.store.set_setting("summary_group_umo", event.unified_msg_origin)
-        yield event.plain_result(f"每日汇总目标已设为当前会话：{event.unified_msg_origin}")
-
-    @staticmethod
-    def _parse_clock(value: str) -> tuple[int, int]:
-        hour, minute = value.split(":", 1)
-        h, m = int(hour), int(minute)
-        if not (0 <= h <= 23 and 0 <= m <= 59):
-            raise ValueError("时间范围错误")
-        return h, m
+        async for result in self._dispatch_account_command(
+            event, operation="group_set", action=action
+        ):
+            yield result
 
     async def schedule(self, event: AstrMessageEvent, clock: str):
         """管理员设置每日任务开始时间。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅管理员可修改时间。")
-            return
-        try:
-            h, m = self._parse_clock(clock)
-            self.store.set_setting("daily_hour", h)
-            self.store.set_setting("daily_minute", m)
-            yield event.plain_result(f"每日任务时间已设为 {h:02d}:{m:02d}。")
-        except Exception:
-            yield event.plain_result("用法：/妮姬 管理 任务时间 HH:MM")
+        async for result in self._dispatch_account_command(
+            event, operation="schedule", value=clock
+        ):
+            yield result
 
     async def summary(self, event: AstrMessageEvent, clock: str):
         """管理员设置每日汇总时间。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅管理员可修改时间。")
-            return
-        try:
-            h, m = self._parse_clock(clock)
-            self.store.set_setting("summary_hour", h)
-            self.store.set_setting("summary_minute", m)
-            yield event.plain_result(f"每日汇总时间已设为 {h:02d}:{m:02d}。")
-        except Exception:
-            yield event.plain_result("用法：/妮姬 管理 汇总时间 HH:MM")
+        async for result in self._dispatch_account_command(
+            event, operation="summary", value=clock
+        ):
+            yield result
 
     async def run(self, event: AstrMessageEvent):
         """管理员立即执行并发送汇总。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅管理员可执行全量任务。")
-            return
-        day = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
-        results = await self._run_all_daily(day)
-        path = self.renderer.render_summary(results)
-        yield event.image_result(path)
+        async for result in self._dispatch_account_command(event, operation="run"):
+            yield result
 
     async def health(self, event: AstrMessageEvent):
         """管理员查看插件健康状态；诊断只读，不执行缓存清理。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅管理员可查看。")
-            return
-        accounts = self.store.list_accounts(with_cookie=False)
-        diagnostics = format_runtime_health(collect_runtime_health(self.data_dir))
-        yield event.plain_result(
-            f"NIKKE插件 {PLUGIN_VERSION}\n账号：{len(accounts)}\n目录：{len(self._directory)}\n"
-            f"绑定服务：{self.web_host}:{self.web_port}\n"
-            f"自动签到：{'启用' if self.config.get('enable_daily_actions', False) else '关闭'}\n"
-            f"CDK兑换：{'启用' if self.config.get('enable_cdk_redemption', False) else '关闭'}\n"
-            f"{diagnostics}"
-        )
+        async for result in self._dispatch_account_command(event, operation="health"):
+            yield result
 
     async def terminate(self):
         lock = getattr(self, "_termination_lock", None)

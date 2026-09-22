@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from .._version import PLUGIN_VERSION
+from ..features.account.application import AccountApplication
 from ..features.announcement.delivery import AnnouncementDelivery
 from ..features.announcement.service import AnnouncementService
 from ..features.calendar.service import CalendarService
@@ -64,6 +65,7 @@ class ServiceContainer:
     config: dict[str, Any]
     extension_zip: Path
     store: NikkeStore
+    account_application: AccountApplication
     character_stat_resources: CharacterStatResourceLoader
     client: BlaBlaClient
     renderer: CardRenderer
@@ -106,6 +108,7 @@ def create_container(
     data_dir.mkdir(parents=True, exist_ok=True)
     extension_zip = data_dir / "nikke-bind-extension.zip"
     store = NikkeStore(data_dir)
+    account_application = AccountApplication(store)
     character_stat_resources = CharacterStatResourceLoader(
         data_dir / "cache" / "character-stats"
     )
@@ -221,6 +224,7 @@ def create_container(
         config=config,
         extension_zip=extension_zip,
         store=store,
+        account_application=account_application,
         character_stat_resources=character_stat_resources,
         client=client,
         renderer=renderer,

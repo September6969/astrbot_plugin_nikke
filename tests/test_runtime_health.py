@@ -6,10 +6,13 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.core.health import RuntimeHealth, collect_runtime_health, format_runtime_health
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from astrbot_plugin_nikke.application.commands.account import AccountCommandHandler
+from astrbot_plugin_nikke.features.account.application import AccountApplication
 
 
 class RuntimeHealthTests(IsolatedAsyncioTestCase):
@@ -138,6 +141,15 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             plugin.web_host = "0.0.0.0"
             plugin.web_port = 6210
             plugin.config = {"enable_daily_actions": False, "enable_cdk_redemption": False}
+            plugin.command_adapter = AstrBotCommandAdapter()
+            plugin.account_application = AccountApplication(plugin.store)
+            plugin.account_command_handler = AccountCommandHandler(
+                application=plugin.account_application,
+                public_base_url="https://bot.example.com",
+                allow_group_bind=False,
+                runtime_health=plugin._account_runtime_health_details,
+                render_manual_summary=AsyncMock(return_value="summary.png"),
+            )
             event = SimpleNamespace(is_admin=lambda: True, plain_result=lambda text: text)
 
             with patch("astrbot_plugin_nikke.core.health.shutil.disk_usage") as disk_usage:
