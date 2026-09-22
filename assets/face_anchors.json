@@ -2643,6 +2643,181 @@
         ],
         "extent_width": 256.0
       }
+    },
+    "c401": {
+      "schema": 2,
+      "render_id": "c401",
+      "runtime": "4.0.47",
+      "animation": "idle",
+      "time": 0,
+      "skeleton_sha256": "3616119c7aaa9b5a1be350b45255e3b808d5f435ff4f2451d6ccf7f13576e844",
+      "atlas_sha256": "b1675a545b65dc2417ca17bad24eb02c95b1f97a497da67ba14f7d4729aa61d0",
+      "anchor_kind": "eye_attachment",
+      "attachments": [
+        "idle_l_eyehl/idle_l_eyehl",
+        "idle_r_eyehl/idle_r_eyehl"
+      ],
+      "point_1024": [
+        508.4862615678011,
+        223.51476755535452
+      ],
+      "extent_1024": [
+        40.859166070117126,
+        19.06176249352291
+      ],
+      "bounds": [
+        -559.338534383853,
+        -2244.632259501753,
+        1115.4682121925791,
+        2354.8755608933548
+      ],
+      "point": [
+        859.9450462712043,
+        629.0590702214181
+      ],
+      "extent": [
+        163.4366642804685,
+        76.24704997409164
+      ],
+      "core_axis": {
+        "eye_point": [
+          859.9450462712043,
+          629.0590702214181
+        ],
+        "head_top_y": 304.5508669067067,
+        "torso_point": [
+          854.6886945145843,
+          1277.4296544923018
+        ],
+        "torso_source": "override:body_total/body_total",
+        "torso_confidence": 0.98,
+        "breast_point": [
+          854.6886945145843,
+          1277.4296544923018
+        ],
+        "head_top_source": "head_attachment:head/head",
+        "breast_source": "override:body_total/body_total"
+      },
+      "core_axis_reason": "ok",
+      "pixel_sha256": "92d157315b18ebd704fa733c93c6adf7a8af9e57451f3fe3cd689aa58cfce6e0",
+      "png_sha256": "3c8d99ca53ca48fbcaace5499832f182ba583ba4062de95d056f956b19c7f993",
+      "image_size": [
+        1745,
+        3567
+      ],
+      "framing": {
+        "target": [
+          760,
+          550
+        ],
+        "extent_width": 160
+      },
+      "png_transform": {
+        "render_size": [
+          4096,
+          4096
+        ],
+        "render_padding": 0.08,
+        "alpha_bbox": [
+          1238,
+          329,
+          2855,
+          3768
+        ],
+        "crop_padding": 64
+      }
+    },
+    "c581": {
+      "schema": 2,
+      "render_id": "c581",
+      "runtime": "4.1.20",
+      "animation": "idle",
+      "time": 0,
+      "skeleton_sha256": "d4d95833deb15a2656ade2b9b029c5e81968f60900ef05100cd493190cc7e504",
+      "atlas_sha256": "7f3df9b03eed0a660c0ba9ccd6dc201e19284901108ced9b5e8020f7319c65c3",
+      "anchor_kind": "eye_attachment",
+      "attachments": [
+        "eye_l9/eye_l9",
+        "eye_l8/eye_l8",
+        "eye_l7/eye_l7",
+        "eye_l6/eye_l6",
+        "eye_l5/eye_l5",
+        "eye_l4/eye_l4",
+        "eye_l3/eye_l3",
+        "eye_l2/eye_l2",
+        "eye_l1/eye_l1",
+        "eye_r9/eye_r9",
+        "eye_r8/eye_r8",
+        "eye_r7/eye_r7",
+        "eye_r6/eye_r6",
+        "eye_r5/eye_r5",
+        "eye_r4/eye_r4",
+        "eye_r3/eye_r3",
+        "eye_r2/eye_r2",
+        "eye_r1/eye_r1"
+      ],
+      "point_1024": [
+        498.871888373966,
+        164.8527246011613
+      ],
+      "extent_1024": [
+        68.35482333548377,
+        24.16530509883831
+      ],
+      "bounds": [
+        -369.29170062952744,
+        -2233.1231598283425,
+        790.529920643643,
+        2260.0170283009584
+      ],
+      "point": [
+        606.487553495864,
+        473.4108984046452
+      ],
+      "extent": [
+        273.4192933419351,
+        96.66122039535324
+      ],
+      "core_axis": {
+        "eye_point": [
+          606.487553495864,
+          473.4108984046452
+        ],
+        "head_top_y": 273.07709869764176,
+        "torso_point": [
+          743.8307179382,
+          1039.7020460850486
+        ],
+        "torso_source": "semantic:chest_l+chest_r",
+        "torso_confidence": 0.96,
+        "breast_point": [
+          743.8307179382,
+          1039.7020460850486
+        ],
+        "head_top_source": "face_attachment:face1/face",
+        "breast_source": "semantic:chest_l+chest_r"
+      },
+      "core_axis_reason": "ok",
+      "pixel_sha256": "d715990e66613670964877daff18256874773bc319418230aaad4d81e003f907",
+      "png_sha256": "10ef6067bf2653de47d1fce6c21990a3dc929d65afd9ff9ada6238f818ad992c",
+      "image_size": [
+        1320,
+        3724
+      ],
+      "png_transform": {
+        "render_size": [
+          4096,
+          4096
+        ],
+        "render_padding": 0.08,
+        "alpha_bbox": [
+          1453,
+          250,
+          2645,
+          3846
+        ],
+        "crop_padding": 64
+      }
     }
   },
   "unavailable": {}

@@ -1,0 +1,20 @@
+{
+  "characters": {
+    "c401": {
+      "character_resource_id": "401",
+      "costume_id": null,
+      "local_relpath": "assets/spine-rendered/c401.png",
+      "alpha_bbox": [1238, 329, 2855, 3768],
+      "render_width": 4096,
+      "crop_padding": 64
+    },
+    "c581": {
+      "character_resource_id": "581",
+      "costume_id": null,
+      "local_relpath": "assets/spine-rendered/c581.png",
+      "alpha_bbox": [1453, 250, 2645, 3846],
+      "render_width": 4096,
+      "crop_padding": 64
+    }
+  }
+}

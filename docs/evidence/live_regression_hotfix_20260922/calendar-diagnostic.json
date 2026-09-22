@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-09-22T07:27:22.726850+00:00",
+  "source": "current GameKee + current official InformationFeeds + observed production Trail Marker record",
+  "announcement_fetch": {
+    "ok": true,
+    "message": "常规同步成功：收到 17 条，新增 0 条，更新 0 条。",
+    "records": 17
+  },
+  "schedule_refresh": {
+    "ok": true,
+    "message": "ok"
+  },
+  "raw_event_count": 145,
+  "canonical_event_count": 143,
+  "page_count": 2,
+  "lets_drink_pass": {
+    "count": 1,
+    "sources": [
+      "gamekee",
+      "official"
+    ],
+    "match_reason": [
+      "canonical_title_exact:+100",
+      "category_family:activity",
+      "server_scope_compatible",
+      "canonical_title_exact_high_overlap",
+      "interval_overlap_ratio:0.994048",
+      "canonical_title_exact_meta_reconciled"
+    ],
+    "event_type": "pass"
+  },
+  "trail_marker": {
+    "count": 1,
+    "sources": [
+      "gamekee",
+      "observed-production"
+    ],
+    "interval_overlap_ratio": 1.0,
+    "match_reason": [
+      "canonical_title_exact:+100",
+      "category_family:activity",
+      "server_scope_compatible",
+      "canonical_title_exact_high_overlap",
+      "interval_overlap_ratio:1.000000"
+    ],
+    "event_type": "limited_stage"
+  }
+}

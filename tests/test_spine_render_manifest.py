@@ -49,7 +49,8 @@ class SpineRenderManifestTests(unittest.TestCase):
         self.assertTrue(self.manifest_path.is_file(), "Manifest 不存在")
         data = json.loads(self.manifest_path.read_text(encoding="utf-8"))
         characters = data.get("characters", {})
-        self.assertEqual(len(characters), 8)
+        self.assertEqual(len(characters), data["total_characters"])
+        self.assertEqual(len(characters), data["verified_count"])
 
         for asset_id, entry in characters.items():
             relpath = entry["local_relpath"]
@@ -62,7 +63,8 @@ class SpineRenderManifestTests(unittest.TestCase):
 
     def test_valid_png_accepted(self):
         """测试合规预渲染 PNG 完整性核验。"""
-        for asset_id in ("c010", "c010_02", "c010_03", "c017", "c234", "c330", "c352", "c471"):
+        manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+        for asset_id in manifest["characters"]:
             p = self.rendered_dir / f"{asset_id}.png"
             ok, msg, info = check_png_integrity(p)
             self.assertTrue(ok, f"PNG 检查未通过: {asset_id} ({msg})")
