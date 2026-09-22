@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-09-22T07:27:22.726850+00:00",
+  "calendar": {
+    "source": "current GameKee + current official InformationFeeds + observed production Trail Marker record",
+    "raw_event_count": 145,
+    "canonical_event_count": 143,
+    "page_count": 2,
+    "lets_drink_pass": {
+      "count": 1,
+      "left_source": "gamekee",
+      "right_source": "official",
+      "event_type": "pass",
+      "match_reason": "canonical_title_exact_meta_reconciled",
+      "overlap_ratio": 0.994048
+    },
+    "trail_marker": {
+      "count": 1,
+      "left_source": "gamekee",
+      "right_source": "observed-production",
+      "event_type": "limited_stage",
+      "start_delta_hours": 3,
+      "end_delta_hours": 1,
+      "overlap_ratio": 1.0,
+      "match_reason": "canonical_title_exact_high_overlap"
+    }
+  },
+  "root_cause": {
+    "calendar": "Canonical titles were equal, but family equality and a fixed 10-minute boundary gate rejected business/META and long-duration high-overlap pairs.",
+    "character": "PR #98 verified semantic selectors with fixtures and audit sidecars, but c401/c581 were absent from the formal Spine manifest and rendered portrait set, so prepare_face_anchors never emitted production runtime records."
+  },
+  "sin": {
+    "render_id": "c401",
+    "pixel_sha256": "92d157315b18ebd704fa733c93c6adf7a8af9e57451f3fe3cd689aa58cfce6e0",
+    "framing_source": "eye_attachment",
+    "core_axis_available": true,
+    "protected_top_source": "head_attachment:head/head",
+    "torso_source": "override:body_total/body_total",
+    "scale_before": 0.9789725010872043,
+    "scale_after": 0.9789725010872043,
+    "desired_top": -49.83153130625294,
+    "final_top": 95.85307611606504,
+    "safe_top": 394.0,
+    "safe_bottom": 1364.0,
+    "head_top_card_after": 394.0,
+    "eye_card_after": 711.684607422318,
+    "torso_card_after": 1346.421579937357,
+    "before_source": "anchor_unavailable",
+    "visual_inspection": "Face and eyes are visible below the Header; verified torso remains above the Summary safe boundary."
+  },
+  "arcana": {
+    "render_id": "c581",
+    "pixel_sha256": "d715990e66613670964877daff18256874773bc319418230aaad4d81e003f907",
+    "framing_source": "eye_attachment",
+    "core_axis_available": true,
+    "protected_top_source": "face_attachment:face1/face",
+    "torso_source": "semantic:chest_l+chest_r",
+    "scale_before": 0.9362909137500011,
+    "scale_after": 0.9362909137500011,
+    "desired_top": 122.74967735350583,
+    "final_top": 138.32039373618576,
+    "safe_top": 394.0,
+    "safe_bottom": 1364.0,
+    "head_top_card_after": 394.0,
+    "eye_card_after": 581.57071638268,
+    "torso_card_after": 1111.7839724929015,
+    "before_source": "anchor_unavailable",
+    "visual_inspection": "The before card hides the face under the Header; the after card shows the complete face and eyes without entering Summary or equipment areas."
+  }
+}

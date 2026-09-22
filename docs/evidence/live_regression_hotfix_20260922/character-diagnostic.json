@@ -1,0 +1,38 @@
+{
+  "sin": {
+    "render_id": "c401",
+    "pixel_sha256": "92d157315b18ebd704fa733c93c6adf7a8af9e57451f3fe3cd689aa58cfce6e0",
+    "framing_source": "eye_attachment",
+    "core_axis_available": true,
+    "protected_top_source": "head_attachment:head/head",
+    "torso_source": "override:body_total/body_total",
+    "scale_before": 0.9789725010872043,
+    "scale_after": 0.9789725010872043,
+    "desired_top": -49.83153130625294,
+    "final_top": 95.85307611606504,
+    "safe_top": 394.0,
+    "safe_bottom": 1364.0,
+    "head_top_card_after": 394.0,
+    "eye_card_after": 711.684607422318,
+    "torso_card_after": 1346.421579937357,
+    "before_source": "anchor_unavailable"
+  },
+  "arcana": {
+    "render_id": "c581",
+    "pixel_sha256": "d715990e66613670964877daff18256874773bc319418230aaad4d81e003f907",
+    "framing_source": "eye_attachment",
+    "core_axis_available": true,
+    "protected_top_source": "face_attachment:face1/face",
+    "torso_source": "semantic:chest_l+chest_r",
+    "scale_before": 0.9362909137500011,
+    "scale_after": 0.9362909137500011,
+    "desired_top": 122.74967735350583,
+    "final_top": 138.32039373618576,
+    "safe_top": 394.0,
+    "safe_bottom": 1364.0,
+    "head_top_card_after": 394.0,
+    "eye_card_after": 581.57071638268,
+    "torso_card_after": 1111.7839724929015,
+    "before_source": "anchor_unavailable"
+  }
+}

@@ -390,6 +390,178 @@ def test_merge_datasets_uses_canonical_title_evidence_for_packaging_variants(tmp
     assert service.quality_diagnostics["canonical_title_matches"] == 1
 
 
+def test_merge_datasets_reconciles_exact_business_title_with_meta_category(tmp_path):
+    service = ScheduleService(tmp_path, visual_cache=False)
+    business = _event(
+        "gk:lets-drink-pass",
+        "【活动PASS】LET'S DRINK PASS",
+        "pass",
+        detail_url="https://www.gamekee.com/nikke/721020.html",
+    )
+    package = _event(
+        "official:lets-drink-pass",
+        "LET'S DRINK PASS",
+        "package",
+        primary_source="official",
+        sources=["official"],
+        detail_url="https://official.example/lets-drink-pass",
+    )
+    service._source_datasets = {"gamekee": [business], "official": [package]}
+
+    merged = list(service._merge_datasets().values())
+
+    assert len(merged) == 1
+    assert merged[0].event_type == "pass"
+    reasons = merged[0].metadata["identity_match"]["reasons"]
+    assert "canonical_title_exact_meta_reconciled" in reasons
+
+
+def test_merge_datasets_accepts_exact_title_long_interval_high_overlap(tmp_path):
+    service = ScheduleService(tmp_path, visual_cache=False)
+    utc8 = timezone(timedelta(hours=8))
+    gamekee = _event(
+        "gk:trail-marker",
+        "Trail Marker Event",
+        "limited_stage",
+        start_at=datetime(2026, 8, 13, 3, 0, tzinfo=utc8),
+        end_at=datetime(2026, 10, 8, 3, 59, tzinfo=utc8),
+    )
+    official = _event(
+        "official:trail-marker",
+        "【限时通关】Trail Marker",
+        "limited_stage",
+        primary_source="official",
+        sources=["official"],
+        start_at=datetime(2026, 8, 13, 0, 0, tzinfo=utc8),
+        end_at=datetime(2026, 10, 8, 4, 59, tzinfo=utc8),
+    )
+    service._source_datasets = {"gamekee": [gamekee], "official": [official]}
+
+    merged = list(service._merge_datasets().values())
+
+    assert len(merged) == 1
+    reasons = merged[0].metadata["identity_match"]["reasons"]
+    assert "canonical_title_exact_high_overlap" in reasons
+
+
+def test_schedule_service_deduplicates_live_regression_pairs_before_pagination(tmp_path):
+    utc8 = timezone(timedelta(hours=8))
+    service = ScheduleService(tmp_path, visual_cache=False)
+    service._source_datasets = {
+        "gamekee": [
+            _event("gk:drink", "【活动PASS】LET'S DRINK PASS", "pass"),
+            _event(
+                "gk:trail",
+                "Trail Marker Event",
+                "limited_stage",
+                start_at=datetime(2026, 8, 13, 3, 0, tzinfo=utc8),
+                end_at=datetime(2026, 10, 8, 3, 59, tzinfo=utc8),
+            ),
+        ],
+        "official": [
+            _event(
+                "official:drink",
+                "LET'S DRINK PASS",
+                "package",
+                primary_source="official",
+                sources=["official"],
+            ),
+            _event(
+                "official:trail",
+                "【限时通关】Trail Marker",
+                "limited_stage",
+                primary_source="official",
+                sources=["official"],
+                start_at=datetime(2026, 8, 13, 0, 0, tzinfo=utc8),
+                end_at=datetime(2026, 10, 8, 4, 59, tzinfo=utc8),
+            ),
+        ],
+    }
+
+    canonical = list(service._merge_datasets().values())
+    titles = [canonical_event_title(event.title) for event in canonical]
+
+    assert titles.count("let s drink pass") == 1
+    assert titles.count("trail marker") == 1
+    assert next(event for event in canonical if canonical_event_title(event.title) == "let s drink pass").event_type == "pass"
+    assert service.quality_diagnostics["identity_matches"] == 2
+
+
+def test_canonical_title_high_overlap_does_not_merge_distinct_periods_or_short_events():
+    first_period = _event(
+        "gk:trail-marker-aug",
+        "Trail Marker",
+        "limited_stage",
+        start_at=datetime(2026, 8, 13, tzinfo=UTC),
+        end_at=datetime(2026, 10, 8, tzinfo=UTC),
+    )
+    later_period = _event(
+        "official:trail-marker-nov",
+        "【限时通关】Trail Marker",
+        "limited_stage",
+        primary_source="official",
+        sources=["official"],
+        start_at=datetime(2026, 11, 1, tzinfo=UTC),
+        end_at=datetime(2027, 1, 1, tzinfo=UTC),
+    )
+    short_left = _event(
+        "gk:short",
+        "Trail Marker",
+        "limited_stage",
+        start_at=START,
+        end_at=START + timedelta(hours=2),
+    )
+    short_right = _event(
+        "official:short",
+        "Trail Marker Event",
+        "limited_stage",
+        primary_source="official",
+        sources=["official"],
+        start_at=START + timedelta(minutes=90),
+        end_at=START + timedelta(hours=3, minutes=30),
+    )
+
+    assert canonical_identity_match(first_period, later_period) is None
+    assert canonical_identity_match(short_left, short_right) is None
+
+
+def test_canonical_meta_reconciliation_preserves_specific_business_categories(tmp_path):
+    cases = (
+        ("Mission Pass Foo", "pass", "package"),
+        ("Trail Marker", "limited_stage", "announcement"),
+        ("Alice", "recruit", "package"),
+    )
+    for index, (title, business_type, meta_type) in enumerate(cases):
+        service = ScheduleService(tmp_path / str(index), visual_cache=False)
+        business = _event(f"gk:{index}", title, business_type)
+        meta = _event(
+            f"official:{index}",
+            title,
+            meta_type,
+            primary_source="official",
+            sources=["official"],
+        )
+        service._source_datasets = {"gamekee": [business], "official": [meta]}
+
+        merged = list(service._merge_datasets().values())
+
+        assert len(merged) == 1
+        assert merged[0].event_type == business_type
+
+
+def test_canonical_exact_title_does_not_reconcile_different_business_families():
+    recruit = _event("gk:alice", "Alice", "recruit")
+    costume = _event(
+        "official:alice-costume",
+        "Alice",
+        "limited_costume",
+        primary_source="official",
+        sources=["official"],
+    )
+
+    assert canonical_identity_match(recruit, costume) is None
+
+
 def test_canonical_dataset_is_lossless_while_feed_can_deprioritize_meta(tmp_path):
     service = ScheduleService(tmp_path, visual_cache=False)
     events = []

@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "generated_at": "2026-09-13T14:44:01.337134+00:00",
-  "total_characters": 8,
-  "verified_count": 8,
+  "total_characters": 10,
+  "verified_count": 10,
   "failed_count": 0,
   "characters": {
     "c010": {
@@ -185,6 +185,56 @@
         328,
         3222,
         3748
+      ],
+      "runtime_version": "4.1",
+      "verification": "offline_spine_webgl_4.1.56_idle_0",
+      "render_width": 4096,
+      "crop_padding": 64
+    },
+    "c401": {
+      "spine_asset_id": "c401",
+      "character_resource_id": "401",
+      "character_name": "森",
+      "character_name_en": "Sin",
+      "costume_id": null,
+      "costume_name": null,
+      "is_costume": false,
+      "local_relpath": "assets/spine-rendered/c401.png",
+      "sha256": "3c8d99ca53ca48fbcaace5499832f182ba583ba4062de95d056f956b19c7f993",
+      "width": 1745,
+      "height": 3567,
+      "format": "png",
+      "file_size": 3819882,
+      "alpha_bbox": [
+        1238,
+        329,
+        2855,
+        3768
+      ],
+      "runtime_version": "4.0",
+      "verification": "offline_spine_webgl_4.0.31_idle_0",
+      "render_width": 4096,
+      "crop_padding": 64
+    },
+    "c581": {
+      "spine_asset_id": "c581",
+      "character_resource_id": "581",
+      "character_name": "阿尔卡娜",
+      "character_name_en": "Arcana",
+      "costume_id": null,
+      "costume_name": null,
+      "is_costume": false,
+      "local_relpath": "assets/spine-rendered/c581.png",
+      "sha256": "10ef6067bf2653de47d1fce6c21990a3dc929d65afd9ff9ada6238f818ad992c",
+      "width": 1320,
+      "height": 3724,
+      "format": "png",
+      "file_size": 2663483,
+      "alpha_bbox": [
+        1453,
+        250,
+        2645,
+        3846
       ],
       "runtime_version": "4.1",
       "verification": "offline_spine_webgl_4.1.56_idle_0",

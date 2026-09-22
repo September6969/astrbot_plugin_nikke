@@ -1,4 +1,7 @@
 import hashlib
+import json
+import math
+from pathlib import Path
 from unittest.mock import patch
 
 from PIL import Image
@@ -7,6 +10,9 @@ from astrbot_plugin_nikke.features.character.face_anchor import framing
 from astrbot_plugin_nikke.features.character.layout import MIN_AUTO_SCALE_RATIO, summary_layout
 from astrbot_plugin_nikke.features.character.models import CostumeSelection
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def make_card():
@@ -132,3 +138,38 @@ def test_new_torso_metadata_is_consumed_without_legacy_breast_field():
     assert result["core_axis"]["torso_source"] == "verified-test"
     assert result["core_axis"]["torso_confidence"] == 0.91
     assert result["core_axis"]["torso_card_after"] <= result["core_axis"]["safe_bottom"]
+
+
+def test_production_c401_c581_records_match_portraits_and_safe_corridor():
+    records = json.loads(
+        (ROOT / "assets/data/face_anchors.json").read_text(encoding="utf-8")
+    )["records"]
+
+    for render_id, resource_id in (("c401", "401"), ("c581", "581")):
+        portrait_path = ROOT / "assets/spine-rendered" / f"{render_id}.png"
+        assert portrait_path.is_file()
+        row = records[render_id]
+        with Image.open(portrait_path) as opened:
+            portrait = opened.convert("RGBA")
+
+        assert row["pixel_sha256"] == hashlib.sha256(portrait.tobytes()).hexdigest()
+        assert row["image_size"] == list(portrait.size)
+        for point in (row["point"], row["extent"], row["core_axis"]["eye_point"], row["core_axis"]["torso_point"]):
+            assert len(point) == 2
+            assert all(math.isfinite(value) for value in point)
+        assert math.isfinite(row["core_axis"]["head_top_y"])
+
+        card = example_card()
+        card.resource_id = resource_id
+        card.costume_id = 0
+        card.costume_selection = CostumeSelection(0, "test", "default")
+        result = framing(card, portrait, body_centering=False, summary_count=4)
+        axis = result["core_axis"]
+
+        assert result["source"] not in {"anchor_unavailable", "identity_unknown", "anchor_invalid"}
+        assert result["render_id"] == render_id
+        assert axis["available"] is True
+        assert axis["head_top_card_after"] >= axis["safe_top"] - 1e-6
+        assert axis["eye_card_after"] >= axis["head_top_card_after"]
+        assert axis["torso_card_after"] <= axis["safe_bottom"] + 1e-6
+        assert axis["scale_after"] >= axis["scale_before"] * MIN_AUTO_SCALE_RATIO

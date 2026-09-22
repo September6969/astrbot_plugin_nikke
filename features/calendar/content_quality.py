@@ -136,6 +136,9 @@ DISPLAY_GROUP_ORDER = {
     "meta": 4,
 }
 CANONICAL_TIME_TOLERANCE_SECONDS = 600
+CANONICAL_LONG_INTERVAL_SECONDS = 24 * 60 * 60
+CANONICAL_HIGH_OVERLAP_THRESHOLD = 0.98
+CANONICAL_HIGH_OVERLAP_BOUNDARY_SECONDS = 6 * 60 * 60
 _UPDATE_DESCRIPTION_ALIASES = (
     "版本更新",
     "客户端更新",
@@ -371,6 +374,24 @@ def canonical_event_title(value: Any) -> str:
     text = re.sub(r"\s+(?:event|activity)$", "", text)
     text = re.sub(r"[^\w\u4e00-\u9fff]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def interval_overlap_ratio(
+    left_start: datetime,
+    left_end: datetime,
+    right_start: datetime,
+    right_end: datetime,
+) -> float:
+    """返回交集占较短区间的比例；无效或不重叠区间返回 0。"""
+
+    left_duration = (left_end - left_start).total_seconds()
+    right_duration = (right_end - right_start).total_seconds()
+    if left_duration <= 0 or right_duration <= 0:
+        return 0.0
+    intersection = (min(left_end, right_end) - max(left_start, right_start)).total_seconds()
+    if intersection <= 0:
+        return 0.0
+    return intersection / min(left_duration, right_duration)
 
 
 def category_family(category: Any) -> str:
@@ -814,7 +835,15 @@ def canonical_identity_match(left: Any, right: Any) -> IdentityMatch | None:
 
     left_family = category_family(_event_value(left, "event_type", "event"))
     right_family = category_family(_event_value(right, "event_type", "event"))
-    if left_family == "unknown" or left_family != right_family:
+    business_families = {"activity", "recruit", "costume_gacha", "limited_costume"}
+    meta_reconciled = (
+        left_family == "meta" and right_family in business_families
+    ) or (
+        right_family == "meta" and left_family in business_families
+    )
+    if left_family == "unknown" or right_family == "unknown":
+        return None
+    if left_family != right_family and not meta_reconciled:
         return None
 
     start_left = getattr(left, "start_at", None)
@@ -825,18 +854,41 @@ def canonical_identity_match(left: Any, right: Any) -> IdentityMatch | None:
         return None
     start_diff = abs((start_left - start_right).total_seconds())
     end_diff = abs((end_left - end_right).total_seconds())
-    if start_diff > CANONICAL_TIME_TOLERANCE_SECONDS or end_diff > CANONICAL_TIME_TOLERANCE_SECONDS:
+    exact_window = (
+        start_diff <= CANONICAL_TIME_TOLERANCE_SECONDS
+        and end_diff <= CANONICAL_TIME_TOLERANCE_SECONDS
+    )
+    left_duration = (end_left - start_left).total_seconds()
+    right_duration = (end_right - start_right).total_seconds()
+    overlap_ratio = interval_overlap_ratio(start_left, end_left, start_right, end_right)
+    high_overlap = (
+        min(left_duration, right_duration) >= CANONICAL_LONG_INTERVAL_SECONDS
+        and overlap_ratio >= CANONICAL_HIGH_OVERLAP_THRESHOLD
+        and max(start_diff, end_diff) <= CANONICAL_HIGH_OVERLAP_BOUNDARY_SECONDS
+    )
+    if not exact_window and not high_overlap:
         return None
 
+    reasons = [
+        "canonical_title_exact:+100",
+        f"category_family:{left_family}",
+        "server_scope_compatible",
+    ]
+    if high_overlap and not exact_window:
+        reasons.extend(
+            (
+                "canonical_title_exact_high_overlap",
+                f"interval_overlap_ratio:{overlap_ratio:.6f}",
+            )
+        )
+    else:
+        reasons.append("time_window_compatible")
+    if meta_reconciled:
+        reasons.append("canonical_title_exact_meta_reconciled")
     return IdentityMatch(
         100,
         IdentityDecision.MATCH,
-        (
-            "canonical_title_exact:+100",
-            f"category_family:{left_family}",
-            "time_window_compatible",
-            "server_scope_compatible",
-        ),
+        tuple(reasons),
     )
 
 

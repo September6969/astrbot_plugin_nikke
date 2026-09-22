@@ -31,6 +31,7 @@ from .content_quality import (
     DisplayTier,
     IdentityDecision,
     apply_display_relevance,
+    category_family,
     canonical_identity_match,
     get_display_relevance,
     score_identity,
@@ -152,7 +153,11 @@ def _is_same_identity(a: CanonicalEvent, b: CanonicalEvent) -> bool:
 _is_same_event = _is_same_identity
 
 
-def _merge_two_events(base: CanonicalEvent, incoming: CanonicalEvent) -> CanonicalEvent:
+def _merge_two_events(
+    base: CanonicalEvent,
+    incoming: CanonicalEvent,
+    identity_match=None,
+) -> CanonicalEvent:
     """字段级多源仲裁合并：
     - title: resolve_field("title", ...) -> GameKee (地道中文) > Official > 其他
     - banner_url / detail_url: resolve_field(...) -> GameKee > Official > 其他
@@ -216,6 +221,14 @@ def _merge_two_events(base: CanonicalEvent, incoming: CanonicalEvent) -> Canonic
     # 4. 事件类型仲裁
     type_res = resolve_field("event_type", _collect_candidates("event_type"), default=incoming.event_type or base.event_type)
     event_type = type_res.value or incoming.event_type or base.event_type
+    identity_reasons = set(getattr(identity_match, "reasons", ()) or ())
+    if "canonical_title_exact_meta_reconciled" in identity_reasons:
+        base_family = category_family(base.event_type)
+        incoming_family = category_family(incoming.event_type)
+        if base_family == "meta" and incoming_family != "meta":
+            event_type = incoming.event_type
+        elif incoming_family == "meta" and base_family != "meta":
+            event_type = base.event_type
 
     # 5. 取消状态与独立开始证据
     cancel_res = resolve_field("cancellation", _collect_candidates("cancellation", "is_cancelled"), default=base.is_cancelled or incoming.is_cancelled)
@@ -514,7 +527,9 @@ class ScheduleService:
                     ambiguous_seen = True
 
             if matched_idx >= 0:
-                merged_list[matched_idx] = _merge_two_events(merged_list[matched_idx], incoming)
+                merged_list[matched_idx] = _merge_two_events(
+                    merged_list[matched_idx], incoming, identity_match=identity
+                )
             else:
                 counter = "identity_ambiguous" if ambiguous_seen else "identity_distinct"
                 self.quality_diagnostics[counter] = self.quality_diagnostics.get(counter, 0) + 1

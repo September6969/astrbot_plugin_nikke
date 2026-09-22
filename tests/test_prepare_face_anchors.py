@@ -19,6 +19,23 @@ def test_manifest_rebuild_preserves_records_outside_explicit_scope():
     assert merged["c352"] == rebuilt["c352"]
 
 
+def test_partial_c401_c581_rebuild_preserves_existing_production_records():
+    old = {
+        "c010": {"pixel_sha256": "c010-old"},
+        "c016": {"pixel_sha256": "c016-old"},
+        "c191": {"pixel_sha256": "c191-old"},
+    }
+    rebuilt = {
+        "c401": {"pixel_sha256": "c401-new"},
+        "c581": {"pixel_sha256": "c581-new"},
+    }
+
+    merged, preserved = merge_records(old, rebuilt)
+
+    assert preserved == 3
+    assert merged == {**old, **rebuilt}
+
+
 def test_registry_key_requires_explicit_default_identity():
     assert _registry_key("c401", {}) == "401:default"
     assert _registry_key("c401_01", {}) is None
