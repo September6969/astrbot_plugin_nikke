@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import unittest
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any
 
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
+from astrbot_plugin_nikke.features.profile.application import ProfileApplication
 from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
 from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaError, CookieExpired
 from astrbot_plugin_nikke.main import NikkePlugin
@@ -129,10 +133,20 @@ def _plugin(*, account: dict[str, Any] | None, client: _FakeClient) -> tuple[Nik
     renderer = _FakeRenderer()
     feedback = _FakeFeedbackManager()
     plugin.store = store
-    plugin.client = client
-    plugin.profile_builder = builder
+    plugin.profile_application = ProfileApplication(
+        gateway=client,
+        builder=builder,
+        clock=lambda: datetime(2026, 9, 22, 12, 0, tzinfo=timezone.utc),
+        plugin_version="test-version",
+    )
     plugin.profile_renderer = renderer
     plugin.feedback_manager = feedback
+    plugin.command_adapter = AstrBotCommandAdapter()
+    plugin.profile_command_handler = ProfileCommandHandler(
+        account_reader=store,
+        application=plugin.profile_application,
+        present=plugin._render_profile_dashboard,
+    )
     return plugin, store, builder, renderer, feedback
 
 
@@ -144,7 +158,10 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
         results = [item async for item in plugin.me(_FakeEvent())]
 
         self.assertEqual(len(results), 1)
-        self.assertIn("绑定", results[0]["text"])
+        self.assertEqual(
+            results[0]["text"],
+            "查询失败：尚未绑定账号，请先私聊发送 /妮姬 账号 绑定",
+        )
         self.assertEqual(client.calls, [])
         self.assertEqual(store.invalidated, [])
         self.assertEqual(builder.calls, [])

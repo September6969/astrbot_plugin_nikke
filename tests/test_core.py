@@ -555,69 +555,67 @@ class UnionRaidFixtureTests(unittest.TestCase):
 
 
 class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
-    def test_profile_rows_use_confirmed_optional_fields(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+    def test_profile_builder_extracts_confirmed_optional_fields(self):
+        from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
 
-        rows = dict(
-            NikkePlugin._profile_rows(
-                {"area_id": "3", "nickname": "测试"},
-                {
-                    "nickname": "测试",
-                    "lv": 99,
-                    "team_combat": 1234567,
-                    "icon_id": 42,
-                    "created_at": "2024-01-01",
-                    "character_count": 80,
-                    "character_costume_count": 12,
-                    "progress_normal_campaign": 100,
-                    "progress_hard_campaign": 50,
-                    "progress_tribe_tower": 200,
-                    "sim_room_overclock_current_sub_season_high_score": 31,
-                },
-                {
-                    "synchro_level": 300,
-                    "outpost_battle_level": 250,
-                    "infra_core_level": 20,
-                    "tactic_academy_class": 9,
-                    "tactic_academy_lesson": 3,
-                    "jukebox_count": 25,
-                    "recycle_room_researches": [{"lv": 10}, {"lv": 20}],
-                    "memorial_counts": [{"count": 4}, {"count": 6}],
-                },
-            )
+        data = ProfileBuilder().build(
+            account={"area_id": "3", "nickname": "测试"},
+            basic={
+                "nickname": "测试",
+                "lv": 99,
+                "team_combat": 1234567,
+                "icon_id": 42,
+                "created_at": "2024-01-01",
+                "character_count": 80,
+                "character_costume_count": 12,
+                "progress_normal_campaign": 100,
+                "progress_hard_campaign": 50,
+                "progress_tribe_tower": 200,
+                "sim_room_overclock_current_sub_season_high_score": 31,
+            },
+            outpost={
+                "synchro_level": 300,
+                "outpost_battle_level": 250,
+                "infra_core_level": 20,
+                "tactic_academy_class": 9,
+                "tactic_academy_lesson": 3,
+                "jukebox_count": 25,
+                "recycle_room_researches": [{"lv": 10}, {"lv": 20}],
+                "memorial_counts": [{"count": 4}, {"count": 6}],
+            },
+            roster=None,
+            fetched_at="2026-09-22 12:00",
+            plugin_version="test",
         )
-        self.assertEqual(rows["指挥官等级"], "99")
-        self.assertEqual(rows["部队总战力"], "1,234,567")
-        self.assertEqual(rows["无尽塔进度"], "200")
-        self.assertNotIn("部落塔进度", rows)
-        self.assertNotIn("战术学院班级", rows)
-        self.assertNotIn("战术学院课程", rows)
-        self.assertEqual(rows["回收室研究"], "2 项 · 等级合计 30")
-        self.assertEqual(rows["收藏记录"], "10")
-        self.assertNotIn("头像 ID", rows)
 
-    def test_profile_rows_with_campaign_resolver(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        self.assertEqual(data.commander_level, 99)
+        self.assertEqual(data.team_combat, 1234567)
+        self.assertEqual(data.progress_tribe_tower, "200")
+        self.assertEqual([item.level for item in data.recycle_room_researches], [10, 20])
+        self.assertEqual([item.count for item in data.memorial_counts], [4, 6])
+        self.assertFalse(hasattr(data, "icon_id"))
+
+    def test_profile_builder_uses_campaign_resolver(self):
+        from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
         from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
 
         resolver = CampaignStageResolver({
             "NORMAL": {"46": {"46-40": 6046044}},
             "HARD": {"35": {"35-36": 7035044}},
         })
-        rows = dict(
-            NikkePlugin._profile_rows(
-                {"area_id": "3", "nickname": "测试"},
-                {
-                    "nickname": "测试",
-                    "progress_normal_campaign": 6046044,
-                    "progress_hard_campaign": 7035044,
-                },
-                {},
-                campaign_resolver=resolver,
-            )
+        data = ProfileBuilder(campaign_resolver=resolver).build(
+            account={"area_id": "3", "nickname": "测试"},
+            basic={
+                "progress_normal_campaign": 6046044,
+                "progress_hard_campaign": 7035044,
+            },
+            outpost={},
+            roster=None,
+            fetched_at="2026-09-22 12:00",
+            plugin_version="test",
         )
-        self.assertEqual(rows["普通主线"], "NORMAL 46-40")
-        self.assertEqual(rows["困难主线"], "HARD 35-36")
+        self.assertEqual(data.normal_campaign, "46-40")
+        self.assertEqual(data.hard_campaign, "35-36")
 
     async def test_chinese_and_legacy_commands_share_one_root_router(self):
         from astrbot_plugin_nikke.main import NikkePlugin

@@ -7,6 +7,7 @@ from .contracts import (
     ImageReply,
     TextReply,
 )
+from .profile import ProfileCommandHandler
 
 __all__ = [
     "CommandContext",
@@ -14,4 +15,5 @@ __all__ = [
     "CommandResult",
     "ImageReply",
     "TextReply",
+    "ProfileCommandHandler",
 ]

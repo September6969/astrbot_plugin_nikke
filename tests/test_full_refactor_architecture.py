@@ -67,14 +67,17 @@ def test_shared_container_and_resource_owners_are_unique() -> None:
     assert not violations, f"共享资源存在多个生产所有者：{violations}"
 
 
-def test_no_default_off_route_or_dynamic_module_forwarder() -> None:
+def test_no_default_off_profile_route() -> None:
+    assert not _violations("default_off_or_legacy_route"), METRICS[
+        "profile_route_flag_references"
+    ]
+
+
+def test_dynamic_module_forwarders_are_removed() -> None:
     assert not _violations("empty_forwarder_module"), METRICS[
         "empty_forwarder_modules"
     ]
     assert not _violations("star_import"), METRICS["star_imports"]
-    assert not _violations("default_off_or_legacy_route"), METRICS[
-        "profile_route_flag_references"
-    ]
     assert not _violations("dynamic_module_forwarder"), METRICS[
         "dynamic_module_getattrs"
     ]

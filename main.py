@@ -33,6 +33,7 @@ from astrbot.api.star import Context, Star
 
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from .application.commands.guide import GuideCommandHandler
+from .application.commands.profile import ProfileCommandHandler
 from .application.commands.tarot import TarotCommandHandler
 from ._version import PLUGIN_VERSION
 from .core.container import create_container
@@ -46,13 +47,11 @@ from .features.campaign.models import ClearLineupStatus
 from .ui.renderers import (
     CampaignHistoryRenderer,
     CharacterCardRenderer,
-    ProfileCardRenderer,
     T2IRenderer,
     UnionRaidRenderer,
 )
 from .ui.primitives import CardRenderer
 from .ui.t2i_payloads import CalendarT2IPayloadBuilder
-from .features.campaign.stage_resolver import CampaignStageResolver
 from .features.character.builder import CharacterCardBuilder
 from .features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
 from .features.character.identity import CharacterDirectoryResolver
@@ -61,7 +60,6 @@ from .features.character.stat_resources import CharacterStatResourceLoader, map_
 from .core.privacy import safe_exception_message
 from .features.daily.models import DailyTaskResult, DailyTaskStatus
 from .core.feedback import DelayedFeedbackManager
-from .features.profile.builder import ProfileBuilder
 from .core.health import collect_runtime_health, format_runtime_health
 from .core.config import normalize_runtime_config, read_schedule_clock
 from .integrations.spine.config import build_spine_renderer
@@ -102,7 +100,7 @@ class NikkePlugin(Star):
         self.data_dir = Path("data") / "nikke"
         self.container = create_container(self.plugin_dir, self.data_dir, self.config)
 
-        # 映射容器属性到 self，保留 100% 既有公开调用与测试字段契约
+        # 映射公开组件到插件门面；Profile 用例由正式 handler 编排。
         self.extension_zip = self.container.extension_zip
         self.store = self.container.store
         self.character_stat_resources = self.container.character_stat_resources
@@ -113,7 +111,6 @@ class NikkePlugin(Star):
         self.asset_manager = self.container.asset_manager
         self.character_renderer = self.container.character_renderer
         self.campaign_resolver = self.container.campaign_resolver
-        self.profile_builder = self.container.profile_builder
         self.profile_application = self.container.profile_application
         self.profile_renderer = self.container.profile_renderer
         self.raid_builder = self.container.raid_builder
@@ -136,6 +133,12 @@ class NikkePlugin(Star):
         self.tower_registry = self.container.tower_registry
         self.daily_runner = self.container.daily_runner
         self.web = self.container.web
+        self.command_adapter = AstrBotCommandAdapter()
+        self.profile_command_handler = ProfileCommandHandler(
+            account_reader=self.store,
+            application=self.profile_application,
+            present=self._render_profile_dashboard,
+        )
 
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
@@ -384,33 +387,6 @@ class NikkePlugin(Star):
         if not account:
             raise ValueError("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
         return account
-
-    def _profile_application_enabled(self) -> bool:
-        """只接受明确的布尔开关，避免损坏配置意外切换新 Profile 路径。"""
-        config = getattr(self, "config", None) or {}
-        return config.get("profile_application_enabled", False) is True
-
-    async def _build_profile_dashboard(self, account: dict[str, Any]):
-        """在请求开始固定 Profile 路径；单次请求只进入一条 gateway 链路。"""
-        if self._profile_application_enabled():
-            application = getattr(self, "profile_application", None)
-            if application is None:
-                raise RuntimeError("Profile application 未装配")
-            return await application.build_dashboard(account)
-
-        data = await self.client.get_profile_dashboard(account)
-        return self.profile_builder.build(
-            account=account,
-            basic=data["basic"],
-            outpost=data["outpost"],
-            roster=data["roster"],
-            outpost_available=data.get("outpost_available"),
-            roster_available=data.get("roster_available"),
-            daily=data.get("daily"),
-            daily_available=data.get("daily_available"),
-            fetched_at=datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-            plugin_version=PLUGIN_VERSION,
-        )
 
     def _name_map(self) -> dict[str, str]:
         """按实际目录内容生成 name_code -> display_name 映射。
@@ -796,70 +772,12 @@ class NikkePlugin(Star):
             f"自动签到：{'开启' if account.get('auto_daily_enabled') else '关闭'}"
         )
 
-    @staticmethod
-    def _profile_rows(
-        account: dict,
-        basic: dict,
-        outpost: dict,
-        campaign_resolver: CampaignStageResolver | None = None,
-    ) -> list[tuple[str, str]]:
-        """只使用真实响应已确认存在的字段生成档案行。"""
-        normal_raw = basic.get("progress_normal_campaign", basic.get("progress_campaign_normal"))
-        if normal_raw is not None and campaign_resolver is not None:
-            stage_normal = campaign_resolver.resolve_id(normal_raw, mode_hint="NORMAL")
-            normal_text = f"NORMAL {stage_normal.name}" if stage_normal else (f"未映射 · ID {normal_raw}" if re.fullmatch(r"\d+", str(normal_raw).strip()) else str(normal_raw))
-        else:
-            normal_text = str(normal_raw if normal_raw is not None else "未知")
-
-        hard_raw = basic.get("progress_hard_campaign", basic.get("progress_campaign_hard"))
-        if hard_raw is not None and campaign_resolver is not None:
-            stage_hard = campaign_resolver.resolve_id(hard_raw, mode_hint="HARD")
-            hard_text = f"HARD {stage_hard.name}" if stage_hard else (f"未映射 · ID {hard_raw}" if re.fullmatch(r"\d+", str(hard_raw).strip()) else str(hard_raw))
-        else:
-            hard_text = str(hard_raw if hard_raw is not None else "未知")
-
-        rows = [
-            ("指挥官", str(basic.get("nickname") or account.get("nickname") or account.get("role_name") or "未知")),
-            ("区服", str(account.get("area_id") or "未知")),
-            ("同步器", str(outpost.get("synchro_level", 0))),
-            ("前哨等级", str(outpost.get("outpost_battle_level", 0))),
-            ("普通主线", normal_text),
-            ("困难主线", hard_text),
-        ]
-
-        optional = (
-            ("lv", "指挥官等级"),
-            ("team_combat", "部队总战力"),
-            ("created_at", "注册时间"),
-            ("character_count", "持有妮姬"),
-            ("character_costume_count", "时装数量"),
-            ("progress_tribe_tower", "无尽塔进度"),
-            ("sim_room_overclock_current_sub_season_high_score", "模拟室超频分数"),
-        )
-        for key, label in optional:
-            if key in basic and basic[key] not in (None, ""):
-                value = basic[key]
-                if key == "team_combat" and isinstance(value, (int, float)):
-                    value = f"{int(value):,}"
-                rows.append((label, str(value)))
-
-        outpost_optional = (
-            ("infra_core_level", "基础核心等级"),
-            ("jukebox_count", "点唱机收集"),
-        )
-        for key, label in outpost_optional:
-            if key in outpost and outpost[key] not in (None, ""):
-                rows.append((label, str(outpost[key])))
-
-        researches = outpost.get("recycle_room_researches")
-        if isinstance(researches, list):
-            levels = [int(item.get("lv", 0) or 0) for item in researches if isinstance(item, dict)]
-            rows.append(("回收室研究", f"{len(levels)} 项 · 等级合计 {sum(levels)}"))
-        memorials = outpost.get("memorial_counts")
-        if isinstance(memorials, list):
-            count = sum(int(item.get("count", 0) or 0) for item in memorials if isinstance(item, dict))
-            rows.append(("收藏记录", str(count)))
-        return rows
+    async def _render_profile_dashboard(self, dashboard):
+        """优先使用 T2I，失败时以同一 DTO 回退 Pillow。"""
+        path = await self._try_t2i("profile", dashboard)
+        if not path:
+            path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
+        return path
 
     async def me(self, event: AstrMessageEvent):
         """生成个人账号概览卡。"""
@@ -867,12 +785,10 @@ class NikkePlugin(Star):
             lambda: self._send_delayed_notice(event, "正在生成个人账号概览...")
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
-            account = self._account_or_error(event)
-            dashboard = await self._build_profile_dashboard(account)
-            path = await self._try_t2i("profile", dashboard)
-            if not path:
-                path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
-            yield event.image_result(path)
+            async for result in self.command_adapter.dispatch(
+                event, self.profile_command_handler
+            ):
+                yield result
         except CookieExpired:
             self.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")

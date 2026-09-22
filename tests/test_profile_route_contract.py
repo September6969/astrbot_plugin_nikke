@@ -1,14 +1,33 @@
-"""验证 Profile 实际命令入口的双路径合同和单 gateway 责任。"""
+"""验证 Profile 命令已收敛到正式 handler 的唯一 application 路径。"""
 
+from __future__ import annotations
+
+import ast
 import asyncio
+import json
+from pathlib import Path
 
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
 from astrbot_plugin_nikke.integrations.blablalink.client import CookieExpired
 from astrbot_plugin_nikke.main import NikkePlugin
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
 class _Event:
+    def get_platform_name(self):
+        return "synthetic-platform"
+
     def get_sender_id(self):
         return "route-user"
+
+    def is_admin(self):
+        return False
+
+    def is_private_chat(self):
+        return True
 
     def image_result(self, path):
         return ("image", path)
@@ -18,44 +37,26 @@ class _Event:
 
 
 class _Store:
-    def __init__(self):
+    def __init__(self, account=None):
+        self.account = account or {"qq_id": "route-user", "cookie": "cookie"}
         self.invalidated = []
+        self.lookup_ids = []
 
     def get_account(self, qq_id):
-        return {"qq_id": qq_id, "cookie": "cookie"}
+        self.lookup_ids.append(qq_id)
+        return self.account
 
     def mark_cookie_invalid(self, qq_id):
         self.invalidated.append(qq_id)
 
 
-class _Client:
-    def __init__(self, response):
-        self.response = response
-        self.calls = 0
-
-    async def get_profile_dashboard(self, account):
-        self.calls += 1
-        if isinstance(self.response, BaseException):
-            raise self.response
-        return self.response
-
-
-class _LegacyBuilder:
-    def __init__(self):
-        self.calls = 0
-
-    def build(self, **kwargs):
-        self.calls += 1
-        return {"route": "legacy"}
-
-
 class _Application:
     def __init__(self, response):
         self.response = response
-        self.calls = 0
+        self.calls = []
 
     async def build_dashboard(self, account):
-        self.calls += 1
+        self.calls.append(account)
         if isinstance(self.response, BaseException):
             raise self.response
         return self.response
@@ -63,18 +64,27 @@ class _Application:
 
 class _Renderer:
     def render_profile(self, dashboard):
-        return f"{dashboard['route']}.png"
+        return "profile.png"
 
 
-def _plugin(*, enabled, client_response=None, application_response=None):
+def _plugin(*, account=None, application_response=None):
     plugin = NikkePlugin.__new__(NikkePlugin)
-    plugin.config = {"profile_application_enabled": enabled, "ui_renderer": "pillow"}
-    plugin.store = _Store()
-    plugin.client = _Client(client_response)
-    plugin.profile_builder = _LegacyBuilder()
+    plugin.store = _Store(account)
     plugin.profile_application = _Application(application_response)
     plugin.profile_renderer = _Renderer()
     plugin.feedback_manager = None
+    plugin.command_adapter = AstrBotCommandAdapter()
+
+    async def no_t2i(page, dashboard):
+        assert page == "profile"
+        return None
+
+    plugin._try_t2i = no_t2i
+    plugin.profile_command_handler = ProfileCommandHandler(
+        account_reader=plugin.store,
+        application=plugin.profile_application,
+        present=plugin._render_profile_dashboard,
+    )
     return plugin
 
 
@@ -85,42 +95,50 @@ def _run_me(plugin):
     return asyncio.run(consume())
 
 
-def test_disabled_route_uses_legacy_gateway_once():
-    plugin = _plugin(
-        enabled=False,
-        client_response={"basic": {}, "outpost": {}, "roster": []},
-        application_response={"route": "new"},
-    )
+def test_profile_route_uses_one_application_path_and_preserves_image_reply():
+    plugin = _plugin(application_response=object())
 
-    assert _run_me(plugin) == [("image", "legacy.png")]
-    assert plugin.client.calls == 1
-    assert plugin.profile_builder.calls == 1
-    assert plugin.profile_application.calls == 0
+    assert _run_me(plugin) == [("image", "profile.png")]
+    assert plugin.profile_application.calls == [plugin.store.account]
+    assert plugin.store.lookup_ids == ["route-user"]
+    assert not hasattr(plugin, "profile_builder")
 
 
-def test_enabled_route_uses_application_gateway_once():
-    plugin = _plugin(
-        enabled=True,
-        client_response=AssertionError("新路由不应直接调用 client"),
-        application_response={"route": "new"},
-    )
+def test_unbound_profile_does_not_call_application():
+    plugin = _plugin(account=None, application_response=AssertionError("must not run"))
+    plugin.store.account = None
 
-    assert _run_me(plugin) == [("image", "new.png")]
-    assert plugin.client.calls == 0
-    assert plugin.profile_builder.calls == 0
-    assert plugin.profile_application.calls == 1
+    result = _run_me(plugin)
+
+    assert result == [("plain", "查询失败：尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")]
+    assert plugin.profile_application.calls == []
+    assert plugin.store.invalidated == []
 
 
-def test_enabled_route_keeps_cookie_invalidation_at_command_boundary():
-    plugin = _plugin(
-        enabled=True,
-        client_response=AssertionError("新路由不应直接调用 client"),
-        application_response=CookieExpired("expired"),
-    )
+def test_cookie_invalidation_has_one_owner_at_command_boundary():
+    plugin = _plugin(application_response=CookieExpired("expired"))
 
-    results = _run_me(plugin)
+    result = _run_me(plugin)
 
-    assert results == [("plain", "登录状态已失效，请重新发送 /妮姬 账号 绑定。")]
-    assert plugin.client.calls == 0
-    assert plugin.profile_application.calls == 1
+    assert result == [("plain", "登录状态已失效，请重新发送 /妮姬 账号 绑定。")]
+    assert len(plugin.profile_application.calls) == 1
     assert plugin.store.invalidated == ["route-user"]
+
+
+def test_main_has_no_profile_builder_branch_or_field_assembly():
+    source = (ROOT / "main.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    plugin = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "NikkePlugin"
+    )
+    methods = {node.name for node in plugin.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))}
+
+    assert "_profile_rows" not in methods
+    assert "_build_profile_dashboard" not in methods
+    assert "profile_builder" not in source
+    assert "profile_application_enabled" not in source
+    assert "profile_application_enabled" not in json.loads(
+        (ROOT / "_conf_schema.json").read_text(encoding="utf-8")
+    )

@@ -77,11 +77,20 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
     data = next(iter(get_cases(page, tmp_path).values()))
     if page == "profile":
-        plugin.client = Mock(get_profile_dashboard=AsyncMock(return_value={"basic": {}, "outpost": {}, "roster": []}))
-        plugin.profile_builder = Mock(build=Mock(return_value=data))
+        from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+        from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
+
+        plugin.store = Mock(get_account=Mock(return_value={"qq_id": "synthetic-qq"}))
+        plugin.profile_application = Mock(build_dashboard=AsyncMock(return_value=data))
         fallback = Mock(return_value="fallback.png")
         plugin.profile_renderer = Mock(render_profile=fallback)
-        command, args, request = plugin.me, (), plugin.client.get_profile_dashboard
+        plugin.command_adapter = AstrBotCommandAdapter()
+        plugin.profile_command_handler = ProfileCommandHandler(
+            account_reader=plugin.store,
+            application=plugin.profile_application,
+            present=plugin._render_profile_dashboard,
+        )
+        command, args, request = plugin.me, (), plugin.profile_application.build_dashboard
     elif page == "union_overview":
         plugin.client = Mock(get_union_raid_overview=AsyncMock(return_value={"guild_name": "synthetic", "level_info": {}}))
         plugin.raid_builder = Mock(build=Mock(return_value=data))

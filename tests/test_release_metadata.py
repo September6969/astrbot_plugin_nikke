@@ -24,7 +24,6 @@ class ReleaseMetadataTests(unittest.TestCase):
         expected = {
             "character_card_layout": ("string", "replica"),
             "ui_renderer": ("string", "pillow"),
-            "profile_application_enabled": ("bool", False),
             "public_base_url": ("string", "https://nikke.irises777.xyz"),
             "web_host": ("string", "0.0.0.0"),
             "web_port": ("int", 6210),

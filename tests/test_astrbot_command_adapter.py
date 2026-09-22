@@ -30,7 +30,7 @@ def _plugin_methods() -> dict[str, ast.AsyncFunctionDef]:
 
 def test_guide_and_tarot_entries_are_thin_adapter_delegates() -> None:
     methods = _plugin_methods()
-    for name in ("guide", "tarot_command"):
+    for name in ("guide", "tarot_command", "me"):
         method = methods[name]
         logical_statements = sum(isinstance(node, ast.stmt) for node in ast.walk(method))
         assert logical_statements <= 20, (name, logical_statements)
@@ -46,6 +46,7 @@ def test_application_command_handlers_do_not_import_astrbot() -> None:
     for relative in (
         "application/commands/contracts.py",
         "application/commands/guide.py",
+        "application/commands/profile.py",
         "application/commands/tarot.py",
     ):
         tree = ast.parse((ROOT / relative).read_text(encoding="utf-8"))
@@ -66,6 +67,8 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     from astrbot.core.star.star_handler import star_handlers_registry
 
     from astrbot_plugin_nikke.features.tarot.service import TarotService
+    from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+    from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
     from astrbot_plugin_nikke.main import NikkePlugin
 
     class Event:
@@ -116,6 +119,40 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     plugin.plugin_dir = tmp_path
     plugin.data_dir = tmp_path / "runtime"
     plugin.tarot = TarotService(tmp_path, plugin.data_dir / "tarot")
+
+    class AccountReader:
+        @staticmethod
+        def get_account(qq_id):
+            return {"qq_id": qq_id, "cookie": "synthetic-cookie"}
+
+    class ProfileApplication:
+        def __init__(self):
+            self.calls = []
+
+        async def build_dashboard(self, account):
+            self.calls.append(account)
+            return object()
+
+    class ProfileRenderer:
+        @staticmethod
+        def render_profile(dashboard):
+            return "synthetic-profile.png"
+
+    async def no_t2i(page, dashboard):
+        assert page == "profile"
+        return None
+
+    plugin.store = AccountReader()
+    plugin.profile_application = ProfileApplication()
+    plugin.profile_renderer = ProfileRenderer()
+    plugin.feedback_manager = None
+    plugin.command_adapter = AstrBotCommandAdapter()
+    plugin._try_t2i = no_t2i
+    plugin.profile_command_handler = ProfileCommandHandler(
+        account_reader=plugin.store,
+        application=plugin.profile_application,
+        present=plugin._render_profile_dashboard,
+    )
     registered = next(
         handler
         for handler in star_handlers_registry.get_handlers_by_module_name(
@@ -146,6 +183,15 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     components = [component for result in guide_results for component in result.chain]
     assert any(isinstance(component, Plain) and "第 1/1 页" in component.text for component in components)
     assert sum(isinstance(component, Image) for component in components) == 1
+
+    profile_results = [
+        result
+        async for result in registered.handler(plugin, Event(), "我的", "", "")
+    ]
+    assert len(profile_results) == 1
+    assert isinstance(profile_results[0], MessageEventResult)
+    assert isinstance(profile_results[0].chain[0], Image)
+    assert len(plugin.profile_application.calls) == 1
 
 
 @pytest.mark.asyncio
