@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from enum import Enum
 import re
@@ -71,6 +71,16 @@ CATEGORY_ALIASES: dict[str, tuple[str, ...]] = {
     "solo_raid": ("单人突袭", "solo raid"),
     "union_raid": ("联盟突袭", "union raid"),
     "special_arena": ("特殊竞技场", "special arena"),
+    "mini_game": ("小游戏", "mini game", "mini-game"),
+    "limited_stage": ("限时通关", "limited stage", "trail marker"),
+    "costume_gacha": (
+        "costume gacha",
+        "时装转盘",
+        "服装转盘",
+        "转盘抽奖",
+        "转盘",
+    ),
+    "limited_costume": ("limited costume", "限定时装", "限定服装"),
     "recruit": ("招募", "pick up", "pickup", "recruitment", "special recruit", "recruit"),
     "double_reward": (
         "full burst",
@@ -82,6 +92,8 @@ CATEGORY_ALIASES: dict[str, tuple[str, ...]] = {
     ),
     "maintenance": ("维护", "maintenance"),
     "update": ("版本更新", "客户端更新", "update"),
+    "announcement": ("公告", "announcement", "notice"),
+    "package": ("礼包", "package", "bundle"),
     "pass": ("mission pass", "pass", "任务通行证"),
 }
 
@@ -90,12 +102,40 @@ _CATEGORY_ORDER = (
     "solo_raid",
     "union_raid",
     "special_arena",
+    "mini_game",
+    "limited_stage",
+    "costume_gacha",
+    "limited_costume",
     "recruit",
     "double_reward",
     "maintenance",
     "update",
+    "announcement",
+    "package",
     "pass",
 )
+ACTIVITY_CATEGORIES = frozenset(
+    {
+        "event",
+        "pass",
+        "mini_game",
+        "limited_stage",
+        "coop",
+        "solo_raid",
+        "union_raid",
+        "special_arena",
+        "double_reward",
+    }
+)
+META_CATEGORIES = frozenset({"maintenance", "update", "announcement", "package"})
+DISPLAY_GROUP_ORDER = {
+    "activity": 0,
+    "recruit": 1,
+    "costume_gacha": 2,
+    "limited_costume": 3,
+    "meta": 4,
+}
+CANONICAL_TIME_TOLERANCE_SECONDS = 600
 _UPDATE_DESCRIPTION_ALIASES = (
     "版本更新",
     "客户端更新",
@@ -140,6 +180,56 @@ def _category_hit(category: str, text: str, *, field: str) -> bool:
     return False
 
 
+def classify_explicit_title(title: str) -> tuple[str, float, str] | None:
+    """按标题中的明确语义分类，优先于 tag/activity_kind/description。"""
+
+    text = _fold(title)
+    if not text:
+        return None
+
+    explicit_rules = (
+        ("limited_costume", ("limited costume", "限定时装", "限定服装"), "explicit_title:limited_costume"),
+        (
+            "costume_gacha",
+            ("costume gacha", "时装转盘", "服装转盘", "转盘抽奖", "转盘"),
+            "explicit_title:costume_gacha",
+        ),
+        ("mini_game", ("mini game", "mini-game", "小游戏"), "explicit_title:mini_game"),
+        (
+            "limited_stage",
+            ("limited stage", "限时通关", "trail marker"),
+            "explicit_title:limited_stage",
+        ),
+        (
+            "pass",
+            ("mission pass", "活动pass", "任务通行证", "通行证"),
+            "explicit_title:pass",
+        ),
+        (
+            "recruit",
+            ("special recruit", "pick up", "pickup", "recruitment", "招募"),
+            "explicit_title:recruit",
+        ),
+        ("coop", ("coordinated operation", "协同作战", "协同"), "explicit_title:coop"),
+        ("solo_raid", ("solo raid", "单人突袭"), "explicit_title:solo_raid"),
+        ("union_raid", ("union raid", "联盟突袭"), "explicit_title:union_raid"),
+        ("special_arena", ("special arena", "特殊竞技场"), "explicit_title:special_arena"),
+        ("double_reward", ("double reward", "double drop", "full burst", "双倍"), "explicit_title:double_reward"),
+        ("maintenance", ("maintenance", "维护"), "explicit_title:maintenance"),
+        ("update", ("version update", "client update", "版本更新", "客户端更新"), "explicit_title:update"),
+        ("announcement", ("announcement", "notice", "公告"), "explicit_title:announcement"),
+        ("package", ("package", "bundle", "礼包"), "explicit_title:package"),
+    )
+    for category, aliases, reason in explicit_rules:
+        if any(_contains_alias(text, alias) for alias in aliases):
+            return category, 1.0, reason
+
+    # SSR 标题是明确的招募语义；只在标题中识别，避免描述里的奖励文字误分类。
+    if re.search(r"(?<![a-z0-9])ssr(?![a-z0-9])", text):
+        return "recruit", 1.0, "explicit_title:ssr_recruit"
+    return None
+
+
 def classify_category(
     title: str,
     tag: str = "",
@@ -151,6 +241,20 @@ def classify_category(
     标题、标签和结构化 activity kind 的权重明显高于描述，防止描述里的
     “奖励更新”之类营销文案改变真正的活动类型。
     """
+
+    explicit = classify_explicit_title(title)
+    if explicit is not None:
+        return explicit[0]
+
+    description_text = _fold(description)
+    if (
+        _contains_alias(description_text, "new character packages")
+        or (
+            _contains_alias(description_text, "available after")
+            and _contains_alias(description_text, "maintenance")
+        )
+    ):
+        return "package"
 
     fields = (
         ("title", _fold(title), 100),
@@ -227,6 +331,145 @@ def normalize_title(value: Any) -> str:
     tokens = [token for token in re.split(r"[^\w\u4e00-\u9fff]+", text) if token]
     tokens = [token for token in tokens if token not in decorative]
     return " ".join(tokens)
+
+
+def canonical_event_title(value: Any) -> str:
+    """去除确定属于展示包装的标题前后缀，保留事件核心身份。"""
+
+    text = _fold(value)
+    if not text:
+        return ""
+
+    # 只剥离标题最前面的包装块；角色名、Season、月份、编号不会被按位置猜测删除。
+    bracket_prefix = re.compile(r"^\s*(?:\[[^\]]*\]|【[^】]*】|\([^)]*\)|（[^）]*）)\s*")
+    while True:
+        stripped = bracket_prefix.sub("", text, count=1)
+        if stripped == text:
+            break
+        text = stripped
+
+    wrapper_prefixes = (
+        "limited costume",
+        "costume gacha",
+        "mini game",
+        "mission pass",
+        "activity pass",
+        "活动pass",
+        "任务通行证",
+        "limited stage",
+        "ssr",
+        "special recruit",
+    )
+    for prefix in wrapper_prefixes:
+        before = text
+        pattern = rf"^{re.escape(_fold(prefix))}(?:\s*[:：-]\s*|\s+)"
+        text = re.sub(pattern, "", text, count=1)
+        if text != before:
+            break
+
+    # Event/Activity 是包装后缀；核心名称内的同名词不在这里处理。
+    text = re.sub(r"\s+(?:event|activity)$", "", text)
+    text = re.sub(r"[^\w\u4e00-\u9fff]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def category_family(category: Any) -> str:
+    """返回 Operations Feed 使用的稳定分类族。"""
+
+    normalized = _fold(category).replace(" ", "_")
+    if normalized in ACTIVITY_CATEGORIES:
+        return "activity"
+    if normalized in {"recruit", "recruitment"}:
+        return "recruit"
+    if normalized == "costume_gacha":
+        return "costume_gacha"
+    if normalized == "limited_costume":
+        return "limited_costume"
+    if normalized in META_CATEGORIES:
+        return "meta"
+    return "unknown"
+
+
+def operations_display_group(event_or_category: Any) -> int:
+    """返回 Operations Feed 的展示组序号，META 始终位于最后。"""
+
+    if isinstance(event_or_category, str):
+        category = event_or_category
+    else:
+        category = _event_value(
+            event_or_category,
+            "event_type",
+            _event_value(event_or_category, "category", "event"),
+        )
+    family = category_family(category)
+    # 未知分类保留在活动区，避免新来源字段导致内容静默消失。
+    return DISPLAY_GROUP_ORDER.get(family, DISPLAY_GROUP_ORDER["activity"])
+
+
+def _precision_rank(value: Any) -> int:
+    normalized = str(getattr(value, "value", value) or "UNKNOWN").upper()
+    return {"EXACT": 0, "DATE_ONLY": 1}.get(normalized, 2)
+
+
+def _datetime_sort_key(value: Any) -> datetime:
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value
+    return datetime.max.replace(tzinfo=timezone.utc)
+
+
+def _stable_identity(event: Any) -> str:
+    return str(
+        getattr(
+            event,
+            "identity_key",
+            getattr(event, "id", getattr(event, "event_id", "")),
+        )
+        or ""
+    )
+
+
+def operations_display_sort_key(event: Any, status: str) -> tuple[Any, ...]:
+    """按业务展示组排序，不改变 canonical_models.active_sort_key。"""
+
+    status_value = str(getattr(status, "value", status) or "").upper()
+    group = operations_display_group(event)
+    stable_id = _stable_identity(event)
+    if status_value == "ACTIVE":
+        end_at = getattr(event, "end_at", None)
+        return (
+            group,
+            _precision_rank(getattr(event, "end_precision", "UNKNOWN")),
+            _datetime_sort_key(end_at),
+            -get_display_relevance(event).score,
+            stable_id,
+        )
+    start_at = getattr(event, "start_at", None)
+    return (group, _datetime_sort_key(start_at), stable_id)
+
+
+def sort_operations_display_events(events: Iterable[Any], status: str) -> list[Any]:
+    """按 Operations Feed 的分类族和时间契约稳定排序。"""
+
+    return sorted(events, key=lambda event: operations_display_sort_key(event, status))
+
+
+def _explicit_identity_label(value: Any) -> str:
+    """提取标题中明确的角色/服装身份，用于阻止错误跨角色合并。"""
+
+    raw = unicodedata.normalize("NFKC", str(value or "")).casefold().strip()
+    raw = re.sub(r"^\s*(?:\[[^\]]*\]|【[^】]*】|\([^)]*\)|（[^）]*）)\s*", "", raw)
+    prefixes = ("special recruit", "limited costume", "costume gacha", "ssr", "特殊招募")
+    prefix_pattern = "|".join(re.escape(prefix) for prefix in prefixes)
+    match = re.match(
+        rf"^(?:{prefix_pattern})\s*[:：-]?\s*(.+?)(?=\s*[:：\-–—]|\s*$)",
+        raw,
+    )
+    if not match:
+        return ""
+    label = _fold(match.group(1))
+    return re.sub(r"\s+(?:announcement|notice|公告|event|activity)$", "", label).strip()
 
 
 def title_similarity(left: Any, right: Any) -> float:
@@ -434,6 +677,20 @@ def score_identity(left: Any, right: Any) -> IdentityMatch:
         explicit_same_source = True
         reasons.append("explicit_same_source:+100")
 
+    left_identity_label = _explicit_identity_label(getattr(left, "title", ""))
+    right_identity_label = _explicit_identity_label(getattr(right, "title", ""))
+    if (
+        not explicit_same_source
+        and left_identity_label
+        and right_identity_label
+        and left_identity_label != right_identity_label
+    ):
+        return IdentityMatch(
+            -100,
+            IdentityDecision.DISTINCT,
+            ("explicit_identity_conflict:-100", "strong_identity_gate:missing"),
+        )
+
     left_detail = str(getattr(left, "detail_url", "") or "")
     right_detail = str(getattr(right, "detail_url", "") or "")
     if left_detail and right_detail and left_detail == right_detail:
@@ -519,6 +776,68 @@ def score_identity(left: Any, right: Any) -> IdentityMatch:
     else:
         decision = IdentityDecision.DISTINCT
     return IdentityMatch(score, decision, tuple(reasons))
+
+
+def canonical_identity_match(left: Any, right: Any) -> IdentityMatch | None:
+    """识别标题包装变化造成的同一事件，不放宽通用身份门槛。"""
+
+    left_scope = str(getattr(left, "server_scope", "GLOBAL") or "GLOBAL")
+    right_scope = str(getattr(right, "server_scope", "GLOBAL") or "GLOBAL")
+    if left_scope != right_scope and "UNKNOWN" not in (left_scope, right_scope):
+        return None
+
+    left_cycle = str(getattr(left, "cycle_id", "") or "")
+    right_cycle = str(getattr(right, "cycle_id", "") or "")
+    if left_cycle and right_cycle and left_cycle != right_cycle:
+        return None
+
+    left_sources = {str(item).casefold() for item in getattr(left, "sources", [])}
+    right_sources = {str(item).casefold() for item in getattr(right, "sources", [])}
+    left_primary = str(getattr(left, "primary_source", "") or "").casefold()
+    right_primary = str(getattr(right, "primary_source", "") or "").casefold()
+    if left_primary:
+        left_sources.add(left_primary)
+    if right_primary:
+        right_sources.add(right_primary)
+    if (
+        left_sources & right_sources
+        and getattr(left, "id", None)
+        and getattr(right, "id", None)
+        and getattr(left, "id", None) != getattr(right, "id", None)
+    ):
+        return None
+
+    left_title = canonical_event_title(getattr(left, "title", ""))
+    right_title = canonical_event_title(getattr(right, "title", ""))
+    if not left_title or left_title != right_title:
+        return None
+
+    left_family = category_family(_event_value(left, "event_type", "event"))
+    right_family = category_family(_event_value(right, "event_type", "event"))
+    if left_family == "unknown" or left_family != right_family:
+        return None
+
+    start_left = getattr(left, "start_at", None)
+    start_right = getattr(right, "start_at", None)
+    end_left = getattr(left, "end_at", None)
+    end_right = getattr(right, "end_at", None)
+    if not all(isinstance(value, datetime) for value in (start_left, start_right, end_left, end_right)):
+        return None
+    start_diff = abs((start_left - start_right).total_seconds())
+    end_diff = abs((end_left - end_right).total_seconds())
+    if start_diff > CANONICAL_TIME_TOLERANCE_SECONDS or end_diff > CANONICAL_TIME_TOLERANCE_SECONDS:
+        return None
+
+    return IdentityMatch(
+        100,
+        IdentityDecision.MATCH,
+        (
+            "canonical_title_exact:+100",
+            f"category_family:{left_family}",
+            "time_window_compatible",
+            "server_scope_compatible",
+        ),
+    )
 
 
 _DEADLINE_KEYWORDS = (
