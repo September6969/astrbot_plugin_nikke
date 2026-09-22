@@ -33,6 +33,15 @@ def build_spine_semantics(base_dir: Path | str) -> dict:
 
     metadata = json.loads(metadata_file.read_text(encoding="utf-8")).get("entries", {})
     mapper = SpineSemanticMapper(overrides_path=overrides_file)
+    existing_semantics_file = mappings_dir / "spine_bone_semantics.json"
+    existing_semantics = {}
+    if existing_semantics_file.is_file():
+        try:
+            existing_semantics = json.loads(
+                existing_semantics_file.read_text(encoding="utf-8")
+            ).get("entries", {})
+        except (OSError, UnicodeError, ValueError, AttributeError):
+            existing_semantics = {}
 
     # 预置的标准通用骨骼语义模板（覆盖标准 NIKKE 骨骼结构）
     STANDARD_NIKKE_SEMANTICS = {
@@ -73,13 +82,37 @@ def build_spine_semantics(base_dir: Path | str) -> dict:
             entry_semantics = dict(STANDARD_NIKKE_SEMANTICS)
             # 应用 manual override
             if key in mapper._cached_overrides:
-                for sem, bname in mapper._cached_overrides[key].items():
-                    entry_semantics[sem] = {
-                        "bone": bname,
-                        "confidence": 1.0,
-                        "source": "manual",
-                    }
+                for sem, raw_value in mapper._cached_overrides[key].items():
+                    if isinstance(raw_value, str):
+                        entry_semantics[sem] = {
+                            "bone": raw_value,
+                            "confidence": 1.0,
+                            "source": "manual",
+                        }
+                    elif (
+                        isinstance(raw_value, dict)
+                        and raw_value.get("kind") in {None, "bone"}
+                        and isinstance(raw_value.get("bone"), str)
+                    ):
+                        entry_semantics[sem] = {
+                            "bone": raw_value["bone"],
+                            "confidence": 1.0,
+                            "source": "manual",
+                        }
         semantics_entries[key] = entry_semantics
+
+    # 保留有明确 verified 证据、但尚未进入本地 metadata 清单的结构化
+    # upper_torso 记录；禁止把普通自动推断结果带入生成文件。
+    for key, previous in existing_semantics.items():
+        if not isinstance(previous, dict):
+            continue
+        verified_torso = previous.get("upper_torso")
+        if not isinstance(verified_torso, dict) or verified_torso.get("verified") is not True:
+            continue
+        if key not in semantics_entries:
+            semantics_entries[key] = {"upper_torso": verified_torso}
+        elif "upper_torso" not in semantics_entries[key]:
+            semantics_entries[key]["upper_torso"] = verified_torso
 
     payload = {
         "schema_version": 1,

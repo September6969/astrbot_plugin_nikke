@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "description": "人工骨骼语义覆盖表。优先级绝对高于自动推断。",
+  "schema_version": 2,
+  "description": "人工骨骼与上躯干语义覆盖表。旧的字符串骨骼值保持兼容；结构化上躯干覆盖必须包含精确身份和来源证据。",
   "entries": {
     "470:default": {
       "head": "c_head",
@@ -8,6 +8,20 @@
       "pelvis": "lower_boddy",
       "left_foot": "c_foot_l",
       "right_foot": "c_foot_r"
+    },
+    "401:default": {
+      "upper_torso": {
+        "kind": "attachment",
+        "slot": "body_total",
+        "attachment": "body_total",
+        "bone": "move3",
+        "parent": "move2",
+        "verified": true,
+        "confidence": 0.98,
+        "source": "docs/evidence/spine_semantics/c401_c581_idle_audit_20260921.md",
+        "verified_at": "2026-09-21",
+        "skeleton_sha256": "3616119c7aaa9b5a1be350b45255e3b808d5f435ff4f2451d6ccf7f13576e844"
+      }
     }
   }
 }

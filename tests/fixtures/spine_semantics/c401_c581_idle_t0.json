@@ -1,0 +1,57 @@
+{
+  "c401": {
+    "runtime": "4.0.47",
+    "skeleton_sha256": "3616119c7aaa9b5a1be350b45255e3b808d5f435ff4f2451d6ccf7f13576e844",
+    "atlas_sha256": "b1675a545b65dc2417ca17bad24eb02c95b1f97a497da67ba14f7d4729aa61d0",
+    "time": 0,
+    "anatomy_bones_1024": [
+      {"name": "move3", "parent": "move2", "x": 482.086, "y": 368.357},
+      {"name": "move7", "parent": "move3", "x": 483.086, "y": 285.805}
+    ],
+    "attachment_candidates_1024": [
+      {
+        "slot": "body_total",
+        "attachment": "body_total",
+        "bone": "move3",
+        "parent": "move2",
+        "type": "MeshAttachment",
+        "box": [429.398, 261.31, 584.946, 509.905],
+        "point": [507.172, 385.607],
+        "surface": null
+      },
+      {
+        "slot": "op2",
+        "attachment": "op2",
+        "bone": "move7",
+        "parent": "move3",
+        "type": "MeshAttachment",
+        "box": [405.8, 302.9, 521.0, 356.5],
+        "point": [463.4, 329.7],
+        "surface": null
+      }
+    ]
+  },
+  "c581": {
+    "runtime": "4.1.20",
+    "skeleton_sha256": "d4d95833deb15a2656ade2b9b029c5e81968f60900ef05100cd493190cc7e504",
+    "atlas_sha256": "7f3df9b03eed0a660c0ba9ccd6dc201e19284901108ced9b5e8020f7319c65c3",
+    "time": 0,
+    "anatomy_bones_1024": [
+      {"name": "chest_l", "parent": "pelvis7", "x": 581.636, "y": 304.45},
+      {"name": "chest_r", "parent": "pelvis7", "x": 484.779, "y": 308.401},
+      {"name": "body", "parent": "pelvis2", "x": 522.912, "y": 339.612}
+    ],
+    "attachment_candidates_1024": [
+      {
+        "slot": "chest",
+        "attachment": "chest",
+        "bone": "chest_r",
+        "parent": "pelvis7",
+        "type": "MeshAttachment",
+        "box": [449.083, 223.532, 592.176, 339.603],
+        "point": [520.629, 281.567],
+        "surface": null
+      }
+    ]
+  }
+}

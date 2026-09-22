@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_at": "2026-09-15T04:45:04.849632+00:00",
-  "total_entries": 156,
+  "total_entries": 157,
   "entries": {
     "80:default": {
       "root": {
@@ -1711,6 +1711,21 @@
         "bone": "c_foot_r",
         "confidence": 0.93,
         "source": "auto-name"
+      }
+    },
+    "581:default": {
+      "upper_torso": {
+        "kind": "bone_pair",
+        "bones": [
+          "chest_l",
+          "chest_r"
+        ],
+        "parent": "pelvis7",
+        "confidence": 0.96,
+        "source": "verified-spine-audit",
+        "verified": true,
+        "verified_at": "2026-09-21",
+        "skeleton_sha256": "d4d95833deb15a2656ade2b9b029c5e81968f60900ef05100cd493190cc7e504"
       }
     },
     "402:default": {

@@ -31,7 +31,7 @@
 | Calendar Content Quality v1 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\calendar-content-quality-v1-worktree\astrbot_plugin_nikke` / `feat/calendar-content-quality-v1`；从已部署 UI 基线 `origin/feat/calendar-pixel-contract-v1@ecc5495` 建立，P0 parser/classifier/relevance/identity/official prefilter 已接线；新增 13、旧 Calendar/合并 66、UI 46 定向测试通过，最终 full pytest 1031 passed/2 skipped；未部署、未修改 main、未发送 QQ 消息 |
 
 | 2026-09-21 Character Card main integration | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\character-card-main-integration` / `integration/character-card-main`；从 `origin/main@bde290f2` 建立，先保留 Calendar 两项提交，再以模块化方式移植 `feat/character-card-layout-v2@bef2d3b1`；定向 Python 70 passed/22 subtests、Node 4 passed，预览与 before/after 证据已记录；最终 full pytest、CI、main 合并与部署待后续门禁 |
-| Calendar Operations Feed v2 | 当前独立主题，`READY_OFFLINE` | `E:\_codex_work\calendar-feed-normalization-v2` / `feat/calendar-feed-normalization-v2`；从 `origin/main@d79650ae` 建立，标题优先分类、canonical identity、META 保留与 Operations Feed 分组排序已接线；公开只读 123/123 valid，定向 181 passed（含 bracket wrapper 回归），预览已查看；最终 full pytest 单次记录 1117 passed/2 skipped/648 subtests/16 个既有 resolver 相对路径环境失败，PR #99 新 review fix 后等待 CI，未部署、未发 QQ、未合并 |
+| Calendar Operations Feed v2 | 已进入 main，`READY_OFFLINE` | `E:\_codex_work\calendar-feed-normalization-v2` / `feat/calendar-feed-normalization-v2`；历史起点 `origin/main@d79650ae`，标题优先分类、canonical identity、META 保留与 Operations Feed 分组排序已接线；公开只读 123/123 valid，定向 181 passed（含 bracket wrapper 回归），预览已查看；PR #99 merge `e177026`，main CI `35686712265` success；未部署、未发 QQ |
 
 ## 当前新增工作树
 
@@ -69,3 +69,9 @@
 - 服务器数据盘维护后可用空间约 12,269,004 KiB，仍高于 5 GiB 门禁；Nikke-db vendor 约 4,651,740 KiB，渲染目录约 9,740 KiB。
 - 只读 Campaign 输出目录为 `/AstrBot/data/nikke/campaign-capture/`；Chapter 1 smoke 已完成，full capture 继续后台运行，快照不回写仓库。
 - 证据文件：`docs/evidence/pr79_live_runtime_v03_20260912.json`；其中区分 `READY_OFFLINE`、`READY_FOR_RETEST`、`PARTIAL` 与 `NEEDS_LIVE_EVIDENCE`，不记录 Cookie、Token、OpenID 或 QQ ID。
+
+## 2026-09-21 当前新增工作树（Character Card v2 Spine semantic anchor v2）
+
+| 范围 | 状态 | 备注 |
+| --- | --- | --- |
+| Character Card v2 Spine semantic anchor v2 | PR #98 对齐验证中，`READY_OFFLINE` | `E:\_codex_work\spine-semantic-anchor-v2` / `feat/spine-semantic-anchor-v2`；历史起点 `origin/main@d79650ae`，integration base `origin/main@e177026`，仅处理 c401/c581 上躯干语义锚点与兼容合同；定向 Python 86、Node 6、Calendar smoke 27 通过，最终 full pytest 1128 passed/2 skipped/648 subtests/17 个既有环境失败；新 PR CI 待 push 后取得，真实 skeleton/atlas 只读审计证据已记录，未部署、未访问真实账号、未发送 QQ 消息 |

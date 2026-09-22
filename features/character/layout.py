@@ -114,17 +114,23 @@ def core_axis_interval(
     scale: float,
     head_top_y: float,
     eye_y: float,
-    breast_y: float,
+    torso_y: float | None = None,
+    breast_y: float | None = None,
     safe_top: float,
     safe_bottom: float,
 ) -> CoreAxisInterval:
-    """计算头顶→眼睛→胸部轴在卡面中的合法 top 区间。"""
-    values = (scale, head_top_y, eye_y, breast_y, safe_top, safe_bottom)
+    """计算头顶→眼睛→上躯干轴在卡面中的合法 top 区间。"""
+    if torso_y is None:
+        torso_y = breast_y
+    elif breast_y is not None:
+        return CoreAxisInterval(False, None, None, None, 0.0, "invalid_axis")
+    upper_torso_y = torso_y
+    values = (scale, head_top_y, eye_y, upper_torso_y, safe_top, safe_bottom)
     if not all(_finite_number(value) for value in values):
         return CoreAxisInterval(False, None, None, None, 0.0, "invalid_axis")
     if (
         scale <= 0
-        or not (head_top_y <= eye_y < breast_y)
+        or not (head_top_y <= eye_y < upper_torso_y)
         or safe_bottom <= safe_top
     ):
         return CoreAxisInterval(
@@ -136,10 +142,10 @@ def core_axis_interval(
             "invalid_axis",
         )
 
-    protected_span = (breast_y - head_top_y) * scale
+    protected_span = (upper_torso_y - head_top_y) * scale
     available = safe_bottom - safe_top
     min_top = safe_top - head_top_y * scale
-    max_top = safe_bottom - breast_y * scale
+    max_top = safe_bottom - upper_torso_y * scale
     reason = "ok" if min_top <= max_top else "corridor_too_small"
     return CoreAxisInterval(
         True,
@@ -170,25 +176,31 @@ def fitted_scale(
     *,
     original_scale: float,
     head_top_y: float,
-    breast_y: float,
+    torso_y: float | None = None,
+    breast_y: float | None = None,
     safe_top: float,
     safe_bottom: float,
     min_ratio: float = MIN_AUTO_SCALE_RATIO,
 ) -> tuple[float | None, str]:
     """在不超过 6% 自动缩放预算的范围内寻找可行比例。"""
-    values = (original_scale, head_top_y, breast_y, safe_top, safe_bottom, min_ratio)
+    if torso_y is None:
+        torso_y = breast_y
+    elif breast_y is not None:
+        return None, "invalid_axis"
+    upper_torso_y = torso_y
+    values = (original_scale, head_top_y, upper_torso_y, safe_top, safe_bottom, min_ratio)
     if not all(_finite_number(value) for value in values):
         return None, "invalid_axis"
     if (
         original_scale <= 0
-        or breast_y <= head_top_y
+        or upper_torso_y <= head_top_y
         or safe_bottom <= safe_top
         or not 0 < min_ratio <= 1
     ):
         return None, "invalid_axis"
 
     available = safe_bottom - safe_top
-    portrait_span = breast_y - head_top_y
+    portrait_span = upper_torso_y - head_top_y
     required = available / portrait_span
     if required >= original_scale:
         return original_scale, "already_fits"

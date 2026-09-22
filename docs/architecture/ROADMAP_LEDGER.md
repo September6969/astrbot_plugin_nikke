@@ -265,10 +265,20 @@
 - 定向回归为 Python `70 passed`（含 `22 subtests`）与 Node `4 passed`；11 个角色卡合成样本实际查看，overflow 全部为空；before/after 预览和性能数据记录在 `docs/evidence/character_card_layout_v2_integration_20260921.md`。
 - 当前状态：`READY_OFFLINE`，PR #97 最终提交为 `8f4fe8a`。最终 full pytest 已按一次性规则执行：`1119 passed, 2 skipped, 653 subtests passed, 17 failed`；16 项为旧 Calendar Operations Feed 测试文件误随历史分支带入，已删除并由当前 Calendar 定向 `125 passed` 覆盖；另 1 项为本地 worktree 名称导致注册测试子进程加载旁边旧树。未重复 full pytest；GitHub CI run `35619830726` 已在标准 checkout 目录通过 Node、Spine 与 Python 3.10–3.13 全量回归。尚未合并 main、未部署、未发送 QQ 消息。
 
-## Calendar Operations Feed v2（2026-09-21，当前独立主题）
+## Character Card v2 Spine semantic anchor v2（2026-09-21）
 
-- 从 `origin/main@d79650ae442c7c31e740b281e1332da640b31409` 建立独立 worktree `E:\_codex_work\calendar-feed-normalization-v2` 与分支 `feat/calendar-feed-normalization-v2`；不复用旧 Calendar/Character Card worktree，不修改 main。
+- 历史开发起点为实时核验的 `origin/main@d79650ae442c7c31e740b281e1332da640b31409`；本次对齐将最新 `origin/main@e177026edffe36ea10211df9df4380792ebf426d` 合并进独立 worktree `E:\_codex_work\spine-semantic-anchor-v2` 与分支 `feat/spine-semantic-anchor-v2`，不使用旧 overnight 或历史 worktree 作为基线。
+- 本轮仅处理 `c401` 与 `c581` 的上躯干语义锚点：扩展 `bone`/`bone_pair`/`attachment`/`attachment_pair`/`surface` 证据选择器、保守 generic fallback 与 fail-closed；结构化语义不会被旧单骨骼 mapper 误读。`op*`、位置猜测、任意平均、发饰/外套/武器/特效均不作为上躯干证据。
+- `c401` 使用真实 4.0 skeleton 的 `body_total/body_total` attachment（`move3`，父级 `move2`，confidence `0.98`）；`c581` 使用真实 4.1 skeleton 的 `chest_l + chest_r`（共同父级 `pelvis7`，confidence `0.96`）。idle `t=0` 与 `t=0.5` 采样、运行时版本、数量和 SHA-256 记录在 `docs/evidence/spine_semantics/c401_c581_idle_audit_20260921.*`。
+- runtime metadata 只保留已选择的 torso point；`attachment_candidates_1024` 只留在 discovery sidecar。`torso_y`/`upper_torso_y` 为新内部命名，同时保留 `breast_y`、`breast_point` 与 `breast_source` 兼容合同。完整验收说明见 `docs/acceptance/SPINE_SEMANTIC_ANCHOR_V2.md`。
+- 对齐后定向 Python Character/Spine/T2I `86 passed`、Node sidecar/surface `6 passed`、Calendar smoke `27 passed`；`compileall`、两个 Node `--check`、JSON 校验和 `git diff --check` 通过。最终唯一 full pytest 为 `1128 passed, 2 skipped, 648 subtests passed, 17 failed`：11 个 Boss resolver、5 个 Lineup resolver 为既有相对素材路径/镜像环境问题，另 1 个注册测试子进程从 `E:\_codex_work\astrbot_plugin_nikke` 旁边旧 worktree 加载 deprecated decorator；Character/Spine/Calendar 无失败，未修改业务代码迎合环境，也未重复 full pytest。
+- 旧 GitHub CI run `35635088655` 仅作历史记录；对齐后的 PR #98 必须取得新 push 后 CI，Node、Spine 4.0 headless worker 与 Python 3.10–3.13 全部通过后才可 Ready/Merge。
+- 当前对齐状态：`READY_OFFLINE`；通过 PR CI、合并与 main push CI 后为 `READY_FOR_LIVE_DEPLOYMENT`。本轮不部署、不访问真实账号、不发送 QQ 消息。
+
+## Calendar Operations Feed v2（2026-09-21，已进入 main）
+
+- 从 `origin/main@d79650ae442c7c31e740b281e1332da640b31409` 建立独立 worktree `E:\_codex_work\calendar-feed-normalization-v2` 与分支 `feat/calendar-feed-normalization-v2`；不复用旧 Calendar/Character Card worktree，不修改 main；历史开发起点保留作审计记录。
 - 已完成标题优先分类、canonical title 身份证据、兼容分类族、META 保留、Operations Feed 分组/时间/精度/稳定身份排序；服务文本、旧查询接口和 T2I payload 共用排序契约，`active_sort_key`/`resolve_next_ending` 未改。
 - 公开 GameKee 只读复核为 123/123 valid、0 malformed、0 duplicate、123 visual；当前快照分类为 event 76、pass 20、costume_gacha 18、recruit 6、double_reward 1、mini_game 1、limited_stage 1。单条活动不追加网络请求。
 - 定向测试已通过：内容质量/身份/展示排序 27（含 bracket wrapper 三类回归断言），Schedule/P0 39，Calendar UI/v04/v05/T2I 115，合计 181。公开 page-1 与合成分页 page-1/page-2 已实际查看；详情和 hash 见 `docs/acceptance/CALENDAR_FEED_NORMALIZATION_V2.md` 与 `docs/evidence/calendar_feed_normalization_v2_20260921.json`。
-- 当前状态为 `READY_OFFLINE`；`compileall` 与 `git diff --check` 已通过，最终 full pytest 仅执行一次并记录为 `1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项均为既有 Boss/Lineup resolver 的相对素材路径环境问题，Calendar 无失败；未重复 full pytest。Draft PR #99 的 GitHub CI run `35640293133`（Python 3.10–3.13、Node、Spine 4.0）已全绿；本轮 review blocker 修复后等待新 CI；未部署、未访问真实账号、未发送 QQ 消息、未合并 main。
+- 当前状态为 `READY_OFFLINE`；`compileall` 与 `git diff --check` 已通过，最终 full pytest 仅执行一次并记录为 `1117 passed, 2 skipped, 648 subtests passed, 16 failed`。16 项均为既有 Boss/Lineup resolver 的相对素材路径环境问题，Calendar 无失败；未重复 full pytest。review blocker 修复后的 PR CI run `35686354953` 与合并后的 main push CI run `35686712265` 均全绿，PR #99 已以 `e177026edffe36ea10211df9df4380792ebf426d` 合并；未部署、未访问真实账号、未发送 QQ 消息。

@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "status": "READY_OFFLINE",
+  "scope": "Character Card v2 upper-torso semantic anchor audit",
+  "audited_at": "2026-09-21",
+  "source": {
+    "bundle_origin": "user-owned serv read-only audit",
+    "c401_skeleton": "/opt/nikke-bot/astrbot/data/vendor/nikke-db/l2d/c401/c401_00.skel",
+    "c401_atlas": "/opt/nikke-bot/astrbot/data/vendor/nikke-db/l2d/c401/c401_00.atlas",
+    "c581_skeleton": "/opt/nikke-bot/astrbot/data/vendor/nikke-db/l2d/c581/c581_00.skel",
+    "c581_atlas": "/opt/nikke-bot/astrbot/data/vendor/nikke-db/l2d/c581/c581_00.atlas",
+    "runtime_policy": "matched Spine Core used only for offline sidecar discovery"
+  },
+  "characters": {
+    "c401": {
+      "runtime": "4.0.47",
+      "skeleton_sha256": "3616119c7aaa9b5a1be350b45255e3b808d5f435ff4f2451d6ccf7f13576e844",
+      "atlas_sha256": "b1675a545b65dc2417ca17bad24eb02c95b1f97a497da67ba14f7d4729aa61d0",
+      "counts": {
+        "anatomy_bones_1024": 282,
+        "attachment_candidates_1024": 120,
+        "head_surface_candidates_1024": 1
+      },
+      "verified_selection": {
+        "source": "override:body_total/body_total",
+        "confidence": 0.98,
+        "kind": "attachment",
+        "slot": "body_total",
+        "attachment": "body_total",
+        "bone": "move3",
+        "parent": "move2",
+        "point_1024_at_idle_t0": [507.172174, 385.607414]
+      },
+      "rejected_examples": [
+        "op1/op2 names are not accepted as upper-torso evidence",
+        "hair, weapon and jacket attachments are not accepted as torso evidence"
+      ],
+      "samples": [
+        {"time": 0, "eye_point_1024": [508.486262, 223.514768], "upper_torso_point_1024": [507.172174, 385.607414]},
+        {"time": 0.5, "eye_point_1024": [507.849337, 223.782285], "upper_torso_point_1024": [506.806128, 384.64698]}
+      ]
+    },
+    "c581": {
+      "runtime": "4.1.20",
+      "skeleton_sha256": "d4d95833deb15a2656ade2b9b029c5e81968f60900ef05100cd493190cc7e504",
+      "atlas_sha256": "7f3df9b03eed0a660c0ba9ccd6dc201e19284901108ced9b5e8020f7319c65c3",
+      "counts": {
+        "anatomy_bones_1024": 268,
+        "attachment_candidates_1024": 156,
+        "head_surface_candidates_1024": 1
+      },
+      "verified_selection": {
+        "source": "semantic:chest_l+chest_r",
+        "confidence": 0.96,
+        "kind": "bone_pair",
+        "bones": ["chest_l", "chest_r"],
+        "parent": "pelvis7",
+        "point_1024_at_idle_t0": [533.207679, 306.425512]
+      },
+      "samples": [
+        {"time": 0, "eye_point_1024": [498.871888, 164.852725], "upper_torso_point_1024": [533.207679, 306.425512]},
+        {"time": 0.5, "eye_point_1024": [499.453737, 164.320685], "upper_torso_point_1024": [535.263117, 298.218901]}
+      ]
+    }
+  },
+  "contract": {
+    "priority": [
+      "per-render manual override",
+      "existing override registry",
+      "semantic registry",
+      "verified attachment mapping",
+      "conservative generic heuristic",
+      "fail closed"
+    ],
+    "production_sidecar_only_fields": ["attachment_candidates_1024", "anatomy_bones_1024", "head_surface_candidates_1024"],
+    "raw_bundles_committed": false,
+    "real_account_or_message_access": false,
+    "deployment_performed": false
+  }
+}

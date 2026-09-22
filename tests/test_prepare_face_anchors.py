@@ -1,4 +1,4 @@
-from scripts.prepare_face_anchors import merge_records
+from scripts.prepare_face_anchors import _registry_key, _role_override, merge_records
 
 
 def test_manifest_rebuild_preserves_records_outside_explicit_scope():
@@ -17,3 +17,18 @@ def test_manifest_rebuild_preserves_records_outside_explicit_scope():
     assert merged["legacy"] == old["legacy"]
     assert merged["c010"] == rebuilt["c010"]
     assert merged["c352"] == rebuilt["c352"]
+
+
+def test_registry_key_requires_explicit_default_identity():
+    assert _registry_key("c401", {}) == "401:default"
+    assert _registry_key("c401_01", {}) is None
+    assert _registry_key("c401_01", {"resource_id": 401, "costume_id": 60004}) == "401:60004"
+
+
+def test_structured_torso_override_wins_over_legacy_chest_value():
+    structured = {
+        "upper_torso": {"kind": "attachment", "slot": "body_total"},
+        "chest": "legacy_bone",
+    }
+    assert _role_override(structured) == structured["upper_torso"]
+    assert _role_override({"chest": "legacy_bone"}) == "legacy_bone"

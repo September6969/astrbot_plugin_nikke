@@ -4,9 +4,12 @@ import {pathToFileURL} from 'node:url';
 import crypto from 'node:crypto';
 import vm from 'node:vm';
 import {classifySurfaceSemantics} from './spine_surface_semantics.mjs';
+import {makeAttachmentCandidate} from './spine_attachment_candidates.mjs';
 
-const [runtime, skelPath, atlasPath, renderId, animation, output] = process.argv.slice(2);
-if (!output) throw new Error('参数：runtime/index.js skeleton atlas render_id animation output.json');
+const [runtime, skelPath, atlasPath, renderId, animation, output, sampleTimeRaw] = process.argv.slice(2);
+if (!output) throw new Error('参数：runtime/index.js skeleton atlas render_id animation output.json [sample_time]');
+const parsedSampleTime = Number(sampleTimeRaw);
+const sampleTime = Number.isFinite(parsedSampleTime) && parsedSampleTime >= 0 ? parsedSampleTime : 0;
 let spine;
 try {
   const mod = await import(pathToFileURL(runtime).href);
@@ -32,7 +35,7 @@ skeleton.setToSetupPose();
 if (!data.findAnimation(animation)) throw new Error('没有指定的 idle 动画');
 const state = new spine.AnimationState(new spine.AnimationStateData(data));
 state.setAnimation(0, animation, false);
-state.update(0);
+state.update(sampleTime);
 state.apply(skeleton);
 skeleton.updateWorldTransform();
 const offset = new spine.Vector2(), size = new spine.Vector2();
@@ -112,30 +115,46 @@ const anatomyBones1024 = skeleton.bones
 
 // head/face 表面单独分类，避免把头发、头饰误升格为 head surface。
 const headSurfaceCandidates1024 = [];
+const attachmentCandidates1024 = [];
 for (const slot of skeleton.drawOrder) {
   const attachment = slot.getAttachment();
   if (!attachment || slot.color.a === 0 || attachment.color?.a === 0 || !slot.bone.active) continue;
   const name = `${slot.data.name}/${attachment.name}`;
-  const semantic = classifySurfaceSemantics(slot.data.name, attachment.name);
-  if (!semantic.kind) continue;
   const box = worldVertices(slot, attachment);
   if (!box) continue;
-  headSurfaceCandidates1024.push({
-    name,
-    kind: semantic.kind,
-    semantic_source: semantic.source,
-    box: boxTo1024(box),
-  });
+  const semantic = classifySurfaceSemantics(slot.data.name, attachment.name);
+  const mappedBox = boxTo1024(box);
+  attachmentCandidates1024.push(makeAttachmentCandidate({
+    slotName: slot.data.name,
+    attachmentName: attachment.name,
+    boneName: slot.bone.data.name,
+    parentName: slot.bone.parent?.data?.name ?? '',
+    attachmentType: attachment.constructor?.name ?? 'unknown',
+    box,
+    mappedBox,
+    surfaceKind: semantic.kind,
+    semanticSource: semantic.source,
+  }));
+  if (semantic.kind) {
+    headSurfaceCandidates1024.push({
+      name,
+      kind: semantic.kind,
+      semantic_source: semantic.source,
+      box: mappedBox,
+    });
+  }
 }
 
-const result = {schema: 1, render_id: renderId, runtime: data.version, animation, time: 0,
+const result = {schema: 2, render_id: renderId, runtime: data.version, animation, time: sampleTime,
   skeleton_sha256: crypto.createHash('sha256').update(raw).digest('hex'),
   atlas_sha256: crypto.createHash('sha256').update(fs.readFileSync(atlasPath)).digest('hex'),
   anchor_kind: ['eye_attachment', 'face_attachment', 'head_attachment', 'head_bone'][chosen[0].priority],
   attachments: chosen.map(x => x.name), point_1024: to1024(point),
   extent_1024: extent?.map(x => x * scale), candidates, bounds: [offset.x, offset.y, size.x, size.y],
   anatomy_bones_1024: anatomyBones1024,
-  head_surface_candidates_1024: headSurfaceCandidates1024};
+  head_surface_candidates_1024: headSurfaceCandidates1024,
+  attachment_candidates_1024: attachmentCandidates1024};
 fs.writeFileSync(output, JSON.stringify(result, null, 2), 'utf8');
 console.log(JSON.stringify({renderId, kind: result.anchor_kind, point: result.point_1024, names: result.attachments,
-  anatomyBoneCount: anatomyBones1024.length, headSurfaceCandidateCount: headSurfaceCandidates1024.length}));
+  anatomyBoneCount: anatomyBones1024.length, headSurfaceCandidateCount: headSurfaceCandidates1024.length,
+  attachmentCandidateCount: attachmentCandidates1024.length, time: sampleTime}));
