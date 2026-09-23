@@ -18,6 +18,7 @@ from astrbot.api.star import Context, Star
 
 from ._version import PLUGIN_VERSION
 from .adapters.astrbot.collections import AstrBotAdapterCollection, PluginCommandHandlers
+from .adapters.astrbot.compatibility import require_supported_astrbot_version
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from .adapters.astrbot.command_runtime import NikkeCommandRuntime, normalize_nikke_prefix
 from .adapters.astrbot.runtime import AstrBotRuntimeAdapter
@@ -42,6 +43,7 @@ class NikkePlugin(Star):
     """负责宿主装配、命令注册与生命周期入口的轻量插件外壳。"""
 
     def __init__(self, context: Context, config=None):
+        require_supported_astrbot_version()
         super().__init__(context)
         self._command_runtime = NikkeCommandRuntime(self)
         self.context = context
