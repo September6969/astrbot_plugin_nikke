@@ -7,6 +7,8 @@ from .contracts import (
     ImageReply,
     TextReply,
 )
+from .cdk import CdkCommandHandler
+from .daily import DailyCommandHandler
 from .profile import ProfileCommandHandler
 
 __all__ = [
@@ -15,5 +17,7 @@ __all__ = [
     "CommandResult",
     "ImageReply",
     "TextReply",
+    "CdkCommandHandler",
+    "DailyCommandHandler",
     "ProfileCommandHandler",
 ]

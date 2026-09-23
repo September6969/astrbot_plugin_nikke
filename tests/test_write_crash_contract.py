@@ -2,7 +2,6 @@
 """验证 Daily/CDK 写请求的崩溃窗口不会被自动重放。"""
 
 import asyncio
-import hashlib
 from unittest.mock import AsyncMock
 
 import pytest
@@ -11,7 +10,7 @@ from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.features.cdk.service import CdkService
 from astrbot_plugin_nikke.features.daily.models import DailyTaskStatus
 from astrbot_plugin_nikke.features.daily.runner import DailyRunner
-from astrbot_plugin_nikke.integrations.blablalink.client import UnknownAfterAction
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaTimeoutError, UnknownAfterAction
 
 
 class _DailyCrashClient:
@@ -33,7 +32,7 @@ class _DailyCrashClient:
     async def perform_daily_signin(self, account: dict[str, str]) -> str:
         self.perform_calls += 1
         run_key = DailyRunner.daily_run_key(self.day, self.account, "signin")
-        self.intent_seen_before_write = self.store.get_run(run_key)["status"] == "running"
+        self.intent_seen_before_write = self.store.get_run(run_key)["status"] == "DISPATCH_INTENT"
         raise UnknownAfterAction("结果未确认", "UNKNOWN_AFTER_ACTION", "DailyCheckIn")
 
 
@@ -60,7 +59,7 @@ async def test_daily_unknown_write_is_persisted_before_side_effect_and_not_repla
     assert client.intent_seen_before_write is True
     assert client.perform_calls == 1
     assert client.read_calls == 2
-    assert store.get_run(signin_key)["status"] == "unknown"
+    assert store.get_run(signin_key)["status"] == "UNKNOWN_AFTER_ACTION"
 
 
 @pytest.mark.asyncio
@@ -85,7 +84,91 @@ async def test_cdk_cancelled_write_is_marked_unknown_and_not_replayed(tmp_path):
     assert second.is_unknown is True
     assert second.success is False
     assert client.redeem_cdk.await_count == 1
-    run_key = "cdk:synthetic-qq:game-uid:" + hashlib.sha256(b"TEST-CODE").hexdigest()
+    run_key = CdkService.persistent_run_key(account, "TEST-CODE")
     run = store.get_run(run_key)
-    assert run["status"] == "unknown"
+    assert run["status"] == "UNKNOWN_AFTER_ACTION"
     assert "TEST-CODE" not in run["detail"]
+
+
+@pytest.mark.asyncio
+async def test_cdk_dispatch_intent_is_persisted_before_remote_write(tmp_path):
+    store = NikkeStore(tmp_path)
+    account = {"game_uid": "game-uid", "area_id": "1", "platform": "global"}
+    key = CdkService.persistent_run_key(account, "TEST-CODE")
+    client = AsyncMock()
+
+    async def redeem(_account, _code):
+        assert store.get_run(key)["status"] == "DISPATCH_INTENT"
+        return type("Result", (), {"success": True, "terminal": True, "message": "兑换成功"})()
+
+    client.redeem_cdk.side_effect = redeem
+    result = await CdkService(client).redeem_single(
+        account, "TEST-CODE", store=store, qq_id="synthetic-qq"
+    )
+
+    assert result.success is True
+    assert client.redeem_cdk.await_count == 1
+    assert store.get_run(key)["status"] == "success"
+
+
+@pytest.mark.asyncio
+async def test_legacy_cdk_success_record_blocks_replay_after_qq_rebinding(tmp_path):
+    store = NikkeStore(tmp_path)
+    account = {"game_uid": "game-uid", "area_id": "1", "platform": "global"}
+    client = AsyncMock()
+    legacy_key = CdkService._legacy_run_key("previous-qq", "game-uid", "TEST-CODE")
+    store.claim_run(legacy_key, "previous-qq", "cdk")
+    store.finish_run(legacy_key, "success", "兑换成功")
+
+    result = await CdkService(client).redeem_single(
+        account, "TEST-CODE", store=store, qq_id="synthetic-qq"
+    )
+
+    assert result.success is True
+    client.redeem_cdk.assert_not_awaited()
+    assert store.get_run(CdkService.persistent_run_key(account, "TEST-CODE")) is None
+
+
+@pytest.mark.asyncio
+async def test_legacy_cdk_failed_record_is_conservatively_blocked(tmp_path):
+    store = NikkeStore(tmp_path)
+    account = {"game_uid": "game-uid", "area_id": "1", "platform": "global"}
+    client = AsyncMock()
+    legacy_key = CdkService._legacy_run_key("previous-qq", "game-uid", "TEST-CODE")
+    store.claim_run(legacy_key, "previous-qq", "cdk")
+    store.finish_run(legacy_key, "failed", "旧版本无法证明未写入")
+
+    result = await CdkService(client).redeem_single(
+        account, "TEST-CODE", store=store, qq_id="current-qq"
+    )
+
+    assert result.is_unknown is True
+    assert "未自动重发" in result.message
+    client.redeem_cdk.assert_not_awaited()
+    assert store.get_run(CdkService.persistent_run_key(account, "TEST-CODE")) is None
+
+
+@pytest.mark.asyncio
+async def test_cdk_timeout_and_unexpected_error_are_unknown_and_not_replayed(tmp_path):
+    for error in (
+        BlaBlaTimeoutError("synthetic timeout", endpoint="RedeemCdk"),
+        RuntimeError("synthetic transport failure"),
+    ):
+        store = NikkeStore(tmp_path / type(error).__name__)
+        client = AsyncMock()
+        client.redeem_cdk.side_effect = error
+        service = CdkService(client)
+        account = {"game_uid": "game-uid", "area_id": "1", "platform": "global"}
+
+        first = await service.redeem_single(
+            account, "TEST-CODE", store=store, qq_id="synthetic-qq"
+        )
+        second = await service.redeem_single(
+            account, "TEST-CODE", store=store, qq_id="synthetic-qq"
+        )
+
+        assert first.is_unknown is True
+        assert second.is_unknown is True
+        client.redeem_cdk.assert_awaited_once()
+        run = store.get_run(CdkService.persistent_run_key(account, "TEST-CODE"))
+        assert run["status"] == "UNKNOWN_AFTER_ACTION"

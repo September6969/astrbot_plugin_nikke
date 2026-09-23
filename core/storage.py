@@ -179,6 +179,7 @@ class NikkeStore:
             """,
             "CREATE INDEX IF NOT EXISTS idx_bind_expiry ON bind_sessions(expires_at)",
             "CREATE INDEX IF NOT EXISTS idx_run_created ON action_runs(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_run_action ON action_runs(action)",
         )
         for statement in statements:
             conn.execute(statement)
@@ -411,10 +412,11 @@ class NikkeStore:
         return json.loads(row[0]) if row else default
 
     def claim_run(self, run_key: str, qq_id: str, action: str) -> bool:
+        """原子持久化写入意图；调用方必须在外部写请求之前 claim。"""
         try:
             with self._lock, self._connect() as conn:
                 conn.execute(
-                    "INSERT INTO action_runs(run_key,qq_id,action,status,created_at) VALUES(?,?,?,'running',?)",
+                    "INSERT INTO action_runs(run_key,qq_id,action,status,created_at) VALUES(?,?,?,'DISPATCH_INTENT',?)",
                     (run_key, str(qq_id), action, int(time.time())),
                 )
             return True
@@ -429,6 +431,25 @@ class NikkeStore:
             ).fetchone()
         return dict(row) if row else None
 
+    def get_legacy_cdk_runs(self, game_uid: str, code_digest: str) -> list[dict[str, Any]]:
+        """查找旧 QQ 作用域中同一游戏账号与兑换码的记录，防止换绑后重放。"""
+        uid = str(game_uid or "").strip()
+        digest = str(code_digest or "").strip().lower()
+        if not uid or not digest:
+            return []
+        suffix = f":{uid}:{digest}"
+        with self._lock, self._connect() as conn:
+            rows = conn.execute(
+                "SELECT run_key,qq_id,action,status,detail,created_at "
+                "FROM action_runs WHERE action='cdk'"
+            ).fetchall()
+        return [
+            dict(row)
+            for row in rows
+            if str(row["run_key"]).startswith("cdk:")
+            and str(row["run_key"]).endswith(suffix)
+        ]
+
     def retry_run(
         self,
         run_key: str,
@@ -436,7 +457,7 @@ class NikkeStore:
         *,
         stale_after: int = 0,
     ) -> bool:
-        """原子重领失败任务；也可回收超过指定秒数的运行中任务。"""
+        """仅原子重领明确可重试终态；过期写入意图必须隔离为未知，不能重放。"""
         allowed = sorted(str(status) for status in statuses)
         conditions: list[str] = []
         params: list[Any] = []
@@ -444,14 +465,11 @@ class NikkeStore:
             conditions.append("status IN (" + ",".join("?" for _ in allowed) + ")")
             params.extend(allowed)
         now = int(time.time())
-        if stale_after > 0:
-            conditions.append("(status='running' AND created_at<=?)")
-            params.append(now - stale_after)
         if not conditions:
             return False
         with self._lock, self._connect() as conn:
             cursor = conn.execute(
-                "UPDATE action_runs SET status='running',detail='',created_at=? "
+                "UPDATE action_runs SET status='DISPATCH_INTENT',detail='',created_at=? "
                 "WHERE run_key=? AND (" + " OR ".join(conditions) + ")",
                 (now, run_key, *params),
             )
@@ -461,8 +479,8 @@ class NikkeStore:
         """原子隔离过期写请求，不能将结果不明的任务重新领取。"""
         with self._lock, self._connect() as conn:
             cursor = conn.execute(
-                "UPDATE action_runs SET status='unknown', detail=? "
-                "WHERE run_key=? AND status='running' AND created_at<=?",
+                "UPDATE action_runs SET status='UNKNOWN_AFTER_ACTION', detail=? "
+                "WHERE run_key=? AND status IN ('running','DISPATCH_INTENT') AND created_at<=?",
                 (detail[:500], run_key, int(time.time()) - stale_after),
             )
         return cursor.rowcount == 1

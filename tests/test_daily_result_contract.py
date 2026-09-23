@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock
 
 from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaError, CookieExpired, UnknownAfterAction
 from astrbot_plugin_nikke.features.daily.models import DailyTaskResult, DailyTaskStatus
+from astrbot_plugin_nikke.features.daily.runner import DailyRunner
 from astrbot_plugin_nikke.main import NikkePlugin
 
 
@@ -77,17 +78,17 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
         plugin = self._plugin(enabled=False)
         plugin.client.get_daily_signin.return_value = {"found": False, "completed": False, "task_id": ""}
 
-        result = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        result = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.UNAVAILABLE)
         self.assertEqual(plugin.store.finished[-1][1], "unavailable")
 
     async def test_existing_unknown_daily_run_is_not_reported_as_done(self):
         plugin = self._plugin()
-        run_key = NikkePlugin._daily_run_key("2026-09-07", self._account(), "daily")
+        run_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "daily")
         plugin.store.runs[run_key] = {"status": "unknown", "detail": "未确认"}
 
-        result = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        result = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.UNKNOWN_AFTER_ACTION)
         plugin.client.get_profile.assert_awaited_once()
@@ -96,7 +97,7 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
     async def test_disabled_pending_task_is_explicit(self):
         plugin = self._plugin(enabled=False)
 
-        result = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        result = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.PENDING)
         plugin.client.perform_daily_signin.assert_not_awaited()
@@ -104,12 +105,12 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
     async def test_pending_result_is_rechecked_when_actions_become_enabled(self):
         plugin = self._plugin(enabled=False)
 
-        first = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        first = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
         self.assertEqual(first.status, DailyTaskStatus.PENDING)
         self.assertEqual(plugin.store.finished[-1][1], "pending")
 
         plugin.config["enable_daily_actions"] = True
-        second = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        second = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
 
         self.assertEqual(second.status, DailyTaskStatus.SUCCESS)
         plugin.client.perform_daily_signin.assert_awaited_once()
@@ -118,12 +119,12 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
         plugin = self._plugin(enabled=False)
         plugin.client.get_daily_signin.return_value = {"found": False, "completed": False, "task_id": ""}
 
-        first = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        first = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
         self.assertEqual(first.status, DailyTaskStatus.UNAVAILABLE)
         self.assertEqual(plugin.store.finished[-1][1], "unavailable")
 
         plugin.client.get_daily_signin.return_value = {"found": True, "completed": True, "task_id": "task"}
-        second = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        second = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
 
         self.assertEqual(second.status, DailyTaskStatus.ALREADY_DONE)
         self.assertEqual(plugin.client.get_daily_signin.await_count, 2)
@@ -132,14 +133,14 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
         plugin = self._plugin(enabled=True)
         plugin.client.get_daily_signin.return_value = {"found": False, "completed": False, "task_id": ""}
 
-        first = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        first = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
         self.assertEqual(first.status, DailyTaskStatus.UNAVAILABLE)
         plugin.client.perform_daily_signin.assert_not_awaited()
-        signin_key = NikkePlugin._daily_run_key("2026-09-07", self._account(), "signin")
+        signin_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "signin")
         self.assertEqual(plugin.store.runs[signin_key]["status"], "unavailable")
 
         plugin.client.get_daily_signin.return_value = {"found": True, "completed": False, "task_id": "task"}
-        second = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        second = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
         self.assertEqual(second.status, DailyTaskStatus.SUCCESS)
         plugin.client.perform_daily_signin.assert_awaited_once()
 
@@ -147,7 +148,7 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
         plugin = self._plugin(enabled=True)
         plugin.store.runs["2026-09-07:u1:daily"] = {"status": "success", "detail": "旧记录"}
 
-        result = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        result = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.UNAVAILABLE)
         plugin.client.get_profile.assert_not_awaited()
@@ -156,7 +157,7 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
     async def test_missing_game_identity_is_retryable_without_claiming(self):
         plugin = self._plugin(enabled=True)
 
-        result = await plugin._run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
+        result = await plugin.daily_runner.run_daily_for_account({"qq_id": "u1", "nickname": "测试"}, "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.UNAVAILABLE)
         self.assertEqual(plugin.store.claimed, [])
@@ -166,21 +167,21 @@ class DailyResultWiringTests(IsolatedAsyncioTestCase):
         plugin = self._plugin()
         plugin.client.perform_daily_signin.side_effect = UnknownAfterAction("未确认", "UNKNOWN_AFTER_ACTION", "DailyCheckIn")
 
-        result = await plugin._run_daily_for_account(self._account(), "2026-09-07")
+        result = await plugin.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
 
         self.assertEqual(result.status, DailyTaskStatus.UNKNOWN_AFTER_ACTION)
-        self.assertEqual(result.run_status, "unknown")
+        self.assertEqual(result.run_status, "UNKNOWN_AFTER_ACTION")
         self.assertEqual(plugin.client.perform_daily_signin.await_count, 1)
-        self.assertEqual(plugin.store.finished[-1][1], "unknown")
+        self.assertEqual(plugin.store.finished[-1][1], "UNKNOWN_AFTER_ACTION")
 
     async def test_rate_limit_and_cookie_expired_are_distinct(self):
         rate_limited = self._plugin()
         rate_limited.client.perform_daily_signin.side_effect = BlaBlaError("请求过频", "212000", "DailyCheckIn")
-        result = await rate_limited._run_daily_for_account(self._account(), "2026-09-07")
+        result = await rate_limited.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
         self.assertEqual(result.status, DailyTaskStatus.RATE_LIMITED)
 
         expired = self._plugin()
         expired.client.get_daily_signin.side_effect = CookieExpired("失效", "401", "GetTaskListWithStatusV2")
-        result = await expired._run_daily_for_account(self._account(), "2026-09-07")
+        result = await expired.daily_runner.run_daily_for_account(self._account(), "2026-09-07")
         self.assertEqual(result.status, DailyTaskStatus.COOKIE_EXPIRED)
         self.assertEqual(expired.store.invalidated, ["u1"])

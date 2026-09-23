@@ -73,20 +73,50 @@ class CdkService:
                 self._locks[account_key] = asyncio.Lock()
             return self._locks[account_key]
 
+    @staticmethod
+    def canonical_account_key(account: dict[str, Any]) -> str:
+        """构造不依赖 QQ 绑定者的稳定游戏账号作用域。"""
+        game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
+        if not game_uid:
+            return ""
+        platform = str(account.get("platform") or "global").strip().casefold()
+        area_id = str(account.get("area_id") or "").strip()
+        return f"{platform}:{area_id}:{game_uid}" if platform else ""
+
+    @classmethod
+    def persistent_run_key(cls, account: dict[str, Any], code: str) -> str:
+        """为游戏账号与兑换码生成不暴露明文身份的稳定执行键。"""
+        identity = cls.canonical_account_key(account)
+        if not identity:
+            return ""
+        account_digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
+        code_digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
+        return f"cdk:game:{account_digest}:{code_digest}"
+
     async def _redeem_single_core(self, account: dict[str, Any], code: str) -> CdkRedeemResult:
         """单条 CDK 兑换的核心逻辑（不加锁）。"""
         try:
             res = await self.client.redeem_cdk(account, code)
             if res.success:
                 return CdkRedeemResult(code=code, success=True, message=res.message or "兑换成功", terminal=True)
-            else:
-                return CdkRedeemResult(
-                    code=code,
-                    success=False,
-                    message=f"{res.message or '兑换失败'}（若持续失败请前往 BlaBlaLink 手动填写）",
-                    is_unknown=getattr(res, "is_unknown", False),
-                    terminal=getattr(res, "terminal", True),
-                )
+            terminal = bool(getattr(res, "terminal", True))
+            is_rate_limited = bool(getattr(res, "is_rate_limited", False))
+            is_unknown = bool(getattr(res, "is_unknown", False)) or (
+                not terminal and not is_rate_limited
+            )
+            message = res.message or "兑换结果未确认"
+            if is_unknown:
+                message = "兑换结果未确认，请核对官方兑换记录；未自动重发"
+            elif not is_rate_limited and "BlaBlaLink" not in message:
+                message = f"{message}（若持续失败请前往 BlaBlaLink 手动填写）"
+            return CdkRedeemResult(
+                code=code,
+                success=False,
+                message=message,
+                is_unknown=is_unknown,
+                is_rate_limited=is_rate_limited,
+                terminal=terminal,
+            )
         except CookieExpired:
             raise
         except (BlaBlaTimeoutError, httpx.TimeoutException, BlaBlaNetworkError, httpx.NetworkError) as exc:
@@ -110,7 +140,7 @@ class CdkService:
                     terminal=False,
                 )
 
-            # 临时 HTTP 错误（5xx、408 等）与服务端异常不应永久阻止重试
+            # 写请求的服务端错误无法证明请求未生效，必须按未知结果隔离。
             is_http_temp = False
             if code_str.isdigit():
                 code_int = int(code_str)
@@ -123,14 +153,16 @@ class CdkService:
                 return CdkRedeemResult(
                     code=code,
                     success=False,
-                    message=f"社区服务响应异常 ({exc.code or 'HTTP错误'})，可稍后重试",
+                    message="兑换结果未确认，请核对官方兑换记录；未自动重发",
+                    is_unknown=True,
                     terminal=False,
                 )
 
             return CdkRedeemResult(
                 code=code,
                 success=False,
-                message=f"{exc}（若持续失败请前往 BlaBlaLink 手动填写）",
+                message="兑换结果未确认，请核对官方兑换记录；未自动重发",
+                is_unknown=True,
                 terminal=False,
             )
         except Exception as exc:
@@ -138,7 +170,8 @@ class CdkService:
             return CdkRedeemResult(
                 code=code,
                 success=False,
-                message="系统异常，请前往 BlaBlaLink 手动填写",
+                message="兑换结果未确认，请核对官方兑换记录；未自动重发",
+                is_unknown=True,
                 terminal=False,
             )
 
@@ -151,7 +184,8 @@ class CdkService:
         qq_id: str = "",
     ) -> CdkRedeemResult:
         """单条 CDK 兑换，使用账号锁互斥与可选持久执行记录。"""
-        lock = await self._get_account_lock(account_key or str(account.get("game_uid", "default")))
+        stable_key = self.canonical_account_key(account)
+        lock = await self._get_account_lock(stable_key or account_key or "unresolved-account")
         async with lock:
             if store is not None:
                 return await self._redeem_persistently(account, code, store, qq_id)
@@ -170,7 +204,8 @@ class CdkService:
         if len(codes) > 10:
             raise ValueError("单次最多兑换 10 个码")
         delay = max(1.0, delay)
-        lock = await self._get_account_lock(account_key or str(account.get("game_uid", "default")))
+        stable_key = self.canonical_account_key(account)
+        lock = await self._get_account_lock(stable_key or account_key or "unresolved-account")
         batch_res = CdkBatchResult()
 
         async with lock:
@@ -196,9 +231,10 @@ class CdkService:
         return batch_res
 
     async def _redeem_persistently(self, account, code, store, qq_id):
-        """批量使用单条命令相同的持久键与原子 claim/retry，锁由调用者持有。"""
+        """单条与批量共用稳定账号键、持久 intent 与原子重领。"""
         game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
-        if not game_uid:
+        key = self.persistent_run_key(account, code)
+        if not key:
             return CdkRedeemResult(
                 code,
                 False,
@@ -206,21 +242,35 @@ class CdkService:
                 is_unknown=True,
                 terminal=False,
             )
-        digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
-        key = f"cdk:{qq_id}:{game_uid}:{digest}"
         existing = store.get_run(key)
-        # 批量重放不能隐式重试未知写结果，需用户先确认官方记录。
-        if existing and existing["status"] in {"success", "terminal", "unknown"}:
-            status = existing["status"]
-            return CdkRedeemResult(code, status == "success", "此码已有处理记录，请核对官方兑换历史",
-                                   is_unknown=status == "unknown", terminal=status != "unknown")
-        if existing and existing["status"] == "running":
-            changed = store.mark_stale_running_unknown(
-                key, stale_after=120, detail="兑换结果未确认，请先检查官方兑换历史。")
-            current = store.get_run(key)
-            unknown = changed or (current and current["status"] == "unknown")
-            message = "兑换结果未确认，请先检查官方兑换历史" if unknown else "此码正在处理，请稍后查询"
-            return CdkRedeemResult(code, False, message, is_unknown=True, terminal=False)
+        existing_result = self._existing_write_result(code, key, existing, store)
+        if existing_result is not None:
+            return existing_result
+
+        # 切换键前检查旧 QQ 作用域记录，避免升级后重放已提交或结果不明的兑换。
+        code_digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
+        legacy_reader = getattr(store, "get_legacy_cdk_runs", None)
+        if callable(legacy_reader):
+            legacy_records = legacy_reader(game_uid, code_digest)
+        else:
+            legacy_key = self._legacy_run_key(qq_id, game_uid, code)
+            legacy = store.get_run(legacy_key) if legacy_key else None
+            legacy_records = [legacy] if legacy else []
+        for legacy in legacy_records:
+            legacy_key = str(legacy.get("run_key", ""))
+            if not legacy_key or legacy_key == key:
+                continue
+            legacy_result = self._existing_write_result(code, legacy_key, legacy, store)
+            if legacy_result is not None:
+                return legacy_result
+            return CdkRedeemResult(
+                code,
+                False,
+                "发现旧版兑换处理记录，结果需先核对官方历史；未自动重发",
+                is_unknown=True,
+                terminal=False,
+            )
+
         claimed = store.retry_run(key, {"failed", "expired"}) if existing else store.claim_run(key, qq_id, "cdk")
         if not claimed:
             return CdkRedeemResult(code, False, "此码正在处理，请稍后查询", is_unknown=True, terminal=False)
@@ -230,11 +280,68 @@ class CdkService:
             store.finish_run(key, "expired", "登录状态已失效")
             raise
         except asyncio.CancelledError:
-            store.finish_run(key, "unknown", "兑换中断，结果未确认")
+            store.finish_run(key, "UNKNOWN_AFTER_ACTION", "兑换中断，结果未确认")
             raise
-        status = "success" if result.success else "unknown" if result.is_unknown else "failed" if not result.terminal else "terminal"
+        status = (
+            "success"
+            if result.success
+            else "unknown"
+            if result.is_unknown or (not result.terminal and not result.is_rate_limited)
+            else "failed"
+            if result.is_rate_limited
+            else "terminal"
+        )
         # 不将可能含兑换码的上游消息持久化。
         detail = {"success": "兑换成功", "unknown": "结果未确认，请核对官方历史", "failed": "请求失败，可稍后重试", "terminal": "官方已拒绝此码"}[status]
-        store.finish_run(key, status, detail)
+        persisted_status = "UNKNOWN_AFTER_ACTION" if status == "unknown" else status
+        store.finish_run(key, persisted_status, detail)
         return result
+
+    @classmethod
+    def _legacy_run_key(cls, qq_id: str, game_uid: str, code: str) -> str:
+        """生成旧版 QQ 作用域执行键，仅用于迁移期的防重放检查。"""
+        if not qq_id or not game_uid:
+            return ""
+        digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
+        return f"cdk:{qq_id}:{game_uid}:{digest}"
+
+    @staticmethod
+    def _existing_write_result(code, key, existing, store):
+        """把终态或未决记录映射为不触发再次写入的结果。"""
+        if not existing:
+            return None
+        status = str(existing.get("status", ""))
+        if status in {"running", "DISPATCH_INTENT"}:
+            changed = store.mark_stale_running_unknown(
+                key,
+                stale_after=120,
+                detail="兑换结果未确认，请先检查官方兑换历史。",
+            )
+            current = store.get_run(key) or {}
+            unknown = changed or current.get("status") in {
+                "unknown",
+                "UNKNOWN_AFTER_ACTION",
+            }
+            message = (
+                "兑换结果未确认，请先检查官方兑换历史"
+                if unknown
+                else "此码正在处理，请稍后查询"
+            )
+            return CdkRedeemResult(code, False, message, is_unknown=True, terminal=False)
+        if status in {"unknown", "UNKNOWN_AFTER_ACTION"}:
+            return CdkRedeemResult(
+                code,
+                False,
+                "此码已有处理记录，请核对官方兑换历史",
+                is_unknown=True,
+                terminal=False,
+            )
+        if status in {"success", "terminal"}:
+            return CdkRedeemResult(
+                code,
+                status == "success",
+                "此码已有处理记录，请核对官方兑换历史",
+                terminal=True,
+            )
+        return None
 

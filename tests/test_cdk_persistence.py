@@ -1,6 +1,5 @@
 """重复批量、跨服务重启与取消使用持久执行记录。"""
 import tempfile
-import hashlib
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock
@@ -16,8 +15,12 @@ class PersistenceTests(IsolatedAsyncioTestCase):
     async def test_command_wires_persistent_store_and_account_identity(self):
         plugin = NikkePlugin.__new__(NikkePlugin)
         plugin.config = {"enable_cdk_redemption": True}
-        plugin.store = object()
-        plugin._account_or_error = lambda event: {"game_uid": "synthetic-game"}
+        class Store:
+            @staticmethod
+            def get_account(actor_id, with_cookie=True):
+                return {"qq_id": actor_id, "game_uid": "synthetic-game"}
+
+        plugin.store = Store()
         plugin.cdk_service = SimpleNamespace(
             redeem_batch=AsyncMock(
                 return_value=CdkBatchResult(
@@ -36,9 +39,8 @@ class PersistenceTests(IsolatedAsyncioTestCase):
         output = [item async for item in plugin.cdk_batch(Event(), "SECRET-CODE")]
 
         plugin.cdk_service.redeem_batch.assert_awaited_once_with(
-            {"game_uid": "synthetic-game"},
+            {"qq_id": "synthetic-user", "game_uid": "synthetic-game"},
             ["SECRET-CODE"],
-            account_key="synthetic-user:synthetic-game",
             store=plugin.store,
             qq_id="synthetic-user",
         )
@@ -65,7 +67,7 @@ class PersistenceTests(IsolatedAsyncioTestCase):
                     account_key="fake-account", store=store, qq_id="fake-qq", delay=0)
                 self.assertTrue(result.results[0].success)
             self.assertEqual(client.redeem_cdk.await_count, 1)
-            key = "cdk:fake-qq:fake-game:" + hashlib.sha256(b"TEST-CODE").hexdigest()
+            key = CdkService.persistent_run_key({"game_uid": "fake-game"}, "TEST-CODE")
             self.assertEqual(store.get_run(key)["status"], "success")
             self.assertNotIn("TEST-CODE", str(store.get_run(key)))
 

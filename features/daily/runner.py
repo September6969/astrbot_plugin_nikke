@@ -6,12 +6,28 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import random
-from typing import Any
+from typing import Any, Protocol, Sequence
 
 from ...core.privacy import safe_exception_message
-from ...core.storage import NikkeStore
 from ...integrations.blablalink.client import BlaBlaClient, CookieExpired, UnknownAfterAction
 from .models import DailyTaskResult, DailyTaskStatus
+
+
+class DailyStore(Protocol):
+    """Daily runner 消费的最小持久化接口。"""
+
+    def get_run(self, run_key: str) -> dict[str, Any] | None: ...
+    def claim_run(self, run_key: str, qq_id: str, action: str) -> bool: ...
+    def retry_run(self, run_key: str, statuses: set[str]) -> bool: ...
+    def finish_run(self, run_key: str, status: str, detail: str = "") -> None: ...
+    def mark_cookie_invalid(self, qq_id: str) -> None: ...
+    def list_accounts(
+        self,
+        push_only: bool = False,
+        with_cookie: bool = True,
+        auto_daily_only: bool = False,
+    ) -> Sequence[dict[str, Any]]: ...
+    def set_setting(self, key: str, value: Any) -> None: ...
 
 
 class DailyRunner:
@@ -20,7 +36,7 @@ class DailyRunner:
     def __init__(
         self,
         client: BlaBlaClient | Any | None = None,
-        store: NikkeStore | Any | None = None,
+        store: DailyStore | Any | None = None,
         config: dict[str, Any] | None = None,
     ):
         self.client = client
@@ -73,7 +89,9 @@ class DailyRunner:
         status = str(legacy.get("status", ""))
         return DailyTaskResult(
             account_name,
-            DailyTaskStatus.UNKNOWN_AFTER_ACTION if status in {"running", "unknown"} else DailyTaskStatus.UNAVAILABLE,
+            DailyTaskStatus.UNKNOWN_AFTER_ACTION
+            if status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}
+            else DailyTaskStatus.UNAVAILABLE,
             "发现旧版 QQ 作用域记录，未据此判定今日结果，也未执行写操作；请先完成账号作用域迁移",
         )
 
@@ -93,7 +111,7 @@ class DailyRunner:
         if not self.store.claim_run(run_key, qq_id, "daily"):
             existing = self.store.get_run(run_key)
             existing_status = str(existing.get("status", "")) if existing else ""
-            if existing_status in {"running", "unknown"}:
+            if existing_status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                 try:
                     result = await self.read_only_daily_recovery(account, account_name)
                 except CookieExpired:
@@ -152,7 +170,7 @@ class DailyRunner:
                         DailyTaskStatus.ALREADY_DONE,
                         str(existing_signin.get("detail") or "登录有效；今日已经签到"),
                     )
-                elif signin_status in {"running", "unknown"}:
+                elif signin_status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                     try:
                         result = await self.read_only_daily_recovery(account, account_name)
                     except CookieExpired:
@@ -202,7 +220,11 @@ class DailyRunner:
                     signin_finished = True
                     result = DailyTaskResult(account_name, DailyTaskStatus.SUCCESS, detail)
                 except UnknownAfterAction:
-                    self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
+                    self.store.finish_run(
+                        signin_key,
+                        "UNKNOWN_AFTER_ACTION",
+                        "签到结果未确认，未自动重发",
+                    )
                     signin_finished = True
                     result = DailyTaskResult(
                         account_name,
@@ -220,14 +242,19 @@ class DailyRunner:
                     result = mapped
         except asyncio.CancelledError:
             existing_signin = self.store.get_run(signin_key) or {}
-            if str(existing_signin.get("status", "")) in {"running", "unknown"}:
-                self.store.finish_run(signin_key, "unknown", "签到已取消，结果未确认，未自动重发")
-            self.store.finish_run(run_key, "unknown", "日常任务已取消，结果未确认，未自动重发")
+            if str(existing_signin.get("status", "")) in {
+                "running",
+                "DISPATCH_INTENT",
+                "unknown",
+                "UNKNOWN_AFTER_ACTION",
+            }:
+                self.store.finish_run(signin_key, "UNKNOWN_AFTER_ACTION", "签到已取消，结果未确认，未自动重发")
+            self.store.finish_run(run_key, "UNKNOWN_AFTER_ACTION", "日常任务已取消，结果未确认，未自动重发")
             raise
         except CookieExpired:
             self.store.mark_cookie_invalid(qq_id)
             existing_signin = self.store.get_run(signin_key) or {}
-            if str(existing_signin.get("status", "")) in {"running", "unknown"}:
+            if str(existing_signin.get("status", "")) in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                 self.store.finish_run(signin_key, "expired", "登录状态已失效")
                 signin_finished = True
             result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")

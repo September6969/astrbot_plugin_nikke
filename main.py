@@ -13,7 +13,6 @@ if _plugins_dir not in sys.path:
     sys.path.insert(0, _plugins_dir)
 
 import asyncio
-import hashlib
 import json
 import os
 import random
@@ -33,6 +32,8 @@ from astrbot.api.star import Context, Star
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
 from .application.commands.campaign import CampaignCommandHandler
+from .application.commands.cdk import CdkCommandHandler
+from .application.commands.daily import DailyCommandHandler
 from .application.commands.guide import GuideCommandHandler
 from .application.commands.profile import ProfileCommandHandler
 from .application.commands.tarot import TarotCommandHandler
@@ -57,10 +58,10 @@ from .features.character.application import (
     CharacterNotFound,
     CharacterNotOwned,
 )
-from .features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
-from .integrations.blablalink.client import BlaBlaClient, BlaBlaError, CookieExpired, UnknownAfterAction
+from .features.cdk.service import CdkService
+from .integrations.blablalink.client import BlaBlaClient, BlaBlaError, CookieExpired
 from .core.privacy import safe_exception_message
-from .features.daily.models import DailyTaskResult, DailyTaskStatus
+from .features.daily.models import DailyTaskResult
 from .core.feedback import DelayedFeedbackManager
 from .core.health import collect_runtime_health, format_runtime_health
 from .core.config import normalize_runtime_config, read_schedule_clock
@@ -145,6 +146,8 @@ class NikkePlugin(Star):
             application=self.profile_application,
             present=self._render_profile_dashboard,
         )
+        self.daily_command_handler = self._build_daily_command_handler()
+        self.cdk_command_handler = self._build_cdk_command_handler()
 
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
@@ -231,6 +234,53 @@ class NikkePlugin(Star):
     @cdk_service.setter
     def cdk_service(self, value: CdkService) -> None:
         self._cdk_service_inst = value
+
+    @property
+    def daily_command_handler(self) -> DailyCommandHandler:
+        handler = getattr(self, "_daily_command_handler", None)
+        if handler is None:
+            handler = self._build_daily_command_handler()
+            self._daily_command_handler = handler
+        return handler
+
+    @daily_command_handler.setter
+    def daily_command_handler(self, handler: DailyCommandHandler) -> None:
+        self._daily_command_handler = handler
+
+    def _build_daily_command_handler(self) -> DailyCommandHandler:
+        return DailyCommandHandler(
+            account_reader=getattr(self, "store", None),
+            store=getattr(self, "store", None),
+            runner=self.daily_runner,
+            client=getattr(self, "client", None),
+            config=getattr(self, "config", {}),
+            render_summary=lambda rows: self.renderer.render_summary(rows),
+            send_summary=self._send_daily_summary_image,
+        )
+
+    @property
+    def cdk_command_handler(self) -> CdkCommandHandler:
+        handler = getattr(self, "_cdk_command_handler", None)
+        if handler is None:
+            handler = self._build_cdk_command_handler()
+            self._cdk_command_handler = handler
+        return handler
+
+    @cdk_command_handler.setter
+    def cdk_command_handler(self, handler: CdkCommandHandler) -> None:
+        self._cdk_command_handler = handler
+
+    def _build_cdk_command_handler(self) -> CdkCommandHandler:
+        return CdkCommandHandler(
+            account_reader=getattr(self, "store", None),
+            store=getattr(self, "store", None),
+            client=getattr(self, "client", None),
+            service=self.cdk_service,
+            config=getattr(self, "config", {}),
+        )
+
+    async def _send_daily_summary_image(self, target: str, path: str) -> None:
+        await self.context.send_message(target, MessageChain([Image.fromFileSystem(path)]))
 
     def _pack_extension(self) -> None:
         extension_dir = self.plugin_dir / "extension"
@@ -379,9 +429,7 @@ class NikkePlugin(Star):
 
     async def _render_manual_daily_summary(self) -> str:
         """执行一次管理员手动日常汇总并返回展示图片。"""
-        day = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
-        results = await self._run_all_daily(day)
-        return self.renderer.render_summary(results)
+        return await self.daily_command_handler.render_manual_summary()
 
     async def _dispatch_account_command(
         self,
@@ -1012,11 +1060,6 @@ class NikkePlugin(Star):
         path = self.renderer.render(data.name, data.title, data.rows)
         yield event.image_result(path)
 
-    @staticmethod
-    def _daily_error_result(account_name: str, prefix: str, exc: Exception) -> DailyTaskResult:
-        """把异常映射到保守状态，避免所有异常都显示为泛化失败。"""
-        return DailyRunner.daily_error_result(account_name, prefix, exc)
-
     @property
     def daily_runner(self) -> DailyRunner:
         runner = getattr(self, "_daily_runner", None)
@@ -1040,283 +1083,63 @@ class NikkePlugin(Star):
     def daily_runner(self, runner: DailyRunner) -> None:
         self._daily_runner = runner
 
-    async def _read_only_daily_recovery(self, account: dict, account_name: str) -> DailyTaskResult:
-        """恢复未决任务时只读核验，绝不重放签到写操作。"""
-        return await self.daily_runner.read_only_daily_recovery(account, account_name)
-
-    @staticmethod
-    def _daily_identity(account: dict) -> str:
-        """构造不依赖 QQ 的稳定游戏账号作用域。"""
-        return DailyRunner.daily_identity(account)
-
-    @classmethod
-    def _daily_run_key(cls, day: str, account: dict, action: str) -> str:
-        return DailyRunner.daily_run_key(day, account, action)
-
-    def _legacy_daily_guard(self, day: str, qq_id: str, action: str, account_name: str) -> DailyTaskResult | None:
-        """发现旧 QQ 作用域记录时显式阻断，不把它静默当成新账号结果。"""
-        return self.daily_runner.legacy_daily_guard(day, qq_id, action, account_name)
-
-    async def _run_daily_for_account(self, account: dict, day: str) -> DailyTaskResult:
-        return await self.daily_runner.run_daily_for_account(account, day)
-
     async def _run_all_daily(
         self,
         day: str,
         stagger: bool = False,
         automatic: bool = False,
     ) -> list[DailyTaskResult]:
-        return await self.daily_runner.run_all_daily(day, stagger=stagger, automatic=automatic)
+        return await self.daily_command_handler.run_all_daily(
+            day, stagger=stagger, automatic=automatic
+        )
 
     async def _send_summary(self, day: str) -> None:
-        group_umo = self.store.get_setting("summary_group_umo", "")
-        if not group_umo:
-            logger.warning("[NIKKE] 尚未配置每日汇总群")
-            return
-        # 只读取自动批次结果；旧的无 scope 键和管理员手动结果都不作为自动汇总来源。
-        stored = self.store.get_setting(f"daily_results:{day}:automatic", [])
-        results = [DailyTaskResult.from_storage(item) for item in stored] if isinstance(stored, list) else []
-        if not results or any(result is None for result in results):
-            results = await self._run_all_daily(day, automatic=True)
-        path = self.renderer.render_summary([result.summary_row() for result in results])
-        await self.context.send_message(group_umo, MessageChain([Image.fromFileSystem(path)]))
-
-    async def _daily_status(self, event: AstrMessageEvent):
-        """只读查询当前账号的每日签到状态。"""
-        try:
-            account = self._account_or_error(event)
-            await self.client.get_profile(account)
-            status = await self.client.get_daily_signin(account)
-            if not status["found"]:
-                result = DailyTaskResult("", DailyTaskStatus.UNAVAILABLE, "未找到签到任务")
-            elif status["completed"]:
-                result = DailyTaskResult("", DailyTaskStatus.ALREADY_DONE, "今日已签到")
-            else:
-                result = DailyTaskResult("", DailyTaskStatus.PENDING, "今日待签到")
-            yield event.plain_result(result.detail)
-        except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
-            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except Exception as exc:
-            yield event.plain_result(f"查询失败：{exc}")
+        await self.daily_command_handler.send_automatic_summary(day)
 
     async def daily(self, event: AstrMessageEvent, action: str = "", value: str = ""):
-        """直接签到、只读查询，或设置自己的定时签到偏好。"""
-        action_key = action.strip().casefold()
-        if action_key in {"状态", "status"}:
-            async for result in self._daily_status(event):
-                yield result
-            return
-        if action_key in {"自动", "auto"}:
-            value_key = value.strip().casefold()
-            if value_key not in {"开", "on", "1", "关", "off", "0"}:
-                yield event.plain_result("用法：/妮姬 日常 自动 开|关")
-                return
-            try:
-                account = self._account_or_error(event)
-            except ValueError as exc:
-                yield event.plain_result(str(exc))
-                return
-            enabled = value_key in {"开", "on", "1"}
-            self.store.set_auto_daily(account["qq_id"], enabled)
-            global_state = "全局签到写操作当前关闭；设置已保存，暂不会提交。" if not bool(
-                self.config.get("enable_daily_actions", False)
-            ) else "仍需保持每日汇总开启，定时任务才会处理此账号。"
-            yield event.plain_result(
-                f"自动签到已{'开启' if enabled else '关闭'}。{global_state}"
-            )
-            return
-        if action_key:
-            yield event.plain_result("用法：/妮姬 签到 [状态] 或 /妮姬 日常 自动 开|关")
-            return
-        if not bool(self.config.get("enable_daily_actions", False)):
-            yield event.plain_result("签到写操作当前由管理员关闭；可使用 /妮姬 签到 状态 只读查询。")
-            return
-        try:
-            account = self._account_or_error(event)
-            result = await self._run_daily_for_account(account, datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d"))
-            yield event.plain_result(f"{result.account_name}：{result.detail}")
-        except Exception as exc:
-            yield event.plain_result(f"签到失败：{exc}")
+        """将 AstrBot 事件转成 Daily 命令上下文。"""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event, self.daily_command_handler, action=action, value=value
+        ):
+            yield result
 
     async def claim(self, event: AstrMessageEvent):
         """兼容旧版英文签到指令。"""
         async for result in self.daily(event):
             yield result
 
-    @staticmethod
-    def _mask_cdk(code: str) -> str:
-        return code[:2] + "***" + code[-2:] if len(code) > 4 else "***"
-
     async def cdk(self, event: AstrMessageEvent, code: str):
-        """使用当前绑定账号兑换国际服CDK。"""
-        if not bool(self.config.get("enable_cdk_redemption", False)):
-            yield event.plain_result("CDK真实兑换当前由管理员关闭。")
-            return
-        normalized = code.strip()
-        if not CDK_PATTERN.fullmatch(normalized):
-            yield event.plain_result("兑换码格式无效：仅支持4至64位字母、数字、下划线或连字符。")
-            return
-        qq_id = self._qq_id(event)
-        masked = self._mask_cdk(normalized)
-        try:
-            account = self._account_or_error(event)
-        except ValueError as exc:
-            yield event.plain_result(str(exc))
-            return
-        game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
-        if not game_uid:
-            yield event.plain_result("账号缺少稳定游戏身份，未执行兑换。")
-            return
-        account_key = f"{qq_id}:{game_uid}"
-        digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
-        run_key = f"cdk:{qq_id}:{game_uid}:{digest}"
-        retryable = {"failed", "expired"}
-        existing = self.store.get_run(run_key)
-        if existing and existing["status"] not in retryable:
-            if existing["status"] == "running":
-                changed = self.store.mark_stale_running_unknown(
-                    run_key, stale_after=120, detail="兑换结果未确认，请先检查官方兑换历史。")
-                current = self.store.get_run(run_key)
-                if changed or (current and current["status"] == "unknown"):
-                    yield event.plain_result("兑换结果未确认，请先检查官方兑换历史，勿重复提交。")
-                else:
-                    yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
-                return
-            yield event.plain_result(existing["detail"] or f"兑换码 {masked} 已处理。")
-            return
-        if existing:
-            if not self.store.retry_run(run_key, retryable):
-                yield event.plain_result(f"兑换码 {masked} 正在处理，请稍后再试。")
-                return
-        elif not self.store.claim_run(run_key, qq_id, "cdk"):
-            yield event.plain_result(f"兑换码 {masked} 正在处理，请勿重复提交。")
-            return
-        try:
-            result = await self.cdk_service.redeem_single(account, normalized, account_key=account_key)
-            detail = f"兑换码 {masked}：{result.message}"
-            if result.success:
-                status = "success"
-            elif result.is_unknown:
-                status = "unknown"
-            elif result.is_rate_limited or not getattr(result, "terminal", True):
-                status = "failed"
-            else:
-                status = "terminal"
-            # 上游消息可能回显完整兑换码，仅持久化固定状态说明。
-            stored_detail = {"success": "兑换成功", "unknown": "结果未确认，请核对官方历史",
-                             "failed": "请求失败，可稍后重试", "terminal": "官方已拒绝此码"}[status]
-            self.store.finish_run(run_key, status, f"兑换码 {masked}：{stored_detail}")
-            yield event.plain_result(detail)
-        except CookieExpired:
-            self.store.mark_cookie_invalid(qq_id)
-            self.store.finish_run(run_key, "expired", "登录状态已失效")
-            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except asyncio.CancelledError:
-            self.store.finish_run(run_key, "unknown", "兑换中断，结果未确认，请先检查官方历史")
-            raise
-        except Exception as exc:
-            self.store.finish_run(run_key, "failed", f"兑换码 {masked}：请求失败，可稍后重试")
-            logger.warning(f"[NIKKE] CDK兑换失败: {type(exc).__name__}")
-            yield event.plain_result(f"兑换码 {masked}：请求失败，可稍后重试。")
+        """将单码兑换请求委托给 CDK 命令用例。"""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event, self.cdk_command_handler, operation="single", code=code
+        ):
+            yield result
 
     async def cdk_batch(self, event: AstrMessageEvent, raw_codes: str):
-        """批量兑换多个 CDK。"""
-        if not bool(self.config.get("enable_cdk_redemption", False)):
-            yield event.plain_result("CDK真实兑换当前由管理员关闭。")
-            return
-        codes = CdkInputParser.parse(raw_codes, max_items=10)
-        if not codes:
-            yield event.plain_result("未检测到有效的兑换码。支持空格/换行/逗号分隔，单次最多10个。")
-            return
-        try:
-            account = self._account_or_error(event)
-        except ValueError as exc:
-            yield event.plain_result(str(exc))
-            return
-        qq_id = self._qq_id(event)
-        game_uid = str(account.get("game_uid") or account.get("uid") or "default").strip()
-        account_key = f"{qq_id}:{game_uid}"
-        batch_res = await self.cdk_service.redeem_batch(account, codes, account_key=account_key, store=self.store, qq_id=qq_id)
-        lines = [f"【CDK 批量兑换结果】共 {len(batch_res.results)} 项："]
-        for res in batch_res.results:
-            masked = self._mask_cdk(res.code)
-            icon = "✓" if res.success else ("?" if res.is_unknown else "✗")
-            lines.append(f"{icon} {masked}：{res.message}")
-        if batch_res.stopped_by_cookie:
-            self.store.mark_cookie_invalid(qq_id)
-            lines.append("\n⚠️ 登录状态已失效，已中止剩余兑换。请重新绑定。")
-        elif batch_res.stopped_by_rate_limit:
-            lines.append("\n⚠️ 遇到官方频控限制，已中止剩余兑换，请稍后再试。")
-        yield event.plain_result("\n".join(lines))
+        """将批量兑换请求委托给 CDK 命令用例。"""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event, self.cdk_command_handler, operation="batch", codes=raw_codes
+        ):
+            yield result
 
     async def cdk_available(self, event: AstrMessageEvent):
-        """查询官方可用 CDK 列表。"""
-        try:
-            account = self._account_or_error(event)
-            items = await self.client.get_cdk_redemption(account)
-            if not items:
-                yield event.plain_result("官方暂无可查询的可用 CDK 列表。")
-                return
-
-            available_items = [
-                item
-                for item in items
-                if isinstance(item, dict)
-                and item.get("status") in (None, 0, "0")
-            ]
-            if not available_items:
-                yield event.plain_result("官方暂无可查询的可用 CDK 列表。")
-                return
-
-            lines = ["【官方可用 CDK 列表】"]
-            for item in available_items[:15]:
-                code = str(
-                    item.get("cdk")
-                    or item.get("cdkey")
-                    or item.get("code")
-                    or item.get("title")
-                    or "未知"
-                )
-                desc = str(item.get("desc") or item.get("reward") or "").strip()
-                expire = str(item.get("expire_time") or item.get("end_time") or "").strip()
-                extra = f" ({desc})" if desc else ""
-                exp_str = f" [截止: {expire}]" if expire else ""
-                lines.append(f"• {code}{extra}{exp_str}")
-            yield event.plain_result("\n".join(lines))
-        except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
-            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except Exception as exc:
-            yield event.plain_result(f"获取可用 CDK 失败：{exc}")
+        """委托只读可用码查询用例。"""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event, self.cdk_command_handler, operation="available"
+        ):
+            yield result
 
     async def cdk_history(self, event: AstrMessageEvent):
-        """查询官方 CDK 历史兑换记录。"""
-        try:
-            account = self._account_or_error(event)
-            items = await self.client.get_cdk_redemption_history(account)
-            if not items:
-                yield event.plain_result("官方暂无 CDK 兑换历史记录。")
-                return
-            lines = ["【CDK 兑换历史记录】"]
-            for item in items[:15]:
-                code = str(
-                    item.get("cdk")
-                    or item.get("cdkey")
-                    or item.get("code")
-                    or "未知"
-                )
-                masked = self._mask_cdk(code)
-                status = str(item.get("status") or item.get("result") or item.get("msg") or "已兑换")
-                time_str = str(item.get("redeemed_at") or item.get("created_at") or item.get("time") or "").strip()
-                t = f" [{time_str}]" if time_str else ""
-                lines.append(f"• {masked}: {status}{t}")
-            yield event.plain_result("\n".join(lines))
-        except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
-            yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except Exception as exc:
-            yield event.plain_result(f"获取 CDK 历史失败：{exc}")
+        """委托只读兑换历史查询用例。"""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event, self.cdk_command_handler, operation="history"
+        ):
+            yield result
 
     async def campaign(self, event: AstrMessageEvent, stage_str: str = "", mode_str: str = ""):
         """查询主线战役关卡的历史通关阵容。"""

@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock
 
+from astrbot_plugin_nikke.application.commands.daily import DailyCommandHandler
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.features.daily.models import DailyTaskResult, DailyTaskStatus
 from astrbot_plugin_nikke.core.storage import NikkeStore
@@ -156,22 +157,27 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
                     return [("manual-account", "已执行")]
                 return default
 
-        class Renderer:
-            @staticmethod
-            def render_summary(results):
-                return "synthetic-summary.png"
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
-        plugin.renderer = Renderer()
-        plugin.context = type("Context", (), {"send_message": AsyncMock()})()
-        plugin._run_all_daily = AsyncMock(
+        runner = type("Runner", (), {})()
+        runner.run_all_daily = AsyncMock(
             return_value=[DailyTaskResult("automatic-account", DailyTaskStatus.SUCCESS, "已执行")]
         )
+        sender = AsyncMock()
+        handler = DailyCommandHandler(
+            account_reader=Store(),
+            store=Store(),
+            runner=runner,
+            client=None,
+            config={},
+            render_summary=lambda rows: "synthetic-summary.png",
+            send_summary=sender,
+        )
 
-        await plugin._send_summary("2026-09-07")
+        await handler.send_automatic_summary("2026-09-07")
 
-        plugin._run_all_daily.assert_awaited_once_with("2026-09-07", automatic=True)
+        runner.run_all_daily.assert_awaited_once_with(
+            "2026-09-07", stagger=False, automatic=True
+        )
+        sender.assert_awaited_once_with("synthetic-group", "synthetic-summary.png")
 
     async def test_summary_fallback_stays_in_automatic_scope(self):
         class Store:
@@ -179,16 +185,19 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
             def get_setting(key, default=None):
                 return "synthetic-group" if key == "summary_group_umo" else []
 
-        class Renderer:
-            @staticmethod
-            def render_summary(results):
-                return "synthetic-summary.png"
+        runner = type("Runner", (), {})()
+        runner.run_all_daily = AsyncMock(return_value=[])
+        handler = DailyCommandHandler(
+            account_reader=Store(),
+            store=Store(),
+            runner=runner,
+            client=None,
+            config={},
+            render_summary=lambda rows: "synthetic-summary.png",
+            send_summary=AsyncMock(),
+        )
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
-        plugin.renderer = Renderer()
-        plugin.context = type("Context", (), {"send_message": AsyncMock()})()
-        plugin._run_all_daily = AsyncMock(return_value=[])
-
-        await plugin._send_summary("2026-09-07")
-        plugin._run_all_daily.assert_awaited_once_with("2026-09-07", automatic=True)
+        await handler.send_automatic_summary("2026-09-07")
+        runner.run_all_daily.assert_awaited_once_with(
+            "2026-09-07", stagger=False, automatic=True
+        )

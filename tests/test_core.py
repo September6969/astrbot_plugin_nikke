@@ -7,6 +7,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from astrbot_plugin_nikke.integrations.blablalink.client import (
     BlaBlaClient,
@@ -261,8 +262,24 @@ class StoreTests(unittest.TestCase):
             self.assertTrue(store.claim_run(key, "1", "cdk"))
             store.finish_run(key, "failed", "请求失败")
             self.assertTrue(store.retry_run(key, {"failed"}, stale_after=120))
-            self.assertEqual(store.get_run(key)["status"], "running")
+            self.assertEqual(store.get_run(key)["status"], "DISPATCH_INTENT")
             self.assertFalse(store.retry_run(key, {"failed"}, stale_after=120))
+
+    def test_stale_dispatch_intent_cannot_be_reclaimed_as_retryable(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = NikkeStore(td)
+            key = "cdk:game:synthetic-intent"
+            with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1000):
+                self.assertTrue(store.claim_run(key, "1", "cdk"))
+            with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1180):
+                self.assertFalse(store.retry_run(key, {"failed"}, stale_after=120))
+                self.assertTrue(
+                    store.mark_stale_running_unknown(
+                        key, stale_after=120, detail="结果未确认"
+                    )
+                )
+                self.assertEqual(store.get_run(key)["status"], "UNKNOWN_AFTER_ACTION")
+                self.assertFalse(store.retry_run(key, {"failed"}, stale_after=120))
 
 
 class ClientTests(unittest.IsolatedAsyncioTestCase):
@@ -823,9 +840,10 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         second = [item async for item in plugin.cdk(Event(), code)]
         persisted = json.dumps(plugin.store.runs, ensure_ascii=False)
         self.assertEqual(plugin.client.calls, 1)
-        self.assertEqual(first, second)
+        self.assertIn("兑换成功", first[0])
+        self.assertIn("已有处理记录", second[0])
         self.assertNotIn(code, persisted)
-        self.assertNotIn(code, "".join(first))
+        self.assertNotIn(code, "".join(first + second))
 
     async def test_character_command_delegates_identity_and_fetch_to_application(self):
         from astrbot_plugin_nikke.main import NikkePlugin
