@@ -8,7 +8,7 @@ from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 
-from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProvider
 from astrbot_plugin_nikke.features.campaign.models import ClearLineupStatus, StageClearRecord
 from ..primitives import CardRenderer
 from ..theme import UI_COLORS
@@ -25,12 +25,9 @@ THEME = {
 class CampaignHistoryRenderer(CardRenderer):
     WIDTH = 1400
 
-    def __init__(self, output_dir: str | Path, font_dir: str | Path, assets: AssetManager | None = None):
+    def __init__(self, output_dir: str | Path, font_dir: str | Path, assets=None):
         super().__init__(output_dir, font_dir)
-        # 显式区分“未提供”与 falsey 的共享管理器，确保依赖注入不会被绕过。
-        self.assets = assets if assets is not None else AssetManager(
-            Path(output_dir) / "cache", Path(__file__).parent / "assets"
-        )
+        self.assets = assets if assets is not None else FallbackAssetProvider()
 
     def _text(self, draw, xy, text, size, color, *, width=None, bold=False):
         text = str(text).replace("\n", " ")

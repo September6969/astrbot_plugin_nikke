@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 
-from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProvider
 from astrbot_plugin_nikke.features.character.models import CharacterCardAssets, CharacterCardData, EquipmentData, EquipmentOption
 from ..theme import character_theme
 from ..primitives import CardRenderer
@@ -22,9 +22,9 @@ class CharacterCardRenderer(CardRenderer):
     BURST_NAMES = {"step1": "BURST I", "step2": "BURST II", "step3": "BURST III", "allstep": "BURST 全阶段"}
     SLOT_NAMES = {"head": "HEAD · 头部", "torso": "TORSO · 躯干", "arm": "ARM · 手臂", "leg": "LEG · 腿部"}
 
-    def __init__(self, output_dir, font_dir, assets: AssetManager | None = None):
+    def __init__(self, output_dir, font_dir, assets=None):
         super().__init__(output_dir, font_dir)
-        self.assets = assets or AssetManager(Path(output_dir) / "cache", Path(__file__).resolve().parents[2] / "assets")
+        self.assets = assets if assets is not None else FallbackAssetProvider()
 
     @staticmethod
     def _number(value):

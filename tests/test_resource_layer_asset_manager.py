@@ -51,7 +51,7 @@ class ResourceLayerAssetManagerTests(unittest.TestCase):
                 mock_resp.raise_for_status = MagicMock()
                 mock_resp.iter_bytes = MagicMock(return_value=[mock_bytes])
 
-                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as mock_stream:
+                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream") as mock_stream:
                     mock_stream.return_value.__enter__.return_value = mock_resp
 
                     img = manager.get_skill_icon(102, "s1")
@@ -78,7 +78,7 @@ class ResourceLayerAssetManagerTests(unittest.TestCase):
                 mock_resp.raise_for_status = MagicMock()
                 mock_resp.iter_bytes = MagicMock(return_value=[bad_bytes])
 
-                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as mock_stream:
+                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream") as mock_stream:
                     mock_stream.return_value.__enter__.return_value = mock_resp
 
                     img = manager.get_skill_icon(102, "s1")
