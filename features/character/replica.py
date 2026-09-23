@@ -115,9 +115,14 @@ def cache_identity(data):
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
-def art_style(data, portrait, *, summary_count=None):
+def art_style(data, portrait, *, summary_count=None, identity_resolver=None):
     from astrbot_plugin_nikke.features.character.face_anchor import framing
-    return framing(data, portrait, summary_count=summary_count)["style"]
+    return framing(
+        data,
+        portrait,
+        summary_count=summary_count,
+        identity_resolver=identity_resolver,
+    )["style"]
 
 
 def noto_font_700():

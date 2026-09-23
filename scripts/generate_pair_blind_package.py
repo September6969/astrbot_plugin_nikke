@@ -220,7 +220,10 @@ async def main():
                 assets = await asyncio.to_thread(manager.resolve_character_assets, card)
                 assets.portrait = portrait
 
-                res_off = framing(card, portrait, body_centering=False)
+                res_off = framing(
+                    card, portrait, body_centering=False,
+                    identity_resolver=manager.nikke_db,
+                )
                 base_l, base_t, base_w, base_h = parse_style_transform(res_off["style"])
 
                 shifts = {

@@ -2,6 +2,7 @@
 """妮姬角色卡的独立 T2I payload 投影。"""
 
 from ..t2i_assets import T2IAssetResolver
+from ...features.character.ports import CharacterRenderIdentity
 from .common import display_number
 
 
@@ -27,8 +28,13 @@ def _normalize_equipment_icon(source):
 class CharacterT2IPayloadBuilder:
     """只把角色卡 DTO 和已经解析的资产投影为模板数据。"""
 
-    def __init__(self, resolver: T2IAssetResolver):
+    def __init__(
+        self,
+        resolver: T2IAssetResolver,
+        identity_resolver: CharacterRenderIdentity | None = None,
+    ):
         self.resolver = resolver
+        self.identity_resolver = identity_resolver
 
     def build(self, data, card_assets):
         from dataclasses import asdict
@@ -224,7 +230,12 @@ class CharacterT2IPayloadBuilder:
             "font_barlow_sb": barlow_semibold_font(),
             "font_rajdhani": rajdhani_font(),
             "font_rajdhani_sb": rajdhani_semibold_font(),
-            "art_style": art_style(data, portrait, summary_count=layout.count),
+            "art_style": art_style(
+                data,
+                portrait,
+                summary_count=layout.count,
+                identity_resolver=self.identity_resolver,
+            ),
             "summary_panel_style": summary_panel_style,
             "character_layout": character_layout,
             "name": data.name_cn,

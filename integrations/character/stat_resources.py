@@ -14,8 +14,8 @@ from typing import Any, Callable, Mapping
 import httpx
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
-from .stat_calculator import CharacterStatTables, StatCalculationError
-from .research_levels import map_research_levels
+from astrbot_plugin_nikke.features.character.stat_calculator import CharacterStatTables, StatCalculationError
+from astrbot_plugin_nikke.features.character.research_levels import map_research_levels
 
 
 EXIA_REFERENCE_COMMIT = "a6e653691d6a6d685f89c54694fadbf800e5d4b2"

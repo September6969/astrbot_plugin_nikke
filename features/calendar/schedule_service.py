@@ -6,10 +6,10 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
 
 from .models import CalendarActivity
-from .visuals import CalendarVisualCache
+from .ports import CalendarFetchGateway, CalendarVisualPort
 from .canonical_models import (
     CanonicalEvent,
     Coverage,
@@ -20,7 +20,6 @@ from .canonical_models import (
     compute_health_badge,
     CST,
 )
-from ...integrations.blablalink.fetch_client import FetchClient
 from .schedule_adapters import (
     BaseScheduleAdapter,
     GameKeeScheduleAdapter,
@@ -46,8 +45,8 @@ class ScheduleService:
         self,
         data_dir: Path | str,
         *,
-        visual_cache: CalendarVisualCache | None | bool = None,
-        fetch_client: FetchClient | None = None,
+        visual_cache: CalendarVisualPort | None | Literal[False] = None,
+        fetch_client: CalendarFetchGateway | None = None,
         announcement_service: Any = None,
         ttl_seconds: float = 300.0,
         **kwargs: Any,
@@ -66,17 +65,15 @@ class ScheduleService:
         self.cache_path = self.data_dir / "calendar_cache.json"  # 100% 兼容文件
         self.overrides_path = self.data_dir / "schedule_overrides.json"
 
-        self.fetch_client = fetch_client or FetchClient()
+        self.fetch_client = fetch_client
         self.announcement_service = announcement_service
         self.ttl_seconds = ttl_seconds
 
         # 视觉缓存
-        if visual_cache is False:
+        if visual_cache is False or visual_cache is None:
             self.visual_cache = None
-        elif isinstance(visual_cache, CalendarVisualCache):
-            self.visual_cache = visual_cache
         else:
-            self.visual_cache = CalendarVisualCache(self.data_dir)
+            self.visual_cache = visual_cache
 
         # 每源 LKG 数据集 (source -> list[CanonicalEvent])
         self._source_datasets: dict[str, list[CanonicalEvent]] = {}

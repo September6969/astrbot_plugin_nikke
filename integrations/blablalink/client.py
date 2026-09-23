@@ -15,6 +15,7 @@ from typing import Any, Callable
 import httpx
 
 from ...core.cookie_utils import parse_cookie as _parse_cookie
+from ...features.daily.errors import UnknownAfterActionError
 from .errors import BlaBlaError, CookieExpired
 
 
@@ -45,15 +46,17 @@ NIKKE_DIRECTORY_EN = "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf0301938
 
 class BlaBlaTimeoutError(BlaBlaError):
     """网络或请求传输超时，结果未确认。"""
+    outcome_unknown = True
     pass
 
 
 class BlaBlaNetworkError(BlaBlaError):
     """网络连接异常。"""
+    outcome_unknown = True
     pass
 
 
-class UnknownAfterAction(BlaBlaError):
+class UnknownAfterAction(BlaBlaError, UnknownAfterActionError):
     """写请求已尝试，后续只读验证仍无法确认结果，禁止自动重发。"""
 
 

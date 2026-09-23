@@ -21,16 +21,16 @@ class VoiceResourceProvider:
         cache: Path,
         *,
         transport=None,
-        task_factory: Callable[[Awaitable[Any]], asyncio.Task | None],
+        task_factory: Callable[[Awaitable[Any]], asyncio.Task[Any] | None],
     ):
         self.cache = Path(cache) / "source"
         self.transport = transport
         self._task_factory = task_factory
-        self._tasks = {}
-        self._failed = {}
+        self._tasks: dict[str, asyncio.Task[Any]] = {}
+        self._failed: dict[str, float] = {}
         self._slots = asyncio.Semaphore(2)
         self._closed = False
-        self._validated_cache: dict[tuple, tuple[int, int, int, str]] = {}
+        self._validated_cache: dict[tuple[Path, str, str, str], tuple[int, int, int, str]] = {}
 
     def _cache_path_is_safe(self) -> bool:
         """缓存路径任一现有层级为符号链接时拒绝读写，避免越出数据目录。"""

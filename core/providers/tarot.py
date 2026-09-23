@@ -8,6 +8,7 @@ from pathlib import Path
 
 from ...core.privacy import safe_exception_message
 from ...features.tarot.service import TarotDataError, TarotService
+from ...integrations.tarot.images import TarotImageProvider
 
 logger = logging.getLogger("astrbot_plugin_nikke")
 
@@ -20,6 +21,7 @@ def create_tarot_service(plugin_dir: Path, data_dir: Path) -> TarotService | Non
             data_dir / "tarot",
             deck_mode="auto",
             rotate_reversed=True,
+            image_provider_factory=TarotImageProvider,
         )
     except (OSError, ValueError, TarotDataError) as exc:
         logger.warning("[NIKKE] 塔罗服务初始化失败：%s", safe_exception_message(exc))

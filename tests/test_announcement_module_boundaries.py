@@ -9,6 +9,12 @@ from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
 from astrbot_plugin_nikke.features.announcement.normalization import AnnouncementVersioning
 
 FEATURES = Path(__file__).parents[1] / "features" / "announcement"
+INFORMATION_FEEDS_ADAPTER = (
+    Path(__file__).parents[1]
+    / "integrations"
+    / "announcement"
+    / "information_feeds.py"
+)
 
 
 def _tree(path: Path) -> ast.Module:
@@ -83,7 +89,7 @@ def test_announcement_query_is_local_and_source_free() -> None:
 
 
 def test_announcement_source_adapter_does_not_import_application() -> None:
-    tree = _tree(FEATURES / "sources.py")
+    tree = _tree(INFORMATION_FEEDS_ADAPTER)
     assert not any(
         isinstance(node, ast.ImportFrom)
         and node.module is not None

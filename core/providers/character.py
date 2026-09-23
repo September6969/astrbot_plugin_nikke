@@ -14,7 +14,7 @@ from ...features.account.ports import AccountStorePort
 from ...features.character.application import CharacterApplication
 from ...features.character.composition import create_character_card_builder
 from ...features.character.identity import CharacterDirectoryResolver
-from ...features.character.stat_resources import CharacterStatResourceLoader
+from ...integrations.character.stat_resources import CharacterStatResourceLoader
 from ...integrations.blablalink.client import BlaBlaClient
 from ...ui.renderers import CharacterCardRenderer
 

@@ -1,11 +1,20 @@
 """构图只消费经过图像绑定校验的离线锚点。"""
 import hashlib
+from pathlib import Path
 from unittest.mock import patch
 from PIL import Image
 
-from astrbot_plugin_nikke.features.character.face_anchor import framing
+from astrbot_plugin_nikke.features.character.face_anchor import framing as _framing
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 from astrbot_plugin_nikke.features.character.models import CostumeSelection
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
+
+_ASSETS = Path(__file__).resolve().parents[1] / "assets"
+_IDENTITY = NikkeDbProvider(_ASSETS, _ASSETS, remote=False)
+
+
+def framing(data, portrait, **kwargs):
+    return _framing(data, portrait, identity_resolver=_IDENTITY, **kwargs)
 
 
 def test_anchor_binding_and_no_default_costume_fallback():
@@ -270,7 +279,6 @@ def test_face_y_offset_behavior_and_contracts():
     from astrbot_plugin_nikke.features.character.face_anchor import (
         DEFAULT_FACE_Y_OFFSET,
         FACE_Y_OFFSET_OVERRIDES,
-        framing,
     )
     from astrbot_plugin_nikke.features.character.face_guided_centering import DEFAULT_CENTERING_CONFIG
 

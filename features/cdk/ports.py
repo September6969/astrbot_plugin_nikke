@@ -51,3 +51,22 @@ class CdkRunStore(Protocol):
 
     def finish_run(self, run_key: str, status: str, detail: str = "") -> None:
         """保存调用方计算出的终态。"""
+
+
+class CdkRedemption(Protocol):
+    """单条兑换响应的最小领域视图。"""
+
+    success: bool
+    terminal: bool
+    message: str
+    code: str
+    is_unknown: bool
+
+
+class CdkGateway(Protocol):
+    """向兑换服务提供一次不可自动重放的写请求。"""
+
+    async def redeem_cdk(
+        self, account: Mapping[str, Any], code: str
+    ) -> CdkRedemption:
+        """发送一次 CDK 兑换请求并返回明确或未知结果。"""

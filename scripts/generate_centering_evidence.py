@@ -200,8 +200,14 @@ async def main():
                 raise ValueError(f"Failed to resolve portrait for {render_id} (rid={rid})!")
 
             # Compute framing OFF & ON
-            res_off = framing(card, portrait, body_centering=False)
-            res_on = framing(card, portrait, body_centering=True)
+            res_off = framing(
+                card, portrait, body_centering=False,
+                identity_resolver=manager.nikke_db,
+            )
+            res_on = framing(
+                card, portrait, body_centering=True,
+                identity_resolver=manager.nikke_db,
+            )
             diag = res_on.get("body_centering", {})
 
             # Extract geometric values

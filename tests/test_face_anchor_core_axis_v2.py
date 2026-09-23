@@ -6,13 +6,19 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from astrbot_plugin_nikke.features.character.face_anchor import framing
+from astrbot_plugin_nikke.features.character.face_anchor import framing as _framing
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 from astrbot_plugin_nikke.features.character.layout import MIN_AUTO_SCALE_RATIO, summary_layout
 from astrbot_plugin_nikke.features.character.models import CostumeSelection
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
 
 
 ROOT = Path(__file__).resolve().parents[1]
+_IDENTITY = NikkeDbProvider(ROOT / "assets", ROOT / "assets", remote=False)
+
+
+def framing(data, portrait, **kwargs):
+    return _framing(data, portrait, identity_resolver=_IDENTITY, **kwargs)
 
 
 def make_card():

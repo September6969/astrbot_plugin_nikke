@@ -14,6 +14,7 @@ from PIL import Image
 
 from astrbot_plugin_nikke.features.tarot.models import DrawnTarotCard
 from astrbot_plugin_nikke.features.tarot.service import TarotDeckRepository, TarotService
+from astrbot_plugin_nikke.integrations.tarot.images import TarotImageProvider
 
 
 SOURCE_DATA = Path(__file__).resolve().parents[1] / "assets" / "tarot" / "tarot_cards.json"
@@ -152,7 +153,9 @@ class TarotBackendTests(unittest.TestCase):
         service = TarotService(self.root, self.runtime)
         card = service.deck.card_by_key(major["key"])
         assert card is not None
-        reversed_path = service.images.image_for(DrawnTarotCard(card, "reversed"))
+        reversed_path = TarotImageProvider(
+            service.deck, self.runtime / "reversed_cache"
+        ).image_for(DrawnTarotCard(card, "reversed"))
         self.assertIsNotNone(reversed_path)
         with Image.open(reversed_path) as rotated:
             self.assertEqual(rotated.convert("RGB").getpixel((1, 1)), (255, 0, 0))
@@ -311,4 +314,3 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -18,7 +18,7 @@ from urllib.parse import urljoin, urlparse
 import httpx
 from PIL import Image, ImageOps
 
-from .models import CalendarActivity, _aware_utc
+from astrbot_plugin_nikke.features.calendar.models import CalendarActivity, _aware_utc
 
 
 class CalendarVisualCache:

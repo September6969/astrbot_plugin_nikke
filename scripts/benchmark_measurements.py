@@ -23,7 +23,7 @@ from cryptography.fernet import Fernet
 from astrbot_plugin_nikke.features.character.identity import CharacterDirectoryResolver
 from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.features.voice.audio import VoiceAudioCache
-from astrbot_plugin_nikke.features.voice.provider import VoiceResourceProvider
+from astrbot_plugin_nikke.integrations.voice.resource_provider import VoiceResourceProvider
 from astrbot_plugin_nikke.features.account.status import BIND_SESSION_PENDING, BIND_SESSION_SUCCESS
 
 

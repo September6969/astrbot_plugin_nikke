@@ -12,11 +12,12 @@ from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 
 class T2IRenderer:
-    OPTIONS = {"type": "png", "quality": None, "full_page": True,
+    OPTIONS: dict[str, object] = {"type": "png", "quality": None, "full_page": True,
                "animations": "disabled", "caret": "hide", "scale": "css", "omit_background": False}
 
     def __init__(self, html_render, assets, timeout: float = 30):
         self._html_render = html_render
+        self.assets = assets
         self.timeout = timeout
         self.loader = T2ITemplateLoader()
         self.payload_builder = CampaignT2IPayloadBuilder(assets, T2IAssetResolver())
@@ -42,7 +43,10 @@ class T2IRenderer:
         if page == "character":
             # 只在线程中准备既有本地资产；原生 HTML 渲染仍为直接异步调用。
             assets = await asyncio.to_thread(self.payload_builder.assets.resolve_character_assets, data)
-            payload = CharacterT2IPayloadBuilder(self.payload_builder.resolver).build(data, assets)
+            payload = CharacterT2IPayloadBuilder(
+                self.payload_builder.resolver,
+                identity_resolver=getattr(self.assets, "nikke_db", None),
+            ).build(data, assets)
             return await self.render_payload(page, payload)
         builders = {
             "profile": ProfileT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver),

@@ -17,17 +17,9 @@ import logging
 import re
 from typing import Any
 
-import httpx
-
 from .models import CdkBatchResult, CdkRedeemResult
-from .ports import CdkRunStore
-from astrbot_plugin_nikke.integrations.blablalink.client import (
-    BlaBlaClient,
-    BlaBlaError,
-    BlaBlaNetworkError,
-    BlaBlaTimeoutError,
-    CookieExpired,
-)
+from .ports import CdkGateway, CdkRunStore
+from astrbot_plugin_nikke.features.account.errors import CredentialExpiredError
 
 logger = logging.getLogger("nikke.cdk")
 
@@ -63,7 +55,7 @@ class CdkInputParser:
 
 
 class CdkService:
-    def __init__(self, client: BlaBlaClient):
+    def __init__(self, client: CdkGateway):
         self.client = client
         self._locks: dict[str, asyncio.Lock] = {}
         self._global_lock = asyncio.Lock()
@@ -118,19 +110,11 @@ class CdkService:
                 is_rate_limited=is_rate_limited,
                 terminal=terminal,
             )
-        except CookieExpired:
+        except CredentialExpiredError:
             raise
-        except (BlaBlaTimeoutError, httpx.TimeoutException, BlaBlaNetworkError, httpx.NetworkError) as exc:
-            logger.warning("CDK 兑换网络异常: %s", type(exc).__name__)
-            return CdkRedeemResult(
-                code=code,
-                success=False,
-                message="网络请求超时，请先检查游戏内邮箱或官方兑换记录，切勿频繁重复提交",
-                is_unknown=True,
-                terminal=False,
-            )
-        except BlaBlaError as exc:
-            code_str = str(exc.code).strip()
+        except Exception as exc:
+            logger.warning("CDK 兑换适配器异常: %s", type(exc).__name__)
+            code_str = str(getattr(exc, "code", "")).strip()
             is_rate_limit = code_str in {"212000", "429"} or "请求过频" in str(exc)
             if is_rate_limit:
                 return CdkRedeemResult(
@@ -141,37 +125,14 @@ class CdkService:
                     terminal=False,
                 )
 
-            # 写请求的服务端错误无法证明请求未生效，必须按未知结果隔离。
-            is_http_temp = False
-            if code_str.isdigit():
-                code_int = int(code_str)
-                if 500 <= code_int < 600 or code_int in {408, 429}:
-                    is_http_temp = True
-            elif "HTTP" in str(exc) or any(err in str(exc) for err in ("500", "502", "503", "504")):
-                is_http_temp = True
-
-            if is_http_temp:
-                return CdkRedeemResult(
-                    code=code,
-                    success=False,
-                    message="兑换结果未确认，请核对官方兑换记录；未自动重发",
-                    is_unknown=True,
-                    terminal=False,
-                )
-
             return CdkRedeemResult(
                 code=code,
                 success=False,
-                message="兑换结果未确认，请核对官方兑换记录；未自动重发",
-                is_unknown=True,
-                terminal=False,
-            )
-        except Exception as exc:
-            logger.error("CDK 兑换异常: %s", type(exc).__name__)
-            return CdkRedeemResult(
-                code=code,
-                success=False,
-                message="兑换结果未确认，请核对官方兑换记录；未自动重发",
+                message=(
+                    "网络请求超时，请先检查游戏内邮箱或官方兑换记录，切勿频繁重复提交"
+                    if getattr(exc, "outcome_unknown", False)
+                    else "兑换结果未确认，请核对官方兑换记录；未自动重发"
+                ),
                 is_unknown=True,
                 terminal=False,
             )
@@ -218,7 +179,7 @@ class CdkService:
                         batch_res.stopped_by_rate_limit = True
                         logger.warning("CDK 批量兑换触发限流，中止剩余任务")
                         break
-                except CookieExpired:
+                except CredentialExpiredError:
                     batch_res.stopped_by_cookie = True
                     batch_res.results.append(
                         CdkRedeemResult(code=code, success=False, message="登录状态已失效，已中止剩余兑换")
@@ -298,7 +259,7 @@ class CdkService:
             return CdkRedeemResult(code, False, "此码正在处理，请稍后查询", is_unknown=True, terminal=False)
         try:
             result = await self._redeem_single_core(account, code)
-        except CookieExpired:
+        except CredentialExpiredError:
             store.finish_run(key, "expired", "登录状态已失效")
             raise
         except asyncio.CancelledError:

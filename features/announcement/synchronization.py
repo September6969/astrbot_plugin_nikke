@@ -7,13 +7,16 @@ from collections import Counter
 import logging
 from typing import Any
 
-import httpx
-
 from astrbot_plugin_nikke.core.privacy import safe_exception_message
 
 from .deadlines import CST
 from .models import AnnouncementRecord
 from .normalization import AnnouncementNormalizer
+from .ports import (
+    AnnouncementSource,
+    AnnouncementSourceFactory,
+    OfficialAnnouncementFetcher,
+)
 from .repository import AnnouncementRepository
 
 logger = logging.getLogger("nikke.announcements")
@@ -28,27 +31,41 @@ class AnnouncementSyncCoordinator:
     DEEP_PAGE_SIZE = 20
     normalize_locale = staticmethod(AnnouncementNormalizer.normalize_locale)
 
-    def __init__(self, repository: AnnouncementRepository):
+    def __init__(
+        self,
+        repository: AnnouncementRepository,
+        *,
+        source_factory: AnnouncementSourceFactory | None = None,
+        official_fetcher: OfficialAnnouncementFetcher | None = None,
+    ):
         self.repository = repository
+        self._source_factory = source_factory
+        self._official_fetcher = official_fetcher
 
-    @staticmethod
-    async def fetch_primary(*, locale: str = "en", deep: bool = False, fallback=None) -> list[AnnouncementRecord]:
-        from .sources import InformationFeedsSource
-
+    async def fetch_primary(self, *, locale: str = "en", deep: bool = False) -> list[AnnouncementRecord]:
         try:
             selected_locale = AnnouncementNormalizer.normalize_locale(locale)
-            return await InformationFeedsSource(
+            source = self._create_source(
                 selected_locale,
                 max_pages=(AnnouncementSyncCoordinator.DEEP_MAX_PAGES if deep else AnnouncementSyncCoordinator.NORMAL_MAX_PAGES),
                 page_size=(AnnouncementSyncCoordinator.DEEP_PAGE_SIZE if deep else AnnouncementSyncCoordinator.NORMAL_PAGE_SIZE),
-            ).fetch()
+            )
+            return await source.fetch()
         except Exception:
             if deep:
                 # 深度范围必须由主 InformationFeeds 源确认，不能用旧回退源冒充完成。
                 raise
-            if fallback is not None:
-                return await fallback()
-            return await AnnouncementSyncCoordinator.fetch_official()
+            return await self._fetch_official()
+
+    def _create_source(self, locale: str, *, max_pages: int, page_size: int) -> AnnouncementSource:
+        if self._source_factory is None:
+            raise RuntimeError("公告来源尚未由组合根装配")
+        return self._source_factory(locale, max_pages=max_pages, page_size=page_size)
+
+    async def _fetch_official(self) -> list[AnnouncementRecord]:
+        if self._official_fetcher is None:
+            raise RuntimeError("官方公告回退来源尚未由组合根装配")
+        return await self._official_fetcher()
 
     async def sync_from_source(
         self,
@@ -65,9 +82,7 @@ class AnnouncementSyncCoordinator:
             if fetcher is not None:
                 records = await fetcher()
             else:
-                from .sources import InformationFeedsSource
-
-                source = InformationFeedsSource(
+                source = self._create_source(
                     selected_locale,
                     max_pages=self.DEEP_MAX_PAGES if deep else self.NORMAL_MAX_PAGES,
                     page_size=self.DEEP_PAGE_SIZE if deep else self.NORMAL_PAGE_SIZE,
@@ -81,13 +96,13 @@ class AnnouncementSyncCoordinator:
                     # 不以旧 MVP 回退结果冒充已完成的深度扫描。
                     if deep:
                         raise
-                    records = await self.fetch_official()
+                    records = await self._fetch_official()
                     source_name = "blablalink-fallback"
                     scan = {"fallback": True, "requested_pages": self.NORMAL_MAX_PAGES, "page_size": self.NORMAL_PAGE_SIZE}
             if not isinstance(records, list):
                 raise ValueError("公告来源未返回列表")
 
-            counts = Counter()
+            counts: Counter[str] = Counter()
             for r in records:
                 if not isinstance(r, AnnouncementRecord):
                     counts["invalid"] += 1
@@ -136,42 +151,3 @@ class AnnouncementSyncCoordinator:
             safe_message = safe_exception_message(exc)
             logger.warning("官方公告同步失败，降级读取本地缓存: %s", safe_message)
             return False, f"官方数据同步失败（{safe_message}），已降级读取本地缓存"
-
-    @staticmethod
-    async def fetch_official() -> list[AnnouncementRecord]:
-        """生产环境官方公告拉取器（带超时与异常降级）。"""
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.get("https://api.blablalink.com/api/ugc/direct/standalonesite/User/GetAnnouncements")
-            resp.raise_for_status()
-            data = resp.json()
-            code = data.get("code")
-            # 严格校验：若返回权限不足或非 0 状态码，必须抛出受控异常走降级，严禁误判为同步成功
-            if code not in (0, "0") or data.get("code_type") == 1:
-                msg = data.get("msg") or f"状态码 {code}"
-                raise RuntimeError(f"官方公告接口返回业务错误: {msg} (code={code})")
-            payload_data = data.get("data")
-            if not isinstance(payload_data, dict):
-                raise RuntimeError("官方公告数据结构缺失或非字典对象")
-            if "list" not in payload_data:
-                raise RuntimeError("官方公告数据缺失 list 字段")
-            items = payload_data["list"]
-            if not isinstance(items, list):
-                raise RuntimeError("官方公告 list 字段非列表格式")
-            records = []
-            for it in items:
-                if not isinstance(it, dict):
-                    continue
-                content_id = it.get("content_id") or it.get("id")
-                if not isinstance(content_id, (str, int)) or isinstance(content_id, bool) or not str(content_id).strip():
-                    logger.warning("跳过缺少稳定 ID 的公告")
-                    continue
-                rec = AnnouncementRecord(
-                    content_id=str(content_id),
-                    title=str(it.get("title", "")),
-                    body=str(it.get("content", "") or it.get("body", "")),
-                    published_at=str(it.get("publish_time", "")),
-                    source_url=str(it.get("url", "")),
-                    locale="und",
-                )
-                records.append(rec)
-        return records

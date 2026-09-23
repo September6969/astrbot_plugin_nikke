@@ -76,7 +76,10 @@ async def main() -> None:
                     "astrbot_plugin_nikke.features.character.face_anchor.metadata",
                     return_value={},
                 ):
-                    before = framing(card, portrait, body_centering=False, summary_count=4)
+                    before = framing(
+                        card, portrait, body_centering=False, summary_count=4,
+                        identity_resolver=manager.nikke_db,
+                    )
                     before_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, assets)
                 before_payload["art_style"] = before["style"]
                 before_html = template.render(**before_payload)
@@ -86,7 +89,10 @@ async def main() -> None:
                 await page.screenshot(path=str(before_path), full_page=True)
 
                 metadata.cache_clear()
-                after = framing(card, portrait, body_centering=False, summary_count=4)
+                after = framing(
+                    card, portrait, body_centering=False, summary_count=4,
+                    identity_resolver=manager.nikke_db,
+                )
                 after_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, assets)
                 after_payload["art_style"] = after["style"]
                 after_html = template.render(**after_payload)

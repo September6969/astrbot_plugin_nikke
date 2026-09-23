@@ -10,7 +10,13 @@ import httpx
 from astrbot_plugin_nikke.features.cdk.models import CdkBatchResult, CdkRedeemResult
 from astrbot_plugin_nikke.features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
 from astrbot_plugin_nikke.application.commands.cdk import CdkCommandHandler
-from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaError, CdkRedemptionResult, CookieExpired
+from astrbot_plugin_nikke.integrations.blablalink.client import (
+    BlaBlaClient,
+    BlaBlaError,
+    BlaBlaTimeoutError,
+    CdkRedemptionResult,
+    CookieExpired,
+)
 
 
 class CdkInputParserTests(unittest.TestCase):
@@ -104,7 +110,7 @@ class CdkServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_single_network_timeout_marks_unknown(self):
         client = AsyncMock(spec=BlaBlaClient)
-        client.redeem_cdk.side_effect = httpx.TimeoutException("Read timed out")
+        client.redeem_cdk.side_effect = BlaBlaTimeoutError("Read timed out")
         service = CdkService(client)
         res = await service.redeem_single({"game_uid": "123"}, "TIMEOUT_CODE")
         self.assertFalse(res.success)

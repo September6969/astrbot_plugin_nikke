@@ -140,19 +140,21 @@ def test_calendar_horizon_and_classification(tmp_path):
 async def test_calendar_command_fallback_same_snapshot(tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
+    from astrbot_plugin_nikke.integrations.calendar.visual_cache import CalendarVisualCache
     plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin.services.calendar = CalendarService(tmp_path)
+    visual_cache = CalendarVisualCache(tmp_path / "calendar")
+    visual_cache.sync = AsyncMock()
+    plugin.services.calendar = CalendarService(tmp_path, visual_cache=visual_cache)
     inject_calendar_handler(plugin)
     plugin.services.calendar._has_snapshot = True
     plugin.services.calendar.sync_from_source = AsyncMock()
-    plugin.services.calendar.visual_cache.sync = AsyncMock()
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
     event = Mock(plain_result=lambda text: text)
     results = [result async for result in plugin.event_schedule(event)]
     assert "未来 14 天" in results[0]
     plugin.services.calendar.sync_from_source.assert_not_called()
-    plugin.services.calendar.visual_cache.sync.assert_not_awaited()
+    visual_cache.sync.assert_not_awaited()
 
 
 def test_union_scopes_and_exact_values(tmp_path):
@@ -341,4 +343,3 @@ def test_union_records_no_attack_summary(tmp_path):
     assert payload_unknown["no_attack"]["label"] == "无法确认"
     html3 = Environment(autoescape=False).from_string(template).render(**payload_unknown)
     assert "无法确认" in html3
-

@@ -12,6 +12,7 @@ from astrbot_plugin_nikke.features.announcement.application import AnnouncementA
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
 from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
 from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
+from astrbot_plugin_nikke.integrations.announcement.information_feeds import InformationFeedsSource
 
 
 def test_delivery_coordination_limit_is_explicitly_process_local():
@@ -22,7 +23,12 @@ def test_delivery_coordination_limit_is_explicitly_process_local():
 @pytest.mark.asyncio
 async def test_cached_announcement_query_does_not_fetch_and_preserves_filters():
     now = datetime(2026, 9, 6, tzinfo=timezone.utc)
-    announcements = AnnouncementService(clock=lambda: now)
+    announcements = AnnouncementService(
+        clock=lambda: now,
+        source_factory=lambda locale, *, max_pages, page_size: InformationFeedsSource(
+            locale, max_pages=max_pages, page_size=page_size
+        ),
+    )
     announcements.add_or_update(
         AnnouncementRecord(
             "ja:maintenance",
@@ -45,7 +51,7 @@ async def test_cached_announcement_query_does_not_fetch_and_preserves_filters():
     )
 
     with tempfile.TemporaryDirectory() as directory, patch(
-        "astrbot_plugin_nikke.features.announcement.sources.InformationFeedsSource.fetch",
+        "astrbot_plugin_nikke.integrations.announcement.information_feeds.InformationFeedsSource.fetch",
         new=AsyncMock(return_value=[]),
     ) as fetch:
         application = AnnouncementApplication(
@@ -63,7 +69,12 @@ async def test_cached_announcement_query_does_not_fetch_and_preserves_filters():
 @pytest.mark.asyncio
 async def test_deep_rescan_returns_public_sync_result_without_dispatching():
     now = datetime(2026, 9, 6, tzinfo=timezone.utc)
-    announcements = AnnouncementService(clock=lambda: now)
+    announcements = AnnouncementService(
+        clock=lambda: now,
+        source_factory=lambda locale, *, max_pages, page_size: InformationFeedsSource(
+            locale, max_pages=max_pages, page_size=page_size
+        ),
+    )
     refreshed = AnnouncementRecord(
         "ja:new",
         "新しいお知らせ",
@@ -74,7 +85,7 @@ async def test_deep_rescan_returns_public_sync_result_without_dispatching():
     )
 
     with tempfile.TemporaryDirectory() as directory, patch(
-        "astrbot_plugin_nikke.features.announcement.sources.InformationFeedsSource.fetch",
+        "astrbot_plugin_nikke.integrations.announcement.information_feeds.InformationFeedsSource.fetch",
         new=AsyncMock(return_value=[refreshed]),
     ) as fetch:
         delivery = AnnouncementDelivery(NikkeStore(directory))

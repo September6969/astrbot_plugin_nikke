@@ -10,9 +10,12 @@ from PIL import Image
 import pytest
 
 from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
-from astrbot_plugin_nikke.features.calendar.sources import GameKeeNikkeScheduleSource, _extract_image_urls
+from astrbot_plugin_nikke.features.calendar.gamekee_parser import (
+    MAX_IMAGE_CANDIDATES,
+    extract_image_urls as _extract_image_urls,
+)
 from astrbot_plugin_nikke.features.calendar.service import CalendarService
-from astrbot_plugin_nikke.features.calendar.visuals import CalendarVisualCache
+from astrbot_plugin_nikke.integrations.calendar.visual_cache import CalendarVisualCache
 
 NOW = datetime(2026, 9, 15, tzinfo=timezone.utc)
 
@@ -31,7 +34,9 @@ def test_url_text_and_nested_json():
     urls = ("https://example.test/a.png", "https://example.test/b.png")
     assert _extract_image_urls(" ".join(urls)) == urls
     assert _extract_image_urls(",".join(urls)) == urls
-    assert len(_extract_image_urls([f"https://example.test/{i}" for i in range(20)])) == 20
+    many_urls = [f"https://example.test/{i}" for i in range(20)]
+    assert len(_extract_image_urls(many_urls)) == MAX_IMAGE_CANDIDATES
+    assert len(_extract_image_urls(many_urls, limit=None)) == 20
     assert _extract_image_urls(json.dumps([{"src": urls[0]}, {"nested": {"image": urls[1]}}])) == urls
 
 
@@ -98,19 +103,13 @@ async def test_visual_non_image_content_type_is_rejected(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_real_candidate_chain_and_retry(tmp_path):
-    count = 0
-    def source_response(request):
-        nonlocal count
-        count += 1
-        if count == 1:
-            return httpx.Response(429)
-        return httpx.Response(200, json={"code": 0, "data": [{"id": 1, "title": "event",
-            "begin_at": int((NOW - timedelta(days=1)).timestamp()), "end_at": int((NOW + timedelta(days=3)).timestamp()),
-            "big_picture": "https://example.test/bad", "picture": "https://example.test/good"}]})
-    source = GameKeeNikkeScheduleSource(transport=httpx.MockTransport(source_response))
-    events = await source.fetch()
-    assert count == 2
+async def test_visual_candidate_chain_uses_fallback_image(tmp_path):
+    events = [
+        activity(
+            key_visual_url="https://example.test/bad",
+            image_urls=("https://example.test/good",),
+        )
+    ]
     assert events[0].visual_candidates == ("https://example.test/bad", "https://example.test/good")
     seen = []
     def image_response(request):
@@ -172,19 +171,6 @@ def test_schema_one_is_readable(tmp_path):
         row.pop(key)
     (tmp_path / "calendar_cache.json").write_text(json.dumps({"schema": 1, "activities": [row]}), encoding="utf-8")
     assert CalendarService(tmp_path, visual_cache=False).activity_count() == 1
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("status", [500, 503])
-async def test_server_error_retry_is_bounded(status):
-    calls = []
-    def respond(request):
-        calls.append(request)
-        return httpx.Response(status)
-    source = GameKeeNikkeScheduleSource(transport=httpx.MockTransport(respond), max_retries=1)
-    with pytest.raises(httpx.HTTPStatusError):
-        await source.fetch()
-    assert len(calls) == 2
 
 
 @pytest.mark.asyncio

@@ -14,6 +14,7 @@ from .query import AnnouncementQuery
 from .repository import AnnouncementRepository
 from .synchronization import AnnouncementSyncCoordinator
 from .models import AnnouncementRecord
+from .ports import AnnouncementSourceFactory, OfficialAnnouncementFetcher
 
 
 class AnnouncementService:
@@ -44,9 +45,20 @@ class AnnouncementService:
         }
     )
 
-    def __init__(self, data_dir: Path | None = None, *, clock: Any = None):
+    def __init__(
+        self,
+        data_dir: Path | None = None,
+        *,
+        clock: Any = None,
+        source_factory: AnnouncementSourceFactory | None = None,
+        official_fetcher: OfficialAnnouncementFetcher | None = None,
+    ):
         self.repository = AnnouncementRepository(data_dir, clock=clock)
-        self.synchronizer = AnnouncementSyncCoordinator(self.repository)
+        self.synchronizer = AnnouncementSyncCoordinator(
+            self.repository,
+            source_factory=source_factory,
+            official_fetcher=official_fetcher,
+        )
         self.query = AnnouncementQuery(self.repository)
         self.diagnostics = AnnouncementDiagnostics(self.repository)
 
@@ -102,17 +114,11 @@ class AnnouncementService:
     async def sync_from_source(self, fetcher=None, *, locale: str = "en", deep: bool = False) -> tuple[bool, str]:
         return await self.synchronizer.sync_from_source(fetcher, locale=locale, deep=deep)
 
-    @staticmethod
-    async def fetch_primary(*, locale: str = "en", deep: bool = False) -> list[AnnouncementRecord]:
-        return await AnnouncementSyncCoordinator.fetch_primary(
-            locale=locale,
-            deep=deep,
-            fallback=AnnouncementService.fetch_official,
-        )
+    async def fetch_primary(self, *, locale: str = "en", deep: bool = False) -> list[AnnouncementRecord]:
+        return await self.synchronizer.fetch_primary(locale=locale, deep=deep)
 
-    @staticmethod
-    async def fetch_official() -> list[AnnouncementRecord]:
-        return await AnnouncementSyncCoordinator.fetch_official()
+    async def fetch_official(self) -> list[AnnouncementRecord]:
+        return await self.synchronizer._fetch_official()
 
     def add_or_update(self, record: AnnouncementRecord, *, persist: bool = True) -> tuple[bool, bool]:
         return self.repository.add_or_update(record, persist=persist)

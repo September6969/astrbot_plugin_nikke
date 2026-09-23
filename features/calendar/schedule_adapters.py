@@ -29,8 +29,8 @@ from astrbot_plugin_nikke.features.calendar.canonical_models import (
     ManualOverride,
 )
 from .gamekee_parser import ParseFailure, parse_gamekee_row
-from ...integrations.blablalink.fetch_client import FetchClient
 from ...core.privacy import safe_exception_message
+from .ports import CalendarFetchGateway
 
 logger = logging.getLogger("nikke.schedule.adapters")
 
@@ -120,8 +120,8 @@ class BaseScheduleAdapter(ABC):
 class GameKeeScheduleAdapter(BaseScheduleAdapter):
     API_URL = "https://www.gamekee.com/v1/activity/page-list"
 
-    def __init__(self, fetch_client: FetchClient | None = None):
-        self.client = fetch_client or FetchClient()
+    def __init__(self, fetch_client: CalendarFetchGateway | None = None):
+        self.client = fetch_client
         self.last_scan: dict[str, Any] = {
             "rows": 0,
             "valid": 0,
@@ -169,6 +169,8 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
         }
 
         try:
+            if self.client is None:
+                raise RuntimeError("Calendar 网络端口尚未由组合根装配")
             payload = await self.client.get_json(self.API_URL, headers=headers, params=params)
         except Exception as exc:
             err = safe_exception_message(exc)

@@ -1,5 +1,6 @@
 from io import BytesIO
 import base64
+from pathlib import Path
 
 from PIL import Image
 from jinja2 import Environment
@@ -114,7 +115,8 @@ def test_custom_webfonts_and_slot_geometry_in_template():
 
 
 def test_face_anchor_eight_real_samples_and_three_fallbacks():
-    from astrbot_plugin_nikke.features.character.face_anchor import metadata, framing, identity_resolver
+    from astrbot_plugin_nikke.features.character.face_anchor import metadata, framing
+    from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
     from astrbot_plugin_nikke.features.character.models import CostumeSelection
     from astrbot_plugin_nikke.tests.test_character_replica import example_card
     from PIL import Image
@@ -133,8 +135,11 @@ def test_face_anchor_eight_real_samples_and_three_fallbacks():
         ("tetra", "352", 0, "c352"),
     ]
 
+    assets = Path(__file__).resolve().parents[1] / "assets"
+    identity_resolver = NikkeDbProvider(assets, assets, remote=False)
+
     for name, rid, costume, expected_render_id in eight_samples:
-        render_id = identity_resolver().resolve_render_id(rid, costume)
+        render_id = identity_resolver.resolve_render_id(rid, costume)
         assert render_id == expected_render_id, f"{name} render_id mismatch"
         record = meta.get(render_id)
         assert record is not None, f"{name} missing in metadata"
@@ -162,7 +167,7 @@ def test_face_anchor_eight_real_samples_and_three_fallbacks():
     unknown_costume_card = example_card()
     unknown_costume_card.costume_id = "unknown"
     unknown_costume_card.costume_selection = CostumeSelection("unknown", "test", "unknown")
-    result = framing(unknown_costume_card, dummy_img)
+    result = framing(unknown_costume_card, dummy_img, identity_resolver=identity_resolver)
     assert result["source"] == "identity_unknown"
     assert result["style"] == "object-fit:contain"
 

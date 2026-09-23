@@ -250,8 +250,9 @@ class AnnouncementServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_official_fetch_error_is_not_recorded_as_sync_success(self):
         from unittest.mock import patch, MagicMock
+        from astrbot_plugin_nikke.integrations.announcement.official_source import fetch_official_announcements
 
-        service = AnnouncementService()
+        service = AnnouncementService(official_fetcher=fetch_official_announcements)
         self.assertIsNone(service.last_updated_at)
 
         # 模拟官方接口返回权限错误 (code: 220000)

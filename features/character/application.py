@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from astrbot_plugin_nikke.core.privacy import safe_exception_message
-from astrbot_plugin_nikke.integrations.blablalink.errors import CookieExpired
+from astrbot_plugin_nikke.features.account.errors import CredentialExpiredError
 from .models import CharacterCardData, CharacterCardRequest, CharacterCardResult
 from .research_levels import map_research_levels
 
@@ -253,7 +253,7 @@ class CharacterApplication:
         try:
             profile = await self._gateway.get_profile(account)
         except Exception as exc:
-            if isinstance(exc, CookieExpired):
+            if isinstance(exc, CredentialExpiredError):
                 raise
             _LOGGER.warning(
                 "[NIKKE] 研究快照读取失败：%s", safe_exception_message(exc)

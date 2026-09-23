@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 import httpx
-from astrbot_plugin_nikke.features.voice.provider import VoiceResourceProvider
+from astrbot_plugin_nikke.integrations.voice.resource_provider import VoiceResourceProvider
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 

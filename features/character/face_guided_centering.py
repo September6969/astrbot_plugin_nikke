@@ -25,9 +25,36 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Sequence
+from typing import Protocol, Sequence
 
-from PIL import Image
+
+class AlphaPixels(Protocol):
+    """可按像素坐标读取透明度的视图。"""
+
+    def __getitem__(self, point: tuple[int, int]) -> int: ...
+
+
+class AlphaChannel(Protocol):
+    """RGBA 图像的透明度通道。"""
+
+    @property
+    def size(self) -> tuple[int, int]: ...
+
+    def load(self) -> AlphaPixels: ...
+
+
+class RasterImage(Protocol):
+    """图像算法实际使用的最小结构化接口。"""
+
+    @property
+    def width(self) -> int: ...
+
+    @property
+    def height(self) -> int: ...
+
+    def convert(self, mode: str) -> RasterImage: ...
+
+    def getchannel(self, channel: str) -> AlphaChannel: ...
 
 
 @dataclass(frozen=True)
@@ -230,7 +257,7 @@ class _Observation:
 
 
 def center_after_face_anchor(
-    portrait: Image.Image,
+    portrait: RasterImage,
     *,
     face_point: Sequence[float],
     base: FrameTransform,
@@ -323,7 +350,7 @@ def center_after_face_anchor(
 
 
 def analyze_face_guided_silhouette(
-    portrait: Image.Image,
+    portrait: RasterImage,
     *,
     face_point: Sequence[float],
     config: CenteringConfig = DEFAULT_CENTERING_CONFIG,
@@ -606,7 +633,7 @@ def analyze_face_guided_silhouette(
     )
 
 
-def css_style_for_transform(portrait: Image.Image, transform: FrameTransform) -> str:
+def css_style_for_transform(portrait: RasterImage, transform: FrameTransform) -> str:
     """Serialise a candidate transform in the same shape as ``framing()``."""
 
     width = portrait.width * transform.scale
@@ -667,7 +694,7 @@ def _bootstrap_subject_width(
     y0 = max(top, int(round(face_y - max(2.0, active_height * 0.015))))
     y1 = min(bottom, int(round(face_y + band)))
 
-    rows: list[tuple[int, float, float, bool, float]] = []
+    rows: list[tuple[float, float, float, bool, float]] = []
     # (distance from face_y, effective width, full width, contaminated, half_balance)
     for y in range(y0, y1 + 1):
         runs = _opaque_runs_for_row(
@@ -933,13 +960,16 @@ def _noop_result(base: FrameTransform, face_before: tuple[float, float], *, reas
 
 
 def _validate_inputs(
-    portrait: Image.Image,
+    portrait: RasterImage,
     face_point: Sequence[float],
     base: FrameTransform,
     config: CenteringConfig,
 ) -> None:
-    if not isinstance(portrait, Image.Image):
-        raise TypeError("portrait must be a PIL.Image.Image")
+    if not all(
+        callable(getattr(portrait, name, None))
+        for name in ("convert", "getchannel")
+    ) or not all(hasattr(portrait, name) for name in ("width", "height")):
+        raise TypeError("portrait must provide RGBA raster operations")
     if len(face_point) != 2 or not all(_finite_number(v) for v in face_point):
         raise ValueError("face_point must contain two finite numbers")
     fx, fy = float(face_point[0]), float(face_point[1])

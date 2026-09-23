@@ -68,3 +68,16 @@ class DailyStore(Protocol):
 
     def set_setting(self, key: str, value: Any) -> None:
         """保存 Daily feature 自己拥有的持久结果。"""
+
+
+class DailyGateway(Protocol):
+    """Daily 用例所需的账号只读与签到能力。"""
+
+    async def get_profile(self, account: Mapping[str, Any]) -> Mapping[str, Any]:
+        """读取账号资料以验证会话。"""
+
+    async def get_daily_signin(self, account: Mapping[str, Any]) -> Mapping[str, Any]:
+        """只读查询当天签到状态。"""
+
+    async def perform_daily_signin(self, account: Mapping[str, Any]) -> str:
+        """执行一次受状态保护的签到写操作。"""

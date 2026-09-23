@@ -12,6 +12,10 @@ from ...features.announcement.ports import AnnouncementStateStore
 from ...features.announcement.service import AnnouncementService
 from ...features.calendar.application import CalendarApplication
 from ...features.calendar.service import CalendarService
+from ...integrations.announcement.information_feeds import InformationFeedsSource
+from ...integrations.announcement.official_source import fetch_official_announcements
+from ...integrations.blablalink.fetch_client import FetchClient
+from ...integrations.calendar.visual_cache import CalendarVisualCache
 
 
 @dataclass(frozen=True)
@@ -28,10 +32,19 @@ def create_announcement_resources(
     data_dir: Path, *, store: AnnouncementStateStore
 ) -> AnnouncementResources:
     """组装公告投递和 Calendar 提醒所共享的唯一服务。"""
-    service = AnnouncementService(data_dir / "announcements")
+    service = AnnouncementService(
+        data_dir / "announcements",
+        source_factory=lambda locale, *, max_pages, page_size: InformationFeedsSource(
+            locale, max_pages=max_pages, page_size=page_size
+        ),
+        official_fetcher=fetch_official_announcements,
+    )
     delivery = AnnouncementDelivery(store)
     calendar = CalendarService(
-        data_dir / "calendar", announcement_service=service
+        data_dir / "calendar",
+        announcement_service=service,
+        fetch_client=FetchClient(),
+        visual_cache=CalendarVisualCache(data_dir / "calendar"),
     )
     calendar_application = calendar.application
     application = AnnouncementApplication(

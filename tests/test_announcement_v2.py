@@ -15,7 +15,7 @@ import httpx
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
 from astrbot_plugin_nikke.features.announcement.application import AnnouncementApplication
 from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
-from astrbot_plugin_nikke.features.announcement.sources import InformationFeedsSource
+from astrbot_plugin_nikke.integrations.announcement.information_feeds import InformationFeedsSource
 from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.application.commands.announcement import AnnouncementCommandHandler
@@ -98,17 +98,15 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
                     service.add_or_update(invalid)
 
     async def test_deep_fetch_primary_does_not_use_legacy_fallback(self) -> None:
-        with patch(
-            "astrbot_plugin_nikke.features.announcement.sources.InformationFeedsSource.fetch",
-            new=AsyncMock(side_effect=RuntimeError("主源故障")),
-        ), patch.object(
-            AnnouncementService,
-            "fetch_official",
-            new=AsyncMock(return_value=[]),
-        ) as legacy:
-            with self.assertRaises(RuntimeError):
-                await AnnouncementService.fetch_primary(locale="ja", deep=True)
-            legacy.assert_not_awaited()
+        source = SimpleNamespace(fetch=AsyncMock(side_effect=RuntimeError("主源故障")))
+        legacy = AsyncMock(return_value=[])
+        service = AnnouncementService(
+            source_factory=lambda locale, *, max_pages, page_size: source,
+            official_fetcher=legacy,
+        )
+        with self.assertRaises(RuntimeError):
+            await service.fetch_primary(locale="ja", deep=True)
+        legacy.assert_not_awaited()
 
     async def test_deep_rescan_reports_bounded_scope_and_locale(self) -> None:
         service = AnnouncementService()
@@ -177,8 +175,10 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
             kwargs["transport"] = httpx.MockTransport(handler)
             return real_client(*args, **kwargs)
 
-        with patch("astrbot_plugin_nikke.features.announcement.synchronization.httpx.AsyncClient", client_factory):
-            records = await AnnouncementService.fetch_official()
+        from astrbot_plugin_nikke.integrations.announcement.official_source import fetch_official_announcements
+
+        with patch("astrbot_plugin_nikke.integrations.announcement.official_source.httpx.AsyncClient", client_factory):
+            records = await fetch_official_announcements()
         self.assertEqual([item.content_id for item in records], ["a", "b"])
         self.assertEqual([item.locale for item in records], ["und", "und"])
 

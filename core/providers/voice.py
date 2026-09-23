@@ -16,7 +16,7 @@ from ...features.voice.encoder import VoiceEncoder
 from ...features.voice.mapping import VoiceMapRegistry
 from ...features.voice.pipeline import VoicePipeline
 from ...features.voice.ports import VoiceSettingsStore
-from ...features.voice.provider import VoiceResourceProvider
+from ...integrations.voice.resource_provider import VoiceResourceProvider
 
 logger = logging.getLogger("astrbot_plugin_nikke")
 

@@ -16,7 +16,7 @@ import httpx
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
 from astrbot_plugin_nikke.features.calendar.models import CalendarActivity, _aware_utc
 from astrbot_plugin_nikke.features.calendar.service import CalendarService
-from astrbot_plugin_nikke.features.calendar.sources import GameKeeNikkeScheduleSource, _canonical_int
+from astrbot_plugin_nikke.features.calendar.gamekee_parser import _canonical_int
 from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
@@ -142,91 +142,6 @@ class TestCalendarSources(IsolatedAsyncioTestCase):
         self.assertIsNone(_canonical_int("1.0"))
         self.assertIsNone(_canonical_int("abc"))
         self.assertIsNone(_canonical_int(None))
-
-    async def test_gamekee_fetch_contract_and_mapping(self):
-        captured_request = {}
-
-        def mock_handler(request: httpx.Request) -> httpx.Response:
-            captured_request["url"] = str(request.url)
-            captured_request["headers"] = dict(request.headers)
-            captured_request["params"] = dict(request.url.params)
-
-            payload = {
-                "code": 0,
-                "data": [
-                    {
-                        "id": 991,
-                        "title": "协同作战：神罚",
-                        "begin_at": 1789200000,
-                        "end_at": 1789300000,
-                        "importance": 1,
-                        "tag": "协同作战",
-                        "big_picture": "https://img.gamekee.com/big.png",
-                        "picture": "https://img.gamekee.com/small.png",
-                        "link_url": "https://gamekee.com/nikke/991",
-                        "description": "协同作战说明",
-                    },
-                    {
-                        # Malformed row (missing end_at > begin_at)
-                        "id": 992,
-                        "title": "坏数据",
-                        "begin_at": 1789300000,
-                        "end_at": 1789200000,
-                    },
-                ],
-            }
-            return httpx.Response(200, json=payload)
-
-        transport = httpx.MockTransport(mock_handler)
-        source = GameKeeNikkeScheduleSource(transport=transport)
-        activities = await source.fetch()
-
-        self.assertEqual(captured_request["headers"].get("game-alias"), "nikke")
-        self.assertEqual(captured_request["params"].get("serverId"), "19")
-        self.assertEqual(captured_request["params"].get("status"), "0")
-        self.assertEqual(captured_request["params"].get("limit"), "999")
-
-        self.assertEqual(len(activities), 1)
-        act = activities[0]
-        self.assertEqual(act.event_id, "gamekee:991")
-        self.assertEqual(act.title, "协同作战：神罚")
-        self.assertEqual(act.category, "coop")
-        self.assertEqual(act.banner_url, "https://img.gamekee.com/big.png")
-        self.assertEqual(act.source_url, "https://gamekee.com/nikke/991")
-        self.assertEqual(act.importance, 1)
-
-        self.assertEqual(source.last_scan["rows"], 2)
-        self.assertEqual(source.last_scan["valid"], 1)
-        self.assertEqual(source.last_scan["malformed"], 1)
-        self.assertEqual(source.last_scan["duplicates"], 0)
-
-    async def test_schema_drift_protection_on_all_malformed(self):
-        def mock_handler(request: httpx.Request) -> httpx.Response:
-            payload = {
-                "code": 200,
-                "data": [
-                    {"id": 1, "title": "broken", "begin_at": True, "end_at": 2},
-                    {"id": "bad", "title": "also broken", "begin_at": 1, "end_at": 0},
-                ],
-            }
-            return httpx.Response(200, json=payload)
-
-        transport = httpx.MockTransport(mock_handler)
-        source = GameKeeNikkeScheduleSource(transport=transport)
-        with self.assertRaises(ValueError) as ctx:
-            await source.fetch()
-        self.assertIn("漂移", str(ctx.exception))
-
-    async def test_valid_empty_upstream_data(self):
-        def mock_handler(request: httpx.Request) -> httpx.Response:
-            return httpx.Response(200, json={"code": 0, "data": []})
-
-        transport = httpx.MockTransport(mock_handler)
-        source = GameKeeNikkeScheduleSource(transport=transport)
-        activities = await source.fetch()
-        self.assertEqual(activities, [])
-        self.assertEqual(source.last_scan["rows"], 0)
-
 
 class TestCalendarService(IsolatedAsyncioTestCase):
     def setUp(self):

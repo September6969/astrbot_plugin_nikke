@@ -10,7 +10,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from ..features.account.application import AccountApplication
+    from ..features.character.builder import CharacterCardBuilder
+    from ..integrations.blablalink.client import BlaBlaClient
+    from ..ui.primitives import CardRenderer
+    from .asset_manager import AssetManager
+    from .feedback import DelayedFeedbackManager
 
 from ..features.announcement.application import AnnouncementApplication
 from ..features.announcement.service import AnnouncementService
@@ -22,7 +30,7 @@ from ..features.campaign.stage_resolver import CampaignStageResolver
 from ..features.cdk.service import CdkService
 from ..features.character.application import CharacterApplication
 from ..features.character.identity import CharacterDirectoryResolver
-from ..features.character.stat_resources import CharacterStatResourceLoader
+from ..integrations.character.stat_resources import CharacterStatResourceLoader
 from ..features.daily.runner import DailyRunner
 from ..features.guide.application import GuideApplication
 from ..features.profile.builder import ProfileBuilder

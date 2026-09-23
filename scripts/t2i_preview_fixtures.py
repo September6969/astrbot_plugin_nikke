@@ -9,6 +9,7 @@ def calendar_cases(directory):
     from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
     from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent, TimePrecision, SourceHealth, FetchOutcome
+    from astrbot_plugin_nikke.integrations.calendar.visual_cache import CalendarVisualCache
     from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 
     case_names = (
@@ -42,7 +43,11 @@ def calendar_cases(directory):
     )
     result = {}
     for name in case_names:
-        service = CalendarService(Path(directory) / name)
+        case_dir = Path(directory) / name
+        service = CalendarService(
+            case_dir,
+            visual_cache=CalendarVisualCache(case_dir / "calendar"),
+        )
         service._has_snapshot = name != "unavailable"
         service.last_updated_at = NOW.isoformat()
         service.last_sync_error = "合成同步失败示例" if name == "stale" else ""
