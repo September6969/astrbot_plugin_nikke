@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Unit and regression tests for Union Raid models, builder, and renderer."""
 
+from plugin_fixtures import make_plugin_shell
 import json
 import tempfile
 import unittest
@@ -316,7 +317,7 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_chinese_and_legacy_raid_commands_route_correctly(self):
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
         async def fake_union_raid(event):
@@ -351,7 +352,7 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_my_raid_command_routes_to_member_scope(self):
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
         async def fake_union_raid_my(event):

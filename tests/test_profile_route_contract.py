@@ -1,6 +1,7 @@
 """验证 Profile 命令已收敛到正式 handler 的唯一 application 路径。"""
 
 from __future__ import annotations
+from plugin_fixtures import make_plugin_shell
 
 import ast
 import asyncio
@@ -68,21 +69,21 @@ class _Renderer:
 
 
 def _plugin(*, account=None, application_response=None):
-    plugin = NikkePlugin.__new__(NikkePlugin)
-    plugin.store = _Store(account)
-    plugin.profile_application = _Application(application_response)
-    plugin.profile_renderer = _Renderer()
-    plugin.feedback_manager = None
-    plugin.command_adapter = AstrBotCommandAdapter()
+    plugin = make_plugin_shell()
+    plugin.services.store = _Store(account)
+    plugin.services.profile_application = _Application(application_response)
+    plugin.services.profile_renderer = _Renderer()
+    plugin.services.feedback_manager = None
+    plugin.adapters.command = AstrBotCommandAdapter()
 
     async def no_t2i(page, dashboard):
         assert page == "profile"
         return None
 
     plugin._try_t2i = no_t2i
-    plugin.profile_command_handler = ProfileCommandHandler(
-        account_reader=plugin.store,
-        application=plugin.profile_application,
+    plugin.handlers.profile = ProfileCommandHandler(
+        account_reader=plugin.services.store,
+        application=plugin.services.profile_application,
         present=plugin._render_profile_dashboard,
     )
     return plugin
@@ -99,20 +100,20 @@ def test_profile_route_uses_one_application_path_and_preserves_image_reply():
     plugin = _plugin(application_response=object())
 
     assert _run_me(plugin) == [("image", "profile.png")]
-    assert plugin.profile_application.calls == [plugin.store.account]
-    assert plugin.store.lookup_ids == ["route-user"]
+    assert plugin.services.profile_application.calls == [plugin.services.store.account]
+    assert plugin.services.store.lookup_ids == ["route-user"]
     assert not hasattr(plugin, "profile_builder")
 
 
 def test_unbound_profile_does_not_call_application():
     plugin = _plugin(account=None, application_response=AssertionError("must not run"))
-    plugin.store.account = None
+    plugin.services.store.account = None
 
     result = _run_me(plugin)
 
     assert result == [("plain", "查询失败：尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")]
-    assert plugin.profile_application.calls == []
-    assert plugin.store.invalidated == []
+    assert plugin.services.profile_application.calls == []
+    assert plugin.services.store.invalidated == []
 
 
 def test_cookie_invalidation_has_one_owner_at_command_boundary():
@@ -121,8 +122,8 @@ def test_cookie_invalidation_has_one_owner_at_command_boundary():
     result = _run_me(plugin)
 
     assert result == [("plain", "登录状态已失效，请重新发送 /妮姬 账号 绑定。")]
-    assert len(plugin.profile_application.calls) == 1
-    assert plugin.store.invalidated == ["route-user"]
+    assert len(plugin.services.profile_application.calls) == 1
+    assert plugin.services.store.invalidated == ["route-user"]
 
 
 def test_main_has_no_profile_builder_branch_or_field_assembly():

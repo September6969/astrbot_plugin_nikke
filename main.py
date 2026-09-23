@@ -21,6 +21,10 @@ from astrbot.api.message_components import Image
 from astrbot.api.star import Context, Star
 
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from .adapters.astrbot.collections import (
+    AstrBotAdapterCollection,
+    PluginCommandHandlers,
+)
 from .adapters.astrbot.runtime import AstrBotRuntimeAdapter
 from .adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
@@ -35,8 +39,6 @@ from .application.commands.tarot import TarotCommandHandler
 from .application.commands.tower import TowerCommandHandler
 from ._version import PLUGIN_VERSION
 from .core.container import create_container
-from .features.daily.runner import DailyRunner
-from .features.calendar.application import CalendarApplication
 from .ui.renderers import (
     CampaignHistoryRenderer,
     T2IRenderer,
@@ -48,7 +50,6 @@ from .features.character.application import (
     CharacterNotFound,
     CharacterNotOwned,
 )
-from .features.cdk.service import CdkService
 from .integrations.blablalink.client import BlaBlaError, CookieExpired
 from .core.privacy import safe_exception_message
 from .features.daily.models import DailyTaskResult
@@ -78,48 +79,20 @@ class NikkePlugin(Star):
         self.plugin_dir = Path(__file__).resolve().parent
         self.data_dir = Path("data") / "nikke"
         self._directory: list[dict] = []
-        self.container = create_container(
+        self.services = create_container(
             self.plugin_dir,
             self.data_dir,
             self.config,
             directory_provider=lambda: self._directory,
         )
-
-        # 映射公开组件到插件门面；Profile 与 Character 用例由应用边界编排。
-        self.extension_zip = self.container.extension_zip
-        self.store = self.container.store
-        self.character_application = self.container.character_application
-        self.client = self.container.client
-        self.renderer = self.container.renderer
-        self.asset_manager = self.container.asset_manager
-        self.character_renderer = self.container.character_renderer
-        self.campaign_application = self.container.campaign_application
-        self.profile_application = self.container.profile_application
-        self.profile_renderer = self.container.profile_renderer
-        self.raid_builder = self.container.raid_builder
-        self.raid_application = self.container.raid_application
-        self.raid_renderer = self.container.raid_renderer
-        self.campaign_renderer = self.container.campaign_renderer
-        self.cdk_service = self.container.cdk_service
-        self.feedback_manager = self.container.feedback_manager
-        self.voice_application = self.container.voice_application
-        self.voice_event_adapter = AstrBotVoiceAdapter(self.voice_application)
-        self.announcement_application = self.container.announcement_application
-        self.calendar = self.container.calendar
-        self.calendar_application = self.container.calendar_application
-        self.tarot = self.container.tarot
-        self.tower_application = self.container.tower_application
-        self.daily_runner = self.container.daily_runner
-        self.web = self.container.web
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
         ).rstrip("/")
         self.web_host = str(self.config.get("web_host", "0.0.0.0"))
         self.web_port = int(self.config.get("web_port", 6210))
-        self.account_application = self.container.account_application
         self.runtime = AstrBotRuntimeAdapter(
-            coordinator=self.container.runtime_coordinator,
-            services=self.container,
+            coordinator=self.services.runtime_coordinator,
+            services=self.services,
             context=self.context,
             plugin_dir=self.plugin_dir,
             config=self.config,
@@ -129,46 +102,44 @@ class NikkePlugin(Star):
             send_summary=self._send_summary,
             on_directory_loaded=self._apply_directory,
         )
-        self.command_adapter = AstrBotCommandAdapter()
-        self.tower_command_handler = TowerCommandHandler(self.tower_application)
-        self.tarot_command_handler = TarotCommandHandler(
-            self.tarot,
-            self.plugin_dir,
-            self.data_dir,
-            on_service_created=lambda service: setattr(self, "tarot", service),
+        self.adapters = AstrBotAdapterCollection(
+            command=AstrBotCommandAdapter(),
+            voice=AstrBotVoiceAdapter(self.services.voice_application),
         )
-        self.guide_application = self.container.guide_application
-        self.guide_command_handler = GuideCommandHandler(self.guide_application)
-        self.profile_command_handler = ProfileCommandHandler(
-            account_reader=self.store,
-            application=self.profile_application,
-            present=self._render_profile_dashboard,
-        )
-        self.daily_command_handler = self._build_daily_command_handler()
-        self.cdk_command_handler = self._build_cdk_command_handler()
-        self.calendar_command_handler = self._build_calendar_command_handler()
-        self.announcement_command_handler = self._build_announcement_command_handler()
-
-        self.account_command_handler = AccountCommandHandler(
-            application=self.account_application,
-            public_base_url=self.public_base_url,
-            allow_group_bind=bool(self.config.get("allow_group_bind", False)),
-            runtime_health=self._account_runtime_health_details,
-            render_manual_summary=self._render_manual_daily_summary,
+        self.handlers = PluginCommandHandlers(
+            account=AccountCommandHandler(
+                application=self.services.account_application,
+                public_base_url=self.public_base_url,
+                allow_group_bind=bool(self.config.get("allow_group_bind", False)),
+                runtime_health=self._account_runtime_health_details,
+                render_manual_summary=self._render_manual_daily_summary,
+            ),
+            announcement=self._build_announcement_command_handler(),
+            cdk=self._build_cdk_command_handler(),
+            calendar=self._build_calendar_command_handler(),
+            daily=self._build_daily_command_handler(),
+            guide=GuideCommandHandler(self.services.guide_application),
+            profile=ProfileCommandHandler(
+                account_reader=self.services.store,
+                application=self.services.profile_application,
+                present=self._render_profile_dashboard,
+            ),
+            tarot=TarotCommandHandler(self.services.tarot),
+            tower=TowerCommandHandler(self.services.tower_application),
         )
         self.runtime.start()
 
     def _apply_directory(self, directory: list[dict[str, Any]]) -> None:
         """将运行时载入的角色目录交给插件展示状态与战役应用。"""
         self._directory = directory
-        self.campaign_application.update_directory(directory)
+        self.services.campaign_application.update_directory(directory)
 
     def _build_campaign_renderer(self) -> CampaignHistoryRenderer:
         """让所有图片渲染器复用同一个资源缓存与线程池。"""
         return CampaignHistoryRenderer(
             self.data_dir / "cards",
             self.plugin_dir / "fonts",
-            self.asset_manager,
+            self.services.asset_manager,
         )
 
     async def _render_campaign_record(self, record):
@@ -177,12 +148,16 @@ class NikkePlugin(Star):
             try:
                 renderer = getattr(self, "campaign_t2i_renderer", None)
                 if renderer is None:
-                    renderer = T2IRenderer(html_render=self.html_render, assets=self.asset_manager)
+                    renderer = T2IRenderer(
+                        html_render=self.html_render, assets=self.services.asset_manager
+                    )
                     self.campaign_t2i_renderer = renderer
                 return await renderer.render_campaign_history(record)
             except Exception as exc:
                 logger.warning("[NIKKE] Campaign T2I 失败，回退 Pillow: %s", type(exc).__name__)
-        return await asyncio.to_thread(self.campaign_renderer.render_campaign_history, record)
+        return await asyncio.to_thread(
+            self.services.campaign_renderer.render_campaign_history, record
+        )
 
     async def _try_t2i(self, page, data, **kwargs):
         """图片展示失败返回空信号，由命令使用已取得的数据安全回退。"""
@@ -195,88 +170,38 @@ class NikkePlugin(Star):
         try:
             renderer = getattr(self, "campaign_t2i_renderer", None)
             if renderer is None:
-                renderer = T2IRenderer(html_render=self.html_render, assets=self.asset_manager)
+                renderer = T2IRenderer(
+                    html_render=self.html_render, assets=self.services.asset_manager
+                )
                 self.campaign_t2i_renderer = renderer
             return await renderer.render_view(page, data, **kwargs)
         except Exception as exc:
             logger.warning("[NIKKE] %s T2I 失败，使用已有数据回退: %s", page, type(exc).__name__)
             return None
 
-    @property
-    def cdk_service(self) -> CdkService:
-        if getattr(self, "_cdk_service_inst", None) is None:
-            self._cdk_service_inst = CdkService(getattr(self, "client", None))
-        return self._cdk_service_inst
-
-    @cdk_service.setter
-    def cdk_service(self, value: CdkService) -> None:
-        self._cdk_service_inst = value
-
-    @property
-    def daily_command_handler(self) -> DailyCommandHandler:
-        handler = getattr(self, "_daily_command_handler", None)
-        if handler is None:
-            handler = self._build_daily_command_handler()
-            self._daily_command_handler = handler
-        return handler
-
-    @daily_command_handler.setter
-    def daily_command_handler(self, handler: DailyCommandHandler) -> None:
-        self._daily_command_handler = handler
-
     def _build_daily_command_handler(self) -> DailyCommandHandler:
         return DailyCommandHandler(
-            account_reader=getattr(self, "store", None),
-            store=getattr(self, "store", None),
-            runner=self.daily_runner,
-            client=getattr(self, "client", None),
-            config=getattr(self, "config", {}),
-            render_summary=lambda rows: self.renderer.render_summary(rows),
+            account_reader=self.services.store,
+            store=self.services.store,
+            runner=self.services.daily_runner,
+            client=self.services.client,
+            config=self.config,
+            render_summary=lambda rows: self.services.renderer.render_summary(rows),
             send_summary=self._send_daily_summary_image,
         )
 
-    @property
-    def cdk_command_handler(self) -> CdkCommandHandler:
-        handler = getattr(self, "_cdk_command_handler", None)
-        if handler is None:
-            handler = self._build_cdk_command_handler()
-            self._cdk_command_handler = handler
-        return handler
-
-    @cdk_command_handler.setter
-    def cdk_command_handler(self, handler: CdkCommandHandler) -> None:
-        self._cdk_command_handler = handler
-
     def _build_cdk_command_handler(self) -> CdkCommandHandler:
         return CdkCommandHandler(
-            account_reader=getattr(self, "store", None),
-            store=getattr(self, "store", None),
-            client=getattr(self, "client", None),
-            service=self.cdk_service,
-            config=getattr(self, "config", {}),
+            account_reader=self.services.store,
+            store=self.services.store,
+            client=self.services.client,
+            service=self.services.cdk_service,
+            config=self.config,
         )
-
-    @property
-    def calendar_application(self) -> CalendarApplication:
-        application = getattr(self, "_calendar_application", None)
-        return application or CalendarApplication(getattr(self, "calendar", None))
-
-    @calendar_application.setter
-    def calendar_application(self, application: CalendarApplication) -> None:
-        self._calendar_application = application
-
-    @property
-    def calendar_command_handler(self) -> CalendarCommandHandler | None:
-        handler = getattr(self, "_calendar_command_handler", None)
-        return handler or self._build_calendar_command_handler()
-
-    @calendar_command_handler.setter
-    def calendar_command_handler(self, handler: CalendarCommandHandler) -> None:
-        self._calendar_command_handler = handler
 
     def _build_calendar_command_handler(self) -> CalendarCommandHandler:
         return CalendarCommandHandler(
-            application=self.calendar_application,
+            application=self.services.calendar_application,
             payload_builder=CalendarT2IPayloadBuilder(),
             render=lambda payload: self._try_t2i("calendar_schedule", payload),
             start_background_refresh=self._request_calendar_refresh,
@@ -284,11 +209,12 @@ class NikkePlugin(Star):
 
     def _build_announcement_command_handler(self) -> AnnouncementCommandHandler:
         return AnnouncementCommandHandler(
-            application=self.announcement_application,
+            application=self.services.announcement_application,
             push_enabled=lambda: bool(
                 self.config.get("enable_announcement_push", False)
             ),
         )
+
 
     def _request_calendar_refresh(self) -> None:
         """将命令触发的刷新委托给运行时，未初始化时安全忽略。"""
@@ -319,9 +245,18 @@ class NikkePlugin(Star):
             diagnostics=format_runtime_health(collect_runtime_health(self.data_dir)),
         )
 
+    def _start_delayed_feedback(self, event, message: str):
+        """通过共享反馈管理器登记当前命令的延迟提示。"""
+        feedback_manager = getattr(self.services, "feedback_manager", None)
+        if feedback_manager is None:
+            return None
+        return feedback_manager.start_delayed_feedback(
+            lambda: self.runtime.send_delayed_notice(event, message)
+        )
+
     async def _render_manual_daily_summary(self) -> str:
         """执行一次管理员手动日常汇总并返回展示图片。"""
-        return await self.daily_command_handler.render_manual_summary()
+        return await self.handlers.daily.render_manual_summary()
 
     async def _dispatch_account_command(
         self,
@@ -333,9 +268,9 @@ class NikkePlugin(Star):
         state: str = "",
     ):
         """将平台事件转成账号命令上下文并返回已适配结果。"""
-        async for result in self.command_adapter.dispatch(
+        async for result in self.adapters.command.dispatch(
             event,
-            self.account_command_handler,
+            self.handlers.account,
             operation=operation,
             action=action,
             value=value,
@@ -345,7 +280,7 @@ class NikkePlugin(Star):
             yield result
 
     def _account_or_error(self, event: AstrMessageEvent) -> dict:
-        account = self.store.get_account(self._qq_id(event))
+        account = self.services.store.get_account(self._qq_id(event))
         if not account:
             raise ValueError("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
         return account
@@ -449,9 +384,9 @@ class NikkePlugin(Star):
             arg2 = parts[3] if len(parts) > 3 else ""
         command_key = command.strip().casefold()
         if command_key in {"塔层", "tower"}:
-            async for result in self.command_adapter.dispatch(
+            async for result in self.adapters.command.dispatch(
                 event,
-                self.tower_command_handler,
+                self.handlers.tower,
                 tower=arg1,
                 floor=arg2,
             ):
@@ -538,10 +473,9 @@ class NikkePlugin(Star):
                     yield result
                 return
             if arg1:
-                adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
-                async for result in adapter.dispatch(
+                async for result in self.adapters.command.dispatch(
                     event,
-                    self.announcement_command_handler,
+                    self.handlers.announcement,
                     operation="unsupported",
                 ):
                     yield result
@@ -606,17 +540,8 @@ class NikkePlugin(Star):
         value: str = "",
     ):
         """NIKKE 塔罗：单抽、三张牌阵与每日固定抽牌。"""
-        handler = getattr(self, "tarot_command_handler", None)
-        if handler is None:
-            handler = TarotCommandHandler(
-                getattr(self, "tarot", None),
-                self.plugin_dir,
-                self.data_dir,
-                on_service_created=lambda service: setattr(self, "tarot", service),
-            )
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
-        async for result in adapter.dispatch(
-            event, handler, action=action, value=value
+        async for result in self.adapters.command.dispatch(
+            event, self.handlers.tarot, action=action, value=value
         ):
             yield result
 
@@ -650,16 +575,16 @@ class NikkePlugin(Star):
         """优先使用 T2I，失败时以同一 DTO 回退 Pillow。"""
         path = await self._try_t2i("profile", dashboard)
         if not path:
-            path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
+            path = await asyncio.to_thread(self.services.profile_renderer.render_profile, dashboard)
         return path
 
     async def _render_character_card_pillow(self, card):
         """只负责角色卡 Pillow 展示；资源准备仍由共享资产管理器完成。"""
         card_assets = await asyncio.to_thread(
-            self.asset_manager.resolve_character_assets, card
+            self.services.asset_manager.resolve_character_assets, card
         )
         return await asyncio.to_thread(
-            self.character_renderer.render_character, card, card_assets
+            self.services.character_renderer.render_character, card, card_assets
         )
 
     async def _build_character_card(self, event, name):
@@ -669,20 +594,18 @@ class NikkePlugin(Star):
             query=name,
             directory=tuple(self._directory),
         )
-        return await self.character_application.build_card(request)
+        return await self.services.character_application.build_card(request)
 
     async def me(self, event: AstrMessageEvent):
         """生成个人账号概览卡。"""
-        handle = self.feedback_manager.start_delayed_feedback(
-            lambda: self.runtime.send_delayed_notice(event, "正在生成个人账号概览...")
-        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
+        handle = self._start_delayed_feedback(event, "正在生成个人账号概览...")
         try:
-            async for result in self.command_adapter.dispatch(
-                event, self.profile_command_handler
+            async for result in self.adapters.command.dispatch(
+                event, self.handlers.profile
             ):
                 yield result
         except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
+            self.services.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except (BlaBlaError, ValueError, RuntimeError) as exc:
             yield event.plain_result(f"查询失败：{exc}")
@@ -724,13 +647,13 @@ class NikkePlugin(Star):
 
     async def voice_settings(self, event: AstrMessageEvent, action: str = "", value: str = ""):
         """通过语音适配器处理偏好设置命令。"""
-        async for result in self.voice_event_adapter.voice_settings(event, action, value):
+        async for result in self.adapters.voice.voice_settings(event, action, value):
             yield result
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_nikke_poke(self, event: AstrMessageEvent):
         """将框架戳一戳事件委托给语音事件适配器。"""
-        async for result in self.voice_event_adapter.on_poke(
+        async for result in self.adapters.voice.on_poke(
             event,
             closing=getattr(getattr(self, "runtime", None), "closing", False),
         ):
@@ -740,11 +663,11 @@ class NikkePlugin(Star):
         """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""
         from .features.raid.participants import format_ranking
         try:
-            data = await self.raid_application.ranking(self._qq_id(event))
+            data = await self.services.raid_application.ranking(self._qq_id(event))
             path = await self._try_t2i("union_records", data)
             yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
+            self.services.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
         except (BlaBlaError, ValueError):
             yield event.plain_result("突袭排名暂不可用：数据不完整或请求失败，请稍后重试。")
@@ -754,11 +677,11 @@ class NikkePlugin(Star):
         from .features.raid.application import RaidMemberIdentityUnavailable
         from .features.raid.participants import format_ranking
         try:
-            data = await self.raid_application.member(self._qq_id(event))
+            data = await self.services.raid_application.member(self._qq_id(event))
             path = await self._try_t2i("union_member", data)
             yield event.image_result(path) if path else event.plain_result(format_ranking(data))
         except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
+            self.services.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
         except RaidMemberIdentityUnavailable as exc:
             yield event.plain_result(str(exc))
@@ -767,17 +690,15 @@ class NikkePlugin(Star):
 
     async def union_raid(self, event: AstrMessageEvent):
         """查询当前账号所属联盟的联盟突袭战况。"""
-        handle = self.feedback_manager.start_delayed_feedback(
-            lambda: self.runtime.send_delayed_notice(event, "正在查询联盟突袭战况...")
-        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
+        handle = self._start_delayed_feedback(event, "正在查询联盟突袭战况...")
         try:
-            data = await self.raid_application.overview(self._qq_id(event))
+            data = await self.services.raid_application.overview(self._qq_id(event))
             path = await self._try_t2i("union_overview", data)
             if not path:
-                path = await asyncio.to_thread(self.raid_renderer.render_raid_overview, data)
+                path = await asyncio.to_thread(self.services.raid_renderer.render_raid_overview, data)
             yield event.image_result(path)
         except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
+            self.services.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except (BlaBlaError, ValueError, RuntimeError) as exc:
             yield event.plain_result(f"突袭查询失败：{safe_exception_message(exc)}")
@@ -791,17 +712,17 @@ class NikkePlugin(Star):
     async def roster(self, event: AstrMessageEvent):
         """生成自己的妮姬练度表。"""
         try:
-            data = await self.character_application.roster(
+            data = await self.services.character_application.roster(
                 self._qq_id(event), self._directory
             )
-            path = self.renderer.render_roster(
+            path = self.services.renderer.render_roster(
                 data.commander_name,
                 data.characters,
                 data.name_map,
             )
             yield event.image_result(path)
         except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
+            self.services.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新绑定。")
         except Exception as exc:
             logger.warning("[NIKKE] roster 查询失败: %s", safe_exception_message(exc))
@@ -817,9 +738,7 @@ class NikkePlugin(Star):
         if not name.strip():
             yield event.plain_result("用法：/妮姬 查询 练度 <角色名>")
             return
-        handle = self.feedback_manager.start_delayed_feedback(
-            lambda: self.runtime.send_delayed_notice(event, "正在查询与渲染角色卡片...")
-        ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
+        handle = self._start_delayed_feedback(event, "正在查询与渲染角色卡片...")
         try:
             card = (await self._build_character_card(event, name)).card
             path = await self._try_t2i("character", card)
@@ -833,7 +752,7 @@ class NikkePlugin(Star):
         except CharacterNotOwned as exc:
             yield event.plain_result(str(exc))
         except CookieExpired:
-            self.store.mark_cookie_invalid(self._qq_id(event))
+            self.services.store.mark_cookie_invalid(self._qq_id(event))
             yield event.plain_result("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except (BlaBlaError, ValueError, RuntimeError) as exc:
             yield event.plain_result(f"查询失败：{exc}")
@@ -850,38 +769,15 @@ class NikkePlugin(Star):
             yield event.plain_result("用法：/妮姬 查询 资料 <角色名>")
             return
         try:
-            data = self.character_application.info(name, self._directory)
+            data = self.services.character_application.info(name, self._directory)
         except CharacterNotFound:
             yield event.plain_result("没有找到该妮姬。")
             return
         except CharacterAmbiguousMatch as exc:
             yield event.plain_result(self._ambiguous_character_message(exc))
             return
-        path = self.renderer.render(data.name, data.title, data.rows)
+        path = self.services.renderer.render(data.name, data.title, data.rows)
         yield event.image_result(path)
-
-    @property
-    def daily_runner(self) -> DailyRunner:
-        runner = getattr(self, "_daily_runner", None)
-        if runner is None:
-            runner = DailyRunner(
-                client=getattr(self, "client", None),
-                store=getattr(self, "store", None),
-                config=getattr(self, "config", {}),
-            )
-            self._daily_runner = runner
-        else:
-            if hasattr(self, "client"):
-                runner.client = self.client
-            if hasattr(self, "store"):
-                runner.store = self.store
-            if hasattr(self, "config"):
-                runner.config = self.config
-        return runner
-
-    @daily_runner.setter
-    def daily_runner(self, runner: DailyRunner) -> None:
-        self._daily_runner = runner
 
     async def _run_all_daily(
         self,
@@ -889,18 +785,18 @@ class NikkePlugin(Star):
         stagger: bool = False,
         automatic: bool = False,
     ) -> list[DailyTaskResult]:
-        return await self.daily_command_handler.run_all_daily(
+        return await self.handlers.daily.run_all_daily(
             day, stagger=stagger, automatic=automatic
         )
 
     async def _send_summary(self, day: str) -> None:
-        await self.daily_command_handler.send_automatic_summary(day)
+        await self.handlers.daily.send_automatic_summary(day)
 
     async def daily(self, event: AstrMessageEvent, action: str = "", value: str = ""):
         """将 AstrBot 事件转成 Daily 命令上下文。"""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
-            event, self.daily_command_handler, action=action, value=value
+            event, self.handlers.daily, action=action, value=value
         ):
             yield result
 
@@ -911,39 +807,39 @@ class NikkePlugin(Star):
 
     async def cdk(self, event: AstrMessageEvent, code: str):
         """将单码兑换请求委托给 CDK 命令用例。"""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
-            event, self.cdk_command_handler, operation="single", code=code
+            event, self.handlers.cdk, operation="single", code=code
         ):
             yield result
 
     async def cdk_batch(self, event: AstrMessageEvent, raw_codes: str):
         """将批量兑换请求委托给 CDK 命令用例。"""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
-            event, self.cdk_command_handler, operation="batch", codes=raw_codes
+            event, self.handlers.cdk, operation="batch", codes=raw_codes
         ):
             yield result
 
     async def cdk_available(self, event: AstrMessageEvent):
         """委托只读可用码查询用例。"""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
-            event, self.cdk_command_handler, operation="available"
+            event, self.handlers.cdk, operation="available"
         ):
             yield result
 
     async def cdk_history(self, event: AstrMessageEvent):
         """委托只读兑换历史查询用例。"""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
-            event, self.cdk_command_handler, operation="history"
+            event, self.handlers.cdk, operation="history"
         ):
             yield result
 
     async def campaign(self, event: AstrMessageEvent, stage_str: str = "", mode_str: str = ""):
         """查询主线战役关卡的历史通关阵容。"""
-        feedback_manager = getattr(self, "feedback_manager", None)
+        feedback_manager = self.services.feedback_manager
         start_feedback = None
         if feedback_manager is not None:
             start_feedback = lambda: feedback_manager.start_delayed_feedback(
@@ -952,12 +848,12 @@ class NikkePlugin(Star):
                 )
             )
         handler = CampaignCommandHandler(
-            application=self.campaign_application,
+            application=self.services.campaign_application,
             present=self._render_campaign_record,
-            invalidate_cookie=lambda qq_id: self.store.mark_cookie_invalid(qq_id),
+            invalidate_cookie=lambda qq_id: self.services.store.mark_cookie_invalid(qq_id),
             start_feedback=start_feedback,
         )
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
             event, handler, stage=stage_str, mode=mode_str
         ):
@@ -965,8 +861,8 @@ class NikkePlugin(Star):
 
     async def event_schedule(self, event: AstrMessageEvent, horizon: str = ""):
         """将日程查询转为框架命令，并由 Calendar application 处理快照。"""
-        handler = self.calendar_command_handler
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        handler = self.handlers.calendar
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
             event, handler, horizon=horizon
         ):
@@ -981,10 +877,10 @@ class NikkePlugin(Star):
         query: str | None = None,
     ):
         """把公告查询参数委托给 framework-free handler。"""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
             event,
-            self.announcement_command_handler,
+            self.handlers.announcement,
             operation="view",
             locale=locale or "",
             category=category or "",
@@ -994,10 +890,10 @@ class NikkePlugin(Star):
 
     async def announcement_deep_rescan(self, event: AstrMessageEvent, locale: str = "en"):
         """把管理员深度重扫委托给 framework-free handler。"""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
             event,
-            self.announcement_command_handler,
+            self.handlers.announcement,
             operation="deep_rescan",
             locale=locale,
         ):
@@ -1007,10 +903,10 @@ class NikkePlugin(Star):
         """由适配器传入当前会话目标，权限与订阅写入归 handler/application。"""
         operation = "unsubscribe" if action == "取消订阅" else "subscribe"
         target = getattr(event, "unified_msg_origin", "") or ""
-        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        adapter = self.adapters.command
         async for result in adapter.dispatch(
             event,
-            self.announcement_command_handler,
+            self.handlers.announcement,
             operation=operation,
             target=target,
         ):
@@ -1018,9 +914,9 @@ class NikkePlugin(Star):
 
     async def guide(self, event: AstrMessageEvent, category: str = "", page: str = "1"):
         """查看或发送常用攻略图。"""
-        async for result in self.command_adapter.dispatch(
+        async for result in self.adapters.command.dispatch(
             event,
-            self.guide_command_handler,
+            self.handlers.guide,
             category=category,
             page=page,
         ):

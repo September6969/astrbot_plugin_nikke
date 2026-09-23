@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from plugin_fixtures import make_plugin_shell
 import asyncio
 import unittest
 from types import SimpleNamespace
@@ -89,12 +90,12 @@ class LogPrivacyTests(unittest.TestCase):
             raise RuntimeError("qq_id=12345 openid=openid-secret token=token-secret")
 
         async def run():
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.feedback_manager = None
-            plugin.store = SimpleNamespace(
+            plugin = make_plugin_shell()
+            plugin.services.feedback_manager = None
+            plugin.services.store = SimpleNamespace(
                 get_account=lambda _qq_id: {"cookie": "synthetic-cookie"}
             )
-            plugin.raid_application = SimpleNamespace(overview=failing_fetcher)
+            plugin.services.raid_application = SimpleNamespace(overview=failing_fetcher)
             event = SimpleNamespace(
                 get_sender_id=lambda: "10001",
                 plain_result=lambda text: text,

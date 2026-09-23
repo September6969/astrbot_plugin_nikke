@@ -1,5 +1,6 @@
 """每账号自动签到偏好只影响定时任务，不触发真实写操作。"""
 
+from plugin_fixtures import inject_daily_handler, make_plugin_shell
 import sqlite3
 import tempfile
 import unittest
@@ -84,20 +85,21 @@ class DailyAutoCommandTests(unittest.IsolatedAsyncioTestCase):
                 self.enabled = (qq_id, enabled)
                 return True
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
+        plugin = make_plugin_shell()
+        plugin.services.store = Store()
         plugin.config = {"enable_daily_actions": global_enabled}
+        inject_daily_handler(plugin)
         return plugin
 
     async def test_preference_command_only_changes_local_setting(self):
         plugin = self._plugin(global_enabled=False)
         results = [item async for item in plugin.daily(self.Event(), "自动", "开")]
-        self.assertEqual(plugin.store.enabled, ("10001", True))
+        self.assertEqual(plugin.services.store.enabled, ("10001", True))
         self.assertIn("自动签到已开启", results[0])
         self.assertIn("暂不会提交", results[0])
 
     async def test_router_passes_auto_value_to_daily_handler(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
         async def daily(event, action, value):
@@ -124,16 +126,17 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
             def set_setting(self, key, value):
                 self.saved.append((key, value))
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
+        plugin = make_plugin_shell()
+        plugin.services.store = Store()
         plugin.config = {"max_concurrency": 2}
+        inject_daily_handler(plugin)
         return plugin
 
     async def test_scheduled_batch_requires_both_account_preferences(self):
         plugin = self._plugin()
         self.assertEqual(await plugin._run_all_daily("2026-09-07", automatic=True), [])
         self.assertEqual(
-            plugin.store.calls,
+            plugin.services.store.calls,
             [{"push_only": True, "with_cookie": True, "auto_daily_only": True}],
         )
 
@@ -141,11 +144,11 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
         plugin = self._plugin()
         self.assertEqual(await plugin._run_all_daily("2026-09-07"), [])
         self.assertEqual(
-            plugin.store.calls,
+            plugin.services.store.calls,
             [{"push_only": True, "with_cookie": True, "auto_daily_only": False}],
         )
         self.assertEqual(
-            plugin.store.saved,
+            plugin.services.store.saved,
             [("daily_results:2026-09-07:manual", [])],
         )
 

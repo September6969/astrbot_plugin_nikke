@@ -1,4 +1,5 @@
 import asyncio
+from plugin_fixtures import make_plugin_shell
 import importlib.util
 import json
 from pathlib import Path
@@ -95,36 +96,37 @@ async def test_handler_fallback_same_dto_without_second_fetch(failure):
     from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
     from astrbot_plugin_nikke.main import NikkePlugin
 
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin.client = Mock(
+    plugin.services.client = Mock(
         get_main_quest_clear_lineup=AsyncMock(
             return_value={"code": 1300017, "msg": "no historical lineup"}
         )
     )
     account_reader = Mock()
     account_reader.get_account.return_value = {"area_id": 7, "nickname": "test"}
-    plugin.campaign_application = CampaignApplication(
+    plugin.services.campaign_application = CampaignApplication(
         resolver=CampaignStageResolver.from_file(ROOT / "assets" / "campaign_stages.json"),
-        gateway=plugin.client,
+        gateway=plugin.services.client,
         account_reader=account_reader,
         builder=CampaignHistoryBuilder(),
         clock=lambda: datetime(2026, 9, 22, 18, 0, tzinfo=timezone.utc),
         plugin_version="test-version",
     )
-    plugin.store = Mock()
+    plugin.services.store = Mock()
+    plugin.services.feedback_manager = None
     plugin.campaign_t2i_renderer = Mock(render_campaign_history=AsyncMock(side_effect=failure))
-    plugin.campaign_renderer = Mock(render_campaign_history=Mock(return_value="fallback.png"))
+    plugin.services.campaign_renderer = Mock(render_campaign_history=Mock(return_value="fallback.png"))
     event = Mock(
         image_result=lambda path: path,
         plain_result=lambda text: text,
         get_sender_id=lambda: "qq-123",
     )
     assert [result async for result in plugin.campaign(event, "46-40")] == ["fallback.png"]
-    plugin.client.get_main_quest_clear_lineup.assert_awaited_once()
+    plugin.services.client.get_main_quest_clear_lineup.assert_awaited_once()
     plugin.campaign_t2i_renderer.render_campaign_history.assert_awaited_once()
     record = plugin.campaign_t2i_renderer.render_campaign_history.await_args.args[0]
-    plugin.campaign_renderer.render_campaign_history.assert_called_once_with(record)
+    plugin.services.campaign_renderer.render_campaign_history.assert_called_once_with(record)
 
 
 @pytest.mark.asyncio
@@ -139,18 +141,18 @@ async def test_timeout_and_cancel():
 @pytest.mark.asyncio
 async def test_native_injection_success_and_default_pillow():
     from astrbot_plugin_nikke.main import NikkePlugin
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
     plugin.html_render = AsyncMock(return_value="native.png")
-    plugin.asset_manager = Mock(get_lineup_portrait=Mock(return_value=None))
-    plugin.campaign_renderer = Mock(render_campaign_history=Mock(return_value="pillow.png"))
+    plugin.services.asset_manager = Mock(get_lineup_portrait=Mock(return_value=None))
+    plugin.services.campaign_renderer = Mock(render_campaign_history=Mock(return_value="pillow.png"))
     record = preview.fixture_record("normal")
     assert await plugin._render_campaign_record(record) == "native.png"
     plugin.html_render.assert_awaited_once()
-    plugin.campaign_renderer.render_campaign_history.assert_not_called()
+    plugin.services.campaign_renderer.render_campaign_history.assert_not_called()
     plugin.config = {}
     assert await plugin._render_campaign_record(record) == "pillow.png"
-    plugin.campaign_renderer.render_campaign_history.assert_called_once_with(record)
+    plugin.services.campaign_renderer.render_campaign_history.assert_called_once_with(record)
 
 
 def test_partial_assets_preserve_identity_and_numbers():
@@ -195,10 +197,10 @@ def test_unfittable_data_fails_to_fallback_without_truncation(field, value):
 @pytest.mark.asyncio
 async def test_cancellation_does_not_trigger_fallback():
     from astrbot_plugin_nikke.main import NikkePlugin
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
     plugin.campaign_t2i_renderer = Mock(render_campaign_history=AsyncMock(side_effect=asyncio.CancelledError()))
-    plugin.campaign_renderer = Mock()
+    plugin.services.campaign_renderer = Mock()
     with pytest.raises(asyncio.CancelledError):
         await plugin._render_campaign_record(preview.fixture_record("normal"))
-    plugin.campaign_renderer.render_campaign_history.assert_not_called()
+    plugin.services.campaign_renderer.render_campaign_history.assert_not_called()

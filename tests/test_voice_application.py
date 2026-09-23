@@ -209,8 +209,8 @@ class VoiceApplicationTests(IsolatedAsyncioTestCase):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         }
         self.assertNotIn("resolve_voice_character", methods)
-        self.assertIn("voice_event_adapter", methods["voice_settings"])
-        self.assertIn("voice_event_adapter", methods["on_nikke_poke"])
+        self.assertIn("self.adapters.voice", methods["voice_settings"])
+        self.assertIn("self.adapters.voice", methods["on_nikke_poke"])
         for forbidden in (
             "VoicePreference", "VoiceMapRegistry", "VoiceAudioCache",
             "Record.fromFileSystem", "resolve_poke", "resolve_by_spine_asset",

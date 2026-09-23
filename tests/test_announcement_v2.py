@@ -1,6 +1,7 @@
 """Announcement V2 的范围、版本、重扫与查询行为回归。"""
 
 from __future__ import annotations
+from plugin_fixtures import make_plugin_shell
 
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -246,7 +247,7 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         service.add_or_update(record("ja", "维护告知", "维护正文", locale="ja", category="maintenance"))
         service.add_or_update(record("en", "Event Notice", "Event body", locale="en", category="event"))
         service.sync_from_source = AsyncMock(side_effect=AssertionError("本地查询不应同步"))
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         delivery = AnnouncementDelivery(NikkeStore(directory.name))
@@ -254,8 +255,8 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
             announcements=service,
             delivery=delivery,
         )
-        plugin.announcement_application = application
-        plugin.announcement_command_handler = AnnouncementCommandHandler(
+        plugin.services.announcement_application = application
+        plugin.handlers.announcement = AnnouncementCommandHandler(
             application=application,
             push_enabled=lambda: False,
         )
@@ -288,14 +289,14 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
     async def test_deep_rescan_requires_admin_and_resubscribe_never_replays_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             service = AnnouncementService()
-            plugin = NikkePlugin.__new__(NikkePlugin)
+            plugin = make_plugin_shell()
             delivery = AnnouncementDelivery(NikkeStore(directory))
             application = AnnouncementApplication(
                 announcements=service,
                 delivery=delivery,
             )
-            plugin.announcement_application = application
-            plugin.announcement_command_handler = AnnouncementCommandHandler(
+            plugin.services.announcement_application = application
+            plugin.handlers.announcement = AnnouncementCommandHandler(
                 application=application,
                 push_enabled=lambda: False,
             )

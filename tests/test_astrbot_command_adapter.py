@@ -1,6 +1,7 @@
 """先验证非 Profile 入口能否收敛到 AstrBot 适配边界。"""
 
 from __future__ import annotations
+from plugin_fixtures import inject_tarot_handler, make_plugin_shell
 
 import ast
 import inspect
@@ -117,12 +118,13 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
         encoding="utf-8",
     )
 
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.plugin_dir = tmp_path
     plugin.data_dir = tmp_path / "runtime"
-    plugin.tarot = TarotService(tmp_path, plugin.data_dir / "tarot")
-    plugin.guide_application = GuideApplication(guide_root)
-    plugin.guide_command_handler = GuideCommandHandler(plugin.guide_application)
+    plugin.services.tarot = TarotService(tmp_path, plugin.data_dir / "tarot")
+    inject_tarot_handler(plugin)
+    plugin.services.guide_application = GuideApplication(guide_root)
+    plugin.handlers.guide = GuideCommandHandler(plugin.services.guide_application)
 
     class AccountReader:
         @staticmethod
@@ -146,15 +148,15 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
         assert page == "profile"
         return None
 
-    plugin.store = AccountReader()
-    plugin.profile_application = ProfileApplication()
-    plugin.profile_renderer = ProfileRenderer()
-    plugin.feedback_manager = None
-    plugin.command_adapter = AstrBotCommandAdapter()
+    plugin.services.store = AccountReader()
+    plugin.services.profile_application = ProfileApplication()
+    plugin.services.profile_renderer = ProfileRenderer()
+    plugin.services.feedback_manager = None
+    plugin.adapters.command = AstrBotCommandAdapter()
     plugin._try_t2i = no_t2i
-    plugin.profile_command_handler = ProfileCommandHandler(
-        account_reader=plugin.store,
-        application=plugin.profile_application,
+    plugin.handlers.profile = ProfileCommandHandler(
+        account_reader=plugin.services.store,
+        application=plugin.services.profile_application,
         present=plugin._render_profile_dashboard,
     )
     registered = next(
@@ -195,7 +197,7 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     assert len(profile_results) == 1
     assert isinstance(profile_results[0], MessageEventResult)
     assert isinstance(profile_results[0].chain[0], Image)
-    assert len(plugin.profile_application.calls) == 1
+    assert len(plugin.services.profile_application.calls) == 1
 
 
 @pytest.mark.asyncio

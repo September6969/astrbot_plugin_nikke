@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from plugin_fixtures import inject_cdk_handler, make_plugin_shell
 import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch
@@ -330,16 +331,18 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
             def finish_run(self, key, status, detail=""):
                 self.runs[key] = {"status": status, "detail": detail}
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.config = {"enable_cdk_redemption": True}
-        plugin.store = Store()
-        plugin.cdk_service = service
+        plugin.services.store = Store()
+        plugin.services.cdk_service = service
+        plugin.services.client = client
+        inject_cdk_handler(plugin)
 
         # 第一次触发限流
         results1 = [item async for item in plugin.cdk(Event(), "RATELIMIT_CODE")]
         self.assertEqual(len(results1), 1)
-        run_key = list(plugin.store.runs.keys())[0]
-        self.assertEqual(plugin.store.runs[run_key]["status"], "failed")
+        run_key = list(plugin.services.store.runs.keys())[0]
+        self.assertEqual(plugin.services.store.runs[run_key]["status"], "failed")
 
         # 第二次由于状态是 failed（在 retryable 集合中），应该能够重新触发重试而非直接返回已处理
         results2 = [item async for item in plugin.cdk(Event(), "RATELIMIT_CODE")]
@@ -391,22 +394,24 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "兑换成功", "0")
         service = CdkService(client)
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.config = {"enable_cdk_redemption": True}
-        plugin.store = Store()
-        plugin.cdk_service = service
+        plugin.services.store = Store()
+        plugin.services.cdk_service = service
+        plugin.services.client = client
+        inject_cdk_handler(plugin)
 
         # 账号 A 兑换
         [item async for item in plugin.cdk(Event(), "TESTCODE123")]
-        keys_a = list(plugin.store.runs.keys())
+        keys_a = list(plugin.services.store.runs.keys())
         self.assertEqual(len(keys_a), 1)
         self.assertTrue(keys_a[0].startswith("cdk:game:"))
         self.assertNotIn("10001", keys_a[0])
 
         # 换绑为账号 B
-        plugin.store.current_uid = "uid_B"
+        plugin.services.store.current_uid = "uid_B"
         [item async for item in plugin.cdk(Event(), "TESTCODE123")]
-        keys_b = list(plugin.store.runs.keys())
+        keys_b = list(plugin.services.store.runs.keys())
         self.assertEqual(len(keys_b), 2)
         self.assertTrue(keys_b[1].startswith("cdk:game:"))
         self.assertNotIn("10001", keys_b[1])
@@ -430,11 +435,13 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
                 return {"qq_id": qq_id, "game_uid": "uid1", "cookie": "cookie"}
 
         self.event = Event()
-        self.plugin = NikkePlugin.__new__(NikkePlugin)
+        self.plugin = make_plugin_shell()
         self.plugin.config = {"enable_cdk_redemption": True}
-        self.plugin.store = Store()
+        self.plugin.services.store = Store()
         self.client = AsyncMock(spec=BlaBlaClient)
-        self.plugin.client = self.client
+        self.plugin.services.client = self.client
+        self.plugin.services.cdk_service = CdkService(self.client)
+        inject_cdk_handler(self.plugin)
 
     async def test_cdk_available_identifies_real_cdk_field(self):
         self.client.get_cdk_redemption.return_value = [

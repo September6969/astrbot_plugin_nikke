@@ -22,6 +22,7 @@
 18. same title, different scope -> 独立 identity，不误合并
 """
 
+from plugin_fixtures import inject_calendar_handler, make_plugin_shell
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
@@ -1000,7 +1001,7 @@ async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
     from astrbot_plugin_nikke.main import NikkePlugin
     from unittest.mock import Mock, AsyncMock
 
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     mock_cal = Mock()
     mock_cal.has_snapshot.return_value = False
     mock_cal.normalize_horizon.side_effect = ScheduleService.normalize_horizon
@@ -1020,10 +1021,11 @@ async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
     mock_cal.cached_visual_event_ids.return_value = ()
     mock_cal.sync_from_source = AsyncMock()
     mock_cal.refresh_schedule_data = AsyncMock()
-    plugin.calendar = mock_cal
+    plugin.services.calendar = mock_cal
 
     spawn_mock = Mock()
     plugin.runtime = SimpleNamespace(request_calendar_refresh=spawn_mock)
+    inject_calendar_handler(plugin)
 
     dummy_event = Mock()
     dummy_event.plain_result = lambda text: text

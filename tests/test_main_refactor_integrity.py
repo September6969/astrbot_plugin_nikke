@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import hashlib
+import ast
 import tempfile
 import unittest
 from pathlib import Path
@@ -28,6 +29,9 @@ class MainRefactorIntegrityTests(unittest.TestCase):
             self.assertIsNotNone(container.store)
             self.assertIs(container.account_application._store, container.store)
             self.assertIs(container.web.store, container.store)
+            self.assertIs(container.web.client, container.client)
+            self.assertIs(container.daily_runner.store, container.store)
+            self.assertIs(container.daily_runner.client, container.client)
             self.assertIsNotNone(container.client)
             self.assertIsNotNone(container.asset_manager)
             self.assertIsNotNone(container.renderer)
@@ -36,8 +40,35 @@ class MainRefactorIntegrityTests(unittest.TestCase):
             self.assertIsInstance(container.campaign_application, CampaignApplication)
             self.assertIs(container.campaign_application._account_reader, container.store)
             self.assertIs(container.campaign_application._gateway, container.client)
+            self.assertIs(container.raid_application._gateway, container.client)
+            self.assertIs(container.voice_application._store, container.store)
+            self.assertIs(container.campaign_renderer.assets, container.asset_manager)
             self.assertIsInstance(container.guide_application, GuideApplication)
             self.assertIsInstance(container.tower_application, TowerApplication)
+
+    def test_plugin_constructor_does_not_copy_container_members(self):
+        source = (self.root / "main.py").read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        aliases = []
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+                continue
+            value = node.value
+            if not (
+                isinstance(value, ast.Attribute)
+                and isinstance(value.value, ast.Attribute)
+                and isinstance(value.value.value, ast.Name)
+                and value.value.value.id == "self"
+                and value.value.attr in {"services", "handlers", "adapters"}
+            ):
+                continue
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for target in targets:
+                if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name):
+                    if target.value.id == "self" and target.attr != value.value.attr:
+                        aliases.append(target.attr)
+        self.assertEqual(aliases, [])
+        self.assertNotIn("self.container", source)
 
     def test_daily_runner_identity_and_keys(self):
         account = {

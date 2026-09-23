@@ -2,6 +2,7 @@
 """账号与管理命令边界的行为及路由合同。"""
 
 from __future__ import annotations
+from plugin_fixtures import make_plugin_shell
 
 import ast
 import inspect
@@ -268,7 +269,7 @@ class MainAccountCommandDelegationTests(IsolatedAsyncioTestCase):
             self.assertNotIn("store", attrs, f"{name} 仍直接访问存储")
             self.assertIn("_dispatch_account_command", attrs, f"{name} 未委派账号命令 handler")
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls: list[dict[str, str]] = []
 
         class Adapter:
@@ -276,8 +277,8 @@ class MainAccountCommandDelegationTests(IsolatedAsyncioTestCase):
                 calls.append(parameters)
                 yield "delegated"
 
-        plugin.command_adapter = Adapter()
-        plugin.account_command_handler = object()
+        plugin.adapters.command = Adapter()
+        plugin.handlers.account = object()
         event = SimpleNamespace(unified_msg_origin="group:example")
         result = [item async for item in plugin.account(event, "绑定", "")]
 

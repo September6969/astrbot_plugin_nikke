@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from plugin_fixtures import inject_cdk_handler, make_plugin_shell
 import asyncio
 import json
 import sqlite3
@@ -692,7 +693,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_chinese_and_legacy_commands_share_one_root_router(self):
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
         async def account(event, action="", value=""):
@@ -716,7 +717,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_m5_command_routing(self):
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
         async def campaign(event, arg1="", arg2=""):
@@ -801,8 +802,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                     ("爱丽丝", "爱丽丝：仙境兔女郎")
                 )
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.character_application = Application()
+        plugin = make_plugin_shell()
+        plugin.services.character_application = Application()
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
             {"name_code": 2, "name_cn": "爱丽丝：仙境兔女郎", "name_en": "Alice: Wonderland Bunny"},
@@ -827,8 +828,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             async def build_card(self, request):
                 raise CharacterNotOwned("爱丽丝")
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.character_application = Application()
+        plugin = make_plugin_shell()
+        plugin.services.character_application = Application()
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
@@ -886,15 +887,16 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 self.calls += 1
                 return CdkRedemptionResult(True, True, "兑换成功", "0")
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.config = {"enable_cdk_redemption": True}
-        plugin.store = Store()
-        plugin.client = Client()
+        plugin.services.store = Store()
+        plugin.services.client = Client()
+        inject_cdk_handler(plugin)
         code = "SECRETCODE123"
         first = [item async for item in plugin.cdk(Event(), code)]
         second = [item async for item in plugin.cdk(Event(), code)]
-        persisted = json.dumps(plugin.store.runs, ensure_ascii=False)
-        self.assertEqual(plugin.client.calls, 1)
+        persisted = json.dumps(plugin.services.store.runs, ensure_ascii=False)
+        self.assertEqual(plugin.services.client.calls, 1)
         self.assertIn("兑换成功", first[0])
         self.assertIn("已有处理记录", second[0])
         self.assertNotIn(code, persisted)
@@ -918,9 +920,9 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 self.requests.append(request)
                 raise CharacterNotOwned("爱丽丝")
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         application = Application()
-        plugin.character_application = application
+        plugin.services.character_application = application
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
@@ -953,9 +955,9 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         )
         application = Mock(roster=AsyncMock(return_value=data))
         renderer = Mock(render_roster=Mock(return_value="roster.png"))
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.character_application = application
-        plugin.renderer = renderer
+        plugin = make_plugin_shell()
+        plugin.services.character_application = application
+        plugin.services.renderer = renderer
         plugin._directory = directory
 
         result = [item async for item in plugin.roster(Event())]
@@ -982,9 +984,9 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             )
         )
         renderer = Mock()
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.character_application = application
-        plugin.renderer = renderer
+        plugin = make_plugin_shell()
+        plugin.services.character_application = application
+        plugin.services.renderer = renderer
         plugin._directory = []
 
         result = [item async for item in plugin.info(Event(), "丽丝")]
@@ -999,7 +1001,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         from types import SimpleNamespace
         from unittest.mock import AsyncMock
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.runtime = SimpleNamespace(close=AsyncMock())
 
         await plugin.terminate()

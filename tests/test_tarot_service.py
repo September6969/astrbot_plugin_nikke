@@ -1,4 +1,5 @@
 from __future__ import annotations
+from plugin_fixtures import inject_tarot_handler, make_plugin_shell
 
 import json
 import random
@@ -194,10 +195,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_help_and_status(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         # Help
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "帮助")]
@@ -214,10 +216,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_draw_single(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "单抽")]
         # May have 0 or 1 image depending on whether asset exists on disk in temp dir,
@@ -230,10 +233,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_draw_three(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "三张")]
         self.assertTrue(len(results) >= 1)
@@ -247,10 +251,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_draw_daily(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         event = DummyTarotEvent("999888")
         results1 = [r async for r in plugin.tarot_command(event, "今日")]
@@ -261,10 +266,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_daily_emits_one_text_result(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         results = [r async for r in plugin.tarot_command(DummyTarotEvent("single-message"), "今日")]
         self.assertEqual(sum(result[0] == "plain" for result in results), 1)
@@ -273,10 +279,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_unknown_action(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "未知动作")]
         self.assertEqual(len(results), 1)
@@ -285,10 +292,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_nikke_command_dispatches_tarot(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         # Dispatch via nikke(event, "塔罗", "单抽")
         results = [r async for r in plugin.nikke(DummyTarotEvent(), "塔罗", "单抽")]

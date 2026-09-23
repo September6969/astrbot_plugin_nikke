@@ -2,6 +2,7 @@
 """Calendar v0.4 结构化活动日程系统测试套件。"""
 
 from __future__ import annotations
+from plugin_fixtures import inject_calendar_handler, make_plugin_shell
 
 import json
 import tempfile
@@ -444,7 +445,8 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
                 return text
 
         # 1. Invalid horizon
-        main_inst = NikkePlugin.__new__(NikkePlugin)
+        main_inst = make_plugin_shell()
+        inject_calendar_handler(main_inst)
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "99")]
         self.assertEqual(len(results), 1)
         self.assertIn("日程范围错误", results[0])
@@ -461,8 +463,10 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
             end_at=now + timedelta(days=2),
         )
         await cal.sync_from_source(fetcher=lambda: [act])
-        main_inst.calendar = cal
-        main_inst.announcements = AnnouncementService()
+        main_inst.services.calendar = cal
+        main_inst.services.announcements = AnnouncementService()
+        main_inst.services.calendar_application = cal.application
+        inject_calendar_handler(main_inst)
 
         # Query 7 days
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "7")]
@@ -476,7 +480,9 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
 
         # 3. Calendar has no snapshot -> returns immediate notice without awaiting remote network
         cal_empty = CalendarService(Path(self.tmp_dir.name) / "cal_empty")
-        main_inst.calendar = cal_empty
+        main_inst.services.calendar = cal_empty
+        main_inst.services.calendar_application = cal_empty.application
+        inject_calendar_handler(main_inst)
 
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "14")]
         self.assertIn("日程数据尚未就绪，正在后台同步，请稍后重试。", results[0])

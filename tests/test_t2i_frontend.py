@@ -1,4 +1,5 @@
 import json
+from plugin_fixtures import inject_calendar_handler, make_plugin_shell
 import asyncio
 from unittest.mock import AsyncMock, Mock
 
@@ -57,7 +58,7 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
     assert "&lt;script&gt;" in html and "&lt;/style&gt;" in html and "&lt;img" in html
     assert '<script>' not in html and '<img src=x' not in html
     assert html.count("</style>") == 1
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
     assert await plugin._try_t2i(page, data) is None
@@ -71,7 +72,7 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
 @pytest.mark.parametrize("page", ["profile", "union_overview", "character"])
 async def test_pillow_command_fallback_retains_dto(page, tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
     plugin._account_or_error = Mock(return_value={})
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
@@ -80,42 +81,42 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
         from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
 
-        plugin.store = Mock(get_account=Mock(return_value={"qq_id": "synthetic-qq"}))
-        plugin.profile_application = Mock(build_dashboard=AsyncMock(return_value=data))
+        plugin.services.store = Mock(get_account=Mock(return_value={"qq_id": "synthetic-qq"}))
+        plugin.services.profile_application = Mock(build_dashboard=AsyncMock(return_value=data))
         fallback = Mock(return_value="fallback.png")
-        plugin.profile_renderer = Mock(render_profile=fallback)
-        plugin.command_adapter = AstrBotCommandAdapter()
-        plugin.profile_command_handler = ProfileCommandHandler(
-            account_reader=plugin.store,
-            application=plugin.profile_application,
+        plugin.services.profile_renderer = Mock(render_profile=fallback)
+        plugin.adapters.command = AstrBotCommandAdapter()
+        plugin.handlers.profile = ProfileCommandHandler(
+            account_reader=plugin.services.store,
+            application=plugin.services.profile_application,
             present=plugin._render_profile_dashboard,
         )
-        command, args, request = plugin.me, (), plugin.profile_application.build_dashboard
+        command, args, request = plugin.me, (), plugin.services.profile_application.build_dashboard
     elif page == "union_overview":
-        plugin.raid_application = Mock(overview=AsyncMock(return_value=data))
+        plugin.services.raid_application = Mock(overview=AsyncMock(return_value=data))
         fallback = Mock(return_value="fallback.png")
-        plugin.raid_renderer = Mock(render_raid_overview=fallback)
-        command, args, request = plugin.union_raid, (), plugin.raid_application.overview
+        plugin.services.raid_renderer = Mock(render_raid_overview=fallback)
+        command, args, request = plugin.union_raid, (), plugin.services.raid_application.overview
     else:
         plugin._directory = [{"name_code": "5065"}]
         from types import SimpleNamespace
-        plugin.character_application = Mock(
+        plugin.services.character_application = Mock(
             build_card=AsyncMock(return_value=SimpleNamespace(card=data))
         )
         card_assets = object()
-        plugin.asset_manager = Mock(resolve_character_assets=Mock(return_value=card_assets))
+        plugin.services.asset_manager = Mock(resolve_character_assets=Mock(return_value=card_assets))
         fallback = Mock(return_value="fallback.png")
-        plugin.character_renderer = Mock(render_character=fallback)
+        plugin.services.character_renderer = Mock(render_character=fallback)
         command, args, request = (
             plugin.character,
             ("皇冠",),
-            plugin.character_application.build_card,
+            plugin.services.character_application.build_card,
         )
     event = Mock(image_result=lambda path: path)
     assert [result async for result in command(event, *args)] == ["fallback.png"]
     request.assert_awaited_once()
     if page == "character":
-        plugin.asset_manager.resolve_character_assets.assert_called_once_with(data)
+        plugin.services.asset_manager.resolve_character_assets.assert_called_once_with(data)
         fallback.assert_called_once_with(data, card_assets)
     else:
         fallback.assert_called_once_with(data)
@@ -139,18 +140,19 @@ def test_calendar_horizon_and_classification(tmp_path):
 async def test_calendar_command_fallback_same_snapshot(tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin.calendar = CalendarService(tmp_path)
-    plugin.calendar._has_snapshot = True
-    plugin.calendar.sync_from_source = AsyncMock()
-    plugin.calendar.visual_cache.sync = AsyncMock()
+    plugin.services.calendar = CalendarService(tmp_path)
+    inject_calendar_handler(plugin)
+    plugin.services.calendar._has_snapshot = True
+    plugin.services.calendar.sync_from_source = AsyncMock()
+    plugin.services.calendar.visual_cache.sync = AsyncMock()
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
     event = Mock(plain_result=lambda text: text)
     results = [result async for result in plugin.event_schedule(event)]
     assert "未来 14 天" in results[0]
-    plugin.calendar.sync_from_source.assert_not_called()
-    plugin.calendar.visual_cache.sync.assert_not_awaited()
+    plugin.services.calendar.sync_from_source.assert_not_called()
+    plugin.services.calendar.visual_cache.sync.assert_not_awaited()
 
 
 def test_union_scopes_and_exact_values(tmp_path):
@@ -182,16 +184,16 @@ def test_union_scopes_and_exact_values(tmp_path):
 async def test_union_command_failure_no_refetch(page, command):
     from astrbot_plugin_nikke.main import NikkePlugin
     from astrbot_plugin_nikke.features.raid.participants import RaidRankingData
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
     application_call = "ranking" if page == "union_records" else "member"
-    plugin.raid_application = Mock(
+    plugin.services.raid_application = Mock(
         **{application_call: AsyncMock(return_value=RaidRankingData([]))}
     )
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
     results = [result async for result in getattr(plugin, command)(Mock(plain_result=lambda text: text))]
     assert "当前响应" in results[0]
-    getattr(plugin.raid_application, application_call).assert_awaited_once()
+    getattr(plugin.services.raid_application, application_call).assert_awaited_once()
 
 
 def test_profile_structure_and_unknowns(tmp_path):

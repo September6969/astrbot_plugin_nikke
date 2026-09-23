@@ -1,10 +1,12 @@
 """验证真实接线的开关和权限，发送器始终使用 mock。"""
+from plugin_fixtures import make_plugin_shell
 import tempfile
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, Mock
 from astrbot_plugin_nikke.adapters.astrbot.runtime import AstrBotRuntimeAdapter
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
@@ -30,7 +32,8 @@ class PushWiringTests(IsolatedAsyncioTestCase):
 
     async def test_admin_subscription_uses_current_target(self):
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
+            plugin = make_plugin_shell()
+            plugin.adapters.command = AstrBotCommandAdapter()
             plugin.config = {}
             announcements = AnnouncementService()
             delivery = AnnouncementDelivery(NikkeStore(directory))
@@ -38,8 +41,8 @@ class PushWiringTests(IsolatedAsyncioTestCase):
                 announcements=announcements,
                 delivery=delivery,
             )
-            plugin.announcement_application = application
-            plugin.announcement_command_handler = AnnouncementCommandHandler(
+            plugin.services.announcement_application = application
+            plugin.handlers.announcement = AnnouncementCommandHandler(
                 application=application,
                 push_enabled=lambda: bool(plugin.config.get("enable_announcement_push", False)),
             )

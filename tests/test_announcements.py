@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from plugin_fixtures import make_plugin_shell
 import unittest
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -301,7 +302,7 @@ class AnnouncementReviewRegressionTests(unittest.IsolatedAsyncioTestCase):
         for command in ("announcements_view",):
             for error in (None, asyncio.TimeoutError(), RuntimeError("测试同步异常")):
                 with self.subTest(command=command, error=type(error).__name__):
-                    plugin = NikkePlugin.__new__(NikkePlugin)
+                    plugin = make_plugin_shell()
                     announcements = AnnouncementService()
                     announcements.sync_from_source = AsyncMock(
                         return_value=(False, "官方源不可用"), side_effect=error
@@ -311,8 +312,8 @@ class AnnouncementReviewRegressionTests(unittest.IsolatedAsyncioTestCase):
                             announcements=announcements,
                             delivery=AnnouncementDelivery(NikkeStore(directory)),
                         )
-                        plugin.announcement_application = application
-                        plugin.announcement_command_handler = AnnouncementCommandHandler(
+                        plugin.services.announcement_application = application
+                        plugin.handlers.announcement = AnnouncementCommandHandler(
                             application=application,
                             push_enabled=lambda: False,
                         )

@@ -1,5 +1,6 @@
 """Profile V2 的 synthetic 合同、请求预算和出图闭环测试。"""
 
+from plugin_fixtures import make_plugin_shell
 import math
 import tempfile
 import unittest
@@ -327,24 +328,24 @@ class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
                 return text
 
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.store = Store()
-            plugin.profile_application = ProfileApplication(
+            plugin = make_plugin_shell()
+            plugin.services.store = Store()
+            plugin.services.profile_application = ProfileApplication(
                 gateway=SyntheticClient(),
                 builder=ProfileBuilder(),
                 clock=lambda: datetime(2026, 9, 22, 12, 0, tzinfo=timezone.utc),
                 plugin_version="test-version",
             )
-            plugin.profile_renderer = ProfileCardRenderer(
+            plugin.services.profile_renderer = ProfileCardRenderer(
                 Path(directory), Path(__file__).resolve().parents[1] / "fonts"
             )
-            plugin.command_adapter = AstrBotCommandAdapter()
-            plugin.profile_command_handler = ProfileCommandHandler(
-                account_reader=plugin.store,
-                application=plugin.profile_application,
+            plugin.adapters.command = AstrBotCommandAdapter()
+            plugin.handlers.profile = ProfileCommandHandler(
+                account_reader=plugin.services.store,
+                application=plugin.services.profile_application,
                 present=plugin._render_profile_dashboard,
             )
-            plugin.feedback_manager = None
+            plugin.services.feedback_manager = None
             results = [item async for item in plugin.me(Event())]
             self.assertEqual(len(results), 1)
             with Image.open(results[0]) as image:

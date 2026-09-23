@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
+from plugin_fixtures import make_plugin_shell
 import time
 import unittest
 from datetime import datetime, timezone
@@ -128,8 +129,8 @@ class PrefixNormalizationAndCommandTests(unittest.IsolatedAsyncioTestCase):
     async def test_announcement_simplification_notice_on_extra_args(self):
         from astrbot_plugin_nikke.application.commands.announcement import AnnouncementCommandHandler
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.announcement_command_handler = AnnouncementCommandHandler(
+        plugin = make_plugin_shell()
+        plugin.handlers.announcement = AnnouncementCommandHandler(
             application=None,
             push_enabled=lambda: False,
         )
@@ -141,7 +142,7 @@ class PrefixNormalizationAndCommandTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("/妮姬 公告", reply[0])
 
     async def test_hash_prefix_in_nikke_command(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.tower_registry = None
         event = SimpleNamespace(plain_result=lambda text: text)
 

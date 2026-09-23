@@ -1,4 +1,5 @@
 """命令分页按索引顺序读取，越界不回退到首图。"""
+from plugin_fixtures import make_plugin_shell
 import json
 import tempfile
 from pathlib import Path
@@ -13,11 +14,11 @@ from astrbot_plugin_nikke.main import NikkePlugin
 class GuidePaginationTests(IsolatedAsyncioTestCase):
     @staticmethod
     def _plugin(plugin_dir: Path) -> NikkePlugin:
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = plugin_dir
-        plugin.guide_application = GuideApplication(plugin_dir / "assets" / "guides")
-        plugin.guide_command_handler = GuideCommandHandler(plugin.guide_application)
-        plugin.command_adapter = AstrBotCommandAdapter()
+        plugin.services.guide_application = GuideApplication(plugin_dir / "assets" / "guides")
+        plugin.handlers.guide = GuideCommandHandler(plugin.services.guide_application)
+        plugin.adapters.command = AstrBotCommandAdapter()
         return plugin
 
     async def test_unregistered_directory_is_not_sent(self):

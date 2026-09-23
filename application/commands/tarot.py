@@ -1,8 +1,6 @@
 """塔罗命令用例；以显式文本/图片结果与 AstrBot 解耦。"""
 
 import logging
-from pathlib import Path
-from typing import Callable
 
 from ...core.privacy import safe_exception_message
 from ...features.tarot.service import TarotDataError, TarotService
@@ -13,38 +11,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class TarotCommandHandler:
-    def __init__(
-        self,
-        service: TarotService | None,
-        plugin_dir: Path,
-        data_dir: Path,
-        on_service_created: Callable[[TarotService], None] | None = None,
-    ):
+    def __init__(self, service: TarotService | None):
         self.service = service
-        self.plugin_dir = plugin_dir
-        self.data_dir = data_dir
-        self.on_service_created = on_service_created
 
     async def handle(self, context: CommandContext) -> CommandResult:
         service = self.service
         if service is None:
-            try:
-                service = TarotService(
-                    self.plugin_dir,
-                    self.data_dir / "tarot",
-                    deck_mode="auto",
-                    rotate_reversed=True,
-                )
-            except (OSError, ValueError, TarotDataError) as exc:
-                _LOGGER.warning(
-                    "[NIKKE] 塔罗服务不可用：%s", safe_exception_message(exc)
-                )
-                return CommandResult(
-                    (TextReply("塔罗功能暂不可用：牌库资源尚未准备完成。"),)
-                )
-            self.service = service
-            if self.on_service_created is not None:
-                self.on_service_created(service)
+            return CommandResult(
+                (TextReply("塔罗功能暂不可用：牌库资源尚未准备完成。"),)
+            )
 
         action = context.parameters.get("action", "").strip().casefold()
         if action in {"", "帮助", "help"}:

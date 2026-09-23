@@ -1,4 +1,5 @@
 from __future__ import annotations
+from plugin_fixtures import inject_daily_handler, make_plugin_shell
 
 import asyncio
 from unittest import IsolatedAsyncioTestCase
@@ -77,13 +78,14 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
     async def test_signin_intent_is_persisted_before_reads(self):
         store = FakeDailyStore()
         client = FakeDailyClient(store.events)
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = store
-        plugin.client = client
+        plugin = make_plugin_shell()
+        plugin.services.store = store
+        plugin.services.client = client
         plugin.config = {"enable_daily_actions": True}
+        inject_daily_handler(plugin)
         account = self._account()
 
-        result = await plugin.daily_runner.run_daily_for_account(account, "2026-09-07")
+        result = await plugin.services.daily_runner.run_daily_for_account(account, "2026-09-07")
 
         self.assertEqual(result.account_name, "测试指挥官")
         self.assertIn("签到成功", result.detail)
@@ -95,13 +97,14 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         run_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "daily")
         store.runs[run_key] = {"status": "running"}
         client = FakeDailyClient(store.events, completed=True)
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = store
-        plugin.client = client
+        plugin = make_plugin_shell()
+        plugin.services.store = store
+        plugin.services.client = client
         plugin.config = {"enable_daily_actions": True}
+        inject_daily_handler(plugin)
         account = self._account()
 
-        result = await plugin.daily_runner.run_daily_for_account(account, "2026-09-07")
+        result = await plugin.services.daily_runner.run_daily_for_account(account, "2026-09-07")
 
         self.assertEqual(result.account_name, "测试指挥官")
         self.assertEqual(result.status, DailyTaskStatus.ALREADY_DONE)
@@ -114,13 +117,14 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         signin_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "signin")
         store.runs[signin_key] = {"status": "running"}
         client = FakeDailyClient(store.events)
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = store
-        plugin.client = client
+        plugin = make_plugin_shell()
+        plugin.services.store = store
+        plugin.services.client = client
         plugin.config = {"enable_daily_actions": True}
+        inject_daily_handler(plugin)
         account = self._account()
 
-        result = await plugin.daily_runner.run_daily_for_account(account, "2026-09-07")
+        result = await plugin.services.daily_runner.run_daily_for_account(account, "2026-09-07")
 
         self.assertEqual(result.account_name, "测试指挥官")
         self.assertIn("未自动重发", result.detail)
@@ -132,13 +136,14 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         signin_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "signin")
         store.runs[signin_key] = {"status": "success", "detail": "登录有效；签到成功"}
         client = FakeDailyClient(store.events, completed=False)
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = store
-        plugin.client = client
+        plugin = make_plugin_shell()
+        plugin.services.store = store
+        plugin.services.client = client
         plugin.config = {"enable_daily_actions": True}
+        inject_daily_handler(plugin)
         account = self._account()
 
-        result = await plugin.daily_runner.run_daily_for_account(account, "2026-09-07")
+        result = await plugin.services.daily_runner.run_daily_for_account(account, "2026-09-07")
 
         self.assertEqual(result.account_name, "测试指挥官")
         self.assertEqual(result.detail, "登录有效；签到成功")
@@ -155,13 +160,14 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
         run_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "daily")
         store.runs[signin_key] = {"status": "running"}
         client = ExpiredDailyClient(store.events)
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = store
-        plugin.client = client
+        plugin = make_plugin_shell()
+        plugin.services.store = store
+        plugin.services.client = client
         plugin.config = {"enable_daily_actions": True}
+        inject_daily_handler(plugin)
         account = self._account()
 
-        result = await plugin.daily_runner.run_daily_for_account(account, "2026-09-07")
+        result = await plugin.services.daily_runner.run_daily_for_account(account, "2026-09-07")
 
         self.assertEqual(result.account_name, "测试指挥官")
         self.assertIn("重新绑定", result.detail)
@@ -172,16 +178,17 @@ class DailyRecoveryTests(IsolatedAsyncioTestCase):
     async def test_cancellation_marks_owned_intents_unknown_and_is_rethrown(self):
         store = FakeDailyStore()
         client = CancelledDailyClient(store.events)
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = store
-        plugin.client = client
+        plugin = make_plugin_shell()
+        plugin.services.store = store
+        plugin.services.client = client
         plugin.config = {"enable_daily_actions": True}
+        inject_daily_handler(plugin)
         account = self._account()
         run_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "daily")
         signin_key = DailyRunner.daily_run_key("2026-09-07", self._account(), "signin")
 
         with self.assertRaises(asyncio.CancelledError):
-            await plugin.daily_runner.run_daily_for_account(account, "2026-09-07")
+            await plugin.services.daily_runner.run_daily_for_account(account, "2026-09-07")
 
         self.assertEqual(store.finished[signin_key][0], "UNKNOWN_AFTER_ACTION")
         self.assertEqual(store.finished[run_key][0], "UNKNOWN_AFTER_ACTION")

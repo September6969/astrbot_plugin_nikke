@@ -1,6 +1,7 @@
 """Profile 命令边界合同：只使用 fake，不访问真实账号或发送真实消息。"""
 
 from __future__ import annotations
+from plugin_fixtures import make_plugin_shell
 
 import unittest
 from dataclasses import dataclass
@@ -127,24 +128,24 @@ class _FakeFeedbackManager:
 
 def _plugin(*, account: dict[str, Any] | None, client: _FakeClient) -> tuple[NikkePlugin, _FakeStore, _FakeBuilder, _FakeRenderer, _FakeFeedbackManager]:
     """构造不触发容器、Web 服务或后台网络任务的插件门面。"""
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     store = _FakeStore(account)
     builder = _FakeBuilder()
     renderer = _FakeRenderer()
     feedback = _FakeFeedbackManager()
-    plugin.store = store
-    plugin.profile_application = ProfileApplication(
+    plugin.services.store = store
+    plugin.services.profile_application = ProfileApplication(
         gateway=client,
         builder=builder,
         clock=lambda: datetime(2026, 9, 22, 12, 0, tzinfo=timezone.utc),
         plugin_version="test-version",
     )
-    plugin.profile_renderer = renderer
-    plugin.feedback_manager = feedback
-    plugin.command_adapter = AstrBotCommandAdapter()
-    plugin.profile_command_handler = ProfileCommandHandler(
+    plugin.services.profile_renderer = renderer
+    plugin.services.feedback_manager = feedback
+    plugin.adapters.command = AstrBotCommandAdapter()
+    plugin.handlers.profile = ProfileCommandHandler(
         account_reader=store,
-        application=plugin.profile_application,
+        application=plugin.services.profile_application,
         present=plugin._render_profile_dashboard,
     )
     return plugin, store, builder, renderer, feedback

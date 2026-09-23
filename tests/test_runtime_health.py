@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """验证只读运行健康诊断和管理员命令接线。"""
 
+from plugin_fixtures import make_plugin_shell
 import tempfile
 import unittest
 from pathlib import Path
@@ -134,17 +135,17 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             (root / "cache").mkdir()
             (root / "nikke.sqlite3").write_bytes(b"synthetic-db")
             (root / "secret.key").write_bytes(b"synthetic-key")
-            plugin = NikkePlugin.__new__(NikkePlugin)
+            plugin = make_plugin_shell()
             plugin.data_dir = root
-            plugin.store = SimpleNamespace(list_accounts=lambda with_cookie=False: [{"qq_id": "synthetic"}])
+            plugin.services.store = SimpleNamespace(list_accounts=lambda with_cookie=False: [{"qq_id": "synthetic"}])
             plugin._directory = []
             plugin.web_host = "0.0.0.0"
             plugin.web_port = 6210
             plugin.config = {"enable_daily_actions": False, "enable_cdk_redemption": False}
-            plugin.command_adapter = AstrBotCommandAdapter()
-            plugin.account_application = AccountApplication(plugin.store)
-            plugin.account_command_handler = AccountCommandHandler(
-                application=plugin.account_application,
+            plugin.adapters.command = AstrBotCommandAdapter()
+            plugin.services.account_application = AccountApplication(plugin.services.store)
+            plugin.handlers.account = AccountCommandHandler(
+                application=plugin.services.account_application,
                 public_base_url="https://bot.example.com",
                 allow_group_bind=False,
                 runtime_health=plugin._account_runtime_health_details,

@@ -1,4 +1,5 @@
 """公开塔层查询不需要绑定账号，并安全处理未知层数与损坏快照。"""
+from plugin_fixtures import make_plugin_shell
 import json
 import tempfile
 from pathlib import Path
@@ -14,13 +15,13 @@ from astrbot_plugin_nikke.main import NikkePlugin
 class TowerTests(IsolatedAsyncioTestCase):
     @staticmethod
     def _plugin(plugin_dir: Path) -> NikkePlugin:
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = plugin_dir
-        plugin.tower_application = TowerApplication(
+        plugin.services.tower_application = TowerApplication(
             plugin_dir / "assets" / "tower_floors.json"
         )
-        plugin.tower_command_handler = TowerCommandHandler(plugin.tower_application)
-        plugin.command_adapter = AstrBotCommandAdapter()
+        plugin.handlers.tower = TowerCommandHandler(plugin.services.tower_application)
+        plugin.adapters.command = AstrBotCommandAdapter()
         return plugin
 
     @staticmethod
