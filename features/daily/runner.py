@@ -6,28 +6,12 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import random
-from typing import Any, Protocol, Sequence
+from typing import Any
 
 from ...core.privacy import safe_exception_message
 from ...integrations.blablalink.client import BlaBlaClient, CookieExpired, UnknownAfterAction
 from .models import DailyTaskResult, DailyTaskStatus
-
-
-class DailyStore(Protocol):
-    """Daily runner 消费的最小持久化接口。"""
-
-    def get_run(self, run_key: str) -> dict[str, Any] | None: ...
-    def claim_run(self, run_key: str, qq_id: str, action: str) -> bool: ...
-    def retry_run(self, run_key: str, statuses: set[str]) -> bool: ...
-    def finish_run(self, run_key: str, status: str, detail: str = "") -> None: ...
-    def mark_cookie_invalid(self, qq_id: str) -> None: ...
-    def list_accounts(
-        self,
-        push_only: bool = False,
-        with_cookie: bool = True,
-        auto_daily_only: bool = False,
-    ) -> Sequence[dict[str, Any]]: ...
-    def set_setting(self, key: str, value: Any) -> None: ...
+from .ports import DailyStore
 
 
 class DailyRunner:
@@ -36,7 +20,7 @@ class DailyRunner:
     def __init__(
         self,
         client: BlaBlaClient | Any | None = None,
-        store: DailyStore | Any | None = None,
+        store: DailyStore | None = None,
         config: dict[str, Any] | None = None,
     ):
         self.client = client
@@ -108,7 +92,9 @@ class DailyRunner:
         if legacy_daily:
             return legacy_daily
         run_key = self.daily_run_key(day, account, "daily")
-        if not self.store.claim_run(run_key, qq_id, "daily"):
+        if not self.store.claim_run(
+            run_key, qq_id, "daily", initial_status="DISPATCH_INTENT"
+        ):
             existing = self.store.get_run(run_key)
             existing_status = str(existing.get("status", "")) if existing else ""
             if existing_status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
@@ -134,7 +120,12 @@ class DailyRunner:
                     "今日签到已有失败记录，未自动重发",
                 )
             if existing_status in {"pending", "unavailable"}:
-                if not self.store.retry_run(run_key, {"pending", "unavailable"}):
+                if not self.store.transition_run(
+                    run_key,
+                    from_statuses={"pending", "unavailable"},
+                    to_status="DISPATCH_INTENT",
+                    refresh_created_at=True,
+                ):
                     return DailyTaskResult(
                         account_name,
                         DailyTaskStatus.UNKNOWN_AFTER_ACTION,
@@ -150,12 +141,19 @@ class DailyRunner:
         signin_owned = False
         signin_finished = False
         if bool(self.config.get("enable_daily_actions", False)):
-            signin_owned = self.store.claim_run(signin_key, qq_id, "signin")
+            signin_owned = self.store.claim_run(
+                signin_key, qq_id, "signin", initial_status="DISPATCH_INTENT"
+            )
             if not signin_owned:
                 existing_signin = self.store.get_run(signin_key) or {}
                 signin_status = str(existing_signin.get("status", ""))
                 if signin_status in {"pending", "unavailable"}:
-                    signin_owned = self.store.retry_run(signin_key, {"pending", "unavailable"})
+                    signin_owned = self.store.transition_run(
+                        signin_key,
+                        from_statuses={"pending", "unavailable"},
+                        to_status="DISPATCH_INTENT",
+                        refresh_created_at=True,
+                    )
                     if not signin_owned:
                         result = DailyTaskResult(
                             account_name,

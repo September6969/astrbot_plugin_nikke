@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from .audio import VoicePreference
+from .ports import VoiceSettingsStore
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,7 +38,7 @@ class VoiceApplication:
     def __init__(
         self,
         *,
-        store: Any,
+        store: VoiceSettingsStore,
         character_resolver: Any,
         costume_registry: Any,
         audio_cache: Any,

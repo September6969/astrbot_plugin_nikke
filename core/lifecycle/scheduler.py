@@ -11,6 +11,7 @@ from typing import Any
 
 from ..config import read_schedule_clock
 from .coordinator import RuntimeCoordinator
+from .ports import SchedulerSettingsStore
 
 
 class RuntimeScheduler:
@@ -20,7 +21,7 @@ class RuntimeScheduler:
         self,
         *,
         coordinator: RuntimeCoordinator,
-        store: Any,
+        store: SchedulerSettingsStore,
         config: Mapping[str, Any],
         run_daily: Callable[..., Awaitable[Any]],
         send_summary: Callable[[str], Awaitable[Any]],

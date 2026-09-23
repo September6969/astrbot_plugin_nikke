@@ -24,6 +24,7 @@ from astrbot_plugin_nikke.features.character.identity import CharacterDirectoryR
 from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.features.voice.audio import VoiceAudioCache
 from astrbot_plugin_nikke.features.voice.provider import VoiceResourceProvider
+from astrbot_plugin_nikke.features.account.status import BIND_SESSION_PENDING, BIND_SESSION_SUCCESS
 
 
 def percentile(data, p):
@@ -155,8 +156,17 @@ def benchmark_list_accounts():
         n_accounts = 10
         for i in range(n_accounts):
             token = f"tok_{i}_" + "x" * 20
-            store.create_bind_session(token, f"qq_{i}")
-            store.consume_bind_session(token, f"game_token=abc_{i}; uid={i}", str(i), f"open_{i}", f"nick_{i}", f"role_{i}", "global")
+            store.create_bind_session(token, f"qq_{i}", status=BIND_SESSION_PENDING)
+            store.consume_bind_session(
+                token,
+                f"game_token=abc_{i}; uid={i}",
+                str(i),
+                f"open_{i}",
+                f"nick_{i}",
+                f"role_{i}",
+                "global",
+                success_status=BIND_SESSION_SUCCESS,
+            )
 
         # Before: 模拟原有的 N+1 次 SQL 连接与查询
         samples_before = []

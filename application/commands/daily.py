@@ -5,34 +5,13 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from datetime import datetime, timedelta, timezone
-from typing import Any, Protocol
+from typing import Any
 
 from ...features.daily.models import DailyTaskResult, DailyTaskStatus
+from ...features.daily.ports import DailyAccountReader, DailyCommandStore
 from ...features.daily.runner import DailyRunner
 from ...integrations.blablalink.client import CookieExpired
 from .contracts import CommandContext, CommandResult, ImageReply, TextReply
-
-
-class DailyAccountReader(Protocol):
-    """读取当前命令发起者绑定账号的端口。"""
-
-    def get_account(
-        self, qq_id: str, with_cookie: bool = True
-    ) -> Mapping[str, Any] | None:
-        """读取绑定账号；写入/状态用例需要凭据。"""
-
-
-class DailyCommandStore(Protocol):
-    """Daily 命令需要的最小存储端口。"""
-
-    def set_auto_daily(self, qq_id: str, enabled: bool) -> bool:
-        """保存账号的本地自动签到偏好。"""
-
-    def get_setting(self, key: str, default: Any = None) -> Any:
-        """读取每日汇总目标与持久结果。"""
-
-    def mark_cookie_invalid(self, qq_id: str) -> None:
-        """标记绑定凭据失效。"""
 
 
 DailySummaryRenderer = Callable[[Sequence[tuple[str, str]]], str]

@@ -17,6 +17,10 @@ from astrbot_plugin_nikke.integrations.blablalink.client import (
 )
 from astrbot_plugin_nikke.ui.primitives import CardRenderer
 from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.features.account.status import (
+    BIND_SESSION_PENDING,
+    BIND_SESSION_SUCCESS,
+)
 from astrbot_plugin_nikke.integrations.web.service import BindingWebService
 from astrbot_plugin_nikke.integrations.web.service import public_error
 
@@ -104,7 +108,9 @@ class BindingApiTests(unittest.IsolatedAsyncioTestCase):
 
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            store.create_bind_session("a" * 40, "123456", 600)
+            store.create_bind_session(
+                "a" * 40, "123456", 600, status=BIND_SESSION_PENDING
+            )
             capture = CaptureClient()
             service = BindingWebService(store, capture, Path(td) / "extension.zip")
             from aiohttp.test_utils import TestClient, TestServer
@@ -223,9 +229,18 @@ class StoreTests(unittest.TestCase):
     def test_single_use_and_encryption(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            store.create_bind_session("a" * 40, "10001", 600)
+            store.create_bind_session(
+                "a" * 40, "10001", 600, status=BIND_SESSION_PENDING
+            )
             qq_id = store.consume_bind_session(
-                "a" * 40, VALID_COOKIE, "12345", "67890", "丽塔", "丽塔", "3"
+                "a" * 40,
+                VALID_COOKIE,
+                "12345",
+                "67890",
+                "丽塔",
+                "丽塔",
+                "3",
+                success_status=BIND_SESSION_SUCCESS,
             )
             self.assertEqual(qq_id, "10001")
             self.assertEqual(store.get_account("10001")["cookie"], VALID_COOKIE)
@@ -237,49 +252,89 @@ class StoreTests(unittest.TestCase):
             self.assertNotIn(b"secret-token", encrypted)
             with self.assertRaises(ValueError):
                 store.consume_bind_session(
-                    "a" * 40, VALID_COOKIE, "12345", "67890", "丽塔", "丽塔", "3"
+                    "a" * 40,
+                    VALID_COOKIE,
+                    "12345",
+                    "67890",
+                    "丽塔",
+                    "丽塔",
+                    "3",
+                    success_status=BIND_SESSION_SUCCESS,
                 )
 
     def test_expired_session_rejected(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            store.create_bind_session("b" * 40, "10001", -1)
+            store.create_bind_session(
+                "b" * 40, "10001", -1, status=BIND_SESSION_PENDING
+            )
             with self.assertRaises(ValueError):
                 store.consume_bind_session(
-                    "b" * 40, VALID_COOKIE, "12345", "67890", "", "", "3"
+                    "b" * 40,
+                    VALID_COOKIE,
+                    "12345",
+                    "67890",
+                    "",
+                    "",
+                    "3",
+                    success_status=BIND_SESSION_SUCCESS,
                 )
 
     def test_idempotent_run(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            self.assertTrue(store.claim_run("2026-09-05:1:daily", "1", "daily"))
-            self.assertFalse(store.claim_run("2026-09-05:1:daily", "1", "daily"))
+            self.assertTrue(store.claim_run("2026-09-05:1:daily", "1", "daily", initial_status="DISPATCH_INTENT"))
+            self.assertFalse(store.claim_run("2026-09-05:1:daily", "1", "daily", initial_status="DISPATCH_INTENT"))
 
     def test_failed_run_can_be_retried_without_duplication(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
             key = "cdk:1:digest"
-            self.assertTrue(store.claim_run(key, "1", "cdk"))
+            self.assertTrue(store.claim_run(key, "1", "cdk", initial_status="DISPATCH_INTENT"))
             store.finish_run(key, "failed", "请求失败")
-            self.assertTrue(store.retry_run(key, {"failed"}, stale_after=120))
+            self.assertTrue(store.transition_run(
+                key,
+                from_statuses={"failed"},
+                to_status="DISPATCH_INTENT",
+                refresh_created_at=True,
+            ))
             self.assertEqual(store.get_run(key)["status"], "DISPATCH_INTENT")
-            self.assertFalse(store.retry_run(key, {"failed"}, stale_after=120))
+            self.assertFalse(store.transition_run(
+                key,
+                from_statuses={"failed"},
+                to_status="DISPATCH_INTENT",
+                refresh_created_at=True,
+            ))
 
     def test_stale_dispatch_intent_cannot_be_reclaimed_as_retryable(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
             key = "cdk:game:synthetic-intent"
             with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1000):
-                self.assertTrue(store.claim_run(key, "1", "cdk"))
+                self.assertTrue(store.claim_run(key, "1", "cdk", initial_status="DISPATCH_INTENT"))
             with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1180):
-                self.assertFalse(store.retry_run(key, {"failed"}, stale_after=120))
+                self.assertFalse(store.transition_run(
+                    key,
+                    from_statuses={"failed"},
+                    to_status="DISPATCH_INTENT",
+                    refresh_created_at=True,
+                ))
                 self.assertTrue(
-                    store.mark_stale_running_unknown(
-                        key, stale_after=120, detail="结果未确认"
+                    store.transition_run(
+                        key,
+                        from_statuses={"running", "DISPATCH_INTENT"},
+                        to_status="UNKNOWN_AFTER_ACTION",
+                        stale_after=120,
+                        detail="结果未确认",
                     )
                 )
                 self.assertEqual(store.get_run(key)["status"], "UNKNOWN_AFTER_ACTION")
-                self.assertFalse(store.retry_run(key, {"failed"}, stale_after=120))
+                self.assertFalse(store.transition_run(
+                    key,
+                    from_statuses={"failed"},
+                    to_status="DISPATCH_INTENT",
+                    refresh_created_at=True,
+                ))
 
 
 class ClientTests(unittest.IsolatedAsyncioTestCase):
@@ -808,13 +863,13 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def get_run(self, key):
                 return self.runs.get(key)
 
-            def claim_run(self, key, qq_id, action):
+            def claim_run(self, key, qq_id, action, *, initial_status):
                 if key in self.runs:
                     return False
-                self.runs[key] = {"status": "running", "detail": ""}
+                self.runs[key] = {"status": initial_status, "detail": ""}
                 return True
 
-            def retry_run(self, key, statuses, stale_after=0):
+            def transition_run(self, key, *, from_statuses, to_status, detail="", stale_after=None, refresh_created_at=False):
                 return False
 
             def finish_run(self, key, status, detail=""):

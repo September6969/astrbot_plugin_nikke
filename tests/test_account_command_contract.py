@@ -15,6 +15,7 @@ from astrbot_plugin_nikke.application.commands.account import (
     RuntimeHealthDetails,
 )
 from astrbot_plugin_nikke.features.account.application import AccountApplication
+from astrbot_plugin_nikke.features.account.status import BIND_SESSION_PENDING
 from astrbot_plugin_nikke.application.commands.contracts import (
     CommandContext,
     ImageReply,
@@ -24,12 +25,14 @@ from astrbot_plugin_nikke.application.commands.contracts import (
 
 class FakeStore:
     def __init__(self) -> None:
-        self.bind_sessions: list[tuple[str, str, int]] = []
+        self.bind_sessions: list[tuple[str, str, int, str]] = []
         self.accounts: dict[str, dict[str, Any]] = {}
         self.writes: list[tuple[Any, ...]] = []
 
-    def create_bind_session(self, token: str, qq_id: str, ttl: int = 600) -> None:
-        self.bind_sessions.append((token, qq_id, ttl))
+    def create_bind_session(
+        self, token: str, qq_id: str, ttl: int = 600, *, status: str
+    ) -> None:
+        self.bind_sessions.append((token, qq_id, ttl, status))
 
     def get_account(self, qq_id: str, with_cookie: bool = True):
         self.writes.append(("get_account", qq_id, with_cookie))
@@ -100,7 +103,10 @@ class AccountCommandContractTests(IsolatedAsyncioTestCase):
             context(operation="bind", actor_id="qq-owner", private=True)
         )
 
-        self.assertEqual(self.store.bind_sessions, [("T" * 40, "qq-owner", 600)])
+        self.assertEqual(
+            self.store.bind_sessions,
+            [("T" * 40, "qq-owner", 600, BIND_SESSION_PENDING)],
+        )
         self.assertIn("https://bot.example.com/bind/" + "T" * 40, result.messages[0].text)
         self.assertIn("仅可使用一次", result.messages[0].text)
 
@@ -129,7 +135,10 @@ class AccountCommandContractTests(IsolatedAsyncioTestCase):
         )
 
         self.assertIn("/bind/" + "T" * 40, result.messages[0].text)
-        self.assertEqual(self.store.bind_sessions, [("T" * 40, "group-owner", 600)])
+        self.assertEqual(
+            self.store.bind_sessions,
+            [("T" * 40, "group-owner", 600, BIND_SESSION_PENDING)],
+        )
 
     async def test_status_reads_only_non_secret_account_fields(self) -> None:
         self.store.accounts["qq-owner"] = {

@@ -28,7 +28,7 @@ async def test_single_final_and_retryable_states_without_plaintext():
     for status in ("success", "terminal", "unknown", "UNKNOWN_AFTER_ACTION", "failed", "expired"):
         with tempfile.TemporaryDirectory() as directory:
             store = NikkeStore(directory)
-            store.claim_run(key("FAKE-CODE"), "synthetic-user", "cdk")
+            store.claim_run(key("FAKE-CODE"), "synthetic-user", "cdk", initial_status="DISPATCH_INTENT")
             store.finish_run(key("FAKE-CODE"), status)
             client = AsyncMock()
             client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "兑换成功")
@@ -47,7 +47,7 @@ async def test_single_stale_and_fresh_intents_never_replay():
         with tempfile.TemporaryDirectory() as directory:
             store = NikkeStore(directory)
             with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1000):
-                store.claim_run(key("FAKE-CODE"), "synthetic-user", "cdk")
+                store.claim_run(key("FAKE-CODE"), "synthetic-user", "cdk", initial_status="DISPATCH_INTENT")
             client = AsyncMock()
             service = CdkService(client)
             with patch(
@@ -71,7 +71,7 @@ async def test_legacy_batch_intent_is_quarantined_but_new_code_continues():
     with tempfile.TemporaryDirectory() as directory:
         store = NikkeStore(directory)
         with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1000):
-            store.claim_run(legacy_key("FAKE-A"), "synthetic-user", "cdk")
+            store.claim_run(legacy_key("FAKE-A"), "synthetic-user", "cdk", initial_status="DISPATCH_INTENT")
         client = AsyncMock()
         client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "ok")
         with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1180), patch(
@@ -94,12 +94,16 @@ async def test_atomic_transition_across_store_instances():
     with tempfile.TemporaryDirectory() as directory:
         stores = [NikkeStore(directory), NikkeStore(directory)]
         with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1000):
-            stores[0].claim_run(key("FAKE-A"), "synthetic-user", "cdk")
+            stores[0].claim_run(key("FAKE-A"), "synthetic-user", "cdk", initial_status="DISPATCH_INTENT")
         with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1180), ThreadPoolExecutor(2) as pool:
             results = list(
                 pool.map(
-                    lambda store: store.mark_stale_running_unknown(
-                        key("FAKE-A"), stale_after=120, detail="结果未确认"
+                    lambda store: store.transition_run(
+                        key("FAKE-A"),
+                        from_statuses={"running", "DISPATCH_INTENT"},
+                        to_status="UNKNOWN_AFTER_ACTION",
+                        stale_after=120,
+                        detail="结果未确认",
                     ),
                     stores,
                 )
@@ -112,7 +116,7 @@ async def test_batch_final_states_skip_retryable_states_retry():
     for status in ("success", "terminal", "unknown", "UNKNOWN_AFTER_ACTION", "failed", "expired"):
         with tempfile.TemporaryDirectory() as directory:
             store = NikkeStore(directory)
-            store.claim_run(key("FAKE-A"), "synthetic-user", "cdk")
+            store.claim_run(key("FAKE-A"), "synthetic-user", "cdk", initial_status="DISPATCH_INTENT")
             store.finish_run(key("FAKE-A"), status)
             client = AsyncMock()
             client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "ok")

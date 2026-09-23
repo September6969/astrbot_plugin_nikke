@@ -5,6 +5,8 @@ import json
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 
+from .ports import AnnouncementStateStore
+
 
 def aware(value):
     parsed = datetime.fromisoformat(value) if isinstance(value, str) else value
@@ -36,7 +38,7 @@ class AnnouncementDelivery:
     CONFIRMED_FAILURE = "CONFIRMED_FAILURE"
     UNKNOWN_AFTER_ACTION = "UNKNOWN_AFTER_ACTION"
 
-    def __init__(self, store):
+    def __init__(self, store: AnnouncementStateStore):
         self.store = store
         self._dispatch_lock = asyncio.Lock()
 

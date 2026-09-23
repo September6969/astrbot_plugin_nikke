@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 
 from .models import CdkBatchResult, CdkRedeemResult
+from .ports import CdkRunStore
 from astrbot_plugin_nikke.integrations.blablalink.client import (
     BlaBlaClient,
     BlaBlaError,
@@ -180,7 +181,7 @@ class CdkService:
         account: dict[str, Any],
         code: str,
         account_key: str = "",
-        store=None,
+        store: CdkRunStore | None = None,
         qq_id: str = "",
     ) -> CdkRedeemResult:
         """单条 CDK 兑换，使用账号锁互斥与可选持久执行记录。"""
@@ -197,7 +198,7 @@ class CdkService:
         codes: list[str],
         account_key: str = "",
         delay: float = 1.0,
-        store=None,
+        store: CdkRunStore | None = None,
         qq_id: str = "",
     ) -> CdkBatchResult:
         """批量串行兑换 CDK，遇登录失效或限流安全中止。与单条兑换共享同账号互斥锁。"""
@@ -230,7 +231,9 @@ class CdkService:
 
         return batch_res
 
-    async def _redeem_persistently(self, account, code, store, qq_id):
+    async def _redeem_persistently(
+        self, account: dict[str, Any], code: str, store: CdkRunStore, qq_id: str
+    ):
         """单条与批量共用稳定账号键、持久 intent 与原子重领。"""
         game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
         key = self.persistent_run_key(account, code)
@@ -249,9 +252,17 @@ class CdkService:
 
         # 切换键前检查旧 QQ 作用域记录，避免升级后重放已提交或结果不明的兑换。
         code_digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
-        legacy_reader = getattr(store, "get_legacy_cdk_runs", None)
-        if callable(legacy_reader):
-            legacy_records = legacy_reader(game_uid, code_digest)
+        list_runs = getattr(store, "list_runs", None)
+        if not game_uid:
+            legacy_records = []
+        elif callable(list_runs):
+            suffix = f":{game_uid}:{code_digest}"
+            legacy_records = [
+                record
+                for record in list_runs(action="cdk")
+                if str(record.get("run_key", "")).startswith("cdk:")
+                and str(record.get("run_key", "")).endswith(suffix)
+            ]
         else:
             legacy_key = self._legacy_run_key(qq_id, game_uid, code)
             legacy = store.get_run(legacy_key) if legacy_key else None
@@ -271,7 +282,18 @@ class CdkService:
                 terminal=False,
             )
 
-        claimed = store.retry_run(key, {"failed", "expired"}) if existing else store.claim_run(key, qq_id, "cdk")
+        claimed = (
+            store.transition_run(
+                key,
+                from_statuses={"failed", "expired"},
+                to_status="DISPATCH_INTENT",
+                refresh_created_at=True,
+            )
+            if existing
+            else store.claim_run(
+                key, qq_id, "cdk", initial_status="DISPATCH_INTENT"
+            )
+        )
         if not claimed:
             return CdkRedeemResult(code, False, "此码正在处理，请稍后查询", is_unknown=True, terminal=False)
         try:
@@ -306,14 +328,18 @@ class CdkService:
         return f"cdk:{qq_id}:{game_uid}:{digest}"
 
     @staticmethod
-    def _existing_write_result(code, key, existing, store):
+    def _existing_write_result(
+        code: str, key: str, existing, store: CdkRunStore
+    ):
         """把终态或未决记录映射为不触发再次写入的结果。"""
         if not existing:
             return None
         status = str(existing.get("status", ""))
         if status in {"running", "DISPATCH_INTENT"}:
-            changed = store.mark_stale_running_unknown(
+            changed = store.transition_run(
                 key,
+                from_statuses={"running", "DISPATCH_INTENT"},
+                to_status="UNKNOWN_AFTER_ACTION",
                 stale_after=120,
                 detail="兑换结果未确认，请先检查官方兑换历史。",
             )

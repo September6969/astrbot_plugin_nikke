@@ -18,12 +18,15 @@ class FakeStore:
         self.invalidated = []
         self.runs = {}
 
-    def claim_run(self, run_key, qq_id, action):
+    def claim_run(self, run_key, qq_id, action, *, initial_status):
         self.claimed.append((run_key, qq_id, action))
         if run_key in self.runs:
             return False
         if action == "signin":
+            if self.signin_claim:
+                self.runs[run_key] = {"status": initial_status, "detail": ""}
             return self.signin_claim
+        self.runs[run_key] = {"status": initial_status, "detail": ""}
         return True
 
     def finish_run(self, run_key, status, detail=""):
@@ -33,10 +36,19 @@ class FakeStore:
     def get_run(self, run_key):
         return self.runs.get(run_key)
 
-    def retry_run(self, run_key, statuses):
+    def transition_run(
+        self,
+        run_key,
+        *,
+        from_statuses,
+        to_status,
+        detail="",
+        stale_after=None,
+        refresh_created_at=False,
+    ):
         current = self.runs.get(run_key)
-        if current and current["status"] in statuses:
-            self.runs[run_key] = {"status": "running", "detail": ""}
+        if current and current["status"] in from_statuses:
+            self.runs[run_key] = {"status": to_status, "detail": detail}
             return True
         return False
 

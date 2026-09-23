@@ -10,12 +10,13 @@ from astrbot_plugin_nikke.application.commands.daily import DailyCommandHandler
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.features.daily.models import DailyTaskResult, DailyTaskStatus
 from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.features.account.status import BIND_SESSION_PENDING, BIND_SESSION_SUCCESS
 
 
 class DailyAutoStoreTests(unittest.TestCase):
     def _bound_store(self, directory: str) -> NikkeStore:
         store = NikkeStore(directory)
-        store.create_bind_session("a" * 40, "10001")
+        store.create_bind_session("a" * 40, "10001", status=BIND_SESSION_PENDING)
         store.consume_bind_session(
             "a" * 40,
             "session=synthetic",
@@ -24,6 +25,7 @@ class DailyAutoStoreTests(unittest.TestCase):
             "合成指挥官",
             "合成角色",
             "3",
+            success_status=BIND_SESSION_SUCCESS,
         )
         return store
 

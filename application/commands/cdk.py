@@ -4,28 +4,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, Protocol
+from typing import Any
 
 from ...features.cdk.models import CdkBatchResult
+from ...features.cdk.ports import CdkAccountReader, CdkCommandStore
 from ...features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
 from ...integrations.blablalink.client import CookieExpired
 from .contracts import CommandContext, CommandResult, TextReply
-
-
-class CdkAccountReader(Protocol):
-    """读取绑定账号的最小端口。"""
-
-    def get_account(
-        self, qq_id: str, with_cookie: bool = True
-    ) -> Mapping[str, Any] | None:
-        """返回绑定账号及写入接口凭据。"""
-
-
-class CdkCommandStore(Protocol):
-    """CDK 命令需要的最小存储端口。"""
-
-    def mark_cookie_invalid(self, qq_id: str) -> None:
-        """标记绑定凭据失效。"""
 
 
 class CdkCommandHandler:

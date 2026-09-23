@@ -16,11 +16,11 @@ class FakeDailyStore:
         self.finished = {}
         self.invalid = []
 
-    def claim_run(self, run_key, qq_id, action):
+    def claim_run(self, run_key, qq_id, action, *, initial_status):
         self.events.append(f"claim:{action}")
         if run_key in self.runs:
             return False
-        self.runs[run_key] = {"status": "DISPATCH_INTENT"}
+        self.runs[run_key] = {"status": initial_status}
         return True
 
     def get_run(self, run_key):

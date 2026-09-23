@@ -319,12 +319,12 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
                 return {"qq_id": qq_id, "game_uid": "uid1", "cookie": "cookie"}
             def get_run(self, key):
                 return self.runs.get(key)
-            def claim_run(self, key, qq_id, action):
-                self.runs[key] = {"status": "running", "detail": ""}
+            def claim_run(self, key, qq_id, action, *, initial_status):
+                self.runs[key] = {"status": initial_status, "detail": ""}
                 return True
-            def retry_run(self, key, statuses, stale_after=0):
-                if key in self.runs and self.runs[key]["status"] in statuses:
-                    self.runs[key]["status"] = "running"
+            def transition_run(self, key, *, from_statuses, to_status, detail="", stale_after=None, refresh_created_at=False):
+                if key in self.runs and self.runs[key]["status"] in from_statuses:
+                    self.runs[key]["status"] = to_status
                     return True
                 return False
             def finish_run(self, key, status, detail=""):
@@ -381,8 +381,8 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
                 return {"qq_id": qq_id, "game_uid": self.current_uid, "cookie": "cookie"}
             def get_run(self, key):
                 return self.runs.get(key)
-            def claim_run(self, key, qq_id, action):
-                self.runs[key] = {"status": "running", "detail": ""}
+            def claim_run(self, key, qq_id, action, *, initial_status):
+                self.runs[key] = {"status": initial_status, "detail": ""}
                 return True
             def finish_run(self, key, status, detail=""):
                 self.runs[key] = {"status": status, "detail": detail}

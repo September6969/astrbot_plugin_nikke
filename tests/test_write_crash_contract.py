@@ -117,7 +117,7 @@ async def test_legacy_cdk_success_record_blocks_replay_after_qq_rebinding(tmp_pa
     account = {"game_uid": "game-uid", "area_id": "1", "platform": "global"}
     client = AsyncMock()
     legacy_key = CdkService._legacy_run_key("previous-qq", "game-uid", "TEST-CODE")
-    store.claim_run(legacy_key, "previous-qq", "cdk")
+    store.claim_run(legacy_key, "previous-qq", "cdk", initial_status="DISPATCH_INTENT")
     store.finish_run(legacy_key, "success", "兑换成功")
 
     result = await CdkService(client).redeem_single(
@@ -135,7 +135,7 @@ async def test_legacy_cdk_failed_record_is_conservatively_blocked(tmp_path):
     account = {"game_uid": "game-uid", "area_id": "1", "platform": "global"}
     client = AsyncMock()
     legacy_key = CdkService._legacy_run_key("previous-qq", "game-uid", "TEST-CODE")
-    store.claim_run(legacy_key, "previous-qq", "cdk")
+    store.claim_run(legacy_key, "previous-qq", "cdk", initial_status="DISPATCH_INTENT")
     store.finish_run(legacy_key, "failed", "旧版本无法证明未写入")
 
     result = await CdkService(client).redeem_single(

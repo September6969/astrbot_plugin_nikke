@@ -14,13 +14,15 @@ class BindingSessionStore(Protocol):
     db_path: Path
     key_path: Path
 
-    def create_bind_session(self, token: str, qq_id: str, ttl: int = 600) -> None:
+    def create_bind_session(
+        self, token: str, qq_id: str, ttl: int = 600, *, status: str
+    ) -> None:
         """创建一次性绑定会话。"""
 
     def get_bind_session(self, token: str) -> Mapping[str, Any] | None:
         """查询绑定会话状态。"""
 
-    def fail_bind_session(self, token: str, error: str) -> None:
+    def fail_bind_session(self, token: str, error: str, *, status: str) -> None:
         """记录验证失败状态。"""
 
     def consume_bind_session(
@@ -34,6 +36,8 @@ class BindingSessionStore(Protocol):
         area_id: str,
         x_common_params: str = "",
         user_agent: str = "",
+        *,
+        success_status: str,
     ) -> str:
         """在同一事务中消费会话并持久化账号凭据。"""
 

@@ -5,31 +5,10 @@ from __future__ import annotations
 
 import secrets
 from collections.abc import Callable, Mapping, Sequence
-from typing import Any, Protocol
+from typing import Any
 
-
-class AccountStorePort(Protocol):
-    """账号命令需要的最小持久化能力。"""
-
-    def create_bind_session(self, token: str, qq_id: str, ttl: int = 600) -> None:
-        """创建有时效的一次性绑定会话。"""
-
-    def get_account(
-        self, qq_id: str, with_cookie: bool = True
-    ) -> Mapping[str, Any] | None:
-        """读取指定账号；状态查询必须关闭 Cookie 返回。"""
-
-    def delete_account(self, qq_id: str) -> bool:
-        """解除指定 QQ 的账号绑定。"""
-
-    def set_push(self, qq_id: str, enabled: bool) -> bool:
-        """更新账号的每日汇总偏好。"""
-
-    def set_setting(self, key: str, value: Any) -> None:
-        """持久化插件设置。"""
-
-    def list_accounts(self, with_cookie: bool = True) -> Sequence[Mapping[str, Any]]:
-        """列出账号；管理员健康检查只读非敏感字段。"""
+from .ports import AccountStorePort
+from .status import BIND_SESSION_PENDING
 
 
 class AccountApplication:
@@ -50,7 +29,10 @@ class AccountApplication:
         """创建一次性绑定会话并返回不泄漏给其他层的公开链接。"""
         token = self._token_factory(36)
         self._store.create_bind_session(
-            token, str(qq_id), self.BIND_SESSION_TTL_SECONDS
+            token,
+            str(qq_id),
+            self.BIND_SESSION_TTL_SECONDS,
+            status=BIND_SESSION_PENDING,
         )
         return f"{public_base_url.rstrip('/')}/bind/{token}"
 
