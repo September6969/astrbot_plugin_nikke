@@ -21,6 +21,8 @@ try:
 except ImportError:
     from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
 
+from .resource_store import NikkeDbResourceStore
+
 logger = logging.getLogger("nikke.nikke_db")
 
 
@@ -52,10 +54,17 @@ class NikkeDbProvider:
         *,
         remote: bool = False,
         master_resolver: CharacterMasterResolver | None = None,
+        local_root: str | Path | None = None,
     ):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
         self.remote = remote
+        # 旧测试/本地调用未提供独立根目录时保留 cache/nikke-db 兼容路径；
+        # 正式容器通过 local_root 指向 /AstrBot/data/vendor/nikke-db。
+        self.resource_store = NikkeDbResourceStore(
+            local_root if local_root is not None else self.cache_dir / "nikke-db",
+            remote=remote,
+        )
 
         self._failed: dict[str, float] = {}
         self._locks: dict[str, threading.Lock] = {}
@@ -311,58 +320,10 @@ class NikkeDbProvider:
         now = time.monotonic()
         if self._index is not None and (now - self._index_loaded_at) < self.INDEX_TTL:
             return self._index
-
-        index_file = self.cache_dir / "nikke-db" / "index" / "l2d.json"
-        if index_file.is_file():
-            try:
-                mtime = index_file.stat().st_mtime
-                if (time.time() - mtime) < self.INDEX_TTL:
-                    data = json.loads(index_file.read_text(encoding="utf-8"))
-                    if isinstance(data, list):
-                        self._index = {item.get("id"): item for item in data if isinstance(item, dict) and "id" in item}
-                        self._index_loaded_at = now
-                        return self._index
-                    if isinstance(data, dict):
-                        self._index = data
-                        self._index_loaded_at = now
-                        return self._index
-            except (OSError, ValueError):
-                pass
-
-        if allow_remote and self.remote and not self.is_failed("index:l2d"):
-            try:
-                with httpx.Client(timeout=5) as client:
-                    resp = client.get(self.INDEX_URL)
-                    resp.raise_for_status()
-                    data = resp.json()
-                    index_file.parent.mkdir(parents=True, exist_ok=True)
-                    index_file.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-                    if isinstance(data, list):
-                        self._index = {item.get("id"): item for item in data if isinstance(item, dict) and "id" in item}
-                    elif isinstance(data, dict):
-                        self._index = data
-                    else:
-                        self._index = {}
-                    self._index_loaded_at = now
-                    return self._index
-            except (httpx.HTTPError, OSError, ValueError):
-                self.mark_failed("index:l2d", 300)
-
-        if index_file.is_file():
-            try:
-                data = json.loads(index_file.read_text(encoding="utf-8"))
-                if isinstance(data, list):
-                    self._index = {item.get("id"): item for item in data if isinstance(item, dict) and "id" in item}
-                elif isinstance(data, dict):
-                    self._index = data
-                else:
-                    self._index = {}
-                self._index_loaded_at = now
-                return self._index
-            except (OSError, ValueError):
-                pass
-
-        self._index = {}
+        self._index = self.resource_store.get_index(
+            allow_remote=allow_remote and self.remote,
+            ttl=self.INDEX_TTL,
+        )
         self._index_loaded_at = now
         return self._index
 
@@ -377,7 +338,26 @@ class NikkeDbProvider:
             return verified[0]
         if entry and isinstance(entry, dict) and "version" in entry:
             return entry["version"]
+        try:
+            bundle = self.resource_store.resolve_local(character_id)
+            return bundle.runtime_version
+        except Exception:
+            pass
         return None
+
+    def source_version(self, character_id: str, *, allow_remote: bool = False) -> str:
+        """返回本地镜像/索引的稳定 source identity。"""
+        return self.resource_store.source_version(character_id, allow_remote=allow_remote)
+
+    def ensure_spine_bundle(
+        self,
+        character_id: str,
+        urls: dict[str, str],
+        *,
+        allow_remote: bool | None = None,
+    ):
+        """后台任务专用：本地优先，缺失时补齐并完成真实版本校验。"""
+        return self.resource_store.ensure_bundle(character_id, urls, allow_remote=allow_remote)
 
     def resolve_spine_bundle_urls(self, character_id: str, action: str = "setup") -> dict[str, str]:
         """生成 Nikke-DB 当前的 canonical bundle 路径。"""

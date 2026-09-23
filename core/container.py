@@ -126,14 +126,41 @@ def create_container(
         )
 
     spine_budget = (config or {}).get("spine_budget_seconds", 20.0)
+    spine_cache_value = (config or {}).get("spine_runtime_cache_dir")
+    spine_meta_value = (config or {}).get("spine_runtime_meta_dir")
+    nikke_db_root_value = (config or {}).get("nikke_db_local_root")
+    spine_cache_dir = (
+        Path(spine_cache_value).expanduser()
+        if isinstance(spine_cache_value, str) and spine_cache_value.strip()
+        else data_dir / "cache" / "spine-rendered"
+    )
+    spine_meta_dir = (
+        Path(spine_meta_value).expanduser()
+        if isinstance(spine_meta_value, str) and spine_meta_value.strip()
+        else data_dir / "cache" / "spine-meta"
+    )
+    nikke_db_root = (
+        Path(nikke_db_root_value).expanduser()
+        if isinstance(nikke_db_root_value, str) and nikke_db_root_value.strip()
+        else data_dir.parent / "vendor" / "nikke-db"
+    )
     asset_manager = AssetManager(
         data_dir / "cache",
         plugin_dir / "assets",
         remote=True,
-        spine_renderer=build_spine_renderer(data_dir / "cache", config),
+        spine_renderer=build_spine_renderer(
+            data_dir / "cache",
+            config,
+            prerender_dir=spine_cache_dir,
+        ),
         spine_budget_seconds=float(spine_budget) if isinstance(spine_budget, (int, float)) and spine_budget > 0 else 20.0,
         spine_manifest_path=data_dir / "spine-manifest.json",
         spine_rendered_dir=data_dir / "spine-rendered",
+        nikke_db_local_root=nikke_db_root,
+        spine_runtime_cache_dir=spine_cache_dir,
+        spine_runtime_meta_dir=spine_meta_dir,
+        spine_auto_warm_enabled=(config or {}).get("spine_auto_warm_enabled", True) is not False,
+        nikke_db_remote_fetch_enabled=(config or {}).get("nikke_db_remote_fetch_enabled", True) is not False,
     )
     character_renderer = CharacterCardRenderer(
         data_dir / "cards",

@@ -1,6 +1,6 @@
 # 配置合同与安全边界
 
-配置 schema 位于 `_conf_schema.json`。下表与 schema 的 22 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
+配置 schema 位于 `_conf_schema.json`。下表与 schema 的 27 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
 
 | 配置键 | 默认值 | 作用与边界 |
 | --- | --- | --- |
@@ -20,6 +20,11 @@
 | `spine_worker_path_4_1` | 空字符串 | 可选的官方 Spine 4.1 headless worker 绝对路径；为空时对 4.1 bundle 只使用中性占位图回退。 |
 | `spine_runtime_version` | `4.0` | worker 严格匹配的 Spine major.minor；未知或不匹配 bundle 不执行。 |
 | `spine_worker_timeout` | `4` | 单次 worker 最大秒数，配置范围 1–5。 |
+| `nikke_db_local_root` | 空字符串 | Nikke-DB vendor 根目录；留空时从 AstrBot data root 推导。 |
+| `spine_runtime_cache_dir` | 空字符串 | 运行时 Spine PNG 缓存目录；留空时使用 `cache/spine-rendered`。 |
+| `spine_runtime_meta_dir` | 空字符串 | 运行时 metadata 目录；留空时使用 `cache/spine-meta`。 |
+| `spine_auto_warm_enabled` | `true` | 缺图时后台按 key 去重 warm，查询线程立即 fallback。 |
+| `nikke_db_remote_fetch_enabled` | `true` | 允许后台从公开 Nikke-DB 白名单补齐缺失 bundle。 |
 | `voice_dynamic_enabled` | `true` | 仅启用 `assets/voice_poke_map.json` 中有来源证据的官方动态语音；空映射或关闭时回退本地登记音频。 |
 | `custom_character_aliases` | 空字符串 | 用户自定义角色别名，支持JSON对象或多行“角色名=别名1,别名2”格式；与内置别名合并。 |
 | `max_concurrency` | `2` | 每日账号任务最大并发数；应按上游频控和部署容量调整。 |

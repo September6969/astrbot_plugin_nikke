@@ -19,6 +19,14 @@ from .layout import (
 
 
 _TRUTHY = {"1", "true", "yes", "on", "preview"}
+_RUNTIME_METADATA_DIR: Path | None = None
+
+
+def configure_runtime_metadata_dir(path: str | Path | None) -> None:
+    """配置后台生成的 metadata 目录；不在请求线程解析 Spine。"""
+    global _RUNTIME_METADATA_DIR
+    _RUNTIME_METADATA_DIR = Path(path).expanduser().resolve() if path is not None else None
+    metadata.cache_clear()
 
 
 def body_centering_requested(explicit):
@@ -35,7 +43,32 @@ def metadata():
         if not candidate.is_file():
             candidate = assets_root / "face_anchors.json"
         data = json.loads(candidate.read_text(encoding="utf-8"))
-        return data.get("records", {}) if data.get("schema") == 1 else {}
+        bundled = data.get("records", {}) if data.get("schema") == 1 else {}
+        if not isinstance(bundled, dict):
+            bundled = {}
+        if _RUNTIME_METADATA_DIR is None:
+            return bundled
+        # bundled record 保持第一优先级；同一 render_id 的 runtime 记录作为
+        # variant 加入，framing() 仍会按 pixel_sha256/image_size 精确选择。
+        try:
+            from ...integrations.spine.runtime_meta import SpineRuntimeMetadataStore
+
+            runtime_records = SpineRuntimeMetadataStore(_RUNTIME_METADATA_DIR).read_records()
+        except (OSError, ValueError, ImportError):
+            runtime_records = {}
+        merged = dict(bundled)
+        for key, runtime_row in runtime_records.items():
+            existing = merged.get(key)
+            if isinstance(existing, dict):
+                variants = list(existing.get("variants", [])) if isinstance(existing.get("variants"), list) else []
+                variants = [item for item in variants if isinstance(item, dict)]
+                variants.append(runtime_row)
+                existing = dict(existing)
+                existing["variants"] = variants
+                merged[key] = existing
+            else:
+                merged[key] = runtime_row
+        return merged
     except (OSError, ValueError, AttributeError):
         return {}
 
