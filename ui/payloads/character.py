@@ -2,6 +2,7 @@
 """妮姬角色卡的独立 T2I payload 投影。"""
 
 from ..t2i_assets import T2IAssetResolver
+from .common import display_number
 
 
 def _normalize_equipment_icon(source):
@@ -21,10 +22,6 @@ def _normalize_equipment_icon(source):
     y = (180 - fitted.height) // 2
     canvas.alpha_composite(fitted, (x, y))
     return canvas
-
-
-def display_number(value):
-    return "Unknown" if value is None else f"{value:,}"
 
 
 class CharacterT2IPayloadBuilder:

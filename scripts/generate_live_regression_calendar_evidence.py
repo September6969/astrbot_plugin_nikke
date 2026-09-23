@@ -22,7 +22,7 @@ from astrbot_plugin_nikke.features.calendar.content_quality import (
     interval_overlap_ratio,
 )
 from astrbot_plugin_nikke.features.calendar.schedule_service import ScheduleService
-from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 

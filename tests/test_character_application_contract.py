@@ -262,9 +262,8 @@ def test_character_t2i_payload_has_a_canonical_independent_module():
     from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
 
     root = Path(__file__).resolve().parents[1]
-    legacy = (root / "ui" / "t2i_payloads.py").read_text(encoding="utf-8")
     renderer = (root / "ui" / "renderers" / "t2i.py").read_text(encoding="utf-8")
-    assert "class CharacterT2IPayloadBuilder" not in legacy
+    assert not (root / "ui" / "t2i_payloads.py").exists()
     assert "ui.payloads.character import CharacterT2IPayloadBuilder" in renderer
     assert CharacterT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.character"
     stale_imports = []

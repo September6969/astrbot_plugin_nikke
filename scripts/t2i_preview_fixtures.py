@@ -9,7 +9,7 @@ def calendar_cases(directory):
     from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
     from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent, TimePrecision, SourceHealth, FetchOutcome
-    from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 
     case_names = (
         "normal", "7-days", "30-days", "stale", "long-title", "many-events", "empty", "unavailable",

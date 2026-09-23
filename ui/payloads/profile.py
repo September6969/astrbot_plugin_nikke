@@ -1,38 +1,7 @@
 """Profile 页面表现 payload；只消费已准备的领域数据和本地资产。"""
 
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-
-
-def display_number(value):
-    """把 Profile 数值转换成稳定的展示文本，不猜测缺失值。"""
-    return "Unknown" if value is None else f"{value:,}"
-
-
-def format_compact_number(value):
-    """仅 Profile Resources 使用的 compact 紧凑数字格式化（约 3 位有效数字）。"""
-    if value is None:
-        return "Unknown"
-    if isinstance(value, str):
-        try:
-            value = float(value)
-        except ValueError:
-            return value
-    if value < 0:
-        return "-" + format_compact_number(-value)
-    if value < 1000:
-        return str(int(round(value)))
-    for divisor, suffix in ((1_000_000_000, "B"), (1_000_000, "M"), (1_000, "K")):
-        if value >= divisor:
-            scaled = value / divisor
-            if round(scaled, 2) < 10:
-                return f"{scaled:.2f}{suffix}"
-            elif round(scaled, 1) < 100:
-                return f"{scaled:.1f}{suffix}"
-            elif round(scaled, 0) < 1000:
-                return f"{scaled:.0f}{suffix}"
-            else:
-                continue
-    return f"{value / 1_000_000_000:.0f}B"
+from .common import display_number, format_compact_number
 
 
 def section_state(available=None, partial=False, items=None):

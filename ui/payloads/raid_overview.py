@@ -13,7 +13,7 @@ class UnionOverviewT2IPayloadBuilder:
         from astrbot_plugin_nikke.features.raid.models import RaidState
         from astrbot_plugin_nikke.features.raid.participants import format_compact_number
         from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
-        from astrbot_plugin_nikke.ui.t2i_payloads import (
+        from astrbot_plugin_nikke.ui.payloads.common import (
             boss_presentation,
             display_number,
             display_remaining,

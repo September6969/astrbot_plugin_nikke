@@ -11,10 +11,7 @@ from astrbot_plugin_nikke.scripts.preview_t2i_ui import fixture_record
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
-from astrbot_plugin_nikke.ui.t2i_payloads import (
-    CampaignT2IPayloadBuilder as LegacyCampaignT2IPayloadBuilder,
-    ProfileT2IPayloadBuilder,
-)
+from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
@@ -24,28 +21,16 @@ from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_campaign_payload_legacy_import_points_to_canonical_module():
-    assert LegacyCampaignT2IPayloadBuilder is CampaignT2IPayloadBuilder
+def test_campaign_payload_builder_uses_canonical_page_module():
+    assert CampaignT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.campaign"
 
 
 def test_union_payload_builders_are_owned_by_page_modules():
-    import ast
-
     assert UnionMemberT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_member"
     assert UnionOverviewT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_overview"
     assert UnionRecordsT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_records"
 
-    source = (ROOT / "ui" / "t2i_payloads.py").read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    assert not any(
-        isinstance(node, ast.ClassDef)
-        and node.name in {
-            "UnionMemberT2IPayloadBuilder",
-            "UnionOverviewT2IPayloadBuilder",
-            "UnionRecordsT2IPayloadBuilder",
-        }
-        for node in ast.walk(tree)
-    )
+    assert not (ROOT / "ui" / "t2i_payloads.py").exists()
 
 
 @pytest.fixture

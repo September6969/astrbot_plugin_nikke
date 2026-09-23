@@ -188,7 +188,7 @@ async def test_union_command_failure_no_refetch(page, command):
 
 
 def test_profile_structure_and_unknowns(tmp_path):
-    from astrbot_plugin_nikke.ui.t2i_payloads import ProfileT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("profile", tmp_path)
     builder = ProfileT2IPayloadBuilder()
@@ -236,7 +236,7 @@ async def test_character_slots_theme_and_assets(tmp_path):
 
 
 def test_profile_resource_silver_mileage_label(tmp_path):
-    from astrbot_plugin_nikke.ui.t2i_payloads import ProfileT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("profile", tmp_path)
     builder = ProfileT2IPayloadBuilder()

@@ -792,7 +792,7 @@ async def test_manual_empty_does_not_refresh_freshness(tmp_path):
 
 def test_t2i_payload_purged_legacy_groups(tmp_path):
     """P0-6: CalendarT2IPayloadBuilder 返回的字典中彻底不存在 groups, ending_soon, active, upcoming 键。"""
-    from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 
     service = ScheduleService(tmp_path)
     ev = CanonicalEvent(

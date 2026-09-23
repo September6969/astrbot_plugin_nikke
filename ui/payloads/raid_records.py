@@ -3,7 +3,7 @@
 
 class UnionRecordsT2IPayloadBuilder:
     def build(self, data, union_members=None, **kwargs):
-        from astrbot_plugin_nikke.ui.t2i_payloads import display_number
+        from astrbot_plugin_nikke.ui.payloads.common import display_number
 
         if union_members is None:
             union_members = getattr(data, "union_members", None)

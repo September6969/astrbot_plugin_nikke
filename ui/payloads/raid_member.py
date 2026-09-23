@@ -8,7 +8,7 @@ class UnionMemberT2IPayloadBuilder:
     def build(self, data):
         from astrbot_plugin_nikke.features.campaign.models import StageClearMember
         from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
-        from astrbot_plugin_nikke.ui.t2i_payloads import boss_presentation, display_number
+        from astrbot_plugin_nikke.ui.payloads.common import boss_presentation, display_number
 
         if data.scope != "CURRENT_RESPONSE_MEMBER":
             raise ValueError("个人报告要求明确的当前成员响应范围")

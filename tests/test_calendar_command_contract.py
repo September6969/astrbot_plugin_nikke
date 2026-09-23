@@ -141,14 +141,7 @@ def test_main_calendar_route_does_not_read_schedule_service_or_model_fields():
 
 def test_calendar_pagination_payload_is_owned_by_page_module():
     root = Path(__file__).resolve().parents[1]
-    compatibility = root / "ui" / "t2i_payloads.py"
-    source = compatibility.read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    assert not any(
-        isinstance(node, ast.ClassDef) and node.name == "CalendarT2IPayloadBuilder"
-        for node in tree.body
-    )
-    assert len(source.splitlines()) <= 100
+    assert not (root / "ui" / "t2i_payloads.py").exists()
     from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 
     assert CalendarT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.calendar"
