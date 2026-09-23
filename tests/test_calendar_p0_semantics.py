@@ -1002,6 +1002,21 @@ async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
     plugin = NikkePlugin.__new__(NikkePlugin)
     mock_cal = Mock()
     mock_cal.has_snapshot.return_value = False
+    mock_cal.normalize_horizon.side_effect = ScheduleService.normalize_horizon
+    mock_cal.freeze_query_context.return_value = QueryContext(
+        now=NOW,
+        snapshot_version="synthetic",
+        events=(),
+        source_health={},
+        freshness=Freshness.EXPIRED.value,
+        coverage=Coverage.UNAVAILABLE.value,
+    )
+    mock_cal.format_schedule_text.return_value = "功能尚未就绪"
+    mock_cal.activity_count.return_value = 0
+    mock_cal.data_quality = "SCHEDULE DATA UNAVAILABLE"
+    mock_cal.last_updated_at = None
+    mock_cal.last_sync_error = ""
+    mock_cal.cached_visual_event_ids.return_value = ()
     mock_cal.sync_from_source = AsyncMock()
     mock_cal.refresh_schedule_data = AsyncMock()
     plugin.calendar = mock_cal

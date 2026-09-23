@@ -33,6 +33,7 @@ from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
 from .application.commands.campaign import CampaignCommandHandler
 from .application.commands.cdk import CdkCommandHandler
+from .application.commands.calendar import CalendarCommandHandler
 from .application.commands.daily import DailyCommandHandler
 from .application.commands.guide import GuideCommandHandler
 from .application.commands.profile import ProfileCommandHandler
@@ -43,7 +44,7 @@ from .core.container import create_container
 from .features.daily.runner import DailyRunner
 from .features.announcement.service import AnnouncementService
 from .features.announcement.delivery import AnnouncementDelivery
-from .features.calendar.service import CalendarService
+from .features.calendar.application import CalendarApplication
 from .core.asset_manager import AssetManager
 from .ui.renderers import (
     CampaignHistoryRenderer,
@@ -52,7 +53,7 @@ from .ui.renderers import (
     UnionRaidRenderer,
 )
 from .ui.primitives import CardRenderer
-from .ui.t2i_payloads import CalendarT2IPayloadBuilder
+from .ui.payloads.calendar import CalendarT2IPayloadBuilder
 from .features.character.application import (
     CharacterAmbiguousMatch,
     CharacterNotFound,
@@ -127,6 +128,7 @@ class NikkePlugin(Star):
         self.announcements = self.container.announcements
         self.announcement_delivery = self.container.announcement_delivery
         self.calendar = self.container.calendar
+        self.calendar_application = self.container.calendar_application
         self.tarot = self.container.tarot
         self.tower_application = self.container.tower_application
         self.daily_runner = self.container.daily_runner
@@ -148,6 +150,7 @@ class NikkePlugin(Star):
         )
         self.daily_command_handler = self._build_daily_command_handler()
         self.cdk_command_handler = self._build_cdk_command_handler()
+        self.calendar_command_handler = self._build_calendar_command_handler()
 
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
@@ -279,6 +282,37 @@ class NikkePlugin(Star):
             config=getattr(self, "config", {}),
         )
 
+    @property
+    def calendar_application(self) -> CalendarApplication:
+        application = getattr(self, "_calendar_application", None)
+        return application or CalendarApplication(getattr(self, "calendar", None))
+
+    @calendar_application.setter
+    def calendar_application(self, application: CalendarApplication) -> None:
+        self._calendar_application = application
+
+    @property
+    def calendar_command_handler(self) -> CalendarCommandHandler | None:
+        handler = getattr(self, "_calendar_command_handler", None)
+        return handler or self._build_calendar_command_handler()
+
+    @calendar_command_handler.setter
+    def calendar_command_handler(self, handler: CalendarCommandHandler) -> None:
+        self._calendar_command_handler = handler
+
+    def _build_calendar_command_handler(self) -> CalendarCommandHandler:
+        return CalendarCommandHandler(
+            application=self.calendar_application,
+            payload_builder=CalendarT2IPayloadBuilder(),
+            render=lambda payload: self._try_t2i("calendar_schedule", payload),
+            start_background_refresh=self._start_calendar_background_refresh,
+        )
+
+    def _start_calendar_background_refresh(self) -> None:
+        spawn = getattr(self, "_spawn_background_task", None)
+        if callable(spawn):
+            spawn(self._sync_calendar_background())
+
     async def _send_daily_summary_image(self, target: str, path: str) -> None:
         await self.context.send_message(target, MessageChain([Image.fromFileSystem(path)]))
 
@@ -339,7 +373,9 @@ class NikkePlugin(Star):
 
     async def _sync_calendar_background(self) -> None:
         try:
-            await self.calendar.sync_from_source()
+            application = self.calendar_application
+            if application is not None:
+                await application.refresh_schedule()
         except Exception as exc:
             logger.debug("[NIKKE] 后台日程同步跳过: %s", safe_exception_message(exc))
 
@@ -389,10 +425,8 @@ class NikkePlugin(Star):
             await asyncio.sleep(20)
 
     def _deadline_reminders_for_delivery(self):
-        calendar = getattr(self, "calendar", None)
-        if calendar is not None and calendar.has_snapshot() and calendar.activity_count() > 0:
-            return calendar.list_reminder_deadlines()
-        return self.announcements.list_active_deadlines()
+        fallback = self.announcements.list_active_deadlines()
+        return self.calendar_application.reminder_deadlines(fallback)
 
     async def _dispatch_announcements(self):
         """默认关闭，只有管理员启用且目标显式订阅后才由调度调用。"""
@@ -1164,63 +1198,13 @@ class NikkePlugin(Star):
             yield result
 
     async def event_schedule(self, event: AstrMessageEvent, horizon: str = ""):
-        """查询进行中与即将截止的官方活动日程。"""
-        sub = str(horizon or "").strip().casefold()
-        if sub in {"刷新", "refresh", "rescan"}:
-            calendar = getattr(self, "calendar", None)
-            if calendar is not None:
-                if hasattr(calendar, "refresh_schedule_data"):
-                    ok, msg = await calendar.refresh_schedule_data()
-                else:
-                    ok, msg = await calendar.sync_from_source()
-                quality = getattr(calendar, "data_quality", "OK")
-                yield event.plain_result(
-                    f"【NIKKE 日程】数据刷新完成：{'成功' if ok else '失败（已保留旧快照）'} ({quality})\n"
-                    f"当前活动条目数：{calendar.activity_count()}"
-                    f"{f'，提示：{msg}' if msg != 'ok' else ''}"
-                )
-                return
-            yield event.plain_result("日程服务尚未就绪。")
-            return
-
-        try:
-            days = CalendarService.normalize_horizon(horizon)
-        except ValueError as exc:
-            yield event.plain_result(f"日程范围错误：{exc}\n用法：/妮姬 日程 [7|14|30] 或 /妮姬 日程 刷新")
-            return
-
-        calendar = getattr(self, "calendar", None)
-        if calendar is None:
-            if hasattr(self, "_spawn_background_task"):
-                if hasattr(self, "_sync_announcements_background"):
-                    self._spawn_background_task(self._sync_announcements_background())
-                elif hasattr(self, "announcements") and hasattr(self.announcements, "sync_from_source"):
-                    self._spawn_background_task(self.announcements.sync_from_source())
-            yield event.plain_result("日程服务尚未就绪，正在后台同步，请稍后重试。")
-            return
-
-        if not calendar.has_snapshot():
-            if hasattr(self, "_spawn_background_task"):
-                if hasattr(self, "_sync_calendar_background"):
-                    self._spawn_background_task(self._sync_calendar_background())
-                elif hasattr(calendar, "refresh_schedule_data"):
-                    self._spawn_background_task(calendar.refresh_schedule_data())
-                elif hasattr(calendar, "sync_from_source"):
-                    self._spawn_background_task(calendar.sync_from_source())
-            yield event.plain_result("日程数据尚未就绪，正在后台同步，请稍后重试。")
-            return
-
-        payload = CalendarT2IPayloadBuilder().build(calendar, days)
-        path_or_paths = await self._try_t2i("calendar_schedule", payload)
-        if isinstance(path_or_paths, (list, tuple)):
-            for p in path_or_paths:
-                if p:
-                    yield event.image_result(p)
-        elif path_or_paths:
-            yield event.image_result(path_or_paths)
-        else:
-            yield event.plain_result(payload["fallback_text"])
-        return
+        """将日程查询转为框架命令，并由 Calendar application 处理快照。"""
+        handler = self.calendar_command_handler
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event, handler, horizon=horizon
+        ):
+            yield result
 
     async def announcements_view(
         self,

@@ -19,6 +19,7 @@ from ..features.account.application import AccountApplication
 from ..features.announcement.delivery import AnnouncementDelivery
 from ..features.announcement.service import AnnouncementService
 from ..features.calendar.service import CalendarService
+from ..features.calendar.application import CalendarApplication
 from ..features.campaign.application import CampaignApplication
 from ..features.campaign.builder import CampaignHistoryBuilder
 from ..features.campaign.stage_resolver import CampaignStageResolver
@@ -100,6 +101,7 @@ class ServiceContainer:
     announcements: AnnouncementService
     announcement_delivery: AnnouncementDelivery
     calendar: CalendarService
+    calendar_application: CalendarApplication
     tarot: TarotService | None
     guide_application: GuideApplication
     web: BindingWebService
@@ -227,6 +229,7 @@ def create_container(
     announcements = AnnouncementService(data_dir / "announcements")
     announcement_delivery = AnnouncementDelivery(store)
     calendar = CalendarService(data_dir / "calendar", announcement_service=announcements)
+    calendar_application = CalendarApplication(calendar)
     try:
         tarot = TarotService(
             plugin_dir,
@@ -291,6 +294,7 @@ def create_container(
         announcements=announcements,
         announcement_delivery=announcement_delivery,
         calendar=calendar,
+        calendar_application=calendar_application,
         tarot=tarot,
         guide_application=guide_application,
         web=web,

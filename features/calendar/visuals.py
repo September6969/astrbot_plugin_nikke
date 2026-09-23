@@ -161,6 +161,10 @@ class CalendarVisualCache:
         except (OSError, RuntimeError, ValueError):
             return None
 
+    def cached_event_ids(self) -> tuple[str, ...]:
+        """返回视觉清单中的事件键；调用方只能据此探测本地缓存。"""
+        return tuple(self._manifest)
+
     @staticmethod
     def _target_filename(event_id: str, source_url: str) -> str:
         digest = hashlib.sha256(f"{event_id}|{source_url}".encode("utf-8")).hexdigest()[:32]

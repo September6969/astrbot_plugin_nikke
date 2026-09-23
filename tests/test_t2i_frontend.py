@@ -137,11 +137,13 @@ async def test_calendar_command_fallback_same_snapshot(tmp_path):
     plugin.calendar = CalendarService(tmp_path)
     plugin.calendar._has_snapshot = True
     plugin.calendar.sync_from_source = AsyncMock()
+    plugin.calendar.visual_cache.sync = AsyncMock()
     plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
     event = Mock(plain_result=lambda text: text)
     results = [result async for result in plugin.event_schedule(event)]
     assert "未来 14 天" in results[0]
     plugin.calendar.sync_from_source.assert_not_called()
+    plugin.calendar.visual_cache.sync.assert_not_awaited()
 
 
 def test_union_scopes_and_exact_values(tmp_path):

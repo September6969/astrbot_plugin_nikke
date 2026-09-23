@@ -8,6 +8,7 @@ from .contracts import (
     TextReply,
 )
 from .cdk import CdkCommandHandler
+from .calendar import CalendarCommandHandler
 from .daily import DailyCommandHandler
 from .profile import ProfileCommandHandler
 
@@ -18,6 +19,7 @@ __all__ = [
     "ImageReply",
     "TextReply",
     "CdkCommandHandler",
+    "CalendarCommandHandler",
     "DailyCommandHandler",
     "ProfileCommandHandler",
 ]

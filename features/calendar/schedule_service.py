@@ -410,6 +410,12 @@ class ScheduleService:
         event_id = activity if isinstance(activity, str) else getattr(activity, "event_id", getattr(activity, "id", ""))
         return self.visual_cache.resolve_path(event_id)
 
+    def cached_visual_event_ids(self) -> tuple[str, ...]:
+        """只列出清单中的本地视觉缓存键，不执行同步或网络请求。"""
+        if self.visual_cache is None:
+            return ()
+        return self.visual_cache.cached_event_ids()
+
     @staticmethod
     def normalize_horizon(value: Any) -> int:
         """只接受 7、14、30 天，默认 14 天。"""
@@ -1061,9 +1067,15 @@ class ScheduleService:
         valid_acts.sort(key=lambda a: (safe_datetime_key(a.end_at), a.event_id))
         return valid_acts
 
-    def group_window(self, days: int = 14, now: datetime | None = None) -> dict[str, list[CalendarActivity]]:
+    def group_window(
+        self,
+        days: int = 14,
+        now: datetime | None = None,
+        *,
+        context: QueryContext | None = None,
+    ) -> dict[str, list[CalendarActivity]]:
         """向后兼容分组接口。"""
-        ctx = self.freeze_query_context(now)
+        ctx = context or self.freeze_query_context(now)
         horizon = timedelta(days=self.normalize_horizon(days))
         soon_events: list[CanonicalEvent] = []
         active_events: list[CanonicalEvent] = []
@@ -1090,9 +1102,11 @@ class ScheduleService:
         days: int = 14,
         now: datetime | None = None,
         fallback_error: str = "",
+        *,
+        context: QueryContext | None = None,
     ) -> str:
         """基于同一 QueryContext 的统一文本 Fallback。"""
-        ctx = self.freeze_query_context(now)
+        ctx = context or self.freeze_query_context(now)
         if not self._has_snapshot:
             if fallback_error:
                 return f"暂时无法获取官方日程：{fallback_error}。当前没有可用缓存，请稍后重试。"
@@ -1122,7 +1136,7 @@ class ScheduleService:
         if error_to_show:
             lines.append(f"⚠️ 日程数据同步失败：{error_to_show}，以下为本地缓存。")
 
-        groups = self.group_window(days, ctx.now)
+        groups = self.group_window(days, ctx.now, context=ctx)
         soon = groups["ending_soon"]
         active = groups["active"]
         upcoming = groups["upcoming"]
