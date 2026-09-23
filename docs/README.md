@@ -2,6 +2,8 @@
 
 本目录收录 NIKKE AstrBot 插件的完整技术设计、契约定义、验收报告、视觉规范与审计证据。
 
+整仓重构的最终架构、迁移表、删除清单、恢复办法和 G01–G04 状态见[重构交付记录](refactor/FINAL_DELIVERY.md)。
+
 ---
 
 ## 目录组织结构 (Documentation Structure)

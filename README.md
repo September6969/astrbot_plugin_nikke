@@ -42,7 +42,7 @@
 
 ## 最小部署
 
-要求：AstrBot `>=4.24,<5`、Python 3.10+、可访问 BlaBlaLink 的网络，以及 HTTPS 域名。
+要求：AstrBot `>=4.24,<5`、Python `>=3.12`、可访问 BlaBlaLink 的网络，以及 HTTPS 域名。AstrBot 4.24.0 起要求 Python 3.12 或更新版本；插件启动时会检查 AstrBot 版本，无法确认版本或不满足范围时会在宿主初始化前明确拒绝加载。
 
 1. 将目录放入 `AstrBot/data/plugins/astrbot_plugin_nikke`。
 2. 安装 `requirements.txt` 中的依赖并重启 AstrBot。
@@ -137,28 +137,24 @@ nikke.example.com {
 
 ## 架构与分层
 
-插件在经过 Issue #82 重构后采用领域模块化设计，根目录平铺业务代码均已收敛至分层包中，并通过根目录存根（Compatibility Shims）实现 100% 向后兼容：
+当前代码按宿主适配、命令应用、领域功能、外部集成与核心装配分层；完整模块迁移、边界、删除清单和恢复说明见[整仓重构交付记录](docs/refactor/FINAL_DELIVERY.md)。
 
-- `ui/`：主题令牌、通用卡片基元及各领域专用渲染器（`ui/renderers/`）。
-- `features/`：13 个高内聚领域业务模块（`character`, `profile`, `raid`, `campaign`, `daily`, `tarot`, `cdk`, `voice`, `calendar`, `announcement`, `tower`, `guide` 等）。
-- `core/`：核心底层设施（`ServiceContainer`, `AssetManager`, `NikkeStore`, `DelayedFeedbackManager`, 配置规范化与隐私脱敏等）。
-- `integrations/`：外部依赖隔离层（`blablalink`, `spine`, `nikke_db`, `web` 服务）。
-- `assets/`：静态资源分流与多级回退（`data/` 结构化表、`icons/` 图标、`fonts/` 字体）。
-- `docs/`：7 大功能目录分层文档（`architecture/`, `acceptance/`, `evidence/`, `reports/` 等），索引详见 [docs/README.md](docs/README.md)。
+- `main.py`：AstrBot 插件轻量入口、宿主版本校验和事件注册。
+- `adapters/astrbot/`：AstrBot 事件/消息边界、运行时接入及版本兼容检查。
+- `application/commands/`：将命令输入映射到领域应用，不承载 AstrBot 消息对象。
+- `features/`：13 个账号、角色、日程、公告、签到、CDK、联盟突袭等领域模块。
+- `integrations/`：外部 HTTP、资产、Spine 和存储相关适配；由窄接口连接到领域服务。
+- `core/`：唯一 `ServiceContainer`/`create_container` 组合根、共享 provider、持久化和统一生命周期。
+- `ui/`：页面 payload、主题与领域 renderer。
 
 ## 测试与质量保证
 
-全套回归套件支持 Pytest 与 Node.js 合同测试：
+R23 本地 checkpoint 在 Python 3.13.13 / AstrBot 4.24.0 上的完整 pytest 为 `1317 passed, 2 skipped, 651 subtests passed`；Node v24.15.0 三个测试文件共 10 passed。此为本地快照，不代替远端 CI：Python 3.12、Node 22、Linux Spine Docker/CI 仍列为 G01。
 
 ```bash
-# 运行全量 Python 单元测试与契约测试
 python -m pytest -v
-
-# 运行浏览器扩展契约测试
-node tests/extension.test.cjs
+node --test tests/extension.test.cjs tests/spine_attachment_candidates.test.mjs tests/spine_surface_semantics.test.mjs
 ```
-
-测试套件覆盖 930+ 个用例，包括令牌生命周期、Cookie 加密、账号作用域隔离、Replica 1600×2400 像素级排版校准、Spine 离线面部锚点与渲染、Tarot 78 张标准牌义、每日签到状态机与并发幂等锁、资源回退容错等。
 
 ## 许可证与来源
 
