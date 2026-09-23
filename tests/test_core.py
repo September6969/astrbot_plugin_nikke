@@ -936,23 +936,16 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("仙境兔女郎", result[0])
         renderer.render.assert_not_called()
 
-    async def test_terminate_reclaims_asset_manager(self):
+    async def test_terminate_delegates_to_runtime_coordinator(self):
         from astrbot_plugin_nikke.main import NikkePlugin
-        from unittest.mock import AsyncMock, MagicMock
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock
 
         plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin._background_tasks = []
-        plugin.feedback_manager = AsyncMock()
-        mock_web = AsyncMock()
-        plugin.web = mock_web
-        mock_asset_manager = MagicMock()
-        plugin.asset_manager = mock_asset_manager
+        plugin.runtime = SimpleNamespace(close=AsyncMock())
 
         await plugin.terminate()
-        self.assertTrue(plugin._closing)
-        mock_asset_manager.close.assert_called_once()
-        mock_web.stop.assert_awaited_once()
+        plugin.runtime.close.assert_awaited_once()
 
 if __name__ == "__main__":
     unittest.main()

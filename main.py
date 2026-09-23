@@ -13,23 +13,15 @@ if _plugins_dir not in sys.path:
     sys.path.insert(0, _plugins_dir)
 
 import asyncio
-import json
-import os
-import random
-import re
-import shutil
-import time
-import zipfile
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from typing import Any
 
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
-from astrbot.api.message_components import Image, Plain
+from astrbot.api.message_components import Image
 from astrbot.api.star import Context, Star
 
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from .adapters.astrbot.runtime import AstrBotRuntimeAdapter
 from .adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
 from .application.commands.announcement import AnnouncementCommandHandler
@@ -44,16 +36,11 @@ from .application.commands.tower import TowerCommandHandler
 from ._version import PLUGIN_VERSION
 from .core.container import create_container
 from .features.daily.runner import DailyRunner
-from .features.announcement.application import AnnouncementApplication
 from .features.calendar.application import CalendarApplication
-from .core.asset_manager import AssetManager
 from .ui.renderers import (
     CampaignHistoryRenderer,
-    CharacterCardRenderer,
     T2IRenderer,
-    UnionRaidRenderer,
 )
-from .ui.primitives import CardRenderer
 from .ui.payloads.calendar import CalendarT2IPayloadBuilder
 from .features.character.application import (
     CharacterAmbiguousMatch,
@@ -61,15 +48,11 @@ from .features.character.application import (
     CharacterNotOwned,
 )
 from .features.cdk.service import CdkService
-from .integrations.blablalink.client import BlaBlaClient, BlaBlaError, CookieExpired
+from .integrations.blablalink.client import BlaBlaError, CookieExpired
 from .core.privacy import safe_exception_message
 from .features.daily.models import DailyTaskResult
-from .core.feedback import DelayedFeedbackManager
 from .core.health import collect_runtime_health, format_runtime_health
-from .core.config import normalize_runtime_config, read_schedule_clock
-from .integrations.spine.config import build_spine_renderer
-from .core.storage import NikkeStore
-from .integrations.web.service import BindingWebService
+from .core.config import normalize_runtime_config
 
 
 def normalize_nikke_prefix(text: str) -> str:
@@ -127,6 +110,24 @@ class NikkePlugin(Star):
         self.tower_application = self.container.tower_application
         self.daily_runner = self.container.daily_runner
         self.web = self.container.web
+        self.public_base_url = str(
+            self.config.get("public_base_url", "https://nikke.irises777.xyz")
+        ).rstrip("/")
+        self.web_host = str(self.config.get("web_host", "0.0.0.0"))
+        self.web_port = int(self.config.get("web_port", 6210))
+        self.account_application = self.container.account_application
+        self.runtime = AstrBotRuntimeAdapter(
+            coordinator=self.container.runtime_coordinator,
+            services=self.container,
+            context=self.context,
+            plugin_dir=self.plugin_dir,
+            config=self.config,
+            web_host=self.web_host,
+            web_port=self.web_port,
+            run_daily=self._run_all_daily,
+            send_summary=self._send_summary,
+            on_directory_loaded=self._apply_directory,
+        )
         self.command_adapter = AstrBotCommandAdapter()
         self.tower_command_handler = TowerCommandHandler(self.tower_application)
         self.tarot_command_handler = TarotCommandHandler(
@@ -147,12 +148,6 @@ class NikkePlugin(Star):
         self.calendar_command_handler = self._build_calendar_command_handler()
         self.announcement_command_handler = self._build_announcement_command_handler()
 
-        self.public_base_url = str(
-            self.config.get("public_base_url", "https://nikke.irises777.xyz")
-        ).rstrip("/")
-        self.web_host = str(self.config.get("web_host", "0.0.0.0"))
-        self.web_port = int(self.config.get("web_port", 6210))
-        self.account_application = self.container.account_application
         self.account_command_handler = AccountCommandHandler(
             application=self.account_application,
             public_base_url=self.public_base_url,
@@ -160,10 +155,12 @@ class NikkePlugin(Star):
             runtime_health=self._account_runtime_health_details,
             render_manual_summary=self._render_manual_daily_summary,
         )
-        self._termination_lock = asyncio.Lock()
-        self._background_tasks: list[asyncio.Task] = []
-        self._closing = False
-        self._spawn_background_task(self._start_services())
+        self.runtime.start()
+
+    def _apply_directory(self, directory: list[dict[str, Any]]) -> None:
+        """将运行时载入的角色目录交给插件展示状态与战役应用。"""
+        self._directory = directory
+        self.campaign_application.update_directory(directory)
 
     def _build_campaign_renderer(self) -> CampaignHistoryRenderer:
         """让所有图片渲染器复用同一个资源缓存与线程池。"""
@@ -172,23 +169,6 @@ class NikkePlugin(Star):
             self.plugin_dir / "fonts",
             self.asset_manager,
         )
-
-    def _spawn_background_task(self, coro):
-        """统一登记任务，关闭期间拒绝新任务并释放尚未启动的协程。"""
-        if getattr(self, "_closing", False):
-            coro.close()
-            return None
-        if not hasattr(self, "_background_tasks"):
-            self._background_tasks = []
-        task = asyncio.create_task(coro)
-        self._background_tasks.append(task)
-        def done(completed):
-            if completed in self._background_tasks:
-                self._background_tasks.remove(completed)
-            if not completed.cancelled() and completed.exception() is not None:
-                logger.warning("[NIKKE] 后台任务失败: %s", type(completed.exception()).__name__)
-        task.add_done_callback(done)
-        return task
 
     async def _render_campaign_record(self, record):
         """同一 DTO 切换展示路径，渲染失败不重新请求业务接口。"""
@@ -298,7 +278,7 @@ class NikkePlugin(Star):
             application=self.calendar_application,
             payload_builder=CalendarT2IPayloadBuilder(),
             render=lambda payload: self._try_t2i("calendar_schedule", payload),
-            start_background_refresh=self._start_calendar_background_refresh,
+            start_background_refresh=self._request_calendar_refresh,
         )
 
     def _build_announcement_command_handler(self) -> AnnouncementCommandHandler:
@@ -309,130 +289,14 @@ class NikkePlugin(Star):
             ),
         )
 
-    def _start_calendar_background_refresh(self) -> None:
-        spawn = getattr(self, "_spawn_background_task", None)
-        if callable(spawn):
-            spawn(self._sync_calendar_background())
+    def _request_calendar_refresh(self) -> None:
+        """将命令触发的刷新委托给运行时，未初始化时安全忽略。"""
+        runtime = getattr(self, "runtime", None)
+        if runtime is not None:
+            runtime.request_calendar_refresh()
 
     async def _send_daily_summary_image(self, target: str, path: str) -> None:
         await self.context.send_message(target, MessageChain([Image.fromFileSystem(path)]))
-
-    def _pack_extension(self) -> None:
-        extension_dir = self.plugin_dir / "extension"
-        with zipfile.ZipFile(self.extension_zip, "w", zipfile.ZIP_DEFLATED) as archive:
-            for path in extension_dir.rglob("*"):
-                if path.is_file():
-                    if path.name == "manifest.json":
-                        manifest = json.loads(path.read_text(encoding="utf-8"))
-                        manifest["host_permissions"] = [
-                            "https://*.blablalink.com/*", self.web.site_origin + "/*"
-                        ]
-                        archive.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2))
-                    else:
-                        archive.write(path, path.relative_to(extension_dir))
-
-    async def _start_services(self) -> None:
-        try:
-            await asyncio.to_thread(self._pack_extension)
-        except Exception as exc:
-            logger.warning("[NIKKE] 浏览器扩展打包跳过: %s", safe_exception_message(exc))
-        try:
-            await self.tower_application.preload()
-        except Exception as exc:
-            logger.warning("[NIKKE] 塔层静态资料预热失败: %s", safe_exception_message(exc))
-        try:
-            await self.web.start(self.web_host, self.web_port)
-            logger.info(f"[NIKKE] 绑定服务已监听 {self.web_host}:{self.web_port}")
-        except Exception as exc:
-            logger.error("[NIKKE] 绑定服务启动失败: %s", safe_exception_message(exc))
-        try:
-            self._directory = await self.client.get_directory()
-            self.campaign_application.update_directory(self._directory)
-            logger.info(f"[NIKKE] 已载入 {len(self._directory)} 条妮姬目录")
-        except Exception as exc:
-            logger.warning("[NIKKE] 妮姬目录载入失败: %s", safe_exception_message(exc))
-        try:
-            # L2D 索引只在服务启动时单次预热；角色卡热路径只读本地索引，避免 N+1。
-            await asyncio.to_thread(self.asset_manager.nikke_db.get_l2d_index, allow_remote=True)
-        except Exception as exc:
-            logger.debug("[NIKKE] L2D 索引预热跳过: %s", safe_exception_message(exc))
-        try:
-            # Exia 静态表只在服务启动时统一预热；角色卡只读取缓存，不逐字段请求网络。
-            await self.character_application.preload_stat_resources()
-            logger.info("[NIKKE] Exia/NIKKE 静态属性表已载入并缓存")
-        except Exception as exc:
-            logger.warning("[NIKKE] 静态属性表预热失败，角色卡将保留 —：%s", safe_exception_message(exc))
-        self._spawn_background_task(self._sync_announcements_background())
-        self._spawn_background_task(self._sync_calendar_background())
-        await self._scheduler_loop()
-
-    async def _sync_announcements_background(self) -> None:
-        try:
-            await self.announcement_application.sync_announcements()
-        except Exception as exc:
-            logger.debug("[NIKKE] 后台公告同步跳过: %s", safe_exception_message(exc))
-
-    async def _sync_calendar_background(self) -> None:
-        try:
-            application = self.calendar_application
-            if application is not None:
-                await application.refresh_schedule()
-        except Exception as exc:
-            logger.debug("[NIKKE] 后台日程同步跳过: %s", safe_exception_message(exc))
-
-    async def _send_delayed_notice(self, event: AstrMessageEvent, text: str) -> None:
-        try:
-            if hasattr(self, "context") and hasattr(self.context, "send_message") and hasattr(event, "unified_msg_origin"):
-                await self.context.send_message(event.unified_msg_origin, MessageChain([Plain(text)]))
-        except Exception as exc:
-            logger.debug("[NIKKE] 延迟提示发送跳过: %s", safe_exception_message(exc))
-
-    async def _scheduler_loop(self) -> None:
-        last_daily = ""
-        last_summary = ""
-        last_announcement_sync = 0.0
-        last_calendar_sync = 0.0
-        while not self._closing:
-            now = datetime.now(timezone(timedelta(hours=8)))
-            today = now.strftime("%Y-%m-%d")
-            daily_h, daily_m = read_schedule_clock(
-                self.store.get_setting,
-                "daily",
-                default_hour=self.config["daily_hour"],
-                default_minute=self.config["daily_minute"],
-            )
-            summary_h, summary_m = read_schedule_clock(
-                self.store.get_setting,
-                "summary",
-                default_hour=self.config["summary_hour"],
-                default_minute=self.config["summary_minute"],
-            )
-            if (now.hour, now.minute) == (daily_h, daily_m) and last_daily != today:
-                last_daily = today
-                self._spawn_background_task(self._run_all_daily(today, stagger=True, automatic=True))
-            if (now.hour, now.minute) == (summary_h, summary_m) and last_summary != today:
-                last_summary = today
-                self._spawn_background_task(self._send_summary(today))
-            if time.time() - last_announcement_sync > 3600:
-                last_announcement_sync = time.time()
-                self._spawn_background_task(self._sync_announcements_background())
-            if time.time() - last_calendar_sync > 300:
-                last_calendar_sync = time.time()
-                self._spawn_background_task(self._sync_calendar_background())
-            if self.config.get("enable_announcement_push", False):
-                task = getattr(self, "_announcement_push_task", None)
-                if task is None or task.done():
-                    self._announcement_push_task = self._spawn_background_task(self._dispatch_announcements())
-            await asyncio.sleep(20)
-
-    async def _dispatch_announcements(self):
-        """默认关闭，只有管理员启用且目标显式订阅后才由调度调用。"""
-        if not self.config.get("enable_announcement_push", False):
-            return
-        async def sender(target, text):
-            await asyncio.wait_for(self.context.send_message(target, MessageChain([Plain(text)])), timeout=10)
-            return True
-        await self.announcement_application.dispatch_pushes(sender)
 
     @staticmethod
     def _qq_id(event: AstrMessageEvent) -> str:
@@ -791,7 +655,7 @@ class NikkePlugin(Star):
     async def me(self, event: AstrMessageEvent):
         """生成个人账号概览卡。"""
         handle = self.feedback_manager.start_delayed_feedback(
-            lambda: self._send_delayed_notice(event, "正在生成个人账号概览...")
+            lambda: self.runtime.send_delayed_notice(event, "正在生成个人账号概览...")
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
             async for result in self.command_adapter.dispatch(
@@ -849,7 +713,7 @@ class NikkePlugin(Star):
         """将框架戳一戳事件委托给语音事件适配器。"""
         async for result in self.voice_event_adapter.on_poke(
             event,
-            closing=getattr(self, "_closing", False),
+            closing=getattr(getattr(self, "runtime", None), "closing", False),
         ):
             yield result
 
@@ -885,7 +749,7 @@ class NikkePlugin(Star):
     async def union_raid(self, event: AstrMessageEvent):
         """查询当前账号所属联盟的联盟突袭战况。"""
         handle = self.feedback_manager.start_delayed_feedback(
-            lambda: self._send_delayed_notice(event, "正在查询联盟突袭战况...")
+            lambda: self.runtime.send_delayed_notice(event, "正在查询联盟突袭战况...")
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
             data = await self.raid_application.overview(self._qq_id(event))
@@ -935,7 +799,7 @@ class NikkePlugin(Star):
             yield event.plain_result("用法：/妮姬 查询 练度 <角色名>")
             return
         handle = self.feedback_manager.start_delayed_feedback(
-            lambda: self._send_delayed_notice(event, "正在查询与渲染角色卡片...")
+            lambda: self.runtime.send_delayed_notice(event, "正在查询与渲染角色卡片...")
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
             card = await self.character_application.character_card(
@@ -1066,7 +930,7 @@ class NikkePlugin(Star):
         start_feedback = None
         if feedback_manager is not None:
             start_feedback = lambda: feedback_manager.start_delayed_feedback(
-                lambda: self._send_delayed_notice(
+                lambda: self.runtime.send_delayed_notice(
                     event, "正在查询战役通关阵容..."
                 )
             )
@@ -1191,52 +1055,9 @@ class NikkePlugin(Star):
             yield result
 
     async def terminate(self):
-        lock = getattr(self, "_termination_lock", None)
-        if lock is None:
-            lock = asyncio.Lock()
-            self._termination_lock = lock
-        async with lock:
-            if getattr(self, "_terminated", False):
-                return
-            self._closing = True
-            cleanup_errors = []
-            # 先停止生产任务，再关闭它们依赖的资源。
-            tasks = list(getattr(self, "_background_tasks", ()))
-            for task in tasks:
-                task.cancel()
-            await asyncio.gather(*tasks, return_exceptions=True)
-            feedback_manager = getattr(self, "feedback_manager", None)
-            if feedback_manager is not None:
-                try:
-                    await feedback_manager.close()
-                except Exception as exc:
-                    cleanup_errors.append(exc)
-                    logger.debug("[NIKKE] 反馈管理器回收失败：%s", safe_exception_message(exc))
-            voice_application = getattr(self, "voice_application", None)
-            if voice_application is not None:
-                try:
-                    await voice_application.close()
-                except Exception as exc:
-                    cleanup_errors.append(exc)
-                    logger.debug("[NIKKE] 语音应用回收失败：%s", safe_exception_message(exc))
-            asset_manager = getattr(self, "asset_manager", None)
-            if asset_manager is not None:
-                try:
-                    asset_manager.close()
-                except Exception as exc:
-                    cleanup_errors.append(exc)
-                    logger.debug("[NIKKE] 素材管理器回收失败：%s", safe_exception_message(exc))
-            web = getattr(self, "web", None)
-            if web is not None:
-                try:
-                    await web.stop()
-                except Exception as exc:
-                    cleanup_errors.append(exc)
-                    logger.debug("[NIKKE] 绑定服务回收失败：%s", safe_exception_message(exc))
-            if cleanup_errors:
-                raise cleanup_errors[0]
-            self._terminated = True
-            logger.info("[NIKKE] 插件已停止")
+        await self.close()
 
     async def close(self):
-        await self.terminate()
+        runtime = getattr(self, "runtime", None)
+        if runtime is not None:
+            await runtime.close()

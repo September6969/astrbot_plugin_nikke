@@ -57,6 +57,7 @@ from ..ui.renderers import (
 )
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from .feedback import DelayedFeedbackManager
+from .lifecycle.coordinator import RuntimeCoordinator
 from .privacy import safe_exception_message
 from astrbot_plugin_nikke.core.storage import NikkeStore
 
@@ -92,6 +93,7 @@ class ServiceContainer:
     campaign_renderer: CampaignHistoryRenderer
     campaign_application: CampaignApplication
     cdk_service: CdkService
+    runtime_coordinator: RuntimeCoordinator
     feedback_manager: DelayedFeedbackManager
     voice_application: VoiceApplication
     announcements: AnnouncementService
@@ -201,7 +203,11 @@ def create_container(
         plugin_version=PLUGIN_VERSION,
     )
     cdk_service = CdkService(client)
-    feedback_manager = DelayedFeedbackManager(1.5)
+    runtime_coordinator = RuntimeCoordinator()
+    feedback_manager = DelayedFeedbackManager(
+        1.5,
+        task_factory=runtime_coordinator.create_task,
+    )
     voice_mapping = VoiceMapRegistry(plugin_dir / "assets" / "voice_poke_map.json")
     for error in voice_mapping.errors:
         logger.warning("[NIKKE] 语音映射清单校验失败：%s", error)
@@ -218,11 +224,22 @@ def create_container(
 
     costume_registry = CostumeRegistry(plugin_dir / "assets")
     voice_audio = VoiceAudioCache(plugin_dir / "assets" / "voices", data_dir / "voice_cache")
-    voice_provider = VoiceResourceProvider(data_dir / "voice_cache")
+    voice_provider = VoiceResourceProvider(
+        data_dir / "voice_cache",
+        task_factory=runtime_coordinator.create_task,
+    )
     ffmpeg = shutil.which("ffmpeg")
     ffprobe = shutil.which("ffprobe")
     voice_encoder = VoiceEncoder(data_dir / "voice_cache", ffmpeg, ffprobe) if ffmpeg and ffprobe else None
-    voice_pipeline = VoicePipeline(voice_provider, voice_encoder) if voice_encoder else None
+    voice_pipeline = (
+        VoicePipeline(
+            voice_provider,
+            voice_encoder,
+            task_factory=runtime_coordinator.create_task,
+        )
+        if voice_encoder
+        else None
+    )
     voice_application = VoiceApplication(
         store=store,
         character_resolver=voice_character_resolver,
@@ -298,6 +315,7 @@ def create_container(
         campaign_renderer=campaign_renderer,
         campaign_application=campaign_application,
         cdk_service=cdk_service,
+        runtime_coordinator=runtime_coordinator,
         feedback_manager=feedback_manager,
         voice_application=voice_application,
         announcements=announcements,

@@ -6,7 +6,9 @@ import math
 import re
 import time
 import uuid
+from collections.abc import Awaitable, Callable
 from pathlib import Path
+from typing import Any
 import httpx
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
@@ -14,9 +16,16 @@ from astrbot_plugin_nikke.core.asset_manager import AssetManager
 class VoiceResourceProvider:
     MAX_BYTES = 12 * 1024 * 1024
 
-    def __init__(self, cache: Path, *, transport=None):
+    def __init__(
+        self,
+        cache: Path,
+        *,
+        transport=None,
+        task_factory: Callable[[Awaitable[Any]], asyncio.Task | None],
+    ):
         self.cache = Path(cache) / "source"
         self.transport = transport
+        self._task_factory = task_factory
         self._tasks = {}
         self._failed = {}
         self._slots = asyncio.Semaphore(2)
@@ -55,7 +64,14 @@ class VoiceResourceProvider:
         if task is None:
             if len(self._tasks) >= 20:
                 return None
-            task = asyncio.create_task(self._fetch(map_key, speech_id, locale, key))
+            fetch = self._fetch(map_key, speech_id, locale, key)
+            try:
+                task = self._task_factory(fetch)
+            except BaseException:
+                fetch.close()
+                raise
+            if task is None:
+                return None
             self._tasks[key] = task
             def done(completed):
                 self._tasks.pop(key, None)

@@ -25,6 +25,7 @@
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from unittest.mock import Mock, AsyncMock
 from pathlib import Path
 
@@ -1021,8 +1022,8 @@ async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
     mock_cal.refresh_schedule_data = AsyncMock()
     plugin.calendar = mock_cal
 
-    spawn_mock = Mock(side_effect=lambda coro: coro.close() if asyncio.iscoroutine(coro) else None)
-    plugin._spawn_background_task = spawn_mock
+    spawn_mock = Mock()
+    plugin.runtime = SimpleNamespace(request_calendar_refresh=spawn_mock)
 
     dummy_event = Mock()
     dummy_event.plain_result = lambda text: text

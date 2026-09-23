@@ -94,8 +94,6 @@ def test_announcement_runtime_routes_do_not_read_delivery_or_sync_state():
         "record_count",
     }
     route_names = (
-        "_sync_announcements_background",
-        "_dispatch_announcements",
         "announcements_view",
         "announcement_deep_rescan",
         "announcement_subscription",
@@ -109,3 +107,6 @@ def test_announcement_runtime_routes_do_not_read_delivery_or_sync_state():
             node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)
         )
         assert not (names & forbidden), f"{name} bypasses AnnouncementApplication"
+
+    assert not hasattr(NikkePlugin, "_sync_announcements_background")
+    assert not hasattr(NikkePlugin, "_dispatch_announcements")

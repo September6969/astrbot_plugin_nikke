@@ -1,133 +1,160 @@
-"""后台任务完成、取消及关闭期间的登记行为。"""
+"""验证插件入口把唯一生命周期所有权交给 RuntimeCoordinator。"""
+
+from __future__ import annotations
+
+import ast
 import asyncio
-from unittest import IsolatedAsyncioTestCase
-from unittest.mock import AsyncMock, MagicMock
+import inspect
+import textwrap
+import unittest
+from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
+
 from astrbot_plugin_nikke.main import NikkePlugin
 
 
-class LifecycleTests(IsolatedAsyncioTestCase):
-    async def test_shutdown_awaits_cleanup_before_resources(self):
+class LifecycleTests(unittest.IsolatedAsyncioTestCase):
+    async def test_plugin_close_delegates_to_runtime_and_tolerates_partial_init(self):
         plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._background_tasks = []
-        events = []
-        async def job():
+        plugin.runtime = SimpleNamespace(close=AsyncMock())
+
+        await plugin.terminate()
+        await plugin.close()
+
+        self.assertEqual(plugin.runtime.close.await_count, 2)
+
+        partial_plugin = NikkePlugin.__new__(NikkePlugin)
+        await partial_plugin.close()
+
+    async def test_runtime_coordinator_cancels_tasks_before_resource_cleanup(self):
+        from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
+
+        coordinator = RuntimeCoordinator()
+        events: list[str] = []
+        ready = asyncio.Event()
+
+        async def pending_job():
             try:
                 await asyncio.Event().wait()
             finally:
                 events.append("cancelled")
-        plugin.web = SimpleNamespace(stop=AsyncMock(side_effect=lambda: events.append("web")))
-        plugin._spawn_background_task(job())
-        await asyncio.sleep(0)
-        await plugin.terminate()
-        self.assertEqual(events, ["cancelled", "web"])
-        self.assertEqual(plugin._background_tasks, [])
-        self.assertIsNone(plugin._spawn_background_task(job()))
 
-    async def test_completed_task_removed(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._background_tasks = []
-        task = plugin._spawn_background_task(asyncio.sleep(0))
-        await task
-        await asyncio.sleep(0)
-        self.assertEqual(plugin._background_tasks, [])
+        async def start():
+            coordinator.create_task(pending_job())
+            ready.set()
 
-    async def test_shutdown_is_idempotent(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin._background_tasks = []
-        plugin.feedback_manager = AsyncMock()
-        plugin.web = AsyncMock()
-        plugin.asset_manager = MagicMock()
+        async def scheduler():
+            await asyncio.Event().wait()
 
-        await plugin.terminate()
-        await plugin.terminate()
+        coordinator.register_cleanup("web", lambda: events.append("web"))
+        coordinator.register_cleanup("assets", lambda: events.append("assets"))
+        coordinator.start(start, scheduler)
+        await ready.wait()
 
-        plugin.feedback_manager.close.assert_awaited_once()
-        plugin.asset_manager.close.assert_called_once()
-        plugin.web.stop.assert_awaited_once()
+        await asyncio.gather(coordinator.close(), coordinator.close())
 
-    async def test_shutdown_closes_voice_application_owner(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin._background_tasks = []
-        plugin.voice_application = AsyncMock()
-        plugin.web = AsyncMock()
-        plugin.asset_manager = MagicMock()
+        self.assertEqual(events, ["cancelled", "assets", "web"])
+        self.assertEqual(coordinator.active_task_count, 0)
+        self.assertTrue(coordinator.closed)
 
-        await plugin.terminate()
+    def test_main_has_no_parallel_scheduler_or_task_factory(self):
+        module = ast.parse(textwrap.dedent(inspect.getsource(NikkePlugin)))
+        method_names = {
+            node.name
+            for node in ast.walk(module)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        }
+        self.assertTrue({"close", "terminate"}.issubset(method_names))
+        self.assertTrue(
+            {
+                "_spawn_background_task",
+                "_start_services",
+                "_scheduler_loop",
+                "_dispatch_announcements",
+            }.isdisjoint(method_names)
+        )
+        self.assertFalse(
+            any(
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "create_task"
+                for node in ast.walk(module)
+            )
+        )
 
-        plugin.voice_application.close.assert_awaited_once()
-        self.assertFalse(hasattr(plugin, "voice_pipeline"))
+        init_tree = ast.parse(textwrap.dedent(inspect.getsource(NikkePlugin.__init__)))
+        runtime_starts = [
+            node
+            for node in ast.walk(init_tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "start"
+            and isinstance(node.func.value, ast.Attribute)
+            and node.func.value.attr == "runtime"
+        ]
+        self.assertEqual(len(runtime_starts), 1)
 
-    async def test_concurrent_shutdown_waits_for_the_first_cleanup(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin._background_tasks = []
-        plugin.feedback_manager = AsyncMock()
-        plugin.web = AsyncMock()
+        close_tree = ast.parse(textwrap.dedent(inspect.getsource(NikkePlugin.close)))
+        self.assertTrue(
+            any(
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "close"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "runtime"
+                for node in ast.walk(close_tree)
+            )
+        )
 
-        async def delayed_stop():
-            await asyncio.sleep(0)
+    def test_all_runtime_background_factories_flow_through_coordinator(self):
+        package = Path(__file__).resolve().parents[1]
+        raw_factory_references = []
+        for path in package.rglob("*.py"):
+            relative = path.relative_to(package)
+            if relative.parts[0] in {"tests", "scripts"}:
+                continue
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if (
+                    isinstance(node, ast.Attribute)
+                    and node.attr == "create_task"
+                    and isinstance(node.value, ast.Name)
+                    and node.value.id == "asyncio"
+                ):
+                    raw_factory_references.append(relative.as_posix())
+        self.assertEqual(
+            raw_factory_references,
+            ["core/lifecycle/coordinator.py"],
+        )
 
-        plugin.web.stop.side_effect = delayed_stop
-        plugin.asset_manager = MagicMock()
+        container = ast.parse(
+            (package / "core" / "container.py").read_text(encoding="utf-8")
+        )
+        managed_constructors = {
+            node.func.id
+            for node in ast.walk(container)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in {
+                "DelayedFeedbackManager",
+                "VoiceResourceProvider",
+                "VoicePipeline",
+            }
+            and any(
+                keyword.arg == "task_factory"
+                and isinstance(keyword.value, ast.Attribute)
+                and keyword.value.attr == "create_task"
+                and isinstance(keyword.value.value, ast.Name)
+                and keyword.value.value.id == "runtime_coordinator"
+                for keyword in node.keywords
+            )
+        }
+        self.assertEqual(
+            managed_constructors,
+            {"DelayedFeedbackManager", "VoiceResourceProvider", "VoicePipeline"},
+        )
 
-        await asyncio.gather(plugin.terminate(), plugin.terminate())
 
-        plugin.feedback_manager.close.assert_awaited_once()
-        plugin.asset_manager.close.assert_called_once()
-        plugin.web.stop.assert_awaited_once()
-
-    async def test_cleanup_failure_keeps_shutdown_retryable(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin._background_tasks = []
-        plugin.feedback_manager = AsyncMock()
-        plugin.web = AsyncMock()
-        plugin.asset_manager = MagicMock()
-        plugin.asset_manager.close.side_effect = [RuntimeError("synthetic close failure"), None]
-
-        with self.assertRaisesRegex(RuntimeError, "synthetic close failure"):
-            await plugin.terminate()
-        self.assertFalse(getattr(plugin, "_terminated", False))
-
-        await plugin.terminate()
-        self.assertTrue(plugin._terminated)
-        self.assertEqual(plugin.asset_manager.close.call_count, 2)
-
-    async def test_shutdown_handles_partial_initialization_without_web(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-
-        await plugin.terminate()
-
-        self.assertTrue(plugin._terminated)
-
-    async def test_shutdown_closes_falsey_injected_resources(self):
-        class FalseyFeedback:
-            def __bool__(self):
-                return False
-
-            async def close(self):
-                self.closed = True
-
-        class FalseyAssets:
-            def __bool__(self):
-                return False
-
-            def close(self):
-                self.closed = True
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin._background_tasks = []
-        plugin.feedback_manager = FalseyFeedback()
-        plugin.asset_manager = FalseyAssets()
-        plugin.web = AsyncMock()
-
-        await plugin.terminate()
-
-        self.assertTrue(plugin.feedback_manager.closed)
-        self.assertTrue(plugin.asset_manager.closed)
-        plugin.web.stop.assert_awaited_once()
+if __name__ == "__main__":
+    unittest.main()

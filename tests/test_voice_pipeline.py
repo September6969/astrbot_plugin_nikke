@@ -12,7 +12,12 @@ class VoicePipelineTests(IsolatedAsyncioTestCase):
     def pipeline(self, **kwargs):
         provider = SimpleNamespace(resolve=AsyncMock(return_value=Path('synthetic.mp3')), close=AsyncMock())
         encoder = SimpleNamespace(encode=AsyncMock(return_value=Path('synthetic.wav')))
-        return VoicePipeline(provider, encoder, **kwargs)
+        return VoicePipeline(
+            provider,
+            encoder,
+            task_factory=asyncio.create_task,
+            **kwargs,
+        )
 
     async def test_concurrent_requests_share_download_and_encode(self):
         pipeline = self.pipeline()

@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, Mock
+from astrbot_plugin_nikke.adapters.astrbot.runtime import AstrBotRuntimeAdapter
+from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
 from astrbot_plugin_nikke.features.announcement.application import AnnouncementApplication
@@ -15,11 +17,16 @@ from astrbot_plugin_nikke.core.storage import NikkeStore
 
 class PushWiringTests(IsolatedAsyncioTestCase):
     async def test_default_disabled_does_not_call_sender(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.config = {}
-        plugin.context = SimpleNamespace(send_message=AsyncMock())
-        await plugin._dispatch_announcements()
-        plugin.context.send_message.assert_not_awaited()
+        runtime = object.__new__(AstrBotRuntimeAdapter)
+        runtime._coordinator = RuntimeCoordinator()
+        runtime._config = {}
+        runtime._context = SimpleNamespace(send_message=AsyncMock())
+        runtime._services = SimpleNamespace(
+            announcement_application=SimpleNamespace(dispatch_pushes=AsyncMock())
+        )
+        await runtime._dispatch_announcements()
+        runtime._context.send_message.assert_not_awaited()
+        await runtime._coordinator.close()
 
     async def test_admin_subscription_uses_current_target(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -55,11 +62,15 @@ class PushWiringTests(IsolatedAsyncioTestCase):
             self.assertEqual(delivery.plan([fresh], now=later), [])
 
     async def test_enabled_wiring_uses_injected_dispatch(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.config = {"enable_announcement_push": True}
-        plugin.context = SimpleNamespace(send_message=AsyncMock())
+        runtime = object.__new__(AstrBotRuntimeAdapter)
+        runtime._coordinator = RuntimeCoordinator()
+        runtime._config = {"enable_announcement_push": True}
+        runtime._context = SimpleNamespace(send_message=AsyncMock())
         async def dispatch_pushes(sender):
             self.assertTrue(await sender("fake-session", "synthetic"))
-        plugin.announcement_application = SimpleNamespace(dispatch_pushes=dispatch_pushes)
-        await plugin._dispatch_announcements()
-        plugin.context.send_message.assert_awaited_once()
+        runtime._services = SimpleNamespace(
+            announcement_application=SimpleNamespace(dispatch_pushes=dispatch_pushes)
+        )
+        await runtime._dispatch_announcements()
+        runtime._context.send_message.assert_awaited_once()
+        await runtime._coordinator.close()

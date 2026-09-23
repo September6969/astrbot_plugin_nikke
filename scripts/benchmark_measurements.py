@@ -78,7 +78,7 @@ async def benchmark_voice_registry():
 async def benchmark_cached_source():
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        provider = VoiceResourceProvider(root)
+        provider = VoiceResourceProvider(root, task_factory=asyncio.create_task)
         source_dir = root / "source"
         source_dir.mkdir()
 
