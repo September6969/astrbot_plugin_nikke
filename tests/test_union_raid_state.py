@@ -126,7 +126,13 @@ class PrefixNormalizationAndCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(normalize_nikke_prefix("普通消息"), "普通消息")
 
     async def test_announcement_simplification_notice_on_extra_args(self):
+        from astrbot_plugin_nikke.application.commands.announcement import AnnouncementCommandHandler
+
         plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin.announcement_command_handler = AnnouncementCommandHandler(
+            application=None,
+            push_enabled=lambda: False,
+        )
         event = SimpleNamespace(plain_result=lambda text: text)
 
         for bad_arg in ("10", "5", "最新", "活动", "语言 ja", "分类 维护"):

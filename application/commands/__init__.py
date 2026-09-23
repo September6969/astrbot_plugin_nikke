@@ -9,6 +9,7 @@ from .contracts import (
 )
 from .cdk import CdkCommandHandler
 from .calendar import CalendarCommandHandler
+from .announcement import AnnouncementCommandHandler
 from .daily import DailyCommandHandler
 from .profile import ProfileCommandHandler
 
@@ -20,6 +21,7 @@ __all__ = [
     "TextReply",
     "CdkCommandHandler",
     "CalendarCommandHandler",
+    "AnnouncementCommandHandler",
     "DailyCommandHandler",
     "ProfileCommandHandler",
 ]

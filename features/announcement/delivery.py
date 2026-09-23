@@ -283,7 +283,7 @@ class AnnouncementDelivery:
                     self._mark_unknown(push.key, current, f"sender exception: {type(exc).__name__}")
                     unknown += 1
                     continue
-                if accepted is not True:
+                if accepted is False:
                     try:
                         self._commit_failure(push.key, current)
                     except Exception as exc:
@@ -291,6 +291,14 @@ class AnnouncementDelivery:
                         unknown += 1
                         continue
                     failed += 1
+                    continue
+                if accepted is not True:
+                    self._mark_unknown(
+                        push.key,
+                        current,
+                        "sender returned an indeterminate result",
+                    )
+                    unknown += 1
                     continue
                 try:
                     self._commit_success(push, current)

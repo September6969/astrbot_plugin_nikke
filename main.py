@@ -31,6 +31,7 @@ from astrbot.api.star import Context, Star
 
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
+from .application.commands.announcement import AnnouncementCommandHandler
 from .application.commands.campaign import CampaignCommandHandler
 from .application.commands.cdk import CdkCommandHandler
 from .application.commands.calendar import CalendarCommandHandler
@@ -42,8 +43,7 @@ from .application.commands.tower import TowerCommandHandler
 from ._version import PLUGIN_VERSION
 from .core.container import create_container
 from .features.daily.runner import DailyRunner
-from .features.announcement.service import AnnouncementService
-from .features.announcement.delivery import AnnouncementDelivery
+from .features.announcement.application import AnnouncementApplication
 from .features.calendar.application import CalendarApplication
 from .core.asset_manager import AssetManager
 from .ui.renderers import (
@@ -125,8 +125,7 @@ class NikkePlugin(Star):
         self.voice_provider = self.container.voice_provider
         self.voice_encoder = self.container.voice_encoder
         self.voice_pipeline = self.container.voice_pipeline
-        self.announcements = self.container.announcements
-        self.announcement_delivery = self.container.announcement_delivery
+        self.announcement_application = self.container.announcement_application
         self.calendar = self.container.calendar
         self.calendar_application = self.container.calendar_application
         self.tarot = self.container.tarot
@@ -151,6 +150,7 @@ class NikkePlugin(Star):
         self.daily_command_handler = self._build_daily_command_handler()
         self.cdk_command_handler = self._build_cdk_command_handler()
         self.calendar_command_handler = self._build_calendar_command_handler()
+        self.announcement_command_handler = self._build_announcement_command_handler()
 
         self.public_base_url = str(
             self.config.get("public_base_url", "https://nikke.irises777.xyz")
@@ -308,6 +308,14 @@ class NikkePlugin(Star):
             start_background_refresh=self._start_calendar_background_refresh,
         )
 
+    def _build_announcement_command_handler(self) -> AnnouncementCommandHandler:
+        return AnnouncementCommandHandler(
+            application=self.announcement_application,
+            push_enabled=lambda: bool(
+                self.config.get("enable_announcement_push", False)
+            ),
+        )
+
     def _start_calendar_background_refresh(self) -> None:
         spawn = getattr(self, "_spawn_background_task", None)
         if callable(spawn):
@@ -367,7 +375,7 @@ class NikkePlugin(Star):
 
     async def _sync_announcements_background(self) -> None:
         try:
-            await self.announcements.sync_from_source()
+            await self.announcement_application.sync_announcements()
         except Exception as exc:
             logger.debug("[NIKKE] 后台公告同步跳过: %s", safe_exception_message(exc))
 
@@ -424,10 +432,6 @@ class NikkePlugin(Star):
                     self._announcement_push_task = self._spawn_background_task(self._dispatch_announcements())
             await asyncio.sleep(20)
 
-    def _deadline_reminders_for_delivery(self):
-        fallback = self.announcements.list_active_deadlines()
-        return self.calendar_application.reminder_deadlines(fallback)
-
     async def _dispatch_announcements(self):
         """默认关闭，只有管理员启用且目标显式订阅后才由调度调用。"""
         if not self.config.get("enable_announcement_push", False):
@@ -435,11 +439,7 @@ class NikkePlugin(Star):
         async def sender(target, text):
             await asyncio.wait_for(self.context.send_message(target, MessageChain([Plain(text)])), timeout=10)
             return True
-        await self.announcement_delivery.dispatch(
-            self.announcements.list_announcements(limit=10000),
-            self._deadline_reminders_for_delivery(),
-            sender,
-        )
+        await self.announcement_application.dispatch_pushes(sender)
 
     @staticmethod
     def _qq_id(event: AstrMessageEvent) -> str:
@@ -692,7 +692,13 @@ class NikkePlugin(Star):
                     yield result
                 return
             if arg1:
-                yield event.plain_result("公告命令已简化，请使用：\n\n/妮姬 公告")
+                adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+                async for result in adapter.dispatch(
+                    event,
+                    self.announcement_command_handler,
+                    operation="unsupported",
+                ):
+                    yield result
                 return
             async for result in self.announcements_view(event):
                 yield result
@@ -1214,71 +1220,41 @@ class NikkePlugin(Star):
         category: str | None = None,
         query: str | None = None,
     ):
-        """查看本地缓存中的公告，可按已知 locale/category/关键词过滤。"""
-        fallback_error = ""
-        if self.announcements.record_count() == 0:
-            try:
-                success, msg = await asyncio.wait_for(self.announcements.sync_from_source(), timeout=4.0)
-                if not success:
-                    fallback_error = msg
-            except asyncio.TimeoutError:
-                fallback_error = "同步公告超时"
-            except Exception as e:
-                fallback_error = f"同步异常: {e}"
-        try:
-            text = self.announcements.format_announcements_text(
-                5,
-                fallback_error=fallback_error,
-                locale=locale,
-                category=category,
-                query=query,
-            )
-        except ValueError as exc:
-            text = f"公告查询参数无效：{exc}"
-        yield event.plain_result(text)
+        """把公告查询参数委托给 framework-free handler。"""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event,
+            self.announcement_command_handler,
+            operation="view",
+            locale=locale or "",
+            category=category or "",
+            query=query or "",
+        ):
+            yield result
 
     async def announcement_deep_rescan(self, event: AstrMessageEvent, locale: str = "en"):
-        """管理员受限的公开只读深度公告重扫，不发送消息。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅机器人管理员可执行公告深度刷新。")
-            return
-        try:
-            selected_locale = self.announcements.normalize_locale(locale)
-        except ValueError as exc:
-            yield event.plain_result(f"公告语言无效：{exc}")
-            return
-        try:
-            success, message = await asyncio.wait_for(
-                self.announcements.sync_from_source(locale=selected_locale, deep=True),
-                timeout=40.0,
-            )
-        except asyncio.TimeoutError:
-            yield event.plain_result("公告深度刷新超时，已保留原有缓存。")
-            return
-        except Exception as exc:
-            yield event.plain_result(f"公告深度刷新异常：{exc}")
-            return
-        if not success:
-            yield event.plain_result(message)
-            return
-        yield event.plain_result(message + " 仅执行公开只读同步，未发送消息。")
+        """把管理员深度重扫委托给 framework-free handler。"""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event,
+            self.announcement_command_handler,
+            operation="deep_rescan",
+            locale=locale,
+        ):
+            yield result
 
     async def announcement_subscription(self, event: AstrMessageEvent, action: str):
-        """目标只取当前会话，禁止通过命令替其它会话订阅。"""
-        if not self._is_admin(event):
-            yield event.plain_result("仅机器人管理员可管理公告订阅。")
-            return
-        target = getattr(event, "unified_msg_origin", "")
-        if not target:
-            yield event.plain_result("当前适配器未提供可持久化会话目标。")
-            return
-        if action == "取消订阅":
-            self.announcement_delivery.unsubscribe(target)
-            yield event.plain_result("已取消当前会话的公告订阅。")
-            return
-        self.announcement_delivery.subscribe(target, self.announcements.list_announcements(limit=10000))
-        suffix = "" if self.config.get("enable_announcement_push", False) else " 全局推送开关当前关闭，不会自动发送。"
-        yield event.plain_result("已订阅当前会话；不补发已有公告，截止提醒为 24/6/1 小时。" + suffix)
+        """由适配器传入当前会话目标，权限与订阅写入归 handler/application。"""
+        operation = "unsubscribe" if action == "取消订阅" else "subscribe"
+        target = getattr(event, "unified_msg_origin", "") or ""
+        adapter = getattr(self, "command_adapter", None) or AstrBotCommandAdapter()
+        async for result in adapter.dispatch(
+            event,
+            self.announcement_command_handler,
+            operation=operation,
+            target=target,
+        ):
+            yield result
 
     async def guide(self, event: AstrMessageEvent, category: str = "", page: str = "1"):
         """查看或发送常用攻略图。"""

@@ -213,6 +213,22 @@ class DeliveryTests(IsolatedAsyncioTestCase):
         await restarted.dispatch([self.record()], [], retry_sender, now=self.now)
         retry_sender.assert_not_awaited()
 
+    async def test_indeterminate_sender_return_is_unknown_and_not_replayed(self):
+        self.service.subscribe("fake", [], now=self.now)
+        sender = AsyncMock(return_value=None)
+
+        result = await self.service.dispatch(
+            [self.record()], [], sender, now=self.now
+        )
+
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 1})
+        restarted = AnnouncementDelivery(self.store)
+        retry_sender = AsyncMock(return_value=True)
+        await restarted.dispatch(
+            [self.record()], [], retry_sender, now=self.now + timedelta(minutes=10)
+        )
+        retry_sender.assert_not_awaited()
+
     async def test_intent_persistence_failure_does_not_send(self):
         self.service.subscribe("fake", [], now=self.now)
         original_set_setting = self.store.set_setting

@@ -12,10 +12,12 @@ from unittest.mock import AsyncMock, patch
 import httpx
 
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+from astrbot_plugin_nikke.features.announcement.application import AnnouncementApplication
 from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
 from astrbot_plugin_nikke.features.announcement.sources import InformationFeedsSource
 from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
 from astrbot_plugin_nikke.main import NikkePlugin
+from astrbot_plugin_nikke.application.commands.announcement import AnnouncementCommandHandler
 from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
@@ -245,8 +247,18 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         service.add_or_update(record("en", "Event Notice", "Event body", locale="en", category="event"))
         service.sync_from_source = AsyncMock(side_effect=AssertionError("本地查询不应同步"))
         plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.announcements = service
-        plugin.announcement_delivery = SimpleNamespace(dispatch=AsyncMock())
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        delivery = AnnouncementDelivery(NikkeStore(directory.name))
+        application = AnnouncementApplication(
+            announcements=service,
+            delivery=delivery,
+        )
+        plugin.announcement_application = application
+        plugin.announcement_command_handler = AnnouncementCommandHandler(
+            application=application,
+            push_enabled=lambda: False,
+        )
         event = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
 
         # Simplified command: any extra argument yields simplification message
@@ -272,14 +284,21 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         self.assertIn("Event Notice", category_reply[0])
         self.assertIn("维护告知", query_reply[0])
         service.sync_from_source.assert_not_awaited()
-        plugin.announcement_delivery.dispatch.assert_not_awaited()
 
     async def test_deep_rescan_requires_admin_and_resubscribe_never_replays_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             service = AnnouncementService()
             plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.announcements = service
-            plugin.announcement_delivery = SimpleNamespace()
+            delivery = AnnouncementDelivery(NikkeStore(directory))
+            application = AnnouncementApplication(
+                announcements=service,
+                delivery=delivery,
+            )
+            plugin.announcement_application = application
+            plugin.announcement_command_handler = AnnouncementCommandHandler(
+                application=application,
+                push_enabled=lambda: False,
+            )
             service.sync_from_source = AsyncMock(return_value=(True, "同步成功"))
             denied = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
 
@@ -297,7 +316,6 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
             self.assertIn("公开只读", allowed_reply[0])
             service.sync_from_source.assert_awaited_once_with(locale="ja", deep=True)
 
-            delivery = AnnouncementDelivery(NikkeStore(directory))
             v1 = record("old", body="版本 1", published_at=NOW - timedelta(days=30))
             delivery.subscribe("target", [v1], now=NOW - timedelta(days=1))
             delivery.unsubscribe("target")

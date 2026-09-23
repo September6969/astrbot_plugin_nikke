@@ -16,6 +16,7 @@ from typing import Any
 
 from .._version import PLUGIN_VERSION
 from ..features.account.application import AccountApplication
+from ..features.announcement.application import AnnouncementApplication
 from ..features.announcement.delivery import AnnouncementDelivery
 from ..features.announcement.service import AnnouncementService
 from ..features.calendar.service import CalendarService
@@ -99,7 +100,7 @@ class ServiceContainer:
     voice_encoder: VoiceEncoder | None
     voice_pipeline: VoicePipeline | None
     announcements: AnnouncementService
-    announcement_delivery: AnnouncementDelivery
+    announcement_application: AnnouncementApplication
     calendar: CalendarService
     calendar_application: CalendarApplication
     tarot: TarotService | None
@@ -230,6 +231,11 @@ def create_container(
     announcement_delivery = AnnouncementDelivery(store)
     calendar = CalendarService(data_dir / "calendar", announcement_service=announcements)
     calendar_application = CalendarApplication(calendar)
+    announcement_application = AnnouncementApplication(
+        announcements=announcements,
+        delivery=announcement_delivery,
+        deadline_selector=calendar_application.reminder_deadlines,
+    )
     try:
         tarot = TarotService(
             plugin_dir,
@@ -292,7 +298,7 @@ def create_container(
         voice_encoder=voice_encoder,
         voice_pipeline=voice_pipeline,
         announcements=announcements,
-        announcement_delivery=announcement_delivery,
+        announcement_application=announcement_application,
         calendar=calendar,
         calendar_application=calendar_application,
         tarot=tarot,

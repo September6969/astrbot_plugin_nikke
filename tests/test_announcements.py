@@ -1,10 +1,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
+import tempfile
 from datetime import datetime, timedelta, timezone
 
 from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
 from astrbot_plugin_nikke.features.announcement.service import AnnouncementService, DeadlineParser, GameDeadline
+from astrbot_plugin_nikke.features.announcement.application import AnnouncementApplication
+from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+from astrbot_plugin_nikke.application.commands.announcement import AnnouncementCommandHandler
+from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class AnnouncementModelsTests(unittest.TestCase):
@@ -297,17 +302,27 @@ class AnnouncementReviewRegressionTests(unittest.IsolatedAsyncioTestCase):
             for error in (None, asyncio.TimeoutError(), RuntimeError("测试同步异常")):
                 with self.subTest(command=command, error=type(error).__name__):
                     plugin = NikkePlugin.__new__(NikkePlugin)
-                    plugin.announcements = AnnouncementService()
-                    plugin.announcements.sync_from_source = AsyncMock(
+                    announcements = AnnouncementService()
+                    announcements.sync_from_source = AsyncMock(
                         return_value=(False, "官方源不可用"), side_effect=error
                     )
-                    replies = [reply async for reply in getattr(plugin, command)(Event())]
+                    with tempfile.TemporaryDirectory() as directory:
+                        application = AnnouncementApplication(
+                            announcements=announcements,
+                            delivery=AnnouncementDelivery(NikkeStore(directory)),
+                        )
+                        plugin.announcement_application = application
+                        plugin.announcement_command_handler = AnnouncementCommandHandler(
+                            application=application,
+                            push_enabled=lambda: False,
+                        )
+                        replies = [reply async for reply in getattr(plugin, command)(Event())]
                     self.assertEqual(len(replies), 1)
                     expected = "官方源不可用" if error is None else "超时" if isinstance(error, asyncio.TimeoutError) else "测试同步异常"
                     self.assertIn(expected, replies[0])
                     self.assertIn("没有可用缓存", replies[0])
                     self.assertNotIn("正在同步", replies[0])
-                    plugin.announcements.sync_from_source.assert_awaited_once()
+                    announcements.sync_from_source.assert_awaited_once()
 
 
 class ScheduleActiveCoopAndEventTests(unittest.TestCase):

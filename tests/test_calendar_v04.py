@@ -481,28 +481,26 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "14")]
         self.assertIn("日程数据尚未就绪，正在后台同步，请稍后重试。", results[0])
 
-    def test_deadline_reminders_for_delivery_selector(self):
+    def test_calendar_application_selects_deadline_source_for_delivery(self):
         from astrbot_plugin_nikke.features.announcement.service import AnnouncementService, GameDeadline
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.calendar.application import CalendarApplication
 
-        main_inst = NikkePlugin.__new__(NikkePlugin)
         ann_service = AnnouncementService()
-        main_inst.announcements = ann_service
 
         real_now = datetime.now(timezone.utc)
         dl = GameDeadline("d1", "Ann Deadline", "event", end_at=real_now + timedelta(days=1), start_at=real_now - timedelta(days=1))
         ann_service._deadlines = {dl.event_id: dl}
+        fallback = ann_service.list_active_deadlines(now=real_now)
 
         # Without calendar -> returns announcements deadlines
-        main_inst.calendar = None
-        deadlines = main_inst._deadline_reminders_for_delivery()
+        deadlines = CalendarApplication(None).reminder_deadlines(fallback)
         self.assertEqual(len(deadlines), 1)
         self.assertEqual(deadlines[0].event_id, "d1")
 
         # With calendar without snapshot -> returns announcements deadlines
         cal = CalendarService(Path(self.tmp_dir.name) / "cal2")
-        main_inst.calendar = cal
-        deadlines = main_inst._deadline_reminders_for_delivery()
+        calendar_app = CalendarApplication(cal)
+        deadlines = calendar_app.reminder_deadlines(fallback)
         self.assertEqual(len(deadlines), 1)
         self.assertEqual(deadlines[0].event_id, "d1")
 
@@ -516,6 +514,6 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         cal._activities["cal_1"] = act
         cal._has_snapshot = True
 
-        deadlines = main_inst._deadline_reminders_for_delivery()
+        deadlines = calendar_app.reminder_deadlines(fallback)
         self.assertEqual(len(deadlines), 1)
         self.assertEqual(deadlines[0].event_id, "cal_1")
