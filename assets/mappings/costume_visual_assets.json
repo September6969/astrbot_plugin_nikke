@@ -12,9 +12,15 @@
       "default": {
         "spine_asset_id": "c018",
         "icon": "data/nikke/blabla-assets/character/si/si_c018_00_s.webp",
-        "portrait": null,
+        "portrait": "assets/spine-rendered/c018.png",
         "fullbody": null,
-        "spine": null
+        "spine": {
+          "skeleton": "spine/c018/c018_00.skel",
+          "atlas": "spine/c018/c018_00.atlas",
+          "textures": [
+            "spine/c018/c018_00.png"
+          ]
+        }
       },
       "costumes": {}
     },

@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "generated_at": "2026-09-13T14:44:01.337134+00:00",
-  "total_characters": 10,
-  "verified_count": 10,
+  "total_characters": 11,
+  "verified_count": 11,
   "failed_count": 0,
   "characters": {
     "c010": {
@@ -240,6 +240,41 @@
       "verification": "offline_spine_webgl_4.1.56_idle_0",
       "render_width": 4096,
       "crop_padding": 64
+    },
+    "c018": {
+      "spine_asset_id": "c018",
+      "character_resource_id": "18",
+      "character_name": "尼恩：透视之眼",
+      "character_name_en": "Neon: Vision Eye",
+      "costume_id": null,
+      "costume_name": null,
+      "is_costume": false,
+      "local_relpath": "assets/spine-rendered/c018.png",
+      "sha256": "045b0b3b568e7a2731ea42fb56b35b418e75f845842c889f22ac5963e58a33c5",
+      "width": 2536,
+      "height": 3830,
+      "format": "png",
+      "file_size": 3673960,
+      "alpha_bbox": [
+        64,
+        64,
+        2472,
+        3766
+      ],
+      "runtime_version": "4.1",
+      "verification": "offline_spine_webgl_4.1.20_idle_0",
+      "render_width": 4096,
+      "crop_padding": 64,
+      "source_repo": "https://github.com/Nikke-db/Nikke-db.github.io",
+      "source_path": "l2d/c018/c018_00.skel",
+      "source_atlas_path": "l2d/c018/c018_00.atlas",
+      "source_texture_path": "l2d/c018/c018_00.png",
+      "source_skel_sha256": "6583aecf0cab04f5d3a2f7f2b1ddec0e65992513373b25d6bdca719eef28558c",
+      "source_atlas_sha256": "adc2adbefd357e2d9d0502f5c3c71ed5e9524db4aec4cbd9dc422746ce922daa",
+      "source_texture_sha256": "dbe42aa7327c126e07d8728ffc8b60fdaadf8cbdd13b8258ad458cc9616f15cf",
+      "source_skel_git_blob_sha": "83c6123ab66e5e29a451db21afea29edee4be487",
+      "source_atlas_git_blob_sha": "72db95d875074e7f3339404be213a5fec5ef8c73",
+      "source_texture_git_blob_sha": "db2afce084f8a931a86d170ba516d6d1f8d43296"
     }
   }
 }
