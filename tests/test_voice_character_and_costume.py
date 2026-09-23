@@ -5,9 +5,12 @@ import asyncio
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+from astrbot_plugin_nikke.adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
+from astrbot_plugin_nikke.features.voice.application import VoiceApplication
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.features.voice.audio import VoicePreference
@@ -150,8 +153,15 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         self.plugin = NikkePlugin(ContextMock())
         self.plugin.store = NikkeStore(self.data_dir)
         self.plugin.data_dir = self.data_dir
-        self.plugin.voice_character_resolver = VoiceCharacterResolver(self.plugin.plugin_dir / "assets")
-        self.plugin.costume_registry = CostumeRegistry(self.plugin.plugin_dir / "assets")
+        voice_application = VoiceApplication(
+            store=self.plugin.store,
+            character_resolver=VoiceCharacterResolver(self.plugin.plugin_dir / "assets"),
+            costume_registry=CostumeRegistry(self.plugin.plugin_dir / "assets"),
+            audio_cache=SimpleNamespace(),
+            mapping_registry=SimpleNamespace(),
+        )
+        self.plugin.voice_application = voice_application
+        self.plugin.voice_event_adapter = AstrBotVoiceAdapter(voice_application)
 
     async def asyncTearDown(self):
         self.temp_dir.cleanup()

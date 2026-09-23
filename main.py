@@ -30,6 +30,7 @@ from astrbot.api.message_components import Image, Plain
 from astrbot.api.star import Context, Star
 
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from .adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from .application.commands.account import AccountCommandHandler, RuntimeHealthDetails
 from .application.commands.announcement import AnnouncementCommandHandler
 from .application.commands.campaign import CampaignCommandHandler
@@ -68,13 +69,6 @@ from .core.health import collect_runtime_health, format_runtime_health
 from .core.config import normalize_runtime_config, read_schedule_clock
 from .integrations.spine.config import build_spine_renderer
 from .core.storage import NikkeStore
-from .features.character.registries.costume import CostumeRegistry
-from .features.voice.character_resolver import VoiceCharacterResolver
-from .features.voice.audio import VoiceAudioCache, VoicePreference, is_self_poke
-from .features.voice.encoder import VoiceEncoder
-from .features.voice.mapping import VoiceMapRegistry
-from .features.voice.pipeline import VoicePipeline
-from .features.voice.provider import VoiceResourceProvider
 from .integrations.web.service import BindingWebService
 
 
@@ -99,7 +93,13 @@ class NikkePlugin(Star):
         self.config = normalize_runtime_config(config)
         self.plugin_dir = Path(__file__).resolve().parent
         self.data_dir = Path("data") / "nikke"
-        self.container = create_container(self.plugin_dir, self.data_dir, self.config)
+        self._directory: list[dict] = []
+        self.container = create_container(
+            self.plugin_dir,
+            self.data_dir,
+            self.config,
+            directory_provider=lambda: self._directory,
+        )
 
         # 映射公开组件到插件门面；Profile 与 Character 用例由应用边界编排。
         self.extension_zip = self.container.extension_zip
@@ -118,13 +118,8 @@ class NikkePlugin(Star):
         self.campaign_renderer = self.container.campaign_renderer
         self.cdk_service = self.container.cdk_service
         self.feedback_manager = self.container.feedback_manager
-        self.voice_mapping = self.container.voice_mapping
-        self.voice_character_resolver = self.container.voice_character_resolver
-        self.costume_registry = self.container.costume_registry
-        self._voice_audio = self.container.voice_audio
-        self.voice_provider = self.container.voice_provider
-        self.voice_encoder = self.container.voice_encoder
-        self.voice_pipeline = self.container.voice_pipeline
+        self.voice_application = self.container.voice_application
+        self.voice_event_adapter = AstrBotVoiceAdapter(self.voice_application)
         self.announcement_application = self.container.announcement_application
         self.calendar = self.container.calendar
         self.calendar_application = self.container.calendar_application
@@ -157,7 +152,6 @@ class NikkePlugin(Star):
         ).rstrip("/")
         self.web_host = str(self.config.get("web_host", "0.0.0.0"))
         self.web_port = int(self.config.get("web_port", 6210))
-        self._directory: list[dict] = []
         self.account_application = self.container.account_application
         self.account_command_handler = AccountCommandHandler(
             application=self.account_application,
@@ -166,7 +160,6 @@ class NikkePlugin(Star):
             runtime_health=self._account_runtime_health_details,
             render_manual_summary=self._render_manual_daily_summary,
         )
-        self._voice_poke_cooldowns: dict[tuple, float] = {}
         self._termination_lock = asyncio.Lock()
         self._background_tasks: list[asyncio.Task] = []
         self._closing = False
@@ -500,18 +493,6 @@ class NikkePlugin(Star):
         )
         suffix = "\n候选过多，请继续补全名称。" if error.too_many else ""
         return "找到多个角色，请输入更完整的名称：\n\n" + candidates + suffix
-
-    def resolve_voice_character(self, query: str) -> str | None:
-        resolver = getattr(self, "voice_character_resolver", None)
-        if resolver is None:
-            user_aliases = (self.config or {}).get("custom_character_aliases")
-            try:
-                resolver = VoiceCharacterResolver(self.plugin_dir / "assets", user_aliases=user_aliases)
-            except ValueError as err:
-                logger.error("[NIKKE] 语音用户自定义别名配置错误，已忽略自定义别名：%s", err)
-                resolver = VoiceCharacterResolver(self.plugin_dir / "assets")
-            self.voice_character_resolver = resolver
-        return resolver.resolve(query, getattr(self, "_directory", None))
 
     @staticmethod
     def _help_text(category: str = "", include_admin: bool = False) -> str:
@@ -859,120 +840,18 @@ class NikkePlugin(Star):
         yield event.plain_result("用法：/妮姬 查询 练度 [角色名]、/妮姬 查询 资料 <角色名>、/妮姬 查询 战役 <关卡> 或 /妮姬 攻略")
 
     async def voice_settings(self, event: AstrMessageEvent, action: str = "", value: str = ""):
-        """保存明确的语音偏好，音频需管理员在本地登记授权来源。"""
-        from .features.voice.audio import VoicePreference
-        key = f"{event.get_platform_name()}:{self._qq_id(event)}"
-        preference = VoicePreference.load(self.store, key)
-        action_clean = str(action or "").strip()
-        value_clean = str(value or "").strip()
-
-        if action_clean in {"开", "关"}:
-            preference.enabled = action_clean == "开"
-        elif action_clean == "语言" and value_clean.lower() in {"ja", "en", "ko"}:
-            preference.locale = value_clean.lower()
-            preference.explicit_locale = True
-        elif action_clean == "角色":
-            if not value_clean:
-                yield event.plain_result("用法：/妮姬 语音 角色 <角色名|英文名|代码>")
-                return
-            resolved_char = self.resolve_voice_character(value_clean)
-            if not resolved_char:
-                yield event.plain_result(f"未找到妮姬：{value_clean}")
-                return
-            preference.character = resolved_char
-            preference.skin = "default"
-            preference.spine_asset_id = ""
-        elif action_clean in {"服装", "皮肤", "skin", "costume"}:
-            char_res = getattr(self, "voice_character_resolver", None)
-            current_rid = char_res.get_resource_id(preference.character) if char_res else None
-            costume_reg = getattr(self, "costume_registry", None)
-            if costume_reg is None:
-                costume_reg = CostumeRegistry(self.plugin_dir / "assets")
-                self.costume_registry = costume_reg
-
-            if not value_clean:
-                available = costume_reg.get_costumes_for_resource(current_rid)
-                if available:
-                    lines = [f"当前角色 {preference.character} 可用已核验服装："]
-                    for c in available:
-                        lines.append(f"- {c.costume_id}：{c.costume_name} ({c.spine_asset_id})")
-                    lines.append("用法：/妮姬 语音 服装 <默认|服装ID|服装名>")
-                    yield event.plain_result("\n".join(lines))
-                else:
-                    yield event.plain_result(f"当前角色 {preference.character} 暂无可切换的已核验服装。\n用法：/妮姬 语音 服装 默认")
-                return
-
-            result = costume_reg.resolve(value_clean, expected_resource_id=current_rid)
-            if not result.ok:
-                yield event.plain_result(result.message)
-                return
-            if result.status == "RESET_DEFAULT":
-                preference.skin = "default"
-                preference.spine_asset_id = ""
-            else:
-                preference.skin = result.costume.costume_id
-                preference.spine_asset_id = result.costume.spine_asset_id
-        elif action_clean:
-            yield event.plain_result("用法：/妮姬 语音 开|关，语音 语言 ja|en|ko，语音 角色 <角色名>，语音 服装 <默认|服装ID|服装名>")
-            return
-
-        preference.save(self.store, key)
-        skin_str = f" · {preference.skin}" if preference.skin != "default" else ""
-        yield event.plain_result(f"互动语音：{'开启' if preference.enabled else '关闭'} · {preference.character}{skin_str} · {preference.locale}。")
+        """通过语音适配器处理偏好设置命令。"""
+        async for result in self.voice_event_adapter.voice_settings(event, action, value):
+            yield result
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_nikke_poke(self, event: AstrMessageEvent):
-        """仅对戳向本 Bot 的通知响应；默认关闭，不发送未经登记的音频，纯语音无文本兜底。"""
-        raw = getattr(event.message_obj, "raw_message", None)
-        if event.get_platform_name() != "aiocqhttp" or not is_self_poke(raw):
-            return
-        preference = VoicePreference.load(self.store, f"{event.get_platform_name()}:{self._qq_id(event)}")
-        if not preference.enabled or getattr(self, "_closing", False):
-            return
-        now = time.monotonic()
-        cooldowns = getattr(self, "_voice_poke_cooldowns", {})
-        cooldown_key = (event.get_platform_name(), event.get_sender_id(), getattr(event, "unified_msg_origin", ""))
-        if now - cooldowns.get(cooldown_key, float("-inf")) < 10:
-            return
-        self._voice_poke_cooldowns = {key: stamp for key, stamp in cooldowns.items() if now - stamp < 10}
-        self._voice_poke_cooldowns[cooldown_key] = now
-        try:
-            audio = await self._voice_audio.resolve(preference)
-        except (OSError, ValueError, asyncio.TimeoutError):
-            audio = None
-        if audio is None:
-            mapping_registry = getattr(self, "voice_mapping", None)
-            pipeline = getattr(self, "voice_pipeline", None)
-            canonical_spine = getattr(preference, "spine_asset_id", "") or None
-            if mapping_registry:
-                if hasattr(mapping_registry, "resolve_poke"):
-                    mapping = mapping_registry.resolve_poke(
-                        preference.character,
-                        preference.skin,
-                        preference.locale,
-                        spine_asset_id=canonical_spine,
-                    )
-                else:
-                    mapping = mapping_registry.resolve(
-                        preference.character,
-                        preference.skin,
-                        preference.locale,
-                        spine_asset_id=canonical_spine,
-                    )
-                    if mapping is None and canonical_spine:
-                        mapping = mapping_registry.resolve_by_spine_asset(canonical_spine, preference.locale)
-            if (
-                mapping is not None
-                and pipeline is not None
-                and getattr(self, "config", {}).get("voice_dynamic_enabled", True)
-            ):
-                try:
-                    audio = await pipeline.resolve(mapping.map_key, mapping.speech_id, mapping.locale, budget=4)
-                except (OSError, ValueError, asyncio.TimeoutError):
-                    audio = None
-        if audio:
-            from astrbot.api.message_components import Record
-            yield event.chain_result([Record.fromFileSystem(str(audio))])
+        """将框架戳一戳事件委托给语音事件适配器。"""
+        async for result in self.voice_event_adapter.on_poke(
+            event,
+            closing=getattr(self, "_closing", False),
+        ):
+            yield result
 
     async def union_raid_ranking(self, event: AstrMessageEvent):
         """展示当前响应范围的伤害排名，不声称覆盖完整赛季。"""
@@ -1333,24 +1212,13 @@ class NikkePlugin(Star):
                 except Exception as exc:
                     cleanup_errors.append(exc)
                     logger.debug("[NIKKE] 反馈管理器回收失败：%s", safe_exception_message(exc))
-            voice_pipeline = getattr(self, "voice_pipeline", None)
-            if voice_pipeline is not None:
+            voice_application = getattr(self, "voice_application", None)
+            if voice_application is not None:
                 try:
-                    await voice_pipeline.close()
+                    await voice_application.close()
                 except Exception as exc:
                     cleanup_errors.append(exc)
-                    logger.debug("[NIKKE] 语音管线回收失败：%s", safe_exception_message(exc))
-            else:
-                for resource in (getattr(self, "voice_provider", None), getattr(self, "voice_encoder", None)):
-                    close = getattr(resource, "close", None)
-                    if close is not None:
-                        try:
-                            result = close()
-                            if asyncio.iscoroutine(result):
-                                await result
-                        except Exception as exc:
-                            cleanup_errors.append(exc)
-                            logger.debug("[NIKKE] 语音资源回收失败：%s", safe_exception_message(exc))
+                    logger.debug("[NIKKE] 语音应用回收失败：%s", safe_exception_message(exc))
             asset_manager = getattr(self, "asset_manager", None)
             if asset_manager is not None:
                 try:

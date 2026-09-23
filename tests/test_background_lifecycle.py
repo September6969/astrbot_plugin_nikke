@@ -47,6 +47,19 @@ class LifecycleTests(IsolatedAsyncioTestCase):
         plugin.asset_manager.close.assert_called_once()
         plugin.web.stop.assert_awaited_once()
 
+    async def test_shutdown_closes_voice_application_owner(self):
+        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin._closing = False
+        plugin._background_tasks = []
+        plugin.voice_application = AsyncMock()
+        plugin.web = AsyncMock()
+        plugin.asset_manager = MagicMock()
+
+        await plugin.terminate()
+
+        plugin.voice_application.close.assert_awaited_once()
+        self.assertFalse(hasattr(plugin, "voice_pipeline"))
+
     async def test_concurrent_shutdown_waits_for_the_first_cleanup(self):
         plugin = NikkePlugin.__new__(NikkePlugin)
         plugin._closing = False

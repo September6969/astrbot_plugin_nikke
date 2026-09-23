@@ -12,7 +12,7 @@ import shutil
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from .._version import PLUGIN_VERSION
 from ..features.account.application import AccountApplication
@@ -39,6 +39,7 @@ from ..features.raid.builder import UnionRaidBuilder
 from ..features.tarot.service import TarotDataError, TarotService
 from ..features.tower.application import TowerApplication
 from ..features.voice.audio import VoiceAudioCache
+from ..features.voice.application import VoiceApplication
 from ..features.voice.character_resolver import VoiceCharacterResolver
 from ..features.voice.encoder import VoiceEncoder
 from ..features.voice.mapping import VoiceMapRegistry
@@ -92,13 +93,7 @@ class ServiceContainer:
     campaign_application: CampaignApplication
     cdk_service: CdkService
     feedback_manager: DelayedFeedbackManager
-    voice_mapping: VoiceMapRegistry
-    voice_character_resolver: VoiceCharacterResolver
-    costume_registry: CostumeRegistry
-    voice_audio: VoiceAudioCache
-    voice_provider: VoiceResourceProvider
-    voice_encoder: VoiceEncoder | None
-    voice_pipeline: VoicePipeline | None
+    voice_application: VoiceApplication
     announcements: AnnouncementService
     announcement_application: AnnouncementApplication
     calendar: CalendarService
@@ -114,6 +109,8 @@ def create_container(
     plugin_dir: Path,
     data_dir: Path,
     config: dict[str, Any],
+    *,
+    directory_provider: Callable[[], Any] | None = None,
 ) -> ServiceContainer:
     """装配插件依赖，建立各服务之间的依赖注入关系。"""
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -226,6 +223,18 @@ def create_container(
     ffprobe = shutil.which("ffprobe")
     voice_encoder = VoiceEncoder(data_dir / "voice_cache", ffmpeg, ffprobe) if ffmpeg and ffprobe else None
     voice_pipeline = VoicePipeline(voice_provider, voice_encoder) if voice_encoder else None
+    voice_application = VoiceApplication(
+        store=store,
+        character_resolver=voice_character_resolver,
+        costume_registry=costume_registry,
+        audio_cache=voice_audio,
+        mapping_registry=voice_mapping,
+        pipeline=voice_pipeline,
+        provider=voice_provider,
+        encoder=voice_encoder,
+        dynamic_enabled=lambda: bool(config.get("voice_dynamic_enabled", True)),
+        directory_provider=directory_provider,
+    )
 
     announcements = AnnouncementService(data_dir / "announcements")
     announcement_delivery = AnnouncementDelivery(store)
@@ -290,13 +299,7 @@ def create_container(
         campaign_application=campaign_application,
         cdk_service=cdk_service,
         feedback_manager=feedback_manager,
-        voice_mapping=voice_mapping,
-        voice_character_resolver=voice_character_resolver,
-        costume_registry=costume_registry,
-        voice_audio=voice_audio,
-        voice_provider=voice_provider,
-        voice_encoder=voice_encoder,
-        voice_pipeline=voice_pipeline,
+        voice_application=voice_application,
         announcements=announcements,
         announcement_application=announcement_application,
         calendar=calendar,
