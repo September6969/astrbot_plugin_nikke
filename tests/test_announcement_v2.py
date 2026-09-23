@@ -176,7 +176,7 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
             kwargs["transport"] = httpx.MockTransport(handler)
             return real_client(*args, **kwargs)
 
-        with patch("astrbot_plugin_nikke.features.announcement.service.httpx.AsyncClient", client_factory):
+        with patch("astrbot_plugin_nikke.features.announcement.synchronization.httpx.AsyncClient", client_factory):
             records = await AnnouncementService.fetch_official()
         self.assertEqual([item.content_id for item in records], ["a", "b"])
         self.assertEqual([item.locale for item in records], ["und", "und"])

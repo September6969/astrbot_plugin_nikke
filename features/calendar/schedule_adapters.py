@@ -403,7 +403,7 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
 
         # 若无现成 GameDeadline，则尝试从公告正文提取
         if not deadlines and records_map:
-            from ..announcement.service import DeadlineParser
+            from ..announcement.deadlines import DeadlineParser
             for rec in records_map.values():
                 title = getattr(rec, "title", "")
                 body = getattr(rec, "body", "") or getattr(rec, "content", "")
