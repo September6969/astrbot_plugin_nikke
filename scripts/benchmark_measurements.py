@@ -80,74 +80,77 @@ async def benchmark_cached_source():
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
         provider = VoiceResourceProvider(root, task_factory=asyncio.create_task)
-        source_dir = root / "source"
-        source_dir.mkdir()
+        try:
+            source_dir = root / "source"
+            source_dir.mkdir()
 
-        audio_bytes = b"ID3" + b"\x00" * (100 * 1024)  # 100 KB
-        sha = hashlib.sha256(audio_bytes).hexdigest()
-        target = source_dir / "test.mp3"
-        manifest = source_dir / "test.json"
-        target.write_bytes(audio_bytes)
-        manifest.write_text(json.dumps({
-            "sha256": sha,
-            "source_path": "/voice/ja/line_1.mp3",
-            "map_key": "map_test",
-        }), encoding="utf-8")
+            audio_bytes = b"ID3" + b"\x00" * (100 * 1024)  # 100 KB 音频样本
+            sha = hashlib.sha256(audio_bytes).hexdigest()
+            target = source_dir / "test.mp3"
+            manifest = source_dir / "test.json"
+            target.write_bytes(audio_bytes)
+            manifest.write_text(json.dumps({
+                "sha256": sha,
+                "source_path": "/voice/ja/line_1.mp3",
+                "map_key": "map_test",
+            }), encoding="utf-8")
 
-        # Baseline _cached_source implementation (full execution: symlink check, stat, read_bytes, json decode, sha256)
-        def cached_source_baseline(p, tgt, mnf, mk, sid, loc):
-            try:
-                if not p._cache_path_is_safe() or tgt.is_symlink() or mnf.is_symlink():
+            # 基线实现：每次访问都检查符号链接、读取文件并计算 SHA-256。
+            def cached_source_baseline(p, tgt, mnf, mk, sid, loc):
+                try:
+                    if not p._cache_path_is_safe() or tgt.is_symlink() or mnf.is_symlink():
+                        return None
+                    age = time.time() - mnf.stat().st_mtime
+                    if not tgt.is_file() or not mnf.is_file() or not 0 <= age < 86400 or tgt.stat().st_size > p.MAX_BYTES:
+                        return None
+                    raw = tgt.read_bytes()
+                    saved = json.loads(mnf.read_text(encoding="utf-8"))
+                except (OSError, UnicodeDecodeError, ValueError):
                     return None
-                age = time.time() - mnf.stat().st_mtime
-                if not tgt.is_file() or not mnf.is_file() or not 0 <= age < 86400 or tgt.stat().st_size > p.MAX_BYTES:
+                expected_source_path = f"/voice/{loc}/{sid}.mp3"
+                if (
+                    not isinstance(saved, dict)
+                    or saved.get("sha256") != hashlib.sha256(raw).hexdigest()
+                    or saved.get("source_path") != expected_source_path
+                    or saved.get("map_key") != mk
+                    or not p.is_mp3(raw)
+                ):
                     return None
-                raw = tgt.read_bytes()
-                saved = json.loads(mnf.read_text(encoding="utf-8"))
-            except (OSError, UnicodeDecodeError, ValueError):
-                return None
-            expected_source_path = f"/voice/{loc}/{sid}.mp3"
-            if (
-                not isinstance(saved, dict)
-                or saved.get("sha256") != hashlib.sha256(raw).hexdigest()
-                or saved.get("source_path") != expected_source_path
-                or saved.get("map_key") != mk
-                or not p.is_mp3(raw)
-            ):
-                return None
-            return tgt
+                return tgt
 
-        # Warm up both
-        assert cached_source_baseline(provider, target, manifest, "map_test", "line_1", "ja") is not None
-        assert provider._cached_source(target, manifest, "map_test", "line_1", "ja") is not None
+            # 预热两种实现。
+            assert cached_source_baseline(provider, target, manifest, "map_test", "line_1", "ja") is not None
+            assert provider._cached_source(target, manifest, "map_test", "line_1", "ja") is not None
 
-        # Before (baseline: disk reads + sha256 hashing on every access)
-        samples_before = []
-        for _ in range(1000):
-            t0 = time.perf_counter_ns()
-            res = cached_source_baseline(provider, target, manifest, "map_test", "line_1", "ja")
-            t1 = time.perf_counter_ns()
-            samples_before.append((t1 - t0) / 1000.0)
-            assert res is not None
+            # 基线：每次都读盘并计算 SHA-256。
+            samples_before = []
+            for _ in range(1000):
+                t0 = time.perf_counter_ns()
+                res = cached_source_baseline(provider, target, manifest, "map_test", "line_1", "ja")
+                t1 = time.perf_counter_ns()
+                samples_before.append((t1 - t0) / 1000.0)
+                assert res is not None
 
-        # After (optimized: fast metadata/stat check + verified cache hit)
-        samples_after = []
-        for _ in range(1000):
-            t0 = time.perf_counter_ns()
-            res = provider._cached_source(target, manifest, "map_test", "line_1", "ja")
-            t1 = time.perf_counter_ns()
-            samples_after.append((t1 - t0) / 1000.0)
-            assert res is not None
+            # 优化实现：元数据检查后命中已验证缓存。
+            samples_after = []
+            for _ in range(1000):
+                t0 = time.perf_counter_ns()
+                res = provider._cached_source(target, manifest, "map_test", "line_1", "ja")
+                t1 = time.perf_counter_ns()
+                samples_after.append((t1 - t0) / 1000.0)
+                assert res is not None
 
-        print(json.dumps({
-            "name": "voice_cached_source_validation_100kb",
-            "samples": 1000,
-            "unit": "us",
-            "before_median": statistics.median(samples_before),
-            "before_p95": percentile(samples_before, 0.95),
-            "after_median": statistics.median(samples_after),
-            "after_p95": percentile(samples_after, 0.95),
-        }))
+            print(json.dumps({
+                "name": "voice_cached_source_validation_100kb",
+                "samples": 1000,
+                "unit": "us",
+                "before_median": statistics.median(samples_before),
+                "before_p95": percentile(samples_before, 0.95),
+                "after_median": statistics.median(samples_after),
+                "after_p95": percentile(samples_after, 0.95),
+            }))
+        finally:
+            await provider.close()
 
 
 def benchmark_list_accounts():

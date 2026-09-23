@@ -34,7 +34,11 @@ class VoiceAdapterTests(IsolatedAsyncioTestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "authorized-local.wav"
-            path.write_bytes(b"synthetic")
+            with wave.open(str(path), "wb") as audio:
+                audio.setnchannels(1)
+                audio.setsampwidth(2)
+                audio.setframerate(24000)
+                audio.writeframes(b"\x00\x00" * 240)
             application = SimpleNamespace(resolve_poke=AsyncMock(return_value=path))
             adapter = AstrBotVoiceAdapter(application)
             raw = {
@@ -69,7 +73,13 @@ class VoiceAdapterTests(IsolatedAsyncioTestCase):
                     closing=True,
                 ),
             )
-            self.assertEqual(results[0][0].file, path.as_uri())
+            record = results[0][0]
+            self.assertEqual(Path(record.path), path.resolve())
+            payload = await AiocqhttpMessageEvent._from_segment_to_dict(record)
+            self.assertEqual(payload["type"], "record")
+            encoded = payload["data"]["file"]
+            self.assertTrue(encoded.startswith("base64://"))
+            self.assertEqual(base64.b64decode(encoded[9:]), path.read_bytes())
 
     async def test_event_adapter_settings_uses_neutral_identity_and_plain_reply(self):
         from astrbot_plugin_nikke.adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
