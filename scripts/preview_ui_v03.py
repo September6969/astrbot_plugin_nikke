@@ -64,7 +64,7 @@ def main():
     output = root / args.tag
     output.mkdir(parents=True, exist_ok=True)
     manager = AssetManager(output / "cache", ROOT / "assets", remote=False)
-    render = CharacterCardRenderer(output, ROOT / "fonts", manager)
+    render = CharacterCardRenderer(output, ROOT / "fonts")
     base = build_card()
     base.commander_name, base.fetched_at = "展示样本 · 非真实账号", "2026-09-10 12:00"
     base.name_cn, base.name_en, base.resource_id, base.name_code = "拉毗", "Rapi", "10", "sample"

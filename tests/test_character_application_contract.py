@@ -1,4 +1,6 @@
 import ast
+import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import Mock
@@ -12,6 +14,7 @@ from astrbot_plugin_nikke.features.character.application import (
     CharacterNotOwned,
 )
 from astrbot_plugin_nikke.features.character.identity import CharacterDirectoryResolver
+from astrbot_plugin_nikke.features.character.models import CharacterCardRequest, CharacterCardResult
 
 
 DISPLAY_TZ = timezone(timedelta(hours=8))
@@ -148,17 +151,56 @@ async def test_character_card_uses_exact_identity_costume_research_and_injected_
     gateway = FakeGateway()
     application, builder, resources = make_application(gateway=gateway)
 
-    card = await application.character_card("qq-1", "Alice", directory())
+    result = await application.build_card(
+        CharacterCardRequest(qq_id="qq-1", query="Alice", directory=directory())
+    )
+    assert isinstance(result, CharacterCardResult)
+    card = result.card
 
     assert gateway.detail_requests[0][1] == "alice"
     assert gateway.roster_requests == []
     assert builder.build.call_args.kwargs["directory"]["resource_id"] == 5065
+    assert builder.build.call_args.kwargs["display_name"] == "爱丽丝"
     assert builder.build.call_args.kwargs["account"]["research_levels"]["general"] == 7
+    assert set(builder.build.call_args.kwargs["account"]) == {
+        "nickname", "role_name", "research_levels"
+    }
+    assert "cookie" not in builder.build.call_args.kwargs["account"]
     assert builder.build.call_args.kwargs["payload"]["detail"]["costume_tid"] == 30049
     assert builder.build.call_args.kwargs["fetched_at"] == "2026-09-22 20:30"
     assert builder.build.call_args.kwargs["plugin_version"] == "test-version"
     resources.prepare_payload.assert_called_once()
     assert card is builder.build.return_value
+
+
+@pytest.mark.asyncio
+async def test_legacy_character_card_method_wraps_the_request_result_contract():
+    application, builder, _ = make_application()
+
+    card = await application.character_card("qq-1", "Alice", directory())
+
+    assert card is builder.build.return_value
+
+
+def test_character_application_import_does_not_load_render_network_or_database_modules():
+    root = Path(__file__).resolve().parents[1]
+    source = (
+        "import importlib, sys; "
+        "importlib.import_module('astrbot_plugin_nikke.features.character.application'); "
+        "loaded = sorted(name for name in ('PIL', 'httpx', 'aiohttp', 'requests', 'sqlite3') "
+        "if name in sys.modules); "
+        "print(','.join(loaded)); "
+        "raise SystemExit(bool(loaded))"
+    )
+    result = subprocess.run(
+        [sys.executable, "-X", "utf8", "-c", source],
+        cwd=root.parent,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.mark.asyncio

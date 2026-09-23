@@ -10,7 +10,7 @@ from PIL import Image
 from astrbot_plugin_nikke.features.character.models import EquipmentOption
 from astrbot_plugin_nikke.ui.theme import character_theme, UI_COLORS, _relative_luminance
 from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
-from astrbot_plugin_nikke.tests.test_card_builder import build_card
+from astrbot_plugin_nikke.tests.test_card_builder import build_card, fallback_card_assets
 from astrbot_plugin_nikke.integrations.web.service import BindingWebService
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,11 +27,15 @@ def test_four_positions_have_exactly_three_rows_even_when_unequipped():
     with tempfile.TemporaryDirectory() as td:
         renderer = CharacterCardRenderer(td, ROOT / "fonts")
         card = build_card()
+        assets = fallback_card_assets(card)
         for item in card.equipment.values():
             item.equipped = False
             item.options = [EquipmentOption("stale", "残留不显示", .1, "percent")]
         with patch.object(renderer, "_text", wraps=renderer._text) as text:
-            renderer.draw_equipment_column(Image.new("RGBA", (1800, 1000)), card, character_theme("ELYSION", "Fire"))
+            renderer.draw_equipment_column(
+                Image.new("RGBA", (1800, 1000)), card,
+                character_theme("ELYSION", "Fire"), equipment_icons=assets.equipment,
+            )
         strings = [call.args[2] for call in text.call_args_list]
         assert strings.count("空槽") == 12
         assert strings.count("未装备") == 4

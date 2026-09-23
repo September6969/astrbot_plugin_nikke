@@ -26,7 +26,7 @@ from ..features.campaign.builder import CampaignHistoryBuilder
 from ..features.campaign.stage_resolver import CampaignStageResolver
 from ..features.cdk.service import CdkService
 from ..features.character.application import CharacterApplication
-from ..features.character.builder import CharacterCardBuilder
+from ..features.character.composition import create_character_card_builder
 from ..features.character.identity import CharacterDirectoryResolver
 from ..features.character.registries.costume import CostumeRegistry
 from ..features.character.stat_resources import CharacterStatResourceLoader
@@ -127,7 +127,8 @@ def create_container(
         lambda message: logger.info(f"[NIKKE诊断] {message}"),
     )
     renderer = CardRenderer(data_dir / "cards", plugin_dir / "fonts")
-    character_builder = CharacterCardBuilder(
+    character_builder = create_character_card_builder(
+        plugin_dir,
         unknown_ol_inventory_path=data_dir / "ol_unknown_inventory.json",
     )
     user_aliases = (config or {}).get("custom_character_aliases")
@@ -164,7 +165,6 @@ def create_container(
     character_renderer = CharacterCardRenderer(
         data_dir / "cards",
         plugin_dir / "fonts",
-        asset_manager,
     )
     campaign_resolver = CampaignStageResolver.from_file(plugin_dir / "assets" / "campaign_stages.json")
     profile_builder = ProfileBuilder(campaign_resolver=campaign_resolver)

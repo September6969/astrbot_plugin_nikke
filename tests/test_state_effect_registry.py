@@ -2,9 +2,8 @@ import hashlib
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
 from astrbot_plugin_nikke.features.character.registries.state_effect import StateEffectRegistry
-from astrbot_plugin_nikke.tests.test_card_builder import load_fixture
+from astrbot_plugin_nikke.tests.test_card_builder import load_fixture, make_builder
 
 
 def record(**overrides):
@@ -34,7 +33,7 @@ class StateEffectRegistryTests(unittest.TestCase):
         self.assertEqual(metadata.format_value(1463), (0.1463, "percent"))
 
         fixture = load_fixture()
-        card = CharacterCardBuilder(state_effect_registry=registry).build(
+        card = make_builder(state_effect_registry=registry).build(
             account={}, directory=fixture["directory"],
             payload={
                 "roster_item": fixture["roster_item"],

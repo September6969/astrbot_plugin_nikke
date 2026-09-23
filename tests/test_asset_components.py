@@ -191,26 +191,28 @@ def test_fallback_provider_is_non_owning_and_returns_complete_card_assets() -> N
     assert set(result.equipment) == {"head", "torso", "arm", "leg"}
 
 
-def test_renderers_use_non_owning_fallback_when_no_asset_owner_is_injected() -> None:
+def test_character_renderer_does_not_own_asset_resolution() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         fonts = ROOT / "fonts"
-        campaign = CampaignHistoryRenderer(root / "campaign", fonts)
         character = CharacterCardRenderer(root / "character", fonts)
-        assert isinstance(campaign.assets, FallbackAssetProvider)
-        assert isinstance(character.assets, FallbackAssetProvider)
-        assert not isinstance(campaign.assets, AssetManager)
-        assert not isinstance(character.assets, AssetManager)
+        assert not hasattr(character, "assets")
+        source = (ROOT / "ui" / "renderers" / "character.py").read_text(encoding="utf-8")
+        for forbidden in (
+            "resolve_character_assets",
+            "get_character_portrait",
+            "get_equipment_icon",
+            "get_favorite_item_icon",
+            "get_cube_icon",
+        ):
+            assert forbidden not in source
 
 
-def test_character_renderer_preserves_falsey_injected_asset_owner() -> None:
-    class FalseyAssets(FallbackAssetProvider):
-        def __bool__(self) -> bool:
-            return False
+def test_character_renderer_requires_explicitly_prepared_assets() -> None:
+    import inspect
 
-    assets = FalseyAssets()
-    renderer = CharacterCardRenderer(tempfile.gettempdir(), ROOT / "fonts", assets)
-    assert renderer.assets is assets
+    assert "card_assets" in inspect.signature(CharacterCardRenderer.render_character).parameters
+    assert inspect.signature(CharacterCardRenderer.render_character).parameters["card_assets"].default is inspect.Parameter.empty
 
 
 def test_prefetch_lifecycle_close_is_idempotent_and_prevents_new_tasks() -> None:

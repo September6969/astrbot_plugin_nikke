@@ -5,10 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
-
-from PIL import Image
-
+from typing import Any, Literal, Mapping, Sequence
 
 @dataclass(frozen=True, slots=True)
 class CostumeSelection:
@@ -110,17 +107,33 @@ class CharacterCardData:
     weapon_base_source: str | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class CharacterCardRequest:
+    """角色卡用例的显式输入，不暴露账号凭据或渲染资源。"""
+
+    qq_id: str
+    query: str
+    directory: Sequence[Mapping[str, Any]]
+
+
+@dataclass(frozen=True, slots=True)
+class CharacterCardResult:
+    """角色卡用例的领域输出。"""
+
+    card: CharacterCardData
+
+
 @dataclass(slots=True)
 class CharacterCardAssets:
-    portrait: Image.Image
-    equipment: dict[str, Image.Image]
-    favorite_item: Image.Image
-    cube: Image.Image
-    element: Image.Image
-    corporation: Image.Image
-    weapon: Image.Image
-    burst: Image.Image
-    skills: dict[str, Image.Image] = field(default_factory=dict)
+    portrait: Any
+    equipment: dict[str, Any]
+    favorite_item: Any
+    cube: Any
+    element: Any
+    corporation: Any
+    weapon: Any
+    burst: Any
+    skills: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

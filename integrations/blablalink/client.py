@@ -15,6 +15,7 @@ from typing import Any, Callable
 import httpx
 
 from ...core.cookie_utils import parse_cookie as _parse_cookie
+from .errors import BlaBlaError, CookieExpired
 
 
 API_BASE = "https://api.blablalink.com"
@@ -42,13 +43,6 @@ NIKKE_DIRECTORY_ZH = "https://sg-tools-cdn.blablalink.com/jz-26/ww-14/c4619ec833
 NIKKE_DIRECTORY_EN = "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json"
 
 
-class BlaBlaError(RuntimeError):
-    def __init__(self, message: str, code: str = "", endpoint: str = ""):
-        super().__init__(message)
-        self.code = str(code)
-        self.endpoint = endpoint
-
-
 class BlaBlaTimeoutError(BlaBlaError):
     """网络或请求传输超时，结果未确认。"""
     pass
@@ -56,10 +50,6 @@ class BlaBlaTimeoutError(BlaBlaError):
 
 class BlaBlaNetworkError(BlaBlaError):
     """网络连接异常。"""
-    pass
-
-
-class CookieExpired(BlaBlaError):
     pass
 
 

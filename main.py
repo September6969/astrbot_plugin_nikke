@@ -44,6 +44,7 @@ from .ui.renderers import (
 from .ui.payloads.calendar import CalendarT2IPayloadBuilder
 from .features.character.application import (
     CharacterAmbiguousMatch,
+    CharacterCardRequest,
     CharacterNotFound,
     CharacterNotOwned,
 )
@@ -652,6 +653,24 @@ class NikkePlugin(Star):
             path = await asyncio.to_thread(self.profile_renderer.render_profile, dashboard)
         return path
 
+    async def _render_character_card_pillow(self, card):
+        """只负责角色卡 Pillow 展示；资源准备仍由共享资产管理器完成。"""
+        card_assets = await asyncio.to_thread(
+            self.asset_manager.resolve_character_assets, card
+        )
+        return await asyncio.to_thread(
+            self.character_renderer.render_character, card, card_assets
+        )
+
+    async def _build_character_card(self, event, name):
+        """将消息事件转成角色卡用例的显式 request。"""
+        request = CharacterCardRequest(
+            qq_id=self._qq_id(event),
+            query=name,
+            directory=tuple(self._directory),
+        )
+        return await self.character_application.build_card(request)
+
     async def me(self, event: AstrMessageEvent):
         """生成个人账号概览卡。"""
         handle = self.feedback_manager.start_delayed_feedback(
@@ -802,12 +821,10 @@ class NikkePlugin(Star):
             lambda: self.runtime.send_delayed_notice(event, "正在查询与渲染角色卡片...")
         ) if hasattr(self, "feedback_manager") and self.feedback_manager else None
         try:
-            card = await self.character_application.character_card(
-                self._qq_id(event), name, self._directory
-            )
+            card = (await self._build_character_card(event, name)).card
             path = await self._try_t2i("character", card)
             if not path:
-                path = await asyncio.to_thread(self.character_renderer.render_character, card)
+                path = await self._render_character_card_pillow(card)
             yield event.image_result(path)
         except CharacterAmbiguousMatch as exc:
             yield event.plain_result(self._ambiguous_character_message(exc))

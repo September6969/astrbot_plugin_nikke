@@ -5,16 +5,16 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
 from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
 from astrbot_plugin_nikke.features.character.ol_unknown_inventory import UnknownOlInventory
+from astrbot_plugin_nikke.tests.test_card_builder import make_builder
 
 
 class UnknownOlInventoryTests(unittest.TestCase):
     def test_unknown_option_keeps_id_visible_and_is_counted_without_identity(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "ol_unknown_inventory.json"
-            builder = CharacterCardBuilder(unknown_ol_inventory_path=path)
+            builder = make_builder(unknown_ol_inventory=UnknownOlInventory(path))
             option = builder._option_from_effect(
                 effect_id="7999999",
                 functions=[{

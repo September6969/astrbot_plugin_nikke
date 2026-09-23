@@ -13,9 +13,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from astrbot_plugin_nikke.core.privacy import safe_exception_message
-from astrbot_plugin_nikke.integrations.blablalink.client import CookieExpired
-from .models import CharacterCardData
-from .stat_resources import map_research_levels
+from astrbot_plugin_nikke.integrations.blablalink.errors import CookieExpired
+from .models import CharacterCardData, CharacterCardRequest, CharacterCardResult
+from .research_levels import map_research_levels
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -71,6 +71,7 @@ class CharacterCardBuilderPort(Protocol):
         payload: Mapping[str, Any],
         fetched_at: str,
         plugin_version: str,
+        display_name: str,
     ) -> CharacterCardData:
         """从身份、账号和上游详情构建角色卡领域 DTO。"""
 
@@ -283,9 +284,20 @@ class CharacterApplication:
         query: str,
         directory: Sequence[Mapping[str, Any]],
     ) -> CharacterCardData:
-        """按唯一目录身份读取并构建角色卡；上游身份不符时绝不借用其他角色。"""
-        account = self._account(qq_id)
-        target = self._unique_match(query, directory)
+        """兼容旧调用方；新入口使用显式的 request/result 合同。"""
+        result = await self.build_card(
+            CharacterCardRequest(qq_id=str(qq_id), query=query, directory=tuple(directory))
+        )
+        return result.card
+
+    async def build_card(
+        self, request: CharacterCardRequest
+    ) -> CharacterCardResult:
+        """按唯一目录身份读取并构建角色卡；凭据只留在上游网关调用内。"""
+        account = self._account(request.qq_id)
+        target = self._identity.enrich(
+            self._unique_match(request.query, request.directory)
+        )
         code = str(target.get("name_code", "")).strip()
         if not code:
             raise CharacterIdentityMismatch("角色目录缺少稳定 name_code")
@@ -312,12 +324,15 @@ class CharacterApplication:
 
         profile = await self.profile_for_stat_calculation(account)
         outpost = profile.get("outpost", {}) if isinstance(profile, Mapping) else {}
-        account_for_card = dict(account)
-        account_for_card["research_levels"] = map_research_levels(
-            outpost.get("recycle_room_researches")
-            if isinstance(outpost, Mapping)
-            else None
-        )
+        account_for_card = {
+            "nickname": account.get("nickname"),
+            "role_name": account.get("role_name"),
+            "research_levels": map_research_levels(
+                outpost.get("recycle_room_researches")
+                if isinstance(outpost, Mapping)
+                else None
+            ),
+        }
         prepared_payload = dict(payload)
         try:
             prepared_payload = await asyncio.to_thread(
@@ -328,10 +343,12 @@ class CharacterApplication:
                 "[NIKKE] 角色静态属性资源准备失败：%s",
                 safe_exception_message(exc),
             )
-        return self._card_builder.build(
+        card = self._card_builder.build(
             account=account_for_card,
             directory=target,
             payload=prepared_payload,
             fetched_at=self._query_time().strftime("%Y-%m-%d %H:%M"),
             plugin_version=self._plugin_version,
+            display_name=display_name,
         )
+        return CharacterCardResult(card=card)

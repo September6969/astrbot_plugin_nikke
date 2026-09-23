@@ -741,7 +741,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 return text
 
         class Application:
-            async def character_card(self, qq_id, name, directory):
+            async def build_card(self, request):
                 raise CharacterAmbiguousMatch(
                     ("爱丽丝", "爱丽丝：仙境兔女郎")
                 )
@@ -769,7 +769,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 return text
 
         class Application:
-            async def character_card(self, qq_id, name, directory):
+            async def build_card(self, request):
                 raise CharacterNotOwned("爱丽丝")
 
         plugin = NikkePlugin.__new__(NikkePlugin)
@@ -859,8 +859,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def __init__(self):
                 self.requests = []
 
-            async def character_card(self, qq_id, name, directory):
-                self.requests.append((qq_id, name, directory))
+            async def build_card(self, request):
+                self.requests.append(request)
                 raise CharacterNotOwned("爱丽丝")
 
         plugin = NikkePlugin.__new__(NikkePlugin)
@@ -872,7 +872,10 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         results = [item async for item in plugin.character(Event(), "爱丽丝")]
         self.assertEqual(len(results), 1)
         self.assertIn("未持有", results[0])
-        self.assertEqual(application.requests, [("10001", "爱丽丝", plugin._directory)])
+        self.assertEqual(len(application.requests), 1)
+        self.assertEqual(application.requests[0].qq_id, "10001")
+        self.assertEqual(application.requests[0].query, "爱丽丝")
+        self.assertEqual(tuple(application.requests[0].directory), tuple(plugin._directory))
 
     async def test_roster_command_delegates_account_and_name_mapping_to_application(self):
         from unittest.mock import AsyncMock, Mock

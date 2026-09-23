@@ -9,7 +9,6 @@ from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 
-from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProvider
 from astrbot_plugin_nikke.features.character.models import CharacterCardAssets, CharacterCardData, EquipmentData, EquipmentOption
 from ..theme import character_theme
 from ..primitives import CardRenderer
@@ -22,9 +21,8 @@ class CharacterCardRenderer(CardRenderer):
     BURST_NAMES = {"step1": "BURST I", "step2": "BURST II", "step3": "BURST III", "allstep": "BURST 全阶段"}
     SLOT_NAMES = {"head": "HEAD · 头部", "torso": "TORSO · 躯干", "arm": "ARM · 手臂", "leg": "LEG · 腿部"}
 
-    def __init__(self, output_dir, font_dir, assets=None):
+    def __init__(self, output_dir, font_dir):
         super().__init__(output_dir, font_dir)
-        self.assets = assets if assets is not None else FallbackAssetProvider()
 
     @staticmethod
     def _number(value):
@@ -99,7 +97,7 @@ class CharacterCardRenderer(CardRenderer):
         self._text(draw, (1410, 35), f"Lv.{data.level:,}", 54, theme.text, width=345, bold=True)
         self._text(draw, (1412, 105), "PERSONAL BUILD / 个人练度", 18, theme.muted, width=345)
 
-    def draw_character_area(self, canvas, data, theme, portrait=None):
+    def draw_character_area(self, canvas, data, theme, portrait):
         area = Image.new("RGBA", (600, 740), theme.background)
         draw = ImageDraw.Draw(area)
         base, accent = ImageColor.getrgb(theme.background), ImageColor.getrgb(theme.primary)
@@ -107,8 +105,6 @@ class CharacterCardRenderer(CardRenderer):
             weight = 0.24 * (1 - abs(y - 330) / 740)
             color = tuple(round(a * (1 - weight) + b * weight) for a, b in zip(base, accent))
             draw.line((0, y, 600, y), fill=color)
-        if portrait is None:
-            portrait = self.assets.get_character_portrait(data.name_code, data.resource_id, data.costume_id)
         bounds = portrait.getbbox()
         if bounds:
             portrait = portrait.crop(bounds)
@@ -133,7 +129,9 @@ class CharacterCardRenderer(CardRenderer):
             self._text(draw, (x, 357), label, 18, theme.muted)
             self._text(draw, (x, 385), self._number(value), 32, theme.text, width=190, bold=True)
 
-    def draw_growth_panel(self, canvas, data, theme, favorite_icon=None, cube_icon=None, corporation_icon=None):
+    def draw_growth_panel(
+        self, canvas, data, theme, *, favorite_icon, cube_icon, corporation_icon
+    ):
         draw = ImageDraw.Draw(canvas)
         self._panel(draw, (660, 450, 1310, 707), "DEVELOPMENT / 养成", theme)
         if corporation_icon is not None:
@@ -147,8 +145,8 @@ class CharacterCardRenderer(CardRenderer):
             self._text(draw, (x, y), label, 17, theme.muted, width=193)
             self._text(draw, (x, y + 32), value, 31, theme.primary if index == 1 else theme.text, width=193, bold=True)
         items = [
-            ("FAVORITE / 收藏品", data.favorite_item, favorite_icon if favorite_icon is not None else self.assets.get_favorite_item_icon(data.favorite_item.tid if data.favorite_item else None)),
-            ("CUBE / 魔方", data.cube, cube_icon if cube_icon is not None else self.assets.get_cube_icon(data.cube.tid if data.cube else None)),
+            ("FAVORITE / 收藏品", data.favorite_item, favorite_icon),
+            ("CUBE / 魔方", data.cube, cube_icon),
         ]
         for index, (label, item, icon) in enumerate(items):
             x, y = 891 + index * 209, 600
@@ -157,16 +155,14 @@ class CharacterCardRenderer(CardRenderer):
             self._text(draw, (x + 52, y + 30), (item.display_name or "已装备") if item else "未装备", 21, theme.text, width=138)
             self._text(draw, (x + 52, y + 59), f"Lv.{item.level}" if item and item.level is not None else "—", 18, theme.primary)
 
-    def draw_equipment_column(self, canvas, data, theme, equipment_icons=None):
+    def draw_equipment_column(self, canvas, data, theme, *, equipment_icons):
         for index, slot in enumerate(self.SLOT_NAMES):
             item = data.equipment.get(slot, EquipmentData(slot))
             x, y = 1330, 165 + index * 189
             draw = ImageDraw.Draw(canvas)
             draw.rounded_rectangle((x, y, 1760, y + 173), 14, fill=theme.panel, outline="#343B46")
             draw.rounded_rectangle((x + 12, y + 8, x + 78, y + 74), 8, fill="#282E3A")
-            icon = equipment_icons.get(slot) if equipment_icons and slot in equipment_icons else None
-            if icon is None:
-                icon = self.assets.get_equipment_icon(slot, item.equipment_id if item.equipped else None)
+            icon = equipment_icons.get(slot)
             self._paste(canvas, icon, (x + 14, y + 10, 62, 62))
             self._text(draw, (x + 103, y + 17), self.SLOT_NAMES[slot], 24, theme.text, width=304, bold=True)
             status = f"Lv.{item.level}" if item.equipped and item.level is not None else ("已装备" if item.equipped else "未装备")
@@ -223,11 +219,8 @@ class CharacterCardRenderer(CardRenderer):
         canvas.alpha_composite(watermark, (x, 445))
 
     def render_character(
-        self, data: CharacterCardData, card_assets: CharacterCardAssets | None = None
+        self, data: CharacterCardData, card_assets: CharacterCardAssets
     ) -> str:
-        if card_assets is None:
-            card_assets = self.assets.resolve_character_assets(data)
-
         portrait = card_assets.portrait
         theme = character_theme(data.corporation, data.element, portrait)
         canvas = Image.new("RGBA", (self.WIDTH, self.HEIGHT), theme.background)
