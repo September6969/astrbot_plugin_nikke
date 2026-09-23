@@ -1,0 +1,25 @@
+{
+  "evidence_status": "READY_OFFLINE",
+  "note": "脱敏 fixture 合成预览，不代表真实账号、QQ 送达或部署现场证据。",
+  "render_id": "c018",
+  "resource_id": "18",
+  "portrait_source": "assets/spine-rendered/c018.png",
+  "portrait_size": [
+    2536,
+    3830
+  ],
+  "portrait_sha256": "045b0b3b568e7a2731ea42fb56b35b418e75f845842c889f22ac5963e58a33c5",
+  "framing_source": "anchor_available_head_only",
+  "anchor_point": [
+    1251.2466204157688,
+    724.8506619118557
+  ],
+  "core_axis_available": false,
+  "core_axis_reason": "upper_torso_unavailable",
+  "fallback_reason": null,
+  "card_size": [
+    1800,
+    1000
+  ],
+  "card_sha256": "ee2e9faf884bd23630d0200a4c84c9dc6c72ad842651046f0ae7d06591aac0e8"
+}
