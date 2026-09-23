@@ -249,9 +249,9 @@ class AccountCommandContractTests(IsolatedAsyncioTestCase):
 
 class MainAccountCommandDelegationTests(IsolatedAsyncioTestCase):
     async def test_legacy_command_methods_only_dispatch_to_account_handler(self) -> None:
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
 
-        source = inspect.getsource(NikkePlugin)
+        source = inspect.getsource(NikkeCommandRuntime)
         tree = ast.parse(source)
         methods = {
             node.name: node

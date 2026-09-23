@@ -15,12 +15,14 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _plugin_methods() -> dict[str, ast.AsyncFunctionDef]:
-    tree = ast.parse((ROOT / "main.py").read_text(encoding="utf-8"))
+def _command_runtime_methods() -> dict[str, ast.AsyncFunctionDef]:
+    tree = ast.parse(
+        (ROOT / "adapters/astrbot/command_runtime.py").read_text(encoding="utf-8")
+    )
     plugin = next(
         node
         for node in tree.body
-        if isinstance(node, ast.ClassDef) and node.name == "NikkePlugin"
+        if isinstance(node, ast.ClassDef) and node.name == "NikkeCommandRuntime"
     )
     return {
         node.name: node
@@ -30,7 +32,7 @@ def _plugin_methods() -> dict[str, ast.AsyncFunctionDef]:
 
 
 def test_guide_and_tarot_entries_are_thin_adapter_delegates() -> None:
-    methods = _plugin_methods()
+    methods = _command_runtime_methods()
     for name in ("guide", "tarot_command", "me"):
         method = methods[name]
         logical_statements = sum(isinstance(node, ast.stmt) for node in ast.walk(method))
@@ -41,6 +43,36 @@ def test_guide_and_tarot_entries_are_thin_adapter_delegates() -> None:
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
         }
         assert "dispatch" in called_attributes, (name, called_attributes)
+
+
+def test_registered_main_command_thinly_delegates_to_runtime() -> None:
+    tree = ast.parse((ROOT / "main.py").read_text(encoding="utf-8"))
+    plugin = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "NikkePlugin"
+    )
+    command = next(node for node in plugin.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "nikke")
+    attributes = {
+        node.attr
+        for node in ast.walk(command)
+        if isinstance(node, ast.Attribute)
+    }
+    assert "command_runtime" in attributes
+    assert "nikke" in attributes
+    assert sum(isinstance(node, ast.stmt) for node in ast.walk(command)) <= 20
+
+    event = next(
+        node for node in plugin.body
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "on_nikke_poke"
+    )
+    event_attributes = {
+        node.attr
+        for node in ast.walk(event)
+        if isinstance(node, ast.Attribute)
+    }
+    assert "adapters" in event_attributes
+    assert "on_poke" in event_attributes
 
 
 def test_application_command_handlers_do_not_import_astrbot() -> None:

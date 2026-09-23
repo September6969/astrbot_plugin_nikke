@@ -18,7 +18,7 @@ class CampaignResourceWiringTests(unittest.TestCase):
         plugin.plugin_dir = Path("plugin")
         plugin.services.asset_manager = sentinel.shared_assets
 
-        with patch("astrbot_plugin_nikke.main.CampaignHistoryRenderer") as renderer:
+        with patch("astrbot_plugin_nikke.adapters.astrbot.command_runtime.CampaignHistoryRenderer") as renderer:
             plugin._build_campaign_renderer()
 
         renderer.assert_called_once_with(

@@ -70,6 +70,89 @@ class MainRefactorIntegrityTests(unittest.TestCase):
         self.assertEqual(aliases, [])
         self.assertNotIn("self.container", source)
 
+    def test_main_is_a_thin_host_shell_with_registered_entry_map(self):
+        source = (self.root / "main.py").read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        self.assertLessEqual(len(source.splitlines()), 700)
+
+        imported_modules = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imported_modules.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                imported_modules.append(node.module or "")
+        forbidden = ("features", "integrations", "ui.renderers", "httpx", "PIL", "core.storage")
+        self.assertFalse(
+            [module for module in imported_modules if module.startswith(forbidden)],
+            imported_modules,
+        )
+
+        plugin = next(
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == "NikkePlugin"
+        )
+        registered = []
+        for method in plugin.body:
+            if not isinstance(method, ast.AsyncFunctionDef):
+                continue
+            decorator_text = ast.unparse(method.decorator_list)
+            if "filter.command" not in decorator_text and "filter.event_message_type" not in decorator_text:
+                continue
+            registered.append(method.name)
+            self.assertLessEqual(
+                sum(isinstance(node, ast.stmt) for node in ast.walk(method)),
+                20,
+                method.name,
+            )
+            self.assertTrue(
+                any(
+                    isinstance(node, ast.Attribute)
+                    and isinstance(node.value, ast.Name)
+                    and node.value.id == "self"
+                    and node.attr == (
+                        "command_runtime" if method.name == "nikke" else "adapters"
+                    )
+                    for node in ast.walk(method)
+                ),
+                method.name,
+            )
+        self.assertEqual(registered, ["nikke", "on_nikke_poke"])
+        command_methods = {
+            "nikke", "tarot_command", "nikke_help", "account", "bind", "unbind",
+            "status", "me", "query", "voice_settings", "union_raid_ranking",
+            "union_raid_my", "union_raid", "roster", "progress", "character", "info",
+            "daily", "claim", "cdk", "cdk_batch", "cdk_available", "cdk_history",
+            "campaign", "event_schedule", "announcements_view",
+            "announcement_deep_rescan", "announcement_subscription", "guide", "push",
+            "admin", "group_set", "schedule", "summary", "run", "health",
+        }
+        methods = {
+            method.name: method
+            for method in plugin.body
+            if isinstance(method, ast.AsyncFunctionDef)
+        }
+        self.assertTrue(command_methods.issubset(methods))
+        for name in command_methods:
+            method = methods[name]
+            self.assertLessEqual(
+                sum(isinstance(node, ast.stmt) for node in ast.walk(method)), 20,
+                name,
+            )
+            self.assertTrue(
+                any(
+                    isinstance(node, ast.Attribute)
+                    and node.attr in {"command_runtime", "adapters", "_dispatch_account_command", "daily"}
+                    for node in ast.walk(method)
+                ),
+                name,
+            )
+        entry_map = self.root / "docs/architecture/ASTRBOT_COMMAND_ENTRY_MAP.md"
+        self.assertTrue(entry_map.is_file())
+        mapping = entry_map.read_text(encoding="utf-8")
+        for entry in ("日程", "塔罗", "announcement", "group_set", "on_nikke_poke"):
+            self.assertIn(entry, mapping)
+
     def test_daily_runner_identity_and_keys(self):
         account = {
             "game_uid": "98765432",

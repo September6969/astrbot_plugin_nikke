@@ -90,7 +90,9 @@ def test_cdk_persistent_identity_is_stable_across_qq_rebinding():
 
 @pytest.mark.parametrize("method_name", ["daily", "claim", "cdk", "cdk_batch", "cdk_available", "cdk_history"])
 def test_main_write_command_adapters_do_not_interpret_persistent_write_state(method_name):
-    method = getattr(NikkePlugin, method_name)
+    from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
+
+    method = getattr(NikkeCommandRuntime, method_name)
     tree = ast.parse(textwrap.dedent(inspect.getsource(method)))
     forbidden_names = {
         "run_key",
