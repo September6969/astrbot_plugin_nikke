@@ -136,6 +136,36 @@
     },
     "default": 4
   },
+  "nikke_db_local_root": {
+    "description": "Nikke-DB 本地 vendor 根目录",
+    "type": "string",
+    "hint": "默认由 AstrBot data root 推导为 /AstrBot/data/vendor/nikke-db；只存公开 L2D 镜像，不含账号凭据。",
+    "default": ""
+  },
+  "spine_runtime_cache_dir": {
+    "description": "Spine 运行时 PNG 缓存目录",
+    "type": "string",
+    "hint": "留空时使用 /AstrBot/data/nikke/cache/spine-rendered；缓存写入采用原子替换。",
+    "default": ""
+  },
+  "spine_runtime_meta_dir": {
+    "description": "Spine 运行时 metadata 缓存目录",
+    "type": "string",
+    "hint": "留空时使用 /AstrBot/data/nikke/cache/spine-meta；记录必须绑定真实像素 hash 与尺寸。",
+    "default": ""
+  },
+  "spine_auto_warm_enabled": {
+    "description": "角色立绘缺失时启用后台 warm",
+    "type": "bool",
+    "hint": "请求线程立即 fallback，后台按 render/costume/source/runtime/animation key 去重。",
+    "default": true
+  },
+  "nikke_db_remote_fetch_enabled": {
+    "description": "允许后台从公开 Nikke-DB 补齐缺失 bundle",
+    "type": "bool",
+    "hint": "仅允许 raw.githubusercontent.com 白名单 HTTPS；不会携带 Cookie、token 或私有 header。",
+    "default": true
+  },
   "voice_dynamic_enabled": {
     "description": "启用官方动态语音",
     "type": "bool",

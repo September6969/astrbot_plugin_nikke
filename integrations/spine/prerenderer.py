@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import logging
+import json
 import math
 import re
 import queue
@@ -274,6 +275,10 @@ class SpineJob:
     bundle_urls: Mapping[str, str] | None = None
     animation: str = "idle"
     skin: str | None = None
+    # 用于后台 provenance/metadata，不参与身份猜测。
+    resource_id: str | None = None
+    costume_id: str | int | None = None
+    source_identity: str | None = None
     # 总预算从入队时开始计算，覆盖排队等待和后续运行时阶段。
     budget_seconds: float | None = None
     enqueued_at: float = field(default_factory=time.monotonic, init=False)
@@ -518,12 +523,18 @@ class SpinePreRenderer:
         *,
         runtime: SpineRuntimeBackend | Mapping[str, SpineRuntimeBackend] | None = None,
         fetcher: SpineBundleFetcher | None = None,
+        prerender_dir: str | Path | None = None,
+        bundle_resolver: Callable[[SpineJob], SpineBundle | object | None] | None = None,
+        metadata_writer: Callable[[SpineJob, SpineBundle, Image.Image], None] | None = None,
         max_workers: int = 1,
         max_queue_size: int = 20,
     ):
         self.cache_dir = Path(cache_dir)
-        self.prerender_dir = self.cache_dir / "portraits"
+        self.prerender_dir = Path(prerender_dir) if prerender_dir is not None else self.cache_dir / "portraits"
         self.prerender_dir.mkdir(parents=True, exist_ok=True)
+        self.render_index_path = self.prerender_dir / "index.json"
+        self.bundle_resolver = bundle_resolver
+        self.metadata_writer = metadata_writer
         self._runtimes: dict[str, SpineRuntimeBackend] = {}
         if isinstance(runtime, Mapping):
             for ver, rt in runtime.items():
@@ -612,6 +623,8 @@ class SpinePreRenderer:
 
     def enqueue(self, job: SpineJob) -> bool:
         """按 key 去重并启动后台预渲染；不可用 runtime 时直接返回 False。"""
+        # runtime_version 为空时允许先入队；bundle resolver 会在后台根据
+        # skeleton 的真实 major.minor 决定 runtime，绝不在请求线程猜版本。
         if not self.is_available(job.runtime_version):
             return False
         self.start()
@@ -683,17 +696,25 @@ class SpinePreRenderer:
 
     def handle_job(self, job: SpineJob) -> None:
         """队列工作线程执行回调。"""
-        if job.runtime_version is None or job.runtime_version == SPINE_VERSION_UNKNOWN:
-            logger.info(
-                "Spine 任务 [%s] 版本未知，标记跳过",
-                sanitize_log_text(job.cache_key, max_length=120),
-            )
-            if job.callback:
-                job.callback(None)
-            return
-
         bundle = job.bundle
-        if bundle is None and job.bundle_urls:
+        runtime_version = job.runtime_version
+        if bundle is None and self.bundle_resolver is not None:
+            try:
+                resolved = self.bundle_resolver(job)
+                if resolved is not None and hasattr(resolved, "as_spine_bundle"):
+                    runtime_version = getattr(resolved, "runtime_version", runtime_version)
+                    bundle = resolved.as_spine_bundle()
+                elif isinstance(resolved, SpineBundle):
+                    bundle = resolved
+            except Exception as exc:
+                logger.warning(
+                    "Spine 本地镜像/warm 解析失败 [%s]: %s",
+                    sanitize_log_text(job.cache_key, max_length=120),
+                    safe_exception_message(exc),
+                )
+        # 配置了正式 vendor resolver 后，失败必须 fail closed；不能再绕过
+        # remote 开关回落到旧 fetcher，避免同一个任务出现两套网络路径。
+        if bundle is None and job.bundle_urls and self.bundle_resolver is None:
             try:
                 bundle_key = job.character_id or job.cache_key
                 if not job.character_id and job.animation and bundle_key.endswith(f"_{job.animation}"):
@@ -701,7 +722,14 @@ class SpinePreRenderer:
                 bundle = self.fetcher.fetch(job.bundle_urls, bundle_key, budget_seconds=job.budget_seconds)
             except SpineRenderError as exc:
                 logger.warning("Spine bundle fallback [%s]: %s", sanitize_log_text(job.cache_key, max_length=120), exc)
-        result = self.render_full_body(bundle, job.runtime_version, animation=job.animation, skin=job.skin) if bundle else None
+        if runtime_version is None or runtime_version == SPINE_VERSION_UNKNOWN:
+            logger.info(
+                "Spine 任务 [%s] 版本未知，标记跳过",
+                sanitize_log_text(job.cache_key, max_length=120),
+            )
+            result = None
+        else:
+            result = self.render_full_body(bundle, runtime_version, animation=job.animation, skin=job.skin) if bundle else None
         if result is not None:
             output_path = self.prerender_dir / f"{job.cache_key}.png"
             try:
@@ -712,6 +740,37 @@ class SpinePreRenderer:
                 logger.error("保存 Spine 预渲染缓存失败: %s", safe_exception_message(exc))
             finally:
                 temporary.unlink(missing_ok=True)
+            self._record_render_index(job, runtime_version, output_path)
+            if self.metadata_writer is not None and bundle is not None:
+                try:
+                    self.metadata_writer(job, bundle, result)
+                except Exception as exc:
+                    logger.warning("Spine runtime metadata 写入失败: %s", safe_exception_message(exc))
 
         if job.callback:
             job.callback(result)
+
+    def _record_render_index(self, job: SpineJob, runtime_version: str | float | None, output_path: Path) -> None:
+        """记录最新缓存指针；损坏/中断写入不会覆盖旧 index。"""
+        try:
+            current = json.loads(self.render_index_path.read_text(encoding="utf-8")) if self.render_index_path.is_file() else {}
+        except (OSError, ValueError):
+            current = {}
+        if not isinstance(current, dict):
+            current = {}
+        current[job.character_id] = {
+            "cache_key": job.cache_key,
+            "png": output_path.name,
+            "runtime_version": str(runtime_version) if runtime_version is not None else None,
+            "animation": job.animation,
+            "skin": job.skin,
+            "source_identity": job.source_identity,
+        }
+        temporary = self.render_index_path.with_name(f".{self.render_index_path.name}.{threading.get_ident()}.tmp")
+        try:
+            temporary.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
+            temporary.replace(self.render_index_path)
+        except OSError as exc:
+            logger.warning("Spine runtime index 写入失败: %s", safe_exception_message(exc))
+        finally:
+            temporary.unlink(missing_ok=True)

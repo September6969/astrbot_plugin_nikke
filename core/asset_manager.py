@@ -33,6 +33,7 @@ except ImportError:
     from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver, VisualAssetResolution
 from .privacy import safe_exception_message, sanitize_log_text
 from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
+from astrbot_plugin_nikke.integrations.spine.runtime_meta import SpineRuntimeMetadataStore
 from astrbot_plugin_nikke.features.character.skill_icon_resolver import SkillIconResolver
 from astrbot_plugin_nikke.integrations.spine.prerenderer import SpineBundleFetcher, SpineJob, SpinePreRenderer
 from astrbot_plugin_nikke.features.character.registries.static import StaticDataRegistry
@@ -91,6 +92,11 @@ class AssetManager:
         spine_budget_seconds: float = 20.0,
         spine_manifest_path: str | Path | None = None,
         spine_rendered_dir: str | Path | None = None,
+        nikke_db_local_root: str | Path | None = None,
+        spine_runtime_cache_dir: str | Path | None = None,
+        spine_runtime_meta_dir: str | Path | None = None,
+        spine_auto_warm_enabled: bool = True,
+        nikke_db_remote_fetch_enabled: bool | None = None,
     ):
         self.cache_dir = Path(cache_dir)
         self.asset_dir = Path(asset_dir)
@@ -111,9 +117,33 @@ class AssetManager:
         self._spine_wait_events: dict[str, list[threading.Event]] = {}
         if isinstance(spine_budget_seconds, bool) or not isinstance(spine_budget_seconds, (int, float)) or spine_budget_seconds <= 0:
             raise ValueError("Spine 预渲染预算必须是正数")
-        self.spine_renderer = spine_renderer or SpinePreRenderer(self.cache_dir)
+        self.spine_runtime_cache_dir = (
+            Path(spine_runtime_cache_dir) if spine_runtime_cache_dir is not None else self.cache_dir / "portraits"
+        )
+        self.spine_runtime_meta_dir = (
+            Path(spine_runtime_meta_dir) if spine_runtime_meta_dir is not None else self.cache_dir / "spine-meta"
+        )
+        self.spine_auto_warm_enabled = bool(spine_auto_warm_enabled)
+        self.nikke_db_remote_fetch_enabled = self.remote if nikke_db_remote_fetch_enabled is None else bool(nikke_db_remote_fetch_enabled)
+        self.spine_renderer = spine_renderer or SpinePreRenderer(
+            self.cache_dir,
+            prerender_dir=self.spine_runtime_cache_dir,
+        )
         self.spine_budget_seconds = float(spine_budget_seconds)
-        self.nikke_db = NikkeDbProvider(self.cache_dir, self.asset_dir, remote=self.remote)
+        self.nikke_db = NikkeDbProvider(
+            self.cache_dir,
+            self.asset_dir,
+            remote=self.nikke_db_remote_fetch_enabled,
+            local_root=nikke_db_local_root,
+        )
+        self.runtime_metadata_store = SpineRuntimeMetadataStore(self.spine_runtime_meta_dir)
+        try:
+            from astrbot_plugin_nikke.features.character.face_anchor import configure_runtime_metadata_dir
+
+            configure_runtime_metadata_dir(self.spine_runtime_meta_dir)
+        except (ImportError, OSError, ValueError):
+            logger.debug("Spine runtime metadata 目录未接入 face-anchor 读取器")
+        self.spine_renderer.bundle_resolver = self._resolve_spine_job_bundle
         self.spine_manifest_path = Path(spine_manifest_path) if spine_manifest_path is not None else None
         self.spine_rendered_dir = Path(spine_rendered_dir) if spine_rendered_dir is not None else None
         self._spine_manifest: dict[str, Any] = {}
@@ -601,6 +631,16 @@ class AssetManager:
             animation=animation,
         )
 
+    def _resolve_spine_job_bundle(self, job: SpineJob):
+        """后台 warm 的唯一 bundle 入口；请求线程不会触发这里。"""
+        if not job.bundle_urls:
+            return None
+        return self.nikke_db.ensure_spine_bundle(
+            job.character_id,
+            dict(job.bundle_urls),
+            allow_remote=self.nikke_db_remote_fetch_enabled,
+        )
+
     def _get_spine_portrait(
         self,
         char_id: str,
@@ -652,17 +692,37 @@ class AssetManager:
             if image is not None:
                 return image
 
-        # 2. 兼容旧的版本化本地 PNG，但直接读取文件，不能调用 Worker cache API。
+        # 2. 读取持久化 runtime cache；这里只读 PNG，不调用 Worker/网络。
         runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
         if runtime_version is not None and runtime_version != "SPINE_VERSION_UNKNOWN":
             animation = IdleAnimationResolver.resolve_for_asset(char_id)
             if animation:
-                cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
+                # 新缓存键绑定 source identity；旧版本键仍保留读取兼容，避免
+                # 升级后丢失已经生成的 portrait cache。
+                source_version = self.nikke_db.source_version(char_id, allow_remote=False)
+                cache_keys = [
+                    self.nikke_db.compute_cache_key(
+                        char_id,
+                        costume_id,
+                        source_version=source_version,
+                        runtime_version=str(runtime_version),
+                        renderer_version=self.spine_renderer.RENDERER_VERSION,
+                        animation=animation,
+                    ),
+                    self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation),
+                ]
+                paths = [
+                    self.spine_runtime_cache_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
+                    for cache_key in dict.fromkeys(cache_keys)
+                ]
                 try:
-                    cached_path = self.spine_renderer.prerender_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
+                    for cache_key in dict.fromkeys(cache_keys):
+                        renderer_path = self.spine_renderer.prerender_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
+                        if renderer_path not in paths:
+                            paths.append(renderer_path)
                 except (AttributeError, OSError, ValueError):
-                    cached_path = None
-                if cached_path is not None:
+                    pass
+                for cached_path in paths:
                     cached = self._load_spine_image(cached_path)
                     if cached is not None:
                         return cached
@@ -684,6 +744,8 @@ class AssetManager:
             if image is not None:
                 return image
             logger.warning("STATIC_SPINE_ASSET_MISSING: %s (costume: %s)", char_id, costume_id)
+            if self.spine_auto_warm_enabled:
+                self.schedule_spine_portrait_warm(resource_id, costume_id)
         return self.fallback("portrait")
 
     def get_lineup_portrait(
@@ -764,19 +826,27 @@ class AssetManager:
             boss_id=boss_id, icon_id=icon_id, monster_model_id=monster_model_id, boss_name=boss_name
         )
 
-    def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
-        """兼容旧调用名；正式 backend 仍受 runtime、版本和队列预算约束。"""
-        char_id = self.nikke_db.resolve_spine_asset_id(resource_id, costume_id, allow_remote=False)
+    def schedule_spine_portrait_warm(self, resource_id, costume_id: int | str | None = None) -> bool:
+        """正式的 on-demand warm 入口；缺图立即 fallback，后台按 key 去重。"""
+        char_id = self.nikke_db.resolve_render_id(resource_id, costume_id)
         if char_id == "missing":
             return False
         runtime_version = self.nikke_db.resolve_spine_version(char_id, allow_remote=False)
         urls = self.nikke_db.resolve_spine_bundle_urls(char_id, action="setup")
-        if runtime_version is None or not urls or not self.spine_renderer.is_available(runtime_version):
+        if not urls or not self.spine_renderer.is_available(runtime_version):
             return False
         animation = IdleAnimationResolver.resolve_for_asset(char_id)
         if not animation:
             return False
-        cache_key = self._spine_cache_key(char_id, costume_id, runtime_version, animation=animation)
+        source_version = self.nikke_db.source_version(char_id, allow_remote=False)
+        cache_key = self.nikke_db.compute_cache_key(
+            char_id,
+            costume_id,
+            source_version=source_version,
+            runtime_version=str(runtime_version) if runtime_version is not None else None,
+            renderer_version=self.spine_renderer.RENDERER_VERSION,
+            animation=animation,
+        )
         if self.spine_renderer.cached_portrait(cache_key) is not None:
             return False
         return self.spine_renderer.enqueue(
@@ -786,9 +856,16 @@ class AssetManager:
                 runtime_version=runtime_version,
                 bundle_urls=urls,
                 animation=animation,
+                resource_id=str(resource_id),
+                costume_id=costume_id,
+                source_identity=source_version,
                 budget_seconds=self.spine_budget_seconds,
             )
         )
+
+    def enqueue_experimental_spine(self, resource_id, costume_id: int | str | None = None) -> bool:
+        """旧调用名兼容别名；新代码使用 schedule_spine_portrait_warm。"""
+        return self.schedule_spine_portrait_warm(resource_id, costume_id)
 
     def get_equipment_icon(self, slot, equipment_id) -> Image.Image:
         resource = self.registry.resolve("equipment", equipment_id)

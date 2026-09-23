@@ -13,7 +13,12 @@ from .worker_caller import SpineWorkerConfig, SpineWorkerRuntime
 logger = logging.getLogger("nikke.spine.config")
 
 
-def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None = None) -> SpinePreRenderer:
+def build_spine_renderer(
+    cache_dir: str | Path,
+    config: Mapping[str, Any] | None = None,
+    *,
+    prerender_dir: str | Path | None = None,
+) -> SpinePreRenderer:
     """只有明确配置且存在 worker 时启用 runtime，否则使用中性占位图。"""
 
     values = config if isinstance(config, Mapping) else {}
@@ -22,15 +27,15 @@ def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None
     root = Path(cache_dir)
     bundle_root = root / "spine-bundles"
     if worker_path is None:
-        return SpinePreRenderer(root)
+        return SpinePreRenderer(root, prerender_dir=prerender_dir)
     try:
         worker_path = worker_path.resolve()
     except OSError:
         logger.warning("Spine worker 路径无法解析，使用中性占位图")
-        return SpinePreRenderer(root)
+        return SpinePreRenderer(root, prerender_dir=prerender_dir)
     if not worker_path.is_file():
         logger.warning("Spine worker 不存在，使用中性占位图")
-        return SpinePreRenderer(root)
+        return SpinePreRenderer(root, prerender_dir=prerender_dir)
     version = str(values.get("spine_runtime_version", "4.0")).strip() or "4.0"
     timeout = values.get("spine_worker_timeout", 4)
     runtimes: dict[str, SpineWorkerRuntime] = {}
@@ -68,4 +73,5 @@ def build_spine_renderer(cache_dir: str | Path, config: Mapping[str, Any] | None
         root,
         runtime=runtimes,
         fetcher=SpineBundleFetcher(bundle_root),
+        prerender_dir=prerender_dir,
     )
