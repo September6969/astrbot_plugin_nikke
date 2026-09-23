@@ -4,15 +4,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Protocol
 
 from .canonical_models import (
-    EventStatus,
     QueryContext,
-    resolve_event_status,
 )
+from .time_rules import CalendarTimeRules
 
 
 class CalendarQueryService(Protocol):
@@ -176,23 +175,7 @@ class CalendarApplication:
     @staticmethod
     def normalize_horizon(value: Any) -> int:
         """只接受 7、14、30 天；服务未装配时仍可返回准确用法错误。"""
-        if value is None or value == "":
-            return 14
-        if type(value) is bool:
-            raise ValueError("日程范围只支持 7、14、30 天")
-        if type(value) is int:
-            if value in (7, 14, 30):
-                return value
-            raise ValueError("日程范围只支持 7、14、30 天")
-        if isinstance(value, str):
-            normalized = value.strip()
-            if not normalized:
-                return 14
-            if normalized.isascii() and normalized.isdecimal():
-                days = int(normalized)
-                if days in (7, 14, 30):
-                    return days
-        raise ValueError("日程范围只支持 7、14、30 天")
+        return CalendarTimeRules.normalize_horizon(value)
 
     def _resolve_background_path(
         self, context: QueryContext, horizon_days: int
@@ -200,17 +183,11 @@ class CalendarApplication:
         """按 Operations Feed 优先级选取已缓存背景，不触发缓存同步。"""
         if self._calendar is None:
             return None
-        active: list[Any] = []
-        upcoming: list[Any] = []
-        horizon = context.now + timedelta(days=horizon_days)
-        for event in context.events:
-            status = resolve_event_status(event, context.now)
-            if status == EventStatus.ACTIVE:
-                active.append(event)
-            elif status == EventStatus.UPCOMING and (
-                event.start_at is None or event.start_at <= horizon
-            ):
-                upcoming.append(event)
+        groups = CalendarTimeRules.classify_events(
+            context.events, context.now, horizon_days
+        )
+        active = groups.active_including_soon
+        upcoming = groups.upcoming
 
         candidate_ids: list[str] = []
         primary_categories = {"event", "solo_raid", "union_raid"}

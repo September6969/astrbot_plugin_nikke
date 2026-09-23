@@ -11,6 +11,9 @@
 
 from __future__ import annotations
 
+from typing import Any
+
+from .application import CalendarApplication
 from astrbot_plugin_nikke.features.calendar.schedule_service import (
     ScheduleService,
     CAT_LABELS,
@@ -19,8 +22,11 @@ from astrbot_plugin_nikke.features.calendar.schedule_service import (
 
 
 class CalendarService(ScheduleService):
-    """向后兼容的 CalendarService 类，完全由底层 ScheduleService 驱动。"""
-    pass
+    """日程服务及与其生命周期绑定的共享应用查询入口。"""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.application = CalendarApplication(self)
 
 
 __all__ = ["CalendarService", "CAT_LABELS", "CST"]

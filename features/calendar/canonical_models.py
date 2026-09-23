@@ -20,25 +20,14 @@ from enum import Enum
 import hashlib
 from typing import Any, Sequence
 
-class TimePrecision(str, Enum):
-    EXACT = "EXACT"
-    DATE_ONLY = "DATE_ONLY"
-    INFERRED = "INFERRED"
-    UNKNOWN = "UNKNOWN"
-
-
-CST = timezone(timedelta(hours=8))
-
-from .models import CalendarActivity, _aware_utc
-
-
-class EventStatus(str, Enum):
-    UPCOMING = "UPCOMING"
-    ACTIVE = "ACTIVE"
-    ENDED = "ENDED"
-    UNKNOWN = "UNKNOWN"
-    CANCELLED = "CANCELLED"
-    INVALID = "INVALID"
+from .models import (
+    CalendarActivity,
+    CST,
+    EventStatus,
+    TimePrecision,
+    _aware_utc,
+    resolve_event_status,
+)
 
 
 class Freshness(str, Enum):
@@ -716,80 +705,6 @@ class CanonicalEvent:
             fingerprint=str(data.get("fingerprint", "")),
             version=int(data.get("version", 1)),
         )
-
-
-def resolve_event_status(
-    event: CanonicalEvent | CalendarActivity,
-    now: datetime | None = None,
-    evidence: list[FieldEvidence] | None = None,
-) -> str:
-    """统一领域状态计算函数 (Runtime Status Resolver)。
-
-    任何快照中保存的 status 均不是静态真值，必须在查询时刻通过本函数动态计算。
-
-    规则优先级：
-    1. 非法时间区间 (start_at >= end_at) -> INVALID / UNKNOWN
-    2. 明确取消 (is_cancelled) -> CANCELLED
-    3. start_at=None, end_at=None -> UNKNOWN
-    4. start_at=None, end_at=future:
-       - 存在独立 started evidence -> 若 now >= end_at 为 ENDED，否则 ACTIVE
-       - 否则 -> UNKNOWN (严禁仅由 end_at 在未来反推已开始)
-    5. start_at 在未来 (now < start_at) -> UPCOMING
-    6. start_at 在过去，end_at 为 None -> ACTIVE
-    7. now >= end_at -> ENDED
-    8. start_at <= now < end_at -> ACTIVE
-    """
-    current = _aware_utc(now) if now else datetime.now(timezone.utc)
-
-    # 1. 非法区间判断
-    if hasattr(event, "is_valid_interval") and not event.is_valid_interval:
-        return EventStatus.INVALID.value
-
-    start = getattr(event, "start_at", None)
-    end = getattr(event, "end_at", None)
-    if start and end and end <= start:
-        return EventStatus.INVALID.value
-
-    # 2. 取消判断
-    if getattr(event, "is_cancelled", False):
-        return EventStatus.CANCELLED.value
-
-    # 检查额外证据中的取消
-    if evidence:
-        for ev in evidence:
-            if ev.is_cancelled:
-                return EventStatus.CANCELLED.value
-
-    # 3. 双 None
-    if start is None and end is None:
-        return EventStatus.UNKNOWN.value
-
-    # 4. 开始时间未知
-    has_started = getattr(event, "has_started_evidence", False)
-    if not has_started and evidence:
-        has_started = any(ev.is_started_evidence for ev in evidence)
-
-    if start is None:
-        if has_started:
-            if end is not None and current >= end:
-                return EventStatus.ENDED.value
-            return EventStatus.ACTIVE.value
-        return EventStatus.UNKNOWN.value
-
-    # 5. 未到开始时间
-    if current < start:
-        return EventStatus.UPCOMING.value
-
-    # 6. 开始时间在过去，无截止时间
-    if end is None:
-        return EventStatus.ACTIVE.value
-
-    # 7. 超过截止时间
-    if current >= end:
-        return EventStatus.ENDED.value
-
-    # 8. 进行中
-    return EventStatus.ACTIVE.value
 
 
 def active_sort_key(event: CanonicalEvent, now: datetime | None = None) -> tuple[int, datetime, str]:

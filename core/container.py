@@ -256,7 +256,7 @@ def create_container(
     announcements = AnnouncementService(data_dir / "announcements")
     announcement_delivery = AnnouncementDelivery(store)
     calendar = CalendarService(data_dir / "calendar", announcement_service=announcements)
-    calendar_application = CalendarApplication(calendar)
+    calendar_application = calendar.application
     announcement_application = AnnouncementApplication(
         announcements=announcements,
         delivery=announcement_delivery,
