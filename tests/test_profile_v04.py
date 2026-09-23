@@ -21,6 +21,7 @@ from astrbot_plugin_nikke.features.profile.models import (
     MemorialCountData,
     ProfileDashboardData,
     RecycleResearchData,
+    SimulationRoomDailyRecord,
 )
 from astrbot_plugin_nikke.features.character.registries.research import research_zh_name
 
@@ -40,25 +41,30 @@ class ProfileV04UnitTests(unittest.TestCase):
         self.assertEqual(format_compact_number("invalid"), "—")
 
     def test_memorial_category_registry(self):
+        registry = MemorialCategoryRegistry()
         raw_memorials = [
-            {"category": "HandWriting", "count": 94},
-            {"category": "CallLog", "count": 39},
-            {"category": "Data", "count": 80},
-            {"category": "OldTales", "count": 8},
-            {"category": "UnbreakableSphere", "count": 4},
+            MemorialCountData("HandWriting", 94),
+            MemorialCountData("CallLog", 39),
+            MemorialCountData("Data", 80),
+            MemorialCountData("OldTales", 8),
+            MemorialCountData("UnbreakableSphere", 4),
         ]
-        summary = MemorialCategoryRegistry.summarize_memorials(raw_memorials, jukebox_count="180")
-        self.assertEqual(summary["手机"], 94)
-        self.assertEqual(summary["通话记录"], 39)
-        self.assertEqual(summary["数据资料"], 80 + 8 + 4)
-        self.assertEqual(summary["BGM"], 180)
+        summary, partial = registry.summarize(raw_memorials, jukebox_count=180)
+        self.assertFalse(partial)
+        self.assertEqual(
+            [(item.display_name, item.count) for item in summary],
+            [("手机", 94), ("通话记录", 39), ("数据资料", 92), ("BGM", 180)],
+        )
 
-        # Empty and malformed safety
-        empty_summary = MemorialCategoryRegistry.summarize_memorials(None, jukebox_count=None)
-        self.assertEqual(empty_summary["手机"], 0)
-        self.assertEqual(empty_summary["通话记录"], 0)
-        self.assertEqual(empty_summary["数据资料"], 0)
-        self.assertEqual(empty_summary["BGM"], 0)
+        empty_summary, empty_partial = registry.summarize(None, jukebox_count=None)
+        self.assertIsNone(empty_summary)
+        self.assertFalse(empty_partial)
+
+        unknown_summary, unknown_partial = registry.summarize(
+            [MemorialCountData("Unmapped", 8)], jukebox_count=None
+        )
+        self.assertIsNone(unknown_summary)
+        self.assertTrue(unknown_partial)
 
     def test_parse_storage_fullness(self):
         self.assertEqual(_parse_storage_fullness(0), 0.0)
@@ -152,11 +158,18 @@ class ProfileV04RendererTests(unittest.TestCase):
             dispatch_completed=3,
             dispatch_total=15,
             tower_daily_remaining=0,
-            sim_room_daily_record="5-C",
+            sim_room_daily_record=SimulationRoomDailyRecord(
+                chapter=3, difficulty=5, raw={"chapter": 3, "difficulty": 5}
+            ),
             sim_room_overclock_subseason=27,
             sim_room_overclock_season=27,
             currencies=currencies,
-            memorial_summary_dict={"手机": 94, "通话记录": 39, "数据资料": 92, "BGM": 180},
+            memorial_summary=[
+                MemorialCountData("phone", 94, "手机", "phone"),
+                MemorialCountData("call_log", 39, "通话记录", "call_log"),
+                MemorialCountData("data", 92, "数据资料", "data"),
+                MemorialCountData("bgm", 180, "BGM", "bgm"),
+            ],
             recycle_room_researches=[
                 RecycleResearchData("1001", 120, 0, "General", "Personal"),
                 RecycleResearchData("1101", 80, 50, "Attacker", "Class"),
@@ -183,13 +196,11 @@ class ProfileV04RendererTests(unittest.TestCase):
             self.assertEqual(
                 titles,
                 [
-                    "BASIC INFO / 基本信息",
-                    "CAMPAIGN / 主线进度",
+                    "BASIC + CAMPAIGN / 基本信息与主线",
                     "TODAY / 今日状态",
-                    "OUTPOST / 前哨基地",
-                    "ROSTER / 妮姬统计",
-                    "COLLECTION / 收藏",
+                    "OUTPOST + ROSTER / 前哨与妮姬",
                     "RECYCLE ROOM / 循环室",
+                    "COLLECTION / 遗失物品",
                     "RESOURCES / 我的资源",
                     "MORE / 更多数据",
                 ],

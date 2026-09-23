@@ -551,10 +551,6 @@ class ProfileBuilder:
                 if isinstance(t, dict)
             )
 
-        memorial_summary_dict = MemorialCategoryRegistry.summarize_memorials(
-            outpost.get("memorial_counts"), jukebox_count
-        )
-
         return ProfileDashboardData(
             commander_name=commander_name,
             area_id=area_id,
@@ -604,5 +600,4 @@ class ProfileBuilder:
             currencies=currencies,
             currencies_partial=currencies_partial,
             daily_partial=daily_partial,
-            memorial_summary_dict=memorial_summary_dict,
         )

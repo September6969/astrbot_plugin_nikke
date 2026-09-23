@@ -194,9 +194,6 @@ class AssetManager:
     def resolve_boss_asset(self, **kwargs):
         return self._characters.resolve_boss_asset(**kwargs)
 
-    def enqueue_experimental_spine(self, resource_id, costume_id=None) -> bool:
-        return self._spine.enqueue_experimental(resource_id, costume_id)
-
     def get_equipment_icon(self, slot, equipment_id):
         return self._icons.get_equipment_icon(slot, equipment_id)
 

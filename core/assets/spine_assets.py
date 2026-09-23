@@ -10,7 +10,7 @@ from typing import Any, Callable
 from PIL import Image
 
 from ...integrations.spine.idle_resolver import IdleAnimationResolver
-from ...integrations.spine.prerenderer import SpineBundleFetcher, SpineJob
+from ...integrations.spine.prerenderer import SpineBundleFetcher
 from .environment import AssetEnvironment
 from .image_codec import AssetImageCodec
 from .models import AssetResult
@@ -100,35 +100,6 @@ class SpineAssetService:
                 return image
             logger.warning("STATIC_SPINE_ASSET_MISSING: %s (costume: %s)", char_id, costume_id)
         return self.env.fallback("portrait")
-
-    def enqueue_experimental(self, resource_id, costume_id: int | str | None = None) -> bool:
-        """正式 backend 仍受 runtime、版本和队列预算约束。"""
-        db = self.env.nikke_db
-        char_id = db.resolve_spine_asset_id(resource_id, costume_id, allow_remote=False)
-        if char_id == "missing":
-            return False
-        runtime_version = db.resolve_spine_version(char_id, allow_remote=False)
-        urls = db.resolve_spine_bundle_urls(char_id, action="setup")
-        renderer = self.env.spine_renderer
-        if runtime_version is None or not urls or not renderer.is_available(runtime_version):
-            return False
-        animation = IdleAnimationResolver.resolve_for_asset(char_id)
-        if not animation:
-            return False
-        cache_key = self.cache_key(char_id, costume_id, runtime_version, animation=animation)
-        if renderer.cached_portrait(cache_key) is not None:
-            return False
-        return renderer.enqueue(
-            SpineJob(
-                cache_key=cache_key,
-                character_id=char_id,
-                runtime_version=runtime_version,
-                bundle_urls=urls,
-                animation=animation,
-                budget_seconds=self.env.spine_budget_seconds,
-            )
-        )
-
 
 class CharacterAssetService:
     def __init__(

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Backward compatibility shim for ServiceContainer and create_container."""
+"""ServiceContainer 公开兼容导入壳；计划在下一个 major 版本（1.0.0）移除。"""
 import importlib
 import sys
 import warnings

@@ -1,5 +1,7 @@
 # NIKKE Luna Max 本地交付与后续运行门槛
 
+> 历史快照说明：本记录下方的 `LOCAL_IMPLEMENTATION_COMPLETE` 只对应旧 `plan_luna_max` 运行及其修复后 checkpoint，不代表 `full_repository_refactor_v2` 已完成。R21（2026-09-23）复核确认 Profile 命令现已唯一走 `ProfileCommandHandler` → `ProfileApplication`；`profile_application_enabled` 不存在于当前配置或入口代码，兼容回退路径已收敛。旧条目中“默认关闭开关/保留回退”的描述不适用于当前工作树。
+
 ## 当前结论
 
 当前状态：`LOCAL_IMPLEMENTATION_COMPLETE`（审核后 A74 重工及最终本地回归已完成）。

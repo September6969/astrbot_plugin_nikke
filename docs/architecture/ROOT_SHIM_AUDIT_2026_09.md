@@ -152,3 +152,8 @@
 | **Phase 4** | PR B: 根目录终态收敛 (清理剩余 29 个存根) | 29 | 已完成并经回归测试验证 | 942 passed, 2 skipped, 0 failed |
 | **终态** | 根目录只保留 4 个核心入口文件 | 4 (`main.py`, `__init__.py`, `_version.py`, `container.py`) | 达到目标终态 | 4/4 仅留必要入口，`FORBIDDEN_LEGACY_ROOT_MODULES` 全绿 |
 
+# R21 后续复核（2026-09-23）
+
+- 删除 `experimental/spine_prerenderer.py` 及其空包 `experimental/__init__.py`：全仓 Python/测试/脚本/扩展/动态导入审计仅发现模块自身和历史审计/验收文档提及；正式唯一实现为 `integrations/spine/prerenderer.py`。`enqueue_experimental_spine()` 与 `SpineAssetService.enqueue_experimental()` 仅互相转发，没有生产或测试调用点，已随之删除。静态读取与正式受控预渲染实现保留。
+- 删除 `ProfileDashboardData.memorial_summary_dict`、`MemorialCategoryRegistry.summarize_memorials()` 以及 renderer 对 dict 摘要和字符串模拟室记录的分支。消费者审计仅发现 builder/renderer 之间的旧 DTO 通路和 `tests/test_profile_v04.py` 手工夹具；builder 已同时产出结构化 `memorial_summary`，现由唯一结构化 `summarize()` 提供展示摘要并保留未知/部分语义。
+- 保留 `container.py` 根级公开转发 shim：代码显式标注 deprecated 且发出 `DeprecationWarning`；唯一目的为历史 `ServiceContainer`/`create_container` 导入兼容，不重复装配。正式 owner 是 `core/container.py`；在 `tests/test_repository_integrity.py` 作为唯一显式例外验证，计划于 `1.0.0` 移除。仓库外当前使用量不可由本地审计证明，因此不宣称有活跃外部调用方。
