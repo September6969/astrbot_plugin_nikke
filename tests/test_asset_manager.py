@@ -1,3 +1,4 @@
+import hashlib
 import io
 import json
 import tempfile
@@ -558,7 +559,24 @@ class AssetManagerTests(unittest.TestCase):
             rendered_dir = assets / "spine-rendered"
             rendered_dir.mkdir(parents=True)
             # 伪造已持久化预渲染好的 Crown c330.png
-            Image.new("RGBA", (150, 250), "gold").save(rendered_dir / "c330.png")
+            image_path = rendered_dir / "c330.png"
+            Image.new("RGBA", (150, 250), "gold").save(image_path)
+            (assets / "spine_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "characters": {
+                            "c330": {
+                                "png_file": "c330.png",
+                                "sha256": hashlib.sha256(image_path.read_bytes()).hexdigest(),
+                                "width": 150,
+                                "height": 250,
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
 
             manager = AssetManager(cache, assets, remote=True)
             try:
@@ -567,6 +585,59 @@ class AssetManagerTests(unittest.TestCase):
                     self.assertEqual(portrait.size, (150, 250))
                     # 绝对不能触发网络
                     stream.assert_not_called()
+            finally:
+                manager.close()
+
+    def test_undeclared_bundled_and_legacy_cache_pngs_cannot_bypass_manifest(self):
+        for declare_other_id in (False, True):
+            with self.subTest(declare_other_id=declare_other_id), tempfile.TemporaryDirectory() as td:
+                cache = Path(td) / "cache"
+                assets = Path(td) / "assets"
+                bundled = assets / "spine-rendered"
+                legacy_cache = cache / "spine-rendered"
+                legacy_portraits = cache / "portraits"
+                for directory in (bundled, legacy_cache, legacy_portraits):
+                    directory.mkdir(parents=True)
+                Image.new("RGBA", (11, 13), "gold").save(bundled / "c330.png")
+                Image.new("RGBA", (17, 19), "red").save(legacy_cache / "c330.png")
+                Image.new("RGBA", (23, 29), "blue").save(legacy_portraits / "c330.png")
+                if declare_other_id:
+                    (assets / "spine_manifest.json").write_text(
+                        json.dumps({"schema_version": 1, "characters": {"c010": {"png_file": "missing.png", "sha256": "0" * 64}}}),
+                        encoding="utf-8",
+                    )
+
+                manager = AssetManager(cache, assets, remote=False)
+                try:
+                    portrait = manager.get_character_portrait(5065, "330")
+                    self.assertEqual(portrait.size, (600, 900))
+                finally:
+                    manager.close()
+
+    def test_declared_invalid_spine_manifest_does_not_fall_back_to_legacy_png(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td) / "cache"
+            assets = Path(td) / "assets"
+            (assets / "spine-rendered").mkdir(parents=True)
+            (cache / "spine-rendered").mkdir(parents=True)
+            Image.new("RGBA", (11, 13), "gold").save(assets / "spine-rendered" / "c330.png")
+            Image.new("RGBA", (17, 19), "red").save(cache / "spine-rendered" / "c330.png")
+            (assets / "spine_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "characters": {
+                            "c330": {"png_file": "c330.png", "sha256": "0" * 64}
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            manager = AssetManager(cache, assets, remote=False)
+            try:
+                portrait = manager.get_character_portrait(5065, "330")
+                self.assertEqual(portrait.size, (600, 900))
             finally:
                 manager.close()
 

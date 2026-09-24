@@ -548,7 +548,7 @@ def character_cases():
     fixture = json.loads((root / "tests" / "fixtures" / "character_details_sanitized.json").read_text(encoding="utf-8"))
     master = CharacterMasterResolver()
     result = {}
-    for name, resource in (("c010", 10), ("c010_02", 10), ("c010_03", 10), ("c017", 17), ("c234", 234), ("c330", 330), ("c352", 352), ("c471", 471), ("representative-dark", 10), ("representative-light", 330), ("bright", 330), ("dark", 10), ("low-saturation", 352), ("wide-pose", 471),
+    for name, resource in (("c010", 10), ("c010_02", 10), ("c010_03", 10), ("c017", 17), ("c018", 18), ("c234", 234), ("c330", 330), ("c352", 352), ("c471", 471), ("representative-dark", 10), ("representative-light", 330), ("bright", 330), ("dark", 10), ("low-saturation", 352), ("wide-pose", 471),
                            ("long-name", 330), ("missing-optional", 10), ("missing-art", 470), ("ol-max", 330),
                            ("nayuta", 223), ("low-ol", 10), ("max-ol", 330)):
         canonical = master.resolve_resource_id(resource)

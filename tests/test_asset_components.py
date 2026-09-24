@@ -170,6 +170,33 @@ def test_spine_manifest_store_fails_closed_on_hash_mismatch() -> None:
         assert hashlib.sha256(image_path.read_bytes()).hexdigest() != "0" * 64
 
 
+def test_spine_manifest_store_fails_closed_when_declared_png_is_missing() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        asset_dir = root / "assets"
+        asset_dir.mkdir()
+        (asset_dir / "spine_manifest.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "characters": {
+                        "c018": {
+                            "png_file": "c018.png",
+                            "sha256": "a" * 64,
+                        }
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        store = SpineManifestStore(asset_dir, root / "cache")
+
+        path, declared = store.resolve_png("c018")
+        assert declared is True
+        assert path is None
+        assert store.load_png("c018") is None
+
+
 def test_fallback_provider_is_non_owning_and_returns_complete_card_assets() -> None:
     class Card:
         resource_id = "c010"
