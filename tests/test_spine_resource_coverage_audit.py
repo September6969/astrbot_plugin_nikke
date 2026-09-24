@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from astrbot_plugin_nikke.core.assets.spine_manifest import SpineManifestStore
 from scripts.audit_spine_resource_coverage import audit, classify_undeclared_png
 
 
@@ -97,15 +98,15 @@ def test_current_coverage_categories_match_the_pinned_snapshot() -> None:
     assert summary["canonical_render_consumers"] == 378
     assert summary["upstream_l2d_render_ids"] == 558
     assert summary["upstream_l2d_complete_bundles"] == 558
-    assert summary["manifest_render_ids"] == 11
+    assert summary["manifest_render_ids"] == 38
     assert summary["bundled_png_render_ids"] == 39
-    assert summary["verified_manifest_png_render_ids"] == 11
+    assert summary["verified_manifest_png_render_ids"] == 38
     assert summary["face_anchor_render_ids"] == 39
     assert summary["trusted_semantic_core_axis_render_ids"] == 2
-    assert summary["upstream_exists_manifest_missing"] == 367
+    assert summary["upstream_exists_manifest_missing"] == 340
     assert summary["manifest_without_current_character_consumer"] == 0
-    assert summary["render_asset_gap"] == 367
-    assert summary["manual_review_required"] == 367
+    assert summary["render_asset_gap"] == 340
+    assert summary["manual_review_required"] == 340
     assert summary["unsupported"] == 0
 
 
@@ -113,6 +114,8 @@ def test_undeclared_png_audit_is_deterministic_exhaustive_and_manifest_fail_clos
     report = _report()
     review = report["undeclared_png_audit"]
     undeclared = set(report["sets"]["bundled_png_not_declared_by_manifest"])
+    baseline_path = ROOT / "docs/evidence/spine_resource_coverage_phase2/undeclared-png-audit.json"
+    baseline_review = json.loads(baseline_path.read_text(encoding="utf-8"))
     category_sets = {
         category: set(values)
         for category, values in review["classification_sets"].items()
@@ -128,19 +131,36 @@ def test_undeclared_png_audit_is_deterministic_exhaustive_and_manifest_fail_clos
     }
     assert set.union(*category_sets.values()) == undeclared
     assert sum(map(len, category_sets.values())) == len(undeclared)
-    assert review["summary"]["undeclared_png_count"] == 28
+    assert review["summary"]["undeclared_png_count"] == 1
     assert review["summary"]["classification_counts"] == {
+        "VERIFIED_MANIFEST_CANDIDATE": 0,
+        "VALID_VARIANT_NEEDS_REVIEW": 0,
+        "HISTORICAL_OR_TEST_ONLY": 0,
+        "STALE_OR_ORPHAN_FILE": 0,
+        "INVALID_ASSET": 1,
+    }
+    assert category_sets["INVALID_ASSET"] == {"c191"}
+    assert undeclared == {"c191"}
+
+    baseline_sets = {
+        category: set(values)
+        for category, values in baseline_review["classification_sets"].items()
+    }
+    assert baseline_review["summary"]["undeclared_png_count"] == 28
+    assert baseline_review["summary"]["classification_counts"] == {
         "VERIFIED_MANIFEST_CANDIDATE": 27,
         "VALID_VARIANT_NEEDS_REVIEW": 0,
         "HISTORICAL_OR_TEST_ONLY": 0,
         "STALE_OR_ORPHAN_FILE": 0,
         "INVALID_ASSET": 1,
     }
-    assert category_sets["VERIFIED_MANIFEST_CANDIDATE"] == undeclared - {"c191"}
-    assert category_sets["INVALID_ASSET"] == {"c191"}
+    assert baseline_sets["VERIFIED_MANIFEST_CANDIDATE"] == set(baseline_review["classification_sets"]["VERIFIED_MANIFEST_CANDIDATE"])
+    assert len(baseline_sets["VERIFIED_MANIFEST_CANDIDATE"]) == 27
+    assert baseline_sets["INVALID_ASSET"] == {"c191"}
+    assert sum(map(len, baseline_sets.values())) == 28
 
-    records = {row["render_id"]: row for row in review["records"]}
-    assert set(records) == undeclared
+    records = {row["render_id"]: row for row in baseline_review["records"]}
+    assert len(records) == 28
     for render_id, row in records.items():
         assert row["identity_chain"]["default_character_consumer"] is True
         assert row["identity_chain"]["canonical_resource_ids"]
@@ -170,11 +190,29 @@ def test_undeclared_png_audit_is_deterministic_exhaustive_and_manifest_fail_clos
     assert records["c191"]["classification"] == "INVALID_ASSET"
     assert records["c191"]["source_provenance"]["state"] == "generation_source_mismatch"
 
-    # 当前 11 个 manifest 项保持不变；未声明 PNG 不因审计输出被提升为生产资源。
-    assert undeclared.isdisjoint(report["manifest_status"])
-    assert report["summary"]["manifest_render_ids"] == 11
-    assert report["summary"]["verified_manifest_png_render_ids"] == 11
+    manifest = json.loads((ROOT / "assets/spine_manifest.json").read_text(encoding="utf-8"))
+    mirror = json.loads((ROOT / "assets/data/spine_manifest.json").read_text(encoding="utf-8"))
+    assert manifest == mirror
+    assert list(manifest["characters"]) == sorted(manifest["characters"])
+    candidate_ids = baseline_sets["VERIFIED_MANIFEST_CANDIDATE"]
+    assert candidate_ids <= set(manifest["characters"])
+    assert "c191" not in manifest["characters"]
+    for render_id in candidate_ids:
+        evidence = records[render_id]
+        entry = manifest["characters"][render_id]
+        assert entry["sha256"] == evidence["bundled_png"]["sha256"]
+        assert [entry["width"], entry["height"]] == evidence["bundled_png"]["dimensions"]
+        assert entry["runtime_version"] == evidence["source_provenance"]["skeleton_runtime_metadata"][:3]
+        assert entry["character_resource_id"] == evidence["identity_chain"]["canonical_resource_ids"][0]
+    assert report["summary"]["manifest_render_ids"] == 38
+    assert report["summary"]["verified_manifest_png_render_ids"] == 38
     assert review["scope"]["manifest_trust_boundary_changed"] is False
+
+    store = SpineManifestStore(ROOT / "assets", ROOT / ".audit-cache-unused")
+    candidate_image = store.load_png("c011")
+    assert candidate_image is not None and candidate_image.size == (1683, 3567)
+    assert store.load_png("c191") is None
+    assert store.is_declared("c191") is False
 
 
 def test_undeclared_png_classification_priority_and_variants_are_explicit() -> None:
