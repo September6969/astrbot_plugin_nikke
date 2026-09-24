@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from plugin_fixtures import make_plugin_shell
+from plugin_fixtures import inject_raid_handler, make_plugin_shell
 import asyncio
 import unittest
 from types import SimpleNamespace
@@ -96,6 +96,7 @@ class LogPrivacyTests(unittest.TestCase):
                 get_account=lambda _qq_id: {"cookie": "synthetic-cookie"}
             )
             plugin.services.raid_application = SimpleNamespace(overview=failing_fetcher)
+            inject_raid_handler(plugin)
             event = SimpleNamespace(
                 get_sender_id=lambda: "10001",
                 plain_result=lambda text: text,

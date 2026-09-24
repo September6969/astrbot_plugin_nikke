@@ -102,11 +102,22 @@ class DailyAutoCommandTests(unittest.IsolatedAsyncioTestCase):
         plugin = make_plugin_shell()
         calls = []
 
-        async def daily(event, action, value):
-            calls.append((action, value))
-            yield "ok"
+        class DailyHandler:
+            async def handle(self, context):
+                calls.append(
+                    (
+                        context.parameters["action"],
+                        context.parameters["value"],
+                    )
+                )
+                from astrbot_plugin_nikke.application.commands.contracts import (
+                    CommandResult,
+                    TextReply,
+                )
 
-        plugin.daily = daily
+                return CommandResult((TextReply("ok"),))
+
+        plugin.handlers.daily = DailyHandler()
         results = [item async for item in plugin.nikke(self.Event(), "日常", "自动", "关")]
         self.assertEqual(results, ["ok"])
         self.assertEqual(calls, [("自动", "关")])
@@ -134,7 +145,12 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_scheduled_batch_requires_both_account_preferences(self):
         plugin = self._plugin()
-        self.assertEqual(await plugin._run_all_daily("2026-09-07", automatic=True), [])
+        self.assertEqual(
+            await plugin.handlers.daily.run_all_daily(
+                "2026-09-07", automatic=True
+            ),
+            [],
+        )
         self.assertEqual(
             plugin.services.store.calls,
             [{"push_only": True, "with_cookie": True, "auto_daily_only": True}],
@@ -142,7 +158,7 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_explicit_admin_batch_keeps_existing_selection_semantics(self):
         plugin = self._plugin()
-        self.assertEqual(await plugin._run_all_daily("2026-09-07"), [])
+        self.assertEqual(await plugin.handlers.daily.run_all_daily("2026-09-07"), [])
         self.assertEqual(
             plugin.services.store.calls,
             [{"push_only": True, "with_cookie": True, "auto_daily_only": False}],

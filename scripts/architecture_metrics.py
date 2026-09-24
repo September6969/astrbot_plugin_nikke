@@ -14,6 +14,7 @@ from typing import Any
 
 PLAN_THRESHOLDS = {
     "main.py": 700,
+    "adapters/astrbot/command_runtime.py": 400,
     "core/asset_manager.py": 300,
     "ui/t2i_payloads.py": 100,
     "features/calendar/schedule_service.py": 450,
@@ -34,6 +35,22 @@ FEATURE_FORBIDDEN_ROOTS = {
 }
 UI_FORBIDDEN_ROOTS = {"sqlite3", "httpx", "aiohttp", "requests"}
 EXCLUDED_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules", "build", "dist"}
+CLASS_GETATTR_ALLOWLIST = {
+    ("features/announcement/service.py", "AnnouncementService", "_COMPAT_STATE")
+}
+ADAPTER_INFRASTRUCTURE_FORBIDDEN_ROOTS = {
+    "integrations",
+    "sqlite3",
+    "httpx",
+    "aiohttp",
+    "requests",
+    "urllib3",
+}
+ADAPTER_CORE_FORBIDDEN_PREFIXES = (
+    "core.storage",
+    "core.container",
+    "core.providers",
+)
 
 
 def _module_name(root: Path, path: Path) -> str:
@@ -156,11 +173,47 @@ def _complexity_score(function: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
     return sum(1 for node in ast.walk(function) if isinstance(node, branch_types))
 
 
+def _is_allowlisted_class_getattr(
+    path: str, class_node: ast.ClassDef, method: ast.FunctionDef | ast.AsyncFunctionDef
+) -> bool:
+    """仅允许公告 facade 以显式状态名集合保留历史状态访问。"""
+    if (path, class_node.name, "_COMPAT_STATE") not in CLASS_GETATTR_ALLOWLIST:
+        return False
+    has_membership_guard = any(
+        isinstance(node, ast.Compare)
+        and isinstance(node.left, ast.Name)
+        and node.left.id == "name"
+        and any(isinstance(operator, ast.In) for operator in node.ops)
+        and any(
+            isinstance(value, ast.Attribute)
+            and isinstance(value.value, ast.Name)
+            and value.value.id == "self"
+            and value.attr == "_COMPAT_STATE"
+            for value in node.comparators
+        )
+        for node in ast.walk(method)
+    )
+    raises_attribute_error = any(
+        isinstance(node, ast.Raise)
+        and node.exc is not None
+        and (
+            isinstance(node.exc, ast.Name)
+            and node.exc.id == "AttributeError"
+            or isinstance(node.exc, ast.Call)
+            and isinstance(node.exc.func, ast.Name)
+            and node.exc.func.id == "AttributeError"
+        )
+        for node in ast.walk(method)
+    )
+    return has_membership_guard and raises_attribute_error
+
+
 def classify_module_shape(tree: ast.Module, path: str) -> dict[str, Any]:
     """标记空转发、通配符导入和动态模块属性，防止以薄壳绕过门禁。"""
     effective: list[ast.stmt] = []
     star_imports: list[int] = []
     dynamic_getattr: list[int] = []
+    class_getattrs: list[dict[str, Any]] = []
     for node in tree.body:
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
             if isinstance(node.value.value, str):
@@ -170,6 +223,21 @@ def classify_module_shape(tree: ast.Module, path: str) -> dict[str, Any]:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "__getattr__":
             dynamic_getattr.append(node.lineno)
         effective.append(node)
+
+    for class_node in (node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)):
+        for member in class_node.body:
+            if not isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            if member.name != "__getattr__":
+                continue
+            allowlisted = _is_allowlisted_class_getattr(path, class_node, member)
+            class_getattrs.append(
+                {
+                    "class": class_node.name,
+                    "line": member.lineno,
+                    "allowlisted": allowlisted,
+                }
+            )
 
     forwarder_nodes = (ast.Import, ast.ImportFrom, ast.Assign, ast.AnnAssign, ast.Pass)
     has_import = any(isinstance(node, (ast.Import, ast.ImportFrom)) for node in effective)
@@ -183,7 +251,75 @@ def classify_module_shape(tree: ast.Module, path: str) -> dict[str, Any]:
         "empty_forwarder": is_forwarder,
         "star_import_lines": star_imports,
         "module_getattr_lines": dynamic_getattr,
+        "class_getattrs": class_getattrs,
+        "broad_class_getattrs": [
+            item for item in class_getattrs if not item["allowlisted"]
+        ],
     }
+
+
+def _command_runtime_responsibilities(
+    tree: ast.Module, path: str
+) -> list[dict[str, Any]]:
+    """验证命令 runtime 只负责宿主路由，不编排领域、网络或展示实现。"""
+    if path != "adapters/astrbot/command_runtime.py":
+        return []
+    violations: list[dict[str, Any]] = []
+    forbidden_roots = {"features", "integrations", "ui", "core.storage"}
+    forbidden_attributes = {
+        "services",
+        "store",
+        "client",
+        "asset_manager",
+        "character_application",
+        "raid_application",
+        "campaign_application",
+        "daily_application",
+        "renderer",
+        "character_renderer",
+        "campaign_renderer",
+        "raid_renderer",
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if module.startswith("."):
+                continue
+            if any(module == root or module.startswith(root + ".") for root in forbidden_roots):
+                violations.append(
+                    {"line": node.lineno, "symbol": module, "reason": "domain-or-presentation-import"}
+                )
+        elif isinstance(node, ast.Attribute) and node.attr in forbidden_attributes:
+            violations.append(
+                {"line": node.lineno, "symbol": node.attr, "reason": "direct-orchestration-access"}
+            )
+    return violations
+
+
+def _adapter_infrastructure_imports(
+    path: str, records: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """拒绝 AstrBot adapter 直接拥有网络、数据库或 composition 实现。"""
+    if not path.startswith("adapters/"):
+        return []
+    violations = []
+    for record in records:
+        module = _normalise_module_name(record["module"])
+        root = module.split(".", 1)[0]
+        if (
+            root in ADAPTER_INFRASTRUCTURE_FORBIDDEN_ROOTS
+            or any(module == prefix or module.startswith(prefix + ".")
+                   for prefix in ADAPTER_CORE_FORBIDDEN_PREFIXES)
+        ):
+            violations.append(
+                {
+                    "path": path,
+                    "line": record["line"],
+                    "module": module,
+                    "names": record["names"],
+                }
+            )
+    return violations
 
 
 def _strongly_connected_components(graph: dict[str, set[str]]) -> list[list[str]]:
@@ -309,6 +445,7 @@ def collect_metrics(root: Path) -> dict[str, Any]:
     forwarders: list[dict[str, Any]] = []
     star_imports: list[dict[str, Any]] = []
     dynamic_getattrs: list[dict[str, Any]] = []
+    class_getattrs: list[dict[str, Any]] = []
     function_metrics: list[dict[str, Any]] = []
     plugin_methods: list[dict[str, Any]] = []
     resource_constructors: dict[str, set[str]] = defaultdict(set)
@@ -319,6 +456,9 @@ def collect_metrics(root: Path) -> dict[str, Any]:
     main_business_imports: list[dict[str, Any]] = []
     profile_flags: list[dict[str, Any]] = []
     adapter_domain_imports: list[dict[str, Any]] = []
+    adapter_infrastructure_imports: list[dict[str, Any]] = []
+    adapter_resource_constructions: list[dict[str, Any]] = []
+    command_runtime_responsibilities: list[dict[str, Any]] = []
 
     for path, tree in trees.items():
         relative = path.relative_to(root).as_posix()
@@ -326,6 +466,9 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         package_initializer = _is_package_initializer(path)
         source_imports = _import_records(tree, relative)
         imports.extend(source_imports)
+        adapter_infrastructure_imports.extend(
+            _adapter_infrastructure_imports(relative, source_imports)
+        )
         shape = classify_module_shape(tree, relative)
         if shape["empty_forwarder"] and not package_initializer:
             forwarders.append(shape)
@@ -334,6 +477,13 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         )
         dynamic_getattrs.extend(
             {"path": relative, "line": line} for line in shape["module_getattr_lines"]
+        )
+        class_getattrs.extend(
+            {"path": relative, **item} for item in shape["class_getattrs"]
+        )
+        command_runtime_responsibilities.extend(
+            {"path": relative, **item}
+            for item in _command_runtime_responsibilities(tree, relative)
         )
         if package_initializer:
             public_import_inventory[relative] = _public_imports(tree)
@@ -395,6 +545,10 @@ def collect_metrics(root: Path) -> dict[str, Any]:
                 )
                 if call_name in RESOURCE_TYPES and not relative.startswith(("tests/", "scripts/")):
                     resource_constructors[call_name].add(relative)
+                    if relative.startswith("adapters/"):
+                        adapter_resource_constructions.append(
+                            {"path": relative, "line": node.lineno, "symbol": call_name}
+                        )
                 if call_name == "create_task" and not relative.startswith(("tests/", "scripts/")):
                     task_creators.add(relative)
             if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -518,6 +672,18 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         {"category": "adapter_domain_import", **record}
         for record in adapter_domain_imports
     )
+    violations.extend(
+        {"category": "adapter_infrastructure_import", **record}
+        for record in adapter_infrastructure_imports
+    )
+    violations.extend(
+        {"category": "adapter_resource_construction", **record}
+        for record in adapter_resource_constructions
+    )
+    violations.extend(
+        {"category": "command_runtime_responsibility", **record}
+        for record in command_runtime_responsibilities
+    )
     for resource, owners in duplicate_resource_owners.items():
         violations.append(
             {"category": "duplicate_resource_owner", "resource": resource, "owners": owners}
@@ -533,6 +699,9 @@ def collect_metrics(root: Path) -> dict[str, Any]:
     for item in dynamic_getattrs:
         if not item["path"].startswith(("tests/", "scripts/")):
             violations.append({"category": "dynamic_module_forwarder", **item})
+    for item in class_getattrs:
+        if not item["allowlisted"] and not item["path"].startswith(("tests/", "scripts/")):
+            violations.append({"category": "broad_class_dynamic_forwarder", **item})
     for item in forwarders:
         if not item["path"].startswith(("tests/", "scripts/")):
             violations.append({"category": "empty_forwarder_module", "path": item["path"]})
@@ -573,9 +742,13 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         "ui_dependency_violations": ui_dependency_violations,
         "main_business_imports": main_business_imports,
         "adapter_domain_imports": adapter_domain_imports,
+        "adapter_infrastructure_imports": adapter_infrastructure_imports,
         "empty_forwarder_modules": forwarders,
         "star_imports": star_imports,
         "dynamic_module_getattrs": dynamic_getattrs,
+        "class_getattrs": class_getattrs,
+        "adapter_resource_constructions": adapter_resource_constructions,
+        "command_runtime_responsibilities": command_runtime_responsibilities,
         "profile_route_flag_references": profile_flags,
         "syntax_errors": syntax_errors,
         "gate_violations": violations,

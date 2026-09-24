@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from plugin_fixtures import inject_cdk_handler, make_plugin_shell
+from plugin_fixtures import (
+    inject_cdk_handler,
+    inject_character_handler,
+    make_plugin_shell,
+)
 import asyncio
 import json
 import sqlite3
@@ -691,71 +695,92 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(data.hard_campaign, "35-36")
 
     async def test_chinese_and_legacy_commands_share_one_root_router(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
         plugin = make_plugin_shell()
         calls = []
 
-        async def account(event, action="", value=""):
-            calls.append(("account", action, value))
-            yield "账号结果"
+        class AccountHandler:
+            async def handle(self, context):
+                calls.append(
+                    (
+                        "account",
+                        context.parameters["operation"],
+                        context.parameters["action"],
+                        context.parameters["value"],
+                    )
+                )
+                return CommandResult((TextReply("账号结果"),))
 
-        async def roster(event):
-            calls.append(("roster",))
-            yield "练度结果"
+        class CharacterHandler:
+            async def handle(self, context):
+                calls.append(("character", context.parameters["operation"]))
+                return CommandResult((TextReply("练度结果"),))
 
-        plugin.account = account
-        plugin.roster = roster
-        event = object()
+        plugin.handlers.account = AccountHandler()
+        plugin.handlers.character = CharacterHandler()
+
+        class Event:
+            @staticmethod
+            def plain_result(text):
+                return text
+
+        event = Event()
 
         chinese = [item async for item in plugin.nikke(event, "账号", "绑定", "")]
         legacy = [item async for item in plugin.nikke(event, "roster", "", "")]
         self.assertEqual(chinese, ["账号结果"])
         self.assertEqual(legacy, ["练度结果"])
-        self.assertEqual(calls, [("account", "绑定", ""), ("roster",)])
+        self.assertEqual(
+            calls,
+            [("account", "account", "绑定", ""), ("character", "roster")],
+        )
 
     async def test_m5_command_routing(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
         plugin = make_plugin_shell()
         calls = []
 
-        async def campaign(event, arg1="", arg2=""):
-            calls.append(("campaign", arg1, arg2))
-            yield "战役结果"
+        class Handler:
+            def __init__(self, name, replies):
+                self.name = name
+                self.replies = replies
 
-        async def cdk_batch(event, raw_codes=""):
-            calls.append(("cdk_batch", raw_codes))
-            yield "批量CDK结果"
+            async def handle(self, context):
+                parameters = dict(context.parameters)
+                calls.append((self.name, parameters))
+                return CommandResult(
+                    (TextReply(self.replies.get(parameters.get("operation", ""), self.name)),)
+                )
 
-        async def cdk_available(event):
-            calls.append(("cdk_available",))
-            yield "可用CDK结果"
+        plugin.handlers.campaign = Handler("campaign", {"": "战役结果"})
+        plugin.handlers.cdk = Handler(
+            "cdk",
+            {
+                "batch": "批量CDK结果",
+                "available": "可用CDK结果",
+                "history": "CDK历史结果",
+            },
+        )
+        plugin.handlers.calendar = Handler("calendar", {"": "日程结果"})
+        plugin.handlers.announcement = Handler(
+            "announcement", {"view": "公告结果"}
+        )
+        plugin.handlers.guide = Handler("guide", {"": "攻略结果"})
 
-        async def cdk_history(event):
-            calls.append(("cdk_history",))
-            yield "CDK历史结果"
+        class Event:
+            @staticmethod
+            def plain_result(text):
+                return text
 
-        async def event_schedule(event):
-            calls.append(("event_schedule",))
-            yield "日程结果"
-
-        async def announcements_view(event):
-            calls.append(("announcements_view",))
-            yield "公告结果"
-
-        async def guide(event, category="", page="1"):
-            calls.append(("guide", category))
-            yield "攻略结果"
-
-        plugin.campaign = campaign
-        plugin.cdk_batch = cdk_batch
-        plugin.cdk_available = cdk_available
-        plugin.cdk_history = cdk_history
-        plugin.event_schedule = event_schedule
-        plugin.announcements_view = announcements_view
-        plugin.guide = guide
-        event = object()
+        event = Event()
 
         r1 = [item async for item in plugin.nikke(event, "战役", "46-40", "")]
         r2 = [item async for item in plugin.nikke(event, "cdk", "批量", "CODE1 CODE2")]
@@ -775,13 +800,13 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             calls,
             [
-                ("campaign", "46-40", ""),
-                ("cdk_batch", "CODE1 CODE2"),
-                ("cdk_available",),
-                ("cdk_history",),
-                ("event_schedule",),
-                ("announcements_view",),
-                ("guide", "练度"),
+                ("campaign", {"stage": "46-40", "mode": ""}),
+                ("cdk", {"operation": "batch", "codes": "CODE1 CODE2"}),
+                ("cdk", {"operation": "available"}),
+                ("cdk", {"operation": "history"}),
+                ("calendar", {"horizon": ""}),
+                ("announcement", {"operation": "view"}),
+                ("guide", {"category": "练度", "page": "1"}),
             ],
         )
 
@@ -808,6 +833,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
             {"name_code": 2, "name_cn": "爱丽丝：仙境兔女郎", "name_en": "Alice: Wonderland Bunny"},
         ]
+        inject_character_handler(plugin)
         result = [item async for item in plugin.character(Event(), "丽丝")]
         self.assertEqual(len(result), 1)
         self.assertIn("找到多个角色", result[0])
@@ -833,6 +859,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
+        inject_character_handler(plugin)
         result = [item async for item in plugin.character(Event(), "爱丽丝")]
         self.assertEqual(len(result), 1)
         self.assertIn("未持有", result[0])
@@ -926,6 +953,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
+        inject_character_handler(plugin)
         results = [item async for item in plugin.character(Event(), "爱丽丝")]
         self.assertEqual(len(results), 1)
         self.assertIn("未持有", results[0])
@@ -959,11 +987,12 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin.services.character_application = application
         plugin.services.renderer = renderer
         plugin._directory = directory
+        inject_character_handler(plugin)
 
         result = [item async for item in plugin.roster(Event())]
 
         self.assertEqual(result, ["roster.png"])
-        application.roster.assert_awaited_once_with("10001", directory)
+        application.roster.assert_awaited_once_with("10001", tuple(directory))
         renderer.render_roster.assert_called_once_with(
             "测试指挥官", data.characters, data.name_map
         )
@@ -988,6 +1017,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin.services.character_application = application
         plugin.services.renderer = renderer
         plugin._directory = []
+        inject_character_handler(plugin)
 
         result = [item async for item in plugin.info(Event(), "丽丝")]
 

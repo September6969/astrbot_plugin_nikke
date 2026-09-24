@@ -315,19 +315,25 @@ class UnionRaidRendererTests(unittest.TestCase):
 
 class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_chinese_and_legacy_raid_commands_route_correctly(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
         plugin = make_plugin_shell()
         calls = []
 
-        async def fake_union_raid(event):
-            calls.append("union_raid")
-            yield "突袭结果"
+        class RaidHandler:
+            async def handle(self, context):
+                calls.append(context.parameters["operation"])
+                return CommandResult((TextReply("突袭结果"),))
 
-        plugin.union_raid = fake_union_raid
+        plugin.handlers.raid = RaidHandler()
 
         class FakeEvent:
-            pass
+            @staticmethod
+            def plain_result(text):
+                return text
 
         event = FakeEvent()
 
@@ -347,26 +353,32 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
         results = [r async for r in plugin.query(event, "突袭")]
         self.assertEqual(results, ["突袭结果"])
 
-        self.assertEqual(len(calls), 4)
+        self.assertEqual(calls, ["overview"] * 4)
 
     async def test_my_raid_command_routes_to_member_scope(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
         plugin = make_plugin_shell()
         calls = []
 
-        async def fake_union_raid_my(event):
-            calls.append("union_raid_my")
-            yield "我的突袭结果"
+        class RaidHandler:
+            async def handle(self, context):
+                calls.append(context.parameters["operation"])
+                return CommandResult((TextReply("我的突袭结果"),))
 
-        plugin.union_raid_my = fake_union_raid_my
+        plugin.handlers.raid = RaidHandler()
 
         class FakeEvent:
-            pass
+            @staticmethod
+            def plain_result(text):
+                return text
 
         results = [r async for r in plugin.nikke(FakeEvent(), "联盟突袭", "我的")]
         self.assertEqual(results, ["我的突袭结果"])
-        self.assertEqual(calls, ["union_raid_my"])
+        self.assertEqual(calls, ["member"])
 
 
 if __name__ == "__main__":

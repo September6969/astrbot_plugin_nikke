@@ -31,18 +31,14 @@ def _command_runtime_methods() -> dict[str, ast.AsyncFunctionDef]:
     }
 
 
-def test_guide_and_tarot_entries_are_thin_adapter_delegates() -> None:
+def test_command_runtime_is_a_router_without_feature_implementation() -> None:
     methods = _command_runtime_methods()
-    for name in ("guide", "tarot_command", "me"):
-        method = methods[name]
-        logical_statements = sum(isinstance(node, ast.stmt) for node in ast.walk(method))
-        assert logical_statements <= 20, (name, logical_statements)
-        called_attributes = {
-            node.func.attr
-            for node in ast.walk(method)
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-        }
-        assert "dispatch" in called_attributes, (name, called_attributes)
+    assert {"nikke", "query"} <= set(methods)
+    source = (ROOT / "adapters/astrbot/command_runtime.py").read_text(encoding="utf-8")
+    assert "services." not in source
+    assert "features." not in source
+    assert "integrations." not in source
+    assert "ui." not in source
 
 
 def test_registered_main_command_thinly_delegates_to_runtime() -> None:
@@ -78,8 +74,11 @@ def test_registered_main_command_thinly_delegates_to_runtime() -> None:
 def test_application_command_handlers_do_not_import_astrbot() -> None:
     for relative in (
         "application/commands/contracts.py",
+        "application/commands/campaign.py",
+        "application/commands/character.py",
         "application/commands/guide.py",
         "application/commands/profile.py",
+        "application/commands/raid.py",
         "application/commands/tarot.py",
     ):
         tree = ast.parse((ROOT / relative).read_text(encoding="utf-8"))
@@ -185,11 +184,11 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     plugin.services.profile_renderer = ProfileRenderer()
     plugin.services.feedback_manager = None
     plugin.adapters.command = AstrBotCommandAdapter()
-    plugin._try_t2i = no_t2i
+    plugin.presentation.try_t2i = no_t2i
     plugin.handlers.profile = ProfileCommandHandler(
         account_reader=plugin.services.store,
         application=plugin.services.profile_application,
-        present=plugin._render_profile_dashboard,
+        present=plugin.presentation.render_profile,
     )
     registered = next(
         handler

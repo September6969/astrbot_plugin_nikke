@@ -20,17 +20,20 @@ from ._version import PLUGIN_VERSION
 from .adapters.astrbot.collections import AstrBotAdapterCollection, PluginCommandHandlers
 from .adapters.astrbot.compatibility import require_supported_astrbot_version
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from .adapters.astrbot.command_presentation import AstrBotCommandPresentation
 from .adapters.astrbot.command_runtime import NikkeCommandRuntime, normalize_nikke_prefix
 from .adapters.astrbot.runtime import AstrBotRuntimeAdapter
 from .adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from .application.commands.account import AccountCommandHandler
 from .application.commands.announcement import AnnouncementCommandHandler
 from .application.commands.campaign import CampaignCommandHandler
+from .application.commands.character import CharacterCommandHandler
 from .application.commands.cdk import CdkCommandHandler
 from .application.commands.calendar import CalendarCommandHandler
 from .application.commands.daily import DailyCommandHandler
 from .application.commands.guide import GuideCommandHandler
 from .application.commands.profile import ProfileCommandHandler
+from .application.commands.raid import RaidCommandHandler
 from .application.commands.tarot import TarotCommandHandler
 from .application.commands.tower import TowerCommandHandler
 from .core.config import normalize_runtime_config
@@ -45,7 +48,6 @@ class NikkePlugin(Star):
     def __init__(self, context: Context, config=None):
         require_supported_astrbot_version()
         super().__init__(context)
-        self._command_runtime = NikkeCommandRuntime(self)
         self.context = context
         if hasattr(context, "astrbot_config") and isinstance(context.astrbot_config, dict):
             wake_prefixes = context.astrbot_config.setdefault("wake_prefix", ["/"])
@@ -70,59 +72,120 @@ class NikkePlugin(Star):
             command=AstrBotCommandAdapter(),
             voice=AstrBotVoiceAdapter(self.services.voice_application),
         )
-        runtime = self._command_runtime
+        self.presentation = AstrBotCommandPresentation(
+            services=self.services,
+            config=lambda: self.config,
+            html_render=lambda: getattr(self, "html_render", None),
+            context=context,
+        )
+        daily_handler = DailyCommandHandler(
+            account_reader=self.services.store,
+            store=self.services.store,
+            runner=self.services.daily_runner,
+            client=self.services.client,
+            config=self.config,
+            render_summary=self.services.renderer.render_summary,
+            send_summary=self.presentation.send_summary_image,
+        )
         self.runtime = AstrBotRuntimeAdapter(
             coordinator=self.services.runtime_coordinator,
             services=self.services,
             context=context,
             plugin_dir=self.plugin_dir,
+            data_dir=self.data_dir,
             config=self.config,
             web_host=self.web_host,
             web_port=self.web_port,
-            run_daily=runtime._run_all_daily,
-            send_summary=runtime._send_summary,
-            on_directory_loaded=runtime._apply_directory,
+            run_daily=daily_handler.run_all_daily,
+            send_summary=daily_handler.send_automatic_summary,
+            on_directory_loaded=self._apply_directory,
         )
         self.handlers = PluginCommandHandlers(
             account=AccountCommandHandler(
                 application=self.services.account_application,
                 public_base_url=self.public_base_url,
                 allow_group_bind=bool(self.config.get("allow_group_bind", False)),
-                runtime_health=runtime._account_runtime_health_details,
-                render_manual_summary=runtime._render_manual_daily_summary,
+                runtime_health=lambda: self.runtime.health_details(
+                    len(self._directory)
+                ),
+                render_manual_summary=daily_handler.render_manual_summary,
             ),
-            announcement=runtime._build_announcement_command_handler(),
-            cdk=runtime._build_cdk_command_handler(),
-            calendar=runtime._build_calendar_command_handler(),
-            daily=runtime._build_daily_command_handler(),
+            announcement=AnnouncementCommandHandler(
+                application=self.services.announcement_application,
+                push_enabled=lambda: bool(
+                    self.config.get("enable_announcement_push", False)
+                ),
+            ),
+            cdk=CdkCommandHandler(
+                account_reader=self.services.store,
+                store=self.services.store,
+                client=self.services.client,
+                service=self.services.cdk_service,
+                config=self.config,
+            ),
+            calendar=CalendarCommandHandler(
+                application=self.services.calendar_application,
+                payload_builder=self.presentation.calendar_payload_builder,
+                render=lambda payload: self.presentation.try_t2i(
+                    "calendar_schedule", payload
+                ),
+                start_background_refresh=self.runtime.request_calendar_refresh,
+            ),
+            campaign=CampaignCommandHandler(
+                application=self.services.campaign_application,
+                present=self.presentation.render_campaign_record,
+                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                start_feedback=self.runtime.start_delayed_feedback,
+            ),
+            character=CharacterCommandHandler(
+                application=self.services.character_application,
+                directory=lambda: tuple(self._directory),
+                render_roster=self.presentation.render_roster,
+                render_card=self.presentation.render_character_card,
+                render_info=self.presentation.render_character_info,
+                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                start_feedback=self.runtime.start_delayed_feedback,
+            ),
+            daily=daily_handler,
             guide=GuideCommandHandler(self.services.guide_application),
             profile=ProfileCommandHandler(
                 account_reader=self.services.store,
                 application=self.services.profile_application,
-                present=runtime._render_profile_dashboard,
+                present=self.presentation.render_profile,
+                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                start_feedback=self.runtime.start_delayed_feedback,
+            ),
+            raid=RaidCommandHandler(
+                application=self.services.raid_application,
+                render_overview=self.presentation.render_raid_overview,
+                render_ranking=self.presentation.render_raid_ranking,
+                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                start_feedback=self.runtime.start_delayed_feedback,
             ),
             tarot=TarotCommandHandler(self.services.tarot),
             tower=TowerCommandHandler(self.services.tower_application),
         )
+        self._command_runtime = NikkeCommandRuntime(
+            adapters=self.adapters,
+            handlers=self.handlers,
+        )
         self.runtime.start()
+
+    def _apply_directory(self, directory: list[dict[str, Any]]) -> None:
+        self._directory = directory
+        self.services.campaign_application.update_directory(directory)
 
     @property
     def command_runtime(self) -> NikkeCommandRuntime:
         """延迟创建轻量路由器，兼容无需完整初始化的测试夹具。"""
         runtime = self.__dict__.get("_command_runtime")
         if runtime is None:
-            runtime = NikkeCommandRuntime(self)
+            runtime = NikkeCommandRuntime(
+                adapters=self.adapters,
+                handlers=self.handlers,
+            )
             self.__dict__["_command_runtime"] = runtime
         return runtime
-
-    def __getattr__(self, name: str) -> Any:
-        """保留旧插件实例方法的委托访问，不复制领域服务属性。"""
-        runtime = self.__dict__.get("_command_runtime")
-        if runtime is None:
-            runtime = self.command_runtime
-        if hasattr(type(runtime), name):
-            return getattr(runtime, name)
-        raise AttributeError(f"{type(self).__name__!s} has no attribute {name!r}")
 
     @staticmethod
     def _help_text(category: str = "", include_admin: bool = False) -> str:
@@ -158,11 +221,12 @@ class NikkePlugin(Star):
             yield result
 
     async def nikke_help(self, event: AstrMessageEvent, category: str = ""):
-        async for result in self.command_runtime.nikke_help(event, category):
-            yield result
+        yield event.plain_result(self._help_text(category, bool(event.is_admin())))
 
     async def me(self, event: AstrMessageEvent):
-        async for result in self.command_runtime.me(event):
+        async for result in self.adapters.command.dispatch(
+            event, self.handlers.profile
+        ):
             yield result
 
     async def query(self, event: AstrMessageEvent, kind: str = "", name: str = ""):
@@ -170,7 +234,9 @@ class NikkePlugin(Star):
             yield result
 
     async def progress(self, event: AstrMessageEvent):
-        async for result in self.command_runtime.progress(event):
+        async for result in self.adapters.command.dispatch(
+            event, self.handlers.profile
+        ):
             yield result
 
     async def daily(self, event: AstrMessageEvent, action: str = "", value: str = ""):
@@ -210,7 +276,12 @@ class NikkePlugin(Star):
     async def campaign(
         self, event: AstrMessageEvent, stage_str: str = "", mode_str: str = ""
     ):
-        async for result in self.command_runtime.campaign(event, stage_str, mode_str):
+        async for result in self.adapters.command.dispatch(
+            event,
+            self.handlers.campaign,
+            stage=stage_str,
+            mode=mode_str,
+        ):
             yield result
 
     async def event_schedule(self, event: AstrMessageEvent, horizon: str = ""):
@@ -264,6 +335,26 @@ class NikkePlugin(Star):
     ):
         async for result in self.adapters.command.dispatch(
             event, self.handlers.guide, category=category, page=page
+        ):
+            yield result
+
+    async def _dispatch_account_command(
+        self,
+        event: AstrMessageEvent,
+        *,
+        operation: str,
+        action: str = "",
+        value: str = "",
+        state: str = "",
+    ):
+        async for result in self.adapters.command.dispatch(
+            event,
+            self.handlers.account,
+            operation=operation,
+            action=action,
+            value=value,
+            state=state,
+            unified_msg_origin=str(getattr(event, "unified_msg_origin", "") or ""),
         ):
             yield result
 
@@ -330,27 +421,45 @@ class NikkePlugin(Star):
             yield result
 
     async def roster(self, event: AstrMessageEvent):
-        async for result in self.command_runtime.roster(event):
+        async for result in self.adapters.command.dispatch(
+            event, self.handlers.character, operation="roster"
+        ):
             yield result
 
     async def character(self, event: AstrMessageEvent, name: str):
-        async for result in self.command_runtime.character(event, name):
+        async for result in self.adapters.command.dispatch(
+            event,
+            self.handlers.character,
+            operation="character",
+            name=name,
+        ):
             yield result
 
     async def info(self, event: AstrMessageEvent, name: str):
-        async for result in self.command_runtime.info(event, name):
+        async for result in self.adapters.command.dispatch(
+            event,
+            self.handlers.character,
+            operation="info",
+            name=name,
+        ):
             yield result
 
     async def union_raid(self, event: AstrMessageEvent):
-        async for result in self.command_runtime.union_raid(event):
+        async for result in self.adapters.command.dispatch(
+            event, self.handlers.raid, operation="overview"
+        ):
             yield result
 
     async def union_raid_ranking(self, event: AstrMessageEvent):
-        async for result in self.command_runtime.union_raid_ranking(event):
+        async for result in self.adapters.command.dispatch(
+            event, self.handlers.raid, operation="ranking"
+        ):
             yield result
 
     async def union_raid_my(self, event: AstrMessageEvent):
-        async for result in self.command_runtime.union_raid_my(event):
+        async for result in self.adapters.command.dispatch(
+            event, self.handlers.raid, operation="member"
+        ):
             yield result
 
     async def terminate(self):

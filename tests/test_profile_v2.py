@@ -343,7 +343,7 @@ class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
             plugin.handlers.profile = ProfileCommandHandler(
                 account_reader=plugin.services.store,
                 application=plugin.services.profile_application,
-                present=plugin._render_profile_dashboard,
+                present=plugin.presentation.render_profile,
             )
             plugin.services.feedback_manager = None
             results = [item async for item in plugin.me(Event())]

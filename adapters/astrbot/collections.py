@@ -9,9 +9,12 @@ from ...application.commands.account import AccountCommandHandler
 from ...application.commands.announcement import AnnouncementCommandHandler
 from ...application.commands.cdk import CdkCommandHandler
 from ...application.commands.calendar import CalendarCommandHandler
+from ...application.commands.campaign import CampaignCommandHandler
+from ...application.commands.character import CharacterCommandHandler
 from ...application.commands.daily import DailyCommandHandler
 from ...application.commands.guide import GuideCommandHandler
 from ...application.commands.profile import ProfileCommandHandler
+from ...application.commands.raid import RaidCommandHandler
 from ...application.commands.tarot import TarotCommandHandler
 from ...application.commands.tower import TowerCommandHandler
 from .command_adapter import AstrBotCommandAdapter
@@ -26,9 +29,12 @@ class PluginCommandHandlers:
     announcement: AnnouncementCommandHandler | None = None
     cdk: CdkCommandHandler | None = None
     calendar: CalendarCommandHandler | None = None
+    campaign: CampaignCommandHandler | None = None
+    character: CharacterCommandHandler | None = None
     daily: DailyCommandHandler | None = None
     guide: GuideCommandHandler | None = None
     profile: ProfileCommandHandler | None = None
+    raid: RaidCommandHandler | None = None
     tarot: TarotCommandHandler | None = None
     tower: TowerCommandHandler | None = None
 

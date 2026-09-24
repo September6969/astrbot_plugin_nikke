@@ -1,8 +1,9 @@
 import unittest
 from plugin_fixtures import make_plugin_shell
+import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, call, patch, sentinel
+from unittest.mock import Mock, call
 
 from PIL import Image
 
@@ -12,19 +13,19 @@ from astrbot_plugin_nikke.main import NikkePlugin
 
 
 class CampaignResourceWiringTests(unittest.TestCase):
-    def test_campaign_renderer_reuses_plugin_asset_manager(self):
+    def test_campaign_presentation_uses_container_renderer(self):
         plugin = make_plugin_shell()
-        plugin.data_dir = Path("data/nikke")
-        plugin.plugin_dir = Path("plugin")
-        plugin.services.asset_manager = sentinel.shared_assets
+        plugin.services.campaign_renderer = Mock(
+            render_campaign_history=Mock(return_value="campaign.png")
+        )
+        record = object()
 
-        with patch("astrbot_plugin_nikke.adapters.astrbot.command_runtime.CampaignHistoryRenderer") as renderer:
-            plugin._build_campaign_renderer()
-
-        renderer.assert_called_once_with(
-            Path("data/nikke/cards"),
-            Path("plugin/fonts"),
-            sentinel.shared_assets,
+        self.assertEqual(
+            asyncio.run(plugin.presentation.render_campaign_record(record)),
+            "campaign.png",
+        )
+        plugin.services.campaign_renderer.render_campaign_history.assert_called_once_with(
+            record
         )
 
     def test_campaign_renderer_keeps_falsey_shared_asset_manager(self):

@@ -123,9 +123,9 @@ async def test_missing_snapshot_schedules_background_refresh_without_rendering()
 
 
 def test_main_calendar_route_does_not_read_schedule_service_or_model_fields():
-    from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
+    from astrbot_plugin_nikke.main import NikkePlugin
 
-    method = getattr(NikkeCommandRuntime, "event_schedule")
+    method = getattr(NikkePlugin, "event_schedule")
     tree = ast.parse(textwrap.dedent(inspect.getsource(method)))
     forbidden_names = {
         "has_snapshot",

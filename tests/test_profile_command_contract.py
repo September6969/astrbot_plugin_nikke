@@ -146,7 +146,11 @@ def _plugin(*, account: dict[str, Any] | None, client: _FakeClient) -> tuple[Nik
     plugin.handlers.profile = ProfileCommandHandler(
         account_reader=store,
         application=plugin.services.profile_application,
-        present=plugin._render_profile_dashboard,
+        present=plugin.presentation.render_profile,
+        invalidate_cookie=store.mark_cookie_invalid,
+        start_feedback=lambda _context, _message: feedback.start_delayed_feedback(
+            lambda: None
+        ),
     )
     return plugin, store, builder, renderer, feedback
 
@@ -213,7 +217,7 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(dashboard.commander_name, "合成指挥官")
             return None
 
-        plugin._try_t2i = failed_t2i
+        plugin.presentation.try_t2i = failed_t2i
         results = [item async for item in plugin.me(_FakeEvent())]
 
         self.assertEqual(results, [{"kind": "image", "path": "synthetic-profile.png"}])

@@ -101,7 +101,7 @@ async def test_campaign_command_presents_record_and_cancels_delayed_feedback() -
         application=application,
         present=present,
         invalidate_cookie=lambda _: None,
-        start_feedback=lambda: feedback,
+        start_feedback=lambda _context, _message: feedback,
     )
 
     result = await handler.handle(
@@ -133,7 +133,7 @@ async def test_unknown_campaign_stage_does_not_start_feedback_or_read_account() 
         application=application,
         present=lambda _: pytest.fail("未知关卡不能渲染"),
         invalidate_cookie=lambda _: None,
-        start_feedback=lambda: feedback_calls.append("started"),
+        start_feedback=lambda _context, _message: feedback_calls.append("started"),
     )
 
     result = await handler.handle(

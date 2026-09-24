@@ -14,8 +14,12 @@ from typing import Any
 from astrbot.api.event import MessageChain
 from astrbot.api.message_components import Plain
 
+from ..._version import PLUGIN_VERSION
+from ...application.commands.account import RuntimeHealthDetails
+from ...application.commands.contracts import CommandContext
 from ...core.lifecycle.coordinator import RuntimeCoordinator
 from ...core.lifecycle.scheduler import RuntimeScheduler
+from ...core.health import collect_runtime_health, format_runtime_health
 from ...core.privacy import safe_exception_message
 
 logger = logging.getLogger("astrbot_plugin_nikke.runtime")
@@ -31,6 +35,7 @@ class AstrBotRuntimeAdapter:
         services: Any,
         context: Any,
         plugin_dir: Path,
+        data_dir: Path | None = None,
         config: dict[str, Any],
         web_host: str,
         web_port: int,
@@ -42,6 +47,7 @@ class AstrBotRuntimeAdapter:
         self._services = services
         self._context = context
         self._plugin_dir = plugin_dir
+        self._data_dir = data_dir or plugin_dir
         self._config = config
         self._web_host = web_host
         self._web_port = web_port
@@ -77,12 +83,45 @@ class AstrBotRuntimeAdapter:
     async def send_delayed_notice(self, event: Any, text: str) -> None:
         """在宿主边界发送延迟提示，不向应用层泄漏 AstrBot 消息类型。"""
         try:
-            target = getattr(event, "unified_msg_origin", None)
+            target = (
+                event
+                if isinstance(event, str)
+                else getattr(event, "unified_msg_origin", None)
+            )
             sender = getattr(self._context, "send_message", None)
             if not self.closing and target and callable(sender):
                 await sender(target, MessageChain([Plain(text)]))
         except Exception as exc:
             logger.debug("[NIKKE] 延迟提示发送跳过: %s", safe_exception_message(exc))
+
+    def start_delayed_feedback(
+        self, command: CommandContext, message: str
+    ) -> Any:
+        """按当前会话创建反馈任务；其所有权仍归共享 FeedbackManager。"""
+        feedback_manager = getattr(self._services, "feedback_manager", None)
+        if feedback_manager is None or not command.conversation_id:
+            return None
+        return feedback_manager.start_delayed_feedback(
+            lambda: self.send_delayed_notice(command.conversation_id, message)
+        )
+
+    def health_details(self, directory_count: int) -> RuntimeHealthDetails:
+        """为 Account 命令提供只读宿主健康信息。"""
+        return RuntimeHealthDetails(
+            plugin_version=PLUGIN_VERSION,
+            directory_count=directory_count,
+            web_host=self._web_host,
+            web_port=self._web_port,
+            daily_actions_enabled=bool(
+                self._config.get("enable_daily_actions", False)
+            ),
+            cdk_redemption_enabled=bool(
+                self._config.get("enable_cdk_redemption", False)
+            ),
+            diagnostics=format_runtime_health(
+                collect_runtime_health(self._data_dir)
+            ),
+        )
 
     def _register_cleanup(self) -> None:
         """按依赖创建顺序登记，协调器会以逆序执行。"""

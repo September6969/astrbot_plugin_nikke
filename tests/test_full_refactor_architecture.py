@@ -8,6 +8,8 @@ from pathlib import Path
 from scripts.architecture_metrics import (
     PLAN_THRESHOLDS,
     PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
+    _adapter_infrastructure_imports,
+    _command_runtime_responsibilities,
     classify_module_shape,
     collect_metrics,
     compare_metrics,
@@ -18,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 METRICS = collect_metrics(ROOT)
 EXPECTED_PLAN_THRESHOLDS = {
     "main.py": 700,
+    "adapters/astrbot/command_runtime.py": 400,
     "core/asset_manager.py": 300,
     "ui/t2i_payloads.py": 100,
     "features/calendar/schedule_service.py": 450,
@@ -43,6 +46,45 @@ def test_metrics_cover_plan_hotspots_and_public_import_inventory() -> None:
 def test_plan_hotspot_size_limits() -> None:
     violations = _violations("hotspot_size")
     assert not violations, f"超出 PLAN.md 热点行数门槛：{violations}"
+
+
+def test_command_runtime_is_only_a_host_router() -> None:
+    violations = _violations("command_runtime_responsibility")
+    assert not violations, f"command runtime 越权承担领域或展示实现：{violations}"
+    assert not _violations("adapter_resource_construction")
+
+
+def test_adapter_import_gate_rejects_infrastructure_but_allows_application_contracts() -> None:
+    records = [
+        {"module": "core.storage", "line": 3, "names": ["NikkeStore"]},
+        {"module": "integrations.blablalink.client", "line": 4, "names": ["BlaBlaClient"]},
+        {"module": "httpx", "line": 5, "names": ["httpx"]},
+        {"module": "application.commands.contracts", "line": 6, "names": ["CommandResult"]},
+    ]
+    violations = _adapter_infrastructure_imports(
+        "adapters/astrbot/example.py", records
+    )
+    assert [item["module"] for item in violations] == [
+        "core.storage",
+        "integrations.blablalink.client",
+        "httpx",
+    ]
+
+
+def test_command_runtime_responsibility_gate_detects_domain_access():
+    tree = ast.parse(
+        "from features.raid.application import RaidApplication\n"
+        "class NikkeCommandRuntime:\n"
+        "    def run(self):\n"
+        "        return self.services.raid_application.overview('user')\n"
+    )
+    violations = _command_runtime_responsibilities(
+        tree, "adapters/astrbot/command_runtime.py"
+    )
+    assert {item["reason"] for item in violations} == {
+        "domain-or-presentation-import",
+        "direct-orchestration-access",
+    }
 
 
 def test_main_plugin_methods_are_thin_delegates() -> None:
@@ -83,6 +125,19 @@ def test_dynamic_module_forwarders_are_removed() -> None:
     ]
 
 
+def test_class_level_broad_dynamic_forwarders_are_removed() -> None:
+    assert not _violations("broad_class_dynamic_forwarder"), METRICS[
+        "class_getattrs"
+    ]
+    compatibility = [
+        item
+        for item in METRICS["class_getattrs"]
+        if item["path"] == "features/announcement/service.py"
+    ]
+    assert compatibility
+    assert all(item["allowlisted"] for item in compatibility)
+
+
 def test_internal_import_cycles_are_removed() -> None:
     assert not METRICS["import_cycles"], METRICS["import_cycles"]
 
@@ -102,6 +157,28 @@ def test_empty_wrapper_and_dynamic_forwarder_are_detected() -> None:
     )
     dynamic_shape = classify_module_shape(dynamic_module, "features/example/bridge.py")
     assert dynamic_shape["module_getattr_lines"] == [1]
+
+    broad_class = ast.parse(
+        "class Forwarder:\n"
+        "    def __getattr__(self, name):\n"
+        "        return getattr(target, name)\n"
+    )
+    broad_shape = classify_module_shape(broad_class, "features/example/bridge.py")
+    assert broad_shape["broad_class_getattrs"] == [
+        {"class": "Forwarder", "line": 2, "allowlisted": False}
+    ]
+
+    narrow_class = ast.parse(
+        "class AnnouncementService:\n"
+        "    def __getattr__(self, name):\n"
+        "        if name in self._COMPAT_STATE:\n"
+        "            return getattr(self.repository, name)\n"
+        "        raise AttributeError(name)\n"
+    )
+    narrow_shape = classify_module_shape(
+        narrow_class, "features/announcement/service.py"
+    )
+    assert narrow_shape["broad_class_getattrs"] == []
 
     metadata_module = ast.parse("PLUGIN_VERSION = '0.2.0'\n")
     metadata_shape = classify_module_shape(metadata_module, "_version.py")

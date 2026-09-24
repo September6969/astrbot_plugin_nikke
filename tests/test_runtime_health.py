@@ -12,7 +12,10 @@ from unittest.mock import AsyncMock, patch
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.core.health import RuntimeHealth, collect_runtime_health, format_runtime_health
 from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
-from astrbot_plugin_nikke.application.commands.account import AccountCommandHandler
+from astrbot_plugin_nikke.application.commands.account import (
+    AccountCommandHandler,
+    RuntimeHealthDetails,
+)
 from astrbot_plugin_nikke.features.account.application import AccountApplication
 
 
@@ -148,7 +151,21 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
                 application=plugin.services.account_application,
                 public_base_url="https://bot.example.com",
                 allow_group_bind=False,
-                runtime_health=plugin._account_runtime_health_details,
+                runtime_health=lambda: RuntimeHealthDetails(
+                    plugin_version="test",
+                    directory_count=len(plugin._directory),
+                    web_host=plugin.web_host,
+                    web_port=plugin.web_port,
+                    daily_actions_enabled=plugin.config.get(
+                        "enable_daily_actions", False
+                    ),
+                    cdk_redemption_enabled=plugin.config.get(
+                        "enable_cdk_redemption", False
+                    ),
+                    diagnostics=format_runtime_health(
+                        collect_runtime_health(plugin.data_dir)
+                    ),
+                ),
                 render_manual_summary=AsyncMock(return_value="summary.png"),
             )
             event = SimpleNamespace(is_admin=lambda: True, plain_result=lambda text: text)

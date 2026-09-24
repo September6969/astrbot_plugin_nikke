@@ -35,6 +35,9 @@ class AstrBotCommandAdapter:
             actor_id=str(self._event_value(event, "get_sender_id", "") or ""),
             is_admin=bool(self._event_value(event, "is_admin", False)),
             is_private_chat=bool(self._event_value(event, "is_private_chat", False)),
+            conversation_id=str(
+                self._event_value(event, "unified_msg_origin", "") or ""
+            ),
             parameters=MappingProxyType(normalized_parameters),
         )
 

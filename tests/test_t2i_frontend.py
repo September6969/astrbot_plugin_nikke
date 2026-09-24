@@ -1,5 +1,10 @@
 import json
-from plugin_fixtures import inject_calendar_handler, make_plugin_shell
+from plugin_fixtures import (
+    inject_calendar_handler,
+    inject_character_handler,
+    inject_raid_handler,
+    make_plugin_shell,
+)
 import asyncio
 from unittest.mock import AsyncMock, Mock
 
@@ -60,11 +65,13 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
     assert html.count("</style>") == 1
     plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
-    assert await plugin._try_t2i(page, data) is None
-    plugin.campaign_t2i_renderer.render_view.side_effect = asyncio.CancelledError()
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
+    assert await plugin.presentation.try_t2i(page, data) is None
+    plugin.presentation._t2i_renderer.render_view.side_effect = asyncio.CancelledError()
     with pytest.raises(asyncio.CancelledError):
-        await plugin._try_t2i(page, data)
+        await plugin.presentation.try_t2i(page, data)
     assets.close()
 
 
@@ -74,8 +81,9 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
     plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin._account_or_error = Mock(return_value={})
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
     data = next(iter(get_cases(page, tmp_path).values()))
     if page == "profile":
         from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
@@ -89,13 +97,15 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         plugin.handlers.profile = ProfileCommandHandler(
             account_reader=plugin.services.store,
             application=plugin.services.profile_application,
-            present=plugin._render_profile_dashboard,
+            present=plugin.presentation.render_profile,
         )
         command, args, request = plugin.me, (), plugin.services.profile_application.build_dashboard
     elif page == "union_overview":
         plugin.services.raid_application = Mock(overview=AsyncMock(return_value=data))
+        plugin.services.store = Mock()
         fallback = Mock(return_value="fallback.png")
         plugin.services.raid_renderer = Mock(render_raid_overview=fallback)
+        inject_raid_handler(plugin)
         command, args, request = plugin.union_raid, (), plugin.services.raid_application.overview
     else:
         plugin._directory = [{"name_code": "5065"}]
@@ -103,10 +113,12 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         plugin.services.character_application = Mock(
             build_card=AsyncMock(return_value=SimpleNamespace(card=data))
         )
+        plugin.services.store = Mock()
         card_assets = object()
         plugin.services.asset_manager = Mock(resolve_character_assets=Mock(return_value=card_assets))
         fallback = Mock(return_value="fallback.png")
         plugin.services.character_renderer = Mock(render_character=fallback)
+        inject_character_handler(plugin)
         command, args, request = (
             plugin.character,
             ("皇冠",),
@@ -120,7 +132,7 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         fallback.assert_called_once_with(data, card_assets)
     else:
         fallback.assert_called_once_with(data)
-    assert plugin.campaign_t2i_renderer.render_view.call_args.args[1] is data
+    assert plugin.presentation._t2i_renderer.render_view.call_args.args[1] is data
 
 
 def test_calendar_horizon_and_classification(tmp_path):
@@ -149,7 +161,9 @@ async def test_calendar_command_fallback_same_snapshot(tmp_path):
     inject_calendar_handler(plugin)
     plugin.services.calendar._has_snapshot = True
     plugin.services.calendar.sync_from_source = AsyncMock()
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
     event = Mock(plain_result=lambda text: text)
     results = [result async for result in plugin.event_schedule(event)]
     assert "未来 14 天" in results[0]
@@ -192,8 +206,12 @@ async def test_union_command_failure_no_refetch(page, command):
     plugin.services.raid_application = Mock(
         **{application_call: AsyncMock(return_value=RaidRankingData([]))}
     )
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
-    results = [result async for result in getattr(plugin, command)(Mock(plain_result=lambda text: text))]
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
+    inject_raid_handler(plugin)
+    route = plugin.union_raid_ranking if command == "union_raid_ranking" else plugin.union_raid_my
+    results = [result async for result in route(Mock(plain_result=lambda text: text))]
     assert "当前响应" in results[0]
     getattr(plugin.services.raid_application, application_call).assert_awaited_once()
 

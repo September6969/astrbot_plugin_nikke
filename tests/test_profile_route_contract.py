@@ -80,11 +80,12 @@ def _plugin(*, account=None, application_response=None):
         assert page == "profile"
         return None
 
-    plugin._try_t2i = no_t2i
+    plugin.presentation.try_t2i = no_t2i
     plugin.handlers.profile = ProfileCommandHandler(
         account_reader=plugin.services.store,
         application=plugin.services.profile_application,
-        present=plugin._render_profile_dashboard,
+        present=plugin.presentation.render_profile,
+        invalidate_cookie=plugin.services.store.mark_cookie_invalid,
     )
     return plugin
 

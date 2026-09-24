@@ -1,5 +1,5 @@
 import asyncio
-from plugin_fixtures import make_plugin_shell
+from plugin_fixtures import inject_campaign_handler, make_plugin_shell
 import importlib.util
 import json
 from pathlib import Path
@@ -115,8 +115,11 @@ async def test_handler_fallback_same_dto_without_second_fetch(failure):
     )
     plugin.services.store = Mock()
     plugin.services.feedback_manager = None
-    plugin.campaign_t2i_renderer = Mock(render_campaign_history=AsyncMock(side_effect=failure))
+    plugin.presentation._t2i_renderer = Mock(
+        render_campaign_history=AsyncMock(side_effect=failure)
+    )
     plugin.services.campaign_renderer = Mock(render_campaign_history=Mock(return_value="fallback.png"))
+    inject_campaign_handler(plugin)
     event = Mock(
         image_result=lambda path: path,
         plain_result=lambda text: text,
@@ -124,8 +127,8 @@ async def test_handler_fallback_same_dto_without_second_fetch(failure):
     )
     assert [result async for result in plugin.campaign(event, "46-40")] == ["fallback.png"]
     plugin.services.client.get_main_quest_clear_lineup.assert_awaited_once()
-    plugin.campaign_t2i_renderer.render_campaign_history.assert_awaited_once()
-    record = plugin.campaign_t2i_renderer.render_campaign_history.await_args.args[0]
+    plugin.presentation._t2i_renderer.render_campaign_history.assert_awaited_once()
+    record = plugin.presentation._t2i_renderer.render_campaign_history.await_args.args[0]
     plugin.services.campaign_renderer.render_campaign_history.assert_called_once_with(record)
 
 
@@ -144,14 +147,19 @@ async def test_native_injection_success_and_default_pillow():
     plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
     plugin.html_render = AsyncMock(return_value="native.png")
+    plugin.presentation._t2i_renderer = Mock(
+        render_campaign_history=AsyncMock(return_value="native.png")
+    )
     plugin.services.asset_manager = Mock(get_lineup_portrait=Mock(return_value=None))
     plugin.services.campaign_renderer = Mock(render_campaign_history=Mock(return_value="pillow.png"))
     record = preview.fixture_record("normal")
-    assert await plugin._render_campaign_record(record) == "native.png"
-    plugin.html_render.assert_awaited_once()
+    assert await plugin.presentation.render_campaign_record(record) == "native.png"
+    plugin.presentation._t2i_renderer.render_campaign_history.assert_awaited_once_with(
+        record
+    )
     plugin.services.campaign_renderer.render_campaign_history.assert_not_called()
     plugin.config = {}
-    assert await plugin._render_campaign_record(record) == "pillow.png"
+    assert await plugin.presentation.render_campaign_record(record) == "pillow.png"
     plugin.services.campaign_renderer.render_campaign_history.assert_called_once_with(record)
 
 
@@ -199,8 +207,12 @@ async def test_cancellation_does_not_trigger_fallback():
     from astrbot_plugin_nikke.main import NikkePlugin
     plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin.campaign_t2i_renderer = Mock(render_campaign_history=AsyncMock(side_effect=asyncio.CancelledError()))
+    plugin.presentation._t2i_renderer = Mock(
+        render_campaign_history=AsyncMock(side_effect=asyncio.CancelledError())
+    )
     plugin.services.campaign_renderer = Mock()
     with pytest.raises(asyncio.CancelledError):
-        await plugin._render_campaign_record(preview.fixture_record("normal"))
+        await plugin.presentation.render_campaign_record(
+            preview.fixture_record("normal")
+        )
     plugin.services.campaign_renderer.render_campaign_history.assert_not_called()

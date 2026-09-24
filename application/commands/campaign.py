@@ -10,17 +10,18 @@ from ...core.privacy import safe_exception_message
 from ...features.campaign.application import CampaignApplication
 from ...features.campaign.models import ClearLineupStatus, StageClearRecord
 from ...integrations.blablalink.client import BlaBlaError, CookieExpired
-from .contracts import CommandContext, CommandResult, ImageReply, TextReply
+from .contracts import (
+    CommandContext,
+    CommandFeedbackStarter,
+    CommandResult,
+    ImageReply,
+    TextReply,
+)
 
 
 _LOGGER = logging.getLogger(__name__)
 _USAGE = "用法：/妮姬 战役 [普通/困难] <关卡名>（例如：46-40、困难 35-36）"
 _COOKIE_EXPIRED = "登录状态已失效，请重新发送 /妮姬 账号 绑定。"
-
-
-class FeedbackHandle(Protocol):
-    async def cancel(self) -> None:
-        """结束命令对应的延迟反馈任务。"""
 
 
 class CampaignCommandHandler:
@@ -30,7 +31,7 @@ class CampaignCommandHandler:
         application: CampaignApplication,
         present: Callable[[StageClearRecord], Awaitable[str]],
         invalidate_cookie: Callable[[str], None],
-        start_feedback: Callable[[], FeedbackHandle | None] | None = None,
+        start_feedback: CommandFeedbackStarter | None = None,
     ) -> None:
         self._application = application
         self._present = present
@@ -57,7 +58,9 @@ class CampaignCommandHandler:
         feedback = None
         try:
             if self._start_feedback is not None:
-                feedback = self._start_feedback()
+                feedback = self._start_feedback(
+                    context, "正在查询战役通关阵容..."
+                )
             record = await self._application.lookup(context.actor_id, stage)
             if record.status in {ClearLineupStatus.RATE_LIMITED, ClearLineupStatus.ERROR}:
                 return CommandResult((TextReply(record.status_message),))

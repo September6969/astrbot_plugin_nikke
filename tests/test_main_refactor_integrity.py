@@ -142,7 +142,13 @@ class MainRefactorIntegrityTests(unittest.TestCase):
             self.assertTrue(
                 any(
                     isinstance(node, ast.Attribute)
-                    and node.attr in {"command_runtime", "adapters", "_dispatch_account_command", "daily"}
+                    and node.attr in {
+                        "command_runtime",
+                        "adapters",
+                        "_dispatch_account_command",
+                        "daily",
+                        "_help_text",
+                    }
                     for node in ast.walk(method)
                 ),
                 name,

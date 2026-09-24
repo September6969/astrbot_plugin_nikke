@@ -142,17 +142,29 @@ class PrefixNormalizationAndCommandTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("/妮姬 公告", reply[0])
 
     async def test_hash_prefix_in_nikke_command(self):
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
+
         plugin = make_plugin_shell()
-        plugin.tower_registry = None
         event = SimpleNamespace(plain_result=lambda text: text)
 
-        called = False
-        async def mock_info(ev, name):
-            nonlocal called
-            called = True
-            yield "info called with " + name
+        calls = []
 
-        plugin.info = mock_info
+        class CharacterHandler:
+            async def handle(self, context):
+                calls.append(
+                    (
+                        context.parameters["operation"],
+                        context.parameters["name"],
+                    )
+                )
+                return CommandResult(
+                    (TextReply("info called with " + context.parameters["name"]),)
+                )
+
+        plugin.handlers.character = CharacterHandler()
         replies = [item async for item in plugin.nikke(event, "#妮姬", "查询", "资料 拉毗")]
-        self.assertTrue(called)
+        self.assertEqual(calls, [("info", "拉毗")])
         self.assertIn("拉毗", replies[0])

@@ -1,5 +1,7 @@
 import unittest
+from importlib import import_module
 from importlib.metadata import PackageNotFoundError
+from pathlib import Path
 from unittest.mock import patch
 
 from astrbot.api.star import Star
@@ -12,6 +14,18 @@ from astrbot_plugin_nikke.main import NikkePlugin
 
 
 class AstrBotCompatibilityTests(unittest.TestCase):
+    def test_packaging_is_declared_directly_and_compatibility_imports(self):
+        root = Path(__file__).resolve().parents[1]
+        requirements = (root / "requirements.txt").read_text(encoding="utf-8")
+        direct_requirements = {
+            line.partition("#")[0].strip().lower()
+            for line in requirements.splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        }
+        self.assertIn("packaging>=23.2,<27", direct_requirements)
+        module = import_module("astrbot_plugin_nikke.adapters.astrbot.compatibility")
+        self.assertTrue(callable(module.require_supported_astrbot_version))
+
     def test_accepts_supported_astrbot_release_range(self):
         for supported in ("4.24.0", "4.28.0", "4.99.0"):
             with self.subTest(version=supported):

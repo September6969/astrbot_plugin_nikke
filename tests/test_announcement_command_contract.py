@@ -84,7 +84,7 @@ async def test_unsupported_announcement_action_uses_the_shared_prompt():
 
 
 def test_announcement_runtime_routes_do_not_read_delivery_or_sync_state():
-    from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
+    from astrbot_plugin_nikke.main import NikkePlugin
 
     forbidden = {
         "announcement_delivery",
@@ -102,7 +102,7 @@ def test_announcement_runtime_routes_do_not_read_delivery_or_sync_state():
     )
 
     for name in route_names:
-        method = getattr(NikkeCommandRuntime, name)
+        method = getattr(NikkePlugin, name)
         tree = ast.parse(textwrap.dedent(inspect.getsource(method)))
         names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
         names.update(
