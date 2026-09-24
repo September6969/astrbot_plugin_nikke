@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "reviewed_source_head": "6664df93e0011239b6a1284478cc863dcdc0353e",
+  "review_type": "manual_visual_integrity_screen",
+  "review_scope": "Only the 27 source-matched PNGs explicitly added to the synchronized bundled manifests in this phase.",
+  "criteria": [
+    "PNG displays as a non-empty character/render composition.",
+    "No obvious decode corruption or severe unintended truncation is visible.",
+    "Large props, vehicles, effects, or wide framing are not rejected solely for being unusual when they are part of the rendered composition."
+  ],
+  "limitations": [
+    "This is a visual integrity screen, not pixel-perfect reproduction certification.",
+    "Visual appearance is not used to infer a semantic torso/core axis.",
+    "Source identity is established by canonical resource mapping and pinned skeleton/atlas provenance, not by visual guesswork."
+  ],
+  "result": "all_reviewed_images_passed_basic_visual_integrity_screen",
+  "render_ids": [
+    "c011",
+    "c012",
+    "c016",
+    "c070",
+    "c072",
+    "c080",
+    "c082",
+    "c100",
+    "c101",
+    "c102",
+    "c110",
+    "c111",
+    "c120",
+    "c140",
+    "c161",
+    "c170",
+    "c172",
+    "c180",
+    "c181",
+    "c220",
+    "c221",
+    "c222",
+    "c224",
+    "c233",
+    "c270",
+    "c310",
+    "c400"
+  ],
+  "excluded_render_ids": {
+    "c191": "Not visually promoted because source atlas SHA-256 does not match its generation record."
+  }
+}

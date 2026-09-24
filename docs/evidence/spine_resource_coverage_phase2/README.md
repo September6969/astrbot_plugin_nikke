@@ -56,6 +56,7 @@
 ## Evidence files
 
 - `render-source-verification.json`: 28 个候选的 pinned source 核验；其中 27 个 generation inputs 匹配，`c191` 不匹配。
+- `visual-review.json`: 对拟登记的 27 张现有 PNG 逐张查看的完整性筛查记录；不把自动分类或图像观感当作语义 Core Axis 证据。
 - `undeclared-png-audit.json`: 提升 manifest 前，对 28 个 PNG 的穷尽分类；27 个候选、1 个无效资源。
 - `coverage-summary.json`: 当前 manifest 下的可复现完整集合报告。
 - `c018-character-card-diagnostic.json`: c018 portrait、anchor/framing 和白卡预览哈希/尺寸诊断。
