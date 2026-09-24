@@ -1,9 +1,12 @@
 from __future__ import annotations
+from plugin_fixtures import inject_tarot_handler, make_plugin_shell
 
 import json
+import random
 import shutil
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -11,6 +14,7 @@ from PIL import Image
 
 from astrbot_plugin_nikke.features.tarot.models import DrawnTarotCard
 from astrbot_plugin_nikke.features.tarot.service import TarotDeckRepository, TarotService
+from astrbot_plugin_nikke.integrations.tarot.images import TarotImageProvider
 
 
 SOURCE_DATA = Path(__file__).resolve().parents[1] / "assets" / "tarot" / "tarot_cards.json"
@@ -48,6 +52,23 @@ class TarotBackendTests(unittest.TestCase):
         )
         self.assertTrue(all(item.orientation in {"upright", "reversed"} for item in reading.cards))
 
+    def test_injected_random_source_makes_draws_reproducible(self) -> None:
+        first = TarotService(
+            self.root,
+            self.runtime / "first",
+            random_source=random.Random(2026),
+        ).draw_three()
+        second = TarotService(
+            self.root,
+            self.runtime / "second",
+            random_source=random.Random(2026),
+        ).draw_three()
+
+        self.assertEqual(
+            [(item.card.key, item.orientation) for item in first.cards],
+            [(item.card.key, item.orientation) for item in second.cards],
+        )
+
     def test_daily_draw_is_stable_and_persisted(self) -> None:
         when = datetime(2026, 9, 14, 3, 0, tzinfo=timezone.utc)
         service1 = TarotService(self.root, self.runtime)
@@ -56,6 +77,50 @@ class TarotBackendTests(unittest.TestCase):
         two = service2.draw_daily("aiocqhttp:123456", now=when)
         self.assertEqual(one.cards[0].card.key, two.cards[0].card.key)
         self.assertEqual(one.cards[0].orientation, two.cards[0].orientation)
+
+    def test_daily_draw_uses_injected_clock_in_china_timezone(self) -> None:
+        fixed_now = datetime(2026, 9, 14, 16, 0, tzinfo=timezone.utc)
+        service = TarotService(
+            self.root,
+            self.runtime,
+            clock=lambda: fixed_now,
+        )
+
+        reading = service.draw_daily("aiocqhttp:clock")
+
+        self.assertEqual(reading.date_key, "2026-09-15")
+
+    def test_daily_draw_uses_utc8_date_boundary(self) -> None:
+        service = TarotService(self.root, self.runtime)
+        before_midnight = datetime(2026, 9, 14, 15, 59, tzinfo=timezone.utc)
+        after_midnight = datetime(2026, 9, 14, 16, 0, tzinfo=timezone.utc)
+
+        first = service.draw_daily("aiocqhttp:date-boundary", now=before_midnight)
+        second = service.draw_daily("aiocqhttp:date-boundary", now=after_midnight)
+
+        self.assertEqual(first.date_key, "2026-09-14")
+        self.assertEqual(second.date_key, "2026-09-15")
+        saved = json.loads((self.runtime / "daily_draws.json").read_text(encoding="utf-8"))
+        self.assertEqual(set(saved), {"2026-09-14", "2026-09-15"})
+
+    def test_daily_draw_concurrent_calls_keep_one_subject_record(self) -> None:
+        service = TarotService(self.root, self.runtime)
+        when = datetime(2026, 9, 14, 3, 0, tzinfo=timezone.utc)
+
+        def draw_once(_: int):
+            return service.draw_daily("aiocqhttp:concurrent", now=when)
+
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            readings = list(pool.map(draw_once, range(16)))
+
+        results = {
+            (reading.date_key, reading.cards[0].card.key, reading.cards[0].orientation)
+            for reading in readings
+        }
+        self.assertEqual(results, {("2026-09-14", readings[0].cards[0].card.key, readings[0].cards[0].orientation)})
+        saved = json.loads((self.runtime / "daily_draws.json").read_text(encoding="utf-8"))
+        self.assertEqual(set(saved), {"2026-09-14"})
+        self.assertEqual(len(saved["2026-09-14"]), 1)
 
     def test_minor_arcana_activates_only_when_all_56_images_exist(self) -> None:
         payload = json.loads(SOURCE_DATA.read_text(encoding="utf-8"))
@@ -88,7 +153,9 @@ class TarotBackendTests(unittest.TestCase):
         service = TarotService(self.root, self.runtime)
         card = service.deck.card_by_key(major["key"])
         assert card is not None
-        reversed_path = service.images.image_for(DrawnTarotCard(card, "reversed"))
+        reversed_path = TarotImageProvider(
+            service.deck, self.runtime / "reversed_cache"
+        ).image_for(DrawnTarotCard(card, "reversed"))
         self.assertIsNotNone(reversed_path)
         with Image.open(reversed_path) as rotated:
             self.assertEqual(rotated.convert("RGB").getpixel((1, 1)), (255, 0, 0))
@@ -131,10 +198,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_help_and_status(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         # Help
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "帮助")]
@@ -151,10 +219,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_draw_single(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "单抽")]
         # May have 0 or 1 image depending on whether asset exists on disk in temp dir,
@@ -167,10 +236,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_draw_three(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "三张")]
         self.assertTrue(len(results) >= 1)
@@ -184,10 +254,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_tarot_command_draw_daily(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         event = DummyTarotEvent("999888")
         results1 = [r async for r in plugin.tarot_command(event, "今日")]
@@ -195,13 +266,27 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(results1[-1][1], results2[-1][1])
         self.assertIn("【今日塔罗】", results1[-1][1])
 
+    async def test_tarot_command_daily_emits_one_text_result(self) -> None:
+        from astrbot_plugin_nikke.main import NikkePlugin
+
+        plugin = make_plugin_shell()
+        plugin.plugin_dir = self.root
+        plugin.data_dir = self.runtime
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
+
+        results = [r async for r in plugin.tarot_command(DummyTarotEvent("single-message"), "今日")]
+        self.assertEqual(sum(result[0] == "plain" for result in results), 1)
+        self.assertEqual(results[-1][0], "plain")
+
     async def test_tarot_command_unknown_action(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "未知动作")]
         self.assertEqual(len(results), 1)
@@ -210,10 +295,11 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_nikke_command_dispatches_tarot(self) -> None:
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.plugin_dir = self.root
         plugin.data_dir = self.runtime
-        plugin.tarot = TarotService(self.root, self.runtime)
+        plugin.services.tarot = TarotService(self.root, self.runtime)
+        inject_tarot_handler(plugin)
 
         # Dispatch via nikke(event, "塔罗", "单抽")
         results = [r async for r in plugin.nikke(DummyTarotEvent(), "塔罗", "单抽")]
@@ -228,4 +314,3 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

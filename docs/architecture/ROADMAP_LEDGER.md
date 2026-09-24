@@ -2,6 +2,8 @@
 
 更新时间：2026-09-12。本文件是路线图状态摘要，不是运行时状态源；每次恢复前仍须重新 fetch、核验 GitHub PR/CI、工作树和未提交状态。
 
+> 本文早期单角色卡条目（1800×1000、Pillow renderer、旧视觉回退）是历史交付记录，不代表当前产品支持。PR #103 后唯一生产单卡为 1600×2400 白色竖版 T2I replica，失败明确报错且不回退。
+
 ## 当前基线
 
 本轮按依赖顺序推进独立 PR。本次接管主题在现有 `fix/live-runtime-v03` 分支原地继续；当前重新核验的 `origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0` 仅作为事实基线记录，恢复任务时仍须重新核验。
@@ -153,7 +155,7 @@
 ## Voice Pipeline V2（当前独立主题）
 
 - `feat/voice-pipeline-v2` 从合并后的 `origin/main@09821816f7489885f4fb33045fd56fe39adda1d3` 建立；接入本地音频 → 精确证据映射的官方动态资源 → 文本三级回退。
-- `VoiceMapRegistry` 要求 `character + costume + locale` 完整精确键、HTTPS 来源和核验日期；`assets/voice_poke_map.json` 当前保持空表，未把剧情语音或 Alice 映射猜成 Poke 语音。
+- `VoiceMapRegistry` 要求 `character + costume + locale` 完整精确键、HTTPS 来源和核验日期；截至 2026-09-22，`assets/voice_poke_map.json` 为 schema v3、含 2106 条 source-annotated 映射，仍未把剧情语音或 Alice 映射猜成 Poke 语音。
 - `VoicePipeline` 共享下载/编码任务，响应预算为 4 秒、最大 5 秒；插件关闭时回收 pipeline、provider 和 encoder。工具缺失或动态映射不存在时保持文本回退。
 - 离线状态目标为 `READY_OFFLINE`；角色/服装映射、资源授权、NapCat/OneBot 实际 Record 播放和 QQ 送达仍为 `NEEDS_LIVE_EVIDENCE`。
 

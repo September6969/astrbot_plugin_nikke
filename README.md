@@ -12,12 +12,12 @@
 - 技能等级、突破、核心和装备词条整理。
 - NIKKE 风格图片卡、每日账号健康检查与群汇总框架。
 - 中文精简指令、英文旧指令兼容，以及受独立开关保护的国际服 CDK 兑换。
-- 单角色练度使用 1800×1000 横版角色海报，展示立绘、核心属性、模块化养成、四件装备卡和完整词条汇总；只请求目标角色详情。
+- 单角色练度使用唯一的 1600×2400 白色竖版 replica 卡，展示 Spine 立绘、Face Anchor / Core Axis 构图、核心属性、装备和词条区域；只请求目标角色详情，渲染失败时明确提示且不回退为旧 Pillow 卡。
 - 公告/日程查询接入官网 InformationFeeds：常规扫描最多 2 页×5 条，管理员深度重扫最多 5 页×20 条；支持 en/ja/ko/th/de/fr 本地过滤、全文读取、磁盘缓存降级和独立内容/日程版本。日期解析仍为启发式。
 - 联盟突袭总览及当前响应内伤害排名；主线通关史查询使用官网静态关卡 ID，覆盖 3,572 项普通/困难关卡。
 - 无需绑定账号的塔层静态速查，覆盖 7,350 个公开塔层；不是玩家进度或通关保证。
 - 批量 CDK 逐码持久化、同账号互斥和不确定结果保护；动态后台任务在关闭时统一回收。
-- 本地授权攻略索引，以及默认关闭的 OneBot 戳一戳语音链路：本地授权音频 → 有来源证据的官方动态资源 → 文本回退；`assets/voice_poke_map.json` 当前为空，实际 QQ 播放尚待验收。
+- 本地授权攻略索引，以及默认关闭的 OneBot 戳一戳语音链路：本地授权音频 → 有来源证据的官方动态资源 → 文本回退；截至 2026-09-22，`assets/voice_poke_map.json` 为 schema v3、含 2106 条映射，实际 QQ 播放和资源授权仍待验收。
 - 离线缓存清理工具默认只生成计划；仅对已知缓存路径显式传入 `--apply` 才会删除陈旧缓存，不触碰数据库、密钥或出图目录。
 
 尚未完成或默认禁用：
@@ -42,7 +42,7 @@
 
 ## 最小部署
 
-要求：AstrBot `>=4.24,<5`、Python 3.10+、可访问 BlaBlaLink 的网络，以及 HTTPS 域名。
+要求：AstrBot `>=4.24,<5`、Python `>=3.12`、可访问 BlaBlaLink 的网络，以及 HTTPS 域名。AstrBot 4.24.0 起要求 Python 3.12 或更新版本；插件启动时会检查 AstrBot 版本，无法确认版本或不满足范围时会在宿主初始化前明确拒绝加载。
 
 1. 将目录放入 `AstrBot/data/plugins/astrbot_plugin_nikke`。
 2. 安装 `requirements.txt` 中的依赖并重启 AstrBot。
@@ -84,7 +84,7 @@ nikke.example.com {
 夜间开发新增入口：
 
 - `/妮姬 公告`、`/妮姬 日程`：公开公告及可解析日程；公告还支持 `语言 <en|ja|ko|th|de|fr>`、`分类 <活动|维护|本地标识>`、`搜索 <关键词>`、`诊断`，以及仅管理员可用的 `深度刷新 [语言]`。查询、诊断和重扫均不发送消息；深度重扫只读取公开 CMS。
-- `/妮姬 公告 订阅`、`/妮姬 公告 取消订阅`：仅机器人管理员管理当前会话。需另外开启 `enable_announcement_push`，默认不会发送；失败退避 5 分钟，截止提醒为 24/6/1 小时。
+- `/妮姬 公告 订阅`、`/妮姬 公告 取消订阅`：仅机器人管理员管理当前会话。需另外开启 `enable_announcement_push`，默认不会发送；明确失败退避 5 分钟，发送异常或游标提交失败进入未知状态并禁止自动重发，截止提醒为 24/6/1 小时。
 - `/妮姬 攻略 练度 2`：按本地授权索引分页，每页最多 3 项。
 - `/妮姬 联盟突袭 排名`：当前响应范围内排名。
 - `/妮姬 联盟突袭 我的`：按绑定账号稳定 `game_openid` 精确筛选当前响应记录；不声称完整赛季覆盖。
@@ -137,28 +137,24 @@ nikke.example.com {
 
 ## 架构与分层
 
-插件在经过 Issue #82 重构后采用领域模块化设计，根目录平铺业务代码均已收敛至分层包中，并通过根目录存根（Compatibility Shims）实现 100% 向后兼容：
+当前代码按宿主适配、命令应用、领域功能、外部集成与核心装配分层；完整模块迁移、边界、删除清单和恢复说明见[整仓重构交付记录](docs/refactor/FINAL_DELIVERY.md)。
 
-- `ui/`：主题令牌、通用卡片基元及各领域专用渲染器（`ui/renderers/`）。
-- `features/`：13 个高内聚领域业务模块（`character`, `profile`, `raid`, `campaign`, `daily`, `tarot`, `cdk`, `voice`, `calendar`, `announcement`, `tower`, `guide` 等）。
-- `core/`：核心底层设施（`ServiceContainer`, `AssetManager`, `NikkeStore`, `DelayedFeedbackManager`, 配置规范化与隐私脱敏等）。
-- `integrations/`：外部依赖隔离层（`blablalink`, `spine`, `nikke_db`, `web` 服务）。
-- `assets/`：静态资源分流与多级回退（`data/` 结构化表、`icons/` 图标、`fonts/` 字体）。
-- `docs/`：7 大功能目录分层文档（`architecture/`, `acceptance/`, `evidence/`, `reports/` 等），索引详见 [docs/README.md](docs/README.md)。
+- `main.py`：AstrBot 插件轻量入口、宿主版本校验和事件注册。
+- `adapters/astrbot/`：AstrBot 事件/消息边界、版本兼容检查、纯路由与 T2I/Pillow 宿主展示桥；`command_runtime.py` 受 400 行架构门禁约束。
+- `application/commands/`：将命令输入映射到领域应用；Character、Raid、Campaign 等命令编排不依赖 AstrBot 消息对象。
+- `features/`：13 个账号、角色、日程、公告、签到、CDK、联盟突袭等领域模块。
+- `integrations/`：外部 HTTP、资产、Spine 和存储相关适配；由窄接口连接到领域服务。
+- `core/`：唯一 `ServiceContainer`/`create_container` 组合根、共享 provider、持久化和统一生命周期。
+- `ui/`：页面 payload、主题与领域 renderer。
 
 ## 测试与质量保证
 
-全套回归套件支持 Pytest 与 Node.js 合同测试：
+PR #103 本轮本地完整 pytest（Python 3.14.5）为 `1338 passed, 2 skipped, 651 subtests passed`；mypy 2.3.1 配置目标 37 个 source files、compileall、包/compatibility import 与架构门禁均通过。本机按 CI 同款 `node --test tests/extension.test.cjs`（Node v24.15.0）为 4 passed。最终 HEAD 与逐文件 manifest 指纹见 [重构交付记录](docs/refactor/FINAL_DELIVERY.md) 指向的 run artifact；本地结果不替代 PR 当前 head 的远端 CI。
 
 ```bash
-# 运行全量 Python 单元测试与契约测试
 python -m pytest -v
-
-# 运行浏览器扩展契约测试
-node tests/extension.test.cjs
+node --test tests/extension.test.cjs
 ```
-
-测试套件覆盖 930+ 个用例，包括令牌生命周期、Cookie 加密、账号作用域隔离、Replica 1600×2400 像素级排版校准、Spine 离线面部锚点与渲染、Tarot 78 张标准牌义、每日签到状态机与并发幂等锁、资源回退容错等。
 
 ## 许可证与来源
 

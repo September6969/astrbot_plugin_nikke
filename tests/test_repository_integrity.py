@@ -96,6 +96,7 @@ class RepositoryIntegrityTests(unittest.TestCase):
         ("tarot_service", "TarotService"),
         ("cdk_service", "CdkService"),
         ("asset_manager", "AssetManager"),
+        # 根 container 是唯一保留的公开兼容例外，移除期限及门禁见下方常量。
         ("container", "ServiceContainer"),
         ("storage", "NikkeStore"),
         ("client", "BlaBlaClient"),
@@ -209,6 +210,10 @@ class RepositoryIntegrityTests(unittest.TestCase):
         "web_service",
     ]
 
+    PUBLIC_ROOT_SHIM_EXCEPTIONS = {
+        "container.py": {"target": "core.container", "expires": "1.0.0"},
+    }
+
     def test_required_root_files_exist(self):
         """验证根目录必须保留的基础文件完备存在。"""
         for filename in self.REQUIRED_ROOT_FILES:
@@ -232,6 +237,14 @@ class RepositoryIntegrityTests(unittest.TestCase):
                 mod = importlib.import_module(f"astrbot_plugin_nikke.{mod_name}")
                 self.assertTrue(hasattr(mod, symbol_name), f"模块 {mod_name} 缺失符号 {symbol_name}")
 
+    def test_public_root_shim_exception_has_expiry(self):
+        """将唯一公开根 shim 限定为有版本期限的架构测试例外。"""
+        exception = self.PUBLIC_ROOT_SHIM_EXCEPTIONS["container.py"]
+        self.assertEqual(exception, {"target": "core.container", "expires": "1.0.0"})
+        source = (ROOT / "container.py").read_text(encoding="utf-8")
+        self.assertIn("下一个 major 版本（1.0.0）移除", source)
+        self.assertIn(".core.container", source)
+
     def test_forbidden_legacy_root_modules_cleaned(self):
         """验证已废弃归档的根目录旧模块已被彻底清除且无法从根目录导入。"""
         for mod_name in self.FORBIDDEN_LEGACY_ROOT_MODULES:
@@ -240,6 +253,23 @@ class RepositoryIntegrityTests(unittest.TestCase):
                 self.assertFalse(shim_file.is_file(), f"根目录仍残留已废弃模块: {mod_name}.py")
                 with self.assertRaises(ModuleNotFoundError, msg=f"已清理模块 {mod_name} 仍能从根目录导入"):
                     importlib.import_module(f"astrbot_plugin_nikke.{mod_name}")
+
+    def test_unused_internal_compatibility_paths_removed(self):
+        """验证无内部消费者的 Spine 桥接与 Profile 双摘要路径已删除。"""
+        self.assertFalse((ROOT / "experimental" / "__init__.py").exists())
+        self.assertFalse((ROOT / "experimental" / "spine_prerenderer.py").exists())
+        with self.assertRaises(ModuleNotFoundError):
+            importlib.import_module("astrbot_plugin_nikke.experimental.spine_prerenderer")
+
+        from astrbot_plugin_nikke.core.asset_manager import AssetManager
+        from astrbot_plugin_nikke.core.assets.spine_assets import SpineAssetService
+        from astrbot_plugin_nikke.features.character.registries.memorial import MemorialCategoryRegistry
+        from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
+
+        self.assertFalse(hasattr(AssetManager, "enqueue_experimental_spine"))
+        self.assertFalse(hasattr(SpineAssetService, "enqueue_experimental"))
+        self.assertFalse(hasattr(MemorialCategoryRegistry, "summarize_memorials"))
+        self.assertNotIn("memorial_summary_dict", ProfileDashboardData.__dataclass_fields__)
 
     def test_assets_structured_registries_exist(self):
         """验证 assets/data 中的 21 个核心结构化数据表均真实存在且可解析。"""

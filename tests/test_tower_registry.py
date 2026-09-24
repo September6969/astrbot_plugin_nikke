@@ -1,14 +1,29 @@
 """公开塔层查询不需要绑定账号，并安全处理未知层数与损坏快照。"""
+from plugin_fixtures import make_plugin_shell
 import json
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from astrbot_plugin_nikke.application.commands.tower import TowerCommandHandler
+from astrbot_plugin_nikke.features.tower.application import TowerApplication
 from astrbot_plugin_nikke.features.tower.registry import TowerRegistry
 from astrbot_plugin_nikke.main import NikkePlugin
 
 
 class TowerTests(IsolatedAsyncioTestCase):
+    @staticmethod
+    def _plugin(plugin_dir: Path) -> NikkePlugin:
+        plugin = make_plugin_shell()
+        plugin.plugin_dir = plugin_dir
+        plugin.services.tower_application = TowerApplication(
+            plugin_dir / "assets" / "tower_floors.json"
+        )
+        plugin.handlers.tower = TowerCommandHandler(plugin.services.tower_application)
+        plugin.adapters.command = AstrBotCommandAdapter()
+        return plugin
+
     @staticmethod
     def _snapshot() -> dict:
         return {
@@ -75,8 +90,7 @@ class TowerTests(IsolatedAsyncioTestCase):
                     self.assertIn("用法", registry.describe(tower, floor))
 
     async def test_command_does_not_need_account(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.plugin_dir = Path(__file__).resolve().parents[1]
+        plugin = self._plugin(Path(__file__).resolve().parents[1])
         event = SimpleNamespace(plain_result=lambda x: x)
         result = [x async for x in plugin.nikke(event, "塔层", "极乐净土", "1")]
         self.assertEqual(len(result), 1)
@@ -84,8 +98,7 @@ class TowerTests(IsolatedAsyncioTestCase):
 
     async def test_command_fails_closed_for_a_corrupt_snapshot(self):
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.plugin_dir = Path(directory)
+            plugin = self._plugin(Path(directory))
             assets = plugin.plugin_dir / "assets"
             assets.mkdir()
             self._write_snapshot(assets, {"floors": {}})

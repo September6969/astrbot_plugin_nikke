@@ -9,6 +9,7 @@ import unittest
 from cryptography.fernet import Fernet
 
 from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.features.account.status import BIND_SESSION_PENDING, BIND_SESSION_SUCCESS
 
 
 class StorageLifecycleTests(unittest.TestCase):
@@ -43,7 +44,9 @@ class StorageLifecycleTests(unittest.TestCase):
             store = NikkeStore(directory)
             for i in range(1, 4):
                 token = f"token_test_{i}_" + "x" * 20
-                store.create_bind_session(token, f"1000{i}")
+                store.create_bind_session(
+                    token, f"1000{i}", status=BIND_SESSION_PENDING
+                )
                 store.consume_bind_session(
                     token,
                     f"game_token=tok_{i}; game_uid={i}",
@@ -52,6 +55,7 @@ class StorageLifecycleTests(unittest.TestCase):
                     f"Player_{i}",
                     f"Commander_{i}",
                     "global",
+                    success_status=BIND_SESSION_SUCCESS,
                 )
             # push_enabled 默认为 1；关闭 10001 和 10003，仅保留 10002
             store.set_push("10001", False)

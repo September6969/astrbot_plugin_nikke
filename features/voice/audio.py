@@ -10,6 +10,8 @@ import wave
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
+from .ports import VoiceSettingsStore
+
 
 @dataclass
 class VoicePreference:
@@ -21,7 +23,7 @@ class VoicePreference:
     explicit_locale: bool = False
 
     @classmethod
-    def load(cls, store, key):
+    def load(cls, store: VoiceSettingsStore, key: str) -> "VoicePreference":
         raw = store.get_setting("voice:" + hashlib.sha256(key.encode()).hexdigest(), {})
         if not raw:
             return cls()
@@ -32,7 +34,7 @@ class VoicePreference:
             data["explicit_locale"] = False
         return cls(**data)
 
-    def save(self, store, key):
+    def save(self, store: VoiceSettingsStore, key: str) -> None:
         store.set_setting("voice:" + hashlib.sha256(key.encode()).hexdigest(), asdict(self))
 
 

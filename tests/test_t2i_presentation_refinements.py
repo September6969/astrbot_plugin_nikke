@@ -4,13 +4,12 @@ import pytest
 from jinja2 import Environment
 
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
-from astrbot_plugin_nikke.ui.t2i_payloads import (
-    format_compact_number,
-    display_number,
+from astrbot_plugin_nikke.ui.payloads.common import display_number, format_compact_number
+from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.character import (
     CharacterT2IPayloadBuilder,
-    ProfileT2IPayloadBuilder,
-    T2IAssetResolver,
 )
+from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.features.character.registries.static import StaticDataRegistry
 from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
 from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegistry

@@ -41,9 +41,16 @@ class FeedbackHandle:
 
 
 class DelayedFeedbackManager:
-    def __init__(self, default_delay: float = 1.5):
+    def __init__(
+        self,
+        default_delay: float = 1.5,
+        *,
+        task_factory: Callable[[Awaitable[Any]], asyncio.Task | None],
+    ):
         self.default_delay = default_delay
+        self._task_factory = task_factory
         self._active_handles: set[FeedbackHandle] = set()
+        self._closed = False
 
     def start_delayed_feedback(
         self,
@@ -53,6 +60,10 @@ class DelayedFeedbackManager:
         """启动一个延迟发送“正在处理”消息的后台任务。"""
         effective_delay = delay if delay is not None else self.default_delay
         handle = FeedbackHandle()
+        if self._closed:
+            handle.finished = True
+            handle.cancelled = True
+            return handle
         self._active_handles.add(handle)
 
         async def _runner():
@@ -70,11 +81,22 @@ class DelayedFeedbackManager:
             finally:
                 self._active_handles.discard(handle)
 
-        handle.delayed_task = asyncio.create_task(_runner())
+        coroutine = _runner()
+        try:
+            handle.delayed_task = self._task_factory(coroutine)
+        except BaseException:
+            coroutine.close()
+            self._active_handles.discard(handle)
+            raise
+        if handle.delayed_task is None:
+            handle.finished = True
+            handle.cancelled = True
+            self._active_handles.discard(handle)
         return handle
 
     async def close(self) -> None:
         """插件关闭时取消并等待全部延迟任务。"""
+        self._closed = True
         current = list(self._active_handles)
         for handle in current:
             await handle.cancel()

@@ -6,8 +6,7 @@ from __future__ import annotations
 import logging
 import math
 import re
-from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from .models import (
     CharacterCardData,
@@ -18,12 +17,32 @@ from .models import (
     FavoriteItemData,
     OptionSummary,
 )
-from .identity import CharacterDirectoryResolver
 from .stat_calculator import CharacterStatCalculator
 from astrbot_plugin_nikke.core.privacy import sanitize_log_text
-from .registries.overload import OverloadTierRegistry
-from astrbot_plugin_nikke.features.character.ol_unknown_inventory import UnknownOlInventory
-from .registries.state_effect import StateEffectRegistry
+
+
+class StateEffectLookup(Protocol):
+    """Builder 所需的状态词条只读查询合同。"""
+
+    def resolve(self, option_id: Any, function_type: Any) -> Any | None:
+        """按稳定词条 ID 与类型解析已核验元数据。"""
+
+    def resolve_option(self, option_id: Any) -> Any | None:
+        """返回唯一现场观察记录，用于发现上游类型冲突。"""
+
+
+class OverloadTierLookup(Protocol):
+    """Builder 所需的 OL 等级只读查询合同。"""
+
+    def resolve(self, option_id: Any) -> Any | None:
+        """解析词条等级与分组元数据。"""
+
+
+class UnknownOptionObserver(Protocol):
+    """只接收未知词条 ID 和原始键的观察端口。"""
+
+    def observe(self, raw_id: Any, raw_key: Any) -> None:
+        """记录一次不含账号身份的未知词条观察。"""
 
 
 SLOTS = ("head", "torso", "arm", "leg")
@@ -150,29 +169,15 @@ class CharacterCardBuilder:
 
     def __init__(
         self,
-        state_effect_registry: StateEffectRegistry | None = None,
-        overload_tier_registry: OverloadTierRegistry | None = None,
+        state_effect_registry: StateEffectLookup | None = None,
+        overload_tier_registry: OverloadTierLookup | None = None,
         stat_calculator: CharacterStatCalculator | None = None,
-        unknown_ol_inventory_path: str | Path | None = None,
+        unknown_ol_inventory: UnknownOptionObserver | None = None,
     ):
-        se_path = Path(__file__).resolve().parents[2] / "assets" / "data" / "state_effects.json"
-        if not se_path.is_file():
-            se_path = Path(__file__).resolve().parents[2] / "assets" / "state_effects.json"
-        self.state_effect_registry = state_effect_registry or StateEffectRegistry.from_file(se_path)
-
-        ol_path = Path(__file__).resolve().parents[2] / "assets" / "data" / "overload_tiers.json"
-        if not ol_path.is_file():
-            ol_path = Path(__file__).resolve().parents[2] / "assets" / "overload_tiers.json"
-        self.overload_tier_registry = overload_tier_registry or OverloadTierRegistry.from_file(ol_path)
+        self.state_effect_registry = state_effect_registry
+        self.overload_tier_registry = overload_tier_registry
         self.stat_calculator = stat_calculator or CharacterStatCalculator()
-        self.unknown_ol_inventory = (
-            UnknownOlInventory(unknown_ol_inventory_path)
-            if unknown_ol_inventory_path is not None else None
-        )
-        if self.unknown_ol_inventory is not None:
-            self.unknown_ol_inventory.prune_known({
-                entry.state_effect_id for entry in self.overload_tier_registry.entries
-            })
+        self.unknown_ol_inventory = unknown_ol_inventory
 
     @staticmethod
     def _unknown_option_label(option_id: str | None, raw_type: str) -> str:
@@ -229,11 +234,23 @@ class CharacterCardBuilder:
     ) -> EquipmentOption:
         """优先使用完整 OL 等级表；现场 registry 仅补充精确 formatter 证据。"""
         raw_type = str(function.get("function_type", "") or "Unknown")
-        tier = self.overload_tier_registry.resolve(option_id)
+        tier = (
+            self.overload_tier_registry.resolve(option_id)
+            if self.overload_tier_registry is not None
+            else None
+        )
         level = tier.level if tier is not None else _optional_int(function.get("level"), minimum=0)
-        metadata = self.state_effect_registry.resolve(option_id, raw_type)
+        metadata = (
+            self.state_effect_registry.resolve(option_id, raw_type)
+            if self.state_effect_registry is not None
+            else None
+        )
         if metadata is None and tier is not None:
-            observed = self.state_effect_registry.resolve_option(option_id)
+            observed = (
+                self.state_effect_registry.resolve_option(option_id)
+                if self.state_effect_registry is not None
+                else None
+            )
             if observed is not None:
                 logger.warning(
                     "OL_FUNCTION_TYPE_MISMATCH: id=%s expected=%s observed=%s",
@@ -277,7 +294,11 @@ class CharacterCardBuilder:
     ) -> EquipmentOption:
         """把一个 option 固定为一行，多 function detail 不再拆成多个槽位。"""
         option_id = str(effect_id) if effect_id not in (None, "", 0, "0") else None
-        tier_metadata = self.overload_tier_registry.resolve(option_id)
+        tier_metadata = (
+            self.overload_tier_registry.resolve(option_id)
+            if self.overload_tier_registry is not None
+            else None
+        )
         tier = tier_metadata.level if tier_metadata is not None else None
         valid_functions = [item for item in functions if isinstance(item, dict)]
         if not valid_functions:
@@ -339,6 +360,7 @@ class CharacterCardBuilder:
         payload: dict[str, Any],
         fetched_at: str,
         plugin_version: str,
+        display_name: str | None = None,
     ) -> CharacterCardData:
         roster = payload.get("roster_item", {}) or {}
         detail = payload.get("detail", {}) or {}
@@ -369,7 +391,11 @@ class CharacterCardBuilder:
                     functions=functions,
                     position=index,
                 )
-                metadata = self.overload_tier_registry.resolve(effect_id)
+                metadata = (
+                    self.overload_tier_registry.resolve(effect_id)
+                    if self.overload_tier_registry is not None
+                    else None
+                )
                 option.effect_group_id = metadata.group_id if metadata else None
                 if len(functions) == 1 and isinstance(functions[0], dict):
                     raw = functions[0].get("function_value")
@@ -411,7 +437,14 @@ class CharacterCardBuilder:
             fetched_at=fetched_at,
             plugin_version=plugin_version,
             name_code=str(directory.get("name_code", roster.get("name_code", ""))),
-            name_cn=CharacterDirectoryResolver.display_name(directory),
+            name_cn=display_name or str(
+                directory.get("name_zh_cn")
+                or directory.get("name_zh_tw")
+                or directory.get("name_cn")
+                or directory.get("name_en")
+                or directory.get("name_code")
+                or "未知妮姬"
+            ),
             name_en=str(directory.get("name_en", "") or ""),
             resource_id=(
                 str(directory.get("resource_id"))

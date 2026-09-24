@@ -27,7 +27,11 @@
 - 投递成功记录也默认保留 90 天；清理后把成功版本压缩到每目标的 `baseline` 水位，防止同一旧版本因重扫再次投递。
 - 首次订阅和重新订阅都以当时可见版本建立 baseline，不回放旧公告或已错过的截止提醒。
 - 已订阅目标仍可接收其 baseline 之后的版本升级，即使原公告的 `published_at` 已超过查询/重扫窗口。
-- 这是 **best-effort de-duplication**：发送成功到落盘前进程崩溃仍可能导致重复，不能称 exactly-once。
+- 发送前必须先持久化 `DISPATCH_INTENT`；明确返回 `True` 后才提交 `CONFIRMED_SUCCESS`/`delivered`。
+- 发送器异常、取消，或成功后的游标提交失败，都保留 `UNKNOWN_AFTER_ACTION`；该键继续阻塞计划，重启和后续调度不得自动重发。
+- 发送器明确返回 `False` 才是 `CONFIRMED_FAILURE`，可以使用受控 `retry_after`；`None` 或其它非布尔/非约定结果按 `UNKNOWN_AFTER_ACTION` 处理，不自动重发。未知状态只能由人工或上游幂等接口对账为 `CONFIRMED_SUCCESS` 或 `CONFIRMED_FAILURE`。
+- 该合同仍不宣称外部系统 exactly-once；它要求本地在结果不明时 fail-closed，不能把未知窗口当作失败自动重放。
+- `AnnouncementApplication` 是查询、订阅与投递编排的唯一运行时边界；每个插件运行实例只装配一个应用/投递服务，`asyncio.Lock` 只串行化该进程内同一实例，不是跨进程锁。不得让多个 worker/插件实例并发共享同一投递状态；横向扩容前须先建立分布式唯一调度/锁及上游幂等对账能力。
 
 ## ID、版本与乱序
 

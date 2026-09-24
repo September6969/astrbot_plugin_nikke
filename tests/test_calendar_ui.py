@@ -22,7 +22,7 @@ from astrbot_plugin_nikke.features.calendar.service import CalendarService
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 NOW = datetime(2026, 9, 13, 4, 0, 0, tzinfo=timezone.utc)

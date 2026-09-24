@@ -8,20 +8,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
-
-
-def _aware_utc(value: Any) -> datetime:
-    """强制转换为 timezone-aware UTC datetime，拒绝 naive datetime。"""
-    if isinstance(value, str):
-        parsed = datetime.fromisoformat(value)
-    elif isinstance(value, datetime):
-        parsed = value
-    else:
-        raise ValueError(f"时间必须是 ISO 8601 字符串或 datetime 对象: {value!r}")
-
-    if parsed.tzinfo is None or parsed.tzinfo.utcoffset(parsed) is None:
-        raise ValueError(f"时间必须包含明确时区信息 (拒绝 naive datetime): {value!r}")
-    return parsed.astimezone(timezone.utc)
+from .time_rules import CST, EventStatus, TimePrecision, _aware_utc, resolve_event_status
 
 
 @dataclass(slots=True)
@@ -93,24 +80,19 @@ class CalendarActivity:
         return tuple(result)
 
     def is_active(self, now: datetime | None = None) -> bool:
-        current = _aware_utc(now) if now else datetime.now(timezone.utc)
-        return self.start_at <= current <= self.end_at
+        return resolve_event_status(self, now) == EventStatus.ACTIVE.value
 
     def is_upcoming(self, now: datetime | None = None) -> bool:
-        current = _aware_utc(now) if now else datetime.now(timezone.utc)
-        return current < self.start_at
+        return resolve_event_status(self, now) == EventStatus.UPCOMING.value
 
     def is_ended(self, now: datetime | None = None) -> bool:
-        current = _aware_utc(now) if now else datetime.now(timezone.utc)
-        return current > self.end_at
+        return resolve_event_status(self, now) == EventStatus.ENDED.value
 
     def remaining_display(self, now: datetime | None = None) -> str:
         current = _aware_utc(now) if now else datetime.now(timezone.utc)
-        if current > self.end_at:
+        if current >= self.end_at:
             return "已结束"
         if getattr(self, "end_precision", "EXACT") != "EXACT":
-            from datetime import timedelta
-            CST = timezone(timedelta(hours=8))
             return f"{self.end_at.astimezone(CST).strftime('%m.%d')} 截止"
         if current < self.start_at:
             diff = self.start_at - current
@@ -209,11 +191,4 @@ class CalendarActivity:
             display_score=int(data.get("display_score", 0) or 0),
             display_tier=str(data.get("display_tier", "META") or "META"),
         )
-
-
-def __getattr__(name: str) -> Any:
-    if name == "TimePrecision":
-        from .canonical_models import TimePrecision
-        return TimePrecision
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

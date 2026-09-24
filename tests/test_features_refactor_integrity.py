@@ -6,29 +6,35 @@ import pytest
 
 def test_features_domains_importable():
     from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
+    from astrbot_plugin_nikke.features.campaign.application import CampaignApplication
     from astrbot_plugin_nikke.features.campaign.builder import CampaignHistoryBuilder
     from astrbot_plugin_nikke.features.cdk.service import CdkService
     from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
     from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
     from astrbot_plugin_nikke.features.daily.models import DailyTaskResult
+    from astrbot_plugin_nikke.features.guide.application import GuideApplication
     from astrbot_plugin_nikke.features.guide.registry import GuideRegistry
     from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
     from astrbot_plugin_nikke.features.raid.builder import UnionRaidBuilder
     from astrbot_plugin_nikke.features.tower.registry import TowerRegistry
+    from astrbot_plugin_nikke.features.tower.application import TowerApplication
     from astrbot_plugin_nikke.features.voice.character_resolver import VoiceCharacterResolver
     from astrbot_plugin_nikke.features.tarot.service import TarotService
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
 
     assert AnnouncementService is not None
+    assert CampaignApplication is not None
     assert CampaignHistoryBuilder is not None
     assert CdkService is not None
     assert CharacterCardBuilder is not None
     assert CostumeRegistry is not None
     assert DailyTaskResult is not None
+    assert GuideApplication is not None
     assert GuideRegistry is not None
     assert ProfileBuilder is not None
     assert UnionRaidBuilder is not None
     assert TowerRegistry is not None
+    assert TowerApplication is not None
     assert VoiceCharacterResolver is not None
     assert TarotService is not None
     assert CalendarService is not None

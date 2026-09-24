@@ -4,6 +4,8 @@
 > 针对 Issue #82 完成后的仓库根目录，全面排查 94 个根目录 `.py` 文件，制定清理与迁移策略。
 > 消除视觉拥挤与冗余存根，将所有业务实现与内部引用全面收敛至 `features/`, `core/`, `integrations/`, `ui/` 分层包中。
 
+> **后续状态（PR #103）**：本审计是历史快照。`character_card_renderer.py` 兼容 shim 及其 1800×1000 Pillow 实现已彻底删除；当前角色练度卡只使用白色竖版 T2I replica。
+
 ---
 
 ## 一、分类统计总览
@@ -46,7 +48,7 @@
 | 21 | `card_theme.py` | **C** | Compatibility Shim | `ui.theme` | 0 (无) | 4 (test_character_card_renderer.py, test_theme_and_profile.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
 | 22 | `cdk_models.py` | **C** | Compatibility Shim | `features.cdk.models` | 0 (无) | 3 (test_cdk.py, test_cdk_persistence.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
 | 23 | `cdk_service.py` | **C** | Compatibility Shim | `features.cdk.service` | 1 (main.py) | 4 (test_cdk.py, test_cdk_persistence.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
-| 24 | `character_card_renderer.py` | **C** | Compatibility Shim | `ui.renderers.character` | 2 (scripts/preview_character_cards.py, scripts/preview_ui_v03.py) | 5 (test_card_builder.py, test_character_card_renderer.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
+| 24 | `character_card_renderer.py` | **HISTORICAL / DELETED** | Retired legacy single-character renderer and shim | None | 0 current production refs | 0 current test refs | No compatibility surface retained | Deleted by PR #103; current white vertical T2I replica is the sole production character-card path |
 | 25 | `character_crop.py` | **C** | Legacy Implementation (unmigrated) | `features.character.crop` | 0 (无) | 1 (test_character_crop.py) | High (Business logic) | Migrate to target, then convert to shim/delete |
 | 26 | `character_detail_diagnostic.py` | **C** | Compatibility Shim | `features.character.diagnostic` | 1 (scripts/diagnose_character_details.py) | 1 (test_character_detail_diagnostic.py) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
 | 27 | `character_identity.py` | **C** | Compatibility Shim | `features.character.identity` | 2 (main.py, scripts/benchmark_measurements.py) | 1 (test_character_identity.py) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
@@ -152,3 +154,8 @@
 | **Phase 4** | PR B: 根目录终态收敛 (清理剩余 29 个存根) | 29 | 已完成并经回归测试验证 | 942 passed, 2 skipped, 0 failed |
 | **终态** | 根目录只保留 4 个核心入口文件 | 4 (`main.py`, `__init__.py`, `_version.py`, `container.py`) | 达到目标终态 | 4/4 仅留必要入口，`FORBIDDEN_LEGACY_ROOT_MODULES` 全绿 |
 
+# R21 后续复核（2026-09-23）
+
+- 删除 `experimental/spine_prerenderer.py` 及其空包 `experimental/__init__.py`：全仓 Python/测试/脚本/扩展/动态导入审计仅发现模块自身和历史审计/验收文档提及；正式唯一实现为 `integrations/spine/prerenderer.py`。`enqueue_experimental_spine()` 与 `SpineAssetService.enqueue_experimental()` 仅互相转发，没有生产或测试调用点，已随之删除。静态读取与正式受控预渲染实现保留。
+- 删除 `ProfileDashboardData.memorial_summary_dict`、`MemorialCategoryRegistry.summarize_memorials()` 以及 renderer 对 dict 摘要和字符串模拟室记录的分支。消费者审计仅发现 builder/renderer 之间的旧 DTO 通路和 `tests/test_profile_v04.py` 手工夹具；builder 已同时产出结构化 `memorial_summary`，现由唯一结构化 `summarize()` 提供展示摘要并保留未知/部分语义。
+- 保留 `container.py` 根级公开转发 shim：代码显式标注 deprecated 且发出 `DeprecationWarning`；唯一目的为历史 `ServiceContainer`/`create_container` 导入兼容，不重复装配。正式 owner 是 `core/container.py`；在 `tests/test_repository_integrity.py` 作为唯一显式例外验证，计划于 `1.0.0` 移除。仓库外当前使用量不可由本地审计证明，因此不宣称有活跃外部调用方。

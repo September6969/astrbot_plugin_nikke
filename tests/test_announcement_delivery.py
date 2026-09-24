@@ -41,7 +41,7 @@ class DeliveryTests(IsolatedAsyncioTestCase):
         records = [old, self.record()]
         sender = AsyncMock(side_effect=[False, True])
         result = await self.service.dispatch(records, [], sender, now=self.now)
-        self.assertEqual(result, {"succeeded": 1, "failed": 1})
+        self.assertEqual(result, {"succeeded": 1, "failed": 1, "unknown": 0})
         restarted = AnnouncementDelivery(self.store)
         pending = restarted.plan(records, now=self.now)
         self.assertEqual([p.target for p in pending], ["fake:group:a"])
@@ -88,3 +88,158 @@ class DeliveryTests(IsolatedAsyncioTestCase):
         sender.assert_not_awaited()
         await restarted.dispatch([self.record()], [], sender, now=self.now+timedelta(minutes=5))
         sender.assert_awaited_once()
+
+    async def test_cancelled_in_flight_send_does_not_commit_cursor(self):
+        self.service.subscribe("fake", [], now=self.now)
+        push = self.service.plan([self.record()], now=self.now)[0]
+        entered = asyncio.Event()
+        blocked = asyncio.Event()
+
+        async def sender(_target, _text):
+            entered.set()
+            await blocked.wait()
+            return True
+
+        dispatch_task = asyncio.create_task(
+            self.service.dispatch([self.record()], [], sender, now=self.now)
+        )
+        await entered.wait()
+        dispatch_task.cancel()
+        with self.assertRaises(asyncio.CancelledError):
+            await dispatch_task
+
+        state = self.store.get_setting(self.service.SETTING)
+        self.assertEqual(state["delivered"], {})
+        self.assertEqual(
+            state["dispatch_intents"][push.key]["status"],
+            "UNKNOWN_AFTER_ACTION",
+        )
+        restarted = AnnouncementDelivery(self.store)
+        retry_sender = AsyncMock(return_value=True)
+        result = await restarted.dispatch([self.record()], [], retry_sender, now=self.now)
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 0})
+        retry_sender.assert_not_awaited()
+
+    async def test_process_exit_after_send_before_cursor_commit_is_unknown(self):
+        self.service.subscribe("fake", [], now=self.now)
+        original_set_setting = self.store.set_setting
+
+        def fail_delivery_commit(key, value):
+            if key == self.service.SETTING and value.get("delivered"):
+                raise RuntimeError("synthetic process exit")
+            return original_set_setting(key, value)
+
+        self.store.set_setting = fail_delivery_commit
+        sender = AsyncMock(return_value=True)
+        result = await self.service.dispatch([self.record()], [], sender, now=self.now)
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 1})
+        sender.assert_awaited_once()
+        state = self.store.get_setting(self.service.SETTING)
+        self.assertEqual(state["delivered"], {})
+        push = self.service.plan([self.record()], now=self.now)
+        self.assertEqual(push, [])
+        self.assertEqual(len(state["dispatch_intents"]), 1)
+        self.assertEqual(next(iter(state["dispatch_intents"].values()))["status"], "UNKNOWN_AFTER_ACTION")
+
+        self.store.set_setting = original_set_setting
+        restarted = AnnouncementDelivery(self.store)
+        retry_sender = AsyncMock(return_value=True)
+        result = await restarted.dispatch([self.record()], [], retry_sender, now=self.now)
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 0})
+        retry_sender.assert_not_awaited()
+
+        key = next(iter(state["dispatch_intents"]))
+        self.assertTrue(restarted.reconcile_unknown(key, "CONFIRMED_SUCCESS", now=self.now))
+        self.assertIn(key, restarted._state()["delivered"])
+        self.assertEqual(restarted.plan([self.record()], now=self.now), [])
+
+    async def test_recovered_orphaned_intent_becomes_unknown_without_replay(self):
+        self.service.subscribe("fake", [], now=self.now)
+
+        class SimulatedProcessExit(BaseException):
+            pass
+
+        def exit_after_sender(_push, _current):
+            raise SimulatedProcessExit()
+
+        self.service._commit_success = exit_after_sender
+        sender = AsyncMock(return_value=True)
+        with self.assertRaises(SimulatedProcessExit):
+            await self.service.dispatch([self.record()], [], sender, now=self.now)
+
+        sender.assert_awaited_once()
+        state = self.store.get_setting(self.service.SETTING)
+        key = next(iter(state["dispatch_intents"]))
+        self.assertEqual(state["dispatch_intents"][key]["status"], "DISPATCH_INTENT")
+
+        restarted = AnnouncementDelivery(self.store)
+        retry_sender = AsyncMock(return_value=True)
+        result = await restarted.dispatch([self.record()], [], retry_sender, now=self.now)
+
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 1})
+        retry_sender.assert_not_awaited()
+        recovered = restarted._state()["dispatch_intents"][key]
+        self.assertEqual(recovered["status"], "UNKNOWN_AFTER_ACTION")
+
+    async def test_dispatch_intent_is_persisted_before_sender(self):
+        self.service.subscribe("fake", [], now=self.now)
+        push = self.service.plan([self.record()], now=self.now)[0]
+        observed = []
+
+        async def sender(_target, _text):
+            state = self.store.get_setting(self.service.SETTING)
+            observed.append(state["dispatch_intents"][push.key]["status"])
+            return True
+
+        result = await self.service.dispatch([self.record()], [], sender, now=self.now)
+
+        self.assertEqual(observed, ["DISPATCH_INTENT"])
+        self.assertEqual(result, {"succeeded": 1, "failed": 0, "unknown": 0})
+        state = self.service._state()
+        self.assertNotIn(push.key, state["dispatch_intents"])
+        self.assertEqual(state["delivered"][push.key]["status"], "CONFIRMED_SUCCESS")
+
+    async def test_sender_exception_is_unknown_and_not_replayed(self):
+        self.service.subscribe("fake", [], now=self.now)
+        sender = AsyncMock(side_effect=RuntimeError("transport timeout after accept"))
+
+        result = await self.service.dispatch([self.record()], [], sender, now=self.now)
+
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 1})
+        key = next(iter(self.service._state()["dispatch_intents"]))
+        self.assertEqual(self.service._state()["dispatch_intents"][key]["status"], "UNKNOWN_AFTER_ACTION")
+        restarted = AnnouncementDelivery(self.store)
+        retry_sender = AsyncMock(return_value=True)
+        await restarted.dispatch([self.record()], [], retry_sender, now=self.now)
+        retry_sender.assert_not_awaited()
+
+    async def test_indeterminate_sender_return_is_unknown_and_not_replayed(self):
+        self.service.subscribe("fake", [], now=self.now)
+        sender = AsyncMock(return_value=None)
+
+        result = await self.service.dispatch(
+            [self.record()], [], sender, now=self.now
+        )
+
+        self.assertEqual(result, {"succeeded": 0, "failed": 0, "unknown": 1})
+        restarted = AnnouncementDelivery(self.store)
+        retry_sender = AsyncMock(return_value=True)
+        await restarted.dispatch(
+            [self.record()], [], retry_sender, now=self.now + timedelta(minutes=10)
+        )
+        retry_sender.assert_not_awaited()
+
+    async def test_intent_persistence_failure_does_not_send(self):
+        self.service.subscribe("fake", [], now=self.now)
+        original_set_setting = self.store.set_setting
+
+        def fail_intent_commit(key, value):
+            if key == self.service.SETTING and value.get("dispatch_intents"):
+                raise RuntimeError("synthetic intent persistence failure")
+            return original_set_setting(key, value)
+
+        self.store.set_setting = fail_intent_commit
+        sender = AsyncMock(return_value=True)
+        with self.assertRaisesRegex(RuntimeError, "synthetic intent persistence failure"):
+            await self.service.dispatch([self.record()], [], sender, now=self.now)
+        sender.assert_not_awaited()

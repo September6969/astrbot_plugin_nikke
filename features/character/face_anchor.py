@@ -7,6 +7,7 @@ import json
 import math
 import os
 from pathlib import Path
+from typing import TypeGuard
 
 from .layout import (
     MIN_AUTO_SCALE_RATIO,
@@ -16,6 +17,7 @@ from .layout import (
     normalize_summary_count,
     summary_layout,
 )
+from .ports import CharacterRenderIdentity
 
 
 _TRUTHY = {"1", "true", "yes", "on", "preview"}
@@ -28,14 +30,19 @@ def body_centering_requested(explicit):
 
 
 @lru_cache(maxsize=1)
-def metadata():
+def metadata() -> dict[str, object]:
     try:
         assets_root = Path(__file__).resolve().parents[2] / "assets"
         candidate = assets_root / "data" / "face_anchors.json"
         if not candidate.is_file():
             candidate = assets_root / "face_anchors.json"
         data = json.loads(candidate.read_text(encoding="utf-8"))
-        return data.get("records", {}) if data.get("schema") == 1 else {}
+        if not isinstance(data, dict) or data.get("schema") != 1:
+            return {}
+        records = data.get("records")
+        if not isinstance(records, dict):
+            return {}
+        return {key: value for key, value in records.items() if isinstance(key, str)}
     except (OSError, ValueError, AttributeError):
         return {}
 
@@ -47,10 +54,10 @@ FACE_Y_OFFSET_OVERRIDES: dict[str, float | dict[str, float]] = {}
 def resolve_face_y_offset(
     render_id: str | None = None,
     char_id: str | None = None,
-    row: dict | None = None,
+    row: dict[str, object] | None = None,
 ) -> float:
     """解析 Face Anchor 后应用到卡面的垂直偏移。"""
-    def _extract_offset(value):
+    def _extract_offset(value: object) -> float | None:
         if value is None or isinstance(value, bool):
             return None
         if isinstance(value, (int, float)) and math.isfinite(value):
@@ -101,7 +108,7 @@ def resolve_face_y_offset(
     return float(DEFAULT_FACE_Y_OFFSET)
 
 
-def _finite_point(value):
+def _finite_point(value: object) -> TypeGuard[list[int | float]]:
     return (
         isinstance(value, list)
         and len(value) == 2
@@ -114,7 +121,14 @@ def _finite_point(value):
     )
 
 
-def _validated_core_axis(row: dict, portrait, point: list[float]):
+def _finite_extent(value: object) -> TypeGuard[list[int | float]]:
+    return (
+        _finite_point(value)
+        and all(item > 0 for item in value)
+    )
+
+
+def _validated_core_axis(row: dict[str, object], portrait, point: list[int | float]):
     """严格校验离线生成的头顶、眼睛、上躯干轴，不猜测缺失坐标。"""
     axis = row.get("core_axis")
     if not isinstance(axis, dict):
@@ -160,17 +174,30 @@ def _validated_core_axis(row: dict, portrait, point: list[float]):
     }, "ok"
 
 
-def framing(data, portrait, *, body_centering=None, summary_count=None):
-    from PIL import Image
-
-    if not isinstance(portrait, Image.Image):
+def framing(
+    data,
+    portrait,
+    *,
+    body_centering=None,
+    summary_count=None,
+    identity_resolver: CharacterRenderIdentity | None = None,
+):
+    if not all(
+        callable(getattr(portrait, name, None))
+        for name in ("convert", "tobytes")
+    ) or not all(hasattr(portrait, name) for name in ("size", "width", "height")):
         return {"style": "", "source": "unavailable"}
 
     # 通过正式身份映射得到包含皮肤的键；不能回退到默认皮肤锚点。
     if data.costume_selection and data.costume_selection.kind == "unknown":
         return {"style": "object-fit:contain", "source": "identity_unknown"}
 
-    key = identity_resolver().resolve_render_id(data.resource_id, data.costume_id)
+    if identity_resolver is None:
+        return {
+            "style": "object-fit:contain;object-position:50% 35%",
+            "source": "identity_unavailable",
+        }
+    key = identity_resolver.resolve_render_id(data.resource_id, data.costume_id)
     row = metadata().get(key)
     digest = hashlib.sha256(portrait.convert("RGBA").tobytes()).hexdigest()
     if isinstance(row, dict):
@@ -219,18 +246,11 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
     ):
         return {"style": "object-fit:contain", "source": "anchor_invalid"}
 
-    valid_extent = (
-        isinstance(extent, list)
-        and len(extent) == 2
-        and all(
-            isinstance(item, (int, float))
-            and not isinstance(item, bool)
-            and math.isfinite(item)
-            and item > 0
-            for item in extent
-        )
+    initial_scale = (
+        desired / extent[0]
+        if _finite_extent(extent)
+        else 2400 / portrait.height
     )
-    initial_scale = desired / extent[0] if valid_extent else 2400 / portrait.height
     initial_scale = min(initial_scale, 7200 / max(portrait.size))
     requested = body_centering_requested(body_centering)
 
@@ -284,7 +304,7 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
     scale = initial_scale
     width, height, left, top, diagnostics = _place(scale)
 
-    char_id = identity_resolver().resolve_character_id(data.resource_id)
+    char_id = identity_resolver.resolve_character_id(data.resource_id)
     y_offset = resolve_face_y_offset(render_id=key, char_id=char_id, row=row)
     desired_top = top + y_offset
     final_top = desired_top
@@ -436,11 +456,3 @@ def framing(data, portrait, *, body_centering=None, summary_count=None):
     if core_diag is not None:
         ret["core_axis"] = core_diag
     return ret
-
-
-@lru_cache(maxsize=1)
-def identity_resolver():
-    from ...integrations.nikke_db.provider import NikkeDbProvider
-
-    assets = Path(__file__).resolve().parents[2] / "assets"
-    return NikkeDbProvider(assets, assets, remote=False)

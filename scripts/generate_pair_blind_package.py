@@ -23,7 +23,7 @@ from astrbot_plugin_nikke.asset_manager import AssetManager
 from astrbot_plugin_nikke.character_master_resolver import CharacterMasterResolver
 from astrbot_plugin_nikke.card_models import CostumeSelection
 from astrbot_plugin_nikke.character_weapon_bases import card_fields
-from astrbot_plugin_nikke.t2i_payloads import CharacterT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
 from astrbot_plugin_nikke.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.t2i_templates import T2ITemplateLoader
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
@@ -220,7 +220,10 @@ async def main():
                 assets = await asyncio.to_thread(manager.resolve_character_assets, card)
                 assets.portrait = portrait
 
-                res_off = framing(card, portrait, body_centering=False)
+                res_off = framing(
+                    card, portrait, body_centering=False,
+                    identity_resolver=manager.nikke_db,
+                )
                 base_l, base_t, base_w, base_h = parse_style_transform(res_off["style"])
 
                 shifts = {

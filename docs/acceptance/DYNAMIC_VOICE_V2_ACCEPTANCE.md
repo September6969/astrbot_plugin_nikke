@@ -32,7 +32,7 @@ python -m pytest -q tests/test_voice_resource_provider.py tests/test_voice_pipel
 | 测试状态 | DONE：Python 3.10.11 定向与全量本地行为测试、Node 测试、compileall 与 diff check 通过；最终 head 对应 CI 已核验 |
 | 合成预览 | 不适用：本增量没有图片卡或音频播放预览；仅使用合成 MP3 头 |
 | 现场证据 | NEEDS_LIVE_EVIDENCE：角色/皮肤互动映射、远程资源授权、OneBot 实际播放 |
-| 产品状态 | READY_OFFLINE：动态 pipeline、生命周期和 Record 序列化已接线；`assets/voice_poke_map.json` 当前为空，真实角色/皮肤映射与播放仍为 `NEEDS_LIVE_EVIDENCE` |
+| 产品状态 | READY_OFFLINE：动态 pipeline、生命周期和 Record 序列化已接线；截至 2026-09-22，`assets/voice_poke_map.json` 含 schema v3 的 2106 条 source-annotated 映射，真实角色/皮肤映射可用性与播放仍为 `NEEDS_LIVE_EVIDENCE` |
 
 ## 最小现场动作
 

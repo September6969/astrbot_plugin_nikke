@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Unit and regression tests for Union Raid models, builder, and renderer."""
 
+from plugin_fixtures import make_plugin_shell
 import json
 import tempfile
 import unittest
@@ -314,19 +315,25 @@ class UnionRaidRendererTests(unittest.TestCase):
 
 class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_chinese_and_legacy_raid_commands_route_correctly(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
-        async def fake_union_raid(event):
-            calls.append("union_raid")
-            yield "突袭结果"
+        class RaidHandler:
+            async def handle(self, context):
+                calls.append(context.parameters["operation"])
+                return CommandResult((TextReply("突袭结果"),))
 
-        plugin.union_raid = fake_union_raid
+        plugin.handlers.raid = RaidHandler()
 
         class FakeEvent:
-            pass
+            @staticmethod
+            def plain_result(text):
+                return text
 
         event = FakeEvent()
 
@@ -346,26 +353,32 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
         results = [r async for r in plugin.query(event, "突袭")]
         self.assertEqual(results, ["突袭结果"])
 
-        self.assertEqual(len(calls), 4)
+        self.assertEqual(calls, ["overview"] * 4)
 
     async def test_my_raid_command_routes_to_member_scope(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
-        async def fake_union_raid_my(event):
-            calls.append("union_raid_my")
-            yield "我的突袭结果"
+        class RaidHandler:
+            async def handle(self, context):
+                calls.append(context.parameters["operation"])
+                return CommandResult((TextReply("我的突袭结果"),))
 
-        plugin.union_raid_my = fake_union_raid_my
+        plugin.handlers.raid = RaidHandler()
 
         class FakeEvent:
-            pass
+            @staticmethod
+            def plain_result(text):
+                return text
 
         results = [r async for r in plugin.nikke(FakeEvent(), "联盟突袭", "我的")]
         self.assertEqual(results, ["我的突袭结果"])
-        self.assertEqual(calls, ["union_raid_my"])
+        self.assertEqual(calls, ["member"])
 
 
 if __name__ == "__main__":
@@ -375,6 +388,21 @@ from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, MY
 from unittest.mock import AsyncMock
 
 class UnionRaidClientTests(unittest.IsolatedAsyncioTestCase):
+    async def test_attack_snapshot_keeps_guild_identity_with_one_overview_call(self):
+        client = BlaBlaClient()
+        account = {"cookie": "synthetic-cookie", "area_id": 81}
+        snapshot = {
+            "guild_id": "synthetic-guild",
+            "guild_name": "synthetic-union",
+            "level_info": {"participate_data": []},
+        }
+        client.get_union_raid_overview = AsyncMock(return_value=snapshot)
+
+        result = await client.get_union_raid_snapshot(account)
+
+        self.assertIs(result, snapshot)
+        client.get_union_raid_overview.assert_awaited_once_with(account, attacks=True)
+
     async def test_get_union_raid_overview_payload_contracts(self):
         client = BlaBlaClient()
         account = {"cookie": "dummy", "area_id": "81", "game_openid": "abc-def-ghi"}

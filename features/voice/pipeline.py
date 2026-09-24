@@ -2,14 +2,24 @@
 import asyncio
 import inspect
 import math
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 
 class VoicePipeline:
-    def __init__(self, provider, encoder, *, max_pending=20):
+    def __init__(
+        self,
+        provider,
+        encoder,
+        *,
+        max_pending=20,
+        task_factory: Callable[[Awaitable[Any]], asyncio.Task | None],
+    ):
         if isinstance(max_pending, bool) or not isinstance(max_pending, int) or not 1 <= max_pending <= 20:
             raise ValueError("语音任务数量超限")
         self.provider, self.encoder = provider, encoder
         self.max_pending = max_pending
+        self._task_factory = task_factory
         self._tasks = {}
         self._closed = False
 
@@ -28,7 +38,14 @@ class VoicePipeline:
         if task is None:
             if len(self._tasks) >= self.max_pending:
                 return None
-            task = asyncio.create_task(self._prepare(*key))
+            preparation = self._prepare(*key)
+            try:
+                task = self._task_factory(preparation)
+            except BaseException:
+                preparation.close()
+                raise
+            if task is None:
+                return None
             self._tasks[key] = task
             def completed(done):
                 self._tasks.pop(key, None)

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
+from plugin_fixtures import make_plugin_shell
 import time
 import unittest
 from datetime import datetime, timezone
@@ -13,7 +14,7 @@ from astrbot_plugin_nikke.features.raid.models import (
     RaidState,
     UnionRaidOverviewData,
 )
-from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
 
 
 class UnionRaidStateResolutionTests(unittest.TestCase):
@@ -126,7 +127,13 @@ class PrefixNormalizationAndCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(normalize_nikke_prefix("普通消息"), "普通消息")
 
     async def test_announcement_simplification_notice_on_extra_args(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        from astrbot_plugin_nikke.application.commands.announcement import AnnouncementCommandHandler
+
+        plugin = make_plugin_shell()
+        plugin.handlers.announcement = AnnouncementCommandHandler(
+            application=None,
+            push_enabled=lambda: False,
+        )
         event = SimpleNamespace(plain_result=lambda text: text)
 
         for bad_arg in ("10", "5", "最新", "活动", "语言 ja", "分类 维护"):
@@ -135,17 +142,29 @@ class PrefixNormalizationAndCommandTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("/妮姬 公告", reply[0])
 
     async def test_hash_prefix_in_nikke_command(self):
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.tower_registry = None
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
+
+        plugin = make_plugin_shell()
         event = SimpleNamespace(plain_result=lambda text: text)
 
-        called = False
-        async def mock_info(ev, name):
-            nonlocal called
-            called = True
-            yield "info called with " + name
+        calls = []
 
-        plugin.info = mock_info
+        class CharacterHandler:
+            async def handle(self, context):
+                calls.append(
+                    (
+                        context.parameters["operation"],
+                        context.parameters["name"],
+                    )
+                )
+                return CommandResult(
+                    (TextReply("info called with " + context.parameters["name"]),)
+                )
+
+        plugin.handlers.character = CharacterHandler()
         replies = [item async for item in plugin.nikke(event, "#妮姬", "查询", "资料 拉毗")]
-        self.assertTrue(called)
+        self.assertEqual(calls, [("info", "拉毗")])
         self.assertIn("拉毗", replies[0])

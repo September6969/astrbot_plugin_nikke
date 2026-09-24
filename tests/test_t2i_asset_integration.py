@@ -10,12 +10,27 @@ from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.scripts.preview_t2i_ui import fixture_record
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-from astrbot_plugin_nikke.ui.t2i_payloads import (CampaignT2IPayloadBuilder, UnionOverviewT2IPayloadBuilder,
-                                             UnionMemberT2IPayloadBuilder, ProfileT2IPayloadBuilder,
-                                             CharacterT2IPayloadBuilder)
+from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_campaign_payload_builder_uses_canonical_page_module():
+    assert CampaignT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.campaign"
+
+
+def test_union_payload_builders_are_owned_by_page_modules():
+    assert UnionMemberT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_member"
+    assert UnionOverviewT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_overview"
+    assert UnionRecordsT2IPayloadBuilder.__module__ == "astrbot_plugin_nikke.ui.payloads.raid_records"
+
+    assert not (ROOT / "ui" / "t2i_payloads.py").exists()
 
 
 @pytest.fixture

@@ -1,13 +1,33 @@
 """本地测试音频及 OneBot 通知过滤；不进行真实消息发送。"""
+from plugin_fixtures import make_plugin_shell
 import json
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
+from unittest.mock import AsyncMock, Mock
+from astrbot_plugin_nikke.adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from astrbot_plugin_nikke.features.voice.audio import VoiceAudioCache, VoicePreference, is_self_poke
+from astrbot_plugin_nikke.features.voice.application import VoiceApplication
 from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
 class VoiceAudioTests(IsolatedAsyncioTestCase):
+    @staticmethod
+    def _wire_voice_adapter(plugin, audio_cache, mapping_registry=None, pipeline=None):
+        application = VoiceApplication(
+            store=plugin.services.store,
+            character_resolver=SimpleNamespace(),
+            costume_registry=SimpleNamespace(),
+            audio_cache=audio_cache,
+            mapping_registry=mapping_registry,
+            pipeline=pipeline,
+            dynamic_enabled=True,
+        )
+        plugin.adapters.voice = AstrBotVoiceAdapter(application)
+        plugin._closing = False
+        return application
+
     async def test_invalid_and_overlong_wav_are_not_cached(self):
         import wave
         with tempfile.TemporaryDirectory() as directory:
@@ -55,59 +75,60 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
         self.assertFalse(is_self_poke(dict(event, user_id="fake-bot")))
 
     async def test_listener_default_off_and_record_sender(self):
-        from types import SimpleNamespace
-        from unittest.mock import AsyncMock, Mock
         from astrbot_plugin_nikke.main import NikkePlugin
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.store = NikkeStore(directory)
+            plugin = make_plugin_shell()
+            plugin.services.store = NikkeStore(directory)
             plugin.plugin_dir = Path(directory)
+            audio_cache = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "fake.wav"))
+            self._wire_voice_adapter(plugin, audio_cache)
             raw = dict(post_type="notice", notice_type="notify", sub_type="poke", self_id="fake-bot", target_id="fake-bot", user_id="fake-user")
             event = SimpleNamespace(message_obj=SimpleNamespace(raw_message=raw), get_platform_name=lambda: "aiocqhttp",
                 get_sender_id=lambda: "fake-user", plain_result=lambda x: x, chain_result=Mock(side_effect=lambda x: x))
             self.assertEqual([x async for x in plugin.on_nikke_poke(event)], [])
             event.get_sender_id = lambda: "other-user"
             raw["user_id"] = "other-user"
-            VoicePreference(True).save(plugin.store, "aiocqhttp:other-user")
-            plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "fake.wav"))
+            VoicePreference(True).save(plugin.services.store, "aiocqhttp:other-user")
             self.assertEqual(len([x async for x in plugin.on_nikke_poke(event)]), 1)
             event.get_sender_id = lambda: "fake-user"
             raw["user_id"] = "fake-user"
             event.chain_result.reset_mock()
-            VoicePreference(True).save(plugin.store, "aiocqhttp:fake-user")
-            plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "fake.wav"))
+            VoicePreference(True).save(plugin.services.store, "aiocqhttp:fake-user")
             self.assertEqual(len([x async for x in plugin.on_nikke_poke(event)]), 1)
             event.chain_result.assert_called_once()
             self.assertEqual([x async for x in plugin.on_nikke_poke(event)], [])
 
     async def test_listener_uses_verified_dynamic_pipeline_after_local_cache_miss(self):
-        from types import SimpleNamespace
-        from unittest.mock import AsyncMock, Mock
         from astrbot_plugin_nikke.main import NikkePlugin
         from astrbot_plugin_nikke.features.voice.mapping import VoiceMapping
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.store = NikkeStore(directory)
+            plugin = make_plugin_shell()
+            plugin.services.store = NikkeStore(directory)
             plugin.plugin_dir = Path(directory)
             plugin.config = {"voice_dynamic_enabled": True}
             raw = dict(post_type="notice", notice_type="notify", sub_type="poke", self_id="fake-bot", target_id="fake-bot", user_id="fake-user")
             event = SimpleNamespace(message_obj=SimpleNamespace(raw_message=raw), get_platform_name=lambda: "aiocqhttp",
                 get_sender_id=lambda: "fake-user", plain_result=lambda x: x, chain_result=Mock(side_effect=lambda x: x))
             preference = VoicePreference(True, character="alice", locale="en", skin="default")
-            preference.save(plugin.store, "aiocqhttp:fake-user")
-            plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=None))
+            preference.save(plugin.services.store, "aiocqhttp:fake-user")
             mock_mapping = VoiceMapping(
                 "alice", "default", "c191", "en", "alice_poke", "alice_poke_01",
                 "https://example.invalid/source", "https://example.invalid/map", "2026-09-08",
             )
-            plugin.voice_mapping = SimpleNamespace(
+            mapping_registry = SimpleNamespace(
                 resolve=Mock(return_value=mock_mapping),
                 resolve_poke=Mock(return_value=mock_mapping),
             )
-            plugin.voice_pipeline = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "verified.wav"))
+            pipeline = SimpleNamespace(resolve=AsyncMock(return_value=Path(directory) / "verified.wav"))
+            self._wire_voice_adapter(
+                plugin,
+                SimpleNamespace(resolve=AsyncMock(return_value=None)),
+                mapping_registry,
+                pipeline,
+            )
             outputs = [x async for x in plugin.on_nikke_poke(event)]
             self.assertEqual(len(outputs), 1)
-            plugin.voice_pipeline.resolve.assert_awaited_once_with("alice_poke", "alice_poke_01", "en", budget=4)
+            pipeline.resolve.assert_awaited_once_with("alice_poke", "alice_poke_01", "en", budget=4)
 
     def test_voice_preference_default_locale_and_migration(self):
         import hashlib
@@ -153,19 +174,20 @@ class VoiceAudioTests(IsolatedAsyncioTestCase):
                 self.assertTrue(loaded_valid.explicit_locale)
 
     async def test_poke_interaction_audio_only_no_text_fallback(self):
-        from types import SimpleNamespace
-        from unittest.mock import AsyncMock, Mock
         from astrbot_plugin_nikke.main import NikkePlugin
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.store = NikkeStore(directory)
+            plugin = make_plugin_shell()
+            plugin.services.store = NikkeStore(directory)
             plugin.plugin_dir = Path(directory)
             raw = dict(post_type="notice", notice_type="notify", sub_type="poke", self_id="fake-bot", target_id="fake-bot", user_id="fake-user")
             event = SimpleNamespace(message_obj=SimpleNamespace(raw_message=raw), get_platform_name=lambda: "aiocqhttp",
                 get_sender_id=lambda: "fake-user", plain_result=lambda x: x, chain_result=Mock(side_effect=lambda x: x))
-            VoicePreference(True, character="rapi", locale="ja").save(plugin.store, "aiocqhttp:fake-user")
-            plugin._voice_audio = SimpleNamespace(resolve=AsyncMock(return_value=None))
-            plugin.voice_mapping = SimpleNamespace(resolve_poke=Mock(return_value=None))
+            VoicePreference(True, character="rapi", locale="ja").save(plugin.services.store, "aiocqhttp:fake-user")
+            self._wire_voice_adapter(
+                plugin,
+                SimpleNamespace(resolve=AsyncMock(return_value=None)),
+                SimpleNamespace(resolve_poke=Mock(return_value=None)),
+            )
             outputs = [x async for x in plugin.on_nikke_poke(event)]
             self.assertEqual(outputs, [], "音频解析失败时戳一戳必须不发送任何内容，禁止伪造文本台词")
 

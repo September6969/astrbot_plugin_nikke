@@ -1,19 +1,48 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import ast
+import inspect
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from PIL import Image
-
 from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
-from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
+from astrbot_plugin_nikke.features.character.registries.overload import OverloadTierRegistry
+from astrbot_plugin_nikke.features.character.registries.state_effect import StateEffectRegistry
+from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProvider
 from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, CHARACTER_DETAILS
 from astrbot_plugin_nikke._version import PLUGIN_VERSION
 
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "character_details_sanitized.json"
+
+
+def make_builder(*, state_effect_registry=None, overload_tier_registry=None, unknown_ol_inventory=None):
+    assets = Path(__file__).resolve().parents[1] / "assets"
+    state_effect_path = assets / "data" / "state_effects.json"
+    if not state_effect_path.is_file():
+        state_effect_path = assets / "state_effects.json"
+    overload_tier_path = assets / "data" / "overload_tiers.json"
+    if not overload_tier_path.is_file():
+        overload_tier_path = assets / "overload_tiers.json"
+    return CharacterCardBuilder(
+        state_effect_registry=(
+            state_effect_registry
+            if state_effect_registry is not None
+            else StateEffectRegistry.from_file(state_effect_path)
+        ),
+        overload_tier_registry=(
+            overload_tier_registry
+            if overload_tier_registry is not None
+            else OverloadTierRegistry.from_file(overload_tier_path)
+        ),
+        unknown_ol_inventory=unknown_ol_inventory,
+    )
+
+
+def fallback_card_assets(card):
+    return FallbackAssetProvider().resolve_character_assets(card)
 
 
 def load_fixture():
@@ -27,7 +56,7 @@ def build_card():
         "detail": fixture["character_details"][0],
         "state_effects": fixture["state_effects"],
     }
-    return CharacterCardBuilder().build(
+    return make_builder().build(
         account={"nickname": "测试指挥官"},
         directory=fixture["directory"],
         payload=payload,
@@ -37,10 +66,32 @@ def build_card():
 
 
 class CharacterCardBuilderTests(unittest.TestCase):
+    def test_builder_uses_injected_ports_without_file_or_identity_adapters(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / "features" / "character" / "builder.py").read_text(encoding="utf-8")
+        module = ast.parse(source)
+        imported_modules = {
+            node.module or ""
+            for node in ast.walk(module)
+            if isinstance(node, ast.ImportFrom)
+        }
+        self.assertFalse(any(name.startswith(".registries") for name in imported_modules))
+        self.assertNotIn(".identity", imported_modules)
+        self.assertNotIn("pathlib", imported_modules)
+        self.assertNotIn(
+            "astrbot_plugin_nikke.features.character.ol_unknown_inventory",
+            imported_modules,
+        )
+        init_parameters = inspect.signature(CharacterCardBuilder.__init__).parameters
+        self.assertIn("state_effect_registry", init_parameters)
+        self.assertIn("overload_tier_registry", init_parameters)
+        self.assertIn("unknown_ol_inventory", init_parameters)
+        self.assertNotIn("unknown_ol_inventory_path", init_parameters)
+
     def test_costume_id_is_preserved_for_static_portrait_resolution(self):
         fixture = load_fixture()
         fixture["roster_item"]["costume_id"] = "skin_01"
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -52,7 +103,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         fixture["roster_item"]["costume_id"] = 0
         detail = dict(fixture["character_details"][0])
         detail["costume_tid"] = 30049
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -64,7 +115,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         fixture["roster_item"]["costume_id"] = 99999
         detail = dict(fixture["character_details"][0])
         detail["costume_tid"] = 30049
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -76,7 +127,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         fixture["roster_item"]["costume_id"] = 0
         detail = dict(fixture["character_details"][0])
         detail["costume_tid"] = 0
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -87,7 +138,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         fixture = load_fixture()
         fixture["roster_item"]["costume_id"] = 30049
         detail = {k: v for k, v in fixture["character_details"][0].items() if "costume" not in k}
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": detail, "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -99,7 +150,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         fixture["directory"]["name_zh_tw"] = "阿爾卡娜"
         fixture["directory"]["name_zh_cn_alias"] = "阿尔卡娜"
         fixture["directory"]["name_cn"] = "阿爾卡娜"
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -109,7 +160,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
 
         # 若存在官方确切 zh-CN 则优先展示
         fixture["directory"]["name_zh_cn"] = "官方简中名"
-        card_with_sc = CharacterCardBuilder().build(
+        card_with_sc = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -143,7 +194,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
             "function_value_type": "Percent",
             "level": 2,
         })
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"roster_item": fixture["roster_item"], "detail": fixture["character_details"][0], "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -162,7 +213,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertAlmostEqual(totals[("优越代码伤害增加", "percent")], 0.6365)
 
     def test_registry_and_fallback_option_values_are_identical(self):
-        builder = CharacterCardBuilder()
+        builder = make_builder()
         func = {
             "function_type": "StatAtk",
             "function_value": 1322,
@@ -189,7 +240,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
                 "function_value_type": "Percent",
             }],
         }]
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={},
             directory=fixture["directory"],
             payload={
@@ -223,7 +274,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
             "detail": detail,
             "state_effects": fixture["state_effects"],
         }
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={"nickname": "测试指挥官"},
             directory=fixture["directory"],
             payload=payload,
@@ -265,7 +316,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         self.assertAlmostEqual(option.value, 0.0688)
 
     def test_known_integer_encoded_ol_regressions_keep_name_tier_and_percent(self):
-        builder = CharacterCardBuilder()
+        builder = make_builder()
         cases = {
             "7000909": ("StatChargeDamage", 1040, "蓄力伤害增加", 9, 0.104),
             "7001111": ("StatCritical", 571, "暴击率增加", 11, 0.0571),
@@ -286,7 +337,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
                 self.assertAlmostEqual(option.value, value)
 
     def test_known_ol_function_type_mismatch_keeps_authoritative_identity(self):
-        builder = CharacterCardBuilder()
+        builder = make_builder()
         with self.assertLogs("astrbot_plugin_nikke.card_builder", level="WARNING") as logs:
             option = builder._option_from_effect(
                 effect_id="7001211",
@@ -307,7 +358,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         detail = fixture["character_details"][0]
         for slot in ("head", "torso", "arm", "leg"):
             detail[f"{slot}_equip_tid"] = 0
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={"detail": detail, "state_effects": fixture["state_effects"]},
             fetched_at="test", plugin_version="test",
@@ -329,7 +380,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         fixture = load_fixture()
         detail = fixture["character_details"][0]
         detail.update({"hp": "123456", "attack": 789, "defense": 456})
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={
                 "roster_item": fixture["roster_item"],
@@ -352,7 +403,7 @@ class CharacterCardBuilderTests(unittest.TestCase):
         detail["skill1_lv"] = True
         detail["skill2_lv"] = "NaN"
         detail["ulti_skill_lv"] = 4.5
-        card = CharacterCardBuilder().build(
+        card = make_builder().build(
             account={}, directory=fixture["directory"],
             payload={
                 "roster_item": roster,
@@ -415,17 +466,6 @@ class CharacterDetailClientTests(unittest.IsolatedAsyncioTestCase):
         result = await client.get_character_detail(account, "5101")
         self.assertEqual(client.detail_payload["name_codes"], ["5101"])
         self.assertEqual(result["roster_item"]["lv"], 525)
-
-
-class CharacterCardRendererTests(unittest.TestCase):
-    def test_renderer_outputs_fixed_horizontal_card(self):
-        root = Path(__file__).resolve().parents[1]
-        with tempfile.TemporaryDirectory() as td:
-            renderer = CharacterCardRenderer(td, root / "fonts")
-            path = renderer.render_character(build_card())
-            with Image.open(path) as image:
-                self.assertEqual(image.size, (1800, 1000))
-                self.assertEqual(image.mode, "RGB")
 
 
 if __name__ == "__main__":

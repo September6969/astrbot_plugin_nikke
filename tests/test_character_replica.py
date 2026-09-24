@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from astrbot_plugin_nikke.features.character.models import EquipmentData, EquipmentOption
 from astrbot_plugin_nikke.features.character.replica import build_summary, rounded_gain, cache_identity
-from astrbot_plugin_nikke.tests.test_card_builder import build_card
+from astrbot_plugin_nikke.tests.test_card_builder import build_card, make_builder
 
 
 def example_card():
@@ -77,12 +77,11 @@ def test_cache_identity_changes_with_costume_and_numbers():
 def test_all_135_overload_tier_ids_and_affixes_coverage():
     import json
     from pathlib import Path
-    from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
     from astrbot_plugin_nikke.features.character.replica import SHORT_NAMES, CANONICAL_LABELS
 
     tiers_path = Path(__file__).resolve().parent.parent / "assets" / "overload_tiers.json"
     data = json.loads(tiers_path.read_text(encoding="utf-8"))
-    builder = CharacterCardBuilder()
+    builder = make_builder()
 
     expected_groups = {
         "100100": ("IncElementDmg", "优越代码伤害增加", "优越"),

@@ -2,16 +2,22 @@
 import asyncio
 
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-from astrbot_plugin_nikke.ui.t2i_payloads import CampaignT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 
 class T2IRenderer:
-    OPTIONS = {"type": "png", "quality": None, "full_page": True,
+    OPTIONS: dict[str, object] = {"type": "png", "quality": None, "full_page": True,
                "animations": "disabled", "caret": "hide", "scale": "css", "omit_background": False}
 
     def __init__(self, html_render, assets, timeout: float = 30):
         self._html_render = html_render
+        self.assets = assets
         self.timeout = timeout
         self.loader = T2ITemplateLoader()
         self.payload_builder = CampaignT2IPayloadBuilder(assets, T2IAssetResolver())
@@ -35,17 +41,13 @@ class T2IRenderer:
 
     async def render_view(self, page, data, **kwargs):
         if page == "character":
-            from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
             # 只在线程中准备既有本地资产；原生 HTML 渲染仍为直接异步调用。
             assets = await asyncio.to_thread(self.payload_builder.assets.resolve_character_assets, data)
-            payload = CharacterT2IPayloadBuilder(self.payload_builder.resolver).build(data, assets)
+            payload = CharacterT2IPayloadBuilder(
+                self.payload_builder.resolver,
+                identity_resolver=getattr(self.assets, "nikke_db", None),
+            ).build(data, assets)
             return await self.render_payload(page, payload)
-        from astrbot_plugin_nikke.ui.t2i_payloads import (
-            UnionOverviewT2IPayloadBuilder,
-            UnionRecordsT2IPayloadBuilder,
-            UnionMemberT2IPayloadBuilder,
-            ProfileT2IPayloadBuilder,
-        )
         builders = {
             "profile": ProfileT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver),
             "union_overview": UnionOverviewT2IPayloadBuilder(self.payload_builder.assets, self.payload_builder.resolver),

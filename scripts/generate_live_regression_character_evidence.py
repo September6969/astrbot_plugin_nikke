@@ -22,7 +22,7 @@ from astrbot_plugin_nikke.features.character.models import CostumeSelection
 from astrbot_plugin_nikke.features.character.weapon_bases import card_fields
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
-from astrbot_plugin_nikke.ui.t2i_payloads import CharacterT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 
 
@@ -76,7 +76,10 @@ async def main() -> None:
                     "astrbot_plugin_nikke.features.character.face_anchor.metadata",
                     return_value={},
                 ):
-                    before = framing(card, portrait, body_centering=False, summary_count=4)
+                    before = framing(
+                        card, portrait, body_centering=False, summary_count=4,
+                        identity_resolver=manager.nikke_db,
+                    )
                     before_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, assets)
                 before_payload["art_style"] = before["style"]
                 before_html = template.render(**before_payload)
@@ -86,7 +89,10 @@ async def main() -> None:
                 await page.screenshot(path=str(before_path), full_page=True)
 
                 metadata.cache_clear()
-                after = framing(card, portrait, body_centering=False, summary_count=4)
+                after = framing(
+                    card, portrait, body_centering=False, summary_count=4,
+                    identity_resolver=manager.nikke_db,
+                )
                 after_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, assets)
                 after_payload["art_style"] = after["style"]
                 after_html = template.render(**after_payload)

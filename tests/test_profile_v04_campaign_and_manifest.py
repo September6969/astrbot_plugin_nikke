@@ -156,7 +156,7 @@ class ProfileV04ContractTests(unittest.TestCase):
             root = Path(directory)
             manager = AssetManager(root / "cache", root, remote=True)
             try:
-                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=AssertionError("currency icon network")):
+                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream", side_effect=AssertionError("currency icon network")):
                     self.assertIsNone(manager.get_currency_icon(99))
 
                 icon = root / "cache" / "currency" / "gem.png"
@@ -198,7 +198,7 @@ class ProfileV04ContractTests(unittest.TestCase):
             assets = Path(__file__).resolve().parents[1] / "assets"
             manager = AssetManager(Path(directory) / "cache", assets, remote=True)
             try:
-                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=AssertionError("currency icon network")):
+                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream", side_effect=AssertionError("currency icon network")):
                     loaded = manager.get_currency_icon(1000)
                 self.assertIsNotNone(loaded)
                 self.assertEqual(loaded.size, (105, 96))
@@ -268,7 +268,7 @@ class SpineManifestHotPathTests(unittest.TestCase):
             (root / "spine_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             manager = AssetManager(root / "cache", root, remote=True)
             try:
-                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=AssertionError("network")), patch.object(
+                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream", side_effect=AssertionError("network")), patch.object(
                     SpinePreRenderer, "cached_portrait", side_effect=AssertionError("worker cache")
                 ):
                     portrait = manager.get_character_portrait("5010", "10")
@@ -349,7 +349,7 @@ class SpineManifestHotPathTests(unittest.TestCase):
             (root / "spine_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             manager = AssetManager(root / "cache", root, remote=True)
             try:
-                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream", side_effect=AssertionError("network")), patch.object(
+                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream", side_effect=AssertionError("network")), patch.object(
                     SpinePreRenderer, "cached_portrait", side_effect=AssertionError("worker cache")
                 ), patch.object(SpinePreRenderer, "enqueue", side_effect=AssertionError("worker enqueue")):
                     portrait = manager.get_character_portrait("5010", "10")

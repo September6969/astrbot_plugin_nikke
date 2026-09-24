@@ -16,6 +16,7 @@ from astrbot_plugin_nikke.integrations.web.bind_template import render_bind_page
 from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, ValidationResult
 from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.integrations.web.service import BindingWebService
+from astrbot_plugin_nikke.features.account.status import BIND_SESSION_PENDING
 
 
 class TestBindTutorialPage(IsolatedAsyncioTestCase):
@@ -101,7 +102,7 @@ class TestBindWebServiceAPI(IsolatedAsyncioTestCase):
 
     async def test_submit_missing_cookies_returns_standard_code(self):
         token = "x" * 40
-        self.store.create_bind_session(token, "12345678", 600)
+        self.store.create_bind_session(token, "12345678", 600, status=BIND_SESSION_PENDING)
 
         # 缺少 game_uid 和 game_openid
         payload = {
@@ -121,7 +122,7 @@ class TestBindWebServiceAPI(IsolatedAsyncioTestCase):
     async def test_submit_expired_token_returns_token_expired_code(self):
         token = "e" * 40
         # 创建已过期的 session
-        self.store.create_bind_session(token, "12345678", -10)
+        self.store.create_bind_session(token, "12345678", -10, status=BIND_SESSION_PENDING)
 
         payload = {
             "token": token,
@@ -140,7 +141,7 @@ class TestBindWebServiceAPI(IsolatedAsyncioTestCase):
 
     async def test_submit_success_returns_bound_code_and_masked_status(self):
         token = "s" * 40
-        self.store.create_bind_session(token, "12345678", 600)
+        self.store.create_bind_session(token, "12345678", 600, status=BIND_SESSION_PENDING)
 
         mock_validation = ValidationResult(
             valid=True,

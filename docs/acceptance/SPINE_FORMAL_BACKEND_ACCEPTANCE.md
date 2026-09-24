@@ -4,7 +4,7 @@
 
 ## 本次实现
 
-- `spine_prerenderer.py` 现在是正式编排实现；`experimental/spine_prerenderer.py` 仅保留历史导出兼容层，不重复维护另一份实现。
+- `integrations/spine/prerenderer.py` 是正式编排实现；R21 消费者审计确认实验包转发桥无内部调用方后已删除，不重复维护另一份实现。
 - `SpineRuntimeBackend` 通过依赖注入接收具体 runtime，严格比较 `major.minor`；未知或不匹配版本直接回退，不猜测默认 runtime。
 - `SpineBundleFetcher` 只接受无账号上下文的 `raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/` HTTPS 路径，按 skeleton、atlas、纹理页和总量限制写入原子缓存。
 - `SpinePreRenderer` 负责 bundle 预检查、透明 RGBA 归一化、可见像素裁切、版本化 PNG 缓存和后台队列；runtime 异常不会穿透角色卡线程。

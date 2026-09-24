@@ -16,10 +16,10 @@ def test_ui_package_exports():
 def test_ui_renderers_exports():
     import astrbot_plugin_nikke.ui.renderers as renderers
     assert hasattr(renderers, "CampaignHistoryRenderer")
-    assert hasattr(renderers, "CharacterCardRenderer")
     assert hasattr(renderers, "ProfileCardRenderer")
     assert hasattr(renderers, "UnionRaidRenderer")
     assert hasattr(renderers, "T2IRenderer")
+    assert not hasattr(renderers, "CharacterCardRenderer")
 
 
 def test_ui_formal_contracts_and_root_isolation():
@@ -27,7 +27,6 @@ def test_ui_formal_contracts_and_root_isolation():
     from astrbot_plugin_nikke.ui.primitives import CardRenderer
     from astrbot_plugin_nikke.ui.renderers import (
         CampaignHistoryRenderer,
-        CharacterCardRenderer,
         ProfileCardRenderer,
         UnionRaidRenderer,
         T2IRenderer,
@@ -38,7 +37,6 @@ def test_ui_formal_contracts_and_root_isolation():
     assert UI_COLORS is not None
     assert CardRenderer is not None
     assert CampaignHistoryRenderer is not None
-    assert CharacterCardRenderer is not None
     assert ProfileCardRenderer is not None
     assert UnionRaidRenderer is not None
     assert T2IRenderer is not None

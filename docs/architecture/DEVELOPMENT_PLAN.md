@@ -1,5 +1,7 @@
 # 当前执行状态入口（2026-09-06）
 
+> 后续角色卡产品决策（PR #103）：早期计划中的 `CharacterCardRenderer` / 1800×1000 Pillow 单卡描述均为历史记录；当前唯一生产实现是 1600×2400 白色竖版 T2I replica，失败明确报错、不回退旧版。
+
 本表是能力状态摘要；合并后的远端事实、PR、CI 和工作区边界以 [Post-Merge 状态](..\operations\POST_MERGE_STATUS.md) 为准。
 下一阶段入口见 [Post-Merge Phase 2 计划](POST_MERGE_PHASE2_PLAN.md)。下方旧计划保留为历史规格，其中 TODO/BLOCKED 不再作为当前进度判断。
 历史自治规则见 [审核与自治计划](EXECUTION_AUTONOMY_PLAN.md)，不覆盖新的状态入口。
@@ -323,7 +325,7 @@ evidence/
 | 安全绑定 | `DONE` | MV3 扩展 + HTTPS 绑定服务 + 单次 token + Cookie/XCommon 加密 |
 | 账号状态 | `DONE` | 绑定、解绑、Cookie 状态、汇总开关 |
 | 练度总览 | `DONE` / legacy UI | 可用，但仍走旧 CardRenderer |
-| 单角色练度卡 | `DONE` | 1800×1000、新 Builder、四槽装备、目标角色定向请求 |
+| 单角色练度卡 | `DONE` | PR #103 中为 1600×2400 白色竖版 T2I replica；四槽装备、目标角色定向请求；旧 1800×1000 Pillow renderer 退役 |
 | Profile | `PARTIAL` | 主体完成，Research/Collection 仍摘要化 |
 | Campaign History | `MVP + DEBT` | NORMAL 46 / HARD 35 可用；未知错误传播仍需收紧 |
 | Union Raid Overview | `MVP + DEBT` | Boss HP 总览可用；多轮选择和 HP clamp 有债 |

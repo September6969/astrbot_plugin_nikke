@@ -179,6 +179,7 @@ class NikkeStore:
             """,
             "CREATE INDEX IF NOT EXISTS idx_bind_expiry ON bind_sessions(expires_at)",
             "CREATE INDEX IF NOT EXISTS idx_run_created ON action_runs(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_run_action ON action_runs(action)",
         )
         for statement in statements:
             conn.execute(statement)
@@ -238,14 +239,16 @@ class NikkeStore:
         """Cookie 字符串解析；委托至共享实现。"""
         return parse_cookie(cookie)
 
-    def create_bind_session(self, token: str, qq_id: str, ttl: int = 600) -> None:
+    def create_bind_session(
+        self, token: str, qq_id: str, ttl: int = 600, *, status: str
+    ) -> None:
         now = int(time.time())
         digest = self.token_hash(token)
         with self._lock, self._connect() as conn:
             conn.execute("DELETE FROM bind_sessions WHERE expires_at < ?", (now,))
             conn.execute(
-                "INSERT INTO bind_sessions(token_hash, qq_id, created_at, expires_at) VALUES(?,?,?,?)",
-                (digest, str(qq_id), now, now + ttl),
+                "INSERT INTO bind_sessions(token_hash, qq_id, created_at, expires_at, status) VALUES(?,?,?,?,?)",
+                (digest, str(qq_id), now, now + ttl, str(status)),
             )
 
     def get_bind_session(self, token: str) -> dict[str, Any] | None:
@@ -256,11 +259,11 @@ class NikkeStore:
             ).fetchone()
         return dict(row) if row else None
 
-    def fail_bind_session(self, token: str, error: str) -> None:
+    def fail_bind_session(self, token: str, error: str, *, status: str) -> None:
         with self._lock, self._connect() as conn:
             conn.execute(
-                "UPDATE bind_sessions SET status='failed', error=? WHERE token_hash=?",
-                (error[:240], self.token_hash(token)),
+                "UPDATE bind_sessions SET status=?, error=? WHERE token_hash=?",
+                (str(status), error[:240], self.token_hash(token)),
             )
 
     def consume_bind_session(
@@ -274,6 +277,8 @@ class NikkeStore:
         area_id: str,
         x_common_params: str = "",
         user_agent: str = "",
+        *,
+        success_status: str,
     ) -> str:
         now = int(time.time())
         digest = self.token_hash(token)
@@ -307,8 +312,8 @@ class NikkeStore:
                 (qq_id, encrypted, game_uid, game_openid, nickname, role_name, area_id, now, encrypted_xcommon, user_agent),
             )
             conn.execute(
-                "UPDATE bind_sessions SET used_at=?, status='success', error='' WHERE token_hash=?",
-                (now, digest),
+                "UPDATE bind_sessions SET used_at=?, status=?, error='' WHERE token_hash=?",
+                (now, str(success_status), digest),
             )
         return qq_id
 
@@ -410,12 +415,15 @@ class NikkeStore:
             row = conn.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
         return json.loads(row[0]) if row else default
 
-    def claim_run(self, run_key: str, qq_id: str, action: str) -> bool:
+    def claim_run(
+        self, run_key: str, qq_id: str, action: str, *, initial_status: str
+    ) -> bool:
+        """原子创建运行记录；初始状态由调用方的领域合同提供。"""
         try:
             with self._lock, self._connect() as conn:
                 conn.execute(
-                    "INSERT INTO action_runs(run_key,qq_id,action,status,created_at) VALUES(?,?,?,'running',?)",
-                    (run_key, str(qq_id), action, int(time.time())),
+                    "INSERT INTO action_runs(run_key,qq_id,action,status,created_at) VALUES(?,?,?,?,?)",
+                    (run_key, str(qq_id), action, str(initial_status), int(time.time())),
                 )
             return True
         except sqlite3.IntegrityError:
@@ -429,41 +437,51 @@ class NikkeStore:
             ).fetchone()
         return dict(row) if row else None
 
-    def retry_run(
+    def list_runs(self, *, action: str | None = None) -> list[dict[str, Any]]:
+        """按可选 action 字段读取运行记录，不解释运行键或状态语义。"""
+        with self._lock, self._connect() as conn:
+            if action is None:
+                rows = conn.execute(
+                    "SELECT run_key,qq_id,action,status,detail,created_at FROM action_runs"
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT run_key,qq_id,action,status,detail,created_at "
+                    "FROM action_runs WHERE action=?",
+                    (str(action),),
+                ).fetchall()
+        return [dict(row) for row in rows]
+
+    def transition_run(
         self,
         run_key: str,
-        statuses: set[str],
         *,
-        stale_after: int = 0,
+        from_statuses: set[str],
+        to_status: str,
+        detail: str = "",
+        stale_after: int | None = None,
+        refresh_created_at: bool = False,
     ) -> bool:
-        """原子重领失败任务；也可回收超过指定秒数的运行中任务。"""
-        allowed = sorted(str(status) for status in statuses)
-        conditions: list[str] = []
-        params: list[Any] = []
-        if allowed:
-            conditions.append("status IN (" + ",".join("?" for _ in allowed) + ")")
-            params.extend(allowed)
-        now = int(time.time())
-        if stale_after > 0:
-            conditions.append("(status='running' AND created_at<=?)")
-            params.append(now - stale_after)
-        if not conditions:
+        """按调用方提供的前置状态与目标状态，原子迁移运行记录。"""
+        allowed = sorted(str(status) for status in from_statuses)
+        if not allowed:
             return False
+        now = int(time.time())
+        assignments = "status=?,detail=?"
+        params: list[Any] = [str(to_status), detail[:500]]
+        if refresh_created_at:
+            assignments += ",created_at=?"
+            params.append(now)
+        conditions = ["run_key=?", "status IN (" + ",".join("?" for _ in allowed) + ")"]
+        params.extend([run_key, *allowed])
+        if stale_after is not None:
+            conditions.append("created_at<=?")
+            params.append(now - stale_after)
         with self._lock, self._connect() as conn:
             cursor = conn.execute(
-                "UPDATE action_runs SET status='running',detail='',created_at=? "
-                "WHERE run_key=? AND (" + " OR ".join(conditions) + ")",
-                (now, run_key, *params),
-            )
-        return cursor.rowcount == 1
-
-    def mark_stale_running_unknown(self, run_key: str, *, stale_after: int, detail: str) -> bool:
-        """原子隔离过期写请求，不能将结果不明的任务重新领取。"""
-        with self._lock, self._connect() as conn:
-            cursor = conn.execute(
-                "UPDATE action_runs SET status='unknown', detail=? "
-                "WHERE run_key=? AND status='running' AND created_at<=?",
-                (detail[:500], run_key, int(time.time()) - stale_after),
+                f"UPDATE action_runs SET {assignments} WHERE "
+                + " AND ".join(conditions),
+                params,
             )
         return cursor.rowcount == 1
 

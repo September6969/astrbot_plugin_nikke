@@ -1,4 +1,10 @@
 import json
+from plugin_fixtures import (
+    inject_calendar_handler,
+    inject_character_handler,
+    inject_raid_handler,
+    make_plugin_shell,
+)
 import asyncio
 from unittest.mock import AsyncMock, Mock
 
@@ -6,6 +12,7 @@ import pytest
 from jinja2 import Environment
 
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
+from astrbot_plugin_nikke.application.commands.character import CharacterRenderFailure
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 
 
@@ -26,6 +33,32 @@ async def test_page_fixtures(page, tmp_path):
         for forbidden in ("https://", "http://", "file://", "<script", "{% include", "{% import"):
             assert forbidden not in html, (page, name, forbidden)
         assert native.call_args.kwargs["options"]["type"] == "png"
+    assets.close()
+
+
+@pytest.mark.asyncio
+async def test_character_success_uses_white_vertical_template(tmp_path):
+    from pathlib import Path
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
+    from astrbot_plugin_nikke.features.character.replica import VERSION
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+
+    data = next(iter(get_cases("character", tmp_path).values()))
+    assets = AssetManager(
+        tmp_path / "cache",
+        Path(__file__).resolve().parents[1] / "assets",
+        remote=False,
+    )
+    native = AsyncMock(return_value="white-replica.png")
+    renderer = T2IRenderer(native, assets)
+
+    assert await renderer.render_view("character", data) == "white-replica.png"
+    template, payload = native.call_args.args
+    assert payload["template_version"] == VERSION == "replica-1600x2400-v2"
+    assert payload["character_art_data_uri"].startswith("data:image/png;base64,")
+    assert "width:1600px;height:2400px" in template
+    assert "background:#e8ebee" in template
+    assert native.call_args.kwargs["options"]["type"] == "png"
     assets.close()
 
 
@@ -57,52 +90,59 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
     assert "&lt;script&gt;" in html and "&lt;/style&gt;" in html and "&lt;img" in html
     assert '<script>' not in html and '<img src=x' not in html
     assert html.count("</style>") == 1
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
-    assert await plugin._try_t2i(page, data) is None
-    plugin.campaign_t2i_renderer.render_view.side_effect = asyncio.CancelledError()
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
+    if page == "character":
+        with pytest.raises(CharacterRenderFailure):
+            await plugin.presentation.try_t2i(page, data)
+    else:
+        assert await plugin.presentation.try_t2i(page, data) is None
+    plugin.presentation._t2i_renderer.render_view.side_effect = asyncio.CancelledError()
     with pytest.raises(asyncio.CancelledError):
-        await plugin._try_t2i(page, data)
+        await plugin.presentation.try_t2i(page, data)
     assets.close()
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("page", ["profile", "union_overview", "character"])
+@pytest.mark.parametrize("page", ["profile", "union_overview"])
 async def test_pillow_command_fallback_retains_dto(page, tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin._account_or_error = Mock(return_value={})
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
     data = next(iter(get_cases(page, tmp_path).values()))
     if page == "profile":
-        plugin.client = Mock(get_profile_dashboard=AsyncMock(return_value={"basic": {}, "outpost": {}, "roster": []}))
-        plugin.profile_builder = Mock(build=Mock(return_value=data))
+        from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+        from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
+
+        plugin.services.store = Mock(get_account=Mock(return_value={"qq_id": "synthetic-qq"}))
+        plugin.services.profile_application = Mock(build_dashboard=AsyncMock(return_value=data))
         fallback = Mock(return_value="fallback.png")
-        plugin.profile_renderer = Mock(render_profile=fallback)
-        command, args, request = plugin.me, (), plugin.client.get_profile_dashboard
+        plugin.services.profile_renderer = Mock(render_profile=fallback)
+        plugin.adapters.command = AstrBotCommandAdapter()
+        plugin.handlers.profile = ProfileCommandHandler(
+            account_reader=plugin.services.store,
+            application=plugin.services.profile_application,
+            present=plugin.presentation.render_profile,
+        )
+        command, args, request = plugin.me, (), plugin.services.profile_application.build_dashboard
     elif page == "union_overview":
-        plugin.client = Mock(get_union_raid_overview=AsyncMock(return_value={"guild_name": "synthetic", "level_info": {}}))
-        plugin.raid_builder = Mock(build=Mock(return_value=data))
+        plugin.services.raid_application = Mock(overview=AsyncMock(return_value=data))
+        plugin.services.store = Mock()
         fallback = Mock(return_value="fallback.png")
-        plugin.raid_renderer = Mock(render_raid_overview=fallback)
-        command, args, request = plugin.union_raid, (), plugin.client.get_union_raid_overview
-    else:
-        plugin._directory = [{"name_code": "5065"}]
-        plugin.character_identity = Mock(find=Mock(return_value=plugin._directory))
-        plugin.client = Mock(get_character_detail=AsyncMock(return_value={}))
-        plugin._get_profile_for_stat_calculation = AsyncMock(return_value={})
-        plugin.character_stat_resources = Mock(prepare_payload=Mock(return_value={}))
-        plugin.character_builder = Mock(build=Mock(return_value=data))
-        fallback = Mock(return_value="fallback.png")
-        plugin.character_renderer = Mock(render_character=fallback)
-        command, args, request = plugin.character, ("皇冠",), plugin.client.get_character_detail
+        plugin.services.raid_renderer = Mock(render_raid_overview=fallback)
+        inject_raid_handler(plugin)
+        command, args, request = plugin.union_raid, (), plugin.services.raid_application.overview
     event = Mock(image_result=lambda path: path)
     assert [result async for result in command(event, *args)] == ["fallback.png"]
     request.assert_awaited_once()
     fallback.assert_called_once_with(data)
-    assert plugin.campaign_t2i_renderer.render_view.call_args.args[1] is data
+    assert plugin.presentation._t2i_renderer.render_view.call_args.args[1] is data
 
 
 def test_calendar_horizon_and_classification(tmp_path):
@@ -122,20 +162,29 @@ def test_calendar_horizon_and_classification(tmp_path):
 async def test_calendar_command_fallback_same_snapshot(tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    from astrbot_plugin_nikke.integrations.calendar.visual_cache import CalendarVisualCache
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin.calendar = CalendarService(tmp_path)
-    plugin.calendar._has_snapshot = True
-    plugin.calendar.sync_from_source = AsyncMock()
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
+    visual_cache = CalendarVisualCache(tmp_path / "calendar")
+    visual_cache.sync = AsyncMock()
+    plugin.services.calendar = CalendarService(tmp_path, visual_cache=visual_cache)
+    inject_calendar_handler(plugin)
+    plugin.services.calendar._has_snapshot = True
+    plugin.services.calendar.sync_from_source = AsyncMock()
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
     event = Mock(plain_result=lambda text: text)
     results = [result async for result in plugin.event_schedule(event)]
     assert "未来 14 天" in results[0]
-    plugin.calendar.sync_from_source.assert_not_called()
+    plugin.services.calendar.sync_from_source.assert_not_called()
+    visual_cache.sync.assert_not_awaited()
 
 
 def test_union_scopes_and_exact_values(tmp_path):
-    from astrbot_plugin_nikke.ui.t2i_payloads import UnionOverviewT2IPayloadBuilder, UnionRecordsT2IPayloadBuilder, UnionMemberT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
     overview = get_cases("union_overview", tmp_path)
     partial = UnionOverviewT2IPayloadBuilder().build(overview["partial-hp"])
@@ -160,18 +209,25 @@ def test_union_scopes_and_exact_values(tmp_path):
 @pytest.mark.parametrize("page,command", [("union_records", "union_raid_ranking"), ("union_member", "union_raid_my")])
 async def test_union_command_failure_no_refetch(page, command):
     from astrbot_plugin_nikke.main import NikkePlugin
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    from astrbot_plugin_nikke.features.raid.participants import RaidRankingData
+    plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    plugin._account_or_error = Mock(return_value={"game_openid": "synthetic-member"})
-    plugin.client = Mock(get_union_raid_data=AsyncMock(return_value={"participate_data": []}))
-    plugin.campaign_t2i_renderer = Mock(render_view=AsyncMock(side_effect=RuntimeError()))
-    results = [result async for result in getattr(plugin, command)(Mock(plain_result=lambda text: text))]
+    application_call = "ranking" if page == "union_records" else "member"
+    plugin.services.raid_application = Mock(
+        **{application_call: AsyncMock(return_value=RaidRankingData([]))}
+    )
+    plugin.presentation._t2i_renderer = Mock(
+        render_view=AsyncMock(side_effect=RuntimeError())
+    )
+    inject_raid_handler(plugin)
+    route = plugin.union_raid_ranking if command == "union_raid_ranking" else plugin.union_raid_my
+    results = [result async for result in route(Mock(plain_result=lambda text: text))]
     assert "当前响应" in results[0]
-    plugin.client.get_union_raid_data.assert_awaited_once()
+    getattr(plugin.services.raid_application, application_call).assert_awaited_once()
 
 
 def test_profile_structure_and_unknowns(tmp_path):
-    from astrbot_plugin_nikke.ui.t2i_payloads import ProfileT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("profile", tmp_path)
     builder = ProfileT2IPayloadBuilder()
@@ -218,8 +274,45 @@ async def test_character_slots_theme_and_assets(tmp_path):
     assets.close()
 
 
+@pytest.mark.asyncio
+async def test_character_unworn_equipment_keeps_fixed_empty_rows_without_stale_options(tmp_path):
+    from pathlib import Path
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
+    from astrbot_plugin_nikke.features.character.models import EquipmentOption
+
+    native = AsyncMock(return_value="card.png")
+    assets = AssetManager(
+        tmp_path / "cache",
+        Path(__file__).resolve().parents[1] / "assets",
+        remote=False,
+    )
+    renderer = T2IRenderer(native, assets)
+    card = get_cases("character", tmp_path)["ol-max"]
+    for item in card.equipment.values():
+        item.equipped = False
+        item.options = [EquipmentOption("stale", "残留不显示", 0.1, "percent")]
+
+    await renderer.render_view("character", card)
+    payload = native.call_args.args[1]
+
+    assert len(payload["equipment"]) == 4
+    assert all(item["status"] == "未装备" for item in payload["equipment"])
+    assert all(len(item["options"]) == 3 for item in payload["equipment"])
+    assert all(
+        row["name"] == "空槽" and row["value"] == "—" and row["state"] == "EMPTY"
+        for item in payload["equipment"]
+        for row in item["options"]
+    )
+    assert all(
+        "残留不显示" not in row["name"]
+        for item in payload["equipment"]
+        for row in item["options"]
+    )
+    assets.close()
+
+
 def test_profile_resource_silver_mileage_label(tmp_path):
-    from astrbot_plugin_nikke.ui.t2i_payloads import ProfileT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
     cases = get_cases("profile", tmp_path)
     builder = ProfileT2IPayloadBuilder()
@@ -285,7 +378,7 @@ async def test_character_card_visual_polish(tmp_path):
 
 def test_union_records_no_attack_summary(tmp_path):
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
-    from astrbot_plugin_nikke.ui.t2i_payloads import UnionRecordsT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
     cases = get_cases("union_records", tmp_path)
     builder = UnionRecordsT2IPayloadBuilder()
     template = T2ITemplateLoader().load("union_records")
@@ -315,4 +408,3 @@ def test_union_records_no_attack_summary(tmp_path):
     assert payload_unknown["no_attack"]["label"] == "无法确认"
     html3 = Environment(autoescape=False).from_string(template).render(**payload_unknown)
     assert "无法确认" in html3
-

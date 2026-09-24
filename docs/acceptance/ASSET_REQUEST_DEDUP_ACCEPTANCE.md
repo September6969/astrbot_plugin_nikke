@@ -18,7 +18,7 @@
 ## 行为验证
 
 ```text
-pytest tests/test_asset_manager.py tests/test_character_card_renderer.py tests/test_campaign_history.py
+pytest tests/test_asset_manager.py tests/test_asset_components.py tests/test_character_card_retirement.py tests/test_campaign_history.py
 36 passed
 ```
 

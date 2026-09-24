@@ -6,12 +6,14 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import random
+from collections.abc import Mapping
 from typing import Any
 
 from ...core.privacy import safe_exception_message
-from ...core.storage import NikkeStore
-from ...integrations.blablalink.client import BlaBlaClient, CookieExpired, UnknownAfterAction
+from ..account.errors import CredentialExpiredError
+from .errors import UnknownAfterActionError
 from .models import DailyTaskResult, DailyTaskStatus
+from .ports import DailyGateway, DailyStore
 
 
 class DailyRunner:
@@ -19,13 +21,25 @@ class DailyRunner:
 
     def __init__(
         self,
-        client: BlaBlaClient | Any | None = None,
-        store: NikkeStore | Any | None = None,
+        client: DailyGateway | None = None,
+        store: DailyStore | None = None,
         config: dict[str, Any] | None = None,
     ):
-        self.client = client
-        self.store = store
+        self._client = client
+        self._store = store
         self.config = config or {}
+
+    @property
+    def client(self) -> DailyGateway:
+        if self._client is None:
+            raise RuntimeError("DailyGateway 未配置")
+        return self._client
+
+    @property
+    def store(self) -> DailyStore:
+        if self._store is None:
+            raise RuntimeError("DailyStore 未配置")
+        return self._store
 
     @staticmethod
     def daily_error_result(account_name: str, prefix: str, exc: Exception) -> DailyTaskResult:
@@ -36,7 +50,9 @@ class DailyRunner:
             return DailyTaskResult(account_name, DailyTaskStatus.RATE_LIMITED, f"{prefix}请求受到频控，请稍后再试")
         return DailyTaskResult(account_name, DailyTaskStatus.FAILED, f"{prefix}失败：{type(exc).__name__}")
 
-    async def read_only_daily_recovery(self, account: dict, account_name: str) -> DailyTaskResult:
+    async def read_only_daily_recovery(
+        self, account: Mapping[str, Any], account_name: str
+    ) -> DailyTaskResult:
         """恢复未决任务时只读核验，绝不重放签到写操作。"""
         await self.client.get_profile(account)
         status = await self.client.get_daily_signin(account)
@@ -49,7 +65,7 @@ class DailyRunner:
         )
 
     @staticmethod
-    def daily_identity(account: dict) -> str:
+    def daily_identity(account: Mapping[str, Any]) -> str:
         """构造不依赖 QQ 的稳定游戏账号作用域。"""
         game_uid = str(account.get("game_uid") or account.get("uid") or "").strip()
         area_id = str(account.get("area_id") or "").strip()
@@ -59,7 +75,7 @@ class DailyRunner:
         return f"{platform}:{area_id}:{game_uid}"
 
     @classmethod
-    def daily_run_key(cls, day: str, account: dict, action: str) -> str:
+    def daily_run_key(cls, day: str, account: Mapping[str, Any], action: str) -> str:
         identity = cls.daily_identity(account)
         digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
         return f"{day}:game:{digest}:{action}"
@@ -73,11 +89,15 @@ class DailyRunner:
         status = str(legacy.get("status", ""))
         return DailyTaskResult(
             account_name,
-            DailyTaskStatus.UNKNOWN_AFTER_ACTION if status in {"running", "unknown"} else DailyTaskStatus.UNAVAILABLE,
+            DailyTaskStatus.UNKNOWN_AFTER_ACTION
+            if status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}
+            else DailyTaskStatus.UNAVAILABLE,
             "发现旧版 QQ 作用域记录，未据此判定今日结果，也未执行写操作；请先完成账号作用域迁移",
         )
 
-    async def run_daily_for_account(self, account: dict, day: str) -> DailyTaskResult:
+    async def run_daily_for_account(
+        self, account: Mapping[str, Any], day: str
+    ) -> DailyTaskResult:
         qq_id = str(account["qq_id"])
         account_name = str(account.get("nickname") or qq_id)
         if not self.daily_identity(account):
@@ -90,13 +110,15 @@ class DailyRunner:
         if legacy_daily:
             return legacy_daily
         run_key = self.daily_run_key(day, account, "daily")
-        if not self.store.claim_run(run_key, qq_id, "daily"):
+        if not self.store.claim_run(
+            run_key, qq_id, "daily", initial_status="DISPATCH_INTENT"
+        ):
             existing = self.store.get_run(run_key)
             existing_status = str(existing.get("status", "")) if existing else ""
-            if existing_status in {"running", "unknown"}:
+            if existing_status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                 try:
                     result = await self.read_only_daily_recovery(account, account_name)
-                except CookieExpired:
+                except CredentialExpiredError:
                     self.store.mark_cookie_invalid(qq_id)
                     result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
                 except asyncio.CancelledError:
@@ -116,7 +138,12 @@ class DailyRunner:
                     "今日签到已有失败记录，未自动重发",
                 )
             if existing_status in {"pending", "unavailable"}:
-                if not self.store.retry_run(run_key, {"pending", "unavailable"}):
+                if not self.store.transition_run(
+                    run_key,
+                    from_statuses={"pending", "unavailable"},
+                    to_status="DISPATCH_INTENT",
+                    refresh_created_at=True,
+                ):
                     return DailyTaskResult(
                         account_name,
                         DailyTaskStatus.UNKNOWN_AFTER_ACTION,
@@ -132,12 +159,19 @@ class DailyRunner:
         signin_owned = False
         signin_finished = False
         if bool(self.config.get("enable_daily_actions", False)):
-            signin_owned = self.store.claim_run(signin_key, qq_id, "signin")
+            signin_owned = self.store.claim_run(
+                signin_key, qq_id, "signin", initial_status="DISPATCH_INTENT"
+            )
             if not signin_owned:
                 existing_signin = self.store.get_run(signin_key) or {}
                 signin_status = str(existing_signin.get("status", ""))
                 if signin_status in {"pending", "unavailable"}:
-                    signin_owned = self.store.retry_run(signin_key, {"pending", "unavailable"})
+                    signin_owned = self.store.transition_run(
+                        signin_key,
+                        from_statuses={"pending", "unavailable"},
+                        to_status="DISPATCH_INTENT",
+                        refresh_created_at=True,
+                    )
                     if not signin_owned:
                         result = DailyTaskResult(
                             account_name,
@@ -152,10 +186,10 @@ class DailyRunner:
                         DailyTaskStatus.ALREADY_DONE,
                         str(existing_signin.get("detail") or "登录有效；今日已经签到"),
                     )
-                elif signin_status in {"running", "unknown"}:
+                elif signin_status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                     try:
                         result = await self.read_only_daily_recovery(account, account_name)
-                    except CookieExpired:
+                    except CredentialExpiredError:
                         self.store.mark_cookie_invalid(qq_id)
                         result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
                     except asyncio.CancelledError:
@@ -181,7 +215,6 @@ class DailyRunner:
                 if not signin_owned:
                     self.store.finish_run(run_key, result.run_status, result.detail)
                     return result
-        result: DailyTaskResult
         try:
             await self.client.get_profile(account)
             status = await self.client.get_daily_signin(account)
@@ -201,15 +234,19 @@ class DailyRunner:
                     self.store.finish_run(signin_key, "success", detail)
                     signin_finished = True
                     result = DailyTaskResult(account_name, DailyTaskStatus.SUCCESS, detail)
-                except UnknownAfterAction:
-                    self.store.finish_run(signin_key, "unknown", "签到结果未确认，未自动重发")
+                except UnknownAfterActionError:
+                    self.store.finish_run(
+                        signin_key,
+                        "UNKNOWN_AFTER_ACTION",
+                        "签到结果未确认，未自动重发",
+                    )
                     signin_finished = True
                     result = DailyTaskResult(
                         account_name,
                         DailyTaskStatus.UNKNOWN_AFTER_ACTION,
                         "签到结果未确认，请稍后查询状态；未自动重发",
                     )
-                except CookieExpired:
+                except CredentialExpiredError:
                     self.store.finish_run(signin_key, "expired", "登录状态已失效")
                     signin_finished = True
                     raise
@@ -220,14 +257,19 @@ class DailyRunner:
                     result = mapped
         except asyncio.CancelledError:
             existing_signin = self.store.get_run(signin_key) or {}
-            if str(existing_signin.get("status", "")) in {"running", "unknown"}:
-                self.store.finish_run(signin_key, "unknown", "签到已取消，结果未确认，未自动重发")
-            self.store.finish_run(run_key, "unknown", "日常任务已取消，结果未确认，未自动重发")
+            if str(existing_signin.get("status", "")) in {
+                "running",
+                "DISPATCH_INTENT",
+                "unknown",
+                "UNKNOWN_AFTER_ACTION",
+            }:
+                self.store.finish_run(signin_key, "UNKNOWN_AFTER_ACTION", "签到已取消，结果未确认，未自动重发")
+            self.store.finish_run(run_key, "UNKNOWN_AFTER_ACTION", "日常任务已取消，结果未确认，未自动重发")
             raise
-        except CookieExpired:
+        except CredentialExpiredError:
             self.store.mark_cookie_invalid(qq_id)
             existing_signin = self.store.get_run(signin_key) or {}
-            if str(existing_signin.get("status", "")) in {"running", "unknown"}:
+            if str(existing_signin.get("status", "")) in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                 self.store.finish_run(signin_key, "expired", "登录状态已失效")
                 signin_finished = True
             result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
@@ -251,7 +293,7 @@ class DailyRunner:
         )
         semaphore = asyncio.Semaphore(max(1, int(self.config.get("max_concurrency", 2))))
 
-        async def run(account):
+        async def run(account: Mapping[str, Any]) -> DailyTaskResult:
             if stagger:
                 await asyncio.sleep(random.uniform(0, 15 * 60))
             async with semaphore:

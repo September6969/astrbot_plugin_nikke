@@ -130,12 +130,13 @@ jobs:
         run: node --test tests/extension.test.cjs
 
   test:
-    name: Test (Python ${{ matrix.python-version }})
+    name: Test (Python ${{ matrix.python-version }}, AstrBot ${{ matrix.astrbot-specifier }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13"]
+        astrbot-specifier: ["==4.24.0", ">=4.24,<5"]
 
     env:
       PYTHONPATH: ${{ github.workspace }}/..
@@ -152,9 +153,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade "pip==26.0.1"
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio astrbot playwright
+          pip install pytest pytest-asyncio "astrbot${{ matrix.astrbot-specifier }}" playwright
           python -m playwright install --with-deps chromium
 
       - name: Check syntax and compilation

@@ -1,13 +1,17 @@
 """Profile V2 的 synthetic 合同、请求预算和出图闭环测试。"""
 
+from plugin_fixtures import make_plugin_shell
 import math
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 from PIL import Image
 
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
 from astrbot_plugin_nikke.integrations.blablalink.client import (
     CHARACTERS,
     OUTPOST,
@@ -17,6 +21,7 @@ from astrbot_plugin_nikke.integrations.blablalink.client import (
     CookieExpired,
 )
 from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
+from astrbot_plugin_nikke.features.profile.application import ProfileApplication
 from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 from astrbot_plugin_nikke.features.profile.models import (
     MemorialCountData,
@@ -285,7 +290,7 @@ class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
                 {"cookie": "synthetic-cookie", "area_id": "3", "game_openid": "synthetic-openid"}
             )
 
-    async def test_me_command_uses_real_client_builder_renderer_chain(self):
+    async def test_me_command_uses_profile_application_handler_chain(self):
         calls = []
 
         class SyntheticClient(BlaBlaClient):
@@ -323,14 +328,24 @@ class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
                 return text
 
         with tempfile.TemporaryDirectory() as directory:
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.store = Store()
-            plugin.client = SyntheticClient()
-            plugin.profile_builder = ProfileBuilder()
-            plugin.profile_renderer = ProfileCardRenderer(
+            plugin = make_plugin_shell()
+            plugin.services.store = Store()
+            plugin.services.profile_application = ProfileApplication(
+                gateway=SyntheticClient(),
+                builder=ProfileBuilder(),
+                clock=lambda: datetime(2026, 9, 22, 12, 0, tzinfo=timezone.utc),
+                plugin_version="test-version",
+            )
+            plugin.services.profile_renderer = ProfileCardRenderer(
                 Path(directory), Path(__file__).resolve().parents[1] / "fonts"
             )
-            plugin.feedback_manager = None
+            plugin.adapters.command = AstrBotCommandAdapter()
+            plugin.handlers.profile = ProfileCommandHandler(
+                account_reader=plugin.services.store,
+                application=plugin.services.profile_application,
+                present=plugin.presentation.render_profile,
+            )
+            plugin.services.feedback_manager = None
             results = [item async for item in plugin.me(Event())]
             self.assertEqual(len(results), 1)
             with Image.open(results[0]) as image:

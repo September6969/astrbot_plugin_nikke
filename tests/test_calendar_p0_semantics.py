@@ -22,9 +22,11 @@
 18. same title, different scope -> 独立 identity，不误合并
 """
 
+from plugin_fixtures import inject_calendar_handler, make_plugin_shell
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from unittest.mock import Mock, AsyncMock
 from pathlib import Path
 
@@ -791,7 +793,7 @@ async def test_manual_empty_does_not_refresh_freshness(tmp_path):
 
 def test_t2i_payload_purged_legacy_groups(tmp_path):
     """P0-6: CalendarT2IPayloadBuilder 返回的字典中彻底不存在 groups, ending_soon, active, upcoming 键。"""
-    from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 
     service = ScheduleService(tmp_path)
     ev = CanonicalEvent(
@@ -999,15 +1001,31 @@ async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
     from astrbot_plugin_nikke.main import NikkePlugin
     from unittest.mock import Mock, AsyncMock
 
-    plugin = NikkePlugin.__new__(NikkePlugin)
+    plugin = make_plugin_shell()
     mock_cal = Mock()
     mock_cal.has_snapshot.return_value = False
+    mock_cal.normalize_horizon.side_effect = ScheduleService.normalize_horizon
+    mock_cal.freeze_query_context.return_value = QueryContext(
+        now=NOW,
+        snapshot_version="synthetic",
+        events=(),
+        source_health={},
+        freshness=Freshness.EXPIRED.value,
+        coverage=Coverage.UNAVAILABLE.value,
+    )
+    mock_cal.format_schedule_text.return_value = "功能尚未就绪"
+    mock_cal.activity_count.return_value = 0
+    mock_cal.data_quality = "SCHEDULE DATA UNAVAILABLE"
+    mock_cal.last_updated_at = None
+    mock_cal.last_sync_error = ""
+    mock_cal.cached_visual_event_ids.return_value = ()
     mock_cal.sync_from_source = AsyncMock()
     mock_cal.refresh_schedule_data = AsyncMock()
-    plugin.calendar = mock_cal
+    plugin.services.calendar = mock_cal
 
-    spawn_mock = Mock(side_effect=lambda coro: coro.close() if asyncio.iscoroutine(coro) else None)
-    plugin._spawn_background_task = spawn_mock
+    spawn_mock = Mock()
+    plugin.runtime = SimpleNamespace(request_calendar_refresh=spawn_mock)
+    inject_calendar_handler(plugin)
 
     dummy_event = Mock()
     dummy_event.plain_result = lambda text: text

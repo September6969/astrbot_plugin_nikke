@@ -17,10 +17,15 @@ from urllib.parse import urlsplit
 from aiohttp import web
 
 from ..._version import PLUGIN_VERSION
+from ...features.account.status import (
+    BIND_SESSION_FAILED,
+    BIND_SESSION_PENDING,
+    BIND_SESSION_SUCCESS,
+)
 from .bind_template import render_bind_page
+from .ports import BindingSessionStore
 from ..blablalink.client import BlaBlaClient, BlaBlaError
 from ...core.privacy import sanitize_log_text
-from ...core.storage import NikkeStore
 
 
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{32,128}$")
@@ -53,7 +58,14 @@ def public_error(exc: Exception) -> str:
 
 
 class BindingWebService:
-    def __init__(self, store: NikkeStore, client: BlaBlaClient, extension_zip: Path, api_key: str = "", public_base_url: str = SITE_ORIGIN):
+    def __init__(
+        self,
+        store: BindingSessionStore,
+        client: BlaBlaClient,
+        extension_zip: Path,
+        api_key: str = "",
+        public_base_url: str = SITE_ORIGIN,
+    ):
         parsed = urlsplit(public_base_url)
         if (parsed.scheme != "https" or not parsed.hostname or parsed.username
                 or parsed.password or parsed.path not in ("", "/") or parsed.query or parsed.fragment):
@@ -151,7 +163,9 @@ class BindingWebService:
         if not qq_id.isdigit() or len(qq_id) > 20:
             return web.json_response({"ok": False, "error": "QQ号格式错误"}, status=400)
         token = secrets.token_urlsafe(32)
-        self.store.create_bind_session(token, qq_id, 600)
+        self.store.create_bind_session(
+            token, qq_id, 600, status=BIND_SESSION_PENDING
+        )
         return web.json_response(
             {"ok": True, "token": token, "expires_in": 600, "url": f"/bind/{token}"},
             status=201,
@@ -243,6 +257,7 @@ class BindingWebService:
                 result.area_id,
                 x_common_params,
                 user_agent,
+                success_status=BIND_SESSION_SUCCESS,
             )
             return web.json_response({
                 "ok": True,
@@ -256,13 +271,17 @@ class BindingWebService:
             })
         except (BlaBlaError, ValueError) as exc:
             error = public_error(exc)
-            self.store.fail_bind_session(token, error)
+            self.store.fail_bind_session(
+                token, error, status=BIND_SESSION_FAILED
+            )
             return web.json_response(
                 {"ok": False, "code": "INVALID_COOKIE", "message": error, "error": error},
                 status=400,
             )
         except Exception:
-            self.store.fail_bind_session(token, "服务器验证失败")
+            self.store.fail_bind_session(
+                token, "服务器验证失败", status=BIND_SESSION_FAILED
+            )
             return web.json_response(
                 {"ok": False, "code": "SERVER_ERROR", "message": "服务器验证失败，请稍后重试", "error": "服务器验证失败，请稍后重试"},
                 status=502,

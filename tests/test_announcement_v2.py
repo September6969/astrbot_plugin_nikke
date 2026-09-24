@@ -1,6 +1,7 @@
 """Announcement V2 的范围、版本、重扫与查询行为回归。"""
 
 from __future__ import annotations
+from plugin_fixtures import make_plugin_shell
 
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -12,10 +13,12 @@ from unittest.mock import AsyncMock, patch
 import httpx
 
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+from astrbot_plugin_nikke.features.announcement.application import AnnouncementApplication
 from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
-from astrbot_plugin_nikke.features.announcement.sources import InformationFeedsSource
+from astrbot_plugin_nikke.integrations.announcement.information_feeds import InformationFeedsSource
 from astrbot_plugin_nikke.features.announcement.service import AnnouncementService
 from astrbot_plugin_nikke.main import NikkePlugin
+from astrbot_plugin_nikke.application.commands.announcement import AnnouncementCommandHandler
 from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
@@ -95,17 +98,15 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
                     service.add_or_update(invalid)
 
     async def test_deep_fetch_primary_does_not_use_legacy_fallback(self) -> None:
-        with patch(
-            "astrbot_plugin_nikke.features.announcement.sources.InformationFeedsSource.fetch",
-            new=AsyncMock(side_effect=RuntimeError("主源故障")),
-        ), patch.object(
-            AnnouncementService,
-            "fetch_official",
-            new=AsyncMock(return_value=[]),
-        ) as legacy:
-            with self.assertRaises(RuntimeError):
-                await AnnouncementService.fetch_primary(locale="ja", deep=True)
-            legacy.assert_not_awaited()
+        source = SimpleNamespace(fetch=AsyncMock(side_effect=RuntimeError("主源故障")))
+        legacy = AsyncMock(return_value=[])
+        service = AnnouncementService(
+            source_factory=lambda locale, *, max_pages, page_size: source,
+            official_fetcher=legacy,
+        )
+        with self.assertRaises(RuntimeError):
+            await service.fetch_primary(locale="ja", deep=True)
+        legacy.assert_not_awaited()
 
     async def test_deep_rescan_reports_bounded_scope_and_locale(self) -> None:
         service = AnnouncementService()
@@ -174,8 +175,10 @@ class AnnouncementV2ServiceTests(IsolatedAsyncioTestCase):
             kwargs["transport"] = httpx.MockTransport(handler)
             return real_client(*args, **kwargs)
 
-        with patch("astrbot_plugin_nikke.features.announcement.service.httpx.AsyncClient", client_factory):
-            records = await AnnouncementService.fetch_official()
+        from astrbot_plugin_nikke.integrations.announcement.official_source import fetch_official_announcements
+
+        with patch("astrbot_plugin_nikke.integrations.announcement.official_source.httpx.AsyncClient", client_factory):
+            records = await fetch_official_announcements()
         self.assertEqual([item.content_id for item in records], ["a", "b"])
         self.assertEqual([item.locale for item in records], ["und", "und"])
 
@@ -244,9 +247,19 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         service.add_or_update(record("ja", "维护告知", "维护正文", locale="ja", category="maintenance"))
         service.add_or_update(record("en", "Event Notice", "Event body", locale="en", category="event"))
         service.sync_from_source = AsyncMock(side_effect=AssertionError("本地查询不应同步"))
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.announcements = service
-        plugin.announcement_delivery = SimpleNamespace(dispatch=AsyncMock())
+        plugin = make_plugin_shell()
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        delivery = AnnouncementDelivery(NikkeStore(directory.name))
+        application = AnnouncementApplication(
+            announcements=service,
+            delivery=delivery,
+        )
+        plugin.services.announcement_application = application
+        plugin.handlers.announcement = AnnouncementCommandHandler(
+            application=application,
+            push_enabled=lambda: False,
+        )
         event = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
 
         # Simplified command: any extra argument yields simplification message
@@ -272,14 +285,21 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         self.assertIn("Event Notice", category_reply[0])
         self.assertIn("维护告知", query_reply[0])
         service.sync_from_source.assert_not_awaited()
-        plugin.announcement_delivery.dispatch.assert_not_awaited()
 
     async def test_deep_rescan_requires_admin_and_resubscribe_never_replays_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             service = AnnouncementService()
-            plugin = NikkePlugin.__new__(NikkePlugin)
-            plugin.announcements = service
-            plugin.announcement_delivery = SimpleNamespace()
+            plugin = make_plugin_shell()
+            delivery = AnnouncementDelivery(NikkeStore(directory))
+            application = AnnouncementApplication(
+                announcements=service,
+                delivery=delivery,
+            )
+            plugin.services.announcement_application = application
+            plugin.handlers.announcement = AnnouncementCommandHandler(
+                application=application,
+                push_enabled=lambda: False,
+            )
             service.sync_from_source = AsyncMock(return_value=(True, "同步成功"))
             denied = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
 
@@ -297,7 +317,6 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
             self.assertIn("公开只读", allowed_reply[0])
             service.sync_from_source.assert_awaited_once_with(locale="ja", deep=True)
 
-            delivery = AnnouncementDelivery(NikkeStore(directory))
             v1 = record("old", body="版本 1", published_at=NOW - timedelta(days=30))
             delivery.subscribe("target", [v1], now=NOW - timedelta(days=1))
             delivery.unsubscribe("target")

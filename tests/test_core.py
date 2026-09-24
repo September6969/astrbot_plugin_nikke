@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from plugin_fixtures import (
+    inject_cdk_handler,
+    inject_character_handler,
+    make_plugin_shell,
+)
 import asyncio
 import json
 import sqlite3
@@ -7,6 +12,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from astrbot_plugin_nikke.integrations.blablalink.client import (
     BlaBlaClient,
@@ -16,6 +22,10 @@ from astrbot_plugin_nikke.integrations.blablalink.client import (
 )
 from astrbot_plugin_nikke.ui.primitives import CardRenderer
 from astrbot_plugin_nikke.core.storage import NikkeStore
+from astrbot_plugin_nikke.features.account.status import (
+    BIND_SESSION_PENDING,
+    BIND_SESSION_SUCCESS,
+)
 from astrbot_plugin_nikke.integrations.web.service import BindingWebService
 from astrbot_plugin_nikke.integrations.web.service import public_error
 
@@ -103,7 +113,9 @@ class BindingApiTests(unittest.IsolatedAsyncioTestCase):
 
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            store.create_bind_session("a" * 40, "123456", 600)
+            store.create_bind_session(
+                "a" * 40, "123456", 600, status=BIND_SESSION_PENDING
+            )
             capture = CaptureClient()
             service = BindingWebService(store, capture, Path(td) / "extension.zip")
             from aiohttp.test_utils import TestClient, TestServer
@@ -222,9 +234,18 @@ class StoreTests(unittest.TestCase):
     def test_single_use_and_encryption(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            store.create_bind_session("a" * 40, "10001", 600)
+            store.create_bind_session(
+                "a" * 40, "10001", 600, status=BIND_SESSION_PENDING
+            )
             qq_id = store.consume_bind_session(
-                "a" * 40, VALID_COOKIE, "12345", "67890", "丽塔", "丽塔", "3"
+                "a" * 40,
+                VALID_COOKIE,
+                "12345",
+                "67890",
+                "丽塔",
+                "丽塔",
+                "3",
+                success_status=BIND_SESSION_SUCCESS,
             )
             self.assertEqual(qq_id, "10001")
             self.assertEqual(store.get_account("10001")["cookie"], VALID_COOKIE)
@@ -236,33 +257,89 @@ class StoreTests(unittest.TestCase):
             self.assertNotIn(b"secret-token", encrypted)
             with self.assertRaises(ValueError):
                 store.consume_bind_session(
-                    "a" * 40, VALID_COOKIE, "12345", "67890", "丽塔", "丽塔", "3"
+                    "a" * 40,
+                    VALID_COOKIE,
+                    "12345",
+                    "67890",
+                    "丽塔",
+                    "丽塔",
+                    "3",
+                    success_status=BIND_SESSION_SUCCESS,
                 )
 
     def test_expired_session_rejected(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            store.create_bind_session("b" * 40, "10001", -1)
+            store.create_bind_session(
+                "b" * 40, "10001", -1, status=BIND_SESSION_PENDING
+            )
             with self.assertRaises(ValueError):
                 store.consume_bind_session(
-                    "b" * 40, VALID_COOKIE, "12345", "67890", "", "", "3"
+                    "b" * 40,
+                    VALID_COOKIE,
+                    "12345",
+                    "67890",
+                    "",
+                    "",
+                    "3",
+                    success_status=BIND_SESSION_SUCCESS,
                 )
 
     def test_idempotent_run(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
-            self.assertTrue(store.claim_run("2026-09-05:1:daily", "1", "daily"))
-            self.assertFalse(store.claim_run("2026-09-05:1:daily", "1", "daily"))
+            self.assertTrue(store.claim_run("2026-09-05:1:daily", "1", "daily", initial_status="DISPATCH_INTENT"))
+            self.assertFalse(store.claim_run("2026-09-05:1:daily", "1", "daily", initial_status="DISPATCH_INTENT"))
 
     def test_failed_run_can_be_retried_without_duplication(self):
         with tempfile.TemporaryDirectory() as td:
             store = NikkeStore(td)
             key = "cdk:1:digest"
-            self.assertTrue(store.claim_run(key, "1", "cdk"))
+            self.assertTrue(store.claim_run(key, "1", "cdk", initial_status="DISPATCH_INTENT"))
             store.finish_run(key, "failed", "请求失败")
-            self.assertTrue(store.retry_run(key, {"failed"}, stale_after=120))
-            self.assertEqual(store.get_run(key)["status"], "running")
-            self.assertFalse(store.retry_run(key, {"failed"}, stale_after=120))
+            self.assertTrue(store.transition_run(
+                key,
+                from_statuses={"failed"},
+                to_status="DISPATCH_INTENT",
+                refresh_created_at=True,
+            ))
+            self.assertEqual(store.get_run(key)["status"], "DISPATCH_INTENT")
+            self.assertFalse(store.transition_run(
+                key,
+                from_statuses={"failed"},
+                to_status="DISPATCH_INTENT",
+                refresh_created_at=True,
+            ))
+
+    def test_stale_dispatch_intent_cannot_be_reclaimed_as_retryable(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = NikkeStore(td)
+            key = "cdk:game:synthetic-intent"
+            with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1000):
+                self.assertTrue(store.claim_run(key, "1", "cdk", initial_status="DISPATCH_INTENT"))
+            with patch("astrbot_plugin_nikke.core.storage.time.time", return_value=1180):
+                self.assertFalse(store.transition_run(
+                    key,
+                    from_statuses={"failed"},
+                    to_status="DISPATCH_INTENT",
+                    refresh_created_at=True,
+                ))
+                self.assertTrue(
+                    store.transition_run(
+                        key,
+                        from_statuses={"running", "DISPATCH_INTENT"},
+                        to_status="UNKNOWN_AFTER_ACTION",
+                        stale_after=120,
+                        detail="结果未确认",
+                    )
+                )
+                self.assertEqual(store.get_run(key)["status"], "UNKNOWN_AFTER_ACTION")
+                self.assertFalse(store.transition_run(
+                    key,
+                    from_statuses={"failed"},
+                    to_status="DISPATCH_INTENT",
+                    refresh_created_at=True,
+                ))
 
 
 class ClientTests(unittest.IsolatedAsyncioTestCase):
@@ -555,136 +632,155 @@ class UnionRaidFixtureTests(unittest.TestCase):
 
 
 class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
-    def test_profile_rows_use_confirmed_optional_fields(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+    def test_profile_builder_extracts_confirmed_optional_fields(self):
+        from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
 
-        rows = dict(
-            NikkePlugin._profile_rows(
-                {"area_id": "3", "nickname": "测试"},
-                {
-                    "nickname": "测试",
-                    "lv": 99,
-                    "team_combat": 1234567,
-                    "icon_id": 42,
-                    "created_at": "2024-01-01",
-                    "character_count": 80,
-                    "character_costume_count": 12,
-                    "progress_normal_campaign": 100,
-                    "progress_hard_campaign": 50,
-                    "progress_tribe_tower": 200,
-                    "sim_room_overclock_current_sub_season_high_score": 31,
-                },
-                {
-                    "synchro_level": 300,
-                    "outpost_battle_level": 250,
-                    "infra_core_level": 20,
-                    "tactic_academy_class": 9,
-                    "tactic_academy_lesson": 3,
-                    "jukebox_count": 25,
-                    "recycle_room_researches": [{"lv": 10}, {"lv": 20}],
-                    "memorial_counts": [{"count": 4}, {"count": 6}],
-                },
-            )
+        data = ProfileBuilder().build(
+            account={"area_id": "3", "nickname": "测试"},
+            basic={
+                "nickname": "测试",
+                "lv": 99,
+                "team_combat": 1234567,
+                "icon_id": 42,
+                "created_at": "2024-01-01",
+                "character_count": 80,
+                "character_costume_count": 12,
+                "progress_normal_campaign": 100,
+                "progress_hard_campaign": 50,
+                "progress_tribe_tower": 200,
+                "sim_room_overclock_current_sub_season_high_score": 31,
+            },
+            outpost={
+                "synchro_level": 300,
+                "outpost_battle_level": 250,
+                "infra_core_level": 20,
+                "tactic_academy_class": 9,
+                "tactic_academy_lesson": 3,
+                "jukebox_count": 25,
+                "recycle_room_researches": [{"lv": 10}, {"lv": 20}],
+                "memorial_counts": [{"count": 4}, {"count": 6}],
+            },
+            roster=None,
+            fetched_at="2026-09-22 12:00",
+            plugin_version="test",
         )
-        self.assertEqual(rows["指挥官等级"], "99")
-        self.assertEqual(rows["部队总战力"], "1,234,567")
-        self.assertEqual(rows["无尽塔进度"], "200")
-        self.assertNotIn("部落塔进度", rows)
-        self.assertNotIn("战术学院班级", rows)
-        self.assertNotIn("战术学院课程", rows)
-        self.assertEqual(rows["回收室研究"], "2 项 · 等级合计 30")
-        self.assertEqual(rows["收藏记录"], "10")
-        self.assertNotIn("头像 ID", rows)
 
-    def test_profile_rows_with_campaign_resolver(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        self.assertEqual(data.commander_level, 99)
+        self.assertEqual(data.team_combat, 1234567)
+        self.assertEqual(data.progress_tribe_tower, "200")
+        self.assertEqual([item.level for item in data.recycle_room_researches], [10, 20])
+        self.assertEqual([item.count for item in data.memorial_counts], [4, 6])
+        self.assertFalse(hasattr(data, "icon_id"))
+
+    def test_profile_builder_uses_campaign_resolver(self):
+        from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
         from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
 
         resolver = CampaignStageResolver({
             "NORMAL": {"46": {"46-40": 6046044}},
             "HARD": {"35": {"35-36": 7035044}},
         })
-        rows = dict(
-            NikkePlugin._profile_rows(
-                {"area_id": "3", "nickname": "测试"},
-                {
-                    "nickname": "测试",
-                    "progress_normal_campaign": 6046044,
-                    "progress_hard_campaign": 7035044,
-                },
-                {},
-                campaign_resolver=resolver,
-            )
+        data = ProfileBuilder(campaign_resolver=resolver).build(
+            account={"area_id": "3", "nickname": "测试"},
+            basic={
+                "progress_normal_campaign": 6046044,
+                "progress_hard_campaign": 7035044,
+            },
+            outpost={},
+            roster=None,
+            fetched_at="2026-09-22 12:00",
+            plugin_version="test",
         )
-        self.assertEqual(rows["普通主线"], "NORMAL 46-40")
-        self.assertEqual(rows["困难主线"], "HARD 35-36")
+        self.assertEqual(data.normal_campaign, "46-40")
+        self.assertEqual(data.hard_campaign, "35-36")
 
     async def test_chinese_and_legacy_commands_share_one_root_router(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
-        async def account(event, action="", value=""):
-            calls.append(("account", action, value))
-            yield "账号结果"
+        class AccountHandler:
+            async def handle(self, context):
+                calls.append(
+                    (
+                        "account",
+                        context.parameters["operation"],
+                        context.parameters["action"],
+                        context.parameters["value"],
+                    )
+                )
+                return CommandResult((TextReply("账号结果"),))
 
-        async def roster(event):
-            calls.append(("roster",))
-            yield "练度结果"
+        class CharacterHandler:
+            async def handle(self, context):
+                calls.append(("character", context.parameters["operation"]))
+                return CommandResult((TextReply("练度结果"),))
 
-        plugin.account = account
-        plugin.roster = roster
-        event = object()
+        plugin.handlers.account = AccountHandler()
+        plugin.handlers.character = CharacterHandler()
+
+        class Event:
+            @staticmethod
+            def plain_result(text):
+                return text
+
+        event = Event()
 
         chinese = [item async for item in plugin.nikke(event, "账号", "绑定", "")]
         legacy = [item async for item in plugin.nikke(event, "roster", "", "")]
         self.assertEqual(chinese, ["账号结果"])
         self.assertEqual(legacy, ["练度结果"])
-        self.assertEqual(calls, [("account", "绑定", ""), ("roster",)])
+        self.assertEqual(
+            calls,
+            [("account", "account", "绑定", ""), ("character", "roster")],
+        )
 
     async def test_m5_command_routing(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.application.commands.contracts import (
+            CommandResult,
+            TextReply,
+        )
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         calls = []
 
-        async def campaign(event, arg1="", arg2=""):
-            calls.append(("campaign", arg1, arg2))
-            yield "战役结果"
+        class Handler:
+            def __init__(self, name, replies):
+                self.name = name
+                self.replies = replies
 
-        async def cdk_batch(event, raw_codes=""):
-            calls.append(("cdk_batch", raw_codes))
-            yield "批量CDK结果"
+            async def handle(self, context):
+                parameters = dict(context.parameters)
+                calls.append((self.name, parameters))
+                return CommandResult(
+                    (TextReply(self.replies.get(parameters.get("operation", ""), self.name)),)
+                )
 
-        async def cdk_available(event):
-            calls.append(("cdk_available",))
-            yield "可用CDK结果"
+        plugin.handlers.campaign = Handler("campaign", {"": "战役结果"})
+        plugin.handlers.cdk = Handler(
+            "cdk",
+            {
+                "batch": "批量CDK结果",
+                "available": "可用CDK结果",
+                "history": "CDK历史结果",
+            },
+        )
+        plugin.handlers.calendar = Handler("calendar", {"": "日程结果"})
+        plugin.handlers.announcement = Handler(
+            "announcement", {"view": "公告结果"}
+        )
+        plugin.handlers.guide = Handler("guide", {"": "攻略结果"})
 
-        async def cdk_history(event):
-            calls.append(("cdk_history",))
-            yield "CDK历史结果"
+        class Event:
+            @staticmethod
+            def plain_result(text):
+                return text
 
-        async def event_schedule(event):
-            calls.append(("event_schedule",))
-            yield "日程结果"
-
-        async def announcements_view(event):
-            calls.append(("announcements_view",))
-            yield "公告结果"
-
-        async def guide(event, category="", page="1"):
-            calls.append(("guide", category))
-            yield "攻略结果"
-
-        plugin.campaign = campaign
-        plugin.cdk_batch = cdk_batch
-        plugin.cdk_available = cdk_available
-        plugin.cdk_history = cdk_history
-        plugin.event_schedule = event_schedule
-        plugin.announcements_view = announcements_view
-        plugin.guide = guide
-        event = object()
+        event = Event()
 
         r1 = [item async for item in plugin.nikke(event, "战役", "46-40", "")]
         r2 = [item async for item in plugin.nikke(event, "cdk", "批量", "CODE1 CODE2")]
@@ -704,18 +800,19 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             calls,
             [
-                ("campaign", "46-40", ""),
-                ("cdk_batch", "CODE1 CODE2"),
-                ("cdk_available",),
-                ("cdk_history",),
-                ("event_schedule",),
-                ("announcements_view",),
-                ("guide", "练度"),
+                ("campaign", {"stage": "46-40", "mode": ""}),
+                ("cdk", {"operation": "batch", "codes": "CODE1 CODE2"}),
+                ("cdk", {"operation": "available"}),
+                ("cdk", {"operation": "history"}),
+                ("calendar", {"horizon": ""}),
+                ("announcement", {"operation": "view"}),
+                ("guide", {"category": "练度", "page": "1"}),
             ],
         )
 
     async def test_character_query_requires_unique_match(self):
         from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterAmbiguousMatch
 
         class Event:
             def get_sender_id(self):
@@ -724,22 +821,19 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def plain_result(self, text):
                 return text
 
-        class Store:
-            def get_account(self, qq_id):
-                return {
-                    "qq_id": qq_id,
-                    "cookie": VALID_COOKIE,
-                    "game_uid": "game-10001",
-                    "area_id": "global",
-                    "platform": "global",
-                }
+        class Application:
+            async def build_card(self, request):
+                raise CharacterAmbiguousMatch(
+                    ("爱丽丝", "爱丽丝：仙境兔女郎")
+                )
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
+        plugin = make_plugin_shell()
+        plugin.services.character_application = Application()
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
             {"name_code": 2, "name_cn": "爱丽丝：仙境兔女郎", "name_en": "Alice: Wonderland Bunny"},
         ]
+        inject_character_handler(plugin)
         result = [item async for item in plugin.character(Event(), "丽丝")]
         self.assertEqual(len(result), 1)
         self.assertIn("找到多个角色", result[0])
@@ -747,6 +841,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_character_query_rejects_unowned_character(self):
         from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterNotOwned
 
         class Event:
             def get_sender_id(self):
@@ -755,20 +850,16 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def plain_result(self, text):
                 return text
 
-        class Store:
-            def get_account(self, qq_id):
-                return {"qq_id": qq_id, "cookie": VALID_COOKIE}
+        class Application:
+            async def build_card(self, request):
+                raise CharacterNotOwned("爱丽丝")
 
-        class FakeClient:
-            async def get_character_detail(self, account, code):
-                raise ValueError("该账号未持有这名妮姬")
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
-        plugin.client = FakeClient()
+        plugin = make_plugin_shell()
+        plugin.services.character_application = Application()
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
+        inject_character_handler(plugin)
         result = [item async for item in plugin.character(Event(), "爱丽丝")]
         self.assertEqual(len(result), 1)
         self.assertIn("未持有", result[0])
@@ -800,13 +891,13 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def get_run(self, key):
                 return self.runs.get(key)
 
-            def claim_run(self, key, qq_id, action):
+            def claim_run(self, key, qq_id, action, *, initial_status):
                 if key in self.runs:
                     return False
-                self.runs[key] = {"status": "running", "detail": ""}
+                self.runs[key] = {"status": initial_status, "detail": ""}
                 return True
 
-            def retry_run(self, key, statuses, stale_after=0):
+            def transition_run(self, key, *, from_statuses, to_status, detail="", stale_after=None, refresh_created_at=False):
                 return False
 
             def finish_run(self, key, status, detail=""):
@@ -823,21 +914,24 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 self.calls += 1
                 return CdkRedemptionResult(True, True, "兑换成功", "0")
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.config = {"enable_cdk_redemption": True}
-        plugin.store = Store()
-        plugin.client = Client()
+        plugin.services.store = Store()
+        plugin.services.client = Client()
+        inject_cdk_handler(plugin)
         code = "SECRETCODE123"
         first = [item async for item in plugin.cdk(Event(), code)]
         second = [item async for item in plugin.cdk(Event(), code)]
-        persisted = json.dumps(plugin.store.runs, ensure_ascii=False)
-        self.assertEqual(plugin.client.calls, 1)
-        self.assertEqual(first, second)
+        persisted = json.dumps(plugin.services.store.runs, ensure_ascii=False)
+        self.assertEqual(plugin.services.client.calls, 1)
+        self.assertIn("兑换成功", first[0])
+        self.assertIn("已有处理记录", second[0])
         self.assertNotIn(code, persisted)
-        self.assertNotIn(code, "".join(first))
+        self.assertNotIn(code, "".join(first + second))
 
-    async def test_character_query_does_not_call_get_roster(self):
+    async def test_character_command_delegates_identity_and_fetch_to_application(self):
         from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterNotOwned
 
         class Event:
             def get_sender_id(self):
@@ -845,151 +939,103 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             def plain_result(self, text):
                 return text
 
-        class Store:
-            def get_account(self, qq_id):
-                return {"qq_id": qq_id, "cookie": VALID_COOKIE}
-
-        class TrackingClient:
+        class Application:
             def __init__(self):
-                self.roster_called = False
-                self.detail_called = False
+                self.requests = []
 
-            async def get_roster(self, account, include_details=True):
-                self.roster_called = True
-                return [{"name_code": 1, "lv": 200}]
+            async def build_card(self, request):
+                self.requests.append(request)
+                raise CharacterNotOwned("爱丽丝")
 
-            async def get_character_detail(self, account, code):
-                self.detail_called = True
-                raise ValueError("该账号未持有这名妮姬")
-
-        client = TrackingClient()
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.store = Store()
-        plugin.client = client
+        plugin = make_plugin_shell()
+        application = Application()
+        plugin.services.character_application = application
         plugin._directory = [
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
+        inject_character_handler(plugin)
         results = [item async for item in plugin.character(Event(), "爱丽丝")]
         self.assertEqual(len(results), 1)
         self.assertIn("未持有", results[0])
-        # 验证 main.character() 不再主动调用 client.get_roster()
-        self.assertFalse(client.roster_called)
-        self.assertTrue(client.detail_called)
+        self.assertEqual(len(application.requests), 1)
+        self.assertEqual(application.requests[0].qq_id, "10001")
+        self.assertEqual(application.requests[0].query, "爱丽丝")
+        self.assertEqual(tuple(application.requests[0].directory), tuple(plugin._directory))
 
-    async def test_terminate_reclaims_asset_manager(self):
+    async def test_roster_command_delegates_account_and_name_mapping_to_application(self):
+        from unittest.mock import AsyncMock, Mock
+
         from astrbot_plugin_nikke.main import NikkePlugin
-        from unittest.mock import AsyncMock, MagicMock
+        from astrbot_plugin_nikke.features.character.application import CharacterRosterData
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin._background_tasks = []
-        plugin.feedback_manager = AsyncMock()
-        mock_web = AsyncMock()
-        plugin.web = mock_web
-        mock_asset_manager = MagicMock()
-        plugin.asset_manager = mock_asset_manager
+        class Event:
+            def get_sender_id(self):
+                return "10001"
 
-        await plugin.terminate()
-        self.assertTrue(plugin._closing)
-        mock_asset_manager.close.assert_called_once()
-        mock_web.stop.assert_awaited_once()
+            def image_result(self, path):
+                return path
 
-    async def test_stats_profile_cache_bounded_lru_eviction(self):
+        directory = [{"name_code": "alice", "name_cn": "爱丽丝"}]
+        data = CharacterRosterData(
+            commander_name="测试指挥官",
+            characters=({"name_code": "alice", "lv": 200},),
+            name_map={"alice": "爱丽丝"},
+        )
+        application = Mock(roster=AsyncMock(return_value=data))
+        renderer = Mock(render_roster=Mock(return_value="roster.png"))
+        plugin = make_plugin_shell()
+        plugin.services.character_application = application
+        plugin.services.renderer = renderer
+        plugin._directory = directory
+        inject_character_handler(plugin)
+
+        result = [item async for item in plugin.roster(Event())]
+
+        self.assertEqual(result, ["roster.png"])
+        application.roster.assert_awaited_once_with("10001", tuple(directory))
+        renderer.render_roster.assert_called_once_with(
+            "测试指挥官", data.characters, data.name_map
+        )
+
+    async def test_info_command_refuses_ambiguous_identity_instead_of_rendering_first(self):
+        from unittest.mock import Mock
+
         from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.character.application import CharacterAmbiguousMatch
+
+        class Event:
+            def plain_result(self, text):
+                return text
+
+        application = Mock(
+            info=Mock(
+                side_effect=CharacterAmbiguousMatch(("爱丽丝", "仙境兔女郎"))
+            )
+        )
+        renderer = Mock()
+        plugin = make_plugin_shell()
+        plugin.services.character_application = application
+        plugin.services.renderer = renderer
+        plugin._directory = []
+        inject_character_handler(plugin)
+
+        result = [item async for item in plugin.info(Event(), "丽丝")]
+
+        self.assertEqual(len(result), 1)
+        self.assertIn("找到多个角色", result[0])
+        self.assertIn("仙境兔女郎", result[0])
+        renderer.render.assert_not_called()
+
+    async def test_terminate_delegates_to_runtime_coordinator(self):
+        from astrbot_plugin_nikke.main import NikkePlugin
+        from types import SimpleNamespace
         from unittest.mock import AsyncMock
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._stats_profile_cache = {}
-        plugin.client = AsyncMock()
-        plugin.client.get_profile = AsyncMock(side_effect=lambda acc: {"synchro_level": 200})
+        plugin = make_plugin_shell()
+        plugin.runtime = SimpleNamespace(close=AsyncMock())
 
-        # 连续填充 60 个账号，验证总容量不超过 50
-        for i in range(60):
-            account = {"game_uid": f"uid_{i}", "cookie": VALID_COOKIE}
-            await plugin._get_profile_for_stat_calculation(account)
-
-        self.assertLessEqual(len(plugin._stats_profile_cache), 50)
-        # 最早的 uid_0 应已被淘汰
-        self.assertNotIn("uid_0", plugin._stats_profile_cache)
-        # 最近的 uid_59 应存在
-        self.assertIn("uid_59", plugin._stats_profile_cache)
-
-    def test_name_map_cache_identity_rejects_same_length_different_content(self):
-        """回归测试：目录 A 与目录 B 具有相同长度（如均为 200 条），但内容不同时，B 绝不能复用 A 的缓存。"""
-        from astrbot_plugin_nikke.main import NikkePlugin
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.plugin_dir = Path(__file__).resolve().parent.parent
-
-        dir_a = [
-            {"name_code": 101, "name_cn": "拉毗", "name_en": "Rapi"},
-            {"name_code": 102, "name_cn": "阿尼斯", "name_en": "Anis"},
-        ]
-        dir_b = [
-            {"name_code": 101, "name_cn": "红莲", "name_en": "Scarlet"},
-            {"name_code": 102, "name_cn": "神罚", "name_en": "Modernia"},
-        ]
-
-        self.assertEqual(len(dir_a), len(dir_b))
-
-        plugin._directory = dir_a
-        map_a = plugin._name_map()
-        self.assertIn("拉毗", map_a["101"])
-        self.assertIs(plugin._name_map(), map_a)
-
-        plugin._directory = dir_b
-        map_b = plugin._name_map()
-        self.assertNotEqual(map_a, map_b)
-        self.assertIn("红莲", map_b["101"])
-        self.assertNotIn("拉毗", map_b["101"])
-
-    def test_name_map_invalidates_on_name_zh_cn_difference(self):
-        """回归测试：相同长度且传统字段相同，但 name_zh_cn 不同时，缓存必须准确失效。"""
-        from astrbot_plugin_nikke.main import NikkePlugin
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.plugin_dir = Path(__file__).resolve().parent.parent
-
-        dir_a = [
-            {"name_code": 101, "name_cn": "拉毗", "name_zh_tw": "拉毗", "name_en": "Rapi", "name_zh_cn": "拉毗-初版"},
-        ]
-        dir_b = [
-            {"name_code": 101, "name_cn": "拉毗", "name_zh_tw": "拉毗", "name_en": "Rapi", "name_zh_cn": "拉毗-修正版"},
-        ]
-
-        plugin._directory = dir_a
-        map_a = plugin._name_map()
-        self.assertEqual(map_a["101"], "拉毗-初版")
-
-        plugin._directory = dir_b
-        map_b = plugin._name_map()
-        self.assertNotEqual(map_a, map_b)
-        self.assertEqual(map_b["101"], "拉毗-修正版")
-
-    def test_name_map_field_boundary_safety_with_special_characters(self):
-        """回归测试：字段内包含冒号等分隔符时，结构化序列化杜绝字段拼接坍缩与碰撞。"""
-        from astrbot_plugin_nikke.main import NikkePlugin
-
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin.plugin_dir = Path(__file__).resolve().parent.parent
-
-        # 若使用简单的 ":" 拼接，两者都会变成 "101:a:b:c"
-        dir_1 = [
-            {"name_code": 101, "name_zh_cn": "a:b", "name_zh_tw": "c", "name_cn": "", "name_en": ""},
-        ]
-        dir_2 = [
-            {"name_code": 101, "name_zh_cn": "a", "name_zh_tw": "b:c", "name_cn": "", "name_en": ""},
-        ]
-
-        plugin._directory = dir_1
-        map_1 = plugin._name_map()
-        self.assertEqual(map_1["101"], "a:b")
-
-        plugin._directory = dir_2
-        map_2 = plugin._name_map()
-        self.assertNotEqual(map_1, map_2)
-        self.assertEqual(map_2["101"], "a")
-
+        await plugin.terminate()
+        plugin.runtime.close.assert_awaited_once()
 
 if __name__ == "__main__":
     unittest.main()

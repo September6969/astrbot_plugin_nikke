@@ -4,7 +4,7 @@
 
 `READY_OFFLINE`：`/妮姬 戳一戳` 已按本地音频 → 有来源证据的官方动态资源 → 文本顺序接线。动态 pipeline 使用 single-flight、4 秒常规预算和不超过 5 秒的最大预算；超时的共享准备任务只继续填充缓存，不向迟到响应发送音频。
 
-`NEEDS_LIVE_EVIDENCE`：当前 `assets/voice_poke_map.json` 保持空表。真实角色/服装到 `voice_map`/`speech_id` 的对应关系、远端资源授权、OneBot/NapCat Record 播放和 QQ 送达尚未核验。
+`NEEDS_LIVE_EVIDENCE`：截至 2026-09-22，`assets/voice_poke_map.json` 为 schema v3、含 2106 条 source-annotated 映射；真实角色/服装到 `voice_map`/`speech_id` 的现场可用性、远端资源授权、OneBot/NapCat Record 播放和 QQ 送达尚未核验。
 
 ## 合同
 

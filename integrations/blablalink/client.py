@@ -15,6 +15,8 @@ from typing import Any, Callable
 import httpx
 
 from ...core.cookie_utils import parse_cookie as _parse_cookie
+from ...features.daily.errors import UnknownAfterActionError
+from .errors import BlaBlaError, CookieExpired
 
 
 API_BASE = "https://api.blablalink.com"
@@ -42,28 +44,19 @@ NIKKE_DIRECTORY_ZH = "https://sg-tools-cdn.blablalink.com/jz-26/ww-14/c4619ec833
 NIKKE_DIRECTORY_EN = "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json"
 
 
-class BlaBlaError(RuntimeError):
-    def __init__(self, message: str, code: str = "", endpoint: str = ""):
-        super().__init__(message)
-        self.code = str(code)
-        self.endpoint = endpoint
-
-
 class BlaBlaTimeoutError(BlaBlaError):
     """网络或请求传输超时，结果未确认。"""
+    outcome_unknown = True
     pass
 
 
 class BlaBlaNetworkError(BlaBlaError):
     """网络连接异常。"""
+    outcome_unknown = True
     pass
 
 
-class CookieExpired(BlaBlaError):
-    pass
-
-
-class UnknownAfterAction(BlaBlaError):
+class UnknownAfterAction(BlaBlaError, UnknownAfterActionError):
     """写请求已尝试，后续只读验证仍无法确认结果，禁止自动重发。"""
 
 
@@ -424,9 +417,13 @@ class BlaBlaClient:
             "level_info": level_data,
         }
 
+    async def get_union_raid_snapshot(self, account: dict[str, Any]) -> dict[str, Any]:
+        """一次采集联盟身份与攻击响应，供休赛期回退复用明确 guild_id。"""
+        return await self.get_union_raid_overview(account, attacks=True)
+
     async def get_union_raid_data(self, account: dict[str, Any]) -> dict[str, Any]:
         """复用联盟上下文，仅请求已确认的攻击列表接口。"""
-        response = await self.get_union_raid_overview(account, attacks=True)
+        response = await self.get_union_raid_snapshot(account)
         return response["level_info"]
 
     async def get_union_raid_season(self, account: dict[str, Any], *, guild_id: str, season_id: str, levels: bool = False) -> dict[str, Any]:

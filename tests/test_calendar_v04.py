@@ -2,6 +2,7 @@
 """Calendar v0.4 结构化活动日程系统测试套件。"""
 
 from __future__ import annotations
+from plugin_fixtures import inject_calendar_handler, make_plugin_shell
 
 import json
 import tempfile
@@ -15,7 +16,7 @@ import httpx
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
 from astrbot_plugin_nikke.features.calendar.models import CalendarActivity, _aware_utc
 from astrbot_plugin_nikke.features.calendar.service import CalendarService
-from astrbot_plugin_nikke.features.calendar.sources import GameKeeNikkeScheduleSource, _canonical_int
+from astrbot_plugin_nikke.features.calendar.gamekee_parser import _canonical_int
 from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
@@ -141,91 +142,6 @@ class TestCalendarSources(IsolatedAsyncioTestCase):
         self.assertIsNone(_canonical_int("1.0"))
         self.assertIsNone(_canonical_int("abc"))
         self.assertIsNone(_canonical_int(None))
-
-    async def test_gamekee_fetch_contract_and_mapping(self):
-        captured_request = {}
-
-        def mock_handler(request: httpx.Request) -> httpx.Response:
-            captured_request["url"] = str(request.url)
-            captured_request["headers"] = dict(request.headers)
-            captured_request["params"] = dict(request.url.params)
-
-            payload = {
-                "code": 0,
-                "data": [
-                    {
-                        "id": 991,
-                        "title": "协同作战：神罚",
-                        "begin_at": 1789200000,
-                        "end_at": 1789300000,
-                        "importance": 1,
-                        "tag": "协同作战",
-                        "big_picture": "https://img.gamekee.com/big.png",
-                        "picture": "https://img.gamekee.com/small.png",
-                        "link_url": "https://gamekee.com/nikke/991",
-                        "description": "协同作战说明",
-                    },
-                    {
-                        # Malformed row (missing end_at > begin_at)
-                        "id": 992,
-                        "title": "坏数据",
-                        "begin_at": 1789300000,
-                        "end_at": 1789200000,
-                    },
-                ],
-            }
-            return httpx.Response(200, json=payload)
-
-        transport = httpx.MockTransport(mock_handler)
-        source = GameKeeNikkeScheduleSource(transport=transport)
-        activities = await source.fetch()
-
-        self.assertEqual(captured_request["headers"].get("game-alias"), "nikke")
-        self.assertEqual(captured_request["params"].get("serverId"), "19")
-        self.assertEqual(captured_request["params"].get("status"), "0")
-        self.assertEqual(captured_request["params"].get("limit"), "999")
-
-        self.assertEqual(len(activities), 1)
-        act = activities[0]
-        self.assertEqual(act.event_id, "gamekee:991")
-        self.assertEqual(act.title, "协同作战：神罚")
-        self.assertEqual(act.category, "coop")
-        self.assertEqual(act.banner_url, "https://img.gamekee.com/big.png")
-        self.assertEqual(act.source_url, "https://gamekee.com/nikke/991")
-        self.assertEqual(act.importance, 1)
-
-        self.assertEqual(source.last_scan["rows"], 2)
-        self.assertEqual(source.last_scan["valid"], 1)
-        self.assertEqual(source.last_scan["malformed"], 1)
-        self.assertEqual(source.last_scan["duplicates"], 0)
-
-    async def test_schema_drift_protection_on_all_malformed(self):
-        def mock_handler(request: httpx.Request) -> httpx.Response:
-            payload = {
-                "code": 200,
-                "data": [
-                    {"id": 1, "title": "broken", "begin_at": True, "end_at": 2},
-                    {"id": "bad", "title": "also broken", "begin_at": 1, "end_at": 0},
-                ],
-            }
-            return httpx.Response(200, json=payload)
-
-        transport = httpx.MockTransport(mock_handler)
-        source = GameKeeNikkeScheduleSource(transport=transport)
-        with self.assertRaises(ValueError) as ctx:
-            await source.fetch()
-        self.assertIn("漂移", str(ctx.exception))
-
-    async def test_valid_empty_upstream_data(self):
-        def mock_handler(request: httpx.Request) -> httpx.Response:
-            return httpx.Response(200, json={"code": 0, "data": []})
-
-        transport = httpx.MockTransport(mock_handler)
-        source = GameKeeNikkeScheduleSource(transport=transport)
-        activities = await source.fetch()
-        self.assertEqual(activities, [])
-        self.assertEqual(source.last_scan["rows"], 0)
-
 
 class TestCalendarService(IsolatedAsyncioTestCase):
     def setUp(self):
@@ -444,7 +360,8 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
                 return text
 
         # 1. Invalid horizon
-        main_inst = NikkePlugin.__new__(NikkePlugin)
+        main_inst = make_plugin_shell()
+        inject_calendar_handler(main_inst)
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "99")]
         self.assertEqual(len(results), 1)
         self.assertIn("日程范围错误", results[0])
@@ -461,8 +378,10 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
             end_at=now + timedelta(days=2),
         )
         await cal.sync_from_source(fetcher=lambda: [act])
-        main_inst.calendar = cal
-        main_inst.announcements = AnnouncementService()
+        main_inst.services.calendar = cal
+        main_inst.services.announcements = AnnouncementService()
+        main_inst.services.calendar_application = cal.application
+        inject_calendar_handler(main_inst)
 
         # Query 7 days
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "7")]
@@ -476,33 +395,33 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
 
         # 3. Calendar has no snapshot -> returns immediate notice without awaiting remote network
         cal_empty = CalendarService(Path(self.tmp_dir.name) / "cal_empty")
-        main_inst.calendar = cal_empty
+        main_inst.services.calendar = cal_empty
+        main_inst.services.calendar_application = cal_empty.application
+        inject_calendar_handler(main_inst)
 
         results = [r async for r in main_inst.event_schedule(DummyEvent(), "14")]
         self.assertIn("日程数据尚未就绪，正在后台同步，请稍后重试。", results[0])
 
-    def test_deadline_reminders_for_delivery_selector(self):
+    def test_calendar_application_selects_deadline_source_for_delivery(self):
         from astrbot_plugin_nikke.features.announcement.service import AnnouncementService, GameDeadline
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke.features.calendar.application import CalendarApplication
 
-        main_inst = NikkePlugin.__new__(NikkePlugin)
         ann_service = AnnouncementService()
-        main_inst.announcements = ann_service
 
         real_now = datetime.now(timezone.utc)
         dl = GameDeadline("d1", "Ann Deadline", "event", end_at=real_now + timedelta(days=1), start_at=real_now - timedelta(days=1))
         ann_service._deadlines = {dl.event_id: dl}
+        fallback = ann_service.list_active_deadlines(now=real_now)
 
         # Without calendar -> returns announcements deadlines
-        main_inst.calendar = None
-        deadlines = main_inst._deadline_reminders_for_delivery()
+        deadlines = CalendarApplication(None).reminder_deadlines(fallback)
         self.assertEqual(len(deadlines), 1)
         self.assertEqual(deadlines[0].event_id, "d1")
 
         # With calendar without snapshot -> returns announcements deadlines
         cal = CalendarService(Path(self.tmp_dir.name) / "cal2")
-        main_inst.calendar = cal
-        deadlines = main_inst._deadline_reminders_for_delivery()
+        calendar_app = CalendarApplication(cal)
+        deadlines = calendar_app.reminder_deadlines(fallback)
         self.assertEqual(len(deadlines), 1)
         self.assertEqual(deadlines[0].event_id, "d1")
 
@@ -516,6 +435,6 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         cal._activities["cal_1"] = act
         cal._has_snapshot = True
 
-        deadlines = main_inst._deadline_reminders_for_delivery()
+        deadlines = calendar_app.reminder_deadlines(fallback)
         self.assertEqual(len(deadlines), 1)
         self.assertEqual(deadlines[0].event_id, "cal_1")

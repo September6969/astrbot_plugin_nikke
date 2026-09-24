@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from plugin_fixtures import inject_cdk_handler, make_plugin_shell
 import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch
@@ -8,7 +9,14 @@ import httpx
 
 from astrbot_plugin_nikke.features.cdk.models import CdkBatchResult, CdkRedeemResult
 from astrbot_plugin_nikke.features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
-from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaError, CdkRedemptionResult, CookieExpired
+from astrbot_plugin_nikke.application.commands.cdk import CdkCommandHandler
+from astrbot_plugin_nikke.integrations.blablalink.client import (
+    BlaBlaClient,
+    BlaBlaError,
+    BlaBlaTimeoutError,
+    CdkRedemptionResult,
+    CookieExpired,
+)
 
 
 class CdkInputParserTests(unittest.TestCase):
@@ -68,9 +76,9 @@ class CdkInputParserTests(unittest.TestCase):
         self.assertEqual(codes, ["CODE1", "CODE2", "CODE3", "CODE4"])
 
     def test_shared_cdk_pattern_consistency(self):
-        import astrbot_plugin_nikke.main as main_mod
+        import astrbot_plugin_nikke.application.commands.cdk as command_mod
 
-        self.assertIs(main_mod.CDK_PATTERN, CDK_PATTERN)
+        self.assertIs(command_mod.CDK_PATTERN, CDK_PATTERN)
         self.assertEqual(CDK_PATTERN.pattern, r"[A-Za-z0-9_-]{4,64}")
         self.assertFalse(CDK_PATTERN.fullmatch("abc"))
         self.assertTrue(CDK_PATTERN.fullmatch("abcd"))
@@ -102,7 +110,7 @@ class CdkServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_single_network_timeout_marks_unknown(self):
         client = AsyncMock(spec=BlaBlaClient)
-        client.redeem_cdk.side_effect = httpx.TimeoutException("Read timed out")
+        client.redeem_cdk.side_effect = BlaBlaTimeoutError("Read timed out")
         service = CdkService(client)
         res = await service.redeem_single({"game_uid": "123"}, "TIMEOUT_CODE")
         self.assertFalse(res.success)
@@ -304,7 +312,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(res.is_rate_limited)
         self.assertFalse(res.terminal)
 
-        # 验证 main.cdk() 记录状态为 "failed" 而不是 "terminal"
+        # 验证 CDK 持久服务将频控结果记录为可控失败而非终态。
         class Event:
             def get_sender_id(self):
                 return "10001"
@@ -318,27 +326,29 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
                 return {"qq_id": qq_id, "game_uid": "uid1", "cookie": "cookie"}
             def get_run(self, key):
                 return self.runs.get(key)
-            def claim_run(self, key, qq_id, action):
-                self.runs[key] = {"status": "running", "detail": ""}
+            def claim_run(self, key, qq_id, action, *, initial_status):
+                self.runs[key] = {"status": initial_status, "detail": ""}
                 return True
-            def retry_run(self, key, statuses, stale_after=0):
-                if key in self.runs and self.runs[key]["status"] in statuses:
-                    self.runs[key]["status"] = "running"
+            def transition_run(self, key, *, from_statuses, to_status, detail="", stale_after=None, refresh_created_at=False):
+                if key in self.runs and self.runs[key]["status"] in from_statuses:
+                    self.runs[key]["status"] = to_status
                     return True
                 return False
             def finish_run(self, key, status, detail=""):
                 self.runs[key] = {"status": status, "detail": detail}
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.config = {"enable_cdk_redemption": True}
-        plugin.store = Store()
-        plugin.cdk_service = service
+        plugin.services.store = Store()
+        plugin.services.cdk_service = service
+        plugin.services.client = client
+        inject_cdk_handler(plugin)
 
         # 第一次触发限流
         results1 = [item async for item in plugin.cdk(Event(), "RATELIMIT_CODE")]
         self.assertEqual(len(results1), 1)
-        run_key = list(plugin.store.runs.keys())[0]
-        self.assertEqual(plugin.store.runs[run_key]["status"], "failed")
+        run_key = list(plugin.services.store.runs.keys())[0]
+        self.assertEqual(plugin.services.store.runs[run_key]["status"], "failed")
 
         # 第二次由于状态是 failed（在 retryable 集合中），应该能够重新触发重试而非直接返回已处理
         results2 = [item async for item in plugin.cdk(Event(), "RATELIMIT_CODE")]
@@ -346,22 +356,24 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         # 1次直接调用 + 2次通过 plugin 调用 = 3次
         self.assertEqual(client.redeem_cdk.call_count, 3)
 
-    async def test_http_temporary_error_is_not_terminal_and_retryable(self):
+    async def test_http_temporary_error_is_unknown_and_not_terminal(self):
         client = AsyncMock(spec=BlaBlaClient)
         client.redeem_cdk.side_effect = BlaBlaError("HTTP 502 Bad Gateway", "502", "RecordCdkRedemption")
         service = CdkService(client)
         res = await service.redeem_single({"game_uid": "uid1"}, "HTTP_502_CODE")
         self.assertFalse(res.success)
+        self.assertTrue(res.is_unknown)
         self.assertFalse(res.terminal)
-        self.assertIn("可稍后重试", res.message)
+        self.assertIn("未自动重发", res.message)
 
         # 同样针对 500
         client.redeem_cdk.side_effect = BlaBlaError("HTTP 500 Internal Server Error", "500", "RecordCdkRedemption")
         res500 = await service.redeem_single({"game_uid": "uid1"}, "HTTP_500_CODE")
         self.assertFalse(res500.success)
+        self.assertTrue(res500.is_unknown)
         self.assertFalse(res500.terminal)
 
-    async def test_rebind_account_changes_run_key_scope(self):
+    async def test_rebind_account_changes_canonical_game_scope(self):
         from astrbot_plugin_nikke.main import NikkePlugin
 
         class Event:
@@ -378,8 +390,8 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
                 return {"qq_id": qq_id, "game_uid": self.current_uid, "cookie": "cookie"}
             def get_run(self, key):
                 return self.runs.get(key)
-            def claim_run(self, key, qq_id, action):
-                self.runs[key] = {"status": "running", "detail": ""}
+            def claim_run(self, key, qq_id, action, *, initial_status):
+                self.runs[key] = {"status": initial_status, "detail": ""}
                 return True
             def finish_run(self, key, status, detail=""):
                 self.runs[key] = {"status": status, "detail": detail}
@@ -388,23 +400,27 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         client.redeem_cdk.return_value = CdkRedemptionResult(True, True, "兑换成功", "0")
         service = CdkService(client)
 
-        plugin = NikkePlugin.__new__(NikkePlugin)
+        plugin = make_plugin_shell()
         plugin.config = {"enable_cdk_redemption": True}
-        plugin.store = Store()
-        plugin.cdk_service = service
+        plugin.services.store = Store()
+        plugin.services.cdk_service = service
+        plugin.services.client = client
+        inject_cdk_handler(plugin)
 
         # 账号 A 兑换
         [item async for item in plugin.cdk(Event(), "TESTCODE123")]
-        keys_a = list(plugin.store.runs.keys())
+        keys_a = list(plugin.services.store.runs.keys())
         self.assertEqual(len(keys_a), 1)
-        self.assertIn("10001:uid_A", keys_a[0])
+        self.assertTrue(keys_a[0].startswith("cdk:game:"))
+        self.assertNotIn("10001", keys_a[0])
 
         # 换绑为账号 B
-        plugin.store.current_uid = "uid_B"
+        plugin.services.store.current_uid = "uid_B"
         [item async for item in plugin.cdk(Event(), "TESTCODE123")]
-        keys_b = list(plugin.store.runs.keys())
+        keys_b = list(plugin.services.store.runs.keys())
         self.assertEqual(len(keys_b), 2)
-        self.assertIn("10001:uid_B", keys_b[1])
+        self.assertTrue(keys_b[1].startswith("cdk:game:"))
+        self.assertNotIn("10001", keys_b[1])
         # 两个账号各自兑换了一次，client 调用2次
         self.assertEqual(client.redeem_cdk.call_count, 2)
 
@@ -425,11 +441,13 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
                 return {"qq_id": qq_id, "game_uid": "uid1", "cookie": "cookie"}
 
         self.event = Event()
-        self.plugin = NikkePlugin.__new__(NikkePlugin)
+        self.plugin = make_plugin_shell()
         self.plugin.config = {"enable_cdk_redemption": True}
-        self.plugin.store = Store()
+        self.plugin.services.store = Store()
         self.client = AsyncMock(spec=BlaBlaClient)
-        self.plugin.client = self.client
+        self.plugin.services.client = self.client
+        self.plugin.services.cdk_service = CdkService(self.client)
+        inject_cdk_handler(self.plugin)
 
     async def test_cdk_available_identifies_real_cdk_field(self):
         self.client.get_cdk_redemption.return_value = [
@@ -483,7 +501,7 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
         results = [item async for item in self.plugin.cdk_history(self.event)]
         self.assertEqual(len(results), 1)
         text = results[0]
-        expected_mask = self.plugin._mask_cdk("HISTORYCODE")
+        expected_mask = CdkCommandHandler.mask_code("HISTORYCODE")
         self.assertEqual(expected_mask, "HI***DE")
         self.assertIn(expected_mask, text)
         self.assertNotIn("• ***:", text)
@@ -511,8 +529,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
         results_hist = [item async for item in self.plugin.cdk_history(self.event)]
         self.assertEqual(len(results_hist), 1)
         text_hist = results_hist[0]
-        self.assertIn(self.plugin._mask_cdk("HISTKEY123"), text_hist)
-        self.assertIn(self.plugin._mask_cdk("HISTCODE456"), text_hist)
+        self.assertIn(CdkCommandHandler.mask_code("HISTKEY123"), text_hist)
+        self.assertIn(CdkCommandHandler.mask_code("HISTCODE456"), text_hist)
 
     async def test_cdk_available_empty_after_filter(self):
         self.client.get_cdk_redemption.return_value = [

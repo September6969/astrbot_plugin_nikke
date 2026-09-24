@@ -32,7 +32,7 @@ class DailyTaskResult:
     def run_status(self) -> str:
         """返回 action_runs 使用的保守状态，不伪造写操作成功。"""
         if self.status is DailyTaskStatus.UNKNOWN_AFTER_ACTION:
-            return "unknown"
+            return "UNKNOWN_AFTER_ACTION"
         if self.status is DailyTaskStatus.COOKIE_EXPIRED:
             return "expired"
         if self.status in {DailyTaskStatus.FAILED, DailyTaskStatus.RATE_LIMITED}:

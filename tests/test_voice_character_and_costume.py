@@ -5,9 +5,12 @@ import asyncio
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+from astrbot_plugin_nikke.adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
+from astrbot_plugin_nikke.features.voice.application import VoiceApplication
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.features.voice.audio import VoicePreference
@@ -148,10 +151,17 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.data_dir = Path(self.temp_dir.name)
         self.plugin = NikkePlugin(ContextMock())
-        self.plugin.store = NikkeStore(self.data_dir)
+        self.plugin.services.store = NikkeStore(self.data_dir)
         self.plugin.data_dir = self.data_dir
-        self.plugin.voice_character_resolver = VoiceCharacterResolver(self.plugin.plugin_dir / "assets")
-        self.plugin.costume_registry = CostumeRegistry(self.plugin.plugin_dir / "assets")
+        voice_application = VoiceApplication(
+            store=self.plugin.services.store,
+            character_resolver=VoiceCharacterResolver(self.plugin.plugin_dir / "assets"),
+            costume_registry=CostumeRegistry(self.plugin.plugin_dir / "assets"),
+            audio_cache=SimpleNamespace(),
+            mapping_registry=SimpleNamespace(),
+        )
+        self.plugin.services.voice_application = voice_application
+        self.plugin.adapters.voice = AstrBotVoiceAdapter(voice_application)
 
     async def asyncTearDown(self):
         self.temp_dir.cleanup()
@@ -174,7 +184,7 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(results), 1)
         self.assertIn("arcana", results[0])
 
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.character, "arcana")
         self.assertEqual(pref.skin, "default")
         self.assertEqual(pref.spine_asset_id, "")
@@ -182,13 +192,13 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         # 切换到德雷克
         results = [r async for r in self.plugin.voice_settings(event, "角色", "德雷克")]
         self.assertIn("drake", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.character, "drake")
 
         # 未知角色拒绝
         results = [r async for r in self.plugin.voice_settings(event, "角色", "火星妮姬")]
         self.assertIn("未找到妮姬：火星妮姬", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.character, "drake")  # 保持原状
 
     async def test_voice_settings_costume_switch_and_owner_enforcement(self):
@@ -201,13 +211,13 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         # 设为 Classic Vacation (10005)
         results = [r async for r in self.plugin.voice_settings(event, "服装", "10005")]
         self.assertIn("10005", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "10005")
         self.assertEqual(pref.spine_asset_id, "c010_03")
 
         # 恢复默认
         results = [r async for r in self.plugin.voice_settings(event, "服装", "默认")]
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "default")
         self.assertEqual(pref.spine_asset_id, "")
 
@@ -215,13 +225,13 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         [r async for r in self.plugin.voice_settings(event, "角色", "drake")]
         results = [r async for r in self.plugin.voice_settings(event, "服装", "10005")]
         self.assertIn("不属于", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "default")
 
         # 德雷克选择自己的 80001 (Villain Racer) -> 成功
         results = [r async for r in self.plugin.voice_settings(event, "服装", "80001")]
         self.assertIn("80001", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "80001")
         self.assertEqual(pref.spine_asset_id, "c101_01")
 
@@ -236,19 +246,19 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         # 允许 ja
         results = [r async for r in self.plugin.voice_settings(event, "语言", "ja")]
         self.assertIn("ja", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.locale, "ja")
 
         # 允许 en
         results = [r async for r in self.plugin.voice_settings(event, "语言", "en")]
         self.assertIn("en", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.locale, "en")
 
         # 拒绝 zh-cn
         results = [r async for r in self.plugin.voice_settings(event, "语言", "zh-cn")]
         self.assertIn("用法：", results[0])
-        pref = VoicePreference.load(self.plugin.store, "aiocqhttp:123456")
+        pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.locale, "en")  # 保持不变
 
     async def test_text_poke_dialogue_is_completely_removed(self):

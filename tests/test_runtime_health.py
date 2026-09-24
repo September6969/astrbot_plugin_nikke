@@ -1,15 +1,22 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """验证只读运行健康诊断和管理员命令接线。"""
 
+from plugin_fixtures import make_plugin_shell
 import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.core.health import RuntimeHealth, collect_runtime_health, format_runtime_health
+from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
+from astrbot_plugin_nikke.application.commands.account import (
+    AccountCommandHandler,
+    RuntimeHealthDetails,
+)
+from astrbot_plugin_nikke.features.account.application import AccountApplication
 
 
 class RuntimeHealthTests(IsolatedAsyncioTestCase):
@@ -131,13 +138,36 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
             (root / "cache").mkdir()
             (root / "nikke.sqlite3").write_bytes(b"synthetic-db")
             (root / "secret.key").write_bytes(b"synthetic-key")
-            plugin = NikkePlugin.__new__(NikkePlugin)
+            plugin = make_plugin_shell()
             plugin.data_dir = root
-            plugin.store = SimpleNamespace(list_accounts=lambda with_cookie=False: [{"qq_id": "synthetic"}])
+            plugin.services.store = SimpleNamespace(list_accounts=lambda with_cookie=False: [{"qq_id": "synthetic"}])
             plugin._directory = []
             plugin.web_host = "0.0.0.0"
             plugin.web_port = 6210
             plugin.config = {"enable_daily_actions": False, "enable_cdk_redemption": False}
+            plugin.adapters.command = AstrBotCommandAdapter()
+            plugin.services.account_application = AccountApplication(plugin.services.store)
+            plugin.handlers.account = AccountCommandHandler(
+                application=plugin.services.account_application,
+                public_base_url="https://bot.example.com",
+                allow_group_bind=False,
+                runtime_health=lambda: RuntimeHealthDetails(
+                    plugin_version="test",
+                    directory_count=len(plugin._directory),
+                    web_host=plugin.web_host,
+                    web_port=plugin.web_port,
+                    daily_actions_enabled=plugin.config.get(
+                        "enable_daily_actions", False
+                    ),
+                    cdk_redemption_enabled=plugin.config.get(
+                        "enable_cdk_redemption", False
+                    ),
+                    diagnostics=format_runtime_health(
+                        collect_runtime_health(plugin.data_dir)
+                    ),
+                ),
+                render_manual_summary=AsyncMock(return_value="summary.png"),
+            )
             event = SimpleNamespace(is_admin=lambda: True, plain_result=lambda text: text)
 
             with patch("astrbot_plugin_nikke.core.health.shutil.disk_usage") as disk_usage:

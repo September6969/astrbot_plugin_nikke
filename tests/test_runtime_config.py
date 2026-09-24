@@ -3,14 +3,15 @@
 
 import asyncio
 import unittest
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
-from unittest.mock import patch
 
-from astrbot_plugin_nikke.main import NikkePlugin
 from astrbot_plugin_nikke.core.config import normalize_runtime_config, read_schedule_clock
+from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
+from astrbot_plugin_nikke.core.lifecycle.scheduler import RuntimeScheduler
 
 
-class RuntimeConfigTests(unittest.TestCase):
+class RuntimeConfigTests(unittest.IsolatedAsyncioTestCase):
     def test_invalid_numeric_configuration_uses_safe_defaults(self) -> None:
         config = normalize_runtime_config(
             {
@@ -34,23 +35,47 @@ class RuntimeConfigTests(unittest.TestCase):
         self.assertEqual(config["max_concurrency"], 2)
         self.assertFalse(config["enable_daily_actions"])
 
-    def test_scheduler_survives_corrupt_persisted_clock(self) -> None:
-        plugin = NikkePlugin.__new__(NikkePlugin)
-        plugin._closing = False
-        plugin.config = normalize_runtime_config({})
+    def test_retired_character_layout_config_is_ignored(self) -> None:
+        for legacy_value in ("classic", "replica"):
+            with self.subTest(legacy_value=legacy_value):
+                config = normalize_runtime_config(
+                    {"character_card_layout": legacy_value}
+                )
+                self.assertNotIn("character_card_layout", config)
+
+    async def test_scheduler_survives_corrupt_persisted_clock(self) -> None:
+        coordinator = RuntimeCoordinator()
+        config = normalize_runtime_config({})
         persisted = {"daily_hour": "broken", "summary_minute": 99}
-        plugin.store = SimpleNamespace(
+        store = SimpleNamespace(
             get_setting=lambda key, default=None: persisted.get(key, default)
         )
-        plugin._spawn_background_task = lambda coro: coro.close()
+        events = []
+        scheduler = RuntimeScheduler(
+            coordinator=coordinator,
+            store=store,
+            config=config,
+            run_daily=lambda day, **_kwargs: self._record(events, "daily", day),
+            send_summary=lambda day: self._record(events, "summary", day),
+            sync_announcements=lambda: self._record(events, "announcements"),
+            sync_calendar=lambda: self._record(events, "calendar"),
+            dispatch_announcements=lambda: self._record(events, "push"),
+            clock=lambda: datetime(
+                2026, 9, 23, config["daily_hour"], config["daily_minute"],
+                tzinfo=timezone(timedelta(hours=8)),
+            ),
+            unix_time=lambda: 0.0,
+        )
 
-        async def stop_after_one_tick(_delay: int) -> None:
-            plugin._closing = True
+        await scheduler.tick()
+        await asyncio.sleep(0)
 
-        with patch("astrbot_plugin_nikke.main.asyncio.sleep", new=stop_after_one_tick):
-            asyncio.run(plugin._scheduler_loop())
+        self.assertEqual(events, [("daily", "2026-09-23")])
+        await coordinator.close()
 
-        self.assertTrue(plugin._closing)
+    @staticmethod
+    async def _record(events, *entry):
+        events.append(entry)
 
     def test_malformed_persisted_json_is_scoped_to_one_clock_field(self) -> None:
         """持久化层解析异常只影响对应字段，另一字段仍按实际值读取。"""

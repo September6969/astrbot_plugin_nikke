@@ -114,5 +114,4 @@ class ProfileDashboardData:
     sim_room_overclock_season: str | None = None
     currencies: list[CurrencyItem] | None = None
     currencies_partial: bool = False
-    memorial_summary_dict: dict[str, int] | None = None
 

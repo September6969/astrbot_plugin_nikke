@@ -4,12 +4,17 @@ import asyncio
 import unittest
 
 from astrbot_plugin_nikke.core.feedback import DelayedFeedbackManager
+from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
 from astrbot_plugin_nikke.features.voice.feedback import VoiceResolver
 
 
 class DelayedFeedbackManagerTests(unittest.IsolatedAsyncioTestCase):
     async def test_fast_task_cancels_delayed_feedback_without_sending(self):
-        manager = DelayedFeedbackManager(default_delay=0.1)
+        coordinator = RuntimeCoordinator()
+        manager = DelayedFeedbackManager(
+            default_delay=0.1,
+            task_factory=coordinator.create_task,
+        )
         sent = []
 
         async def fake_sender():
@@ -25,9 +30,15 @@ class DelayedFeedbackManagerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(sent, [])
         self.assertTrue(handle.finished)
         self.assertTrue(handle.cancelled)
+        await manager.close()
+        await coordinator.close()
 
     async def test_slow_task_triggers_delayed_feedback(self):
-        manager = DelayedFeedbackManager(default_delay=0.05)
+        coordinator = RuntimeCoordinator()
+        manager = DelayedFeedbackManager(
+            default_delay=0.05,
+            task_factory=coordinator.create_task,
+        )
         sent = []
 
         async def fake_sender():
@@ -40,9 +51,15 @@ class DelayedFeedbackManagerTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(handle.sent_at)
 
         await handle.cancel()
+        await manager.close()
+        await coordinator.close()
 
     async def test_manager_close_cancels_all_active_handles(self):
-        manager = DelayedFeedbackManager(default_delay=1.0)
+        coordinator = RuntimeCoordinator()
+        manager = DelayedFeedbackManager(
+            default_delay=1.0,
+            task_factory=coordinator.create_task,
+        )
         sent = []
 
         async def fake_sender():
@@ -57,6 +74,7 @@ class DelayedFeedbackManagerTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(h1.cancelled)
         self.assertTrue(h2.cancelled)
         self.assertEqual(sent, [])
+        await coordinator.close()
 
 
 class VoiceResolverTests(unittest.TestCase):

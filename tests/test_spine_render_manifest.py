@@ -349,7 +349,7 @@ class SpineRenderManifestTests(unittest.TestCase):
             cache = Path(td) / "cache"
             manager = AssetManager(cache, self.assets_dir, remote=True)  # 即便开启 remote=True
             try:
-                with patch("astrbot_plugin_nikke.core.asset_manager.httpx.stream") as stream:
+                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream") as stream:
                     # 默认立绘
                     img1 = manager.get_character_portrait(201001, "10")
                     self.assertEqual(img1.size, (425, 891))

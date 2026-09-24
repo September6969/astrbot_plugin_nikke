@@ -16,9 +16,7 @@ import secrets
 import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterable
-
-from PIL import Image as PILImage
+from typing import Any, Callable, Iterable
 
 from .models import (
     DrawnTarotCard,
@@ -26,6 +24,7 @@ from .models import (
     TarotDeckStatus,
     TarotReading,
 )
+from .ports import TarotImagePort, TarotImageProviderFactory
 
 CHINA_TZ = timezone(timedelta(hours=8))
 DEFAULT_SPREAD = ("situation", "obstacle", "advice")
@@ -245,47 +244,6 @@ class TarotDailyStore:
             os.replace(tmp, self.path)
 
 
-class TarotImageProvider:
-    """Resolve final card images and cache physically reversed variants."""
-
-    def __init__(
-        self,
-        deck: TarotDeckRepository,
-        cache_dir: Path,
-        *,
-        rotate_reversed: bool = True,
-    ) -> None:
-        self.deck = deck
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.rotate_reversed = bool(rotate_reversed)
-
-    def image_for(self, draw: DrawnTarotCard) -> Path | None:
-        source = self.deck.resolve_image(draw.card)
-        if source is None or not draw.is_reversed or not self.rotate_reversed:
-            return source
-        try:
-            stat = source.stat()
-        except OSError:
-            return None
-        fingerprint = hashlib.sha256(
-            f"{source}:{stat.st_mtime_ns}:{stat.st_size}".encode("utf-8")
-        ).hexdigest()[:12]
-        safe_key = draw.card.key.replace(":", "_").replace("/", "_")
-        output = self.cache_dir / f"{safe_key}_reversed_{fingerprint}.png"
-        if output.is_file():
-            return output
-        try:
-            with PILImage.open(source) as image:
-                rotated = image.convert("RGBA").rotate(180, expand=False)
-                tmp = output.with_suffix(".tmp.png")
-                rotated.save(tmp, format="PNG", optimize=True)
-                os.replace(tmp, output)
-        except (OSError, ValueError):
-            return source
-        return output
-
-
 class TarotService:
     """Facade used by AstrBot handlers."""
 
@@ -296,18 +254,28 @@ class TarotService:
         *,
         deck_mode: str = "auto",
         rotate_reversed: bool = True,
+        image_provider_factory: TarotImageProviderFactory | None = None,
+        random_source: random.Random | None = None,
+        clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.plugin_dir = Path(plugin_dir)
         self.runtime_dir = Path(data_dir)
         self.runtime_dir.mkdir(parents=True, exist_ok=True)
         self.deck = TarotDeckRepository(self.plugin_dir, deck_mode=deck_mode)
         self.daily_store = TarotDailyStore(self.runtime_dir / "daily_draws.json")
-        self.images = TarotImageProvider(
-            self.deck,
-            self.runtime_dir / "reversed_cache",
-            rotate_reversed=rotate_reversed,
+        self.images: TarotImagePort | None = (
+            image_provider_factory(
+                self.deck,
+                self.runtime_dir / "reversed_cache",
+                rotate_reversed=rotate_reversed,
+            )
+            if image_provider_factory is not None
+            else None
         )
-        self._random = secrets.SystemRandom()
+        self._random = (
+            random_source if random_source is not None else secrets.SystemRandom()
+        )
+        self._clock = clock if clock is not None else lambda: datetime.now(CHINA_TZ)
 
     @staticmethod
     def _draw_orientation(rng: random.Random | secrets.SystemRandom) -> str:
@@ -342,7 +310,7 @@ class TarotService:
         *,
         now: datetime | None = None,
     ) -> TarotReading:
-        current = now.astimezone(CHINA_TZ) if now else datetime.now(CHINA_TZ)
+        current = now.astimezone(CHINA_TZ) if now else self._clock().astimezone(CHINA_TZ)
         date_key = current.strftime("%Y-%m-%d")
         cards = self._active()
         saved = self.daily_store.get(date_key, user_key)
@@ -365,6 +333,8 @@ class TarotService:
         return TarotReading("daily", (draw,), len(cards), date_key=date_key)
 
     def image_paths(self, reading: TarotReading) -> list[Path | None]:
+        if self.images is None:
+            return [self.deck.resolve_image(draw.card) for draw in reading.cards]
         return [self.images.image_for(draw) for draw in reading.cards]
 
     def deck_status(self) -> TarotDeckStatus:

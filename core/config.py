@@ -39,8 +39,9 @@ def bounded_int(value: Any, *, default: int, minimum: int, maximum: int) -> int:
 
 
 def normalize_runtime_config(config: Mapping[str, Any] | None) -> dict[str, Any]:
-    """复制配置并修正数值边界，不改变开关和其它未知配置。"""
+    """复制配置并修正数值边界；忽略已退役的旧单角色布局配置。"""
     normalized = dict(config) if isinstance(config, Mapping) else {}
+    normalized.pop("character_card_layout", None)
     for key, (default, minimum, maximum) in _NUMERIC_CONTRACTS.items():
         normalized[key] = bounded_int(
             normalized.get(key),

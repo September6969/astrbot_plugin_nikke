@@ -9,7 +9,8 @@ def calendar_cases(directory):
     from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
     from astrbot_plugin_nikke.features.calendar.service import CalendarService
     from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent, TimePrecision, SourceHealth, FetchOutcome
-    from astrbot_plugin_nikke.ui.t2i_payloads import CalendarT2IPayloadBuilder
+    from astrbot_plugin_nikke.integrations.calendar.visual_cache import CalendarVisualCache
+    from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 
     case_names = (
         "normal", "7-days", "30-days", "stale", "long-title", "many-events", "empty", "unavailable",
@@ -42,7 +43,11 @@ def calendar_cases(directory):
     )
     result = {}
     for name in case_names:
-        service = CalendarService(Path(directory) / name)
+        case_dir = Path(directory) / name
+        service = CalendarService(
+            case_dir,
+            visual_cache=CalendarVisualCache(case_dir / "calendar"),
+        )
         service._has_snapshot = name != "unavailable"
         service.last_updated_at = NOW.isoformat()
         service.last_sync_error = "合成同步失败示例" if name == "stale" else ""
@@ -536,9 +541,10 @@ def union_overview_cases():
 def character_cases():
     import json
     import copy
-    from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
+    from astrbot_plugin_nikke.features.character.composition import create_character_card_builder
     from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
     root = Path(__file__).resolve().parents[1]
+    builder = create_character_card_builder(root)
     fixture = json.loads((root / "tests" / "fixtures" / "character_details_sanitized.json").read_text(encoding="utf-8"))
     master = CharacterMasterResolver()
     result = {}
@@ -592,7 +598,7 @@ def character_cases():
             detail["leg_equip_option1_id"] = 80010
             detail["leg_equip_option2_id"] = 80011
             detail["leg_equip_option3_id"] = 0
-        data = CharacterCardBuilder().build(account={"nickname": "合成练度 · 非真实账号"}, directory=directory,
+        data = builder.build(account={"nickname": "合成练度 · 非真实账号"}, directory=directory,
                                             payload={"roster_item": roster, "detail": detail, "state_effects": effects},
                                             fetched_at="2026-09-13 12:00", plugin_version="T2I PREVIEW")
         if name == "max-ol":
