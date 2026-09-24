@@ -208,7 +208,7 @@ PR #103 已承载整仓迁移。本表是评审导航，不代表拆分或合入
 
 | Gate | 当前状态 | 未完成边界 |
 |---|---|---|
-| G01 CI | `COMPLETE` | PR head `56007862f2638af0faac1a773d18352b2e86b22a` 的 workflow run `35945461776` 六个 jobs 全部成功。最终交付文档 head 仍须由 run ledger 记录并核验同一矩阵；不以本次 checkpoint 冒充最终 head CI。 |
+| G01 CI | `COMPLETE` | 权威 run id 与 `head_sha` 记录在独立 R24 ledger 的 `state.json.remote_ci`；final audit 强制校验 `remote_ci.head_sha == git rev-parse HEAD` 且六个 required jobs 全成功。此前 implementation checkpoint 的 run 不代替最终交付 HEAD 的 CI 证据。 |
 | G02 真实验收 | `NOT_RUN` | 需要用户授权的真实账号及用户验收；本任务未写入真实账号、QQ、群消息、签到或 CDK |
 | G03 部署 | `NOT_RUN` | 未授权部署；没有更改服务器、生产数据或运行服务 |
 | G04 稳定观察 | `NOT_STARTED` | 仅在 G02/G03 获准并完成后才有运行观察窗口 |
