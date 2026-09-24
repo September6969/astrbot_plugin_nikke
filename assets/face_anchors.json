@@ -2818,6 +2818,69 @@
         ],
         "crop_padding": 64
       }
+    },
+    "c018": {
+      "schema": 2,
+      "render_id": "c018",
+      "runtime": "4.1.20",
+      "animation": "idle",
+      "time": 0,
+      "skeleton_sha256": "6583aecf0cab04f5d3a2f7f2b1ddec0e65992513373b25d6bdca719eef28558c",
+      "atlas_sha256": "adc2adbefd357e2d9d0502f5c3c71ed5e9524db4aec4cbd9dc422746ce922daa",
+      "anchor_kind": "eye_attachment",
+      "attachments": [
+        "R_eyebg_idle,smile,angry/R_eyebg_idle,smile,angry",
+        "R_eyeball_idle,smile,angry/R_eyeball_idle,smile,angry",
+        "R_eyelid_down_idle,smile,angry/R_eyelid_down_idle,smile,angry",
+        "R_eyelid_up_idle,smile,angry/R_eyelid_up_idle,smile,angry",
+        "L_eyebg/L_eyebg",
+        "L_eyeball/L_eyeball",
+        "L_eyelid_down/L_eyelid_down",
+        "L_eyelid_up/L_eyelid_up"
+      ],
+      "point_1024": [
+        312.8116551039422,
+        181.21266547796392
+      ],
+      "extent_1024": [
+        57.237958694082536,
+        39.36142772446751
+      ],
+      "bounds": [
+        -275.27074334106914,
+        -1982.7259624791186,
+        1441.3072158108216,
+        2048.7520993260196
+      ],
+      "point": [
+        1251.2466204157688,
+        724.8506619118557
+      ],
+      "extent": [
+        228.95183477633014,
+        157.44571089787004
+      ],
+      "core_axis_reason": "upper_torso_unavailable",
+      "pixel_sha256": "c69086e57ee92e93764763c090018f5d0bbb11bc44dd0b7c8aa234a7f720cd80",
+      "png_sha256": "045b0b3b568e7a2731ea42fb56b35b418e75f845842c889f22ac5963e58a33c5",
+      "image_size": [
+        2536,
+        3830
+      ],
+      "png_transform": {
+        "render_size": [
+          4096,
+          4096
+        ],
+        "render_padding": 0.08,
+        "alpha_bbox": [
+          64,
+          64,
+          2472,
+          3766
+        ],
+        "crop_padding": 64
+      }
     }
   },
   "unavailable": {}
