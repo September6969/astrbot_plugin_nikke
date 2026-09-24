@@ -5,10 +5,19 @@ FROM ${BASE_IMAGE} AS build
 ARG SPINE_COMMIT=425ce416bb218b28caeec47b317aa57cd7140375
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates git cmake ninja-build g++ pkg-config wget \
-        libfreetype-dev libx11-dev libxrandr-dev libxcursor-dev libxi-dev libgl-dev libudev-dev libopenal-dev libvorbis-dev libogg-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Ubuntu 镜像索引与包文件切换时可能短暂不同步；清理索引后只重试一次，最终失败仍阻断构建。
+RUN set -eu; \
+    install_packages() { \
+        apt-get install -y --no-install-recommends ca-certificates git cmake ninja-build g++ pkg-config wget \
+            libfreetype-dev libx11-dev libxrandr-dev libxcursor-dev libxi-dev libgl-dev libudev-dev libopenal-dev libvorbis-dev libogg-dev; \
+    }; \
+    rm -rf /var/lib/apt/lists/*; \
+    if ! (apt-get update && install_packages); then \
+        rm -rf /var/lib/apt/lists/*; \
+        apt-get update; \
+        install_packages; \
+    fi; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 --branch 4.0 https://github.com/EsotericSoftware/spine-runtimes.git /opt/spine-runtimes \
     && cd /opt/spine-runtimes \
@@ -27,9 +36,18 @@ RUN cmake -S /opt/nikke-worker -B /opt/nikke-worker/build -G Ninja -DCMAKE_BUILD
 
 FROM ${BASE_IMAGE}
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends libfreetype6 libx11-6 libxrandr2 libxcursor1 libxi6 libgl1 libudev1 libflac12 libvorbis0a libvorbisenc2 libogg0 libopenal1 xvfb xauth \
-    && rm -rf /var/lib/apt/lists/*
+# Ubuntu 镜像索引与包文件切换时可能短暂不同步；清理索引后只重试一次，最终失败仍阻断构建。
+RUN set -eu; \
+    install_packages() { \
+        apt-get install -y --no-install-recommends libfreetype6 libx11-6 libxrandr2 libxcursor1 libxi6 libgl1 libudev1 libflac12 libvorbis0a libvorbisenc2 libogg0 libopenal1 xvfb xauth; \
+    }; \
+    rm -rf /var/lib/apt/lists/*; \
+    if ! (apt-get update && install_packages); then \
+        rm -rf /var/lib/apt/lists/*; \
+        apt-get update; \
+        install_packages; \
+    fi; \
+    rm -rf /var/lib/apt/lists/*
 COPY --from=build /opt/nikke-worker/build/nikke-spine-worker /usr/local/bin/nikke-spine-worker
 COPY --from=build /opt/SFML-2.5.1/lib/ /usr/local/lib/
 RUN ldconfig
