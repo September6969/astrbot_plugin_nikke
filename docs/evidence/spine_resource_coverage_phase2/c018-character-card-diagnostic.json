@@ -1,0 +1,57 @@
+{
+  "character_card": {
+    "canvas": [
+      1600,
+      2400
+    ],
+    "preview_dimensions": [
+      1600,
+      2400
+    ],
+    "preview_file": "c018-character-card.png",
+    "preview_sha256": "611289a414b87ad46de14b98ffb0873e006eef232f8b65b515f52217e0de601b",
+    "template": "templates/t2i/character.html"
+  },
+  "core_axis": "unavailable",
+  "core_axis_reason": "upper_torso_unavailable",
+  "face_anchor_crop_transform": {
+    "alpha_bbox": [
+      848,
+      196,
+      3256,
+      3898
+    ],
+    "crop_padding": 64,
+    "render_padding": 0.08,
+    "render_size": [
+      4096,
+      4096
+    ]
+  },
+  "face_anchor_point": [
+    467.2466204157688,
+    592.8506619118557
+  ],
+  "face_anchor_state": "anchor_available_head_only",
+  "framing_source": "eye_attachment",
+  "generated_from_head": "eb30aa7d387be5cf81aa01ac2219b4768660e86f",
+  "manifest_source": "assets/data/spine_manifest.json",
+  "portrait_alpha_bbox": [
+    64,
+    64,
+    2472,
+    3766
+  ],
+  "portrait_dimensions": [
+    2536,
+    3830
+  ],
+  "portrait_rgba_pixel_sha256": "c69086e57ee92e93764763c090018f5d0bbb11bc44dd0b7c8aa234a7f720cd80",
+  "portrait_sha256": "045b0b3b568e7a2731ea42fb56b35b418e75f845842c889f22ac5963e58a33c5",
+  "portrait_source": "verified_bundled_manifest",
+  "render_id": "c018",
+  "resource_id": 18,
+  "runtime_version": "4.1",
+  "schema_version": 1,
+  "skeleton_runtime": "4.1.20"
+}

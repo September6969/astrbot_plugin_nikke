@@ -24,7 +24,8 @@
 
 | Metric | 旧 #102 历史值 | Phase 2 登记前 | Phase 2 当前 | Phase 2 delta |
 |---|---:|---:|---:|---:|
-| Canonical Character resources | 200 | 378 | 378 | 0 |
+| Canonical Character resources | 200 | 200 | 200 | 0 |
+| Canonical render IDs / consumers | n/r | 378 | 378 | 0 |
 | Upstream L2D IDs | 558 | 558 | 558 | 0 |
 | Manifest render IDs | 11 | 11 | 38 | +27 |
 | Bundled PNG IDs | n/r | 39 | 39 | 0 |
@@ -44,7 +45,7 @@
 - `Unsupported`: 明确分类为不支持的当前 canonical render identity；未将待审资源或缺图伪装成 unsupported。
 - `Undeclared PNG`: 磁盘有 PNG，但不在 manifest。当前唯一值为 `c191`，并由测试确认 `SpineManifestStore` 拒绝加载。
 
-当前快照计数：378 个 canonical consumer、558 个 upstream complete bundle、38 个 manifest、39 个 PNG、38 个 verified manifest PNG、39 个 anchor、2 个 trusted semantic Core Axis、340 个 missing manifest/render gap、0 个 orphan、0 个 unsupported；另有 1 个未声明且无效的 `c191`。
+当前快照计数：200 个 canonical Character resources、378 个 canonical render IDs/consumers、558 个 upstream complete bundle、38 个 manifest、39 个 PNG、38 个 verified manifest PNG、39 个 anchor、2 个 trusted semantic Core Axis、340 个 missing manifest/render gap、0 个 orphan、0 个 unsupported；另有 1 个未声明且无效的 `c191`。另有 180 个 upstream L2D render IDs 不被当前 canonical Character data 表示。
 
 ## 保持的 framing 合同
 

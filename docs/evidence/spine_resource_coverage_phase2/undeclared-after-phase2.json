@@ -1,0 +1,177 @@
+{
+  "classification_sets": {
+    "HISTORICAL_OR_TEST_ONLY": [],
+    "INVALID_ASSET": [
+      "c191"
+    ],
+    "STALE_OR_ORPHAN_FILE": [],
+    "VALID_VARIANT_NEEDS_REVIEW": [],
+    "VERIFIED_MANIFEST_CANDIDATE": []
+  },
+  "definitions": {
+    "HISTORICAL_OR_TEST_ONLY": "仅用于已文档化的研究、preview 或测试样本，不作为生产 bundled portrait。",
+    "INVALID_ASSET": "PNG 不可解码/没有可见 alpha，或已有 Face Anchor 与 PNG raw hash、RGBA hash、尺寸不匹配。",
+    "STALE_OR_ORPHAN_FILE": "缺少当前 canonical consumer 或固定 upstream snapshot 中没有完整 L2D bundle。",
+    "VALID_VARIANT_NEEDS_REVIEW": "仅被当前 canonical Costume/alternate consumer 使用的有效 PNG；仍需人工确认角色与 variant 对应关系。",
+    "VERIFIED_MANIFEST_CANDIDATE": "机械 identity/upstream/image 检查满足候选条件；必须另行人工确认 source-to-render provenance、视觉与 framing，且本分类不会自动加入 manifest。"
+  },
+  "generated_from_head": "eb30aa7d387be5cf81aa01ac2219b4768660e86f",
+  "records": [
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1697,
+          3502
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1761,
+          3566
+        ],
+        "file_size": 3219494,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c191.png",
+        "rgba_pixel_sha256": "f2955f7d17c7ee2ada92c624d79f34e8c4bc451119e29bfde27d0bf41f27994d",
+        "sha256": "c69c7d25353a02049ebe915b17431c0235164dbc7e0ff88a93954889d5333d98"
+      },
+      "classification": "INVALID_ASSET",
+      "classification_reason": "Face Anchor 所记录的生成输入与固定 upstream skeleton/atlas 字节不一致；拒绝提升到 manifest。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (爱丽丝)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          744.4747109763516,
+          621.3574984368197
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "191"
+        ],
+        "character_keys": [
+          "alice"
+        ],
+        "consumers": [
+          {
+            "character_key": "alice",
+            "identity": "191:default",
+            "kind": "default",
+            "render_id": "c191",
+            "resource_id": "191"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c191",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "bc1aab5ade310ce5a6c3276e7417b82e34cf7bad32f8f5381921dee9aae5254d",
+        "generation_inputs_match_pinned_bundle": false,
+        "generation_record_source": "assets/data/face_anchors.json#records.c191",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1229,
+            329,
+            2862,
+            3767
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c191.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "89b38ad6df508273b33dacff090411c06ee22de9b9ca6655ff6e00f2ae29e637",
+        "source_bundle_sha256_bound_to_render": false,
+        "state": "generation_source_mismatch",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "a99850bac39435b6f1e24a0b9a4e67d107b5b1ce",
+            "path": "l2d/c191/c191_00.atlas",
+            "size": 3972
+          },
+          {
+            "git_blob_sha1": "2928fea0e96d5b16c3e22f0220568828391145ea",
+            "path": "l2d/c191/c191_00.png",
+            "size": 3317026
+          },
+          {
+            "git_blob_sha1": "ecb7a2b8e7196e250168ead777db74d620ba5687",
+            "path": "l2d/c191/c191_00.skel",
+            "size": 994119
+          },
+          {
+            "git_blob_sha1": "66110288f4f0c7f3f59e7f7cf984019e939d3bf5",
+            "path": "l2d/c191/c191_00_2.png",
+            "size": 44198
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "scope": {
+    "automatic_asset_download_or_promotion": false,
+    "classification_is_production_authorization": false,
+    "manifest_trust_boundary_changed": false
+  },
+  "source": {
+    "commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+    "ref": "main",
+    "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+    "snapshot_schema_version": 2
+  },
+  "summary": {
+    "classification_counts": {
+      "HISTORICAL_OR_TEST_ONLY": 0,
+      "INVALID_ASSET": 1,
+      "STALE_OR_ORPHAN_FILE": 0,
+      "VALID_VARIANT_NEEDS_REVIEW": 0,
+      "VERIFIED_MANIFEST_CANDIDATE": 0
+    },
+    "undeclared_png_count": 1
+  }
+}
