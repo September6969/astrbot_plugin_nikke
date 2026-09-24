@@ -1,11 +1,10 @@
 # 配置合同与安全边界
 
-配置 schema 位于 `_conf_schema.json`。下表与 schema 的 22 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
+配置 schema 位于 `_conf_schema.json`。下表与 schema 的 21 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
 
 | 配置键 | 默认值 | 作用与边界 |
 | --- | --- | --- |
-| `character_card_layout` | `replica` | 单角色卡使用案例竖版 T2I；`classic` 使用原 Pillow 布局。 |
-| `ui_renderer` | `pillow` | Campaign、日程、联盟总览/记录/成员、Profile 支持 `pillow` / `t2i`；缺失或未知值使用 Pillow。T2I 注入 AstrBot 原生 html_render，30 秒超时或失败后使用同一 DTO 回退 Pillow（记录、成员和日程回退原文本），不再次请求 API。原生渲染策略与端点由 AstrBot 管理。 |
+| `ui_renderer` | `pillow` | Campaign、日程、联盟总览/记录/成员、Profile 支持 `pillow` / `t2i`；缺失或未知值使用 Pillow。单角色练度卡始终使用白色竖版 T2I，不受此开关影响，失败明确提示且不回退旧角色卡。其他页面 T2I 注入 AstrBot 原生 html_render，30 秒超时或失败后使用同一 DTO 回退 Pillow（记录、成员和日程回退原文本），不再次请求 API。原生渲染策略与端点由 AstrBot 管理。旧部署中的 `character_card_layout` 自 0.2.x 起被忽略，不再公开配置。 |
 | `public_base_url` | `https://nikke.irises777.xyz` | 绑定公网 HTTPS 地址；必须是无账号、路径、查询参数的站点地址。 |
 | `web_host` | `0.0.0.0` | 容器内监听地址；不代表应将端口直接暴露到公网。 |
 | `web_port` | `6210` | 绑定服务容器端口；公网访问应经过 HTTPS 反向代理。 |
@@ -32,6 +31,6 @@
 - 修改 `public_base_url` 后必须重启插件并重新安装对应绑定扩展；不能把默认站点 ZIP 当作任意自定义域名授权。
 - `data/nikke/nikke.sqlite3` 与 `data/nikke/secret.key` 必须一起备份；不能通过配置迁移替代离线备份。
 - 本文档只核对本地 schema 和代码默认值，不声称配置已在真实部署或账号上联调。
-## 角色卡布局补充
+## 单角色练度卡
 
-`character_card_layout` 默认 `replica`：单角色卡使用 1600×2400 案例竖版 HTML/T2I，独立于其他页面的 `ui_renderer`。设置为 `classic` 可使用原 Pillow 角色卡。T2I 不可用时继续沿用原有 Pillow 回退；日程和练度总览的渲染选择不受此配置影响。
+单角色练度卡只使用 `templates/t2i/character.html` 的 1600×2400 白色竖版 replica，资产与构图由现行 Spine portrait、Face Anchor / Core Axis 链路提供。`ui_renderer` 只控制其他仍支持 Pillow/T2I 双路的页面。T2I 失败时返回明确的渲染失败提示；不会调用旧 1800×1000 Pillow renderer，也不会重新查询角色详情。历史 `character_card_layout` 配置项已从 schema 删除，旧部署值会在运行时忽略。

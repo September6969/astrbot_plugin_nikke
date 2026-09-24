@@ -1,5 +1,7 @@
 # Issue #80 技术评估与回复草案：AstrBot 内置 T2I 渲染管线与 Pillow 画布方案对比
 
+> 历史技术评估。单角色练度卡最终决策已更新：旧 Pillow 横版 renderer 退役，白色竖版 T2I 为唯一生产视觉路径；此文中的旧方案比较不代表当前支持状态。
+
 > **状态**：草案评审中（仅供维护者内部审阅，未发布至 GitHub）  
 > **关联 Issue**：[Issue #80](https://github.com/September6969/astrbot_plugin_nikke/issues/80)  
 > **涉及模块**：图像渲染管线、AstrBot 核心交互层、移动端/QQ 卡片呈现  

@@ -18,7 +18,6 @@ from astrbot_plugin_nikke.core.assets.image_cache import AssetImageCache
 from astrbot_plugin_nikke.core.assets.spine_manifest import SpineManifestStore
 from astrbot_plugin_nikke.features.character.models import CharacterCardAssets
 from astrbot_plugin_nikke.ui.renderers.campaign import CampaignHistoryRenderer
-from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -189,30 +188,6 @@ def test_fallback_provider_is_non_owning_and_returns_complete_card_assets() -> N
     assert isinstance(result, CharacterCardAssets)
     assert result.portrait.size[0] > 0
     assert set(result.equipment) == {"head", "torso", "arm", "leg"}
-
-
-def test_character_renderer_does_not_own_asset_resolution() -> None:
-    with tempfile.TemporaryDirectory() as directory:
-        root = Path(directory)
-        fonts = ROOT / "fonts"
-        character = CharacterCardRenderer(root / "character", fonts)
-        assert not hasattr(character, "assets")
-        source = (ROOT / "ui" / "renderers" / "character.py").read_text(encoding="utf-8")
-        for forbidden in (
-            "resolve_character_assets",
-            "get_character_portrait",
-            "get_equipment_icon",
-            "get_favorite_item_icon",
-            "get_cube_icon",
-        ):
-            assert forbidden not in source
-
-
-def test_character_renderer_requires_explicitly_prepared_assets() -> None:
-    import inspect
-
-    assert "card_assets" in inspect.signature(CharacterCardRenderer.render_character).parameters
-    assert inspect.signature(CharacterCardRenderer.render_character).parameters["card_assets"].default is inspect.Parameter.empty
 
 
 def test_prefetch_lifecycle_close_is_idempotent_and_prevents_new_tasks() -> None:

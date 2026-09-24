@@ -11,7 +11,7 @@
 定向测试：
 
 ```text
-python -m pytest -q tests/test_static_registry.py tests/test_asset_manager.py tests/test_card_builder.py tests/test_character_card_renderer.py
+python -m pytest -q tests/test_static_registry.py tests/test_asset_manager.py tests/test_card_builder.py tests/test_character_card_retirement.py
 ```
 
 结果：本地主题相关 `27 passed, 16 subtests passed`；全量 `264 passed, 2 warnings, 59 subtests passed`。

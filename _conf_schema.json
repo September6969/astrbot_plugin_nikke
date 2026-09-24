@@ -1,11 +1,4 @@
 {
-  "character_card_layout": {
-    "description": "单角色卡样式",
-    "type": "string",
-    "options": ["replica", "classic"],
-    "hint": "replica 使用1600×2400案例竖版；失败自动回退旧版。classic 保留旧横版。此设置仅影响单角色卡。",
-    "default": "replica"
-  },
   "ui_renderer": {
     "description": "图片渲染方式",
     "type": "string",

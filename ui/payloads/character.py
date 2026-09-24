@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """妮姬角色卡的独立 T2I payload 投影。"""
 
+from typing import Any
+
 from ..t2i_assets import T2IAssetResolver
 from ...features.character.ports import CharacterRenderIdentity
 from .common import display_number
@@ -57,7 +59,10 @@ class CharacterT2IPayloadBuilder:
             replica_font,
         )
         from ...features.character.layout import summary_layout
-        from ...ui.renderers.character import CharacterCardRenderer
+        from .character_labels import (
+            CHARACTER_EQUIPMENT_SLOT_LABELS,
+            format_equipment_option_value,
+        )
         from ...ui.theme import (
             _extract_portrait_palette,
             _parse,
@@ -87,8 +92,8 @@ class CharacterT2IPayloadBuilder:
                 f"{theme.background} 100%)"
             )
 
-        equipment = []
-        for slot, label in CharacterCardRenderer.SLOT_NAMES.items():
+        equipment: list[dict[str, Any]] = []
+        for slot, label in CHARACTER_EQUIPMENT_SLOT_LABELS.items():
             item = data.equipment.get(slot, EquipmentData(slot))
             options = item.options if item.equipped else []
             rows = []
@@ -102,7 +107,7 @@ class CharacterT2IPayloadBuilder:
                 rows.append(
                     {
                         "name": option.display_name,
-                        "value": CharacterCardRenderer._option_value(option),
+                        "value": format_equipment_option_value(option),
                         "tier": f"T{tier}" if tier is not None else "—",
                         "replica_tier": f"{tier}阶" if tier is not None else "—",
                         "semantic": (
@@ -252,7 +257,7 @@ class CharacterT2IPayloadBuilder:
             "summary": [
                 {
                     "label": item.display_name,
-                    "value": CharacterCardRenderer._option_value(item),
+                    "value": format_equipment_option_value(item),
                     "tier": "—",
                 }
                 for item in data.option_totals

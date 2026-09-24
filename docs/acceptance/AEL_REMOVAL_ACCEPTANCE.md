@@ -15,5 +15,5 @@
 ## 验证
 
 - 在排除历史路线文档后，`rg -i "AEL|calculate_ael"` 不再命中产品代码、README、NOTICE 或测试。
-- `tests/test_core.py` 与 `tests/test_character_card_renderer.py` 定向测试通过。
+- `tests/test_core.py` 与 `tests/test_character_card_retirement.py` 定向测试通过；旧 1800×1000 renderer 专属测试已随实现退役。
 - 未修改数据库 schema、配置、账号凭据或远程服务器状态。

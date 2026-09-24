@@ -7,12 +7,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from PIL import Image
-
 from astrbot_plugin_nikke.features.character.builder import CharacterCardBuilder
 from astrbot_plugin_nikke.features.character.registries.overload import OverloadTierRegistry
 from astrbot_plugin_nikke.features.character.registries.state_effect import StateEffectRegistry
-from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
 from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProvider
 from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, CHARACTER_DETAILS
 from astrbot_plugin_nikke._version import PLUGIN_VERSION
@@ -469,18 +466,6 @@ class CharacterDetailClientTests(unittest.IsolatedAsyncioTestCase):
         result = await client.get_character_detail(account, "5101")
         self.assertEqual(client.detail_payload["name_codes"], ["5101"])
         self.assertEqual(result["roster_item"]["lv"], 525)
-
-
-class CharacterCardRendererTests(unittest.TestCase):
-    def test_renderer_outputs_fixed_horizontal_card(self):
-        root = Path(__file__).resolve().parents[1]
-        with tempfile.TemporaryDirectory() as td:
-            renderer = CharacterCardRenderer(td, root / "fonts")
-            card = build_card()
-            path = renderer.render_character(card, fallback_card_assets(card))
-            with Image.open(path) as image:
-                self.assertEqual(image.size, (1800, 1000))
-                self.assertEqual(image.mode, "RGB")
 
 
 if __name__ == "__main__":

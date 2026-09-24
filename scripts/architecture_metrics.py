@@ -296,6 +296,67 @@ def _command_runtime_responsibilities(
     return violations
 
 
+def _character_card_retirement_violations(
+    root: Path, production_sources: dict[str, str]
+) -> list[dict[str, Any]]:
+    """阻止已退役的单角色 Pillow/classic 实现重新进入生产路径。"""
+    violations: list[dict[str, Any]] = []
+    legacy_module = root / "ui" / "renderers" / "character.py"
+    if legacy_module.exists():
+        violations.append(
+            {
+                "reason": "legacy-renderer-module",
+                "path": "ui/renderers/character.py",
+            }
+        )
+
+    for path, source in sorted(production_sources.items()):
+        for line_number, line in enumerate(source.splitlines(), 1):
+            if "CharacterCardRenderer" in line:
+                violations.append(
+                    {
+                        "reason": "legacy-renderer-reference",
+                        "path": path,
+                        "line": line_number,
+                    }
+                )
+            if "character_card_layout" in line:
+                if path == "core/config.py" and line.strip() == (
+                    'normalized.pop("character_card_layout", None)'
+                ):
+                    continue
+                violations.append(
+                    {
+                        "reason": "legacy-layout-decision",
+                        "path": path,
+                        "line": line_number,
+                    }
+                )
+            if '"classic"' in line.casefold() or "'classic'" in line.casefold():
+                violations.append(
+                    {
+                        "reason": "classic-card-mode-literal",
+                        "path": path,
+                        "line": line_number,
+                    }
+                )
+
+    schema_path = root / "_conf_schema.json"
+    if schema_path.is_file():
+        try:
+            schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            schema = {}
+        if "character_card_layout" in schema:
+            violations.append(
+                {
+                    "reason": "legacy-layout-config-exposed",
+                    "path": "_conf_schema.json",
+                }
+            )
+    return violations
+
+
 def _adapter_infrastructure_imports(
     path: str, records: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -611,6 +672,9 @@ def collect_metrics(root: Path) -> dict[str, Any]:
     production_paths = [
         path for path in paths if not path.relative_to(root).as_posix().startswith(("tests/", "scripts/"))
     ]
+    production_sources = {
+        path.relative_to(root).as_posix(): sources[path] for path in production_paths
+    }
     module_sizes = sorted(
         (
             {
@@ -684,6 +748,13 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         {"category": "command_runtime_responsibility", **record}
         for record in command_runtime_responsibilities
     )
+    character_card_retirement_violations = _character_card_retirement_violations(
+        root, production_sources
+    )
+    violations.extend(
+        {"category": "legacy_character_card", **record}
+        for record in character_card_retirement_violations
+    )
     for resource, owners in duplicate_resource_owners.items():
         violations.append(
             {"category": "duplicate_resource_owner", "resource": resource, "owners": owners}
@@ -749,6 +820,7 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         "class_getattrs": class_getattrs,
         "adapter_resource_constructions": adapter_resource_constructions,
         "command_runtime_responsibilities": command_runtime_responsibilities,
+        "character_card_retirement_violations": character_card_retirement_violations,
         "profile_route_flag_references": profile_flags,
         "syntax_errors": syntax_errors,
         "gate_violations": violations,

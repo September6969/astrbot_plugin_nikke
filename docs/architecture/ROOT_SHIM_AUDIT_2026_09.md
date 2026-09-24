@@ -4,6 +4,8 @@
 > 针对 Issue #82 完成后的仓库根目录，全面排查 94 个根目录 `.py` 文件，制定清理与迁移策略。
 > 消除视觉拥挤与冗余存根，将所有业务实现与内部引用全面收敛至 `features/`, `core/`, `integrations/`, `ui/` 分层包中。
 
+> **后续状态（PR #103）**：本审计是历史快照。`character_card_renderer.py` 兼容 shim 及其 1800×1000 Pillow 实现已彻底删除；当前角色练度卡只使用白色竖版 T2I replica。
+
 ---
 
 ## 一、分类统计总览
@@ -46,7 +48,7 @@
 | 21 | `card_theme.py` | **C** | Compatibility Shim | `ui.theme` | 0 (无) | 4 (test_character_card_renderer.py, test_theme_and_profile.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
 | 22 | `cdk_models.py` | **C** | Compatibility Shim | `features.cdk.models` | 0 (无) | 3 (test_cdk.py, test_cdk_persistence.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
 | 23 | `cdk_service.py` | **C** | Compatibility Shim | `features.cdk.service` | 1 (main.py) | 4 (test_cdk.py, test_cdk_persistence.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
-| 24 | `character_card_renderer.py` | **C** | Compatibility Shim | `ui.renderers.character` | 2 (scripts/preview_character_cards.py, scripts/preview_ui_v03.py) | 5 (test_card_builder.py, test_character_card_renderer.py...) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
+| 24 | `character_card_renderer.py` | **HISTORICAL / DELETED** | Retired legacy single-character renderer and shim | None | 0 current production refs | 0 current test refs | No compatibility surface retained | Deleted by PR #103; current white vertical T2I replica is the sole production character-card path |
 | 25 | `character_crop.py` | **C** | Legacy Implementation (unmigrated) | `features.character.crop` | 0 (无) | 1 (test_character_crop.py) | High (Business logic) | Migrate to target, then convert to shim/delete |
 | 26 | `character_detail_diagnostic.py` | **C** | Compatibility Shim | `features.character.diagnostic` | 1 (scripts/diagnose_character_details.py) | 1 (test_character_detail_diagnostic.py) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |
 | 27 | `character_identity.py` | **C** | Compatibility Shim | `features.character.identity` | 2 (main.py, scripts/benchmark_measurements.py) | 1 (test_character_identity.py) | Low (Internal legacy) | Migrate to target, then convert to shim/delete |

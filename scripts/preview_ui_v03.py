@@ -1,4 +1,4 @@
-"""脱敏展示层基准：固定输入、重复计时、原尺寸/半尺寸/QQ压缩模拟。"""
+"""旧版非角色展示层基准：固定输入、重复计时与压缩模拟。"""
 from __future__ import annotations
 
 import argparse
@@ -23,8 +23,6 @@ package.__path__ = [str(ROOT)]
 sys.modules[package.__name__] = package
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
-from astrbot_plugin_nikke.features.character.models import EquipmentOption, OptionSummary
-from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
 from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
 from astrbot_plugin_nikke.features.campaign.models import StageClearRecord, StageClearMember, ClearLineupStatus
@@ -46,7 +44,6 @@ def main():
     if args.baseline:
         # 在独立进程中载入已核验基线，不切换工作树或覆盖当前文件。
         modules = {"card_theme": None, "renderer": "CardRenderer",
-                   "character_card_renderer": "CharacterCardRenderer",
                    "profile_card_renderer": "ProfileCardRenderer",
                    "campaign_history_renderer": "CampaignHistoryRenderer",
                    "union_raid_renderer": "UnionRaidRenderer", "web_service": "BindingWebService",
@@ -64,54 +61,9 @@ def main():
     output = root / args.tag
     output.mkdir(parents=True, exist_ok=True)
     manager = AssetManager(output / "cache", ROOT / "assets", remote=False)
-    render = CharacterCardRenderer(output, ROOT / "fonts")
     base = build_card()
     base.commander_name, base.fetched_at = "展示样本 · 非真实账号", "2026-09-10 12:00"
-    base.name_cn, base.name_en, base.resource_id, base.name_code = "拉毗", "Rapi", "10", "sample"
-    base.level, base.hp, base.attack, base.defense, base.combat = 526, 5429825, 176926, 35499, 174321
-    base.corporation, base.element, base.spine_asset_id = "ELYSION", "Fire", "c010"
-    for item in base.equipment.values():
-        item.equipped = True
-        item.options = [EquipmentOption("sample", "攻击力提升", .1322, "percent", position=1, tier=15),
-                        EquipmentOption("sample", "最大装弹数提升", .8537, "percent", position=2, tier=12),
-                        EquipmentOption("sample", "空槽", 0, "empty", position=3)]
-    assets = manager.resolve_character_assets(base)
-    base.option_totals = [OptionSummary("攻击力提升", .1322 * 4, "percent"),
-                          OptionSummary("最大装弹数提升", .8537 * 4, "percent")]
-    for name in ("c010", "c010_03"):
-        if not (root / "portraits" / f"{name}-idle.png").is_file():
-            raise RuntimeError(f"缺少指定 idle@0 预览素材: {name}")
-    default = Image.open(root / "portraits/c010-idle.png").convert("RGBA")
-    vacation = Image.open(root / "portraits/c010_03-idle.png").convert("RGBA")
     jobs = {}
-    for name, portrait in (("character-c010", default), ("character-c010_03", vacation),
-                           ("character-full-ol", default), ("character-missing-ol", default),
-                           ("character-long-name", vacation), ("character-fallback", assets.portrait)):
-        card, images = copy.deepcopy(base), copy.copy(assets)
-        images.portrait = portrait
-        if name.endswith("c010_03"):
-            card.costume_id, card.spine_asset_id = "10005", "c010_03"
-        if name.endswith("full-ol"):
-            for item in card.equipment.values():
-                item.options[2] = EquipmentOption("sample", "暴击率提升", .05, "percent", position=3, tier=8)
-            card.option_totals.append(OptionSummary("暴击率提升", .20, "percent"))
-        if name.endswith("missing-ol"):
-            card.option_totals = []
-            card.hp = card.attack = card.defense = None
-            for item in card.equipment.values():
-                item.options = []
-            card.equipment["head"].equipped = False
-            card.equipment["arm"].options = [EquipmentOption("unverified", "未识别词条", 1, "unknown", position=1)]
-        if name.endswith("long-name"):
-            card.name_cn = "繁體與简体混合超长正式角色名称排版样本"
-            card.name_en = "VERY LONG OFFICIAL CHARACTER NAME / CLASSIC VACATION"
-        jobs[name] = lambda c=card, a=images: render.render_character(c, a)
-    for name, size in (("tall", (120, 1600)), ("wide", (1600, 250))):
-        card, images = copy.deepcopy(base), copy.copy(assets)
-        card.name_cn = f"合成极端轮廓 / {name}"
-        card.corporation = "ABNORMAL"
-        images.portrait = Image.new("RGBA", size, "#9296AD")
-        jobs[f"character-{name}"] = lambda c=card, a=images: render.render_character(c, a)
     profile = ProfileDashboardData("展示指挥官", "", 526, 318, "NORMAL 34-24", "HARD 18-21", 187,
                                    526, 174321, base.fetched_at, base.plugin_version,
                                    commander_level=382, created_at="2023-01-16", roster_available=True,

@@ -35,6 +35,14 @@ class RuntimeConfigTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(config["max_concurrency"], 2)
         self.assertFalse(config["enable_daily_actions"])
 
+    def test_retired_character_layout_config_is_ignored(self) -> None:
+        for legacy_value in ("classic", "replica"):
+            with self.subTest(legacy_value=legacy_value):
+                config = normalize_runtime_config(
+                    {"character_card_layout": legacy_value}
+                )
+                self.assertNotIn("character_card_layout", config)
+
     async def test_scheduler_survives_corrupt_persisted_clock(self) -> None:
         coordinator = RuntimeCoordinator()
         config = normalize_runtime_config({})

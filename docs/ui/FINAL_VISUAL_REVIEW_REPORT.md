@@ -1,5 +1,7 @@
 # FINAL VISUAL REVIEW REPORT
 
+> 历史视觉复核记录：Character 章节针对旧阶段设计。该 1800×1000 Pillow 单角色卡现已退役；当前唯一生产路径是 1600×2400 白色竖版 replica，失败不回退旧版。
+
 本次最终视觉复核已完成。分支 `feat/t2i-campaign-phase1`，HEAD `ebbb18f8c32ca5cf27ba3fb3ceb1255fe6acabb5`。
 
 实现继续保存在未提交工作树；未 commit、push、PR、merge、deploy 或发送 QQ。以开始本轮时的未提交工作为基线，没有覆盖此前功能与资产交付。

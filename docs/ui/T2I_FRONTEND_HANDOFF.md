@@ -1,4 +1,6 @@
-# NIKKE 原生 HTML/T2I 前端交接
+# NIKKE 原生 HTML/T2I 前端交接（历史记录）
+
+> 当前状态：本文保留旧阶段的接线记录。PR #103 退役了单角色 1800×1000 Pillow 卡；唯一生产角色卡现为 1600×2400 白色竖版 T2I。渲染失败只返回明确错误，不会转入 Pillow 角色卡或重复查询。
 
 ## 工作树与范围
 
@@ -12,7 +14,7 @@
 
 `ui_renderer` 默认 `pillow`；设为 `t2i` 启用以下七页。配置缺失或未知值沿用旧路径。
 
-| 页面 | 命令 / 数据来源 | 画布 | T2I 失败回退 |
+| 页面 | 命令 / 数据来源 | 画布 | T2I 失败行为 |
 |---|---|---|---|
 | Campaign | 原 Campaign 命令，CampaignHistoryBuilder → StageClearRecord | 1600×880 | 同一 DTO → Pillow |
 | Calendar | `/妮姬 日程 [7/14/30]`，默认 14，CalendarService | 宽 1400，动态高 | 同一窗口数据 → 原文本 |
@@ -20,9 +22,9 @@
 | Union Records | `/妮姬 联盟突袭 排行`，既有 build_ranking | 宽 1500，动态高 | 同一 DTO → 原文本 |
 | Union Member | `/妮姬 联盟突袭 我的`，既有 build_member_ranking | 宽 1500，动态高 | 同一 DTO → 原文本 |
 | Profile | `/妮姬 我的`，ProfileBuilder → ProfileDashboardData | 宽 1200，动态高 | 同一 DTO → Pillow |
-| Character | 原个人练度命令，CharacterCardBuilder → CharacterCardData | 1800×1000 | 同一 DTO → Pillow |
+| Character | `/妮姬 查询 练度 <角色>`，CharacterApplication → CharacterCardData | 1600×2400 | Spine/Face Anchor → CharacterT2IPayloadBuilder → `templates/t2i/character.html` → AstrBot html_render；失败明确报错 |
 
-T2IRenderer 通过 callback 使用 `self.html_render`，不继承 Star，不启动浏览器，不创建 Node 构建链，不选择或覆盖 AstrBot 服务端点。各模板声明数值 viewport width，避免不同原生端点的默认视口改变画布；动态页仍 full_page、不截断。原生选项依据 [官方服务文档](https://github.com/AstrBotDevs/astrbot-t2i-service)。生产超时 30 秒；普通失败走既有回退，取消直接传播，不重新查询业务 API。
+T2IRenderer 通过 callback 使用 `self.html_render`，不继承 Star，不启动浏览器，不创建 Node 构建链，不选择或覆盖 AstrBot 服务端点。各模板声明数值 viewport width，避免不同原生端点的默认视口改变画布；动态页仍 full_page、不截断。原生选项依据 [官方服务文档](https://github.com/AstrBotDevs/astrbot-t2i-service)。生产超时 30 秒；普通页面失败走既有回退，单角色卡失败明确报错且不回退旧 Pillow，取消直接传播，不重新查询业务 API。
 
 Calendar 的分组从原文本逻辑抽出为 `CalendarService.group_window`，仍由 Service 决定 ENDING SOON / ACTIVE / UPCOMING、24 小时边界和 horizon。adapter 仅格式化；活动不截断。Union Records 保持 Builder 排序与真实 rank；`len(attacks)` 只标记返回记录。Member 使用 `RECORD 01` 等记录编号与 CURRENT_RESPONSE_MEMBER，保留每条精确伤害、五个成员、成员精确 combat 与真实记录字段。Overview 不放成员排名、联盟 Rank 或总伤害 KPI，不推断 Current Target。
 
@@ -66,7 +68,7 @@ T2IAssetResolver 只接受 Path / PIL，限制 12 MiB 输入、20M pixels，按�
 
 本次最终结果：全量 pytest **763 passed / 490 subtests passed**；T2I 定向 **57 passed**（含资产集成 15 项）；扩展 **4 passed**；Python 3.10 compileall 与 `git diff --check` 通过。资产准备阶段的原有 29 项测试亦通过。数字为不同测试集合，不能相加作总数。全量日志：`E:\DevCache\nikke-t2i-phase1\full-frontend-delivery-tests.log`；定向日志：`targeted-t2i-final.log`；扩展日志：`extension-final-tests.log`，均位于同一父目录。
 
-18 个交付图名（含同图别名），合计 54 张 100% / 50% / 30% PNG 已验证格式、尺寸与缩放比例。七页代表图已作视觉检查：页面类型、第一视觉、关键数字/状态与主要结构可识别；50% 主要业务数据可读取；100% 可读取细节。Profile 最终为 1200×2680，Character 为 1800×1000。此处是本阶段实现检查，不替代后续最终美术和 QQ 实机验收。
+18 个交付图名（含同图别名），合计 54 张 100% / 50% / 30% PNG 已验证格式、尺寸与缩放比例。七页代表图已作视觉检查：页面类型、第一视觉、关键数字/状态与主要结构可识别；50% 主要业务数据可读取；100% 可读取细节。该历史阶段的 Character 图片为 1800×1000；当前唯一角色卡为 1600×2400 白色竖版。此处是本阶段实现检查，不替代后续最终美术和 QQ 实机验收。
 
 所有 pytest 使用 fake native callback，真实截图仅由显式预览脚本运行。现有测试未删除或降低强度；Phase 1 头像占位测试升级为真实解析且继续禁止调用 Spine。
 
@@ -95,6 +97,7 @@ python scripts/preview_t2i_frontend.py --page <page> --output-dir <preview>/t2i 
 
 - 普通异常、超时、无效 native 返回值、取消传播、默认 Pillow、原生成功。
 - 命令层同一 DTO 回退，确认不重复业务请求；Calendar 保留原 Service 文字合同。
+- 单角色练度卡没有视觉回退分支：已取得 DTO 的白色竖版 T2I 渲染失败时向用户返回明确错误，不重查详情、不调用 Pillow 角色卡。
 - 单头像缺失/损坏、错误角色皮肤、未知身份，保留名字/LV/combat，其他成员不受影响。
 - Boss 已知/未解析；缺图不伪造身份、HP、元素或状态。
 - Spine 错 hash、缺 hash、坏 PNG、缺文件、路径越界、身份冲突及未知角色安全降级。

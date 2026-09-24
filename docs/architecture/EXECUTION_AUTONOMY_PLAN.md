@@ -4,6 +4,7 @@
 > 本文是 overnight 阶段的执行规则和历史快照；不是当前状态入口。当前主分支基线、PR #5 和工作区以 [POST_MERGE_STATUS.md](..\operations\POST_MERGE_STATUS.md) 为准。
 > 本文快照中的主分支基线：`main@deeef6277f09a42918d71b44f49170398a05558b`
 > 本文快照中的工作分支：`feat/overnight-backlog`，已由 PR #5 合并，不是当前开发分支。
+> 后续角色卡决策：本文提到的 `CharacterCardRenderer` 调用链均属历史路径；PR #103 已将其退役，当前唯一角色卡是白色竖版 T2I。
 > 当前 HEAD 与提交数量以 `git rev-parse HEAD`、`git rev-list --count origin/main..HEAD` 为准，避免固定计数过期。
 > 本文目的：统一此前讨论中的 **审核修复、Agent 最大自治、Guide/Spine/Voice 资源策略、人工边界、后续开发顺序和执行 Prompt**。  
 > 本文优先于此前较保守的“人工任务”说明。

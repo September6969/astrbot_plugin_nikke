@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
+from astrbot_plugin_nikke.ui.payloads.character_labels import format_equipment_option_value
 from astrbot_plugin_nikke.features.character.ol_unknown_inventory import UnknownOlInventory
 from astrbot_plugin_nikke.tests.test_card_builder import make_builder
 
@@ -24,7 +24,7 @@ class UnknownOlInventoryTests(unittest.TestCase):
                 position=1,
             )
             self.assertEqual(option.display_name, "未知词条 · ID 7999999")
-            self.assertEqual(CharacterCardRenderer._option_value(option), "待确认")
+            self.assertEqual(format_equipment_option_value(option), "待确认")
 
             builder.unknown_ol_inventory.observe(option.option_id, option.raw_type)
             builder.unknown_ol_inventory.observe(option.option_id, option.raw_type)

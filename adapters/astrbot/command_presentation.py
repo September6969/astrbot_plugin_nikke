@@ -11,6 +11,7 @@ from astrbot.api import logger
 from astrbot.api.event import MessageChain
 from astrbot.api.message_components import Image
 
+from ...application.commands.character import CharacterRenderFailure
 from ...ui.payloads.calendar import CalendarT2IPayloadBuilder
 from ...ui.renderers import T2IRenderer
 
@@ -34,11 +35,20 @@ class AstrBotCommandPresentation:
         self.calendar_payload_builder = CalendarT2IPayloadBuilder()
 
     async def try_t2i(self, page: str, data: Any, **kwargs: Any) -> str | None:
-        """T2I 失败时返回空信号，由调用方使用原有数据回退。"""
+        """普通页面失败时返回回退信号；单角色卡失败时显式报错。"""
         if page == "character":
-            if self._config().get("character_card_layout", "replica") == "classic":
-                return None
-        elif self._config().get("ui_renderer", "pillow") != "t2i":
+            try:
+                path = await self._renderer().render_view(page, data, **kwargs)
+            except Exception as exc:
+                logger.warning(
+                    "[NIKKE] 单角色白色 replica 渲染失败: %s",
+                    type(exc).__name__,
+                )
+                raise CharacterRenderFailure from exc
+            if not isinstance(path, str) or not path.strip():
+                raise CharacterRenderFailure
+            return path
+        if self._config().get("ui_renderer", "pillow") != "t2i":
             return None
         try:
             return await self._renderer().render_view(page, data, **kwargs)
@@ -68,16 +78,9 @@ class AstrBotCommandPresentation:
 
     async def render_character_card(self, card: Any) -> str:
         path = await self.try_t2i("character", card)
-        if path:
-            return path
-        card_assets = await asyncio.to_thread(
-            self._services.asset_manager.resolve_character_assets, card
-        )
-        return await asyncio.to_thread(
-            self._services.character_renderer.render_character,
-            card,
-            card_assets,
-        )
+        if path is None:
+            raise CharacterRenderFailure
+        return path
 
     async def render_character_info(self, data: Any) -> str:
         return await asyncio.to_thread(

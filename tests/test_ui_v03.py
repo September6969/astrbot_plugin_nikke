@@ -1,51 +1,28 @@
 """展示层回归：数据不变、固定槽位与安全页面。"""
 import asyncio
-import tempfile
 import types
-from pathlib import Path
-from unittest.mock import patch
 
-from PIL import Image
-
-from astrbot_plugin_nikke.features.character.models import EquipmentOption
 from astrbot_plugin_nikke.ui.theme import character_theme, UI_COLORS, _relative_luminance
-from astrbot_plugin_nikke.ui.renderers.character import CharacterCardRenderer
-from astrbot_plugin_nikke.tests.test_card_builder import build_card, fallback_card_assets
+from astrbot_plugin_nikke.ui.payloads.character_labels import format_equipment_option_value
 from astrbot_plugin_nikke.integrations.web.service import BindingWebService
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_issue_73_percent_presentation():
     for value, expected in ((.1322, "13.22%"), (.8537, "85.37%")):
-        option = EquipmentOption("fixture", "测试词条", value, "percent")
-        assert CharacterCardRenderer._option_value(option) == expected
+        option = types.SimpleNamespace(value=value, unit="percent")
+        assert format_equipment_option_value(option) == expected
         assert option.value == value
 
 
-def test_four_positions_have_exactly_three_rows_even_when_unequipped():
-    with tempfile.TemporaryDirectory() as td:
-        renderer = CharacterCardRenderer(td, ROOT / "fonts")
-        card = build_card()
-        assets = fallback_card_assets(card)
-        for item in card.equipment.values():
-            item.equipped = False
-            item.options = [EquipmentOption("stale", "残留不显示", .1, "percent")]
-        with patch.object(renderer, "_text", wraps=renderer._text) as text:
-            renderer.draw_equipment_column(
-                Image.new("RGBA", (1800, 1000)), card,
-                character_theme("ELYSION", "Fire"), equipment_icons=assets.equipment,
-            )
-        strings = [call.args[2] for call in text.call_args_list]
-        assert strings.count("空槽") == 12
-        assert strings.count("未装备") == 4
-        assert "残留不显示" not in strings
-
-
-def test_empty_unknown_and_verified_remain_distinct():
-    values = [CharacterCardRenderer._option_value(EquipmentOption("test", "test", .1322, unit))
-              for unit in ("empty", "unknown", "percent")]
+def test_equipment_value_labels_keep_empty_unknown_and_flat_distinct():
+    values = [
+        format_equipment_option_value(types.SimpleNamespace(value=.1322, unit=unit))
+        for unit in ("empty", "unknown", "percent")
+    ]
     assert values == ["—", "待确认", "13.22%"]
+    assert format_equipment_option_value(
+        types.SimpleNamespace(value=1234.6, unit="flat")
+    ) == "1,235"
 
 
 def test_binding_page_never_echoes_request_url():

@@ -16,7 +16,6 @@ from ...features.character.composition import create_character_card_builder
 from ...features.character.identity import CharacterDirectoryResolver
 from ...integrations.character.stat_resources import CharacterStatResourceLoader
 from ...integrations.blablalink.client import BlaBlaClient
-from ...ui.renderers import CharacterCardRenderer
 
 logger = logging.getLogger("astrbot_plugin_nikke")
 
@@ -29,7 +28,6 @@ class CharacterResources:
     stat_resources: CharacterStatResourceLoader
     builder: Any
     identity: CharacterDirectoryResolver
-    renderer: CharacterCardRenderer
 
 
 def create_character_resources(
@@ -66,5 +64,4 @@ def create_character_resources(
         clock=clock,
         plugin_version=plugin_version,
     )
-    renderer = CharacterCardRenderer(data_dir / "cards", plugin_dir / "fonts")
-    return CharacterResources(application, stat_resources, builder, identity, renderer)
+    return CharacterResources(application, stat_resources, builder, identity)

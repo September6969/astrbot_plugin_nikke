@@ -34,6 +34,10 @@ CardPresenter = Callable[[CharacterCardData], Awaitable[str]]
 InfoPresenter = Callable[[CharacterInfoData], Awaitable[str]]
 
 
+class CharacterRenderFailure(RuntimeError):
+    """新版单角色角色卡无法完成展示。"""
+
+
 class CharacterCommandHandler:
     """把角色查询编排收在命令用例，渲染与宿主反馈由注入端口提供。"""
 
@@ -101,6 +105,8 @@ class CharacterCommandHandler:
         except CookieExpired:
             self._invalidate_cookie(context.actor_id)
             return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except CharacterRenderFailure:
+            return self._text("角色卡渲染失败，请稍后重试。")
         except (BlaBlaError, ValueError, RuntimeError) as exc:
             return self._text(f"查询失败：{safe_exception_message(exc)}")
         except Exception as exc:

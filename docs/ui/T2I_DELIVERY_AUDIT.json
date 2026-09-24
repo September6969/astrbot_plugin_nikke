@@ -1,4 +1,6 @@
 {
+  "classification": "HISTORICAL_ONLY_NOT_CURRENT_CHARACTER_CARD_ACCEPTANCE",
+  "superseded_by": "PR #103 legacy character card retirement",
   "branch": "feat/t2i-campaign-phase1",
   "head": "ebbb18f8c32ca5cf27ba3fb3ceb1255fe6acabb5",
   "pytest": {

@@ -12,6 +12,7 @@ import pytest
 from jinja2 import Environment
 
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
+from astrbot_plugin_nikke.application.commands.character import CharacterRenderFailure
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 
 
@@ -32,6 +33,32 @@ async def test_page_fixtures(page, tmp_path):
         for forbidden in ("https://", "http://", "file://", "<script", "{% include", "{% import"):
             assert forbidden not in html, (page, name, forbidden)
         assert native.call_args.kwargs["options"]["type"] == "png"
+    assets.close()
+
+
+@pytest.mark.asyncio
+async def test_character_success_uses_white_vertical_template(tmp_path):
+    from pathlib import Path
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
+    from astrbot_plugin_nikke.features.character.replica import VERSION
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+
+    data = next(iter(get_cases("character", tmp_path).values()))
+    assets = AssetManager(
+        tmp_path / "cache",
+        Path(__file__).resolve().parents[1] / "assets",
+        remote=False,
+    )
+    native = AsyncMock(return_value="white-replica.png")
+    renderer = T2IRenderer(native, assets)
+
+    assert await renderer.render_view("character", data) == "white-replica.png"
+    template, payload = native.call_args.args
+    assert payload["template_version"] == VERSION == "replica-1600x2400-v2"
+    assert payload["character_art_data_uri"].startswith("data:image/png;base64,")
+    assert "width:1600px;height:2400px" in template
+    assert "background:#e8ebee" in template
+    assert native.call_args.kwargs["options"]["type"] == "png"
     assets.close()
 
 
@@ -68,7 +95,11 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
     plugin.presentation._t2i_renderer = Mock(
         render_view=AsyncMock(side_effect=RuntimeError())
     )
-    assert await plugin.presentation.try_t2i(page, data) is None
+    if page == "character":
+        with pytest.raises(CharacterRenderFailure):
+            await plugin.presentation.try_t2i(page, data)
+    else:
+        assert await plugin.presentation.try_t2i(page, data) is None
     plugin.presentation._t2i_renderer.render_view.side_effect = asyncio.CancelledError()
     with pytest.raises(asyncio.CancelledError):
         await plugin.presentation.try_t2i(page, data)
@@ -76,7 +107,7 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("page", ["profile", "union_overview", "character"])
+@pytest.mark.parametrize("page", ["profile", "union_overview"])
 async def test_pillow_command_fallback_retains_dto(page, tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
     plugin = make_plugin_shell()
@@ -107,31 +138,10 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         plugin.services.raid_renderer = Mock(render_raid_overview=fallback)
         inject_raid_handler(plugin)
         command, args, request = plugin.union_raid, (), plugin.services.raid_application.overview
-    else:
-        plugin._directory = [{"name_code": "5065"}]
-        from types import SimpleNamespace
-        plugin.services.character_application = Mock(
-            build_card=AsyncMock(return_value=SimpleNamespace(card=data))
-        )
-        plugin.services.store = Mock()
-        card_assets = object()
-        plugin.services.asset_manager = Mock(resolve_character_assets=Mock(return_value=card_assets))
-        fallback = Mock(return_value="fallback.png")
-        plugin.services.character_renderer = Mock(render_character=fallback)
-        inject_character_handler(plugin)
-        command, args, request = (
-            plugin.character,
-            ("皇冠",),
-            plugin.services.character_application.build_card,
-        )
     event = Mock(image_result=lambda path: path)
     assert [result async for result in command(event, *args)] == ["fallback.png"]
     request.assert_awaited_once()
-    if page == "character":
-        plugin.services.asset_manager.resolve_character_assets.assert_called_once_with(data)
-        fallback.assert_called_once_with(data, card_assets)
-    else:
-        fallback.assert_called_once_with(data)
+    fallback.assert_called_once_with(data)
     assert plugin.presentation._t2i_renderer.render_view.call_args.args[1] is data
 
 
@@ -261,6 +271,43 @@ async def test_character_slots_theme_and_assets(tmp_path):
     html = Environment(autoescape=False).from_string(template).render(**payload)
     assert 'class="corp-watermark"' not in html
     assert 'class="equipment-grid"' in html
+    assets.close()
+
+
+@pytest.mark.asyncio
+async def test_character_unworn_equipment_keeps_fixed_empty_rows_without_stale_options(tmp_path):
+    from pathlib import Path
+    from astrbot_plugin_nikke.core.asset_manager import AssetManager
+    from astrbot_plugin_nikke.features.character.models import EquipmentOption
+
+    native = AsyncMock(return_value="card.png")
+    assets = AssetManager(
+        tmp_path / "cache",
+        Path(__file__).resolve().parents[1] / "assets",
+        remote=False,
+    )
+    renderer = T2IRenderer(native, assets)
+    card = get_cases("character", tmp_path)["ol-max"]
+    for item in card.equipment.values():
+        item.equipped = False
+        item.options = [EquipmentOption("stale", "残留不显示", 0.1, "percent")]
+
+    await renderer.render_view("character", card)
+    payload = native.call_args.args[1]
+
+    assert len(payload["equipment"]) == 4
+    assert all(item["status"] == "未装备" for item in payload["equipment"])
+    assert all(len(item["options"]) == 3 for item in payload["equipment"])
+    assert all(
+        row["name"] == "空槽" and row["value"] == "—" and row["state"] == "EMPTY"
+        for item in payload["equipment"]
+        for row in item["options"]
+    )
+    assert all(
+        "残留不显示" not in row["name"]
+        for item in payload["equipment"]
+        for row in item["options"]
+    )
     assets.close()
 
 

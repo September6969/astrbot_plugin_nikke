@@ -9,6 +9,7 @@ from scripts.architecture_metrics import (
     PLAN_THRESHOLDS,
     PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
     _adapter_infrastructure_imports,
+    _character_card_retirement_violations,
     _command_runtime_responsibilities,
     classify_module_shape,
     collect_metrics,
@@ -52,6 +53,37 @@ def test_command_runtime_is_only_a_host_router() -> None:
     violations = _violations("command_runtime_responsibility")
     assert not violations, f"command runtime 越权承担领域或展示实现：{violations}"
     assert not _violations("adapter_resource_construction")
+
+
+def test_legacy_character_card_renderer_is_retired() -> None:
+    assert not _violations("legacy_character_card"), METRICS[
+        "character_card_retirement_violations"
+    ]
+
+
+def test_legacy_character_card_gate_detects_reintroduced_renderer_and_classic_branch(
+    tmp_path,
+) -> None:
+    renderer = tmp_path / "ui" / "renderers" / "character.py"
+    renderer.parent.mkdir(parents=True)
+    renderer.write_text("class CharacterCardRenderer: pass\n", encoding="utf-8")
+    presentation = (
+        'if config.get("character_card_layout") == "classic":\n'
+        "    return pillow_render()\n"
+    )
+    violations = _character_card_retirement_violations(
+        tmp_path,
+        {
+            "ui/renderers/character.py": renderer.read_text(encoding="utf-8"),
+            "adapters/astrbot/command_presentation.py": presentation,
+        },
+    )
+    assert {item["reason"] for item in violations} == {
+        "legacy-renderer-module",
+        "legacy-renderer-reference",
+        "legacy-layout-decision",
+        "classic-card-mode-literal",
+    }
 
 
 def test_adapter_import_gate_rejects_infrastructure_but_allows_application_contracts() -> None:

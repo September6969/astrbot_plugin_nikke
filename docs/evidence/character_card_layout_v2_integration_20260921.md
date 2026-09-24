@@ -1,5 +1,7 @@
 # Character Card Layout v2 集成证据
 
+> **HISTORICAL ONLY — NOT CURRENT ACCEPTANCE.** 本证据记录早期布局集成；其中的旧 Pillow/classic 视觉合同及图片不作为当前生产实现的验收标准。当前单角色卡只使用 PR #103 中的 1600×2400 白色竖版 T2I replica。
+
 日期：2026-09-21  
 工作树：`E:\_codex_work\character-card-main-integration`  
 分支：`integration/character-card-main`  

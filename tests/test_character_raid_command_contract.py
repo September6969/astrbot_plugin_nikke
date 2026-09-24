@@ -7,7 +7,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from astrbot_plugin_nikke.application.commands.character import CharacterCommandHandler
+from astrbot_plugin_nikke.application.commands.character import (
+    CharacterRenderFailure,
+    CharacterCommandHandler,
+)
 from astrbot_plugin_nikke.application.commands.contracts import CommandContext
 from astrbot_plugin_nikke.application.commands.raid import RaidCommandHandler
 from astrbot_plugin_nikke.features.raid.participants import RaidRankingData, format_ranking
@@ -96,6 +99,41 @@ async def test_character_cookie_expiry_invalidates_once_and_feedback_is_cancelle
 
     assert "登录状态已失效" in result.messages[0].text
     assert invalidated == ["qq-1"]
+    assert feedback.cancelled == 1
+
+
+@pytest.mark.asyncio
+async def test_character_render_failure_is_explicit_and_does_not_repeat_domain_query():
+    requests = []
+    feedback = FeedbackHandle()
+
+    class Application:
+        async def build_card(self, request):
+            requests.append(request)
+            return SimpleNamespace(card=object())
+
+    async def failed_render(_card):
+        raise CharacterRenderFailure
+
+    handler = CharacterCommandHandler(
+        application=Application(),
+        directory=lambda: ({"name_code": "5065"},),
+        render_roster=lambda _data: None,
+        render_card=failed_render,
+        render_info=lambda _data: None,
+        invalidate_cookie=lambda _actor_id: None,
+        start_feedback=lambda _context, _message: feedback,
+    )
+
+    result = await handler.handle(
+        CommandContext(
+            actor_id="game-user",
+            parameters={"operation": "character", "name": "皇冠"},
+        )
+    )
+
+    assert result.messages[0].text == "角色卡渲染失败，请稍后重试。"
+    assert len(requests) == 1
     assert feedback.cancelled == 1
 
 

@@ -1,6 +1,6 @@
 # NIKKE 需求证据矩阵
 
-更新时间：2026-09-12。
+更新时间：2026-09-12；本表的 `origin/main` 基线条目为历史快照。PR #103 对单角色卡的当前后续实现见更新后的代码、测试与最终交付证据。
 
 本矩阵按路线图第 4、5、54、55 节建立；历史条目保留其当时基线，当前接管主题基线为已核验的 `origin/main` `e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`。开放 PR 的代码不视为已进入主线；表中明确标注的 PR 只表示可审阅的后续证据。
 
@@ -23,7 +23,7 @@
 | REQ-ACCOUNT-001 | 安全绑定 | `/妮姬 账号 绑定` | `main.py`、`web_service.py`、`storage.py`；`tests/test_core.py` 覆盖合成绑定会话、来源校验和脱敏 | 未读取真实账号；真实浏览器绑定需用户提供目标环境并明确授权 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / READY_OFFLINE`；`NEEDS_LIVE_EVIDENCE` | 在授权环境做一次最小绑定链路核验，确认 cookie/key 不越界保存 |
 | REQ-ACCOUNT-002 | 解绑 / 状态 | `/妮姬 账号`、`/妮姬 账号 解绑` | `main.py`、`storage.py`；核心测试覆盖状态、解绑和凭据错误语义 | 未对真实账号执行解绑或状态读取 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED`；`NEEDS_LIVE_EVIDENCE` | 授权后核对真实状态显示与解绑结果，不自动执行 |
 | REQ-PROFILE-001 | `/妮姬 我的` 个人概览出图 | `/妮姬 我的` | 已合并 PR #7；`profile_builder.py`、`profile_card_renderer.py`；`docs/PROFILE_V2_ACCEPTANCE.md`、`tests/test_profile_v2.py`、`tests/test_profile_structured.py`，含缺失/异常值、分区归属、请求预算和合成 PNG | 未使用真实账号；真实字段兼容和现场图片未验收 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / READY_OFFLINE`；`NEEDS_LIVE_EVIDENCE` | 授权后用真实账号核对字段合同；不能把合成预览当作现场证据 |
-| REQ-CHAR-001 | 单条角色练度卡 / 资料卡 | `/妮姬 查询 练度 [角色名]`、`/妮姬 查询 资料 <角色名>` | `character_card_renderer.py`、`card_models.py` 已有渲染链；`tests/test_character_card_renderer.py` 覆盖残留词条清理；角色静态 registry 的后续补强在 Draft PR #11 | 未确认完整角色详情字段覆盖；不为未观察字段推断数值或公式 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED`；`DRAFT_PENDING_REVIEW` | 审阅 PR #11 的静态 registry；真实字段仍需授权响应 |
+| REQ-CHAR-001 | 单条角色练度卡 / 资料卡 | `/妮姬 查询 练度 [角色名]`、`/妮姬 查询 资料 <角色名>` | 历史 main 基线使用过 Pillow renderer；PR #103 将单角色练度卡收敛为 `CharacterApplication → CharacterCardData → T2IRenderer → templates/t2i/character.html`，`tests/test_character_card_retirement.py` 与 T2I/command 合同覆盖单路径、失败不回退及不重复查询；资料卡仍使用通用 renderer | 未确认完整角色详情字段覆盖；不为未观察字段推断数值或公式，未执行真实账号验收 | `PARTIAL`; `NEEDS_LIVE_EVIDENCE` | 审阅 PR #103；授权后验证真实响应字段，不执行真实写操作 |
 | REQ-CAMPAIGN-001 | 主线历史 / 阵容查询 | `/妮姬 战役 [普通/困难] <关卡>` | `campaign_stage_resolver.py`、`campaign_history_builder.py`、`campaign_history_renderer.py`；`tests/test_campaign_history.py` 有合成合同；严格数值合同增强在 Draft PR #15 | 未宣称完整账号联调；未知关卡和上游覆盖仍需证据 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED`；`DRAFT_PENDING_REVIEW` | 审阅 PR #15，补充已确认的章节/fixture；未知错误不得静默猜测 |
 | REQ-TOWER-001 | 塔层静态资料 | `/妮姬 塔层 <塔名> <层数>` | `tower_registry.py`、`assets/tower_floors.json`、`tests/test_tower_registry.py`；输出明确是静态快照，不保证通关 | 不需要真实账号；静态资源来源/版本仍按快照管理 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED / READY_OFFLINE` | 仅在有授权素材或新快照时更新，不把静态值写成玩家进度 |
 | REQ-RAID-001 | 联盟突袭 overview | `/妮姬 联盟突袭` | `client.py`、`union_raid_builder.py`、`union_raid_renderer.py`；`tests/test_union_raid.py`、`tests/test_raid_evidence.py` 覆盖响应范围和异常语义 | canonical identity、完整范围和多轮覆盖未现场确认 | `IMPLEMENTED / WIRED / SYNTHETIC_VERIFIED`；`NEEDS_LIVE_EVIDENCE` | 需要授权响应来确认 scope；不从返回记录数推断完整赛季 |

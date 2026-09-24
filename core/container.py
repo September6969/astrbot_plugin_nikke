@@ -43,7 +43,6 @@ from ..features.voice.application import VoiceApplication
 from ..integrations.web.service import BindingWebService
 from ..ui.renderers import (
     CampaignHistoryRenderer,
-    CharacterCardRenderer,
     ProfileCardRenderer,
     UnionRaidRenderer,
 )
@@ -82,7 +81,6 @@ class ServiceContainer:
     character_builder: CharacterCardBuilder
     character_identity: CharacterDirectoryResolver
     asset_manager: AssetManager
-    character_renderer: CharacterCardRenderer
     campaign_resolver: CampaignStageResolver
     profile_builder: ProfileBuilder
     profile_application: ProfileApplication
@@ -189,7 +187,6 @@ def create_container(
         character_builder=character.builder,
         character_identity=character.identity,
         asset_manager=asset_manager,
-        character_renderer=character.renderer,
         campaign_resolver=campaign.resolver,
         profile_builder=profile.builder,
         profile_application=profile.application,

@@ -1,6 +1,6 @@
 # 单角色练度卡验收（历史归档）
 
-**2026-09-15：以下为历史版本记录，不再是当前验收规格。** 横版、左右分区和旧材质约束由 [案例竖版与日程 v0.5 规格及报告](..\ui\REPLICA_CALENDAR_V05_REPORT.md) 替代。原 Pillow 布局仅作为 classic 配置及 T2I 失败回退保留。
+**HISTORICAL ONLY — NO LONGER IMPLEMENTED.** 本文记录的 1800×1000 Pillow 横版角色卡已彻底退役，不再由 `classic` 配置启用，也不是新版 T2I 失败后的回退。当前唯一生产角色卡为 [1600×2400 白色竖版 replica](..\ui\REPLICA_CALENDAR_V05_REPORT.md)；渲染失败会明确提示并结束。
 
 状态：`READY_OFFLINE`（2026-09-08）。预览来自脱敏 fixture 与公开静态 FB，不代表真实账号联调、QQ 送达、部署或素材权利方授权。
 
