@@ -208,7 +208,7 @@ PR #103 已承载整仓迁移。本表是评审导航，不代表拆分或合入
 
 | Gate | 当前状态 | 未完成边界 |
 |---|---|---|
-| G01 CI | `NOT_RUN_REMOTE`（当前 final-doc commit push 后更新） | Python 3.12/3.13 × AstrBot 4.24.0/支持范围、Node 22、Spine headless worker；精确最终 run ID 由当前 PR head 对应的 final audit 记录 |
+| G01 CI | `COMPLETE` | PR head `56007862f2638af0faac1a773d18352b2e86b22a` 的 workflow run `35945461776` 六个 jobs 全部成功。最终交付文档 head 仍须由 run ledger 记录并核验同一矩阵；不以本次 checkpoint 冒充最终 head CI。 |
 | G02 真实验收 | `NOT_RUN` | 需要用户授权的真实账号及用户验收；本任务未写入真实账号、QQ、群消息、签到或 CDK |
 | G03 部署 | `NOT_RUN` | 未授权部署；没有更改服务器、生产数据或运行服务 |
 | G04 稳定观察 | `NOT_STARTED` | 仅在 G02/G03 获准并完成后才有运行观察窗口 |
