@@ -9,6 +9,7 @@ GitHub API 并更新快照；审计本身不下载或修改任何角色资源。
 from __future__ import annotations
 
 import argparse
+import ast
 import datetime as dt
 import hashlib
 import json
@@ -36,6 +37,17 @@ UPSTREAM_ID_RE = re.compile(r"^c[0-9]+(?:_[0-9]+)?$", re.ASCII)
 L2D_PATH_RE = re.compile(r"^l2d/(c[0-9]+(?:_[0-9]+)?)/(.*)$", re.ASCII)
 FB_PATH_RE = re.compile(r"^(?:images/)?FB/(c[0-9]+(?:_[0-9]+)?)_00\.png$", re.ASCII)
 DEFAULT_SNAPSHOT = Path("docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json")
+SOURCE_VERIFICATION = Path("docs/evidence/spine_resource_coverage_phase2/render-source-verification.json")
+CENTERING_EVIDENCE_SCRIPT = Path("scripts/generate_centering_evidence.py")
+CENTERING_EVIDENCE_DOC = Path("docs/face_guided_body_centering.md")
+
+UNDECLARED_PNG_CATEGORIES = (
+    "VERIFIED_MANIFEST_CANDIDATE",
+    "VALID_VARIANT_NEEDS_REVIEW",
+    "HISTORICAL_OR_TEST_ONLY",
+    "STALE_OR_ORPHAN_FILE",
+    "INVALID_ASSET",
+)
 
 
 def _read_json(path: Path) -> Any:
@@ -202,6 +214,156 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _centering_sample_specs(root: Path) -> dict[str, dict[str, Any]]:
+    """从离线研究脚本读取真实立绘样本身份，不导入其渲染依赖。"""
+    script = root / CENTERING_EVIDENCE_SCRIPT
+    if not script.is_file():
+        return {}
+    module = ast.parse(script.read_text(encoding="utf-8"), filename=str(CENTERING_EVIDENCE_SCRIPT))
+    for node in module.body:
+        targets: list[ast.expr] = []
+        value: ast.expr | None = None
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+            value = node.value
+        elif isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+            value = node.value
+        if value is None or not any(isinstance(target, ast.Name) and target.id == "SAMPLE_SPECS" for target in targets):
+            continue
+        try:
+            specs = ast.literal_eval(value)
+        except (ValueError, TypeError) as exc:
+            raise ValueError("SAMPLE_SPECS 必须保持为可静态解析的离线数据") from exc
+        if not isinstance(specs, list):
+            raise ValueError("SAMPLE_SPECS 必须是数组")
+        result: dict[str, dict[str, Any]] = {}
+        for spec in specs:
+            if not isinstance(spec, dict) or not isinstance(spec.get("render_id"), str):
+                raise ValueError("SAMPLE_SPECS 含无效 render_id")
+            render_id = spec["render_id"]
+            if render_id in result:
+                raise ValueError(f"SAMPLE_SPECS render_id 重复: {render_id}")
+            result[render_id] = spec
+        return result
+    return {}
+
+
+def _centering_evidence_is_nonproduction(root: Path) -> bool:
+    """只有文档仍声明 opt-in/default-off 时才按研究样本归档。"""
+    document = root / CENTERING_EVIDENCE_DOC
+    if not document.is_file():
+        return False
+    content = document.read_text(encoding="utf-8")
+    return "Opt-in Preview" in content and "严格 OFF" in content
+
+
+def _generation_record_valid(
+    render_id: str,
+    anchor: dict[str, Any],
+    image_sha: str | None,
+    pixel_sha: str | None,
+    dimensions: list[int] | None,
+) -> bool:
+    """校验 Face Anchor 中同次生成记录绑定的输入、输出及渲染参数。"""
+    transform = anchor.get("png_transform")
+    runtime = anchor.get("runtime")
+    if not isinstance(transform, dict):
+        return False
+    render_size = transform.get("render_size")
+    crop_box = transform.get("alpha_bbox")
+    crop_padding = transform.get("crop_padding")
+    return all(
+        (
+            anchor.get("render_id") == render_id,
+            isinstance(anchor.get("skeleton_sha256"), str)
+            and re.fullmatch(r"[0-9a-f]{64}", anchor["skeleton_sha256"]) is not None,
+            isinstance(anchor.get("atlas_sha256"), str)
+            and re.fullmatch(r"[0-9a-f]{64}", anchor["atlas_sha256"]) is not None,
+            runtime in {"4.0.47", "4.1.20"},
+            anchor.get("animation") == "idle",
+            anchor.get("time") == 0,
+            isinstance(anchor.get("png_sha256"), str) and anchor.get("png_sha256") == image_sha,
+            isinstance(anchor.get("pixel_sha256"), str) and anchor.get("pixel_sha256") == pixel_sha,
+            isinstance(anchor.get("image_size"), list) and anchor.get("image_size") == dimensions,
+            isinstance(render_size, list)
+            and len(render_size) == 2
+            and all(isinstance(value, int) and value > 0 for value in render_size),
+            isinstance(crop_box, list)
+            and len(crop_box) == 4
+            and all(isinstance(value, int) for value in crop_box)
+            and crop_box[0] < crop_box[2]
+            and crop_box[1] < crop_box[3],
+            isinstance(crop_padding, int) and crop_padding >= 0,
+        )
+    )
+
+
+def _pinned_source_matches_generation(
+    source_verification: dict[str, Any],
+    snapshot: dict[str, Any],
+    render_id: str,
+    anchor: dict[str, Any],
+) -> tuple[bool, dict[str, Any]]:
+    """确认生成输入 SHA-256 与固定 upstream tree 的字节证据一致。"""
+    record = source_verification.get("records", {}).get(render_id)
+    if not isinstance(record, dict):
+        return False, {}
+    commit_matches = (
+        source_verification.get("upstream_commit_sha") == snapshot.get("commit_sha")
+        and record.get("pinned_bundle_complete") is True
+    )
+    skeleton = record.get("skeleton") if isinstance(record.get("skeleton"), dict) else {}
+    atlas = record.get("atlas") if isinstance(record.get("atlas"), dict) else {}
+    matches = all(
+        (
+            commit_matches,
+            record.get("generation_inputs_match_pinned_snapshot") is True,
+            skeleton.get("matches_snapshot") is True,
+            atlas.get("matches_snapshot") is True,
+            skeleton.get("matches_generation_record") is True,
+            atlas.get("matches_generation_record") is True,
+            skeleton.get("sha256") == anchor.get("skeleton_sha256"),
+            atlas.get("sha256") == anchor.get("atlas_sha256"),
+            all(page.get("present_in_snapshot") is True for page in atlas.get("pages", [])),
+        )
+    )
+    return matches, record
+
+
+def classify_undeclared_png(
+    *,
+    image_valid: bool,
+    anchor_present: bool,
+    anchor_valid: bool,
+    consumers: list[dict[str, Any]],
+    upstream_bundle_complete: bool,
+    centering_sample: bool,
+    generation_record_valid: bool = False,
+    pinned_source_matches: bool = False,
+) -> tuple[str, str]:
+    """按互斥优先级分类；候选状态不等同于 manifest 批准。"""
+    if not image_valid or (anchor_present and not anchor_valid):
+        return "INVALID_ASSET", "PNG 无法解码/没有可见 alpha，或已有 Face Anchor 与当前 PNG 身份不匹配。"
+    if not consumers or not upstream_bundle_complete:
+        return "STALE_OR_ORPHAN_FILE", "缺少当前 canonical Character/Costume consumer，或固定 upstream snapshot 中没有完整 L2D bundle。"
+    if not any(row.get("kind") == "default" for row in consumers):
+        return "VALID_VARIANT_NEEDS_REVIEW", "资源只由已验证的 Costume/alternate consumer 使用；需人工确认 variant 身份与视觉对应关系。"
+    if generation_record_valid and not pinned_source_matches:
+        return "INVALID_ASSET", "Face Anchor 所记录的生成输入与固定 upstream skeleton/atlas 字节不一致；拒绝提升到 manifest。"
+    if generation_record_valid and pinned_source_matches:
+        return (
+            "VERIFIED_MANIFEST_CANDIDATE",
+            "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+        )
+    if centering_sample:
+        return (
+            "HISTORICAL_OR_TEST_ONLY",
+            "该 PNG 仅有离线 face-guided centering 研究用途，缺少可核验的同次生成记录；不进入生产 manifest。",
+        )
+    return "INVALID_ASSET", "缺少可核验的同次生成输入/输出记录，PNG 来源 provenance 不足以进入 manifest。"
+
+
 def _manifest_state(root: Path) -> dict[str, Any]:
     assets = root / "assets"
     store = SpineManifestStore(assets, root / ".audit-cache-unused")
@@ -302,7 +464,12 @@ def _anchor_state(
     statuses: dict[str, dict[str, Any]] = {}
     for render_id, row in sorted(records.items()):
         if not isinstance(row, dict):
-            statuses[render_id] = {"valid": False, "trusted_semantic_core_axis": False, "reason": "invalid_anchor_record"}
+            statuses[render_id] = {
+                "valid": False,
+                "trusted_semantic_core_axis": False,
+                "image_decoded": False,
+                "reason": "invalid_anchor_record",
+            }
             continue
         path = manifest_state["paths"].get(render_id)
         if path is None:
@@ -311,6 +478,7 @@ def _anchor_state(
         raw_sha = None
         rgba_sha = None
         dimensions = None
+        alpha_bbox = None
         if path.is_file():
             try:
                 raw_sha = _file_sha256(path)
@@ -318,6 +486,8 @@ def _anchor_state(
                     rgba = opened.convert("RGBA")
                     dimensions = list(rgba.size)
                     rgba_sha = hashlib.sha256(rgba.tobytes()).hexdigest()
+                    bbox = rgba.getchannel("A").getbbox()
+                    alpha_bbox = list(bbox) if bbox else None
             except (OSError, ValueError):
                 reasons.append("anchor_png_unreadable")
         else:
@@ -354,7 +524,16 @@ def _anchor_state(
         statuses[render_id] = {
             "valid": is_valid,
             "trusted_semantic_core_axis": trusted,
+            "image_decoded": dimensions is not None and alpha_bbox is not None,
+            "png_sha256": raw_sha,
+            "rgba_pixel_sha256": rgba_sha,
+            "image_size": dimensions,
+            "alpha_bbox": alpha_bbox,
             "anchor_kind": row.get("anchor_kind"),
+            "point": row.get("point"),
+            "runtime": row.get("runtime"),
+            "skeleton_sha256": row.get("skeleton_sha256"),
+            "core_axis_reason": row.get("core_axis_reason"),
             "core_axis_state": "available" if trusted else "unavailable",
             "reasons": sorted(reasons),
         }
@@ -364,6 +543,242 @@ def _anchor_state(
         "valid_ids": valid,
         "trusted_core_ids": trusted_core,
         "statuses": statuses,
+    }
+
+
+def _build_undeclared_png_audit(
+    root: Path,
+    snapshot: dict[str, Any],
+    upstream: dict[str, Any],
+    defaults: list[dict[str, Any]],
+    costumes: list[dict[str, Any]],
+    manifest_state: dict[str, Any],
+    anchors: dict[str, Any],
+    generated_from_head: str,
+) -> dict[str, Any]:
+    """为现存未声明 PNG 生成可重复、fail-closed 的逐项审计。"""
+    sample_specs = _centering_sample_specs(root)
+    centering_is_nonproduction = _centering_evidence_is_nonproduction(root)
+    source_verification_path = root / SOURCE_VERIFICATION
+    source_verification = (
+        _read_json(source_verification_path) if source_verification_path.is_file() else {}
+    )
+    consumers_by_render: dict[str, list[dict[str, Any]]] = {}
+    for consumer in defaults + costumes:
+        consumers_by_render.setdefault(str(consumer["render_id"]), []).append(consumer)
+
+    source_files_by_render: dict[str, list[dict[str, Any]]] = {}
+    l2d_files = snapshot.get("l2d_files", snapshot.get("files", []))
+    for item in l2d_files if isinstance(l2d_files, list) else []:
+        path = item.get("path") if isinstance(item, dict) else None
+        if not isinstance(path, str):
+            continue
+        match = L2D_PATH_RE.fullmatch(path)
+        if match is None:
+            continue
+        render_id, relative = match.groups()
+        if "/" in relative:
+            continue
+        source_files_by_render.setdefault(render_id, []).append(
+            {"path": path, "git_blob_sha1": item.get("sha"), "size": item.get("size")}
+        )
+    for source_files in source_files_by_render.values():
+        source_files.sort(key=lambda row: row["path"])
+
+    records: list[dict[str, Any]] = []
+    category_ids = {category: [] for category in UNDECLARED_PNG_CATEGORIES}
+    assets = root / "assets"
+    for render_id in sorted(manifest_state["png_ids"] - set(manifest_state["entries"])):
+        image_path = assets / "spine-rendered" / f"{render_id}.png"
+        anchor_record = anchors["records"].get(render_id)
+        anchor_status = anchors["statuses"].get(render_id, {})
+        anchor_present = isinstance(anchor_record, dict)
+        image_sha = anchor_status.get("png_sha256")
+        pixel_sha = anchor_status.get("rgba_pixel_sha256")
+        dimensions = anchor_status.get("image_size")
+        alpha_bbox = anchor_status.get("alpha_bbox")
+        image_decoded = bool(anchor_status.get("image_decoded", False))
+
+        # 没有 anchor 的图片仍要独立做 PNG 完整性检查，不能因此跳过审计。
+        if not anchor_present:
+            try:
+                image_sha = _file_sha256(image_path)
+                with Image.open(image_path) as opened:
+                    opened.load()
+                    rgba = opened.convert("RGBA")
+                    dimensions = list(rgba.size)
+                    pixel_sha = hashlib.sha256(rgba.tobytes()).hexdigest()
+                    bbox = rgba.getchannel("A").getbbox()
+                    alpha_bbox = list(bbox) if bbox else None
+                image_decoded = dimensions is not None and alpha_bbox is not None
+            except (OSError, ValueError):
+                image_decoded = False
+
+        consumers = sorted(
+            consumers_by_render.get(render_id, []),
+            key=lambda row: (row.get("identity", ""), row.get("kind", "")),
+        )
+        anchor_valid = bool(anchor_status.get("valid", False)) if anchor_present else False
+        png_valid = bool(image_decoded and image_sha and pixel_sha and dimensions and alpha_bbox)
+        anchor = anchor_record if anchor_present else {}
+        generation_record_valid = _generation_record_valid(
+            render_id,
+            anchor,
+            image_sha,
+            pixel_sha,
+            dimensions,
+        ) if anchor_present else False
+        pinned_source_matches, pinned_source_record = _pinned_source_matches_generation(
+            source_verification,
+            snapshot,
+            render_id,
+            anchor,
+        ) if anchor_present else (False, {})
+        category, reason = classify_undeclared_png(
+            image_valid=png_valid,
+            anchor_present=anchor_present,
+            anchor_valid=anchor_valid,
+            consumers=consumers,
+            upstream_bundle_complete=render_id in upstream["complete_ids"],
+            centering_sample=render_id in sample_specs and centering_is_nonproduction,
+            generation_record_valid=generation_record_valid,
+            pinned_source_matches=pinned_source_matches,
+        )
+        category_ids[category].append(render_id)
+
+        sample = sample_specs.get(render_id)
+        source_files = source_files_by_render.get(render_id, [])
+        trusted_core = bool(anchor_status.get("trusted_semantic_core_axis", False))
+        upstream_bundle_complete = render_id in upstream["complete_ids"]
+        records.append(
+            {
+                "render_id": render_id,
+                "classification": category,
+                "classification_reason": reason,
+                "identity_chain": {
+                    "consumers": consumers,
+                    "canonical_resource_ids": sorted({str(row["resource_id"]) for row in consumers}),
+                    "character_keys": sorted({str(row["character_key"]) for row in consumers if row.get("character_key")}),
+                    "default_character_consumer": any(row.get("kind") == "default" for row in consumers),
+                    "costume_consumer": any(row.get("kind") == "verified_costume" for row in consumers),
+                },
+                "upstream": {
+                    "repository": snapshot.get("source_repo", SOURCE_REPO),
+                    "ref": snapshot.get("ref", "main"),
+                    "snapshot_commit_sha": snapshot.get("commit_sha"),
+                    "l2d_directory_present": render_id in upstream["render_ids"],
+                    "complete_root_bundle": upstream_bundle_complete,
+                    "root_files": source_files,
+                },
+                "bundled_png": {
+                    "path": f"assets/spine-rendered/{render_id}.png",
+                    "manifest_declared": False,
+                    "manifest_trusted": False,
+                    "decode_valid": png_valid,
+                    "sha256": image_sha,
+                    "rgba_pixel_sha256": pixel_sha,
+                    "dimensions": dimensions,
+                    "alpha_bbox": alpha_bbox,
+                    "file_size": image_path.stat().st_size if image_path.is_file() else None,
+                },
+                "source_provenance": {
+                    "state": (
+                        "verified_against_pinned_bundle"
+                        if generation_record_valid and pinned_source_matches
+                        else "generation_source_mismatch"
+                        if generation_record_valid and pinned_source_record
+                        else "generation_record_incomplete"
+                    ),
+                    "generation_record_valid": generation_record_valid,
+                    "generation_record_source": (
+                        f"assets/data/face_anchors.json#records.{render_id}" if anchor_present else None
+                    ),
+                    "generation_script": (
+                        "scripts/batch_prepare_samples.py" if generation_record_valid else None
+                    ),
+                    "skeleton_runtime_metadata": anchor.get("runtime") if anchor_present else None,
+                    "runtime_metadata_source": (
+                        f"assets/data/face_anchors.json#records.{render_id}.runtime" if anchor_present else None
+                    ),
+                    "skeleton_sha256_metadata": anchor.get("skeleton_sha256") if anchor_present else None,
+                    "atlas_sha256_metadata": anchor.get("atlas_sha256") if anchor_present else None,
+                    "pinned_upstream_commit": snapshot.get("commit_sha"),
+                    "pinned_source_verification_file": (
+                        SOURCE_VERIFICATION.as_posix() if pinned_source_record else None
+                    ),
+                    "pinned_source_bundle_complete": pinned_source_record.get("pinned_bundle_complete", False),
+                    "generation_inputs_match_pinned_bundle": pinned_source_matches,
+                    "source_bundle_sha256_bound_to_render": generation_record_valid and pinned_source_matches,
+                    "renderer_build_digest_recorded": False,
+                    "animation": anchor.get("animation") if anchor_present else None,
+                    "time": anchor.get("time") if anchor_present else None,
+                    "render_transform": anchor.get("png_transform") if anchor_present else None,
+                    "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+                },
+                "face_anchor": {
+                    "present": anchor_present,
+                    "identity_valid": anchor_valid,
+                    "anchor_kind": anchor.get("anchor_kind") if anchor_present else None,
+                    "point": anchor.get("point") if anchor_present else None,
+                    "png_sha256_matches": bool(anchor_present and anchor.get("png_sha256") == image_sha),
+                    "rgba_pixel_sha256_matches": bool(anchor_present and anchor.get("pixel_sha256") == pixel_sha),
+                    "dimensions_match": bool(anchor_present and anchor.get("image_size") == dimensions),
+                    "trusted_semantic_core_axis": trusted_core,
+                    "core_axis_state": "available" if trusted_core else "unavailable",
+                    "core_axis_reason": (
+                        anchor.get("core_axis_reason")
+                        or (None if trusted_core else "no_verified_semantic_or_override_binding_for_consumer")
+                    ),
+                },
+                "evidence_usage": {
+                    "centering_sample": sample is not None and centering_is_nonproduction,
+                    "sample_spec_present": sample is not None,
+                    "sample_category_code": sample.get("category_code") if sample else None,
+                    "sample_category": sample.get("category") if sample else None,
+                    "script": str(CENTERING_EVIDENCE_SCRIPT.as_posix()) if sample else None,
+                    "scope_document": str(CENTERING_EVIDENCE_DOC.as_posix()) if sample else None,
+                    "scope_status": "Opt-in Preview / Default OFF" if sample and centering_is_nonproduction else None,
+                },
+                "production_eligibility": {
+                    "accepted_by_manifest_trust_boundary": False,
+                    "automatic_manifest_promotion": False,
+                    "unsupported_classification": False,
+                },
+            }
+        )
+
+    all_ids = sorted(manifest_state["png_ids"] - set(manifest_state["entries"]))
+    classified_ids = [render_id for values in category_ids.values() for render_id in values]
+    if sorted(classified_ids) != all_ids or len(classified_ids) != len(set(classified_ids)):
+        raise ValueError("未声明 PNG 分类必须互斥且完整覆盖当前文件集合")
+
+    return {
+        "schema_version": 1,
+        "generated_from_head": generated_from_head,
+        "definitions": {
+            "VERIFIED_MANIFEST_CANDIDATE": "机械 identity/upstream/image 检查满足候选条件；必须另行人工确认 source-to-render provenance、视觉与 framing，且本分类不会自动加入 manifest。",
+            "VALID_VARIANT_NEEDS_REVIEW": "仅被当前 canonical Costume/alternate consumer 使用的有效 PNG；仍需人工确认角色与 variant 对应关系。",
+            "HISTORICAL_OR_TEST_ONLY": "仅用于已文档化的研究、preview 或测试样本，不作为生产 bundled portrait。",
+            "STALE_OR_ORPHAN_FILE": "缺少当前 canonical consumer 或固定 upstream snapshot 中没有完整 L2D bundle。",
+            "INVALID_ASSET": "PNG 不可解码/没有可见 alpha，或已有 Face Anchor 与 PNG raw hash、RGBA hash、尺寸不匹配。",
+        },
+        "scope": {
+            "classification_is_production_authorization": False,
+            "manifest_trust_boundary_changed": False,
+            "automatic_asset_download_or_promotion": False,
+        },
+        "source": {
+            "repository": snapshot.get("source_repo", SOURCE_REPO),
+            "ref": snapshot.get("ref", "main"),
+            "commit_sha": snapshot.get("commit_sha"),
+            "snapshot_schema_version": snapshot.get("schema_version"),
+        },
+        "summary": {
+            "undeclared_png_count": len(all_ids),
+            "classification_counts": {category: len(category_ids[category]) for category in UNDECLARED_PNG_CATEGORIES},
+        },
+        "classification_sets": {category: sorted(category_ids[category]) for category in UNDECLARED_PNG_CATEGORIES},
+        "records": records,
     }
 
 
@@ -541,9 +956,20 @@ def audit(root: Path, snapshot: dict[str, Any], generated_from_head: str | None 
         "trusted_semantic_core_axis": "Face Anchor 与 PNG raw/pixel hash、尺寸均相符，并且 semantic/override registry 对该身份标记 verified 且 skeleton SHA 与 anchor 一致。",
         "upstream_l2d_not_represented_by_current_character_data": "upstream L2D render_id 未被当前 canonical 默认 Character identity 表示；Costume render variants 单独统计为消费者，不改变此默认角色覆盖指标。",
     }
+    audit_head = generated_from_head or _git_head(root)
+    undeclared_png_audit = _build_undeclared_png_audit(
+        root,
+        snapshot,
+        upstream,
+        defaults,
+        costumes,
+        manifest_state,
+        anchors,
+        audit_head,
+    )
     return {
         "schema_version": 2,
-        "generated_from_head": generated_from_head or _git_head(root),
+        "generated_from_head": audit_head,
         "source": {
             "repository": snapshot.get("source_repo", SOURCE_REPO),
             "ref": snapshot.get("ref", "main"),
@@ -556,6 +982,7 @@ def audit(root: Path, snapshot: dict[str, Any], generated_from_head: str | None 
         "sets": lists,
         "manifest_status": manifest_state["statuses"],
         "face_anchor_status": anchors["statuses"],
+        "undeclared_png_audit": undeclared_png_audit,
         "c018": c018,
     }
 
@@ -575,6 +1002,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Missing manifest / orphan / invalid PNG / undeclared PNG: `{summary['upstream_exists_manifest_missing']}` / `{summary['manifest_without_current_character_consumer']}` / `{summary['manifest_png_missing_or_invalid']}` / `{summary['bundled_png_not_declared_by_manifest']}`",
         f"- Render Asset Gap / unsupported: `{summary['render_asset_gap']}` / `{summary['unsupported']}`",
         f"- Manual visual/source review required: `{summary['manual_review_required']}`",
+        f"- Undeclared PNG review categories: `{report['undeclared_png_audit']['summary']['classification_counts']}`",
         "",
         "## Definitions",
         "",
@@ -633,6 +1061,7 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--upstream-snapshot", type=Path, default=DEFAULT_SNAPSHOT)
     parser.add_argument("--output", type=Path, required=True, help="确定性 JSON 输出路径")
+    parser.add_argument("--undeclared-png-output", type=Path, help="可选的逐 PNG 分类审计 JSON 路径")
     parser.add_argument("--markdown-output", type=Path, help="可选 Markdown 摘要路径")
     parser.add_argument("--character-card-preview", type=Path, help="已由生产 T2I renderer 生成的 c018 白卡 PNG")
     parser.add_argument("--diagnostic-output", type=Path, help="可选 c018 白卡 JSON 诊断路径，需同时提供 preview")
@@ -656,6 +1085,12 @@ def main() -> int:
     if args.markdown_output is not None:
         args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
         args.markdown_output.write_text(render_markdown(report), encoding="utf-8")
+    if args.undeclared_png_output is not None:
+        args.undeclared_png_output.parent.mkdir(parents=True, exist_ok=True)
+        args.undeclared_png_output.write_text(
+            json.dumps(report["undeclared_png_audit"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     if args.diagnostic_output is not None:
         preview_path = args.character_card_preview.resolve()
         if not preview_path.is_file():
