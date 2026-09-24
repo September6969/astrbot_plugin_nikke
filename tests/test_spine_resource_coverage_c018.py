@@ -15,6 +15,7 @@ from PIL import Image
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.features.character.face_anchor import framing
 from astrbot_plugin_nikke.features.character.weapon_bases import card_fields
+from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver
 from astrbot_plugin_nikke.tests.test_card_builder import build_card
 
@@ -88,7 +89,14 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         )
         with Image.open(self.root / "assets/spine-rendered/c018.png") as opened:
             portrait = opened.convert("RGBA")
-        result = framing(card, portrait, body_centering=False, summary_count=4)
+        identity = NikkeDbProvider(self.root / "assets", self.root / "assets", remote=False)
+        result = framing(
+            card,
+            portrait,
+            body_centering=False,
+            summary_count=4,
+            identity_resolver=identity,
+        )
         self.assertEqual(result["source"], "eye_attachment")
         self.assertFalse(result["core_axis"]["available"])
         self.assertEqual(result["core_axis"]["reason"], "core_axis_unavailable")
