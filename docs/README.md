@@ -2,7 +2,7 @@
 
 本目录收录 NIKKE AstrBot 插件的完整技术设计、契约定义、验收报告、视觉规范与审计证据。
 
-整仓重构的最终架构、迁移表、删除清单、恢复办法和 G01–G04 状态见[重构交付记录](refactor/FINAL_DELIVERY.md)。
+PR #103 整仓重构的命令架构收口、迁移表、删除清单、恢复办法，以及由最终 run ledger 绑定的 HEAD/manifest/架构审计和 G01–G04 状态见[重构交付记录](refactor/FINAL_DELIVERY.md)。真实账号验收、部署和稳定观察与本地代码完成、CI 通过分开记录。
 
 ---
 

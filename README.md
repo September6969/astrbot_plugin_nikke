@@ -140,8 +140,8 @@ nikke.example.com {
 当前代码按宿主适配、命令应用、领域功能、外部集成与核心装配分层；完整模块迁移、边界、删除清单和恢复说明见[整仓重构交付记录](docs/refactor/FINAL_DELIVERY.md)。
 
 - `main.py`：AstrBot 插件轻量入口、宿主版本校验和事件注册。
-- `adapters/astrbot/`：AstrBot 事件/消息边界、运行时接入及版本兼容检查。
-- `application/commands/`：将命令输入映射到领域应用，不承载 AstrBot 消息对象。
+- `adapters/astrbot/`：AstrBot 事件/消息边界、版本兼容检查、纯路由与 T2I/Pillow 宿主展示桥；`command_runtime.py` 受 400 行架构门禁约束。
+- `application/commands/`：将命令输入映射到领域应用；Character、Raid、Campaign 等命令编排不依赖 AstrBot 消息对象。
 - `features/`：13 个账号、角色、日程、公告、签到、CDK、联盟突袭等领域模块。
 - `integrations/`：外部 HTTP、资产、Spine 和存储相关适配；由窄接口连接到领域服务。
 - `core/`：唯一 `ServiceContainer`/`create_container` 组合根、共享 provider、持久化和统一生命周期。
@@ -149,11 +149,11 @@ nikke.example.com {
 
 ## 测试与质量保证
 
-R23 本地 checkpoint 在 Python 3.13.13 / AstrBot 4.24.0 上的完整 pytest 为 `1317 passed, 2 skipped, 651 subtests passed`；Node v24.15.0 三个测试文件共 10 passed。此为本地快照，不代替远端 CI：Python 3.12、Node 22、Linux Spine Docker/CI 仍列为 G01。
+PR #103 本轮本地完整 pytest（Python 3.14.5）为 `1338 passed, 2 skipped, 651 subtests passed`；mypy 2.3.1 配置目标 37 个 source files、compileall、包/compatibility import 与架构门禁均通过。本机按 CI 同款 `node --test tests/extension.test.cjs`（Node v24.15.0）为 4 passed。最终 HEAD 与逐文件 manifest 指纹见 [重构交付记录](docs/refactor/FINAL_DELIVERY.md) 指向的 run artifact；本地结果不替代 PR 当前 head 的远端 CI。
 
 ```bash
 python -m pytest -v
-node --test tests/extension.test.cjs tests/spine_attachment_candidates.test.mjs tests/spine_surface_semantics.test.mjs
+node --test tests/extension.test.cjs
 ```
 
 ## 许可证与来源
