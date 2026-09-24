@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Any, Callable
 
 from PIL import Image
@@ -51,30 +50,8 @@ class SpineAssetService:
             logger.warning("STATIC_SPINE_ASSET_INVALID: %s (costume: %s)", char_id, costume_id)
             return None
 
-        manifest_loaded = manifest.source is not None
-        candidate_paths: list[Path] = []
-        if not manifest_loaded:
-            candidate_paths.append(self.env.asset_dir / "spine-rendered" / f"{char_id}.png")
-        if self.env.spine_manifest.rendered_dir is not None and not manifest_loaded:
-            candidate_paths.append(self.env.spine_manifest.rendered_dir / f"{char_id}.png")
-        candidate_paths.extend(
-            [
-                self.env.cache_dir / "spine-rendered" / f"{char_id}.png",
-                self.env.cache_dir / "portraits" / f"{char_id}.png",
-            ]
-        )
-        seen: set[Path] = set()
-        for path in candidate_paths:
-            try:
-                resolved = path.resolve()
-            except OSError:
-                continue
-            if resolved in seen:
-                continue
-            seen.add(resolved)
-            image = AssetImageCodec.load_file(resolved)
-            if image is not None:
-                return image
+        # 未声明的打包 PNG 和旧式裸缓存都不构成资源身份或完整性证据。
+        # 动态预渲染仍只允许通过下方包含身份/版本的 canonical cache key 命中。
 
         runtime_version = self.env.nikke_db.resolve_spine_version(char_id, allow_remote=False)
         if runtime_version is not None and runtime_version != "SPINE_VERSION_UNKNOWN":

@@ -7,6 +7,9 @@
 - `character-card-pixel-calibration/`
 - `character_card_layout_v2_integration_20260921.md`
 - `eunhwa-tactical-upgrade/` 中的旧角色卡截图与 trace
+- `spine_resource_coverage_20260923/` 是旧 #102 / pre-refactor coverage 算法快照；其中 `neon-vision-eye-card.png` 为已退役的横版预览，不是当前白色竖版角色卡验收图
 - `../ui/T2I_DELIVERY_AUDIT.json` 与 `../ui/T2I_VISUAL_REVIEW_AUDIT.json` 中绑定旧分支/HEAD 的视觉快照
 
 当前单角色卡合同由 `../acceptance/CONFIGURATION_ACCEPTANCE.md`、`../ui/REPLICA_CALENDAR_V05_REPORT.md` 与 `tests/test_character_card_retirement.py` 维护。c018/c401/c581 资源身份、Spine manifest、Face Anchor 和 Core Axis 证据仍按各自专项测试与清单验证；本说明不将其降为历史数据。
+
+post-#103 Spine 覆盖重审与可复现命令见 `spine_resource_coverage_post_refactor/README.md`。旧 #102 资源提交仅作为历史资源与 SHA 证据，不代表本次基于新架构的审计结果。
