@@ -17,7 +17,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from PIL import Image
@@ -43,7 +43,7 @@ DEFAULT_TARGETS = [
     "c234",
     "c352",
 ]
-SOURCE_REPO = "https://github.com/Nikke-db/Nikke-db.github.io.git"
+SOURCE_REPO = "https://github.com/Nikke-db/Nikke-db.github.io"
 MANIFEST_SCHEMA_VERSION = 2
 _ASSET_ID = re.compile(r"^c[0-9]+(?:_[0-9]+)?$", re.ASCII)
 
@@ -51,6 +51,28 @@ _ASSET_ID = re.compile(r"^c[0-9]+(?:_[0-9]+)?$", re.ASCII)
 def detect_spine_version(skel_path: Path) -> str:
     """通过 skeleton 真实头部识别 4.0/4.1，不按角色或服装猜测。"""
     return LocalSpineBundleResolver.detect_runtime_version(skel_path)
+
+
+def _worker_command_prefix(worker: str, bundle_root: Path) -> list[str]:
+    """解析原生 worker 路径或固定 docker://image 维护参数。"""
+    if worker.startswith("docker://"):
+        image = worker.removeprefix("docker://")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,254}", image, re.ASCII):
+            raise ValueError("Docker Spine worker 镜像名称无效")
+        if not shutil.which("docker"):
+            raise FileNotFoundError("docker:// worker 需要本机 Docker CLI")
+        return [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "spine_worker_docker_bridge.py"),
+            "--image",
+            image,
+            "--bundle-root",
+            str(bundle_root),
+            "--",
+        ]
+    if not shutil.which(worker) and not Path(worker).exists():
+        raise FileNotFoundError(f"找不到 Spine worker: {worker}")
+    return [worker]
 
 
 def parse_atlas_texture_pages(atlas_path: Path) -> list[str]:
@@ -94,7 +116,52 @@ def _run_git_commit(root: Path) -> str:
     except (OSError, subprocess.SubprocessError):
         return "unknown"
     value = completed.stdout.strip()
-    return value if completed.returncode == 0 and re.fullmatch(r"[0-9a-fA-F]{7,64}", value) else "unknown"
+    if completed.returncode == 0 and re.fullmatch(r"[0-9a-fA-F]{40,64}", value):
+        return value.lower()
+
+    provenance = _read_json(root / "fetch-provenance.json", {})
+    commit = provenance.get("source_commit") if isinstance(provenance, dict) else None
+    files = provenance.get("files") if isinstance(provenance, dict) else None
+    if (
+        provenance.get("schema_version") != 1
+        or provenance.get("source_repository") != SOURCE_REPO
+        or not isinstance(commit, str)
+        or not re.fullmatch(r"[0-9a-f]{40}", commit)
+        or provenance.get("upstream_snapshot_sha") != commit
+        or not isinstance(files, list)
+        or not files
+    ):
+        return "unknown"
+
+    root_resolved = root.resolve()
+    seen: set[str] = set()
+    for row in files:
+        if not isinstance(row, dict):
+            return "unknown"
+        relative = row.get("path")
+        expected_hash = row.get("sha256")
+        expected_size = row.get("size")
+        if (
+            not isinstance(relative, str)
+            or "\\" in relative
+            or PurePosixPath(relative).is_absolute()
+            or any(part in {"", ".", ".."} for part in PurePosixPath(relative).parts)
+            or not relative.startswith("l2d/")
+            or relative in seen
+            or not isinstance(expected_hash, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_hash)
+            or type(expected_size) is not int
+            or expected_size <= 0
+        ):
+            return "unknown"
+        seen.add(relative)
+        try:
+            path = _inside(root_resolved / Path(*PurePosixPath(relative).parts), root_resolved, "provenance asset")
+            if path.stat().st_size != expected_size or _sha256(path) != expected_hash:
+                return "unknown"
+        except (OSError, LocalSpineResolveError):
+            return "unknown"
+    return commit
 
 
 def _read_json(path: Path, default: Any) -> Any:
@@ -219,10 +286,9 @@ def render_spine_portrait(
     """
     version = detect_spine_version(skel_path)
     worker_bin = worker_40 if version == "4.0" else worker_41
-    if not shutil.which(worker_bin) and not Path(worker_bin).exists():
-        raise FileNotFoundError(f"找不到 Spine {version} worker")
 
     bundle_root = skel_path.parent.resolve()
+    worker_prefix = _worker_command_prefix(worker_bin, bundle_root)
     for path, label in ((skel_path, "skeleton"), (atlas_path, "atlas"), *[(item, "纹理") for item in textures]):
         _inside(path, bundle_root, label)
     if not textures:
@@ -232,7 +298,7 @@ def render_spine_portrait(
     os.close(fd)
     rgba_path = Path(tmp_name)
     command = [
-        worker_bin,
+        *worker_prefix,
         "--skeleton", str(skel_path.resolve()),
         "--atlas", str(atlas_path.resolve()),
         "--output", str(rgba_path.resolve()),
@@ -418,7 +484,9 @@ def main(argv: list[str] | None = None) -> int:
         if isinstance(cached, dict) and not _cached_entry_is_valid(cached, target_png, asset_id, output_root):
             # 旧 manifest 的坏条目是独立的 invalid 证据，不能被 fallback 当作成功。
             render_invalid.append(asset_id)
-        if not args.force and _cached_entry_is_valid(cached, target_png, asset_id, output_root):
+        if not args.force and isinstance(cached, dict) and _cached_entry_is_valid(
+            cached, target_png, asset_id, output_root
+        ):
             entries[asset_id] = cached
             success.append(asset_id)
             bundle_found.append(asset_id)
