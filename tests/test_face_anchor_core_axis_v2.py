@@ -100,11 +100,11 @@ def test_missing_core_axis_uses_face_guard_without_core_interval():
     assert explicit["style"] == old_path["style"]
     assert explicit["core_axis"]["available"] is False
     assert explicit["core_axis"]["reason"] == "core_axis_unavailable"
-    assert explicit["vertical_guard_source"] == "face_local_alpha"
+    assert explicit["vertical_guard_source"] == "face_safe_top"
     assert explicit["guard_top_card_after"] >= explicit["safe_top"] - 1.0
 
 
-def test_face_anchor_without_core_axis_keeps_head_below_identity_panel():
+def test_face_anchor_without_core_axis_keeps_face_below_identity_panel():
     from PIL import ImageDraw
 
     card = make_card()
@@ -117,29 +117,41 @@ def test_face_anchor_without_core_axis_keeps_head_below_identity_panel():
     with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
         result = framing(card, image, body_centering=False, summary_count=4)
 
-    assert result["vertical_guard_source"] == "face_local_alpha"
+    assert result["vertical_guard_source"] == "face_safe_top"
     assert result["safe_top"] == summary_layout(4).safe_top
     assert result["guard_top_card_after"] >= result["safe_top"] - 1.0
+    assert result["guard_top_source_y"] == 4.0
     assert result["core_axis"]["available"] is False
 
 
-def test_face_local_head_scan_ignores_distant_alpha_speck():
+def test_face_anchor_guard_uses_face_extent_not_connected_head_accessory():
     from PIL import ImageDraw
 
     card = make_card()
-    image = Image.new("RGBA", (200, 300), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, 20, 10), fill=(255, 255, 255, 255))
-    draw.ellipse((82, 40, 118, 102), fill=(255, 255, 255, 255))
-    draw.rectangle((78, 96, 122, 280), fill=(255, 255, 255, 255))
-    row = make_row(image, point=(100, 75), extent=(20, 20), target=(860, 380))
+    plain = Image.new("RGBA", (200, 300), (0, 0, 0, 0))
+    plain_draw = ImageDraw.Draw(plain)
+    plain_draw.ellipse((82, 60, 118, 110), fill=(255, 255, 255, 255))
+    plain_draw.rectangle((90, 100, 110, 280), fill=(255, 255, 255, 255))
+    decorated = plain.copy()
+    decorated_draw = ImageDraw.Draw(decorated)
+    decorated_draw.rectangle((82, 0, 118, 48), fill=(255, 255, 255, 255))
+    decorated_draw.rectangle((97, 48, 103, 66), fill=(255, 255, 255, 255))
 
-    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
-        result = framing(card, image, body_centering=False, summary_count=4)
+    def render(image):
+        row = make_row(image, point=(100, 85), extent=(24, 20), target=(860, 380))
+        with patch(
+            "astrbot_plugin_nikke.features.character.face_anchor.metadata",
+            return_value={"c471": row},
+        ):
+            return framing(card, image, body_centering=False, summary_count=4)
 
-    assert result["vertical_guard_source"] == "face_local_alpha"
-    assert result["guard_top_source_y"] >= 35.0
-    assert result["guard_top_card_after"] >= result["safe_top"] - 1.0
+    plain_result = render(plain)
+    decorated_result = render(decorated)
+
+    assert decorated_result["vertical_guard_source"] == "face_safe_top"
+    assert decorated_result["guard_top_source_y"] == 65.0
+    assert decorated_result["style"] == plain_result["style"]
+    assert decorated_result["guard_top_card_after"] >= decorated_result["safe_top"] - 1.0
 
 
 def test_missing_face_anchor_uses_robust_alpha_fallback_and_safe_transform():

@@ -133,94 +133,13 @@ def _finite_extent(value: object) -> TypeGuard[list[int | float]]:
     )
 
 
-def estimate_local_head_top(portrait, face_point, extent) -> float | None:
-    """沿脸部锚点附近的连续透明度轮廓向上估计头顶。"""
+def _face_safe_top_y(face_point, extent) -> float | None:
+    """从已验证的眼/脸附件锚点构造面部保护上界，不扫描头饰轮廓。"""
     if not _finite_point(face_point) or not _finite_extent(extent):
         return None
-    width, height = portrait.size
-    face_x, face_y = float(face_point[0]), float(face_point[1])
-    if not (0 <= face_x < width and 0 <= face_y < height):
-        return None
-
-    extent_width, extent_height = float(extent[0]), float(extent[1])
-    half_width = max(extent_width * 1.5, width * 0.03)
-    left = max(0, math.floor(face_x - half_width))
-    right = min(width - 1, math.ceil(face_x + half_width))
-    min_run = max(4.0, extent_width * 0.25)
-    max_gap = max(3, round(extent_height * 0.35))
-    pixels = portrait.convert("RGBA").getchannel("A").load()
-
-    def row_runs(y: int) -> list[tuple[int, int]]:
-        runs: list[tuple[int, int]] = []
-        start = None
-        last_opaque = None
-        gap = 0
-        for x in range(left, right + 1):
-            if pixels[x, y] >= 24:
-                if start is None:
-                    start = x
-                last_opaque = x
-                gap = 0
-            elif start is not None:
-                gap += 1
-                if gap > 2:
-                    if last_opaque is not None and last_opaque - start + 1 >= min_run:
-                        runs.append((start, last_opaque))
-                    start = None
-                    last_opaque = None
-                    gap = 0
-        if start is not None and last_opaque is not None and last_opaque - start + 1 >= min_run:
-            runs.append((start, last_opaque))
-        return runs
-
-    def nearest_run(y: int, tracking_x: float | None = None):
-        candidates = row_runs(y)
-        if tracking_x is None:
-            candidates = [
-                run for run in candidates
-                if abs((run[0] + run[1]) / 2.0 - face_x) <= half_width
-            ]
-        else:
-            max_lateral = max(extent_width * 0.75, width * 0.03)
-            candidates = [
-                run for run in candidates
-                if abs((run[0] + run[1]) / 2.0 - tracking_x) <= max_lateral
-            ]
-        if not candidates:
-            return None
-        return min(
-            candidates,
-            key=lambda run: abs((run[0] + run[1]) / 2.0 - (face_x if tracking_x is None else tracking_x)),
-        )
-
-    candidate_rows = range(
-        max(0, math.floor(face_y - extent_height)),
-        min(height - 1, math.ceil(face_y + extent_height)) + 1,
-    )
-    seed = None
-    seed_y = None
-    for y in sorted(candidate_rows, key=lambda candidate: (abs(candidate - face_y), candidate < face_y)):
-        seed = nearest_run(y)
-        if seed is not None:
-            seed_y = y
-            break
-    if seed is None or seed_y is None:
-        return None
-
-    tracking_x = (seed[0] + seed[1]) / 2.0
-    head_top = seed_y
-    gap = 0
-    for y in range(seed_y - 1, -1, -1):
-        run = nearest_run(y, tracking_x)
-        if run is not None:
-            head_top = y
-            tracking_x = (run[0] + run[1]) / 2.0
-            gap = 0
-        else:
-            gap += 1
-            if gap > max_gap:
-                break
-    return float(head_top)
+    # 元数据 extent 是已验证眼/脸附件的宽高；在锚点上方留一个完整高度，
+    # 形成面部保护带，不把帽子、耳朵、角或机械饰件的 alpha 当作头顶。
+    return max(0.0, float(face_point[1]) - float(extent[1]))
 
 
 def _fallback_framing(portrait, source: str, render_id: str | None = None):
@@ -373,16 +292,17 @@ def framing(
         else 2400 / portrait.height
     )
     initial_scale = min(initial_scale, 7200 / max(portrait.size))
-    local_head_top = estimate_local_head_top(portrait, point, extent)
-    alpha_bounds = robust_alpha_bounds(portrait)
     core, core_reason = _validated_core_axis(row, portrait, point)
     if core is not None:
         guard_y, guard_source = float(core["head_top_y"]), "core_head_top"
-    elif local_head_top is not None:
-        guard_y, guard_source = local_head_top, "face_local_alpha"
     else:
-        guard_y = float(alpha_bounds[1]) if alpha_bounds is not None else 0.0
-        guard_source = "robust_alpha_top"
+        face_safe_top_y = _face_safe_top_y(point, extent)
+        if face_safe_top_y is not None:
+            guard_y, guard_source = face_safe_top_y, "face_safe_top"
+        else:
+            alpha_bounds = robust_alpha_bounds(portrait)
+            guard_y = float(alpha_bounds[1]) if alpha_bounds is not None else 0.0
+            guard_source = "robust_alpha_top"
 
     requested = body_centering_requested(body_centering)
 

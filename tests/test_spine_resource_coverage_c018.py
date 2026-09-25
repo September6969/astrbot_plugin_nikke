@@ -160,11 +160,16 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         eye_x = left + record["point"][0] * scale
         eye_y = top + record["point"][1] * scale
         self.assertAlmostEqual(eye_x, 760.0, places=2)
-        self.assertEqual(result["vertical_guard_source"], "face_local_alpha")
-        self.assertGreater(result["vertical_correction_y"], 0.0)
+        self.assertEqual(result["vertical_guard_source"], "face_safe_top")
+        self.assertAlmostEqual(
+            result["guard_top_source_y"],
+            record["point"][1] - record["extent"][1],
+        )
         self.assertGreaterEqual(
             result["guard_top_card_after"], result["safe_top"] - 1.0
         )
+        self.assertGreaterEqual(result["vertical_correction_y"], 0.0)
+        self.assertLess(result["vertical_correction_y"], 10.0)
         self.assertAlmostEqual(
             eye_y, 566.0 + result["vertical_correction_y"], places=2
         )

@@ -261,7 +261,7 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                 )
                 expected_guard_sources = {
                     "c014": "robust_alpha_top",
-                    "c018": "face_local_alpha",
+                    "c018": "face_safe_top",
                     "c020": "robust_alpha_top",
                     "c401": "core_head_top",
                     "c581": "core_head_top",
