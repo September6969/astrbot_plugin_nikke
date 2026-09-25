@@ -4,6 +4,7 @@
 Spine runtime；真实 runtime、合法测试素材和 Linux headless 仍单独登记。
 """
 
+import io
 import json
 import tempfile
 from pathlib import Path
@@ -115,10 +116,12 @@ class SpineFormalBackendTests(TestCase):
             root = Path(directory)
             fetcher = SpineBundleFetcher(root / "bundles")
             base = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_00"
+            png_buffer = io.BytesIO()
+            Image.new("RGBA", (8, 8), "white").save(png_buffer, format="PNG")
             payloads = {
                 ".skel": b"binary-skeleton",
-                ".atlas": b"page.png\nsize: 64, 64\n",
-                ".png": b"png-bytes",
+                ".atlas": b"page.png\nsize: 8, 8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nregion\nbounds: 0,0,8,8\n",
+                ".png": png_buffer.getvalue(),
             }
 
             def open_stream(_method, url, **_kwargs):
@@ -140,6 +143,63 @@ class SpineFormalBackendTests(TestCase):
                     {"skel": "https://evil.example/l2d/c191.skel", "atlas": base + ".atlas", "png": base + ".png"},
                     "bad",
                 )
+
+    def test_fetcher_uses_each_atlas_texture_and_verifies_pinned_blob_hashes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fetcher = SpineBundleFetcher(root / "bundles")
+            base = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/" + "a" * 40 + "/l2d/c020/"
+            image_data: dict[str, bytes] = {}
+            for name, color in (("portrait/one.png", "red"), ("portrait/two.png", "blue")):
+                buffer = io.BytesIO()
+                Image.new("RGBA", (8, 8), color).save(buffer, format="PNG")
+                image_data[name] = buffer.getvalue()
+            atlas_data = (
+                "portrait/one.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nregion-one\nbounds: 0,0,8,8\n\n"
+                "portrait/two.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nregion-two\nbounds: 0,0,8,8\n"
+            ).encode("utf-8")
+            payloads = {
+                "hero.skel": b"verified skeleton",
+                "hero.atlas": atlas_data,
+                **image_data,
+            }
+            urls = {
+                "skel": base + "hero.skel",
+                "atlas": base + "hero.atlas",
+                "portrait/one.png": base + "portrait/one.png",
+                "portrait/two.png": base + "portrait/two.png",
+            }
+            blob_hashes = {
+                urls["skel"]: fetcher._git_blob_sha(payloads["hero.skel"]),
+                urls["atlas"]: fetcher._git_blob_sha(atlas_data),
+                urls["portrait/one.png"]: fetcher._git_blob_sha(image_data["portrait/one.png"]),
+                urls["portrait/two.png"]: fetcher._git_blob_sha(image_data["portrait/two.png"]),
+            }
+
+            def open_stream(_method, url, **_kwargs):
+                response = MagicMock()
+                path = url.split("/l2d/", 1)[1]
+                path = path.split("/", 1)[1]
+                relative = "/".join(path.split("/")[1:]) if path.startswith("c020/") else path
+                name = relative.rsplit("/", 1)[-1]
+                if name == "hero.skel":
+                    data = payloads["hero.skel"]
+                elif name == "hero.atlas":
+                    data = payloads["hero.atlas"]
+                else:
+                    data = image_data[relative]
+                response.iter_bytes.return_value = [data]
+                context = MagicMock()
+                context.__enter__.return_value = response
+                return context
+
+            with patch("astrbot_plugin_nikke.integrations.spine.prerenderer.httpx.stream", side_effect=open_stream):
+                bundle = fetcher.fetch(urls, "multi", expected_blob_hashes=blob_hashes)
+                with self.assertRaisesRegex(SpineRenderError, "内容校验"):
+                    fetcher.fetch(urls, "wrong-hash", expected_blob_hashes={urls["skel"]: "0" * 40})
+            self.assertEqual(len(bundle.textures), 2)
+            with Image.open(bundle.textures[0]) as first, Image.open(bundle.textures[1]) as second:
+                self.assertNotEqual(first.convert("RGBA").getpixel((0, 0)), second.convert("RGBA").getpixel((0, 0)))
 
     def test_bundle_mapping_rejects_invalid_texture_entries(self):
         with self.assertRaises(SpineRenderError):

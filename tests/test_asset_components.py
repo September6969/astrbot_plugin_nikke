@@ -233,12 +233,14 @@ def test_spine_cache_identity_covers_costume_runtime_and_animation() -> None:
     with tempfile.TemporaryDirectory() as directory:
         manager = AssetManager(Path(directory) / "cache", ROOT / "assets")
         try:
+            spine = manager._spine
             keys = {
-                manager._spine_cache_key("c010", None, "4.0", "idle"),
-                manager._spine_cache_key("c010", "10005", "4.0", "idle"),
-                manager._spine_cache_key("c010", "10005", "4.1", "idle"),
-                manager._spine_cache_key("c010", "10005", "4.1", "attack"),
+                spine.cache_key("c010", "c010", None, "a" * 40, "4.0", "idle"),
+                spine.cache_key("c010@c010_02", "c010", "10005", "a" * 40, "4.0", "idle"),
+                spine.cache_key("c010@c010_02", "c010", "10005", "a" * 40, "4.1", "idle"),
+                spine.cache_key("c010@c010_02", "c010", "10005", "a" * 40, "4.1", "attack"),
+                spine.cache_key("c010@c010_02", "c010", "10005", "b" * 40, "4.1", "attack"),
             }
-            assert len(keys) == 4
+            assert len(keys) == 5
         finally:
             manager.close()

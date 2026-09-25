@@ -2,8 +2,10 @@
 
 import json
 import tempfile
+import time
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 
@@ -164,25 +166,72 @@ class NikkeDbProviderTests(unittest.TestCase):
     def test_spine_bundle_urls(self):
         with tempfile.TemporaryDirectory() as td:
             provider = NikkeDbProvider(td, td)
+            tree_path = Path(td) / "nikke-db" / "index" / "l2d-tree.json"
+            tree_path.parent.mkdir(parents=True)
+            entries = [
+                {"path": "l2d/c191", "sha": "a" * 40, "type": "tree"},
+                {"path": "l2d/c191/aim", "sha": "b" * 40, "type": "tree"},
+                {"path": "l2d/c191/aim/actual-body.skel", "sha": "c" * 40, "type": "blob"},
+                {"path": "l2d/c191/aim/actual-body.atlas", "sha": "d" * 40, "type": "blob"},
+                {"path": "l2d/c191/aim/pages/texture-01.png", "sha": "e" * 40, "type": "blob"},
+            ]
+            tree_path.write_text(
+                json.dumps({"commit_sha": "f" * 40, "tree_sha": "1" * 40, "fetched_at": time.time(), "entries": entries}),
+                encoding="utf-8",
+            )
             urls = provider.resolve_spine_bundle_urls("191", action="aim")
             self.assertEqual(
                 urls["skel"],
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_aim_00.skel",
+                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/ffffffffffffffffffffffffffffffffffffffff/l2d/c191/aim/actual-body.skel",
             )
             self.assertEqual(
                 urls["atlas"],
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_aim_00.atlas",
+                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/ffffffffffffffffffffffffffffffffffffffff/l2d/c191/aim/actual-body.atlas",
             )
             self.assertEqual(
-                urls["png"],
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c191/aim/c191_aim_00.png",
+                urls["pages/texture-01.png"],
+                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/ffffffffffffffffffffffffffffffffffffffff/l2d/c191/aim/pages/texture-01.png",
             )
+            source = provider.resolve_spine_bundle_source("191", action="aim", allow_remote=False)
+            self.assertEqual(source.commit_sha, "f" * 40)
+            self.assertEqual(source.source_version, "b" * 40)
+            self.assertEqual(provider.resolve_spine_bundle_source("../191"), None)
 
-            static_urls = provider.resolve_spine_bundle_urls("10", action="setup")
-            self.assertEqual(
-                static_urls["skel"],
-                "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel",
-            )
+    def test_github_l2d_tree_is_cached_and_truncation_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td, remote=True)
+            commit_response = MagicMock()
+            commit_response.json.return_value = {
+                "sha": "a" * 40,
+                "commit": {"tree": {"sha": "b" * 40}},
+            }
+            tree_response = MagicMock()
+            tree_response.content = b"{}"
+            tree_response.json.return_value = {
+                "truncated": False,
+                "tree": [
+                    {"path": "l2d/c020", "sha": "c" * 40, "type": "tree"},
+                    {"path": "l2d/c020/hero.skel", "sha": "d" * 40, "type": "blob"},
+                ],
+            }
+            with patch("astrbot_plugin_nikke.integrations.nikke_db.provider.httpx.Client") as client_type:
+                client = client_type.return_value.__enter__.return_value
+                client.get.side_effect = [commit_response, tree_response]
+                result = provider.get_l2d_file_tree()
+                self.assertEqual(result["commit_sha"], "a" * 40)
+                self.assertEqual(client.get.call_count, 2)
+                self.assertEqual(provider.get_l2d_file_tree(), result)
+                self.assertEqual(client.get.call_count, 2)
+
+            payload = json.loads((Path(td) / "nikke-db" / "index" / "l2d-tree.json").read_text(encoding="utf-8"))
+            payload["fetched_at"] = time.time() - provider.L2D_TREE_TTL - 1
+            (Path(td) / "nikke-db" / "index" / "l2d-tree.json").write_text(json.dumps(payload), encoding="utf-8")
+            provider._l2d_tree = None
+            with patch("astrbot_plugin_nikke.integrations.nikke_db.provider.httpx.Client") as client_type:
+                client = client_type.return_value.__enter__.return_value
+                client.get.side_effect = [commit_response, MagicMock()]
+                client.get.return_value.json.return_value = {"truncated": True, "tree": []}
+                self.assertIsNotNone(provider.get_l2d_file_tree())
 
     def test_negative_cache_and_concurrency_lock(self):
         with tempfile.TemporaryDirectory() as td:

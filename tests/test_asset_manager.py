@@ -14,6 +14,7 @@ from PIL import Image
 
 from astrbot_plugin_nikke.core.assets.downloader import AssetDownloader
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.integrations.nikke_db.provider import SpineBundleSource
 
 
 class AssetManagerTests(unittest.TestCase):
@@ -50,17 +51,16 @@ class AssetManagerTests(unittest.TestCase):
     def test_cached_spine_png_is_reused_without_fb_request(self):
         with tempfile.TemporaryDirectory() as td:
             cache = Path(td)
-            index_dir = cache / "nikke-db" / "index"
-            index_dir.mkdir(parents=True)
-            (index_dir / "l2d.json").write_text(json.dumps([{"id": "c191", "version": 4.1}]), encoding="utf-8")
             manager = AssetManager(cache, Path(__file__).resolve().parents[1] / "assets", remote=True)
-            key = manager._spine_cache_key("c191", None, "4.1")
+            source = SpineBundleSource("c191", "a" * 40, None, {}, {})
+            key = manager._spine.cache_key("c191", "c191", None, source.source_version, None, "idle")
             (cache / "portraits").mkdir(parents=True, exist_ok=True)
             Image.new("RGBA", (30, 50), "green").save(cache / "portraits" / f"{key}.png")
             try:
-                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream") as stream:
-                    self.assertEqual(manager.get_character_portrait("5004", "191").size, (30, 50))
-                    stream.assert_not_called()
+                with patch.object(manager.nikke_db, "resolve_spine_bundle_source", return_value=source):
+                    with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream") as stream:
+                        self.assertEqual(manager.get_character_portrait("5004", "191").size, (30, 50))
+                        stream.assert_not_called()
             finally:
                 manager.close()
 
@@ -647,10 +647,11 @@ class AssetManagerTests(unittest.TestCase):
             assets = Path(td) / "assets"
             manager = AssetManager(cache, assets, remote=True)
             try:
-                with self.assertLogs("nikke.asset_manager", level="WARNING") as log_cm:
-                    portrait = manager.get_character_portrait(5065, "330")
-                    self.assertEqual(portrait.size, (600, 900))  # fallback
-                    self.assertTrue(any("STATIC_SPINE_ASSET_MISSING: c330" in m for m in log_cm.output))
+                with patch.object(manager.nikke_db, "resolve_spine_bundle_source", return_value=None):
+                    with self.assertLogs("nikke.asset_manager", level="INFO") as log_cm:
+                        portrait = manager.get_character_portrait(5065, "330")
+                self.assertEqual(portrait.size, (600, 900))
+                self.assertTrue(any("render_id=c330" in m and "bundle_unavailable" in m for m in log_cm.output))
             finally:
                 manager.close()
 

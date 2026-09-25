@@ -40,7 +40,7 @@ class FallbackAssetProvider:
     def get_burst_icon(self, *_args, **_kwargs) -> Image.Image:
         return self.fallback("burst")
 
-    def resolve_character_assets(self, _data, timeout: float = 6.0) -> CharacterCardAssets:
+    def resolve_character_assets(self, _data, timeout: float | None = None) -> CharacterCardAssets:
         del timeout
         return CharacterCardAssets(
             portrait=self.fallback("portrait"),

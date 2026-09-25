@@ -47,7 +47,7 @@ class CharacterCardPrefetcher:
         future.add_done_callback(lambda _: self.slots.release())
         return future
 
-    def resolve_character_assets(self, data: CharacterCardData, timeout: float = 6.0) -> CharacterCardAssets:
+    def resolve_character_assets(self, data: CharacterCardData, timeout: float | None = None) -> CharacterCardAssets:
         equipment = data.equipment
         favorite = data.favorite_item
         cube = data.cube
@@ -94,7 +94,20 @@ class CharacterCardPrefetcher:
                 results[key] = on_failure()
 
         if future_map:
-            done, not_done = concurrent.futures.wait(future_map, timeout=timeout)
+            base_timeout = 6.0 if timeout is None else timeout
+            done, not_done = concurrent.futures.wait(future_map, timeout=base_timeout)
+            portrait_future = next((future for future, key in future_map.items() if key == "portrait"), None)
+            if (
+                timeout is None
+                and portrait_future is not None
+                and portrait_future in not_done
+                and self.env.remote
+                and bool(getattr(self.env.spine_renderer, "supported_runtime_versions", ()))
+            ):
+                # 首次 runtime portrait 有独立的有限预算；其它图标超时不阻塞角色卡。
+                concurrent.futures.wait((portrait_future,), timeout=self.env.spine_budget_seconds)
+                done = {future for future in future_map if future.done()}
+                not_done = set(future_map) - done
             for future in done:
                 key = future_map[future]
                 try:

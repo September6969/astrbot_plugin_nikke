@@ -8,11 +8,14 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 import re
 import threading
 import time
+from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import quote
 
 import httpx
 
@@ -24,11 +27,25 @@ except ImportError:
 logger = logging.getLogger("nikke.nikke_db")
 
 
+@dataclass(frozen=True, slots=True)
+class SpineBundleSource:
+    """由上游 Git tree 真实文件记录解析出的、固定版本 Spine bundle。"""
+
+    asset_id: str
+    source_version: str
+    runtime_version: str | float | None
+    urls: dict[str, str]
+    blob_hashes: dict[str, str]
+    commit_sha: str | None = None
+
+
 class NikkeDbProvider:
     L2D_CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d"
     INDEX_URL = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json"
+    GITHUB_API = "https://api.github.com/repos/Nikke-db/Nikke-db.github.io"
 
     INDEX_TTL = 12 * 3600  # 12 小时本地索引缓存
+    L2D_TREE_TTL = 12 * 3600
     NEGATIVE_CACHE_TTL = 600  # 10 分钟失败退避冷却
 
     NIKKE_DB_ID_OVERRIDES: dict[str, str] = {}
@@ -63,6 +80,8 @@ class NikkeDbProvider:
 
         self._index: dict[str, dict] | None = None
         self._index_loaded_at: float = 0
+        self._l2d_tree: dict[str, object] | None = None
+        self._l2d_tree_loaded_at: float = 0
 
         self.costume_errors: list[str] = []
         self.costume_character_map: dict[str, str] = {}
@@ -379,28 +398,213 @@ class NikkeDbProvider:
             return entry["version"]
         return None
 
-    def resolve_spine_bundle_urls(self, character_id: str, action: str = "setup") -> dict[str, str]:
-        """生成 Nikke-DB 当前的 canonical bundle 路径。"""
-        char_id = self.normalize_resource_id(character_id)
+    @staticmethod
+    def _valid_tree_sha(value: object) -> bool:
+        return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{40}", value) is not None
+
+    @classmethod
+    def _validated_l2d_tree(cls, payload: object) -> dict[str, object] | None:
+        if not isinstance(payload, dict):
+            return None
+        commit_sha = payload.get("commit_sha")
+        tree_sha = payload.get("tree_sha")
+        entries = payload.get("entries")
+        if (
+            not cls._valid_tree_sha(commit_sha)
+            or not cls._valid_tree_sha(tree_sha)
+            or not isinstance(entries, list)
+            or len(entries) > 20000
+        ):
+            return None
+        validated: list[dict[str, str]] = []
+        for item in entries:
+            if not isinstance(item, dict):
+                continue
+            path, sha, kind = item.get("path"), item.get("sha"), item.get("type")
+            if (
+                not isinstance(path, str)
+                or not path.startswith("l2d/")
+                or "\\" in path
+                or any(part in {"", ".", ".."} for part in path.split("/"))
+                or not isinstance(sha, str)
+                or not cls._valid_tree_sha(sha)
+                or not isinstance(kind, str)
+                or kind not in {"blob", "tree"}
+            ):
+                continue
+            validated.append({"path": path, "sha": sha, "type": kind})
+        if not validated:
+            return None
+        validated.sort(key=lambda row: row["path"])
+        return {"commit_sha": commit_sha, "tree_sha": tree_sha, "entries": validated}
+
+    def get_l2d_file_tree(self, *, allow_remote: bool = True) -> dict[str, object] | None:
+        """读取缓存或 GitHub 的固定 L2D 文件树；不依赖推测的文件名。"""
+        now = time.time()
+        if self._l2d_tree is not None and now - self._l2d_tree_loaded_at < self.L2D_TREE_TTL:
+            return self._l2d_tree
+
+        cache_path = self.cache_dir / "nikke-db" / "index" / "l2d-tree.json"
+        cached: dict[str, object] | None = None
+        try:
+            raw_cache = json.loads(cache_path.read_text(encoding="utf-8"))
+            cached = self._validated_l2d_tree(raw_cache)
+            fetched_at = raw_cache.get("fetched_at") if isinstance(raw_cache, dict) else None
+            if cached is not None and isinstance(fetched_at, (int, float)) and now - fetched_at < self.L2D_TREE_TTL:
+                self._l2d_tree = cached
+                self._l2d_tree_loaded_at = now
+                return cached
+        except (OSError, UnicodeError, ValueError):
+            pass
+
+        if allow_remote and self.remote and not self.is_failed("index:l2d-tree"):
+            try:
+                headers = {
+                    "User-Agent": "astrbot-plugin-nikke-spine-portrait",
+                    "Accept": "application/vnd.github+json",
+                }
+                with httpx.Client(timeout=8.0, headers=headers) as client:
+                    commit_response = client.get(f"{self.GITHUB_API}/commits/main")
+                    commit_response.raise_for_status()
+                    commit_payload = commit_response.json()
+                    commit_sha = commit_payload.get("sha") if isinstance(commit_payload, dict) else None
+                    tree_info = commit_payload.get("commit", {}).get("tree", {}) if isinstance(commit_payload, dict) else {}
+                    tree_sha = tree_info.get("sha") if isinstance(tree_info, dict) else None
+                    if not self._valid_tree_sha(commit_sha) or not self._valid_tree_sha(tree_sha):
+                        raise ValueError("GitHub commit 元数据无效")
+
+                    tree_response = client.get(f"{self.GITHUB_API}/git/trees/{tree_sha}?recursive=1")
+                    tree_response.raise_for_status()
+                    if len(tree_response.content) > 12 * 1024 * 1024:
+                        raise ValueError("GitHub L2D tree 响应超过大小限制")
+                    tree_payload = tree_response.json()
+                    if not isinstance(tree_payload, dict) or tree_payload.get("truncated") is not False:
+                        raise ValueError("GitHub L2D tree 不完整")
+                    raw_entries = tree_payload.get("tree")
+                    if not isinstance(raw_entries, list) or len(raw_entries) > 20000:
+                        raise ValueError("GitHub L2D tree 结构无效")
+                    candidate = self._validated_l2d_tree(
+                        {
+                            "commit_sha": commit_sha,
+                            "tree_sha": tree_sha,
+                            "entries": [row for row in raw_entries if isinstance(row, dict) and str(row.get("path", "")).startswith("l2d/")],
+                        }
+                    )
+                    if candidate is None:
+                        raise ValueError("GitHub L2D tree 缺少有效资源项")
+                    candidate["fetched_at"] = now
+                    cache_path.parent.mkdir(parents=True, exist_ok=True)
+                    temporary = cache_path.with_name(f".{cache_path.name}.{threading.get_ident()}.tmp")
+                    try:
+                        temporary.write_text(json.dumps(candidate, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+                        temporary.replace(cache_path)
+                    finally:
+                        temporary.unlink(missing_ok=True)
+                    validated = self._validated_l2d_tree(candidate)
+                    if validated is not None:
+                        self._l2d_tree = validated
+                        self._l2d_tree_loaded_at = now
+                        return validated
+            except (httpx.HTTPError, OSError, UnicodeError, ValueError, TypeError, AttributeError) as exc:
+                logger.info("Nikke-DB L2D tree unavailable: %s", type(exc).__name__)
+                self.mark_failed("index:l2d-tree", 300)
+
+        if cached is not None:
+            self._l2d_tree = cached
+            self._l2d_tree_loaded_at = now
+            return cached
+        return None
+
+    def resolve_spine_bundle_source(
+        self,
+        character_id: str,
+        action: str = "setup",
+        *,
+        allow_remote: bool = True,
+    ) -> SpineBundleSource | None:
+        """从上游 tree 元数据配对真实 skeleton/atlas，并解析 atlas 纹理页。"""
+        asset_id = self.normalize_resource_id(character_id.split("@", 1)[0] if isinstance(character_id, str) else "")
         action_id = self._normalize_id_component(action)
-        if char_id == "missing" or not action_id:
-            return {}
-        if action_id in {"base", "setup", "static"}:
-            base = f"{self.L2D_CDN}/{char_id}"
-            file_prefix = char_id
+        if not asset_id or not asset_id.startswith("c") or not action_id:
+            return None
+        tree = self.get_l2d_file_tree(allow_remote=allow_remote)
+        if tree is None:
+            return None
+        commit_sha = tree.get("commit_sha")
+        entries = tree.get("entries")
+        if not isinstance(commit_sha, str) or not isinstance(entries, list):
+            return None
+
+        root = f"l2d/{asset_id}"
+        requested_dir = root if action_id in {"base", "setup", "static"} else f"{root}/{action_id}"
+        rows = [row for row in entries if isinstance(row, dict)]
+        files = [
+            row for row in rows
+            if row.get("type") == "blob"
+            and isinstance(row.get("path"), str)
+            and row["path"].startswith(requested_dir + "/")
+        ]
+        grouped: dict[tuple[str, str], dict[str, dict[str, str]]] = {}
+        for row in files:
+            path = row["path"]
+            parent, name = path.rsplit("/", 1)
+            suffix = Path(name).suffix.lower()
+            kind = "skeleton" if suffix in {".skel", ".json"} else "atlas" if suffix == ".atlas" else "texture" if suffix in {".png", ".webp"} else ""
+            if kind:
+                grouped.setdefault((parent, Path(name).stem), {})[kind] = row
+        pairs = [
+            (parent, stem, values["skeleton"], values["atlas"])
+            for (parent, stem), values in grouped.items()
+            if "skeleton" in values and "atlas" in values
+        ]
+        direct_pairs = [pair for pair in pairs if pair[0] == requested_dir]
+        if len(direct_pairs) == 1:
+            parent, _stem, skeleton, atlas = direct_pairs[0]
+        elif not direct_pairs and len(pairs) == 1:
+            parent, _stem, skeleton, atlas = pairs[0]
         else:
-            base = f"{self.L2D_CDN}/{char_id}/{action_id}"
-            file_prefix = f"{char_id}_{action_id}"
-        png_name = f"{file_prefix}_00.png"
-        if char_id == "c010_02" and action_id in {"base", "setup", "static"}:
-            png_name = "c010_01.png"
-        elif char_id == "c010_03" and action_id in {"base", "setup", "static"}:
-            png_name = "c010_02.png"
-        return {
-            "skel": f"{base}/{file_prefix}_00.skel",
-            "atlas": f"{base}/{file_prefix}_00.atlas",
-            "png": f"{base}/{png_name}",
-        }
+            return None
+
+        directory_entry = next(
+            (row for row in rows if row.get("type") == "tree" and row.get("path") == parent),
+            None,
+        )
+        if isinstance(directory_entry, dict) and isinstance(directory_entry.get("sha"), str):
+            source_version = directory_entry["sha"]
+        else:
+            scoped = sorted(
+                (row.get("path"), row.get("sha"), row.get("type"))
+                for row in rows
+                if isinstance(row.get("path"), str)
+                and (row["path"] == parent or row["path"].startswith(parent + "/"))
+            )
+            source_version = hashlib.sha256(json.dumps(scoped, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+        def raw_url(path: str) -> str:
+            return f"https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/{commit_sha}/{quote(path, safe='/')}"
+
+        urls = {"skel": raw_url(skeleton["path"]), "atlas": raw_url(atlas["path"])}
+        blob_hashes = {urls["skel"]: skeleton["sha"], urls["atlas"]: atlas["sha"]}
+        for row in files:
+            if row.get("type") != "blob" or Path(row["path"]).suffix.lower() not in {".png", ".webp"}:
+                continue
+            relative = row["path"][len(parent) + 1 :]
+            image_url = raw_url(row["path"])
+            urls[relative] = image_url
+            blob_hashes[image_url] = row["sha"]
+        return SpineBundleSource(
+            asset_id=asset_id,
+            source_version=source_version,
+            runtime_version=None,
+            urls=urls,
+            blob_hashes=blob_hashes,
+            commit_sha=commit_sha,
+        )
+
+    def resolve_spine_bundle_urls(self, character_id: str, action: str = "setup") -> dict[str, str]:
+        """兼容旧调用方，但路径只来自已发现的上游文件树。"""
+        source = self.resolve_spine_bundle_source(character_id, action)
+        return dict(source.urls) if source is not None else {}
 
 
 NikkeDbAssetProvider = NikkeDbProvider
