@@ -6,7 +6,10 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from astrbot_plugin_nikke.features.character.face_anchor import framing as _framing
+from astrbot_plugin_nikke.features.character.face_anchor import (
+    FACE_Y_OFFSET_OVERRIDES,
+    framing as _framing,
+)
 from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 from astrbot_plugin_nikke.features.character.layout import MIN_AUTO_SCALE_RATIO, summary_layout
 from astrbot_plugin_nikke.features.character.models import CostumeSelection
@@ -49,7 +52,7 @@ def make_row(image, *, point, extent, head_top_y=None, breast=None, target=(860,
     return row
 
 
-def test_unknown_summary_count_does_not_change_existing_transform():
+def test_unknown_summary_count_disables_core_corridor_but_keeps_face_safety():
     card = make_card()
     image = Image.new("RGBA", (100, 200), "white")
     row = make_row(image, point=(50, 30), extent=(40, 20), head_top_y=5, breast=(50, 100))
@@ -59,7 +62,9 @@ def test_unknown_summary_count_does_not_change_existing_transform():
 
     assert unknown["core_axis"]["reason"] == "summary_count_unknown"
     assert unknown["core_axis"]["summary_count"] is None
-    assert unknown["style"] != explicit_zero["style"]
+    assert explicit_zero["core_axis"]["summary_count"] == 0
+    assert unknown["guard_top_card_after"] >= 393.0
+    assert explicit_zero["guard_top_card_after"] >= 393.0
 
 
 def test_explicit_summary_count_keeps_full_axis_in_safe_corridor():
@@ -76,9 +81,15 @@ def test_explicit_summary_count_keeps_full_axis_in_safe_corridor():
             assert diag["eye_card_after"] >= diag["head_top_card_after"]
             assert diag["breast_card_after"] <= layout.safe_bottom + 1e-6
             assert diag["scale_after"] == diag["scale_before"]
+            assert result["vertical_guard_source"] == "core_head_top"
+            assert result["guard_top_card_after"] >= result["safe_top"] - 1.0
+            assert diag["combined_min_top"] == max(
+                diag["min_top"],
+                result["safe_top"] - result["guard_top_source_y"] * diag["scale_after"],
+            )
 
 
-def test_missing_core_axis_preserves_face_anchor_transform():
+def test_missing_core_axis_uses_face_guard_without_core_interval():
     card = make_card()
     image = Image.new("RGBA", (100, 200), "white")
     row = make_row(image, point=(50, 30), extent=(40, 20))
@@ -89,6 +100,71 @@ def test_missing_core_axis_preserves_face_anchor_transform():
     assert explicit["style"] == old_path["style"]
     assert explicit["core_axis"]["available"] is False
     assert explicit["core_axis"]["reason"] == "core_axis_unavailable"
+    assert explicit["vertical_guard_source"] == "face_local_alpha"
+    assert explicit["guard_top_card_after"] >= explicit["safe_top"] - 1.0
+
+
+def test_face_anchor_without_core_axis_keeps_head_below_identity_panel():
+    from PIL import ImageDraw
+
+    card = make_card()
+    image = Image.new("RGBA", (100, 200), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.ellipse((34, 0, 66, 43), fill=(255, 255, 255, 255))
+    draw.rectangle((28, 32, 72, 190), fill=(255, 255, 255, 255))
+    row = make_row(image, point=(50, 24), extent=(40, 20), target=(860, 380))
+
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
+        result = framing(card, image, body_centering=False, summary_count=4)
+
+    assert result["vertical_guard_source"] == "face_local_alpha"
+    assert result["safe_top"] == summary_layout(4).safe_top
+    assert result["guard_top_card_after"] >= result["safe_top"] - 1.0
+    assert result["core_axis"]["available"] is False
+
+
+def test_face_local_head_scan_ignores_distant_alpha_speck():
+    from PIL import ImageDraw
+
+    card = make_card()
+    image = Image.new("RGBA", (200, 300), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((0, 0, 20, 10), fill=(255, 255, 255, 255))
+    draw.ellipse((82, 40, 118, 102), fill=(255, 255, 255, 255))
+    draw.rectangle((78, 96, 122, 280), fill=(255, 255, 255, 255))
+    row = make_row(image, point=(100, 75), extent=(20, 20), target=(860, 380))
+
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
+        result = framing(card, image, body_centering=False, summary_count=4)
+
+    assert result["vertical_guard_source"] == "face_local_alpha"
+    assert result["guard_top_source_y"] >= 35.0
+    assert result["guard_top_card_after"] >= result["safe_top"] - 1.0
+
+
+def test_missing_face_anchor_uses_robust_alpha_fallback_and_safe_transform():
+    from PIL import ImageDraw
+
+    card = make_card()
+    image = Image.new("RGBA", (100, 400), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.point((50, 0), fill=(255, 255, 255, 255))
+    draw.rectangle((20, 20, 80, 380), fill=(255, 255, 255, 255))
+
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={}):
+        result = framing(card, image, body_centering=False, summary_count=4)
+
+    assert result["source"] == "anchor_unavailable"
+    assert "object-position:50% 35%" not in result["style"]
+    assert result["vertical_guard_source"] == "robust_alpha_top"
+    assert result["guard_top_source_y"] > 0
+    assert result["guard_top_card_before"] < result["safe_top"]
+    assert result["guard_top_card_after"] >= result["safe_top"] - 1.0
+    assert result["vertical_correction_y"] > 0
+
+
+def test_regression_characters_have_no_per_character_face_offsets():
+    assert not {"c014", "c018", "c020"}.intersection(FACE_Y_OFFSET_OVERRIDES)
 
 
 def test_fit_within_six_percent_rescales_and_satisfies_both_boundaries():
@@ -179,3 +255,5 @@ def test_production_c401_c581_records_match_portraits_and_safe_corridor():
         assert axis["eye_card_after"] >= axis["head_top_card_after"]
         assert axis["torso_card_after"] <= axis["safe_bottom"] + 1e-6
         assert axis["scale_after"] >= axis["scale_before"] * MIN_AUTO_SCALE_RATIO
+        assert result["vertical_guard_source"] == "core_head_top"
+        assert result["guard_top_card_after"] >= result["safe_top"] - 1.0

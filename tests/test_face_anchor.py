@@ -262,18 +262,7 @@ def test_c016_and_c191_real_anchors():
 
 
 def test_face_y_offset_behavior_and_contracts():
-    """Requirement 7: Comprehensive verification of face Y offset behavior.
-    - default face-anchor top is +16px compared to raw baseline without offset
-    - left unchanged
-    - width unchanged
-    - height unchanged
-    - scale unchanged
-    - body-centering ON/OFF both maintain identical +16px Y offset
-    - vertical_gain remains 0.0
-    - fallback / unknown / hash mismatch behavior completely untouched
-    - render-specific override can override global default
-    - character-specific override works with proper priority
-    """
+    """验证人脸偏移、水平居中和统一顶部安全线合同。"""
     import re
     from unittest.mock import patch
     from astrbot_plugin_nikke.features.character.face_anchor import (
@@ -347,15 +336,20 @@ def test_face_y_offset_behavior_and_contracts():
         assert round(t_off - t0_off, 3) == round(t_on - t0_on, 3) == 16.0
         assert res_def_on["body_centering"]["shift_y"] == 0.0
 
-        # 4. Fail-safe: Fallback / unknown / hash mismatch untouched
+        # 4. 未知身份与锚点校验失败时，仍使用透明度边界执行顶部保护。
         card_unknown = example_card()
         card_unknown.costume_selection = CostumeSelection("unknown", "test", "unknown")
-        assert framing(card_unknown, image)["style"] == "object-fit:contain"
-        assert framing(card_unknown, image)["source"] == "identity_unknown"
+        unknown_result = framing(card_unknown, image)
+        assert unknown_result["style"].startswith("width:")
+        assert unknown_result["source"] == "identity_unknown"
+        assert unknown_result["guard_top_card_after"] >= 393.0
 
         wrong_img = Image.new("RGBA", (100, 200), (99, 99, 99, 255))
-        assert framing(card, wrong_img)["style"] == "object-fit:contain;object-position:50% 35%"
-        assert framing(card, wrong_img)["source"] == "anchor_unavailable"
+        missing_anchor = framing(card, wrong_img)
+        assert missing_anchor["style"].startswith("width:")
+        assert "object-position:50% 35%" not in missing_anchor["style"]
+        assert missing_anchor["source"] == "anchor_unavailable"
+        assert missing_anchor["guard_top_card_after"] >= 393.0
 
         # 5. Render-specific override overrides global default
         with patch.dict("astrbot_plugin_nikke.features.character.face_anchor.FACE_Y_OFFSET_OVERRIDES", {"c471": 24.0}):
