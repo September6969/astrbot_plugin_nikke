@@ -157,8 +157,17 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         scale = image_width / portrait.width
         left = float(style_values["left"].removesuffix("px"))
         top = float(style_values["top"].removesuffix("px"))
-        self.assertAlmostEqual(left + record["point"][0] * scale, 760.0, places=2)
-        self.assertAlmostEqual(top + record["point"][1] * scale, 566.0, places=2)
+        eye_x = left + record["point"][0] * scale
+        eye_y = top + record["point"][1] * scale
+        self.assertAlmostEqual(eye_x, 760.0, places=2)
+        self.assertEqual(result["vertical_guard_source"], "face_local_alpha")
+        self.assertGreater(result["vertical_correction_y"], 0.0)
+        self.assertGreaterEqual(
+            result["guard_top_card_after"], result["safe_top"] - 1.0
+        )
+        self.assertAlmostEqual(
+            eye_y, 566.0 + result["vertical_correction_y"], places=2
+        )
 
     def test_stale_c018_face_anchor_fails_closed(self) -> None:
         card = replace(
