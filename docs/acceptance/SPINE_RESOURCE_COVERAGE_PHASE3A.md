@@ -47,4 +47,4 @@ PASS sample 由 `SHA-256(batch_id + NUL + render_id + NUL + png_sha256)` 排序�
 
 ## Evidence
 
-人工工作流 artifact `spine-phase3a-batch-review` 至少包含：coverage summary、38 张 baseline、batch definition、sparse fetch provenance、外部 render manifest/coverage、review queue JSON/Markdown、每张候选白卡的诊断 JSON 和白卡 contact sheet。artifact 不包含 Nikke-db checkout、raw skeleton、atlas 或纹理文件。审阅结论以 artifact 中的 batch、source commit、SHA-256 和当前 run SHA 为准。
+人工工作流 artifact `spine-phase3a-batch-review` 至少包含：coverage summary、38 张 baseline、batch definition、sparse fetch provenance、外部 render manifest/coverage、review queue JSON/Markdown、每张候选的 1600×2400 白卡 PNG、白卡诊断 JSON 和 contact sheet。preview 的表现数值使用合成布局 fixture，只用于视觉/framing 检查，不代表账号或生产性能数据。artifact 不包含 Nikke-db checkout、raw skeleton、atlas 或纹理文件。审阅结论以 artifact 中的 batch、source commit、SHA-256 和当前 run SHA 为准。

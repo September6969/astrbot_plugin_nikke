@@ -273,6 +273,7 @@ jobs:
             ${{ runner.temp }}/nikke-spine-phase3a/render-coverage.json
             ${{ runner.temp }}/nikke-spine-phase3a/review/review-queue.json
             ${{ runner.temp }}/nikke-spine-phase3a/review/review-queue.md
+            ${{ runner.temp }}/nikke-spine-phase3a/white-card-preview/cards/*.png
             ${{ runner.temp }}/nikke-spine-phase3a/white-card-preview/white-card-diagnostic.json
             ${{ runner.temp }}/nikke-spine-phase3a/white-card-preview/white-card-contact-sheet.png
           if-no-files-found: warn

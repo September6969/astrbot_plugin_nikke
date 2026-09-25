@@ -235,6 +235,7 @@ async def render_candidate_cards(
                         "face_anchor_state": "NOT_AUTHORED",
                         "core_axis_state": "UNASSESSED",
                         "framing_source": frame.get("source"),
+                        "card_data_source": "synthetic layout fixture stats; not account or production performance data",
                         "template": "templates/t2i/character.html",
                         "white_card": {
                             "path": f"cards/{render_id}.png",
