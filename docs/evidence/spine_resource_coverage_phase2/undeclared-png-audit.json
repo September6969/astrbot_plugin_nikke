@@ -1,0 +1,3708 @@
+{
+  "classification_sets": {
+    "HISTORICAL_OR_TEST_ONLY": [],
+    "INVALID_ASSET": [
+      "c191"
+    ],
+    "STALE_OR_ORPHAN_FILE": [],
+    "VALID_VARIANT_NEEDS_REVIEW": [],
+    "VERIFIED_MANIFEST_CANDIDATE": [
+      "c011",
+      "c012",
+      "c016",
+      "c070",
+      "c072",
+      "c080",
+      "c082",
+      "c100",
+      "c101",
+      "c102",
+      "c110",
+      "c111",
+      "c120",
+      "c140",
+      "c161",
+      "c170",
+      "c172",
+      "c180",
+      "c181",
+      "c220",
+      "c221",
+      "c222",
+      "c224",
+      "c233",
+      "c270",
+      "c310",
+      "c400"
+    ]
+  },
+  "definitions": {
+    "HISTORICAL_OR_TEST_ONLY": "仅用于已文档化的研究、preview 或测试样本，不作为生产 bundled portrait。",
+    "INVALID_ASSET": "PNG 不可解码/没有可见 alpha，或已有 Face Anchor 与 PNG raw hash、RGBA hash、尺寸不匹配。",
+    "STALE_OR_ORPHAN_FILE": "缺少当前 canonical consumer 或固定 upstream snapshot 中没有完整 L2D bundle。",
+    "VALID_VARIANT_NEEDS_REVIEW": "仅被当前 canonical Costume/alternate consumer 使用的有效 PNG；仍需人工确认角色与 variant 对应关系。",
+    "VERIFIED_MANIFEST_CANDIDATE": "机械 identity/upstream/image 检查满足候选条件；必须另行人工确认 source-to-render provenance、视觉与 framing，且本分类不会自动加入 manifest。"
+  },
+  "generated_from_head": "b76f3c94e7f0899601970222369a8543ddefabbf",
+  "records": [
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1619,
+          3503
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1683,
+          3567
+        ],
+        "file_size": 2329589,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c011.png",
+        "rgba_pixel_sha256": "bdacff60508ee1d2cddae15dfaca2c77b383d254d940ab75dc162f07eb44c4f7",
+        "sha256": "169d9204857c74099cce950c623b810a81ed3bab2a6b8a27c8976a8f13f57060"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (尼恩)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          961.3266730582191,
+          464.32981235140824
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "11"
+        ],
+        "character_keys": [
+          "neon"
+        ],
+        "consumers": [
+          {
+            "character_key": "neon",
+            "identity": "11:default",
+            "kind": "default",
+            "render_id": "c011",
+            "resource_id": "11"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c011",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "227fd820315b1a5d77f429eef9ff642b5fea3e45aea815147a5b181646e73a56",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c011",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1273,
+            329,
+            2828,
+            3768
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c011.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "8ccc47f3f71bfe89e229fc74d5bf4b10a27f85e3258e50e4691dc1bdbf7d430a",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "b219f9e104905c9ca911f831e0b291f9a7724cb6",
+            "path": "l2d/c011/c011_00.atlas",
+            "size": 8240
+          },
+          {
+            "git_blob_sha1": "4199269e842308fbc463fc82bfbe0c56a10d18e0",
+            "path": "l2d/c011/c011_00.png",
+            "size": 3074866
+          },
+          {
+            "git_blob_sha1": "3621899c75caf978c610dd8c9f549ab6cbad2486",
+            "path": "l2d/c011/c011_00.skel",
+            "size": 1030289
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1697,
+          3503
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1761,
+          3567
+        ],
+        "file_size": 2903492,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c012.png",
+        "rgba_pixel_sha256": "cd2c8c25d7a62d1f7cb3a611b868d6a54f38c43eae5dbd4f1ace228f2e323c10",
+        "sha256": "33e00a6f5e258dc3439b75e210f120be042e512e840ee004a7cfebaa513b0632"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (阿妮斯)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          804.6785299601008,
+          496.4650926759996
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "12"
+        ],
+        "character_keys": [
+          "anis"
+        ],
+        "consumers": [
+          {
+            "character_key": "anis",
+            "identity": "12:default",
+            "kind": "default",
+            "render_id": "c012",
+            "resource_id": "12"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c012",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "538bac77eed0f34b348a1eb8b6c561db8e81aaa415df3b35c181c7076bed52a2",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c012",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1231,
+            328,
+            2864,
+            3767
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c012.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "e24b56b57078724817d0933906b1acbb63f937e01eda14e050666b6283128660",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "4f905d02cd7dfa79f05804cd229d493c1c5d47fd",
+            "path": "l2d/c012/c012_00.atlas",
+            "size": 8487
+          },
+          {
+            "git_blob_sha1": "e1569cfc91364324bbada2ea74f00deb86af076e",
+            "path": "l2d/c012/c012_00.png",
+            "size": 2524895
+          },
+          {
+            "git_blob_sha1": "acfb64d9f3c805ff8f4c02ec1b6ca9756e3981a5",
+            "path": "l2d/c012/c012_00.skel",
+            "size": 549385
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1961,
+          3618
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2025,
+          3682
+        ],
+        "file_size": 4095539,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c016.png",
+        "rgba_pixel_sha256": "688661e4e112046f4aac29a15360fe4c24b6e78a5bf8557edaecff60d80c4a3b",
+        "sha256": "5a3c3c26acf0cdc48cfcc4548a242555cd81c698f6b9bd4877f693c1ea1bfcd0"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "C 长枪/背包 (拉毗：小红帽)",
+        "sample_category_code": "C",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          941.7504461854451,
+          510.6821509753304
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "16"
+        ],
+        "character_keys": [
+          "rapi_red_hood"
+        ],
+        "consumers": [
+          {
+            "character_key": "rapi_red_hood",
+            "identity": "16:default",
+            "kind": "default",
+            "render_id": "c016",
+            "resource_id": "16"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c016",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "0caa29be30c83d8fef76bb7f0d123fee812a6b8a3d75fbc98a325ab8f25f6ee0",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c016",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1100,
+            271,
+            2997,
+            3825
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c016.runtime",
+        "skeleton_runtime_metadata": "4.1.20",
+        "skeleton_sha256_metadata": "d19e73d09e743c8621413c1a538aa0ff1a896ac773fb028a876f95331eed1984",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "0a41bb99672b4b983b4c2fd18787950f104b62d2",
+            "path": "l2d/c016/c016_00.atlas",
+            "size": 8659
+          },
+          {
+            "git_blob_sha1": "8984810178eaa9eb8c95f8d6e43d21fe3d49daa2",
+            "path": "l2d/c016/c016_00.png",
+            "size": 4052892
+          },
+          {
+            "git_blob_sha1": "d8133728bb6f06d3219636a916f8dfc6d8621b7e",
+            "path": "l2d/c016/c016_00.skel",
+            "size": 614740
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          3077,
+          3501
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          3141,
+          3565
+        ],
+        "file_size": 4301026,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c070.png",
+        "rgba_pixel_sha256": "a6d1503b644dedc7f358ec391953d0318527b9a8d5e86d50688026741d42814a",
+        "sha256": "f2be6a9519c91c885b5ef0c143001464c2b9296fc802e8f5510c2f3110889862"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (布丽德)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1487.1622167322942,
+          469.1863672408913
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "70"
+        ],
+        "character_keys": [
+          "brid"
+        ],
+        "consumers": [
+          {
+            "character_key": "brid",
+            "identity": "70:default",
+            "kind": "default",
+            "render_id": "c070",
+            "resource_id": "70"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c070",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "5b41ac47fef3de5073db526f2baa163b87b7a14dc3345888d5a2239283e653bd",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c070",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            540,
+            331,
+            3553,
+            3768
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c070.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "e6665991f4c42f0c4d1dacbf0bc7fac0103feb9e4553bc03653a3e08a62928bc",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "a54df45a14523d19429a5e784e590511c75f3e02",
+            "path": "l2d/c070/c070_00.atlas",
+            "size": 4981
+          },
+          {
+            "git_blob_sha1": "ccbe7eb340fa9e6017404d50af1f3ff277ec38ee",
+            "path": "l2d/c070/c070_00.png",
+            "size": 3078746
+          },
+          {
+            "git_blob_sha1": "176d33ca122c6254d24a1e890ecad15c60aef2c4",
+            "path": "l2d/c070/c070_00.skel",
+            "size": 831786
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          2213,
+          3503
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2277,
+          3567
+        ],
+        "file_size": 3368308,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c072.png",
+        "rgba_pixel_sha256": "7356f6653a34092c7971f2d1be9ff947b3950dbe812707f6a8f961bcd93899a5",
+        "sha256": "167274cc674538d404079056d513fcf45265f15f4aafb699b6131c259b8bdd59"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (迪塞尔)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          928.5042503543382,
+          464.886722482996
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "72"
+        ],
+        "character_keys": [
+          "diesel"
+        ],
+        "consumers": [
+          {
+            "character_key": "diesel",
+            "identity": "72:default",
+            "kind": "default",
+            "render_id": "c072",
+            "resource_id": "72"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c072",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "96cc6ace005bfd72aabbcfcf9407379597571a6fe33dab01a6371854d0e08ec7",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c072",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            973,
+            329,
+            3122,
+            3768
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c072.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "cb83292aec0b70a0061e89127d8ed3468ef3ebf20724bb78a1ac5b7ff87ca799",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "1674d15c78dfcc30558e27e9137f578b42b90b2d",
+            "path": "l2d/c072/c072_00.atlas",
+            "size": 6285
+          },
+          {
+            "git_blob_sha1": "7a80fa6f80130f43ac19503787fae8d1db9530a8",
+            "path": "l2d/c072/c072_00.png",
+            "size": 3246295
+          },
+          {
+            "git_blob_sha1": "0f87dafee8713e394c7d15ea8b77e3d069d8364c",
+            "path": "l2d/c072/c072_00.skel",
+            "size": 1059447
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1596,
+          3501
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1660,
+          3565
+        ],
+        "file_size": 2860716,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c080.png",
+        "rgba_pixel_sha256": "9e1f2febec745288d87204ead18f428dbb7dfab4f9da539f5a5726edcd6115ed",
+        "sha256": "986c97d5423e489781327af92fd24bfb609c2572aa51f97f19d8b820f879e146"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (桑迪)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          793.1950667536087,
+          370.0017479198882
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "80"
+        ],
+        "character_keys": [
+          "centi"
+        ],
+        "consumers": [
+          {
+            "character_key": "centi",
+            "identity": "80:default",
+            "kind": "default",
+            "render_id": "c080",
+            "resource_id": "80"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c080",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "cd43a5636993bf900d2cbd7896027fd5c884877eafb6d30503e929b3262c60c7",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c080",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1282,
+            328,
+            2814,
+            3765
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c080.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "110ce146d5bb74d9fbbb1785857730983c406ab0d7032155452451361dd5b0fc",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "fa74001131f2b9bf0cb20f78bc9fe97615b77ff9",
+            "path": "l2d/c080/c080_00.atlas",
+            "size": 6375
+          },
+          {
+            "git_blob_sha1": "861d2e3e4cf185a861804b8db35df8eb07950209",
+            "path": "l2d/c080/c080_00.png",
+            "size": 3721733
+          },
+          {
+            "git_blob_sha1": "694e4ab2a02584684eb05c1d84427cf9263f25b3",
+            "path": "l2d/c080/c080_00.skel",
+            "size": 499372
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1848,
+          3501
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1912,
+          3565
+        ],
+        "file_size": 4534362,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c082.png",
+        "rgba_pixel_sha256": "fd424bbb360f04b474dc2f2a21f18a210f1a1652f19ce4fba11e74e65d3221c3",
+        "sha256": "5538557ddd26c37aa5e934ca8bf6b265d6836e2fd719d60f4337029cfb7c6c7c"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (丽塔)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1036.1799417938164,
+          567.9329633435759
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "82"
+        ],
+        "character_keys": [
+          "liter"
+        ],
+        "consumers": [
+          {
+            "character_key": "liter",
+            "identity": "82:default",
+            "kind": "default",
+            "render_id": "c082",
+            "resource_id": "82"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c082",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "3a8a7f8dc939ff304fa0acd52a0343146940a5042b9655314dc3bc1f492aa074",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c082",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1156,
+            330,
+            2940,
+            3767
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c082.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "dcb38cc402ca3919b2e86774b1bd0b0adcff3671ce9456712ff20286867c8299",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "eda9fc6766128942c73727c11ec8a9a2bc6c0c75",
+            "path": "l2d/c082/c082_00.atlas",
+            "size": 5303
+          },
+          {
+            "git_blob_sha1": "51ab9dc5c5115e9648d7ded05699ba320e5b44f7",
+            "path": "l2d/c082/c082_00.png",
+            "size": 3727399
+          },
+          {
+            "git_blob_sha1": "5fff5a9502740b8468b671e5c2e8feea128890e1",
+            "path": "l2d/c082/c082_00.skel",
+            "size": 840691
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1933,
+          3506
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1997,
+          3570
+        ],
+        "file_size": 3819413,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c100.png",
+        "rgba_pixel_sha256": "83fb7b929ebfa46ef559c2b66c883d3f339f0b7764a75172fe747545ab3c04ec",
+        "sha256": "674530a411cb403399471bfc17c9c637b1ead663d2d503fdcfe383862f563519"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "C 长枪/背包 (拉普拉斯)",
+        "sample_category_code": "C",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          902.7547679692336,
+          487.85933345620106
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "100"
+        ],
+        "character_keys": [
+          "laplace"
+        ],
+        "consumers": [
+          {
+            "character_key": "laplace",
+            "identity": "100:default",
+            "kind": "default",
+            "render_id": "c100",
+            "resource_id": "100"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c100",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "4dfa8ce1c84c901191494e53b803e9aa4b943cf2eb053fb9a045f2764755fcdc",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c100",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1115,
+            327,
+            2984,
+            3769
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c100.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "4eec733f3c84e80541ad3f4e925452656ee289f1c71697f3798304fc32b9509d",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "ef4d23c23e39f0dffcada21c9b9c9f7068fcb448",
+            "path": "l2d/c100/c100_00.atlas",
+            "size": 16953
+          },
+          {
+            "git_blob_sha1": "1fbcedbb3c9d33229f33d0d3a8521f6c662a08ea",
+            "path": "l2d/c100/c100_00.png",
+            "size": 3593443
+          },
+          {
+            "git_blob_sha1": "2d6ed19798949844d1f3d0b7447b3090cd82ab08",
+            "path": "l2d/c100/c100_00.skel",
+            "size": 1557196
+          },
+          {
+            "git_blob_sha1": "7bc3d1aeeed70907083d1a49c7afdc26a4748123",
+            "path": "l2d/c100/c100_00_2.png",
+            "size": 1921324
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1324,
+          3393
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1388,
+          3457
+        ],
+        "file_size": 2705404,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c101.png",
+        "rgba_pixel_sha256": "d8a4bc49d326122f7a7006a33f5271a09ea6721bbfcba093da342981e4ced364",
+        "sha256": "4afe950d263f955783c98ebac7be92fb94813b1d842f91a5f4b70f9b3a6f400f"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "D 机械翼/披风 (德雷克)",
+        "sample_category_code": "D",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          733.6935106691826,
+          385.606247329541
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "101"
+        ],
+        "character_keys": [
+          "drake"
+        ],
+        "consumers": [
+          {
+            "character_key": "drake",
+            "identity": "101:default",
+            "kind": "default",
+            "render_id": "c101",
+            "resource_id": "101"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c101",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "174e346821041facf0ce1764f67abe5adbba6e178cb6a873470be4352b55020c",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c101",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1418,
+            436,
+            2678,
+            3765
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c101.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "a02e6bf34325c197911c0e7ff6cab51ef91ae8b152bef394fd0d2742840f2fb4",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "bfa78127935c8c48ca4c9887db8e81102f8cd9a1",
+            "path": "l2d/c101/c101_00.atlas",
+            "size": 6816
+          },
+          {
+            "git_blob_sha1": "d3cc0006c973e0e1d844881edbf0dffa90acb57b",
+            "path": "l2d/c101/c101_00.png",
+            "size": 2834497
+          },
+          {
+            "git_blob_sha1": "2b265c9559a673bad0c5e6b9a7537f34b9e5a168",
+            "path": "l2d/c101/c101_00.skel",
+            "size": 708022
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          3218,
+          3500
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          3282,
+          3564
+        ],
+        "file_size": 4308004,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c102.png",
+        "rgba_pixel_sha256": "12a3fa326dcb2540e3809ae19954b3d29ff303927f7f11a560ad6199ba001cf7",
+        "sha256": "0bb00111f0900d74310a2866c0bbbb6b9eeec047ffae91fac87dba5618b0b0fa"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "C 长枪/背包 (麦斯威尔)",
+        "sample_category_code": "C",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1504.5464446111082,
+          420.10859489845143
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "102"
+        ],
+        "character_keys": [
+          "maxwell"
+        ],
+        "consumers": [
+          {
+            "character_key": "maxwell",
+            "identity": "102:default",
+            "kind": "default",
+            "render_id": "c102",
+            "resource_id": "102"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c102",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "a54d776ed2c73206043db6587cab9bcba85a393ad1e90af8e6019d54ff701599",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c102",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            455,
+            329,
+            3609,
+            3765
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c102.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "c7bcc737a116f00fa212896885c4e6e994ca68711fb189cc208b78b9d8e9143b",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "0bab49d70d3ad0f800fedb3c89cd11a1e836122c",
+            "path": "l2d/c102/c102_00.atlas",
+            "size": 5447
+          },
+          {
+            "git_blob_sha1": "6aec09f0f0e01a70615e6bbfcaef98e16834d2ad",
+            "path": "l2d/c102/c102_00.png",
+            "size": 3264158
+          },
+          {
+            "git_blob_sha1": "c95ffb8fc991e39725ef9695fb33958b0e71bc20",
+            "path": "l2d/c102/c102_00.skel",
+            "size": 2147108
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1582,
+          3503
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1646,
+          3567
+        ],
+        "file_size": 3310278,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c110.png",
+        "rgba_pixel_sha256": "db260f82f7ae81cc63e644953b5576c0fabc169ea80e06729d595a65dda40b72",
+        "sha256": "b941d821f24a2af685d41959f54ab7dc5eda1ac2ddb186950eb2ebdfdaba07cd"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "G 强非对称姿势 (克拉乌)",
+        "sample_category_code": "G",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1010.0892605852555,
+          346.36096662547243
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "110"
+        ],
+        "character_keys": [
+          "crow"
+        ],
+        "consumers": [
+          {
+            "character_key": "crow",
+            "identity": "110:default",
+            "kind": "default",
+            "render_id": "c110",
+            "resource_id": "110"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c110",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "a99d411401299d6e6211eb0d3a6fa505a8ade9247da563d749e1b002648d4108",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c110",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1289,
+            330,
+            2807,
+            3769
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c110.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "06f3f8dbeadb235dd0abb59af1632d090dc1cfd46012fcfb8d5e754666b96155",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "5f2f1ac226a79f6ad551401e051142eb0f864feb",
+            "path": "l2d/c110/c110_00.atlas",
+            "size": 8029
+          },
+          {
+            "git_blob_sha1": "33d3c0f90a71d985e0272bfbf4be90e85a746804",
+            "path": "l2d/c110/c110_00.png",
+            "size": 3583501
+          },
+          {
+            "git_blob_sha1": "2ed4fbf9eca841f1fe646d2f85b129779d11f746",
+            "path": "l2d/c110/c110_00.skel",
+            "size": 499395
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1723,
+          3776
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1787,
+          3840
+        ],
+        "file_size": 3515532,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c111.png",
+        "rgba_pixel_sha256": "744a341c6bf21e4df32be59e8659f6b03e0908fb018e6cae54607146316a4821",
+        "sha256": "53ef1d163ca19df8670a1d0f5d82948343c8bb77c1750144ed8bd47b346aeef3"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "G 强非对称姿势 (豺狼)",
+        "sample_category_code": "G",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          859.8188897327273,
+          624.6740594473081
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "111"
+        ],
+        "character_keys": [
+          "jackal"
+        ],
+        "consumers": [
+          {
+            "character_key": "jackal",
+            "identity": "111:default",
+            "kind": "default",
+            "render_id": "c111",
+            "resource_id": "111"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c111",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "d276d71d6d78ff3b3b348f6909198ba91ab80dfe32d39325c3054b29da2e86d8",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c111",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1218,
+            192,
+            2877,
+            3904
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c111.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "12901c7a87599d184b1d762d7fe4bca558f9e48b0dcc775aa33e0df8826a814f",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "560766baa74a9fbededda650c3f6badc1eaf3fb7",
+            "path": "l2d/c111/c111_00.atlas",
+            "size": 10765
+          },
+          {
+            "git_blob_sha1": "d99403bfd582f090815952526a803af329292bbb",
+            "path": "l2d/c111/c111_00.png",
+            "size": 3493858
+          },
+          {
+            "git_blob_sha1": "a58fe437b2f49ae1b1279c09457a82534907ca00",
+            "path": "l2d/c111/c111_00.skel",
+            "size": 859755
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1142,
+          3502
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1206,
+          3566
+        ],
+        "file_size": 2057532,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c120.png",
+        "rgba_pixel_sha256": "b6e585090d3d0a8dcb9962c5d6300741c4162667647c8dabdd0188ade8e0cc0f",
+        "sha256": "3108f9ea70bbe4bd961fbe70309c677f527fcfb1084d3f7f1ef67ff3c202697e"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (N102)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          542.697199269717,
+          559.719726807833
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "120"
+        ],
+        "character_keys": [
+          "n102"
+        ],
+        "consumers": [
+          {
+            "character_key": "n102",
+            "identity": "120:default",
+            "kind": "default",
+            "render_id": "c120",
+            "resource_id": "120"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c120",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "039519fdb9e627056cde2ffa22ec188fc365e60e34059b465f6f1137524ae4f0",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c120",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1509,
+            329,
+            2587,
+            3767
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c120.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "42e85360e23450ffc3b6a65f5f7b109a4dbaa780aa36cda0408fb05b0de1ee7b",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "aacf9df852eb169f09cfa0b35061ed7ad5b68244",
+            "path": "l2d/c120/c120_00.atlas",
+            "size": 5963
+          },
+          {
+            "git_blob_sha1": "ac0f9c0fa589568b1fda8f475270acb44d9fc7c6",
+            "path": "l2d/c120/c120_00.png",
+            "size": 2688473
+          },
+          {
+            "git_blob_sha1": "49beb844a4deef63d3a9949bc2dbb07ed19673cc",
+            "path": "l2d/c120/c120_00.skel",
+            "size": 427582
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          3497,
+          3078
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          3561,
+          3142
+        ],
+        "file_size": 4932338,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c140.png",
+        "rgba_pixel_sha256": "900cc5b83316cf85f3252188724ffc402291f04977fa658f5805648927d0838f",
+        "sha256": "ac796c56440c6fa69e2125e89677c719cdcbe32c1458a4e6b92f7b352f4d572d"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "G 强非对称姿势 (舒格)",
+        "sample_category_code": "G",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1325.7237509311874,
+          386.8838545568551
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "140"
+        ],
+        "character_keys": [
+          "sugar"
+        ],
+        "consumers": [
+          {
+            "character_key": "sugar",
+            "identity": "140:default",
+            "kind": "default",
+            "render_id": "c140",
+            "resource_id": "140"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c140",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "42c113fabe28d1fcf243baf6b8a1796728fb7af1d60d034a6fc7c2d2a8f2fbfa",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c140",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            327,
+            541,
+            3760,
+            3555
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c140.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "56ac5685ca2328fa7afcfd881d28083538458eba4cf6aae27cfe0a31c055a725",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "e3ad6a4157e7a382ca183e34bee0fa76947fc716",
+            "path": "l2d/c140/c140_00.atlas",
+            "size": 3360
+          },
+          {
+            "git_blob_sha1": "70f34aceef37f6d131f391fb0c16fe6061a9a800",
+            "path": "l2d/c140/c140_00.png",
+            "size": 3303904
+          },
+          {
+            "git_blob_sha1": "e6054d30b9ae5f4888cd94dc5002919898311fc2",
+            "path": "l2d/c140/c140_00.skel",
+            "size": 1604228
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1993,
+          3570
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2057,
+          3634
+        ],
+        "file_size": 3774412,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c161.png",
+        "rgba_pixel_sha256": "72ecb00c5aaa93164da70678283ea54bf7e08a039d84d02650c4919ca4dd1b80",
+        "sha256": "29176dbe2294f18d38e5f3e10d0647f73e53dc009a9068ee2e296ac65b904eaf"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "F 偏头/侧脸 (米哈拉)",
+        "sample_category_code": "F",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1003.8649256371539,
+          396.7715660157455
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "161"
+        ],
+        "character_keys": [
+          "mihara"
+        ],
+        "consumers": [
+          {
+            "character_key": "mihara",
+            "identity": "161:default",
+            "kind": "default",
+            "render_id": "c161",
+            "resource_id": "161"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c161",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "fea21f2750442b544358e3695d8a46e6889283f46f925933a3a6c096e4d21246",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c161",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1086,
+            295,
+            3015,
+            3801
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c161.runtime",
+        "skeleton_runtime_metadata": "4.1.20",
+        "skeleton_sha256_metadata": "f70de5f588e84850cc780ebbee91f98cf0e213e62c565519406b7239256d6b06",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "17b08c591606f365e16c982b316b649396d4e520",
+            "path": "l2d/c161/c161_00.atlas",
+            "size": 2878
+          },
+          {
+            "git_blob_sha1": "8aa6ffac9e37b4d36b23e30bc6993e23a86a9235",
+            "path": "l2d/c161/c161_00.png",
+            "size": 3000822
+          },
+          {
+            "git_blob_sha1": "d3284c6d511a4ef8cbc3849e37669b4e13548b81",
+            "path": "l2d/c161/c161_00.skel",
+            "size": 258302
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          2008,
+          3503
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2072,
+          3567
+        ],
+        "file_size": 4094706,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c170.png",
+        "rgba_pixel_sha256": "b70d5426d2eff8c64154d8a94c164c415d1803066214f9f95faccb23eb0e9b25",
+        "sha256": "9e33e11bfb3c35813aaccb0cf2ac1de6f454149bb155cccc2f1898a4043321a9"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "B 长发 (普丽瓦蒂)",
+        "sample_category_code": "B",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1202.6332026933483,
+          509.20574245968965
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "170"
+        ],
+        "character_keys": [
+          "privaty"
+        ],
+        "consumers": [
+          {
+            "character_key": "privaty",
+            "identity": "170:default",
+            "kind": "default",
+            "render_id": "c170",
+            "resource_id": "170"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c170",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "773b2fa8d5ea01ee49046d3666f2529e9c03ca374a62618d651524dfdb08b983",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c170",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1077,
+            328,
+            3021,
+            3767
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c170.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "f07072a2ea9bc115544a78fec612adc834067296e6d545a7b654b34fdf9a5c3a",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "fd4d6bf741b7d801d8c20070a0be36d2efde670e",
+            "path": "l2d/c170/c170_00.atlas",
+            "size": 3835
+          },
+          {
+            "git_blob_sha1": "d8b55a9b2c9e6d3ae1dbe3c5f051caa0eedc7be9",
+            "path": "l2d/c170/c170_00.png",
+            "size": 3500251
+          },
+          {
+            "git_blob_sha1": "43c7d6a0a0b50aafdc58add1bd6c7f3d522a8f94",
+            "path": "l2d/c170/c170_00.skel",
+            "size": 699885
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1464,
+          3502
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1528,
+          3566
+        ],
+        "file_size": 2786244,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c172.png",
+        "rgba_pixel_sha256": "fca86fcdc570c8b85a76331fae3aee75412308a0b311818e36c647d61535e6cc",
+        "sha256": "69479753698ec51f0802867f58e7bfc3818e8f7bea90156e8de268578b000350"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (艾德米)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          642.1839161480132,
+          638.8530203302689
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "172"
+        ],
+        "character_keys": [
+          "admi"
+        ],
+        "consumers": [
+          {
+            "character_key": "admi",
+            "identity": "172:default",
+            "kind": "default",
+            "render_id": "c172",
+            "resource_id": "172"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c172",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "94bde42022e29a23fd8f44ef7e81ba8f012d2e59311d58681a51d30d3c1c478d",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c172",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1348,
+            330,
+            2748,
+            3768
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c172.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "338ef58ec9d367bd3602f43b7cade4d7784bec9da5091dedc12e140600db1249",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "7bbdb997bcf4cbe3972abd4d7e5616e47da28096",
+            "path": "l2d/c172/c172_00.atlas",
+            "size": 4096
+          },
+          {
+            "git_blob_sha1": "7decfb590afa6d5e80b81dda20e23a9ac49d803a",
+            "path": "l2d/c172/c172_00.png",
+            "size": 3747499
+          },
+          {
+            "git_blob_sha1": "54053a5be182e9f7a507b302e67b77eacbaf143d",
+            "path": "l2d/c172/c172_00.skel",
+            "size": 519753
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          2051,
+          3505
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2115,
+          3569
+        ],
+        "file_size": 3913830,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c180.png",
+        "rgba_pixel_sha256": "8bf62a67415b40d038073aa4f5208042f82f0f12216c280d8cb2393a582c52bf",
+        "sha256": "3633c2e6b17bf51d23b3908afbae617ae776e38b2e5fc2649638db5df01a2b92"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "D 机械翼/披风 (吉洛霆)",
+        "sample_category_code": "D",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          921.68475872559,
+          384.2850125583291
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "180"
+        ],
+        "character_keys": [
+          "guillotine"
+        ],
+        "consumers": [
+          {
+            "character_key": "guillotine",
+            "identity": "180:default",
+            "kind": "default",
+            "render_id": "c180",
+            "resource_id": "180"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c180",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "21cf6fb36d3b4d118ddbb688cbcb127d87a3cbccadec78c12eccd5469d749e01",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c180",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1057,
+            328,
+            3044,
+            3769
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c180.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "1435116be79a6a52b45eb13dc12a6ec875c0dc74fd2cceceeafcced2b7118723",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "4ee60514c801f8d21907070502c1f499d4a72d40",
+            "path": "l2d/c180/c180_00.atlas",
+            "size": 4927
+          },
+          {
+            "git_blob_sha1": "cb12488c0c366c750a8a6f1433ac20846e2db0de",
+            "path": "l2d/c180/c180_00.png",
+            "size": 3319471
+          },
+          {
+            "git_blob_sha1": "0e739b6fb1d9396c778d280c6aa0f72abb0f7bdc",
+            "path": "l2d/c180/c180_00.skel",
+            "size": 556309
+          },
+          {
+            "git_blob_sha1": "634dcd01a215e7f0ea79eee51434a2fafa3ed8b2",
+            "path": "l2d/c180/c180_00_2.png",
+            "size": 75706
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          2759,
+          3502
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2823,
+          3566
+        ],
+        "file_size": 4483178,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c181.png",
+        "rgba_pixel_sha256": "773044a46fb7bd4ac32d8ee25dfad26c90a3b5db6905dfc342b5fb05fc37a24f",
+        "sha256": "8a6c1567abd07c0c2bc9768f489b25d7bf489fa668e44c8ee6aab7077101b321"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "E 宽裙摆 (梅登)",
+        "sample_category_code": "E",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1521.6129338267538,
+          483.88964440125756
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "181"
+        ],
+        "character_keys": [
+          "maiden"
+        ],
+        "consumers": [
+          {
+            "character_key": "maiden",
+            "identity": "181:default",
+            "kind": "default",
+            "render_id": "c181",
+            "resource_id": "181"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c181",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "c62851cc2d57c991fb63afd0400bd83d46a179e9f5d65e93e84ba2ec64aeffc8",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c181",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            701,
+            330,
+            3396,
+            3768
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c181.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "0a4f3b9a9c9ed1601131bd8fc30d4cb44a4c75d1b3cefa2eae77ec5e1f1f044d",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "b6b0814835dd1c3fba276a3cd04b224115c087f2",
+            "path": "l2d/c181/c181_00.atlas",
+            "size": 6730
+          },
+          {
+            "git_blob_sha1": "508a82cce4d9b22d0305087e4045420a1fb21643",
+            "path": "l2d/c181/c181_00.png",
+            "size": 3173058
+          },
+          {
+            "git_blob_sha1": "36ab4d23fe3ccd85a7f66d9694b5f4fffbe31380",
+            "path": "l2d/c181/c181_00.skel",
+            "size": 996172
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1697,
+          3502
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1761,
+          3566
+        ],
+        "file_size": 3219494,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c191.png",
+        "rgba_pixel_sha256": "f2955f7d17c7ee2ada92c624d79f34e8c4bc451119e29bfde27d0bf41f27994d",
+        "sha256": "c69c7d25353a02049ebe915b17431c0235164dbc7e0ff88a93954889d5333d98"
+      },
+      "classification": "INVALID_ASSET",
+      "classification_reason": "Face Anchor 所记录的生成输入与固定 upstream skeleton/atlas 字节不一致；拒绝提升到 manifest。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "A 普通直立/紧凑 (爱丽丝)",
+        "sample_category_code": "A",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          744.4747109763516,
+          621.3574984368197
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "191"
+        ],
+        "character_keys": [
+          "alice"
+        ],
+        "consumers": [
+          {
+            "character_key": "alice",
+            "identity": "191:default",
+            "kind": "default",
+            "render_id": "c191",
+            "resource_id": "191"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c191",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "bc1aab5ade310ce5a6c3276e7417b82e34cf7bad32f8f5381921dee9aae5254d",
+        "generation_inputs_match_pinned_bundle": false,
+        "generation_record_source": "assets/data/face_anchors.json#records.c191",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1229,
+            329,
+            2862,
+            3767
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c191.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "89b38ad6df508273b33dacff090411c06ee22de9b9ca6655ff6e00f2ae29e637",
+        "source_bundle_sha256_bound_to_render": false,
+        "state": "generation_source_mismatch",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "a99850bac39435b6f1e24a0b9a4e67d107b5b1ce",
+            "path": "l2d/c191/c191_00.atlas",
+            "size": 3972
+          },
+          {
+            "git_blob_sha1": "2928fea0e96d5b16c3e22f0220568828391145ea",
+            "path": "l2d/c191/c191_00.png",
+            "size": 3317026
+          },
+          {
+            "git_blob_sha1": "ecb7a2b8e7196e250168ead777db74d620ba5687",
+            "path": "l2d/c191/c191_00.skel",
+            "size": 994119
+          },
+          {
+            "git_blob_sha1": "66110288f4f0c7f3f59e7f7cf984019e939d3bf5",
+            "path": "l2d/c191/c191_00_2.png",
+            "size": 44198
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          3466,
+          2896
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          3530,
+          2960
+        ],
+        "file_size": 4616725,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c220.png",
+        "rgba_pixel_sha256": "8ea2a7668352656a8db80230f54f5ad700fbc916d22f2ccf5405263695cbc8bd",
+        "sha256": "38c1b73a8ffdfd8ab05719c1f4879af8ff5ff167c6dc3dbac2695837f623d3a8"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "C 长枪/背包 (白雪公主)",
+        "sample_category_code": "C",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1984.3101464930824,
+          453.3488985697709
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "220"
+        ],
+        "character_keys": [
+          "snow_white"
+        ],
+        "consumers": [
+          {
+            "character_key": "snow_white",
+            "identity": "220:default",
+            "kind": "default",
+            "render_id": "c220",
+            "resource_id": "220"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c220",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "319edbcd299ec1db4b779fb9862c8c58f484378a130022fd2329e20cc5460298",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c220",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            366,
+            622,
+            3768,
+            3454
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c220.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "12b1865d278bd9e79827acc278a4886a51f1526bb4236804b3185817e6ad2cc0",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "c72eb0e01c61c9c16b14b574887c148e6c15f4d0",
+            "path": "l2d/c220/c220_00.atlas",
+            "size": 10164
+          },
+          {
+            "git_blob_sha1": "245644c190010ccfbe6d1b95bb24c5b540ee123e",
+            "path": "l2d/c220/c220_00.png",
+            "size": 2852054
+          },
+          {
+            "git_blob_sha1": "451f3585f6dd8a991bbca41d1364ceda2040ded2",
+            "path": "l2d/c220/c220_00.skel",
+            "size": 702477
+          },
+          {
+            "git_blob_sha1": "dc8df1ba50bbb67e24c7482e402d590152690dc3",
+            "path": "l2d/c220/c220_00_2.png",
+            "size": 3057893
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          3086,
+          3494
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          3150,
+          3558
+        ],
+        "file_size": 6275830,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c221.png",
+        "rgba_pixel_sha256": "28e795f100e668c359060e33c966675f528d7239cfb9bcf80fc481fa81eb226b",
+        "sha256": "af3094e019a7f3ddd8424eacdf5372e843dc2c580b33da7a435eb95ce045552f"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "B 长发 (长发公主)",
+        "sample_category_code": "B",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1524.9583129126008,
+          738.5828865816002
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "221"
+        ],
+        "character_keys": [
+          "rapunzel"
+        ],
+        "consumers": [
+          {
+            "character_key": "rapunzel",
+            "identity": "221:default",
+            "kind": "default",
+            "render_id": "c221",
+            "resource_id": "221"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c221",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "1c6afb625ca88f0391a58ff4275af70d2fbd3c713ba772a0fb0da08d7695a008",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c221",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            518,
+            339,
+            3540,
+            3769
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c221.runtime",
+        "skeleton_runtime_metadata": "4.1.20",
+        "skeleton_sha256_metadata": "621964d87a329ac0614b9c0a590df4301f2016a8d3c72107c73f03f20e307ebf",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "e4619082bfb7d610b263e3aded31bbf1fef3e354",
+            "path": "l2d/c221/c221_00.atlas",
+            "size": 8294
+          },
+          {
+            "git_blob_sha1": "934b01cef1c4a072cdddfee88a2dbb4263d12900",
+            "path": "l2d/c221/c221_00.png",
+            "size": 3456371
+          },
+          {
+            "git_blob_sha1": "66975865b95ce73248d205c06ba83d31787f9127",
+            "path": "l2d/c221/c221_00.skel",
+            "size": 757094
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          3114,
+          3505
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          3178,
+          3569
+        ],
+        "file_size": 4133383,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c222.png",
+        "rgba_pixel_sha256": "2a4ea5afa62b3d3c5b8b836ff163b3e8549641cc2dae1bbd8f4acd6756c0aab1",
+        "sha256": "cafeba225b6a355148310b6c533595fef1aa13411415a4a087e1430f8860ca0b"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "F 偏头/侧脸 (红莲)",
+        "sample_category_code": "F",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1422.1287552993072,
+          821.6832960241804
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "222"
+        ],
+        "character_keys": [
+          "scarlet"
+        ],
+        "consumers": [
+          {
+            "character_key": "scarlet",
+            "identity": "222:default",
+            "kind": "default",
+            "render_id": "c222",
+            "resource_id": "222"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c222",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "40adc75a7c827f7e9ae30219375c5d701634421c38d438ba4a18bbef33f80e1c",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c222",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            523,
+            327,
+            3573,
+            3768
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c222.runtime",
+        "skeleton_runtime_metadata": "4.1.20",
+        "skeleton_sha256_metadata": "218c5632d9b59f6f2c580c622329c63ba92d35a04eb838a62f6120b2d6d06a9d",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "b795e6fafa0d2be28131733cb65459ee35eab7f5",
+            "path": "l2d/c222/c222_00.atlas",
+            "size": 8442
+          },
+          {
+            "git_blob_sha1": "df270e0fb78e53d364c08f0ae5f1887191bc7960",
+            "path": "l2d/c222/c222_00.png",
+            "size": 3501792
+          },
+          {
+            "git_blob_sha1": "6acb769a02a6ef654bd74b09a391d6c414824e48",
+            "path": "l2d/c222/c222_00.skel",
+            "size": 521579
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1860,
+          3506
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          1924,
+          3570
+        ],
+        "file_size": 4090625,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c224.png",
+        "rgba_pixel_sha256": "04558a880ad8a2f1cc63a815a4bfedddaae5c0564c31ad68b101e8d7d5e80833",
+        "sha256": "648c45b72a5de24baf8493fedcdd0c956769cf39a131d6d407afa1a897de3f05"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "H costume variants (白雪公主：纯真年代)",
+        "sample_category_code": "H",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1196.6094314072438,
+          801.0764344254658
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "224"
+        ],
+        "character_keys": [
+          "snow_white_innocent_days"
+        ],
+        "consumers": [
+          {
+            "character_key": "snow_white_innocent_days",
+            "identity": "224:default",
+            "kind": "default",
+            "render_id": "c224",
+            "resource_id": "224"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c224",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "c38d9e4bdafb9f3101876e4a35fd5ee5a8f40ef447e129d4472070e7e9dee2b7",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c224",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1152,
+            327,
+            2948,
+            3769
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c224.runtime",
+        "skeleton_runtime_metadata": "4.1.20",
+        "skeleton_sha256_metadata": "0275f95674b858ff75a6b44df1fa209be6d9a34f8440509a80e0af1d4e1831f5",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "ef5f31556e37cab2572cb958611ecd14446b2a5e",
+            "path": "l2d/c224/c224_00.atlas",
+            "size": 8872
+          },
+          {
+            "git_blob_sha1": "ef5f704d44ce614e79bb3a8d3d284b075a96bcf6",
+            "path": "l2d/c224/c224_00.png",
+            "size": 4193356
+          },
+          {
+            "git_blob_sha1": "39d6915ae3c8446a30b0bf4c24aa30324539941f",
+            "path": "l2d/c224/c224_00.skel",
+            "size": 1648781
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          1992,
+          3502
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2056,
+          3566
+        ],
+        "file_size": 4631534,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c233.png",
+        "rgba_pixel_sha256": "ed51bfc4b3ff0e9e92981640a94449c37453b851c60c7f1ca22314fbf108fc4b",
+        "sha256": "cb8b09e8f1b45897d48e63a0a8d6e557b0f4ac4b5e41eb99a0d4937f5a6e4450"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "E 宽裙摆 (桃乐丝)",
+        "sample_category_code": "E",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          745.3542008512054,
+          377.7292974310126
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "233"
+        ],
+        "character_keys": [
+          "dorothy"
+        ],
+        "consumers": [
+          {
+            "character_key": "dorothy",
+            "identity": "233:default",
+            "kind": "default",
+            "render_id": "c233",
+            "resource_id": "233"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c233",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "848b3e67e651bf4e0011ddbedab6d6fb24d99dac2403b2546c88fd317abcbf45",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c233",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1084,
+            329,
+            3012,
+            3767
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c233.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "74a490eae63017478c5da7d2703463c65d63cfcca3ee10a8d1f2cd9ffe6ece30",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "60b0e8ebed740288e686ae5d68b4398c2edcc59e",
+            "path": "l2d/c233/c233_00.atlas",
+            "size": 14764
+          },
+          {
+            "git_blob_sha1": "6a7debdae1dedf6ee43e24877f78fff22cf4cd6b",
+            "path": "l2d/c233/c233_00.png",
+            "size": 4253166
+          },
+          {
+            "git_blob_sha1": "ad6bf93051bb879fdb833e5510c2d5b7c869f714",
+            "path": "l2d/c233/c233_00.skel",
+            "size": 1572577
+          },
+          {
+            "git_blob_sha1": "3f3e9a5a5ef60236494b57f2bb873c6c9d90ac5a",
+            "path": "l2d/c233/c233_00_2.png",
+            "size": 3182527
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          2558,
+          3581
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2622,
+          3645
+        ],
+        "file_size": 3511420,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c270.png",
+        "rgba_pixel_sha256": "99bd0494ea6a1ac0a34276550150fe33cd37f3f10e06466b5e56249dd595fb37",
+        "sha256": "275c361627d3a85c0a5f3e1a2d4103d5e4e34833bcaeffc7ce69b7100ff5b0f2"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "B 长发 (布兰儿)",
+        "sample_category_code": "B",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1358.1569218915397,
+          677.1080409892293
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "270"
+        ],
+        "character_keys": [
+          "blanc"
+        ],
+        "consumers": [
+          {
+            "character_key": "blanc",
+            "identity": "270:default",
+            "kind": "default",
+            "render_id": "c270",
+            "resource_id": "270"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c270",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "8b9530869b8b8520b566f86c0c98b2de993decd725d0360d47b6f993432bc228",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c270",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            801,
+            289,
+            3295,
+            3806
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c270.runtime",
+        "skeleton_runtime_metadata": "4.1.20",
+        "skeleton_sha256_metadata": "09027fc4f2fc75991197bac388c30c1db1dd46b544bb7158f6f0510160cdbcf0",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "cc8dcf7a6340c9f0b91ba16e7a386016555785a2",
+            "path": "l2d/c270/c270_00.atlas",
+            "size": 4773
+          },
+          {
+            "git_blob_sha1": "5cef9786c469392dde026724690e1d0d18ee8153",
+            "path": "l2d/c270/c270_00.png",
+            "size": 2989166
+          },
+          {
+            "git_blob_sha1": "cc06733bb44288f866873873447920b6e37fe282",
+            "path": "l2d/c270/c270_00.skel",
+            "size": 610012
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          2910,
+          3829
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2974,
+          3893
+        ],
+        "file_size": 4587072,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c310.png",
+        "rgba_pixel_sha256": "600c17642730adefece5df2ba420784e58492002af5327d12c3af85ff967b932",
+        "sha256": "20cd39fe61cf3d532766d21224bb858ad3b37d1a9d5f48f693b6f7ad2194dd26"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "E 宽裙摆 (艾德)",
+        "sample_category_code": "E",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1347.9773163941659,
+          632.080520013375
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "310"
+        ],
+        "character_keys": [
+          "ade"
+        ],
+        "consumers": [
+          {
+            "character_key": "ade",
+            "identity": "310:default",
+            "kind": "default",
+            "render_id": "c310",
+            "resource_id": "310"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c310",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "1e8fdd00213774c9c84019d28c808a888c1eaff78a309a7a926399bf4381c791",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c310",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            625,
+            165,
+            3471,
+            3930
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c310.runtime",
+        "skeleton_runtime_metadata": "4.1.20",
+        "skeleton_sha256_metadata": "27a9c8bb65c8787a158c808ea6266167202318556d8522243922a9c19ef84065",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "5b8dcfde953e03e1fb0876af6a6f80025bd3367d",
+            "path": "l2d/c310/c310_00.atlas",
+            "size": 6824
+          },
+          {
+            "git_blob_sha1": "3a95cb2bb996e242e521e3a21de78e7ca4c69541",
+            "path": "l2d/c310/c310_00.png",
+            "size": 3191311
+          },
+          {
+            "git_blob_sha1": "c2e6309f5336ea54f0939d8f26178a475f0fc198",
+            "path": "l2d/c310/c310_00.skel",
+            "size": 375357
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    },
+    {
+      "bundled_png": {
+        "alpha_bbox": [
+          64,
+          64,
+          2049,
+          3621
+        ],
+        "decode_valid": true,
+        "dimensions": [
+          2113,
+          3685
+        ],
+        "file_size": 4132945,
+        "manifest_declared": false,
+        "manifest_trusted": false,
+        "path": "assets/spine-rendered/c400.png",
+        "rgba_pixel_sha256": "928ff724e10e85a94c496979525a867d581ee4e62aa8e9a9a4d10aa61aa6e481",
+        "sha256": "ad5dfda63124c7820e08afd0c3ba599e90b380a51c3aed7ec3edbb9c3c898666"
+      },
+      "classification": "VERIFIED_MANIFEST_CANDIDATE",
+      "classification_reason": "canonical identity、固定 upstream bundle、生成输入/输出 SHA-256、运行时与渲染参数均核验通过；仍需按 manifest 流程显式登记，不自动提升。",
+      "evidence_usage": {
+        "centering_sample": true,
+        "sample_category": "G 强非对称姿势 (吉尔提)",
+        "sample_category_code": "G",
+        "sample_spec_present": true,
+        "scope_document": "docs/face_guided_body_centering.md",
+        "scope_status": "Opt-in Preview / Default OFF",
+        "script": "scripts/generate_centering_evidence.py"
+      },
+      "face_anchor": {
+        "anchor_kind": "eye_attachment",
+        "core_axis_reason": "no_verified_semantic_or_override_binding_for_consumer",
+        "core_axis_state": "unavailable",
+        "dimensions_match": true,
+        "identity_valid": true,
+        "png_sha256_matches": true,
+        "point": [
+          1330.0988336312703,
+          531.2135553574717
+        ],
+        "present": true,
+        "rgba_pixel_sha256_matches": true,
+        "trusted_semantic_core_axis": false
+      },
+      "identity_chain": {
+        "canonical_resource_ids": [
+          "400"
+        ],
+        "character_keys": [
+          "guilty"
+        ],
+        "consumers": [
+          {
+            "character_key": "guilty",
+            "identity": "400:default",
+            "kind": "default",
+            "render_id": "c400",
+            "resource_id": "400"
+          }
+        ],
+        "costume_consumer": false,
+        "default_character_consumer": true
+      },
+      "production_eligibility": {
+        "accepted_by_manifest_trust_boundary": false,
+        "automatic_manifest_promotion": false,
+        "unsupported_classification": false
+      },
+      "render_id": "c400",
+      "source_provenance": {
+        "animation": "idle",
+        "atlas_sha256_metadata": "8fcd38f1dfad49bd798c60f9770f69dd73d59714c7aed218952aca87ad345bc6",
+        "generation_inputs_match_pinned_bundle": true,
+        "generation_record_source": "assets/data/face_anchors.json#records.c400",
+        "generation_record_valid": true,
+        "generation_script": "scripts/batch_prepare_samples.py",
+        "limitation": "生成记录包含 skeleton/atlas 与输出 SHA-256、精确 runtime patch、animation/time 和裁切变换；没有单独记录 renderer 二进制 digest。候选判断不自动改变 manifest 信任边界。",
+        "pinned_source_bundle_complete": true,
+        "pinned_source_verification_file": "docs/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+        "pinned_upstream_commit": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+        "render_transform": {
+          "alpha_bbox": [
+            1058,
+            261,
+            3043,
+            3818
+          ],
+          "crop_padding": 64,
+          "render_padding": 0.08,
+          "render_size": [
+            4096,
+            4096
+          ]
+        },
+        "renderer_build_digest_recorded": false,
+        "runtime_metadata_source": "assets/data/face_anchors.json#records.c400.runtime",
+        "skeleton_runtime_metadata": "4.0.47",
+        "skeleton_sha256_metadata": "983f58e379b069ac47abe8811f7d3a3408c7800a12a892f010d725ea6f280ae0",
+        "source_bundle_sha256_bound_to_render": true,
+        "state": "verified_against_pinned_bundle",
+        "time": 0
+      },
+      "upstream": {
+        "complete_root_bundle": true,
+        "l2d_directory_present": true,
+        "ref": "main",
+        "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+        "root_files": [
+          {
+            "git_blob_sha1": "dbe2523c0e98e299043ff3c9e2c93ed7a9a254ff",
+            "path": "l2d/c400/c400_00.atlas",
+            "size": 4219
+          },
+          {
+            "git_blob_sha1": "18213a03135c9486f660cb96a663574fe22f52a0",
+            "path": "l2d/c400/c400_00.png",
+            "size": 2867706
+          },
+          {
+            "git_blob_sha1": "d69beb1c1b3c8ca8d9d6f43f547e7fb9aa490ccf",
+            "path": "l2d/c400/c400_00.skel",
+            "size": 286331
+          }
+        ],
+        "snapshot_commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "scope": {
+    "automatic_asset_download_or_promotion": false,
+    "classification_is_production_authorization": false,
+    "manifest_trust_boundary_changed": false
+  },
+  "source": {
+    "commit_sha": "6e6ee77ff76ec6f9003953fbcdb3768248cbda04",
+    "ref": "main",
+    "repository": "https://github.com/Nikke-db/Nikke-db.github.io",
+    "snapshot_schema_version": 2
+  },
+  "summary": {
+    "classification_counts": {
+      "HISTORICAL_OR_TEST_ONLY": 0,
+      "INVALID_ASSET": 1,
+      "STALE_OR_ORPHAN_FILE": 0,
+      "VALID_VARIANT_NEEDS_REVIEW": 0,
+      "VERIFIED_MANIFEST_CANDIDATE": 27
+    },
+    "undeclared_png_count": 28
+  }
+}
