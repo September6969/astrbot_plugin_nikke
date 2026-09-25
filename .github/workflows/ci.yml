@@ -19,6 +19,41 @@ jobs:
             --file runtime/spine_worker/Dockerfile \
             --tag nikke-spine-worker:ci \
             runtime/spine_worker
+      - name: Build pinned official Spine 4.1 worker for portrait fallback verification
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: |
+          docker build \
+            --file runtime/spine_worker/Dockerfile.4.1 \
+            --tag nikke-spine-worker:ci-4.1 \
+            runtime/spine_worker
+      - name: Set up Python for official-worker portrait verification
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install white-card verification dependencies
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: |
+          python -m pip install --upgrade "pip==26.0.1"
+          pip install -r requirements.txt pytest pytest-asyncio "astrbot==4.24.0" playwright
+          python -m playwright install --with-deps chromium
+      - name: Verify bundled, runtime-rendered, and cached portraits with official workers
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          PYTHONPATH: ${{ github.workspace }}/..
+          NIKKE_SPINE_E2E_WORKER_40_IMAGE: nikke-spine-worker:ci
+          NIKKE_SPINE_E2E_WORKER_41_IMAGE: nikke-spine-worker:ci-4.1
+          NIKKE_SPINE_E2E_CACHE_ROOT: ${{ runner.temp }}/runtime-portrait-cache
+          NIKKE_SPINE_E2E_EVIDENCE_DIR: ${{ runner.temp }}/runtime-portrait-evidence
+        run: |
+          pytest -v tests/test_runtime_character_portrait_official.py
+      - name: Upload official-worker portrait evidence
+        if: always() && (github.event_name == 'pull_request' || github.event_name == 'push')
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-runtime-character-portraits
+          path: ${{ runner.temp }}/runtime-portrait-evidence/
+          if-no-files-found: warn
       - name: Render public default and legacy multi-skin Spine bundles
         if: github.event_name == 'workflow_dispatch'
         run: |

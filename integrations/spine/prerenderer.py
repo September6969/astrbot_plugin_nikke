@@ -13,15 +13,16 @@ from __future__ import annotations
 
 import logging
 import math
+import hashlib
 import re
 import queue
 import threading
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Callable, Mapping, Protocol, Sequence
 
-from urllib.parse import urlparse
+from urllib.parse import quote, unquote, urljoin, urlparse
 
 import httpx
 
@@ -89,7 +90,7 @@ class SpineBundleFetcher:
     """下载并缓存已允许的 Nikke-DB Spine bundle，不携带账号上下文。"""
 
     ALLOWED_HOST = "raw.githubusercontent.com"
-    ALLOWED_PREFIX = "/Nikke-db/Nikke-db.github.io/main/l2d/"
+    ALLOWED_REPOSITORY_PATH = "/Nikke-db/Nikke-db.github.io/"
     MAX_SKELETON_BYTES = 16 * 1024 * 1024
     MAX_ATLAS_BYTES = 4 * 1024 * 1024
     MAX_TEXTURE_BYTES = 12 * 1024 * 1024
@@ -104,10 +105,19 @@ class SpineBundleFetcher:
         if not isinstance(url, str):
             raise SpineRenderError("Spine bundle URL 类型无效")
         parsed = urlparse(url)
+        decoded_path = unquote(parsed.path)
+        path_parts = decoded_path.lstrip("/").split("/")
+        valid_revision = len(path_parts) >= 5 and (
+            path_parts[2] == "main" or re.fullmatch(r"[0-9a-f]{40}", path_parts[2]) is not None
+        )
         if (
             parsed.scheme != "https"
             or parsed.hostname != cls.ALLOWED_HOST
-            or not parsed.path.startswith(cls.ALLOWED_PREFIX)
+            or not decoded_path.startswith(cls.ALLOWED_REPOSITORY_PATH)
+            or not valid_revision
+            or path_parts[:2] != ["Nikke-db", "Nikke-db.github.io"]
+            or path_parts[3] != "l2d"
+            or any(part in {"", ".", ".."} for part in path_parts)
             or parsed.username
             or parsed.password
             or parsed.query
@@ -128,7 +138,7 @@ class SpineBundleFetcher:
             return cls.MAX_SKELETON_BYTES
         if name == "atlas":
             return cls.MAX_ATLAS_BYTES
-        if name == "png":
+        if name in {"png", "texture"}:
             return cls.MAX_TEXTURE_BYTES
         raise SpineRenderError(f"Spine bundle 文件类型不支持: {name}")
 
@@ -148,119 +158,137 @@ class SpineBundleFetcher:
         except OSError:
             return False
 
+    @staticmethod
+    def _safe_page_path(value: str) -> PurePosixPath:
+        page = PurePosixPath(value)
+        if (
+            not value
+            or "\\" in value
+            or ":" in value
+            or page.is_absolute()
+            or any(part in {"", ".", ".."} for part in page.parts)
+            or page.suffix.lower() not in {".png", ".webp"}
+        ):
+            raise SpineRenderError("Spine atlas 纹理页路径无效")
+        return page
+
+    @staticmethod
+    def _git_blob_sha(data: bytes) -> str:
+        return hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
+
+    @classmethod
+    def _verify_blob(cls, url: str, content: bytes, expected_hashes: Mapping[str, str] | None) -> None:
+        if expected_hashes is None:
+            return
+        expected = expected_hashes.get(url)
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{40}", expected):
+            raise SpineRenderError("Spine bundle 缺少上游内容身份")
+        if cls._git_blob_sha(content) != expected:
+            raise SpineRenderError("Spine bundle 上游内容校验失败")
+
+    @staticmethod
+    def _atlas_texture_pages(atlas: Path) -> list[str]:
+        try:
+            text = atlas.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError) as exc:
+            raise SpineRenderError("Spine atlas 无法读取") from exc
+        pages: list[str] = []
+        for block in re.split(r"\n\s*\n", text.strip()):
+            lines = [line.strip().lstrip("\ufeff") for line in block.splitlines() if line.strip()]
+            if lines and lines[0].lower().endswith((".png", ".webp")):
+                page = SpineBundleFetcher._safe_page_path(lines[0])
+                if page.as_posix() not in pages:
+                    pages.append(page.as_posix())
+        if not pages or len(pages) > 32:
+            raise SpineRenderError("Spine atlas 纹理页数量无效")
+        return pages
+
+    @staticmethod
+    def _valid_texture(path: Path, limit: int) -> bool:
+        try:
+            if not path.is_file() or path.stat().st_size <= 0 or path.stat().st_size > limit:
+                return False
+            with Image.open(path) as image:
+                if image.width <= 0 or image.height <= 0 or image.width * image.height > 20_000_000:
+                    return False
+                image.verify()
+            return True
+        except (OSError, ValueError, Image.DecompressionBombError):
+            return False
+
     def fetch(
         self,
         urls: Mapping[str, str],
         cache_key: str,
         *,
         budget_seconds: float | None = None,
+        expected_blob_hashes: Mapping[str, str] | None = None,
     ) -> SpineBundle:
         started = time.monotonic()
         targets: dict[str, Path] = {}
         total_bytes = 0
         stream_timeout = max(self.timeout_seconds, budget_seconds) if budget_seconds is not None else self.timeout_seconds
 
-        for name in ("skel", "atlas", "png"):
-            url = self._validate_url(urls.get(name))
-            target = self._target(cache_key, name, url)
-            suffix = Path(urlparse(url).path).suffix.lower()
-            if not self._valid_cached(target, self._limit_for(name)):
-                # 优先复用同 cache_dir 下已存在的同 identity 候选目录，避免重复网络下载
-                candidates = sorted(self.cache_dir.glob(f"{cache_key}*"))
-                for alt_dir in candidates:
-                    alt_target = alt_dir / f"{name}{suffix}"
-                    if self._valid_cached(alt_target, self._limit_for(name)):
-                        target = alt_target
-                        break
-            targets[name] = target
-            if self._valid_cached(target, self._limit_for(name)):
-                total_bytes += target.stat().st_size
-                continue
+        def fetch_file(url: str, target: Path, limit: int) -> bytes:
+            nonlocal total_bytes
+            if self._valid_cached(target, limit):
+                cached_content = target.read_bytes()
+                try:
+                    self._verify_blob(url, cached_content, expected_blob_hashes)
+                except SpineRenderError:
+                    # 只覆盖本次精确 source key 下的损坏 bundle 缓存。
+                    pass
+                else:
+                    total_bytes += len(cached_content)
+                    return cached_content
             target.parent.mkdir(parents=True, exist_ok=True)
-            limit = self._limit_for(name)
-            content = bytearray()
+            response_content = bytearray()
             try:
                 with httpx.stream("GET", url, timeout=stream_timeout, follow_redirects=False) as response:
                     response.raise_for_status()
                     for chunk in response.iter_bytes():
-                        content.extend(chunk)
-                        if len(content) > limit or total_bytes + len(content) > self.MAX_TOTAL_BYTES:
+                        response_content.extend(chunk)
+                        if len(response_content) > limit or total_bytes + len(response_content) > self.MAX_TOTAL_BYTES:
                             raise SpineRenderError("Spine bundle 下载超过大小预算")
                         if budget_seconds is not None and time.monotonic() - started > budget_seconds:
                             raise SpineRenderError("Spine bundle 下载超过总预算")
             except (httpx.HTTPError, OSError) as exc:
                 raise SpineRenderError(f"Spine bundle 下载失败: {type(exc).__name__}") from exc
+            data = bytes(response_content)
+            self._verify_blob(url, data, expected_blob_hashes)
             temporary = target.with_name(f".{target.name}.{threading.get_ident()}.tmp")
             try:
-                temporary.write_bytes(bytes(content))
+                temporary.write_bytes(data)
                 temporary.replace(target)
             finally:
                 temporary.unlink(missing_ok=True)
-            total_bytes += len(content)
+            total_bytes += len(data)
+            return data
 
-        # 确保 atlas 声明的所有纹理页名称在 bundle 目录内可直接解析（官方 Spine runtime 按文件名查找）
-        declared_pages: list[str] = []
-        try:
-            atlas_text = targets["atlas"].read_text(encoding="utf-8-sig", errors="replace")
-            for block in re.split(r"\n\s*\n", atlas_text.strip()):
-                lines = [line.strip().lstrip("\ufeff") for line in block.splitlines() if line.strip()]
-                if (
-                    lines
-                    and lines[0].lower().endswith((".png", ".webp"))
-                    and not any(sep in lines[0] for sep in ("/", "\\", ":"))
-                    and not lines[0].startswith(".")
-                ):
-                    declared_pages.append(lines[0])
-        except OSError:
-            pass
+        for name in ("skel", "atlas"):
+            url = self._validate_url(urls.get(name))
+            target = self._target(cache_key, name, url)
+            targets[name] = target
+            fetch_file(url, target, self._limit_for(name))
 
+        declared_pages = self._atlas_texture_pages(targets["atlas"])
+        texture_files: list[Path] = []
+        bundle_root = (self.cache_dir / self._safe_key(cache_key)).resolve()
         for page_name in declared_pages:
-            declared_texture = targets["atlas"].parent / page_name
-            if self._valid_cached(declared_texture, self.MAX_TEXTURE_BYTES):
-                continue
-            if targets["png"].is_file():
-                # 若主 png 文件名匹配首页，直接链接
-                if not declared_texture.is_file() or declared_texture.stat().st_size == 0:
-                    try:
-                        declared_texture.hardlink_to(targets["png"])
-                        continue
-                    except (OSError, AttributeError):
-                        try:
-                            declared_texture.write_bytes(targets["png"].read_bytes())
-                            continue
-                        except OSError:
-                            pass
-            # 尝试从同目录或 URL 清单下载额外声明的纹理页
+            page = self._safe_page_path(page_name)
+            texture_path = targets["atlas"].parent.joinpath(*page.parts)
+            if not texture_path.resolve().is_relative_to(bundle_root):
+                raise SpineRenderError("Spine atlas 纹理页越界")
             page_url = urls.get(page_name)
             if not page_url:
-                primary_png_url = str(urls.get("png", ""))
-                if "/" in primary_png_url:
-                    page_url = f"{primary_png_url.rsplit('/', 1)[0]}/{page_name}"
-            if page_url:
-                try:
-                    val_url = self._validate_url(page_url)
-                    content = bytearray()
-                    with httpx.stream("GET", val_url, timeout=stream_timeout, follow_redirects=False) as resp:
-                        resp.raise_for_status()
-                        for chunk in resp.iter_bytes():
-                            content.extend(chunk)
-                            if len(content) > self.MAX_TEXTURE_BYTES or total_bytes + len(content) > self.MAX_TOTAL_BYTES:
-                                raise SpineRenderError("Spine bundle 下载超过大小预算")
-                            if budget_seconds is not None and time.monotonic() - started > budget_seconds:
-                                raise SpineRenderError("Spine bundle 下载超过总预算")
-                    tmp = declared_texture.with_name(f".{declared_texture.name}.{threading.get_ident()}.tmp")
-                    try:
-                        tmp.write_bytes(bytes(content))
-                        tmp.replace(declared_texture)
-                        total_bytes += len(content)
-                    finally:
-                        tmp.unlink(missing_ok=True)
-                except (httpx.HTTPError, OSError, SpineRenderError):
-                    pass
-
-        texture_files = [targets["atlas"].parent / p for p in declared_pages if (targets["atlas"].parent / p).is_file()]
-        if not texture_files and targets["png"].is_file():
-            texture_files = [targets["png"]]
+                atlas_url = self._validate_url(urls.get("atlas"))
+                page_url = urljoin(atlas_url, quote(page_name, safe="/"))
+            page_url = self._validate_url(page_url)
+            if not self._valid_texture(texture_path, self.MAX_TEXTURE_BYTES):
+                fetch_file(page_url, texture_path, self.MAX_TEXTURE_BYTES)
+            if not self._valid_texture(texture_path, self.MAX_TEXTURE_BYTES):
+                raise SpineRenderError("Spine atlas 声明的纹理页无效")
+            texture_files.append(texture_path)
         return SpineBundle(targets["skel"], targets["atlas"], tuple(texture_files))
 
 
@@ -551,6 +579,11 @@ class SpinePreRenderer:
             return None
         return self._runtimes.get(major_minor)
 
+    @property
+    def supported_runtime_versions(self) -> tuple[str, ...]:
+        """返回已明确注入的 runtime 版本，供内容缓存键隔离使用。"""
+        return tuple(sorted(self._runtimes))
+
     def start(self) -> None:
         """启动受控后台队列；不会同步等待或补发旧卡。"""
         self.queue.start(self.handle_job)
@@ -608,6 +641,75 @@ class SpinePreRenderer:
                 image.load()
                 return image.convert("RGBA")
         except (OSError, ValueError, Image.DecompressionBombError):
+            return None
+
+    def render_remote_portrait(
+        self,
+        *,
+        asset_id: str,
+        source_version: str,
+        urls: Mapping[str, str],
+        cache_key: str,
+        blob_hashes: Mapping[str, str] | None = None,
+        runtime_version: str | float | None = None,
+        animation: str = "idle",
+        skin: str | None = None,
+        budget_seconds: float | None = None,
+    ) -> Image.Image | None:
+        """按固定上游版本读取/生成 portrait，并写入现有本地图片缓存。"""
+        cached = self.cached_portrait(cache_key)
+        if cached is not None:
+            return cached
+        if not self._runtimes:
+            return None
+        started = time.monotonic()
+
+        def remaining_budget() -> float | None:
+            if budget_seconds is None:
+                return None
+            return max(0.0, budget_seconds - (time.monotonic() - started))
+
+        try:
+            safe_asset_id = re.fullmatch(r"c[0-9]+(?:_[0-9]+)?", asset_id)
+            if safe_asset_id is None or not re.fullmatch(r"[0-9a-f]{40,64}", source_version):
+                raise SpineRenderError("Spine portrait source identity 无效")
+            bundle_key = f"runtime-{asset_id}-{source_version[:32]}"
+            bundle = self.fetcher.fetch(
+                urls,
+                bundle_key,
+                budget_seconds=remaining_budget(),
+                expected_blob_hashes=blob_hashes,
+            )
+            actual_version = runtime_version
+            if actual_version is None:
+                from .runtime import detect_spine_version
+
+                actual_version = detect_spine_version(bundle.skeleton)
+            expected_version = self._major_minor(actual_version)
+            if expected_version is None or not self.is_available(expected_version):
+                logger.info("Spine portrait unavailable: render_id=%s result=runtime_unavailable", asset_id)
+                return None
+            remaining = remaining_budget()
+            if remaining is not None and remaining <= 0:
+                raise SpineRenderError("Spine portrait 超过总预算")
+            rendered = self.render_full_body(
+                bundle,
+                expected_version,
+                animation=animation,
+                skin=skin,
+            )
+            if rendered is None:
+                return None
+            output_path = self.prerender_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
+            temporary = output_path.with_name(f".{output_path.name}.{threading.get_ident()}.tmp")
+            try:
+                rendered.save(temporary, format="PNG")
+                temporary.replace(output_path)
+            finally:
+                temporary.unlink(missing_ok=True)
+            return rendered.copy()
+        except (OSError, ValueError, TypeError, SpineRenderError) as exc:
+            logger.info("Spine portrait unavailable: render_id=%s result=render_failed (%s)", asset_id, type(exc).__name__)
             return None
 
     def enqueue(self, job: SpineJob) -> bool:

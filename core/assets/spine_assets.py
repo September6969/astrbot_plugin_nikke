@@ -9,7 +9,6 @@ from typing import Any, Callable
 from PIL import Image
 
 from ...integrations.spine.idle_resolver import IdleAnimationResolver
-from ...integrations.spine.prerenderer import SpineBundleFetcher
 from .environment import AssetEnvironment
 from .image_codec import AssetImageCodec
 from .models import AssetResult
@@ -22,15 +21,26 @@ class SpineAssetService:
     def __init__(self, environment: AssetEnvironment) -> None:
         self.env = environment
 
-    def cache_key(self, char_id: str, costume_id, runtime_version, animation: str | None = None) -> str:
-        if animation is None:
-            animation = IdleAnimationResolver.resolve_for_asset(char_id) or "idle"
+    def cache_key(
+        self,
+        render_id: str,
+        asset_id: str,
+        costume_id,
+        source_version: str,
+        runtime_version: str | float | None,
+        animation: str,
+    ) -> str:
+        """把资源 tree、runtime 和视觉变体绑定到同一缓存身份。"""
+        renderer = self.env.spine_renderer
+        supported = getattr(renderer, "supported_runtime_versions", ())
+        runtime_identity = runtime_version or "auto-" + "-".join(supported or ("none",))
+        safe_render_id = render_id.replace("@", "_skin_")
         return self.env.nikke_db.compute_cache_key(
-            char_id,
+            safe_render_id,
             costume_id,
-            source_version=str(runtime_version),
-            runtime_version=str(runtime_version),
-            renderer_version=self.env.spine_renderer.RENDERER_VERSION,
+            source_version=source_version,
+            runtime_version=runtime_identity,
+            renderer_version=renderer.RENDERER_VERSION,
             animation=animation,
         )
 
@@ -48,34 +58,76 @@ class SpineAssetService:
             if image is not None:
                 return image
             logger.warning("STATIC_SPINE_ASSET_INVALID: %s (costume: %s)", char_id, costume_id)
-            return None
-
-        # 未声明的打包 PNG 和旧式裸缓存都不构成资源身份或完整性证据。
-        # 动态预渲染仍只允许通过下方包含身份/版本的 canonical cache key 命中。
-
-        runtime_version = self.env.nikke_db.resolve_spine_version(char_id, allow_remote=False)
-        if runtime_version is not None and runtime_version != "SPINE_VERSION_UNKNOWN":
-            animation = IdleAnimationResolver.resolve_for_asset(char_id)
-            if animation:
-                cache_key = self.cache_key(char_id, costume_id, runtime_version, animation=animation)
-                try:
-                    cached_path = self.env.spine_renderer.prerender_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
-                except (AttributeError, OSError, ValueError):
-                    cached_path = None
-                if cached_path is not None:
-                    cached = AssetImageCodec.load_file(cached_path)
-                    if cached is not None:
-                        return cached
         return None
 
     def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
-        """仅读静态或版本化本地 Spine 资源；不在查询热路径启动网络/Worker。"""
-        char_id = self.env.nikke_db.resolve_render_id(resource_id, costume_id) if resource_id else "missing"
-        if char_id != "missing":
-            image = self.get_static_portrait(char_id, costume_id)
-            if image is not None:
-                return image
-            logger.warning("STATIC_SPINE_ASSET_MISSING: %s (costume: %s)", char_id, costume_id)
+        """先用已验证 bundled 图；否则按固定 upstream bundle 生成本地缓存。"""
+        del name_code
+        render_id = self.env.nikke_db.resolve_render_id(resource_id, costume_id) if resource_id else "missing"
+        if render_id != "missing":
+            bundled = self.get_static_portrait(render_id, costume_id)
+            if bundled is not None:
+                return bundled
+
+            asset_id, separator, skin = render_id.partition("@")
+            runtime_versions = getattr(self.env.spine_renderer, "supported_runtime_versions", ())
+            source = self.env.nikke_db.resolve_spine_bundle_source(
+                asset_id,
+                allow_remote=self.env.remote and bool(runtime_versions),
+            )
+            if source is not None:
+                animation = IdleAnimationResolver.resolve_for_asset(asset_id) or "idle"
+                cache_key = self.cache_key(
+                    render_id,
+                    asset_id,
+                    costume_id,
+                    source.source_version,
+                    source.runtime_version,
+                    animation,
+                )
+                lock = self.env.nikke_db.get_character_lock(cache_key)
+                with lock:
+                    cached = self.env.spine_renderer.cached_portrait(cache_key)
+                    if cached is not None:
+                        logger.info(
+                            "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=cache_hit",
+                            render_id,
+                        )
+                        return cached
+                    if self.env.remote:
+                        rendered = self.env.spine_renderer.render_remote_portrait(
+                            asset_id=asset_id,
+                            source_version=source.source_version,
+                            urls=source.urls,
+                            blob_hashes=source.blob_hashes,
+                            cache_key=cache_key,
+                            runtime_version=source.runtime_version,
+                            animation=animation,
+                            skin=skin if separator else None,
+                            budget_seconds=self.env.spine_budget_seconds,
+                        )
+                        if rendered is not None:
+                            logger.info(
+                                "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=rendered",
+                                render_id,
+                            )
+                            return rendered
+                        logger.info(
+                            "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=render_failed",
+                            render_id,
+                        )
+                    else:
+                        logger.info(
+                            "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=cache_miss_offline",
+                            render_id,
+                        )
+            else:
+                logger.info(
+                    "PORTRAIT_RESOLUTION: render_id=%s portrait_source=upstream result=bundle_unavailable",
+                    render_id,
+                )
+        else:
+            logger.info("PORTRAIT_RESOLUTION: render_id=missing portrait_source=none result=identity_unavailable")
         return self.env.fallback("portrait")
 
 class CharacterAssetService:

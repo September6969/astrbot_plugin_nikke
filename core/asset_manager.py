@@ -176,9 +176,6 @@ class AssetManager:
     def refresh_spine_manifest(self) -> None:
         self.spine_manifest.refresh()
 
-    def _spine_cache_key(self, char_id, costume_id, runtime_version, animation: str | None = None) -> str:
-        return self._spine.cache_key(char_id, costume_id, runtime_version, animation)
-
     def get_character_portrait(self, name_code, resource_id, costume_id=None):
         return self._characters.get_character_portrait(name_code, resource_id, costume_id)
 
@@ -266,7 +263,7 @@ class AssetManager:
     def _submit_prefetch(self, func):
         return self._prefetcher.submit(func)
 
-    def resolve_character_assets(self, data: CharacterCardData, timeout: float = 6.0) -> CharacterCardAssets:
+    def resolve_character_assets(self, data: CharacterCardData, timeout: float | None = None) -> CharacterCardAssets:
         return self._prefetcher.resolve_character_assets(data, timeout)
 
     def close(self) -> None:
