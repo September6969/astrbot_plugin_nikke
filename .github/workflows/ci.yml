@@ -20,34 +20,35 @@ jobs:
             --tag nikke-spine-worker:ci \
             runtime/spine_worker
       - name: Render public default and legacy multi-skin Spine bundles
+        if: github.event_name == 'workflow_dispatch'
         run: |
           set -eu
           mkdir -p .ci-spine-assets/c010 .ci-spine-assets/c010_01 .ci-spine-assets/c010_02
           for file in c010_02_00.skel c010_02_00.atlas c010_01.png; do
             curl --fail --silent --show-error --location \
-              "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_02/$file" \
+              "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010_02/$file" \
               --output ".ci-spine-assets/c010_02/$file"
           done
           curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.skel \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010/c010_00.skel \
             --output .ci-spine-assets/c010/c010_00.skel
           curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.atlas \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010/c010_00.atlas \
             --output .ci-spine-assets/c010/c010_00.atlas
           curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010/c010_00.png \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010/c010_00.png \
             --output .ci-spine-assets/c010/c010_00.png
           curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.skel \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010_01/c010_01_00.skel \
             --output .ci-spine-assets/c010_01/c010_01_00.skel
           curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_01_00.atlas \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010_01/c010_01_00.atlas \
             --output .ci-spine-assets/c010_01/c010_01_00.atlas
           curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_00.png \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010_01/c010_00.png \
             --output .ci-spine-assets/c010_01/c010_00.png
           curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d/c010_01/c010_00_2.png \
+            https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/6e6ee77ff76ec6f9003953fbcdb3768248cbda04/l2d/c010_01/c010_00_2.png \
             --output .ci-spine-assets/c010_01/c010_00_2.png
           ls -l .ci-spine-assets/c010 .ci-spine-assets/c010_01
           timeout --signal=TERM --kill-after=10s 120s docker run --rm \
@@ -108,7 +109,7 @@ jobs:
           assert not empty, f"透明空图: {empty}"
           PY
       - name: Upload Spine render previews
-        if: always()
+        if: always() && github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: spine-render-smoke
@@ -169,3 +170,109 @@ jobs:
       - name: Run pytest test suite
         run: |
           pytest -v
+
+  spine-phase3a-batch-review:
+    name: Spine Phase 3A candidate dry-run (manual only)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install local renderer dependencies
+        run: |
+          python -m pip install --upgrade "pip==26.0.1"
+          pip install -r requirements.txt "astrbot==4.24.0" playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Build pinned Spine 4.0 and 4.1 workers
+        run: |
+          docker build --file runtime/spine_worker/Dockerfile \
+            --tag nikke-spine-worker:phase3a-4.0 runtime/spine_worker
+          docker build --file runtime/spine_worker/Dockerfile.4.1 \
+            --tag nikke-spine-worker:phase3a-4.1 runtime/spine_worker
+
+      - name: Generate offline calibration, deterministic batch, and sparse bundles
+        env:
+          PHASE3A_ROOT: ${{ runner.temp }}/nikke-spine-phase3a
+        run: |
+          set -euo pipefail
+          mkdir -p "$PHASE3A_ROOT"
+          python scripts/spine_batch_validation.py \
+            --repo-root . \
+            --output "$PHASE3A_ROOT/verified-baseline.json"
+          python scripts/audit_spine_resource_coverage.py \
+            --repo-root . \
+            --upstream-snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json \
+            --output "$PHASE3A_ROOT/coverage-summary.json"
+          python scripts/build_spine_candidate_batch.py \
+            --coverage-summary "$PHASE3A_ROOT/coverage-summary.json" \
+            --output "$PHASE3A_ROOT/batch-001.json" \
+            --batch-id batch-001 \
+            --batch-size 20
+          python scripts/fetch_spine_candidate_bundles.py \
+            --batch "$PHASE3A_ROOT/batch-001.json" \
+            --snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json \
+            --checkout "$PHASE3A_ROOT/nikke-db-object-cache" \
+            --output "$PHASE3A_ROOT/bundle"
+
+      - name: Render candidate portraits with matching official workers
+        env:
+          PHASE3A_ROOT: ${{ runner.temp }}/nikke-spine-phase3a
+          NIKKE_SPINE_WORKER_40: docker://nikke-spine-worker:phase3a-4.0
+          NIKKE_SPINE_WORKER_41: docker://nikke-spine-worker:phase3a-4.1
+        run: |
+          set -euo pipefail
+          mapfile -t ASSETS < <(python -c 'import json,sys; print("\n".join(json.load(open(sys.argv[1],encoding="utf-8"))["render_ids"]))' "$PHASE3A_ROOT/batch-001.json")
+          python scripts/sync_spine_assets.py \
+            --assets "${ASSETS[@]}" \
+            --nikke-db-root "$PHASE3A_ROOT/bundle" \
+            --out-dir "$PHASE3A_ROOT/portraits" \
+            --manifest-path "$PHASE3A_ROOT/render-manifest.json" \
+            --coverage-report "$PHASE3A_ROOT/render-coverage.json" \
+            --worker-40 "$NIKKE_SPINE_WORKER_40" \
+            --worker-41 "$NIKKE_SPINE_WORKER_41"
+
+      - name: Build review queue and current white-card contact sheet
+        if: always()
+        env:
+          PHASE3A_ROOT: ${{ runner.temp }}/nikke-spine-phase3a
+        run: |
+          set -euo pipefail
+          python scripts/spine_batch_review.py \
+            --batch "$PHASE3A_ROOT/batch-001.json" \
+            --fetch-provenance "$PHASE3A_ROOT/bundle/fetch-provenance.json" \
+            --render-manifest "$PHASE3A_ROOT/render-manifest.json" \
+            --bundle-root "$PHASE3A_ROOT/bundle" \
+            --render-root "$PHASE3A_ROOT/portraits" \
+            --baseline "$PHASE3A_ROOT/verified-baseline.json" \
+            --output-dir "$PHASE3A_ROOT/review"
+          python scripts/render_spine_candidate_cards.py \
+            --batch "$PHASE3A_ROOT/batch-001.json" \
+            --fetch-provenance "$PHASE3A_ROOT/bundle/fetch-provenance.json" \
+            --bundle-root "$PHASE3A_ROOT/bundle" \
+            --portrait-root "$PHASE3A_ROOT/portraits" \
+            --output-dir "$PHASE3A_ROOT/white-card-preview"
+
+      - name: Upload Phase 3A review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spine-phase3a-batch-review
+          path: |
+            ${{ runner.temp }}/nikke-spine-phase3a/verified-baseline.json
+            ${{ runner.temp }}/nikke-spine-phase3a/coverage-summary.json
+            ${{ runner.temp }}/nikke-spine-phase3a/batch-001.json
+            ${{ runner.temp }}/nikke-spine-phase3a/bundle/fetch-provenance.json
+            ${{ runner.temp }}/nikke-spine-phase3a/render-manifest.json
+            ${{ runner.temp }}/nikke-spine-phase3a/render-coverage.json
+            ${{ runner.temp }}/nikke-spine-phase3a/review/review-queue.json
+            ${{ runner.temp }}/nikke-spine-phase3a/review/review-queue.md
+            ${{ runner.temp }}/nikke-spine-phase3a/white-card-preview/white-card-diagnostic.json
+            ${{ runner.temp }}/nikke-spine-phase3a/white-card-preview/white-card-contact-sheet.png
+          if-no-files-found: warn
