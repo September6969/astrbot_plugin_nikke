@@ -19,6 +19,7 @@ from PIL import Image
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProvider
+from astrbot_plugin_nikke.features.character.face_anchor import framing
 from astrbot_plugin_nikke.integrations.spine.prerenderer import SpinePreRenderer
 from astrbot_plugin_nikke.integrations.spine.runtime import detect_spine_version
 from astrbot_plugin_nikke.integrations.spine.worker_caller import SpineWorkerConfig, SpineWorkerRuntime
@@ -138,6 +139,41 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                 )
                 self._write_evidence(evidence_root, evidence)
 
+                for render_id, resource_id in (("c401", "401"), ("c581", "581")):
+                    with self.subTest(render_id=render_id):
+                        self.assertTrue(manager.spine_manifest.is_declared(render_id))
+                        before_fetch = fetch_calls
+                        before_calls = sum(worker.calls for worker in worker_runtimes.values())
+                        portrait = manager.get_character_portrait(render_id, resource_id, 0)
+                        self.assertEqual(fetch_calls, before_fetch)
+                        self.assertEqual(
+                            sum(worker.calls for worker in worker_runtimes.values()),
+                            before_calls,
+                            "verified bundled portrait 不应触发 runtime worker",
+                        )
+                        card_evidence = self._render_white_card(
+                            render_id=render_id,
+                            resource_id=resource_id,
+                            portrait=portrait,
+                            manager=manager,
+                            evidence_root=evidence_root,
+                        )
+                        evidence["cards"].append(
+                            {
+                                "render_id": render_id,
+                                "resource_id": resource_id,
+                                "first_request": "bundled_verified_portrait",
+                                "second_request": "not_needed",
+                                "worker_invocations": 0,
+                                "portrait_source": "assets/spine_manifest.json",
+                                "portrait_rgba_sha256": hashlib.sha256(
+                                    portrait.convert("RGBA").tobytes()
+                                ).hexdigest(),
+                                "white_card": card_evidence,
+                            }
+                        )
+                        self._write_evidence(evidence_root, evidence)
+
                 for render_id, resource_id in (("c014", "14"), ("c020", "20")):
                     with self.subTest(render_id=render_id):
                         self.assertEqual(manager.nikke_db.resolve_render_id(resource_id), render_id)
@@ -205,6 +241,38 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                             }
                         )
                         self._write_evidence(evidence_root, evidence)
+
+                from astrbot_plugin_nikke.scripts.spine_batch_review import create_contact_sheet
+
+                contact = create_contact_sheet(
+                    [
+                        {
+                            "render_id": row["render_id"],
+                            "path": evidence_root / row["white_card"]["path"],
+                        }
+                        for row in evidence["cards"]
+                    ],
+                    evidence_root / "face-safe-framing-contact-sheet.png",
+                    columns=5,
+                )
+                self.assertEqual(
+                    contact["render_ids"],
+                    ["c014", "c018", "c020", "c401", "c581"],
+                )
+                expected_guard_sources = {
+                    "c014": "robust_alpha_top",
+                    "c018": "face_safe_top",
+                    "c020": "robust_alpha_top",
+                    "c401": "core_head_top",
+                    "c581": "core_head_top",
+                }
+                actual_guard_sources = {
+                    row["render_id"]: row["white_card"]["framing"]["vertical_guard_source"]
+                    for row in evidence["cards"]
+                }
+                self.assertEqual(actual_guard_sources, expected_guard_sources)
+                evidence["contact_sheet"] = contact
+                self._write_evidence(evidence_root, evidence)
             finally:
                 manager.close()
 
@@ -223,8 +291,60 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
         payload = CharacterT2IPayloadBuilder(
             T2IAssetResolver(), identity_resolver=manager.nikke_db
         ).build(card, assets)
+        frame = framing(
+            card,
+            portrait,
+            body_centering=False,
+            summary_count=4,
+            identity_resolver=manager.nikke_db,
+        )
+        guard = {
+            key: frame[key]
+            for key in (
+                "vertical_guard_source",
+                "safe_top",
+                "guard_top_source_y",
+                "guard_top_card_before",
+                "guard_top_card_after",
+                "vertical_correction_y",
+            )
+        }
+        scale_diagnostics = {
+            key: frame[key]
+            for key in (
+                "framing_mode",
+                "face_anchor",
+                "face_extent",
+                "target_face",
+                "hero_bbox",
+                "safe_rect",
+                "face_safe_source_y",
+                "scale_top_source",
+                "scale_top",
+                "scale_left",
+                "scale_right",
+                "base_face_scale",
+                "min_hero_scale",
+                "max_hero_scale",
+                "selected_scale_limit",
+                "selected_constraint",
+                "breathing_factor",
+                "final_scale",
+                "translate_x",
+                "translate_y",
+                "face_after",
+            )
+            if key in frame
+        }
+        if guard["guard_top_card_after"] < guard["safe_top"] - 1.0:
+            raise AssertionError(f"角色头顶越过白卡安全线: {render_id}")
+        payload["art_style"] = frame["style"]
         html = Environment().from_string(T2ITemplateLoader().load("character")).render(**payload)
         output = evidence_root / f"{render_id}-character-card.png"
+        portrait_output = evidence_root / f"{render_id}-portrait.png"
+        if output.exists() or portrait_output.exists():
+            raise AssertionError(f"拒绝覆盖已有角色预览证据: {render_id}")
+        portrait.convert("RGBA").save(portrait_output, format="PNG")
 
         async def capture() -> None:
             from playwright.async_api import async_playwright
@@ -252,6 +372,14 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
             "path": output.name,
             "sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
             "dimensions": [1600, 2400],
+            "portrait_path": portrait_output.name,
+            "portrait_sha256": hashlib.sha256(portrait_output.read_bytes()).hexdigest(),
+            "portrait_dimensions": list(portrait.size),
+            "framing": {
+                "anchor_source": frame.get("source"),
+                **guard,
+                **scale_diagnostics,
+            },
         }
 
     @staticmethod

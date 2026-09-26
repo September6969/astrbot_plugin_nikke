@@ -169,7 +169,9 @@ def test_face_anchor_eight_real_samples_and_three_fallbacks():
     unknown_costume_card.costume_selection = CostumeSelection("unknown", "test", "unknown")
     result = framing(unknown_costume_card, dummy_img, identity_resolver=identity_resolver)
     assert result["source"] == "identity_unknown"
-    assert result["style"] == "object-fit:contain"
+    assert result["style"].startswith("width:")
+    assert result["vertical_guard_source"] == "robust_alpha_top"
+    assert result["guard_top_card_after"] >= result["safe_top"] - 1.0
 
 def test_character_font_audit_and_fallback():
     from pathlib import Path

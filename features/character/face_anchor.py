@@ -10,13 +10,22 @@ from pathlib import Path
 from typing import TypeGuard
 
 from .layout import (
+    CARD_HEIGHT,
+    CARD_WIDTH,
+    FACE_SAFE_TOP,
+    MAX_HERO_SCALE,
+    HEAD_ONLY_SCALE_BREATHING_FACTOR,
+    MIN_HERO_SCALE,
     MIN_AUTO_SCALE_RATIO,
+    CoreAxisInterval,
     clamp_top,
     core_axis_interval,
     fitted_scale,
     normalize_summary_count,
+    portrait_safe_rect,
     summary_layout,
 )
+from .face_guided_centering import robust_alpha_bounds
 from .ports import CharacterRenderIdentity
 
 
@@ -49,6 +58,12 @@ def metadata() -> dict[str, object]:
 
 DEFAULT_FACE_Y_OFFSET: float = 16.0
 FACE_Y_OFFSET_OVERRIDES: dict[str, float | dict[str, float]] = {}
+_SUBJECT_ALPHA_THRESHOLD = 24
+# 横向分位忽略低质量边缘装饰；纵向仅采样脸部保护区到上半身窗口。
+_HERO_X_QUANTILES = (0.10, 0.90)
+_HERO_SOURCE_DEPTH_EXTENTS = 1.5
+# Pillow 的 BOX 重采样枚举值；通过图像结构接口调用，避免领域层直接导入 PIL。
+_BOX_RESAMPLING_FILTER = 4
 
 
 def resolve_face_y_offset(
@@ -128,6 +143,183 @@ def _finite_extent(value: object) -> TypeGuard[list[int | float]]:
     )
 
 
+def _face_safe_top_y(face_point, extent) -> float | None:
+    """从已验证的眼/脸附件锚点构造面部保护上界，不扫描头饰轮廓。"""
+    if not _finite_point(face_point) or not _finite_extent(extent):
+        return None
+    # 元数据 extent 是已验证眼/脸附件的宽高；在锚点上方留一个完整高度，
+    # 形成面部保护带，不把帽子、耳朵、角或机械饰件的 alpha 当作头顶。
+    return max(0.0, float(face_point[1]) - float(extent[1]))
+
+
+def _alpha_mass_quantile(projection, quantile: float) -> int | None:
+    total = sum(projection)
+    if total <= 0:
+        return None
+    threshold = total * quantile
+    accumulated = 0
+    for index, mass in enumerate(projection):
+        accumulated += mass
+        if accumulated >= threshold:
+            return index
+    return len(projection) - 1
+
+
+def _hero_subject_bounds(portrait, *, face_safe_source_y, point, extent):
+    """只在脸部保护带至上半身范围内估算稳健水平主体边界。"""
+    alpha = portrait.convert("RGBA").getchannel("A")
+    if face_safe_source_y is None or not _finite_point(point) or not _finite_extent(extent):
+        return None
+    width, height = alpha.size
+    hero_top = max(0, math.floor(float(face_safe_source_y)))
+    hero_bottom = min(
+        height,
+        math.ceil(float(point[1]) + _HERO_SOURCE_DEPTH_EXTENTS * float(extent[1])),
+    )
+    if hero_bottom <= hero_top:
+        return None
+    hero_alpha = alpha.crop((0, hero_top, width, hero_bottom))
+    thresholded = hero_alpha.point(
+        [0 if value < _SUBJECT_ALPHA_THRESHOLD else value for value in range(256)]
+    )
+    horizontal = thresholded.resize((width, 1), resample=_BOX_RESAMPLING_FILTER)
+    x_mass = [horizontal.getpixel((x, 0)) for x in range(width)]
+    x0 = _alpha_mass_quantile(x_mass, _HERO_X_QUANTILES[0])
+    x_last = _alpha_mass_quantile(x_mass, _HERO_X_QUANTILES[1])
+    if x0 is None or x_last is None or x_last < x0:
+        return None
+    return (x0, hero_top, x_last + 1, hero_bottom)
+
+
+def _constrain_head_only_scale(
+    *,
+    base_face_scale: float,
+    point: list[int | float],
+    extent: list[int | float],
+    target_face: list[float],
+    face_safe_source_y: float | None,
+    hero_bbox,
+    safe_rect,
+):
+    safe_rect_data = {
+        "left": safe_rect.left,
+        "top": safe_rect.top,
+        "right": safe_rect.right,
+        "bottom": safe_rect.bottom,
+    }
+    diagnostics = {
+        "framing_mode": "head_only_anchor",
+        "face_anchor": [float(point[0]), float(point[1])],
+        "face_extent": [float(extent[0]), float(extent[1])],
+        "target_face": target_face,
+        "hero_bbox": None if hero_bbox is None else list(hero_bbox),
+        "safe_rect": safe_rect_data,
+        "face_safe_source_y": face_safe_source_y,
+        "scale_top_source": "face_safe_top" if face_safe_source_y is not None else "unavailable",
+        "scale_top": None,
+        "scale_left": None,
+        "scale_right": None,
+        "base_face_scale": base_face_scale,
+        "min_hero_scale": MIN_HERO_SCALE,
+        "max_hero_scale": MAX_HERO_SCALE,
+        "selected_scale_limit": min(base_face_scale, MAX_HERO_SCALE),
+        "selected_constraint": "base_face_scale",
+        "breathing_factor": HEAD_ONLY_SCALE_BREATHING_FACTOR,
+        "final_scale": min(base_face_scale, MAX_HERO_SCALE),
+    }
+    if hero_bbox is None:
+        diagnostics["scale_limit_reason"] = "hero_bounds_unavailable"
+        selected_constraint = (
+            "base_face_scale" if base_face_scale <= MAX_HERO_SCALE else "max_hero_scale"
+        )
+        selected_limit = min(base_face_scale, MAX_HERO_SCALE)
+        final_scale = max(
+            MIN_HERO_SCALE,
+            selected_limit * HEAD_ONLY_SCALE_BREATHING_FACTOR,
+        )
+        diagnostics.update(
+            {
+                "selected_constraint": selected_constraint,
+                "selected_scale_limit": selected_limit,
+                "final_scale": final_scale,
+            }
+        )
+        return final_scale, diagnostics
+
+    x0, _y0, x1, _y1 = (float(value) for value in hero_bbox)
+    face_x, face_y = float(point[0]), float(point[1])
+    target_x, target_y = target_face
+    epsilon = 1.0
+    constraints = {
+        "base_face_scale": base_face_scale,
+        "top": (
+            (target_y - safe_rect.top) / max(face_y - face_safe_source_y, epsilon)
+            if face_safe_source_y is not None
+            else MAX_HERO_SCALE
+        ),
+        "left": (target_x - safe_rect.left) / max(face_x - x0, epsilon),
+        "right": (safe_rect.right - target_x) / max(x1 - face_x, epsilon),
+        "max_hero_scale": MAX_HERO_SCALE,
+    }
+    diagnostics.update(
+        {
+            "scale_top": constraints["top"],
+            "scale_left": constraints["left"],
+            "scale_right": constraints["right"],
+        }
+    )
+    selected_constraint = min(constraints, key=lambda name: constraints[name])
+    selected_limit = constraints[selected_constraint]
+    if not math.isfinite(selected_limit) or selected_limit <= 0:
+        diagnostics["scale_limit_reason"] = "no_positive_safe_scale"
+        return min(base_face_scale, MAX_HERO_SCALE), diagnostics
+
+    final_scale = max(
+        MIN_HERO_SCALE,
+        selected_limit * HEAD_ONLY_SCALE_BREATHING_FACTOR,
+    )
+    diagnostics.update(
+        {
+            "selected_scale_limit": selected_limit,
+            "selected_constraint": selected_constraint,
+            "final_scale": final_scale,
+        }
+    )
+    return final_scale, diagnostics
+
+
+def _fallback_framing(portrait, source: str, render_id: str | None = None):
+    """按原 35% contain 位置起步，并对可见轮廓应用统一顶部安全线。"""
+    width, height = portrait.size
+    scale = min(CARD_WIDTH / width, CARD_HEIGHT / height)
+    rendered_width = width * scale
+    rendered_height = height * scale
+    left = (CARD_WIDTH - rendered_width) / 2.0
+    top_before = (CARD_HEIGHT - rendered_height) * 0.35
+    bounds = robust_alpha_bounds(portrait)
+    guard_y = float(bounds[1]) if bounds is not None else 0.0
+    top_after = max(top_before, FACE_SAFE_TOP - guard_y * scale)
+    guard = {
+        "vertical_guard_source": "robust_alpha_top",
+        "safe_top": FACE_SAFE_TOP,
+        "guard_top_source_y": guard_y,
+        "guard_top_card_before": top_before + guard_y * scale,
+        "guard_top_card_after": top_after + guard_y * scale,
+        "vertical_correction_y": top_after - top_before,
+    }
+    result = {
+        "style": (
+            f"width:{rendered_width:.3f}px;height:{rendered_height:.3f}px;"
+            f"left:{left:.3f}px;top:{top_after:.3f}px;object-fit:contain"
+        ),
+        "source": source,
+        **guard,
+    }
+    if render_id is not None:
+        result["render_id"] = render_id
+    return result
+
+
 def _validated_core_axis(row: dict[str, object], portrait, point: list[int | float]):
     """严格校验离线生成的头顶、眼睛、上躯干轴，不猜测缺失坐标。"""
     axis = row.get("core_axis")
@@ -188,15 +380,12 @@ def framing(
     ) or not all(hasattr(portrait, name) for name in ("size", "width", "height")):
         return {"style": "", "source": "unavailable"}
 
-    # 通过正式身份映射得到包含皮肤的键；不能回退到默认皮肤锚点。
     if data.costume_selection and data.costume_selection.kind == "unknown":
-        return {"style": "object-fit:contain", "source": "identity_unknown"}
+        return _fallback_framing(portrait, "identity_unknown")
 
     if identity_resolver is None:
-        return {
-            "style": "object-fit:contain;object-position:50% 35%",
-            "source": "identity_unavailable",
-        }
+        return _fallback_framing(portrait, "identity_unavailable")
+
     key = identity_resolver.resolve_render_id(data.resource_id, data.costume_id)
     row = metadata().get(key)
     digest = hashlib.sha256(portrait.convert("RGBA").tobytes()).hexdigest()
@@ -212,16 +401,13 @@ def framing(
             None,
         )
     if not isinstance(row, dict):
-        return {
-            "style": "object-fit:contain;object-position:50% 35%",
-            "source": "anchor_unavailable",
-        }
+        return _fallback_framing(portrait, "anchor_unavailable", key)
 
     point, extent = row.get("point"), row.get("extent")
     if not _finite_point(point):
-        return {"style": "object-fit:contain", "source": "anchor_invalid"}
-    if not (0 <= point[0] <= portrait.width and 0 <= point[1] <= portrait.height):
-        return {"style": "object-fit:contain", "source": "anchor_invalid"}
+        return _fallback_framing(portrait, "anchor_invalid", key)
+    if not (0 <= point[0] < portrait.width and 0 <= point[1] < portrait.height):
+        return _fallback_framing(portrait, "anchor_invalid", key)
 
     config = row.get("framing", {})
     target = config.get("target", [760, 550]) if isinstance(config, dict) else [760, 550]
@@ -238,13 +424,13 @@ def framing(
         or len(target) != 2
         or not all(type(item) in (int, float) and math.isfinite(item) for item in target)
     ):
-        return {"style": "object-fit:contain", "source": "anchor_invalid"}
+        return _fallback_framing(portrait, "anchor_invalid", key)
     if (
         type(desired) not in (int, float)
         or not math.isfinite(desired)
-        or not 0 < desired <= 1600
+        or not 0 < desired <= CARD_WIDTH
     ):
-        return {"style": "object-fit:contain", "source": "anchor_invalid"}
+        return _fallback_framing(portrait, "anchor_invalid", key)
 
     initial_scale = (
         desired / extent[0]
@@ -252,6 +438,45 @@ def framing(
         else 2400 / portrait.height
     )
     initial_scale = min(initial_scale, 7200 / max(portrait.size))
+    core, core_reason = _validated_core_axis(row, portrait, point)
+    normalized_count = normalize_summary_count(summary_count)
+    char_id = identity_resolver.resolve_character_id(data.resource_id)
+    y_offset = resolve_face_y_offset(render_id=key, char_id=char_id, row=row)
+    head_scale_diagnostics = None
+    scale = initial_scale
+    if core is not None:
+        guard_y, guard_source = float(core["head_top_y"]), "core_head_top"
+    else:
+        face_safe_top_y = _face_safe_top_y(point, extent)
+        if face_safe_top_y is not None:
+            guard_y, guard_source = face_safe_top_y, "face_safe_top"
+        else:
+            alpha_bounds = robust_alpha_bounds(portrait)
+            guard_y = float(alpha_bounds[1]) if alpha_bounds is not None else 0.0
+            guard_source = "robust_alpha_top"
+        base_face_scale = initial_scale
+        if _finite_extent(extent):
+            base_face_scale = min(
+                desired / float(extent[0]),
+                7200 / max(portrait.size),
+            )
+        hero_bbox = _hero_subject_bounds(
+            portrait,
+            face_safe_source_y=face_safe_top_y,
+            point=point,
+            extent=extent if _finite_extent(extent) else [1.0, 1.0],
+        )
+        target_face = [float(target[0]), float(target[1]) + y_offset]
+        scale, head_scale_diagnostics = _constrain_head_only_scale(
+            base_face_scale=base_face_scale,
+            point=point,
+            extent=extent if _finite_extent(extent) else [1.0, 1.0],
+            target_face=target_face,
+            face_safe_source_y=face_safe_top_y,
+            hero_bbox=hero_bbox,
+            safe_rect=portrait_safe_rect(normalized_count),
+        )
+
     requested = body_centering_requested(body_centering)
 
     def _place(scale):
@@ -301,16 +526,10 @@ def framing(
             }
         return width, height, left, top, diagnostics
 
-    scale = initial_scale
     width, height, left, top, diagnostics = _place(scale)
-
-    char_id = identity_resolver.resolve_character_id(data.resource_id)
-    y_offset = resolve_face_y_offset(render_id=key, char_id=char_id, row=row)
     desired_top = top + y_offset
-    final_top = desired_top
-
-    core, core_reason = _validated_core_axis(row, portrait, point)
-    normalized_count = normalize_summary_count(summary_count)
+    face_min_top = FACE_SAFE_TOP - guard_y * scale
+    final_top = max(desired_top, face_min_top)
     core_diag = None
 
     if core is not None:
@@ -356,20 +575,28 @@ def framing(
                 safe_top=layout.safe_top,
                 safe_bottom=layout.safe_bottom,
             )
+            combined_min_top = (
+                max(interval.min_top, face_min_top)
+                if interval.min_top is not None
+                else None
+            )
             core_diag.update(
                 {
                     "min_top": interval.min_top,
+                    "face_min_top": face_min_top,
+                    "combined_min_top": combined_min_top,
                     "max_top": interval.max_top,
                     "protected_span": interval.protected_span,
                     "available_height": interval.available_height,
                 }
             )
 
-            if interval.valid and interval.min_top is not None and interval.max_top is not None:
-                if interval.min_top > interval.max_top:
+            if interval.valid and combined_min_top is not None and interval.max_top is not None:
+                if combined_min_top > interval.max_top:
+                    fit_head_top = min(float(core["head_top_y"]), guard_y)
                     candidate_scale, fit_reason = fitted_scale(
                         original_scale=scale,
-                        head_top_y=core["head_top_y"],
+                        head_top_y=fit_head_top,
                         torso_y=core["torso_point"][1],
                         safe_top=layout.safe_top,
                         safe_bottom=layout.safe_bottom,
@@ -379,6 +606,7 @@ def framing(
                         scale = candidate_scale
                         width, height, left, top, diagnostics = _place(scale)
                         desired_top = top + y_offset
+                        face_min_top = FACE_SAFE_TOP - guard_y * scale
                         interval = core_axis_interval(
                             scale=scale,
                             head_top_y=core["head_top_y"],
@@ -387,48 +615,60 @@ def framing(
                             safe_top=layout.safe_top,
                             safe_bottom=layout.safe_bottom,
                         )
+                        combined_min_top = (
+                            max(interval.min_top, face_min_top)
+                            if interval.min_top is not None
+                            else None
+                        )
                         core_diag.update(
                             {
                                 "scaled_for_fit": True,
                                 "scale_after": scale,
                                 "reason": fit_reason,
                                 "min_top": interval.min_top,
+                                "face_min_top": face_min_top,
+                                "combined_min_top": combined_min_top,
                                 "max_top": interval.max_top,
                                 "protected_span": interval.protected_span,
                                 "desired_top": desired_top,
                             }
                         )
                     else:
-                        # 超过 6% 预算时保留旧变换，不只满足一侧边界。
                         core_diag["reason"] = fit_reason
 
-                if interval.min_top is not None and interval.max_top is not None and interval.min_top <= interval.max_top:
-                    final_top, clamp_reason = clamp_top(desired_top, interval)
+                if (
+                    combined_min_top is not None
+                    and interval.max_top is not None
+                    and combined_min_top <= interval.max_top
+                ):
+                    combined_interval = CoreAxisInterval(
+                        valid=interval.valid,
+                        min_top=combined_min_top,
+                        max_top=interval.max_top,
+                        protected_span=interval.protected_span,
+                        available_height=interval.available_height,
+                        reason=interval.reason,
+                    )
+                    final_top, clamp_reason = clamp_top(desired_top, combined_interval)
                     if core_diag.get("reason") in {"ok", "scaled_for_fit"}:
                         core_diag["reason"] = (
                             clamp_reason
                             if not core_diag["scaled_for_fit"]
                             else f"scaled_for_fit+{clamp_reason}"
                         )
-                elif core_diag.get("reason") != "scale_limited":
-                    core_diag["reason"] = interval.reason
+                else:
+                    final_top = max(desired_top, FACE_SAFE_TOP - guard_y * scale)
+                    if core_diag.get("reason") != "scale_limited":
+                        core_diag["reason"] = (
+                            "face_safety_priority"
+                            if combined_min_top is not None
+                            and interval.max_top is not None
+                            and combined_min_top > interval.max_top
+                            else interval.reason
+                        )
             else:
                 core_diag["reason"] = interval.reason
 
-            core_diag.update(
-                {
-                    "final_top": final_top,
-                    "correction_y": final_top - desired_top,
-                    "head_top_card_before": desired_top + core["head_top_y"] * scale,
-                    "eye_card_before": desired_top + core["eye_point"][1] * scale,
-                    "torso_card_before": desired_top + core["torso_point"][1] * scale,
-                    "breast_card_before": desired_top + core["breast_point"][1] * scale,
-                    "head_top_card_after": final_top + core["head_top_y"] * scale,
-                    "eye_card_after": final_top + core["eye_point"][1] * scale,
-                    "torso_card_after": final_top + core["torso_point"][1] * scale,
-                    "breast_card_after": final_top + core["breast_point"][1] * scale,
-                }
-            )
     elif normalized_count is not None:
         core_diag = {
             "available": False,
@@ -442,7 +682,30 @@ def framing(
             "correction_y": 0.0,
         }
 
+    final_top = max(final_top, FACE_SAFE_TOP - guard_y * scale)
     top = final_top
+    if core_diag is not None:
+        core_diag.update(
+            {
+                "desired_top": desired_top,
+                "final_top": final_top,
+                "correction_y": final_top - desired_top,
+                "scale_after": scale,
+            }
+        )
+        if core is not None:
+            core_diag.update(
+                {
+                    "head_top_card_before": desired_top + core["head_top_y"] * scale,
+                    "eye_card_before": desired_top + core["eye_point"][1] * scale,
+                    "torso_card_before": desired_top + core["torso_point"][1] * scale,
+                    "breast_card_before": desired_top + core["breast_point"][1] * scale,
+                    "head_top_card_after": final_top + core["head_top_y"] * scale,
+                    "eye_card_after": final_top + core["eye_point"][1] * scale,
+                    "torso_card_after": final_top + core["torso_point"][1] * scale,
+                    "breast_card_after": final_top + core["breast_point"][1] * scale,
+                }
+            )
     ret = {
         "style": (
             f"width:{width:.3f}px;height:{height:.3f}px;"
@@ -450,9 +713,27 @@ def framing(
         ),
         "source": row["anchor_kind"],
         "render_id": key,
+        "vertical_guard_source": guard_source,
+        "safe_top": FACE_SAFE_TOP,
+        "guard_top_source_y": guard_y,
+        "guard_top_card_before": desired_top + guard_y * scale,
+        "guard_top_card_after": final_top + guard_y * scale,
+        "vertical_correction_y": final_top - desired_top,
     }
     if diagnostics is not None:
         ret["body_centering"] = diagnostics
     if core_diag is not None:
         ret["core_axis"] = core_diag
+    if head_scale_diagnostics is not None:
+        head_scale_diagnostics.update(
+            {
+                "translate_x": left,
+                "translate_y": top,
+                "face_after": [
+                    left + float(point[0]) * scale,
+                    top + float(point[1]) * scale,
+                ],
+            }
+        )
+        ret.update(head_scale_diagnostics)
     return ret
