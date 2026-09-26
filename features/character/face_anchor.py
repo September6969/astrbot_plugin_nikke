@@ -13,12 +13,14 @@ from .layout import (
     CARD_HEIGHT,
     CARD_WIDTH,
     FACE_SAFE_TOP,
+    HEAD_ONLY_SCALE_BREATHING_FACTOR,
     MIN_AUTO_SCALE_RATIO,
     CoreAxisInterval,
     clamp_top,
     core_axis_interval,
     fitted_scale,
     normalize_summary_count,
+    portrait_safe_rect,
     summary_layout,
 )
 from .face_guided_centering import robust_alpha_bounds
@@ -54,6 +56,11 @@ def metadata() -> dict[str, object]:
 
 DEFAULT_FACE_Y_OFFSET: float = 16.0
 FACE_Y_OFFSET_OVERRIDES: dict[str, float | dict[str, float]] = {}
+_SUBJECT_ALPHA_THRESHOLD = 24
+_SUBJECT_X_QUANTILES = (0.01, 0.99)
+_SUBJECT_Y_QUANTILES = (0.005, 0.995)
+# Pillow 的 BOX 重采样枚举值；通过图像结构接口调用，避免领域层直接导入 PIL。
+_BOX_RESAMPLING_FILTER = 4
 
 
 def resolve_face_y_offset(
@@ -140,6 +147,121 @@ def _face_safe_top_y(face_point, extent) -> float | None:
     # 元数据 extent 是已验证眼/脸附件的宽高；在锚点上方留一个完整高度，
     # 形成面部保护带，不把帽子、耳朵、角或机械饰件的 alpha 当作头顶。
     return max(0.0, float(face_point[1]) - float(extent[1]))
+
+
+def _alpha_mass_quantile(projection, quantile: float) -> int | None:
+    total = sum(projection)
+    if total <= 0:
+        return None
+    threshold = total * quantile
+    accumulated = 0
+    for index, mass in enumerate(projection):
+        accumulated += mass
+        if accumulated >= threshold:
+            return index
+    return len(projection) - 1
+
+
+def _robust_subject_bounds(portrait):
+    """返回完整 alpha 框及按 alpha 质量分位裁剪的主体框。"""
+    alpha = portrait.convert("RGBA").getchannel("A")
+    full_bbox = alpha.getbbox()
+    thresholded = alpha.point(
+        [0 if value < _SUBJECT_ALPHA_THRESHOLD else value for value in range(256)]
+    )
+    width, height = thresholded.size
+    horizontal = thresholded.resize((width, 1), resample=_BOX_RESAMPLING_FILTER)
+    vertical = thresholded.resize((1, height), resample=_BOX_RESAMPLING_FILTER)
+    x_mass = [horizontal.getpixel((x, 0)) for x in range(width)]
+    y_mass = [vertical.getpixel((0, y)) for y in range(height)]
+
+    x0 = _alpha_mass_quantile(x_mass, _SUBJECT_X_QUANTILES[0])
+    x_last = _alpha_mass_quantile(x_mass, _SUBJECT_X_QUANTILES[1])
+    y0 = _alpha_mass_quantile(y_mass, _SUBJECT_Y_QUANTILES[0])
+    y_last = _alpha_mass_quantile(y_mass, _SUBJECT_Y_QUANTILES[1])
+    if x0 is None or x_last is None or y0 is None or y_last is None:
+        return full_bbox, None
+
+    subject_bbox = (x0, y0, x_last + 1, y_last + 1)
+    if subject_bbox[2] <= subject_bbox[0] or subject_bbox[3] <= subject_bbox[1]:
+        return full_bbox, None
+    return full_bbox, subject_bbox
+
+
+def _constrain_head_only_scale(
+    *,
+    max_scale: float,
+    point: list[int | float],
+    target_face: list[float],
+    face_safe_source_y: float | None,
+    full_bbox,
+    subject_bbox,
+    safe_rect,
+):
+    safe_rect_data = {
+        "left": safe_rect.left,
+        "top": safe_rect.top,
+        "right": safe_rect.right,
+        "bottom": safe_rect.bottom,
+    }
+    diagnostics = {
+        "framing_mode": "head_only_anchor",
+        "face_anchor": [float(point[0]), float(point[1])],
+        "target_face": target_face,
+        "subject_bbox": None if subject_bbox is None else list(subject_bbox),
+        "full_bbox": None if full_bbox is None else list(full_bbox),
+        "safe_rect": safe_rect_data,
+        "face_safe_source_y": face_safe_source_y,
+        "scale_top_source": "face_safe_top" if face_safe_source_y is not None else "subject_bbox",
+        "scale_top": None,
+        "scale_bottom": None,
+        "scale_left": None,
+        "scale_right": None,
+        "max_scale": max_scale,
+        "selected_scale_limit": max_scale,
+        "selected_constraint": "max_scale",
+        "breathing_factor": HEAD_ONLY_SCALE_BREATHING_FACTOR,
+        "final_scale": max_scale,
+    }
+    if subject_bbox is None:
+        diagnostics["scale_limit_reason"] = "subject_bounds_unavailable"
+        return max_scale, diagnostics
+
+    x0, y0, x1, y1 = (float(value) for value in subject_bbox)
+    face_x, face_y = float(point[0]), float(point[1])
+    target_x, target_y = target_face
+    epsilon = 1.0
+    top_source_y = y0 if face_safe_source_y is None else face_safe_source_y
+    constraints = {
+        "top": (target_y - safe_rect.top) / max(face_y - top_source_y, epsilon),
+        "bottom": (safe_rect.bottom - target_y) / max(y1 - face_y, epsilon),
+        "left": (target_x - safe_rect.left) / max(face_x - x0, epsilon),
+        "right": (safe_rect.right - target_x) / max(x1 - face_x, epsilon),
+        "max_scale": max_scale,
+    }
+    diagnostics.update(
+        {
+            "scale_top": constraints["top"],
+            "scale_bottom": constraints["bottom"],
+            "scale_left": constraints["left"],
+            "scale_right": constraints["right"],
+        }
+    )
+    selected_constraint = min(constraints, key=lambda name: constraints[name])
+    selected_limit = constraints[selected_constraint]
+    if not math.isfinite(selected_limit) or selected_limit <= 0:
+        diagnostics["scale_limit_reason"] = "no_positive_safe_scale"
+        return max_scale, diagnostics
+
+    final_scale = selected_limit * HEAD_ONLY_SCALE_BREATHING_FACTOR
+    diagnostics.update(
+        {
+            "selected_scale_limit": selected_limit,
+            "selected_constraint": selected_constraint,
+            "final_scale": final_scale,
+        }
+    )
+    return final_scale, diagnostics
 
 
 def _fallback_framing(portrait, source: str, render_id: str | None = None):
@@ -293,6 +415,11 @@ def framing(
     )
     initial_scale = min(initial_scale, 7200 / max(portrait.size))
     core, core_reason = _validated_core_axis(row, portrait, point)
+    normalized_count = normalize_summary_count(summary_count)
+    char_id = identity_resolver.resolve_character_id(data.resource_id)
+    y_offset = resolve_face_y_offset(render_id=key, char_id=char_id, row=row)
+    head_scale_diagnostics = None
+    scale = initial_scale
     if core is not None:
         guard_y, guard_source = float(core["head_top_y"]), "core_head_top"
     else:
@@ -303,6 +430,17 @@ def framing(
             alpha_bounds = robust_alpha_bounds(portrait)
             guard_y = float(alpha_bounds[1]) if alpha_bounds is not None else 0.0
             guard_source = "robust_alpha_top"
+        full_bbox, subject_bbox = _robust_subject_bounds(portrait)
+        target_face = [float(target[0]), float(target[1]) + y_offset]
+        scale, head_scale_diagnostics = _constrain_head_only_scale(
+            max_scale=initial_scale,
+            point=point,
+            target_face=target_face,
+            face_safe_source_y=face_safe_top_y,
+            full_bbox=full_bbox,
+            subject_bbox=subject_bbox,
+            safe_rect=portrait_safe_rect(normalized_count),
+        )
 
     requested = body_centering_requested(body_centering)
 
@@ -353,14 +491,10 @@ def framing(
             }
         return width, height, left, top, diagnostics
 
-    scale = initial_scale
     width, height, left, top, diagnostics = _place(scale)
-    char_id = identity_resolver.resolve_character_id(data.resource_id)
-    y_offset = resolve_face_y_offset(render_id=key, char_id=char_id, row=row)
     desired_top = top + y_offset
     face_min_top = FACE_SAFE_TOP - guard_y * scale
     final_top = max(desired_top, face_min_top)
-    normalized_count = normalize_summary_count(summary_count)
     core_diag = None
 
     if core is not None:
@@ -555,4 +689,16 @@ def framing(
         ret["body_centering"] = diagnostics
     if core_diag is not None:
         ret["core_axis"] = core_diag
+    if head_scale_diagnostics is not None:
+        head_scale_diagnostics.update(
+            {
+                "translate_x": left,
+                "translate_y": top,
+                "face_after": [
+                    left + float(point[0]) * scale,
+                    top + float(point[1]) * scale,
+                ],
+            }
+        )
+        ret.update(head_scale_diagnostics)
     return ret

@@ -24,8 +24,13 @@ def test_anchor_binding_and_no_default_costume_fallback():
     row = {"pixel_sha256": hashlib.sha256(image.tobytes()).hexdigest(), "point": [60, 40],
            "extent": [20, 10], "anchor_kind": "eye_attachment"}
     with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
-        assert framing(card, image)["source"] == "eye_attachment"
-        assert "left:-8.000px" in framing(card, image)["style"]
+        result = framing(card, image)
+        assert result["source"] == "eye_attachment"
+        assert result["framing_mode"] == "head_only_anchor"
+        left = float(result["style"].split("left:", 1)[1].split("px", 1)[0])
+        width = float(result["style"].split("width:", 1)[1].split("px", 1)[0])
+        scale = width / image.width
+        assert abs(left + 60 * scale - result["target_face"][0]) < 0.01
         assert framing(card, Image.new("RGBA", (100, 200), "black"))["source"] == "anchor_unavailable"
         card.costume_id = "unknown"
         card.costume_selection = CostumeSelection("unknown", "test", "unknown")
@@ -50,7 +55,12 @@ def test_resolution_variant_and_head_fallback():
                "framing": {"target": [800, 600], "extent_width": 430}}
     with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": {"variants": [variant]}}):
         result = framing(card, image)
-        assert result["source"] == "head_bone" and "left:200.000px" in result["style"]
+        assert result["source"] == "head_bone"
+        assert result["framing_mode"] == "head_only_anchor"
+        left = float(result["style"].split("left:", 1)[1].split("px", 1)[0])
+        width = float(result["style"].split("width:", 1)[1].split("px", 1)[0])
+        scale = width / image.width
+        assert abs(left + 50 * scale - result["target_face"][0]) < 0.01
         variant["image_size"] = [200, 100]
         assert framing(card, image)["source"] == "anchor_unavailable"
 

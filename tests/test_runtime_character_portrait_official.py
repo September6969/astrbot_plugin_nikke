@@ -309,6 +309,32 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                 "vertical_correction_y",
             )
         }
+        scale_diagnostics = {
+            key: frame[key]
+            for key in (
+                "framing_mode",
+                "face_anchor",
+                "target_face",
+                "subject_bbox",
+                "full_bbox",
+                "safe_rect",
+                "face_safe_source_y",
+                "scale_top_source",
+                "scale_top",
+                "scale_bottom",
+                "scale_left",
+                "scale_right",
+                "max_scale",
+                "selected_scale_limit",
+                "selected_constraint",
+                "breathing_factor",
+                "final_scale",
+                "translate_x",
+                "translate_y",
+                "face_after",
+            )
+            if key in frame
+        }
         if guard["guard_top_card_after"] < guard["safe_top"] - 1.0:
             raise AssertionError(f"角色头顶越过白卡安全线: {render_id}")
         payload["art_style"] = frame["style"]
@@ -351,6 +377,7 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
             "framing": {
                 "anchor_source": frame.get("source"),
                 **guard,
+                **scale_diagnostics,
             },
         }
 

@@ -147,6 +147,14 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
             identity_resolver=identity,
         )
         self.assertEqual(result["source"], "eye_attachment")
+        self.assertEqual(result["framing_mode"], "head_only_anchor")
+        self.assertEqual(result["scale_top_source"], "face_safe_top")
+        self.assertEqual(result["selected_constraint"], "bottom")
+        self.assertLess(result["final_scale"], result["max_scale"] * 0.3)
+        self.assertAlmostEqual(
+            result["final_scale"],
+            result["selected_scale_limit"] * result["breathing_factor"],
+        )
         self.assertFalse(result["core_axis"]["available"])
         self.assertEqual(result["core_axis"]["reason"], "core_axis_unavailable")
         style_values = {

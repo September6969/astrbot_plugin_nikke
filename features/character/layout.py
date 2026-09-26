@@ -24,6 +24,8 @@ FACE_TOP_MARGIN = 24.0
 FACE_BOTTOM_MARGIN = 28.0
 FACE_SAFE_TOP = HEADER_BOTTOM + FACE_TOP_MARGIN
 MIN_AUTO_SCALE_RATIO = 0.94
+HEAD_ONLY_SCALE_BREATHING_FACTOR = 0.96
+PORTRAIT_SAFE_SIDE_MARGIN = 60.0
 
 
 @dataclass(frozen=True)
@@ -37,6 +39,14 @@ class SummaryLayout:
     gear_top: float
     safe_top: float
     safe_bottom: float
+
+
+@dataclass(frozen=True)
+class PortraitSafeRect:
+    left: float
+    top: float
+    right: float
+    bottom: float
 
 
 @dataclass(frozen=True)
@@ -109,6 +119,18 @@ def summary_layout(count: int) -> SummaryLayout:
         gear_top=gear_top,
         safe_top=safe_top,
         safe_bottom=safe_bottom,
+    )
+
+
+def portrait_safe_rect(summary_count: int | None) -> PortraitSafeRect:
+    """从白卡标题栏、摘要区和两侧内容边界取得立绘安全矩形。"""
+    normalized = normalize_summary_count(summary_count)
+    layout = summary_layout(4 if normalized is None else normalized)
+    return PortraitSafeRect(
+        left=PORTRAIT_SAFE_SIDE_MARGIN,
+        top=layout.safe_top,
+        right=CARD_WIDTH - PORTRAIT_SAFE_SIDE_MARGIN,
+        bottom=layout.safe_bottom,
     )
 
 

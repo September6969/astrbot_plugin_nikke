@@ -150,8 +150,62 @@ def test_face_anchor_guard_uses_face_extent_not_connected_head_accessory():
 
     assert decorated_result["vertical_guard_source"] == "face_safe_top"
     assert decorated_result["guard_top_source_y"] == 65.0
+    assert decorated_result["scale_top_source"] == "face_safe_top"
+    assert decorated_result["scale_top"] == plain_result["scale_top"]
     assert decorated_result["style"] == plain_result["style"]
     assert decorated_result["guard_top_card_after"] >= decorated_result["safe_top"] - 1.0
+
+
+def test_head_only_scale_uses_tightest_edge_and_preserves_face_target():
+    from PIL import ImageDraw
+
+    card = make_card()
+    image = Image.new("RGBA", (320, 320), (0, 0, 0, 0))
+    ImageDraw.Draw(image).rectangle((40, 20, 290, 280), fill=(255, 255, 255, 255))
+    row = make_row(image, point=(70, 150), extent=(20, 20), target=(760, 880))
+    row["framing"]["face_y_offset_px"] = 0
+
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
+        result = framing(card, image, body_centering=False, summary_count=4)
+
+    assert result["framing_mode"] == "head_only_anchor"
+    assert result["selected_constraint"] == "right"
+    assert result["selected_scale_limit"] == min(
+        result["scale_top"],
+        result["scale_bottom"],
+        result["scale_left"],
+        result["scale_right"],
+        result["max_scale"],
+    )
+    assert result["final_scale"] == result["selected_scale_limit"] * result["breathing_factor"]
+    assert result["final_scale"] < result["max_scale"]
+    assert result["face_after"] == result["target_face"]
+
+
+def test_head_only_scale_ignores_tiny_alpha_outlier_for_subject_bounds():
+    from PIL import ImageDraw
+
+    card = make_card()
+    base = Image.new("RGBA", (320, 320), (0, 0, 0, 0))
+    ImageDraw.Draw(base).rectangle((40, 20, 290, 280), fill=(255, 255, 255, 255))
+    outlier = base.copy()
+    ImageDraw.Draw(outlier).point((319, 319), fill=(255, 255, 255, 255))
+
+    def render(image):
+        row = make_row(image, point=(70, 150), extent=(20, 20), target=(760, 880))
+        row["framing"]["face_y_offset_px"] = 0
+        with patch(
+            "astrbot_plugin_nikke.features.character.face_anchor.metadata",
+            return_value={"c471": row},
+        ):
+            return framing(card, image, body_centering=False, summary_count=4)
+
+    normal = render(base)
+    with_outlier = render(outlier)
+
+    assert normal["full_bbox"] != with_outlier["full_bbox"]
+    assert normal["subject_bbox"] == with_outlier["subject_bbox"]
+    assert normal["final_scale"] == with_outlier["final_scale"]
 
 
 def test_missing_face_anchor_uses_robust_alpha_fallback_and_safe_transform():
