@@ -156,7 +156,7 @@ def test_face_anchor_guard_uses_face_extent_not_connected_head_accessory():
     assert decorated_result["guard_top_card_after"] >= decorated_result["safe_top"] - 1.0
 
 
-def test_head_only_scale_uses_tightest_edge_and_preserves_face_target():
+def test_head_only_scale_uses_face_and_hero_constraints_without_bottom_limit():
     from PIL import ImageDraw
 
     card = make_card()
@@ -169,27 +169,38 @@ def test_head_only_scale_uses_tightest_edge_and_preserves_face_target():
         result = framing(card, image, body_centering=False, summary_count=4)
 
     assert result["framing_mode"] == "head_only_anchor"
-    assert result["selected_constraint"] == "right"
+    assert "scale_bottom" not in result
+    assert result["face_extent"] == [20.0, 20.0]
+    assert result["hero_bbox"] is not None
+    assert result["selected_constraint"] in {
+        "base_face_scale",
+        "top",
+        "left",
+        "right",
+        "max_hero_scale",
+    }
     assert result["selected_scale_limit"] == min(
+        result["base_face_scale"],
         result["scale_top"],
-        result["scale_bottom"],
         result["scale_left"],
         result["scale_right"],
-        result["max_scale"],
+        result["max_hero_scale"],
     )
     assert result["final_scale"] == result["selected_scale_limit"] * result["breathing_factor"]
-    assert result["final_scale"] < result["max_scale"]
+    assert result["min_hero_scale"] <= result["final_scale"] <= result["max_hero_scale"]
     assert result["face_after"] == result["target_face"]
 
 
-def test_head_only_scale_ignores_tiny_alpha_outlier_for_subject_bounds():
+def test_head_only_scale_ignores_lower_body_and_sparse_accessory_alpha():
     from PIL import ImageDraw
 
     card = make_card()
     base = Image.new("RGBA", (320, 320), (0, 0, 0, 0))
     ImageDraw.Draw(base).rectangle((40, 20, 290, 280), fill=(255, 255, 255, 255))
-    outlier = base.copy()
-    ImageDraw.Draw(outlier).point((319, 319), fill=(255, 255, 255, 255))
+    lower_body = base.copy()
+    ImageDraw.Draw(lower_body).rectangle((90, 281, 240, 319), fill=(255, 255, 255, 255))
+    decorated = lower_body.copy()
+    ImageDraw.Draw(decorated).line((319, 135, 319, 178), fill=(255, 255, 255, 255), width=1)
 
     def render(image):
         row = make_row(image, point=(70, 150), extent=(20, 20), target=(760, 880))
@@ -201,11 +212,41 @@ def test_head_only_scale_ignores_tiny_alpha_outlier_for_subject_bounds():
             return framing(card, image, body_centering=False, summary_count=4)
 
     normal = render(base)
-    with_outlier = render(outlier)
+    with_extra_lower_body = render(lower_body)
+    with_sparse_accessory = render(decorated)
 
-    assert normal["full_bbox"] != with_outlier["full_bbox"]
-    assert normal["subject_bbox"] == with_outlier["subject_bbox"]
-    assert normal["final_scale"] == with_outlier["final_scale"]
+    assert normal["hero_bbox"] == with_extra_lower_body["hero_bbox"]
+    assert normal["final_scale"] == with_extra_lower_body["final_scale"]
+    assert normal["hero_bbox"][0] == with_sparse_accessory["hero_bbox"][0]
+    assert abs(normal["hero_bbox"][2] - with_sparse_accessory["hero_bbox"][2]) <= 2
+    assert (
+        abs(normal["final_scale"] - with_sparse_accessory["final_scale"])
+        <= normal["final_scale"] * 0.01
+    )
+
+
+def test_head_only_small_source_uses_face_extent_instead_of_too_low_global_cap():
+    from PIL import ImageDraw
+
+    card = make_card()
+    image = Image.new("RGBA", (348, 891), (0, 0, 0, 0))
+    ImageDraw.Draw(image).rectangle((118, 110, 246, 180), fill=(255, 255, 255, 255))
+    row = make_row(
+        image,
+        point=(185, 135),
+        extent=(65.844, 21.111),
+        target=(760, 550),
+    )
+    row["framing"]["extent_width"] = 256
+
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
+        result = framing(card, image, body_centering=False, summary_count=4)
+
+    assert result["selected_constraint"] == "max_hero_scale"
+    assert 2.5 < result["final_scale"] <= 3.0
+    assert result["face_extent"][0] * result["final_scale"] > 160
+    assert result["final_scale"] <= result["max_hero_scale"]
+    assert result["face_after"] == result["target_face"]
 
 
 def test_missing_face_anchor_uses_robust_alpha_fallback_and_safe_transform():

@@ -149,8 +149,10 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         self.assertEqual(result["source"], "eye_attachment")
         self.assertEqual(result["framing_mode"], "head_only_anchor")
         self.assertEqual(result["scale_top_source"], "face_safe_top")
-        self.assertEqual(result["selected_constraint"], "bottom")
-        self.assertLess(result["final_scale"], result["max_scale"] * 0.3)
+        self.assertNotIn("scale_bottom", result)
+        self.assertNotEqual(result["selected_constraint"], "bottom")
+        self.assertGreater(result["final_scale"], 0.6)
+        self.assertGreater(result["final_scale"], result["base_face_scale"] * 0.5)
         self.assertAlmostEqual(
             result["final_scale"],
             result["selected_scale_limit"] * result["breathing_factor"],
