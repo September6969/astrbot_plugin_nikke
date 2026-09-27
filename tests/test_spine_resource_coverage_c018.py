@@ -147,6 +147,16 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
             identity_resolver=identity,
         )
         self.assertEqual(result["source"], "eye_attachment")
+        self.assertEqual(result["framing_mode"], "head_only_anchor")
+        self.assertEqual(result["scale_top_source"], "face_safe_top")
+        self.assertNotIn("scale_bottom", result)
+        self.assertNotEqual(result["selected_constraint"], "bottom")
+        self.assertGreater(result["final_scale"], 0.6)
+        self.assertGreater(result["final_scale"], result["base_face_scale"] * 0.5)
+        self.assertAlmostEqual(
+            result["final_scale"],
+            result["selected_scale_limit"] * result["breathing_factor"],
+        )
         self.assertFalse(result["core_axis"]["available"])
         self.assertEqual(result["core_axis"]["reason"], "core_axis_unavailable")
         style_values = {
@@ -157,8 +167,22 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         scale = image_width / portrait.width
         left = float(style_values["left"].removesuffix("px"))
         top = float(style_values["top"].removesuffix("px"))
-        self.assertAlmostEqual(left + record["point"][0] * scale, 760.0, places=2)
-        self.assertAlmostEqual(top + record["point"][1] * scale, 566.0, places=2)
+        eye_x = left + record["point"][0] * scale
+        eye_y = top + record["point"][1] * scale
+        self.assertAlmostEqual(eye_x, 760.0, places=2)
+        self.assertEqual(result["vertical_guard_source"], "face_safe_top")
+        self.assertAlmostEqual(
+            result["guard_top_source_y"],
+            record["point"][1] - record["extent"][1],
+        )
+        self.assertGreaterEqual(
+            result["guard_top_card_after"], result["safe_top"] - 1.0
+        )
+        self.assertGreaterEqual(result["vertical_correction_y"], 0.0)
+        self.assertLess(result["vertical_correction_y"], 10.0)
+        self.assertAlmostEqual(
+            eye_y, 566.0 + result["vertical_correction_y"], places=2
+        )
 
     def test_stale_c018_face_anchor_fails_closed(self) -> None:
         card = replace(

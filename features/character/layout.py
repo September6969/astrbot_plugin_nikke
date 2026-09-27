@@ -6,6 +6,8 @@ import math
 
 
 # 沿用当前 1600×2400 角色卡模板的固定几何边界。
+CARD_WIDTH = 1600.0
+CARD_HEIGHT = 2400.0
 HEADER_BOTTOM = 370.0
 EQUIPMENT_AREA_TOP = 1340.0
 SUMMARY_BOTTOM_LOCAL = 475.0
@@ -20,7 +22,15 @@ SUMMARY_PADDING_BOTTOM = 28.0
 # 头顶到胸部的安全走廊边距。
 FACE_TOP_MARGIN = 24.0
 FACE_BOTTOM_MARGIN = 28.0
+FACE_SAFE_TOP = HEADER_BOTTOM + FACE_TOP_MARGIN
 MIN_AUTO_SCALE_RATIO = 0.94
+HEAD_ONLY_SCALE_BREATHING_FACTOR = 0.98
+# 最低缩放仅为视觉软目标，不能覆盖脸部或横向硬约束。
+MIN_PREFERRED_HERO_SCALE = 0.35
+MAX_HERO_SCALE = 3.0
+# 按基础脸部缩放采样脸下方 300px；真实样本中更深的窗口会纳入外围武器。
+HERO_CARD_DEPTH = 300.0
+PORTRAIT_SAFE_SIDE_MARGIN = 60.0
 
 
 @dataclass(frozen=True)
@@ -34,6 +44,14 @@ class SummaryLayout:
     gear_top: float
     safe_top: float
     safe_bottom: float
+
+
+@dataclass(frozen=True)
+class PortraitSafeRect:
+    left: float
+    top: float
+    right: float
+    bottom: float
 
 
 @dataclass(frozen=True)
@@ -85,7 +103,7 @@ def summary_layout(count: int) -> SummaryLayout:
     height = summary_panel_height(normalized)
     card_bottom = EQUIPMENT_AREA_TOP + SUMMARY_BOTTOM_LOCAL
     gear_top = EQUIPMENT_AREA_TOP + EQUIPMENT_GRID_TOP_LOCAL
-    safe_top = HEADER_BOTTOM + FACE_TOP_MARGIN
+    safe_top = FACE_SAFE_TOP
 
     if normalized:
         local_top = SUMMARY_BOTTOM_LOCAL - height
@@ -106,6 +124,18 @@ def summary_layout(count: int) -> SummaryLayout:
         gear_top=gear_top,
         safe_top=safe_top,
         safe_bottom=safe_bottom,
+    )
+
+
+def portrait_safe_rect(summary_count: int | None) -> PortraitSafeRect:
+    """从白卡标题栏、摘要区和两侧内容边界取得立绘安全矩形。"""
+    normalized = normalize_summary_count(summary_count)
+    layout = summary_layout(4 if normalized is None else normalized)
+    return PortraitSafeRect(
+        left=PORTRAIT_SAFE_SIDE_MARGIN,
+        top=layout.safe_top,
+        right=CARD_WIDTH - PORTRAIT_SAFE_SIDE_MARGIN,
+        bottom=layout.safe_bottom,
     )
 
 

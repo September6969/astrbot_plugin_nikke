@@ -349,6 +349,64 @@ def center_after_face_anchor(
     )
 
 
+def _alpha_histograms(portrait: RasterImage, threshold: int):
+    """生成阈值化透明度在横纵轴上的投影。"""
+    alpha = portrait.convert("RGBA").getchannel("A")
+    width, height = alpha.size
+    pixels = alpha.load()
+    x_hist = [0] * width
+    y_hist = [0] * height
+    alpha_pixels = 0
+    for y in range(height):
+        row_count = 0
+        for x in range(width):
+            if pixels[x, y] >= threshold:
+                x_hist[x] += 1
+                row_count += 1
+        y_hist[y] = row_count
+        alpha_pixels += row_count
+    return pixels, width, height, x_hist, y_hist, alpha_pixels
+
+
+def _robust_alpha_bounds_from_histograms(
+    x_hist: Sequence[int], y_hist: Sequence[int], trim_fraction: float
+) -> tuple[int, int, int, int] | None:
+    left = _hist_quantile_index(x_hist, trim_fraction)
+    right = _hist_quantile_index(x_hist, 1.0 - trim_fraction)
+    top = _hist_quantile_index(y_hist, trim_fraction)
+    bottom = _hist_quantile_index(y_hist, 1.0 - trim_fraction)
+    if None in (left, right, top, bottom):
+        return None
+    assert left is not None and right is not None and top is not None and bottom is not None
+    if right <= left or bottom <= top:
+        return None
+    return left, top, right, bottom
+
+
+def robust_alpha_bounds(
+    portrait: RasterImage,
+    *,
+    alpha_threshold: int = 24,
+    trim_fraction: float = 0.015,
+) -> tuple[int, int, int, int] | None:
+    """返回忽略少量透明度离群像素后的角色轮廓边界。"""
+    if type(alpha_threshold) is not int or not 0 <= alpha_threshold <= 255:
+        raise ValueError("alpha_threshold must be an integer in [0, 255]")
+    if (
+        not isinstance(trim_fraction, (int, float))
+        or isinstance(trim_fraction, bool)
+        or not math.isfinite(trim_fraction)
+        or not 0.0 <= trim_fraction < 0.5
+    ):
+        raise ValueError("trim_fraction must be finite and in [0, 0.5)")
+    _, _, _, x_hist, y_hist, alpha_pixels = _alpha_histograms(
+        portrait, alpha_threshold
+    )
+    if alpha_pixels == 0:
+        return None
+    return _robust_alpha_bounds_from_histograms(x_hist, y_hist, float(trim_fraction))
+
+
 def analyze_face_guided_silhouette(
     portrait: RasterImage,
     *,
@@ -373,36 +431,20 @@ def analyze_face_guided_silhouette(
     """
 
     fx, fy = float(face_point[0]), float(face_point[1])
-    rgba = portrait.convert("RGBA")
-    alpha = rgba.getchannel("A")
-    width, height = alpha.size
-    pixels = alpha.load()
     threshold = config.alpha_threshold
-
-    x_hist = [0] * width
-    y_hist = [0] * height
-    alpha_pixels = 0
-    for y in range(height):
-        row_count = 0
-        for x in range(width):
-            if pixels[x, y] >= threshold:
-                x_hist[x] += 1
-                row_count += 1
-        y_hist[y] = row_count
-        alpha_pixels += row_count
+    pixels, width, height, x_hist, y_hist, alpha_pixels = _alpha_histograms(
+        portrait, threshold
+    )
 
     if alpha_pixels < max(64, config.min_row_samples * config.min_run_width):
         return None
 
-    left = _hist_quantile_index(x_hist, config.trim_fraction)
-    right = _hist_quantile_index(x_hist, 1.0 - config.trim_fraction)
-    top = _hist_quantile_index(y_hist, config.trim_fraction)
-    bottom = _hist_quantile_index(y_hist, 1.0 - config.trim_fraction)
-    if None in (left, right, top, bottom):
+    bounds = _robust_alpha_bounds_from_histograms(
+        x_hist, y_hist, config.trim_fraction
+    )
+    if bounds is None:
         return None
-    assert left is not None and right is not None and top is not None and bottom is not None
-    if right <= left or bottom <= top:
-        return None
+    left, top, right, bottom = bounds
 
     active_height = max(1, bottom - top + 1)
     # Padding-invariant: this offset is based on opaque-subject height, not the
