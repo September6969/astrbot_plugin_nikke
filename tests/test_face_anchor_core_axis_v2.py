@@ -11,7 +11,12 @@ from astrbot_plugin_nikke.features.character.face_anchor import (
     framing as _framing,
 )
 from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
-from astrbot_plugin_nikke.features.character.layout import MIN_AUTO_SCALE_RATIO, summary_layout
+from astrbot_plugin_nikke.features.character.layout import (
+    HERO_CARD_DEPTH,
+    MIN_AUTO_SCALE_RATIO,
+    MIN_PREFERRED_HERO_SCALE,
+    summary_layout,
+)
 from astrbot_plugin_nikke.features.character.models import CostumeSelection
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
 
@@ -187,8 +192,47 @@ def test_head_only_scale_uses_face_and_hero_constraints_without_bottom_limit():
         result["max_hero_scale"],
     )
     assert result["final_scale"] == result["selected_scale_limit"] * result["breathing_factor"]
-    assert result["min_hero_scale"] <= result["final_scale"] <= result["max_hero_scale"]
+    assert 0 < result["final_scale"] <= result["hard_safe_scale"]
     assert result["face_after"] == result["target_face"]
+
+
+def test_head_only_preferred_minimum_never_overrides_hard_safety():
+    card = make_card()
+    image = Image.new("RGBA", (100, 200), "white")
+    # 卡面脸部到顶部安全线只有 4px，源图脸部保护带为 20px，硬上限为 0.20。
+    row = make_row(image, point=(50, 30), extent=(40, 20), target=(760, 398))
+    row["framing"]["face_y_offset_px"] = 0
+
+    with patch("astrbot_plugin_nikke.features.character.face_anchor.metadata", return_value={"c471": row}):
+        result = framing(card, image, body_centering=False, summary_count=4)
+
+    assert result["selected_constraint"] == "top"
+    assert 0 < result["final_scale"] <= result["hard_safe_scale"] < MIN_PREFERRED_HERO_SCALE
+    assert result["undersized_by_constraints"] is True
+    assert result["preferred_min_scale"] == MIN_PREFERRED_HERO_SCALE
+    assert result["guard_top_card_after"] >= result["safe_top"]
+    assert result["face_after"] == result["target_face"]
+
+
+def test_real_head_only_hero_depth_is_normalized_in_card_space():
+    for render_id in ("c017", "c180", "c352"):
+        card = make_card()
+        card.resource_id = str(int(render_id[1:]))
+        with Image.open(ROOT / "assets/spine-rendered" / f"{render_id}.png") as opened:
+            portrait = opened.convert("RGBA")
+        result = framing(card, portrait, body_centering=False, summary_count=4)
+
+        assert result["framing_mode"] == "head_only_anchor"
+        assert math.isclose(
+            result["hero_source_depth"] * result["base_face_scale"], HERO_CARD_DEPTH
+        )
+        assert result["hero_card_depth"] == HERO_CARD_DEPTH
+        expected_bottom = min(
+            portrait.height,
+            math.ceil(result["face_anchor"][1] + result["hero_source_depth"]),
+        )
+        assert result["hero_bbox"][3] == expected_bottom
+        assert "scale_bottom" not in result
 
 
 def test_head_only_scale_ignores_lower_body_and_sparse_accessory_alpha():
@@ -243,7 +287,7 @@ def test_head_only_small_source_uses_face_extent_instead_of_too_low_global_cap()
         result = framing(card, image, body_centering=False, summary_count=4)
 
     assert result["selected_constraint"] == "max_hero_scale"
-    assert 2.5 < result["final_scale"] <= 3.0
+    assert result["final_scale"] == result["max_hero_scale"] * result["breathing_factor"]
     assert result["face_extent"][0] * result["final_scale"] > 160
     assert result["final_scale"] <= result["max_hero_scale"]
     assert result["face_after"] == result["target_face"]

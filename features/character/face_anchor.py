@@ -13,9 +13,10 @@ from .layout import (
     CARD_HEIGHT,
     CARD_WIDTH,
     FACE_SAFE_TOP,
+    HERO_CARD_DEPTH,
     MAX_HERO_SCALE,
     HEAD_ONLY_SCALE_BREATHING_FACTOR,
-    MIN_HERO_SCALE,
+    MIN_PREFERRED_HERO_SCALE,
     MIN_AUTO_SCALE_RATIO,
     CoreAxisInterval,
     clamp_top,
@@ -61,7 +62,6 @@ FACE_Y_OFFSET_OVERRIDES: dict[str, float | dict[str, float]] = {}
 _SUBJECT_ALPHA_THRESHOLD = 24
 # 横向分位忽略低质量边缘装饰；纵向仅采样脸部保护区到上半身窗口。
 _HERO_X_QUANTILES = (0.10, 0.90)
-_HERO_SOURCE_DEPTH_EXTENTS = 1.5
 # Pillow 的 BOX 重采样枚举值；通过图像结构接口调用，避免领域层直接导入 PIL。
 _BOX_RESAMPLING_FILTER = 4
 
@@ -165,16 +165,16 @@ def _alpha_mass_quantile(projection, quantile: float) -> int | None:
     return len(projection) - 1
 
 
-def _hero_subject_bounds(portrait, *, face_safe_source_y, point, extent):
+def _hero_subject_bounds(portrait, *, face_safe_source_y, point, hero_source_depth):
     """只在脸部保护带至上半身范围内估算稳健水平主体边界。"""
-    alpha = portrait.convert("RGBA").getchannel("A")
-    if face_safe_source_y is None or not _finite_point(point) or not _finite_extent(extent):
+    if face_safe_source_y is None:
         return None
+    alpha = portrait.convert("RGBA").getchannel("A")
     width, height = alpha.size
     hero_top = max(0, math.floor(float(face_safe_source_y)))
     hero_bottom = min(
         height,
-        math.ceil(float(point[1]) + _HERO_SOURCE_DEPTH_EXTENTS * float(extent[1])),
+        math.ceil(float(point[1]) + hero_source_depth),
     )
     if hero_bottom <= hero_top:
         return None
@@ -201,6 +201,26 @@ def _constrain_head_only_scale(
     hero_bbox,
     safe_rect,
 ):
+    face_x, face_y = float(point[0]), float(point[1])
+    target_x, target_y = target_face
+    constraints = {
+        "base_face_scale": base_face_scale,
+        "max_hero_scale": MAX_HERO_SCALE,
+    }
+    if face_safe_source_y is not None:
+        constraints["top"] = (target_y - safe_rect.top) / max(
+            face_y - face_safe_source_y, 1.0
+        )
+    if hero_bbox is not None:
+        x0, _y0, x1, _y1 = (float(value) for value in hero_bbox)
+        constraints["left"] = (target_x - safe_rect.left) / max(face_x - x0, 1.0)
+        constraints["right"] = (safe_rect.right - target_x) / max(x1 - face_x, 1.0)
+
+    selected_constraint = min(constraints, key=lambda name: constraints[name])
+    hard_safe_scale = constraints[selected_constraint]
+    # 无可行缩放时不强行放大；通常由非法 target 导致，并保留诊断原因。
+    valid_limit = math.isfinite(hard_safe_scale) and hard_safe_scale > 0
+    final_scale = hard_safe_scale * HEAD_ONLY_SCALE_BREATHING_FACTOR if valid_limit else 0.0
     safe_rect_data = {
         "left": safe_rect.left,
         "top": safe_rect.top,
@@ -216,75 +236,23 @@ def _constrain_head_only_scale(
         "safe_rect": safe_rect_data,
         "face_safe_source_y": face_safe_source_y,
         "scale_top_source": "face_safe_top" if face_safe_source_y is not None else "unavailable",
-        "scale_top": None,
-        "scale_left": None,
-        "scale_right": None,
+        "scale_top": constraints.get("top"),
+        "scale_left": constraints.get("left"),
+        "scale_right": constraints.get("right"),
         "base_face_scale": base_face_scale,
-        "min_hero_scale": MIN_HERO_SCALE,
+        "preferred_min_scale": MIN_PREFERRED_HERO_SCALE,
+        "undersized_by_constraints": final_scale < MIN_PREFERRED_HERO_SCALE,
         "max_hero_scale": MAX_HERO_SCALE,
-        "selected_scale_limit": min(base_face_scale, MAX_HERO_SCALE),
-        "selected_constraint": "base_face_scale",
+        "selected_scale_limit": hard_safe_scale,
+        "selected_constraint": selected_constraint,
+        "hard_safe_scale": hard_safe_scale,
         "breathing_factor": HEAD_ONLY_SCALE_BREATHING_FACTOR,
-        "final_scale": min(base_face_scale, MAX_HERO_SCALE),
+        "final_scale": final_scale,
     }
     if hero_bbox is None:
         diagnostics["scale_limit_reason"] = "hero_bounds_unavailable"
-        selected_constraint = (
-            "base_face_scale" if base_face_scale <= MAX_HERO_SCALE else "max_hero_scale"
-        )
-        selected_limit = min(base_face_scale, MAX_HERO_SCALE)
-        final_scale = max(
-            MIN_HERO_SCALE,
-            selected_limit * HEAD_ONLY_SCALE_BREATHING_FACTOR,
-        )
-        diagnostics.update(
-            {
-                "selected_constraint": selected_constraint,
-                "selected_scale_limit": selected_limit,
-                "final_scale": final_scale,
-            }
-        )
-        return final_scale, diagnostics
-
-    x0, _y0, x1, _y1 = (float(value) for value in hero_bbox)
-    face_x, face_y = float(point[0]), float(point[1])
-    target_x, target_y = target_face
-    epsilon = 1.0
-    constraints = {
-        "base_face_scale": base_face_scale,
-        "top": (
-            (target_y - safe_rect.top) / max(face_y - face_safe_source_y, epsilon)
-            if face_safe_source_y is not None
-            else MAX_HERO_SCALE
-        ),
-        "left": (target_x - safe_rect.left) / max(face_x - x0, epsilon),
-        "right": (safe_rect.right - target_x) / max(x1 - face_x, epsilon),
-        "max_hero_scale": MAX_HERO_SCALE,
-    }
-    diagnostics.update(
-        {
-            "scale_top": constraints["top"],
-            "scale_left": constraints["left"],
-            "scale_right": constraints["right"],
-        }
-    )
-    selected_constraint = min(constraints, key=lambda name: constraints[name])
-    selected_limit = constraints[selected_constraint]
-    if not math.isfinite(selected_limit) or selected_limit <= 0:
+    if not valid_limit:
         diagnostics["scale_limit_reason"] = "no_positive_safe_scale"
-        return min(base_face_scale, MAX_HERO_SCALE), diagnostics
-
-    final_scale = max(
-        MIN_HERO_SCALE,
-        selected_limit * HEAD_ONLY_SCALE_BREATHING_FACTOR,
-    )
-    diagnostics.update(
-        {
-            "selected_scale_limit": selected_limit,
-            "selected_constraint": selected_constraint,
-            "final_scale": final_scale,
-        }
-    )
     return final_scale, diagnostics
 
 
@@ -455,16 +423,12 @@ def framing(
             guard_y = float(alpha_bounds[1]) if alpha_bounds is not None else 0.0
             guard_source = "robust_alpha_top"
         base_face_scale = initial_scale
-        if _finite_extent(extent):
-            base_face_scale = min(
-                desired / float(extent[0]),
-                7200 / max(portrait.size),
-            )
+        hero_source_depth = HERO_CARD_DEPTH / max(base_face_scale, 1e-6)
         hero_bbox = _hero_subject_bounds(
             portrait,
             face_safe_source_y=face_safe_top_y,
             point=point,
-            extent=extent if _finite_extent(extent) else [1.0, 1.0],
+            hero_source_depth=hero_source_depth,
         )
         target_face = [float(target[0]), float(target[1]) + y_offset]
         scale, head_scale_diagnostics = _constrain_head_only_scale(
@@ -475,6 +439,12 @@ def framing(
             face_safe_source_y=face_safe_top_y,
             hero_bbox=hero_bbox,
             safe_rect=portrait_safe_rect(normalized_count),
+        )
+        head_scale_diagnostics.update(
+            {
+                "hero_card_depth": HERO_CARD_DEPTH,
+                "hero_source_depth": hero_source_depth,
+            }
         )
 
     requested = body_centering_requested(body_centering)
