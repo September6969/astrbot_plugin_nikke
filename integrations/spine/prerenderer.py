@@ -56,6 +56,7 @@ class SpineBundle:
         skeleton_value = paths.get("skel") or paths.get("skeleton")
         atlas_value = paths.get("atlas")
         texture_value = paths.get("png") or paths.get("texture") or paths.get("textures")
+        textures: tuple[Path, ...]
         if not isinstance(skeleton_value, (str, Path)) or not isinstance(atlas_value, (str, Path)):
             raise SpineRenderError("Spine bundle 缺少 skeleton 或 atlas")
         if isinstance(texture_value, (str, Path)):
@@ -468,6 +469,11 @@ class SpineTaskQueue:
         with self._lock:
             return len(self._pending_keys)
 
+    @property
+    def active_worker_count(self) -> int:
+        with self._lock:
+            return sum(worker.is_alive() for worker in self._workers)
+
     def wait_idle(self, timeout: float | None = None) -> bool:
         """等待当前任务完成；超时只返回 False，不改变队列状态。"""
         if timeout is None:
@@ -596,7 +602,7 @@ class SpinePreRenderer:
                 self._runtimes[v] = runtime
         self.fetcher = fetcher or SpineBundleFetcher(self.cache_dir / "spine-bundles")
         self.queue = SpineTaskQueue(max_workers=max_workers, max_queue_size=max_queue_size)
-        self._portrait_jobs: dict[str, concurrent.futures.Future] = {}
+        self._portrait_jobs: dict[str, concurrent.futures.Future[Image.Image | None]] = {}
         self._portrait_lock = threading.Lock()
         self._portrait_slots = threading.BoundedSemaphore(max_workers)
         self._portrait_closed = False
@@ -627,6 +633,15 @@ class SpinePreRenderer:
     def close(self, wait: bool = True) -> None:
         self._portrait_closed = True
         self.queue.stop(wait=wait)
+        if wait:
+            with self._portrait_lock:
+                jobs = tuple(self._portrait_jobs.values())
+            if jobs:
+                _, pending = concurrent.futures.wait(jobs, timeout=1.0)
+                if pending:
+                    raise TimeoutError("Spine 立绘任务仍在退出，不能确认资源关闭")
+            if self.queue.active_worker_count:
+                raise TimeoutError("Spine 队列 worker 尚未退出")
 
     def inspect_bundle(
         self,
@@ -708,6 +723,7 @@ class SpinePreRenderer:
                         return None
                     future = concurrent.futures.Future()
                     self._portrait_jobs[cache_key] = future
+            assert future is not None
             if owner:
                 def run() -> None:
                     acquired = False

@@ -6,6 +6,7 @@ import sys
 import threading
 import time
 import asyncio
+from contextlib import ExitStack
 from unittest.mock import patch
 
 import pytest
@@ -131,3 +132,75 @@ def test_official_adapter_deadline_kills_reaps_and_cleans_real_subprocess(tmp_pa
     assert time.monotonic() - start < .5
     assert processes and all(process.poll() is not None for process in processes)
     assert not list(tmp_path.glob(".spine-worker-*"))
+
+
+def test_prefetch_fallback_eventually_releases_slot_and_worker_files(tmp_path):
+    from astrbot_plugin_nikke.tests.test_runtime_character_portrait import RuntimeCharacterPortraitTests
+    from astrbot_plugin_nikke.tests.test_card_builder import build_card
+    from dataclasses import replace
+    helper = RuntimeCharacterPortraitTests()
+    manager, _, fetcher, source = helper._manager(tmp_path)
+    manager.environment.spine_budget_seconds = .06
+    official = SpineWorkerRuntime(SpineWorkerConfig(tmp_path / "worker", tmp_path), version="4.1")
+    manager.spine_renderer._runtimes["4.1"] = official
+    actual_run = subprocess.run
+    actual_popen = subprocess.Popen
+    processes = []
+    entered = threading.Event()
+    def popen(*args, **kwargs):
+        process = actual_popen(*args, **kwargs)
+        processes.append(process)
+        entered.set()
+        return process
+    def run(command, **kwargs):
+        return actual_run([sys.executable, "-c", "import time; time.sleep(10)"], **kwargs)
+    try:
+        with ExitStack() as stack:
+            stack.enter_context(patch("subprocess.Popen", side_effect=popen))
+            stack.enter_context(patch("subprocess.run", side_effect=run))
+            for method in ("get_equipment_icon", "get_favorite_item_icon", "get_cube_icon", "get_element_icon", "get_corporation_icon", "get_weapon_icon", "get_burst_icon"):
+                stack.enter_context(patch.object(manager._icons, method, return_value=manager.fallback("slots")))
+            assets = manager.resolve_character_assets(replace(build_card(), resource_id="20"), timeout=.06)
+            assert assets.portrait.size == (600, 900)
+            assert entered.wait(.3)
+            limit = time.monotonic() + 1
+            while manager.spine_renderer._portrait_jobs and time.monotonic() < limit:
+                time.sleep(.005)
+            assert not manager.spine_renderer._portrait_jobs
+            assert all(process.poll() is not None for process in processes)
+            assert not list(tmp_path.glob(".spine-worker-*"))
+            assert not list(manager.spine_renderer.prerender_dir.glob("*.png"))
+        # 等待原 executor 已提交的任务完成，再验证全部预取槽位归还。
+        manager._executor.submit(lambda: None).result(timeout=1)
+        acquired = 0
+        while manager._prefetch_slots.acquire(blocking=False):
+            acquired += 1
+        for _ in range(acquired):
+            manager._prefetch_slots.release()
+        assert acquired == manager.MAX_PREFETCH_TASKS
+    finally:
+        manager.close()
+
+
+def test_asset_close_failure_is_retryable_and_not_marked_closed(tmp_path):
+    from astrbot_plugin_nikke.tests.test_runtime_character_portrait import RuntimeCharacterPortraitTests
+    manager, _, _, _ = RuntimeCharacterPortraitTests()._manager(tmp_path)
+    with patch.object(manager.spine_renderer, "close", side_effect=TimeoutError("worker alive")):
+        with pytest.raises(TimeoutError):
+            manager.close()
+    assert not manager._closed
+    manager.close()
+    assert manager._closed
+
+
+def test_upstream_tree_lock_wait_is_inside_request_deadline(tmp_path):
+    from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
+    provider = NikkeDbProvider(tmp_path / "cache", tmp_path / "assets")
+    provider._tree_lock.acquire()
+    try:
+        start = time.monotonic()
+        with pytest.raises(TimeoutError):
+            provider.get_l2d_file_tree(deadline=start + .02)
+        assert time.monotonic() - start < .1
+    finally:
+        provider._tree_lock.release()

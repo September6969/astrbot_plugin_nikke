@@ -16,6 +16,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote
+from contextlib import nullcontext
 
 import httpx
 import asyncio
@@ -84,6 +85,7 @@ class NikkeDbProvider:
         self._index_loaded_at: float = 0
         self._l2d_tree: dict[str, object] | None = None
         self._l2d_tree_loaded_at: float = 0
+        self._tree_lock = threading.Lock()
 
         self.costume_errors: list[str] = []
         self.costume_character_map: dict[str, str] = {}
@@ -441,6 +443,16 @@ class NikkeDbProvider:
         return {"commit_sha": commit_sha, "tree_sha": tree_sha, "entries": validated}
 
     def get_l2d_file_tree(self, *, allow_remote: bool = True, deadline: float | None = None) -> dict[str, object] | None:
+        timeout = remaining(deadline)
+        acquired = self._tree_lock.acquire(timeout=timeout if timeout is not None else -1)
+        if not acquired:
+            raise TimeoutError("等待 Spine 文件树超出总预算")
+        try:
+            return self._get_l2d_file_tree(allow_remote=allow_remote, deadline=deadline)
+        finally:
+            self._tree_lock.release()
+
+    def _get_l2d_file_tree(self, *, allow_remote: bool, deadline: float | None) -> dict[str, object] | None:
         """读取缓存或 GitHub 的固定 L2D 文件树；不依赖推测的文件名。"""
         now = time.time()
         remaining(deadline)
@@ -479,7 +491,8 @@ class NikkeDbProvider:
                                 tree = await async_client.get(f"{self.GITHUB_API}/git/trees/{sha}?recursive=1", timeout=remaining(deadline, 8.0))
                                 return commit, tree
                     commit_response, tree_response = asyncio.run(fetch_tree())
-                with httpx.Client(timeout=remaining(deadline, 8.0), headers=headers) as client:
+                context = httpx.Client(timeout=8.0, headers=headers) if deadline is None else nullcontext()
+                with context as client:
                     if deadline is None:
                         commit_response = client.get(f"{self.GITHUB_API}/commits/main")
                     commit_response.raise_for_status()
@@ -524,6 +537,9 @@ class NikkeDbProvider:
                         self._l2d_tree = validated
                         self._l2d_tree_loaded_at = now
                         return validated
+            except TimeoutError:
+                # 调用者预算不足不是 upstream 故障，不污染全局失败冷却。
+                raise
             except (httpx.HTTPError, OSError, UnicodeError, ValueError, TypeError, AttributeError) as exc:
                 logger.info("Nikke-DB L2D tree unavailable: %s", type(exc).__name__)
                 self.mark_failed("index:l2d-tree", 300)
