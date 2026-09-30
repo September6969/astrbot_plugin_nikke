@@ -683,7 +683,7 @@ def test_field_evidence_independent_start_end_arbitration():
 
 @pytest.mark.asyncio
 async def test_per_source_lkg_restart_persistence(tmp_path):
-    """P0-2: Schema 4 格式写入及重启恢复：gamekee 和 official 在 schedule_events.json 中独立保存并成功还原为各源独立数据集。"""
+    """P0-2: Schema 5 写入及重启恢复，各源数据集独立保存并还原。"""
     service1 = ScheduleService(tmp_path)
     ev_gk = CanonicalEvent(
         id="gamekee:301",
@@ -714,7 +714,7 @@ async def test_per_source_lkg_restart_persistence(tmp_path):
     service1._sync_internal_stores(effective)
     service1._save_cache(force_events=True)
 
-    # 验证磁盘持久化为 Schema 4
+    # 验证磁盘持久化为 Schema 5
     data = json.loads((tmp_path / "schedule_events.json").read_text(encoding="utf-8"))
     assert data["schema"] == 5
     assert "source_datasets" in data

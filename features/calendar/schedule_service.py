@@ -37,6 +37,7 @@ from .merge import (
 )
 from .snapshot_repository import CalendarSnapshotRepository
 from .snapshot_state import SnapshotState
+from dataclasses import asdict
 from .refresh import CalendarRefreshCoordinator
 from .query import CAT_LABELS, CalendarScheduleQueries
 
@@ -151,6 +152,11 @@ class ScheduleService:
 
     def has_snapshot(self) -> bool:
         return self._has_snapshot
+
+    @property
+    def snapshot_diagnostics(self) -> dict[str, Any]:
+        """健康诊断显式区分可用内存和已经发布到磁盘的快照。"""
+        return asdict(self.snapshot_state)
 
     def activity_count(self) -> int:
         return len(self._activities)

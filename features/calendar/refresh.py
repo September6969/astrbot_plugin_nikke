@@ -230,6 +230,7 @@ class CalendarRefreshCoordinator:
 
             effective = service._merge_datasets()
             service._sync_internal_stores(effective)
+            service._last_batch_hash = service._compute_batch_hash(list(effective.values()))
             service._has_snapshot = bool(effective)
             service.last_sync_error = ""
             service._update_health_state()

@@ -34,7 +34,10 @@ class SnapshotState:
     def activate(self, service) -> None:
         self.active_display_revision = service._compute_batch_hash(list(service._events.values()))
         self.active_source_revision = revision({
-            source: sorted((event.to_dict() for event in events), key=lambda item: item["id"])
+            source: {
+                "events": sorted((event.to_dict() for event in events), key=lambda item: item["id"]),
+                "dataset_version": getattr(service._source_health.get(source), "dataset_version", 1),
+            }
             for source, events in service._source_datasets.items()
         })
         if (self.active_display_revision != self.persisted_display_revision

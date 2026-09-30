@@ -115,7 +115,7 @@ class CalendarSnapshotRepository:
                 )
                 if state.dirty:
                     state.durability_error = "snapshot revision mismatch"
-            elif data.get("schema") == 5:
+            elif data.get("schema") == 5 or hdata.get("snapshot_generation"):
                 # events 是数据权威；不把另一代 health 的新鲜度套到该快照。
                 state.durability_error = "snapshot generation mismatch; events authoritative, health discarded"
                 state.dirty = True
@@ -131,6 +131,15 @@ class CalendarSnapshotRepository:
 
     @staticmethod
     def _save_cache(service, force_events: bool = False) -> None:
+        try:
+            CalendarSnapshotRepository._publish_cache(service, force_events)
+        except Exception as exc:
+            service.snapshot_state.dirty = True
+            service.snapshot_state.durability_error = safe_exception_message(exc)
+            raise
+
+    @staticmethod
+    def _publish_cache(service, force_events: bool = False) -> None:
         """先发布完整 events，再发布同代 health，兼容缓存最后写。"""
         state = service.snapshot_state
         state.activate(service)
