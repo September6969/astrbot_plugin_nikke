@@ -716,7 +716,7 @@ async def test_per_source_lkg_restart_persistence(tmp_path):
 
     # 验证磁盘持久化为 Schema 4
     data = json.loads((tmp_path / "schedule_events.json").read_text(encoding="utf-8"))
-    assert data["schema"] == 4
+    assert data["schema"] == 5
     assert "source_datasets" in data
     assert len(data["source_datasets"]["gamekee"]) == 1
     assert len(data["source_datasets"]["official"]) == 1

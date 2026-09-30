@@ -132,10 +132,12 @@ async def test_save_failure_keeps_memory_disk_version_and_timestamp(tmp_path):
     timestamp = service.last_updated_at
     with patch.object(service, "_save_cache", side_effect=OSError("disk full")):
         assert not (await service.sync_from_source(lambda: [activity("new")]))[0]
-    assert service.list_activities() == [old]
-    assert service.last_updated_at == timestamp and service.cache_path.read_bytes() == old_bytes
+    assert any(item.event_id == "new" for item in service.list_activities())
+    assert service.snapshot_state.dirty
+    assert service.last_updated_at != timestamp and service.cache_path.read_bytes() == old_bytes
+    activated = service.list_activities()
     assert not (await service.sync_from_source(lambda: [object()]))[0]
-    assert service.list_activities() == [old]
+    assert service.list_activities() == activated
 
 
 @pytest.mark.asyncio

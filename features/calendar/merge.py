@@ -302,7 +302,8 @@ class CalendarMergePolicy:
             service.quality_diagnostics[key] = 0
         all_events: list[CanonicalEvent] = []
         for src, events in service._source_datasets.items():
-            all_events.extend(events)
+            # 仲裁的版本和展示诊断不得回写到来源 LKG。
+            all_events.extend(CanonicalEvent.from_dict(event.to_dict()) for event in events)
 
         merged_list: list[CanonicalEvent] = []
         for incoming in all_events:

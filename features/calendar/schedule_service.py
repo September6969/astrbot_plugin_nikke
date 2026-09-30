@@ -36,6 +36,7 @@ from .merge import (
     _title_similarity,
 )
 from .snapshot_repository import CalendarSnapshotRepository
+from .snapshot_state import SnapshotState
 from .refresh import CalendarRefreshCoordinator
 from .query import CAT_LABELS, CalendarScheduleQueries
 
@@ -53,6 +54,7 @@ class ScheduleService:
     ) -> None:
         self.merge_policy = CalendarMergePolicy()
         self.snapshot_repository = CalendarSnapshotRepository()
+        self.snapshot_state = SnapshotState()
         self.refresh_coordinator = CalendarRefreshCoordinator()
         self.query_service = CalendarScheduleQueries()
 

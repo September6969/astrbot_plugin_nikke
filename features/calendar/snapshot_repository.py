@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 from .models import CalendarActivity, _aware_utc
 from .canonical_models import CanonicalEvent, SourceHealth
+from .snapshot_state import revision
 from ...core.privacy import safe_exception_message
 
 logger = logging.getLogger("nikke.schedule.snapshot")
@@ -23,6 +24,8 @@ class CalendarSnapshotRepository:
         service.migrated_from_merged_snapshot = False
 
         events_loaded = False
+        data = {}
+        hdata = {}
         if service.events_path.is_file():
             try:
                 content = service.events_path.read_text(encoding="utf-8")
@@ -99,6 +102,28 @@ class CalendarSnapshotRepository:
             service._has_snapshot = bool(effective)
             service.last_updated_at = service.content_updated_at.isoformat() if service.content_updated_at else None
             service._update_health_state()
+            state = service.snapshot_state
+            state.activate(service)
+            generation = data.get("generation", "")
+            if data.get("schema") == 5 and generation and generation == hdata.get("snapshot_generation"):
+                state.persisted_display_revision = data.get("display_revision", "")
+                state.persisted_source_revision = data.get("source_revision", "")
+                state.generation = generation
+                state.dirty = (
+                    state.active_display_revision != state.persisted_display_revision
+                    or state.active_source_revision != state.persisted_source_revision
+                )
+                if state.dirty:
+                    state.durability_error = "snapshot revision mismatch"
+            elif data.get("schema") == 5:
+                # events 是数据权威；不把另一代 health 的新鲜度套到该快照。
+                state.durability_error = "snapshot generation mismatch; events authoritative, health discarded"
+                state.dirty = True
+                service.last_success_at = None
+                service.last_attempt_at = None
+                service._source_health = {}
+                service.last_sync_error = state.durability_error
+                service._update_health_state()
         else:
             service._has_snapshot = False
             service._sync_internal_stores({})
@@ -106,28 +131,18 @@ class CalendarSnapshotRepository:
 
     @staticmethod
     def _save_cache(service, force_events: bool = False) -> None:
-        """原子落盘：大事件数据仅在内容变更时写盘，健康元数据独立写盘。"""
-        # 1. schedule_health.json
-        health_payload = {
-            "last_success_at": service.last_success_at.isoformat() if service.last_success_at else None,
-            "last_attempt_at": service.last_attempt_at.isoformat() if service.last_attempt_at else None,
-            "content_updated_at": service.content_updated_at.isoformat() if service.content_updated_at else None,
-            "freshness": service.freshness,
-            "coverage": service.coverage,
-            "source_health": {src: h.to_dict() for src, h in service._source_health.items()},
-        }
-        tmp_health = service.health_path.with_suffix(".json.tmp")
-        with open(tmp_health, "w", encoding="utf-8") as f:
-            f.write(json.dumps(health_payload, ensure_ascii=False, indent=2))
-            f.flush()
-            os.fsync(f.fileno())
-        tmp_health.replace(service.health_path)
-
-        # 2. schedule_events.json 与 calendar_cache.json
-        if force_events or not service.events_path.is_file():
+        """先发布完整 events，再发布同代 health，兼容缓存最后写。"""
+        state = service.snapshot_state
+        state.activate(service)
+        write_events = force_events or state.dirty or not service.events_path.is_file()
+        generation = revision([state.active_display_revision, state.active_source_revision]) if write_events else state.generation
+        if write_events:
             events_payload = {
-                "schema": 4,
-                "content_updated_at": service.content_updated_at.isoformat() if service.content_updated_at else datetime.now(timezone.utc).isoformat(),
+                "schema": 5,
+                "generation": generation,
+                "display_revision": state.active_display_revision,
+                "source_revision": state.active_source_revision,
+                "content_updated_at": service.content_updated_at.isoformat() if service.content_updated_at else None,
                 "fingerprint": service._last_batch_hash,
                 "source_datasets": {
                     src: [ev.to_dict() for ev in ev_list]
@@ -136,21 +151,39 @@ class CalendarSnapshotRepository:
                 "merged_snapshot": [ev.to_dict() for ev in service._events.values()],
                 "events": [ev.to_dict() for ev in service._events.values()],
             }
-            tmp_events = service.events_path.with_suffix(".json.tmp")
-            with open(tmp_events, "w", encoding="utf-8") as f:
-                f.write(json.dumps(events_payload, ensure_ascii=False, indent=2))
-                f.flush()
-                os.fsync(f.fileno())
-            tmp_events.replace(service.events_path)
+            CalendarSnapshotRepository._atomic_write(service.events_path, events_payload)
 
+        health_payload = {
+            "snapshot_generation": generation,
+            "dirty": False,
+            "durability_error": None,
+            "last_success_at": service.last_success_at.isoformat() if service.last_success_at else None,
+            "last_attempt_at": service.last_attempt_at.isoformat() if service.last_attempt_at else None,
+            "content_updated_at": service.content_updated_at.isoformat() if service.content_updated_at else None,
+            "freshness": service.freshness,
+            "coverage": service.coverage,
+            "source_health": {src: h.to_dict() for src, h in service._source_health.items()},
+        }
+        CalendarSnapshotRepository._atomic_write(service.health_path, health_payload)
+
+        # 2. schedule_events.json 与 calendar_cache.json
+        if write_events:
             legacy_payload = {
                 "schema": 2,
                 "updated_at": service.last_updated_at or datetime.now(timezone.utc).isoformat(),
                 "activities": [ev.to_dict() for ev in service._events.values()],
             }
-            tmp_cache = service.cache_path.with_suffix(".json.tmp")
-            with open(tmp_cache, "w", encoding="utf-8") as f:
-                f.write(json.dumps(legacy_payload, ensure_ascii=False, indent=2))
-                f.flush()
-                os.fsync(f.fileno())
-            tmp_cache.replace(service.cache_path)
+            CalendarSnapshotRepository._atomic_write(service.cache_path, legacy_payload)
+        state.acknowledge(generation)
+
+    @staticmethod
+    def _atomic_write(path, payload) -> None:
+        temporary = path.with_suffix(".json.tmp")
+        try:
+            with open(temporary, "w", encoding="utf-8") as handle:
+                handle.write(json.dumps(payload, ensure_ascii=False, indent=2))
+                handle.flush()
+                os.fsync(handle.fileno())
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
