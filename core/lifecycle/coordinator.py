@@ -10,8 +10,8 @@ import concurrent.futures
 import threading
 import time
 import math
-from collections.abc import Awaitable, Callable
-from typing import Any
+from collections.abc import Awaitable, Callable, Coroutine
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -22,21 +22,21 @@ class RuntimeCoordinator:
     def __init__(
         self,
         *,
-        task_factory: Callable[[Awaitable[Any]], asyncio.Task] | None = None,
+        task_factory: Callable[[Awaitable[Any]], asyncio.Task[Any]] | None = None,
         task_error_handler: Callable[[str, BaseException], None] | None = None,
         close_budget_seconds: float = 10.0,
         task_timeout_seconds: float = 2.0,
         cleanup_timeout_seconds: float = 2.0,
     ) -> None:
-        self._task_factory = task_factory or asyncio.create_task
+        self._task_factory = task_factory or self._default_task_factory
         self._task_error_handler = task_error_handler or self._log_task_error
-        self._tasks: set[asyncio.Task] = set()
+        self._tasks: set[asyncio.Task[Any]] = set()
         self._cleanup_actions: list[tuple[str, Callable[[], Any]]] = []
         self._completed_cleanup: set[str] = set()
         self._state = "NEW"
         self._closing = False
         self._closed = False
-        self._start_task: asyncio.Task | None = None
+        self._start_task: asyncio.Task[Any] | None = None
         self._close_lock = asyncio.Lock()
         for value in (close_budget_seconds, task_timeout_seconds, cleanup_timeout_seconds):
             if not math.isfinite(value) or value <= 0:
@@ -44,8 +44,8 @@ class RuntimeCoordinator:
         self.close_budget_seconds = close_budget_seconds
         self.task_timeout_seconds = task_timeout_seconds
         self.cleanup_timeout_seconds = cleanup_timeout_seconds
-        self._cleanup_tasks: dict[str, asyncio.Task] = {}
-        self._cleanup_threads: dict[str, concurrent.futures.Future] = {}
+        self._cleanup_tasks: dict[str, asyncio.Task[Any]] = {}
+        self._cleanup_threads: dict[str, concurrent.futures.Future[Any]] = {}
 
     @property
     def survivors(self) -> tuple[str, ...]:
@@ -82,7 +82,7 @@ class RuntimeCoordinator:
             raise ValueError(f"重复登记运行时资源：{name}")
         self._cleanup_actions.append((name, callback))
 
-    def create_task(self, awaitable: Awaitable[Any]) -> asyncio.Task | None:
+    def create_task(self, awaitable: Awaitable[Any]) -> asyncio.Task[Any] | None:
         """创建并登记所有插件级后台任务。"""
         if not inspect.isawaitable(awaitable):
             raise TypeError("RuntimeCoordinator 只接受 awaitable")
@@ -102,7 +102,7 @@ class RuntimeCoordinator:
         self,
         initialize: Callable[[], Awaitable[Any]],
         scheduler: Callable[[], Awaitable[Any]],
-    ) -> asyncio.Task:
+    ) -> asyncio.Task[Any]:
         """只启动一次初始化和 scheduler；重复调用返回同一个任务。"""
         if self._start_task is not None:
             return self._start_task
@@ -152,8 +152,8 @@ class RuntimeCoordinator:
                 task for task in self._tasks
                 if task is not current and not task.done()
             ]
-            for task in active:
-                task.cancel()
+            for active_task in active:
+                active_task.cancel()
             failures: list[tuple[str, BaseException]] = []
             self._state = "CLOSING_TASKS"
             if active:
@@ -174,8 +174,9 @@ class RuntimeCoordinator:
                         raise TimeoutError("总关闭预算耗尽")
                     task = self._cleanup_tasks.get(name)
                     if task is None or task.cancelled() or (task.done() and task.exception() is not None):
-                        task = asyncio.create_task(self._invoke_cleanup(name, callback))
+                        task = self._default_task_factory(self._invoke_cleanup(name, callback))
                         self._cleanup_tasks[name] = task
+                        task.add_done_callback(self._observe_cleanup)
                     # 给后续独立资源留下机会，不让首个坏 cleanup 消耗全部预算。
                     budget = min(self.cleanup_timeout_seconds, available / (len(actions) - index))
                     done, _ = await asyncio.wait({task}, timeout=budget)
@@ -183,6 +184,8 @@ class RuntimeCoordinator:
                         if inspect.iscoroutinefunction(callback):
                             task.cancel()
                         raise TimeoutError(f"清理资源超时：{name}")
+                    if task.cancelled():
+                        raise RuntimeError(f"资源自行取消清理：{name}")
                     task.result()
                 except Exception as exc:
                     failures.append((name, exc))
@@ -205,7 +208,7 @@ class RuntimeCoordinator:
             result = callback()
         else:
             # 独立 daemon 线程不会冻结事件循环；超时后仍跟踪真实线程完成。
-            future: concurrent.futures.Future = concurrent.futures.Future()
+            future: concurrent.futures.Future[Any] = concurrent.futures.Future()
             self._cleanup_threads[name] = future
             def invoke() -> None:
                 try:
@@ -217,7 +220,13 @@ class RuntimeCoordinator:
         if inspect.isawaitable(result):
             await result
 
-    def _on_task_done(self, task: asyncio.Task) -> None:
+    @staticmethod
+    def _observe_cleanup(task: asyncio.Task[Any]) -> None:
+        # 关闭者可能已返回；保留任务以便重试，同时读取迟到异常避免静默遗失。
+        if not task.cancelled():
+            task.exception()
+
+    def _on_task_done(self, task: asyncio.Task[Any]) -> None:
         self._tasks.discard(task)
         if task.cancelled():
             return
@@ -227,6 +236,10 @@ class RuntimeCoordinator:
             return
         if error is not None:
             self._task_error_handler("background task", error)
+
+    @staticmethod
+    def _default_task_factory(awaitable: Awaitable[Any]) -> asyncio.Task[Any]:
+        return asyncio.create_task(cast(Coroutine[Any, Any, Any], awaitable))
 
     @staticmethod
     def _close_awaitable(awaitable: Awaitable[Any]) -> None:

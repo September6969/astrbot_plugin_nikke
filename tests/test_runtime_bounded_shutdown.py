@@ -141,3 +141,17 @@ async def test_blocking_sync_cleanup_is_tracked_not_falsely_completed():
     await value.close()
     assert calls.count("blocked") == 1
     assert value.closed
+
+
+@pytest.mark.asyncio
+async def test_self_cancelled_cleanup_is_not_external_close_cancellation():
+    value = coordinator()
+    cleaned = []
+    async def self_cancelled():
+        raise asyncio.CancelledError()
+    value.register_cleanup("good", lambda: cleaned.append(True))
+    value.register_cleanup("cancelled", self_cancelled)
+    with pytest.raises(RuntimeError, match="自行取消"):
+        await value.close()
+    assert cleaned == [True]
+    assert not value.closed
