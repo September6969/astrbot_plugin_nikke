@@ -18,6 +18,8 @@ import re
 import queue
 import threading
 import time
+import concurrent.futures
+import asyncio
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import Callable, Mapping, Protocol, Sequence
@@ -29,6 +31,7 @@ import httpx
 from PIL import Image
 
 from ...core.privacy import safe_exception_message, sanitize_log_text
+from .deadline import remaining, from_budget
 
 logger = logging.getLogger("nikke.spine")
 
@@ -82,6 +85,7 @@ class SpineRuntimeBackend(Protocol):
         *,
         animation: str,
         skin: str | None = None,
+        deadline: float | None = None,
     ) -> Image.Image:
         """加载 skeleton/atlas/texture 并返回透明 RGBA 图像。"""
 
@@ -223,14 +227,15 @@ class SpineBundleFetcher:
         *,
         budget_seconds: float | None = None,
         expected_blob_hashes: Mapping[str, str] | None = None,
+        deadline: float | None = None,
     ) -> SpineBundle:
-        started = time.monotonic()
+        deadline = from_budget(budget_seconds, deadline)
         targets: dict[str, Path] = {}
         total_bytes = 0
-        stream_timeout = max(self.timeout_seconds, budget_seconds) if budget_seconds is not None else self.timeout_seconds
 
         def fetch_file(url: str, target: Path, limit: int) -> bytes:
             nonlocal total_bytes
+            remaining(deadline)
             if self._valid_cached(target, limit):
                 cached_content = target.read_bytes()
                 try:
@@ -244,21 +249,25 @@ class SpineBundleFetcher:
             target.parent.mkdir(parents=True, exist_ok=True)
             response_content = bytearray()
             try:
-                with httpx.stream("GET", url, timeout=stream_timeout, follow_redirects=False) as response:
-                    response.raise_for_status()
-                    for chunk in response.iter_bytes():
-                        response_content.extend(chunk)
-                        if len(response_content) > limit or total_bytes + len(response_content) > self.MAX_TOTAL_BYTES:
-                            raise SpineRenderError("Spine bundle 下载超过大小预算")
-                        if budget_seconds is not None and time.monotonic() - started > budget_seconds:
-                            raise SpineRenderError("Spine bundle 下载超过总预算")
+                if deadline is not None:
+                    response_content.extend(self._download_before_deadline(
+                        url, min(limit, self.MAX_TOTAL_BYTES - total_bytes), deadline))
+                else:
+                    with httpx.stream("GET", url, timeout=self.timeout_seconds, follow_redirects=False) as response:
+                        response.raise_for_status()
+                        for chunk in response.iter_bytes():
+                            response_content.extend(chunk)
+                            if len(response_content) > limit or total_bytes + len(response_content) > self.MAX_TOTAL_BYTES:
+                                raise SpineRenderError("Spine bundle 下载超过大小预算")
             except (httpx.HTTPError, OSError) as exc:
                 raise SpineRenderError(f"Spine bundle 下载失败: {type(exc).__name__}") from exc
             data = bytes(response_content)
             self._verify_blob(url, data, expected_blob_hashes)
+            remaining(deadline)
             temporary = target.with_name(f".{target.name}.{threading.get_ident()}.tmp")
             try:
                 temporary.write_bytes(data)
+                remaining(deadline)
                 temporary.replace(target)
             finally:
                 temporary.unlink(missing_ok=True)
@@ -269,12 +278,19 @@ class SpineBundleFetcher:
             url = self._validate_url(urls.get(name))
             target = self._target(cache_key, name, url)
             targets[name] = target
-            fetch_file(url, target, self._limit_for(name))
+            try:
+                fetch_file(url, target, self._limit_for(name))
+            except TimeoutError as exc:
+                raise SpineRenderError("Spine bundle 超过总预算") from exc
 
         declared_pages = self._atlas_texture_pages(targets["atlas"])
         texture_files: list[Path] = []
         bundle_root = (self.cache_dir / self._safe_key(cache_key)).resolve()
         for page_name in declared_pages:
+            try:
+                remaining(deadline)
+            except TimeoutError as exc:
+                raise SpineRenderError("Spine bundle 超过总预算") from exc
             page = self._safe_page_path(page_name)
             texture_path = targets["atlas"].parent.joinpath(*page.parts)
             if not texture_path.resolve().is_relative_to(bundle_root):
@@ -290,6 +306,22 @@ class SpineBundleFetcher:
                 raise SpineRenderError("Spine atlas 声明的纹理页无效")
             texture_files.append(texture_path)
         return SpineBundle(targets["skel"], targets["atlas"], tuple(texture_files))
+
+    def _download_before_deadline(self, url: str, limit: int, deadline: float) -> bytes:
+        """取消实际异步网络读取，避免每个 socket read 重新获得完整预算。"""
+        async def download() -> bytes:
+            async with asyncio.timeout(remaining(deadline)):
+                async with httpx.AsyncClient(timeout=httpx.Timeout(remaining(deadline, self.timeout_seconds)), follow_redirects=False) as client:
+                    async with client.stream("GET", url) as response:
+                        response.raise_for_status()
+                        content = bytearray()
+                        async for chunk in response.aiter_bytes():
+                            remaining(deadline)
+                            content.extend(chunk)
+                            if len(content) > limit:
+                                raise SpineRenderError("Spine bundle 下载超过大小预算")
+                        return bytes(content)
+        return asyncio.run(download())
 
 
 @dataclass(slots=True)
@@ -564,6 +596,10 @@ class SpinePreRenderer:
                 self._runtimes[v] = runtime
         self.fetcher = fetcher or SpineBundleFetcher(self.cache_dir / "spine-bundles")
         self.queue = SpineTaskQueue(max_workers=max_workers, max_queue_size=max_queue_size)
+        self._portrait_jobs: dict[str, concurrent.futures.Future] = {}
+        self._portrait_lock = threading.Lock()
+        self._portrait_slots = threading.BoundedSemaphore(max_workers)
+        self._portrait_closed = False
 
     @property
     def runtime(self) -> SpineRuntimeBackend | None:
@@ -589,6 +625,7 @@ class SpinePreRenderer:
         self.queue.start(self.handle_job)
 
     def close(self, wait: bool = True) -> None:
+        self._portrait_closed = True
         self.queue.stop(wait=wait)
 
     def inspect_bundle(
@@ -655,20 +692,68 @@ class SpinePreRenderer:
         animation: str = "idle",
         skin: str | None = None,
         budget_seconds: float | None = None,
+        deadline: float | None = None,
     ) -> Image.Image | None:
         """按固定上游版本读取/生成 portrait，并写入现有本地图片缓存。"""
+        deadline = from_budget(budget_seconds, deadline)
+        try:
+            remaining(deadline)
+            with self._portrait_lock:
+                if self._portrait_closed:
+                    return None
+                future = self._portrait_jobs.get(cache_key)
+                owner = future is None
+                if owner:
+                    if len(self._portrait_jobs) >= self.queue.max_queue_size:
+                        return None
+                    future = concurrent.futures.Future()
+                    self._portrait_jobs[cache_key] = future
+            if owner:
+                def run() -> None:
+                    acquired = False
+                    try:
+                        acquired = self._portrait_slots.acquire(timeout=remaining(deadline))
+                        if not acquired:
+                            future.set_result(None)
+                            return
+                        result = self._render_remote_portrait(
+                            asset_id=asset_id, source_version=source_version, urls=urls,
+                            cache_key=cache_key, blob_hashes=blob_hashes,
+                            runtime_version=runtime_version, animation=animation, skin=skin,
+                            deadline=deadline,
+                        )
+                        future.set_result(result)
+                    except Exception as exc:
+                        future.set_exception(exc)
+                    finally:
+                        if acquired:
+                            self._portrait_slots.release()
+                        with self._portrait_lock:
+                            self._portrait_jobs.pop(cache_key, None)
+                try:
+                    threading.Thread(target=run, name="nikke-portrait-job", daemon=True).start()
+                except RuntimeError:
+                    with self._portrait_lock:
+                        self._portrait_jobs.pop(cache_key, None)
+                    future.set_result(None)
+            # 等待者超时只停止等待，不取消共享 owner 的任务。
+            result = future.result(timeout=remaining(deadline))
+            remaining(deadline)
+            return result.copy() if result is not None else None
+        except (TimeoutError, SpineRenderError, OSError, ValueError):
+            return None
+
+    def _render_remote_portrait(
+        self, *, asset_id, source_version, urls, cache_key, blob_hashes,
+        runtime_version, animation, skin, deadline,
+    ) -> Image.Image | None:
+        remaining(deadline)
         cached = self.cached_portrait(cache_key)
+        remaining(deadline)
         if cached is not None:
             return cached
         if not self._runtimes:
             return None
-        started = time.monotonic()
-
-        def remaining_budget() -> float | None:
-            if budget_seconds is None:
-                return None
-            return max(0.0, budget_seconds - (time.monotonic() - started))
-
         try:
             safe_asset_id = re.fullmatch(r"c[0-9]+(?:_[0-9]+)?", asset_id)
             if safe_asset_id is None or not re.fullmatch(r"[0-9a-f]{40,64}", source_version):
@@ -677,8 +762,9 @@ class SpinePreRenderer:
             bundle = self.fetcher.fetch(
                 urls,
                 bundle_key,
-                budget_seconds=remaining_budget(),
+                budget_seconds=remaining(deadline),
                 expected_blob_hashes=blob_hashes,
+                deadline=deadline,
             )
             actual_version = runtime_version
             if actual_version is None:
@@ -689,14 +775,13 @@ class SpinePreRenderer:
             if expected_version is None or not self.is_available(expected_version):
                 logger.info("Spine portrait unavailable: render_id=%s result=runtime_unavailable", asset_id)
                 return None
-            remaining = remaining_budget()
-            if remaining is not None and remaining <= 0:
-                raise SpineRenderError("Spine portrait 超过总预算")
+            remaining(deadline)
             rendered = self.render_full_body(
                 bundle,
                 expected_version,
                 animation=animation,
                 skin=skin,
+                deadline=deadline,
             )
             if rendered is None:
                 return None
@@ -704,6 +789,7 @@ class SpinePreRenderer:
             temporary = output_path.with_name(f".{output_path.name}.{threading.get_ident()}.tmp")
             try:
                 rendered.save(temporary, format="PNG")
+                remaining(deadline)
                 temporary.replace(output_path)
             finally:
                 temporary.unlink(missing_ok=True)
@@ -745,6 +831,7 @@ class SpinePreRenderer:
         *,
         animation: str = "idle",
         skin: str | None = None,
+        deadline: float | None = None,
     ) -> Image.Image | None:
         """严格匹配 runtime 并返回裁切后的透明 RGBA PNG 内容。
 
@@ -761,6 +848,7 @@ class SpinePreRenderer:
             return None
 
         try:
+            remaining(deadline)
             bundle = bundle_paths if isinstance(bundle_paths, SpineBundle) else SpineBundle.from_mapping(bundle_paths)
             if not all(path.is_file() for path in bundle.all_files()):
                 raise SpineRenderError("Spine bundle 文件不完整")
@@ -773,8 +861,15 @@ class SpinePreRenderer:
                 raise SpineRenderError(f"Spine bundle 预检查失败: {inspection.get('status')}")
             if int(inspection.get("missing_pages", 0)) != 0:
                 raise SpineRenderError("Spine bundle 缺少纹理页")
-            result = runtime.render(bundle, animation=animation, skin=skin)
-            return self._normalize_output(result)
+            remaining(deadline)
+            if deadline is None:
+                result = runtime.render(bundle, animation=animation, skin=skin)
+            else:
+                result = runtime.render(bundle, animation=animation, skin=skin, deadline=deadline)
+            remaining(deadline)
+            normalized = self._normalize_output(result)
+            remaining(deadline)
+            return normalized
         except (OSError, ValueError, TypeError, SpineRenderError) as exc:
             logger.warning("Spine render fallback: %s", safe_exception_message(exc))
             return None
@@ -794,21 +889,27 @@ class SpinePreRenderer:
                 job.callback(None)
             return
 
+        deadline = job.enqueued_at + job.budget_seconds if job.budget_seconds is not None else None
+        if job.is_expired():
+            if job.callback:
+                job.callback(None)
+            return
         bundle = job.bundle
         if bundle is None and job.bundle_urls:
             try:
                 bundle_key = job.character_id or job.cache_key
                 if not job.character_id and job.animation and bundle_key.endswith(f"_{job.animation}"):
                     bundle_key = bundle_key[:-len(f"_{job.animation}")]
-                bundle = self.fetcher.fetch(job.bundle_urls, bundle_key, budget_seconds=job.budget_seconds)
+                bundle = self.fetcher.fetch(job.bundle_urls, bundle_key, deadline=deadline)
             except SpineRenderError as exc:
                 logger.warning("Spine bundle fallback [%s]: %s", sanitize_log_text(job.cache_key, max_length=120), exc)
-        result = self.render_full_body(bundle, job.runtime_version, animation=job.animation, skin=job.skin) if bundle else None
+        result = self.render_full_body(bundle, job.runtime_version, animation=job.animation, skin=job.skin, deadline=deadline) if bundle else None
         if result is not None:
             output_path = self.prerender_dir / f"{job.cache_key}.png"
             try:
                 temporary = output_path.with_name(f".{output_path.name}.{threading.get_ident()}.tmp")
                 result.save(temporary, format="PNG")
+                remaining(deadline)
                 temporary.replace(output_path)
             except OSError as exc:
                 logger.error("保存 Spine 预渲染缓存失败: %s", safe_exception_message(exc))

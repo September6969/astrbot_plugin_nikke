@@ -7,6 +7,7 @@ import concurrent.futures
 import logging
 import re
 import threading
+import time
 
 from PIL import Image
 
@@ -48,12 +49,14 @@ class CharacterCardPrefetcher:
         return future
 
     def resolve_character_assets(self, data: CharacterCardData, timeout: float | None = None) -> CharacterCardAssets:
+        started = time.monotonic()
+        portrait_deadline = started + (self.env.spine_budget_seconds if timeout is None else min(timeout, self.env.spine_budget_seconds))
         equipment = data.equipment
         favorite = data.favorite_item
         cube = data.cube
         tasks = {
             "portrait": (
-                lambda: self.characters.get_character_portrait(data.name_code, data.resource_id, data.costume_id),
+                lambda: self.characters.get_character_portrait(data.name_code, data.resource_id, data.costume_id, deadline=portrait_deadline),
                 lambda: self.env.fallback("portrait"),
             ),
             "head": (lambda: self.icons.get_equipment_icon("head", equipment.get("head").equipment_id if equipment.get("head") and equipment["head"].equipped else None), lambda: self.env.fallback("head")),
@@ -105,7 +108,7 @@ class CharacterCardPrefetcher:
                 and bool(getattr(self.env.spine_renderer, "supported_runtime_versions", ()))
             ):
                 # 首次 runtime portrait 有独立的有限预算；其它图标超时不阻塞角色卡。
-                concurrent.futures.wait((portrait_future,), timeout=self.env.spine_budget_seconds)
+                concurrent.futures.wait((portrait_future,), timeout=max(0.0, portrait_deadline - time.monotonic()))
                 done = {future for future in future_map if future.done()}
                 not_done = set(future_map) - done
             for future in done:

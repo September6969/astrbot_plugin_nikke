@@ -18,6 +18,7 @@ from typing import Any
 from PIL import Image
 
 from .prerenderer import SpineBundle, SpineRenderError
+from .deadline import remaining
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +81,7 @@ class SpineWorkerRuntime:
         *,
         animation: str,
         skin: str | None = None,
+        deadline: float | None = None,
     ) -> Image.Image:
         skeleton = self._inside_root(bundle.skeleton)
         atlas = self._inside_root(bundle.atlas)
@@ -125,7 +127,7 @@ class SpineWorkerRuntime:
                     cwd=str(self.config.bundle_root),
                     env=environment,
                     capture_output=True,
-                    timeout=self.config.timeout_seconds,
+                    timeout=remaining(deadline, self.config.timeout_seconds),
                     check=False,
                     text=True,
                     encoding="utf-8",
@@ -142,7 +144,12 @@ class SpineWorkerRuntime:
                 raise SpineRenderError("Spine worker 响应不是 JSON") from exc
             if not isinstance(report, dict) or report.get("status") != "ok":
                 raise SpineRenderError("Spine worker 未报告成功")
-            return self._read_rgba(output, self.config.max_output_bytes)
+            remaining(deadline)
+            image = self._read_rgba(output, self.config.max_output_bytes)
+            remaining(deadline)
+            return image
+        except TimeoutError as exc:
+            raise SpineRenderError("Spine worker 超过总预算") from exc
         finally:
             output.unlink(missing_ok=True)
 

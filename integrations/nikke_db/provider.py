@@ -18,6 +18,8 @@ from pathlib import Path
 from urllib.parse import quote
 
 import httpx
+import asyncio
+from ..spine.deadline import remaining
 
 try:
     from ...features.character.master_resolver import CharacterMasterResolver
@@ -438,9 +440,10 @@ class NikkeDbProvider:
         validated.sort(key=lambda row: row["path"])
         return {"commit_sha": commit_sha, "tree_sha": tree_sha, "entries": validated}
 
-    def get_l2d_file_tree(self, *, allow_remote: bool = True) -> dict[str, object] | None:
+    def get_l2d_file_tree(self, *, allow_remote: bool = True, deadline: float | None = None) -> dict[str, object] | None:
         """读取缓存或 GitHub 的固定 L2D 文件树；不依赖推测的文件名。"""
         now = time.time()
+        remaining(deadline)
         if self._l2d_tree is not None and now - self._l2d_tree_loaded_at < self.L2D_TREE_TTL:
             return self._l2d_tree
 
@@ -463,8 +466,22 @@ class NikkeDbProvider:
                     "User-Agent": "astrbot-plugin-nikke-spine-portrait",
                     "Accept": "application/vnd.github+json",
                 }
-                with httpx.Client(timeout=8.0, headers=headers) as client:
-                    commit_response = client.get(f"{self.GITHUB_API}/commits/main")
+                if deadline is not None:
+                    async def fetch_tree():
+                        async with asyncio.timeout(remaining(deadline)):
+                            async with httpx.AsyncClient(headers=headers, timeout=remaining(deadline, 8.0)) as async_client:
+                                commit = await async_client.get(f"{self.GITHUB_API}/commits/main")
+                                commit.raise_for_status()
+                                payload = commit.json()
+                                sha = payload.get("commit", {}).get("tree", {}).get("sha")
+                                if not self._valid_tree_sha(sha):
+                                    raise ValueError("GitHub commit 元数据无效")
+                                tree = await async_client.get(f"{self.GITHUB_API}/git/trees/{sha}?recursive=1", timeout=remaining(deadline, 8.0))
+                                return commit, tree
+                    commit_response, tree_response = asyncio.run(fetch_tree())
+                with httpx.Client(timeout=remaining(deadline, 8.0), headers=headers) as client:
+                    if deadline is None:
+                        commit_response = client.get(f"{self.GITHUB_API}/commits/main")
                     commit_response.raise_for_status()
                     commit_payload = commit_response.json()
                     commit_sha = commit_payload.get("sha") if isinstance(commit_payload, dict) else None
@@ -473,7 +490,8 @@ class NikkeDbProvider:
                     if not self._valid_tree_sha(commit_sha) or not self._valid_tree_sha(tree_sha):
                         raise ValueError("GitHub commit 元数据无效")
 
-                    tree_response = client.get(f"{self.GITHUB_API}/git/trees/{tree_sha}?recursive=1")
+                    if deadline is None:
+                        tree_response = client.get(f"{self.GITHUB_API}/git/trees/{tree_sha}?recursive=1")
                     tree_response.raise_for_status()
                     if len(tree_response.content) > 12 * 1024 * 1024:
                         raise ValueError("GitHub L2D tree 响应超过大小限制")
@@ -493,6 +511,7 @@ class NikkeDbProvider:
                     if candidate is None:
                         raise ValueError("GitHub L2D tree 缺少有效资源项")
                     candidate["fetched_at"] = now
+                    remaining(deadline)
                     cache_path.parent.mkdir(parents=True, exist_ok=True)
                     temporary = cache_path.with_name(f".{cache_path.name}.{threading.get_ident()}.tmp")
                     try:
@@ -521,13 +540,14 @@ class NikkeDbProvider:
         action: str = "setup",
         *,
         allow_remote: bool = True,
+        deadline: float | None = None,
     ) -> SpineBundleSource | None:
         """从上游 tree 元数据配对真实 skeleton/atlas，并解析 atlas 纹理页。"""
         asset_id = self.normalize_resource_id(character_id.split("@", 1)[0] if isinstance(character_id, str) else "")
         action_id = self._normalize_id_component(action)
         if not asset_id or not asset_id.startswith("c") or not action_id:
             return None
-        tree = self.get_l2d_file_tree(allow_remote=allow_remote)
+        tree = self.get_l2d_file_tree(allow_remote=allow_remote, deadline=deadline)
         if tree is None:
             return None
         commit_sha = tree.get("commit_sha")
