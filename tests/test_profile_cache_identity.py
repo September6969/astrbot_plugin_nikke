@@ -96,3 +96,27 @@ async def test_expired_credentials_propagate_and_are_not_cached():
     with pytest.raises(CredentialExpiredError):
         await app.profile_for_stat_calculation(account())
     assert not app._stats_profile_cache
+
+
+def test_legacy_uid_and_field_boundaries_are_explicit():
+    from astrbot_plugin_nikke.features.account.identity import canonical_account_identity
+    assert canonical_account_identity({"platform": " GLOBAL ", "area_id": 1, "uid": 42}) == canonical_account_identity(account())
+    assert canonical_account_identity(account(platform="a:b", area_id="c")) != canonical_account_identity(account(platform="a", area_id="b:c"))
+    assert canonical_account_identity(account(area_id=True)) is None
+
+
+@pytest.mark.asyncio
+async def test_cancelled_follower_does_not_cancel_owner_read():
+    gateway = Gateway()
+    gateway.release = asyncio.Event()
+    app, _, _ = make_application(gateway=gateway)
+    owner = asyncio.create_task(app.profile_for_stat_calculation(account()))
+    await gateway.started.wait()
+    follower = asyncio.create_task(app.profile_for_stat_calculation(account()))
+    await asyncio.sleep(0)
+    follower.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await follower
+    gateway.release.set()
+    assert await owner
+    assert gateway.calls == 1
