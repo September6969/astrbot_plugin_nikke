@@ -6,6 +6,10 @@ from __future__ import annotations
 import asyncio
 import inspect
 import logging
+import concurrent.futures
+import threading
+import time
+import math
 from collections.abc import Awaitable, Callable
 from typing import Any
 
@@ -20,6 +24,9 @@ class RuntimeCoordinator:
         *,
         task_factory: Callable[[Awaitable[Any]], asyncio.Task] | None = None,
         task_error_handler: Callable[[str, BaseException], None] | None = None,
+        close_budget_seconds: float = 10.0,
+        task_timeout_seconds: float = 2.0,
+        cleanup_timeout_seconds: float = 2.0,
     ) -> None:
         self._task_factory = task_factory or asyncio.create_task
         self._task_error_handler = task_error_handler or self._log_task_error
@@ -31,6 +38,23 @@ class RuntimeCoordinator:
         self._closed = False
         self._start_task: asyncio.Task | None = None
         self._close_lock = asyncio.Lock()
+        for value in (close_budget_seconds, task_timeout_seconds, cleanup_timeout_seconds):
+            if not math.isfinite(value) or value <= 0:
+                raise ValueError("关闭预算必须是有限正数")
+        self.close_budget_seconds = close_budget_seconds
+        self.task_timeout_seconds = task_timeout_seconds
+        self.cleanup_timeout_seconds = cleanup_timeout_seconds
+        self._cleanup_tasks: dict[str, asyncio.Task] = {}
+        self._cleanup_threads: dict[str, concurrent.futures.Future] = {}
+
+    @property
+    def survivors(self) -> tuple[str, ...]:
+        """仍在运行的对象不能被 timeout 冒充为已经终止。"""
+        return tuple(sorted(
+            [f"task:{id(task)}" for task in self._tasks if not task.done()]
+            + [f"cleanup:{name}" for name, task in self._cleanup_tasks.items() if not task.done()]
+            + [f"thread:{name}" for name, future in self._cleanup_threads.items() if not future.done()]
+        ))
 
     @property
     def closing(self) -> bool:
@@ -114,12 +138,14 @@ class RuntimeCoordinator:
         return task
 
     async def close(self) -> None:
-        """先阻止新任务，再取消并等待任务，最后逆序关闭资源。"""
-        async with self._close_lock:
+        """共享总预算内停止工作并逐资源隔离，未完成对象保留供重试。"""
+        deadline = time.monotonic() + self.close_budget_seconds
+        await asyncio.wait_for(self._close_lock.acquire(), timeout=self.close_budget_seconds)
+        try:
             if self._closed:
                 return
             self._closing = True
-            self._state = "CLOSING"
+            self._state = "STOP_ACCEPTING_NEW_WORK"
 
             current = asyncio.current_task()
             active = [
@@ -128,27 +154,68 @@ class RuntimeCoordinator:
             ]
             for task in active:
                 task.cancel()
-            if active:
-                await asyncio.gather(*active, return_exceptions=True)
-
             failures: list[tuple[str, BaseException]] = []
-            for name, callback in reversed(self._cleanup_actions):
+            self._state = "CLOSING_TASKS"
+            if active:
+                _, pending = await asyncio.wait(active, timeout=min(
+                    self.task_timeout_seconds, max(0.0, (deadline - time.monotonic()) / 2)))
+                if pending:
+                    failures.append(("tasks", TimeoutError("后台任务取消后仍未退出")))
+
+            self._state = "CLEANING_RESOURCES"
+            actions = [(name, callback) for name, callback in reversed(self._cleanup_actions)
+                       if name not in self._completed_cleanup]
+            for index, (name, callback) in enumerate(actions):
                 if name in self._completed_cleanup:
                     continue
                 try:
-                    result = callback()
-                    if inspect.isawaitable(result):
-                        await result
+                    available = deadline - time.monotonic()
+                    if available <= 0:
+                        raise TimeoutError("总关闭预算耗尽")
+                    task = self._cleanup_tasks.get(name)
+                    if task is None or task.cancelled() or (task.done() and task.exception() is not None):
+                        task = asyncio.create_task(self._invoke_cleanup(name, callback))
+                        self._cleanup_tasks[name] = task
+                    # 给后续独立资源留下机会，不让首个坏 cleanup 消耗全部预算。
+                    budget = min(self.cleanup_timeout_seconds, available / (len(actions) - index))
+                    done, _ = await asyncio.wait({task}, timeout=budget)
+                    if not done:
+                        if inspect.iscoroutinefunction(callback):
+                            task.cancel()
+                        raise TimeoutError(f"清理资源超时：{name}")
+                    task.result()
                 except Exception as exc:
                     failures.append((name, exc))
                 else:
                     self._completed_cleanup.add(name)
 
             if failures:
-                self._state = "CLOSING"
+                self._state = "DEGRADED"
                 raise failures[0][1]
             self._closed = True
             self._state = "CLOSED"
+        except asyncio.CancelledError:
+            self._state = "DEGRADED"
+            raise
+        finally:
+            self._close_lock.release()
+
+    async def _invoke_cleanup(self, name: str, callback: Callable[[], Any]) -> None:
+        if inspect.iscoroutinefunction(callback):
+            result = callback()
+        else:
+            # 独立 daemon 线程不会冻结事件循环；超时后仍跟踪真实线程完成。
+            future: concurrent.futures.Future = concurrent.futures.Future()
+            self._cleanup_threads[name] = future
+            def invoke() -> None:
+                try:
+                    future.set_result(callback())
+                except BaseException as exc:
+                    future.set_exception(exc)
+            threading.Thread(target=invoke, name=f"nikke-cleanup-{name}", daemon=True).start()
+            result = await asyncio.shield(asyncio.wrap_future(future))
+        if inspect.isawaitable(result):
+            await result
 
     def _on_task_done(self, task: asyncio.Task) -> None:
         self._tasks.discard(task)
