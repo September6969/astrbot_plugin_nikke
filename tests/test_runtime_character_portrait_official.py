@@ -44,9 +44,12 @@ class _CountingOfficialWorker(SpineWorkerRuntime):
         super().__init__(config, version=version)
         self.calls = 0
 
-    def render(self, bundle, *, animation: str, skin: str | None = None) -> Image.Image:
+    def render(
+        self, bundle, *, animation: str, skin: str | None = None,
+        deadline: float | None = None,
+    ) -> Image.Image:
         self.calls += 1
-        return super().render(bundle, animation=animation, skin=skin)
+        return super().render(bundle, animation=animation, skin=skin, deadline=deadline)
 
 
 class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
