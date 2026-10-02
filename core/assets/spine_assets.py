@@ -9,6 +9,7 @@ from typing import Any, Callable
 from PIL import Image
 
 from ...integrations.spine.idle_resolver import IdleAnimationResolver
+from ...integrations.spine.deadline import from_budget, remaining
 from .environment import AssetEnvironment
 from .image_codec import AssetImageCodec
 from .models import AssetResult
@@ -60,9 +61,17 @@ class SpineAssetService:
             logger.warning("STATIC_SPINE_ASSET_INVALID: %s (costume: %s)", char_id, costume_id)
         return None
 
-    def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
+    def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None, *, deadline: float | None = None) -> Image.Image:
+        try:
+            return self._get_character_portrait(name_code, resource_id, costume_id, deadline=from_budget(self.env.spine_budget_seconds, deadline))
+        except TimeoutError:
+            logger.info("PORTRAIT_RESOLUTION: portrait_source=runtime result=deadline_exceeded")
+            return self.env.fallback("portrait")
+
+    def _get_character_portrait(self, name_code, resource_id, costume_id, *, deadline) -> Image.Image:
         """先用已验证 bundled 图；否则按固定 upstream bundle 生成本地缓存。"""
         del name_code
+        remaining(deadline)
         render_id = self.env.nikke_db.resolve_render_id(resource_id, costume_id) if resource_id else "missing"
         if render_id != "missing":
             bundled = self.get_static_portrait(render_id, costume_id)
@@ -74,6 +83,7 @@ class SpineAssetService:
             source = self.env.nikke_db.resolve_spine_bundle_source(
                 asset_id,
                 allow_remote=self.env.remote and bool(runtime_versions),
+                deadline=deadline,
             )
             if source is not None:
                 animation = IdleAnimationResolver.resolve_for_asset(asset_id) or "idle"
@@ -85,42 +95,21 @@ class SpineAssetService:
                     source.runtime_version,
                     animation,
                 )
-                lock = self.env.nikke_db.get_character_lock(cache_key)
-                with lock:
-                    cached = self.env.spine_renderer.cached_portrait(cache_key)
-                    if cached is not None:
-                        logger.info(
-                            "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=cache_hit",
-                            render_id,
-                        )
-                        return cached
-                    if self.env.remote:
-                        rendered = self.env.spine_renderer.render_remote_portrait(
-                            asset_id=asset_id,
-                            source_version=source.source_version,
-                            urls=source.urls,
-                            blob_hashes=source.blob_hashes,
-                            cache_key=cache_key,
-                            runtime_version=source.runtime_version,
-                            animation=animation,
-                            skin=skin if separator else None,
-                            budget_seconds=self.env.spine_budget_seconds,
-                        )
-                        if rendered is not None:
-                            logger.info(
-                                "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=rendered",
-                                render_id,
-                            )
-                            return rendered
-                        logger.info(
-                            "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=render_failed",
-                            render_id,
-                        )
-                    else:
-                        logger.info(
-                            "PORTRAIT_RESOLUTION: render_id=%s portrait_source=runtime result=cache_miss_offline",
-                            render_id,
-                        )
+                remaining(deadline)
+                cached = self.env.spine_renderer.cached_portrait(cache_key)
+                remaining(deadline)
+                if cached is not None:
+                    return cached
+                if self.env.remote:
+                    rendered = self.env.spine_renderer.render_remote_portrait(
+                        asset_id=asset_id, source_version=source.source_version,
+                        urls=source.urls, blob_hashes=source.blob_hashes,
+                        cache_key=cache_key, runtime_version=source.runtime_version,
+                        animation=animation, skin=skin if separator else None,
+                        deadline=deadline,
+                    )
+                    if rendered is not None:
+                        return rendered
             else:
                 logger.info(
                     "PORTRAIT_RESOLUTION: render_id=%s portrait_source=upstream result=bundle_unavailable",
@@ -144,8 +133,8 @@ class CharacterAssetService:
         self.lineup_lookup = lineup_lookup or self.resolve_lineup_portrait
         self.boss_lookup = boss_lookup or self.resolve_boss_asset
 
-    def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None) -> Image.Image:
-        return self.spine.get_character_portrait(name_code, resource_id, costume_id)
+    def get_character_portrait(self, name_code, resource_id, costume_id: int | str | None = None, *, deadline: float | None = None) -> Image.Image:
+        return self.spine.get_character_portrait(name_code, resource_id, costume_id, deadline=deadline)
 
     def get_lineup_portrait(
         self,

@@ -131,6 +131,7 @@ class CalendarRefreshCoordinator:
             service._snapshot_version = f"v{int(time.time())}"
 
         service._sync_internal_stores(merged_effective)
+        service.snapshot_state.activate(service)
         service._has_snapshot = bool(merged_effective)
         service.last_sync_error = "; ".join(source_errors) if source_errors else ""
         service._update_health_state()
@@ -160,7 +161,12 @@ class CalendarRefreshCoordinator:
         try:
             service._save_cache(force_events=content_changed)
         except Exception as exc:
-            logger.error("[NIKKE] 日程持久化失败: %s", safe_exception_message(exc))
+            error = safe_exception_message(exc)
+            service.snapshot_state.dirty = True
+            service.snapshot_state.durability_error = error
+            service.last_sync_error = f"persistence failed: {error}"
+            logger.error("[NIKKE] 日程持久化失败: %s", error)
+            return False, service.last_sync_error
 
         if not any_success:
             err = "; ".join(source_errors) or "全部数据源抓取失败"
@@ -224,12 +230,22 @@ class CalendarRefreshCoordinator:
 
             effective = service._merge_datasets()
             service._sync_internal_stores(effective)
+            service._last_batch_hash = service._compute_batch_hash(list(effective.values()))
             service._has_snapshot = bool(effective)
             service.last_sync_error = ""
             service._update_health_state()
             service.last_sync_report = getattr(fetcher, "last_scan", None)
 
-            service._save_cache(force_events=True)
+            service.snapshot_state.activate(service)
+            try:
+                service._save_cache(force_events=True)
+            except Exception as exc:
+                # 新快照已经激活，落盘失败不能回滚可用内存。
+                error = safe_exception_message(exc)
+                service.snapshot_state.dirty = True
+                service.snapshot_state.durability_error = error
+                service.last_sync_error = f"persistence failed: {error}"
+                return False, service.last_sync_error
 
             if service.visual_cache is not None:
                 try:

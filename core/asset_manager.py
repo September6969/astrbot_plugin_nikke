@@ -269,9 +269,6 @@ class AssetManager:
     def close(self) -> None:
         if self._closed:
             return
-        self._closed = True
         self._prefetcher.close()
-        try:
-            self.spine_renderer.close(wait=False)
-        except Exception:
-            pass
+        self.spine_renderer.close(wait=True)
+        self._closed = True

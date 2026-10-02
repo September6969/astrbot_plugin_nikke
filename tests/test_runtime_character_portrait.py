@@ -29,7 +29,7 @@ class _FakeRuntime:
     def __init__(self) -> None:
         self.calls = 0
 
-    def render(self, bundle, *, animation: str, skin: str | None = None) -> Image.Image:
+    def render(self, bundle, *, animation: str, skin: str | None = None, deadline=None) -> Image.Image:
         self.calls += 1
         return Image.new("RGBA", (32, 64), (22, 177, 88, 255))
 
@@ -39,7 +39,7 @@ class _FakeFetcher:
         self.bundle = bundle
         self.calls = 0
 
-    def fetch(self, urls, cache_key, *, budget_seconds=None, expected_blob_hashes=None) -> SpineBundle:
+    def fetch(self, urls, cache_key, *, budget_seconds=None, expected_blob_hashes=None, deadline=None) -> SpineBundle:
         self.calls += 1
         return self.bundle
 

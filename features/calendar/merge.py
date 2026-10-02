@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from typing import Any, Sequence
 
 from .models import CalendarActivity, _aware_utc
+from .snapshot_state import revision
 from .content_quality import (
     DisplayTier,
     IdentityDecision,
@@ -240,8 +241,15 @@ class CalendarMergePolicy:
 
     @staticmethod
     def _compute_batch_hash(service, events: Sequence[CanonicalEvent]) -> str:
-        parts = [e.fingerprint for e in sorted(events, key=lambda x: x.id)]
-        return hashlib.sha256("".join(parts).encode("utf-8")).hexdigest()
+        fields = {
+            "id", "title", "event_type", "start_at", "end_at", "start_precision",
+            "end_precision", "server_scope", "cycle_id", "banner_url", "detail_url",
+            "has_started_evidence", "is_cancelled", "is_valid_interval", "metadata",
+        }
+        return revision([
+            {key: value for key, value in event.to_dict().items() if key in fields}
+            for event in sorted(events, key=lambda item: item.id)
+        ])
 
     @staticmethod
     def reload_overrides(service) -> None:
@@ -302,7 +310,8 @@ class CalendarMergePolicy:
             service.quality_diagnostics[key] = 0
         all_events: list[CanonicalEvent] = []
         for src, events in service._source_datasets.items():
-            all_events.extend(events)
+            # 仲裁的版本和展示诊断不得回写到来源 LKG。
+            all_events.extend(CanonicalEvent.from_dict(event.to_dict()) for event in events)
 
         merged_list: list[CanonicalEvent] = []
         for incoming in all_events:

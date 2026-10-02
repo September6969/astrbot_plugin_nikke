@@ -488,7 +488,7 @@ class AssetManagerTests(unittest.TestCase):
             started = threading.Event()
             release = threading.Event()
             try:
-                def slow_portrait(*_):
+                def slow_portrait(*_, **kwargs):
                     started.set()
                     self.assertTrue(release.wait(2.0))
                     return manager.fallback("portrait")
@@ -528,7 +528,9 @@ class AssetManagerTests(unittest.TestCase):
                 card.costume_id = "skin_01"
                 with patch.object(manager._characters, "get_character_portrait", return_value=manager.fallback("portrait")) as portrait:
                     manager.resolve_character_assets(card)
-                portrait.assert_called_once_with(card.name_code, card.resource_id, "skin_01")
+                portrait.assert_called_once()
+                self.assertEqual(portrait.call_args.args, (card.name_code, card.resource_id, "skin_01"))
+                self.assertGreater(portrait.call_args.kwargs["deadline"], 0)
             finally:
                 manager.close()
 

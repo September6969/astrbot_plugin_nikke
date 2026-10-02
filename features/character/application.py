@@ -14,6 +14,7 @@ from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from astrbot_plugin_nikke.core.privacy import safe_exception_message
 from astrbot_plugin_nikke.features.account.errors import CredentialExpiredError
+from astrbot_plugin_nikke.features.account.identity import AccountIdentity, canonical_account_identity
 from .models import CharacterCardData, CharacterCardRequest, CharacterCardResult
 from .research_levels import map_research_levels
 
@@ -141,7 +142,8 @@ class CharacterApplication:
         self._clock = clock
         self._monotonic = monotonic or time.monotonic
         self._plugin_version = plugin_version
-        self._stats_profile_cache: dict[str, tuple[float, dict[str, Any]]] = {}
+        self._stats_profile_cache: dict[AccountIdentity, tuple[float, dict[str, Any]]] = {}
+        self._profile_reads: dict[AccountIdentity, asyncio.Future[dict[str, Any]]] = {}
         self._name_map_cache: tuple[str, dict[str, str]] | None = None
 
     def _account(self, qq_id: str) -> Mapping[str, Any]:
@@ -245,22 +247,49 @@ class CharacterApplication:
         self, account: Mapping[str, Any]
     ) -> dict[str, Any]:
         """缓存前哨研究快照；失败时由统计计算器保守显示不可用。"""
-        cache_key = str(account.get("game_uid") or account.get("qq_id") or "account")
+        cache_key = canonical_account_identity(account)
+        if cache_key is None:
+            profile, _ = await self._read_stat_profile(account)
+            return profile
         now = self._monotonic()
         cached = self._stats_profile_cache.get(cache_key)
         if cached and now - cached[0] < self.PROFILE_CACHE_TTL_SECONDS:
             return cached[1]
+        pending = self._profile_reads.get(cache_key)
+        if pending is not None:
+            return await asyncio.shield(pending)
+        pending = asyncio.get_running_loop().create_future()
+        self._profile_reads[cache_key] = pending
+        try:
+            profile, successful = await self._read_stat_profile(account)
+            if successful:
+                self._cache_stat_profile(cache_key, profile)
+            pending.set_result(profile)
+            return profile
+        except asyncio.CancelledError:
+            pending.cancel()
+            raise
+        except BaseException as exc:
+            pending.set_exception(exc)
+            pending.exception()
+            raise
+        finally:
+            self._profile_reads.pop(cache_key, None)
+
+    async def _read_stat_profile(self, account: Mapping[str, Any]) -> tuple[dict[str, Any], bool]:
         try:
             profile = await self._gateway.get_profile(account)
+        except CredentialExpiredError:
+            raise
         except Exception as exc:
-            if isinstance(exc, CredentialExpiredError):
-                raise
-            _LOGGER.warning(
-                "[NIKKE] 研究快照读取失败：%s", safe_exception_message(exc)
-            )
-            profile = {}
-        if not isinstance(profile, dict):
-            profile = {}
+            _LOGGER.warning("[NIKKE] 研究快照读取失败：%s", safe_exception_message(exc))
+            return {}, False
+        if not isinstance(profile, Mapping):
+            return {}, False
+        return dict(profile), True
+
+    def _cache_stat_profile(self, cache_key: AccountIdentity, profile: dict[str, Any]) -> None:
+        now = self._monotonic()
         if len(self._stats_profile_cache) >= self.PROFILE_CACHE_LIMIT:
             expired = [
                 key
@@ -276,7 +305,6 @@ class CharacterApplication:
                 )
                 self._stats_profile_cache.pop(oldest, None)
         self._stats_profile_cache[cache_key] = (now, profile)
-        return profile
 
     async def character_card(
         self,

@@ -230,18 +230,18 @@ async def test_profile_snapshot_cache_remains_bounded_and_reuses_five_minute_ent
     ticks = iter(float(index) for index in range(1000))
     application, _, _ = make_application(gateway=gateway, monotonic=lambda: next(ticks))
 
-    first_account = {"game_uid": "stable-1", "qq_id": "qq-1"}
+    first_account = {"platform": "global", "area_id": "1", "game_uid": "stable-1", "qq_id": "qq-1"}
     first = await application.profile_for_stat_calculation(first_account)
     cached = await application.profile_for_stat_calculation(first_account)
     assert cached is first
     assert len(gateway.profile_requests) == 1
 
     for index in range(60):
-        await application.profile_for_stat_calculation({"game_uid": f"uid-{index}"})
+        await application.profile_for_stat_calculation({"platform": "global", "area_id": "1", "game_uid": f"uid-{index}"})
 
     assert len(application._stats_profile_cache) <= 50
-    assert "uid-0" not in application._stats_profile_cache
-    assert "uid-59" in application._stats_profile_cache
+    assert not any(key.game_uid == "uid-0" for key in application._stats_profile_cache)
+    assert any(key.game_uid == "uid-59" for key in application._stats_profile_cache)
 
 
 @pytest.mark.asyncio
@@ -251,7 +251,7 @@ async def test_profile_snapshot_cache_expires_at_five_minutes():
     application, _, _ = make_application(
         gateway=gateway, monotonic=lambda: ticks[0]
     )
-    account = {"game_uid": "stable-1"}
+    account = {"platform": "global", "area_id": "1", "game_uid": "stable-1"}
 
     await application.profile_for_stat_calculation(account)
     ticks[0] = 299.9
