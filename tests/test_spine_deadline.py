@@ -170,13 +170,18 @@ def test_prefetch_fallback_eventually_releases_slot_and_worker_files(tmp_path):
             assert all(process.poll() is not None for process in processes)
             assert not list(tmp_path.glob(".spine-worker-*"))
             assert not list(manager.spine_renderer.prerender_dir.glob("*.png"))
-        # 等待原 executor 已提交的任务完成，再验证全部预取槽位归还。
-        manager._executor.submit(lambda: None).result(timeout=1)
+        # 多线程 executor 的空任务不是完成屏障；有界等待全部回调归还槽位。
+        limit = time.monotonic() + 1
         acquired = 0
-        while manager._prefetch_slots.acquire(blocking=False):
-            acquired += 1
-        for _ in range(acquired):
-            manager._prefetch_slots.release()
+        try:
+            while acquired < manager.MAX_PREFETCH_TASKS:
+                remaining = limit - time.monotonic()
+                if remaining <= 0 or not manager._prefetch_slots.acquire(timeout=remaining):
+                    break
+                acquired += 1
+        finally:
+            for _ in range(acquired):
+                manager._prefetch_slots.release()
         assert acquired == manager.MAX_PREFETCH_TASKS
     finally:
         manager.close()
