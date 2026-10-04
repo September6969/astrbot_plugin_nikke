@@ -14,6 +14,8 @@ from __future__ import annotations
 import logging
 import math
 import hashlib
+import shutil
+from contextlib import contextmanager
 import re
 import queue
 import threading
@@ -488,6 +490,7 @@ class SpineTaskQueue:
                 return False
             time.sleep(min(0.01, remaining))
 
+
     def enqueue(self, job: SpineJob) -> bool:
         with self._lock:
             if self._stopping:
@@ -589,6 +592,7 @@ class SpinePreRenderer:
     ):
         self.cache_dir = Path(cache_dir)
         self.prerender_dir = self.cache_dir / "portraits"
+        self._local_portrait_lock = threading.Lock()
         self.prerender_dir.mkdir(parents=True, exist_ok=True)
         self._runtimes: dict[str, SpineRuntimeBackend] = {}
         if isinstance(runtime, Mapping):
@@ -893,6 +897,67 @@ class SpinePreRenderer:
             # 第三方 runtime 不能穿透后台任务线程或破坏角色卡主链。
             logger.warning("Spine runtime adapter fallback: %s", safe_exception_message(exc))
             return None
+
+    @contextmanager
+    def _local_render_guard(self, deadline):
+        """等待本地渲染锁时也遵守总预算。"""
+        timeout = remaining(deadline)
+        if not self._local_portrait_lock.acquire(timeout=timeout if timeout is not None else -1):
+            raise TimeoutError("等待本地 Spine worker 超出预算")
+        try:
+            yield
+        finally:
+            self._local_portrait_lock.release()
+
+    def render_local_portrait(self, asset_id, *, animation="idle", skin=None, deadline=None):
+        """读取本地正式资源，复制到受限 worker 缓存后渲染。"""
+        from .local_resolver import LocalSpineBundleResolver
+
+        remaining(deadline)
+        local = LocalSpineBundleResolver().resolve(asset_id)
+        digest = hashlib.sha256()
+        for path in local.as_spine_bundle().all_files():
+            remaining(deadline)
+            digest.update(path.relative_to(local.bundle_root).as_posix().encode("utf-8"))
+            digest.update(path.read_bytes())
+        key = SpineBundleFetcher._safe_key(
+            f"local-{asset_id}-{digest.hexdigest()}-{local.runtime_version}-{self.RENDERER_VERSION}-{animation}-{skin or 'default'}"
+        )
+        cached = self.cached_portrait(key)
+        if cached is not None:
+            logger.info("LOCAL_SPINE_PORTRAIT: render_id=%s result=cache_hit", asset_id)
+            return cached
+        with self._local_render_guard(deadline):
+            cached = self.cached_portrait(key)
+            if cached is not None:
+                return cached
+            root = self.cache_dir / "spine-bundles" / key
+            root.mkdir(parents=True, exist_ok=True)
+            targets = []
+            for path in local.as_spine_bundle().all_files():
+                remaining(deadline)
+                target = root / path.relative_to(local.bundle_root)
+                if not target.resolve().is_relative_to(root.resolve()):
+                    raise SpineRenderError("本地 worker 缓存路径越界")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(path, target)
+                targets.append(target)
+            image = self.render_full_body(
+                SpineBundle(targets[0], targets[1], tuple(targets[2:])),
+                local.runtime_version, animation=animation, skin=skin, deadline=deadline,
+            )
+            if image is not None:
+                self.prerender_dir.mkdir(parents=True, exist_ok=True)
+                output = self.prerender_dir / f"{key}.png"
+                temporary = output.with_suffix(".tmp")
+                try:
+                    image.save(temporary, format="PNG")
+                    remaining(deadline)
+                    temporary.replace(output)
+                finally:
+                    temporary.unlink(missing_ok=True)
+            logger.info("LOCAL_SPINE_PORTRAIT: render_id=%s result=%s", asset_id, "rendered" if image is not None else "render_failed")
+            return image
 
     def handle_job(self, job: SpineJob) -> None:
         """队列工作线程执行回调。"""

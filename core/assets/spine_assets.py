@@ -79,6 +79,19 @@ class SpineAssetService:
                 return bundled
 
             asset_id, separator, skin = render_id.partition("@")
+            from ...integrations.spine.local_resolver import LocalSpineBundleResolver, LocalSpineResolveError
+
+            local_root = LocalSpineBundleResolver.DEFAULT_ROOT / "l2d" / asset_id
+            if local_root.is_dir():
+                animation = IdleAnimationResolver.resolve_for_asset(asset_id) or "idle"
+                try:
+                    image = self.env.spine_renderer.render_local_portrait(
+                        asset_id, animation=animation, skin=skin if separator else None, deadline=deadline,
+                    )
+                    return image if image is not None else self.env.fallback("portrait")
+                except LocalSpineResolveError as exc:
+                    logger.warning("LOCAL_SPINE_PORTRAIT: render_id=%s result=invalid_bundle (%s)", asset_id, type(exc).__name__)
+                    return self.env.fallback("portrait")
             runtime_versions = getattr(self.env.spine_renderer, "supported_runtime_versions", ())
             source = self.env.nikke_db.resolve_spine_bundle_source(
                 asset_id,
