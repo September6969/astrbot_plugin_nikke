@@ -86,7 +86,8 @@ class SpineAssetService:
                 animation = IdleAnimationResolver.resolve_for_asset(asset_id) or "idle"
                 try:
                     image = self.env.spine_renderer.render_local_portrait(
-                        asset_id, animation=animation, skin=skin if separator else None, deadline=deadline,
+                        asset_id, LocalSpineBundleResolver().resolve(asset_id),
+                        animation=animation, skin=skin if separator else None, deadline=deadline,
                     )
                     return image if image is not None else self.env.fallback("portrait")
                 except LocalSpineResolveError as exc:

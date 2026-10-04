@@ -909,12 +909,9 @@ class SpinePreRenderer:
         finally:
             self._local_portrait_lock.release()
 
-    def render_local_portrait(self, asset_id, *, animation="idle", skin=None, deadline=None):
+    def render_local_portrait(self, asset_id, local, *, animation="idle", skin=None, deadline=None):
         """读取本地正式资源，复制到受限 worker 缓存后渲染。"""
-        from .local_resolver import LocalSpineBundleResolver
-
         remaining(deadline)
-        local = LocalSpineBundleResolver().resolve(asset_id)
         digest = hashlib.sha256()
         for path in local.as_spine_bundle().all_files():
             remaining(deadline)
