@@ -146,6 +146,9 @@ class SpineWorkerRuntime:
                 raise SpineRenderError("Spine worker 未报告成功")
             remaining(deadline)
             image = self._read_rgba(output, self.config.max_output_bytes)
+            geometry = report.get("geometry")
+            if isinstance(geometry, dict) and geometry.get("schema") == 1:
+                image.info["spine_geometry"] = geometry
             remaining(deadline)
             return image
         except TimeoutError as exc:

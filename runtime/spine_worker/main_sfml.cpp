@@ -22,10 +22,80 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <sstream>
+#include <iomanip>
 #include <string>
 #include <vector>
 
 namespace {
+
+// 同一帧的最终画布坐标随像素返回，避免另一次采样或裁切产生锚点偏移。
+std::string json_string(const char *text) {
+	std::ostringstream out;
+	out << '"';
+	for (const unsigned char c : std::string(text ? text : "")) {
+		if (c == '"' || c == '\\') out << '\\' << c;
+		else if (c < 32) out << "\\u" << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(c) << std::dec;
+		else out << c;
+	}
+	out << '"';
+	return out.str();
+}
+
+std::string anchor_geometry(spine::Skeleton &skeleton) {
+	std::ostringstream out;
+	out << "{\"schema\":1,\"bones\":[";
+	bool first = true;
+	for (size_t i = 0; i < skeleton.getBones().size(); ++i) {
+		auto *bone = skeleton.getBones()[i];
+		if (!bone->isActive() || !std::isfinite(bone->getWorldX()) || !std::isfinite(bone->getWorldY())) continue;
+		if (!first) out << ',';
+		first = false;
+		out << "{\"name\":" << json_string(bone->getData().getName().buffer())
+			<< ",\"parent\":" << json_string(bone->getParent() ? bone->getParent()->getData().getName().buffer() : "")
+			<< ",\"x\":" << bone->getWorldX() << ",\"y\":" << bone->getWorldY() << '}';
+	}
+	out << "],\"attachments\":[";
+	first = true;
+	for (size_t i = 0; i < skeleton.getDrawOrder().size(); ++i) {
+		auto *slot = skeleton.getDrawOrder()[i];
+		auto *attachment = slot->getAttachment();
+		if (!attachment || !slot->getBone().isActive() || slot->getColor().a <= 0) continue;
+		std::vector<float> vertices;
+		if (attachment->getRTTI().isExactly(spine::RegionAttachment::rtti)) {
+			auto *region = static_cast<spine::RegionAttachment *>(attachment);
+			if (region->getColor().a <= 0) continue;
+			vertices.resize(8);
+#if defined(SPINE_MAJOR_VERSION) && (SPINE_MAJOR_VERSION > 4 || (SPINE_MAJOR_VERSION == 4 && SPINE_MINOR_VERSION >= 1))
+			region->computeWorldVertices(*slot, vertices.data(), 0, 2);
+#else
+			region->computeWorldVertices(slot->getBone(), vertices.data(), 0, 2);
+#endif
+		} else if (attachment->getRTTI().isExactly(spine::MeshAttachment::rtti)) {
+			auto *mesh = static_cast<spine::MeshAttachment *>(attachment);
+			if (mesh->getColor().a <= 0 || mesh->getWorldVerticesLength() < 4) continue;
+			vertices.resize(mesh->getWorldVerticesLength());
+			mesh->computeWorldVertices(*slot, 0, mesh->getWorldVerticesLength(), vertices.data(), 0, 2);
+		} else continue;
+		float left = vertices[0], right = left, top = vertices[1], bottom = top;
+		bool valid = true;
+		for (size_t j = 0; j < vertices.size(); j += 2) {
+			if (!std::isfinite(vertices[j]) || !std::isfinite(vertices[j+1])) { valid = false; break; }
+			left = std::min(left, vertices[j]); right = std::max(right, vertices[j]);
+			top = std::min(top, vertices[j+1]); bottom = std::max(bottom, vertices[j+1]);
+		}
+		if (!valid || right <= left || bottom <= top) continue;
+		if (!first) out << ',';
+		first = false;
+		out << "{\"slot\":" << json_string(slot->getData().getName().buffer())
+			<< ",\"attachment\":" << json_string(attachment->getName().buffer())
+			<< ",\"bone\":" << json_string(slot->getBone().getData().getName().buffer())
+			<< ",\"parent\":" << json_string(slot->getBone().getParent() ? slot->getBone().getParent()->getData().getName().buffer() : "")
+			<< ",\"box\":[" << left << ',' << top << ',' << right << ',' << bottom << "]}";
+	}
+	out << "]}";
+	return out.str();
+}
 
 inline void *get_page_texture(spine::AtlasPage *page) {
 #if defined(SPINE_MAJOR_VERSION) && (SPINE_MAJOR_VERSION > 4 || (SPINE_MAJOR_VERSION == 4 && SPINE_MINOR_VERSION >= 1))
@@ -265,7 +335,8 @@ int render(const Options &options) {
 							} else {
 								std::cout << "{\"status\":\"ok\",\"width\":" << options.width
 										  << ",\"height\":" << options.height
-										  << ",\"animation\":\"" << options.animation << "\"}\n";
+										  << ",\"animation\":" << json_string(options.animation.c_str())
+										  << ",\"geometry\":" << anchor_geometry(*drawable.skeleton) << "}\n";
 								result = 0;
 							}
 						}

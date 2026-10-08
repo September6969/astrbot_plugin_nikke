@@ -6,6 +6,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
+from ...features.character.portrait_anchor import read_anchor
+
 from PIL import Image
 
 from ...integrations.spine.idle_resolver import IdleAnimationResolver
@@ -112,7 +114,7 @@ class SpineAssetService:
                 remaining(deadline)
                 cached = self.env.spine_renderer.cached_portrait(cache_key)
                 remaining(deadline)
-                if cached is not None:
+                if cached is not None and read_anchor(cached) is not None:
                     return cached
                 if self.env.remote:
                     rendered = self.env.spine_renderer.render_remote_portrait(
@@ -124,6 +126,9 @@ class SpineAssetService:
                     )
                     if rendered is not None:
                         return rendered
+                # 补算失败或禁止联网时，保留仍可显示的旧图。
+                if cached is not None:
+                    return cached
             else:
                 logger.info(
                     "PORTRAIT_RESOLUTION: render_id=%s portrait_source=upstream result=bundle_unavailable",
