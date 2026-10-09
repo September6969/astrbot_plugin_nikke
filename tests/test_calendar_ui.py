@@ -602,3 +602,34 @@ class TestSourceBoundedDynamicCanvasHeight:
         for page in c["pages"]:
             assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 1600
 
+    def test_duck_typed_snapshot_builds_without_calling_bool_has_snapshot(self):
+        """跨模块或鸭子类型 CalendarScheduleSnapshot 不会抛出 'bool' object is not callable."""
+        from datetime import datetime, timezone
+        from astrbot_plugin_nikke.features.calendar.canonical_models import QueryContext
+
+        class ExternalSnapshot:
+            def __init__(self):
+                self.context = QueryContext(
+                    now=datetime.now(timezone.utc),
+                    snapshot_version="1.0.0",
+                    events=[],
+                    source_health={},
+                )
+                self.horizon_days = 14
+                self.has_snapshot = True  # bool, NOT callable
+                self.activity_count = 0
+                self.data_quality = "HIGH"
+                self.last_updated_at = None
+                self.sync_warning = ""
+                self.background_path = None
+                self.fallback_text = "fallback"
+                self.service_available = True
+
+        snap = ExternalSnapshot()
+        builder = CalendarT2IPayloadBuilder()
+        bundle = builder.build(snap)
+        assert bundle["available"] is True
+        assert bundle["fallback_text"] == "fallback"
+        assert len(bundle["pages"]) == 1
+
+

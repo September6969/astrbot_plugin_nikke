@@ -127,13 +127,18 @@ class BlaBlaClient:
         except (httpx.HTTPError, ValueError) as exc:
             self._diagnose(f"{endpoint} 请求异常；type={type(exc).__name__}")
             raise BlaBlaError(f"{endpoint} 请求失败：{type(exc).__name__}", endpoint=endpoint) from exc
-        code = str(data.get("code", data.get("retcode", data.get("ret_code", ""))))
+        code = str(data.get("code", data.get("retcode", data.get("ret_code", data.get("ret", "")))))
         response_data = data.get("data")
         data_keys = sorted(response_data)[:20] if isinstance(response_data, dict) else []
         self._diagnose(f"{endpoint} 响应；code={code or 'missing'}；data_keys={data_keys}")
         if code not in ("", "0"):
             message = str(data.get("message", data.get("msg", f"接口返回 {code}")))
-            if code in {"1000002", "1000003", "1001001", "401", "403"}:
+            msg_lower = message.lower()
+            if (
+                code in {"1000002", "1000003", "1001001", "300001", "401", "403", "11003"}
+                or "out of time" in msg_lower
+                or ("token" in msg_lower and any(k in msg_lower for k in ("expire", "invalid", "timeout", "out of time")))
+            ):
                 raise CookieExpired("登录状态已失效，请重新绑定", code, endpoint)
             raise BlaBlaError(message, code, endpoint)
         return data
@@ -628,14 +633,20 @@ class BlaBlaClient:
         except (httpx.HTTPError, ValueError) as exc:
             self._diagnose(f"{endpoint} 社区请求异常；type={type(exc).__name__}")
             raise BlaBlaError(f"{endpoint} 请求失败：{type(exc).__name__}", endpoint=endpoint) from exc
-        code = str(data.get("code", data.get("retcode", "")))
+        code = str(data.get("code", data.get("retcode", data.get("ret_code", data.get("ret", "")))))
         response_data = data.get("data")
         keys = sorted(response_data)[:20] if isinstance(response_data, dict) else []
         self._diagnose(f"{endpoint} 社区响应；code={code or 'missing'}；data_keys={keys}")
-        if code not in ("", "0") or str(data.get("msg", "ok")).lower() not in {"", "ok", "success"}:
-            if code in {"1000002", "1000003", "1001001", "300001", "401", "403"}:
+        msg_str = str(data.get("msg", data.get("message", "ok")))
+        msg_lower = msg_str.lower()
+        if code not in ("", "0") or msg_lower not in {"", "ok", "success"}:
+            if (
+                code in {"1000002", "1000003", "1001001", "300001", "401", "403", "11003"}
+                or "out of time" in msg_lower
+                or ("token" in msg_lower and any(k in msg_lower for k in ("expire", "invalid", "timeout", "out of time")))
+            ):
                 raise CookieExpired("登录状态已失效，请重新绑定", code, endpoint)
-            raise BlaBlaError(str(data.get("msg", data.get("message", "社区接口失败"))), code, endpoint)
+            raise BlaBlaError(msg_str if msg_lower not in {"", "ok", "success"} else f"接口返回 {code}", code, endpoint)
         return data
 
     async def get_daily_signin(self, account: dict[str, Any]) -> dict[str, Any]:

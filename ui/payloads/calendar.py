@@ -3,7 +3,10 @@
 
 from pathlib import Path
 
-from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+try:
+    from ..t2i_assets import T2IAssetResolver
+except (ImportError, ValueError):
+    from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 
 
 class CalendarT2IPayloadBuilder:
@@ -359,21 +362,39 @@ class CalendarT2IPayloadBuilder:
 
     def build(self, service, days=14, now=None, warning=""):
         from datetime import datetime, timedelta, timezone
-        from astrbot_plugin_nikke.features.calendar.models import _aware_utc, TimePrecision
-        from astrbot_plugin_nikke.features.calendar.canonical_models import (
-            CanonicalEvent,
-            resolve_event_status,
-            EventStatus,
-            Freshness,
-            Coverage,
-            resolve_next_ending,
-        )
-        from astrbot_plugin_nikke.features.calendar.content_quality import sort_operations_display_events
-        from astrbot_plugin_nikke.features.calendar.schedule_service import CAT_LABELS, CST
-        from astrbot_plugin_nikke.features.calendar.application import CalendarScheduleSnapshot
+        try:
+            from ...features.calendar.models import _aware_utc, TimePrecision
+            from ...features.calendar.canonical_models import (
+                CanonicalEvent,
+                resolve_event_status,
+                EventStatus,
+                Freshness,
+                Coverage,
+                resolve_next_ending,
+            )
+            from ...features.calendar.content_quality import sort_operations_display_events
+            from ...features.calendar.schedule_service import CAT_LABELS, CST
+            from ...features.calendar.application import CalendarScheduleSnapshot
+        except (ImportError, ValueError):
+            from astrbot_plugin_nikke.features.calendar.models import _aware_utc, TimePrecision
+            from astrbot_plugin_nikke.features.calendar.canonical_models import (
+                CanonicalEvent,
+                resolve_event_status,
+                EventStatus,
+                Freshness,
+                Coverage,
+                resolve_next_ending,
+            )
+            from astrbot_plugin_nikke.features.calendar.content_quality import sort_operations_display_events
+            from astrbot_plugin_nikke.features.calendar.schedule_service import CAT_LABELS, CST
+            from astrbot_plugin_nikke.features.calendar.application import CalendarScheduleSnapshot
 
         # 1. 冻结 QueryContext
-        is_snapshot = isinstance(service, CalendarScheduleSnapshot)
+        is_snapshot = (
+            type(service).__name__ == "CalendarScheduleSnapshot"
+            or isinstance(service, CalendarScheduleSnapshot)
+            or (hasattr(service, "context") and hasattr(service, "horizon_days"))
+        )
         if is_snapshot:
             ctx = service.context
             current = ctx.now
@@ -629,7 +650,10 @@ class CalendarT2IPayloadBuilder:
             if not source_display or source_display == "UNKNOWN":
                 source_display = "LOCAL SNAPSHOT"
         else:
-            from astrbot_plugin_nikke.features.calendar.canonical_models import compute_health_badge
+            try:
+                from ...features.calendar.canonical_models import compute_health_badge
+            except (ImportError, ValueError):
+                from astrbot_plugin_nikke.features.calendar.canonical_models import compute_health_badge
             health_display = compute_health_badge(fresh_str, cov_str)
             sources_present = set()
             if source_health:
@@ -669,9 +693,11 @@ class CalendarT2IPayloadBuilder:
             "is_stale": is_stale,
             "sync_warning": sync_warning,
             "available": (
-                service.has_snapshot
-                if is_snapshot
-                else service.has_snapshot()
+                (
+                    service.has_snapshot()
+                    if callable(getattr(service, "has_snapshot", None))
+                    else bool(getattr(service, "has_snapshot", False))
+                )
                 if hasattr(service, "has_snapshot")
                 else bool(events)
             ),
