@@ -426,6 +426,27 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(CookieExpired):
             await ExpiredClient(5).validate_cookie(VALID_COOKIE)
 
+    async def test_token_out_of_time_raises_cookie_expired(self):
+        from unittest.mock import AsyncMock, patch, MagicMock
+        from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, CookieExpired
+
+        client = BlaBlaClient(5)
+        for mock_json in (
+            {"ret": 11003, "msg": "Inner token is out of time."},
+            {"code": 11003, "message": "Inner token is out of time."},
+            {"code": "11003", "msg": "ret=11003,msg=Inner token is out of time."},
+            {"code": -1, "msg": "token is expired"},
+        ):
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_json
+            mock_resp.raise_for_status = MagicMock()
+
+            with patch("httpx.AsyncClient.post", new=AsyncMock(return_value=mock_resp)):
+                with self.assertRaises(CookieExpired):
+                    await client._post("/test", "game_token=x; game_uid=1; game_openid=2", {})
+
+
     async def test_1300015_retries_are_bounded(self):
         class RetryClient(BlaBlaClient):
             def __init__(self):

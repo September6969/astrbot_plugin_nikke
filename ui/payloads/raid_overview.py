@@ -10,18 +10,28 @@ class UnionOverviewT2IPayloadBuilder:
     def build(self, data, now=None):
         from datetime import datetime
 
-        from astrbot_plugin_nikke.features.raid.models import RaidState
-        from astrbot_plugin_nikke.features.raid.participants import format_compact_number
-        from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
-        from astrbot_plugin_nikke.ui.payloads.common import (
-            boss_presentation,
-            display_number,
-            display_remaining,
-        )
+        try:
+            from ...features.raid.models import RaidState
+            from ...features.raid.participants import format_compact_number
+            from ..renderers.raid import UnionRaidRenderer
+            from .common import (
+                boss_presentation,
+                display_number,
+                display_remaining,
+            )
+        except (ImportError, ValueError):
+            from astrbot_plugin_nikke.features.raid.models import RaidState
+            from astrbot_plugin_nikke.features.raid.participants import format_compact_number
+            from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
+            from astrbot_plugin_nikke.ui.payloads.common import (
+                boss_presentation,
+                display_number,
+                display_remaining,
+            )
 
         raid_state = getattr(data, "raid_state", RaidState.UNKNOWN)
-        if isinstance(raid_state, RaidState):
-            state_str = raid_state.value
+        if hasattr(raid_state, "value"):
+            state_str = str(raid_state.value)
         elif isinstance(raid_state, str):
             state_str = raid_state
         else:
