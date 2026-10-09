@@ -54,7 +54,7 @@ async def test_character_success_uses_white_vertical_template(tmp_path):
 
     assert await renderer.render_view("character", data) == "white-replica.png"
     template, payload = native.call_args.args
-    assert payload["template_version"] == VERSION == "replica-1600x2400-v2"
+    assert payload["template_version"] == VERSION == "replica-1600x2400-v4-anchor-semantics"
     assert payload["character_art_data_uri"].startswith("data:image/png;base64,")
     assert "width:1600px;height:2400px" in template
     assert "background:#e8ebee" in template
@@ -370,7 +370,7 @@ async def test_character_card_visual_polish(tmp_path):
     assert 'width:1600px;height:2400px' in html
     assert "backdrop-filter:blur(22px)" in html
     assert "overflow:hidden" in html
-    assert "replica-1600x2400-v2" in html
+    assert "replica-1600x2400-v4-anchor-semantics" in html
     assert '<footer' not in html
     assert 'class="skill-strip"' in html
     assets.close()

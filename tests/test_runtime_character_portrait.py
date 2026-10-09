@@ -45,6 +45,27 @@ class _FakeFetcher:
 
 
 class RuntimeCharacterPortraitTests(unittest.TestCase):
+    def test_local_bundle_uses_worker_without_upstream_requests(self):
+        """本地 bundle 必须直达 worker，热缓存不再渲染。"""
+        from astrbot_plugin_nikke.integrations.spine.local_resolver import LocalSpineBundle, LocalSpineBundleResolver
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manager, runtime, fetcher, _ = self._manager(root)
+            bundle = fetcher.bundle
+            local = LocalSpineBundle(bundle.skeleton.parent, bundle.skeleton, bundle.atlas, bundle.textures, "4.1")
+            vendor = root / "vendor"
+            (vendor / "l2d" / "c020").mkdir(parents=True)
+            manager.nikke_db.resolve_render_id = lambda *_: "c020"
+            manager.nikke_db.resolve_spine_bundle_source = lambda *_a, **_k: self.fail("本地渲染不得查询上游")
+            with patch.object(LocalSpineBundleResolver, "DEFAULT_ROOT", vendor), patch.object(LocalSpineBundleResolver, "resolve", return_value=local):
+                first = manager.get_character_portrait(None, 20)
+                second = manager.get_character_portrait(None, 20)
+                self.assertEqual(first.size, (32, 64))
+                self.assertEqual(second.size, first.size)
+                self.assertEqual(runtime.calls, 1)
+                self.assertEqual(fetcher.calls, 0)
+            manager.close()
+
     def _bundle(self, root: Path) -> SpineBundle:
         bundle_dir = root / "bundle"
         bundle_dir.mkdir()

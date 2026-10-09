@@ -6,6 +6,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
+from ...features.character.portrait_anchor import read_anchor
+
 from PIL import Image
 
 from ...integrations.spine.idle_resolver import IdleAnimationResolver
@@ -79,6 +81,20 @@ class SpineAssetService:
                 return bundled
 
             asset_id, separator, skin = render_id.partition("@")
+            from ...integrations.spine.local_resolver import LocalSpineBundleResolver, LocalSpineResolveError
+
+            local_root = LocalSpineBundleResolver.DEFAULT_ROOT / "l2d" / asset_id
+            if local_root.is_dir():
+                animation = IdleAnimationResolver.resolve_for_asset(asset_id) or "idle"
+                try:
+                    image = self.env.spine_renderer.render_local_portrait(
+                        asset_id, LocalSpineBundleResolver().resolve(asset_id),
+                        animation=animation, skin=skin if separator else None, deadline=deadline,
+                    )
+                    return image if image is not None else self.env.fallback("portrait")
+                except LocalSpineResolveError as exc:
+                    logger.warning("LOCAL_SPINE_PORTRAIT: render_id=%s result=invalid_bundle (%s)", asset_id, type(exc).__name__)
+                    return self.env.fallback("portrait")
             runtime_versions = getattr(self.env.spine_renderer, "supported_runtime_versions", ())
             source = self.env.nikke_db.resolve_spine_bundle_source(
                 asset_id,
@@ -98,7 +114,7 @@ class SpineAssetService:
                 remaining(deadline)
                 cached = self.env.spine_renderer.cached_portrait(cache_key)
                 remaining(deadline)
-                if cached is not None:
+                if cached is not None and read_anchor(cached) is not None:
                     return cached
                 if self.env.remote:
                     rendered = self.env.spine_renderer.render_remote_portrait(
@@ -110,6 +126,9 @@ class SpineAssetService:
                     )
                     if rendered is not None:
                         return rendered
+                # 补算失败或禁止联网时，保留仍可显示的旧图。
+                if cached is not None:
+                    return cached
             else:
                 logger.info(
                     "PORTRAIT_RESOLUTION: render_id=%s portrait_source=upstream result=bundle_unavailable",

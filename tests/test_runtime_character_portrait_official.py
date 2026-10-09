@@ -20,6 +20,7 @@ from PIL import Image
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProvider
 from astrbot_plugin_nikke.features.character.face_anchor import framing
+from astrbot_plugin_nikke.features.character.portrait_anchor import read_anchor
 from astrbot_plugin_nikke.integrations.spine.prerenderer import SpinePreRenderer
 from astrbot_plugin_nikke.integrations.spine.runtime import detect_spine_version
 from astrbot_plugin_nikke.integrations.spine.worker_caller import SpineWorkerConfig, SpineWorkerRuntime
@@ -195,6 +196,10 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                         self.assertNotEqual(first.size, (600, 900), "首次请求不得返回中性占位图")
                         self.assertIsNotNone(first.getchannel("A").getbbox(), "Spine 渲染应含可见人物像素")
                         self.assertEqual(len(list(renderer.prerender_dir.glob("*.png"))), before_cache + 1)
+                        # 新 worker 必须同时生成可消费的锚点，不能只证明像素可渲染。
+                        first_anchor = read_anchor(first)
+                        self.assertIsNotNone(first_anchor)
+                        self.assertEqual(first_anchor["status"], "ready")
 
                         bundle = fetched_bundles[-1]
                         spine_version = detect_spine_version(bundle.skeleton)
@@ -211,6 +216,7 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                         after_first_calls = {version: worker.calls for version, worker in worker_runtimes.items()}
                         after_first_cache = len(list(renderer.prerender_dir.glob("*.png")))
                         second = manager.get_character_portrait(render_id, resource_id, 0)
+                        self.assertEqual(read_anchor(second), first_anchor)
                         self.assertEqual(fetch_calls, after_first_fetch, "缓存命中不应重新获取 bundle")
                         self.assertEqual(
                             {version: worker.calls for version, worker in worker_runtimes.items()},
@@ -263,9 +269,9 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                     ["c014", "c018", "c020", "c401", "c581"],
                 )
                 expected_guard_sources = {
-                    "c014": "robust_alpha_top",
+                    "c014": "face_safe_top",
                     "c018": "face_safe_top",
-                    "c020": "robust_alpha_top",
+                    "c020": "face_safe_top",
                     "c401": "core_head_top",
                     "c581": "core_head_top",
                 }

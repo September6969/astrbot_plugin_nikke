@@ -126,9 +126,9 @@ class CharacterCardPrefetcher:
                 key = future_map[future]
                 safe_key = sanitize_log_text(key, max_length=120)
                 if future.cancel():
-                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，已取消未启动任务并使用 fallback", timeout, safe_key)
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，已取消未启动任务并使用 fallback", base_timeout, safe_key)
                 else:
-                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，任务已运行并使用 fallback", timeout, safe_key)
+                    logger.warning("素材获取超时 (硬预算 %.1fs) [%s]，任务已运行并使用 fallback", base_timeout, safe_key)
                 results[key] = tasks[key][1]()
 
         return CharacterCardAssets(

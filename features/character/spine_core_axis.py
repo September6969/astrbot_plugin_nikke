@@ -504,7 +504,28 @@ def select_upper_torso_anchor(
             return selected, "ok"
         return None, "verified_attachment_unavailable"
 
-    return _select_generic_upper_torso(bones)
+    selected, reason = _select_generic_upper_torso(bones)
+    if selected is not None or reason != "upper_torso_unavailable":
+        return selected, reason
+    # 只接受语义明确、左右各唯一且同父骨骼的胸部表面；不猜测编号骨骼。
+    pairs = []
+    for stem in ("upper_torso", "chest", "breast", "bust"):
+        left = [a for a in attachments if a["attachment"] in {stem + "_l", stem + "_left"}]
+        right = [a for a in attachments if a["attachment"] in {stem + "_r", stem + "_right"}]
+        if len(left) > 1 or len(right) > 1:
+            return None, "ambiguous_upper_torso_attachments"
+        if len(left) == len(right) == 1 and left[0]["parent"] and left[0]["parent"] == right[0]["parent"]:
+            pairs.append((left[0], right[0]))
+    if len(pairs) > 1:
+        return None, "ambiguous_upper_torso_attachments"
+    if len(pairs) == 1:
+        left, right = pairs[0]
+        return SelectedPoint(
+            ((left["point"][0] + right["point"][0]) / 2, (left["point"][1] + right["point"][1]) / 2),
+            f"generic-attachment:{left['raw_slot']}/{left['raw_attachment']}+{right['raw_slot']}/{right['raw_attachment']}",
+            0.62,
+        ), "ok"
+    return None, reason
 
 
 def _clean_head_candidates(candidates: Iterable[dict]) -> list[dict]:

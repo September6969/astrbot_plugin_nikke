@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import hashlib
 import json
 
-VERSION = "replica-1600x2400-v2"
+VERSION = "replica-1600x2400-v4-anchor-semantics"
 SHORT_NAMES = {
     # 简体官方全称
     "攻击力增加": "攻击", "防御力增加": "防御", "最大装弹数增加": "装弹",

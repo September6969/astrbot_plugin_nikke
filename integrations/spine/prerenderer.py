@@ -14,6 +14,8 @@ from __future__ import annotations
 import logging
 import math
 import hashlib
+import shutil
+from contextlib import contextmanager
 import re
 import queue
 import threading
@@ -27,6 +29,9 @@ from typing import Callable, Mapping, Protocol, Sequence
 from urllib.parse import quote, unquote, urljoin, urlparse
 
 import httpx
+
+from .portrait_anchor import save_portrait
+from ...features.character.portrait_anchor import read_anchor
 
 from PIL import Image
 
@@ -488,6 +493,7 @@ class SpineTaskQueue:
                 return False
             time.sleep(min(0.01, remaining))
 
+
     def enqueue(self, job: SpineJob) -> bool:
         with self._lock:
             if self._stopping:
@@ -574,7 +580,7 @@ class SpinePreRenderer:
     裁切、缓存和队列，不猜测或偷偷安装具体商业 runtime。
     """
 
-    RENDERER_VERSION = "2.0"
+    RENDERER_VERSION = "2.2-anchor"
     CROP_PADDING = 60
     MAX_PIXELS = 20_000_000
 
@@ -589,6 +595,7 @@ class SpinePreRenderer:
     ):
         self.cache_dir = Path(cache_dir)
         self.prerender_dir = self.cache_dir / "portraits"
+        self._local_portrait_lock = threading.Lock()
         self.prerender_dir.mkdir(parents=True, exist_ok=True)
         self._runtimes: dict[str, SpineRuntimeBackend] = {}
         if isinstance(runtime, Mapping):
@@ -766,10 +773,10 @@ class SpinePreRenderer:
         remaining(deadline)
         cached = self.cached_portrait(cache_key)
         remaining(deadline)
-        if cached is not None:
+        if cached is not None and read_anchor(cached) is not None:
             return cached
         if not self._runtimes:
-            return None
+            return cached
         try:
             safe_asset_id = re.fullmatch(r"c[0-9]+(?:_[0-9]+)?", asset_id)
             if safe_asset_id is None or not re.fullmatch(r"[0-9a-f]{40,64}", source_version):
@@ -800,11 +807,11 @@ class SpinePreRenderer:
                 deadline=deadline,
             )
             if rendered is None:
-                return None
+                return cached
             output_path = self.prerender_dir / f"{SpineBundleFetcher._safe_key(cache_key)}.png"
             temporary = output_path.with_name(f".{output_path.name}.{threading.get_ident()}.tmp")
             try:
-                rendered.save(temporary, format="PNG")
+                save_portrait(rendered, temporary)
                 remaining(deadline)
                 temporary.replace(output_path)
             finally:
@@ -812,7 +819,7 @@ class SpinePreRenderer:
             return rendered.copy()
         except (OSError, ValueError, TypeError, SpineRenderError) as exc:
             logger.info("Spine portrait unavailable: render_id=%s result=render_failed (%s)", asset_id, type(exc).__name__)
-            return None
+            return cached
 
     def enqueue(self, job: SpineJob) -> bool:
         """按 key 去重并启动后台预渲染；不可用 runtime 时直接返回 False。"""
@@ -831,14 +838,14 @@ class SpinePreRenderer:
         if bounds is None:
             raise SpineRenderError("Spine 输出没有可见像素")
         left, top, right, bottom = bounds
-        return rgba.crop(
-            (
-                max(0, left - self.CROP_PADDING),
-                max(0, top - self.CROP_PADDING),
-                min(rgba.width, right + self.CROP_PADDING),
-                min(rgba.height, bottom + self.CROP_PADDING),
-            )
+        crop = (
+            max(0, left - self.CROP_PADDING),
+            max(0, top - self.CROP_PADDING),
+            min(rgba.width, right + self.CROP_PADDING),
+            min(rgba.height, bottom + self.CROP_PADDING),
         )
+        from .portrait_anchor import attach_anchor
+        return attach_anchor(rgba.crop(crop), image.info.get("spine_geometry"), crop)
 
     def render_full_body(
         self,
@@ -894,6 +901,64 @@ class SpinePreRenderer:
             logger.warning("Spine runtime adapter fallback: %s", safe_exception_message(exc))
             return None
 
+    @contextmanager
+    def _local_render_guard(self, deadline):
+        """等待本地渲染锁时也遵守总预算。"""
+        timeout = remaining(deadline)
+        if not self._local_portrait_lock.acquire(timeout=timeout if timeout is not None else -1):
+            raise TimeoutError("等待本地 Spine worker 超出预算")
+        try:
+            yield
+        finally:
+            self._local_portrait_lock.release()
+
+    def render_local_portrait(self, asset_id, local, *, animation="idle", skin=None, deadline=None):
+        """读取本地正式资源，复制到受限 worker 缓存后渲染。"""
+        remaining(deadline)
+        digest = hashlib.sha256()
+        for path in local.as_spine_bundle().all_files():
+            remaining(deadline)
+            digest.update(path.relative_to(local.bundle_root).as_posix().encode("utf-8"))
+            digest.update(path.read_bytes())
+        key = SpineBundleFetcher._safe_key(
+            f"local-{asset_id}-{digest.hexdigest()}-{local.runtime_version}-{self.RENDERER_VERSION}-{animation}-{skin or 'default'}"
+        )
+        cached = self.cached_portrait(key)
+        if cached is not None and read_anchor(cached) is not None:
+            logger.info("LOCAL_SPINE_PORTRAIT: render_id=%s result=cache_hit", asset_id)
+            return cached
+        with self._local_render_guard(deadline):
+            cached = self.cached_portrait(key)
+            if cached is not None and read_anchor(cached) is not None:
+                return cached
+            root = self.cache_dir / "spine-bundles" / key
+            root.mkdir(parents=True, exist_ok=True)
+            targets = []
+            for path in local.as_spine_bundle().all_files():
+                remaining(deadline)
+                target = root / path.relative_to(local.bundle_root)
+                if not target.resolve().is_relative_to(root.resolve()):
+                    raise SpineRenderError("本地 worker 缓存路径越界")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(path, target)
+                targets.append(target)
+            image = self.render_full_body(
+                SpineBundle(targets[0], targets[1], tuple(targets[2:])),
+                local.runtime_version, animation=animation, skin=skin, deadline=deadline,
+            )
+            if image is not None:
+                self.prerender_dir.mkdir(parents=True, exist_ok=True)
+                output = self.prerender_dir / f"{key}.png"
+                temporary = output.with_suffix(".tmp")
+                try:
+                    save_portrait(image, temporary)
+                    remaining(deadline)
+                    temporary.replace(output)
+                finally:
+                    temporary.unlink(missing_ok=True)
+            logger.info("LOCAL_SPINE_PORTRAIT: render_id=%s result=%s", asset_id, "rendered" if image is not None else "render_failed")
+            return image if image is not None else cached
+
     def handle_job(self, job: SpineJob) -> None:
         """队列工作线程执行回调。"""
         if job.runtime_version is None or job.runtime_version == SPINE_VERSION_UNKNOWN:
@@ -924,7 +989,7 @@ class SpinePreRenderer:
             output_path = self.prerender_dir / f"{job.cache_key}.png"
             try:
                 temporary = output_path.with_name(f".{output_path.name}.{threading.get_ident()}.tmp")
-                result.save(temporary, format="PNG")
+                save_portrait(result, temporary)
                 remaining(deadline)
                 temporary.replace(output_path)
             except OSError as exc:

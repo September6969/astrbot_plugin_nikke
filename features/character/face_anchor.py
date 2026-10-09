@@ -143,13 +143,14 @@ def _finite_extent(value: object) -> TypeGuard[list[int | float]]:
     )
 
 
-def _face_safe_top_y(face_point, extent) -> float | None:
+def _face_safe_top_y(face_point, extent, anchor_kind=None) -> float | None:
     """从已验证的眼/脸附件锚点构造面部保护上界，不扫描头饰轮廓。"""
     if not _finite_point(face_point) or not _finite_extent(extent):
         return None
-    # 元数据 extent 是已验证眼/脸附件的宽高；在锚点上方留一个完整高度，
-    # 形成面部保护带，不把帽子、耳朵、角或机械饰件的 alpha 当作头顶。
-    return max(0.0, float(face_point[1]) - float(extent[1]))
+    # 眼睛上方留一整个眼部高度；脸/整头的锚点已经是表面中心，
+    # 其真实上缘仅距中心半个高度，不能额外多保护半张脸或半个头。
+    fraction = 0.5 if anchor_kind in {"face_attachment", "head_attachment"} else 1.0
+    return max(0.0, float(face_point[1]) - float(extent[1]) * fraction)
 
 
 def _alpha_mass_quantile(projection, quantile: float) -> int | None:
@@ -369,6 +370,11 @@ def framing(
             None,
         )
     if not isinstance(row, dict):
+        from .portrait_anchor import read_anchor
+        attached = read_anchor(portrait)
+        if attached is not None and attached.get("status") == "ready":
+            row = attached
+    if not isinstance(row, dict):
         return _fallback_framing(portrait, "anchor_unavailable", key)
 
     point, extent = row.get("point"), row.get("extent")
@@ -415,7 +421,7 @@ def framing(
     if core is not None:
         guard_y, guard_source = float(core["head_top_y"]), "core_head_top"
     else:
-        face_safe_top_y = _face_safe_top_y(point, extent)
+        face_safe_top_y = _face_safe_top_y(point, extent, row.get("anchor_kind"))
         if face_safe_top_y is not None:
             guard_y, guard_source = face_safe_top_y, "face_safe_top"
         else:
