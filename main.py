@@ -130,6 +130,7 @@ class NikkePlugin(Star):
                     "calendar_schedule", payload
                 ),
                 start_background_refresh=self.runtime.request_calendar_refresh,
+                start_feedback=self.runtime.start_delayed_feedback,
             ),
             campaign=CampaignCommandHandler(
                 application=self.services.campaign_application,
@@ -284,9 +285,9 @@ class NikkePlugin(Star):
         ):
             yield result
 
-    async def event_schedule(self, event: AstrMessageEvent, horizon: str = ""):
+    async def event_schedule(self, event: AstrMessageEvent, horizon: str = "", page: str = ""):
         async for result in self.adapters.command.dispatch(
-            event, self.handlers.calendar, horizon=horizon
+            event, self.handlers.calendar, horizon=horizon, page=page
         ):
             yield result
 

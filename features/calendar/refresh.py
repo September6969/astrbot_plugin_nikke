@@ -24,8 +24,21 @@ class CalendarRefreshCoordinator:
     @staticmethod
     async def refresh_schedule_data(service) -> tuple[bool, str]:
         """统一多源刷新流程 (Refresh Path)。"""
-        async with service._sync_lock:
-            return await service._refresh_schedule_data()
+        if service._task_factory is None:
+            async with service._sync_lock:
+                return await service._refresh_schedule_data()
+        task = service._refresh_task
+        if task is None or task.done():
+            async def run():
+                async with service._sync_lock:
+                    return await service._refresh_schedule_data()
+            task = service._task_factory(run())
+            if task is None:
+                return False, "服务正在关闭"
+            service._refresh_task = task
+            # 即使所有等待者离开，也消费后台异常，任务由运行时统一回收。
+            task.add_done_callback(lambda done: None if done.cancelled() else done.exception())
+        return await asyncio.shield(task)
 
     @staticmethod
     async def _refresh_schedule_data(service) -> tuple[bool, str]:
@@ -64,14 +77,36 @@ class CalendarRefreshCoordinator:
                     response_mode=getattr(adapter, "response_mode", ResponseMode.COMPLETE_SNAPSHOT),
                 )
 
+            if src == "official":
+                report = getattr(getattr(adapter, "announcement_service", None), "last_sync_report", None)
+                if isinstance(report, dict) and report.get("success") is False:
+                    res = FetchResult(FetchOutcome.REQUEST_FAILED, source=src,
+                                      error_message="官方公告更新失败，保留旧日程")
+                elif isinstance(report, dict) and report.get("invalid", 0):
+                    res.completeness = "PARTIAL"
             health.last_outcome = res.outcome.value
+            observed_at = res.observed_at
+            if src == "official":
+                origin = getattr(getattr(adapter, "announcement_service", None), "last_updated_at", None)
+                try:
+                    from .models import _aware_utc
+                    if isinstance(origin, str):
+                        # 公告仓库历史格式明确采用北京时间，按已有格式恢复时区。
+                        parsed = datetime.fromisoformat(origin)
+                        if parsed.tzinfo is None:
+                            from .canonical_models import CST
+                            parsed = parsed.replace(tzinfo=CST)
+                        observed_at = _aware_utc(parsed)
+                    else:
+                        observed_at = _aware_utc(origin) if origin else None
+                except (ValueError, TypeError):
+                    observed_at = None
 
             if src == "gamekee":
                 scan = res.diagnostics or getattr(adapter, "last_scan", {}) or {}
                 for key in ("gamekee_rows", "gamekee_valid", "gamekee_malformed", "gamekee_duplicates"):
                     scan_key = key.removeprefix("gamekee_")
-                    if scan_key in scan:
-                        service.quality_diagnostics[key] = int(scan.get(scan_key, 0) or 0)
+                    service.quality_diagnostics[key] = int(scan.get(key, scan.get(scan_key, 0)) or 0)
                 if "with_visual" in scan:
                     service.quality_diagnostics["with_visual"] = int(scan.get("with_visual", 0) or 0)
             elif src == "official":
@@ -86,22 +121,41 @@ class CalendarRefreshCoordinator:
             contributes = getattr(adapter, "contributes_to_freshness", True)
 
             if res.outcome == FetchOutcome.SUCCESS_DATA:
-                service._source_datasets[src] = res.events
-                health.last_success_at = now_utc
+                complete = res.completeness == "COMPLETE"
+                if (adapter.response_mode == ResponseMode.COMPLETE_SNAPSHOT or src == "manual") and complete:
+                    service._source_datasets[src] = res.events
+                else:
+                    retained = {event.id: CanonicalEvent.from_dict(event.to_dict())
+                                for event in service._source_datasets.get(src, [])}
+                    if not complete:
+                        for event in retained.values():
+                            event.metadata["source_stale"] = True
+                    for event in res.events:
+                        retained[event.id] = event
+                    service._source_datasets[src] = list(retained.values())
+                health.completeness = res.completeness
+                health.last_success_at = observed_at
                 health.consecutive_failures = 0
                 health.last_error_type = ""
                 if contributes:
                     any_success = True
             elif res.outcome == FetchOutcome.SUCCESS_EMPTY:
-                if adapter.response_mode == ResponseMode.COMPLETE_SNAPSHOT:
+                if (adapter.response_mode == ResponseMode.COMPLETE_SNAPSHOT or src == "manual") and res.completeness == "COMPLETE":
                     service._source_datasets[src] = []
-                health.last_success_at = now_utc
+                elif res.completeness != "COMPLETE":
+                    retained = [CanonicalEvent.from_dict(event.to_dict()) for event in service._source_datasets.get(src, [])]
+                    for event in retained:
+                        event.metadata["source_stale"] = True
+                    if src in service._source_datasets:
+                        service._source_datasets[src] = retained
+                health.completeness = res.completeness
+                health.last_success_at = observed_at
                 health.consecutive_failures = 0
                 health.last_error_type = ""
                 if contributes:
                     any_success = True
             elif res.outcome == FetchOutcome.NOT_MODIFIED:
-                health.last_success_at = now_utc
+                health.last_success_at = observed_at
                 health.consecutive_failures = 0
                 health.last_error_type = ""
                 if contributes:
@@ -111,6 +165,9 @@ class CalendarRefreshCoordinator:
                 health.last_error_type = res.error_message or res.outcome.value
                 source_errors.append(f"{src}: {health.last_error_type}")
                 logger.warning("[NIKKE] 数据源 %s 同步失败，保留历史 LKG: %s", src, health.last_error_type)
+
+            if res.outcome in (FetchOutcome.SUCCESS_DATA, FetchOutcome.SUCCESS_EMPTY) and res.completeness != "COMPLETE":
+                source_errors.append(f"{src}: 数据范围不完整，保留未验证的旧记录")
 
         if any_success:
             service.last_success_at = now_utc
@@ -132,7 +189,7 @@ class CalendarRefreshCoordinator:
 
         service._sync_internal_stores(merged_effective)
         service.snapshot_state.activate(service)
-        service._has_snapshot = bool(merged_effective)
+        service._has_snapshot = bool(merged_effective) or any_success or service._has_snapshot
         service.last_sync_error = "; ".join(source_errors) if source_errors else ""
         service._update_health_state()
 

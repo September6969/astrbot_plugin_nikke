@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -78,6 +79,7 @@ class CalendarRefreshResult:
     message: str
     activity_count: int
     data_quality: str
+    has_snapshot: bool | None = None
 
 
 class CalendarApplication:
@@ -88,8 +90,11 @@ class CalendarApplication:
         calendar: CalendarQueryService | None,
         *,
         clock: Callable[[], datetime] | None = None,
+        task_factory=None,
     ) -> None:
         self._calendar = calendar
+        self._explicit_refresh_task = None
+        self._task_factory = task_factory
         self._clock = clock or (lambda: datetime.now(timezone.utc))
 
     def query_schedule(
@@ -148,6 +153,19 @@ class CalendarApplication:
         )
 
     async def refresh_schedule(self) -> CalendarRefreshResult:
+        """共享整条显式刷新链，调用者取消不影响其他等待者。"""
+        if self._calendar is None or self._task_factory is None:
+            return await self._refresh_schedule()
+        task = self._explicit_refresh_task
+        if task is None or task.done():
+            task = self._task_factory(self._refresh_schedule())
+            if task is None:
+                return CalendarRefreshResult(False, "服务正在关闭", 0, "UNAVAILABLE", False)
+            self._explicit_refresh_task = task
+            task.add_done_callback(lambda done: None if done.cancelled() else done.exception())
+        return await asyncio.shield(task)
+
+    async def _refresh_schedule(self) -> CalendarRefreshResult:
         """执行被显式请求的公开只读日程源刷新。"""
         if self._calendar is None:
             return CalendarRefreshResult(
@@ -156,12 +174,25 @@ class CalendarApplication:
                 activity_count=0,
                 data_quality="SCHEDULE DATA UNAVAILABLE",
             )
+        announcement = getattr(self._calendar, "announcement_service", None)
+        warning = ""
+        if announcement is not None:
+            try:
+                ok, detail = await announcement.sync_from_source()
+                if not ok:
+                    warning = "官方公告更新失败，保留旧公告"
+            except Exception:
+                warning = "官方公告更新失败，保留旧公告"
         success, message = await self._calendar.refresh_schedule_data()
+        if warning:
+            message = warning if message == "ok" else f"{warning}；{message}"
+            self._calendar.last_sync_error = message
         return CalendarRefreshResult(
             success=success,
             message=message,
             activity_count=self._calendar.activity_count(),
             data_quality=self._calendar.data_quality,
+            has_snapshot=self._calendar.has_snapshot(),
         )
 
     def reminder_deadlines(self, fallback: list[Any]) -> list[Any]:

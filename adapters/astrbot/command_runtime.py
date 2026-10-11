@@ -57,7 +57,7 @@ class NikkeCommandRuntime:
                 "/妮姬 突袭 排名 [页码] — 贡献排名\n"
                 "/妮姬 突袭 我的 [页码] — 个人队伍记录\n"
                 "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
-                "/妮姬 日程 [7|14|30]　(/nikke schedule [7|14|30])\n"
+                "/妮姬 日程 [7|14|30] [页码]　(/nikke schedule [7|14|30] [页码])\n"
                 "/妮姬 公告　(/nikke news)\n"
                 "/妮姬 攻略 [分类]　(/nikke guide)\n"
                 "/妮姬 塔罗 [单抽|三张|今日|状态]　(/nikke tarot)"
@@ -198,7 +198,7 @@ class NikkeCommandRuntime:
                     yield result
             else:
                 async for result in self._dispatch(
-                    event, self._handlers.calendar, horizon=arg1
+                    event, self._handlers.calendar, horizon=arg1, page=arg2
                 ):
                     yield result
             return

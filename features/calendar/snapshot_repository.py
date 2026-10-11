@@ -99,7 +99,11 @@ class CalendarSnapshotRepository:
         if events_loaded:
             effective = service._merge_datasets()
             service._sync_internal_stores(effective)
-            service._has_snapshot = bool(effective)
+            service._has_snapshot = bool(effective) or any(
+                source != "manual" and service._source_health.get(source)
+                and service._source_health[source].last_success_at
+                for source in service._source_datasets
+            )
             service.last_updated_at = service.content_updated_at.isoformat() if service.content_updated_at else None
             service._update_health_state()
             state = service.snapshot_state

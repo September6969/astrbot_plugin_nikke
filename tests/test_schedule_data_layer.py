@@ -262,7 +262,10 @@ class TestScheduleServiceDataLayer(IsolatedAsyncioTestCase):
         ok, _ = await self.service.sync_from_source(fetcher=lambda: [event])
         self.assertTrue(ok)
         self.assertEqual(self.service.activity_count(), 1)
-        self.assertEqual(self.service.data_quality, "FRESH")
+        # 自定义列表刚刚同步成功，但不能证明默认主来源的覆盖完整性。
+        self.assertEqual(self.service.freshness, "FRESH")
+        self.assertEqual(self.service.coverage, "PARTIAL")
+        self.assertEqual(self.service.data_quality, "PARTIAL DATA")
         self.assertTrue(self.service.cache_path.is_file())
 
         # 2. 从磁盘重建新实例，验证从 L2 快照冷启动

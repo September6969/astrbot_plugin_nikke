@@ -8,7 +8,7 @@ from typing import Any
 
 from .models import CalendarActivity, _aware_utc
 from .content_quality import sort_operations_display_events
-from .canonical_models import CanonicalEvent, QueryContext, compute_health_badge
+from .canonical_models import CanonicalEvent, QueryContext, SourceHealth, compute_health_badge
 from .time_rules import CalendarTimeRules
 
 CAT_LABELS = {
@@ -31,6 +31,16 @@ CAT_LABELS = {
 }
 
 from .canonical_models import CST
+
+def format_event_time(value, precision):
+    """不将未知日期或仅日期转换成虚构的精确时刻。"""
+    precision = getattr(precision, "value", precision)
+    if value is None or precision == "UNKNOWN":
+        return "待公布"
+    if precision != "EXACT":
+        return value.astimezone(CST).strftime("%m/%d") + "（时间待确认）"
+    return value.astimezone(CST).strftime("%m/%d %H:%M")
+
 
 class CalendarScheduleQueries:
 
@@ -57,7 +67,7 @@ class CalendarScheduleQueries:
             now=current,
             snapshot_version=service._snapshot_version,
             events=tuple(service._events.values()),
-            source_health=dict(service._source_health),
+            source_health={name: SourceHealth.from_dict(health.to_dict()) for name, health in service._source_health.items()},
             freshness=service.freshness,
             coverage=service.coverage,
             health_display=compute_health_badge(service.freshness, service.coverage),
@@ -139,18 +149,18 @@ class CalendarScheduleQueries:
         if error_to_show:
             lines.append(f"⚠️ 日程数据同步失败：{error_to_show}，以下为本地缓存。")
 
-        groups = service.group_window(days, ctx.now, context=ctx)
-        soon = groups["ending_soon"]
-        active = groups["active"]
-        upcoming = groups["upcoming"]
+        groups = CalendarTimeRules.classify_events(ctx.events, ctx.now, days)
+        soon = sort_operations_display_events(groups.ending_soon, "ACTIVE")
+        active = sort_operations_display_events(groups.active, "ACTIVE")
+        upcoming = sort_operations_display_events(groups.upcoming, "UPCOMING")
         if not soon and not active and not upcoming:
             lines.append(f"未来 {days} 天暂无已记录活动。")
             return "\n".join(lines).strip()
 
         def format_item(activity: CalendarActivity) -> str:
             label = CAT_LABELS.get(activity.category, "活动")
-            start = activity.start_at.astimezone(CST).strftime("%m/%d %H:%M")
-            end = activity.end_at.astimezone(CST).strftime("%m/%d %H:%M")
+            start = format_event_time(activity.start_at, activity.start_precision)
+            end = format_event_time(activity.end_at, activity.end_precision)
             return f"• [{label}] {activity.title}\n  {start} → {end} · {activity.remaining_display(ctx.now)}"
 
         for heading, events in (("【即将结束】", soon), ("【进行中】", active), ("【即将开始】", upcoming)):
