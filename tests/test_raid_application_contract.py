@@ -307,7 +307,8 @@ async def test_member_uses_exact_stable_openid_for_historical_response(tmp_path)
 
     ranking = await application.member("qq-123")
 
-    assert ranking.scope == "CURRENT_RESPONSE_MEMBER"
+    assert ranking.scope == "LAST_SEASON_MEMBER"
+    assert ranking.season_id == "1234567"
     assert [(item.nickname, item.total_damage) for item in ranking.participants] == [
         ("member-stable-openid", 9)
     ]

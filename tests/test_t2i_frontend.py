@@ -132,16 +132,21 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
         )
         command, args, request = plugin.me, (), plugin.services.profile_application.build_dashboard
     elif page == "union_overview":
-        plugin.services.raid_application = Mock(overview=AsyncMock(return_value=data))
+        plugin.services.raid_application = Mock(dashboard=AsyncMock(return_value=data))
         plugin.services.store = Mock()
         fallback = Mock(return_value="fallback.png")
         plugin.services.raid_renderer = Mock(render_raid_overview=fallback)
         inject_raid_handler(plugin)
-        command, args, request = plugin.union_raid, (), plugin.services.raid_application.overview
-    event = Mock(image_result=lambda path: path)
-    assert [result async for result in command(event, *args)] == ["fallback.png"]
+        command, args, request = plugin.union_raid, (), plugin.services.raid_application.dashboard
+    event = Mock(image_result=lambda path: path, plain_result=lambda text: text)
+    results = [result async for result in command(event, *args)]
+    if page == "union_overview":
+        assert "联盟突袭" in results[0]
+        fallback.assert_not_called()
+    else:
+        assert results == ["fallback.png"]
+        fallback.assert_called_once_with(data)
     request.assert_awaited_once()
-    fallback.assert_called_once_with(data)
     assert plugin.presentation._t2i_renderer.render_view.call_args.args[1] is data
 
 
@@ -197,9 +202,9 @@ def test_union_scopes_and_exact_values(tmp_path):
     assert [row["nickname"] for row in ties["rows"]] == [item.nickname for item in records["tie-rank"].participants]
     members = get_cases("union_member", tmp_path)
     payload = UnionMemberT2IPayloadBuilder(Mock(get_lineup_portrait=Mock(return_value=None)), T2IAssetResolver()).build(members["3-records"])
-    assert payload["scope"] == "CURRENT_RESPONSE_MEMBER"
+    assert "本次返回记录" in payload["scope"]
     rows = payload["participants"][0]["rows"]
-    assert len(rows) == 3 and rows[0]["label"] == "RECORD 01"
+    assert len(rows) == 3 and rows[0]["label"] == "记录 01"
     assert rows[0]["damage"] == "123,456,789"
     assert all(len(row["members"]) == 5 for row in rows)
     assert "synthetic-member" not in json.dumps(payload)
@@ -212,7 +217,7 @@ async def test_union_command_failure_no_refetch(page, command):
     from astrbot_plugin_nikke.features.raid.participants import RaidRankingData
     plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
-    application_call = "ranking" if page == "union_records" else "member"
+    application_call = "ranking_page" if page == "union_records" else "member_page"
     plugin.services.raid_application = Mock(
         **{application_call: AsyncMock(return_value=RaidRankingData([]))}
     )
@@ -242,7 +247,7 @@ def test_profile_structure_and_unknowns(tmp_path):
     assert unavailable["today_state"] == "UNAVAILABLE"
     html = Environment(autoescape=False).from_string(T2ITemplateLoader().load("profile")).render(**builder.build(cases["full"]))
     assert "EXP 0" not in html
-    assert html.index('class="today"') < html.index('SIMULATION /') < html.index('RESOURCES /')
+    assert html.index('class="today"') < html.index('模拟室') < html.index('资源')
 
 
 @pytest.mark.asyncio
@@ -383,28 +388,12 @@ def test_union_records_no_attack_summary(tmp_path):
     builder = UnionRecordsT2IPayloadBuilder()
     template = T2ITemplateLoader().load("union_records")
 
-    # 1. Unattacked members
-    payload_unattacked = builder.build(cases["unattacked-members"])
-    assert payload_unattacked["no_attack"]["status"] == "HAS_UNATTACKED"
-    assert payload_unattacked["no_attack"]["count"] == 3
-    assert payload_unattacked["no_attack"]["label"] == "未出刀 3 人"
-    assert "未出刀队员 Alpha" in payload_unattacked["no_attack"]["members"]
-    html1 = Environment(autoescape=False).from_string(template).render(**payload_unattacked)
-    assert "未出刀 3 人" in html1
-    assert "未出刀队员 Alpha" in html1
-    assert "no-attack-chip" in html1
-
-    # 2. All attacked
-    payload_all = builder.build(cases["all-attacked"])
-    assert payload_all["no_attack"]["status"] == "ALL_ATTACKED"
-    assert payload_all["no_attack"]["count"] == 0
-    assert payload_all["no_attack"]["label"] == "全员已出刀"
-    html2 = Environment(autoescape=False).from_string(template).render(**payload_all)
-    assert "全员已出刀" in html2
-
-    # 3. Unknown (normal without union_members)
-    payload_unknown = builder.build(cases["normal"])
-    assert payload_unknown["no_attack"]["status"] == "UNKNOWN"
-    assert payload_unknown["no_attack"]["label"] == "无法确认"
-    html3 = Environment(autoescape=False).from_string(template).render(**payload_unknown)
-    assert "无法确认" in html3
+    # 昵称名单不能证明未出刀，即使名单上的名字都有记录也不能断言全员出刀。
+    for name in ("unattacked-members", "all-attacked", "normal"):
+        payload = builder.build(cases[name])
+        assert payload["no_attack"]["status"] == "UNKNOWN"
+        assert payload["no_attack"]["count"] is None
+        assert payload["no_attack"]["members"] == []
+        html = Environment(autoescape=False).from_string(template).render(**payload)
+        assert "无法确认" in html
+        assert "全员已出刀" not in html

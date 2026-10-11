@@ -120,9 +120,10 @@ class AssetManagerTests(unittest.TestCase):
                         with ThreadPoolExecutor(max_workers=1) as executor:
                             future = executor.submit(first._load, "portraits", "first", "https://example.com/first")
                             self.assertTrue(entered.wait(2.0))
-                            started = time.monotonic()
                             self.assertIsNone(second._load("portraits", "second", "https://example.com/second"))
-                            self.assertLess(time.monotonic() - started, 0.2)
+                            # 首个下载仍占用槽时第二个请求已返回，直接验证非阻塞降级。
+                            self.assertFalse(release.is_set())
+                            self.assertFalse(future.done())
                             self.assertNotIn("portraits/second.png", second._failed)
                             release.set()
                             self.assertEqual(future.result(timeout=3.0).size, (20, 20))
@@ -430,7 +431,12 @@ class AssetManagerTests(unittest.TestCase):
                     finally:
                         finished.set()
 
-                with patch.object(manager._icons, "get_favorite_item_icon", side_effect=slow_favorite):
+                # 隔离无关素材读取，确保本测试的慢任务能实际启动；排队取消另有专门用例。
+                with (
+                    patch.object(manager._characters, "get_character_portrait", return_value=Image.new("RGBA", (8, 8), "red")),
+                    patch.object(manager._icons, "get_equipment_icon", return_value=Image.new("RGBA", (8, 8), "red")),
+                    patch.object(manager._icons, "get_favorite_item_icon", side_effect=slow_favorite),
+                ):
                     start = time.monotonic()
                     # 设定 0.2 秒硬预算
                     card_assets = manager.resolve_character_assets(card, timeout=0.2)

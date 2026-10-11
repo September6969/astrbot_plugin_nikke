@@ -24,6 +24,22 @@ _USAGE = "用法：/妮姬 战役 [普通/困难] <关卡名>（例如：46-40�
 _COOKIE_EXPIRED = "登录状态已失效，请重新发送 /妮姬 账号 绑定。"
 
 
+def format_campaign(record: StageClearRecord) -> str:
+    """渲染故障时保留已取得的历史阵容，不重新请求接口。"""
+    mode = "困难" if record.mode == "HARD" else "普通"
+    lines = [f"战役历史阵容 · {mode} {record.stage_name}"]
+    if record.status is ClearLineupStatus.UNAVAILABLE:
+        lines.append(record.status_message or "暂无可用历史阵容")
+    else:
+        for member in sorted(record.members, key=lambda item: item.slot):
+            name = member.name_cn or member.name_en or f"角色 {member.tid}"
+            lines.append(f"{member.slot}. {name} · 等级 {member.level} · 战力 {member.combat:,}")
+    if record.fetched_at:
+        lines.append(f"更新时间：{record.fetched_at}")
+    lines.append("图片生成失败，已显示文字摘要。")
+    return "\n".join(lines)
+
+
 class CampaignCommandHandler:
     def __init__(
         self,
@@ -64,7 +80,13 @@ class CampaignCommandHandler:
             record = await self._application.lookup(context.actor_id, stage)
             if record.status in {ClearLineupStatus.RATE_LIMITED, ClearLineupStatus.ERROR}:
                 return CommandResult((TextReply(record.status_message),))
-            return CommandResult((ImageReply(await self._present(record)),))
+            try:
+                image_path = await self._present(record)
+                if not image_path:
+                    raise RuntimeError("图片未生成")
+            except Exception:
+                return CommandResult((TextReply(format_campaign(record)),))
+            return CommandResult((ImageReply(image_path),))
         except CookieExpired:
             self._invalidate_cookie(context.actor_id)
             return CommandResult((TextReply(_COOKIE_EXPIRED),))

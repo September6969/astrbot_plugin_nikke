@@ -144,7 +144,7 @@ async def test_raid_ranking_text_fallback_uses_one_fetched_dto():
     rendered = []
 
     class Application:
-        async def ranking(self, actor_id):
+        async def ranking_page(self, actor_id, page=1):
             calls.append(actor_id)
             return dto
 
@@ -174,7 +174,7 @@ async def test_raid_overview_delayed_feedback_is_cancelled_after_presentation():
     presented = []
 
     class Application:
-        async def overview(self, actor_id):
+        async def dashboard(self, actor_id):
             assert actor_id == "qq-3"
             return dto
 
@@ -201,7 +201,7 @@ async def test_raid_cookie_expiry_invalidates_and_unknown_member_is_not_guessed(
     invalidated = []
 
     class ExpiredApplication:
-        async def overview(self, _actor_id):
+        async def dashboard(self, _actor_id):
             raise CookieExpired("synthetic expired")
 
     expired = RaidCommandHandler(

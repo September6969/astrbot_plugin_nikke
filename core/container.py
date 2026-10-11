@@ -152,6 +152,7 @@ def create_container(
         account_reader=store,
         gateway=client,
         clock=clock,
+        task_factory=shared.runtime_coordinator.create_task,
     )
     asset_manager = shared.asset_manager
     cdk_service = create_cdk_service(client)

@@ -33,13 +33,14 @@ class RaidSquadMember:
 @dataclass(slots=True)
 class RaidAttackData:
     boss_id: str
-    day: int
-    difficulty: int
-    level: int
-    step: int
+    day: int | None
+    difficulty: int | None
+    level: int | None
+    step: int | None
     total_damage: int
     is_final_hit: bool
     squad: list[RaidSquadMember]
+    details_complete: bool = True
 
 
 @dataclass(slots=True)
@@ -55,6 +56,18 @@ class RaidRankingData:
     participants: list[RaidParticipantSummary]
     scope: str = "CURRENT_RESPONSE"
     union_members: list[str] | None = None
+    guild_name: str = "联盟"
+    season_id: str | None = None
+    fetched_at: str = ""
+    incomplete: bool = False
+    coverage_complete: bool = False
+    excluded_records: int = 0
+    total_damage: int = 0
+    total_records: int = 0
+    page: int = 1
+    total_pages: int = 1
+    attendance_status: str = "UNKNOWN"
+    unattacked: list[str] = field(default_factory=list)
 
 
 def build_ranking(payload: dict, union_members: list[str] | None = None) -> RaidRankingData:
@@ -92,7 +105,8 @@ def build_ranking(payload: dict, union_members: list[str] | None = None) -> Raid
         previous = participant.total_damage
     if union_members is None and isinstance(payload, dict):
         union_members = payload.get("union_members") or payload.get("guild_members")
-    return RaidRankingData(participants, union_members=union_members)
+    return RaidRankingData(participants, union_members=union_members,
+        total_damage=sum(p.total_damage for p in participants), total_records=sum(len(p.attacks) for p in participants))
 
 
 def build_member_ranking(payload: dict, member_openid: str) -> RaidRankingData:
@@ -112,7 +126,8 @@ def build_member_ranking(payload: dict, member_openid: str) -> RaidRankingData:
         if openid == member_openid:
             matched.append(row)
     ranking = build_ranking({"participate_data": matched})
-    return RaidRankingData(ranking.participants, scope="CURRENT_RESPONSE_MEMBER")
+    ranking.scope = "CURRENT_RESPONSE_MEMBER"
+    return ranking
 
 
 def format_compact_number(value: int | float | None) -> str:
@@ -153,24 +168,34 @@ def format_compact_number(value: int | float | None) -> str:
 
 
 def format_ranking(data: RaidRankingData) -> str:
-    if data.scope == "CURRENT_RESPONSE_MEMBER":
-        lines = [
-            "【联盟突袭 · 我的当前响应范围】",
-            "按当前响应中与本账号稳定身份精确匹配的记录汇总；不代表完整赛季或实际攻击次数。",
-        ]
-    else:
-        lines = [
-            "【联盟突袭 · 当前响应范围排名】",
-            "按已返回记录的伤害字段汇总；不代表完整赛季或实际攻击次数。",
-        ]
-    for item in data.participants[:50]:
+    member = data.scope.endswith("_MEMBER")
+    title = ("我的上赛季记录" if member else "上赛季返回排名") if data.scope.startswith("LAST_SEASON") else ("我的当前响应范围" if member else "当前响应范围排名")
+    lines = [f"【联盟突袭 · {data.guild_name} · {title}】", scope_label(data), "按已返回记录汇总，不代表完整赛季或实际攻击次数。"]
+    for item in data.participants:
         name = " ".join(item.nickname.split())[:40]
-        lines.append(f"{item.rank}. {name}：{format_compact_number(item.total_damage)} · {len(item.attacks)} 条返回记录")
+        share = f" · 占比 {item.total_damage / data.total_damage:.1%}" if not member and data.total_damage else ""
+        lines.append(f"{item.rank}. {name}：{format_compact_number(item.total_damage)}{share} · {data.total_records if member else len(item.attacks)} 条返回记录")
+        if member:
+            for attack in item.attacks:
+                lines.append(f"第 {attack.day if attack.day is not None else '未知'} 日 · {attack.boss_id or '未知Boss'} · {format_compact_number(attack.total_damage)}")
     if not data.participants:
-        if data.scope == "CURRENT_RESPONSE_MEMBER":
-            lines.append("当前响应未返回此账号的攻击记录。")
+        lines.append("此范围未返回可验证的个人记录。" if member else "此范围没有可验证的攻击记录。")
+    if data.excluded_records:
+        lines.append(f"有 {data.excluded_records} 条无效记录未纳入统计")
+    if not member:
+        if data.attendance_status == "UNKNOWN":
+            lines.append("未出刀情况：当前数据无法确认")
+        elif data.unattacked:
+            lines.append("已确认未出刀：" + "、".join(data.unattacked))
         else:
-            lines.append("当前响应没有攻击记录。")
-    if len(data.participants) > 50:
-        lines.append(f"另有 {len(data.participants)-50} 位成员，当前仅展示前50项。")
+            lines.append("完整范围内全员已有记录")
+    if data.fetched_at:
+        lines.append(f"更新：{data.fetched_at}")
+    lines.append(f"第 {data.page}/{data.total_pages} 页 · /妮姬 突袭 {'我的' if member else '排名'} [页码]")
     return "\n".join(lines)
+
+
+def scope_label(data):
+    season = (f"第 {int(data.season_id) % 1000000} 季 · " if str(data.season_id).isdigit() else f"赛季 {data.season_id} · ") if data.season_id else ""
+    period = "上赛季返回记录" if data.scope.startswith("LAST_SEASON") else "本次返回记录"
+    return season + period + (" · 部分有效数据" if data.incomplete else (" · 已确认完整范围" if data.coverage_complete else " · 完整性未确认"))

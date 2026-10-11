@@ -26,6 +26,25 @@ class ProfileAccountReader(Protocol):
 ProfilePresenter = Callable[[ProfileDashboardData], Awaitable[str]]
 
 
+def format_profile(data: ProfileDashboardData) -> str:
+    """图片不可用时保留同一快照中的核心资料与未知值。"""
+    def value(item):
+        return "未知" if item is None else str(item)
+
+    lines = [f"个人资料 · {data.commander_name}",
+             f"指挥官等级：{value(data.commander_level)} · 同步器：{value(data.synchro_level)}",
+             f"普通主线：{value(data.normal_campaign)} · 困难主线：{value(data.hard_campaign)}",
+             f"角色数量：{value(data.character_count)}"]
+    if data.daily_available is False:
+        lines.append("今日进度：暂时无法获取")
+    else:
+        lines.extend([f"拦截剩余：{value(data.intercept_remaining)}",
+                      f"咨询剩余：{value(data.counsel_remaining)}",
+                      f"派遣完成：{value(data.dispatch_completed)} · 进行中：{value(data.dispatch_in_progress)}"])
+    lines.extend([f"更新时间：{data.fetched_at}", "图片生成失败，已显示文字摘要。"])
+    return "\n".join(lines)
+
+
 class ProfileCommandHandler:
     """将 Profile application 结果转换为单张图片命令结果。"""
 
@@ -61,7 +80,12 @@ class ProfileCommandHandler:
                 )
 
             dashboard = await self._application.build_dashboard(account)
-            image_path = await self._present(dashboard)
+            try:
+                image_path = await self._present(dashboard)
+                if not image_path:
+                    raise RuntimeError("图片未生成")
+            except Exception:
+                return CommandResult((TextReply(format_profile(dashboard)),))
             return CommandResult((ImageReply(image_path),))
         except CookieExpired:
             self._invalidate_cookie(context.actor_id)

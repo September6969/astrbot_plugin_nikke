@@ -52,9 +52,11 @@ class ProfileT2IPayloadBuilder:
             simulation_state = "UNKNOWN"
         roster_state = section_state(data.roster_available, data.roster_partial)
         outpost_state = section_state(data.outpost_available)
-        research_state = section_state(partial=data.research_partial, items=data.recycle_room_researches)
+        # 父接口成功不代表每个子字段都已返回，仅继承明确的不可用状态。
+        child_available = False if data.outpost_available is False else None
+        research_state = section_state(child_available, partial=data.research_partial, items=data.recycle_room_researches)
         resource_state = section_state(partial=data.currencies_partial, items=data.currencies)
-        collection_state = section_state(partial=data.memorial_partial, items=data.memorial_summary)
+        collection_state = section_state(child_available, partial=data.memorial_partial, items=data.memorial_summary)
         resources, used = [], set()
         for definition in CurrencyRegistry.DEFINITIONS.values():
             matches = [item for item in data.currencies or [] if item.type == definition.type]
@@ -76,7 +78,7 @@ class ProfileT2IPayloadBuilder:
         researches = pairs([(item.presentation_name or item.display_name or "研究项目名称 Unknown",
                              "LV." + display_number(item.level) + (f" · EXP {item.exp:,}" if item.exp is not None and item.exp > 0 else ""))
                             for item in data.recycle_room_researches or []], research_state)
-        return {"commander": data.commander_name, "updated": data.fetched_at, "version": data.plugin_version,
+        return {"canvas": {"width": 1080, "height": 800}, "commander": data.commander_name, "updated": data.fetched_at, "version": data.plugin_version,
                 "today": today, "today_state": today_state, "storage": storage,
                 "simulation": pairs([("模拟室每日最佳", data.sim_room_daily_record.display_label if data.sim_room_daily_record else None),
                                      ("每日最佳分数", display_number(data.sim_room_daily_record.score) if data.sim_room_daily_record else None),

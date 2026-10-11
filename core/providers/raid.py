@@ -33,6 +33,7 @@ def create_raid_resources(
     gateway: BlaBlaClient,
     clock: Callable[[], datetime],
     plugin_version: str = PLUGIN_VERSION,
+    task_factory=None,
 ) -> RaidResources:
     """创建一组 Raid 资源，所有外部依赖均由 composition root 提供。"""
     builder = UnionRaidBuilder()
@@ -42,6 +43,7 @@ def create_raid_resources(
         builder=builder,
         clock=clock,
         plugin_version=plugin_version,
+        task_factory=task_factory,
     )
     renderer = UnionRaidRenderer(data_dir / "cards", plugin_dir / "fonts")
     return RaidResources(builder, application, renderer)

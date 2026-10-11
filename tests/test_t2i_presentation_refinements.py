@@ -295,7 +295,7 @@ def test_profile_partial_status_is_section_level_only():
     html = render("profile", payload)
 
     # Section-level badge must exist
-    assert '<span class="badge state-partial">PARTIAL</span>' in html
+    assert '<span class="badge state-partial">部分数据</span>' in html
 
     # Individual rows/fields must NOT contain PARTIAL small tag
     assert '<small>PARTIAL</small>' not in html
@@ -304,7 +304,7 @@ def test_profile_partial_status_is_section_level_only():
     assert '<small>UNKNOWN</small>' not in html
 
     # Every PARTIAL badge must be inside a section-header or today-head
-    for match in re.finditer(r'<span class="badge state-partial">PARTIAL</span>', html):
+    for match in re.finditer(r'<span class="badge state-partial">部分数据</span>', html):
         prefix = html[:match.start()]
         assert "today-head" in prefix[-200:] or "section-header" in prefix[-200:]
 

@@ -10,7 +10,7 @@ class UnionMemberT2IPayloadBuilder:
         from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
         from astrbot_plugin_nikke.ui.payloads.common import boss_presentation, display_number
 
-        if data.scope != "CURRENT_RESPONSE_MEMBER":
+        if data.scope not in {"CURRENT_RESPONSE_MEMBER", "LAST_SEASON_MEMBER"}:
             raise ValueError("个人报告要求明确的当前成员响应范围")
         master = CharacterMasterResolver()
         participants = []
@@ -51,9 +51,10 @@ class UnionMemberT2IPayloadBuilder:
                 rows.append(
                     {
                         **boss,
-                        "label": f"RECORD {index:02}",
+                        "label": f"记录 {(data.page - 1) * 5 + index:02}",
+                        "details_complete": attack.details_complete,
                         "boss": boss["name"],
-                        "day": str(attack.day),
+                        "day": str(attack.day) if attack.day is not None else "未知",
                         "difficulty": str(attack.difficulty),
                         "level": str(attack.level),
                         "step": str(attack.step),
@@ -66,8 +67,11 @@ class UnionMemberT2IPayloadBuilder:
                 {
                     "name": participant.nickname,
                     "damage": display_number(participant.total_damage),
-                    "returned": str(len(participant.attacks)),
+                    "returned": str(data.total_records or len(participant.attacks)),
                     "rows": rows,
                 }
             )
-        return {"scope": data.scope, "participants": participants}
+        from ...features.raid.experience import scope_label
+        return {"scope": scope_label(data), "participants": participants, "guild": data.guild_name,
+                "updated": data.fetched_at, "page": data.page, "pages": data.total_pages,
+                "excluded": data.excluded_records, "canvas": {"width": 1080, "height": 800}}

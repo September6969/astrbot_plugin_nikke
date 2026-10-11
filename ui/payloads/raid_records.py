@@ -1,70 +1,20 @@
-"""联盟突袭排名卡片的展示数据组装。"""
+"""联盟贡献卡：范围内排名，不根据昵称推断出刀。"""
+from ...features.raid.experience import scope_label
+from .common import display_number
 
 
 class UnionRecordsT2IPayloadBuilder:
     def build(self, data, union_members=None, **kwargs):
-        from astrbot_plugin_nikke.ui.payloads.common import display_number
-
-        if union_members is None:
-            union_members = getattr(data, "union_members", None)
-        if union_members is None and isinstance(data, dict):
-            union_members = data.get("union_members") or data.get("guild_members")
-        participants = getattr(data, "participants", None)
-        if participants is None and isinstance(data, dict):
-            participants = data.get("participants", [])
-        participants = participants or []
-        attacked_nicknames = {
-            item.nickname for item in participants if hasattr(item, "nickname")
-        }
-
-        if union_members is None:
-            no_attack = {
-                "status": "UNKNOWN",
-                "count": None,
-                "label": "无法确认",
-                "detail": "缺少全员名单数据，无法确认",
-                "members": [],
-            }
-        else:
-            clean_members = []
-            for member in union_members:
-                if isinstance(member, str) and member.strip():
-                    clean_members.append(member.strip())
-                elif isinstance(member, dict) and member.get("nickname"):
-                    clean_members.append(str(member["nickname"]).strip())
-            unattacked = [
-                name for name in clean_members if name not in attacked_nicknames
-            ]
-            if not unattacked:
-                no_attack = {
-                    "status": "ALL_ATTACKED",
-                    "count": 0,
-                    "label": "全员已出刀",
-                    "detail": "当前已知联盟成员均已有出刀记录",
-                    "members": [],
-                }
-            else:
-                no_attack = {
-                    "status": "HAS_UNATTACKED",
-                    "count": len(unattacked),
-                    "label": f"未出刀 {len(unattacked)} 人",
-                    "detail": "",
-                    "members": unattacked,
-                }
-        return {
-            "scope": (
-                getattr(data, "scope", "CURRENT_RESPONSE")
-                if not isinstance(data, dict)
-                else data.get("scope", "CURRENT_RESPONSE")
-            ),
-            "rows": [
-                {
-                    "rank": str(item.rank),
-                    "nickname": item.nickname,
-                    "damage": display_number(item.total_damage),
-                    "records": str(len(item.attacks)),
-                }
-                for item in participants
-            ],
-            "no_attack": no_attack,
-        }
+        total = data.total_damage or sum(p.total_damage for p in data.participants)
+        status = data.attendance_status
+        no_attack = {"status": status, "count": len(data.unattacked) if status != "UNKNOWN" else None,
+            "label": {"UNKNOWN": "当前数据无法确认", "ALL_ATTACKED": "全员已有记录", "HAS_UNATTACKED": "已确认未出刀"}[status],
+            "detail": "需要同一赛季及游戏日的完整成员名单与攻击记录" if status == "UNKNOWN" else "仅适用于已确认的完整范围",
+            "members": data.unattacked}
+        return {"scope": scope_label(data), "guild": data.guild_name, "updated": data.fetched_at,
+            "page": data.page, "pages": data.total_pages, "total_damage": "未知" if data.incomplete and not data.total_records else display_number(total),
+            "excluded": data.excluded_records, "incomplete": data.incomplete,
+            "rows": [{"rank": str(p.rank), "nickname": p.nickname, "damage": display_number(p.total_damage),
+                "share": f"{p.total_damage / total:.1%}" if total else "—", "records": str(len(p.attacks))}
+                for p in data.participants], "no_attack": no_attack,
+            "canvas": {"width": 1080, "height": 800}}

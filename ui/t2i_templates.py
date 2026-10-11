@@ -14,4 +14,6 @@ class T2ITemplateLoader:
                         ("reset.css", "tokens.css", "components.css", "utilities.css"))
         macros = (shared / "macros.jinja").read_text(encoding="utf-8")
         page_text = (self.root / f"{page}.html").read_text(encoding="utf-8")
+        if page.startswith("union_"):
+            page_text = page_text.replace("<!-- RAID_CSS -->", (shared / "raid.css").read_text(encoding="utf-8"))
         return "{% autoescape true %}\n" + macros + page_text.replace("<!-- SHARED_CSS -->", css) + "\n{% endautoescape %}"

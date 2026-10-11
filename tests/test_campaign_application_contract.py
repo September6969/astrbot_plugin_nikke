@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -14,6 +16,27 @@ from astrbot_plugin_nikke.features.campaign.models import ClearLineupStatus
 from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
 from astrbot_plugin_nikke.integrations.blablalink.client import CookieExpired
 from astrbot_plugin_nikke.features.campaign.application import CampaignApplication
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("available", [True, False])
+async def test_render_failure_keeps_snapshot_without_second_query(available):
+    from astrbot_plugin_nikke.features.campaign.models import StageClearRecord, StageClearMember
+    record = StageClearRecord("HARD", 35, "35-36", 123,
+        status=ClearLineupStatus.AVAILABLE if available else ClearLineupStatus.UNAVAILABLE,
+        status_message="暂无历史阵容", fetched_at="2026-10-10 12:00",
+        members=[StageClearMember(1, 441, 123456, 1, name_cn="测试角色")] if available else [])
+    application = SimpleNamespace(resolve=lambda query: object(), lookup=AsyncMock(return_value=record))
+    feedback = FeedbackHandle()
+    handler = CampaignCommandHandler(application=application,
+        present=AsyncMock(side_effect=RuntimeError("图片失败")), invalidate_cookie=lambda _: None,
+        start_feedback=lambda *args: feedback)
+    result = await handler.handle(CommandContext(actor_id="synthetic", parameters={"stage": "35-36"}))
+    assert isinstance(result.messages[0], TextReply)
+    assert "困难 35-36" in result.messages[0].text
+    assert ("测试角色" if available else "暂无历史阵容") in result.messages[0].text
+    application.lookup.assert_awaited_once()
+    assert feedback.cancelled
 
 
 class AccountReader:
