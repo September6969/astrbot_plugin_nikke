@@ -26,7 +26,7 @@ class CalendarService(ScheduleService):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.application = CalendarApplication(self)
+        self.application = CalendarApplication(self, task_factory=self._task_factory)
 
 
 __all__ = ["CalendarService", "CAT_LABELS", "CST"]

@@ -152,6 +152,7 @@ def create_container(
         account_reader=store,
         gateway=client,
         clock=clock,
+        task_factory=shared.runtime_coordinator.create_task,
     )
     asset_manager = shared.asset_manager
     cdk_service = create_cdk_service(client)
@@ -166,7 +167,7 @@ def create_container(
         directory_provider=directory_provider,
     )
 
-    announcements = create_announcement_resources(data_dir, store=store)
+    announcements = create_announcement_resources(data_dir, store=store, task_factory=runtime_coordinator.create_task)
     tarot = create_tarot_service(plugin_dir, data_dir)
     web = create_binding_web_service(store, client, extension_zip, config)
     daily_runner = create_daily_runner(client=client, store=store, config=config)

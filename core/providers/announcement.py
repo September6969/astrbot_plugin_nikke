@@ -29,7 +29,7 @@ class AnnouncementResources:
 
 
 def create_announcement_resources(
-    data_dir: Path, *, store: AnnouncementStateStore
+    data_dir: Path, *, store: AnnouncementStateStore, task_factory=None
 ) -> AnnouncementResources:
     """组装公告投递和 Calendar 提醒所共享的唯一服务。"""
     service = AnnouncementService(
@@ -43,6 +43,7 @@ def create_announcement_resources(
     calendar = CalendarService(
         data_dir / "calendar",
         announcement_service=service,
+        **({"task_factory": task_factory} if task_factory is not None else {}),
         fetch_client=FetchClient(),
         visual_cache=CalendarVisualCache(data_dir / "calendar"),
     )

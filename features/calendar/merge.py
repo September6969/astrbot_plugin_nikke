@@ -114,19 +114,25 @@ def _merge_two_events(
     def _collect_candidates(field_name: str, attr_name: str | None = None) -> list[Any]:
         attr = attr_name or field_name
         cands = list(merged_evidence.get(field_name, []))
-        if not cands:
-            for ev in (base, incoming):
-                val = getattr(ev, attr, None)
-                if val is not None and val != "":
-                    src = ev.primary_source or (ev.sources[0] if ev.sources else "unknown")
-                    conf = ev.confidence or 0.8
-                    prec = getattr(ev, f"{field_name}_precision", None) or getattr(ev, f"{attr}_precision", None)
-                    cands.append(FieldEvidence(
-                        value=val,
-                        source=src,
-                        confidence=conf,
-                        precision=prec,
-                    ).to_dict())
+        for ev in (base, incoming):
+            if ev.field_evidence.get(field_name):
+                continue
+            val = getattr(ev, attr, None)
+            if val is not None and val != "":
+                src = ev.primary_source or (ev.sources[0] if ev.sources else "unknown")
+                prec = getattr(ev, f"{field_name}_precision", None) or getattr(ev, f"{attr}_precision", None)
+                cands.append(FieldEvidence(value=val, source=src,
+                    confidence=ev.confidence if ev.confidence is not None else 0.8,
+                    precision=prec, observed_at=ev.fetched_at).to_dict())
+        unique = []
+        signatures = []
+        for candidate in cands:
+            signature = {key: value for key, value in candidate.items() if key != "observed_at"}
+            if signature not in signatures:
+                signatures.append(signature)
+                unique.append(candidate)
+        cands = unique
+        merged_evidence[field_name] = cands
         return cands
 
     # 1. 标题仲裁
@@ -309,14 +315,15 @@ class CalendarMergePolicy:
         ):
             service.quality_diagnostics[key] = 0
         all_events: list[CanonicalEvent] = []
-        for src, events in service._source_datasets.items():
+        for src, events in sorted(service._source_datasets.items()):
             # 仲裁的版本和展示诊断不得回写到来源 LKG。
-            all_events.extend(CanonicalEvent.from_dict(event.to_dict()) for event in events)
+            all_events.extend(CanonicalEvent.from_dict(event.to_dict()) for event in sorted(events, key=lambda item: item.id))
 
         merged_list: list[CanonicalEvent] = []
         for incoming in all_events:
             matched_idx = -1
             ambiguous_seen = False
+            matches = []
             for idx, existing in enumerate(merged_list):
                 identity = score_identity(existing, incoming)
                 canonical_match = None
@@ -325,17 +332,19 @@ class CalendarMergePolicy:
                     if canonical_match is not None:
                         identity = canonical_match
                 if identity.decision == IdentityDecision.MATCH:
-                    matched_idx = idx
-                    service.quality_diagnostics["identity_matches"] = service.quality_diagnostics.get("identity_matches", 0) + 1
-                    if canonical_match is not None:
-                        service.quality_diagnostics["canonical_title_matches"] = service.quality_diagnostics.get("canonical_title_matches", 0) + 1
-                        if isinstance(incoming.metadata, dict):
-                            incoming.metadata["identity_match"] = canonical_match.to_dict()
-                    if "official" in {str(item).casefold() for item in incoming.sources}:
-                        service.quality_diagnostics["official_enriched_existing"] += 1
-                    break
-                if identity.decision == IdentityDecision.AMBIGUOUS:
+                    matches.append((idx, identity, canonical_match))
+                elif identity.decision == IdentityDecision.AMBIGUOUS:
                     ambiguous_seen = True
+            if len(matches) == 1 and not ambiguous_seen:
+                matched_idx, identity, canonical_match = matches[0]
+                service.quality_diagnostics["identity_matches"] += 1
+                if canonical_match is not None:
+                    service.quality_diagnostics["canonical_title_matches"] += 1
+                    incoming.metadata["identity_match"] = canonical_match.to_dict()
+                if "official" in incoming.sources:
+                    service.quality_diagnostics["official_enriched_existing"] += 1
+            elif matches:
+                ambiguous_seen = True
 
             if matched_idx >= 0:
                 merged_list[matched_idx] = _merge_two_events(
@@ -393,7 +402,7 @@ class CalendarMergePolicy:
             has_required_failure = False
             for ad in required_adapters:
                 h = service._source_health.get(ad.source_name)
-                if h and h.consecutive_failures > 0:
+                if h is None or h.consecutive_failures > 0 or h.completeness != "COMPLETE":
                     has_required_failure = True
                     break
 

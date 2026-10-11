@@ -130,6 +130,8 @@ class ScheduleService:
         }
 
         self._sync_lock = asyncio.Lock()
+        self._refresh_task = None
+        self._task_factory = kwargs.get("task_factory")
 
         # 默认适配器链
         self.manual_adapter = ManualOverrideScheduleAdapter(self.overrides_path)

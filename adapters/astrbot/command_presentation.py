@@ -106,14 +106,11 @@ class AstrBotCommandPresentation:
             record,
         )
 
-    async def render_raid_overview(self, data: Any) -> str:
+    async def render_raid_overview(self, data: Any) -> str | None:
         path = await self.try_t2i("union_overview", data)
         if path:
             return path
-        return await asyncio.to_thread(
-            self._services.raid_renderer.render_raid_overview,
-            data,
-        )
+        return None
 
     async def render_raid_ranking(self, page: str, data: Any) -> str | None:
         return await self.try_t2i(page, data)

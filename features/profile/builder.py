@@ -545,11 +545,13 @@ class ProfileBuilder:
         tower_daily_list = daily_dict.get("tower_daily_info_list")
         tower_daily_remaining: int | None = None
         if isinstance(tower_daily_list, list):
-            tower_daily_remaining = sum(
-                _optional_int(t.get("remaining_count")) or 0
+            counts = [
+                _optional_int(t.get("remaining_count")) if isinstance(t, dict) else None
                 for t in tower_daily_list
-                if isinstance(t, dict)
-            )
+            ]
+            # 任一记录未知时不能把已知部分冒充完整总数。
+            if all(count is not None and count >= 0 for count in counts):
+                tower_daily_remaining = sum(counts)
 
         return ProfileDashboardData(
             commander_name=commander_name,

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from .participants import RaidRankingData
 
 
 class RaidState(str, Enum):
@@ -76,3 +77,7 @@ class UnionRaidOverviewData:
     previous_season: PreviousSeasonSummary | None = None
     current_season_name: str | None = None
     season_id: str | None = None
+
+    ranking: RaidRankingData | None = None
+    member: RaidRankingData | None = None
+    notices: list[str] = field(default_factory=list)

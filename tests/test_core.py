@@ -825,7 +825,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 ("cdk", {"operation": "batch", "codes": "CODE1 CODE2"}),
                 ("cdk", {"operation": "available"}),
                 ("cdk", {"operation": "history"}),
-                ("calendar", {"horizon": ""}),
+                ("calendar", {"horizon": "", "page": ""}),
                 ("announcement", {"operation": "view"}),
                 ("guide", {"category": "练度", "page": "1"}),
             ],

@@ -7,7 +7,7 @@ class UnionOverviewT2IPayloadBuilder:
 
         self.assets, self.resolver = assets, resolver or T2IAssetResolver()
 
-    def build(self, data, now=None):
+    def _build(self, data, now=None):
         from datetime import datetime
 
         try:
@@ -136,3 +136,19 @@ class UnionOverviewT2IPayloadBuilder:
             "previous_season": prev_dict,
             "current_season_name": getattr(data, "current_season_name", None),
         }
+
+    def build(self, data, now=None):
+        from .raid_records import UnionRecordsT2IPayloadBuilder
+        from .common import display_number
+        from ...features.raid.experience import scope_label
+        payload = self._build(data, now)
+        ranking = getattr(data, "ranking", None)
+        member = getattr(data, "member", None)
+        payload["ranking"] = UnionRecordsT2IPayloadBuilder().build(ranking) if ranking is not None else None
+        if payload["ranking"]:
+            payload["ranking"]["rows"] = payload["ranking"]["rows"][:5]
+        payload["member"] = {"damage": "未知" if member.incomplete and not member.total_records else display_number(member.total_damage), "records": member.total_records,
+            "scope": scope_label(member)} if member is not None else None
+        payload["notices"] = getattr(data, "notices", [])
+        payload["canvas"] = {"width": 1080, "height": 800}
+        return payload

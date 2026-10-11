@@ -324,6 +324,8 @@ class NikkeStore:
             return None
         account = dict(row)
         if with_cookie:
+            # 密文每次重新绑定均变化，用不可逆指纹使短时查询缓存立即失效。
+            account["binding_revision"] = hashlib.sha256(account["cookie_cipher"]).hexdigest()
             try:
                 account["cookie"] = self._cipher.decrypt(account.pop("cookie_cipher")).decode("utf-8")
                 encrypted_xcommon = account.pop("xcommon_cipher", b"")

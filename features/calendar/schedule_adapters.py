@@ -63,6 +63,7 @@ class FetchResult:
     response_mode: ResponseMode = ResponseMode.COMPLETE_SNAPSHOT
     observed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     diagnostics: dict[str, Any] = field(default_factory=dict)
+    completeness: str = "COMPLETE"
 
 
 class BaseScheduleAdapter(ABC):
@@ -162,7 +163,7 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
             "importance": 0,
             "sort": -1,
             "keyword": "",
-            "limit": 999,
+            "limit": 100,
             "page_no": 1,
             "serverId": 19,
             "status": 0,
@@ -171,7 +172,8 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
         try:
             if self.client is None:
                 raise RuntimeError("Calendar 网络端口尚未由组合根装配")
-            payload = await self.client.get_json(self.API_URL, headers=headers, params=params)
+            from .source_scan import scan_gamekee
+            payload, completeness = await scan_gamekee(self.client, self.API_URL, headers, params)
         except Exception as exc:
             err = safe_exception_message(exc)
             logger.warning("[NIKKE] GameKee 网络请求失败: %s", err)
@@ -226,6 +228,7 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
                 source=self.source_name,
                 response_mode=self.response_mode,
                 diagnostics={"gamekee_rows": 0, "gamekee_valid": 0},
+                completeness=completeness,
             )
 
         valid_events: list[CanonicalEvent] = []
@@ -317,6 +320,7 @@ class GameKeeScheduleAdapter(BaseScheduleAdapter):
         return FetchResult(
             outcome=FetchOutcome.SUCCESS_DATA,
             events=valid_events,
+            completeness="PARTIAL" if malformed_count or duplicate_count else completeness,
             source=self.source_name,
             response_mode=self.response_mode,
             diagnostics={

@@ -155,7 +155,7 @@ def test_profile_current_model_progress_icons_and_fields(assets, tmp_path):
     assert all(item["icon_data_uri"] for item in payload["resources"])
     assert dict((v["label"], v["value"]) for v in payload["outpost"])["基础核心"] == "20"
     html = rendered("profile", payload)
-    assert '<meta name="viewport" content="width=1200">' in html
+    assert '<meta name="viewport" content="width=1080">' in html
     assert "storage-track" in html and "72.0%" in html
     for forbidden in ("战术学院", "tactic_academy", "EXP 0"):
         assert forbidden not in html

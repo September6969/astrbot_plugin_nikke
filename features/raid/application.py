@@ -7,6 +7,8 @@ from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping, Protocol
 
+from ..account.errors import CredentialExpiredError
+from .query import RaidQueryMixin
 from .models import RaidState, UnionRaidOverviewData
 from .participants import RaidRankingData, build_member_ranking, build_ranking
 
@@ -27,6 +29,9 @@ class RaidAccountReader(Protocol):
 
 
 class RaidGateway(Protocol):
+    async def get_union_raid_dashboard(self, account: Mapping[str, Any]) -> Mapping[str, Any]:
+        """共享联盟身份返回 Boss、攻击数据及局部失败标记。"""
+
     async def get_union_raid_overview(
         self, account: Mapping[str, Any], *, attacks: bool = False
     ) -> Mapping[str, Any]:
@@ -67,7 +72,7 @@ class RaidBuilderPort(Protocol):
         """返回当前时钟之前最近结束赛季的显式 ID。"""
 
 
-class RaidApplication:
+class RaidApplication(RaidQueryMixin):
     def __init__(
         self,
         *,
@@ -76,16 +81,20 @@ class RaidApplication:
         builder: RaidBuilderPort,
         clock: Callable[[], datetime],
         plugin_version: str,
+        task_factory=None,
     ) -> None:
         self._account_reader = account_reader
         self._gateway = gateway
         self._builder = builder
         self._clock = clock
         self._plugin_version = plugin_version
+        self._task_factory = task_factory
+        self._init_query_cache()
 
     def _account(self, qq_id: str) -> Mapping[str, Any]:
         account = self._account_reader.get_account(str(qq_id))
         if not account:
+            self.invalidate(qq_id)
             raise ValueError("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
         return account
 
@@ -134,6 +143,8 @@ class RaidApplication:
                         total_attacks=len(attacks),
                         total_damage=total_damage,
                     )
+            except CredentialExpiredError:
+                raise
             except Exception as exc:
                 _LOGGER.warning("[NIKKE] 获取上一赛季突袭数据失败: %s", exc)
         return data
@@ -170,7 +181,11 @@ class RaidApplication:
         )
         if historical is not None:
             _, payload = historical
-        return build_member_ranking(payload, member_openid)
+        result = build_member_ranking(payload, member_openid)
+        if historical is not None:
+            result.scope = "LAST_SEASON_MEMBER"
+            result.season_id = historical[0]
+        return result
 
     async def _previous_season_attacks(
         self,
@@ -200,6 +215,8 @@ class RaidApplication:
             historical_attacks = historical.get("participate_data")
             if isinstance(historical_attacks, list) and historical_attacks:
                 return season_id, historical
+        except CredentialExpiredError:
+            raise
         except Exception as exc:
             _LOGGER.warning("[NIKKE] 获取上一赛季突袭攻击记录失败: %s", exc)
         return None

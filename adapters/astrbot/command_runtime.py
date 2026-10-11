@@ -54,10 +54,10 @@ class NikkeCommandRuntime:
                 "/妮姬 查询 资料 <角色名>　(/nikke info)\n"
                 "/妮姬 战役 <关卡>　(/nikke campaign [普通/困难] 46-40)\n"
                 "/妮姬 联盟突袭　(/nikke raid)\n"
-                "/妮姬 联盟突袭 排名 — 当前响应范围\n"
-                "/妮姬 联盟突袭 我的 — 当前账号在本次响应中的记录\n"
+                "/妮姬 突袭 排名 [页码] — 贡献排名\n"
+                "/妮姬 突袭 我的 [页码] — 个人队伍记录\n"
                 "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
-                "/妮姬 日程 [7|14|30]　(/nikke schedule [7|14|30])\n"
+                "/妮姬 日程 [7|14|30] [页码]　(/nikke schedule [7|14|30] [页码])\n"
                 "/妮姬 公告　(/nikke news)\n"
                 "/妮姬 攻略 [分类]　(/nikke guide)\n"
                 "/妮姬 塔罗 [单抽|三张|今日|状态]　(/nikke tarot)"
@@ -198,7 +198,7 @@ class NikkeCommandRuntime:
                     yield result
             else:
                 async for result in self._dispatch(
-                    event, self._handlers.calendar, horizon=arg1
+                    event, self._handlers.calendar, horizon=arg1, page=arg2
                 ):
                     yield result
             return
@@ -214,10 +214,10 @@ class NikkeCommandRuntime:
             return
         if key in {"突袭", "联盟突袭", "raid", "union_raid"}:
             operation = "ranking" if arg1 in {"排名", "ranking"} else (
-                "member" if arg1 in {"我的", "my"} else "overview"
+                "member" if arg1 in {"我的", "my"} else ("overview" if not arg1 else "invalid")
             )
             async for result in self._dispatch(
-                event, self._handlers.raid, operation=operation
+                event, self._handlers.raid, operation=operation, page=arg2 or "1"
             ):
                 yield result
             return

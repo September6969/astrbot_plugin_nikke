@@ -317,6 +317,7 @@ class SourceHealth:
     last_error_type: str = ""
     consecutive_failures: int = 0
     dataset_version: int = 1
+    completeness: str = "UNKNOWN"
 
     def __post_init__(self) -> None:
         if self.last_attempt_at is not None:
@@ -333,6 +334,7 @@ class SourceHealth:
             "last_error_type": self.last_error_type,
             "consecutive_failures": self.consecutive_failures,
             "dataset_version": self.dataset_version,
+            "completeness": self.completeness,
         }
 
     @classmethod
@@ -345,6 +347,7 @@ class SourceHealth:
             last_error_type=str(data.get("last_error_type", "")),
             consecutive_failures=int(data.get("consecutive_failures", 0)),
             dataset_version=int(data.get("dataset_version", 1)),
+            completeness=str(data.get("completeness", "UNKNOWN")),
         )
 
 
@@ -534,7 +537,7 @@ class CanonicalEvent:
             return "时间区间无效"
 
         if not self.end_at or self.end_precision == TimePrecision.UNKNOWN.value:
-            return "结束时间未知" if self.end_at is None and self.start_at else "长期开放"
+            return "结束时间未知"
 
         status = resolve_event_status(self, current)
         if status == EventStatus.ENDED.value:

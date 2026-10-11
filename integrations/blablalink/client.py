@@ -291,7 +291,13 @@ class BlaBlaClient:
             self._post(DAILY_CONTENTS_PROGRESS, account["cookie"], daily_payload),
             return_exceptions=True,
         )
-        # PROFILE is required.
+        # 取消和认证失效优先于其他接口故障，避免用户无法获知需要重新绑定。
+        responses = (basic_resp, outpost_resp, roster_resp, daily_resp)
+        for exception_type in (asyncio.CancelledError, CookieExpired):
+            for response in responses:
+                if isinstance(response, exception_type):
+                    raise response
+        # 基础资料是必需数据。
         if isinstance(basic_resp, BaseException):
             raise basic_resp
         basic_data = basic_resp.get("data") if isinstance(basic_resp, dict) else None
@@ -370,7 +376,7 @@ class BlaBlaClient:
             raise BlaBlaError("每日内容进度格式异常", endpoint="GetUserDailyContentsProgress")
         return progress[0]
 
-    async def get_union_raid_overview(self, account: dict[str, Any], *, attacks: bool = False) -> dict[str, Any]:
+    async def _union_raid_context(self, account: dict[str, Any]) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))
         openid = str(account.get("game_openid", "")).strip()
         if not area_id or not openid:
@@ -412,15 +418,36 @@ class BlaBlaClient:
             "nikke_area_id": int(area_id),
             "intl_open_id": openid,
         }
-        endpoint = UNION_RAID_DATA if attacks else UNION_RAID_LEVEL_INFO
-        level_resp = await self._post(endpoint, account["cookie"], raid_payload)
-        level_data = level_resp.get("data", {}) if isinstance(level_resp, dict) else {}
+        return {"guild_id": guild_id, "guild_name": guild_name, "request": raid_payload}
 
-        return {
-            "guild_id": guild_id,
-            "guild_name": guild_name,
-            "level_info": level_data,
-        }
+    async def get_union_raid_overview(self, account: dict[str, Any], *, attacks: bool = False) -> dict[str, Any]:
+        context = await self._union_raid_context(account)
+        endpoint = UNION_RAID_DATA if attacks else UNION_RAID_LEVEL_INFO
+        response = await self._post(endpoint, account["cookie"], context["request"])
+        return {"guild_id": context["guild_id"], "guild_name": context["guild_name"],
+                "level_info": response.get("data", {})}
+
+    async def get_union_raid_dashboard(self, account: dict[str, Any]) -> dict[str, Any]:
+        """共享一次联盟身份查询；局部失败不抹掉另一区域，认证失败始终上抛。"""
+        import asyncio
+        context = await self._union_raid_context(account)
+        results = await asyncio.gather(*[
+            self._post(endpoint, account["cookie"], context["request"])
+            for endpoint in (UNION_RAID_LEVEL_INFO, UNION_RAID_DATA)
+        ], return_exceptions=True)
+        output = {"guild_id": context["guild_id"], "guild_name": context["guild_name"], "errors": []}
+        for key, result in zip(("level_info", "attacks"), results):
+            if isinstance(result, CookieExpired):
+                raise result
+            if isinstance(result, BaseException):
+                if not isinstance(result, Exception):
+                    raise result
+                output["errors"].append(key)
+            elif isinstance(result, dict) and isinstance(result.get("data"), dict):
+                output[key] = result["data"]
+            else:
+                output["errors"].append(key)
+        return output
 
     async def get_union_raid_snapshot(self, account: dict[str, Any]) -> dict[str, Any]:
         """一次采集联盟身份与攻击响应，供休赛期回退复用明确 guild_id。"""

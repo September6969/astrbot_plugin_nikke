@@ -95,7 +95,7 @@ class LogPrivacyTests(unittest.TestCase):
             plugin.services.store = SimpleNamespace(
                 get_account=lambda _qq_id: {"cookie": "synthetic-cookie"}
             )
-            plugin.services.raid_application = SimpleNamespace(overview=failing_fetcher)
+            plugin.services.raid_application = SimpleNamespace(dashboard=failing_fetcher)
             inject_raid_handler(plugin)
             event = SimpleNamespace(
                 get_sender_id=lambda: "10001",
