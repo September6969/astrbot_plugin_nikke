@@ -21,7 +21,7 @@ from urllib.parse import urlparse
 import httpx
 
 from ...core.privacy import safe_exception_message
-from .http_transport import IsolatedAsyncClient
+from .http_transport import IsolatedAsyncClient, IsolatedCookies
 
 logger = logging.getLogger("nikke.fetch_client")
 
@@ -157,32 +157,51 @@ class FetchClient:
         self._breaker_lock = asyncio.Lock()
         self._client: httpx.AsyncClient | None = client
         self._external_client = client is not None
+        self._closing = False
         self._closed = False
+        self._close_lock = asyncio.Lock()
         self._client_lock = asyncio.Lock()
 
+    @property
+    def closing(self) -> bool:
+        return self._closing or self._closed
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
     async def _get_client(self) -> httpx.AsyncClient:
-        if self._closed:
+        if self._closing or self._closed:
             raise RuntimeError("FetchClient 已关闭，禁止发起新请求")
         if self._client is None:
             async with self._client_lock:
-                if self._client is None and not self._closed:
-                    self._client = IsolatedAsyncClient(
+                if self._client is None and not (self._closing or self._closed):
+                    client = httpx.AsyncClient(
                         transport=self.transport,
                         timeout=self.timeout,
                         follow_redirects=True,
                     )
-        if self._closed or self._client is None:
+                    try:
+                        client._cookies = IsolatedCookies()
+                    except Exception:
+                        pass
+                    self._client = client
+        if self._closing or self._closed or self._client is None:
             raise RuntimeError("FetchClient 已关闭，禁止发起新请求")
         return self._client
 
     async def aclose(self) -> None:
-        """幂等关闭客户端，释放连接资源。"""
+        """幂等关闭客户端，释放连接资源。区分 closing 与 closed，支持取消/失败后安全重试。"""
         if self._closed:
             return
-        self._closed = True
-        if not self._external_client and self._client is not None:
-            await self._client.aclose()
-            self._client = None
+        self._closing = True
+        async with self._close_lock:
+            if self._closed:
+                return
+            if not self._external_client and self._client is not None:
+                await self._client.aclose()
+                self._client = None
+            self._closed = True
 
     async def __aenter__(self) -> FetchClient:
         return self
@@ -207,7 +226,7 @@ class FetchClient:
         timeout: float | None = None,
     ) -> Any:
         """执行 GET 请求并解析 JSON，附带熔断、重试、并发控制与脱敏异常处理。"""
-        if self._closed:
+        if self._closing or self._closed:
             raise RuntimeError("FetchClient 已关闭，禁止发起新请求")
 
         parsed = urlparse(url)

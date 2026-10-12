@@ -17,7 +17,7 @@ from astrbot_plugin_nikke.features.character.application import (
     CharacterNotOwned,
 )
 from astrbot_plugin_nikke.features.character.identity import CharacterDirectoryResolver
-from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, CookieExpired
+from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, CookieExpired, BlaBlaError
 
 
 def make_account(qq_id: str = "10001", revision: str = "rev_1", area_id: int = 1) -> dict[str, Any]:
@@ -149,18 +149,270 @@ async def test_cache_rebinding_invalidation_and_no_backprop():
 
     # 释放任务 1 完成
     allow_finish.set()
-    res1 = await task1
-    assert len(res1) == 1
+    with pytest.raises(ValueError, match="账号绑定状态已变更"):
+        await task1
 
     # 校验：因为完成校验时发现 store 中绑定代次已变成 rev_2，旧响应不得回灌进缓存
     assert len(client._query_cache) == 0
 
     # 用 rev_2 查询，必须重新调用 API
-    allow_finish.set()
     res2 = await client.get_roster(account_v2, include_details=False)
     assert call_count == 2
+    assert len(res2) == 1
     # 正常完成且代次匹配，写入 rev_2 缓存
     assert len(client._query_cache) == 1
+
+
+@pytest.mark.asyncio
+async def test_in_flight_account_unbind_refuses_old_data_and_invalidates_cache():
+    """验证在途请求期间用户解绑，必须拒绝返回旧数据，抛出异常并不写入缓存。"""
+    account_v1 = make_account("10001", revision="rev_1")
+    current_account: dict[str, Any] | None = account_v1
+
+    class FakeStore:
+        def get_account(self, qq_id: str):
+            return current_account
+
+    call_count = 0
+    fetch_started = asyncio.Event()
+    allow_finish = asyncio.Event()
+
+    async def mock_post(path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
+        nonlocal call_count
+        call_count += 1
+        fetch_started.set()
+        await allow_finish.wait()
+        return {
+            "code": "0",
+            "data": {"characters": [{"name_code": "alice", "lv": 100}]},
+        }
+
+    client = BlaBlaClient(account_reader=FakeStore())
+    client._post = mock_post
+
+    task = asyncio.create_task(client.get_roster(account_v1, include_details=False))
+    await fetch_started.wait()
+
+    # 用户在 store 中解绑 (None)
+    current_account = None
+
+    allow_finish.set()
+    with pytest.raises(ValueError, match="尚未绑定账号或账号已解绑"):
+        await task
+
+    assert len(client._query_cache) == 0
+
+
+@pytest.mark.asyncio
+async def test_in_flight_cookie_invalidated_refuses_old_data_and_invalidates_cache():
+    """验证在途请求期间 Cookie 失效，必须拒绝返回旧数据，抛出 CredentialExpiredError。"""
+    account_v1 = make_account("10001", revision="rev_1")
+    current_account: dict[str, Any] | None = dict(account_v1)
+
+    class FakeStore:
+        def get_account(self, qq_id: str):
+            return current_account
+
+    call_count = 0
+    fetch_started = asyncio.Event()
+    allow_finish = asyncio.Event()
+
+    async def mock_post(path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
+        nonlocal call_count
+        call_count += 1
+        fetch_started.set()
+        await allow_finish.wait()
+        return {
+            "code": "0",
+            "data": {"characters": [{"name_code": "alice", "lv": 100}]},
+        }
+
+    client = BlaBlaClient(account_reader=FakeStore())
+    client._post = mock_post
+
+    task = asyncio.create_task(client.get_roster(account_v1, include_details=False))
+    await fetch_started.wait()
+
+    # 用户凭据失效
+    account_invalid = dict(account_v1)
+    account_invalid["cookie_valid"] = False
+    current_account = account_invalid
+
+    allow_finish.set()
+    with pytest.raises(CredentialExpiredError, match="账号凭据已失效"):
+        await task
+
+    assert len(client._query_cache) == 0
+
+
+@pytest.mark.asyncio
+async def test_hot_cache_hit_checks_store_validity_for_unbind_rebind_and_expiry():
+    """验证热缓存命中出口在解绑、重绑和失效时均拒绝返回数据，并清理缓存。"""
+    account_v1 = make_account("10001", revision="rev_1")
+    account_v2 = make_account("10001", revision="rev_2")
+    current_account: dict[str, Any] | None = dict(account_v1)
+
+    class FakeStore:
+        def get_account(self, qq_id: str):
+            return current_account
+
+    call_count = 0
+
+    async def mock_post(path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
+        nonlocal call_count
+        call_count += 1
+        return {
+            "code": "0",
+            "data": {"characters": [{"name_code": "alice", "lv": 100}]},
+        }
+
+    client = BlaBlaClient(account_reader=FakeStore())
+    client._post = mock_post
+
+    # 1. 成功填充热缓存
+    res = await client.get_roster(account_v1, include_details=False)
+    assert len(res) == 1
+    assert call_count == 1
+    assert len(client._query_cache) == 1
+
+    # 2. 解绑场景：store 变为 None，访问热缓存必须抛出 ValueError 并清空缓存
+    current_account = None
+    with pytest.raises(ValueError, match="尚未绑定账号或账号已解绑"):
+        await client.get_roster(account_v1, include_details=False)
+    assert len(client._query_cache) == 0
+
+    # 3. 重新填充热缓存
+    current_account = dict(account_v1)
+    res = await client.get_roster(account_v1, include_details=False)
+    assert len(res) == 1
+    assert call_count == 2
+    assert len(client._query_cache) == 1
+
+    # 4. 重绑场景：store 变成 rev_2，以旧 account_v1 访问必须抛出 ValueError 并清空缓存
+    current_account = dict(account_v2)
+    with pytest.raises(ValueError, match="账号绑定状态已变更"):
+        await client.get_roster(account_v1, include_details=False)
+    assert len(client._query_cache) == 0
+
+    # 5. 重新填充热缓存
+    current_account = dict(account_v1)
+    res = await client.get_roster(account_v1, include_details=False)
+    assert len(res) == 1
+    assert call_count == 3
+    assert len(client._query_cache) == 1
+
+    # 6. 失效场景：store 标记 cookie_valid=False，访问热缓存必须抛出 CredentialExpiredError 并清空缓存
+    account_invalid = dict(account_v1)
+    account_invalid["cookie_valid"] = False
+    current_account = account_invalid
+    with pytest.raises(CredentialExpiredError, match="账号凭据已失效"):
+        await client.get_roster(account_v1, include_details=False)
+    assert len(client._query_cache) == 0
+
+
+@pytest.mark.asyncio
+async def test_get_roster_corrupted_response_not_cached_and_allows_subsequent_success():
+    """验证响应缺失 characters 时必须抛出 BlaBlaError 且绝不缓存为假空名单，后续请求可成功。"""
+    account = make_account("10001", revision="rev_1")
+
+    class FakeStore:
+        def get_account(self, qq_id: str):
+            return account
+
+    responses = [
+        {"code": "0", "data": {}},  # 损坏响应：缺少 characters 字段
+        {"code": "0", "data": {"characters": [{"name_code": "alice", "lv": 100}]}},  # 修复后的正常响应
+    ]
+
+    call_count = 0
+
+    async def mock_post(path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
+        nonlocal call_count
+        resp = responses[call_count]
+        call_count += 1
+        return resp
+
+    client = BlaBlaClient(account_reader=FakeStore())
+    client._post = mock_post
+
+    # 首次调用遇到损坏响应，必须抛出 BlaBlaError，不能转成 []
+    with pytest.raises(BlaBlaError, match="缺失 characters 字段"):
+        await client.get_roster(account, include_details=False)
+
+    # 绝不能写入任何缓存
+    assert len(client._query_cache) == 0
+    assert call_count == 1
+
+    # 第二次调用成功获取真实名单，不被错误缓存挡住
+    res2 = await client.get_roster(account, include_details=False)
+    assert len(res2) == 1
+    assert res2[0]["name_code"] == "alice"
+    assert call_count == 2
+    assert len(client._query_cache) == 1
+
+
+@pytest.mark.asyncio
+async def test_get_roster_valid_empty_list_is_cached():
+    """验证上游明确返回空列表 characters: [] 时作为合法空名单正常缓存。"""
+    account = make_account("10001", revision="rev_1")
+
+    class FakeStore:
+        def get_account(self, qq_id: str):
+            return account
+
+    call_count = 0
+
+    async def mock_post(path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
+        nonlocal call_count
+        call_count += 1
+        return {"code": "0", "data": {"characters": []}}
+
+    client = BlaBlaClient(account_reader=FakeStore())
+    client._post = mock_post
+
+    res = await client.get_roster(account, include_details=False)
+    assert res == []
+    assert call_count == 1
+    assert len(client._query_cache) == 1
+
+    # 命中缓存，不再次发起请求
+    cached_res = await client.get_roster(account, include_details=False)
+    assert cached_res == []
+    assert call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_get_roster_incomplete_character_details_not_cached():
+    """验证包含角色但技能详情不完整时，保留不完整数据返回给调用方，但禁止写入缓存。"""
+    account = make_account("10001", revision="rev_1")
+
+    class FakeStore:
+        def get_account(self, qq_id: str):
+            return account
+
+    async def mock_post(path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
+        if "GetUserCharacters" in path:
+            return {
+                "code": "0",
+                "data": {"characters": [{"name_code": "alice", "lv": 100}, {"name_code": "modernia", "lv": 100}]},
+            }
+        # 仅返回了 alice 的详情，缺失 modernia
+        return {
+            "code": "0",
+            "data": {"character_details": [{"name_code": "alice", "skill1_lv": 10}]},
+        }
+
+    client = BlaBlaClient(account_reader=FakeStore())
+    client._post = mock_post
+
+    res = await client.get_roster(account, include_details=True)
+    assert len(res) == 2
+    assert res[0]["skill1_lv"] == 10
+    assert "skill1_lv" not in res[1]
+
+    # 关键断言：因为详情不完整，禁止写入缓存！
+    assert len(client._query_cache) == 0
+
 
 
 @pytest.mark.asyncio

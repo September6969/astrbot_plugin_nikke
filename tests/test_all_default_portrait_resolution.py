@@ -47,7 +47,9 @@ def provider() -> NikkeDbProvider:
 
 @pytest.fixture(scope="module")
 def character_master() -> list[dict]:
-    p = Path(__file__).parent.parent / "assets" / "character_master.json"
+    base = Path(__file__).parent.parent
+    cand = base / "assets" / "data" / "character_master.json"
+    p = cand if cand.is_file() else base / "assets" / "character_master.json"
     data = json.loads(p.read_text(encoding="utf-8"))
     return data.get("characters", [])
 

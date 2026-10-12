@@ -244,7 +244,7 @@ class AssetManagerTests(unittest.TestCase):
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
         target_dir.mkdir(parents=True, exist_ok=True)
         for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json", "sources.json"):
-            src = assets_dir / name
+            src = assets_dir / "data" / name if (assets_dir / "data" / name).is_file() else assets_dir / name
             if src.is_file():
                 shutil.copy2(src, target_dir / name)
         return target_dir

@@ -79,7 +79,9 @@ def test_all_135_overload_tier_ids_and_affixes_coverage():
     from pathlib import Path
     from astrbot_plugin_nikke.features.character.replica import SHORT_NAMES, CANONICAL_LABELS
 
-    tiers_path = Path(__file__).resolve().parent.parent / "assets" / "overload_tiers.json"
+    assets_dir = Path(__file__).resolve().parent.parent / "assets"
+    tiers_cand = assets_dir / "data" / "overload_tiers.json"
+    tiers_path = tiers_cand if tiers_cand.is_file() else assets_dir / "overload_tiers.json"
     data = json.loads(tiers_path.read_text(encoding="utf-8"))
     builder = make_builder()
 

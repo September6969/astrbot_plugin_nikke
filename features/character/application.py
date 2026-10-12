@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
+from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
 from astrbot_plugin_nikke.core.privacy import safe_exception_message
 from astrbot_plugin_nikke.features.account.errors import CredentialExpiredError
 from astrbot_plugin_nikke.features.account.identity import AccountIdentity, canonical_account_identity
@@ -133,6 +134,7 @@ class CharacterApplication:
         clock: Callable[[], datetime],
         monotonic: Callable[[], float] | None = None,
         plugin_version: str,
+        task_factory: Callable[..., Any] | None = None,
     ) -> None:
         self._account_reader = account_reader
         self._gateway = gateway
@@ -142,6 +144,10 @@ class CharacterApplication:
         self._clock = clock
         self._monotonic = monotonic or time.monotonic
         self._plugin_version = plugin_version
+        self._owned_coordinator = RuntimeCoordinator() if task_factory is None else None
+        self._task_factory = task_factory or (
+            self._owned_coordinator.create_task if self._owned_coordinator else None
+        )
         self._stats_profile_cache: dict[AccountIdentity, tuple[float, dict[str, Any]]] = {}
         self._profile_reads: dict[AccountIdentity, asyncio.Future[dict[str, Any]]] = {}
         self._name_map_cache: tuple[str, dict[str, str]] | None = None
@@ -353,8 +359,16 @@ class CharacterApplication:
                     )
             return raw_payload
 
-        detail_task = asyncio.create_task(_fetch_detail())
-        profile_task = asyncio.create_task(self.profile_for_stat_calculation(account))
+        if self._task_factory is None:
+            raise RuntimeError("服务未正确配置任务工厂")
+        detail_task = self._task_factory(_fetch_detail())
+        if detail_task is None:
+            raise RuntimeError("服务正在关闭，禁止新建角色查询任务")
+        profile_task = self._task_factory(self.profile_for_stat_calculation(account))
+        if profile_task is None:
+            if not detail_task.done():
+                detail_task.cancel()
+            raise RuntimeError("服务正在关闭，禁止新建角色查询任务")
         try:
             results = await asyncio.gather(detail_task, profile_task, return_exceptions=True)
         except BaseException:
@@ -410,3 +424,7 @@ class CharacterApplication:
             display_name=display_name,
         )
         return CharacterCardResult(card=card)
+    async def aclose(self) -> None:
+        """释放私有运行时协调器。"""
+        if self._owned_coordinator is not None and not self._owned_coordinator.closed:
+            await self._owned_coordinator.close()

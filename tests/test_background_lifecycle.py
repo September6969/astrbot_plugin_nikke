@@ -176,6 +176,56 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
             {"DelayedFeedbackManager", "VoiceResourceProvider", "VoicePipeline"},
         )
 
+    async def test_shared_composition_root_coordinator_wiring_and_shutdown_tracking(self):
+        import tempfile
+        from astrbot_plugin_nikke.core.providers.shared import create_shared_resources
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            shared = create_shared_resources(temp_path, temp_path, {})
+            # 1. 组合根断言：client 的任务工厂必须直接绑定至唯一的 shared.runtime_coordinator
+            self.assertIs(shared.client._task_factory.__self__, shared.runtime_coordinator)
+
+            # 2. 真实在途请求跟踪与取消测试：
+            request_started = asyncio.Event()
+            cancelled = asyncio.Event()
+
+            async def mock_post(path, cookie, payload):
+                request_started.set()
+                try:
+                    await asyncio.Event().wait()
+                except asyncio.CancelledError:
+                    cancelled.set()
+                    raise
+
+            shared.client._post = mock_post
+            dummy_account = {
+                "qq_id": "test_1",
+                "game_openid": "openid_1",
+                "game_uid": "uid_1",
+                "area_id": "1",
+                "cookie": "test_cookie",
+                "cookie_valid": True,
+            }
+            shared.store.get_account = lambda qq_id: dummy_account
+
+            fetch_coro = shared.client.get_roster(dummy_account, include_details=False)
+            task = asyncio.create_task(fetch_coro)
+            await request_started.wait()
+
+            # 验证任务已登记在协调器中
+            self.assertEqual(shared.runtime_coordinator.active_task_count, 1)
+
+            # 执行协调器关闭
+            await shared.runtime_coordinator.close()
+
+            # 验证在途请求被成功取消并终止
+            self.assertTrue(cancelled.is_set())
+            self.assertEqual(shared.runtime_coordinator.active_task_count, 0)
+            self.assertTrue(shared.runtime_coordinator.closed)
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+
 
 if __name__ == "__main__":
     unittest.main()

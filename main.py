@@ -100,6 +100,10 @@ class NikkePlugin(Star):
             send_summary=daily_handler.send_automatic_summary,
             on_directory_loaded=self._apply_directory,
         )
+        def _invalidate_cookie(actor_id: str) -> None:
+            self.services.store.mark_cookie_invalid(actor_id)
+            self.services.client.invalidate_cache(actor_id)
+
         self.handlers = PluginCommandHandlers(
             account=AccountCommandHandler(
                 application=self.services.account_application,
@@ -109,6 +113,7 @@ class NikkePlugin(Star):
                     len(self._directory)
                 ),
                 render_manual_summary=daily_handler.render_manual_summary,
+                on_unbind=self.services.client.invalidate_cache,
             ),
             announcement=AnnouncementCommandHandler(
                 application=self.services.announcement_application,
@@ -135,7 +140,7 @@ class NikkePlugin(Star):
             campaign=CampaignCommandHandler(
                 application=self.services.campaign_application,
                 present=self.presentation.render_campaign_record,
-                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                invalidate_cookie=_invalidate_cookie,
                 start_feedback=self.runtime.start_delayed_feedback,
             ),
             character=CharacterCommandHandler(
@@ -144,7 +149,7 @@ class NikkePlugin(Star):
                 render_roster=self.presentation.render_roster,
                 render_card=self.presentation.render_character_card,
                 render_info=self.presentation.render_character_info,
-                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                invalidate_cookie=_invalidate_cookie,
                 start_feedback=self.runtime.start_delayed_feedback,
             ),
             daily=daily_handler,
@@ -153,14 +158,14 @@ class NikkePlugin(Star):
                 account_reader=self.services.store,
                 application=self.services.profile_application,
                 present=self.presentation.render_profile,
-                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                invalidate_cookie=_invalidate_cookie,
                 start_feedback=self.runtime.start_delayed_feedback,
             ),
             raid=RaidCommandHandler(
                 application=self.services.raid_application,
                 render_overview=self.presentation.render_raid_overview,
                 render_ranking=self.presentation.render_raid_ranking,
-                invalidate_cookie=self.services.store.mark_cookie_invalid,
+                invalidate_cookie=_invalidate_cookie,
                 start_feedback=self.runtime.start_delayed_feedback,
             ),
             tarot=TarotCommandHandler(self.services.tarot),

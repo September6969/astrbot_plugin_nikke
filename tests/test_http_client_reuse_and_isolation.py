@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 import httpx
+from unittest.mock import AsyncMock
 import pytest
 
 from astrbot_plugin_nikke.integrations.blablalink.client import (
@@ -231,3 +232,173 @@ async def test_fetch_client_reuse_and_aclose():
 
     finally:
         await fetch_client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_blabla_client_aclose_retry_after_cancellation_and_failure():
+    """验证 BlaBlaClient 在 aclose 被取消或失败后，保留未释放资源并允许重试关闭。"""
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"code": "0", "data": {}})
+
+    transport = httpx.MockTransport(handler)
+    client = BlaBlaClient(transport=transport)
+
+    # 预热并创建内部 client
+    await client._post("/test", "cookie_1", {})
+    underlying = client._client
+    assert underlying is not None
+
+    # 1. 模拟首次关闭被取消
+    original_aclose = underlying.aclose
+    close_attempts = 0
+
+    async def flaky_aclose_cancel():
+        nonlocal close_attempts
+        close_attempts += 1
+        if close_attempts == 1:
+            raise asyncio.CancelledError()
+        await original_aclose()
+
+    underlying.aclose = flaky_aclose_cancel
+
+    with pytest.raises(asyncio.CancelledError):
+        await client.aclose()
+
+    # 验证：未完全释放前 closed 不得为 True，且底层 client 未被丢弃
+    assert client.closed is False
+    assert client.closing is True
+    assert client._client is underlying
+
+    # 2. 重试关闭，成功完成
+    await client.aclose()
+    assert client.closed is True
+    assert client._client is None
+    assert close_attempts == 2
+
+
+@pytest.mark.asyncio
+async def test_blabla_client_aclose_retry_after_exception():
+    """验证 BlaBlaClient 在底层 aclose 抛异常后，状态不置为 closed，允许重试。"""
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"code": "0", "data": {}})
+
+    client = BlaBlaClient(transport=httpx.MockTransport(handler))
+    await client._post("/test", "cookie_1", {})
+    underlying = client._client
+    assert underlying is not None
+
+    original_aclose = underlying.aclose
+    close_attempts = 0
+
+    async def flaky_aclose_error():
+        nonlocal close_attempts
+        close_attempts += 1
+        if close_attempts == 1:
+            raise RuntimeError("IO error during close")
+        await original_aclose()
+
+    underlying.aclose = flaky_aclose_error
+
+    with pytest.raises(RuntimeError, match="IO error during close"):
+        await client.aclose()
+
+    assert client.closed is False
+    assert client.closing is True
+    assert client._client is underlying
+
+    # 重试关闭成功
+    await client.aclose()
+    assert client.closed is True
+    assert client._client is None
+    assert close_attempts == 2
+
+
+@pytest.mark.asyncio
+async def test_blabla_client_concurrent_aclose():
+    """验证多个并发 aclose 安全协调，底层关闭仅执行一次。"""
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"code": "0", "data": {}})
+
+    client = BlaBlaClient(transport=httpx.MockTransport(handler))
+    await client._post("/test", "cookie_1", {})
+    underlying = client._client
+    assert underlying is not None
+
+    original_aclose = underlying.aclose
+    close_attempts = 0
+
+    async def counting_aclose():
+        nonlocal close_attempts
+        close_attempts += 1
+        await asyncio.sleep(0.01)
+        await original_aclose()
+
+    underlying.aclose = counting_aclose
+
+    await asyncio.gather(client.aclose(), client.aclose(), client.aclose())
+    assert client.closed is True
+    assert client._client is None
+    assert close_attempts == 1
+
+
+@pytest.mark.asyncio
+async def test_blabla_client_does_not_close_borrowed_external_client():
+    """验证借用的外部 HTTP 客户端绝对不被关闭。"""
+    mock_external = AsyncMock()
+    client = BlaBlaClient(client=mock_external)
+
+    assert client._external_client is True
+    await client.aclose()
+
+    assert client.closed is True
+    mock_external.aclose.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_fetch_client_aclose_retry_after_cancellation_and_external_protection():
+    """验证 FetchClient 的关闭取消重试机制与借用客户端保护。"""
+    call_count = 0
+
+    async def mock_handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        return httpx.Response(200, json={"result": "ok"})
+
+    transport = httpx.MockTransport(mock_handler)
+    fetch_client = FetchClient(transport=transport)
+    await fetch_client.get_json("https://example.com/test")
+
+    underlying = fetch_client._client
+    assert underlying is not None
+
+    original_aclose = underlying.aclose
+    close_attempts = 0
+
+    async def flaky_aclose_cancel():
+        nonlocal close_attempts
+        close_attempts += 1
+        if close_attempts == 1:
+            raise asyncio.CancelledError()
+        await original_aclose()
+
+    underlying.aclose = flaky_aclose_cancel
+
+    with pytest.raises(asyncio.CancelledError):
+        await fetch_client.aclose()
+
+    assert fetch_client.closed is False
+    assert fetch_client.closing is True
+    assert fetch_client._client is underlying
+
+    # 重试关闭成功
+    await fetch_client.aclose()
+    assert fetch_client.closed is True
+    assert fetch_client._client is None
+    assert close_attempts == 2
+
+    # 借用客户端保护
+    mock_external = AsyncMock()
+    borrowed_fetch = FetchClient(client=mock_external)
+    await borrowed_fetch.aclose()
+    assert borrowed_fetch.closed is True
+    mock_external.aclose.assert_not_called()

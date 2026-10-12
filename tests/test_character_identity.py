@@ -96,8 +96,10 @@ class CharacterDirectoryResolverTests(unittest.TestCase):
         from astrbot_plugin_nikke.features.voice.character_resolver import VoiceCharacterResolver
 
         assets_dir = Path(__file__).resolve().parents[1] / "assets"
-        catalog_path = assets_dir / "character_catalog.json"
-        alias_path = assets_dir / "character_aliases.json"
+        catalog_cand = assets_dir / "data" / "character_catalog.json"
+        catalog_path = catalog_cand if catalog_cand.is_file() else assets_dir / "character_catalog.json"
+        alias_cand = assets_dir / "data" / "character_aliases.json"
+        alias_path = alias_cand if alias_cand.is_file() else assets_dir / "character_aliases.json"
 
         catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
         characters = catalog.get("characters", [])

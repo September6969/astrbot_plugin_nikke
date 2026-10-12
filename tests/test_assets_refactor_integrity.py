@@ -31,9 +31,11 @@ class AssetsRefactorIntegrityTests(unittest.TestCase):
         for lic in ["OFL-BarlowCondensed.txt", "OFL-NotoSansSC.txt", "OFL-Rajdhani.txt"]:
             self.assertTrue((self.fonts_dir / lic).is_file(), f"许可证 {lic} 必须随分发保留")
 
-        # 验证 assets/fonts 冗余副本已不复存在
+        # 验证 assets/fonts 冗余字体副本已不复存在，同时保留架构目录
         assets_fonts = self.assets_dir / "fonts"
-        self.assertFalse(assets_fonts.exists(), "assets/fonts/ 冗余副本目录必须已彻底清除")
+        self.assertTrue(assets_fonts.is_dir(), "assets/fonts 架构目录应保留")
+        for font_name in expected_fonts:
+            self.assertFalse((assets_fonts / font_name).exists(), f"assets/fonts/{font_name} 冗余副本必须已彻底清除")
 
     def test_assets_data_structure(self):
         """验证 assets/data/ 包含所有已规范化的数据清单，且已完成单一来源治理（根目录无重复）。"""

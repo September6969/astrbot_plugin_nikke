@@ -60,7 +60,6 @@ def create_shared_resources(
         spine_manifest_path=data_dir / "spine-manifest.json",
         spine_rendered_dir=data_dir / "spine-rendered",
     )
-    runtime_coordinator = RuntimeCoordinator()
     return SharedResources(
         extension_zip=extension_zip,
         store=store,
