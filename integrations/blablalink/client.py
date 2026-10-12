@@ -250,27 +250,6 @@ class BlaBlaClient:
             "outpost": outpost.get("data", {}).get("outpost_info", {}),
         }
 
-    async def get_daily_contents_progress(self, account: dict[str, Any]) -> dict[str, Any]:
-        """获取每日内容完成进度（保管箱、拦截、竞技场、咨询、派遣、模拟室等）。"""
-        area_id = str(account.get("area_id", ""))
-        if not area_id:
-            validated = await self.validate_cookie(account["cookie"])
-            area_id = validated.area_id
-        payload: dict[str, Any] = {"nikke_area_id": int(area_id)}
-        if account.get("game_openid"):
-            payload["intl_open_id"] = account["game_openid"]
-        resp = await self._post(DAILY_CONTENTS_PROGRESS, account["cookie"], payload)
-        data = resp.get("data") if isinstance(resp, dict) else {}
-        if isinstance(data, dict):
-            dp_list = data.get("daily_progress")
-            if isinstance(dp_list, list) and dp_list:
-                first = dp_list[0]
-                if isinstance(first, dict):
-                    return first
-            elif isinstance(data.get("daily_progress"), dict):
-                return data["daily_progress"]
-        return {}
-
     async def get_profile_dashboard(self, account: dict[str, Any]) -> dict[str, Any]:
         area_id = str(account.get("area_id", ""))
         if not area_id:
@@ -493,32 +472,30 @@ class BlaBlaClient:
         )
         details_data = detail_resp.get("data", {})
         details = details_data.get("character_details", []) or []
-        effects = details_data.get("state_effects", []) or []
-        effects_map = {str(effect.get("id")): effect for effect in effects}
         by_code: dict[str, dict[str, Any]] = {}
-        slots = ("head", "torso", "arm", "leg")
+        skill_keys = ("skill1_lv", "skill2_lv", "ulti_skill_lv")
         for detail in details:
-            equipment_effects = []
-            for slot in slots:
-                for index in range(1, 4):
-                    effect_id = detail.get(f"{slot}_equip_option{index}_id")
-                    effect = effects_map.get(str(effect_id))
-                    for function in (effect or {}).get("function_details", []) or []:
-                        equipment_effects.append(
-                            {
-                                "function_type": function.get("function_type", ""),
-                                "function_value": abs(float(function.get("function_value", 0) or 0)),
-                                "level": function.get("level"),
-                            }
-                        )
-            by_code[str(detail.get("name_code"))] = {
-                **detail,
-                "equipment_effects": equipment_effects,
-            }
+            if not isinstance(detail, dict):
+                continue
+            code = str(detail.get("name_code", "")).strip()
+            if not code:
+                continue
+            skills = {}
+            for k in skill_keys:
+                if k in detail and detail[k] is not None:
+                    skills[k] = detail[k]
+            by_code[code] = skills
+
         merged = []
         for item in roster:
-            code = str(item.get("name_code", ""))
-            merged.append({**item, **by_code.get(code, {})})
+            if not isinstance(item, dict):
+                merged.append(item)
+                continue
+            code = str(item.get("name_code", "")).strip()
+            item_copy = dict(item)
+            if code in by_code:
+                item_copy.update(by_code[code])
+            merged.append(item_copy)
         return merged
 
     async def get_character_detail(
