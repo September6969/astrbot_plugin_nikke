@@ -145,15 +145,16 @@ async def test_command_sends_selected_page_and_build_failure_keeps_page_text(tmp
     builder = CalendarT2IPayloadBuilder()
     handler = CalendarCommandHandler(application=CalendarApplication(service, clock=lambda: NOW),
         payload_builder=builder, render=render, start_background_refresh=Mock())
-    context = CommandContext(parameters={"page": "3"})
+    context = CommandContext(parameters={"page": str(len(builder.build(CalendarApplication(service).query_schedule(now=NOW))["pages"]))})
     result = await handler.handle(context)
     assert len(render.call_args.args[0]["pages"]) == 1
-    assert render.call_args.args[0]["page_number"] == 3
+    assert render.call_args.args[0]["page_number"] == int(context.parameters["page"])
     expected = result.messages[0].text
     builder.build = Mock(side_effect=RuntimeError("render failed"))
-    assert (await handler.handle(context)).messages[0].text == expected
-    assert "3/3 页" in expected
-    assert "超出范围" in (await handler.handle(CommandContext(parameters={"page": "4"}))).messages[0].text
+    assert (await handler.handle(context)).messages[0].text == CalendarApplication(service).query_schedule(now=NOW).fallback_text
+    assert "页】" in expected
+    handler._payload_builder = CalendarT2IPayloadBuilder()
+    assert "超出范围" in (await handler.handle(CommandContext(parameters={"page": "999"}))).messages[0].text
 
 
 def test_asymmetric_evidence_does_not_hide_authoritative_field():
@@ -284,3 +285,90 @@ def test_unknown_start_is_not_silently_reported_as_no_activity(tmp_path):
     assert page["summary"]["active"] == 0
     assert page["unconfirmed_count"] == 1
     assert "另有 1 项时间待确认" in page["fallback_text"]
+
+
+@pytest.mark.asyncio
+async def test_official_existing_deadline_does_not_hide_other_announcement():
+    from types import SimpleNamespace
+    from astrbot_plugin_nikke.features.announcement.deadlines import DeadlineParser
+    from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
+    body = "活动时间：2026-10-10 10:00 至 2026-10-20 23:59 (UTC+8)"
+    known = DeadlineParser.parse_deadlines("已解析活动", body, "known")
+    assert known
+    records = {
+        key: SimpleNamespace(content_id=key, title=title, body=body, category="event", source_url="")
+        for key, title in [("known", "已解析活动"), ("missing", "此前漏掉活动")]
+    }
+    service = SimpleNamespace(list_deadlines=lambda: known, _records=records)
+    result = await OfficialAnnouncementScheduleAdapter(service).fetch_result()
+    assert {e.title for e in result.events} == {"已解析活动", "此前漏掉活动"}
+    assert len(result.events) == 2
+    assert len(known) == 1
+
+
+def test_snapshot_uses_original_calendar_layout(tmp_path):
+    from astrbot_plugin_nikke.features.calendar.application import CalendarApplication
+    from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
+    service = ScheduleService(tmp_path)
+    service._events = {"one": event("one")}
+    service._has_snapshot = True
+    bundle = CalendarT2IPayloadBuilder().build(CalendarApplication(service).query_schedule(now=NOW))
+    assert not bundle.get("experience")
+    assert bundle["canvas"]["width"] == 1600
+    assert bundle["pages"][0]["active_items"][0]["title"] == "one"
+
+
+
+def test_official_parser_recovers_repeated_ranges_without_cross_pairing():
+    from astrbot_plugin_nikke.features.announcement.deadlines import DeadlineParser
+    body = """1. Union Raid
+Union Raid starts October 9, 2026, 5:00:00 (UTC+9).
+Duration: From October 9, 2026, 5:00:00 to October 15, 2026, 4:59:59 (UTC+9)
+2. FULL BURST DAY
+From October 17, 2026, 5:00:00 to October 19, 2026, 4:59:59 (UTC+9)
+From October 24, 2026, 5:00:00 to October 26, 2026, 4:59:59 (UTC+9)
+"""
+    rows = DeadlineParser.parse_deadlines("Update", body, "ranges")
+    assert len(rows) == 3
+    assert len({item.event_id for item in rows}) == 3
+    assert sum(item.name == "FULL BURST DAY" for item in rows) == 2
+    assert next(item for item in rows if item.name == "Union Raid").end_at == datetime(2026, 10, 14, 19, 59, tzinfo=timezone.utc)
+    assert DeadlineParser.parse_deadlines("Unrelated dates", "2026-10-09 05:00 publication\n2026-10-11 05:00 revision\n2026-10-15 05:00 report", "unrelated") == []
+
+
+def test_official_numeric_heading_and_time_first_date_keep_correct_title():
+    from astrbot_plugin_nikke.features.announcement.deadlines import DeadlineParser, CST
+    body = """4.3 Storyline
+Available after the maintenance on October 8, 2026
+4.4 14-Day Login Event
+Event duration: From the end of the October 8, 2026 maintenance to October 28, 2026, 23:59:59 (UTC+9)
+4.6 Story Event
+Event duration: From the end of the October 8, 2026 maintenance to 23:59:59, October 28, 2026 (UTC+9)
+"""
+    rows = DeadlineParser.parse_deadlines("Update", body, "dates")
+    assert {item.name for item in rows} == {"14-Day Login Event", "Story Event"}
+    assert all(item.start_precision == "DATE_ONLY" for item in rows)
+    assert all(item.start_at.astimezone(CST).hour == 0 for item in rows)
+    assert all(item.end_at == datetime(2026, 10, 28, 14, 59, tzinfo=timezone.utc) for item in rows)
+
+
+@pytest.mark.asyncio
+async def test_official_reparse_replaces_only_known_announcement_records(tmp_path):
+    service = ScheduleService(tmp_path)
+    service._source_datasets["official"] = [event("official:changed_0"), event("official:other_0"), event("official:changed_other_0")]
+    source = Source(FetchResult(FetchOutcome.SUCCESS_DATA, [event("official:changed_range_new")],
+                               diagnostics={"reparsed_content_ids": ["changed"]}))
+    source.source_name = "official"
+    source.response_mode = ResponseMode.INCREMENTAL
+    service.adapters = [source]
+    await service.refresh_schedule_data()
+    assert {item.id for item in service._source_datasets["official"]} == {"official:changed_range_new", "official:other_0", "official:changed_other_0"}
+
+
+
+def test_date_lines_are_not_numbered_section_headings():
+    from astrbot_plugin_nikke.features.announcement.deadlines import DeadlineParser
+    body = "1. FULL BURST DAY\n2026.10.17 05:00 to 2026.10.19 04:59 (UTC+9)\n2026.10.24 05:00 to 2026.10.26 04:59 (UTC+9)"
+    rows = DeadlineParser.parse_deadlines("Update", body, "numeric")
+    assert len(rows) == 2
+    assert {row.name for row in rows} == {"FULL BURST DAY"}

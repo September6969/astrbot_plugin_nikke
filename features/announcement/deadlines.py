@@ -20,6 +20,7 @@ class GameDeadline:
     source_content_id: str = ""
     source_url: str = ""
     deadline_version: int = 1
+    start_precision: str = "EXACT"
 
     def is_active(self, now: datetime | None = None) -> bool:
         current = now or datetime.now(timezone.utc)
@@ -66,13 +67,13 @@ class DeadlineParser:
             lambda m: f"{m.group(3)}-{cls.MONTHS[m.group(1).lower()]:02d}-{int(m.group(2)):02d} {int(m.group(4)):02d}:{m.group(5)}",
             body,
         )
-        # 2. 将“维护结束时刻”这类有明确日期的公告表述统一为当地凌晨四点。
+        # 2. 维护结束只提供日期；用日期占位和标记传递精度，禁止伪造凌晨四点。
         pattern_maint = re.compile(
             r"(?:From the end of the|after(?: the)? maintenance on)\s+(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})(?:\s+maintenance)?",
             re.IGNORECASE,
         )
         body = pattern_maint.sub(
-            lambda m: f"{m.group(3)}-{cls.MONTHS[m.group(1).lower()]:02d}-{int(m.group(2)):02d} 04:00",
+            lambda m: f"{m.group(3)}-{cls.MONTHS[m.group(1).lower()]:02d}-{int(m.group(2)):02d} 00:00 [DATE_ONLY]",
             body,
         )
         return body
@@ -131,7 +132,7 @@ class DeadlineParser:
             return []
 
         # 检查是否包含结构化多事件小节（如 "1. ", "2. ", "2.1 " 等）
-        section_pattern = re.compile(r"(?m)^(?=[0-9]+(?:\.[0-9]+)*\s*[\.:、\s]+[A-Za-z\u4e00-\u9fff])")
+        section_pattern = re.compile(r"(?m)^(?=[0-9]+(?:\.[0-9]+)*\s*[\.:、\s]+(?:[A-Za-z\u4e00-\u9fff]|\d+[- ]?(?:Day|day|日)))")
         raw_sections = section_pattern.split(body)
         if len(raw_sections) > 1:
             sections = [s.strip() for s in raw_sections if s.strip()]
@@ -139,6 +140,7 @@ class DeadlineParser:
             sections = [body]
 
         deadlines: list[GameDeadline] = []
+        recovered: dict[str, GameDeadline] = {}
 
         for sec_idx, sec in enumerate(sections):
             matches = list(cls.DATETIME_PATTERN.finditer(sec))
@@ -149,7 +151,7 @@ class DeadlineParser:
             first_line = lines[0] if lines else title
             clean_subname = re.sub(r"^[0-9]+(?:\.[0-9]+)*\s*[\.:、\s]*", "", first_line).strip()
 
-            if len(sections) == 1:
+            if len(sections) == 1 and not section_pattern.match(sec):
                 event_name = title
             else:
                 is_date_or_header = bool(
@@ -170,7 +172,23 @@ class DeadlineParser:
             elif any(w in sec_lower for w in ["recruit", "pick up", "招募"]):
                 inferred_cat = "recruit"
 
-            if len(matches) > 2:
+            reverse_date = re.compile(
+                r"(\d{1,2}):(\d{2})(?::\d{2})?,?\s+(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})", re.I
+            )
+            if len(matches) > 2 or reverse_date.search(sec):
+                # 只提取同一行中明确相连的一对日期；不把说明段的所有日期交叉配对。
+                for line in lines:
+                    candidate = reverse_date.sub(
+                        lambda m: f"{m.group(5)}-{cls.MONTHS[m.group(3).lower()]:02d}-{int(m.group(4)):02d} {int(m.group(1)):02d}:{m.group(2)}", line
+                    )
+                    if len(list(cls.DATETIME_PATTERN.finditer(candidate))) != 2:
+                        continue
+                    for item in cls.parse_deadlines(event_name, candidate, content_id, inferred_cat):
+                        identity = f"{event_name}|{item.start_at}|{item.end_at}"
+                        digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
+                        # 新补出的区间用独立稳定 ID，避免与既有按序编号的事件冲突。
+                        item.event_id = f"{content_id or 'anonymous'}_range_{digest}"
+                        recovered[item.event_id] = item
                 continue
 
             if len(matches) == 2:
@@ -183,7 +201,9 @@ class DeadlineParser:
                         re.IGNORECASE,
                     ):
                         continue
-                    start_tz = cls._extract_timezone(sec[m_start.end() : m_start.end() + 30], sec)
+                    date_only_start = sec[m_start.end():m_start.end() + 15].lstrip().startswith("[DATE_ONLY]")
+                    # DATE_ONLY 以展示时区的日期存储，不代表真实的午夜开始时刻。
+                    start_tz = CST if date_only_start else cls._extract_timezone(sec[m_start.end() : m_start.end() + 30], sec)
                     start_dt = datetime(
                         int(m_start.group(1)),
                         int(m_start.group(2)),
@@ -213,6 +233,7 @@ class DeadlineParser:
                             name=event_name,
                             category=inferred_cat,
                             start_at=start_dt,
+                            start_precision="DATE_ONLY" if date_only_start else "EXACT",
                             end_at=end_dt,
                             source_content_id=content_id,
                         )
@@ -268,4 +289,4 @@ class DeadlineParser:
                 except (ValueError, OverflowError):
                     pass
 
-        return deadlines
+        return deadlines + list(recovered.values())

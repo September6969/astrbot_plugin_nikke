@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -127,6 +128,13 @@ class CalendarRefreshCoordinator:
                 else:
                     retained = {event.id: CanonicalEvent.from_dict(event.to_dict())
                                 for event in service._source_datasets.get(src, [])}
+                    # 仅替换本次成功重新解析的公告，其他增量来源记录继续保留。
+                    if src == "official":
+                        patterns = [re.compile(rf"official:{re.escape(str(cid))}_(?:[0-9]+|range_[a-f0-9]{{20}})")
+                                    for cid in res.diagnostics.get("reparsed_content_ids", []) if cid]
+                        if patterns:
+                            retained = {key: event for key, event in retained.items()
+                                        if not any(pattern.fullmatch(key) for pattern in patterns)}
                     if not complete:
                         for event in retained.values():
                             event.metadata["source_stale"] = True
