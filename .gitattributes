@@ -1,2 +1,6 @@
 # Linux 启动脚本在 Windows 检出和归档时也必须保留 LF。
 *.sh text eol=lf
+
+# 排除仅用于开发、测试与基准评测的大体积证据，精简发行归档包
+docs/evidence export-ignore
+docs/evidence/** export-ignore

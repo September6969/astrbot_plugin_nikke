@@ -18,25 +18,25 @@ class AssetsRefactorIntegrityTests(unittest.TestCase):
         cls.assets_dir = cls.root / "assets"
         cls.fonts_dir = cls.root / "fonts"
 
-    def test_assets_fonts_structure(self):
-        """验证 assets/fonts/ 包含全套所需字体，且与根目录 fonts/ 保持完全一致。"""
-        assets_fonts = self.assets_dir / "fonts"
-        self.assertTrue(assets_fonts.is_dir(), "assets/fonts 目录必须存在")
+    def test_canonical_fonts_structure(self):
+        """验证规范目录 fonts/ 包含全套所需字体及许可证，且 assets/fonts 冗余已被清除。"""
+        self.assertTrue(self.fonts_dir.is_dir(), "fonts 目录必须存在")
 
         expected_fonts = ["NotoSansHans-Medium.otf", "NotoSansHans-Regular.otf", "ReplicaSans.otf"]
         for font_name in expected_fonts:
-            asset_font = assets_fonts / font_name
             root_font = self.fonts_dir / font_name
-            self.assertTrue(asset_font.is_file(), f"assets/fonts/{font_name} 必须存在")
-            self.assertTrue(root_font.is_file(), f"fonts/{font_name} 必须保留以保证向后兼容")
-            self.assertEqual(
-                hashlib.sha256(asset_font.read_bytes()).hexdigest(),
-                hashlib.sha256(root_font.read_bytes()).hexdigest(),
-                f"字体文件哈希必须一致: {font_name}",
-            )
+            self.assertTrue(root_font.is_file(), f"fonts/{font_name} 必须存在")
+
+        # 验证许可证完整保留
+        for lic in ["OFL-BarlowCondensed.txt", "OFL-NotoSansSC.txt", "OFL-Rajdhani.txt"]:
+            self.assertTrue((self.fonts_dir / lic).is_file(), f"许可证 {lic} 必须随分发保留")
+
+        # 验证 assets/fonts 冗余副本已不复存在
+        assets_fonts = self.assets_dir / "fonts"
+        self.assertFalse(assets_fonts.exists(), "assets/fonts/ 冗余副本目录必须已彻底清除")
 
     def test_assets_data_structure(self):
-        """验证 assets/data/ 包含所有已规范化的数据清单，哈希与主清单一致。"""
+        """验证 assets/data/ 包含所有已规范化的数据清单，且已完成单一来源治理（根目录无重复）。"""
         data_dir = self.assets_dir / "data"
         self.assertTrue(data_dir.is_dir(), "assets/data 目录必须存在")
 
@@ -67,12 +67,7 @@ class AssetsRefactorIntegrityTests(unittest.TestCase):
             data_file = data_dir / name
             self.assertTrue(data_file.is_file(), f"assets/data/{name} 必须存在")
             legacy_file = self.assets_dir / name
-            if legacy_file.is_file():
-                self.assertEqual(
-                    hashlib.sha256(data_file.read_bytes()).hexdigest(),
-                    hashlib.sha256(legacy_file.read_bytes()).hexdigest(),
-                    f"数据文件哈希必须一致: {name}",
-                )
+            self.assertFalse(legacy_file.is_file(), f"assets/{name} 不应在根 assets 存在重复副本")
 
     def test_assets_icons_structure(self):
         """验证 assets/icons/ 包含 cube, favorite, currency 子目录。"""

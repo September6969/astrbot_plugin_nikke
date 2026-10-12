@@ -355,11 +355,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    repo_root = get_repo_root()
-    manifest_path = Path(args.manifest_path) if args.manifest_path else repo_root / "assets" / "spine_manifest.json"
+    default_manifest = repo_root / "assets" / "data" / "spine_manifest.json" if (repo_root / "assets" / "data" / "spine_manifest.json").is_file() else repo_root / "assets" / "spine_manifest.json"
+    manifest_path = Path(args.manifest_path) if args.manifest_path else default_manifest
     rendered_dir = Path(args.rendered_dir) if args.rendered_dir else repo_root / "assets" / "spine-rendered"
-    character_master_path = repo_root / "assets" / "character_master.json"
-    costumes_path = repo_root / "assets" / "costumes.json"
+    character_master_path = repo_root / "assets" / "data" / "character_master.json" if (repo_root / "assets" / "data" / "character_master.json").is_file() else repo_root / "assets" / "character_master.json"
+    costumes_path = repo_root / "assets" / "data" / "costumes.json" if (repo_root / "assets" / "data" / "costumes.json").is_file() else repo_root / "assets" / "costumes.json"
 
     if args.verify:
         print(f"=== 开始验证 Manifest: {manifest_path} ===")

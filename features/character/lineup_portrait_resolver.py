@@ -86,6 +86,7 @@ class LineupPortraitResolver:
         manifest_paths = [
             self.base_dir.parent / "blabla-manifests" / "character_zh-tw_nikke_list_zh-TW_v2.json",
             Path("docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_zh-tw_nikke_list_zh-TW_v2.json"),
+            self.asset_dir / "data" / "character_master.json",
             self.asset_dir / "character_master.json",
         ]
 
@@ -176,7 +177,9 @@ class LineupPortraitResolver:
                     logger.warning("Failed to load avatar map: %s", e)
 
         # 3. 补充 assets/costumes.json
-        costumes_json = self.asset_dir / "costumes.json"
+        costumes_json = self.asset_dir / "data" / "costumes.json"
+        if not costumes_json.is_file():
+            costumes_json = self.asset_dir / "costumes.json"
         if costumes_json.is_file():
             try:
                 c_data = json.loads(costumes_json.read_text(encoding="utf-8"))

@@ -142,8 +142,8 @@ def build_costume_catalog(
 if __name__ == "__main__":
     base_dir = Path(__file__).resolve().parent.parent
     nikke_list = base_dir / "data" / "nikke" / "blabla-manifests" / "character_zh-tw_nikke_list_zh-TW_v2.json"
-    master = base_dir / "assets" / "character_master.json"
-    costumes = base_dir / "assets" / "costumes.json"
+    master = base_dir / "assets" / "data" / "character_master.json" if (base_dir / "assets" / "data" / "character_master.json").is_file() else base_dir / "assets" / "character_master.json"
+    costumes = base_dir / "assets" / "data" / "costumes.json" if (base_dir / "assets" / "data" / "costumes.json").is_file() else base_dir / "assets" / "costumes.json"
     inventory = base_dir / "docs" / "evidence" / "blabla_static_assets" / "static_asset_inventory.json"
     output = base_dir / "assets" / "mappings" / "costume_assets.json"
 

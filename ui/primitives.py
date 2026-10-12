@@ -29,10 +29,12 @@ class CardRenderer:
         def _resolve(name: str) -> Path | None:
             for cand in (
                 f_dir / name,
-                f_dir / "assets" / "fonts" / name,
                 f_dir / "fonts" / name,
-                f_dir.parent / "assets" / "fonts" / name,
+                f_dir / "assets" / "fonts" / name,
                 f_dir.parent / "fonts" / name,
+                f_dir.parent / "assets" / "fonts" / name,
+                f_dir.parent.parent / "fonts" / name,
+                Path(__file__).resolve().parents[1] / "fonts" / name,
             ):
                 if cand.is_file():
                     return cand
