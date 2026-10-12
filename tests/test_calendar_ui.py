@@ -629,7 +629,7 @@ class TestSourceBoundedDynamicCanvasHeight:
         builder = CalendarT2IPayloadBuilder()
         bundle = builder.build(snap)
         assert bundle["available"] is True
-        assert bundle["fallback_text"] == bundle["pages"][0]["fallback_text"]
+        assert bundle["fallback_text"] == "fallback"
         assert len(bundle["pages"]) == 1
 
 

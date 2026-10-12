@@ -1,18 +1,3 @@
-{% if experience %}
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
-*{box-sizing:border-box}body{margin:0;width:1080px;background:#f1f4f8;color:#233044;font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;padding:40px}
-h1{font-size:46px;margin:10px 0 8px}.eyebrow{font-size:22px;color:#53708f}.subtitle{font-size:24px;color:#657388;margin-bottom:24px}
-.summary{display:flex;gap:16px;margin:24px 0}.metric{flex:1;background:white;border-radius:20px;padding:22px;font-size:24px}.metric strong{display:block;font-size:44px;color:#245b8b}
-.item{background:white;border-radius:18px;margin:14px 0;padding:22px 26px;border-left:6px solid #7a9ebf}.item.soon{border-left-color:#d39144}
-.group{font-size:22px;color:#54718e}.title{font-size:30px;font-weight:700;line-height:1.5;overflow-wrap:anywhere;margin:6px 0}.dates{font-size:25px;line-height:1.65;color:#4d5d71}.remaining{font-size:24px;color:#255f90}.warning{padding:18px;background:#fff2dc;border-radius:14px;font-size:24px;line-height:1.5}
-footer{font-size:22px;line-height:1.8;color:#5d6d80;margin-top:24px;overflow-wrap:anywhere}.command{color:#245b8b;font-weight:bold;font-size:26px}.empty{padding:44px 28px;background:white;border-radius:20px;font-size:28px;line-height:1.7}
-</style></head><body><div class="eyebrow">妮姬 · 活动日程</div><h1>未来 {{ horizon_days }} 天</h1><div class="subtitle">{{ state_label }} · {{ page_number }} / {{ page_total }} 页</div>
-{% if page_number == 1 %}<div class="summary"><div class="metric">进行中<strong>{{ summary.active }}</strong></div><div class="metric">24 小时内结束<strong>{{ summary.ending }}</strong></div><div class="metric">即将开始<strong>{{ summary.upcoming }}</strong></div></div><div class="eyebrow">数量来自当前快照，非官方完整活动总量</div>{% endif %}
-{% if unconfirmed_count %}<p class="warning">另有 {{ unconfirmed_count }} 项时间待确认，未计入上述范围数量。</p>{% endif %}
-{% if sync_warning %}<p class="warning">部分来源同步异常，以下包含本地缓存。</p>{% endif %}
-{% for item in items %}<article class="item {% if item.group == '24 小时内结束' %}soon{% endif %}"><div class="group">{{ item.group }}{% if item.stale %} · 未重新确认{% endif %}</div><div class="title">{{ item.title }}</div><div class="dates">{{ item.start }} → {{ item.end }}</div><div class="remaining">{{ item.remaining }}</div></article>{% else %}<p class="empty">{{ empty_label }}</p>{% endfor %}
-<footer>{% for source in source_status %}{{ source }}<br>{% endfor %}内容更新：{{ updated_at_display }} · 时间为北京时间<br>当前范围共 {{ total_items }} 项 · 每页最多 8 项<br><span class="command">{{ next_command }}</span></footer></body></html>
-{% else %}
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1600"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'"><style><!-- SHARED_CSS -->
 {% set c_w = canvas.width if canvas is defined and canvas.width is defined else 1600 %}
 {% set c_h = canvas.height if canvas is defined and canvas.height is defined else 900 %}
@@ -565,5 +550,3 @@ html, body {
   </footer>
 </main>
 </body></html>
-
-{% endif %}

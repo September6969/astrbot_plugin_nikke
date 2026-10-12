@@ -71,7 +71,7 @@ async def main():
             bundle = CalendarT2IPayloadBuilder().build(snapshot)
             for payload in bundle["pages"]:
                 name = f"{case}-{payload['page_number']}"
-                await renderer.render_payload("calendar_schedule", payload)
+                await renderer.render_payload("calendar_schedule", {**bundle, **payload, "pages": [payload]})
             if case == "normal":
                 name = "before-normal"
                 legacy = CalendarT2IPayloadBuilder().build(service, now=NOW)

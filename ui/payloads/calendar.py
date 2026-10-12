@@ -396,11 +396,15 @@ class CalendarT2IPayloadBuilder:
             or (hasattr(service, "context") and hasattr(service, "horizon_days"))
         )
         if is_snapshot:
-            from ...features.calendar.presentation import schedule_pages
-            pages = schedule_pages(service)
-            return {**pages[0], "pages": pages, "snapshot_version": service.context.snapshot_version,
-                    "query_now": service.context.now.isoformat(), "available": service.has_snapshot}
-        if hasattr(service, "freeze_query_context"):
+            ctx = service.context
+            current = ctx.now
+            events = ctx.events
+            snapshot_ver = ctx.snapshot_version
+            freshness = ctx.freshness
+            coverage = ctx.coverage
+            source_health = ctx.source_health
+            days = service.horizon_days
+        elif hasattr(service, "freeze_query_context"):
             ctx = service.freeze_query_context(now=now)
             current = ctx.now
             events = ctx.events

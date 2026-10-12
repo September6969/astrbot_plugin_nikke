@@ -381,10 +381,10 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
         }
         try:
             if hasattr(self.announcement_service, "list_deadlines"):
-                deadlines = self.announcement_service.list_deadlines()
+                deadlines = list(self.announcement_service.list_deadlines())
                 diagnostics["official_deadlines_parsed"] = len(deadlines) if isinstance(deadlines, list) else 0
             elif hasattr(self.announcement_service, "list_active_deadlines"):
-                deadlines = self.announcement_service.list_active_deadlines()
+                deadlines = list(self.announcement_service.list_active_deadlines())
                 diagnostics["official_deadlines_parsed"] = len(deadlines) if isinstance(deadlines, list) else 0
             diagnostics["official_deadlines_seen"] = len(deadlines) if isinstance(deadlines, list) else 0
         except Exception as exc:
@@ -407,8 +407,9 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             except Exception:
                 pass
 
-        # 若无现成 GameDeadline，则尝试从公告正文提取
-        if not deadlines and records_map:
+        # 以当前正文重新解析已知公告，既补漏项也纠正旧解析器生成的日期。
+        diagnostics["reparsed_content_ids"] = []
+        if records_map:
             from ..announcement.deadlines import DeadlineParser
             for rec in records_map.values():
                 title = getattr(rec, "title", "")
@@ -421,6 +422,9 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                     continue
                 try:
                     parsed = DeadlineParser.parse_deadlines(title, body, cid, cat)
+                    if parsed and cid:
+                        deadlines = [item for item in deadlines if getattr(item, "source_content_id", "") != cid]
+                        diagnostics["reparsed_content_ids"].append(str(cid))
                     deadlines.extend(parsed)
                     diagnostics["official_deadlines_parsed"] += len(parsed)
                 except Exception:
@@ -462,7 +466,7 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             if end_at is not None:
                 end_at = _aware_utc(end_at)
 
-            start_prec = TimePrecision.EXACT.value if start_at else TimePrecision.UNKNOWN.value
+            start_prec = getattr(dl, "start_precision", TimePrecision.EXACT.value) if start_at else TimePrecision.UNKNOWN.value
             end_prec = TimePrecision.EXACT.value if end_at else TimePrecision.UNKNOWN.value
 
             # 基于正文 body 和标题的多维度取消检测

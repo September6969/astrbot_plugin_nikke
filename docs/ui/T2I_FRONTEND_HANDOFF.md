@@ -17,7 +17,7 @@
 | 页面 | 命令 / 数据来源 | 画布 | T2I 失败行为 |
 |---|---|---|---|
 | Campaign | 原 Campaign 命令，CampaignHistoryBuilder → StageClearRecord | 1600×880 | 同一 DTO → Pillow |
-| Calendar | `/妮姬 日程 [7/14/30] [页码]`，默认 14 天第一页 | 宽 1080，最多 8 项，长标题提前分页 | 同一冻结快照 → 当前页文本 |
+| Calendar | `/妮姬 日程 [7/14/30] [页码]`，默认 14 天第一页 | 恢复宽 1600 的 Operations Feed，高度预算分页 | 同一冻结快照 → 当前页文本；构建失败回退快照全文 |
 | Union Overview | `/妮姬 联盟突袭`，UnionRaidBuilder | 1600×900 | 同一 DTO → Pillow |
 | Union Records | `/妮姬 联盟突袭 排行`，既有 build_ranking | 宽 1500，动态高 | 同一 DTO → 原文本 |
 | Union Member | `/妮姬 联盟突袭 我的`，既有 build_member_ranking | 宽 1500，动态高 | 同一 DTO → 原文本 |

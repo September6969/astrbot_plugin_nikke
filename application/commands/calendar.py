@@ -85,13 +85,6 @@ class CalendarCommandHandler:
             return self._text("日程数据尚未就绪，正在后台同步，请稍后重试。")
 
         fallback = snapshot.fallback_text
-        # 先独立准备本页文字，图片载荷构建失败也不会退回全量长文本。
-        if hasattr(snapshot.context, "events"):
-            from ...features.calendar.presentation import schedule_pages
-            pages = schedule_pages(snapshot)
-            if page > len(pages):
-                return self._text(f"页码超出范围，共 {len(pages)} 页；用法：/妮姬 日程 {snapshot.horizon_days} [页码]")
-            fallback = pages[page - 1]["fallback_text"]
         try:
             payload = self._payload_builder.build(snapshot)
             if payload.get("pages"):
@@ -99,6 +92,15 @@ class CalendarCommandHandler:
                     return self._text("页码超出范围；用法：/妮姬 日程 [7|14|30] [页码]")
                 selected = payload["pages"][page - 1]
                 payload = {**payload, **selected, "pages": [selected]}
+                rows = [*selected.get("active_items", []), *selected.get("next_items", [])]
+                lines = [f"【妮姬日程 · 未来 {snapshot.horizon_days} 天 · {page}/{payload.get('page_total', 1)} 页】"]
+                if snapshot.sync_warning:
+                    lines.append("部分来源同步异常，以下包含本地缓存。")
+                for row in rows:
+                    lines.append(f"{row.get('full_title', row.get('title', ''))}\n{row.get('time_range', row.get('start_time_display', '时间待确认'))} · {row.get('remaining', '')}")
+                if not rows:
+                    lines.append("当前可用数据未记录此范围活动；不代表游戏内没有活动。")
+                payload["fallback_text"] = "\n".join(lines)
             fallback = str(payload.get("fallback_text", fallback))
             rendered = await self._render(payload)
         except Exception:
