@@ -7,16 +7,23 @@
 from __future__ import annotations
 
 import asyncio
+from copy import deepcopy
+import hashlib
 import json
 import random
+import time
+from collections.abc import Awaitable, Mapping
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 import httpx
 
 from ...core.cookie_utils import parse_cookie as _parse_cookie
 from ...features.daily.errors import UnknownAfterActionError
 from .errors import BlaBlaError, CookieExpired
+from .http_transport import IsolatedAsyncClient
+
+T = TypeVar("T")
 
 
 API_BASE = "https://api.blablalink.com"
@@ -80,9 +87,179 @@ class CdkRedemptionResult:
 
 
 class BlaBlaClient:
-    def __init__(self, timeout: int = 20, diagnostic: Callable[[str], None] | None = None):
+    def __init__(
+        self,
+        timeout: int = 20,
+        diagnostic: Callable[[str], None] | None = None,
+        *,
+        transport: httpx.AsyncBaseTransport | None = None,
+        client: httpx.AsyncClient | None = None,
+        task_factory: Callable[[Awaitable[Any]], asyncio.Task[Any]] | None = None,
+        account_reader: Any = None,
+    ):
         self.timeout = httpx.Timeout(timeout, connect=min(timeout, 10))
         self.diagnostic = diagnostic
+        self._transport = transport
+        self._client: httpx.AsyncClient | None = client
+        self._external_client = client is not None
+        self._public_client: httpx.AsyncClient | None = None
+        self._closed = False
+        self._client_lock = asyncio.Lock()
+        self._task_factory = task_factory
+        self._account_reader = account_reader
+        self._query_cache: dict[tuple[Any, ...], tuple[float, Any]] = {}
+        self._query_tasks: dict[tuple[Any, ...], asyncio.Task[Any]] = {}
+        self._query_waiters: dict[tuple[Any, ...], int] = {}
+
+    async def _get_client(self) -> httpx.AsyncClient:
+        if self._closed:
+            raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
+        if self._client is None:
+            async with self._client_lock:
+                if self._client is None and not self._closed:
+                    self._client = IsolatedAsyncClient(
+                        timeout=self.timeout,
+                        follow_redirects=False,
+                        transport=self._transport,
+                    )
+        if self._closed or self._client is None:
+            raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
+        return self._client
+
+    async def _get_public_client(self) -> httpx.AsyncClient:
+        if self._closed:
+            raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
+        if self._public_client is None:
+            async with self._client_lock:
+                if self._public_client is None and not self._closed:
+                    self._public_client = IsolatedAsyncClient(
+                        timeout=self.timeout,
+                        follow_redirects=True,
+                        transport=self._transport,
+                    )
+        if self._closed or self._public_client is None:
+            raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
+        return self._public_client
+
+    async def aclose(self) -> None:
+        """幂等关闭客户端与短缓存中的未决任务。"""
+        if self._closed:
+            return
+        self._closed = True
+        tasks = list(self._query_tasks.values())
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        self._query_tasks.clear()
+        self._query_waiters.clear()
+        self._query_cache.clear()
+
+        if not self._external_client and self._client is not None:
+            await self._client.aclose()
+            self._client = None
+        if self._public_client is not None:
+            await self._public_client.aclose()
+            self._public_client = None
+
+    async def __aenter__(self) -> BlaBlaClient:
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        await self.aclose()
+
+    @staticmethod
+    def _account_identity_key(account: Mapping[str, Any]) -> tuple[str, str, str, str, str] | None:
+        """从账号字典提取经验证的稳定身份维度，缺失稳定标识时返回 None（不参与缓存）。"""
+        if account.get("cookie_valid") in (False, 0):
+            return None
+        openid = str(account.get("game_openid") or "").strip()
+        uid = str(account.get("game_uid") or "").strip()
+        area_id = str(account.get("area_id") or "").strip()
+        qq_id = str(account.get("qq_id") or "").strip()
+        binding_rev = str(account.get("binding_revision") or "").strip()
+        if not binding_rev:
+            cookie_val = str(account.get("cookie") or "")
+            if cookie_val:
+                binding_rev = hashlib.sha256(cookie_val.encode("utf-8")).hexdigest()
+        if not (openid or uid) or not area_id or not binding_rev:
+            return None
+        return (qq_id, openid, uid, area_id, binding_rev)
+
+    def invalidate_cache(self, qq_id: str | None = None) -> None:
+        """使指定账号或全部账号的短时查询缓存失效。"""
+        if qq_id is None:
+            self._query_cache.clear()
+            return
+        target = str(qq_id)
+        for key in list(self._query_cache):
+            if key[0][0] == target:
+                self._query_cache.pop(key, None)
+
+    async def _execute_cached(
+        self,
+        account: Mapping[str, Any],
+        query_type: str,
+        args_key: Any,
+        fetcher: Callable[[], Awaitable[T]],
+        validator: Callable[[T], bool] | None = None,
+    ) -> T:
+        identity = self._account_identity_key(account)
+        if identity is None:
+            return await fetcher()
+
+        cache_key = (identity, query_type, args_key)
+        now = time.monotonic()
+
+        for old_key, (expiry, _) in list(self._query_cache.items()):
+            if expiry <= now:
+                self._query_cache.pop(old_key, None)
+
+        cached = self._query_cache.get(cache_key)
+        if cached is not None and cached[0] > now:
+            return deepcopy(cached[1])
+
+        task = self._query_tasks.get(cache_key)
+        if task is None:
+            async def _run_fetch() -> T:
+                data = await fetcher()
+                if self._account_reader is not None and identity[0]:
+                    latest = self._account_reader.get_account(identity[0])
+                    if not latest:
+                        return data
+                    latest_ident = self._account_identity_key(latest)
+                    if latest_ident != identity:
+                        return data
+                if validator is not None and not validator(data):
+                    return data
+                finish_time = time.monotonic()
+                if len(self._query_cache) >= 128:
+                    self._query_cache.pop(next(iter(self._query_cache)))
+                self._query_cache[cache_key] = (finish_time + 30.0, deepcopy(data))
+                return data
+
+            if self._task_factory is not None:
+                task = self._task_factory(_run_fetch())
+                if task is None:
+                    raise RuntimeError("服务正在关闭，禁止新建查询任务")
+            else:
+                task = asyncio.create_task(_run_fetch())
+            self._query_tasks[cache_key] = task
+            self._query_waiters[cache_key] = 0
+
+        self._query_waiters[cache_key] += 1
+        try:
+            result = await asyncio.shield(task)
+            return deepcopy(result)
+        finally:
+            self._query_waiters[cache_key] -= 1
+            if self._query_waiters[cache_key] <= 0:
+                self._query_waiters.pop(cache_key, None)
+                self._query_tasks.pop(cache_key, None)
+                if not task.done():
+                    task.cancel()
+                    await asyncio.gather(task, return_exceptions=True)
 
     def _diagnose(self, message: str) -> None:
         if not self.diagnostic:
@@ -98,6 +275,8 @@ class BlaBlaClient:
         return _parse_cookie(cookie)
 
     async def _post(self, path: str, cookie: str, payload: dict[str, Any]) -> dict[str, Any]:
+        if self._closed:
+            raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
         endpoint = path.rsplit("/", 1)[-1]
         self._diagnose(f"{endpoint} 请求开始；payload_keys={sorted(payload)}")
         headers = {
@@ -110,9 +289,9 @@ class BlaBlaClient:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
         }
+        client = await self._get_client()
         try:
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
-                response = await client.post(API_BASE + path, json=payload, headers=headers)
+            response = await client.post(API_BASE + path, json=payload, headers=headers)
             response.raise_for_status()
             data = response.json()
         except httpx.TimeoutException as exc:
@@ -453,50 +632,59 @@ class BlaBlaClient:
         return data
 
     async def get_roster(self, account: dict[str, Any], include_details: bool = True) -> list[dict[str, Any]]:
-        area_id = int(account["area_id"])
-        openid = account.get("game_openid", "")
-        roster_resp = await self._post(
-            CHARACTERS,
-            account["cookie"],
-            {"intl_open_id": openid, "nikke_area_id": area_id},
-        )
-        data = roster_resp.get("data", {})
-        roster = data.get("characters", data.get("user_characters", [])) or []
-        if not include_details or not roster:
-            return roster
-        codes = list(dict.fromkeys(str(c.get("name_code", "")) for c in roster if c.get("name_code")))
-        detail_resp = await self._post(
-            CHARACTER_DETAILS,
-            account["cookie"],
-            {"intl_open_id": openid, "nikke_area_id": area_id, "name_codes": codes},
-        )
-        details_data = detail_resp.get("data", {})
-        details = details_data.get("character_details", []) or []
-        by_code: dict[str, dict[str, Any]] = {}
-        skill_keys = ("skill1_lv", "skill2_lv", "ulti_skill_lv")
-        for detail in details:
-            if not isinstance(detail, dict):
-                continue
-            code = str(detail.get("name_code", "")).strip()
-            if not code:
-                continue
-            skills = {}
-            for k in skill_keys:
-                if k in detail and detail[k] is not None:
-                    skills[k] = detail[k]
-            by_code[code] = skills
+        async def _fetch():
+            area_id = int(account["area_id"])
+            openid = account.get("game_openid", "")
+            roster_resp = await self._post(
+                CHARACTERS,
+                account["cookie"],
+                {"intl_open_id": openid, "nikke_area_id": area_id},
+            )
+            data = roster_resp.get("data", {})
+            roster = data.get("characters", data.get("user_characters", [])) or []
+            if not include_details or not roster:
+                return roster
+            codes = list(dict.fromkeys(str(c.get("name_code", "")) for c in roster if c.get("name_code")))
+            detail_resp = await self._post(
+                CHARACTER_DETAILS,
+                account["cookie"],
+                {"intl_open_id": openid, "nikke_area_id": area_id, "name_codes": codes},
+            )
+            details_data = detail_resp.get("data", {})
+            details = details_data.get("character_details", []) or []
+            by_code: dict[str, dict[str, Any]] = {}
+            skill_keys = ("skill1_lv", "skill2_lv", "ulti_skill_lv")
+            for detail in details:
+                if not isinstance(detail, dict):
+                    continue
+                code = str(detail.get("name_code", "")).strip()
+                if not code:
+                    continue
+                skills = {}
+                for k in skill_keys:
+                    if k in detail and detail[k] is not None:
+                        skills[k] = detail[k]
+                by_code[code] = skills
 
-        merged = []
-        for item in roster:
-            if not isinstance(item, dict):
-                merged.append(item)
-                continue
-            code = str(item.get("name_code", "")).strip()
-            item_copy = dict(item)
-            if code in by_code:
-                item_copy.update(by_code[code])
-            merged.append(item_copy)
-        return merged
+            merged = []
+            for item in roster:
+                if not isinstance(item, dict):
+                    merged.append(item)
+                    continue
+                code = str(item.get("name_code", "")).strip()
+                item_copy = dict(item)
+                if code in by_code:
+                    item_copy.update(by_code[code])
+                merged.append(item_copy)
+            return merged
+
+        return await self._execute_cached(
+            account,
+            "roster",
+            bool(include_details),
+            _fetch,
+            validator=lambda d: isinstance(d, list),
+        )
 
     async def get_character_detail(
         self,
@@ -505,44 +693,56 @@ class BlaBlaClient:
     ) -> dict[str, Any]:
         """只请求指定角色的详情，并保留原始装备槽位与状态效果。"""
         code = str(name_code).strip()
-        roster = await self.get_roster(account, include_details=False)
-        roster_item = next(
-            (item for item in roster if str(item.get("name_code", "")) == code),
-            None,
+
+        async def _fetch():
+            roster = await self.get_roster(account, include_details=False)
+            roster_item = next(
+                (item for item in roster if str(item.get("name_code", "")) == code),
+                None,
+            )
+            if roster_item is None:
+                raise ValueError("该账号未持有这名妮姬")
+            response = await self._post(
+                CHARACTER_DETAILS,
+                account["cookie"],
+                {
+                    "intl_open_id": account.get("game_openid", ""),
+                    "nikke_area_id": int(account["area_id"]),
+                    "name_codes": [code],
+                },
+            )
+            data = response.get("data", {}) or {}
+            detail = next(
+                (
+                    item
+                    for item in (data.get("character_details", []) or [])
+                    if str(item.get("name_code", "")) == code
+                ),
+                None,
+            )
+            if detail is None:
+                raise BlaBlaError("未获取到该角色详情", endpoint="GetUserCharacterDetails")
+            return {
+                "roster_item": roster_item,
+                "detail": detail,
+                "state_effects": data.get("state_effects", []) or [],
+            }
+
+        return await self._execute_cached(
+            account,
+            "detail",
+            code,
+            _fetch,
+            validator=lambda d: isinstance(d, dict) and "roster_item" in d and "detail" in d,
         )
-        if roster_item is None:
-            raise ValueError("该账号未持有这名妮姬")
-        response = await self._post(
-            CHARACTER_DETAILS,
-            account["cookie"],
-            {
-                "intl_open_id": account.get("game_openid", ""),
-                "nikke_area_id": int(account["area_id"]),
-                "name_codes": [code],
-            },
-        )
-        data = response.get("data", {}) or {}
-        detail = next(
-            (
-                item
-                for item in (data.get("character_details", []) or [])
-                if str(item.get("name_code", "")) == code
-            ),
-            None,
-        )
-        if detail is None:
-            raise BlaBlaError("未获取到该角色详情", endpoint="GetUserCharacterDetails")
-        return {
-            "roster_item": roster_item,
-            "detail": detail,
-            "state_effects": data.get("state_effects", []) or [],
-        }
 
     async def get_directory(self) -> list[dict[str, Any]]:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            zh_resp, en_resp = await asyncio.gather(
-                client.get(NIKKE_DIRECTORY_ZH), client.get(NIKKE_DIRECTORY_EN)
-            )
+        if self._closed:
+            raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
+        client = await self._get_public_client()
+        zh_resp, en_resp = await asyncio.gather(
+            client.get(NIKKE_DIRECTORY_ZH), client.get(NIKKE_DIRECTORY_EN)
+        )
         zh_resp.raise_for_status()
         en_resp.raise_for_status()
         zh_data = zh_resp.json()
@@ -613,16 +813,18 @@ class BlaBlaClient:
             "x-common-params": x_common,
             "x-language": str(context.get("language", "zh-TW")),
         }
+        if self._closed:
+            raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
         self._diagnose(f"{endpoint} 社区请求开始；method={method}；payload_keys={sorted(payload or {})}")
+        client = await self._get_client()
         try:
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
-                response = await client.request(
-                    method,
-                    API_BASE + path,
-                    params=params,
-                    json=payload if payload is not None else None,
-                    headers=headers,
-                )
+            response = await client.request(
+                method,
+                API_BASE + path,
+                params=params,
+                json=payload if payload is not None else None,
+                headers=headers,
+            )
             response.raise_for_status()
             data = response.json()
         except httpx.TimeoutException as exc:

@@ -330,27 +330,57 @@ class CharacterApplication:
         if not code:
             raise CharacterIdentityMismatch("角色目录缺少稳定 name_code")
         display_name = self._identity.display_name(target)
-        try:
-            payload = await self._gateway.get_character_detail(account, code)
-        except ValueError as exc:
-            if "未持有" in str(exc):
-                raise CharacterNotOwned(display_name) from exc
-            raise
-        if not isinstance(payload, Mapping):
-            raise CharacterIdentityMismatch("角色详情响应不是对象")
-        for field in ("roster_item", "detail"):
-            member = payload.get(field)
-            response_code = (
-                str(member.get("name_code", "")).strip()
-                if isinstance(member, Mapping)
-                else ""
-            )
-            if response_code != code:
-                raise CharacterIdentityMismatch(
-                    f"角色详情 {field} 身份与请求不一致"
-                )
 
-        profile = await self.profile_for_stat_calculation(account)
+        async def _fetch_detail() -> Mapping[str, Any]:
+            try:
+                raw_payload = await self._gateway.get_character_detail(account, code)
+            except ValueError as exc:
+                if "未持有" in str(exc):
+                    raise CharacterNotOwned(display_name) from exc
+                raise
+            if not isinstance(raw_payload, Mapping):
+                raise CharacterIdentityMismatch("角色详情响应不是对象")
+            for field in ("roster_item", "detail"):
+                member = raw_payload.get(field)
+                response_code = (
+                    str(member.get("name_code", "")).strip()
+                    if isinstance(member, Mapping)
+                    else ""
+                )
+                if response_code != code:
+                    raise CharacterIdentityMismatch(
+                        f"角色详情 {field} 身份与请求不一致"
+                    )
+            return raw_payload
+
+        detail_task = asyncio.create_task(_fetch_detail())
+        profile_task = asyncio.create_task(self.profile_for_stat_calculation(account))
+        try:
+            results = await asyncio.gather(detail_task, profile_task, return_exceptions=True)
+        except BaseException:
+            for t in (detail_task, profile_task):
+                if not t.done():
+                    t.cancel()
+            await asyncio.gather(detail_task, profile_task, return_exceptions=True)
+            raise
+
+        detail_res, profile_res = results
+
+        # 1. 任意端登录失效必须优先抛出，不出卡
+        for res in (detail_res, profile_res):
+            if isinstance(res, CredentialExpiredError):
+                raise res
+
+        # 2. 详情读取或身份校验失败，向上抛出
+        if isinstance(detail_res, Exception):
+            raise detail_res
+
+        # 3. 研究资料意外异常
+        if isinstance(profile_res, Exception):
+            raise profile_res
+
+        payload = detail_res
+        profile = profile_res
         outpost = profile.get("outpost", {}) if isinstance(profile, Mapping) else {}
         account_for_card = {
             "nickname": account.get("nickname"),

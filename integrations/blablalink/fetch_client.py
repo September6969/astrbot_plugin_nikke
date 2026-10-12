@@ -21,6 +21,7 @@ from urllib.parse import urlparse
 import httpx
 
 from ...core.privacy import safe_exception_message
+from .http_transport import IsolatedAsyncClient
 
 logger = logging.getLogger("nikke.fetch_client")
 
@@ -134,6 +135,7 @@ class FetchClient:
         circuit_failure_threshold: int = DEFAULT_CIRCUIT_FAILURE_THRESHOLD,
         circuit_recovery_seconds: float = DEFAULT_CIRCUIT_RECOVERY_SECONDS,
         transport: httpx.AsyncBaseTransport | None = None,
+        client: httpx.AsyncClient | None = None,
         default_headers: Mapping[str, str] | None = None,
     ):
         self.timeout = httpx.Timeout(
@@ -153,6 +155,40 @@ class FetchClient:
 
         self._breakers: dict[str, CircuitBreaker] = {}
         self._breaker_lock = asyncio.Lock()
+        self._client: httpx.AsyncClient | None = client
+        self._external_client = client is not None
+        self._closed = False
+        self._client_lock = asyncio.Lock()
+
+    async def _get_client(self) -> httpx.AsyncClient:
+        if self._closed:
+            raise RuntimeError("FetchClient 已关闭，禁止发起新请求")
+        if self._client is None:
+            async with self._client_lock:
+                if self._client is None and not self._closed:
+                    self._client = IsolatedAsyncClient(
+                        transport=self.transport,
+                        timeout=self.timeout,
+                        follow_redirects=True,
+                    )
+        if self._closed or self._client is None:
+            raise RuntimeError("FetchClient 已关闭，禁止发起新请求")
+        return self._client
+
+    async def aclose(self) -> None:
+        """幂等关闭客户端，释放连接资源。"""
+        if self._closed:
+            return
+        self._closed = True
+        if not self._external_client and self._client is not None:
+            await self._client.aclose()
+            self._client = None
+
+    async def __aenter__(self) -> FetchClient:
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        await self.aclose()
 
     def _get_breaker(self, host: str) -> CircuitBreaker:
         if host not in self._breakers:
@@ -171,6 +207,9 @@ class FetchClient:
         timeout: float | None = None,
     ) -> Any:
         """执行 GET 请求并解析 JSON，附带熔断、重试、并发控制与脱敏异常处理。"""
+        if self._closed:
+            raise RuntimeError("FetchClient 已关闭，禁止发起新请求")
+
         parsed = urlparse(url)
         host = parsed.netloc or "unknown"
         safe_url = _sanitize_url(url)
@@ -186,19 +225,15 @@ class FetchClient:
 
         attempt = 0
         last_exception: Exception | None = None
+        client = await self._get_client()
 
         while attempt <= self.max_retries:
             attempt += 1
             try:
                 async with self.semaphore:
-                    async with httpx.AsyncClient(
-                        transport=self.transport,
-                        timeout=req_timeout,
-                        follow_redirects=True,
-                    ) as client:
-                        response = await client.get(url, params=params, headers=req_headers)
-                        response.raise_for_status()
-                        payload = response.json()
+                    response = await client.get(url, params=params, headers=req_headers, timeout=req_timeout)
+                    response.raise_for_status()
+                    payload = response.json()
 
                 breaker.record_success()
                 return payload

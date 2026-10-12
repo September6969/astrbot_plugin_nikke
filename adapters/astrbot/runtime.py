@@ -133,6 +133,12 @@ class AstrBotRuntimeAdapter:
         self._coordinator.register_cleanup(
             "feedback", self._services.feedback_manager.close
         )
+        self._coordinator.register_cleanup(
+            "calendar", self._services.calendar.aclose
+        )
+        self._coordinator.register_cleanup(
+            "client", self._services.client.aclose
+        )
 
     async def _initialize_services(self) -> None:
         await self._best_effort(
