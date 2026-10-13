@@ -64,9 +64,9 @@ class NikkeCommandRuntime:
             ),
             "日常": (
                 "【日常】\n"
-                "/妮姬 签到　(/nikke daily、/nikke claim)\n"
+                "/妮姬 日常 — 社区签到及免费领奖；/妮姬 签到 — 仅签到\n"
                 "/妮姬 签到 状态 — 只查询、不提交\n"
-                "/妮姬 日常 自动 开|关 — 仅控制自己的定时签到\n"
+                "/妮姬 日常 自动 开|关 — 仅控制自己的社区签到及免费领奖\n"
                 "/妮姬 兑换 <CDK>　(/nikke cdk)\n"
                 "/妮姬 兑换 批量 <CDK1> <CDK2>...\n"
                 "/妮姬 兑换 可用|历史\n"
@@ -178,7 +178,8 @@ class NikkeCommandRuntime:
             return
         if key in {"签到", "daily", "claim", "日常", "routine"}:
             async for result in self._dispatch(
-                event, self._handlers.daily, action=arg1, value=arg2
+                event, self._handlers.daily, action=arg1, value=arg2,
+                scope="signin" if key == "签到" else "community"
             ):
                 yield result
             return

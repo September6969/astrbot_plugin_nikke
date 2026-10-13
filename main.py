@@ -86,6 +86,7 @@ class NikkePlugin(Star):
             config=self.config,
             render_summary=self.services.renderer.render_summary,
             send_summary=self.presentation.send_summary_image,
+            send_notice=self.presentation.send_daily_notice,
         )
         self.runtime = AstrBotRuntimeAdapter(
             coordinator=self.services.runtime_coordinator,
@@ -247,7 +248,7 @@ class NikkePlugin(Star):
 
     async def daily(self, event: AstrMessageEvent, action: str = "", value: str = ""):
         async for result in self.adapters.command.dispatch(
-            event, self.handlers.daily, action=action, value=value
+            event, self.handlers.daily, action=action, value=value, scope="community"
         ):
             yield result
 

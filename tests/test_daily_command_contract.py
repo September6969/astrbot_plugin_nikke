@@ -21,6 +21,9 @@ class _Store:
         self.auto_daily.append((actor_id, enabled))
         return True
 
+    def set_setting(self, key, value):
+        self.settings[key] = value
+
     def get_setting(self, key, default=None):
         return self.settings.get(key, default)
 

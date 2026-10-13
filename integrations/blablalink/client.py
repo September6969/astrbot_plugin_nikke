@@ -911,6 +911,9 @@ class BlaBlaClient:
             raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
         self._diagnose(f"{endpoint} 社区请求开始；method={method}；payload_keys={sorted(payload or {})}")
         client = await self._get_client()
+        identity = self._account_identity_key(account)
+        if identity is not None:
+            self._check_binding_validity(identity)
         try:
             response = await client.request(
                 method,
@@ -949,27 +952,71 @@ class BlaBlaClient:
             raise BlaBlaError(msg_str if msg_lower not in {"", "ok", "success"} else f"接口返回 {code}", code, endpoint)
         return data
 
-    async def get_daily_signin(self, account: dict[str, Any]) -> dict[str, Any]:
+    async def get_community_tasks(self, account: dict[str, Any]) -> list[dict[str, Any]]:
+        """读取所有任务，结构异常不能伪装成空列表。"""
         _, game_id = self._community_context(account)
-        data = await self._community_request(
-            "GET",
-            TASK_LIST,
-            account,
-            params={"get_top": "false", "intl_game_id": game_id},
-        )
-        for task in (data.get("data", {}) or {}).get("tasks", []) or []:
-            name = str(task.get("task_name", ""))
-            lowered = name.casefold()
-            if "签到" not in name and "簽到" not in name and "sign" not in lowered:
-                continue
-            reward = next(iter(task.get("reward_infos", []) or []), {})
-            return {
-                "found": True,
-                "completed": bool(reward.get("is_completed", False)),
-                "task_id": str(task.get("task_id", "")),
-                "task_name": name,
-            }
-        return {"found": False, "completed": False, "task_id": "", "task_name": ""}
+        response = await self._community_request("GET", TASK_LIST, account,
+            params={"get_top": "false", "intl_game_id": game_id})
+        data = response.get("data")
+        if not isinstance(data, dict) or not isinstance(data.get("tasks"), list):
+            raise BlaBlaError("社区任务列表格式异常", endpoint=TASK_LIST)
+        if any(not isinstance(task, dict) for task in data["tasks"]):
+            raise BlaBlaError("社区任务条目格式异常", endpoint=TASK_LIST)
+        return data["tasks"]
+
+    async def get_daily_signin(self, account: dict[str, Any]) -> dict[str, Any]:
+        tasks = await self.get_community_tasks(account)
+        candidates = [task for task in tasks if task.get("task_type") == 1]
+        if not candidates:
+            candidates = [task for task in tasks if task.get("task_type") is None and
+                any(word in str(task.get("task_name", "")).casefold() for word in ("签到", "簽到", "sign"))]
+        if not candidates:
+            return {"found": False, "completed": False, "task_id": "", "task_name": ""}
+        if len(candidates) != 1:
+            raise BlaBlaError("签到任务身份不唯一", endpoint=TASK_LIST)
+        task = candidates[0]
+        rewards = task.get("reward_infos")
+        if not isinstance(rewards, list) or not rewards or any(
+            not isinstance(item, dict) or type(item.get("is_completed")) is not bool for item in rewards
+        ):
+            raise BlaBlaError("签到奖励状态未知", endpoint=TASK_LIST)
+        # 官方页面以任务类型识别签到，不能只拿第一项奖励代表全部结果。
+        completed = all(item["is_completed"] for item in rewards)
+        if any(item["is_completed"] for item in rewards) and not completed:
+            raise BlaBlaError("签到奖励状态不一致，请在社区确认", endpoint=TASK_LIST)
+        return {"found": True, "completed": completed,
+                "task_id": str(task.get("task_id") or ""), "task_name": str(task.get("task_name") or "签到")}
+
+    async def get_community_rewards(self, account: dict[str, Any]) -> list[dict[str, Any]]:
+        """官方新手任务是一次性免费奖励；不调用完成任务或积分兑换接口。"""
+        endpoint = "/api/game/proxy/Game/HasFinishOnboardingMissionList"
+        response = await self._community_request("POST", endpoint, account, payload={})
+        data = response.get("data")
+        if not isinstance(data, dict) or not isinstance(data.get("mission_done_list"), list):
+            raise BlaBlaError("免费奖励列表格式异常", endpoint=endpoint)
+        names = {"1": "登录任务奖励", "2": "绑定社区奖励", "3": "绑定游戏奖励",
+                 "4": "添加桌面奖励", "5": "关注任务奖励"}
+        result = []
+        seen = set()
+        for item in data["mission_done_list"]:
+            if not isinstance(item, dict):
+                raise BlaBlaError("免费奖励条目格式异常", endpoint=endpoint)
+            tag = str(item.get("tag_id") or "")
+            status = item.get("mission_status")
+            if not tag or tag in seen:
+                raise BlaBlaError("免费奖励身份缺失或重复", endpoint=endpoint)
+            seen.add(tag)
+            result.append({"id": tag, "name": names.get(tag, "未知任务奖励"),
+                "period": "onboarding-v1", "state": {0: "pending", 1: "claimable", 2: "claimed"}.get(status, "unknown")
+                if type(status) is int and tag in names else "unknown"})
+        return result
+
+    async def claim_community_reward(self, account: dict[str, Any], reward_id: str) -> None:
+        """一次提交；调用方负责持久化意图与写后核验，不自动重试。"""
+        if reward_id not in {"1", "2", "3", "4", "5"}:
+            raise BlaBlaError("奖励类型尚未验证")
+        await self._community_request("POST", "/api/game/proxy/Game/OnboardingMissionGiftCollection",
+                                      account, payload={"tag_id": reward_id})
 
     async def perform_daily_signin(self, account: dict[str, Any]) -> str:
         status = await self.get_daily_signin(account)
@@ -992,6 +1039,8 @@ class BlaBlaClient:
             verified = await self.get_daily_signin(account)
             if verified["completed"]:
                 return "签到成功"
+        except CookieExpired:
+            raise
         except BlaBlaError as exc:
             raise UnknownAfterAction("签到结果未确认，请稍后查询状态，未自动重发", "UNKNOWN_AFTER_ACTION", DAILY_CHECK_IN) from exc
         if last_error and not isinstance(last_error, (BlaBlaTimeoutError, BlaBlaNetworkError)):

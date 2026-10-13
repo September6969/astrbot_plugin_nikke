@@ -74,6 +74,8 @@ class DailyAutoCommandTests(unittest.IsolatedAsyncioTestCase):
 
     def _plugin(self, *, global_enabled=False):
         class Store:
+            def set_setting(self, key, value):
+                pass
             def __init__(self):
                 self.enabled = None
 
@@ -143,7 +145,7 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
         inject_daily_handler(plugin)
         return plugin
 
-    async def test_scheduled_batch_requires_both_account_preferences(self):
+    async def test_scheduled_batch_requires_auto_preference_independent_of_push(self):
         plugin = self._plugin()
         self.assertEqual(
             await plugin.handlers.daily.run_all_daily(
@@ -153,7 +155,7 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(
             plugin.services.store.calls,
-            [{"push_only": True, "with_cookie": True, "auto_daily_only": True}],
+            [{"push_only": False, "with_cookie": True, "auto_daily_only": True}],
         )
 
     async def test_explicit_admin_batch_keeps_existing_selection_semantics(self):
@@ -195,10 +197,8 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
 
         await handler.send_automatic_summary("2026-09-07")
 
-        runner.run_all_daily.assert_awaited_once_with(
-            "2026-09-07", stagger=False, automatic=True
-        )
-        sender.assert_awaited_once_with("synthetic-group", "synthetic-summary.png")
+        runner.run_all_daily.assert_not_awaited()
+        sender.assert_not_awaited()
 
     async def test_summary_fallback_stays_in_automatic_scope(self):
         class Store:
@@ -219,6 +219,4 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
         )
 
         await handler.send_automatic_summary("2026-09-07")
-        runner.run_all_daily.assert_awaited_once_with(
-            "2026-09-07", stagger=False, automatic=True
-        )
+        runner.run_all_daily.assert_not_awaited()

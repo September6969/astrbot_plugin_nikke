@@ -144,7 +144,7 @@
   "enable_daily_actions": {
     "description": "启用每日签到与领奖",
     "type": "bool",
-    "hint": "启用已验证的社区签到与领奖接口，属于写操作；未完成真实授权验收前保持关闭。",
+    "hint": "启用社区签到与已达成的免费新手任务领奖；不会消费积分或代做社交任务。属于写操作，新增领奖尚待真实验收，默认关闭。",
     "obvious_hint": true,
     "default": false
   },

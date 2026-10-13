@@ -27,6 +27,7 @@ class DailyTaskResult:
     account_name: str
     status: DailyTaskStatus
     detail: str
+    items: tuple[dict[str, str], ...] = ()
 
     @property
     def run_status(self) -> str:
@@ -43,12 +44,13 @@ class DailyTaskResult:
             return "unavailable"
         return "success"
 
-    def to_storage(self) -> dict[str, str]:
+    def to_storage(self) -> dict[str, Any]:
         """转换为可安全 JSON 序列化的汇总记录。"""
         return {
             "account_name": self.account_name,
             "status": self.status.value,
             "detail": self.detail,
+            "items": list(self.items),
         }
 
     @classmethod
@@ -64,7 +66,10 @@ class DailyTaskResult:
         detail = payload.get("detail")
         if not isinstance(account_name, str) or not isinstance(detail, str):
             return None
-        return cls(account_name=account_name, status=status, detail=detail)
+        items = payload.get("items", [])
+        if not isinstance(items, list) or any(not isinstance(i, dict) for i in items):
+            return None
+        return cls(account_name=account_name, status=status, detail=detail, items=tuple(items))
 
     def summary_row(self) -> tuple[str, str]:
         """兼容现有图片汇总 renderer 的两列输入。"""
