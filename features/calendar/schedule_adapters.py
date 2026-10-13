@@ -458,7 +458,8 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             detail_url = getattr(dl, "source_url", "") or (getattr(rec, "source_url", "") if rec else "")
             cat_raw = getattr(dl, "category", "") or (getattr(rec, "category", "") if rec else "")
             body_text = (getattr(rec, "body", "") or getattr(rec, "content", "")) if rec else ""
-            category = _classify_category(title, cat_raw, description=body_text)
+            section_text = getattr(dl, "description", "") or ""
+            category = _classify_category(title, cat_raw, description=section_text)
 
             # 严格时区保证为 aware UTC
             if start_at is not None:
@@ -470,7 +471,7 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
             end_prec = TimePrecision.EXACT.value if end_at else TimePrecision.UNKNOWN.value
 
             # 基于正文 body 和标题的多维度取消检测
-            cancel_target = f"{title} {body_text}".casefold()
+            cancel_target = f"{title} {section_text}".casefold()
             is_cancelled = any(k in cancel_target for k in ("取消", "中止", "活动延期", "停止开放", "cancel"))
 
             # 置信度评估：双时间且有上下文为 0.95，单结束时间为 0.90，弱上下文为 0.75
@@ -518,7 +519,7 @@ class OfficialAnnouncementScheduleAdapter(BaseScheduleAdapter):
                     is_valid_interval=is_valid,
                     field_evidence=evidence,
                     metadata={
-                        "description": str(body_text or ""),
+                        "description": str(section_text),
                         "tag": str(cat_raw or ""),
                         "activity_kind": "official_deadline",
                     },

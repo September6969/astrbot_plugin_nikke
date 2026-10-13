@@ -171,7 +171,7 @@ class CalendarT2IPayloadBuilder:
 
         candidate_ids = []
         # 优先级 1：进行中主活动
-        main_categories = {"event", "solo_raid", "union_raid"}
+        main_categories = {"event", "story_event", "solo_raid", "union_raid"}
         for ev in active_events:
             if ev.category in main_categories:
                 candidate_ids.append(ev.event_id)

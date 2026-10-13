@@ -53,6 +53,7 @@ class CalendarVisualCache:
         self._manifest: dict[str, dict[str, Any]] = {}
         self.last_sync: dict[str, int] = {"selected": 0, "downloaded": 0, "cache_hits": 0, "failed": 0}
         self._sync_lock = asyncio.Lock()
+        self._public_dns: dict[str, str] = {}
         self._load_manifest()
 
     @staticmethod
@@ -178,6 +179,30 @@ class CalendarVisualCache:
             and self.resolve_path(activity.event_id) is not None
         )
 
+    async def _resolve_fake_dns(self, client: httpx.AsyncClient, url: str) -> str | None:
+        """仅兼容已知图片 CDN 的代理虚拟地址，重查公网 DNS 并固定连接目标。"""
+        parsed = urlparse(url)
+        host = parsed.hostname or ""
+        if parsed.scheme != "https" or host not in {"cdnimg-v2.gamekee.com", "cdnimg.gamekee.com"}:
+            return None
+        records = await asyncio.to_thread(socket.getaddrinfo, host, 443, type=socket.SOCK_STREAM)
+        addresses = {ipaddress.ip_address(item[4][0]) for item in records}
+        fake_net = ipaddress.ip_network("198.18.0.0/15")
+        if not addresses or not all(address in fake_net for address in addresses):
+            return None
+        if host in self._public_dns:
+            return self._public_dns[host]
+        response = await client.get("https://dns.google/resolve", params={"name": host, "type": "A"})
+        response.raise_for_status()
+        payload = response.json()
+        if payload.get("Status") != 0:
+            return None
+        resolved = [ipaddress.ip_address(row["data"]) for row in payload.get("Answer", []) if row.get("type") == 1]
+        if not resolved or not all(address.is_global and not address.is_multicast for address in resolved):
+            return None
+        self._public_dns[host] = str(resolved[0])
+        return str(resolved[0])
+
     async def _download_image(self, client: httpx.AsyncClient, url: str) -> tuple[bytes, int, int]:
         headers = {
             "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
@@ -188,9 +213,20 @@ class CalendarVisualCache:
         current_url = url
         redirect_hops = 0
         while True:
+            request_url = current_url
+            request_headers = dict(headers)
+            extensions = {}
             if not await self._validate_remote_url(current_url):
-                raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
-            async with client.stream("GET", current_url, headers=headers) as response:
+                if not self._safe_url(current_url):
+                    raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
+                address = await self._resolve_fake_dns(client, current_url)
+                if address is None:
+                    raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
+                host = urlparse(current_url).hostname
+                request_url = str(httpx.URL(current_url).copy_with(host=address))
+                request_headers["host"] = host
+                extensions["sni_hostname"] = host
+            async with client.stream("GET", request_url, headers=request_headers, extensions=extensions) as response:
                 if response.status_code in (301, 302, 303, 307, 308):
                     if redirect_hops >= self.MAX_REDIRECT_HOPS:
                         raise ValueError("活动视觉素材重定向次数超过限制")
@@ -332,6 +368,7 @@ class CalendarVisualCache:
         max_items: int = 16,
     ) -> dict[str, int]:
         current = _aware_utc(now) if now else datetime.now(timezone.utc)
+        self._public_dns.clear()
         if type(horizon_days) is not int or horizon_days < 1 or horizon_days > 90:
             raise ValueError("horizon_days 必须是 1~90 的整数")
         if type(max_items) is not int or max_items < 1 or max_items > 64:

@@ -158,3 +158,32 @@ async def test_get_daily_contents_progress_semantics():
     client._post = AsyncMock(side_effect=CookieExpired("登录已失效", code=11003))
     with pytest.raises(CookieExpired):
         await client.get_daily_contents_progress(account)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("partial", [
+    [{"name_code": "c001", "skill1_lv": 5}],
+    [{"name_code": "c001", "skill1_lv": 5, "skill2_lv": 5, "ulti_skill_lv": None}],
+    [{"name_code": "c001", "skill1_lv": 5, "skill2_lv": 5, "ulti_skill_lv": True}],
+    [{"name_code": "c001", "skill1_lv": 5, "skill2_lv": 5, "ulti_skill_lv": "bad"}],
+    [],
+])
+async def test_partial_details_never_cached_even_with_roster_skills(partial):
+    """缺失或异常详情只降级返回，下次重查；名单字段不能代替详情覆盖证据。"""
+    client = BlaBlaClient()
+    account = {"area_id": "1", "game_uid": "uid", "cookie": "test"}
+    roster = [{"name_code": "c001", "lv": 400, "skill1_lv": 1, "skill2_lv": 1, "ulti_skill_lv": 1}]
+    complete = [{"name_code": "c001", "lv": 1, "skill1_lv": 10, "skill2_lv": "9", "ulti_skill_lv": 8}]
+    client._post = AsyncMock(side_effect=[
+        {"data": {"characters": roster}}, {"data": {"character_details": partial}},
+        {"data": {"characters": roster}}, {"data": {"character_details": complete}},
+    ])
+    try:
+        await client.get_roster(account)
+        result = await client.get_roster(account)
+        assert result[0]["ulti_skill_lv"] == 8
+        assert result[0]["lv"] == 400
+        assert await client.get_roster(account) == result
+        assert client._post.call_count == 4
+    finally:
+        await client.aclose()

@@ -57,6 +57,14 @@ class CalendarCommandHandler:
     async def handle(self, context: CommandContext) -> CommandResult:
         """按只读热查询、尚无快照或显式刷新分派。"""
         horizon = context.parameters.get("horizon", "").strip()
+        if horizon.casefold() in {"订阅", "subscribe", "取消订阅", "unsubscribe", "订阅状态", "subscription"}:
+            subscriptions = getattr(self._application, "subscriptions", None)
+            if subscriptions is None:
+                return self._text("日程订阅服务尚未就绪。")
+            try:
+                return self._text(subscriptions.command(context, horizon.casefold(), context.parameters.get("page", "")))
+            except ValueError as exc:
+                return self._text(str(exc))
         if horizon.casefold() in self._REFRESH_WORDS:
             feedback = self._start_feedback(context, "正在刷新日程信息...") if self._start_feedback else None
             try:

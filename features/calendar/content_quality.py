@@ -67,8 +67,11 @@ class IdentityMatch:
 
 # 对外保留别名表，避免各适配器继续维护一份不一致的关键词。
 CATEGORY_ALIASES: dict[str, tuple[str, ...]] = {
+    "login": ("签到", "簽到", "login event", "log in event", "check in"),
+    "free_reward": ("免费领取", "免費領取", "免费招募", "免費招募", "免费获得", "免費獲得", "免费获取", "free recruit", "free recruitment", "free costume", "free nikke", "free reward", "distribution event"),
+    "story_event": ("支线", "支線", "剧情活动", "劇情活動", "story event"),
     "coop": ("协同作战", "协同", "coordinated operation", "co-op", "coop"),
-    "solo_raid": ("单人突袭", "solo raid"),
+    "solo_raid": ("单人突袭", "个人突袭", "個人突襲", "solo raid"),
     "union_raid": ("联盟突袭", "union raid"),
     "special_arena": ("特殊竞技场", "special arena"),
     "mini_game": ("小游戏", "mini game", "mini-game"),
@@ -98,6 +101,9 @@ CATEGORY_ALIASES: dict[str, tuple[str, ...]] = {
 }
 
 _CATEGORY_ORDER = (
+    "login",
+    "free_reward",
+    "story_event",
     "coop",
     "solo_raid",
     "union_raid",
@@ -117,6 +123,9 @@ _CATEGORY_ORDER = (
 ACTIVITY_CATEGORIES = frozenset(
     {
         "event",
+        "login",
+        "free_reward",
+        "story_event",
         "pass",
         "mini_game",
         "limited_stage",
@@ -191,6 +200,9 @@ def classify_explicit_title(title: str) -> tuple[str, float, str] | None:
         return None
 
     explicit_rules = (
+        ("login", CATEGORY_ALIASES["login"], "explicit_title:login"),
+        ("free_reward", CATEGORY_ALIASES["free_reward"], "explicit_title:free_reward"),
+        ("story_event", CATEGORY_ALIASES["story_event"], "explicit_title:story_event"),
         ("limited_costume", ("limited costume", "限定时装", "限定服装"), "explicit_title:limited_costume"),
         (
             "costume_gacha",
@@ -214,7 +226,7 @@ def classify_explicit_title(title: str) -> tuple[str, float, str] | None:
             "explicit_title:recruit",
         ),
         ("coop", ("coordinated operation", "协同作战", "协同"), "explicit_title:coop"),
-        ("solo_raid", ("solo raid", "单人突袭"), "explicit_title:solo_raid"),
+        ("solo_raid", ("solo raid", "单人突袭", "个人突袭", "個人突襲"), "explicit_title:solo_raid"),
         ("union_raid", ("union raid", "联盟突袭"), "explicit_title:union_raid"),
         ("special_arena", ("special arena", "特殊竞技场"), "explicit_title:special_arena"),
         ("double_reward", ("double reward", "double drop", "full burst", "双倍"), "explicit_title:double_reward"),
@@ -250,6 +262,14 @@ def classify_category(
         return explicit[0]
 
     description_text = _fold(description)
+    # 仅认定明确的免费获取方式；普通招募中提到免费宝石不属于免费活动。
+    if re.search(
+        r"\blog in (?:during|throughout) (?:the )?event to (?:receive|claim|obtain)\b|"
+        r"(?:登录|登入|登錄).{0,16}(?:即可|即送|领取|領取)|"
+        r"(?:obtain|claim|receive).{0,60}\bfor free\b",
+        description_text,
+    ):
+        return "free_reward"
     if (
         _contains_alias(description_text, "new character packages")
         or (
@@ -351,7 +371,13 @@ def canonical_event_title(value: Any) -> str:
             break
         text = stripped
 
+    # 签到天数和 Pass 角色备注属于结构化包装，不能参与跨语言活动名称比较。
+    text = re.sub(r"^\d+\s+day login event\s*[:：–—-]?\s*", "", text)
+    text = re.sub(r"\s*\(\d+日\)$", "", text)
+    text = re.sub(r"(?<=pass)\s*\([\u4e00-\u9fff·\s]+\)$", "", text)
     wrapper_prefixes = (
+        "new story event",
+        "story event",
         "limited costume",
         "costume gacha",
         "mini game",
@@ -698,6 +724,13 @@ def score_identity(left: Any, right: Any) -> IdentityMatch:
         explicit_same_source = True
         reasons.append("explicit_same_source:+100")
 
+    # 同一篇更新公告可包含多个并行活动及阶段，不能把公告链接当成活动身份。
+    # 名称无法对齐时保留两条，宁可等待来源补证，也不能吞掉另一活动。
+    story_types = {str(getattr(item, "event_type", "")) for item in (left, right)}
+    if not explicit_same_source and "story_event" in story_types:
+        if canonical_event_title(getattr(left, "title", "")) != canonical_event_title(getattr(right, "title", "")):
+            return IdentityMatch(-100, IdentityDecision.DISTINCT, ("story_identity_conflict:-100",))
+
     left_identity_label = _explicit_identity_label(getattr(left, "title", ""))
     right_identity_label = _explicit_identity_label(getattr(right, "title", ""))
     if (
@@ -866,7 +899,24 @@ def canonical_identity_match(left: Any, right: Any) -> IdentityMatch | None:
         and overlap_ratio >= CANONICAL_HIGH_OVERLAP_THRESHOLD
         and max(start_diff, end_diff) <= CANONICAL_HIGH_OVERLAP_BOUNDARY_SECONDS
     )
-    if not exact_window and not high_overlap:
+    # 公告维护后开服只有日期精度，百科常把结束日记成零点。
+    # 仅同名、同类、同起点且明确来自官方与百科的一对记录允许字段仲裁；
+    # 不用相似标题或共同公告地址推断活动身份，阶段名称仍保留在核心名称中。
+    official_gamekee = (
+        (left_primary == "official" and right_primary == "gamekee")
+        or (left_primary == "gamekee" and right_primary == "official")
+    )
+    category_left = str(_event_value(left, "event_type", "event"))
+    category_right = str(_event_value(right, "event_type", "event"))
+    date_boundary_match = (
+        official_gamekee and category_left == category_right
+        and category_left in {"login", "pass", "story_event"}
+        and "DATE_ONLY" in {str(getattr(left, "start_precision", "")), str(getattr(right, "start_precision", ""))}
+        and start_diff <= CANONICAL_TIME_TOLERANCE_SECONDS
+        and end_diff <= 24 * 60 * 60 and overlap_ratio >= 0.90
+        and min(left_duration, right_duration) >= 7 * 24 * 60 * 60
+    )
+    if not exact_window and not high_overlap and not date_boundary_match:
         return None
 
     reasons = [
@@ -874,6 +924,8 @@ def canonical_identity_match(left: Any, right: Any) -> IdentityMatch | None:
         f"category_family:{left_family}",
         "server_scope_compatible",
     ]
+    if date_boundary_match:
+        reasons.append("official_gamekee_date_boundary_reconciled")
     if high_overlap and not exact_window:
         reasons.extend(
             (
@@ -925,3 +977,44 @@ def should_parse_deadlines(title: Any, body: Any) -> bool:
     has_keyword = any(_contains_alias(text, keyword) for keyword in _DEADLINE_KEYWORDS)
     has_date = any(pattern.search(text) for pattern in _DATE_PATTERNS)
     return has_keyword and has_date
+
+
+def calendar_display_title(title: str) -> str:
+    """仅翻译明确的玩法词和标题包装，保留活动专名与角色名。"""
+    replacements = (
+        (r"\bCoordinated Operation\b", "协同作战"),
+        (r"\bUnion Raid\b", "联盟突袭"),
+        (r"\bSolo Raid\b", "个人突袭"),
+        (r"\bFULL BURST DAY(?: Event)?\b", "限时双倍"),
+        (r"\b(\d+)[- ]Day Login Event\b", r"\1日签到"),
+        (r"\b(?:New )?Story Event\s*[:：-]?\s*", "支线活动 · "),
+        (r"\bSpecial Recruit\b", "Pick Up"),
+        (r"\bCostume Gacha\b", "转盘时装"),
+        (r"\bFree Recruit(?:ment)?(?: Event)?\b", "免费招募"),
+
+    )
+    for pattern, replacement in replacements:
+        title = re.sub(pattern, replacement, title, flags=re.I)
+    months = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+    for month, name in enumerate(months, 1):
+        title = re.sub(rf"\b{name} Mission Pass\b", f"{month}月 Pass", title, flags=re.I)
+    return title
+
+
+def include_calendar_event(event: Any) -> bool:
+    """按用户范围排除宣传页及普通限时时装，转盘和免费奖励仍保留。"""
+    title = str(getattr(event, "title", ""))
+    category = str(getattr(event, "event_type", ""))
+    if category in {"package", "update", "announcement", "special_arena"}:
+        return False
+    if re.search(r"\bpackages?\b|\bbundles?\b|礼包|禮包|temporary participation|simulation room.{0,8}overclock|临时参战|臨時參戰|角色试用|角色試用", title, re.I):
+        return False
+    if "四周年情报站" in title or "四週年情報站" in title:
+        return False
+    if category == "costume_gacha" or classify_category(title) == "costume_gacha":
+        return True
+    if category == "free_reward":
+        return True
+    return category != "limited_costume" and classify_category(title) != "limited_costume" and not any(
+        word in title for word in ("限时时装", "限時時裝", "限时服装", "限時服裝")
+    )
