@@ -93,6 +93,7 @@ class CalendarApplication:
         task_factory=None,
     ) -> None:
         self._calendar = calendar
+        self.subscriptions = None
         self._explicit_refresh_task = None
         self._task_factory = task_factory
         self._clock = clock or (lambda: datetime.now(timezone.utc))
@@ -221,7 +222,7 @@ class CalendarApplication:
         upcoming = groups.upcoming
 
         candidate_ids: list[str] = []
-        primary_categories = {"event", "solo_raid", "union_raid"}
+        primary_categories = {"event", "story_event", "solo_raid", "union_raid"}
         for event in active:
             if event.category in primary_categories:
                 candidate_ids.append(event.event_id)

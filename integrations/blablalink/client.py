@@ -684,7 +684,10 @@ class BlaBlaClient:
         return data
 
     async def get_roster(self, account: dict[str, Any], include_details: bool = True) -> list[dict[str, Any]]:
+        details_complete = False
+
         async def _fetch():
+            nonlocal details_complete
             area_id = int(account["area_id"])
             openid = account.get("game_openid", "")
             roster_resp = await self._post(
@@ -734,6 +737,17 @@ class BlaBlaClient:
                         skills[k] = detail[k]
                 by_code[code] = skills
 
+            # 只信任本次详情响应的完整性，名单自带技能不能掩盖详情缺失。
+            def valid_skill(value: Any) -> bool:
+                return (
+                    isinstance(value, int) and not isinstance(value, bool) and value > 0
+                ) or (isinstance(value, str) and value.isascii() and value.isdigit() and int(value) > 0)
+
+            details_complete = all(
+                code in by_code and all(valid_skill(by_code[code].get(k)) for k in skill_keys)
+                for code in codes
+            )
+
             merged = []
             for item in roster:
                 if not isinstance(item, dict):
@@ -754,7 +768,7 @@ class BlaBlaClient:
             for item in d:
                 if not isinstance(item, dict) or not str(item.get("name_code", "")).strip():
                     return False
-                if include_details and not any(k in item for k in ("skill1_lv", "skill2_lv", "ulti_skill_lv")):
+                if include_details and not details_complete:
                     return False
             return True
 

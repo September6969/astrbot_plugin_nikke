@@ -21,6 +21,7 @@ class GameDeadline:
     source_url: str = ""
     deadline_version: int = 1
     start_precision: str = "EXACT"
+    description: str = ""
 
     def is_active(self, now: datetime | None = None) -> bool:
         current = now or datetime.now(timezone.utc)
@@ -127,6 +128,12 @@ class DeadlineParser:
         category: str = "event",
     ) -> list[GameDeadline]:
         body = cls._normalize_english_dates(body)
+        # 先统一时间在日期前的格式，避免全文没有标准日期时提前返回。
+        body = re.sub(
+            r"(\d{1,2}):(\d{2})(?::\d{2})?,?\s+(" + "|".join(cls.MONTHS) + r")\s+(\d{1,2}),?\s+(\d{4})",
+            lambda m: f"{m.group(5)}-{cls.MONTHS[m.group(3).lower()]:02d}-{int(m.group(4)):02d} {int(m.group(1)):02d}:{m.group(2)}",
+            body, flags=re.I,
+        )
         total_matches = list(cls.DATETIME_PATTERN.finditer(body))
         if not total_matches:
             return []
@@ -142,11 +149,10 @@ class DeadlineParser:
         deadlines: list[GameDeadline] = []
         recovered: dict[str, GameDeadline] = {}
 
+        story_parent = ""
+        story_number = ""
         for sec_idx, sec in enumerate(sections):
             matches = list(cls.DATETIME_PATTERN.finditer(sec))
-            if not matches:
-                continue
-
             lines = [line.strip() for line in sec.splitlines() if line.strip()]
             first_line = lines[0] if lines else title
             clean_subname = re.sub(r"^[0-9]+(?:\.[0-9]+)*\s*[\.:、\s]*", "", first_line).strip()
@@ -162,6 +168,20 @@ class DeadlineParser:
                     event_name = clean_subname
                 else:
                     event_name = f"{title} ({sec_idx + 1})"
+
+            # 无日期的父标题也必须保留；阶段名称只能继承同一编号层级的支线活动。
+            heading_number = re.match(r"^(\d+(?:\.\d+)*)", first_line)
+            number = heading_number.group(1) if heading_number else ""
+            from ..calendar.content_quality import classify_explicit_title
+            explicit = classify_explicit_title(clean_subname)
+            if explicit and explicit[0] == "story_event":
+                story_parent, story_number = clean_subname, number
+            elif number and story_number and not number.startswith(story_number + "."):
+                story_parent, story_number = "", ""
+            if story_parent and re.match(r"^(?:story\s*[12]|hard(?:\s+mode)?|困难|困難)(?:\b|\s|[:：])", clean_subname, re.I):
+                event_name = f"{story_parent} · {clean_subname}"
+            if not matches:
+                continue
 
             sec_lower = (first_line + " " + sec).lower()
             inferred_cat = category
@@ -188,6 +208,7 @@ class DeadlineParser:
                         digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
                         # 新补出的区间用独立稳定 ID，避免与既有按序编号的事件冲突。
                         item.event_id = f"{content_id or 'anonymous'}_range_{digest}"
+                        item.description = sec
                         recovered[item.event_id] = item
                 continue
 
@@ -236,6 +257,7 @@ class DeadlineParser:
                             start_precision="DATE_ONLY" if date_only_start else "EXACT",
                             end_at=end_dt,
                             source_content_id=content_id,
+                            description=sec,
                         )
                     )
                 except (ValueError, OverflowError):
@@ -284,6 +306,7 @@ class DeadlineParser:
                             start_at=None,
                             end_at=end_dt,
                             source_content_id=content_id,
+                            description=sec,
                         )
                     )
                 except (ValueError, OverflowError):

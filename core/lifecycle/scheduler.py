@@ -28,6 +28,7 @@ class RuntimeScheduler:
         sync_announcements: Callable[[], Awaitable[Any]],
         sync_calendar: Callable[[], Awaitable[Any]],
         dispatch_announcements: Callable[[], Awaitable[Any]],
+        dispatch_calendar: Callable[[], Awaitable[Any]] | None = None,
         clock: Callable[[], datetime] | None = None,
         unix_time: Callable[[], float] = time.time,
         sleep: Callable[[float], Awaitable[Any]] = asyncio.sleep,
@@ -43,6 +44,8 @@ class RuntimeScheduler:
         self._sync_announcements = sync_announcements
         self._sync_calendar = sync_calendar
         self._dispatch_announcements = dispatch_announcements
+        self._dispatch_calendar = dispatch_calendar
+        self._calendar_push_task = None
         self._clock = clock or (
             lambda: datetime.now(timezone(timedelta(hours=8)))
         )
@@ -94,6 +97,10 @@ class RuntimeScheduler:
         if current_epoch - self._last_calendar_sync > self._calendar_interval:
             self._last_calendar_sync = current_epoch
             self._coordinator.create_task(self._sync_calendar())
+        if self._dispatch_calendar is not None:
+            task = self._calendar_push_task
+            if task is None or task.done():
+                self._calendar_push_task = self._coordinator.create_task(self._dispatch_calendar())
         if self._config.get("enable_announcement_push", False):
             task = self._announcement_push_task
             if task is None or task.done():

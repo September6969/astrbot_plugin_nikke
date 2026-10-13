@@ -335,7 +335,11 @@ class CalendarMergePolicy:
                     matches.append((idx, identity, canonical_match))
                 elif identity.decision == IdentityDecision.AMBIGUOUS:
                     ambiguous_seen = True
-            if len(matches) == 1 and not ambiguous_seen:
+            # 唯一的完整同名边界匹配，不应被其他仅时间接近的弱候选阻断。
+            exact_boundary_match = len(matches) == 1 and (
+                "official_gamekee_date_boundary_reconciled" in matches[0][1].reasons
+            )
+            if len(matches) == 1 and (not ambiguous_seen or exact_boundary_match):
                 matched_idx, identity, canonical_match = matches[0]
                 service.quality_diagnostics["identity_matches"] += 1
                 if canonical_match is not None:

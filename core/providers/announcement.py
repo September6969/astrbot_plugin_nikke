@@ -47,6 +47,8 @@ def create_announcement_resources(
         fetch_client=FetchClient(),
         visual_cache=CalendarVisualCache(data_dir / "calendar"),
     )
+    from ...features.calendar.subscriptions import CalendarSubscriptions
+    calendar.application.subscriptions = CalendarSubscriptions(store, calendar)
     calendar_application = calendar.application
     application = AnnouncementApplication(
         announcements=service,

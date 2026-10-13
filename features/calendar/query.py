@@ -4,14 +4,18 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from dataclasses import replace
 from typing import Any
 
 from .models import CalendarActivity, _aware_utc
-from .content_quality import sort_operations_display_events
+from .content_quality import sort_operations_display_events, include_calendar_event, calendar_display_title
 from .canonical_models import CanonicalEvent, QueryContext, SourceHealth, compute_health_badge
 from .time_rules import CalendarTimeRules
 
 CAT_LABELS = {
+    "login": "限时签到",
+    "free_reward": "免费获取",
+    "story_event": "支线活动",
     "coop": "协同",
     "union_raid": "联盟突袭",
     "solo_raid": "单人突袭",
@@ -66,7 +70,8 @@ class CalendarScheduleQueries:
         return QueryContext(
             now=current,
             snapshot_version=service._snapshot_version,
-            events=tuple(service._events.values()),
+            events=tuple(replace(event, title=calendar_display_title(event.title))
+                         for event in service._events.values() if include_calendar_event(event)),
             source_health={name: SourceHealth.from_dict(health.to_dict()) for name, health in service._source_health.items()},
             freshness=service.freshness,
             coverage=service.coverage,

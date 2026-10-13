@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from astrbot.api.event import MessageChain
-from astrbot.api.message_components import Plain
+from astrbot.api.message_components import Plain, At
 
 from ..._version import PLUGIN_VERSION
 from ...application.commands.account import RuntimeHealthDetails
@@ -62,6 +62,7 @@ class AstrBotRuntimeAdapter:
             sync_announcements=self._sync_announcements,
             sync_calendar=self._sync_calendar,
             dispatch_announcements=self._dispatch_announcements,
+            dispatch_calendar=self._dispatch_calendar,
         )
 
     @property
@@ -228,6 +229,21 @@ class AstrBotRuntimeAdapter:
             return True
 
         await self._services.announcement_application.dispatch_pushes(sender)
+
+    async def _dispatch_calendar(self) -> None:
+        """只向显式订阅的本人发送截止提醒，不使用全体艾特。"""
+        if self.closing:
+            return
+        application = getattr(self._services, "calendar_application", None)
+        subscriptions = getattr(application, "subscriptions", None)
+        if subscriptions is None:
+            return
+        async def sender(target, actor, private, text):
+            parts = [] if private else [At(qq=actor)]
+            parts.append(Plain(text))
+            result = await asyncio.wait_for(self._context.send_message(target, MessageChain(parts)), timeout=10)
+            return False if result is False else True
+        await subscriptions.dispatch_due(sender)
 
     def _pack_extension(self) -> None:
         """构建本地绑定扩展包，保留原有宿主权限策略。"""
