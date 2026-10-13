@@ -256,3 +256,26 @@ async def test_zero_rewards_and_partial_success_are_visible():
     partial = await runner.run_community_for_account(ACCOUNT, "2026-10-13")
     assert partial.items[1]["status"] == "success"
     assert partial.items[2]["status"] == "unknown_after_action"
+
+
+@pytest.mark.asyncio
+async def test_status_keeps_saved_result_when_source_is_unavailable():
+    store, client, runner = setup()
+    await runner.run_community_for_account(ACCOUNT, "2026-10-13")
+    client.get_daily_signin.side_effect = TimeoutError()
+    client.get_community_rewards.side_effect = TimeoutError()
+    handler = DailyCommandHandler(account_reader=store, store=store, runner=runner, client=client,
+        config={}, render_summary=lambda rows: "x", send_summary=AsyncMock())
+    result = await handler.handle(CommandContext(actor_id="123", parameters={"scope": "community", "action": "状态"}))
+    assert "状态未知" in result.messages[0].text
+    assert "领取成功" in result.messages[0].text
+    client.claim_community_reward.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_notice_failure_does_not_discard_automatic_results():
+    store, client, runner = setup()
+    runner.on_automatic_result = AsyncMock(side_effect=RuntimeError("storage unavailable"))
+    results = await runner.run_all_daily("2026-10-13", automatic=True)
+    assert len(results) == 1
+    assert store.settings["daily_results:2026-10-13:automatic"]

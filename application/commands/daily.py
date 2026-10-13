@@ -157,26 +157,38 @@ class DailyCommandHandler:
     async def _community_status(self, actor_id: str) -> CommandResult:
         try:
             account = self._account(actor_id)
-            if not account:
-                return self._text("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
-            status = await self._client.get_daily_signin(account)
-            lines = ["社区日常（北京时间08:00刷新）", "签到：" + (
-                "已签到" if status["completed"] else "待签到" if status["found"] else "未找到任务")]
-            rewards = await self._client.get_community_rewards(account)
-            labels = {"pending": "尚未达成", "claimable": "可领取", "claimed": "已领取", "unknown": "状态未知"}
-            lines.extend(f"{r['name']}：{labels[r['state']]}" for r in rewards)
-            if not rewards:
-                lines.append("免费任务奖励：本次未返回记录")
-            identity = hashlib.sha256(DailyRunner.daily_identity(account).encode()).hexdigest()
-            previous = self._store.get_setting(f"community_daily:last:{identity}", {})
-            if isinstance(previous, dict) and previous.get("detail"):
-                lines.append("最近执行（UTC日期 " + str(previous.get("day", "未知")) + "）：\n" + previous["detail"])
-            return self._text("\n".join(lines))
-        except (CookieExpired, CredentialExpiredError):
-            self._store.mark_cookie_invalid(actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except Exception:
-            return self._text("社区日常状态暂不可用，未提交任何写操作。")
+            return self._text("账号状态暂不可用，请检查绑定状态。")
+        if not account:
+            return self._text("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
+        lines = ["社区日常（北京时间08:00刷新）"]
+        expired = False
+        try:
+            status = await self._client.get_daily_signin(account)
+            lines.append("签到：" + ("已签到" if status["completed"] else "待签到" if status["found"] else "未找到任务"))
+        except (CookieExpired, CredentialExpiredError):
+            expired = True
+            self._store.mark_cookie_invalid(actor_id)
+            lines.append("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except Exception:
+            lines.append("签到：查询暂不可用，状态未知")
+        if not expired:
+            try:
+                rewards = await self._client.get_community_rewards(account)
+                labels = {"pending": "尚未达成", "claimable": "可领取", "claimed": "已领取", "unknown": "状态未知"}
+                lines.extend(f"{r['name']}：{labels[r['state']]}" for r in rewards)
+                if not rewards:
+                    lines.append("免费任务奖励：本次未返回记录")
+            except (CookieExpired, CredentialExpiredError):
+                self._store.mark_cookie_invalid(actor_id)
+                lines.append("奖励：登录状态已失效，请重新绑定")
+            except Exception:
+                lines.append("免费任务奖励：查询暂不可用，状态未知")
+        identity = hashlib.sha256(DailyRunner.daily_identity(account).encode()).hexdigest()
+        previous = self._store.get_setting(f"community_daily:last:{identity}", {})
+        if isinstance(previous, dict) and previous.get("detail"):
+            lines.append("最近执行（UTC日期 " + str(previous.get("day", "未知")) + "）：\n" + previous["detail"])
+        return self._text("\n".join(lines))
 
     async def _notify_failure(self, account, day, result):
         if result.status not in {DailyTaskStatus.FAILED, DailyTaskStatus.RATE_LIMITED,

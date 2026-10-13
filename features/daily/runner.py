@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import random
+import logging
 from datetime import datetime, timezone, timedelta
 from collections.abc import Mapping
 from typing import Any
@@ -346,7 +347,12 @@ class DailyRunner(CommunityDailyMixin):
                 except Exception as exc:
                     result = self.daily_error_result(str(account.get("nickname") or account["qq_id"]), "日常", exc)
                 if automatic and self.on_automatic_result is not None:
-                    await self.on_automatic_result(account, run_day, result)
+                    try:
+                        await self.on_automatic_result(account, run_day, result)
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception as exc:
+                        logging.getLogger(__name__).warning("日常异常通知未完成：%s", type(exc).__name__)
                 return result
 
         results = await asyncio.gather(*(run(account) for account in accounts))
