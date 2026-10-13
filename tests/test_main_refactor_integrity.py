@@ -171,7 +171,7 @@ class MainRefactorIntegrityTests(unittest.TestCase):
 
         key = DailyRunner.daily_run_key("2026-09-16", account, "daily")
         digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
-        self.assertEqual(key, f"2026-09-16:game:{digest}:daily")
+        self.assertEqual(key, f"community-utc:2026-09-16:game:{digest}:daily")
 
     def test_daily_runner_error_mapping(self):
         class RateLimitExc(Exception):
