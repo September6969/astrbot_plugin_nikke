@@ -20,7 +20,8 @@ class StageImportTests(TestCase):
             build_mapping(rows + [dict(rows[0], id=22)])
 
     def test_bundled_snapshot_covers_multiple_chapters(self):
-        path = Path(__file__).resolve().parents[1] / "assets/campaign_stages.json"
+        cand = Path(__file__).resolve().parents[1] / "assets" / "data" / "campaign_stages.json"
+        path = cand if cand.is_file() else (Path(__file__).resolve().parents[1] / "assets/campaign_stages.json")
         mapping = json.loads(path.read_text(encoding="utf-8"))
         resolver = CampaignStageResolver(mapping)
         self.assertEqual(resolver.resolve_query("46-14A-1").stage_id, 6046015)

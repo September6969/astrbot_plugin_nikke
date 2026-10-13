@@ -29,7 +29,10 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         self.root = Path(__file__).resolve().parents[1]
 
     def _json(self, relative: str) -> dict:
-        return json.loads((self.root / relative).read_text(encoding="utf-8"))
+        p = self.root / relative
+        if not p.is_file() and (p.parent / "data" / p.name).is_file():
+            p = p.parent / "data" / p.name
+        return json.loads(p.read_text(encoding="utf-8"))
 
     def test_character_master_keeps_c018_identity(self) -> None:
         rows = self._json("assets/data/character_master.json")["characters"]

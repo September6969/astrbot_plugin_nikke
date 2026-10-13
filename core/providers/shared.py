@@ -38,9 +38,12 @@ def create_shared_resources(
     """只创建一次存储、网关、共享绘制资源和运行时协调器。"""
     extension_zip = data_dir / "nikke-bind-extension.zip"
     store = create_nikke_store(data_dir)
+    runtime_coordinator = RuntimeCoordinator()
     client = BlaBlaClient(
         int(config.get("request_timeout", 20)),
         lambda message: logger.info(f"[NIKKE诊断] {message}"),
+        task_factory=runtime_coordinator.create_task,
+        account_reader=store,
     )
     renderer = CardRenderer(data_dir / "cards", plugin_dir / "fonts")
     spine_budget = config.get("spine_budget_seconds", 20.0)
@@ -57,7 +60,6 @@ def create_shared_resources(
         spine_manifest_path=data_dir / "spine-manifest.json",
         spine_rendered_dir=data_dir / "spine-rendered",
     )
-    runtime_coordinator = RuntimeCoordinator()
     return SharedResources(
         extension_zip=extension_zip,
         store=store,

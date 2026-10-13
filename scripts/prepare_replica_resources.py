@@ -20,8 +20,8 @@ from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 def main():
     cache = ROOT / "output/research/roledata"
-    cache.mkdir(parents=True, exist_ok=True)
-    characters = json.loads((ROOT / "assets/character_master.json").read_text(encoding="utf-8"))["characters"]
+    master_path = (ROOT / "assets/data/character_master.json") if (ROOT / "assets/data/character_master.json").is_file() else (ROOT / "assets/character_master.json")
+    characters = json.loads(master_path.read_text(encoding="utf-8"))["characters"]
     icons = ROOT / "assets/skills"
     icons.mkdir(exist_ok=True)
     def fetch(character):
@@ -69,7 +69,7 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         icon_rows = dict(pool.map(fetch_icon, names))
     payload = {"schema": 1, "records": rows, "icons": icon_rows}
-    (ROOT / "assets/character_weapon_bases.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    (ROOT / "assets/data/character_weapon_bases.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({"characters": len(rows), "failed": [key for key, value in rows.items() if "error" in value],
                       "icons": len(icon_rows), "icons_failed": [key for key, value in icon_rows.items() if "error" in value]}))
 

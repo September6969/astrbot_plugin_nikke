@@ -138,7 +138,8 @@ def test_member_costume_and_boss(assets, tmp_path):
 def test_character_verified_art(assets, tmp_path, name):
     case = get_cases("character", tmp_path)[name]
     images = assets.resolve_character_assets(case)
-    manifest = json.loads((ROOT / "assets/spine_manifest.json").read_text(encoding="utf-8"))["characters"][name]
+    manifest_path = (ROOT / "assets/data/spine_manifest.json") if (ROOT / "assets/data/spine_manifest.json").is_file() else (ROOT / "assets/spine_manifest.json")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))["characters"][name]
     assert images.portrait.size == (manifest["width"], manifest["height"])
     payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(case, images)
     assert payload["character_art_data_uri"].startswith("data:image/png;base64,")

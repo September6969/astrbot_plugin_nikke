@@ -190,9 +190,8 @@ def test_undeclared_png_audit_is_deterministic_exhaustive_and_manifest_fail_clos
     assert records["c191"]["classification"] == "INVALID_ASSET"
     assert records["c191"]["source_provenance"]["state"] == "generation_source_mismatch"
 
-    manifest = json.loads((ROOT / "assets/spine_manifest.json").read_text(encoding="utf-8"))
-    mirror = json.loads((ROOT / "assets/data/spine_manifest.json").read_text(encoding="utf-8"))
-    assert manifest == mirror
+    manifest_path = ROOT / "assets/data/spine_manifest.json" if (ROOT / "assets/data/spine_manifest.json").is_file() else ROOT / "assets/spine_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert list(manifest["characters"]) == sorted(manifest["characters"])
     candidate_ids = baseline_sets["VERIFIED_MANIFEST_CANDIDATE"]
     assert candidate_ids <= set(manifest["characters"])

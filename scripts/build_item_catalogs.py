@@ -109,9 +109,9 @@ def build_favorite_item_catalog(fav_map_path: Path | str, output_path: Path | st
 
 if __name__ == "__main__":
     base_dir = Path(__file__).resolve().parent.parent
-    cubes_in = base_dir / "assets" / "cubes.json"
+    cubes_in = base_dir / "assets" / "data" / "cubes.json" if (base_dir / "assets" / "data" / "cubes.json").is_file() else base_dir / "assets" / "cubes.json"
     cubes_out = base_dir / "assets" / "mappings" / "cube_icons.json"
-    fav_in = base_dir / "assets" / "favorite_items.json"
+    fav_in = base_dir / "assets" / "data" / "favorite_items.json" if (base_dir / "assets" / "data" / "favorite_items.json").is_file() else base_dir / "assets" / "favorite_items.json"
     fav_out = base_dir / "assets" / "mappings" / "favorite_item_icons.json"
 
     build_cube_catalog(cubes_in, cubes_out)

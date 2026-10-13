@@ -259,6 +259,8 @@ class BindingWebService:
                 user_agent,
                 success_status=BIND_SESSION_SUCCESS,
             )
+            if qq_id and hasattr(self.client, "invalidate_cache"):
+                self.client.invalidate_cache(qq_id)
             return web.json_response({
                 "ok": True,
                 "code": "BOUND",

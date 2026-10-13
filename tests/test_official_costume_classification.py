@@ -9,7 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _load(relative: str) -> dict:
-    return json.loads((ROOT / relative).read_text(encoding="utf-8-sig"))
+    target = ROOT / relative
+    if not target.is_file() and relative.startswith("assets/") and not relative.startswith("assets/data/"):
+        fallback = ROOT / "assets" / "data" / target.name
+        if fallback.is_file():
+            target = fallback
+    return json.loads(target.read_text(encoding="utf-8-sig"))
 
 
 def test_all_official_costumes_have_final_mapping() -> None:

@@ -28,9 +28,9 @@ class SpineRenderManifestTests(unittest.TestCase):
         self.repo_root = Path(__file__).resolve().parents[1]
         self.assets_dir = self.repo_root / "assets"
         self.rendered_dir = self.assets_dir / "spine-rendered"
-        self.manifest_path = self.assets_dir / "spine_manifest.json"
-        self.master_path = self.assets_dir / "character_master.json"
-        self.costumes_path = self.assets_dir / "costumes.json"
+        self.manifest_path = (self.assets_dir / "data" / "spine_manifest.json") if (self.assets_dir / "data" / "spine_manifest.json").is_file() else (self.assets_dir / "spine_manifest.json")
+        self.master_path = (self.assets_dir / "data" / "character_master.json") if (self.assets_dir / "data" / "character_master.json").is_file() else (self.assets_dir / "character_master.json")
+        self.costumes_path = (self.assets_dir / "data" / "costumes.json") if (self.assets_dir / "data" / "costumes.json").is_file() else (self.assets_dir / "costumes.json")
 
     def test_manifest_generation_is_deterministic(self):
         """测试 manifest 生成结果在多次执行间字节完全一致。"""

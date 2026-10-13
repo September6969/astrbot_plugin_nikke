@@ -10,7 +10,9 @@ from astrbot_plugin_nikke.features.character.master_resolver import CharacterMas
 class CharacterMasterTests(unittest.TestCase):
     def setUp(self):
         self.resolver = CharacterMasterResolver()
-        self.master_file = Path(__file__).resolve().parents[1] / "assets" / "character_master.json"
+        root = Path(__file__).resolve().parents[1]
+        cand = root / "assets" / "data" / "character_master.json"
+        self.master_file = cand if cand.is_file() else root / "assets" / "character_master.json"
 
     def test_master_json_integrity(self):
         self.assertTrue(self.master_file.is_file())

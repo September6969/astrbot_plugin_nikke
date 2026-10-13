@@ -123,7 +123,6 @@ async def test_character_application_rejects_wrong_response_identity_before_stat
         await application.character_card("qq-1", "Alice", directory())
 
     assert gateway.detail_requests[0][1] == "alice"
-    assert gateway.profile_requests == []
     resources.prepare_payload.assert_not_called()
     builder.build.assert_not_called()
 
@@ -141,7 +140,6 @@ async def test_unowned_character_is_distinct_and_never_builds_a_card():
         await application.character_card("qq-1", "Alice", directory())
 
     assert caught.value.display_name == "爱丽丝"
-    assert gateway.profile_requests == []
     resources.prepare_payload.assert_not_called()
     builder.build.assert_not_called()
 

@@ -28,5 +28,9 @@ class CalendarService(ScheduleService):
         super().__init__(*args, **kwargs)
         self.application = CalendarApplication(self, task_factory=self._task_factory)
 
+    async def aclose(self) -> None:
+        if hasattr(self, "fetch_client") and hasattr(self.fetch_client, "aclose"):
+            await self.fetch_client.aclose()
+
 
 __all__ = ["CalendarService", "CAT_LABELS", "CST"]

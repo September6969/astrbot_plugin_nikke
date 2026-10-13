@@ -198,8 +198,16 @@ def _trusted_anchor_y_ratio(anchor: Any, metrics: dict[str, Any]) -> float | Non
 def build_verified_baseline(repo_root: Path) -> dict[str, Any]:
     """只用当前 manifest 中逐项通过 hash/尺寸/解码的 PNG 建视觉分布。"""
     root = repo_root.resolve(strict=True)
-    manifest_path = root / "assets" / "spine_manifest.json"
-    anchors_path = root / "assets" / "data" / "face_anchors.json"
+    manifest_path = (
+        root / "assets" / "data" / "spine_manifest.json"
+        if (root / "assets" / "data" / "spine_manifest.json").is_file()
+        else root / "assets" / "spine_manifest.json"
+    )
+    anchors_path = (
+        root / "assets" / "data" / "face_anchors.json"
+        if (root / "assets" / "data" / "face_anchors.json").is_file()
+        else root / "assets" / "face_anchors.json"
+    )
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         anchors = json.loads(anchors_path.read_text(encoding="utf-8"))

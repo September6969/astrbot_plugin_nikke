@@ -43,7 +43,8 @@ class CostumeRegistry:
             asset_dir = Path(asset_dir).resolve()
 
         self.asset_dir = asset_dir
-        self.costumes_path = self.asset_dir / "costumes.json"
+        cand = self.asset_dir / "data" / "costumes.json"
+        self.costumes_path = cand if cand.is_file() else (self.asset_dir / "costumes.json")
         self._entries: list[VerifiedCostume] = []
         self._by_id: dict[str, VerifiedCostume] = {}
         self._load()

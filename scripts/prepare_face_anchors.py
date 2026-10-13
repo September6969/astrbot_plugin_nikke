@@ -73,7 +73,7 @@ def main():
     parser.add_argument("--runtime-40", type=Path, required=True)
     parser.add_argument("--runtime-41", type=Path, required=True)
     parser.add_argument("--download-missing", action="store_true")
-    parser.add_argument("--output", type=Path, default=ROOT / "assets/face_anchors.json")
+    parser.add_argument("--output", type=Path, default=ROOT / "assets/data/face_anchors.json")
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))["characters"]
     args.bundle_dir.mkdir(parents=True, exist_ok=True)

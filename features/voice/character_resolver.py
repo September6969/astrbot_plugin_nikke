@@ -29,8 +29,8 @@ class VoiceCharacterResolver:
             asset_dir = Path(asset_dir).resolve()
 
         self.asset_dir = asset_dir
-        catalog_path = self.asset_dir / "character_catalog.json"
-        alias_path = self.asset_dir / "character_aliases.json"
+        catalog_path = (self.asset_dir / "data" / "character_catalog.json") if (self.asset_dir / "data" / "character_catalog.json").is_file() else (self.asset_dir / "character_catalog.json")
+        alias_path = (self.asset_dir / "data" / "character_aliases.json") if (self.asset_dir / "data" / "character_aliases.json").is_file() else (self.asset_dir / "character_aliases.json")
 
         self.identity_resolver = CharacterDirectoryResolver(alias_path, user_aliases=user_aliases)
         self.key_to_resource_id: dict[str, int] = {}

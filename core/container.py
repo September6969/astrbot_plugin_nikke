@@ -129,6 +129,7 @@ def create_container(
         gateway=client,
         clock=clock,
         config=config or {},
+        task_factory=shared.runtime_coordinator.create_task,
     )
     campaign = create_campaign_resources(
         plugin_dir,

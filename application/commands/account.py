@@ -38,12 +38,14 @@ class AccountCommandHandler:
         allow_group_bind: bool,
         runtime_health: Callable[[], RuntimeHealthDetails],
         render_manual_summary: Callable[[], Awaitable[str]],
+        on_unbind: Callable[[str], None] | None = None,
     ) -> None:
         self._application = application
         self._public_base_url = public_base_url
         self._allow_group_bind = allow_group_bind
         self._runtime_health = runtime_health
         self._render_manual_summary = render_manual_summary
+        self._on_unbind = on_unbind
 
     async def handle(self, context: CommandContext) -> CommandResult:
         """按显式操作分派账号或管理员命令。"""
@@ -156,6 +158,8 @@ class AccountCommandHandler:
 
     def _unbind(self, context: CommandContext) -> CommandResult:
         removed = self._application.unbind(context.actor_id)
+        if self._on_unbind is not None:
+            self._on_unbind(context.actor_id)
         return self._text("已解除绑定。" if removed else "当前QQ尚未绑定。")
 
     def _status(self, context: CommandContext) -> CommandResult:

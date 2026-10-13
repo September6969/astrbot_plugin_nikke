@@ -39,6 +39,7 @@ def create_character_resources(
     clock: Callable[[], datetime],
     config: dict[str, Any],
     plugin_version: str = PLUGIN_VERSION,
+    task_factory: Callable[..., Any] | None = None,
 ) -> CharacterResources:
     """创建 Character application 与绘制资源；不持有共享 AssetManager。"""
     stat_resources = CharacterStatResourceLoader(
@@ -63,5 +64,6 @@ def create_character_resources(
         card_builder=builder,
         clock=clock,
         plugin_version=plugin_version,
+        task_factory=task_factory,
     )
     return CharacterResources(application, stat_resources, builder, identity)

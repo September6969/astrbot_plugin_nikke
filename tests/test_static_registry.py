@@ -11,6 +11,12 @@ from astrbot_plugin_nikke.features.character.registries.static import StaticData
 class StaticDataRegistryTests(unittest.TestCase):
     def setUp(self):
         self.assets = Path(__file__).resolve().parents[1] / "assets"
+        self.data_dir = (self.assets / "data") if (self.assets / "data").is_dir() else self.assets
+
+    def _copy_registry_files(self, target: Path):
+        for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
+            source_file = (self.data_dir / name) if (self.data_dir / name).is_file() else (self.assets / name)
+            shutil.copy2(source_file, target / name)
 
     def test_verified_registries_expose_exact_ids_and_metadata(self):
         registry = StaticDataRegistry(self.assets)
@@ -50,8 +56,7 @@ class StaticDataRegistryTests(unittest.TestCase):
     def test_hash_mismatch_disables_only_tampered_registry(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
-            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
-                shutil.copy2(self.assets / name, target / name)
+            self._copy_registry_files(target)
 
             content = (target / "equipment.json").read_text(encoding="utf-8")
             (target / "equipment.json").write_text(content + "\n", encoding="utf-8")
@@ -65,8 +70,7 @@ class StaticDataRegistryTests(unittest.TestCase):
     def test_duplicate_mapping_keys_disable_only_ambiguous_registry(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
-            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
-                shutil.copy2(self.assets / name, target / name)
+            self._copy_registry_files(target)
 
             # 更新 manifest hash，确保本测试验证的是重复键合同，而不是 hash 失败。
             duplicate = b'{"3100901":"icn_equipment_head_attacker_t9_3","3100901":"icn_equipment_head_attacker_t9_1"}'
@@ -84,7 +88,8 @@ class StaticDataRegistryTests(unittest.TestCase):
             self.assertEqual(registry.resolve("cube", "1000304"), "ie_10004")
 
     def test_manifest_is_json_and_declares_all_supported_maps(self):
-        manifest = json.loads((self.assets / "registry_manifest.json").read_text(encoding="utf-8"))
+        manifest_file = (self.data_dir / "registry_manifest.json") if (self.data_dir / "registry_manifest.json").is_file() else (self.assets / "registry_manifest.json")
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
 
         self.assertEqual(manifest["schema_version"], 1)
         self.assertEqual(
@@ -95,8 +100,7 @@ class StaticDataRegistryTests(unittest.TestCase):
     def test_costume_ids_are_explicit_and_use_asset_ids(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
-            for name in ("registry_manifest.json", "equipment.json", "cubes.json", "favorite_items.json", "costumes.json"):
-                shutil.copy2(self.assets / name, target / name)
+            self._copy_registry_files(target)
 
             content = json.dumps({"schema_version": 2, "entries": [{
                 "costume_id": "skin_01", "character_resource_id": "191", "spine_asset_id": "c191_01",
