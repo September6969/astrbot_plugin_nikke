@@ -9,7 +9,7 @@ from typing import Any
 
 from astrbot.api import logger
 from astrbot.api.event import MessageChain
-from astrbot.api.message_components import Image
+from astrbot.api.message_components import Image, Plain
 
 from ...application.commands.character import CharacterRenderFailure
 from ...ui.payloads.calendar import CalendarT2IPayloadBuilder
@@ -114,6 +114,10 @@ class AstrBotCommandPresentation:
 
     async def render_raid_ranking(self, page: str, data: Any) -> str | None:
         return await self.try_t2i(page, data)
+
+    async def send_daily_notice(self, target: str, text: str) -> Any:
+        """向业务层确认过的本人私聊会话发送异常摘要。"""
+        return await self._context.send_message(target, MessageChain([Plain(text)]))
 
     async def send_summary_image(self, target: str, path: str) -> None:
         """在 AstrBot 宿主中发送已生成的汇总图片。"""

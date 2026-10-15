@@ -55,6 +55,7 @@ class RuntimeScheduler:
         self._announcement_interval = announcement_interval
         self._calendar_interval = calendar_interval
         self._last_daily = ""
+        self._daily_task = None
         self._last_summary = ""
         self._last_announcement_sync = 0.0
         self._last_calendar_sync = 0.0
@@ -78,10 +79,14 @@ class RuntimeScheduler:
             default_hour=self._config["summary_hour"],
             default_minute=self._config["summary_minute"],
         )
-        if (now.hour, now.minute) == (daily_hour, daily_minute) and self._last_daily != today:
-            self._last_daily = today
-            self._coordinator.create_task(
-                self._run_daily(today, stagger=True, automatic=True)
+        # 社区按 UTC 零点刷新；本地时刻仅决定何时运行，错过时刻允许当天补跑。
+        community_day = now.astimezone(timezone.utc).strftime("%Y-%m-%d")
+        if ((now.hour, now.minute) >= (daily_hour, daily_minute)
+            and self._last_daily != community_day
+            and (self._daily_task is None or self._daily_task.done())):
+            self._last_daily = community_day
+            self._daily_task = self._coordinator.create_task(
+                self._run_daily(community_day, stagger=True, automatic=True)
             )
         if (
             (now.hour, now.minute) == (summary_hour, summary_minute)

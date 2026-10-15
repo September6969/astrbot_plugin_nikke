@@ -25,6 +25,9 @@ class DailyCommandStore(Protocol):
     def get_setting(self, key: str, default: Any = None) -> Any:
         """读取 Daily 命令拥有的摘要设置或结果。"""
 
+    def set_setting(self, key: str, value: Any) -> None:
+        """保存日常范围与已确认的私聊路由。"""
+
     def mark_cookie_invalid(self, qq_id: str) -> None:
         """标记绑定凭据失效。"""
 
@@ -81,3 +84,9 @@ class DailyGateway(Protocol):
 
     async def perform_daily_signin(self, account: Mapping[str, Any]) -> str:
         """执行一次受状态保护的签到写操作。"""
+
+    async def get_community_rewards(self, account: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """读取经确认的免费奖励状态。"""
+
+    async def claim_community_reward(self, account: Mapping[str, Any], reward_id: str) -> None:
+        """提交单个奖励，不自动重试。"""

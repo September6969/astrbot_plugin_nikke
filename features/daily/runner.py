@@ -6,17 +6,20 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import random
+import logging
+from datetime import datetime, timezone, timedelta
 from collections.abc import Mapping
 from typing import Any
 
 from ...core.privacy import safe_exception_message
 from ..account.errors import CredentialExpiredError
 from .errors import UnknownAfterActionError
+from .community import CommunityDailyMixin
 from .models import DailyTaskResult, DailyTaskStatus
 from .ports import DailyGateway, DailyStore
 
 
-class DailyRunner:
+class DailyRunner(CommunityDailyMixin):
     """日常任务执行器，管理账号签到、并发控制、幂等与重试锁。"""
 
     def __init__(
@@ -28,6 +31,8 @@ class DailyRunner:
         self._client = client
         self._store = store
         self.config = config or {}
+        self._account_locks = {}
+        self.on_automatic_result = None
 
     @property
     def client(self) -> DailyGateway:
@@ -78,7 +83,8 @@ class DailyRunner:
     def daily_run_key(cls, day: str, account: Mapping[str, Any], action: str) -> str:
         identity = cls.daily_identity(account)
         digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
-        return f"{day}:game:{digest}:{action}"
+        prefix = f"community-utc:{day}" if action in {"daily", "signin"} else day
+        return f"{prefix}:game:{digest}:{action}"
 
     def legacy_daily_guard(self, day: str, qq_id: str, action: str, account_name: str) -> DailyTaskResult | None:
         """发现旧 QQ 作用域记录时显式阻断，不把它静默当成新账号结果。"""
@@ -95,7 +101,11 @@ class DailyRunner:
             "发现旧版 QQ 作用域记录，未据此判定今日结果，也未执行写操作；请先完成账号作用域迁移",
         )
 
-    async def run_daily_for_account(
+    async def run_daily_for_account(self, account, day):
+        async with self._account_lock(account):
+            return await self._run_signin(account, day)
+
+    async def _run_signin(
         self, account: Mapping[str, Any], day: str
     ) -> DailyTaskResult:
         qq_id = str(account["qq_id"])
@@ -106,6 +116,26 @@ class DailyRunner:
                 DailyTaskStatus.UNAVAILABLE,
                 "账号缺少稳定游戏 UID、区服或平台身份，未执行日常写操作",
             )
+        # 新周期使用独立命名空间。旧北京时间记录只阻止未知写入，成功仍以来源状态复核。
+        digest = hashlib.sha256(self.daily_identity(account).encode()).hexdigest()[:24]
+        try:
+            next_day = (datetime.fromisoformat(day) + timedelta(days=1)).strftime("%Y-%m-%d")
+        except ValueError:
+            next_day = day
+        old_keys = [f"{date}:game:{digest}:{action}" for date in {day, next_day} for action in ("daily", "signin")]
+        old_keys.extend(f"{next_day}:{qq_id}:{action}" for action in ("daily", "signin"))
+        if any((self.store.get_run(key) or {}).get("status") in {
+            "running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"
+        } for key in old_keys):
+            try:
+                return await self.read_only_daily_recovery(account, account_name)
+            except CredentialExpiredError:
+                self.store.mark_cookie_invalid(qq_id)
+                return DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "登录失效，请重新绑定")
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                return DailyTaskResult(account_name, DailyTaskStatus.UNKNOWN_AFTER_ACTION, "旧周期签到待确认，未重发")
         legacy_daily = self.legacy_daily_guard(day, qq_id, "daily", account_name)
         if legacy_daily:
             return legacy_daily
@@ -287,7 +317,7 @@ class DailyRunner:
         automatic: bool = False,
     ) -> list[DailyTaskResult]:
         accounts = self.store.list_accounts(
-            push_only=True,
+            push_only=not automatic,
             with_cookie=True,
             auto_daily_only=automatic,
         )
@@ -297,7 +327,33 @@ class DailyRunner:
             if stagger:
                 await asyncio.sleep(random.uniform(0, 15 * 60))
             async with semaphore:
-                return await self.run_daily_for_account(account, day)
+                # 随机错峰后重新检查绑定和自动开关，避免已退出账号继续执行。
+                reader = getattr(self.store, "get_account", None)
+                if automatic and callable(reader):
+                    current = reader(str(account["qq_id"]))
+                    if not current or not current.get("auto_daily_enabled") or self.daily_identity(current) != self.daily_identity(account):
+                        return DailyTaskResult(str(account.get("nickname") or account["qq_id"]), DailyTaskStatus.PENDING, "自动日常已关闭或绑定已变化，未执行")
+                    account = current
+                run_day = datetime.now(timezone.utc).strftime("%Y-%m-%d") if stagger else day
+                identity = self.daily_identity(account)
+                preference = self.store.get_setting(f"daily_scope_v2:{account['qq_id']}", "")
+                try:
+                    if automatic and identity and preference == identity:
+                        result = await self.run_community_for_account(account, run_day)
+                    else:
+                        result = await self.run_daily_for_account(account, run_day)
+                except asyncio.CancelledError:
+                    raise
+                except Exception as exc:
+                    result = self.daily_error_result(str(account.get("nickname") or account["qq_id"]), "日常", exc)
+                if automatic and self.on_automatic_result is not None:
+                    try:
+                        await self.on_automatic_result(account, run_day, result)
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception as exc:
+                        logging.getLogger(__name__).warning("日常异常通知未完成：%s", type(exc).__name__)
+                return result
 
         results = await asyncio.gather(*(run(account) for account in accounts))
         # 管理员手动批次不能污染自动汇总的数据源，避免绕过账号自动签到偏好。
