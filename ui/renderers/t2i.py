@@ -4,7 +4,10 @@ import asyncio
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.character_info import CharacterInfoT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.daily_summary import DailySummaryT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.roster import RosterT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
@@ -40,6 +43,19 @@ class T2IRenderer:
         return result
 
     async def render_view(self, page, data, **kwargs):
+        if page == "character_info":
+            payload = CharacterInfoT2IPayloadBuilder(
+                self.assets, self.payload_builder.resolver
+            ).build(data)
+            return await self.render_payload(page, payload)
+        if page == "daily_summary":
+            payload = DailySummaryT2IPayloadBuilder().build(
+                data, scope=kwargs.get("scope", "日常任务执行摘要")
+            )
+            results = []
+            for page_payload in payload["pages"]:
+                results.append(await self.render_payload(page, page_payload))
+            return results
         if page == "character":
             # 只在线程中准备既有本地资产；原生 HTML 渲染仍为直接异步调用。
             assets = await asyncio.to_thread(self.payload_builder.assets.resolve_character_assets, data)
@@ -56,6 +72,12 @@ class T2IRenderer:
         }
         if page in builders:
             data = builders[page].build(data, **kwargs)
+        elif page == "roster":
+            builder = RosterT2IPayloadBuilder(
+                self.assets,
+                self.payload_builder.resolver,
+            )
+            data = await asyncio.to_thread(builder.build, data)
         elif page == "calendar_schedule":
             pages = data.get("pages") if isinstance(data, dict) else None
             if pages and isinstance(pages, list):

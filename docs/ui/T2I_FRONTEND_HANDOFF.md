@@ -2,6 +2,8 @@
 
 > 当前状态：本文保留旧阶段的接线记录。PR #103 退役了单角色 1800×1000 Pillow 卡；唯一生产角色卡现为 1600×2400 白色竖版 T2I。渲染失败只返回明确错误，不会转入 Pillow 角色卡或重复查询。
 
+> 2026-10-17 本地 P4 路由更新：生产卡片统一 T2I，失败时由命令层用同一 DTO 返回文本；旧 `ui_renderer` 不再控制路由，旧值由配置归一化为 `t2i` 并最多提示一次。生产 Pillow 卡片 renderer 正在按 P4 清理，Pillow 素材处理保留。本文下方的双路默认与 Pillow 回退叙述是历史实现记录，不代表当前路由；CI、AstrBot 原生 `html_render` 和真实消息显示尚需单独验收。
+
 ## 工作树与范围
 
 - 仓库：`E:\DevCache\nikke-t2i-phase1\astrbot_plugin_nikke`

@@ -7,7 +7,6 @@ from PIL import Image
 
 from astrbot_plugin_nikke.features.campaign.builder import CampaignHistoryBuilder
 from astrbot_plugin_nikke.features.campaign.models import ClearLineupStatus, StageClearMember, StageClearRecord
-from astrbot_plugin_nikke.ui.renderers.campaign import CampaignHistoryRenderer
 from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStage, CampaignStageResolver
 
 
@@ -449,62 +448,6 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         self.assertEqual(record.status_message, "")
 
 
-class CampaignHistoryRendererTests(unittest.TestCase):
-    def test_renderer_generates_1400px_card(self):
-        with tempfile.TemporaryDirectory() as td:
-            output_dir = Path(td) / "cards"
-            output_dir.mkdir(parents=True, exist_ok=True)
-            font_dir = Path(__file__).resolve().parents[1] / "fonts"
-
-            renderer = CampaignHistoryRenderer(output_dir, font_dir)
-
-            members = [
-                StageClearMember(tid=1, level=400, combat=100000, slot=i, name_cn=f"妮姬{i}")
-                for i in range(1, 6)
-            ]
-            record = StageClearRecord(
-                mode="NORMAL",
-                chapter=46,
-                stage_name="46-40",
-                stage_id=6046044,
-                status=ClearLineupStatus.AVAILABLE,
-                members=members,
-                commander_name="指挥官",
-                fetched_at="2026-09-05 15:00",
-                plugin_version="0.3.0",
-            )
-            path = renderer.render_campaign_history(record)
-            self.assertTrue(Path(path).is_file())
-
-            with Image.open(path) as img:
-                self.assertEqual(img.width, 1400)
-                self.assertEqual(img.height, 820)
-
-    def test_renderer_generates_empty_state_card(self):
-        with tempfile.TemporaryDirectory() as td:
-            output_dir = Path(td) / "cards"
-            output_dir.mkdir(parents=True, exist_ok=True)
-            font_dir = Path(__file__).resolve().parents[1] / "fonts"
-
-            renderer = CampaignHistoryRenderer(output_dir, font_dir)
-            record = StageClearRecord(
-                mode="HARD",
-                chapter=35,
-                stage_name="35-36",
-                stage_id=6135041,
-                status=ClearLineupStatus.UNAVAILABLE,
-                status_message="该关卡暂无可查询的历史阵容",
-                members=[],
-                commander_name="指挥官",
-                fetched_at="2026-09-05 15:00",
-                plugin_version="0.3.0",
-            )
-            path = renderer.render_campaign_history(record)
-            self.assertTrue(Path(path).is_file())
-
-            with Image.open(path) as img:
-                self.assertEqual(img.width, 1400)
-                self.assertEqual(img.height, 540)
 
 
 class CampaignClientToBuilderIntegrationTests(unittest.IsolatedAsyncioTestCase):

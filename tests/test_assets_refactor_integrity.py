@@ -8,7 +8,6 @@ from PIL import Image
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.features.character.registries.static import StaticDataRegistry
 from astrbot_plugin_nikke.features.character.replica import replica_font
-from astrbot_plugin_nikke.ui.primitives import CardRenderer
 
 
 class AssetsRefactorIntegrityTests(unittest.TestCase):
@@ -96,14 +95,6 @@ class AssetsRefactorIntegrityTests(unittest.TestCase):
             reg_isolated = StaticDataRegistry(td_path)
             self.assertTrue(reg_isolated.is_valid, f"仅 data/ 结构下 StaticDataRegistry 应当有效: {reg_isolated.errors}")
 
-    def test_card_renderer_resolves_fonts_from_both_locations(self):
-        """验证 CardRenderer 支持传入根目录 fonts 或 assets/fonts。"""
-        with tempfile.TemporaryDirectory() as td:
-            renderer_root = CardRenderer(td, self.fonts_dir)
-            self.assertTrue(Path(renderer_root.regular_path).is_file())
-
-            renderer_assets = CardRenderer(td, self.assets_dir / "fonts")
-            self.assertTrue(Path(renderer_assets.regular_path).is_file())
 
     def test_replica_font_resolution(self):
         """验证 replica_font 能正常读取 ReplicaSans.otf 并返回 data URI。"""

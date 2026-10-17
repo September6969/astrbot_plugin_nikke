@@ -12,7 +12,6 @@ import pytest
 from jinja2 import Environment
 
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
-from astrbot_plugin_nikke.application.commands.character import CharacterRenderFailure
 from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
 
 
@@ -91,15 +90,10 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
     assert '<script>' not in html and '<img src=x' not in html
     assert html.count("</style>") == 1
     plugin = make_plugin_shell()
-    plugin.config = {"ui_renderer": "t2i"}
     plugin.presentation._t2i_renderer = Mock(
         render_view=AsyncMock(side_effect=RuntimeError())
     )
-    if page == "character":
-        with pytest.raises(CharacterRenderFailure):
-            await plugin.presentation.try_t2i(page, data)
-    else:
-        assert await plugin.presentation.try_t2i(page, data) is None
+    assert await plugin.presentation.try_t2i(page, data) is None
     plugin.presentation._t2i_renderer.render_view.side_effect = asyncio.CancelledError()
     with pytest.raises(asyncio.CancelledError):
         await plugin.presentation.try_t2i(page, data)
@@ -108,7 +102,7 @@ async def test_each_page_autoescape_and_failure(page, tmp_path):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("page", ["profile", "union_overview"])
-async def test_pillow_command_fallback_retains_dto(page, tmp_path):
+async def test_text_command_fallback_retains_dto(page, tmp_path):
     from astrbot_plugin_nikke.main import NikkePlugin
     plugin = make_plugin_shell()
     plugin.config = {"ui_renderer": "t2i"}
@@ -122,8 +116,6 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
 
         plugin.services.store = Mock(get_account=Mock(return_value={"qq_id": "synthetic-qq"}))
         plugin.services.profile_application = Mock(build_dashboard=AsyncMock(return_value=data))
-        fallback = Mock(return_value="fallback.png")
-        plugin.services.profile_renderer = Mock(render_profile=fallback)
         plugin.adapters.command = AstrBotCommandAdapter()
         plugin.handlers.profile = ProfileCommandHandler(
             account_reader=plugin.services.store,
@@ -134,18 +126,16 @@ async def test_pillow_command_fallback_retains_dto(page, tmp_path):
     elif page == "union_overview":
         plugin.services.raid_application = Mock(dashboard=AsyncMock(return_value=data))
         plugin.services.store = Mock()
-        fallback = Mock(return_value="fallback.png")
-        plugin.services.raid_renderer = Mock(render_raid_overview=fallback)
         inject_raid_handler(plugin)
         command, args, request = plugin.union_raid, (), plugin.services.raid_application.dashboard
     event = Mock(image_result=lambda path: path, plain_result=lambda text: text)
     results = [result async for result in command(event, *args)]
     if page == "union_overview":
         assert "联盟突袭" in results[0]
-        fallback.assert_not_called()
     else:
-        assert results == ["fallback.png"]
-        fallback.assert_called_once_with(data)
+        assert len(results) == 1
+        assert "个人资料" in results[0]
+        assert "图片生成失败" in results[0]
     request.assert_awaited_once()
     assert plugin.presentation._t2i_renderer.render_view.call_args.args[1] is data
 
@@ -238,7 +228,7 @@ def test_profile_structure_and_unknowns(tmp_path):
     builder = ProfileT2IPayloadBuilder()
     partial = builder.build(cases["resource-partial"])
     assert len(partial["resources"]) == 8
-    assert partial["resources"][0]["value"] == "Unknown"
+    assert partial["resources"][0]["value"] == "未返回"
     assert partial["resources"][0]["scope"] == "PARTIAL"
     zero = builder.build(cases["zero-empty"])
     assert zero["resources"][0]["value"] == "0"
@@ -248,6 +238,40 @@ def test_profile_structure_and_unknowns(tmp_path):
     html = Environment(autoescape=False).from_string(T2ITemplateLoader().load("profile")).render(**builder.build(cases["full"]))
     assert "EXP 0" not in html
     assert html.index('class="today"') < html.index('模拟室') < html.index('资源')
+
+
+def test_profile_edge_fixtures_keep_unknown_zero_partial_and_iconless_values(tmp_path):
+    from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+    from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+
+    cases = get_cases("profile", tmp_path)
+    builder = ProfileT2IPayloadBuilder()
+    extra = builder.build(cases["extra-resources"])
+    assert {item["type_id"] for item in extra["extra_resources"]} == {99001, 99002}
+    assert all("未识别资源" == item["label"] for item in extra["extra_resources"])
+    assert all(item["detail"].startswith("类型 ") for item in extra["extra_resources"])
+
+    partial = builder.build(cases["partial-extra-resources"])
+    assert partial["resource_state"] == "PARTIAL"
+    assert partial["resources"][0]["value"] == "0"
+    assert all(
+        item["value"] == "未返回"
+        for item in partial["resources"][1:]
+    )
+    assert partial["extra_resources"][0]["type_id"] == 99003
+
+    large = builder.build(cases["large-values"])
+    assert {item["label"]: item["value"] for item in large["identity"]}["部队总战力"] == "987,654,321"
+    short = builder.build(cases["short-page"])
+    assert short["resource_state"] == "UNKNOWN"
+    assert all(item["value"] == "Unknown" for item in short["resources"])
+
+    no_icon = ProfileT2IPayloadBuilder().build(cases["iconless-resources"])
+    html = Environment().from_string(T2ITemplateLoader().load("profile")).render(**no_icon)
+    assert len(no_icon["resources"]) == 8
+    assert all(item["icon_data_uri"] is None for item in no_icon["resources"])
+    assert html.count('class="resource-icon-slot"') == 8
+    assert html.count("<img ") == 0
 
 
 @pytest.mark.asyncio
@@ -331,26 +355,38 @@ def test_profile_resource_silver_mileage_label(tmp_path):
 
 
 def test_calendar_operations_feed_presentation(tmp_path):
+    from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
     from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+
     cases = get_cases("calendar_schedule", tmp_path)
     normal = cases["normal"]
     assert normal["canvas"]["width"] == 1600
-    assert normal["canvas"]["height"] == 900
-    assert "pages" in normal and len(normal["pages"]) >= 1
+    assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= normal["canvas"]["height"] <= 1600
+    assert "pages" in normal and len(normal["pages"]) == 1
     assert normal["global_has_active"]
     assert len(normal["active_items"]) == 2
     assert len(normal["next_items"]) == 3
+
+    page = normal["pages"][0]
+    builder = CalendarT2IPayloadBuilder()
+    measured = builder.measure_page_content(
+        page["active_items"], page["next_items"],
+        global_has_active=True, is_first_page=True,
+    )
+    max_height = normal["layout_limits"]["effective_max_canvas_height"]
+    assert page["canvas"]["height"] == builder.compute_canvas_height(measured, max_height)
 
     active_items = normal["active_items"]
     assert any(item["is_next_ending"] for item in active_items)
     assert active_items[0]["urgency"] == "CLOSING"
 
     html = Environment(autoescape=False).from_string(T2ITemplateLoader().load("calendar_schedule")).render(**normal)
-    assert "OPERATIONS FEED" in html
-    assert "ACTIVE OPERATIONS" in html
-    assert "NEXT OPERATIONS" in html
+    assert "妮姬日程" in html
+    assert "进行中" in html
+    assert "即将开始" in html
+    assert "第 1 / 1 页" in html
     assert "1600" in html
-    assert "730" in html or "1180" in html
+    assert 'class="panel"' not in html
     assert "progress-track" not in html
     assert "progress-bar" not in html
     assert "progress_percent" not in html

@@ -357,6 +357,47 @@ def _character_card_retirement_violations(
     return violations
 
 
+def _pillow_card_renderer_retirement_violations(
+    root: Path, production_sources: dict[str, str]
+) -> list[dict[str, Any]]:
+    """阻止退役的生产 Pillow 卡片类、模块和路由依赖重新出现。"""
+    violations: list[dict[str, Any]] = []
+    retired_modules = (
+        "ui/primitives.py",
+        "ui/renderers/profile.py",
+        "ui/renderers/campaign.py",
+        "ui/renderers/raid.py",
+    )
+    retired_symbols = (
+        "CardRenderer",
+        "ProfileCardRenderer",
+        "CampaignHistoryRenderer",
+        "UnionRaidRenderer",
+    )
+    retired_imports = (
+        "ui.primitives",
+        "ui.renderers.profile",
+        "ui.renderers.campaign",
+        "ui.renderers.raid",
+    )
+    for relative in retired_modules:
+        if (root / relative).exists():
+            violations.append({"reason": "legacy-renderer-module", "path": relative})
+    for path, source in sorted(production_sources.items()):
+        for line_number, line in enumerate(source.splitlines(), 1):
+            if any(symbol in line for symbol in retired_symbols) or any(
+                module in line for module in retired_imports
+            ):
+                violations.append(
+                    {"reason": "legacy-renderer-reference", "path": path, "line": line_number}
+                )
+            if any(name in line for name in ("services.renderer", "services.profile_renderer", "services.raid_renderer", "services.campaign_renderer")):
+                violations.append(
+                    {"reason": "legacy-renderer-injection", "path": path, "line": line_number}
+                )
+    return violations
+
+
 def _adapter_infrastructure_imports(
     path: str, records: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -751,9 +792,16 @@ def collect_metrics(root: Path) -> dict[str, Any]:
     character_card_retirement_violations = _character_card_retirement_violations(
         root, production_sources
     )
+    pillow_card_renderer_retirement_violations = (
+        _pillow_card_renderer_retirement_violations(root, production_sources)
+    )
     violations.extend(
         {"category": "legacy_character_card", **record}
         for record in character_card_retirement_violations
+    )
+    violations.extend(
+        {"category": "legacy_pillow_card_renderer", **record}
+        for record in pillow_card_renderer_retirement_violations
     )
     for resource, owners in duplicate_resource_owners.items():
         violations.append(
@@ -821,6 +869,7 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         "adapter_resource_constructions": adapter_resource_constructions,
         "command_runtime_responsibilities": command_runtime_responsibilities,
         "character_card_retirement_violations": character_card_retirement_violations,
+        "pillow_card_renderer_retirement_violations": pillow_card_renderer_retirement_violations,
         "profile_route_flag_references": profile_flags,
         "syntax_errors": syntax_errors,
         "gate_violations": violations,

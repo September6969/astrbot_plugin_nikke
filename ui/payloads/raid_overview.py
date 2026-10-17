@@ -13,20 +13,20 @@ class UnionOverviewT2IPayloadBuilder:
         try:
             from ...features.raid.models import RaidState
             from ...features.raid.participants import format_compact_number
-            from ..renderers.raid import UnionRaidRenderer
             from .common import (
                 boss_presentation,
                 display_number,
                 display_remaining,
+                response_coverage_label,
             )
         except (ImportError, ValueError):
             from astrbot_plugin_nikke.features.raid.models import RaidState
             from astrbot_plugin_nikke.features.raid.participants import format_compact_number
-            from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
             from astrbot_plugin_nikke.ui.payloads.common import (
                 boss_presentation,
                 display_number,
                 display_remaining,
+                response_coverage_label,
             )
 
         raid_state = getattr(data, "raid_state", RaidState.UNKNOWN)
@@ -78,7 +78,7 @@ class UnionOverviewT2IPayloadBuilder:
                 "difficulty": None,
                 "level": None,
                 "bosses": [],
-                "coverage": UnionRaidRenderer._coverage_text(data.response_coverage),
+                "coverage": response_coverage_label(data.response_coverage),
                 "partial": data.partial_boss_records,
                 "returned": 0,
                 "progress": None,
@@ -105,6 +105,8 @@ class UnionOverviewT2IPayloadBuilder:
                 "percent": f"{boss.hp_percent:.1%}" if boss.hp_percent is not None else "Unknown",
                 "bar": round(boss.hp_percent * 100, 2) if boss.hp_percent is not None else None,
                 "status": boss.status.value,
+                "status_label": "已击破" if boss.status.value == "DEFEATED" else "Boss 状态待确认",
+                "placeholder": False,
                 "elements": " / ".join(boss.elements) or "Unknown",
             }
             for boss in data.bosses
@@ -112,11 +114,13 @@ class UnionOverviewT2IPayloadBuilder:
         while len(bosses) < 5:
             bosses.append(
                 {
-                    "name": "未返回 Boss 记录",
+                    "name": "Boss 记录未返回",
                     "hp": "Unknown",
                     "percent": "Unknown",
                     "bar": None,
                     "status": "UNKNOWN",
+                    "status_label": "",
+                    "placeholder": True,
                     "elements": "Unknown",
                 }
             )
@@ -126,7 +130,7 @@ class UnionOverviewT2IPayloadBuilder:
             "difficulty": display_number(data.difficulty),
             "level": display_number(data.level),
             "bosses": bosses,
-            "coverage": UnionRaidRenderer._coverage_text(data.response_coverage),
+            "coverage": response_coverage_label(data.response_coverage),
             "partial": data.partial_boss_records,
             "returned": len(data.bosses),
             "progress": f"{data.total_progress:.1%}" if data.total_progress is not None else "Unknown",
@@ -145,6 +149,19 @@ class UnionOverviewT2IPayloadBuilder:
         ranking = getattr(data, "ranking", None)
         member = getattr(data, "member", None)
         payload["ranking"] = UnionRecordsT2IPayloadBuilder().build(ranking) if ranking is not None else None
+        previous = payload.get("previous_season")
+        scope = str(getattr(ranking, "scope", "")) if ranking is not None else ""
+        if previous and ranking is not None and scope.upper() == "LAST_SEASON":
+            payload["previous_season_summary"] = {
+                "season_name": previous.get("season_name") or previous.get("season_id") or "上赛季",
+                "date_range": previous.get("date_range", ""),
+                "records": ranking.total_records,
+                "damage": "未知" if ranking.incomplete and not ranking.total_records else display_number(ranking.total_damage),
+                "partial": ranking.incomplete,
+                "excluded": ranking.excluded_records,
+            }
+        else:
+            payload["previous_season_summary"] = None
         if payload["ranking"]:
             payload["ranking"]["rows"] = payload["ranking"]["rows"][:5]
         payload["member"] = {"damage": "未知" if member.incomplete and not member.total_records else display_number(member.total_damage), "records": member.total_records,

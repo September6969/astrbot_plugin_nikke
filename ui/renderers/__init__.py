@@ -1,14 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""业务卡片渲染器集合。"""
+"""图片模板渲染器集合。"""
 
-from .campaign import CampaignHistoryRenderer
-from .profile import ProfileCardRenderer
-from .raid import UnionRaidRenderer
 from .t2i import T2IRenderer
 
 __all__ = [
-    "CampaignHistoryRenderer",
-    "ProfileCardRenderer",
-    "UnionRaidRenderer",
     "T2IRenderer",
 ]

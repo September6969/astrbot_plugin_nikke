@@ -103,6 +103,7 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     from astrbot_plugin_nikke.application.commands.guide import GuideCommandHandler
     from astrbot_plugin_nikke.features.guide.application import GuideApplication
     from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
+    from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
     from astrbot_plugin_nikke.main import NikkePlugin
 
     class Event:
@@ -168,12 +169,19 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
 
         async def build_dashboard(self, account):
             self.calls.append(account)
-            return object()
-
-    class ProfileRenderer:
-        @staticmethod
-        def render_profile(dashboard):
-            return "synthetic-profile.png"
+            return ProfileDashboardData(
+                commander_name="合成指挥官",
+                area_id="3",
+                synchro_level=10,
+                outpost_battle_level=None,
+                normal_campaign=None,
+                hard_campaign=None,
+                character_count=1,
+                max_level=None,
+                max_combat=None,
+                fetched_at="2026-10-17T00:00:00Z",
+                plugin_version="test",
+            )
 
     async def no_t2i(page, dashboard):
         assert page == "profile"
@@ -181,7 +189,6 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
 
     plugin.services.store = AccountReader()
     plugin.services.profile_application = ProfileApplication()
-    plugin.services.profile_renderer = ProfileRenderer()
     plugin.services.feedback_manager = None
     plugin.adapters.command = AstrBotCommandAdapter()
     plugin.presentation.try_t2i = no_t2i
@@ -227,7 +234,10 @@ async def test_actual_registered_nikke_handler_dispatches_guide_and_tarot(tmp_pa
     ]
     assert len(profile_results) == 1
     assert isinstance(profile_results[0], MessageEventResult)
-    assert isinstance(profile_results[0].chain[0], Image)
+    assert isinstance(profile_results[0].chain[0], Plain)
+    assert "个人资料 · 合成指挥官" in profile_results[0].get_plain_text()
+    assert "图片生成失败，已显示文字摘要。" in profile_results[0].get_plain_text()
+    assert not any(isinstance(component, Image) for component in profile_results[0].chain)
     assert len(plugin.services.profile_application.calls) == 1
 
 

@@ -36,7 +36,6 @@ def make_plugin_shell() -> NikkePlugin:
     plugin.adapters = AstrBotAdapterCollection(command=AstrBotCommandAdapter())
     plugin.presentation = AstrBotCommandPresentation(
         services=plugin.services,
-        config=lambda: plugin.config,
         html_render=lambda: getattr(plugin, "html_render", None),
         context=plugin.context,
     )

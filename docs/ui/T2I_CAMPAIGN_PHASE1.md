@@ -1,5 +1,7 @@
 # Campaign 原生 T2I：Phase 1 历史记录
 
+> 2026-10-17 更新：本轮统一 UI P4 已将当前设计改为 T2I 优先、同 DTO 文本回退，并移除 `ui_renderer` 双路选择。下文 Campaign→Pillow 回退和配置默认值仅保留为 Phase 1 历史记录，不代表当前生产目标。CI、AstrBot 原生 `html_render` 和真实消息显示仍须单独验收。
+
 本文记录已验收的第一阶段；当前七页实现与真实资产结果见 [完整交接](T2I_FRONTEND_HANDOFF.md)。以下测试数字和占位图说明仅属于当时的阶段状态。
 
 实现基线：`ebbb18f8c32ca5cf27ba3fb3ceb1255fe6acabb5`，工作分支 `feat/t2i-campaign-phase1`。视觉依据为用户提供的 v0.8 REPO ALIGNED 总规范。本阶段仅实现公共基础设施和 Campaign；没有修改其他页面、业务接口、Builder、Resolver 或领域 DTO。

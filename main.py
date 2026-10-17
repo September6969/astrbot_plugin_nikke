@@ -74,7 +74,6 @@ class NikkePlugin(Star):
         )
         self.presentation = AstrBotCommandPresentation(
             services=self.services,
-            config=lambda: self.config,
             html_render=lambda: getattr(self, "html_render", None),
             context=context,
         )
@@ -84,8 +83,9 @@ class NikkePlugin(Star):
             runner=self.services.daily_runner,
             client=self.services.client,
             config=self.config,
-            render_summary=self.services.renderer.render_summary,
-            send_summary=self.presentation.send_summary_image,
+            render_summary=self.presentation.render_daily_summary,
+            format_summary=self.presentation.format_daily_summary,
+            send_summary=self.presentation.send_summary,
             send_notice=self.presentation.send_daily_notice,
         )
         self.runtime = AstrBotRuntimeAdapter(

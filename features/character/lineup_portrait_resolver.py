@@ -222,6 +222,7 @@ class LineupPortraitResolver:
         costume_id: int | str | None = None,
         character_id: int | str | None = None,
         avatar_id: int | str | None = None,
+        resource_id: int | str | None = None,
     ) -> LineupPortraitResolution:
         """按优先级解析阵容小头像，保证零崩溃与清晰 Fallback。"""
         res_id: int | None = None
@@ -231,8 +232,32 @@ class LineupPortraitResolver:
         is_fallback = False
         fallback_reason: str | None = None
 
+        # resource_id 是独立合同，不回退为 battle TID 或角色代码解析。
+        if resource_id is not None:
+            try:
+                if isinstance(resource_id, bool):
+                    raise ValueError
+                resource_value = int(str(resource_id).strip())
+            except (TypeError, ValueError):
+                resource_value = 0
+            entry = self._res_to_char.get(resource_value)
+            if resource_value <= 0 or entry is None:
+                return LineupPortraitResolution(
+                    local_path=self.fallback_file,
+                    relative_uri="/character/si/default_avatar.webp",
+                    is_fallback=True,
+                    fallback_reason="UNRECOGNIZED_RESOURCE_ID",
+                    character_id=None,
+                    resource_id=None,
+                    costume_index=0,
+                    character_name="Unknown",
+                )
+            res_id = resource_value
+            char_id_val = entry.get("character_id")
+            char_name = entry["name"]
+
         # 1. 优先通过 avatar_id 直接解析（BlaBla 用户资料与头像场景）
-        if avatar_id is not None:
+        elif avatar_id is not None:
             try:
                 aid_int = int(avatar_id)
                 if aid_int in self._avatar_map:

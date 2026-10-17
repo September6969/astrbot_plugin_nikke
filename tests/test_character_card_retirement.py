@@ -13,7 +13,6 @@ import pytest
 from astrbot_plugin_nikke.adapters.astrbot.command_presentation import (
     AstrBotCommandPresentation,
 )
-from astrbot_plugin_nikke.application.commands.character import CharacterRenderFailure
 from astrbot_plugin_nikke.core.config import normalize_runtime_config
 from astrbot_plugin_nikke.ui.payloads.character_labels import (
     CHARACTER_EQUIPMENT_SLOT_LABELS,
@@ -40,7 +39,6 @@ async def test_single_character_card_always_uses_white_replica(raw_config):
 
     presentation = AstrBotCommandPresentation(
         services=SimpleNamespace(asset_manager=Mock()),
-        config=lambda: config,
         html_render=lambda: None,
         context=None,
     )
@@ -59,7 +57,6 @@ async def test_replica_render_failure_is_explicit_and_never_uses_pillow_assets()
     asset_manager = Mock()
     presentation = AstrBotCommandPresentation(
         services=SimpleNamespace(asset_manager=asset_manager),
-        config=lambda: {"ui_renderer": "pillow"},
         html_render=lambda: None,
         context=None,
     )
@@ -68,8 +65,7 @@ async def test_replica_render_failure_is_explicit_and_never_uses_pillow_assets()
     )
     presentation._t2i_renderer = renderer
 
-    with pytest.raises(CharacterRenderFailure):
-        await presentation.render_character_card(object())
+    assert await presentation.render_character_card(object()) is None
 
     renderer.render_view.assert_awaited_once()
     asset_manager.resolve_character_assets.assert_not_called()

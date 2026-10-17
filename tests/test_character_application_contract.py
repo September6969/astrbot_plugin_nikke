@@ -346,6 +346,19 @@ def test_roster_name_map_cache_tracks_all_identity_fields_and_field_boundaries()
     assert before_map != after_map
 
 
+def test_roster_name_map_marks_conflicting_codes_as_unverified():
+    application, _, _ = make_application()
+    directory_rows = [
+        {"name_code": " 101 ", "name_zh_cn": "拉毗"},
+        {"name_code": 101, "name_zh_cn": "红莲"},
+        {"name_code": None, "name_zh_cn": "无代码角色"},
+    ]
+
+    mapping = application.name_map(directory_rows)
+
+    assert mapping == {"101": "身份待核验"}
+
+
 def test_character_info_returns_only_exactly_resolved_public_fields():
     application, _, _ = make_application()
 

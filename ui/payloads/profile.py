@@ -61,8 +61,7 @@ class ProfileT2IPayloadBuilder:
         for definition in CurrencyRegistry.DEFINITIONS.values():
             matches = [item for item in data.currencies or [] if item.type == definition.type]
             item = matches[0] if len(matches) == 1 else None
-            if item is not None:
-                used.add(id(item))
+            used.update(id(match) for match in matches)
             icon = None
             if item is not None and item.icon_key and self.assets is not None:
                 try:
@@ -71,27 +70,48 @@ class ProfileT2IPayloadBuilder:
                     pass
             raw_label = item.display_name if item else definition.display_name
             label = "白银积分券" if raw_label == "躯体标签" else raw_label
-            val = format_compact_number(item.value) if item and item.value is not None else "Unknown"
+            if len(matches) > 1:
+                val = "多条记录"
+            elif item is not None:
+                val = format_compact_number(item.value) if item.value is not None else "Unknown"
+            else:
+                val = "Unknown" if data.currencies is None else "未返回"
             resources.append({"label": label, "value": val,
                               "scope": resource_state, "icon_data_uri": icon})
-        extras = [{"label": "白银积分券" if item.display_name == "躯体标签" else item.display_name, "value": display_number(item.value), "scope": resource_state} for item in data.currencies or [] if id(item) not in used]
+        known_types = set(CurrencyRegistry.DEFINITIONS)
+        extras = [
+            {
+                "label": "未识别资源",
+                "detail": f"类型 {item.type}",
+                "type_id": item.type,
+                "value": display_number(item.value),
+                "scope": resource_state,
+                "icon_data_uri": None,
+            }
+            for item in data.currencies or []
+            if item.type not in known_types and id(item) not in used
+        ]
         researches = pairs([(item.presentation_name or item.display_name or "研究项目名称 Unknown",
                              "LV." + display_number(item.level) + (f" · EXP {item.exp:,}" if item.exp is not None and item.exp > 0 else ""))
                             for item in data.recycle_room_researches or []], research_state)
-        return {"canvas": {"width": 1080, "height": 800}, "commander": data.commander_name, "updated": data.fetched_at, "version": data.plugin_version,
+        return {"canvas": {"width": 1080, "height": 800}, "commander": data.commander_name or "指挥官",
+                "identity": pairs([("区服", data.area_id or None),
+                                   ("指挥官等级", display_number(data.commander_level)),
+                                   ("部队总战力", display_number(data.team_combat))]),
+                "updated": data.fetched_at, "version": data.plugin_version,
                 "today": today, "today_state": today_state, "storage": storage,
                 "simulation": pairs([("模拟室每日最佳", data.sim_room_daily_record.display_label if data.sim_room_daily_record else None),
                                      ("每日最佳分数", display_number(data.sim_room_daily_record.score) if data.sim_room_daily_record else None),
                                      ("双周最高", data.sim_room_overclock_subseason), ("赛季最高", data.sim_room_overclock_season)], simulation_state),
                 "simulation_state": simulation_state,
                 "outpost": pairs([("同步器等级", display_number(data.synchro_level)), ("前哨战斗等级", display_number(data.outpost_battle_level)),
-                                  ("基础核心", data.infra_core_level), ("普通主线", data.normal_campaign), ("困难主线", data.hard_campaign)], outpost_state),
+                                  ("基础核心", data.infra_core_level)], outpost_state),
                 "outpost_state": outpost_state,
+                "campaign": pairs([("普通主线", data.normal_campaign), ("困难主线", data.hard_campaign)]),
                 "roster": pairs([("角色数量", display_number(data.character_count)), ("最高等级", display_number(data.max_level)),
                                  ("最高单体 CP", display_number(data.max_combat)), ("时装数量", display_number(data.character_costume_count))], roster_state),
                 "roster_state": roster_state,
                 "researches": researches, "research_state": research_state,
                 "collection": pairs([(item.display_name or "未知分类", display_number(item.count)) for item in data.memorial_summary or []], collection_state),
                 "collection_state": collection_state, "resources": resources, "extra_resources": extras, "resource_state": resource_state,
-                "account": pairs([("区服", data.area_id or None), ("指挥官等级", display_number(data.commander_level)), ("部队总战力", display_number(data.team_combat)),
-                                  ("普通主线", data.normal_campaign), ("困难主线", data.hard_campaign), ("无限之塔", data.progress_tribe_tower), ("创建日期", data.created_at)])}
+                "account": pairs([("无限之塔", data.progress_tribe_tower), ("创建日期", data.created_at)])}

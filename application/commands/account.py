@@ -37,7 +37,7 @@ class AccountCommandHandler:
         public_base_url: str,
         allow_group_bind: bool,
         runtime_health: Callable[[], RuntimeHealthDetails],
-        render_manual_summary: Callable[[], Awaitable[str]],
+        render_manual_summary: Callable[[], Awaitable[CommandResult | str]],
         on_unbind: Callable[[str], None] | None = None,
     ) -> None:
         self._application = application
@@ -228,7 +228,12 @@ class AccountCommandHandler:
     async def _run(self, context: CommandContext, *, authorized: bool) -> CommandResult:
         if not authorized and not context.is_admin:
             return self._text("仅管理员可执行全量任务。")
-        return CommandResult((ImageReply(await self._render_manual_summary()),))
+        result = await self._render_manual_summary()
+        if isinstance(result, CommandResult):
+            return result
+        if isinstance(result, str) and result.strip():
+            return CommandResult((ImageReply(result),))
+        return self._text("日常汇总暂时无法生成。")
 
     def _health(self, context: CommandContext, *, authorized: bool) -> CommandResult:
         if not authorized and not context.is_admin:

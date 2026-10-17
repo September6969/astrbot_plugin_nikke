@@ -5,6 +5,7 @@ Ensures 100% offline, deterministic portrait resolution with multi-level fallbac
 """
 
 from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -12,6 +13,7 @@ from astrbot_plugin_nikke.features.character.lineup_portrait_resolver import (
     LineupPortraitResolver,
     LineupPortraitResolution,
 )
+from astrbot_plugin_nikke.core.asset_manager import AssetManager
 
 
 class LineupPortraitResolverTests(unittest.TestCase):
@@ -33,6 +35,19 @@ class LineupPortraitResolverTests(unittest.TestCase):
         self.assertEqual(res.dimensions, (128, 128))
         self.assertTrue(res.local_path.is_file())
         self.assertTrue(str(res.local_path).endswith("si_c010_00_s.webp"))
+
+    def test_resolve_by_explicit_resource_id_never_uses_tid_or_name_code(self):
+        resolved = self.resolver.resolve(resource_id=10)
+        self.assertFalse(resolved.is_fallback)
+        self.assertEqual(resolved.resource_id, 10)
+        self.assertTrue(str(resolved.local_path).endswith("si_c010_00_s.webp"))
+
+        for wrong_kind in (101001, 3001):
+            with self.subTest(wrong_kind=wrong_kind):
+                result = self.resolver.resolve(resource_id=wrong_kind)
+                self.assertTrue(result.is_fallback)
+                self.assertIsNone(result.resource_id)
+                self.assertEqual(result.fallback_reason, "UNRECOGNIZED_RESOURCE_ID")
 
     def test_resolve_default_character_by_battle_tid(self):
         # Rapi: battle tid 101001 -> resource_id 10
@@ -81,6 +96,22 @@ class LineupPortraitResolverTests(unittest.TestCase):
         with patch("httpx.Client.get") as mock_get:
             res = self.resolver.resolve(tid=10, costume_id="10001")
             self.assertFalse(mock_get.called)
+
+    def test_resource_id_asset_api_reads_local_si_without_spine(self):
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as cache_dir:
+            assets = AssetManager(cache_dir, root / "assets", remote=False)
+            with patch.object(
+                assets.spine_renderer,
+                "render_local_portrait",
+                side_effect=AssertionError("roster icon must not cold-render Spine"),
+            ):
+                image, is_fallback = assets.get_lineup_portrait_by_resource_id(10)
+            assets.close()
+
+        self.assertIsNotNone(image)
+        self.assertFalse(is_fallback)
+        self.assertEqual(image.size, (128, 128))
 
 
 if __name__ == "__main__":

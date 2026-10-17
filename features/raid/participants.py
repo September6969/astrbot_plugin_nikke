@@ -38,7 +38,7 @@ class RaidAttackData:
     level: int | None
     step: int | None
     total_damage: int
-    is_final_hit: bool
+    is_final_hit: bool | None
     squad: list[RaidSquadMember]
     details_complete: bool = True
 

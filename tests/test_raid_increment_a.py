@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-import tempfile
 import unittest
-from pathlib import Path
 
-from PIL import Image
 
 from astrbot_plugin_nikke.features.raid.participants import build_ranking, format_ranking
 from astrbot_plugin_nikke.features.raid.builder import UnionRaidBuilder
 from astrbot_plugin_nikke.features.raid.models import RaidResponseCoverage, UnionRaidOverviewData
-from astrbot_plugin_nikke.ui.renderers.raid import UnionRaidRenderer
 
 
 def _level(*bosses: dict, difficulty: int = 1, level: int = 1) -> dict:
@@ -217,12 +213,11 @@ class RaidIncrementATests(unittest.TestCase):
         self.assertEqual(boss.elements, ["fire", "7"])
         self.assertIsNone(boss.icon_id)
         self.assertIsNone(boss.monster_model_id)
-        with tempfile.TemporaryDirectory() as directory:
-            path = UnionRaidRenderer(
-                Path(directory) / "cards", Path(__file__).resolve().parents[1] / "fonts"
-            ).render_raid_overview(data)
-            with Image.open(path) as image:
-                self.assertEqual(image.size[0], 1600)
+        from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
+
+        payload = UnionOverviewT2IPayloadBuilder().build(data)
+        self.assertEqual(payload["bosses"][0]["name"], "Safe Boss")
+        self.assertEqual(payload["bosses"][0]["elements"], "fire / 7")
 
     def test_ranking_calls_rows_returned_records_not_attacks(self) -> None:
         ranking = build_ranking(
@@ -249,10 +244,6 @@ class RaidIncrementATests(unittest.TestCase):
             response_coverage=RaidResponseCoverage.UNKNOWN_COVERAGE,
         )
 
-        with tempfile.TemporaryDirectory() as directory:
-            output_dir = Path(directory) / "cards"
-            fonts_dir = Path(__file__).resolve().parents[1] / "fonts"
-            path = UnionRaidRenderer(output_dir, fonts_dir).render_raid_overview(data)
-            with Image.open(path) as image:
-                self.assertEqual(image.size[0], 1600)
-                self.assertGreater(image.size[1], 400)
+        from astrbot_plugin_nikke.ui.payloads.common import response_coverage_label
+
+        self.assertEqual(response_coverage_label(data.response_coverage), "返回覆盖未知")

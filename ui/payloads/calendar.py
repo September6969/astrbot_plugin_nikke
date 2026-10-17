@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Calendar Operations Feed T2I payload 与分页。"""
 
+import base64
 from pathlib import Path
 
 try:
@@ -9,13 +10,19 @@ except (ImportError, ValueError):
     from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 
 
+DISPLAY_CATEGORY_LABELS = {
+    "double_reward": "限时双倍",
+    "pass": "活动通行证",
+}
+
+
 class CalendarT2IPayloadBuilder:
     """Operations Feed T2I 渲染数据组装器。
 
     支持：
     1. 基于 Runtime Status Resolver 与起止时间精度的活动数据分类；
-    2. 基于固定宽度 (1600) + 宣传图纵向长度驱动的动态画布高度 (900px ~ 2400px)；
-    3. 每次 Query 共享同一背景源文件，按各页实际画布高度做高质量 Cover-Crop；
+    2. 基于固定宽度 (1600) + 真实内容高度驱动的动态画布高度 (900px ~ 2400px)；
+    3. 每次 Query 共享同一张保留原始纵横比的本地宣传图；
     4. 单项超页降级与标题视觉截断策略 (保留完整 full_title)；
     5. 全局状态与页面状态分离 (NO ACTIVE OPERATIONS 仅在全局无活动时出现)；
     6. 仅保留基于 EXACT 起止时间的辅助 timeline progress_pct 字段。
@@ -28,58 +35,75 @@ class CalendarT2IPayloadBuilder:
     - scaled_source_h = round(1600 * source_h / source_w)
     - effective_max_canvas_h = min(max(FALLBACK_MAX_CANVAS_H, scaled_source_h), ABSOLUTE_MAX_CANVAS_H)
       即：Calendar 默认允许增长至 1600px；当 KV 提供更多纵向空间时（如竖版图），上限随 KV 延长，最高 2400px；横版图绝不会将上限压至 900px。
-    - 垂直外边距: CANVAS_VERTICAL_MARGIN = 170px (上下各 85px 居中)
-    - 面板固定开销: PANEL_OVERHEAD = 180px
-      （包含 panel 上下 1px 边框，以及 body 的上下 padding；CSS 全部使用 border-box）
-    - 动态内容净预算: effective_max_canvas_h - 170 - 180
+    - 页面固定区域: 顶栏 148px、KV 360px、内容顶部间距 22px、页脚 56px、底部 24px。
+    - 动态内容净预算: effective_max_canvas_h - 610px。
     """
 
     CANVAS_W = 1600
+    MAX_INLINE_BACKGROUND_BYTES = 2 * 1024 * 1024
+    MAX_INLINE_BACKGROUND_PIXELS = 20_000_000
     CANVAS_H = 900
     MIN_CANVAS_H = 900
     FALLBACK_MAX_CANVAS_H = 1600
     ABSOLUTE_MAX_CANVAS_H = 2400
     MAX_CANVAS_H = FALLBACK_MAX_CANVAS_H  # 向后兼容
 
-    PANEL_W = 1180
+    PANEL_W = 1456
     PANEL_H = 730
     MIN_PANEL_H = 730
     CANVAS_VERTICAL_MARGIN = 170  # panel_h = canvas_h - CANVAS_VERTICAL_MARGIN
     MAX_PANEL_H = ABSOLUTE_MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN  # 2230
+    PAGE_MARGIN = 72
+    HEADER_TOP_MARGIN = 32
+    HEADER_H = 116
+    KEY_VISUAL_H = 360
+    BODY_TOP_PADDING = 22
+    FOOTER_H = 56
+    BOTTOM_MARGIN = 24
+    FIXED_LAYOUT_H = (
+        HEADER_TOP_MARGIN + HEADER_H + KEY_VISUAL_H
+        + BODY_TOP_PADDING + FOOTER_H + BOTTOM_MARGIN
+    )  # 610
 
-    HEADER_H = 70
-    FOOTER_H = 44
+    # 兼容旧模板的面板几何字段；新日程模板使用整页布局。
     PANEL_TOP_PADDING = 28
     PANEL_BOTTOM_PADDING = 20
-    BODY_TOP_PADDING = 10
     BODY_BOTTOM_PADDING = 6
     PANEL_BORDER_H = 2
-    PANEL_OVERHEAD = (
-        PANEL_TOP_PADDING
-        + HEADER_H
-        + BODY_TOP_PADDING
-        + BODY_BOTTOM_PADDING
-        + FOOTER_H
-        + PANEL_BOTTOM_PADDING
-        + PANEL_BORDER_H
-    )  # 180
+    PANEL_OVERHEAD = FIXED_LAYOUT_H
 
-    MAX_CONTENT_BUDGET = FALLBACK_MAX_CANVAS_H - CANVAS_VERTICAL_MARGIN - PANEL_OVERHEAD  # 1250
+    MAX_CONTENT_BUDGET = FALLBACK_MAX_CANVAS_H - FIXED_LAYOUT_H
     CONTENT_BUDGET = MAX_CONTENT_BUDGET
 
     # 以下常量必须与 calendar_schedule.html 的 border-box 几何保持一一对应。
-    SECTION_HEADER_H = 32
-    SECTION_HEADER_BOTTOM_GAP = 8
-    NEXT_SECTION_TOP_GAP = 12
-    ACTIVE_CARD_GAP = 5
-    NEXT_ROW_GAP = 7
-    ACTIVE_CARD_NORMAL_H = 68
-    ACTIVE_CARD_LONG_H = 80
-    ACTIVE_CARD_OVERSIZE_H = 92
-    NEXT_ROW_NORMAL_H = 44
-    NEXT_ROW_LONG_H = 58
+    SECTION_HEADER_H = 58
+    SECTION_HEADER_BOTTOM_GAP = 12
+    NEXT_SECTION_TOP_GAP = 22
+    ACTIVE_CARD_GAP = 14
+    NEXT_ROW_GAP = 12
+    ACTIVE_CARD_NORMAL_H = 160
+    ACTIVE_CARD_LONG_H = 224
+    ACTIVE_CARD_OVERSIZE_H = 240
+    NEXT_ROW_NORMAL_H = 112
+    NEXT_ROW_LONG_H = 136
 
-    EMPTY_STATE_H = 60
+    ACTIVE_TITLE_FONT_SIZE = 52
+    ACTIVE_TITLE_CONTENT_W = (
+        CANVAS_W - 2 * PAGE_MARGIN - 44 - 7 - 330 - 24
+    )  # 模板卡片宽度扣除内边距、边框、侧栏和列间距
+    ACTIVE_TITLE_CHARS_PER_LINE = ACTIVE_TITLE_CONTENT_W // ACTIVE_TITLE_FONT_SIZE
+    ACTIVE_TITLE_LINE_H = 64
+    ACTIVE_CARD_HEIGHT_OVERHEAD = 96  # 边框、内边距、元信息与安全余量
+
+    NEXT_TITLE_FONT_SIZE = 46
+    NEXT_TITLE_CONTENT_W = (
+        CANVAS_W - 2 * PAGE_MARGIN - 36 - 2 - 250 - 160 - 300 - 54
+    )  # 模板预告行宽度扣除固定列、边框、内边距和列间距
+    NEXT_TITLE_CHARS_PER_LINE = NEXT_TITLE_CONTENT_W // NEXT_TITLE_FONT_SIZE
+    NEXT_TITLE_LINE_H = 56
+    NEXT_ROW_HEIGHT_OVERHEAD = 24  # 上下内边距、边框与安全余量
+
+    EMPTY_STATE_H = 104
 
     # 安全上限：防止异常无限增长（单页 Active + Next 总项数安全上限）
     SAFETY_MAX_ITEMS_PER_PAGE = 40
@@ -87,19 +111,37 @@ class CalendarT2IPayloadBuilder:
     def __init__(self, resolver: T2IAssetResolver | None = None):
         self.resolver = resolver or T2IAssetResolver()
 
+    @staticmethod
+    def estimate_title_lines(title: str, chars_per_line: int) -> int:
+        """按每个 Unicode 码点占满一字宽保守估算换行数。"""
+        capacity = max(1, chars_per_line)
+        return max(1, (len(title) + capacity - 1) // capacity)
+
     @classmethod
     def active_card_height(cls, item: dict) -> int:
-        if item.get("is_oversize"):
-            return cls.ACTIVE_CARD_OVERSIZE_H
-        if item.get("is_long_title"):
-            return cls.ACTIVE_CARD_LONG_H
-        return cls.ACTIVE_CARD_NORMAL_H
+        line_count = item.get("title_line_count")
+        if not isinstance(line_count, int) or line_count < 1:
+            title = str(item.get("full_title") or item.get("title") or "")
+            line_count = cls.estimate_title_lines(
+                title, cls.ACTIVE_TITLE_CHARS_PER_LINE
+            )
+        return max(
+            cls.ACTIVE_CARD_NORMAL_H,
+            cls.ACTIVE_CARD_HEIGHT_OVERHEAD + cls.ACTIVE_TITLE_LINE_H * line_count,
+        )
 
     @classmethod
     def next_row_height(cls, item: dict) -> int:
-        if item.get("is_oversize") or item.get("is_long_title"):
-            return cls.NEXT_ROW_LONG_H
-        return cls.NEXT_ROW_NORMAL_H
+        line_count = item.get("title_line_count")
+        if not isinstance(line_count, int) or line_count < 1:
+            title = str(item.get("full_title") or item.get("title") or "")
+            line_count = cls.estimate_title_lines(
+                title, cls.NEXT_TITLE_CHARS_PER_LINE
+            )
+        return max(
+            cls.NEXT_ROW_NORMAL_H,
+            cls.NEXT_ROW_HEIGHT_OVERHEAD + cls.NEXT_TITLE_LINE_H * line_count,
+        )
 
     @classmethod
     def measure_active_section(cls, items: list[dict]) -> int:
@@ -150,12 +192,12 @@ class CalendarT2IPayloadBuilder:
     @classmethod
     def compute_max_content_budget(cls, max_canvas_height: int) -> int:
         panel_h = max_canvas_height - cls.CANVAS_VERTICAL_MARGIN
-        return panel_h - cls.PANEL_OVERHEAD
+        return max(0, max_canvas_height - cls.FIXED_LAYOUT_H)
 
     @classmethod
     def compute_canvas_height(cls, content_h: int, max_canvas_height: int | None = None) -> int:
         max_h = max_canvas_height or cls.FALLBACK_MAX_CANVAS_H
-        canvas_h_required = cls.PANEL_OVERHEAD + cls.CANVAS_VERTICAL_MARGIN + content_h
+        canvas_h_required = cls.FIXED_LAYOUT_H + content_h
         return max(cls.MIN_CANVAS_H, min(max_h, canvas_h_required))
 
     @classmethod
@@ -229,13 +271,28 @@ class CalendarT2IPayloadBuilder:
         return effective_max_h, source_w, source_h, scaled_source_h
 
     def _encode_background(
-        self, path: Path | None, canvas_height: int = 900
+        self, path: Path | None, canvas_height: int | None = None
     ) -> str | None:
         if path is None:
             return None
         try:
+            from PIL import Image
+
+            if path.stat().st_size <= self.MAX_INLINE_BACKGROUND_BYTES:
+                with Image.open(path) as image:
+                    is_small_webp = (
+                        image.format == "WEBP"
+                        and image.width * image.height <= self.MAX_INLINE_BACKGROUND_PIXELS
+                    )
+                    if is_small_webp:
+                        image.verify()
+                if is_small_webp:
+                    raw = path.read_bytes()
+                    if len(raw) <= self.MAX_INLINE_BACKGROUND_BYTES:
+                        return "data:image/webp;base64," + base64.b64encode(raw).decode("ascii")
+
             return self.resolver.encode(
-                path, size=(self.CANVAS_W, canvas_height), cover_crop=True
+                path, size=(self.CANVAS_W, 1200), cover_crop=False
             )
         except Exception:
             return None
@@ -444,27 +501,37 @@ class CalendarT2IPayloadBuilder:
         # 3. 构造 Active Items
         active_items: list[dict] = []
         for ev in active_canonical:
-            is_long = len(ev.title) > 26
+            title_line_count = self.estimate_title_lines(
+                ev.title, self.ACTIVE_TITLE_CHARS_PER_LINE
+            )
+            is_long = title_line_count > 1
             is_oversize = len(ev.title) > 65
 
             start_prec = ev.start_precision.value if hasattr(ev.start_precision, "value") else str(ev.start_precision)
             end_prec = ev.end_precision.value if hasattr(ev.end_precision, "value") else str(ev.end_precision)
 
+            start_display = (
+                ev.start_at.astimezone(CST).strftime("%m.%d %H:%M")
+                if ev.start_at and start_prec == "EXACT"
+                else ev.start_at.astimezone(CST).strftime("%m.%d")
+                if ev.start_at and start_prec == "DATE_ONLY"
+                else "待确认"
+            )
+            end_display = (
+                ev.end_at.astimezone(CST).strftime("%m.%d %H:%M")
+                if ev.end_at and end_prec == "EXACT"
+                else ev.end_at.astimezone(CST).strftime("%m.%d")
+                if ev.end_at and end_prec == "DATE_ONLY"
+                else "待确认"
+            )
             if ev.start_at and ev.end_at:
-                if start_prec == "DATE_ONLY" and end_prec == "DATE_ONLY":
-                    time_range = f"{ev.start_at.astimezone(CST).strftime('%m.%d')} → {ev.end_at.astimezone(CST).strftime('%m.%d')} · UTC+8"
-                else:
-                    s_fmt = "%m.%d %H:%M" if start_prec == "EXACT" else "%m.%d"
-                    e_fmt = "%m.%d %H:%M" if end_prec == "EXACT" else "%m.%d"
-                    time_range = f"{ev.start_at.astimezone(CST).strftime(s_fmt)} → {ev.end_at.astimezone(CST).strftime(e_fmt)} · UTC+8"
+                time_range = f"{start_display} → {end_display} · UTC+8"
             elif ev.start_at:
-                s_fmt = "%m.%d %H:%M" if start_prec == "EXACT" else "%m.%d"
-                time_range = f"{ev.start_at.astimezone(CST).strftime(s_fmt)} 起 · UTC+8"
+                time_range = f"{start_display} 起 · UTC+8"
             elif ev.end_at:
-                e_fmt = "%m.%d %H:%M" if end_prec == "EXACT" else "%m.%d"
-                time_range = f"{ev.end_at.astimezone(CST).strftime(e_fmt)} 截止 · UTC+8"
+                time_range = f"{end_display} 截止 · UTC+8"
             else:
-                time_range = "时间未定 · UTC+8"
+                time_range = "时间待确认 · UTC+8"
 
             remaining_str = ev.remaining_display(current)
 
@@ -482,8 +549,6 @@ class CalendarT2IPayloadBuilder:
                 urgency = ""
 
             display_title = ev.title
-            if is_oversize and len(display_title) > 90:
-                display_title = display_title[:87] + "..."
 
             # 进度计算：严格条件，禁止伪造
             progress_pct: float | None = None
@@ -503,7 +568,7 @@ class CalendarT2IPayloadBuilder:
                 "event_id": ev.event_id,
                 "title": display_title,
                 "full_title": ev.title,
-                "category": CAT_LABELS.get(ev.category, "活动"),
+                "category": DISPLAY_CATEGORY_LABELS.get(ev.category, CAT_LABELS.get(ev.category, "活动")),
                 "category_code": ev.category,
                 "time_range": time_range,
                 "start": ev.start_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.start_at else "未知",
@@ -513,66 +578,73 @@ class CalendarT2IPayloadBuilder:
                 "urgency": urgency,
                 "is_long_title": is_long,
                 "is_oversize": is_oversize,
+                "title_line_count": title_line_count,
+                "start_precision": start_prec,
                 "end_precision": end_prec,
                 "progress_pct": progress_pct,          # None → 不显示进度条
             }
+            card["layout_height"] = self.active_card_height(card)
             active_items.append(card)
-
 
         # 4. 构造 Next Items
         next_items: list[dict] = []
         for ev in upcoming_canonical:
-            is_long = len(ev.title) > 30
+            title_line_count = self.estimate_title_lines(
+                ev.title, self.NEXT_TITLE_CHARS_PER_LINE
+            )
+            is_long = title_line_count > 1
             is_oversize = len(ev.title) > 65
             start_prec = ev.start_precision.value if hasattr(ev.start_precision, "value") else str(ev.start_precision)
+            end_prec = ev.end_precision.value if hasattr(ev.end_precision, "value") else str(ev.end_precision)
 
-            if ev.start_at:
-                s_fmt = "%m.%d %H:%M" if start_prec == "EXACT" else "%m.%d"
-                start_time_display = ev.start_at.astimezone(CST).strftime(s_fmt)
-                if start_prec == "EXACT":
-                    diff = ev.start_at - current
-                    days_diff = diff.days
-                    hours_diff = diff.seconds // 3600
-                    if days_diff >= 3:
-                        starts_in = f"STARTS IN {days_diff}D"
-                    elif days_diff > 0:
-                        starts_in = f"STARTS IN {days_diff}D {hours_diff}H"
-                    elif hours_diff > 0:
-                        starts_in = f"STARTS IN {hours_diff}H"
-                    else:
-                        mins_diff = max(1, diff.seconds // 60)
-                        starts_in = f"STARTS IN {mins_diff}M"
-                elif start_prec == "DATE_ONLY":
-                    diff_days = max(1, (ev.start_at.date() - current.date()).days)
-                    starts_in = f"STARTS IN {diff_days}D"
+            if ev.start_at and start_prec == "EXACT":
+                start_time_display = ev.start_at.astimezone(CST).strftime("%m.%d %H:%M")
+                diff = ev.start_at - current
+                days_diff = diff.days
+                hours_diff = diff.seconds // 3600
+                if days_diff >= 3:
+                    starts_in = f"{days_diff} 天后开始"
+                elif days_diff > 0:
+                    starts_in = f"{days_diff} 天 {hours_diff} 小时后开始"
+                elif hours_diff > 0:
+                    starts_in = f"{hours_diff} 小时后开始"
                 else:
-                    starts_in = "即将开始"
+                    mins_diff = max(1, diff.seconds // 60)
+                    starts_in = f"{mins_diff} 分钟后开始"
+            elif ev.start_at and start_prec == "DATE_ONLY":
+                start_time_display = ev.start_at.astimezone(CST).strftime("%m.%d")
+                diff_days = max(1, (ev.start_at.date() - current.date()).days)
+                starts_in = f"约 {diff_days} 天后（日期级）"
             else:
                 start_time_display = "时间待定"
                 starts_in = "即将开始"
 
             display_title = ev.title
-            if is_oversize and len(display_title) > 90:
-                display_title = display_title[:87] + "..."
 
             nrow = {
                 "event_id": ev.event_id,
                 "title": display_title,
                 "full_title": ev.title,
-                "category": CAT_LABELS.get(ev.category, "活动"),
+                "category": DISPLAY_CATEGORY_LABELS.get(ev.category, CAT_LABELS.get(ev.category, "活动")),
                 "category_code": ev.category,
                 "start_time_display": start_time_display,
                 "starts_in": starts_in,
+                "start_precision": start_prec,
+                "end_precision": end_prec,
                 "is_long_title": is_long,
                 "is_oversize": is_oversize,
+                "title_line_count": title_line_count,
                 "start": ev.start_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.start_at else "未知",
                 "end": ev.end_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.end_at else "未知",
                 "remaining": starts_in,
             }
+            nrow["layout_height"] = self.next_row_height(nrow)
             next_items.append(nrow)
 
         global_has_active = bool(active_items)
         active_count_total = len(active_items)
+        next_count_total = len(next_items)
+        range_event_count = len(active_items) + len(next_items)
 
         # 5. 背景源探测与有效最大画布高度推导
         source_path = (
@@ -590,12 +662,10 @@ class CalendarT2IPayloadBuilder:
             active_items, next_items, global_has_active, max_canvas_height=effective_max_canvas_h
         )
 
-        # 7. 背景图按每页实际 canvas.height 编码（所有页面共享相同背景源）
+        # 7. 所有页面复用同一份保留纵横比的本地宣传图
+        background_data_uri = self._encode_background(source_path)
         for p in pages:
-            p_canvas_h = p["canvas"]["height"]
-            p["background_data_uri"] = self._encode_background(
-                source_path, canvas_height=p_canvas_h
-            )
+            p["background_data_uri"] = background_data_uri
 
         top_canvas = pages[0]["canvas"] if pages else {"width": self.CANVAS_W, "height": self.MIN_CANVAS_H}
         top_panel = pages[0]["panel"] if pages else {"width": self.PANEL_W, "height": self.MIN_PANEL_H}
@@ -704,6 +774,8 @@ class CalendarT2IPayloadBuilder:
             "fallback_text": fallback_text,
             "global_has_active": global_has_active,
             "active_count_total": active_count_total,
+            "next_count_total": next_count_total,
+            "range_event_count": range_event_count,
             "pages": pages,
             # Top-level direct access (Page 1)
             "page_number": pages[0]["page_number"] if pages else 1,

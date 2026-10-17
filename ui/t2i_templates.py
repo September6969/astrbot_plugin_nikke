@@ -7,7 +7,7 @@ class T2ITemplateLoader:
         self.root = root or Path(__file__).resolve().parent.parent / "templates" / "t2i"
 
     def load(self, page: str = "campaign") -> str:
-        if page not in {"campaign", "calendar_schedule", "union_overview", "union_records", "union_member", "profile", "character"}:
+        if page not in {"campaign", "calendar_schedule", "union_overview", "union_records", "union_member", "profile", "character", "character_info", "daily_summary", "roster"}:
             raise ValueError("尚未支持该页面")
         shared = self.root / "_shared"
         css = "\n".join((shared / name).read_text(encoding="utf-8") for name in

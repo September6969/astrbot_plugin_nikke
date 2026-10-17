@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import re
+import logging
 from collections.abc import Mapping
 from typing import Any
 
 
 _INTEGER_RE = re.compile(r"^[+-]?\d+$")
+_LOGGER = logging.getLogger(__name__)
+_UI_RENDERER_DEPRECATION_LOGGED = False
 
 _NUMERIC_CONTRACTS = {
     "request_timeout": (20, 1, 300),
@@ -39,9 +42,18 @@ def bounded_int(value: Any, *, default: int, minimum: int, maximum: int) -> int:
 
 
 def normalize_runtime_config(config: Mapping[str, Any] | None) -> dict[str, Any]:
-    """复制配置并修正数值边界；忽略已退役的旧单角色布局配置。"""
+    """复制配置并统一图片路由；旧 ui_renderer 值只提示一次并收敛到 T2I。"""
+    global _UI_RENDERER_DEPRECATION_LOGGED
     normalized = dict(config) if isinstance(config, Mapping) else {}
     normalized.pop("character_card_layout", None)
+    raw_renderer = normalized.get("ui_renderer")
+    if raw_renderer is not None and str(raw_renderer).strip().casefold() != "t2i":
+        if not _UI_RENDERER_DEPRECATION_LOGGED:
+            _LOGGER.warning(
+                "ui_renderer 配置已弃用；所有图片页面统一使用 T2I，失败时回退同一查询结果文本。"
+            )
+            _UI_RENDERER_DEPRECATION_LOGGED = True
+    normalized["ui_renderer"] = "t2i"
     for key, (default, minimum, maximum) in _NUMERIC_CONTRACTS.items():
         normalized[key] = bounded_int(
             normalized.get(key),

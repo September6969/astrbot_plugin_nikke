@@ -48,6 +48,9 @@ class UnionMemberT2IPayloadBuilder:
                         }
                     )
                 boss = boss_presentation(self.assets, self.resolver, attack.boss_id)
+                final_hit_label = " · 尾刀" if attack.is_final_hit is True else (
+                    " · 尾刀状态待确认" if attack.is_final_hit is None else ""
+                )
                 rows.append(
                     {
                         **boss,
@@ -59,6 +62,7 @@ class UnionMemberT2IPayloadBuilder:
                         "level": str(attack.level),
                         "step": str(attack.step),
                         "final_hit": attack.is_final_hit,
+                        "final_hit_label": final_hit_label,
                         "damage": display_number(attack.total_damage),
                         "members": members,
                     }

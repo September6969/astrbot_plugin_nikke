@@ -1,48 +1,30 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""验证 UI 模块收敛及根目录兼容性 shim 的完备性与一致性。"""
+"""验证图片表现层只公开 T2I 页面渲染与素材主题能力。"""
 
-import warnings
-import pytest
+import importlib.util
 
 
-def test_ui_package_exports():
+def test_ui_package_exposes_theme_but_no_pillow_card_renderer():
     import astrbot_plugin_nikke.ui as ui
-    assert hasattr(ui, "CardRenderer")
+
     assert hasattr(ui, "character_theme")
     assert hasattr(ui, "UI_COLORS")
     assert hasattr(ui, "CharacterTheme")
+    assert not hasattr(ui, "CardRenderer")
+    assert importlib.util.find_spec("astrbot_plugin_nikke.ui.primitives") is None
 
 
-def test_ui_renderers_exports():
+def test_ui_renderers_only_export_t2i():
     import astrbot_plugin_nikke.ui.renderers as renderers
-    assert hasattr(renderers, "CampaignHistoryRenderer")
-    assert hasattr(renderers, "ProfileCardRenderer")
-    assert hasattr(renderers, "UnionRaidRenderer")
+
+    assert renderers.__all__ == ["T2IRenderer"]
     assert hasattr(renderers, "T2IRenderer")
-    assert not hasattr(renderers, "CharacterCardRenderer")
+    for name in ("CampaignHistoryRenderer", "ProfileCardRenderer", "UnionRaidRenderer"):
+        assert not hasattr(renderers, name)
 
 
-def test_ui_formal_contracts_and_root_isolation():
-    from astrbot_plugin_nikke.ui.theme import character_theme, UI_COLORS, CharacterTheme
-    from astrbot_plugin_nikke.ui.primitives import CardRenderer
-    from astrbot_plugin_nikke.ui.renderers import (
-        CampaignHistoryRenderer,
-        ProfileCardRenderer,
-        UnionRaidRenderer,
-        T2IRenderer,
-    )
-
-    assert CharacterTheme is not None
-    assert character_theme is not None
-    assert UI_COLORS is not None
-    assert CardRenderer is not None
-    assert CampaignHistoryRenderer is not None
-    assert ProfileCardRenderer is not None
-    assert UnionRaidRenderer is not None
-    assert T2IRenderer is not None
-
-    # 验证旧根目录垫片已被彻底收敛，不再暴露于包根
-    legacy_ui_shims = [
+def test_ui_root_compatibility_shims_remain_absent():
+    for shim in (
         "card_theme",
         "renderer",
         "campaign_history_renderer",
@@ -50,8 +32,6 @@ def test_ui_formal_contracts_and_root_isolation():
         "profile_card_renderer",
         "union_raid_renderer",
         "t2i_renderer",
-    ]
-    for shim in legacy_ui_shims:
-        with pytest.raises(ModuleNotFoundError):
-            __import__(f"astrbot_plugin_nikke.{shim}")
+    ):
+        assert importlib.util.find_spec(f"astrbot_plugin_nikke.{shim}") is None
 

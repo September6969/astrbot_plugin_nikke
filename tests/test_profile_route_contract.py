@@ -12,6 +12,7 @@ from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommand
 from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
 from astrbot_plugin_nikke.integrations.blablalink.client import CookieExpired
 from astrbot_plugin_nikke.main import NikkePlugin
+from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -63,16 +64,10 @@ class _Application:
         return self.response
 
 
-class _Renderer:
-    def render_profile(self, dashboard):
-        return "profile.png"
-
-
 def _plugin(*, account=None, application_response=None):
     plugin = make_plugin_shell()
     plugin.services.store = _Store(account)
     plugin.services.profile_application = _Application(application_response)
-    plugin.services.profile_renderer = _Renderer()
     plugin.services.feedback_manager = None
     plugin.adapters.command = AstrBotCommandAdapter()
 
@@ -97,10 +92,27 @@ def _run_me(plugin):
     return asyncio.run(consume())
 
 
-def test_profile_route_uses_one_application_path_and_preserves_image_reply():
-    plugin = _plugin(application_response=object())
+def test_profile_route_uses_one_application_path_and_same_dto_text_fallback():
+    dashboard = ProfileDashboardData(
+        commander_name="路线合成账号",
+        area_id="3",
+        synchro_level=200,
+        outpost_battle_level=None,
+        normal_campaign="35-1",
+        hard_campaign=None,
+        character_count=20,
+        max_level=200,
+        max_combat=90000,
+        fetched_at="2026-10-17 12:00",
+        plugin_version="test",
+    )
+    plugin = _plugin(application_response=dashboard)
 
-    assert _run_me(plugin) == [("image", "profile.png")]
+    result = _run_me(plugin)
+    assert len(result) == 1
+    assert result[0][0] == "plain"
+    assert "路线合成账号" in result[0][1]
+    assert "图片生成失败" in result[0][1]
     assert plugin.services.profile_application.calls == [plugin.services.store.account]
     assert plugin.services.store.lookup_ids == ["route-user"]
     assert not hasattr(plugin, "profile_builder")

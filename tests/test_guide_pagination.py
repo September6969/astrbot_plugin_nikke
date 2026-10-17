@@ -43,6 +43,7 @@ class GuidePaginationTests(IsolatedAsyncioTestCase):
             event = SimpleNamespace(plain_result=lambda x: x, image_result=lambda x: "image")
             result = [x async for x in plugin.nikke(event, "攻略", "练度", "2")]
             self.assertIn("第 2/2 页", result[0])
+            self.assertIn("翻页", result[0])
             self.assertTrue(any("fixture-3" in value for value in result))
             self.assertFalse(any("fixture-0" in value for value in result))
             self.assertEqual([x async for x in plugin.nikke(event, "攻略", "练度", "3")], ["该攻略页不存在。"])
@@ -69,6 +70,8 @@ class GuidePaginationTests(IsolatedAsyncioTestCase):
             for alias in aliases:
                 output = [x async for x in plugin.guide(event, alias)]
                 self.assertTrue(output[0].startswith("text:【"))
+                self.assertIn("第 1/1 页", output[0])
+                self.assertNotIn("翻页", output[0])
                 self.assertTrue(output[1].startswith("text:"))
             red = [x async for x in plugin.guide(event, "红球")]
             self.assertEqual(red[-1], "text:https://nikkeoutpost.netlify.app/")

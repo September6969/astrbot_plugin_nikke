@@ -67,10 +67,15 @@ class GuideCommandHandler:
             )
 
         if page_result.entries:
+            navigation_hint = (
+                f"；使用 /妮姬 攻略 {category} <页码> 翻页"
+                if page_result.total_pages > 1
+                else ""
+            )
             messages = [
                 TextReply(
-                    f"【{category}】第 {page_result.page_number}/{page_result.total_pages} 页；"
-                    f"使用 /妮姬 攻略 {category} <页码> 翻页。"
+                    f"【{category}】第 {page_result.page_number}/{page_result.total_pages} 页"
+                    f"{navigation_hint}。"
                 )
             ]
             for entry in page_result.entries:

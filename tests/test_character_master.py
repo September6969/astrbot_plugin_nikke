@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -50,6 +51,29 @@ class CharacterMasterTests(unittest.TestCase):
 
     def test_resolver_total_count(self):
         self.assertEqual(self.resolver.total_count, 200)
+
+    def test_resolve_exact_name_code_does_not_normalize_it_as_battle_tid(self):
+        rapi = self.resolver.resolve_name_code("3001")
+        self.assertIsNotNone(rapi)
+        self.assertEqual(rapi.name_en, "Rapi")
+        self.assertEqual(rapi.resource_id, 10)
+        self.assertIsNone(self.resolver.resolve_name_code(301704))
+
+    def test_duplicate_static_name_code_is_not_resolved_arbitrarily(self):
+        with open(self.master_file, "r", encoding="utf-8") as source:
+            payload = json.load(source)
+        duplicate = dict(
+            next(item for item in payload["characters"] if item["name_code"] == 3001)
+        )
+        duplicate.update(id=999999, battle_tid_prefix=9999, resource_id=999)
+        payload["characters"].append(duplicate)
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "character_master.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            resolver = CharacterMasterResolver(path)
+
+        self.assertIsNone(resolver.resolve_name_code(3001))
 
     def test_resolve_five_regression_battle_tids(self):
         cases = [

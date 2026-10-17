@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import re
+from html.parser import HTMLParser
 import tempfile
 import time
 from pathlib import Path
@@ -75,6 +77,55 @@ class TestBindTutorialPage(IsolatedAsyncioTestCase):
         page = render_bind_page(token, session, "https://bot.example.com")
         self.assertIn("● 此绑定链接已经使用", page)
         self.assertIn("此绑定链接已经使用过", page)
+
+
+    def test_bind_page_accessibility_and_copy_feedback_contract(self):
+        token = "a" * 40
+        page = render_bind_page(
+            token,
+            {"expires_at": 9999999999, "used_at": None, "status": "pending"},
+            "https://bot.example.test",
+        )
+        self.assertIn('role="tablist"', page)
+        self.assertIn('role="tab"', page)
+        self.assertIn('role="tabpanel"', page)
+        self.assertIn('aria-selected="true"', page)
+        self.assertIn('aria-selected="false"', page)
+        self.assertIn('id="copyFeedback" class="copy-feedback" role="status" aria-live="polite"', page)
+        self.assertIn("event.key === 'ArrowRight'", page)
+        self.assertIn("event.key === 'Home'", page)
+        self.assertIn("event.key === 'End'", page)
+        self.assertIn("document.execCommand('copy') === true", page)
+        self.assertIn("复制失败，请选中绑定链接", page)
+        self.assertNotIn("alert(", page)
+
+    def test_bind_token_and_base_url_are_safe_in_html_and_javascript_contexts(self):
+        token = '</script><img src=x onerror=alert(1)>"&'
+        base_url = 'https://bot.example.test/" autofocus onfocus="alert(2)<script>'
+        page = render_bind_page(
+            token,
+            {"expires_at": 9999999999, "used_at": None, "status": "pending"},
+            base_url,
+        )
+        script_token = re.search(r"var token = (.*);", page)
+        self.assertIsNotNone(script_token)
+        self.assertEqual(json.loads(script_token.group(1)), token)
+        self.assertNotIn('</script><img src=x onerror=alert(1)>', page)
+        self.assertNotIn('<script>alert(2)', page)
+
+        class InputParser(HTMLParser):
+            attrs = None
+
+            def handle_starttag(self, tag, attrs):
+                values = dict(attrs)
+                if tag == "input" and values.get("id") == "bindUrlBox":
+                    self.attrs = values
+
+        parser = InputParser()
+        parser.feed(page)
+        self.assertIsNotNone(parser.attrs)
+        self.assertEqual(parser.attrs["value"], f"{base_url.rstrip('/')}/bind/{token}")
+        self.assertNotIn("onfocus", parser.attrs)
 
 
 class TestBindWebServiceAPI(IsolatedAsyncioTestCase):

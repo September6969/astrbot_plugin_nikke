@@ -46,9 +46,12 @@ def analyze(payload, *, member_id=None, season_id=None, historical=False, attend
                     return integer(row.get(key))
                 except ValueError:
                     return None
+            final_hit = row.get("is_final_hit")
+            if type(final_hit) is not bool:
+                final_hit = None
             record = RaidAttackData(str(row.get("boss_id") or ""), known_number("day"),
                 known_number("difficulty"), known_number("level"), known_number("step"),
-                damage, row.get("is_final_hit") is True, [], details_complete=False)
+                damage, final_hit, [], details_complete=False)
         participant = groups.setdefault(who, RaidParticipantSummary(str(row.get("nickname") or "成员")))
         participant.attacks.append(record)
         participant.total_damage += damage

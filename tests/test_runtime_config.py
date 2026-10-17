@@ -2,11 +2,13 @@
 """验证插件运行时配置的边界合同。"""
 
 import asyncio
+import logging
 import unittest
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 from astrbot_plugin_nikke.core.config import normalize_runtime_config, read_schedule_clock
+import astrbot_plugin_nikke.core.config as runtime_config
 from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
 from astrbot_plugin_nikke.core.lifecycle.scheduler import RuntimeScheduler
 
@@ -99,3 +101,25 @@ class RuntimeConfigTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_ui_renderer_legacy_values_converge_to_t2i_and_warn_once_without_value(
+    caplog, monkeypatch
+):
+    monkeypatch.setattr(runtime_config, "_UI_RENDERER_DEPRECATION_LOGGED", False)
+    with caplog.at_level(logging.WARNING, logger="astrbot_plugin_nikke.core.config"):
+        assert normalize_runtime_config({})["ui_renderer"] == "t2i"
+        assert normalize_runtime_config({"ui_renderer": "T2I"})["ui_renderer"] == "t2i"
+        assert normalize_runtime_config({"ui_renderer": "pillow"})["ui_renderer"] == "t2i"
+        assert normalize_runtime_config(
+            {"ui_renderer": "synthetic-private-config"}
+        )["ui_renderer"] == "t2i"
+
+    warnings = [
+        record.getMessage()
+        for record in caplog.records
+        if record.name == "astrbot_plugin_nikke.core.config"
+    ]
+    assert len(warnings) == 1
+    assert "已弃用" in warnings[0]
+    assert "synthetic-private-config" not in warnings[0]

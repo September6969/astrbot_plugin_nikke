@@ -1,5 +1,5 @@
 {% macro section_header(title, detail='') %}<div class="section-header"><span>{{ title }}</span>{% if detail in ['AVAILABLE','PARTIAL','UNAVAILABLE','UNKNOWN','EMPTY'] %}{{ status_badge(detail) }}{% else %}<span class="muted">{{ detail }}</span>{% endif %}</div>{% endmacro %}
-{% macro status_badge(text) %}<span class="badge state-{{ {'AVAILABLE':'available','PARTIAL':'partial','UNAVAILABLE':'unavailable','UNKNOWN':'unknown','EMPTY':'empty'}.get(text, 'neutral') }}">{{ text }}</span>{% endmacro %}
+{% macro status_badge(text, label=none) %}<span class="badge state-{{ {'AVAILABLE':'available','PARTIAL':'partial','UNAVAILABLE':'unavailable','UNKNOWN':'unknown','EMPTY':'empty','RATE_LIMITED':'rate-limited','ERROR':'error'}.get(text, 'neutral') }}">{{ label if label is not none else text }}</span>{% endmacro %}
 {% macro mode_badge(text) %}<span class="badge mode">{{ text }}</span>{% endmacro %}
 {% macro metric(label, value) %}<div><div class="metric-label">{{ label }}</div><div class="metric-value">{{ value }}</div></div>{% endmacro %}
 {% macro divider() %}<div class="divider"></div>{% endmacro %}

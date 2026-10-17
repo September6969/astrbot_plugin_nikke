@@ -90,6 +90,7 @@ class CharacterInfoData:
     name: str
     title: str
     rows: tuple[tuple[str, str], ...]
+    resource_id: str | None = None
 
 
 class CharacterNotFound(ValueError):
@@ -172,29 +173,37 @@ class CharacterApplication:
 
     def name_map(self, directory: Sequence[Mapping[str, Any]]) -> dict[str, str]:
         """按目录内容指纹缓存 roster 展示名，避免目录变化后复用陈旧结果。"""
-        entries = [
-            (
-                str(item.get("name_code", "")),
-                str(item.get("name_zh_cn", "")),
-                str(item.get("name_zh_tw", "")),
-                str(item.get("name_cn", "")),
-                str(item.get("name_en", "")),
+        entries = []
+        for item in directory:
+            if not isinstance(item, Mapping):
+                continue
+            raw_code = item.get("name_code")
+            code = str(raw_code).strip() if raw_code is not None else ""
+            if not code:
+                continue
+            display = self._identity.display_name(self._identity.enrich(dict(item)))
+            entries.append(
+                (
+                    code,
+                    str(item.get("name_zh_cn", "")),
+                    str(item.get("name_zh_tw", "")),
+                    str(item.get("name_cn", "")),
+                    str(item.get("name_en", "")),
+                    display,
+                )
             )
-            for item in directory
-            if isinstance(item, Mapping)
-        ]
         payload = json.dumps(entries, ensure_ascii=False, separators=(",", ":"))
         fingerprint = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         cached = self._name_map_cache
         if cached is not None and cached[0] == fingerprint:
             return cached[1]
 
+        candidates: dict[str, set[str]] = {}
+        for code, _zh_cn, _zh_tw, _name_cn, _name_en, display in entries:
+            candidates.setdefault(code, set()).add(display)
         mapping = {
-            str(item.get("name_code", "")): self._identity.display_name(
-                self._identity.enrich(item)
-            )
-            for item in directory
-            if isinstance(item, Mapping)
+            code: next(iter(displays)) if len(displays) == 1 else "身份待核验"
+            for code, displays in candidates.items()
         }
         self._name_map_cache = (fingerprint, mapping)
         return mapping
@@ -246,6 +255,11 @@ class CharacterApplication:
                 ("武器", str(item.get("weapon") or "未知")),
                 ("爆裂阶段", str(item.get("burst") or "未知")),
                 ("企业", str(item.get("corporation") or "未知")),
+            ),
+            resource_id=(
+                str(item.get("resource_id"))
+                if item.get("resource_id") not in (None, "")
+                else None
             ),
         )
 

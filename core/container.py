@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from ..features.account.application import AccountApplication
     from ..features.character.builder import CharacterCardBuilder
     from ..integrations.blablalink.client import BlaBlaClient
-    from ..ui.primitives import CardRenderer
     from .asset_manager import AssetManager
     from .feedback import DelayedFeedbackManager
 
@@ -41,11 +40,6 @@ from ..features.tarot.service import TarotDataError, TarotService
 from ..features.tower.application import TowerApplication
 from ..features.voice.application import VoiceApplication
 from ..integrations.web.service import BindingWebService
-from ..ui.renderers import (
-    CampaignHistoryRenderer,
-    ProfileCardRenderer,
-    UnionRaidRenderer,
-)
 from .providers.account import create_account_application
 from .providers.announcement import create_announcement_resources
 from .providers.campaign import create_campaign_resources
@@ -77,19 +71,15 @@ class ServiceContainer:
     character_application: CharacterApplication
     character_stat_resources: CharacterStatResourceLoader
     client: BlaBlaClient
-    renderer: CardRenderer
     character_builder: CharacterCardBuilder
     character_identity: CharacterDirectoryResolver
     asset_manager: AssetManager
     campaign_resolver: CampaignStageResolver
     profile_builder: ProfileBuilder
     profile_application: ProfileApplication
-    profile_renderer: ProfileCardRenderer
     raid_builder: UnionRaidBuilder
     raid_application: RaidApplication
-    raid_renderer: UnionRaidRenderer
     campaign_builder: CampaignHistoryBuilder
-    campaign_renderer: CampaignHistoryRenderer
     campaign_application: CampaignApplication
     cdk_service: CdkService
     runtime_coordinator: RuntimeCoordinator
@@ -119,7 +109,6 @@ def create_container(
     store = shared.store
     account_application = create_account_application(store)
     client = shared.client
-    renderer = shared.renderer
     user_aliases = (config or {}).get("custom_character_aliases")
     clock = lambda: datetime.now(timezone(timedelta(hours=8)))
     character = create_character_resources(
@@ -133,23 +122,16 @@ def create_container(
     )
     campaign = create_campaign_resources(
         plugin_dir,
-        data_dir,
         account_reader=store,
         gateway=client,
-        asset_manager=shared.asset_manager,
         clock=clock,
     )
     profile = create_profile_resources(
-        plugin_dir,
-        data_dir,
         gateway=client,
         campaign_resolver=campaign.resolver,
-        asset_manager=shared.asset_manager,
         clock=clock,
     )
     raid = create_raid_resources(
-        plugin_dir,
-        data_dir,
         account_reader=store,
         gateway=client,
         clock=clock,
@@ -185,19 +167,15 @@ def create_container(
         character_application=character.application,
         character_stat_resources=character.stat_resources,
         client=client,
-        renderer=renderer,
         character_builder=character.builder,
         character_identity=character.identity,
         asset_manager=asset_manager,
         campaign_resolver=campaign.resolver,
         profile_builder=profile.builder,
         profile_application=profile.application,
-        profile_renderer=profile.renderer,
         raid_builder=raid.builder,
         raid_application=raid.application,
-        raid_renderer=raid.renderer,
         campaign_builder=campaign.builder,
-        campaign_renderer=campaign.renderer,
         campaign_application=campaign.application,
         cdk_service=cdk_service,
         runtime_coordinator=runtime_coordinator,
