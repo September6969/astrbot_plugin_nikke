@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import math
 import re
-from typing import Any, Protocol
+from typing import Any, Mapping, Protocol
 
 from .models import (
     CharacterCardData,
@@ -46,6 +46,12 @@ class UnknownOptionObserver(Protocol):
 
 
 SLOTS = ("head", "torso", "arm", "leg")
+
+
+def _slot_equipped(detail: Mapping[str, Any], slot: str) -> bool:
+    """该槽位是否已装备；单卡解析与总表词条完整性判定共用同一口径。"""
+    return detail.get(f"{slot}_equip_tid") not in (None, "", 0, "0")
+
 OPTION_NAMES = {
     "statatk": ("攻击力增加", "percent"),
     "incelementdmg": ("优越代码伤害增加", "percent"),
@@ -162,6 +168,25 @@ def resolve_equipped_costume(
             return CostumeSelection(costume_id=s, source=source, kind="unknown")
 
     return CostumeSelection(costume_id=0, source="default", kind="default")
+
+
+class _OptionSummaryInput:
+    """喂给 build_summary 的轻量输入，只带装备词条与武器基础值。"""
+
+    __slots__ = ("equipment", "base_ammo", "base_charge_seconds", "weapon_base_source")
+
+    def __init__(
+        self,
+        *,
+        equipment: dict[str, EquipmentData],
+        base_ammo: int | None,
+        base_charge_seconds: str | None,
+        weapon_base_source: str | None,
+    ) -> None:
+        self.equipment = equipment
+        self.base_ammo = base_ammo
+        self.base_charge_seconds = base_charge_seconds
+        self.weapon_base_source = weapon_base_source
 
 
 class CharacterCardBuilder:
@@ -352,28 +377,18 @@ class CharacterCardBuilder:
             components=components,
         )
 
-    def build(
-        self,
-        *,
-        account: dict[str, Any],
-        directory: dict[str, Any],
-        payload: dict[str, Any],
-        fetched_at: str,
-        plugin_version: str,
-        display_name: str | None = None,
-    ) -> CharacterCardData:
-        roster = payload.get("roster_item", {}) or {}
+    def _parse_equipment(self, payload: Mapping[str, Any]) -> dict[str, EquipmentData]:
+        """只依据原始槽位字段解析四个装备位；单卡与总表 top-3 复用同一口径。"""
         detail = payload.get("detail", {}) or {}
         effects_map = {
             str(effect.get("id")): effect
             for effect in (payload.get("state_effects", []) or [])
         }
         equipment: dict[str, EquipmentData] = {}
-        totals: dict[tuple[str, str], float] = {}
 
         for slot in SLOTS:
             equipment_id = detail.get(f"{slot}_equip_tid")
-            equipped = equipment_id not in (None, "", 0, "0")
+            equipped = _slot_equipped(detail, slot)
             item = EquipmentData(
                 slot=slot,
                 equipment_id=str(equipment_id) if equipped else None,
@@ -405,11 +420,56 @@ class CharacterCardBuilder:
                     for component in option.components or (option,):
                         if component.unit == "unknown" and self.overload_tier_registry.resolve(option.option_id) is None:
                             self.unknown_ol_inventory.observe(option.option_id, component.raw_type)
+            equipment[slot] = item
+        return equipment
+
+    def option_summary(self, *, resource_id: Any, payload: Mapping[str, Any]) -> dict[str, Any]:
+        """复用单卡词条汇总口径，只解析装备，不计算面板或发起网络请求。"""
+        from .replica import build_summary
+        from .weapon_bases import card_fields
+
+        detail = payload.get("detail")
+        # 只有上游确实返回了四个装备槽字段，空结果才能判定为“明确无词条”；
+        # 缺失装备字段只表示未知，绝不能显示为无词条或零阶。
+        equipment_present = isinstance(detail, Mapping) and all(
+            f"{slot}_equip_tid" in detail for slot in SLOTS
+        )
+        # 已装备槽位还要求三个词条字段齐全；词条字段缺失只能表示未知，
+        # 有已识别词条时由上层降级为 partial，绝不判定为“无词条”。
+        options_fields_present = isinstance(detail, Mapping) and all(
+            not _slot_equipped(detail, slot)
+            or all(f"{slot}_equip_option{index}_id" in detail for index in (1, 2, 3))
+            for slot in SLOTS
+        )
+        equipment = self._parse_equipment(payload)
+        summary_input = _OptionSummaryInput(
+            equipment=equipment, **card_fields(resource_id)
+        )
+        summary = build_summary(summary_input)
+        summary["equipment_present"] = equipment_present
+        summary["options_fields_present"] = options_fields_present
+        return summary
+
+    def build(
+        self,
+        *,
+        account: dict[str, Any],
+        directory: dict[str, Any],
+        payload: dict[str, Any],
+        fetched_at: str,
+        plugin_version: str,
+        display_name: str | None = None,
+    ) -> CharacterCardData:
+        roster = payload.get("roster_item", {}) or {}
+        detail = payload.get("detail", {}) or {}
+        equipment = self._parse_equipment(payload)
+        totals: dict[tuple[str, str], float] = {}
+        for slot in SLOTS:
+            for option in equipment[slot].options:
                 for component in option.components or (option,):
                     if component.unit in {"percent", "flat"}:
                         key = (component.display_name, component.unit)
                         totals[key] = totals.get(key, 0.0) + component.value
-            equipment[slot] = item
 
         option_totals = [
             OptionSummary(display_name=name, unit=unit, value=value)

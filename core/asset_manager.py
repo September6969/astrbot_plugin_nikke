@@ -182,6 +182,9 @@ class AssetManager:
     def get_lineup_portrait(self, tid=None, costume_id=None, character_id=None, avatar_id=None):
         return self._characters.get_lineup_portrait(tid, costume_id, character_id, avatar_id)
 
+    def get_lineup_portrait_by_resource_id(self, resource_id):
+        return self._characters.get_lineup_portrait_by_resource_id(resource_id)
+
     def resolve_lineup_portrait(self, **kwargs):
         return self._characters.resolve_lineup_portrait(**kwargs)
 

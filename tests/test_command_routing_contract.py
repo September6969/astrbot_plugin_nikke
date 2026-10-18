@@ -101,6 +101,7 @@ async def test_chinese_command_routes_keep_use_case_parameters() -> None:
         ("日常", "自动", "开", "daily", {"action": "自动", "value": "开", "scope": "community"}),
         ("兑换", "CODE-1", "", "cdk", {"operation": "single", "code": "CODE-1"}),
         ("日程", "7", "", "calendar", {"horizon": "7", "page": ""}),
+        ("日程", "14", "2", "calendar", {"horizon": "14", "page": "2"}),
         ("公告", "", "", "announcement", {"operation": "view"}),
         ("管理", "健康", "", "account", {"operation": "admin", "action": "健康", "value": "", "unified_msg_origin": "group:synthetic"}),
         ("账号", "绑定", "", "account", {"operation": "account", "action": "绑定", "value": "", "unified_msg_origin": "group:synthetic"}),
@@ -170,6 +171,15 @@ async def test_all_legacy_flat_aliases_remain_routed() -> None:
         parameters = dict(context.parameters)
         for key, value in expected_parameters.items():
             assert parameters[key] == value, (command, key, parameters)
+
+
+@pytest.mark.asyncio
+async def test_query_help_lists_the_supported_tarot_help_action() -> None:
+    plugin, _ = _plugin_with_recorders()
+
+    result = await _route(plugin, "帮助", "查询")
+
+    assert "/妮姬 塔罗 [单抽|三张|今日|状态|帮助]" in result[0][1]
 
 
 def test_broad_class_level_forwarders_are_absent() -> None:

@@ -12,7 +12,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from astrbot_plugin_nikke.integrations.blablalink.client import (
     BlaBlaClient,
@@ -20,7 +20,6 @@ from astrbot_plugin_nikke.integrations.blablalink.client import (
     CdkRedemptionResult,
     CookieExpired,
 )
-from astrbot_plugin_nikke.ui.primitives import CardRenderer
 from astrbot_plugin_nikke.core.storage import NikkeStore
 from astrbot_plugin_nikke.features.account.status import (
     BIND_SESSION_PENDING,
@@ -529,13 +528,6 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(BlaBlaError):
             await client.validate_cookie("game_token=x; game_uid=1")
 
-class RendererTests(unittest.TestCase):
-    def test_summary_card(self):
-        with tempfile.TemporaryDirectory() as td:
-            renderer = CardRenderer(td, td)
-            path = renderer.render_summary([(f"用户{i}", "签到成功") for i in range(25)])
-            self.assertTrue(Path(path).exists())
-            self.assertGreater(Path(path).stat().st_size, 1000)
 
 
 class ExtensionTests(unittest.TestCase):
@@ -1003,10 +995,9 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             name_map={"alice": "爱丽丝"},
         )
         application = Mock(roster=AsyncMock(return_value=data))
-        renderer = Mock(render_roster=Mock(return_value="roster.png"))
         plugin = make_plugin_shell()
         plugin.services.character_application = application
-        plugin.services.renderer = renderer
+        plugin.presentation.render_roster = AsyncMock(return_value="roster.png")
         plugin._directory = directory
         inject_character_handler(plugin)
 
@@ -1014,11 +1005,9 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(result, ["roster.png"])
         application.roster.assert_awaited_once_with("10001", tuple(directory))
-        renderer.render_roster.assert_called_once_with(
-            "测试指挥官", data.characters, data.name_map
-        )
+        plugin.presentation.render_roster.assert_awaited_once_with(data)
 
-    async def test_info_command_refuses_ambiguous_identity_instead_of_rendering_first(self):
+    async def test_info_command_refuses_ambiguous_identity_instead_of_returning_first_candidate(self):
         from unittest.mock import Mock
 
         from astrbot_plugin_nikke.main import NikkePlugin
@@ -1033,10 +1022,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
                 side_effect=CharacterAmbiguousMatch(("爱丽丝", "仙境兔女郎"))
             )
         )
-        renderer = Mock()
         plugin = make_plugin_shell()
         plugin.services.character_application = application
-        plugin.services.renderer = renderer
         plugin._directory = []
         inject_character_handler(plugin)
 
@@ -1045,7 +1032,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(result), 1)
         self.assertIn("找到多个角色", result[0])
         self.assertIn("仙境兔女郎", result[0])
-        renderer.render.assert_not_called()
 
     async def test_terminate_delegates_to_runtime_coordinator(self):
         from astrbot_plugin_nikke.main import NikkePlugin

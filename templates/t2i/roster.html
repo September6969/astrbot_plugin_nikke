@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1200, initial-scale=1">
+<style>
+<!-- SHARED_CSS -->
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1200px; background: #eef1f4; color: #202a33; }
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+.roster { width: 1200px; height: {{ canvas.height }}px; padding: 36px 40px 28px; background: #eef1f4; }
+.roster-header { display: flex; justify-content: space-between; align-items: end; min-height: 176px; padding: 0 4px 28px; }
+.eyebrow { color: #438b9a; font-size: 20px; font-weight: 700; letter-spacing: 2px; }
+.roster-title { margin: 10px 0 0; color: #202a33; font-size: 48px; line-height: 1.15; font-weight: 800; }
+.roster-commander { margin-top: 12px; color: #65727e; font-size: 24px; }
+.roster-count { max-width: 330px; padding: 12px 18px; border-radius: 14px; background: #ffffff; color: #4b626e; font-size: 22px; font-weight: 700; text-align: right; }
+.roster-grid { display: grid; grid-template-columns: 60px 70px minmax(220px, 1fr) 84px 190px 220px 165px; align-items: center; column-gap: 8px; }
+.roster-labels { min-height: 46px; padding: 0 10px 8px; color: #6f7d87; font-size: 28px; line-height: 1; font-weight: 700; }
+.roster-labels span { white-space: nowrap; }
+.roster-row { min-height: 100px; margin-bottom: 8px; padding: 12px 14px; border: 1px solid #e1e7eb; border-radius: 16px; background: #fff; }
+.roster-row.top-three { border-color: #9fcbd0; background: linear-gradient(90deg, #f4fbfb, #ffffff 46%); }
+.rank { color: #87949c; font-size: 22px; font-weight: 800; text-align: center; }
+.top-three .rank { color: #287f8d; }
+.avatar { display: grid; width: 72px; height: 72px; overflow: hidden; place-items: center; border: 2px solid #d6e2e5; border-radius: 50%; background: #e7eef0; color: #61747b; font-size: 24px; font-weight: 800; }
+.avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.identity { min-width: 0; }
+.name { color: #25313b; font-size: 24px; line-height: 1.22; font-weight: 750; overflow-wrap: anywhere; }
+.identity-note { margin-top: 5px; color: #849099; font-size: 15px; }
+.metric { min-width: 0; color: #36434d; font-size: 20px; line-height: 1.25; font-weight: 650; text-align: center; overflow-wrap: anywhere; }
+.combat { color: #1d5865; font-size: 23px; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.skills { color: #53626c; font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.progress { color: #56666e; font-size: 28px; line-height: 1.15; }
+.progress span { display: block; }
+.roster-options { grid-column: 1 / -1; margin-top: 14px; padding: 12px; border: 1px solid #cfe0e3; border-radius: 12px; background: #f6fbfb; }
+.options-head { color: #287f8d; font-size: 20px; line-height: 30px; font-weight: 750; }
+.options-head strong { font-size: 24px; font-variant-numeric: tabular-nums; }
+.options-head small { margin-left: 2px; font-size: 16px; }
+.options-message { color: #5c6c74; }
+.options-grid { margin-top: 6px; }
+.options-row { display: grid; grid-template-columns: minmax(300px, 1fr) 230px 110px; align-items: baseline; column-gap: 10px; min-height: 30px; margin-bottom: 6px; padding: 0 12px; border: 1px solid #e4edef; border-radius: 8px; background: #fff; line-height: 30px; }
+.options-row:last-child { margin-bottom: 0; }
+.opt-label { color: #36434d; font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
+.opt-note { margin-left: 4px; color: #8a949b; font-size: 15px; font-weight: 600; }
+.opt-value { color: #1d5865; font-size: 21px; font-weight: 750; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.opt-tier { color: #4a626b; font-size: 20px; font-weight: 700; text-align: right; white-space: nowrap; }
+.empty { display: grid; min-height: 120px; place-items: center; border: 1px dashed #b8c6cb; border-radius: 16px; background: #fff; color: #697984; font-size: 24px; }
+.roster-footer { margin-top: 18px; padding: 14px 4px 0; border-top: 1px solid #d4dde1; color: #78858e; font-size: 17px; }
+</style>
+</head>
+<body>
+<main class="roster" data-total="{{ total_count }}" data-shown="{{ shown_count }}">
+  <header class="roster-header">
+    <div>
+      <div class="eyebrow">NIKKE / BLABLALINK</div>
+      <h1 class="roster-title">妮姬练度一览</h1>
+      <div class="roster-commander">{{ commander }}</div>
+    </div>
+    <div class="roster-count">{{ range_label }}</div>
+  </header>
+  {% if rows %}
+  <div class="roster-grid roster-labels" aria-hidden="true">
+    <span>排名</span><span>头像</span><span>妮姬</span><span>等级</span><span>战力</span><span>技能 1 / 2 / 爆裂</span><span>突破 / 核心</span>
+  </div>
+  <section class="roster-list">
+  {% for row in rows %}
+    <article class="roster-grid roster-row{% if row.top_three %} top-three{% endif %}" style="min-height:{{ row.row_height }}px" data-rank="{{ row.rank }}" data-code="{{ row.name_code }}">
+      <div class="rank">{{ "%02d"|format(row.rank) }}</div>
+      <div class="avatar" data-identity="{{ 'verified' if row.identity_verified else 'unknown' }}">
+        {% if row.avatar_data_uri %}<img src="{{ row.avatar_data_uri }}" alt="{{ row.name }}">
+        {% else %}<span>{{ row.avatar_placeholder }}</span>{% endif %}
+      </div>
+      <div class="identity">
+        <div class="name">{{ row.name }}{% if row.show_code %} <small>#{{ row.name_code }}</small>{% endif %}</div>
+        {% if not row.identity_verified %}<div class="identity-note">{{ row.identity_note }}</div>{% elif row.avatar_note %}<div class="identity-note">{{ row.avatar_note }}</div>{% endif %}
+      </div>
+      <div class="metric">{{ row.level }}</div>
+      <div class="metric combat">{{ row.combat }}</div>
+      <div class="metric skills">{{ row.skills }}</div>
+      <div class="metric progress"><span>{{ row.grade }}</span><span>{{ row.core }}</span></div>
+      {% if row.options %}
+      <div class="roster-options" data-status="{{ row.options.status }}">
+        {% if row.options.has_rows %}
+        <div class="options-head">【{{ row.options.label }}】<strong>{{ row.options.total }}</strong><small>阶</small>{% if not row.options.complete %} · 部分词条未识别{% endif %}</div>
+        <div class="options-grid">
+          {% for opt in row.options.rows %}
+          <div class="options-row"><span class="opt-label">【{{ opt.label }}】{% if opt.note %}<small class="opt-note">{{ opt.note }}</small>{% endif %}</span><strong class="opt-value">{{ opt.value }}</strong><span class="opt-tier">{{ opt.tier }}</span></div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="options-head options-message">词条 · {{ row.options.message }}</div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </article>
+  {% endfor %}
+  </section>
+  {% else %}
+  <div class="empty">未获取到角色信息</div>
+  {% endif %}
+  <footer class="roster-footer">来源 BlaBlaLink · 按战力、等级排序 · 最多展示 20 名 · 技能“—”表示未返回，“?”表示无法识别</footer>
+</main>
+</body>
+</html>

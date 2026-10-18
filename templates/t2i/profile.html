@@ -1,17 +1,58 @@
 {% macro status_badge(text) %}<span class="badge state-{{ text|lower }}">{{ {'AVAILABLE':'已获取','PARTIAL':'部分数据','UNAVAILABLE':'暂不可用','UNKNOWN':'未知','EMPTY':'暂无记录'}.get(text, text) }}</span>{% endmacro %}
 {% macro section_header(title, detail='') %}<div class="section-header"><span>{{ title }}</span>{% if detail %}{{ status_badge(detail) }}{% endif %}</div>{% endmacro %}
-{% macro key_values(rows, class_name='') %}<div class="kv-grid {{ class_name }}">{% for row in rows %}<div class="kv">{% if row.icon_data_uri %}<img class="resource-icon" src="{{ row.icon_data_uri }}" alt="">{% endif %}<span>{{ row.label }}</span><div><strong>{{ row.value|replace('Unknown', '未知') }}</strong></div></div>{% endfor %}</div>{% endmacro %}
+{% macro key_values(rows, class_name='') %}<div class="kv-grid {{ class_name }}">{% for row in rows %}<div class="kv" data-field="{{ row.label }}"><span>{{ row.label }}</span><strong>{{ row.value|replace('Unknown', '未知') }}</strong></div>{% endfor %}</div>{% endmacro %}
+{% macro resource_grid(rows, class_name='') %}<div class="resource-grid {{ class_name }}">{% for row in rows %}<article class="resource-card" data-field="{{ row.label }}">{% if row.icon_data_uri %}<span class="resource-icon-slot"><img src="{{ row.icon_data_uri }}" alt=""></span>{% else %}<span class="resource-icon-slot" aria-hidden="true"></span>{% endif %}<span class="resource-copy"><span class="resource-label">{{ row.label }}{% if row.detail %}（{{ row.detail }}）{% endif %}</span><strong>{{ row.value|replace('Unknown', '未知') }}</strong></span></article>{% endfor %}</div>{% endmacro %}
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1080"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'"><style><!-- SHARED_CSS -->
-.profile {width:1080px;padding:32px 38px;background:#f5f7fa;color:#242a32;--muted:#626c77;--line:#c7ccd0;--text:#242a32;}
-.profile header {margin-bottom:24px;}.profile h1 {font-size:35px;line-height:1.5;overflow-wrap:anywhere;margin-top:10px;}.profile section {border-top:1px solid var(--line);padding:18px 0;}.profile .today {background:#eaf1f8;color:#233449;padding:24px 28px;border-radius:18px;border:1px solid #cedbe8;--muted:#526579;--line:#cedbe8;}.today h2 {font-size:30px;letter-spacing:0;}.today-head {display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:8px;}
-.kv-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 38px;margin-top:14px;}.kv {display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,1fr);gap:15px;padding:6px 0;align-items:start;font-size:24px;}.kv>span {color:var(--muted);overflow-wrap:anywhere;}.kv>div {text-align:right;overflow-wrap:anywhere;}.kv strong {font-size:26px;font-weight:600;}.kv small {display:block;font-size:14px;color:var(--muted);margin-top:5px;}.today .kv strong {font-size:30px;}
-.columns {display:grid;grid-template-columns:1fr 1fr;gap:38px;}.columns .kv-grid {grid-template-columns:1fr;}.resources {grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;}.resources .kv {display:block;}.resources .kv>div {text-align:left;margin-top:8px;}.resources .kv strong {font-size:26px;}.resource-icon {width:52px;height:52px;object-fit:contain;margin-bottom:8px;}.quiet {font-size:18px;color:var(--muted);margin:16px 0;}.account .kv {font-size:22px;}.account .kv strong {font-size:24px;}.profile footer {margin-top:20px;}.profile .footer-meta {font-size:20px;}
-.storage {padding:16px 0;border-bottom:1px solid #cedbe8;}.storage-label {display:flex;justify-content:space-between;font-size:25px;gap:24px;}.storage-label strong {font-size:36px;}.storage-track {height:12px;background:#d3dfeb;margin-top:16px;}.storage-track span {display:block;height:100%;background:#527fad;}.storage.warning .storage-track span {background:#e9b85a;}.storage.strong-warning .storage-track span {background:#e3a1a1;}.storage small {display:block;color:var(--muted);margin-top:8px;font-size:15px;}
-</style></head><body><main class="profile"><header><div class="eyebrow muted">NIKKE · 个人资料</div><h1>{{ commander }}</h1></header>
+body {margin:0;background:#f3f6fa;}
+.profile {width:1080px;padding:34px 38px 30px;background:#f3f6fa;color:#243143;--muted:#657386;--line:#d5dee8;--text:#243143;--surface:#fff;--blue:#3b719d;}
+.profile header {margin-bottom:18px;}
+.profile-identity {padding:28px 30px 24px;background:linear-gradient(140deg,#fff 0%,#edf4fa 100%);border:1px solid #d6e1ec;border-radius:20px;}
+.profile .eyebrow {font-size:20px;font-weight:700;letter-spacing:2px;color:#456985;}
+.profile h1 {font-size:48px;line-height:1.3;overflow-wrap:anywhere;margin:12px 0 22px;color:#1e2d3d;}
+.identity-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.identity-grid.kv-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
+.identity-grid .kv {display:flex;flex-direction:column;gap:4px;min-width:0;padding:14px 16px;background:#fff;border:1px solid #dce5ed;border-radius:14px;}
+.identity-grid .kv>span {color:var(--muted);font-size:22px;line-height:1.4;}
+.identity-grid .kv>strong {align-self:flex-start;margin-top:2px;color:#274f70;font-size:52px;line-height:1.15;text-align:left;white-space:nowrap;}
+.identity-grid [data-field="区服"]>strong {font-size:28px;}
+.identity-grid [data-field="部队总战力"]>strong {font-size:42px;}
+.profile section {background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:0 0 14px;}
+.profile .today {background:#eaf2f9;color:#233b52;padding:24px 28px;border-color:#cfdeeb;--muted:#526579;--line:#cedbe8;}
+.today h2 {font-size:30px;letter-spacing:0;}
+.today-head {display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:8px;}
+.section-header {display:flex;justify-content:space-between;align-items:center;gap:16px;color:#2b4054;font-size:28px;font-weight:700;line-height:1.35;margin-bottom:10px;}
+.kv-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 30px;margin-top:10px;}
+.kv {display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,1fr);gap:15px;padding:7px 0;align-items:start;font-size:26px;line-height:1.4;}
+.kv>span {color:var(--muted);overflow-wrap:anywhere;}
+.kv>strong {text-align:right;overflow-wrap:anywhere;font-size:30px;font-weight:650;color:#243143;}
+.columns {display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.columns section {margin-bottom:14px;}
+.columns .kv-grid {grid-template-columns:1fr;gap:2px 0;}
+.resource-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 12px;margin-top:12px;}
+.resource-card {display:flex;align-items:flex-start;gap:12px;min-width:0;padding:12px 10px;background:#f7f9fc;border:1px solid #e1e7ee;border-radius:13px;}
+.resource-icon-slot {display:flex;align-items:center;justify-content:center;flex:0 0 48px;width:48px;height:48px;}
+.resource-icon-slot img {display:block;max-width:48px;max-height:48px;object-fit:contain;}
+.resource-copy {display:flex;flex-direction:column;gap:6px;min-width:0;line-height:1.35;}
+.resource-label {color:var(--muted);font-size:22px;overflow-wrap:anywhere;}
+.resource-copy strong {color:#243143;font-size:29px;overflow-wrap:anywhere;}
+.quiet {font-size:18px;color:var(--muted);margin:14px 0;}
+.storage {padding:16px 0;border-bottom:1px solid #cedbe8;}
+.storage-label {display:flex;justify-content:space-between;font-size:25px;gap:24px;}
+.storage-label strong {font-size:36px;}
+.storage-track {height:12px;background:#d3dfeb;margin-top:16px;border-radius:8px;overflow:hidden;}
+.storage-track span {display:block;height:100%;background:#527fad;}
+.storage.warning .storage-track span {background:#d69b36;}
+.storage.strong-warning .storage-track span {background:#bf6d6d;}
+.storage small {display:block;color:var(--muted);margin-top:8px;font-size:15px;}
+.profile footer {margin-top:18px;padding:14px 4px 0;border-top:1px solid var(--line);}
+.profile .footer-meta {font-size:18px;color:var(--muted);line-height:1.55;}
+</style></head><body><main class="profile"><header><div class="profile-identity"><div class="eyebrow">妮姬 · 个人资料</div><h1>{{ commander }}</h1>{{ key_values(identity, 'identity-grid') }}</div></header>
 <section class="today"><div class="today-head"><h2>今日进度</h2>{{ status_badge(today_state) }}</div><div class="storage {{ storage.semantic }}"><div class="storage-label"><span>保管箱容量</span><strong>{{ storage.value|replace('Unknown', '未知') }}</strong></div>{% if storage.bar is not none %}<div class="storage-track"><span style="width:{{ storage.bar }}%"></span></div>{% endif %}</div>{{ key_values(today) }}</section>
 <section>{{ section_header('模拟室', simulation_state) }}{{ key_values(simulation) }}</section>
+<section>{{ section_header('主线进度') }}{{ key_values(campaign) }}</section>
 <div class="columns"><section>{{ section_header('前哨', outpost_state) }}{{ key_values(outpost) }}</section><section>{{ section_header('妮姬', roster_state) }}{{ key_values(roster) }}</section></div>
 <section>{{ section_header('循环室', research_state) }}{% if researches %}{{ key_values(researches) }}{% else %}<p class="quiet">暂无可展示研究记录</p>{% endif %}</section>
-<section>{{ section_header('收集', collection_state) }}{% if collection %}{{ key_values(collection) }}{% else %}<p class="quiet">暂无可展示收集记录</p>{% endif %}</section>
-<section>{{ section_header('资源', resource_state) }}{{ key_values(resources, 'resources') }}</section>
-<section class="account">{{ section_header('账号资料') }}{{ key_values(account) }}</section><footer class="footer-meta">更新于 {{ updated }} · UTC+8<br>查询联盟战况：/妮姬 突袭</footer></main></body></html>
+<section>{{ section_header('遗失物', collection_state) }}{% if collection %}{{ key_values(collection) }}{% else %}<p class="quiet">暂无可展示收集记录</p>{% endif %}</section>
+<section>{{ section_header('资源', resource_state) }}{{ resource_grid(resources, 'resources') }}</section>
+{% if extra_resources %}<section class="extra-resources">{{ section_header('其他已返回资源', resource_state) }}{{ resource_grid(extra_resources) }}</section>{% endif %}
+<section class="account">{{ section_header('账号补充信息') }}{{ key_values(account) }}</section><footer class="footer-meta">更新于 {{ updated }} · UTC+8<br>查询联盟战况：/妮姬 突袭</footer></main></body></html>

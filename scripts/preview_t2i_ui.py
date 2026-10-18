@@ -75,7 +75,7 @@ async def main():
             shutil.copyfile(path, target)
             from PIL import Image
             with Image.open(target) as image:
-                if image.size != (1600, 880):
+                if image.size != (1600, 900):
                     raise ValueError(f"画布溢出: {image.size}")
                 for percent in (30, 50):
                     image.resize((1600 * percent // 100, 880 * percent // 100), Image.Resampling.LANCZOS).save(args.output_dir / f"{name}-{percent}.png")

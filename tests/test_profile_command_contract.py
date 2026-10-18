@@ -7,11 +7,12 @@ import unittest
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
+from unittest.mock import AsyncMock, Mock
 
 from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
 from astrbot_plugin_nikke.features.profile.application import ProfileApplication
-from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
+from astrbot_plugin_nikke.features.profile.models import CurrencyItem, ProfileDashboardData
 from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaError, CookieExpired
 from astrbot_plugin_nikke.main import NikkePlugin
 
@@ -94,13 +95,13 @@ class _FakeBuilder:
         )
 
 
-class _FakeRenderer:
-    """记录 Pillow 回退调用而不产生真实文件。"""
+class _FakePresenter:
+    """记录 T2I 展示端口调用而不产生真实文件。"""
 
     def __init__(self):
         self.calls: list[ProfileDashboardData] = []
 
-    def render_profile(self, dashboard: ProfileDashboardData) -> str:
+    async def render_profile(self, dashboard: ProfileDashboardData) -> str:
         self.calls.append(dashboard)
         return "synthetic-profile.png"
 
@@ -131,7 +132,7 @@ def _plugin(*, account: dict[str, Any] | None, client: _FakeClient) -> tuple[Nik
     plugin = make_plugin_shell()
     store = _FakeStore(account)
     builder = _FakeBuilder()
-    renderer = _FakeRenderer()
+    renderer = _FakePresenter()
     feedback = _FakeFeedbackManager()
     plugin.services.store = store
     plugin.services.profile_application = ProfileApplication(
@@ -140,7 +141,6 @@ def _plugin(*, account: dict[str, Any] | None, client: _FakeClient) -> tuple[Nik
         clock=lambda: datetime(2026, 9, 22, 12, 0, tzinfo=timezone.utc),
         plugin_version="test-version",
     )
-    plugin.services.profile_renderer = renderer
     plugin.services.feedback_manager = feedback
     plugin.adapters.command = AstrBotCommandAdapter()
     plugin.handlers.profile = ProfileCommandHandler(
@@ -205,7 +205,7 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(renderer.calls, [])
         self.assertEqual(feedback.handles[0].cancel_count, 1)
 
-    async def test_t2i_failure_falls_back_to_pillow_without_recollecting(self):
+    async def test_t2i_failure_falls_back_to_text_without_recollecting(self):
         client = _FakeClient()
         plugin, store, builder, renderer, feedback = _plugin(
             account={"qq_id": "synthetic-qq", "cookie": "synthetic", "area_id": "3"},
@@ -220,12 +220,57 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
         plugin.presentation.try_t2i = failed_t2i
         results = [item async for item in plugin.me(_FakeEvent())]
 
-        self.assertEqual(results, [{"kind": "image", "path": "synthetic-profile.png"}])
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["kind"], "plain")
+        self.assertIn("个人资料 · 合成指挥官", results[0]["text"])
+        self.assertIn("图片生成失败", results[0]["text"])
         self.assertEqual(len(client.calls), 1)
         self.assertEqual(len(builder.calls), 1)
-        self.assertEqual(len(renderer.calls), 1)
+        self.assertEqual(len(renderer.calls), 0)
         self.assertEqual(store.invalidated, [])
         self.assertEqual(feedback.handles[0].cancel_count, 1)
+
+    async def test_image_failure_text_fallback_keeps_missing_zero_and_unknown_resources(self):
+        client = _FakeClient()
+        plugin, _store, _builder, renderer, _feedback = _plugin(
+            account={"qq_id": "synthetic-qq", "cookie": "synthetic", "area_id": "3"},
+            client=client,
+        )
+        dashboard = ProfileDashboardData(
+            commander_name="资源回退样例",
+            area_id="3",
+            synchro_level=None,
+            outpost_battle_level=None,
+            normal_campaign=None,
+            hard_campaign=None,
+            character_count=None,
+            max_level=None,
+            max_combat=None,
+            fetched_at="2026-09-13 12:00",
+            plugin_version="test-version",
+            commander_level=382,
+            team_combat=1_286_600,
+            currencies=[
+                CurrencyItem(99, 0, "珠宝", "gem", "0"),
+                CurrencyItem(99001, 12_345, "未知资源", None, "12.3K"),
+            ],
+        )
+        plugin.services.profile_application.build_dashboard = AsyncMock(
+            return_value=dashboard
+        )
+        plugin.presentation.try_t2i = AsyncMock(return_value=None)
+
+        results = [item async for item in plugin.me(_FakeEvent())]
+
+        assert len(results) == 1
+        text = results[0]["text"]
+        assert "珠宝：0" in text
+        assert "战斗数据辑：未返回" in text
+        assert "未识别资源（类型 99001）：12,345" in text
+        assert "图片生成失败" in text
+        assert client.calls == []
+        plugin.services.profile_application.build_dashboard.assert_awaited_once()
+        plugin.presentation.try_t2i.assert_awaited_once()
 
 
 if __name__ == "__main__":

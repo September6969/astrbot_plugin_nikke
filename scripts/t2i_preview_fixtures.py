@@ -39,7 +39,8 @@ def calendar_cases(directory):
         "landscape-kv-25-active",# 25 active + 1920x1080 KV -> 2 pages (1600px base cap)
         "no-kv-overflow",        # 25 active + no KV -> 2 pages (1600px fallback cap)
         "4-active-8-next",
-        "next-only", "unknown-end", "date-only", "critical", "partial", "no-background", "oversize-title"
+        "next-only", "upcoming-precision-mix", "unknown-end", "date-only", "critical", "partial", "no-background", "oversize-title",
+        "title-layout-boundaries"
     )
     result = {}
     for name in case_names:
@@ -424,6 +425,28 @@ def calendar_cases(directory):
                         start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
                     )
                     service._activities[event.event_id] = event
+            elif name == "upcoming-precision-mix":
+                for index, (precision, category) in enumerate((
+                    (TimePrecision.EXACT, "double_reward"),
+                    (TimePrecision.DATE_ONLY, "pass"),
+                    (TimePrecision.UNKNOWN, "event"),
+                ), start=1):
+                    start = NOW + timedelta(days=index + 1)
+                    end = start + timedelta(days=5)
+                    event = CanonicalEvent(
+                        id=f"precision-{index}",
+                        title=f"开始精度样例 {precision.value}",
+                        event_type=category,
+                        start_at=start,
+                        end_at=end,
+                        start_precision=precision.value,
+                        end_precision=precision.value,
+                        sources=["gamekee"],
+                        primary_source="gamekee",
+                        fetched_at=NOW,
+                        updated_at=NOW,
+                    )
+                    service._events[event.id] = event
             elif name == "unknown-end":
                 for index in range(3):
                     ev = CanonicalEvent(
@@ -440,12 +463,20 @@ def calendar_cases(directory):
                 for index in range(3):
                     start = NOW - timedelta(days=2)
                     end = NOW + timedelta(days=3 + index)
-                    event = CalendarActivity(
-                        str(index), f"日期级活动 {index + 1}", start, end,
-                        category="event", banner_url="",
-                        start_precision=TimePrecision.DATE_ONLY, end_precision=TimePrecision.DATE_ONLY
+                    event = CanonicalEvent(
+                        id=str(index),
+                        title=f"日期级活动 {index + 1}",
+                        event_type="event",
+                        start_at=start,
+                        end_at=end,
+                        start_precision=TimePrecision.DATE_ONLY.value,
+                        end_precision=TimePrecision.DATE_ONLY.value,
+                        sources=["gamekee"],
+                        primary_source="gamekee",
+                        fetched_at=NOW,
+                        updated_at=NOW,
                     )
-                    service._activities[event.event_id] = event
+                    service._events[event.id] = event
             elif name == "critical":
                 # 1 item ending in 30 minutes (critical urgency)
                 event0 = CalendarActivity(
@@ -472,7 +503,7 @@ def calendar_cases(directory):
                     )
                     service._activities[event.event_id] = event
             elif name == "oversize-title":
-                huge_title = "超规格长标题测试作战：这是一个异常超长的活动标题，旨在检验固定高度毛玻璃面板在极端长标题情况下的单项超页与两行视觉截断降级策略，不应该突破固定Panel边框，同时完整标题应当妥善保留在full_title中"
+                huge_title = "超规格长标题测试作战：" + ("这是一个异常超长的活动标题，用于检验完整换行、动态单项高度和分页预算，文字不得越出卡片。" * 2)
                 event0 = CalendarActivity(
                     "over-0", huge_title, NOW - timedelta(days=1), NOW + timedelta(days=3),
                     category="event", banner_url="",
@@ -485,6 +516,42 @@ def calendar_cases(directory):
                     start_precision=TimePrecision.EXACT, end_precision=TimePrecision.EXACT
                 )
                 service._activities[event1.event_id] = event1
+            elif name == "title-layout-boundaries":
+                cjk_title = "这是一个二十五个汉字左右的正常长度活动标题验证"
+                mixed_title = "NIKKE-活动Story限定2026联动招募"
+                wide_title = "🌌🌟🧡NIKKE联动"
+                upcoming_title = "即将开始标题必须完整显示以及所有信息都应与标题一起可读验证"
+                full_title = (
+                    "超长标题完整可见验证："
+                    + "周年庆剧情活动限定招募与专属角色故事，开放时间和奖励说明完整展示。" * 3
+                )
+                assert len(cjk_title) == len(mixed_title)
+                active_specs = (
+                    ("layout-active-cjk", cjk_title, NOW - timedelta(days=2), NOW + timedelta(hours=12)),
+                    ("layout-active-mixed", mixed_title, NOW - timedelta(days=2), NOW + timedelta(days=4)),
+                    ("layout-active-wide", wide_title, NOW - timedelta(days=2), NOW + timedelta(days=5)),
+                    ("layout-active-full", full_title, NOW - timedelta(days=2), NOW + timedelta(days=6)),
+                )
+                next_specs = (
+                    ("layout-next-cjk", upcoming_title, NOW + timedelta(days=1), NOW + timedelta(days=8)),
+                    ("layout-next-wide", wide_title, NOW + timedelta(days=2), NOW + timedelta(days=9)),
+                )
+                for event_id, title, start, end in (*active_specs, *next_specs):
+                    event = CanonicalEvent(
+                        id=event_id,
+                        title=title,
+                        event_type="event",
+                        start_at=start,
+                        end_at=end,
+                        start_precision=TimePrecision.EXACT.value,
+                        end_precision=TimePrecision.EXACT.value,
+                        sources=["gamekee"],
+                        primary_source="gamekee",
+                        fetched_at=NOW,
+                        updated_at=NOW,
+                        has_started_evidence=start <= NOW,
+                    )
+                    service._events[event.id] = event
 
         days_val = 7 if name == "7-days" else 30 if name == "30-days" else 14
         result[name] = CalendarT2IPayloadBuilder().build(service, days_val, NOW)
@@ -615,7 +682,12 @@ def profile_cases():
     from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
     from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegistry
     result = {}
-    for name in ("full", "full-current-model", "today-partial", "resource-partial", "research-long-names", "zero-empty", "unavailable", "long-commander"):
+    for name in (
+        "full", "full-current-model", "today-partial", "resource-partial",
+        "research-long-names", "zero-empty", "unavailable", "long-commander",
+        "extra-resources", "partial-extra-resources", "large-values",
+        "short-page", "iconless-resources",
+    ):
         basic = {"nickname": "合成指挥官 · 非真实账号", "lv": 382, "team_combat": 1286600, "character_count": 187,
                  "progress_normal_campaign": "46-40", "progress_hard_campaign": "35-36", "created_at": "2023-01-16T00:00:00+08:00",
                  "currencies": [{"type": kind, "value": (index + 1) * 12345} for index, kind in enumerate(CurrencyRegistry.DEFINITIONS)]}
@@ -655,9 +727,46 @@ def profile_cases():
             daily, outpost = None, {}
         if name == "long-commander":
             basic["nickname"] = "合成长指挥官名称，用于验证自然换行与信息层级。" * 4
-        data = ProfileBuilder().build(account={"area_id": "SYNTHETIC-AREA"} if name == "full-current-model" else {}, basic=basic, outpost=outpost, roster=[{"lv": 441, "combat": 269885}],
-                                      fetched_at="2026-09-13 12:00", plugin_version="T2I PREVIEW", daily=daily,
-                                      outpost_available=name != "unavailable", daily_available=name != "unavailable", roster_available=True)
+        if name == "extra-resources":
+            basic["currencies"].extend([
+                {"type": 99001, "value": 98765},
+                {"type": 99002, "value": 0},
+            ])
+        if name == "partial-extra-resources":
+            basic["currencies"] = [
+                {"type": 99, "value": 0},
+                {"type": 99003, "value": 123456},
+                {"type": "invalid", "value": 7},
+            ]
+        if name == "large-values":
+            basic["team_combat"] = 987_654_321
+            basic["lv"] = 999_999
+            basic["currencies"] = [
+                {"type": 99, "value": 9_876_543_210},
+                {"type": 12000, "value": 0},
+            ]
+        if name == "short-page":
+            basic = {"nickname": "短页资料样例"}
+            outpost = {}
+            daily = None
+        if name == "iconless-resources":
+            basic["currencies"] = [
+                {"type": 99, "value": 0},
+                {"type": 1000, "value": 100_000_000},
+            ]
+        short_page = name == "short-page"
+        data = ProfileBuilder().build(
+            account={"area_id": "SYNTHETIC-AREA"} if name == "full-current-model" else {},
+            basic=basic,
+            outpost=outpost,
+            roster=None if short_page else [{"lv": 441, "combat": 269885}],
+            fetched_at="2026-09-13 12:00",
+            plugin_version="T2I PREVIEW",
+            daily=daily,
+            outpost_available=None if short_page else name != "unavailable",
+            daily_available=None if short_page else name != "unavailable",
+            roster_available=None if short_page else True,
+        )
         if name == "research-long-names":
             for item in data.recycle_room_researches:
                 item.presentation_name = "合成长研究名称：同一行保留完整名称与等级"

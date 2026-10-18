@@ -8,7 +8,6 @@ from types import SimpleNamespace
 import pytest
 
 from astrbot_plugin_nikke.application.commands.character import (
-    CharacterRenderFailure,
     CharacterCommandHandler,
 )
 from astrbot_plugin_nikke.application.commands.contracts import CommandContext
@@ -45,7 +44,6 @@ async def test_character_card_request_and_existing_dto_presentation_are_single_p
         directory=lambda: directory,
         render_roster=lambda _data: None,
         render_card=lambda card: _image_path(card, presented),
-        render_info=lambda _data: None,
         invalidate_cookie=invalidated.append,
         start_feedback=lambda _context, _message: feedback,
     )
@@ -86,7 +84,6 @@ async def test_character_cookie_expiry_invalidates_once_and_feedback_is_cancelle
         directory=lambda: (),
         render_roster=lambda _data: None,
         render_card=lambda _data: None,
-        render_info=lambda _data: None,
         invalidate_cookie=invalidated.append,
         start_feedback=lambda _context, _message: feedback,
     )
@@ -106,21 +103,43 @@ async def test_character_cookie_expiry_invalidates_once_and_feedback_is_cancelle
 async def test_character_render_failure_is_explicit_and_does_not_repeat_domain_query():
     requests = []
     feedback = FeedbackHandle()
+    card = SimpleNamespace(
+        name_code="5065",
+        name_cn="皇冠",
+        name_en="Crown",
+        rarity="SSR",
+        element="水冷",
+        weapon="机枪",
+        burst="III",
+        corporation="米西利斯",
+        level=300,
+        combat=123456,
+        skill1_level=10,
+        skill2_level=10,
+        burst_skill_level=10,
+        grade=3,
+        core=2,
+        bond_level=30,
+        equipment={},
+        favorite_item=None,
+        cube=None,
+        option_totals=[],
+        fetched_at="2026-10-17 12:00",
+    )
 
     class Application:
         async def build_card(self, request):
             requests.append(request)
-            return SimpleNamespace(card=object())
+            return SimpleNamespace(card=card)
 
     async def failed_render(_card):
-        raise CharacterRenderFailure
+        raise TimeoutError("synthetic T2I timeout")
 
     handler = CharacterCommandHandler(
         application=Application(),
         directory=lambda: ({"name_code": "5065"},),
         render_roster=lambda _data: None,
         render_card=failed_render,
-        render_info=lambda _data: None,
         invalidate_cookie=lambda _actor_id: None,
         start_feedback=lambda _context, _message: feedback,
     )
@@ -132,7 +151,8 @@ async def test_character_render_failure_is_explicit_and_does_not_repeat_domain_q
         )
     )
 
-    assert result.messages[0].text == "角色卡渲染失败，请稍后重试。"
+    assert "妮姬练度 · 皇冠" in result.messages[0].text
+    assert "战力：123,456" in result.messages[0].text
     assert len(requests) == 1
     assert feedback.cancelled == 1
 

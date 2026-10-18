@@ -34,7 +34,8 @@ class MainRefactorIntegrityTests(unittest.TestCase):
             self.assertIs(container.daily_runner.client, container.client)
             self.assertIsNotNone(container.client)
             self.assertIsNotNone(container.asset_manager)
-            self.assertIsNotNone(container.renderer)
+            for retired_renderer in ("renderer", "profile_renderer", "raid_renderer", "campaign_renderer"):
+                self.assertFalse(hasattr(container, retired_renderer))
             self.assertIsNotNone(container.daily_runner)
             self.assertIsNotNone(container.web)
             self.assertIsInstance(container.campaign_application, CampaignApplication)
@@ -42,7 +43,6 @@ class MainRefactorIntegrityTests(unittest.TestCase):
             self.assertIs(container.campaign_application._gateway, container.client)
             self.assertIs(container.raid_application._gateway, container.client)
             self.assertIs(container.voice_application._store, container.store)
-            self.assertIs(container.campaign_renderer.assets, container.asset_manager)
             self.assertIsInstance(container.guide_application, GuideApplication)
             self.assertIsInstance(container.tower_application, TowerApplication)
 

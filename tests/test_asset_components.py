@@ -17,7 +17,6 @@ from astrbot_plugin_nikke.core.assets.fallback_provider import FallbackAssetProv
 from astrbot_plugin_nikke.core.assets.image_cache import AssetImageCache
 from astrbot_plugin_nikke.core.assets.spine_manifest import SpineManifestStore
 from astrbot_plugin_nikke.features.character.models import CharacterCardAssets
-from astrbot_plugin_nikke.ui.renderers.campaign import CampaignHistoryRenderer
 
 
 ROOT = Path(__file__).resolve().parents[1]

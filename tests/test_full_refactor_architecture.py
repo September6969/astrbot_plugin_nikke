@@ -10,6 +10,7 @@ from scripts.architecture_metrics import (
     PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
     _adapter_infrastructure_imports,
     _character_card_retirement_violations,
+    _pillow_card_renderer_retirement_violations,
     _command_runtime_responsibilities,
     classify_module_shape,
     collect_metrics,
@@ -59,6 +60,30 @@ def test_legacy_character_card_renderer_is_retired() -> None:
     assert not _violations("legacy_character_card"), METRICS[
         "character_card_retirement_violations"
     ]
+
+
+def test_legacy_pillow_card_renderer_is_retired() -> None:
+    assert not _violations("legacy_pillow_card_renderer"), METRICS[
+        "pillow_card_renderer_retirement_violations"
+    ]
+
+
+def test_legacy_pillow_card_gate_detects_reintroduced_modules_and_injections(tmp_path) -> None:
+    renderer = tmp_path / "ui" / "renderers" / "profile.py"
+    renderer.parent.mkdir(parents=True)
+    renderer.write_text("class ProfileCardRenderer: pass\n", encoding="utf-8")
+    violations = _pillow_card_renderer_retirement_violations(
+        tmp_path,
+        {
+            "ui/renderers/profile.py": renderer.read_text(encoding="utf-8"),
+            "core/container.py": "self.services.profile_renderer = renderer\n",
+        },
+    )
+    assert {item["reason"] for item in violations} == {
+        "legacy-renderer-module",
+        "legacy-renderer-reference",
+        "legacy-renderer-injection",
+    }
 
 
 def test_legacy_character_card_gate_detects_reintroduced_renderer_and_classic_branch(

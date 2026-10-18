@@ -8,13 +8,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.integrations.blablalink.client import BlaBlaClient, BlaBlaError, DAILY_CONTENTS_PROGRESS, PROFILE
 from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyDefinition, CurrencyRegistry
 from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
-from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
 from astrbot_plugin_nikke.integrations.spine.prerenderer import SpinePreRenderer
 from astrbot_plugin_nikke.scripts import capture_campaign_history as capture
@@ -87,11 +86,11 @@ class ProfileV04ContractTests(unittest.TestCase):
         self.assertEqual(data.sim_room_overclock_season, "99")
 
     def test_invalid_capacity_is_safe_and_unknown_memorial_is_not_reclassified(self):
-        self.assertEqual(ProfileCardRenderer._storage_percent(0), 0.0)
-        self.assertEqual(ProfileCardRenderer._storage_percent(1), 100.0)
-        self.assertEqual(ProfileCardRenderer._storage_percent(0.059), 5.9)
-        self.assertIsNone(ProfileCardRenderer._storage_percent(1.1))
-        self.assertIsNone(ProfileCardRenderer._storage_percent("invalid"))
+        from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+
+        for value, expected in ((0, 0.0), (1, 100.0), (0.059, 5.9), (1.1, None), ("invalid", None)):
+            data = self.build(daily={"outpost_battle_storage_fullness": value})
+            self.assertEqual(ProfileT2IPayloadBuilder().build(data)["storage"]["bar"], expected)
         data = self.build(outpost={"memorial_counts": [{"category": "not-verified", "count": 99}]})
         self.assertIsNone(data.memorial_summary)
         self.assertTrue(data.memorial_partial)
@@ -112,11 +111,17 @@ class ProfileV04ContractTests(unittest.TestCase):
                 ]
             }
         )
+        from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+
         self.assertFalse(data.daily_partial)
-        self.assertEqual(ProfileCardRenderer._tower_value(data), "剩余 3 次")
+        values = [item["value"] for item in ProfileT2IPayloadBuilder().build(data)["today"]]
+        self.assertIn("剩余 3", values)
+        self.assertIn("未开放", values)
 
         incomplete = self.build(daily={"tower_daily_info_list": [{"type": 2, "remaining_count": 3}]})
-        self.assertEqual(ProfileCardRenderer._tower_value(incomplete), "次数待核验")
+        incomplete_values = [item["value"] for item in ProfileT2IPayloadBuilder().build(incomplete)["today"]]
+        self.assertIn("开放状态 Unknown", incomplete_values)
+        self.assertNotIn("剩余 3", incomplete_values)
 
     def test_profile_v04_sections_and_height_are_bounded(self):
         data = self.build(
@@ -134,17 +139,14 @@ class ProfileV04ContractTests(unittest.TestCase):
                 "sim_room_daily_best_record": {"chapter": 3, "difficulty": 5},
             },
         )
-        with tempfile.TemporaryDirectory() as directory:
-            renderer = ProfileCardRenderer(Path(directory), Path(__file__).resolve().parents[1] / "fonts")
-            with patch.object(renderer, "_section_panel", wraps=renderer._section_panel) as panel:
-                output = renderer.render_profile(data)
-            titles = [item.args[2] for item in panel.call_args_list]
-            self.assertIn("TODAY / 今日状态", titles)
-            self.assertIn("COLLECTION / 遗失物品", titles)
-            self.assertIn("RESOURCES / 我的资源", titles)
-            with Image.open(output) as image:
-                self.assertLessEqual(image.height, 1850)
-                self.assertEqual(image.width, 1200)
+        from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+
+        payload = ProfileT2IPayloadBuilder().build(data)
+        self.assertEqual(payload["canvas"]["width"], 1080)
+        self.assertEqual(payload["storage"]["bar"], 50.0)
+        self.assertTrue(payload["today"])
+        self.assertTrue(payload["collection"])
+        self.assertEqual(payload["extra_resources"], [])
 
     def test_currency_icon_registry_is_explicit_and_local_only(self):
         coverage = CurrencyRegistry.icon_coverage()
@@ -176,50 +178,11 @@ class ProfileV04ContractTests(unittest.TestCase):
             finally:
                 manager.close()
 
-    def test_profile_renderer_pastes_verified_currency_icon(self):
-        data = self.build(
-            basic={"currencies": [{"type": 1000, "value": 130_000_000}]},
-            outpost={},
-            daily={},
-        )
-        with tempfile.TemporaryDirectory() as directory:
-            icon = Image.new("RGBA", (24, 24), (255, 64, 32, 220))
-            renderer = ProfileCardRenderer(
-                Path(directory),
-                Path(__file__).resolve().parents[1] / "fonts",
-                currency_icon_provider=lambda _currency_type: icon,
-            )
-            output = renderer.render_profile(data)
-            with Image.open(output) as rendered:
-                self.assertEqual(rendered.width, 1200)
-                self.assertLessEqual(rendered.height, 1850)
 
-        with tempfile.TemporaryDirectory() as directory:
-            assets = Path(__file__).resolve().parents[1] / "assets"
-            manager = AssetManager(Path(directory) / "cache", assets, remote=True)
-            try:
-                with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream", side_effect=AssertionError("currency icon network")):
-                    loaded = manager.get_currency_icon(1000)
-                self.assertIsNotNone(loaded)
-                self.assertEqual(loaded.size, (105, 96))
-                self.assertEqual(manager.get_currency_icon(99).size, (53, 57))
-            finally:
-                manager.close()
 
-    def test_profile_renderer_omits_unidentified_currency_from_card(self):
-        currencies = [{"type": item, "value": item} for item in CurrencyRegistry.DEFINITIONS]
-        currencies.insert(0, {"type": 98, "value": 16})
-        data = self.build(basic={"currencies": currencies}, outpost={}, daily={})
-        with tempfile.TemporaryDirectory() as directory:
-            renderer = ProfileCardRenderer(Path(directory), Path(__file__).resolve().parents[1] / "fonts")
-            with patch.object(renderer, "_text", wraps=renderer._text) as text:
-                output = renderer.render_profile(data)
-            labels = [str(call.args[2]) for call in text.call_args_list]
-            self.assertEqual(len(data.currencies), 9)  # 底层数据不丢失。
-            self.assertNotIn("未知资源", labels)
-            self.assertIn("黄金积分券", labels)
-            with Image.open(output) as rendered:
-                self.assertLessEqual(rendered.height, 1850)
+
+
+
 
 
 class ProfileDailyClientTests(unittest.IsolatedAsyncioTestCase):

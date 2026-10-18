@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """统一 UI 表现层。"""
 
-from .primitives import CardRenderer
 from .theme import (
     CORPORATION_COLORS,
     ELEMENT_TINTS,
@@ -14,7 +13,6 @@ from .theme import (
 )
 
 __all__ = [
-    "CardRenderer",
     "CharacterTheme",
     "character_theme",
     "CORPORATION_COLORS",

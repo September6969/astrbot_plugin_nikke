@@ -3,6 +3,15 @@ from ...features.raid.experience import scope_label
 from .common import display_number
 
 
+def _share_fields(damage, total):
+    ratio = damage / total if total > 0 else None
+    return {
+        "share": f"{ratio:.1%}" if ratio is not None else "—",
+        "share_ratio": ratio,
+        "share_bar": round(ratio * 100, 2) if ratio is not None else None,
+    }
+
+
 class UnionRecordsT2IPayloadBuilder:
     def build(self, data, union_members=None, **kwargs):
         total = data.total_damage or sum(p.total_damage for p in data.participants)
@@ -15,6 +24,6 @@ class UnionRecordsT2IPayloadBuilder:
             "page": data.page, "pages": data.total_pages, "total_damage": "未知" if data.incomplete and not data.total_records else display_number(total),
             "excluded": data.excluded_records, "incomplete": data.incomplete,
             "rows": [{"rank": str(p.rank), "nickname": p.nickname, "damage": display_number(p.total_damage),
-                "share": f"{p.total_damage / total:.1%}" if total else "—", "records": str(len(p.attacks))}
+                **_share_fields(p.total_damage, total), "records": str(len(p.attacks))}
                 for p in data.participants], "no_attack": no_attack,
             "canvas": {"width": 1080, "height": 800}}

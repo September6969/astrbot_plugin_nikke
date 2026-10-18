@@ -43,7 +43,6 @@ def daily_handler():
         runner=runner,
         client=client,
         config={"enable_daily_actions": True},
-        render_summary=lambda rows: "summary.png",
         send_summary=AsyncMock(),
         clock=lambda: "2026-09-22",
     )

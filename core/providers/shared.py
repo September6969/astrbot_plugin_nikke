@@ -13,7 +13,6 @@ from ...core.storage import NikkeStore
 from ...features.voice.audio import VoiceAudioCache
 from ...integrations.blablalink.client import BlaBlaClient
 from ...integrations.spine.config import build_spine_renderer
-from ...ui.primitives import CardRenderer
 from ..lifecycle.coordinator import RuntimeCoordinator
 from .storage import create_nikke_store
 
@@ -27,7 +26,6 @@ class SharedResources:
     extension_zip: Path
     store: NikkeStore
     client: BlaBlaClient
-    renderer: CardRenderer
     asset_manager: AssetManager
     runtime_coordinator: RuntimeCoordinator
 
@@ -35,7 +33,7 @@ class SharedResources:
 def create_shared_resources(
     plugin_dir: Path, data_dir: Path, config: dict[str, Any]
 ) -> SharedResources:
-    """只创建一次存储、网关、共享绘制资源和运行时协调器。"""
+    """只创建一次存储、网关、素材资源和运行时协调器。"""
     extension_zip = data_dir / "nikke-bind-extension.zip"
     store = create_nikke_store(data_dir)
     runtime_coordinator = RuntimeCoordinator()
@@ -45,7 +43,6 @@ def create_shared_resources(
         task_factory=runtime_coordinator.create_task,
         account_reader=store,
     )
-    renderer = CardRenderer(data_dir / "cards", plugin_dir / "fonts")
     spine_budget = config.get("spine_budget_seconds", 20.0)
     asset_manager = AssetManager(
         data_dir / "cache",
@@ -64,7 +61,6 @@ def create_shared_resources(
         extension_zip=extension_zip,
         store=store,
         client=client,
-        renderer=renderer,
         asset_manager=asset_manager,
         runtime_coordinator=runtime_coordinator,
     )

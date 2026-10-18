@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
 from typing import Callable
 
 from ..._version import PLUGIN_VERSION
@@ -13,21 +12,17 @@ from ...features.account.ports import AccountStorePort
 from ...features.raid.application import RaidApplication
 from ...features.raid.builder import UnionRaidBuilder
 from ...integrations.blablalink.client import BlaBlaClient
-from ...ui.renderers import UnionRaidRenderer
 
 
 @dataclass(frozen=True)
 class RaidResources:
-    """Raid builder、application 与 renderer。"""
+    """Raid builder 与 application。"""
 
     builder: UnionRaidBuilder
     application: RaidApplication
-    renderer: UnionRaidRenderer
 
 
 def create_raid_resources(
-    plugin_dir: Path,
-    data_dir: Path,
     *,
     account_reader: AccountStorePort,
     gateway: BlaBlaClient,
@@ -35,7 +30,7 @@ def create_raid_resources(
     plugin_version: str = PLUGIN_VERSION,
     task_factory=None,
 ) -> RaidResources:
-    """创建一组 Raid 资源，所有外部依赖均由 composition root 提供。"""
+    """创建 Raid 查询资源，所有外部依赖均由 composition root 提供。"""
     builder = UnionRaidBuilder()
     application = RaidApplication(
         account_reader=account_reader,
@@ -45,5 +40,4 @@ def create_raid_resources(
         plugin_version=plugin_version,
         task_factory=task_factory,
     )
-    renderer = UnionRaidRenderer(data_dir / "cards", plugin_dir / "fonts")
-    return RaidResources(builder, application, renderer)
+    return RaidResources(builder, application)

@@ -236,10 +236,10 @@ def test_combat_numbers_remain_exact_not_compact():
 
 
 # ==============================================================================
-# 4. PROFILE REMOVE EXTRA RESOURCES FROM PRESENTATION
+# 4. PROFILE PRESERVES RESOURCE ROWS AND THEIR UNKNOWN SEMANTICS
 # ==============================================================================
 
-def test_profile_html_does_not_render_extra_resources():
+def test_profile_html_renders_extra_resources_with_their_type_ids():
     basic = {
         "nickname": "测试指挥官", "lv": 300, "team_combat": 1000000,
         "currencies": [
@@ -252,21 +252,67 @@ def test_profile_html_does_not_render_extra_resources():
     profile_data = ProfileBuilder().build(account={}, basic=basic, outpost={}, daily={}, roster=None, fetched_at="2026-09-13 12:00", plugin_version="test")
     payload = ProfileT2IPayloadBuilder().build(profile_data)
 
-    # Diagnostics still present in payload
+    # 额外资源先保留在正式 payload 中，再检查模板是否完整展示。
     assert len(payload["extra_resources"]) > 0
 
-    # But HTML presentation completely strips them
     html = render("profile", payload)
-    assert "额外返回资源" not in html
-    assert "未纳入八项资源区" not in html
-    assert "未知诊断资源" not in html
-    assert "未知资源" not in html
+    assert "其他已返回资源" in html
+    assert "未识别资源（类型 99901）" in html
+    assert "未识别资源（类型 99902）" in html
+    assert "12,345" in html
+    assert "67,890" in html
 
     # The 8 core resources are displayed with compact numbers
     for res in payload["resources"]:
         assert res["label"] in html
         assert res["value"] in html
         assert res["value"] == "50.0K"
+
+
+def test_profile_missing_known_currency_values_are_not_zero_and_keep_icon_slots():
+    profile_data = ProfileBuilder().build(
+        account={}, basic={"nickname": "资源缺失样例", "currencies": []}, outpost={},
+        daily={}, roster=None, fetched_at="2026-09-13 12:00", plugin_version="test",
+    )
+    payload = ProfileT2IPayloadBuilder().build(profile_data)
+    html = render("profile", payload)
+
+    assert len(payload["resources"]) == 8
+    assert all(item["value"] == "未返回" for item in payload["resources"])
+    assert html.count('class="resource-icon-slot"') == 8
+    assert html.count("未返回") >= 8
+
+
+def test_profile_unavailable_currency_collection_remains_unknown():
+    profile_data = ProfileBuilder().build(
+        account={}, basic={"nickname": "资源未知样例"}, outpost={}, daily={}, roster=None,
+        fetched_at="2026-09-13 12:00", plugin_version="test",
+    )
+    payload = ProfileT2IPayloadBuilder().build(profile_data)
+
+    assert all(item["value"] == "Unknown" for item in payload["resources"])
+    assert payload["resource_state"] == "UNKNOWN"
+
+
+def test_profile_campaign_is_displayed_once_and_identity_metrics_are_in_header():
+    data = ProfileBuilder().build(
+        account={"area_id": "SYNTHETIC-AREA"},
+        basic={
+            "nickname": "合成资料样例", "lv": 382, "team_combat": 1_286_600,
+            "progress_normal_campaign": "46-40", "progress_hard_campaign": "35-36",
+        },
+        outpost={}, daily={}, roster=[], fetched_at="2026-09-13 12:00",
+        plugin_version="test",
+    )
+    payload = ProfileT2IPayloadBuilder().build(data)
+    html = render("profile", payload)
+
+    assert html.count('data-field="普通主线"') == 1
+    assert html.count('data-field="困难主线"') == 1
+    assert "SYNTHETIC-AREA" in html
+    assert "指挥官等级" in html
+    assert "部队总战力" in html
+    assert 'class="profile-identity"' in html
 
 
 # ==============================================================================

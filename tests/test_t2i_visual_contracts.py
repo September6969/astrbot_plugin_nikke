@@ -18,14 +18,22 @@ def render(page, data):
 def test_calendar_operations_feed_layout_and_single_footer(tmp_path):
     cases = get_cases("calendar_schedule", tmp_path)
     data = cases["long-title"]
-    html = render("calendar_schedule", data)
+    html = render("calendar_schedule", {**data, **data["pages"][0]})
     assert html.count("<footer") == 1
-    assert "1600" in html
-    assert "730px" in html and "1180px" in html
-    assert "ACTIVE OPERATIONS" in html
+    assert "1600px" in html
+    assert "height: 360px" in html
+    assert "font-size: 64px" in html
+    assert 'class="key-visual' in html
+    assert 'class="panel"' not in html
+    assert "妮姬日程" in html
+    assert "进行中" in html
+    assert "即将开始" in html
     assert "progress-bar" not in html
     assert "progress-track" not in html
     assert "ENDING SOON / 即将结束" not in html
+    assert "default-src 'none'" in html
+    assert "script-src 'none'" in html
+    assert "img-src data:" in html
     for item in data["pages"][0]["active_items"]:
         assert item["title"] in html
         assert item["remaining"] in html
@@ -33,7 +41,7 @@ def test_calendar_operations_feed_layout_and_single_footer(tmp_path):
     assert len(many["pages"]) > 1
     first_page_html = render("calendar_schedule", {**many, **many["pages"][0]})
     assert first_page_html.count("<footer") == 1
-    assert "PAGE 1 /" in first_page_html
+    assert "第 1 /" in first_page_html
 
 
 @pytest.mark.parametrize("state", ["AVAILABLE", "PARTIAL", "UNAVAILABLE", "UNKNOWN", "EMPTY"])

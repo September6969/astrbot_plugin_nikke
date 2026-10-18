@@ -183,6 +183,15 @@ class CharacterAssetService:
         except Exception:
             return None
 
+    def get_lineup_portrait_by_resource_id(self, resource_id):
+        """只用明确的 resource_id 读取本地 SI 头像，不触发网络或 Spine。"""
+        result = self.env.lineup_resolver.resolve(resource_id=resource_id)
+        try:
+            with Image.open(result.local_path) as image:
+                return image.convert("RGBA"), result.is_fallback
+        except Exception:
+            return None, True
+
     def resolve_lineup_portrait(self, **kwargs):
         return self.env.lineup_resolver.resolve(**kwargs)
 

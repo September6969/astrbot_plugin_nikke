@@ -11,16 +11,17 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from ...features.daily.models import DailyTaskResult, DailyTaskStatus
+from ...features.daily.presentation import format_daily_summary_text
 from ...features.daily.ports import DailyAccountReader, DailyCommandStore
 from ...features.daily.runner import DailyRunner
 from ...integrations.blablalink.client import CookieExpired
 from ...features.account.errors import CredentialExpiredError
 from ...core.privacy import safe_exception_message
-from .contracts import CommandContext, CommandResult, ImageReply, TextReply
+from .contracts import CommandContext, CommandReply, CommandResult, TextReply
 
 
-DailySummaryRenderer = Callable[[Sequence[tuple[str, str]]], str]
-DailySummarySender = Callable[[str, str], Awaitable[None]]
+DailySummaryFormatter = Callable[..., Sequence[str] | str]
+DailySummarySender = Callable[[str, Sequence[CommandReply]], Awaitable[None]]
 
 
 class DailyCommandHandler:
@@ -34,8 +35,8 @@ class DailyCommandHandler:
         runner: DailyRunner,
         client: Any,
         config: Mapping[str, Any],
-        render_summary: DailySummaryRenderer,
         send_summary: DailySummarySender,
+        format_summary: DailySummaryFormatter | None = None,
         clock: Callable[[], str] | None = None,
         send_notice: Callable[[str, str], Awaitable[Any]] | None = None,
     ) -> None:
@@ -44,7 +45,7 @@ class DailyCommandHandler:
         self._runner = runner
         self._client = client
         self._config = config
-        self._render_summary = render_summary
+        self._format_summary = format_summary or format_daily_summary_text
         self._send_summary = send_summary
         self._clock = clock or self._today
         self._send_notice = send_notice
@@ -93,10 +94,21 @@ class DailyCommandHandler:
             day, stagger=stagger, automatic=automatic
         )
 
-    async def render_manual_summary(self) -> str:
-        """执行管理员手动批次并渲染既有图片汇总。"""
+    async def render_manual_summary(self) -> CommandResult:
+        """执行一次管理员手动批次，并返回同一结果的分块结构化文本。"""
         results = await self.run_all_daily(self._clock())
-        return self._render_summary([result.summary_row() for result in results])
+        return await self._summary_result(results, scope="管理员手动执行")
+
+    async def _summary_result(
+        self, results: Sequence[DailyTaskResult], *, scope: str
+    ) -> CommandResult:
+        """用同一批结构化结果生成有字符预算的文本；不再经过图片渲染。"""
+        formatted = self._format_summary(results, scope=scope)
+        if isinstance(formatted, str):
+            formatted = (formatted,)
+        return CommandResult(
+            tuple(TextReply(text) for text in formatted if isinstance(text, str) and text)
+        )
 
     async def send_automatic_summary(self, day: str) -> None:
         """只发送自动范围结果；无效或缺失缓存时重新计算自动批次。"""
@@ -112,9 +124,14 @@ class DailyCommandHandler:
         if not results or any(result is None for result in results):
             return
         # 新版社区日常成功静默，只保留旧用户显式配置的签到群汇总。
-        rows = [result.summary_row() for result in results if result is not None and not result.items]
-        if rows:
-            await self._send_summary(group_umo, self._render_summary(rows))
+        summary_results = [
+            result for result in results if result is not None and not result.items
+        ]
+        if summary_results:
+            response = await self._summary_result(
+                summary_results, scope="每日自动任务汇总"
+            )
+            await self._send_summary(group_umo, response.messages)
 
     def _set_auto(self, actor_id: str, value: str, *, community: bool = False) -> CommandResult:
         value_key = value.strip().casefold()

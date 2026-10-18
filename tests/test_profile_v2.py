@@ -2,13 +2,9 @@
 
 from plugin_fixtures import make_plugin_shell
 import math
-import tempfile
 import unittest
 from datetime import datetime, timezone
-from pathlib import Path
-from unittest.mock import patch
 
-from PIL import Image
 
 from astrbot_plugin_nikke.adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from astrbot_plugin_nikke.application.commands.profile import ProfileCommandHandler
@@ -22,7 +18,6 @@ from astrbot_plugin_nikke.integrations.blablalink.client import (
 )
 from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
 from astrbot_plugin_nikke.features.profile.application import ProfileApplication
-from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 from astrbot_plugin_nikke.features.profile.models import (
     MemorialCountData,
     ProfileDashboardData,
@@ -101,133 +96,6 @@ class ProfileV2BuilderTests(unittest.TestCase):
         self.assertEqual(data.character_costume_count, 0)
 
 
-class ProfileV2RendererTests(unittest.TestCase):
-    def renderer(self, directory):
-        root = Path(__file__).resolve().parents[1]
-        return ProfileCardRenderer(Path(directory), root / "fonts")
-
-    def full_data(self):
-        return ProfileDashboardData(
-            commander_name="完整资料",
-            area_id="3",
-            synchro_level=200,
-            outpost_battle_level=15,
-            normal_campaign="35-1",
-            hard_campaign="20-3",
-            character_count=120,
-            max_level=200,
-            max_combat=100000,
-            fetched_at="2026-09-06 12:00",
-            plugin_version="0.1.8",
-            commander_level=250,
-            team_combat=123456,
-            created_at="2024-01-01",
-            character_costume_count=15,
-            progress_tribe_tower="300",
-            sim_room_overclock_score="99999",
-            infra_core_level="3",
-            tactic_academy_class="12",
-            tactic_academy_lesson="34",
-            jukebox_count="42",
-            recycle_room_researches=[
-                RecycleResearchData("1101", 5, 10, "Attacker", "Class"),
-            ],
-            memorial_counts=[MemorialCountData("private-category", 7)],
-            outpost_available=True,
-            roster_available=True,
-        )
-
-    def test_profile_sections_have_single_ownership_and_target_order(self):
-        with tempfile.TemporaryDirectory() as directory:
-            renderer = self.renderer(directory)
-            with patch.object(renderer, "_section_panel", wraps=renderer._section_panel) as panel:
-                path = renderer.render_profile(self.full_data())
-            titles = [call.args[2] for call in panel.call_args_list]
-            self.assertEqual(
-                titles,
-                [
-                    "BASIC INFO / 基本信息",
-                    "CAMPAIGN / 主线进度",
-                    "OUTPOST / 前哨基地",
-                    "ROSTER / 妮姬统计",
-                    "COLLECTION / 收藏",
-                    "RECYCLE ROOM / 循环室",
-                    "MORE / 更多数据",
-                ],
-            )
-            with Image.open(path) as image:
-                self.assertEqual(image.format, "PNG")
-                self.assertEqual(image.width, 1200)
-
-            with patch.object(renderer, "_text", wraps=renderer._text) as text:
-                renderer.render_profile(self.full_data())
-            rendered = str(text.call_args_list)
-            self.assertIn("点唱机收集", rendered)
-            self.assertIn("无尽塔进度", rendered)
-            self.assertNotIn("部落塔进度", rendered)
-            self.assertNotIn("战术学院", rendered)
-            self.assertNotIn("回收室研究", rendered)
-            self.assertNotIn("收藏记录", rendered)
-            self.assertNotIn("private-category", rendered)
-
-    def test_recycle_room_two_columns_and_omit_exp_zero(self):
-        data = self.full_data()
-        data.recycle_room_researches = [
-            RecycleResearchData("1001", 10, 0, "通用研究", "Common"),
-            RecycleResearchData("1002", 20, 500, "极乐净土研究", "Manufacturer"),
-            RecycleResearchData("1003", 30, 0, "米西里斯研究", "Manufacturer"),
-        ]
-        with tempfile.TemporaryDirectory() as directory:
-            renderer = self.renderer(directory)
-            with patch.object(renderer, "_text", wraps=renderer._text) as text:
-                renderer.render_profile(data)
-
-            calls_str = str(text.call_args_list)
-            self.assertIn("Lv.10", calls_str)
-            self.assertNotIn("EXP 0", calls_str)
-            self.assertIn("Lv.20 · EXP 500", calls_str)
-            self.assertIn("Lv.30", calls_str)
-
-            rendered_labels = [
-                (call.args[1], call.args[2])
-                for call in text.call_args_list
-                if len(call.args) >= 3 and call.args[2] in ("通用研究", "极乐净土研究", "米西里斯研究")
-            ]
-            self.assertEqual(len(rendered_labels), 3)
-            pos_map = {name: xy for xy, name in rendered_labels}
-            self.assertEqual(pos_map["通用研究"][0], 70)
-            self.assertEqual(pos_map["极乐净土研究"][0], 620)
-            self.assertEqual(pos_map["米西里斯研究"][0], 70)
-            self.assertEqual(pos_map["通用研究"][1], pos_map["极乐净土研究"][1])
-            self.assertGreater(pos_map["米西里斯研究"][1], pos_map["通用研究"][1])
-
-    def test_failure_and_partial_statuses_are_visible_without_fake_zeroes(self):
-        data = self.full_data()
-        data.synchro_level = None
-        data.outpost_battle_level = None
-        data.infra_core_level = None
-        data.tactic_academy_class = None
-        data.tactic_academy_lesson = None
-        data.jukebox_count = None
-        data.outpost_available = False
-        data.roster_available = False
-        data.roster_partial = True
-        data.max_level = None
-        data.max_combat = None
-        data.research_partial = True
-        data.memorial_partial = True
-        with tempfile.TemporaryDirectory() as directory:
-            renderer = self.renderer(directory)
-            with patch.object(renderer, "_text", wraps=renderer._text) as text:
-                path = renderer.render_profile(data)
-            rendered = str(text.call_args_list)
-            self.assertIn("前哨资料", rendered)
-            self.assertIn("获取失败", rendered)
-            self.assertIn("花名册状态", rendered)
-            self.assertNotIn("等级合计", rendered)
-            self.assertNotIn("收藏记录", rendered)
-            with Image.open(path) as image:
-                self.assertGreater(image.height, 200)
 
 
 class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
@@ -263,20 +131,20 @@ class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(result["outpost_available"])
         self.assertTrue(result["roster_available"])
 
-        with tempfile.TemporaryDirectory() as directory:
-            dashboard = ProfileBuilder().build(
-                account={"area_id": "3"},
-                basic=result["basic"],
-                outpost=result["outpost"],
-                roster=result["roster"],
-                outpost_available=result["outpost_available"],
-                roster_available=result["roster_available"],
-                fetched_at="2026-09-06 12:00",
-                plugin_version="0.1.8",
-            )
-            path = ProfileCardRenderer(Path(directory), Path(__file__).resolve().parents[1] / "fonts").render_profile(dashboard)
-            with Image.open(path) as image:
-                self.assertEqual(image.format, "PNG")
+        dashboard = ProfileBuilder().build(
+            account={"area_id": "3"},
+            basic=result["basic"],
+            outpost=result["outpost"],
+            roster=result["roster"],
+            outpost_available=result["outpost_available"],
+            roster_available=result["roster_available"],
+            fetched_at="2026-09-06 12:00",
+            plugin_version="0.1.8",
+        )
+        from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+        payload = ProfileT2IPayloadBuilder().build(dashboard)
+        self.assertEqual(payload["commander"], "合成账号")
+        self.assertEqual(payload["outpost_state"], "UNAVAILABLE")
 
     async def test_optional_cookie_expired_is_not_downgraded_to_empty_profile(self):
         class ExpiredClient(BlaBlaClient):
@@ -327,29 +195,24 @@ class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
             def plain_result(text):
                 return text
 
-        with tempfile.TemporaryDirectory() as directory:
-            plugin = make_plugin_shell()
-            plugin.services.store = Store()
-            plugin.services.profile_application = ProfileApplication(
-                gateway=SyntheticClient(),
-                builder=ProfileBuilder(),
-                clock=lambda: datetime(2026, 9, 22, 12, 0, tzinfo=timezone.utc),
-                plugin_version="test-version",
-            )
-            plugin.services.profile_renderer = ProfileCardRenderer(
-                Path(directory), Path(__file__).resolve().parents[1] / "fonts"
-            )
-            plugin.adapters.command = AstrBotCommandAdapter()
-            plugin.handlers.profile = ProfileCommandHandler(
-                account_reader=plugin.services.store,
-                application=plugin.services.profile_application,
-                present=plugin.presentation.render_profile,
-            )
-            plugin.services.feedback_manager = None
-            results = [item async for item in plugin.me(Event())]
-            self.assertEqual(len(results), 1)
-            with Image.open(results[0]) as image:
-                self.assertEqual(image.format, "PNG")
-            self.assertEqual(calls.count(PROFILE), 1)
-            self.assertEqual(calls.count(OUTPOST), 1)
-            self.assertEqual(calls.count(CHARACTERS), 1)
+        plugin = make_plugin_shell()
+        plugin.services.store = Store()
+        plugin.services.profile_application = ProfileApplication(
+            gateway=SyntheticClient(),
+            builder=ProfileBuilder(),
+            clock=lambda: datetime(2026, 9, 22, 12, 0, tzinfo=timezone.utc),
+            plugin_version="test-version",
+        )
+        plugin.adapters.command = AstrBotCommandAdapter()
+        plugin.handlers.profile = ProfileCommandHandler(
+            account_reader=plugin.services.store,
+            application=plugin.services.profile_application,
+            present=plugin.presentation.render_profile,
+        )
+        plugin.services.feedback_manager = None
+        results = [item async for item in plugin.me(Event())]
+        self.assertEqual(len(results), 1)
+        self.assertIn("命令链合成账号", str(results[0]))
+        self.assertEqual(calls.count(PROFILE), 1)
+        self.assertEqual(calls.count(OUTPOST), 1)
+        self.assertEqual(calls.count(CHARACTERS), 1)

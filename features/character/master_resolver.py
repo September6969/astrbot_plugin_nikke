@@ -55,6 +55,7 @@ class CharacterMasterResolver:
         self._by_resource_id: dict[int, ResolvedCharacter] = {}
         self._by_default_costume_id: dict[int, ResolvedCharacter] = {}
         self._by_name_code: dict[int, ResolvedCharacter] = {}
+        self._ambiguous_name_codes: set[int] = set()
         self._by_character_key: dict[str, ResolvedCharacter] = {}
         self._by_spine_id: dict[str, ResolvedCharacter] = {}
         self._by_name: dict[str, ResolvedCharacter] = {}
@@ -105,7 +106,12 @@ class CharacterMasterResolver:
             if default_costume_id is not None:
                 self._by_default_costume_id[default_costume_id] = char
             if char.name_code is not None:
-                self._by_name_code[char.name_code] = char
+                if char.name_code not in self._ambiguous_name_codes:
+                    if char.name_code in self._by_name_code:
+                        self._by_name_code.pop(char.name_code, None)
+                        self._ambiguous_name_codes.add(char.name_code)
+                    else:
+                        self._by_name_code[char.name_code] = char
             if char.character_key:
                 self._by_character_key[char.character_key] = char
             if char.spine_asset_id:
@@ -118,6 +124,21 @@ class CharacterMasterResolver:
     @property
     def total_count(self) -> int:
         return len(self._characters)
+
+    def resolve_name_code(self, name_code: int | str) -> ResolvedCharacter | None:
+        """只按静态主表的精确 name_code 查找，不把代码当作 TID 或资源号。"""
+        if isinstance(name_code, bool):
+            return None
+        if isinstance(name_code, int):
+            value = name_code
+        else:
+            raw = str(name_code).strip()
+            if not raw or not raw.isascii() or not raw.isdecimal():
+                return None
+            value = int(raw)
+        if value <= 0 or value in self._ambiguous_name_codes:
+            return None
+        return self._by_name_code.get(value)
 
     @staticmethod
     def normalize_battle_tid_prefix(tid: int | str) -> int | None:

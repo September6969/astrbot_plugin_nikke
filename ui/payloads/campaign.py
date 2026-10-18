@@ -46,12 +46,18 @@ class CampaignT2IPayloadBuilder:
             ClearLineupStatus.RATE_LIMITED: "请求过频",
             ClearLineupStatus.ERROR: "查询不可用",
         }
+        status_codes = {status: status.name for status in ClearLineupStatus}
+        mode_code = record.mode if record.mode in ("NORMAL", "HARD") else "UNKNOWN"
+        mode_labels = {"NORMAL": "普通", "HARD": "困难", "UNKNOWN": "难度待确认"}
         return {
-            "mode": record.mode if record.mode in ("NORMAL", "HARD") else "UNKNOWN",
+            "mode": mode_code,
+            "mode_label": mode_labels[mode_code],
             "stage": record.stage_name,
             "available": available,
             "members": members,
             "total_combat": f"{record.total_combat:,}" if available else "—",
+            "status_code": status_codes[record.status],
+            "status_label": labels[record.status],
             "status": labels[record.status],
             "status_message": record.status_message,
             "commander": record.commander_name,

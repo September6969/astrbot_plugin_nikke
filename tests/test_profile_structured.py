@@ -1,10 +1,6 @@
 """已确认的研究/收藏字段保持未知、空列表与零值语义。"""
-import tempfile
-from pathlib import Path
 from unittest import TestCase
-from unittest.mock import patch
 from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
-from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 
 
 class StructuredProfileTests(TestCase):
@@ -28,12 +24,10 @@ class StructuredProfileTests(TestCase):
         self.assertIsNone(data.recycle_room_researches[1].tid)
         self.assertIsNone(data.recycle_room_researches[2].level)
         self.assertEqual(data.memorial_counts[0].count, 0)
-        with tempfile.TemporaryDirectory() as directory:
-            renderer = ProfileCardRenderer(Path(directory), Path(directory))
-            with patch.object(renderer, "_text", wraps=renderer._text) as draw:
-                output = renderer.render_profile(data)
-                self.assertTrue(Path(output).is_file())
-                self.assertNotIn("private-id", str(draw.call_args_list))
-                self.assertIn("RECYCLE ROOM", str(draw.call_args_list))
-                self.assertIn("循环室", str(draw.call_args_list))
-                self.assertNotIn("EXP 0", str(draw.call_args_list))
+        from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+
+        payload = ProfileT2IPayloadBuilder().build(data)
+        encoded = str(payload)
+        self.assertNotIn("private-id", encoded)
+        self.assertIn("研究项目名称 Unknown", encoded)
+        self.assertNotIn("EXP 0", encoded)

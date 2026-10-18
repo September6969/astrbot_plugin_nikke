@@ -13,13 +13,21 @@
 from __future__ import annotations
 
 import html
+import json
 import time
 from typing import Any
 
 
 def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) -> str:
     now = int(time.time())
-    safe_token = html.escape(token)
+    safe_token = html.escape(token, quote=True)
+    safe_base_url = html.escape(base_url.rstrip("/"), quote=True)
+    safe_token_json = (
+        json.dumps(token, ensure_ascii=True)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+    )
 
     if not session:
         initial_state = "INVALID"
@@ -211,6 +219,49 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
     .tab-pane.active {{
       display: block;
     }}
+    .tab-pane[hidden] {{ display: none; }}
+    .tab-btn:focus-visible, .btn-copy:focus-visible {{
+      outline: 3px solid #f4d38e;
+      outline-offset: 3px;
+    }}
+    .bind-url-row {{
+      display: flex;
+      gap: 8px;
+      margin: 10px 0 8px 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }}
+    .bind-url-input {{
+      flex: 1 1 260px;
+      min-width: 0;
+      width: 100%;
+      background: #111318;
+      border: 1px solid #434c5e;
+      color: #f3f4f6;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }}
+    .copy-feedback {{
+      min-height: 1.5em;
+      margin: 0 0 10px 20px;
+      color: #d1d5db;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }}
+    .copy-feedback[data-state="error"] {{ color: #fca5a5; }}
+    .copy-feedback[data-state="success"] {{ color: #a7d9bd; }}
+    .sr-only {{
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }}
     ol.guide-steps {{
       padding-left: 20px;
       margin: 10px 0;
@@ -299,6 +350,8 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
       .container {{ padding: 20px 16px; margin: 10px auto; }}
       .status-bar {{ flex-direction: column; align-items: flex-start; }}
       .btn {{ width: 100%; margin-left: 0 !important; margin-top: 8px; }}
+      .bind-url-row, .copy-feedback {{ margin-left: 0; }}
+      .bind-url-input, .btn-copy {{ width: 100%; min-width: 0; }}
     }}
   </style>
 </head>
@@ -307,7 +360,7 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
     <h1>NIKKE · BlaBlaLink 安全绑定</h1>
 
     <div id="statusHeader" class="status-bar status-{initial_state.lower()}">
-      <span id="statusText">
+      <span id="statusText" role="status" aria-live="polite" aria-atomic="true">
         {"● 链接有效" if initial_state == "VALID" else ("● 链接已过期（链接无效）" if initial_state == "EXPIRED" else ("● 此绑定链接已经使用（链接无效）" if initial_state == "USED" else "● 链接无效"))}
       </span>
       <span id="timerBadge" class="timer-badge" {"style='display:none'" if initial_state != "VALID" else ""}>
@@ -375,12 +428,12 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
           <div class="step-num">2</div>
           <h2 class="step-title">安装浏览器扩展 (Edge / Chrome)</h2>
         </div>
-        <div class="tabs-nav" role="tablist">
-          <button type="button" class="tab-btn active" onclick="switchTab('edge')">Microsoft Edge</button>
-          <button type="button" class="tab-btn" onclick="switchTab('chrome')">Google Chrome</button>
+        <div class="tabs-nav" role="tablist" aria-label="浏览器安装指南">
+          <button id="tabEdgeButton" type="button" class="tab-btn active" role="tab" aria-controls="tabEdge" aria-selected="true" tabindex="0" data-tab="edge" onclick="switchTab('edge')">Microsoft Edge</button>
+          <button id="tabChromeButton" type="button" class="tab-btn" role="tab" aria-controls="tabChrome" aria-selected="false" tabindex="-1" data-tab="chrome" onclick="switchTab('chrome')">Google Chrome</button>
         </div>
 
-        <div id="tabEdge" class="tab-pane active">
+        <div id="tabEdge" class="tab-pane active" role="tabpanel" aria-labelledby="tabEdgeButton" tabindex="0">
           <ol class="guide-steps">
             <li>下载完成后，将 ZIP 压缩包<strong>解压到一个固定的文件夹</strong>（绑定完成前不要删除或移动该文件夹）。</li>
             <li>在 Edge 地址栏输入 <code class="path">edge://extensions</code> 并回车。</li>
@@ -391,7 +444,7 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
           </ol>
         </div>
 
-        <div id="tabChrome" class="tab-pane">
+        <div id="tabChrome" class="tab-pane" role="tabpanel" aria-labelledby="tabChromeButton" tabindex="0" hidden>
           <ol class="guide-steps">
             <li>将下载的 ZIP 压缩包<strong>解压到一个固定的文件夹</strong>。</li>
             <li>在 Chrome 地址栏输入 <code class="path">chrome://extensions</code> 并回车。</li>
@@ -437,10 +490,12 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
           <li>点击浏览器右上角工具栏的<strong>「NIKKE QQ 安全绑定助手」</strong>图标。</li>
           <li>扩展会自动检测登录状态并填入本次绑定地址；若未自动填入，可点击下方复制链接并粘贴：</li>
         </ol>
-        <div style="display: flex; gap: 8px; margin: 10px 0 16px 20px; align-items: center; flex-wrap: wrap;">
-          <input type="text" id="bindUrlBox" value="{base_url}/bind/{safe_token}" readonly style="flex:1; min-width:260px; background:#111318; border:1px solid #434c5e; color:#f3f4f6; padding:8px 12px; border-radius:6px; font-size:13px;">
-          <button type="button" class="btn btn-copy" onclick="copyBindUrl()">复制链接</button>
+        <label class="sr-only" for="bindUrlBox">本次绑定链接</label>
+        <div class="bind-url-row">
+          <input type="text" id="bindUrlBox" class="bind-url-input" value="{safe_base_url}/bind/{safe_token}" readonly aria-describedby="copyFeedback">
+          <button id="copyBindUrlButton" type="button" class="btn btn-copy" onclick="copyBindUrl()">复制链接</button>
         </div>
+        <p id="copyFeedback" class="copy-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
         <ol class="guide-steps" start="4">
           <li>确认扩展显示“已检测到 BlaBlaLink 登录”，点击扩展内的<strong>「已登录，提交绑定」</strong>。</li>
           <li>提交成功后，扩展将提示成功，本网页也会自动同步刷新！</li>
@@ -481,41 +536,71 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
   </div>
 
   <script>
-    var token = "{safe_token}";
+    var token = {safe_token_json};
     var remainingSeconds = {remaining_seconds};
     var currentState = "{initial_state}";
 
-    function switchTab(tab) {{
-      var edgeBtn = document.querySelectorAll('.tab-btn')[0];
-      var chromeBtn = document.querySelectorAll('.tab-btn')[1];
+    function switchTab(tab, moveFocus) {{
+      var tabs = Array.from(document.querySelectorAll('.tab-btn[role="tab"]'));
       var edgePane = document.getElementById('tabEdge');
       var chromePane = document.getElementById('tabChrome');
-      if (tab === 'edge') {{
-        edgeBtn.classList.add('active');
-        chromeBtn.classList.remove('active');
-        edgePane.classList.add('active');
-        chromePane.classList.remove('active');
-      }} else {{
-        chromeBtn.classList.add('active');
-        edgeBtn.classList.remove('active');
-        chromePane.classList.add('active');
-        edgePane.classList.remove('active');
-      }}
+      var selected = tab === 'edge' ? tabs[0] : tabs[1];
+      var edgeSelected = tab === 'edge';
+      tabs.forEach(function(button) {{
+        var active = button === selected;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', active ? 'true' : 'false');
+        button.tabIndex = active ? 0 : -1;
+      }});
+      edgePane.classList.toggle('active', edgeSelected);
+      edgePane.hidden = !edgeSelected;
+      chromePane.classList.toggle('active', !edgeSelected);
+      chromePane.hidden = edgeSelected;
+      if (moveFocus && selected) selected.focus();
     }}
 
-    function copyBindUrl() {{
+    document.querySelectorAll('.tab-btn[role="tab"]').forEach(function(button) {{
+      button.addEventListener('keydown', function(event) {{
+        var tabs = Array.from(document.querySelectorAll('.tab-btn[role="tab"]'));
+        var index = tabs.indexOf(event.currentTarget);
+        var nextIndex = index;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') nextIndex = 0;
+        else if (event.key === 'End') nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        switchTab(tabs[nextIndex].dataset.tab, true);
+      }});
+    }});
+
+    async function copyBindUrl() {{
       var input = document.getElementById('bindUrlBox');
-      if (!input) return;
-      input.select();
-      input.setSelectionRange(0, 99999);
-      if (navigator.clipboard && navigator.clipboard.writeText) {{
-        navigator.clipboard.writeText(input.value).then(function() {{
-          alert('绑定链接已复制到剪贴板！');
-        }});
-      }} else {{
-        document.execCommand('copy');
-        alert('绑定链接已复制到剪贴板！');
+      var feedback = document.getElementById('copyFeedback');
+      if (!input || !feedback) return;
+      var copied = false;
+      try {{
+        if (navigator.clipboard && navigator.clipboard.writeText) {{
+          await navigator.clipboard.writeText(input.value);
+          copied = true;
+        }}
+      }} catch (_) {{
+        copied = false;
       }}
+      if (!copied) {{
+        try {{
+          input.focus();
+          input.select();
+          input.setSelectionRange(0, input.value.length);
+          copied = document.execCommand('copy') === true;
+        }} catch (_) {{
+          copied = false;
+        }}
+      }}
+      feedback.dataset.state = copied ? 'success' : 'error';
+      feedback.textContent = copied
+        ? '绑定链接已复制到剪贴板。'
+        : '复制失败，请选中绑定链接后按 Ctrl+C 或长按复制。';
     }}
 
     // 倒计时逻辑

@@ -5,6 +5,7 @@ from typing import Any, Protocol
 
 from ...core.privacy import safe_exception_message
 from ...features.profile.application import ProfileApplication
+from ...features.profile.currency_registry import CurrencyRegistry
 from ...features.profile.models import ProfileDashboardData
 from ...integrations.blablalink.client import BlaBlaError, CookieExpired
 from .contracts import (
@@ -29,9 +30,12 @@ ProfilePresenter = Callable[[ProfileDashboardData], Awaitable[str]]
 def format_profile(data: ProfileDashboardData) -> str:
     """图片不可用时保留同一快照中的核心资料与未知值。"""
     def value(item):
-        return "未知" if item is None else str(item)
+        if item is None:
+            return "未知"
+        return f"{item:,}" if isinstance(item, int) and not isinstance(item, bool) else str(item)
 
     lines = [f"个人资料 · {data.commander_name}",
+             f"区服：{value(data.area_id or None)} · 队伍总战力：{value(data.team_combat)}",
              f"指挥官等级：{value(data.commander_level)} · 同步器：{value(data.synchro_level)}",
              f"普通主线：{value(data.normal_campaign)} · 困难主线：{value(data.hard_campaign)}",
              f"角色数量：{value(data.character_count)}"]
@@ -41,6 +45,30 @@ def format_profile(data: ProfileDashboardData) -> str:
         lines.extend([f"拦截剩余：{value(data.intercept_remaining)}",
                       f"咨询剩余：{value(data.counsel_remaining)}",
                       f"派遣完成：{value(data.dispatch_completed)} · 进行中：{value(data.dispatch_in_progress)}"])
+    lines.append("资源" + ("（部分）" if data.currencies_partial else "："))
+    if data.currencies_partial:
+        lines[-1] += "："
+    known_types = set(CurrencyRegistry.DEFINITIONS)
+    currencies = data.currencies
+    for definition in CurrencyRegistry.DEFINITIONS.values():
+        matches = [item for item in currencies or [] if item.type == definition.type]
+        label = "白银积分券" if definition.display_name == "躯体标签" else definition.display_name
+        if len(matches) > 1:
+            amount = "多条记录"
+        elif matches:
+            amount = value(matches[0].value)
+        else:
+            amount = "未知" if currencies is None else "未返回"
+        lines.append(f"{label}：{amount}")
+    extras = [
+        item for item in currencies or [] if item.type not in known_types
+    ]
+    if extras:
+        lines.append("其他已返回资源：")
+        lines.extend(
+            f"未识别资源（类型 {item.type}）：{value(item.value)}"
+            for item in extras
+        )
     lines.extend([f"更新时间：{data.fetched_at}", "图片生成失败，已显示文字摘要。"])
     return "\n".join(lines)
 

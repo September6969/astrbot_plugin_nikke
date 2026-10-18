@@ -191,7 +191,6 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
             runner=runner,
             client=None,
             config={},
-            render_summary=lambda rows: "synthetic-summary.png",
             send_summary=sender,
         )
 
@@ -214,7 +213,6 @@ class DailyAutoSchedulerTests(unittest.IsolatedAsyncioTestCase):
             runner=runner,
             client=None,
             config={},
-            render_summary=lambda rows: "synthetic-summary.png",
             send_summary=AsyncMock(),
         )
 

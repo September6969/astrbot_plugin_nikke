@@ -37,6 +37,19 @@ def format_compact_number(value: Any) -> str:
     return f"{value / 1_000_000_000:.0f}B"
 
 
+def response_coverage_label(coverage: Any) -> str:
+    """将 Raid DTO 已提供的响应范围映射为中性说明。"""
+    from ...features.raid.models import RaidResponseCoverage
+
+    labels = {
+        RaidResponseCoverage.CURRENT_RESPONSE: "本次响应范围（非完整赛季）",
+        RaidResponseCoverage.PARTIAL_RANGE: "已知部分范围",
+        RaidResponseCoverage.CONFIRMED_COMPLETE_RANGE: "已确认完整范围",
+        RaidResponseCoverage.UNKNOWN_COVERAGE: "返回覆盖未知",
+    }
+    return labels.get(coverage, "返回覆盖未知")
+
+
 def display_remaining(value: str | None, now: datetime | None = None) -> str:
     """只格式化具备明确时区的时间，不猜测服务器时区。"""
     if not value:

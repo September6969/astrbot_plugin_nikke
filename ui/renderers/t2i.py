@@ -5,6 +5,7 @@ from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.character import CharacterT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+from astrbot_plugin_nikke.ui.payloads.roster import RosterT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
@@ -56,6 +57,12 @@ class T2IRenderer:
         }
         if page in builders:
             data = builders[page].build(data, **kwargs)
+        elif page == "roster":
+            builder = RosterT2IPayloadBuilder(
+                self.assets,
+                self.payload_builder.resolver,
+            )
+            data = await asyncio.to_thread(builder.build, data)
         elif page == "calendar_schedule":
             pages = data.get("pages") if isinstance(data, dict) else None
             if pages and isinstance(pages, list):

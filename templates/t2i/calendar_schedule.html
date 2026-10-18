@@ -1,552 +1,565 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1600"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'"><style><!-- SHARED_CSS -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1600">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'">
 {% set c_w = canvas.width if canvas is defined and canvas.width is defined else 1600 %}
 {% set c_h = canvas.height if canvas is defined and canvas.height is defined else 900 %}
-{% set p_w = panel.width if panel is defined and panel.width is defined else 1180 %}
-{% set p_h = panel.height if panel is defined and panel.height is defined else 730 %}
+  <style>
+<!-- SHARED_CSS -->
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  margin: 0;
-  padding: 0;
   width: {{ c_w }}px;
   height: {{ c_h }}px;
+  margin: 0;
   overflow: hidden;
   position: relative;
-  background: #0b0f17;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-  color: #e2e8f0;
+  background: #0b111a;
+  color: #f4f7fb;
+  font-family: "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-.canvas-bg {
-  position: absolute;
-  top: 0; left: 0;
-  width: {{ c_w }}px; height: {{ c_h }}px;
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.62) saturate(0.78) blur(3px);
-  z-index: 0;
-}
-.canvas-bg-fallback {
-  background: radial-gradient(circle at 75% 25%, rgba(41, 72, 110, 0.35) 0%, transparent 60%),
-              radial-gradient(circle at 20% 80%, rgba(30, 48, 80, 0.45) 0%, transparent 60%),
-              linear-gradient(135deg, #0e131d 0%, #151b27 50%, #0d121c 100%);
-}
-.canvas-overlay {
-  position: absolute;
-  top: 0; left: 0; width: {{ c_w }}px; height: {{ c_h }}px;
-  background: radial-gradient(circle at 50% 45%, rgba(14, 18, 26, 0.45) 0%, rgba(10, 12, 18, 0.88) 100%),
-              linear-gradient(180deg, rgba(10, 12, 18, 0.25) 0%, rgba(8, 10, 15, 0.65) 100%);
-  z-index: 1;
-}
-.panel {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: {{ p_w }}px;
-  height: {{ p_h }}px;
-  background: rgba(20, 24, 32, 0.68);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  padding: 28px 40px 20px 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.calendar-page {
+  width: {{ c_w }}px;
+  height: {{ c_h }}px;
+  position: relative;
   overflow: hidden;
-  z-index: 2;
+  background:
+    radial-gradient(ellipse at 8% 70%, rgba(30, 61, 89, 0.22), transparent 52%),
+    linear-gradient(180deg, #0b111a 0%, #111924 100%);
 }
-.panel-header {
+.page-header {
+  position: absolute;
+  top: 32px;
+  left: 72px;
+  right: 72px;
+  height: 116px;
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  height: 70px;
-  flex-shrink: 0;
-}
-.eyebrow {
-  font-size: 13px;
-  letter-spacing: 2px;
-  font-weight: 700;
-  color: #00d2ff;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.brand-dot {
-  width: 6px;
-  height: 6px;
-  background: #00d2ff;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #00d2ff;
-}
-.title {
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  color: #ffffff;
-  line-height: 1.1;
-}
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.horizon-badge {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 5px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #e2e8f0;
-}
-.tz-badge {
-  background: rgba(0, 210, 255, 0.1);
-  border: 1px solid rgba(0, 210, 255, 0.3);
-  color: #00d2ff;
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
-}
-.panel-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 10px 0 6px 0;
-  overflow: hidden;
-}
-.section-header {
-  display: flex;
   justify-content: space-between;
+}
+.page-title {
+  color: #f8fafc;
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 76px;
+  letter-spacing: 1px;
+}
+.page-range {
+  display: flex;
   align-items: center;
-  height: 32px;
-  margin-bottom: 8px;
-  flex: 0 0 32px;
+  gap: 28px;
+  padding-bottom: 8px;
+  white-space: nowrap;
 }
-.section-title {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #94a3b8;
-  text-transform: uppercase;
+.range-label {
+  color: #d5dee9;
+  font-size: 44px;
+  font-weight: 650;
+  line-height: 54px;
 }
-.section-count {
-  font-size: 12px;
-  color: #64748b;
+.page-number {
+  color: #a9bad0;
+  font-size: 36px;
+  font-weight: 650;
+  line-height: 46px;
+  padding: 0 18px;
+  border-left: 2px solid rgba(178, 197, 219, 0.28);
 }
-.active-list {
+.key-visual {
+  position: absolute;
+  top: 148px;
+  left: 0;
+  width: 1600px;
+  height: 360px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #101a27 0%, #152337 52%, #0c141e 100%);
+}
+.key-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 68%, rgba(11, 17, 26, 0.48) 100%);
+}
+.key-visual.no-poster::after {
+  background: linear-gradient(180deg, transparent 0%, rgba(11, 17, 26, 0.12) 100%);
+}
+.poster-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.poster-backdrop {
+  display: none;
+  position: absolute;
+  inset: -28px;
+  background-image: var(--poster-image);
+  background-position: center;
+  background-size: cover;
+  filter: blur(22px) brightness(0.42) saturate(0.62);
+  transform: scale(1.05);
+}
+.poster-art {
+  position: absolute;
+  inset: 0;
+  background-image: var(--poster-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+.poster-unavailable {
+  position: relative;
+  z-index: 1;
+  color: #c0ccda;
+  font-size: 38px;
+  line-height: 48px;
+  padding: 22px 32px;
+  border: 1px solid rgba(179, 198, 222, 0.24);
+  border-radius: 12px;
+  background: rgba(15, 25, 38, 0.68);
+}
+.key-visual.is-portrait .poster-backdrop {
+  display: block;
+}
+.content-area {
+  position: absolute;
+  top: 530px;
+  left: 72px;
+  right: 72px;
+  bottom: 80px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  flex: 0 0 auto;
+  overflow: visible;
 }
 .section-active,
 .section-next {
   flex: 0 0 auto;
 }
-.active-card {
-  display: grid;
-  grid-template-columns: 1fr 190px;
-  gap: 14px;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 4px solid #38bdf8;
-  border-radius: 9px;
-  height: 68px;
-  min-height: 68px;
-  padding: 6px 14px;
-  box-sizing: border-box;
-}
-.active-card.is-next-ending {
-  border-left-color: #f59e0b;
-  background: linear-gradient(90deg, rgba(245, 158, 11, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
-}
-.active-card.urgency-critical {
-  border-left-color: #ef4444;
-}
-.active-card.urgency-urgent {
-  border-left-color: #f97316;
-}
-.active-card.urgency-closing {
-  border-left-color: #f59e0b;
-}
-.active-card.is-long {
-  height: 80px;
-  min-height: 80px;
-}
-.active-card.is-oversize {
-  height: 92px;
-  min-height: 92px;
-}
-.card-main {
-  min-width: 0;
-}
-.card-meta {
+.section-header {
+  height: 58px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
-  line-height: 1;
+  justify-content: space-between;
 }
-.cat-tag {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #cbd5e1;
-  line-height: 1;
-}
-.badge-next-ending {
-  font-size: 10px;
-  font-weight: 800;
+.section-title {
+  color: #e6edf6;
+  font-size: 48px;
+  font-weight: 750;
+  line-height: 58px;
   letter-spacing: 1px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(245, 158, 11, 0.2);
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
-  line-height: 1;
 }
-.badge-urgency {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  line-height: 1;
+.section-count {
+  color: #9eafc4;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 42px;
 }
-.badge-critical {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  color: #f87171;
+.active-list,
+.next-list {
+  display: flex;
+  flex-direction: column;
 }
-.badge-urgent {
-  background: rgba(249, 115, 22, 0.2);
-  border: 1px solid rgba(249, 115, 22, 0.5);
-  color: #fb923c;
+.active-list {
+  gap: 14px;
 }
-.badge-closing {
-  background: rgba(245, 158, 11, 0.2);
-  border: 1px solid rgba(245, 158, 11, 0.5);
-  color: #fbbf24;
+.active-card {
+  width: 100%;
+  height: auto;
+  min-height: 160px;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 22px;
+  border: 1px solid rgba(177, 197, 222, 0.16);
+  border-left: 6px solid #61b8df;
+  border-radius: 16px;
+  background: linear-gradient(100deg, rgba(24, 39, 56, 0.96), rgba(19, 30, 44, 0.94));
 }
-.card-title {
-  font-size: 17px;
+.active-card.urgency-critical { border-left-color: #ef5b5b; }
+.active-card.urgency-urgent { border-left-color: #f28b4e; }
+.active-card.urgency-closing { border-left-color: #e9b65c; }
+.active-card.is-long { min-height: 224px; }
+.card-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+.card-meta {
+  min-width: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.category-tag {
+  flex: 0 0 auto;
+  color: #b9d9e8;
+  font-size: 28px;
   font-weight: 700;
-  color: #ffffff;
-  line-height: 1.18;
-  white-space: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-word;
+  line-height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: rgba(91, 174, 211, 0.14);
 }
 .card-time {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-top: 1px;
-  line-height: 1;
+  min-width: 0;
+  color: #c0cedd;
+  font-size: 42px;
+  font-weight: 550;
+  line-height: 52px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
+.badge-ending {
+  flex: 0 0 auto;
+  color: #ffd18b;
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(239, 175, 91, 0.36);
+  border-radius: 6px;
+  background: rgba(177, 105, 35, 0.2);
+}
+.card-title {
+  min-width: 0;
+  color: #fbfdff;
+  font-size: 52px;
+  font-weight: 750;
+  line-height: 64px;
+  display: block;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+.card-progress-wrap {
+  position: absolute;
+  left: 22px;
+  right: 376px;
+  bottom: 0;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 0 0 0 10px;
+  background: rgba(160, 184, 208, 0.18);
+}
+.card-progress-fill {
+  height: 100%;
+  background: #57a9d0;
+}
+.urgency-critical .card-progress-fill { background: #ef5b5b; }
+.urgency-urgent .card-progress-fill { background: #f28b4e; }
+.urgency-closing .card-progress-fill { background: #e9b65c; }
 .card-side {
+  min-width: 0;
+  min-height: 108px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
+  gap: 6px;
   text-align: right;
+  border-left: 1px solid rgba(177, 197, 222, 0.16);
+  padding-left: 18px;
 }
 .remaining-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #64748b;
-  margin-bottom: 2px;
+  color: #9dacc0;
+  font-size: 28px;
+  font-weight: 650;
+  line-height: 34px;
 }
-.remaining-val {
-  font-size: 19px;
+.remaining-value {
+  color: #f5f8fc;
+  font-size: 44px;
   font-weight: 800;
-  color: #f1f5f9;
+  line-height: 52px;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.5px;
 }
-.urgency-text-critical { color: #f87171; }
-.urgency-text-urgent { color: #fb923c; }
-.urgency-text-closing { color: #fbbf24; }
-
+.precision-label {
+  color: #b7c5d6;
+  font-size: 28px;
+  line-height: 34px;
+}
 .section-next {
-  margin-top: 12px;
+  margin-top: 22px;
+}
+.content-area > .section-next:first-child {
+  margin-top: 0;
 }
 .next-list {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  flex: 0 0 auto;
+  gap: 12px;
 }
 .next-row {
+  width: 100%;
+  height: auto;
+  min-height: 112px;
   display: grid;
-  grid-template-columns: 110px 90px 1fr 140px;
+  grid-template-columns: 250px 160px minmax(0, 1fr) 300px;
   align-items: center;
-  gap: 14px;
-  height: 44px;
-  min-height: 44px;
-  padding: 6px 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  font-size: 13px;
+  column-gap: 18px;
+  padding: 10px 18px;
+  border: 1px solid rgba(177, 197, 222, 0.14);
+  border-radius: 14px;
+  background: rgba(21, 35, 51, 0.88);
 }
 .next-row.is-long {
-  height: 58px;
-  min-height: 58px;
+  min-height: 136px;
 }
 .next-time {
-  font-family: monospace;
-  font-size: 13px;
-  color: #94a3b8;
+  color: #bac9da;
+  font-size: 38px;
+  font-weight: 650;
+  line-height: 48px;
   font-variant-numeric: tabular-nums;
 }
-.cat-tag-sm {
-  font-size: 11px;
+.next-category {
+  color: #a6d2e3;
+  font-size: 28px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #94a3b8;
-  text-align: center;
-  display: inline-block;
+  line-height: 38px;
 }
 .next-title {
-  font-size: 15px;
-  color: #e2e8f0;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
+  color: #f1f5fa;
+  font-size: 46px;
+  font-weight: 650;
+  line-height: 56px;
+  display: block;
+  overflow: visible;
+  overflow-wrap: anywhere;
 }
 .next-starts {
-  font-size: 13px;
+  color: #a9d5e7;
+  font-size: 32px;
   font-weight: 700;
-  color: #38bdf8;
+  line-height: 42px;
   text-align: right;
-  letter-spacing: 0.5px;
 }
-.empty-state-active {
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #94a3b8;
-  font-size: 14px;
+.empty-range,
+.empty-state-active,
+.unavailable-state {
+  min-height: 104px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  padding: 20px 24px;
+  border: 1px dashed rgba(184, 201, 223, 0.3);
+  border-radius: 16px;
+  background: rgba(17, 28, 41, 0.78);
+  color: #e2eaf3;
+  font-size: 36px;
+  line-height: 48px;
 }
-.empty-state-active .check-icon {
-  color: #10b981;
-  font-weight: 800;
-}
-.empty-state-panel {
-  display: flex;
+.empty-range,
+.unavailable-state {
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  flex: 1;
-  text-align: center;
-  color: #94a3b8;
 }
-.empty-state-panel h2 {
-  font-size: 24px;
-  color: #e2e8f0;
-  margin-bottom: 8px;
+.empty-note {
+  margin-top: 6px;
+  color: #aebdd0;
+  font-size: 30px;
+  line-height: 40px;
 }
 .panel-footer {
+  position: absolute;
+  left: 72px;
+  right: 72px;
+  bottom: 24px;
+  min-height: 56px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  height: 44px;
-  flex-shrink: 0;
-  font-size: 13px;
-  color: #64748b;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid rgba(180, 198, 221, 0.2);
+  color: #afbdcf;
+  font-size: 30px;
+  line-height: 40px;
 }
 .footer-left {
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 18px;
+  white-space: nowrap;
 }
-.health-tag {
+.health-label {
+  flex: 0 0 auto;
+  color: #c7f0d7;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  padding: 2px 8px;
-  border-radius: 4px;
 }
-.health-ok {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+.health-label.warn { color: #ffd396; }
+.health-label.error { color: #ffb4b4; }
+.footer-source,
+.footer-updated {
+  color: #aebcd0;
 }
-.health-warn {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+.footer-command {
+  flex: 0 0 auto;
+  color: #d0dceb;
+  font-size: 28px;
+  text-align: right;
+  white-space: nowrap;
 }
-.footer-sep {
-  color: rgba(255, 255, 255, 0.15);
-}
-.page-badge {
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 3px 10px;
-  border-radius: 4px;
-}
-/* ── 进度条（辅助，低调） ── */
-.card-progress-wrap {
-  margin-top: 1px;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(148, 163, 184, 0.15);
-  overflow: hidden;
-}
-.card-progress-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: rgba(56, 189, 248, 0.65);
-  transition: none;
-}
-.active-card.is-next-ending .card-progress-fill,
-.active-card.urgency-closing .card-progress-fill {
-  background: rgba(245, 158, 11, 0.65);
-}
-.active-card.urgency-urgent .card-progress-fill {
-  background: rgba(249, 115, 22, 0.65);
-}
-.active-card.urgency-critical .card-progress-fill {
-  background: rgba(239, 68, 68, 0.65);
-}
-</style></head><body>
-{% if background_data_uri %}
-<div class="canvas-bg" style="background-image: url('{{ background_data_uri }}');"></div>
-{% else %}
-<div class="canvas-bg canvas-bg-fallback"></div>
+</style>
+</head>
+<body>
+{% set source_width = layout_limits.background_source_width if layout_limits is defined else none %}
+{% set source_height = layout_limits.background_source_height if layout_limits is defined else none %}
+{% set is_portrait = source_width and source_height and source_height > source_width %}
+{% set p_active = page_active_items if page_active_items is defined else (active_items if active_items is defined else []) %}
+{% set p_next = page_next_items if page_next_items is defined else (next_items if next_items is defined else []) %}
+{% set has_global_act = global_has_active if global_has_active is defined else (p_active|length > 0) %}
+{% set show_act_hdr = show_active_header if show_active_header is defined else (p_active|length > 0 or not has_global_act) %}
+{% set show_nxt_hdr = show_next_header if show_next_header is defined else (p_next|length > 0) %}
+{% set health_text = '数据已更新' %}
+{% set health_class = 'health-label' %}
+{% if freshness == 'EXPIRED' or coverage == 'UNAVAILABLE' %}
+  {% set health_text = '来源更新异常 · 保留旧快照' %}
+  {% set health_class = 'health-label error' %}
+{% elif freshness == 'STALE' %}
+  {% set health_text = '数据已过期 · 保留已有快照' %}
+  {% set health_class = 'health-label warn' %}
+{% elif coverage == 'PARTIAL' %}
+  {% set health_text = '部分来源同步异常 · 保留已有数据' %}
+  {% set health_class = 'health-label warn' %}
 {% endif %}
-<div class="canvas-overlay"></div>
-
-<main class="panel">
-  <header class="panel-header">
-    <div class="header-left">
-      <div class="eyebrow"><span class="brand-dot"></span>NIKKE // OPERATIONS FEED</div>
-      <h1 class="title">活动与作战日程</h1>
-    </div>
-    <div class="header-right">
-      <div class="horizon-badge">{{ horizon_days if horizon_days is defined else 14 }} DAYS HORIZON</div>
-      <div class="tz-badge">{{ timezone_display if timezone_display is defined else 'UTC+8' }}</div>
+<main class="calendar-page">
+  <header class="page-header">
+    <h1 class="page-title">妮姬日程</h1>
+    <div class="page-range">
+      <span class="range-label">未来 {{ horizon_days if horizon_days is defined else 14 }} 天</span>
+      <span class="page-number">第 {{ page_number if page_number is defined else 1 }} / {{ page_total if page_total is defined else 1 }} 页</span>
     </div>
   </header>
 
-  {% set p_active = page_active_items if page_active_items is defined else (active_items if active_items is defined else []) %}
-  {% set p_next = page_next_items if page_next_items is defined else (next_items if next_items is defined else []) %}
-  {% set has_global_act = global_has_active if global_has_active is defined else (p_active|length > 0) %}
-  {% set show_act_hdr = show_active_header if show_active_header is defined else (p_active|length > 0 or not has_global_act) %}
-  {% set show_nxt_hdr = show_next_header if show_next_header is defined else (p_next|length > 0) %}
-
-  <div class="panel-body">
-    {% if not available and available is defined %}
-    <div class="empty-state-panel">
-      <h2>日程暂不可用</h2>
-      <p>{{ sync_warning if sync_warning else '当前没有可用快照' }}</p>
-    </div>
-    {% else %}
-    {% if show_act_hdr %}
-    <section class="section-active">
-      <div class="section-header">
-        <div class="section-title">ACTIVE OPERATIONS // 进行中任务</div>
-        {% if active_count_total is defined and active_count_total > 0 %}
-        <div class="section-count">{{ active_count_total }} 项活动</div>
-        {% endif %}
-      </div>
-      {% if p_active %}
-      <div class="active-list">
-        {% for item in p_active %}
-        <article class="active-card {{ 'is-next-ending' if item.is_next_ending else '' }} {{ 'urgency-' + item.urgency.lower() if item.urgency else '' }} {{ 'is-long' if item.is_long_title else '' }} {{ 'is-oversize' if item.is_oversize else '' }}">
-          <div class="card-main">
-            <div class="card-meta">
-              <span class="cat-tag">{{ item.category }}</span>
-              {% if item.is_next_ending %}<span class="badge-next-ending">NEXT ENDING</span>{% endif %}
-              {% if item.urgency and item.urgency != 'NORMAL' %}<span class="badge-urgency badge-{{ item.urgency.lower() }}">{{ item.urgency }}</span>{% endif %}
-            </div>
-            <h2 class="card-title" title="{{ item.full_title }}">{{ item.title }}</h2>
-            <div class="card-time">{{ item.time_range }}</div>
-            {% if item.progress_pct is defined and item.progress_pct != None %}
-            <div class="card-progress-wrap">
-              <div class="card-progress-fill" style="width: {{ (item.progress_pct * 100) | round(1) }}%"></div>
-            </div>
-            {% endif %}
-
-          </div>
-
-          <div class="card-side">
-            <div class="remaining-label">REMAINING</div>
-            <div class="remaining-val {{ 'urgency-text-' + item.urgency.lower() if item.urgency else '' }}">{{ item.remaining }}</div>
-          </div>
-        </article>
-        {% endfor %}
-      </div>
-      {% elif not has_global_act %}
-      <div class="empty-state-active">
-        <span class="check-icon">✓</span>
-        <span>暂无进行中作战 / NO ACTIVE OPERATIONS</span>
-      </div>
+  <section class="key-visual {% if not background_data_uri %}no-poster{% endif %} {% if is_portrait %}is-portrait{% else %}is-landscape{% endif %}"
+           style="--poster-image:{% if background_data_uri %}url('{{ background_data_uri }}'){% else %}none{% endif %};">
+    <div class="poster-backdrop" aria-hidden="true"></div>
+    <div class="poster-panel">
+      <div class="poster-art" aria-hidden="true"></div>
+      {% if not background_data_uri %}
+      <div class="poster-unavailable">活动图片暂不可用</div>
       {% endif %}
-    </section>
-    {% endif %}
+    </div>
+  </section>
 
-    {% if show_nxt_hdr and p_next %}
-    <section class="section-next">
-      <div class="section-header">
-        <div class="section-title">NEXT OPERATIONS // 预告任务</div>
-      </div>
-      <div class="next-list">
-        {% for item in p_next %}
-        <div class="next-row {{ 'is-long' if item.is_long_title else '' }}">
-          <div class="next-time">{{ item.start_time_display }}</div>
-          <div class="next-cat"><span class="cat-tag-sm">{{ item.category }}</span></div>
-          <div class="next-title" title="{{ item.full_title }}">{{ item.title }}</div>
-          <div class="next-starts">{{ item.starts_in }}</div>
-        </div>
-        {% endfor %}
-      </div>
+  <section class="content-area">
+    {% if not available %}
+    <section class="unavailable-state">
+      <div>日程暂不可用</div>
+      <div class="empty-note">{{ sync_warning if sync_warning else '当前没有可用快照' }}</div>
     </section>
+    {% elif range_event_count is defined and range_event_count == 0 %}
+    <section class="empty-range">
+      <div>当前数据范围内未记录活动</div>
+      <div class="empty-note">来源状态与更新时间见页脚；这不代表游戏内没有活动。</div>
+    </section>
+    {% else %}
+      {% if show_act_hdr %}
+      <section class="section-active">
+        <div class="section-header">
+          <h2 class="section-title">进行中</h2>
+          <div class="section-count">本页 {{ p_active|length }} 项</div>
+        </div>
+        {% if p_active %}
+        <div class="active-list">
+          {% for item in p_active %}
+          <article data-event-id="{{ item.event_id }}" class="active-card {{ 'is-long' if item.is_long_title else '' }} {{ 'is-oversize' if item.is_oversize else '' }} {{ 'urgency-' + item.urgency.lower() if item.urgency else '' }}" style="min-height: {{ item.layout_height|default(160) }}px;">
+            <div class="card-main">
+              <div class="card-meta">
+                <span class="category-tag">{{ item.category }}</span>
+                <span class="card-time">{{ item.time_range }}</span>
+                {% if item.urgency and item.urgency != 'NORMAL' %}
+                <span class="badge-ending">即将结束</span>
+                {% endif %}
+              </div>
+              <h3 class="card-title" title="{{ item.full_title }}">{{ item.title }}</h3>
+              {% if item.progress_pct is defined and item.progress_pct != None %}
+              <div class="card-progress-wrap">
+                <div class="card-progress-fill" style="width: {{ (item.progress_pct * 100) | round(1) }}%"></div>
+              </div>
+              {% endif %}
+            </div>
+            <aside class="card-side">
+              {% if item.end_precision == 'UNKNOWN' %}
+              <span class="precision-label">时间待确认</span>
+              {% elif item.end_precision == 'DATE_ONLY' %}
+              <span class="remaining-label">剩余日期级</span>
+              <span class="remaining-value">{{ item.remaining }}</span>
+              {% else %}
+              <span class="remaining-label">剩余时间</span>
+              <span class="remaining-value">{{ item.remaining }}</span>
+              {% endif %}
+            </aside>
+          </article>
+          {% endfor %}
+        </div>
+        {% elif not has_global_act %}
+        <div class="empty-state-active">当前没有进行中的活动</div>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      {% if show_nxt_hdr and p_next %}
+      <section class="section-next">
+        <div class="section-header">
+          <h2 class="section-title">即将开始</h2>
+          <div class="section-count">本页 {{ p_next|length }} 项</div>
+        </div>
+        <div class="next-list">
+          {% for item in p_next %}
+          <article data-event-id="{{ item.event_id }}" class="next-row {{ 'is-long' if item.is_long_title else '' }} {{ 'is-oversize' if item.is_oversize else '' }}" style="min-height: {{ item.layout_height|default(112) }}px;">
+            <div class="next-time">{{ item.start_time_display }}</div>
+            <div class="next-category">{{ item.category }}</div>
+            <h3 class="next-title" title="{{ item.full_title }}">{{ item.title }}</h3>
+            <div class="next-starts">
+              {% if item.start_precision == 'UNKNOWN' %}时间待确认
+              {% elif item.start_precision == 'DATE_ONLY' %}{{ item.starts_in }}
+              {% else %}{{ item.starts_in }}
+              {% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
     {% endif %}
-    {% endif %}
-  </div>
+  </section>
 
   <footer class="panel-footer">
     <div class="footer-left">
-      <span class="health-tag {{ 'health-warn' if is_stale else 'health-ok' }}">{{ health_display if health_display is defined else 'DATA OK' }}</span>
-      <span class="footer-sep">|</span>
-      <span class="footer-meta">SOURCE: {{ source_display if source_display is defined else 'GAMEKEE + OFFICIAL' }}</span>
-      <span class="footer-sep">|</span>
-      <span class="footer-meta">UPDATED: {{ updated_at_display if updated_at_display is defined else 'Unknown' }}</span>
+      <span class="{{ health_class }}">{{ health_text }}</span>
+      <span class="footer-source">来源 {{ source_display if source_display is defined else '本地快照' }}</span>
+      {% if updated_at_display is defined and updated_at_display != 'Unknown' %}
+      <span class="footer-updated">更新时间 {{ updated_at_display }}</span>
+      {% endif %}
     </div>
-    <div class="footer-right">
-      <span class="page-badge">PAGE {{ page_number if page_number is defined else 1 }} / {{ page_total if page_total is defined else 1 }}</span>
+    <div class="footer-command">
+      {% if page_number is defined and page_total is defined and page_number < page_total %}
+      下一页：/妮姬 日程 {{ horizon_days }} {{ page_number + 1 }}
+      {% else %}
+      查询：/妮姬 日程 {{ horizon_days if horizon_days is defined else 14 }}
+      {% endif %}
     </div>
   </footer>
 </main>
-</body></html>
+</body>
+</html>

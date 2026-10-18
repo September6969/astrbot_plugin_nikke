@@ -88,7 +88,7 @@ def test_asset_entrypoint_never_uses_spine(tmp_path):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("failure", [RuntimeError("fail"), asyncio.TimeoutError()])
-async def test_handler_fallback_same_dto_without_second_fetch(failure):
+async def test_handler_text_fallback_uses_same_dto_without_second_fetch(failure):
     from datetime import datetime, timezone
 
     from astrbot_plugin_nikke.features.campaign.application import CampaignApplication
@@ -97,7 +97,6 @@ async def test_handler_fallback_same_dto_without_second_fetch(failure):
     from astrbot_plugin_nikke.main import NikkePlugin
 
     plugin = make_plugin_shell()
-    plugin.config = {"ui_renderer": "t2i"}
     plugin.services.client = Mock(
         get_main_quest_clear_lineup=AsyncMock(
             return_value={"code": 1300017, "msg": "no historical lineup"}
@@ -118,18 +117,18 @@ async def test_handler_fallback_same_dto_without_second_fetch(failure):
     plugin.presentation._t2i_renderer = Mock(
         render_campaign_history=AsyncMock(side_effect=failure)
     )
-    plugin.services.campaign_renderer = Mock(render_campaign_history=Mock(return_value="fallback.png"))
     inject_campaign_handler(plugin)
     event = Mock(
         image_result=lambda path: path,
         plain_result=lambda text: text,
         get_sender_id=lambda: "qq-123",
     )
-    assert [result async for result in plugin.campaign(event, "46-40")] == ["fallback.png"]
+    results = [result async for result in plugin.campaign(event, "46-40")]
+    assert len(results) == 1
+    assert "战役历史阵容" in results[0]
+    assert "图片生成失败" in results[0]
     plugin.services.client.get_main_quest_clear_lineup.assert_awaited_once()
     plugin.presentation._t2i_renderer.render_campaign_history.assert_awaited_once()
-    record = plugin.presentation._t2i_renderer.render_campaign_history.await_args.args[0]
-    plugin.services.campaign_renderer.render_campaign_history.assert_called_once_with(record)
 
 
 @pytest.mark.asyncio
@@ -142,25 +141,22 @@ async def test_timeout_and_cancel():
 
 
 @pytest.mark.asyncio
-async def test_native_injection_success_and_default_pillow():
+async def test_native_injection_success_ignores_legacy_renderer_value():
     from astrbot_plugin_nikke.main import NikkePlugin
     plugin = make_plugin_shell()
-    plugin.config = {"ui_renderer": "t2i"}
+    plugin.config = {"ui_renderer": "pillow"}
     plugin.html_render = AsyncMock(return_value="native.png")
     plugin.presentation._t2i_renderer = Mock(
         render_campaign_history=AsyncMock(return_value="native.png")
     )
     plugin.services.asset_manager = Mock(get_lineup_portrait=Mock(return_value=None))
-    plugin.services.campaign_renderer = Mock(render_campaign_history=Mock(return_value="pillow.png"))
     record = preview.fixture_record("normal")
     assert await plugin.presentation.render_campaign_record(record) == "native.png"
     plugin.presentation._t2i_renderer.render_campaign_history.assert_awaited_once_with(
         record
     )
-    plugin.services.campaign_renderer.render_campaign_history.assert_not_called()
-    plugin.config = {}
-    assert await plugin.presentation.render_campaign_record(record) == "pillow.png"
-    plugin.services.campaign_renderer.render_campaign_history.assert_called_once_with(record)
+    assert await plugin.presentation.render_campaign_record(record) == "native.png"
+    assert plugin.presentation._t2i_renderer.render_campaign_history.await_count == 2
 
 
 def test_partial_assets_preserve_identity_and_numbers():
@@ -210,9 +206,7 @@ async def test_cancellation_does_not_trigger_fallback():
     plugin.presentation._t2i_renderer = Mock(
         render_campaign_history=AsyncMock(side_effect=asyncio.CancelledError())
     )
-    plugin.services.campaign_renderer = Mock()
     with pytest.raises(asyncio.CancelledError):
         await plugin.presentation.render_campaign_record(
             preview.fixture_record("normal")
         )
-    plugin.services.campaign_renderer.render_campaign_history.assert_not_called()

@@ -8,7 +8,7 @@ import hashlib
 import json
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
@@ -18,6 +18,7 @@ from astrbot_plugin_nikke.features.account.errors import CredentialExpiredError
 from astrbot_plugin_nikke.features.account.identity import AccountIdentity, canonical_account_identity
 from .models import CharacterCardData, CharacterCardRequest, CharacterCardResult
 from .research_levels import map_research_levels
+from .roster_ranking import select_top_codes, stable_name_code
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,12 +78,34 @@ class CharacterCardBuilderPort(Protocol):
     ) -> CharacterCardData:
         """从身份、账号和上游详情构建角色卡领域 DTO。"""
 
+    def option_summary(
+        self, *, resource_id: Any, payload: Mapping[str, Any]
+    ) -> Mapping[str, Any]:
+        """复用单卡词条汇总口径，只解析装备并返回词条摘要。"""
+
+
+@dataclass(frozen=True, slots=True)
+class RosterOptionSummary:
+    """单个 top-3 角色的装备词条摘要。
+
+    status 必须能区分“明确无词条”“详情未返回”“读取失败”和“字段未识别”，
+    未知状态绝不能显示成 0 阶或“无词条”。
+    """
+
+    name_code: str
+    status: str
+    rows: tuple[Mapping[str, Any], ...] = ()
+    total: int = 0
+    complete: bool = True
+    message: str = ""
+
 
 @dataclass(frozen=True, slots=True)
 class CharacterRosterData:
     commander_name: str
     characters: tuple[Mapping[str, Any], ...]
     name_map: Mapping[str, str]
+    option_summaries: Mapping[str, RosterOptionSummary] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,6 +113,7 @@ class CharacterInfoData:
     name: str
     title: str
     rows: tuple[tuple[str, str], ...]
+    resource_id: str | None = None
 
 
 class CharacterNotFound(ValueError):
@@ -122,6 +146,8 @@ class CharacterApplication:
 
     PROFILE_CACHE_TTL_SECONDS = 300.0
     PROFILE_CACHE_LIMIT = 50
+    ROSTER_TOP_OPTION_LIMIT = 3
+    ROSTER_DETAIL_CONCURRENCY = 3
 
     def __init__(
         self,
@@ -172,29 +198,37 @@ class CharacterApplication:
 
     def name_map(self, directory: Sequence[Mapping[str, Any]]) -> dict[str, str]:
         """按目录内容指纹缓存 roster 展示名，避免目录变化后复用陈旧结果。"""
-        entries = [
-            (
-                str(item.get("name_code", "")),
-                str(item.get("name_zh_cn", "")),
-                str(item.get("name_zh_tw", "")),
-                str(item.get("name_cn", "")),
-                str(item.get("name_en", "")),
+        entries = []
+        for item in directory:
+            if not isinstance(item, Mapping):
+                continue
+            raw_code = item.get("name_code")
+            code = str(raw_code).strip() if raw_code is not None else ""
+            if not code:
+                continue
+            display = self._identity.display_name(self._identity.enrich(dict(item)))
+            entries.append(
+                (
+                    code,
+                    str(item.get("name_zh_cn", "")),
+                    str(item.get("name_zh_tw", "")),
+                    str(item.get("name_cn", "")),
+                    str(item.get("name_en", "")),
+                    display,
+                )
             )
-            for item in directory
-            if isinstance(item, Mapping)
-        ]
         payload = json.dumps(entries, ensure_ascii=False, separators=(",", ":"))
         fingerprint = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         cached = self._name_map_cache
         if cached is not None and cached[0] == fingerprint:
             return cached[1]
 
+        candidates: dict[str, set[str]] = {}
+        for code, _zh_cn, _zh_tw, _name_cn, _name_en, display in entries:
+            candidates.setdefault(code, set()).add(display)
         mapping = {
-            str(item.get("name_code", "")): self._identity.display_name(
-                self._identity.enrich(item)
-            )
-            for item in directory
-            if isinstance(item, Mapping)
+            code: next(iter(displays)) if len(displays) == 1 else "身份待核验"
+            for code, displays in candidates.items()
         }
         self._name_map_cache = (fingerprint, mapping)
         return mapping
@@ -202,18 +236,166 @@ class CharacterApplication:
     async def roster(
         self, qq_id: str, directory: Sequence[Mapping[str, Any]]
     ) -> CharacterRosterData:
-        """读取练度列表并附上与同一目录快照匹配的名称。"""
+        """读取练度列表，并为正式排序的 top-3 补齐装备词条摘要。"""
         account = self._account(qq_id)
         characters = await self._gateway.get_roster(account, True)
         if not isinstance(characters, list):
             raise TypeError("角色列表响应必须是数组")
+        option_summaries = await self._roster_option_summaries(
+            account, characters, directory
+        )
         return CharacterRosterData(
             commander_name=str(
                 account.get("nickname") or account.get("role_name") or "指挥官"
             ),
             characters=tuple(characters),
             name_map=self.name_map(directory),
+            option_summaries=option_summaries,
         )
+
+    @staticmethod
+    def _directory_resource_ids(
+        directory: Sequence[Mapping[str, Any]],
+    ) -> dict[str, Any]:
+        """从目录按稳定 name_code 建立 resource_id 索引，用于武器基础值。"""
+        resources: dict[str, Any] = {}
+        for item in directory or ():
+            if not isinstance(item, Mapping):
+                continue
+            code = stable_name_code(item)
+            if code and code not in resources:
+                resources[code] = item.get("resource_id")
+        return resources
+
+    async def _roster_option_summaries(
+        self,
+        account: Mapping[str, Any],
+        characters: Sequence[Mapping[str, Any]],
+        directory: Sequence[Mapping[str, Any]],
+    ) -> dict[str, RosterOptionSummary]:
+        """只抓取正式排序 top-3 的详情；并发有上限，失败不牵连其他角色。"""
+        codes = select_top_codes(characters, self.ROSTER_TOP_OPTION_LIMIT)
+        if not codes:
+            return {}
+        resource_ids = self._directory_resource_ids(directory)
+        semaphore = asyncio.Semaphore(self.ROSTER_DETAIL_CONCURRENCY)
+        summaries = await asyncio.gather(
+            *(
+                self._fetch_option_summary(
+                    account, code, resource_ids.get(code), semaphore
+                )
+                for code in codes
+            )
+        )
+        return dict(zip(codes, summaries))
+
+    async def _fetch_option_summary(
+        self,
+        account: Mapping[str, Any],
+        code: str,
+        resource_id: Any,
+        semaphore: asyncio.Semaphore,
+    ) -> RosterOptionSummary:
+        """单个角色的词条详情；凭据失效优先抛出，其他失败降级为可展示状态。"""
+        async with semaphore:
+            try:
+                payload = await self._gateway.get_character_detail(account, code)
+            except CredentialExpiredError:
+                raise
+            except Exception as exc:
+                _LOGGER.warning(
+                    "[NIKKE] 练度总览词条详情读取失败：%s",
+                    safe_exception_message(exc),
+                )
+                return RosterOptionSummary(
+                    name_code=code,
+                    status="failed",
+                    complete=False,
+                    message="详情读取失败",
+                )
+        if not isinstance(payload, Mapping) or not isinstance(
+            payload.get("detail"), Mapping
+        ):
+            return RosterOptionSummary(
+                name_code=code,
+                status="unreturned",
+                complete=False,
+                message="详情未返回",
+            )
+        try:
+            summary = self._card_builder.option_summary(
+                resource_id=resource_id, payload=payload
+            )
+        except Exception as exc:
+            _LOGGER.warning(
+                "[NIKKE] 练度总览词条解析失败：%s",
+                safe_exception_message(exc),
+            )
+            return RosterOptionSummary(
+                name_code=code,
+                status="failed",
+                complete=False,
+                message="详情解析失败",
+            )
+        if not isinstance(summary, Mapping):
+            return RosterOptionSummary(
+                name_code=code,
+                status="failed",
+                complete=False,
+                message="详情解析失败",
+            )
+        rows = summary.get("rows") or ()
+        if not isinstance(rows, (list, tuple)):
+            rows = ()
+        rows = tuple(row for row in rows if isinstance(row, Mapping))
+        raw_total = summary.get("total")
+        total = raw_total if isinstance(raw_total, int) and not isinstance(raw_total, bool) else 0
+        complete = bool(summary.get("complete"))
+        equipment_present = bool(summary.get("equipment_present"))
+        options_fields_present = bool(summary.get("options_fields_present"))
+        # 装备槽或已装备槽位的词条字段未完整返回时“完整”不成立：
+        # 未知绝不能被标记为完整，有已识别词条时降级为 partial。
+        fields_complete = equipment_present and options_fields_present
+        complete = complete and fields_complete
+        status = self._option_status(
+            rows, total, complete, fields_complete=fields_complete
+        )
+        return RosterOptionSummary(
+            name_code=code,
+            status=status,
+            rows=rows,
+            total=total,
+            complete=complete,
+            message={
+                "ok": "",
+                "partial": "部分词条未识别",
+                "none": "无装备词条",
+                "unknown": "词条字段未识别",
+            }[status],
+        )
+
+    @staticmethod
+    def _option_status(
+        rows: tuple[Mapping[str, Any], ...],
+        total: int,
+        complete: bool,
+        *,
+        fields_complete: bool,
+    ) -> str:
+        """区分有词条、部分识别、明确无词条与字段未识别。
+
+        ``fields_complete`` 同时覆盖装备槽字段与已装备槽位的词条字段：缺失时
+        没有有效词条判定为未知，有有效词条由调用方降级为部分识别；只有字段
+        明确返回且结果为空，才判定为“无装备词条”。
+        """
+        if rows:
+            return "ok" if complete else "partial"
+        if not fields_complete:
+            return "unknown"
+        if total == 0 and complete:
+            return "none"
+        return "unknown"
+
 
     def _unique_match(
         self, query: str, directory: Sequence[Mapping[str, Any]]
@@ -246,6 +428,11 @@ class CharacterApplication:
                 ("武器", str(item.get("weapon") or "未知")),
                 ("爆裂阶段", str(item.get("burst") or "未知")),
                 ("企业", str(item.get("corporation") or "未知")),
+            ),
+            resource_id=(
+                str(item.get("resource_id"))
+                if item.get("resource_id") not in (None, "")
+                else None
             ),
         )
 

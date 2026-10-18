@@ -1,4 +1,3 @@
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -6,7 +5,6 @@ from PIL import Image
 
 from astrbot_plugin_nikke.features.campaign.stage_resolver import CampaignStageResolver
 from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder, parse_profile_created_at
-from astrbot_plugin_nikke.ui.renderers.profile import ProfileCardRenderer
 
 
 class CampaignProfileReverseLookupTests(unittest.TestCase):
@@ -78,12 +76,10 @@ class ProfileDataContractTests(unittest.TestCase):
             fetched_at="",
             plugin_version="test",
         )
-        self.assertEqual(ProfileCardRenderer._extra_items(data), [("注册时间", "2024-10-07")])
-        with tempfile.TemporaryDirectory() as directory:
-            renderer = ProfileCardRenderer(Path(directory), Path(directory))
-            output = renderer.render_profile(data)
-            with Image.open(output) as image:
-                self.assertEqual(image.width, 1200)
+        from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
+
+        payload = ProfileT2IPayloadBuilder().build(data)
+        self.assertIn({"label": "创建日期", "value": "2024-10-07", "scope": ""}, payload["account"])
 
     def test_internal_academy_ids_keep_neutral_unknown_semantics(self):
         data = ProfileBuilder().build(
