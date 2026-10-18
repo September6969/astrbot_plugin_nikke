@@ -15,7 +15,6 @@
 
 | 用户入口 | 图片页 | 失败文本来源 | 保持的语义 |
 |---|---|---|---|
-| `/妮姬 查询 资料 <name>` | `character_info` | 同一公开 `CharacterInfoData` | 只用已确认的公开目录字段与头像，不请求私有账号详情。 |
 | `/妮姬 查询` | `roster` | 同一 `CharacterRosterData` | Top 20、稳定排序、身份映射及未知字段语义不变。 |
 | `/妮姬 查询 练度 <name>` | `character` | 同一 `CharacterCardData` | 资产准备复用当前 DTO，不为文本回退再次解析或查询。 |
 | `/妮姬 个人资料` | `profile` | 同一 `ProfileDashboardData` | 保留缺失、未知、真实零值和部分数据提示。 |
@@ -24,7 +23,10 @@
 | `/妮姬 突袭 排名 [page]` | `union_records` | 同一 `RaidRankingData` | 排名、并列、页码、范围分母和精确数值不变。 |
 | `/妮姬 突袭 我的 [page]` | `union_member` | 同一 `RaidRankingData` | 每页记录、五个队员槽及未知状态不变。 |
 | `/妮姬 日程 ...` | `calendar_schedule` | 同一快照的当前页 | 页码、完整标题、分页 ID 和订阅语义不变。 |
-| 管理员手动/定时日常摘要 | `daily_summary` | 同一批 `DailyTaskResult` | 使用结构化状态码；`UNKNOWN_AFTER_ACTION` 仍为“待确认”，不推断任务已领取。 |
+
+### 已退役为纯文本的入口
+
+`/妮姬 查询 资料 <name>`（公开角色基础资料）与管理员手动/定时日常汇总不再经过 T2I：命令层直接返回结构化文本，`character_info`、`daily_summary` 两个图片页、对应 payload builder 与模板均已删除。日常汇总复用 `features/daily/presentation.py::format_daily_summary_text`，保留全部账号结果、逐条奖励状态、`UNKNOWN_AFTER_ACTION` 待确认语义、原有顺序与目标会话，并按字符预算分块、超长单条显式续页；文本展示不触发签到/领取或额外业务查询。
 
 ## 实现位置
 

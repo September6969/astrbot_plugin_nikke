@@ -1007,7 +1007,7 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         application.roster.assert_awaited_once_with("10001", tuple(directory))
         plugin.presentation.render_roster.assert_awaited_once_with(data)
 
-    async def test_info_command_refuses_ambiguous_identity_instead_of_rendering_first(self):
+    async def test_info_command_refuses_ambiguous_identity_instead_of_returning_first_candidate(self):
         from unittest.mock import Mock
 
         from astrbot_plugin_nikke.main import NikkePlugin
@@ -1024,7 +1024,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         )
         plugin = make_plugin_shell()
         plugin.services.character_application = application
-        plugin.presentation.render_character_info = AsyncMock()
         plugin._directory = []
         inject_character_handler(plugin)
 
@@ -1033,7 +1032,6 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(result), 1)
         self.assertIn("找到多个角色", result[0])
         self.assertIn("仙境兔女郎", result[0])
-        plugin.presentation.render_character_info.assert_not_awaited()
 
     async def test_terminate_delegates_to_runtime_coordinator(self):
         from astrbot_plugin_nikke.main import NikkePlugin

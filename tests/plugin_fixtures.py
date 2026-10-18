@@ -79,7 +79,6 @@ def inject_daily_handler(plugin: NikkePlugin) -> None:
         runner=runner,
         client=getattr(services, "client", None),
         config=plugin.config,
-        render_summary=lambda _rows: "",
         send_summary=send_summary,
     )
 
@@ -145,7 +144,6 @@ def inject_character_handler(plugin: NikkePlugin) -> None:
         directory=lambda: tuple(getattr(plugin, "_directory", ())),
         render_roster=plugin.presentation.render_roster,
         render_card=plugin.presentation.render_character_card,
-        render_info=plugin.presentation.render_character_info,
         invalidate_cookie=invalidate_cookie,
         start_feedback=_feedback_starter(plugin),
     )

@@ -44,7 +44,6 @@ async def test_character_card_request_and_existing_dto_presentation_are_single_p
         directory=lambda: directory,
         render_roster=lambda _data: None,
         render_card=lambda card: _image_path(card, presented),
-        render_info=lambda _data: None,
         invalidate_cookie=invalidated.append,
         start_feedback=lambda _context, _message: feedback,
     )
@@ -85,7 +84,6 @@ async def test_character_cookie_expiry_invalidates_once_and_feedback_is_cancelle
         directory=lambda: (),
         render_roster=lambda _data: None,
         render_card=lambda _data: None,
-        render_info=lambda _data: None,
         invalidate_cookie=invalidated.append,
         start_feedback=lambda _context, _message: feedback,
     )
@@ -142,7 +140,6 @@ async def test_character_render_failure_is_explicit_and_does_not_repeat_domain_q
         directory=lambda: ({"name_code": "5065"},),
         render_roster=lambda _data: None,
         render_card=failed_render,
-        render_info=lambda _data: None,
         invalidate_cookie=lambda _actor_id: None,
         start_feedback=lambda _context, _message: feedback,
     )

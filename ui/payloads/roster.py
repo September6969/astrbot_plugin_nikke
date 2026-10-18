@@ -9,20 +9,12 @@ from time import perf_counter
 from typing import Any
 import unicodedata
 
+from astrbot_plugin_nikke.features.character.roster_ranking import (
+    order_roster_entries,
+    roster_number,
+)
+
 from ..t2i_assets import T2IAssetResolver
-
-
-def roster_number(value: Any) -> int | None:
-    """只接受可验证的非负整数，保留真实的零值。"""
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return value if value >= 0 else None
-    if isinstance(value, str):
-        raw = value.strip()
-        if raw.isascii() and raw.isdecimal():
-            return int(raw)
-    return None
 
 
 def display_roster_number(value: Any, *, grouped: bool = False) -> str:
@@ -43,39 +35,108 @@ def display_roster_skill(value: Any) -> str:
     return "?" if number is None else str(number)
 
 
-def _roster_name_lines(name: str, show_code: bool) -> int:
-    text = f"{name} #{'0000' if show_code else ''}" if show_code else name
-    units = sum(
+# 词条面板的确定性高度模型；必须与 roster.html 的尺寸保持同步。
+OPTION_PANEL_MARGIN_TOP = 14
+OPTION_PANEL_PADDING = 14
+OPTION_TITLE_HEIGHT = 30
+OPTION_ROW_LINE_HEIGHT = 32
+OPTION_ROW_GAP = 6
+OPTION_GRID_MARGIN_TOP = 6
+OPTION_SAFETY_PAD = 12
+# 20px 字体下约 1088px 内容宽对应的全角等效容量，留出安全余量。
+OPTION_LINE_CAPACITY_UNITS = 46.0
+# 固定总表高度模型的全局安全余量，避免长名折行估计偏小时溢出。
+ROSTER_CANVAS_SAFETY = 16
+
+
+def _text_units(text: str) -> float:
+    """按中日韩显示宽度估算文本占用的全角等效宽度。"""
+    return sum(
         0.42 if char.isspace() else
         1.0 if unicodedata.east_asian_width(char) in {"W", "F"} else 0.55
         for char in text
     )
-    return max(1, math.ceil(units / 12))
+
+
+def _roster_name_lines(name: str, show_code: bool) -> int:
+    text = f"{name} #{'0000' if show_code else ''}" if show_code else name
+    return max(1, math.ceil(_text_units(text) / 9))
+
+
+def _option_row_lines(text: str) -> int:
+    return max(1, math.ceil(_text_units(text) / OPTION_LINE_CAPACITY_UNITS))
+
+
+def _option_payload(summary: Any) -> dict[str, Any] | None:
+    """把领域词条摘要投影为可安全展示的结构；未知状态不得伪装成零。"""
+    status = getattr(summary, "status", None)
+    if not isinstance(status, str) or not status:
+        return None
+    rows = []
+    for row in getattr(summary, "rows", ()) or ():
+        if not isinstance(row, Mapping):
+            continue
+        label = str(row.get("label", "") or "")
+        value = str(row.get("value", "") or "")
+        tier = str(row.get("tier", "") or "")
+        note = str(row.get("note", "") or "")
+        rows.append(
+            {
+                "label": label,
+                "value": value,
+                "tier": tier,
+                "note": note,
+                "lines": _option_row_lines(f"{label} {value} {tier} {note}"),
+            }
+        )
+    raw_total = getattr(summary, "total", 0)
+    total = raw_total if isinstance(raw_total, int) and not isinstance(raw_total, bool) else 0
+    complete = bool(getattr(summary, "complete", False))
+    return {
+        "status": status,
+        "rows": rows,
+        "total": total,
+        "complete": complete,
+        "label": "词条合计" if complete else "已知词条合计",
+        "message": str(getattr(summary, "message", "") or ""),
+        "has_rows": bool(rows),
+    }
+
+
+def _option_panel_extra_height(options: Mapping[str, Any]) -> int:
+    """按词条面板的行数与折行估算额外行高，保证不裁切、不溢出。"""
+    rows = options.get("rows") or []
+    if rows:
+        body = sum(
+            max(1, int(row.get("lines", 1))) * OPTION_ROW_LINE_HEIGHT
+            for row in rows
+        )
+        body += OPTION_ROW_GAP * max(0, len(rows) - 1) + OPTION_GRID_MARGIN_TOP
+    else:
+        body = OPTION_ROW_LINE_HEIGHT
+    return (
+        OPTION_PANEL_MARGIN_TOP
+        + 2 * OPTION_PANEL_PADDING
+        + OPTION_TITLE_HEIGHT
+        + body
+        + OPTION_SAFETY_PAD
+    )
 
 
 def project_roster_rows(
     characters: Any,
     name_map: Any,
     master_resolver: Any = None,
+    option_summaries: Any = None,
 ) -> tuple[list[dict[str, Any]], int, str]:
-    """共享排序、身份和数值投影，供 T2I 与 Pillow 展示复用。"""
+    """共享排序、身份和数值投影，供 T2I 与文本回退复用同一顺序来源。"""
     entries = tuple(characters or ())
     names = name_map if isinstance(name_map, Mapping) else {}
-    indexed = [
-        (index, item if isinstance(item, Mapping) else {})
-        for index, item in enumerate(entries)
-    ]
-    indexed.sort(
-        key=lambda pair: (
-            roster_number(pair[1].get("combat")) or 0,
-            roster_number(pair[1].get("lv")) or 0,
-        ),
-        reverse=True,
-    )
-    selected = indexed[:20]
+    summaries = option_summaries if isinstance(option_summaries, Mapping) else {}
+    selected = order_roster_entries(entries)[:20]
     identities = []
     resolve = getattr(master_resolver, "resolve_name_code", None)
-    for _, item in selected:
+    for item in selected:
         raw_code = item.get("name_code")
         code = "" if raw_code is None or isinstance(raw_code, bool) else str(raw_code).strip()
         directory_name = str(names.get(code, "")).strip() if code else ""
@@ -92,41 +153,48 @@ def project_roster_rows(
         name for name, _, canonical in identities if canonical is not None
     )
     rows = []
-    for rank, ((_, item), (name, code, canonical)) in enumerate(
+    for rank, (item, (name, code, canonical)) in enumerate(
         zip(selected, identities), start=1
     ):
         show_code = bool(code and (canonical is None or duplicate_names[name] > 1))
-        rows.append(
-            {
-                "rank": rank,
-                "name": name,
-                "name_code": code,
-                "show_code": show_code,
-                "identity_verified": canonical is not None,
-                "identity_note": "" if canonical is not None else "身份待核验 · 未使用角色头像",
-                "avatar_placeholder": "妮" if canonical is not None else "?",
-                "level": display_roster_number(item.get("lv")),
-                "combat": display_roster_number(item.get("combat"), grouped=True),
-                "skills": "/".join(
-                    display_roster_skill(item.get(key))
-                    for key in ("skill1_lv", "skill2_lv", "ulti_skill_lv")
-                ),
-                "grade": f"突破 {display_roster_number(item.get('grade'))}",
-                "core": (
-                    f"核心 +{display_roster_number(item.get('core'))}"
-                    if item.get("core") is not None
-                    and display_roster_number(item.get("core")) != "无法识别"
-                    else f"核心 {display_roster_number(item.get('core'))}"
-                ),
-                "top_three": rank <= 3,
-                "_canonical": canonical,
-            }
-        )
+        row = {
+            "rank": rank,
+            "name": name,
+            "name_code": code,
+            "show_code": show_code,
+            "identity_verified": canonical is not None,
+            "identity_note": "" if canonical is not None else "身份待核验 · 未使用角色头像",
+            "avatar_placeholder": "妮" if canonical is not None else "?",
+            "level": display_roster_number(item.get("lv")),
+            "combat": display_roster_number(item.get("combat"), grouped=True),
+            "skills": "/".join(
+                display_roster_skill(item.get(key))
+                for key in ("skill1_lv", "skill2_lv", "ulti_skill_lv")
+            ),
+            "grade": f"突破 {display_roster_number(item.get('grade'))}",
+            "core": (
+                f"核心 +{display_roster_number(item.get('core'))}"
+                if item.get("core") is not None
+                and display_roster_number(item.get("core")) != "无法识别"
+                else f"核心 {display_roster_number(item.get('core'))}"
+            ),
+            "top_three": rank <= 3,
+            "options": (
+                _option_payload(summaries.get(code))
+                if rank <= 3 and code
+                else None
+            ),
+            "_canonical": canonical,
+        }
         lines = _roster_name_lines(name, show_code)
-        rows[-1]["row_height"] = max(
+        row_height = max(
             100,
             24 + lines * 30 + (20 if canonical is None else 0),
         )
+        if row["options"] is not None:
+            row_height += _option_panel_extra_height(row["options"])
+        row["row_height"] = row_height
+        rows.append(row)
 
     total_count = len(entries)
     shown_count = len(rows)
@@ -156,6 +224,7 @@ class RosterT2IPayloadBuilder:
             characters,
             getattr(data, "name_map", {}),
             getattr(self.assets, "character_master", None),
+            getattr(data, "option_summaries", {}),
         )
         rows: list[dict[str, Any]] = []
         lookup_count = 0
@@ -202,7 +271,11 @@ class RosterT2IPayloadBuilder:
             if avatar_note and record["_canonical"] is not None:
                 rows[-1]["row_height"] = max(rows[-1]["row_height"], 100 + 20)
 
-        height = 440 if not rows else 360 + sum(row["row_height"] + 8 for row in rows)
+        height = (
+            440
+            if not rows
+            else 360 + sum(row["row_height"] + 8 for row in rows) + ROSTER_CANVAS_SAFETY
+        )
         shown_count = len(rows)
         return {
             "canvas": {"width": 1200, "height": height},

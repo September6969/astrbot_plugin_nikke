@@ -19,6 +19,7 @@ from ...features.character.models import (
     CharacterCardData,
     CharacterCardRequest,
 )
+from ...features.character.roster_ranking import order_roster_entries
 from ...integrations.blablalink.client import BlaBlaError, CookieExpired
 from .contracts import (
     CommandContext,
@@ -31,7 +32,6 @@ from .contracts import (
 
 RosterPresenter = Callable[[CharacterRosterData], Awaitable[str | None]]
 CardPresenter = Callable[[CharacterCardData], Awaitable[str | None]]
-InfoPresenter = Callable[[CharacterInfoData], Awaitable[str | None]]
 
 
 class CharacterCommandHandler:
@@ -44,7 +44,6 @@ class CharacterCommandHandler:
         directory: Callable[[], Sequence[Mapping[str, Any]]],
         render_roster: RosterPresenter,
         render_card: CardPresenter,
-        render_info: InfoPresenter,
         invalidate_cookie: Callable[[str], None],
         start_feedback: CommandFeedbackStarter | None = None,
     ) -> None:
@@ -52,7 +51,6 @@ class CharacterCommandHandler:
         self._directory = directory
         self._render_roster = render_roster
         self._render_card = render_card
-        self._render_info = render_info
         self._invalidate_cookie = invalidate_cookie
         self._start_feedback = start_feedback
 
@@ -131,12 +129,6 @@ class CharacterCommandHandler:
             return self._text("没有找到该妮姬。")
         except CharacterAmbiguousMatch as exc:
             return self._text(self._ambiguous_message(exc))
-        try:
-            path = await self._render_info(data)
-        except Exception:
-            path = None
-        if isinstance(path, str) and path.strip():
-            return CommandResult((ImageReply(path),))
         return self._text(self._format_info(data))
 
     @staticmethod
@@ -181,19 +173,15 @@ class CharacterCommandHandler:
         characters = [
             item for item in data.characters if isinstance(item, Mapping)
         ]
-        characters.sort(
-            key=lambda item: (
-                _safe_sort_number(item.get("combat")),
-                _safe_sort_number(item.get("lv")),
-            ),
-            reverse=True,
-        )
+        ordered = order_roster_entries(characters)
         total = len(data.characters)
-        shown = characters[:20]
+        shown = ordered[:20]
         label = f"Top {len(shown)} / 共 {total} 名" if total > 20 else f"共 {total} 名"
         lines = [f"妮姬练度一览 · {data.commander_name} · {label}"]
         if not shown:
             lines.append("未获取到角色信息")
+        summaries = getattr(data, "option_summaries", None)
+        summaries = summaries if isinstance(summaries, Mapping) else {}
         for rank, item in enumerate(shown, 1):
             code = str(item.get("name_code") or "").strip()
             name = data.name_map.get(code) if code else None
@@ -203,7 +191,46 @@ class CharacterCommandHandler:
                 f" · 技能 {skill(item.get('skill1_lv'))}/{skill(item.get('skill2_lv'))}/{skill(item.get('ulti_skill_lv'))}"
                 f" · 突破 {number(item.get('grade'))} · 核心 {number(item.get('core'))}"
             )
+            if rank <= 3 and code:
+                lines.extend(
+                    CharacterCommandHandler._format_roster_options(
+                        summaries.get(code)
+                    )
+                )
         return "\n".join(lines)
+
+    @staticmethod
+    def _format_roster_options(summary: Any) -> list[str]:
+        """按同一 DTO 词条摘要生成文本；未知状态绝不显示成零或“无词条”。"""
+        if summary is None:
+            return []
+        status = getattr(summary, "status", "")
+        rows = getattr(summary, "rows", ()) or ()
+        total = getattr(summary, "total", 0)
+        complete = bool(getattr(summary, "complete", False))
+        if status in ("ok", "partial") and rows:
+            head = (
+                f"词条合计：{total}阶"
+                if complete
+                else f"已知词条合计：{total}阶 · 部分词条未识别"
+            )
+            out = [head]
+            for row in rows:
+                if not isinstance(row, Mapping):
+                    continue
+                label = str(row.get("label", "") or "")
+                value = str(row.get("value", "") or "")
+                tier = str(row.get("tier", "") or "")
+                note = str(row.get("note", "") or "")
+                suffix = f"（{note}）" if note else ""
+                out.append(f"- 【{label}】{value} {tier}{suffix}")
+            return out
+        message = str(getattr(summary, "message", "") or "")
+        if status == "none":
+            return ["词条：无装备词条"]
+        if status == "unknown":
+            return ["词条：词条字段未识别"]
+        return [f"词条：{message or '详情未返回'}"]
 
     @staticmethod
     def _format_character_card(data: CharacterCardData) -> str:
@@ -254,12 +281,3 @@ class CharacterCommandHandler:
     @staticmethod
     def _text(text: str) -> CommandResult:
         return CommandResult((TextReply(text),))
-
-
-def _safe_sort_number(value) -> int:
-    if isinstance(value, bool):
-        return 0
-    try:
-        return max(0, int(value))
-    except (TypeError, ValueError):
-        return 0

@@ -14,7 +14,7 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
 .roster-title { margin: 10px 0 0; color: #202a33; font-size: 48px; line-height: 1.15; font-weight: 800; }
 .roster-commander { margin-top: 12px; color: #65727e; font-size: 24px; }
 .roster-count { max-width: 330px; padding: 12px 18px; border-radius: 14px; background: #ffffff; color: #4b626e; font-size: 22px; font-weight: 700; text-align: right; }
-.roster-grid { display: grid; grid-template-columns: 60px 70px minmax(220px, 1fr) 84px 150px 220px 175px; align-items: center; column-gap: 8px; }
+.roster-grid { display: grid; grid-template-columns: 60px 70px minmax(220px, 1fr) 84px 190px 220px 165px; align-items: center; column-gap: 8px; }
 .roster-labels { min-height: 46px; padding: 0 10px 8px; color: #6f7d87; font-size: 28px; line-height: 1; font-weight: 700; }
 .roster-labels span { white-space: nowrap; }
 .roster-row { min-height: 100px; margin-bottom: 8px; padding: 12px 14px; border: 1px solid #e1e7eb; border-radius: 16px; background: #fff; }
@@ -31,6 +31,18 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
 .skills { color: #53626c; font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .progress { color: #56666e; font-size: 28px; line-height: 1.15; }
 .progress span { display: block; }
+.roster-options { grid-column: 1 / -1; margin-top: 14px; padding: 12px; border: 1px solid #cfe0e3; border-radius: 12px; background: #f6fbfb; }
+.options-head { color: #287f8d; font-size: 20px; line-height: 30px; font-weight: 750; }
+.options-head strong { font-size: 24px; font-variant-numeric: tabular-nums; }
+.options-head small { margin-left: 2px; font-size: 16px; }
+.options-message { color: #5c6c74; }
+.options-grid { margin-top: 6px; }
+.options-row { display: grid; grid-template-columns: minmax(300px, 1fr) 230px 110px; align-items: baseline; column-gap: 10px; min-height: 30px; margin-bottom: 6px; padding: 0 12px; border: 1px solid #e4edef; border-radius: 8px; background: #fff; line-height: 30px; }
+.options-row:last-child { margin-bottom: 0; }
+.opt-label { color: #36434d; font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
+.opt-note { margin-left: 4px; color: #8a949b; font-size: 15px; font-weight: 600; }
+.opt-value { color: #1d5865; font-size: 21px; font-weight: 750; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.opt-tier { color: #4a626b; font-size: 20px; font-weight: 700; text-align: right; white-space: nowrap; }
 .empty { display: grid; min-height: 120px; place-items: center; border: 1px dashed #b8c6cb; border-radius: 16px; background: #fff; color: #697984; font-size: 24px; }
 .roster-footer { margin-top: 18px; padding: 14px 4px 0; border-top: 1px solid #d4dde1; color: #78858e; font-size: 17px; }
 </style>
@@ -65,6 +77,20 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
       <div class="metric combat">{{ row.combat }}</div>
       <div class="metric skills">{{ row.skills }}</div>
       <div class="metric progress"><span>{{ row.grade }}</span><span>{{ row.core }}</span></div>
+      {% if row.options %}
+      <div class="roster-options" data-status="{{ row.options.status }}">
+        {% if row.options.has_rows %}
+        <div class="options-head">【{{ row.options.label }}】<strong>{{ row.options.total }}</strong><small>阶</small>{% if not row.options.complete %} · 部分词条未识别{% endif %}</div>
+        <div class="options-grid">
+          {% for opt in row.options.rows %}
+          <div class="options-row"><span class="opt-label">【{{ opt.label }}】{% if opt.note %}<small class="opt-note">{{ opt.note }}</small>{% endif %}</span><strong class="opt-value">{{ opt.value }}</strong><span class="opt-tier">{{ opt.tier }}</span></div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="options-head options-message">词条 · {{ row.options.message }}</div>
+        {% endif %}
+      </div>
+      {% endif %}
     </article>
   {% endfor %}
   </section>

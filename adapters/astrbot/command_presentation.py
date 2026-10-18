@@ -11,8 +11,8 @@ from astrbot.api.event import MessageChain
 from astrbot.api.message_components import Image, Plain
 
 from ...application.commands.contracts import CommandReply, ImageReply, TextReply
+from ...features.daily.presentation import format_daily_summary_text
 from ...ui.payloads.calendar import CalendarT2IPayloadBuilder
-from ...ui.payloads.daily_summary import DailySummaryT2IPayloadBuilder
 from ...ui.renderers import T2IRenderer
 
 
@@ -61,18 +61,6 @@ class AstrBotCommandPresentation:
     async def render_character_card(self, card: Any) -> str | None:
         return await self.try_t2i("character", card)
 
-    async def render_character_info(self, data: Any) -> str | None:
-        """仅渲染公开资料 DTO；失败由命令层格式化同一份 DTO。"""
-        try:
-            path = await self._renderer().render_view("character_info", data)
-        except Exception as exc:
-            logger.warning(
-                "[NIKKE] 公开角色资料 T2I 失败，回退同一 DTO 文本: %s",
-                type(exc).__name__,
-            )
-            return None
-        return path if isinstance(path, str) and path.strip() else None
-
     async def render_campaign_record(self, record: Any) -> str | None:
         try:
             path = await self._renderer().render_campaign_history(record)
@@ -97,29 +85,10 @@ class AstrBotCommandPresentation:
         """向业务层确认过的本人私聊会话发送异常摘要。"""
         return await self._context.send_message(target, MessageChain([Plain(text)]))
 
-    async def render_daily_summary(self, results, *, scope: str) -> list[str] | None:
-        """渲染同一批结构化结果的全部汇总页。"""
-        try:
-            paths = await self._renderer().render_view(
-                "daily_summary", results, scope=scope
-            )
-        except Exception as exc:
-            logger.warning(
-                "[NIKKE] 日常汇总 T2I 失败，回退同一批结果文本: %s",
-                type(exc).__name__,
-            )
-            return None
-        if isinstance(paths, str):
-            return [paths] if paths.strip() else None
-        if isinstance(paths, (list, tuple)):
-            clean = [path for path in paths if isinstance(path, str) and path.strip()]
-            return clean or None
-        return None
-
     @staticmethod
     def format_daily_summary(results, *, scope: str) -> tuple[str, ...]:
-        """将同一结构化结果生成图片失败时可用的文本分页。"""
-        return DailySummaryT2IPayloadBuilder().format_text(results, scope=scope)
+        """用同一批结构化结果生成文本分页；不再经过图片渲染。"""
+        return format_daily_summary_text(results, scope=scope)
 
     async def send_summary(self, target: str, replies: list[CommandReply] | tuple[CommandReply, ...]) -> None:
         """在原目标会话的一条消息链中发送所有摘要页或文本块。"""

@@ -138,7 +138,7 @@ async def test_notice_private_route_dedup_and_rebind_guard():
     store, client, runner = setup()
     sender = AsyncMock(return_value=True)
     handler = DailyCommandHandler(account_reader=store, store=store, runner=runner, client=client,
-        config={"enable_daily_actions": True}, render_summary=lambda rows: "x", send_summary=AsyncMock(), send_notice=sender)
+        config={"enable_daily_actions": True}, send_summary=AsyncMock(), send_notice=sender)
     await handler.handle(CommandContext(actor_id="123", is_private_chat=True, conversation_id="private:123",
         parameters={"scope": "community", "action": "自动", "value": "开"}))
     client.get_community_rewards.side_effect = None
@@ -213,7 +213,7 @@ async def test_success_is_silent_and_group_context_is_not_private_route():
     store, client, runner = setup()
     sender = AsyncMock()
     handler = DailyCommandHandler(account_reader=store, store=store, runner=runner, client=client,
-        config={"enable_daily_actions": True}, render_summary=lambda rows: "x", send_summary=AsyncMock(), send_notice=sender)
+        config={"enable_daily_actions": True}, send_summary=AsyncMock(), send_notice=sender)
     await handler.handle(CommandContext(actor_id="123", conversation_id="group:9",
         parameters={"scope": "community", "action": "自动", "value": "开"}))
     assert "daily_private:123" not in store.settings
@@ -265,7 +265,7 @@ async def test_status_keeps_saved_result_when_source_is_unavailable():
     client.get_daily_signin.side_effect = TimeoutError()
     client.get_community_rewards.side_effect = TimeoutError()
     handler = DailyCommandHandler(account_reader=store, store=store, runner=runner, client=client,
-        config={}, render_summary=lambda rows: "x", send_summary=AsyncMock())
+        config={}, send_summary=AsyncMock())
     result = await handler.handle(CommandContext(actor_id="123", parameters={"scope": "community", "action": "状态"}))
     assert "状态未知" in result.messages[0].text
     assert "领取成功" in result.messages[0].text

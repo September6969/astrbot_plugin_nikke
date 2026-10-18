@@ -6,7 +6,6 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 import asyncio
 import hashlib
-import inspect
 
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -18,10 +17,9 @@ from ...features.daily.runner import DailyRunner
 from ...integrations.blablalink.client import CookieExpired
 from ...features.account.errors import CredentialExpiredError
 from ...core.privacy import safe_exception_message
-from .contracts import CommandContext, CommandReply, CommandResult, ImageReply, TextReply
+from .contracts import CommandContext, CommandReply, CommandResult, TextReply
 
 
-DailySummaryRenderer = Callable[..., Awaitable[Sequence[str] | str | None] | Sequence[str] | str | None]
 DailySummaryFormatter = Callable[..., Sequence[str] | str]
 DailySummarySender = Callable[[str, Sequence[CommandReply]], Awaitable[None]]
 
@@ -37,7 +35,6 @@ class DailyCommandHandler:
         runner: DailyRunner,
         client: Any,
         config: Mapping[str, Any],
-        render_summary: DailySummaryRenderer,
         send_summary: DailySummarySender,
         format_summary: DailySummaryFormatter | None = None,
         clock: Callable[[], str] | None = None,
@@ -48,7 +45,6 @@ class DailyCommandHandler:
         self._runner = runner
         self._client = client
         self._config = config
-        self._render_summary = render_summary
         self._format_summary = format_summary or format_daily_summary_text
         self._send_summary = send_summary
         self._clock = clock or self._today
@@ -99,31 +95,14 @@ class DailyCommandHandler:
         )
 
     async def render_manual_summary(self) -> CommandResult:
-        """执行一次管理员手动批次，并返回图片或同一结果的分块文本。"""
+        """执行一次管理员手动批次，并返回同一结果的分块结构化文本。"""
         results = await self.run_all_daily(self._clock())
         return await self._summary_result(results, scope="管理员手动执行")
 
     async def _summary_result(
         self, results: Sequence[DailyTaskResult], *, scope: str
     ) -> CommandResult:
-        try:
-            rendered = self._render_summary(results, scope=scope)
-            if inspect.isawaitable(rendered):
-                rendered = await rendered
-        except asyncio.CancelledError:
-            raise
-        except Exception:
-            rendered = None
-        if isinstance(rendered, str):
-            paths = (rendered,) if rendered.strip() else ()
-        elif isinstance(rendered, Sequence):
-            paths = tuple(
-                path for path in rendered if isinstance(path, str) and path.strip()
-            )
-        else:
-            paths = ()
-        if paths:
-            return CommandResult(tuple(ImageReply(path) for path in paths))
+        """用同一批结构化结果生成有字符预算的文本；不再经过图片渲染。"""
         formatted = self._format_summary(results, scope=scope)
         if isinstance(formatted, str):
             formatted = (formatted,)
