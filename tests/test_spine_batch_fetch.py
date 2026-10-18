@@ -9,9 +9,9 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from scripts import fetch_spine_candidate_bundles as fetch_module
-from scripts.fetch_spine_candidate_bundles import BatchFetchError, fetch_candidate_bundles
-from scripts.sync_spine_assets import _run_git_commit
+from scripts.spine import fetch_spine_candidate_bundles as fetch_module
+from scripts.spine.fetch_spine_candidate_bundles import BatchFetchError, fetch_candidate_bundles
+from scripts.spine.sync_spine_assets import _run_git_commit
 
 
 def _git(root: Path, *args: str) -> str:

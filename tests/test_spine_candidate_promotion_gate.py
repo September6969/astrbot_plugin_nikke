@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.check_spine_candidate_promotion import evaluate_promotion_gate
+from scripts.spine.check_spine_candidate_promotion import evaluate_promotion_gate
 
 
 def _evidence() -> tuple[dict, dict]:

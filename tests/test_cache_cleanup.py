@@ -6,7 +6,7 @@ import time
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.scripts.cleanup_cache import (
+from astrbot_plugin_nikke.scripts.operations.cleanup_cache import (
     CacheCandidate,
     CleanupPlan,
     apply_cleanup,

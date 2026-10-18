@@ -7,8 +7,8 @@ import pytest
 from jinja2 import Environment
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
-from astrbot_plugin_nikke.scripts.preview_t2i_ui import fixture_record
-from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
+from astrbot_plugin_nikke.scripts.preview.preview_t2i_ui import fixture_record
+from astrbot_plugin_nikke.scripts.shared.t2i_preview_fixtures import get_cases
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.payloads.campaign import CampaignT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.profile import ProfileT2IPayloadBuilder
@@ -49,7 +49,7 @@ def rendered(page, payload):
 
 
 def test_entire_prepared_compact_and_boss_inventory_is_local(assets):
-    inventory = json.loads((ROOT / "data/nikke/blabla-manifests/character_zh-tw_nikke_list_zh-TW_v2.json").read_text(encoding="utf-8"))
+    inventory = json.loads((ROOT / "assets/manifests/blablalink/character_zh-tw_nikke_list_zh-TW_v2.json").read_text(encoding="utf-8"))
     costumes = 0
     for character in inventory:
         result = assets.resolve_lineup_portrait(character_id=character["id"])

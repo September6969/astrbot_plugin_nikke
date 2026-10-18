@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from astrbot_plugin_nikke.scripts.analyze_spine_visuals import analyze
+from astrbot_plugin_nikke.scripts.spine.analyze_spine_visuals import analyze
 
 
 class AnalyzeSpineVisualsTests(unittest.TestCase):

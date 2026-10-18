@@ -5,7 +5,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from scripts.architecture_metrics import (
+from scripts.audit.architecture_metrics import (
     PLAN_THRESHOLDS,
     PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
     _adapter_infrastructure_imports,

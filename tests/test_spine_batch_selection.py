@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.build_spine_candidate_batch import build_candidate_batch
+from scripts.spine.build_spine_candidate_batch import build_candidate_batch
 
 
 def test_batch_selection_is_deterministic_and_defaults_only() -> None:

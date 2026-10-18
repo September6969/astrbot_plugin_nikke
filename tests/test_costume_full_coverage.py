@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from scripts.audit_costume_spine_coverage import build_report
+from scripts.spine.audit_costume_spine_coverage import build_report
 
 
 def test_full_coverage_separates_official_and_verified_denominators(tmp_path: Path) -> None:

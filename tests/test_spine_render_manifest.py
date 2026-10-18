@@ -15,7 +15,7 @@ from unittest.mock import patch
 from PIL import Image
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
-from scripts.rebuild_spine_render_manifest import (
+from scripts.spine.rebuild_spine_render_manifest import (
     audit_spine_assets,
     build_manifest_dict,
     check_png_integrity,
@@ -73,7 +73,7 @@ class SpineRenderManifestTests(unittest.TestCase):
             self.assertGreater(info["height"], 0)
 
     def test_verify_manifest_passes_on_production_assets(self):
-        """测试 scripts/rebuild_spine_render_manifest.py 的 --verify 函数成功通过。"""
+        """测试 scripts/spine/rebuild_spine_render_manifest.py 的 --verify 函数成功通过。"""
         ok, errors = verify_manifest(self.manifest_path, self.rendered_dir)
         self.assertTrue(ok, f"生产 Manifest 验证失败: {errors}")
         self.assertEqual(len(errors), 0)

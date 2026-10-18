@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.upgrade_preflight import build_preflight, inspect_database, main
+from scripts.operations.upgrade_preflight import build_preflight, inspect_database, main
 
 
 TABLES_SQL = """

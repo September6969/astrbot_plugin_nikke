@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.spine_batch_validation import build_verified_baseline, score_visual_metrics
+from scripts.spine.spine_batch_validation import build_verified_baseline, score_visual_metrics
 
 
 ROOT = Path(__file__).resolve().parents[1]

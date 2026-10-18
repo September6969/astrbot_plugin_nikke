@@ -9,14 +9,14 @@ from pathlib import Path
 
 from PIL import Image
 
-from scripts.spine_batch_review import (
+from scripts.spine.spine_batch_review import (
     build_review_queue,
     create_contact_sheet,
     deterministic_pass_sample,
     render_review_markdown,
     validate_candidate_render,
 )
-from scripts.spine_batch_validation import build_verified_baseline
+from scripts.spine.spine_batch_validation import build_verified_baseline
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_review_and_white_card_tools_run_as_repository_scripts() -> None:
     for name in ("spine_batch_review.py", "render_spine_candidate_cards.py"):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / name), "--help"],
+            [sys.executable, str(ROOT / "scripts" / "spine" / name), "--help"],
             cwd=ROOT,
             check=False,
             capture_output=True,

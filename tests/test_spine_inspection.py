@@ -2,7 +2,7 @@
 import tempfile
 from pathlib import Path
 from unittest import TestCase
-from astrbot_plugin_nikke.scripts.inspect_spine_bundle import inspect
+from astrbot_plugin_nikke.scripts.spine.inspect_spine_bundle import inspect
 
 
 class SpineInspectionTests(TestCase):

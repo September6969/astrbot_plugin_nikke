@@ -76,7 +76,7 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                     "import subprocess, sys\n"
                     "from pathlib import Path\n"
                     f"sys.path.insert(0, {str(ROOT.parent)!r})\n"
-                    "from astrbot_plugin_nikke.scripts.spine_worker_docker_bridge import build_docker_command\n"
+                    "from astrbot_plugin_nikke.scripts.spine.spine_worker_docker_bridge import build_docker_command\n"
                     f"command = build_docker_command({image!r}, Path.cwd(), sys.argv[1:])\n"
                     "raise SystemExit(subprocess.run(command, check=False, timeout=90).returncode)\n",
                     encoding="utf-8",
@@ -251,7 +251,7 @@ class OfficialRuntimeCharacterPortraitTests(unittest.TestCase):
                         )
                         self._write_evidence(evidence_root, evidence)
 
-                from astrbot_plugin_nikke.scripts.spine_batch_review import create_contact_sheet
+                from astrbot_plugin_nikke.scripts.spine.spine_batch_review import create_contact_sheet
 
                 contact = create_contact_sheet(
                     [
