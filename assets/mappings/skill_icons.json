@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_at": "2026-09-14T23:52:01.976853+00:00",
-  "source": "data/nikke/blabla-manifests/character_character_skill_map.json",
+  "source": "assets/manifests/blablalink/character_character_skill_map.json",
   "total_characters": 206,
   "characters": {
     "10": {

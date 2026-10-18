@@ -13,6 +13,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from astrbot_plugin_nikke.core.paths import builtin_dir, builtin_roots, manifest_candidates
+
 logger = logging.getLogger("nikke.boss_resolver")
 
 
@@ -40,22 +42,10 @@ class BossAssetResolver:
         asset_dir: str | Path | None = None,
         manifest_path: str | Path | None = None,
     ):
-        if base_dir is None:
-            self.base_dir = Path("data/nikke/blabla-assets")
-        else:
-            self.base_dir = Path(base_dir)
-
-        if asset_dir is None:
-            self.asset_dir = Path(__file__).resolve().parents[2] / "assets"
-        else:
-            self.asset_dir = Path(asset_dir)
-
-        self.search_roots = [
-            self.base_dir,
-            self.asset_dir,
-            Path("/AstrBot/data/nikke/blabla-assets"),
-            Path("/opt/nikke-bot/data/nikke/blabla-assets"),
-        ]
+        self.asset_dir = Path(asset_dir) if asset_dir is not None else Path(__file__).resolve().parents[2] / "assets"
+        self.base_dir = Path(base_dir) if base_dir is not None else builtin_dir("blablalink", asset_dir=self.asset_dir)
+        # 内置素材仅在插件目录内回退；宿主数据须由调用者显式传入。
+        self.search_roots = list(dict.fromkeys((self.base_dir, *builtin_roots("blablalink", asset_dir=self.asset_dir), self.asset_dir)))
 
         self.custom_manifest_path = Path(manifest_path) if manifest_path else None
         self.fallback_file = self._find_fallback_file()
@@ -84,9 +74,7 @@ class BossAssetResolver:
             manifest_file = self.custom_manifest_path
         else:
             candidates = [
-                self.base_dir.parent / "blabla-manifests" / "boss_identity_manifest.json",
-                Path("data/nikke/blabla-manifests/boss_identity_manifest.json"),
-                Path("docs/evidence/blabla_static_assets/boss_identity_manifest.json"),
+                *manifest_candidates("boss_identity_manifest.json", self.asset_dir, self.base_dir),
             ]
             for root in self.search_roots:
                 candidates.extend([

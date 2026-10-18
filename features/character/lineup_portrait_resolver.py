@@ -13,6 +13,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from astrbot_plugin_nikke.core.paths import builtin_dir, builtin_roots, manifest_candidates
+
 logger = logging.getLogger("nikke.lineup_resolver")
 
 
@@ -39,23 +41,10 @@ class LineupPortraitResolver:
         base_dir: str | Path | None = None,
         asset_dir: str | Path | None = None,
     ):
-        if base_dir is None:
-            self.base_dir = Path("data/nikke/blabla-assets")
-        else:
-            self.base_dir = Path(base_dir)
-
-        if asset_dir is None:
-            self.asset_dir = Path(__file__).resolve().parents[2] / "assets"
-        else:
-            self.asset_dir = Path(asset_dir)
-
-        # 候选查找根目录（优先 local mirror，再检查 assets）
-        self.search_roots = [
-            self.base_dir,
-            self.asset_dir,
-            Path("/AstrBot/data/nikke/blabla-assets"),
-            Path("/opt/nikke-bot/data/nikke/blabla-assets"),
-        ]
+        self.asset_dir = Path(asset_dir) if asset_dir is not None else Path(__file__).resolve().parents[2] / "assets"
+        self.base_dir = Path(base_dir) if base_dir is not None else builtin_dir("blablalink", asset_dir=self.asset_dir)
+        # 内置素材仅在插件目录内回退；宿主数据须由调用者显式传入。
+        self.search_roots = list(dict.fromkeys((self.base_dir, *builtin_roots("blablalink", asset_dir=self.asset_dir), self.asset_dir)))
 
         # 默认占位图
         self.fallback_file = self._find_fallback_file()
@@ -84,8 +73,7 @@ class LineupPortraitResolver:
         """从本地快照或 assets 加载权威清单索引。"""
         # 1. 尝试加载 nikke_list_zh-TW_v2 快照或 assets/character_master.json
         manifest_paths = [
-            self.base_dir.parent / "blabla-manifests" / "character_zh-tw_nikke_list_zh-TW_v2.json",
-            Path("docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_zh-tw_nikke_list_zh-TW_v2.json"),
+            *manifest_candidates("character_zh-tw_nikke_list_zh-TW_v2.json", self.asset_dir, self.base_dir),
             self.asset_dir / "data" / "character_master.json",
             self.asset_dir / "character_master.json",
         ]
@@ -157,8 +145,7 @@ class LineupPortraitResolver:
 
         # 2. 尝试加载 character_avatar_map
         avatar_paths = [
-            self.base_dir.parent / "blabla-manifests" / "character_character_avatar_map.json",
-            Path("docs/evidence/blabla_static_assets/blabla_manifest_snapshots/character_character_avatar_map.json"),
+            *manifest_candidates("character_character_avatar_map.json", self.asset_dir, self.base_dir),
         ]
         for ap in avatar_paths:
             if ap.is_file():

@@ -26,8 +26,8 @@
 - `NotoSansSC-ReplicaSubset-800.woff2`（约 115 KB）
 
 ### 2.1 字符覆盖范围
-子集字符集由脚本 `scripts/build_replica_font_subset.py` 自动汇集，覆盖：
-1. **官方全部角色名**：来自 `assets/character_master.json` 中已收录的所有角色中文与英文名；
+子集字符集由脚本 `scripts/assets/build_replica_font_subset.py` 自动汇集，覆盖：
+1. **官方全部角色名**：来自 `assets/data/character_master.json` 中已收录的所有角色中文与英文名；
 2. **固定 UI 文案**：如“词条合计”、“已知词条合计”、“阶”、“技能”、“爆裂”、“未装备”、“未获得效果”等；
 3. **装备词条选项**：所有洗练词条全称与短标签（攻击、防御、装弹、蓄速、优越、暴率、暴伤、命中、蓄伤）；
 4. **基础符号与标点**：数字 `0-9`、字母 `a-zA-Z`、阶数 `T1-T15`、标点符号、特殊符号（✦、★、·、—、~ 等）。
@@ -35,7 +35,7 @@
 ### 2.2 重新生成子集
 当新增角色或修改固定词条时，可随时运行以下脚本一键刷新 WOFF2 子集：
 ```bash
-python scripts/build_replica_font_subset.py
+python scripts/assets/build_replica_font_subset.py
 ```
 
 ---

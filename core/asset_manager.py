@@ -22,6 +22,7 @@ from astrbot_plugin_nikke.features.raid.boss_resolver import BossAssetResolver
 from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 from astrbot_plugin_nikke.integrations.spine.prerenderer import SpinePreRenderer
 
+from .paths import builtin_dir, builtin_roots
 from .assets.downloader import AssetDownloader
 from .assets.environment import AssetEnvironment
 from .assets.icon_assets import IconAssetService, load_static_icon_mappings
@@ -74,7 +75,7 @@ class AssetManager:
         )
         self.spine_manifest_path = Path(spine_manifest_path) if spine_manifest_path is not None else None
         self.spine_rendered_dir = Path(spine_rendered_dir) if spine_rendered_dir is not None else None
-        self.blabla_assets_dir = self.asset_dir.parent / "data" / "nikke" / "blabla-assets"
+        self.blabla_assets_dir = builtin_dir("blablalink", asset_dir=self.asset_dir)
         self.lineup_resolver = LineupPortraitResolver(self.blabla_assets_dir, self.asset_dir)
         self.boss_resolver = BossAssetResolver(self.blabla_assets_dir, self.asset_dir)
         self.lineup_portrait_resolver = self.lineup_resolver
@@ -95,11 +96,11 @@ class AssetManager:
         )
         self.cube_icons_map, self.favorite_item_icons_map = load_static_icon_mappings(self.asset_dir)
         self.sources = self._load_sources()
-        mirror_parent = self.blabla_assets_dir.parent.parent.parent
+        mirror_parent = self.asset_dir.parent
         self.image_cache = AssetImageCache(
             self.cache_dir,
             self.asset_dir,
-            extra_roots=(self.blabla_assets_dir, mirror_parent),
+            extra_roots=(*builtin_roots("blablalink", asset_dir=self.asset_dir), mirror_parent),
         )
         self.downloader = AssetDownloader(self.image_cache, remote_enabled=remote)
         self._failed = self.downloader.failed_until

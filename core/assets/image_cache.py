@@ -43,7 +43,11 @@ class AssetImageCache:
     @staticmethod
     def _relative_candidates(relative: str) -> list[str]:
         raw = [relative]
+        if relative.startswith("assets/blablalink/"):
+            raw.append(relative[len("assets/blablalink/"):])
+        # 旧清单路径仅作只读兼容，同时允许在新内置目录命中。
         if relative.startswith("data/nikke/blabla-assets/"):
+            raw.insert(0, "assets/blablalink/" + relative[len("data/nikke/blabla-assets/"):])
             raw.append(relative[len("data/nikke/blabla-assets/"):])
         if relative.startswith("assets/"):
             raw.append(relative[len("assets/"):])
