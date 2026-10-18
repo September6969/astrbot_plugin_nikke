@@ -24,7 +24,7 @@
 - 新增回归先复现增量结果丢失旧记录及重复并发刷新，再验证修复；覆盖部分空结果、分页失败、重复页面、多候选、字段证据不对称、冻结健康信息、关闭与取消、历史缓存及分页回退。
 - 公开只读 GameKee 实测：SUCCESS_DATA、COMPLETE，129 条返回、129 条有效、0 条损坏、0 条重复。只使用公开日程接口，不涉及真实账号。
 - 实际 Chromium 预览：`E:\DevCache\nikke-calendar-preview-20261011\index.html`。共 12 张，包含旧版对照及 432 像素手机缩图；布局检查无横向溢出。
-- 预览重建：`python scripts/preview_calendar_experience.py --output E:\DevCache\nikke-calendar-preview-20261011`。
+- 预览重建：`python scripts/preview/preview_calendar_experience.py --output E:\DevCache\nikke-calendar-preview-20261011`。
 - 专项测试 175 项通过；新增边界及命令、持久化定向复测 29 项通过。Node 扩展 4 项通过，Python 编译和差异空白检查通过。
 - 最终全量 pytest：**1486 passed、3 skipped、654 subtests passed**，耗时 347.26 秒；仅有第三方 google.genai 弃用警告。日志位于 `E:\DevCache\nikke-anchor-linkage\calendar-final-verified-tests.log`。
 

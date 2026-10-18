@@ -64,7 +64,7 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         self.assertEqual(entry["runtime_version"], "4.1")
 
     def test_current_upstream_snapshot_has_l2d_bundle_and_no_c018_fb(self) -> None:
-        snapshot = self._json("docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json")
+        snapshot = self._json("tests/fixtures/spine/upstream_asset_snapshot.json")
         paths = [row["path"] for row in snapshot["l2d_files"]]
         self.assertTrue({
             "l2d/c018/c018_00.skel",
@@ -247,9 +247,9 @@ class SpineResourceCoverageC018Tests(unittest.TestCase):
         asyncio.run(exercise())
 
     def test_coverage_snapshot_does_not_hide_c018(self) -> None:
-        from scripts.audit_spine_resource_coverage import audit
+        from scripts.spine.audit_spine_resource_coverage import audit
 
-        snapshot = self._json("docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json")
+        snapshot = self._json("tests/fixtures/spine/upstream_asset_snapshot.json")
         report = audit(self.root, snapshot, generated_from_head="c018-test")
         self.assertNotIn("c018", report["sets"]["upstream_exists_manifest_missing"])
         self.assertNotIn("c018", report["sets"]["render_asset_gap"])

@@ -18,12 +18,12 @@ def _load(relative: str) -> dict:
 
 
 def test_all_official_costumes_have_final_mapping() -> None:
-    inventory_document = _load("docs/evidence/official_costume_inventory.json")
+    inventory_document = _load("tests/fixtures/costume/official_costume_inventory.json")
     inventory = inventory_document["costumes"]
     inventory_stats = inventory_document["statistics"]
-    matrix = _load("docs/evidence/costume_spine_candidate_matrix.json")
+    matrix = _load("tests/fixtures/costume/costume_spine_candidate_matrix.json")
     registry = _load("assets/costumes.json")["entries"]
-    manual = _load("docs/evidence/costume_identity_manual_validation.json")
+    manual = _load("tests/fixtures/costume/costume_identity_manual_validation.json")
 
     assert inventory_stats == {
         "total_official_costumes": 178,
@@ -43,11 +43,11 @@ def test_all_official_costumes_have_final_mapping() -> None:
 
 
 def test_official_costume_evidence_files_are_consistent() -> None:
-    inventory = _load("docs/evidence/official_costume_inventory.json")
-    risk = _load("docs/evidence/official_costume_support_risk.json")
-    matrix = _load("docs/evidence/costume_spine_candidate_matrix.json")
+    inventory = _load("tests/fixtures/costume/official_costume_inventory.json")
+    risk = _load("tests/fixtures/costume/official_costume_support_risk.json")
+    matrix = _load("tests/fixtures/costume/costume_spine_candidate_matrix.json")
     registry = _load("assets/costumes.json")
-    runtime = _load("docs/evidence/spine_runtime_resolution_audit.json")
+    runtime = _load("tests/fixtures/costume/spine_runtime_resolution_audit.json")
 
     assert inventory["statistics"]["total_official_costumes"] == 178
     assert risk["total_official_costumes"] == 178
@@ -90,7 +90,7 @@ def test_frozen_costume_regressions_are_unchanged() -> None:
 
 
 def test_public_poster_suffix_is_not_used_as_spine_identity() -> None:
-    matrix = {row["costume_id"]: row for row in _load("docs/evidence/costume_spine_candidate_matrix.json")["items"]}
+    matrix = {row["costume_id"]: row for row in _load("tests/fixtures/costume/costume_spine_candidate_matrix.json")["items"]}
     assert matrix["10005"]["public_poster_asset_id"] == "c010_02"
     assert matrix["10005"]["matched_asset_id"] == "c010_03"
     assert matrix["30006"]["public_poster_asset_id"] == "c072_02"
@@ -99,7 +99,7 @@ def test_public_poster_suffix_is_not_used_as_spine_identity() -> None:
 
 
 def test_manual_validation_provenance_is_complete() -> None:
-    manual = _load("docs/evidence/costume_identity_manual_validation.json")["entries"]
+    manual = _load("tests/fixtures/costume/costume_identity_manual_validation.json")["entries"]
     registry = {row["costume_id"]: row for row in _load("assets/costumes.json")["entries"]}
     assert len(manual) == 131
     for row in manual:

@@ -39,7 +39,7 @@ T2IRenderer 不继承 Star，不启动浏览器，不指定端点或 local / rem
 预览命令（在包根目录，使用已安装 AstrBot / Jinja2 / Pillow 的 Python）：
 
 ```text
-python scripts/preview_t2i_ui.py --output-dir <输出目录> --fixture all
+python scripts/preview/preview_t2i_ui.py --output-dir <输出目录> --fixture all
 ```
 
 只导出离线 HTML / payload 时加 `--html-only`。脚本复用生产 adapter、loader、asset resolver 和 CSS；原生截图调用 `Star.html_render(..., return_url=False)`，不构造 NikkePlugin、不启动账号服务。它只发送仓库内合成 fixtures。输出包括原始 PNG、50% / 30% 检查图、HTML 与 JSON；PNG 尺寸不是 1600×880 时直接报错。

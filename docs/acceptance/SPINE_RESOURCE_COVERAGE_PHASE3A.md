@@ -29,13 +29,13 @@ Phase 3A 只为当前 canonical default character 的 Spine coverage gap 建立�
 本地具备项目正式 Spine 4.0/4.1 worker 与 Chromium 的维护环境，可按同一阶段调用：
 
 ```powershell
-python scripts/spine_batch_validation.py --repo-root . --output <external-output>/verified-baseline.json
-python scripts/audit_spine_resource_coverage.py --repo-root . --upstream-snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json --output <external-output>/coverage-summary.json
-python scripts/build_spine_candidate_batch.py --coverage-summary <external-output>/coverage-summary.json --output <external-output>/batch-001.json --batch-id batch-001 --batch-size 20
-python scripts/fetch_spine_candidate_bundles.py --batch <external-output>/batch-001.json --snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json --checkout <external-output>/nikke-db-object-cache --output <external-output>/bundle
+python scripts/spine/spine_batch_validation.py --repo-root . --output <external-output>/verified-baseline.json
+python scripts/spine/audit_spine_resource_coverage.py --repo-root . --upstream-snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json --output <external-output>/coverage-summary.json
+python scripts/spine/build_spine_candidate_batch.py --coverage-summary <external-output>/coverage-summary.json --output <external-output>/batch-001.json --batch-id batch-001 --batch-size 20
+python scripts/spine/fetch_spine_candidate_bundles.py --batch <external-output>/batch-001.json --snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json --checkout <external-output>/nikke-db-object-cache --output <external-output>/bundle
 ```
 
-然后将 `<external-output>/bundle` 交给 `scripts/sync_spine_assets.py`，并将其 PNG、render manifest 交给 `scripts/spine_batch_review.py` 和 `scripts/render_spine_candidate_cards.py`。所有维护输出必须在仓库外；`sync_spine_assets.py` 的 manifest 路径必须明确指向外部临时文件，不能指向生产 manifest。
+然后将 `<external-output>/bundle` 交给 `scripts/spine/sync_spine_assets.py`，并将其 PNG、render manifest 交给 `scripts/spine/spine_batch_review.py` 和 `scripts/spine/render_spine_candidate_cards.py`。所有维护输出必须在仓库外；`sync_spine_assets.py` 的 manifest 路径必须明确指向外部临时文件，不能指向生产 manifest。
 
 ## 机器校验与人工复核
 
@@ -43,7 +43,7 @@ python scripts/fetch_spine_candidate_bundles.py --batch <external-output>/batch-
 
 PASS sample 由 `SHA-256(batch_id + NUL + render_id + NUL + png_sha256)` 排序后确定，输入顺序不影响结果。所有项目仍须人工审核白卡构图、视觉质量、Face Anchor 与 Core Axis；无 anchor 不会被当作已验证状态。
 
-晋升检查通过 `scripts/check_spine_candidate_promotion.py` 执行，只判断候选 evidence、review decision、anchor 图像身份及当前 production manifest SHA 是否一致。它不会写文件或修改 manifest。Phase 3A 的预期 promotion count 固定为 0。
+晋升检查通过 `scripts/spine/check_spine_candidate_promotion.py` 执行，只判断候选 evidence、review decision、anchor 图像身份及当前 production manifest SHA 是否一致。它不会写文件或修改 manifest。Phase 3A 的预期 promotion count 固定为 0。
 
 ## Evidence
 

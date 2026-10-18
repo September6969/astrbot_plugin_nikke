@@ -2,5 +2,14 @@
 *.sh text eol=lf
 
 # 排除仅用于开发、测试与基准评测的大体积证据，精简发行归档包
-docs/evidence export-ignore
-docs/evidence/** export-ignore
+docs/archive/evidence export-ignore
+docs/archive/evidence/** export-ignore
+
+# 历史报告也只保留在 Git 仓库中，不随发行包分发。
+docs/archive/reports export-ignore
+docs/archive/reports/** export-ignore
+
+# 固定输入的来源哈希基于 Git 原始字节，所有平台统一 LF。
+tests/fixtures/spine/*.json text eol=lf
+tests/fixtures/costume/*.json text eol=lf
+tests/fixtures/character/*.json text eol=lf

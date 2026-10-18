@@ -1,0 +1,82 @@
+[
+  {
+    "fixture": "tests/fixtures/spine/upstream_asset_snapshot.json",
+    "source": "docs/archive/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "aea234375fb3285f254ed687a80bb33b944615ec84b54c8e537ee1c3fee96bb4",
+    "size": 649594,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/spine/render-source-verification.json",
+    "source": "docs/archive/evidence/spine_resource_coverage_phase2/render-source-verification.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "68f45b7065508420523b8e96a5dc21f3552394b28bc075eca50d03bece352443",
+    "size": 36481,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/spine/undeclared-png-audit.json",
+    "source": "docs/archive/evidence/spine_resource_coverage_phase2/undeclared-png-audit.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "1dc04ce40008c6ad14e6c362da7aa3b48ac7af5f497863ef31849b6d43975d5b",
+    "size": 137630,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/costume/official_costume_inventory.json",
+    "source": "docs/archive/evidence/official_costume_inventory.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "182dfd8d8bf1b0c16a7cf4e5c0b8238a940eddd186e1767beddd152944beeb2a",
+    "size": 77367,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/costume/costume_spine_candidate_matrix.json",
+    "source": "docs/archive/evidence/costume_spine_candidate_matrix.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "77223649e3d61bfd74860b0f6b622e6d78ec887cc47387bccd26b002a64ae33e",
+    "size": 327418,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/costume/costume_identity_manual_validation.json",
+    "source": "docs/archive/evidence/costume_identity_manual_validation.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "c5401064b2ecac1002d46792834e0a401a5cf82cac47cee91d58a88cb4055de8",
+    "size": 110779,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/costume/official_costume_support_risk.json",
+    "source": "docs/archive/evidence/official_costume_support_risk.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "b31424f6b613ff4e75c5b3f8da4b9afb6a27f94cbe8da5dd2a7e9ec52dc98707",
+    "size": 70713,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/costume/spine_runtime_resolution_audit.json",
+    "source": "docs/archive/evidence/spine_runtime_resolution_audit.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "9405298293091e53a3d70e814780bf502c9d09b417010968605ff46c051790ab",
+    "size": 167975,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/character/arcana_live_20260909.json",
+    "source": "docs/archive/evidence/arcana_live_20260909.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "d37b57502cf5d8d44d0476a34939a87b8220ffda41304a2661cecbd8a13cd9d3",
+    "size": 3878,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  },
+  {
+    "fixture": "tests/fixtures/character/state_effect_registry_live_20260909.json",
+    "source": "docs/archive/evidence/state_effect_registry_live_20260909.json",
+    "source_commit": "de54408543b21d32d278c177450019f69752ccf9",
+    "sha256": "6c3d0c7b64f8d814c20bb556fbde16189579f7b10c79d6a5ba2550193d1ca2a8",
+    "size": 2941,
+    "hash_basis": "Git blob bytes; fixtures use LF on all platforms"
+  }
+]

@@ -223,7 +223,7 @@
 - 重新核验当前事实基线：`origin/main@e4a9ff9867dc9a92c203484c748562e4c0a7f1d0`；当前分支 `fix/live-runtime-v03` 的完整 Profile 图标代码提交为 `be7e2ce`，PR #79 仍为 OPEN、非 Draft，没有合并或修改 main。
 - Manifest fail-closed 已锁定：声明过的 entry 对路径、PNG 解码和 SHA-256 具有权威性；失效项记录 `STATIC_SPINE_ASSET_INVALID` 后直接交给 UI fallback，不再读取旧 Spine cache、启动 worker 或访问网络。Hot path 只允许本地文件、Pillow 和 hash。
 - Nikke-db 维护脚本已加入默认 5 GB 磁盘门禁，并修复中断的 `--no-checkout` 初始索引误判；两阶段 sparse checkout 已在 `serv` 实际跑通，240 个目标的 atlas 纹理页均按声明路径加入，未默认拉取 aim/cover。
-- `serv` 隔离维护证据：Nikke-db source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，200 默认 + 40 历史已核验 Costume，共 240 项，runtime 4.0/4.1 为 102/138；补齐精确 sparse Costume bundle 并通过禁网 Docker worker 桥接后，渲染成功 240、失败 0、无效 0、缺失 0。这里的 Costume 100% 仅是历史 verified subset，不是全官方 Costume coverage；全量分母、状态和 Racer's High 追踪由 `scripts/audit_costume_spine_coverage.py` 及 `docs/evidence/pr79_live_runtime_v03_20260912.json` 单独记录。不把隔离结果冒充生产部署。
+- `serv` 隔离维护证据：Nikke-db source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，200 默认 + 40 历史已核验 Costume，共 240 项，runtime 4.0/4.1 为 102/138；补齐精确 sparse Costume bundle 并通过禁网 Docker worker 桥接后，渲染成功 240、失败 0、无效 0、缺失 0。这里的 Costume 100% 仅是历史 verified subset，不是全官方 Costume coverage；全量分母、状态和 Racer's High 追踪由 `scripts/spine/audit_costume_spine_coverage.py` 及 `docs/evidence/pr79_live_runtime_v03_20260912.json` 单独记录。不把隔离结果冒充生产部署。
 - Profile v0.4 已完成 live Tower 字段形状核查：`type`、`is_opened`、`remaining_count`；只统计开放条目，无法可靠取得 total 时显示“剩余 X 次”，不使用数组长度伪造 `0/3`。8 项已知资源均按固定上游或用户数量对照、SHA-256 和本地只读路径接入；type 98 仍未知并按用户要求不上卡。
 - `serv` 授权账号只读 Profile 已在隔离目录实渲染为 `1200×1715`，底层 9 项资源、卡面 8 项、4 项 Tower；脱敏图已实际查看，8 枚 verified 图标的语义、缩放、透明边缘和文字避让正常。该证据不等于生产部署或 QQ 送达。
 - Profile 合成 after 图为 `1200×1619`，已查看原图、50% 和 30% 预览；12 个 warmup 后样本 median `126.2293 ms`、p95 `134.312 ms`。

@@ -6,7 +6,7 @@
 
 ## 请求与复用
 
-`scripts/capture_campaign_history.py` 复用现有 `BlaBlaClient.get_main_quest_clear_lineup()`、现有账号 session 和 `CampaignHistoryBuilder`，不复制 HTTP client，不执行 Daily、CDK、Signin、绑定变更或其它写操作。
+`scripts/operations/capture_campaign_history.py` 复用现有 `BlaBlaClient.get_main_quest_clear_lineup()`、现有账号 session 和 `CampaignHistoryBuilder`，不复制 HTTP client，不执行 Daily、CDK、Signin、绑定变更或其它写操作。
 
 ## Snapshot schema
 

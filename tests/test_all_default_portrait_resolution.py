@@ -14,7 +14,7 @@ def get_manifest_assets() -> tuple[dict[str, Any] | None, Path | None]:
     candidates = [
         Path("/AstrBot/data/nikke/spine-manifest.json"),
         Path("/opt/nikke-bot/astrbot/data/nikke/spine-manifest.json"),
-        Path(__file__).parent.parent / "docs" / "evidence" / "spine_runtime_resolution_audit.json",
+        Path(__file__).parent.parent / "tests" / "fixtures" / "costume" / "spine_runtime_resolution_audit.json",
     ]
     for p in candidates:
         if p.is_file():

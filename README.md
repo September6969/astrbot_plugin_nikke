@@ -4,6 +4,12 @@
 
 [安装与首次使用](#安装与首次使用) · [常用命令](#常用命令) · [日程与订阅](#日程与订阅) · [配置](#配置) · [常见问题](#常见问题)
 
+## 仓库导航
+
+[文档总览](docs/README.md) · [开发工具](scripts/README.md) · [结构与迁移](docs/architecture/REPOSITORY_ORGANIZATION.md) · [历史资料](docs/archive/INDEX.md)
+
+业务代码保持 `adapters/`、`application/`、`core/`、`features/`、`integrations/`、`ui/` 分层；内置素材在 `assets/`，模板在 `templates/`。独立组件位于 `extension/`、`runtime/spine_worker/` 和 `deploy/`，本地工具输出进入已忽略的 `output/`。
+
 ## 能做什么
 
 | 功能 | 说明 |
@@ -208,7 +214,7 @@ python -m astrbot_plugin_nikke.scripts.backup_nikke_data \
 备份工具只读、不连接网络；拒绝符号链接、数据目录内的备份目标及已有目标覆盖。恢复前检查备份与权限。升级或回滚前，可在插件目录执行：
 
 ```bash
-python scripts/upgrade_preflight.py --data-dir /实际路径/AstrBot/data/nikke
+python scripts/operations/upgrade_preflight.py --data-dir /实际路径/AstrBot/data/nikke
 ```
 
 此检查不修改数据库或生产文件。启动时会执行兼容的数据库迁移；更高版本的数据结构会被拒绝加载，不会自动降级。

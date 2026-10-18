@@ -25,7 +25,7 @@ CI verification (GitHub Actions, run 35468485641):
 
 Local regression on merged main (`a527740`): **988 passed, 2 skipped, 0 failed**.
 
-Machine-readable evidence: [`docs/evidence/deployment_live_20260920.json`](../evidence/deployment_live_20260920.json).
+Machine-readable evidence: [`docs/evidence/deployment_live_20260920.json`](../archive/evidence/deployment_live_20260920.json).
 
 ---
 
@@ -51,7 +51,7 @@ Post-deployment in-container verification results:
   - `[NIKKE] Exia/NIKKE 静态属性表已载入并缓存`
   - OneBot v11 adapter connected and actively handling messages.
 
-Machine-readable evidence: [`docs/evidence/deployment_live_20260917.json`](..\evidence\deployment_live_20260917.json).
+Machine-readable evidence: [`docs/evidence/deployment_live_20260917.json`](../archive/evidence/deployment_live_20260917.json).
 
 ---
 
@@ -70,7 +70,7 @@ The post-deploy smoke checks passed:
 - The database integrity check remained `ok` with schema 2, and the backup manifest remained present.
 - The last five minutes of AstrBot logs contained no checked secret markers or error lines.
 
-The complete machine-readable record is [`docs/evidence/deployment_live_20260909.json`](..\evidence\deployment_live_20260909.json).
+The complete machine-readable record is [`docs/evidence/deployment_live_20260909.json`](../archive/evidence/deployment_live_20260909.json).
 
 ## Remaining live gates
 

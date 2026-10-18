@@ -238,21 +238,21 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$PHASE3A_ROOT"
-          python scripts/spine_batch_validation.py \
+          python scripts/spine/spine_batch_validation.py \
             --repo-root . \
             --output "$PHASE3A_ROOT/verified-baseline.json"
-          python scripts/audit_spine_resource_coverage.py \
+          python scripts/spine/audit_spine_resource_coverage.py \
             --repo-root . \
-            --upstream-snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json \
+            --upstream-snapshot tests/fixtures/spine/upstream_asset_snapshot.json \
             --output "$PHASE3A_ROOT/coverage-summary.json"
-          python scripts/build_spine_candidate_batch.py \
+          python scripts/spine/build_spine_candidate_batch.py \
             --coverage-summary "$PHASE3A_ROOT/coverage-summary.json" \
             --output "$PHASE3A_ROOT/batch-001.json" \
             --batch-id batch-001 \
             --batch-size 20
-          python scripts/fetch_spine_candidate_bundles.py \
+          python scripts/spine/fetch_spine_candidate_bundles.py \
             --batch "$PHASE3A_ROOT/batch-001.json" \
-            --snapshot docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json \
+            --snapshot tests/fixtures/spine/upstream_asset_snapshot.json \
             --checkout "$PHASE3A_ROOT/nikke-db-object-cache" \
             --output "$PHASE3A_ROOT/bundle"
 
@@ -264,7 +264,7 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t ASSETS < <(python -c 'import json,sys; print("\n".join(json.load(open(sys.argv[1],encoding="utf-8"))["render_ids"]))' "$PHASE3A_ROOT/batch-001.json")
-          python scripts/sync_spine_assets.py \
+          python scripts/spine/sync_spine_assets.py \
             --assets "${ASSETS[@]}" \
             --nikke-db-root "$PHASE3A_ROOT/bundle" \
             --out-dir "$PHASE3A_ROOT/portraits" \
@@ -279,7 +279,7 @@ jobs:
           PHASE3A_ROOT: ${{ runner.temp }}/nikke-spine-phase3a
         run: |
           set -euo pipefail
-          python scripts/spine_batch_review.py \
+          python scripts/spine/spine_batch_review.py \
             --batch "$PHASE3A_ROOT/batch-001.json" \
             --fetch-provenance "$PHASE3A_ROOT/bundle/fetch-provenance.json" \
             --render-manifest "$PHASE3A_ROOT/render-manifest.json" \
@@ -287,7 +287,7 @@ jobs:
             --render-root "$PHASE3A_ROOT/portraits" \
             --baseline "$PHASE3A_ROOT/verified-baseline.json" \
             --output-dir "$PHASE3A_ROOT/review"
-          python scripts/render_spine_candidate_cards.py \
+          python scripts/spine/render_spine_candidate_cards.py \
             --batch "$PHASE3A_ROOT/batch-001.json" \
             --fetch-provenance "$PHASE3A_ROOT/bundle/fetch-provenance.json" \
             --bundle-root "$PHASE3A_ROOT/bundle" \

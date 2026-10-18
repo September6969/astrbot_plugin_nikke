@@ -67,7 +67,7 @@
 | --- | --- | --- | --- |
 | Profile Dashboard v0.4 | `client.py` 四路 Profile/Daily 读取、`profile_builder.py` 结构化字段、`profile_card_renderer.py` TODAY/RECYCLE/COLLECTION/RESOURCES 分区；8 项已知资源均有来源与 SHA-256 的本地图标 | 新增 Profile/Daily/partial/height/icon/未知资源不上卡行为测试；服务器脱敏实渲染 PNG 已查看 | QQ 图片送达仍未在本轮确认；未登记 type 98 仅保留底层审计数据 |
 | Local Nikke-db Spine | `local_spine_resolver.py`、manifest v2 schema、维护期 sparse checkout/预渲染脚本；正式头像热路径禁 HTTP/Worker/FB | 多纹理、BOM、4.0/4.1、损坏图片、路径越界、symlink escape、manifest hash 行为测试；`serv` 隔离维护对当前 240-target registry 达到 240/240 render 与 integrity validation | `SPINE_STATIC_PIPELINE_COMPLETE`；证据为隔离维护产物，不代表部署或真实 QQ 送达，runtime/source 与游戏素材权利分别记录 |
-| Campaign capture | `scripts/capture_campaign_history.py` 只处理 NORMAL/HARD，支持状态、限流、resume/force、脱敏 JSONL、TID/Costume inventory | 授权只读现场完成 NORMAL 1785 + HARD 1787；最终 2699 available、873 unavailable、0 retryable；71 raw TID 100% resolved；10+10 离线渲染回放全部通过 | 完整快照仅在服务器；API 未明确返回 costume_id，inventory 如实为 0；真实 QQ 客户端送达未验证 |
+| Campaign capture | `scripts/operations/capture_campaign_history.py` 只处理 NORMAL/HARD，支持状态、限流、resume/force、脱敏 JSONL、TID/Costume inventory | 授权只读现场完成 NORMAL 1785 + HARD 1787；最终 2699 available、873 unavailable、0 retryable；71 raw TID 100% resolved；10+10 离线渲染回放全部通过 | 完整快照仅在服务器；API 未明确返回 costume_id，inventory 如实为 0；真实 QQ 客户端送达未验证 |
 
 上表是现场续作前的离线基线；其 `READY_OFFLINE` 上限已由下方 2026-09-12 现场增补取代。测试 fixture、合成图或静态 schema 仍不冒充真实联调、QQ 送达、部署或资源授权。
 

@@ -24,10 +24,10 @@ git rev-parse HEAD
 Copy-Item (Join-Path $runDir 'source_manifest.pr103-final.json') $manifest
 python (Join-Path $runDir 'write_source_manifest.py') --repo $PWD --manifest $manifest
 python (Join-Path $runDir 'scripts/verify_source_manifest.py') --repo $PWD --manifest $manifest --expected-head (git rev-parse HEAD)
-python scripts/architecture_metrics.py --check --output (Join-Path $runDir 'architecture-current-pr103-character-card-retirement-final.json')
+python scripts/audit/architecture_metrics.py --check --output (Join-Path $runDir 'architecture-current-pr103-character-card-retirement-final.json')
 ```
 
-最终架构指标（同一版 `scripts/architecture_metrics.py` 对 PR base 与最终 clean HEAD 计算）：
+最终架构指标（同一版 `scripts/audit/architecture_metrics.py` 对 PR base 与最终 clean HEAD 计算）：
 
 | 指标 | PR base `771f43e` | final HEAD | 变化 |
 |---|---:|---:|---:|

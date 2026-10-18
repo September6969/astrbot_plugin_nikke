@@ -137,8 +137,8 @@ Astra 在完成 Character T2I 渲染页面与自动化测试后，接入真实�
 ## 6. 维护工具与原子写入保证
 
 为防止后续人工维护或自动化同步引入格式错漏，已建立专用维护脚本：
-`scripts/rebuild_spine_render_manifest.py`
+`scripts/spine/rebuild_spine_render_manifest.py`
 
-- `python scripts/rebuild_spine_render_manifest.py --audit-only`：只读审查，输出诊断，返回码反应是否存在损坏/缺失。
-- `python scripts/rebuild_spine_render_manifest.py --write`：使用临时文件写入、校验无误后通过 `os.replace` 原子替换原文件，杜绝写入中断导致 manifest 损坏。
-- `python scripts/rebuild_spine_render_manifest.py --verify`：全量回读校验磁盘上的 manifest 与物理文件的一致性。
+- `python scripts/spine/rebuild_spine_render_manifest.py --audit-only`：只读审查，输出诊断，返回码反应是否存在损坏/缺失。
+- `python scripts/spine/rebuild_spine_render_manifest.py --write`：使用临时文件写入、校验无误后通过 `os.replace` 原子替换原文件，杜绝写入中断导致 manifest 损坏。
+- `python scripts/spine/rebuild_spine_render_manifest.py --verify`：全量回读校验磁盘上的 manifest 与物理文件的一致性。

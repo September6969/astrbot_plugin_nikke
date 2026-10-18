@@ -13,7 +13,7 @@
 
 ## 脱敏诊断
 
-`character_detail_diagnostic.py` 与 `scripts/diagnose_character_details.py` 只输出：
+`character_detail_diagnostic.py` 与 `scripts/operations/diagnose_character_details.py` 只输出：
 
 - 字段名；
 - JSON 类型；
@@ -27,7 +27,7 @@
 在获得明确授权的测试账号后导出一次脱敏的 `GetUserCharacterDetails` 响应，运行：
 
 ```text
-python scripts/diagnose_character_details.py sanitized_character_details.json
+python scripts/operations/diagnose_character_details.py sanitized_character_details.json
 ```
 
 只将字段名/类型/形状登记到证据文件；只有当 Bla CharacterDetails 明确确认 HP/ATK/DEF 字段语义后，才允许更新 builder。若响应没有这些字段，角色卡继续显示 `—`，不从 combat、等级或 simulated stats 反推。

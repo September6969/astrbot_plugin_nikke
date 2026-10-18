@@ -1,67 +1,42 @@
-# NIKKE 插件文档索引 (Documentation Index)
+# 文档导航
 
-本目录收录 NIKKE AstrBot 插件的完整技术设计、契约定义、验收报告、视觉规范与审计证据。
+本目录区分当前使用说明、架构与接口合同，以及历史验收和取证资料。历史记录描述当时的环境与结论，不能代替当前版本验收。
 
-PR #103 整仓重构的命令架构收口、迁移表、删除清单、恢复办法，以及由最终 run ledger 绑定的 HEAD/manifest/架构审计和 G01–G04 状态见[重构交付记录](refactor/FINAL_DELIVERY.md)。真实账号验收、部署和稳定观察与本地代码完成、CI 通过分开记录。
+## 使用与部署
 
----
+- [安装、命令和配置](../README.md)
+- [部署文件](../deploy/)
+- [发布检查清单](operations/RELEASE_CHECKLIST.md)
+- [运维资料](operations/)
+- [扩展组件](../extension/)
+- [Spine worker](../runtime/spine_worker/)
 
-## 目录组织结构 (Documentation Structure)
+## 架构与开发
 
-`
-docs/
-├── README.md              # 文档总目录与导航（当前文件）
-├── architecture/          # 系统架构设计、演进规划与工作基线记录
-├── contracts/             # 各子系统数据契约与接口规格定义
-├── acceptance/            # 历史与现行功能验收标准、测试报告与发布签署
-├── ui/                    # T2I 渲染链路、视觉卡面规范、Handoff 与验收切片
-├── operations/            # 运维清单、发布审计、多平台运行状态与路线台账
-├── research/              # 前期逆向分析、资产探查与探索性研究成果
-├── archive/               # 归档的历史临时文档与老旧变更记录
-└── evidence/              # 线上真实环境抓包证据、面板对照与快照数据
-`
+- [架构目录](architecture/)
+- [仓库结构与迁移说明](architecture/REPOSITORY_ORGANIZATION.md)
+- [开发工具及输入输出](../scripts/README.md)
+- [界面渲染与交接资料](ui/)
+- [前期调研](research/)
+- [PR #103 重构交付记录](refactor/FINAL_DELIVERY.md)
 
----
+## 当前接口合同与验收
 
-## 分类说明与核心文档导引
+- [接口合同目录](contracts/)
+- [角色数据合同](contracts/CHARACTER_DATA_V2_CONTRACT.md)
+- [公告合同](contracts/ANNOUNCEMENT_V2_CONTRACT.md)
+- [动态语音合同](contracts/DYNAMIC_VOICE_V2_CONTRACT.md)
+- [Spine 探测合同](contracts/SPINE_SPIKE_CONTRACT.md)
+- [验收标准与阶段报告](acceptance/)
+- [需求与证据矩阵](operations/REQUIREMENT_EVIDENCE_MATRIX.md)
 
-### 1. 架构与规划 [rchitecture/](architecture/)
-- [ISSUE_82_REBASE_2026_09.md](architecture\ISSUE_82_REBASE_2026_09.md): Issue #82 重新对齐与真实基线审计 (2026-09)
-- [CALENDAR_V04_ARCHITECTURE.md](architecture\CALENDAR_V04_ARCHITECTURE.md): 结构化日历活动系统架构设计
-- [DEVELOPMENT_PLAN.md](architecture\DEVELOPMENT_PLAN.md): 插件核心演进计划
-- [ROADMAP_LEDGER.md](architecture\ROADMAP_LEDGER.md): 功能路线演进台账
-- [WORKTREE_INDEX.md](architecture\WORKTREE_INDEX.md): 工作区索引与基线映射
+验收报告需结合记录日期、提交、环境和未验证项阅读。本地 Chromium 预览、AstrBot 原生接口、真实账号验收、部署及 CI 是不同的验证范围。
 
-### 2. 数据与接口契约 [contracts/](contracts/)
-- [ANNOUNCEMENT_V2_CONTRACT.md](contracts\ANNOUNCEMENT_V2_CONTRACT.md): 官方公告 V2 接口与模型契约
-- [CHARACTER_DATA_V2_CONTRACT.md](contracts\CHARACTER_DATA_V2_CONTRACT.md): 角色数据契约 V2
-- [DYNAMIC_VOICE_V2_CONTRACT.md](contracts\DYNAMIC_VOICE_V2_CONTRACT.md): 动态语音管线契约
-- [SPINE_SPIKE_CONTRACT.md](contracts\SPINE_SPIKE_CONTRACT.md): Spine 渲染探测接口契约
-- [TOWER_SNAPSHOT_CONTRACT.md](contracts\TOWER_SNAPSHOT_CONTRACT.md): 企业塔快照契约
+## 历史资料
 
-### 3. 功能验收报告 [cceptance/](acceptance/)
-- 收录各特性阶段验收报告（包含 CI 测试覆盖率、边界验证与回归结果），如：
-  - [CHARACTER_CARD_FINAL_ACCEPTANCE.md](acceptance\CHARACTER_CARD_FINAL_ACCEPTANCE.md)
-  - [REPLICA_CALENDAR_V05_REPORT.md](ui\REPLICA_CALENDAR_V05_REPORT.md)
-  - [STATE_EFFECT_REGISTRY_ACCEPTANCE.md](acceptance\STATE_EFFECT_REGISTRY_ACCEPTANCE.md)
-  - [UNION_RAID_INCREMENT_A_ACCEPTANCE.md](acceptance\UNION_RAID_INCREMENT_A_ACCEPTANCE.md)
+- [归档索引及迁移映射](archive/INDEX.md)
+- [历史证据](archive/evidence/)
+- [历史报告](archive/reports/)
+- [早期设计与变更](archive/)
 
-### 4. UI 与 T2I 表现层 [ui/](ui/)
-- [REPLICA_CALENDAR_V05_REPORT.md](ui\REPLICA_CALENDAR_V05_REPORT.md): Replica 单角色练度卡与 Calendar v0.5 落地报告
-- [UI_AUDIT_V03.md](ui\UI_AUDIT_V03.md): UI v0.3 全量视觉审计
-- [T2I_FRONTEND_HANDOFF.md](ui\T2I_FRONTEND_HANDOFF.md): T2I 渲染前端交接文档
-- [T2I_CAMPAIGN_PHASE1.md](ui\T2I_CAMPAIGN_PHASE1.md): 战役推图阵容可视化
-
-### 5. 运维与运行保障 [operations/](operations/)
-- [RELEASE_CHECKLIST.md](operations\RELEASE_CHECKLIST.md): 正式发布上线检查清单
-- [LIVE_EVIDENCE_REGISTER.md](operations\LIVE_EVIDENCE_REGISTER.md): 现场证据登记簿
-- [REQUIREMENT_EVIDENCE_MATRIX.md](operations\REQUIREMENT_EVIDENCE_MATRIX.md): 需求与证据矩阵
-
-### 6. 技术预研与调研 [
-esearch/](research/)
-- [BLA_STATIC_ASSET_EXISTING_AUDIT.md](research\BLA_STATIC_ASSET_EXISTING_AUDIT.md): 静态资源全量审计
-- [SPINE_RENDERED_ASSET_AUDIT.md](research\SPINE_RENDERED_ASSET_AUDIT.md): Spine 渲染资产审计报告
-- [VOICE_MAPPING_RESEARCH.md](research\VOICE_MAPPING_RESEARCH.md): 角色语音映射分析
-
-### 7. 现场证据资产 [evidence/](evidence/)
-- 保存 55 项正式受控的真实抓包数据、面板对照与现场验证 JSON 快照（保留原始路径）。
+旧 `docs/evidence/`、根 `eunhwa-tactical-upgrade/` 和受控 `reports/` 的内容保留在归档中。CI 使用的小型固定快照独立放在 [tests/fixtures](../tests/fixtures/)，来源及 SHA-256 见[固定输入来源表](../tests/fixtures/repository_organization_sources.json)。
