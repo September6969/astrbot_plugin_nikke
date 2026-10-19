@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from PIL import Image
 
-from astrbot_plugin_nikke.scripts.mirror_blablalink_assets import (
+from astrbot_plugin_nikke.scripts.assets.mirror_blablalink_assets import (
     filter_items,
     get_local_dest_path,
     verify_local_file,

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.phase3_output_guard import require_new_external_path
+from scripts.shared.phase3_output_guard import require_new_external_path
 
 
 def test_maintenance_output_must_be_external_and_not_exist(tmp_path: Path) -> None:

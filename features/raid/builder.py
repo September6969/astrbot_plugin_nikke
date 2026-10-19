@@ -21,7 +21,7 @@ class UnionRaidBuilder:
             Path(manifest_path) if manifest_path else None,
             Path(__file__).resolve().parents[2] / "assets" / "data" / "raid_raid_list.json",
             Path(__file__).resolve().parents[2] / "assets" / "raid_raid_list.json",
-            Path("data") / "nikke" / "blabla-manifests" / "raid_raid_list.json",
+            Path(__file__).resolve().parents[2] / "assets" / "manifests" / "blablalink" / "raid_raid_list.json",
         ]
         for p in paths:
             if p and p.is_file():

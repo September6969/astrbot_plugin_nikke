@@ -27,7 +27,7 @@
 ## 发布前人工确认
 
 1. 复核 `CHANGELOG.md`、`docs/REQUIREMENT_EVIDENCE_MATRIX.md` 和各主题 acceptance 文档的状态没有把 fixture/合成输出写成 live evidence。
-2. 在目标环境运行只读 `scripts/upgrade_preflight.py`，确认 `nikke.sqlite3` 与 `secret.key` 成对备份，并由人工保留回滚副本。
+2. 在目标环境运行只读 `scripts/operations/upgrade_preflight.py`，确认 `nikke.sqlite3` 与 `secret.key` 成对备份，并由人工保留回滚副本。
 3. 通过 Caddy/HTTPS 和 `/healthz` 的现场检查后，再由维护者决定是否启用公告推送、签到、CDK 或 Voice 动态映射。
 
 本清单不包含 Cookie、token、密码、二维码、账号标识或消息内容。

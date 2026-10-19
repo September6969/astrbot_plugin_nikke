@@ -1,7 +1,7 @@
 """证据转换只使用人工输入，禁止将本测试当作真实响应。"""
 import json
 from unittest import TestCase
-from astrbot_plugin_nikke.scripts.raid_evidence import semantic_sanitize
+from astrbot_plugin_nikke.scripts.shared.raid_evidence import semantic_sanitize
 
 
 class EvidenceTests(TestCase):

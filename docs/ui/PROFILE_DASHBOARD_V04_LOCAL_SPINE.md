@@ -53,7 +53,7 @@ checkout 使用 blobless、no-checkout、非 cone sparse 规则，只取目标 `
 
 生产 `get_character_portrait()` 只按已验证 `resource/costume → canonical spine asset → manifest/PNG → Pillow` 读取本地文件，禁止 HTTP、Git、Worker、动态队列和 FB 回退。manifest 没有 entry 时按兼容策略处理；一旦 entry 存在，路径、PNG、解码和 SHA-256 失效即记录 `STATIC_SPINE_ASSET_INVALID` 并立即返回，由 UI 使用抽象占位图，不再读取旧 Spine cache；未声明 entry 的缺失仍记录 `STATIC_SPINE_ASSET_MISSING`。占位图不计为成功立绘。
 
-维护脚本 `scripts/update_nikke_db.sh` 与 `scripts/sync_spine_assets.py` 仅由人工维护期调用，不配置 cron，也不从 QQ 命令调用。
+维护脚本 `scripts/operations/update_nikke_db.sh` 与 `scripts/spine/sync_spine_assets.py` 仅由人工维护期调用，不配置 cron，也不从 QQ 命令调用。
 
 ## Manifest v2 与 coverage
 

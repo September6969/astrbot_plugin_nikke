@@ -134,7 +134,7 @@ flowchart LR
 ## 6. 后续实施路线
 
 1. **固化快照**：下载权威 JSON Manifest 并持久化至 `data/nikke/blabla-manifests/` 与 `docs/evidence/blabla_static_assets/`。
-2. **构建镜像脚本**：编写 `scripts/mirror_blablalink_assets.py`，支持 `--audit-only`、`--estimate-size`、`--download`、断点续传与 SHA-256 验证。
+2. **构建镜像脚本**：编写 `scripts/assets/mirror_blablalink_assets.py`，支持 `--audit-only`、`--estimate-size`、`--download`、断点续传与 SHA-256 验证。
 3. **镜像核心资源**：拉取全量 `si` 头像（378 张，~2.3MB）与核心 UI 图标，落盘至本地持久化目录。
 4. **实现 Resolvers**：
    - `lineup_portrait_resolver.py`：支持 `tid`、`character_id`、`costume_id` 自动定位本地头像，支持多级兜底；

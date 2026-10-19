@@ -39,7 +39,7 @@
 - Python 3.10/3.13 环境未安装 pytest；上述 pytest 结果来自 Python 3.14，不替代 CI 支持矩阵。
 - 当前正式源码指纹见 `E:/DevCache/nikke-luna-max-runs/20260922T101830Z-2356cfe3/source_manifest.json` 和 `state.json.source_manifest`，覆盖基线至当前 checkpoint 的源码差异。
 - Voice registry、缓存音频校验、账号列表、角色名 map 的固定输入 before/after median/P95 已记录；关闭耗时和 `tracemalloc` 峰值已记录。
-- 详细证据：[F90_final_local_verification.md](../../../../evidence/F90_final_local_verification.md)。
+- 详细证据：外部历史文件 `F90_final_local_verification.md`（当时相对路径 `../../../../evidence/F90_final_local_verification.md`，未纳入本仓库；仓库内汇总见[重构交付记录](../refactor/FINAL_DELIVERY.md)）。
 
 ### 当前 patch/提交状态
 

@@ -7,11 +7,11 @@ import json
 from pathlib import Path
 
 from astrbot_plugin_nikke.core.assets.spine_manifest import SpineManifestStore
-from scripts.audit_spine_resource_coverage import audit, classify_undeclared_png
+from scripts.spine.audit_spine_resource_coverage import audit, classify_undeclared_png
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SNAPSHOT_PATH = ROOT / "docs/evidence/spine_resource_coverage_post_refactor/upstream_asset_snapshot.json"
+SNAPSHOT_PATH = ROOT / "tests/fixtures/spine/upstream_asset_snapshot.json"
 
 
 def _report() -> dict:
@@ -114,7 +114,7 @@ def test_undeclared_png_audit_is_deterministic_exhaustive_and_manifest_fail_clos
     report = _report()
     review = report["undeclared_png_audit"]
     undeclared = set(report["sets"]["bundled_png_not_declared_by_manifest"])
-    baseline_path = ROOT / "docs/evidence/spine_resource_coverage_phase2/undeclared-png-audit.json"
+    baseline_path = ROOT / "tests/fixtures/spine/undeclared-png-audit.json"
     baseline_review = json.loads(baseline_path.read_text(encoding="utf-8"))
     category_sets = {
         category: set(values)

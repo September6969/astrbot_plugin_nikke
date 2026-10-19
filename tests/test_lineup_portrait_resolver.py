@@ -20,7 +20,7 @@ class LineupPortraitResolverTests(unittest.TestCase):
     def setUp(self):
         # 使用本地镜像根目录进行测试
         self.resolver = LineupPortraitResolver(
-            base_dir="data/nikke/blabla-assets",
+            base_dir="assets/blablalink",
             asset_dir="assets",
         )
 

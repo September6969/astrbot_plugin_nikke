@@ -161,11 +161,8 @@ def rajdhani_semibold_font():
 @lru_cache(maxsize=16)
 def _load_font_data_uri(filename: str = "ReplicaSans.otf"):
     import base64
-    from pathlib import Path
-    plugin_root = Path(__file__).resolve().parents[2]
-    path = plugin_root / "fonts" / filename
-    if not path.is_file():
-        path = plugin_root / "assets" / "fonts" / filename
+    from astrbot_plugin_nikke.core.paths import builtin_file
+    path = builtin_file("fonts", filename)
     if not path.is_file():
         return None
     ext = path.suffix.lstrip(".").lower()

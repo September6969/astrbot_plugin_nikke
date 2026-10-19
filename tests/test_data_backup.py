@@ -9,7 +9,7 @@ from pathlib import Path
 
 from cryptography.fernet import Fernet
 
-from astrbot_plugin_nikke.scripts.backup_nikke_data import BackupError, create_backup, restore_backup
+from astrbot_plugin_nikke.scripts.operations.backup_nikke_data import BackupError, create_backup, restore_backup
 
 
 class DataBackupTests(unittest.TestCase):

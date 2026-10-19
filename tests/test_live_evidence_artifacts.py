@@ -8,8 +8,8 @@ from pathlib import Path
 import unittest
 
 
-EVIDENCE_PATH = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "arcana_live_20260909.json"
-STATE_EFFECT_EVIDENCE_PATH = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "state_effect_registry_live_20260909.json"
+EVIDENCE_PATH = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "character" / "arcana_live_20260909.json"
+STATE_EFFECT_EVIDENCE_PATH = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "character" / "state_effect_registry_live_20260909.json"
 
 
 class ArcanaLiveEvidenceTests(unittest.TestCase):

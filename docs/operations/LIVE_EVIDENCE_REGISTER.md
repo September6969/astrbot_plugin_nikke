@@ -64,7 +64,7 @@
 
 ## E-RAID-01：联盟突袭 identity 与响应范围
 
-**已查来源**：`client.py` 的 `GetMyGuildInfo`、`GetUnionRaidLevelInfo`、`GetUnionRaidData` 常量与请求链；`scripts/capture_union_raid_fixtures.py` 的完整 `intl_open_id` 与 `guild_id/nikke_area_id` payload；`scripts/raid_evidence.py` 的关系保留脱敏；`tests/test_union_raid.py`、`tests/test_raid_evidence.py` 的离线合同。
+**已查来源**：`client.py` 的 `GetMyGuildInfo`、`GetUnionRaidLevelInfo`、`GetUnionRaidData` 常量与请求链；`scripts/operations/capture_union_raid_fixtures.py` 的完整 `intl_open_id` 与 `guild_id/nikke_area_id` payload；`scripts/shared/raid_evidence.py` 的关系保留脱敏；`tests/test_union_raid.py`、`tests/test_raid_evidence.py` 的离线合同。
 
 **未决问题**：`participate_data` 中哪一个身份字段可与当前账号安全对应；响应是当前轮次、单页还是完整赛季；成员、攻击次数、剩余次数和同分排名的范围语义；历史赛季是否由同一 endpoint 提供。
 

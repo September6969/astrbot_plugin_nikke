@@ -40,7 +40,7 @@
 - Node sidecar/surface：`6 passed`。
 - Calendar smoke：`27 passed`（canonical title、duplicate normalization、分类与 display ordering）。
 - `python -m compileall -q .`：通过。
-- `node --check scripts/extract_spine_face_anchor.mjs scripts/spine_attachment_candidates.mjs`：通过。
+- `node --check scripts/spine/extract_spine_face_anchor.mjs scripts/spine/spine_attachment_candidates.mjs`：通过。
 - `git diff --check`：通过；Git 的 LF→CRLF 提示不是 diff 错误。
 - 最终唯一 full pytest（本次 main 对齐后）：`1128 passed, 2 skipped, 648 subtests passed, 17 failed`。失败为 11 个既有 Boss resolver、5 个既有 Lineup resolver 的相对素材路径/镜像环境问题，以及 `tests/test_registration_api.py::test_import_uses_star_auto_registration_without_deprecated_decorator` 从旁边旧 `E:\_codex_work\astrbot_plugin_nikke` worktree 加载 deprecated decorator；Character/Spine/Calendar 没有失败。未修改业务代码迎合环境，也未重复 full pytest。
 - 使用临时包别名隔离当前分支后，等价自动注册导入核验通过；当前分支 `main.py` 不含已弃用装饰器。

@@ -16,8 +16,8 @@ from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyDefi
 from astrbot_plugin_nikke.features.profile.builder import ProfileBuilder
 from astrbot_plugin_nikke.features.profile.models import ProfileDashboardData
 from astrbot_plugin_nikke.integrations.spine.prerenderer import SpinePreRenderer
-from astrbot_plugin_nikke.scripts import capture_campaign_history as capture
-from astrbot_plugin_nikke.scripts import sync_spine_assets as sync
+from astrbot_plugin_nikke.scripts.operations import capture_campaign_history as capture
+from astrbot_plugin_nikke.scripts.spine import sync_spine_assets as sync
 
 
 class ProfileV04ContractTests(unittest.TestCase):

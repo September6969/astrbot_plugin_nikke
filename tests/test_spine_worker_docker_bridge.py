@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.spine_worker_docker_bridge import DockerBridgeError, build_docker_command
+from scripts.spine.spine_worker_docker_bridge import DockerBridgeError, build_docker_command
 
 
 def test_docker_bridge_maps_only_paths_inside_the_selected_bundle(tmp_path: Path) -> None:

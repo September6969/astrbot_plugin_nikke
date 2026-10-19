@@ -1,4 +1,4 @@
-from scripts.prepare_face_anchors import _registry_key, _role_override, merge_records
+from scripts.spine.prepare_face_anchors import _registry_key, _role_override, merge_records
 
 
 def test_manifest_rebuild_preserves_records_outside_explicit_scope():

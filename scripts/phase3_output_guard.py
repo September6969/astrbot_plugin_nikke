@@ -1,18 +1,7 @@
-#!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""为 Phase 3 维护工具约束外部输出路径，避免写入仓库或覆盖已有 evidence。"""
-
-from __future__ import annotations
-
+"""旧命令兼容入口；实现位于 scripts/shared/phase3_output_guard.py。"""
+import sys
 from pathlib import Path
-
-
-def require_new_external_path(path: Path, repository_root: Path, *, label: str) -> Path:
-    """返回一个尚不存在且位于仓库外的绝对目标路径。"""
-    target = path.resolve(strict=False)
-    root = repository_root.resolve(strict=True)
-    if target.is_relative_to(root):
-        raise ValueError(f"{label}必须写到仓库外")
-    if target.exists():
-        raise ValueError(f"{label}目标已存在；拒绝覆盖")
-    return target
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.shared.compat import dispatch
+dispatch(__name__, globals(), "shared.phase3_output_guard")

@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "status": "LIVE_READ_ONLY",
+  "checked_at": "2026-09-09T12:06:52Z",
+  "baseline": "origin/main@1a98895e4af19f360b3a2cc79bb40cb0542b415a",
+  "source_urls": [
+    "https://sg-tools-cdn.blablalink.com/jz-26/ww-14/c4619ec83335bcfd7b23e43600520dc7.json",
+    "https://sg-tools-cdn.blablalink.com/yl-57/hd-03/1bf030193826e243c2e195f951a4be00.json",
+    "https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails"
+  ],
+  "query_resolution": {
+    "阿爾卡娜": {
+      "name_code": 5140,
+      "resource_id": 581,
+      "resolution": "local_query_name_zh_tw"
+    },
+    "阿尔卡娜": {
+      "name_code": 5140,
+      "resource_id": 581,
+      "resolution": "local_query_alias"
+    },
+    "ARCANA": {
+      "name_code": 5140,
+      "resource_id": 581,
+      "resolution": "directory_name_en"
+    }
+  },
+  "authorized_read": {
+    "arcana_held": true,
+    "name_code": 5140,
+    "resource_id": 581,
+    "costume_id": 0,
+    "roster_keys": [
+      "combat",
+      "core",
+      "costume_id",
+      "grade",
+      "lv",
+      "name_code"
+    ],
+    "roster_types": {
+      "combat": "int",
+      "core": "int",
+      "costume_id": "int",
+      "grade": "int",
+      "lv": "int",
+      "name_code": "int"
+    },
+    "detail_keys": [
+      "arena_combat",
+      "arena_harmony_cube_lv",
+      "arena_harmony_cube_tid",
+      "arm_equip_corporation_type",
+      "arm_equip_lv",
+      "arm_equip_option1_id",
+      "arm_equip_option2_id",
+      "arm_equip_option3_id",
+      "arm_equip_tid",
+      "arm_equip_tier",
+      "attractive_lv",
+      "combat",
+      "core",
+      "costume_tid",
+      "favorite_item_lv",
+      "favorite_item_tid",
+      "grade",
+      "harmony_cube_lv",
+      "harmony_cube_tid",
+      "head_equip_corporation_type",
+      "head_equip_lv",
+      "head_equip_option1_id",
+      "head_equip_option2_id",
+      "head_equip_option3_id",
+      "head_equip_tid",
+      "head_equip_tier",
+      "leg_equip_corporation_type",
+      "leg_equip_lv",
+      "leg_equip_option1_id",
+      "leg_equip_option2_id",
+      "leg_equip_option3_id",
+      "leg_equip_tid",
+      "leg_equip_tier",
+      "lv",
+      "name_code",
+      "skill1_lv",
+      "skill2_lv",
+      "torso_equip_corporation_type",
+      "torso_equip_lv",
+      "torso_equip_option1_id",
+      "torso_equip_option2_id",
+      "torso_equip_option3_id",
+      "torso_equip_tid",
+      "torso_equip_tier",
+      "ulti_skill_lv"
+    ],
+    "detail_type_contract": "all observed detail fields were int",
+    "equipment_option_ids": [
+      "7000611",
+      "7001011",
+      "7001111",
+      "7001211"
+    ],
+    "state_effects_sha256": "ef4490c2a593dfa73d9be9086a5ca1208dead551ab97503e97a23e35ef8ffaf4",
+    "state_effects": [
+      {
+        "option_id": "7000611",
+        "function_type": "StatAccuracyCircle",
+        "function_value_type": "Percent",
+        "value_shape": "int"
+      },
+      {
+        "option_id": "7001011",
+        "function_type": "StatChargeTime",
+        "function_value_type": "Percent",
+        "value_shape": "int"
+      },
+      {
+        "option_id": "7001111",
+        "function_type": "StatCritical",
+        "function_value_type": "Integer",
+        "value_shape": "int"
+      },
+      {
+        "option_id": "7001211",
+        "function_type": "StatCriticalDamage",
+        "function_value_type": "Integer",
+        "value_shape": "int"
+      }
+    ]
+  },
+  "privacy_boundary": {
+    "persisted": [
+      "field names",
+      "field types",
+      "name_code",
+      "resource_id",
+      "costume_id",
+      "option IDs",
+      "function type and value shape",
+      "source response hash"
+    ]
+  },
+  "next_gaps": [
+    "Bla public/static option metadata and source hash for labels and divisors",
+    "verified OL tier values 1..15",
+    "verified HP/ATK/DEF formula and in-game comparison",
+    "non-default costume evidence"
+  ]
+}

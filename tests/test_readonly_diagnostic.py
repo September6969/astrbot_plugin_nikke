@@ -1,7 +1,7 @@
 """诊断结果不得泄露输入标识或额外字段。"""
 import json
 from unittest import TestCase
-from astrbot_plugin_nikke.scripts.diagnose_readonly import summarize
+from astrbot_plugin_nikke.scripts.operations.diagnose_readonly import summarize
 
 
 class DiagnosticTests(TestCase):

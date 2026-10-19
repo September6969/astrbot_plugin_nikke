@@ -19,7 +19,7 @@ from astrbot_plugin_nikke.features.raid.boss_resolver import (
 class BossAssetResolverTests(unittest.TestCase):
     def setUp(self):
         self.resolver = BossAssetResolver(
-            base_dir="data/nikke/blabla-assets",
+            base_dir="assets/blablalink",
             asset_dir="assets",
         )
 
@@ -89,7 +89,7 @@ class BossAssetResolverTests(unittest.TestCase):
             isolated_resolver = BossAssetResolver(
                 base_dir=td,
                 asset_dir=td,
-                manifest_path="data/nikke/blabla-manifests/boss_identity_manifest.json",
+                manifest_path="assets/manifests/blablalink/boss_identity_manifest.json",
             )
             res = isolated_resolver.resolve(boss_id="2420020214")
             self.assertTrue(res.is_fallback)

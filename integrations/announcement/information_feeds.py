@@ -1,4 +1,4 @@
-"""官网 InformationFeeds 只读适配器，合同及采样来源见 docs/evidence/overnight.md。"""
+"""官网 InformationFeeds 只读适配器，合同及采样来源见 docs/archive/evidence/overnight.md。"""
 import asyncio
 from datetime import datetime, timezone
 from html.parser import HTMLParser

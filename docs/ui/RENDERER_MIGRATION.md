@@ -33,7 +33,7 @@
 - `adapters/astrbot/command_presentation.py` 将页面交给 `T2IRenderer`，失败时只返回不可用信号，由对应命令用现有 DTO 格式化文本。
 - `ui/renderers/t2i.py` 调用注入的 `html_render`，并以 30 秒边界等待结果；取消异常不转换成普通失败。
 - `core/config.py` 统一归一旧 `ui_renderer` 值；`_conf_schema.json` 与 README 不再承诺 Pillow 卡片路由。
-- `scripts/architecture_metrics.py` 与 `tests/test_p4_renderer_migration.py` 防止生产 Pillow 卡片类、旧导入或容器注入被重新引入。
+- `scripts/audit/architecture_metrics.py` 与 `tests/test_p4_renderer_migration.py` 防止生产 Pillow 卡片类、旧导入或容器注入被重新引入。
 
 ## 验收边界
 

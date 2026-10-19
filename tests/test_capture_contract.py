@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, patch
-from astrbot_plugin_nikke.scripts import capture_union_raid_fixtures as capture
+from astrbot_plugin_nikke.scripts.operations import capture_union_raid_fixtures as capture
 
 
 class CaptureTests(IsolatedAsyncioTestCase):

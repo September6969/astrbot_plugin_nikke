@@ -19,7 +19,7 @@ from astrbot_plugin_nikke.features.calendar.canonical_models import (
 )
 from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
 from astrbot_plugin_nikke.features.calendar.service import CalendarService
-from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
+from astrbot_plugin_nikke.scripts.shared.t2i_preview_fixtures import get_cases
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder

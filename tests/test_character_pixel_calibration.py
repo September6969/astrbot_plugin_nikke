@@ -186,7 +186,7 @@ def test_character_font_audit_and_fallback():
         rajdhani_font, rajdhani_semibold_font, replica_font
     )
 
-    fonts_dir = Path(__file__).resolve().parents[1] / "fonts"
+    fonts_dir = Path(__file__).resolve().parents[1] / "assets" / "fonts"
     assert (fonts_dir / "NotoSansSC-ReplicaSubset-700.woff2").exists()
     assert (fonts_dir / "NotoSansSC-ReplicaSubset-800.woff2").exists()
     assert (fonts_dir / "BarlowCondensed-Bold.ttf").exists()

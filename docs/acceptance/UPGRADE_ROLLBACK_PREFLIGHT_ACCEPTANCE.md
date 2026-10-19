@@ -21,8 +21,8 @@
 在离线检查目录执行：
 
 ```powershell
-python scripts/upgrade_preflight.py --data-dir .\data\nikke --min-free-bytes 0 --min-free-percent 0
-python scripts/upgrade_preflight.py --data-dir .\data\nikke --backup-dir .\backup\nikke
+python scripts/operations/upgrade_preflight.py --data-dir .\data\nikke --min-free-bytes 0 --min-free-percent 0
+python scripts/operations/upgrade_preflight.py --data-dir .\data\nikke --backup-dir .\backup\nikke
 ```
 
 默认最低余量是 1 GiB 且 10%。退出码为 `0`（READY）、`2`（MIGRATION_REQUIRED）或 `1`（BLOCKED）。示例目录只用于离线验证；在本 PR 中没有对真实账号、生产数据库、部署环境或备份介质执行操作。

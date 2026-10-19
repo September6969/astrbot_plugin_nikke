@@ -14,7 +14,7 @@ from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("campaign_preview", ROOT / "scripts" / "preview_t2i_ui.py")
+spec = importlib.util.spec_from_file_location("campaign_preview", ROOT / "scripts" / "preview" / "preview_t2i_ui.py")
 preview = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(preview)
 

@@ -52,8 +52,8 @@
 - `templates/t2i/union_member.html`
 - `templates/t2i/profile.html`
 - `templates/t2i/character.html`
-- `scripts/preview_t2i_ui.py`
-- `scripts/preview_t2i_frontend.py`
+- `scripts/preview/preview_t2i_ui.py`
+- `scripts/preview/preview_t2i_frontend.py`
 
 预览脚本仅增加逗号分隔 fixture 选择，便于一次使用同一生产堆栈复核多个案例。
 

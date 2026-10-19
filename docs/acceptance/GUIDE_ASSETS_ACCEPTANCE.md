@@ -16,7 +16,7 @@
 ## 完整性与安全
 
 - 原件保留在 `E:\walkthrough`；仓库只提交处理副本。
-- `scripts/import_walkthrough_assets.py` 在处理前核对五张图片的固定 SHA-256，使用 120 像素纵向重叠，并拒绝任何超过 12 MiB 的输出。
+- `scripts/assets/import_walkthrough_assets.py` 在处理前核对五张图片的固定 SHA-256，使用 120 像素纵向重叠，并拒绝任何超过 12 MiB 的输出。
 - `assets/guides/source_manifest.json` 记录每个源文件的 SHA-256、字节数、分段裁切范围、输出 SHA-256、署名、登记日期与授权。
 - `GuideRegistry` 要求每条记录至少有图片或链接。链接只允许 HTTPS、无嵌入凭据且 hostname 严格为 `nikkeoutpost.netlify.app`；图片仍防目录逃逸、扩展名伪装和超大文件。
 - 保留原图可见署名。养成图登记为“屑芙蒂（原图可见署名）”，充能/PVP/珍藏品登记为“迪恩deen33（原图可见署名）”；洗词条标记“用户授权提供，原图未署名”。

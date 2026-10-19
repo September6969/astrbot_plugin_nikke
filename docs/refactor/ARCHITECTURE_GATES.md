@@ -7,9 +7,9 @@
 运行：
 
 ```powershell
-python scripts/architecture_metrics.py --output <run_dir>/architecture-current.json
-python scripts/architecture_metrics.py --baseline <run_dir>/architecture-baseline.json --output <run_dir>/architecture-current.json
-python scripts/architecture_metrics.py --check
+python scripts/audit/architecture_metrics.py --output <run_dir>/architecture-current.json
+python scripts/audit/architecture_metrics.py --baseline <run_dir>/architecture-baseline.json --output <run_dir>/architecture-current.json
+python scripts/audit/architecture_metrics.py --check
 ```
 
 指标使用 Python AST 和仓库静态文件，不安装依赖、不导入插件、不访问网络或数据库。输出包括：
@@ -24,7 +24,7 @@ python scripts/architecture_metrics.py --check
 
 ## 硬阈值
 
-硬阈值由 `scripts/architecture_metrics.py` 和对应架构测试共同锁定：`main.py` 700 行、`adapters/astrbot/command_runtime.py` 400 行、`core/asset_manager.py` 300 行、`ui/t2i_payloads.py` 100 行、Calendar `schedule_service.py` 450 行、Announcement `service.py` 450 行、`core/container.py` 350 行。插件业务方法最多 20 个 AST 逻辑语句；构造和关闭方法不计入该规则。
+硬阈值由 `scripts/audit/architecture_metrics.py` 和对应架构测试共同锁定：`main.py` 700 行、`adapters/astrbot/command_runtime.py` 400 行、`core/asset_manager.py` 300 行、`ui/t2i_payloads.py` 100 行、Calendar `schedule_service.py` 450 行、Announcement `service.py` 450 行、`core/container.py` 350 行。插件业务方法最多 20 个 AST 逻辑语句；构造和关闭方法不计入该规则。
 
 `command_runtime.py` 另有责任门禁：不得导入 `features`、`integrations`、`ui` 或 storage 实现，不得直接访问领域 application、client、store、AssetManager 或 renderer。feature DTO / domain exception 的宿主转换仍可留在专用 AstrBot adapter；command router 不承担 feature use-case orchestration。
 

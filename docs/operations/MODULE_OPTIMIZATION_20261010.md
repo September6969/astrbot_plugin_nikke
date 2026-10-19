@@ -43,8 +43,8 @@
 ```powershell
 $env:PYTHONPATH='E:\DevCache\nikke-anchor-linkage;E:\DevCache\nikke-anchor-linkage\astrbot_plugin_nikke'
 $env:PYTHONIOENCODING='utf-8'
-python scripts/preview_raid_experience.py --output E:\DevCache\nikke-raid-experience-20261010
-python scripts/preview_profile_experience.py --output E:\DevCache\nikke-profile-experience-20261010
+python scripts/preview/preview_raid_experience.py --output E:\DevCache\nikke-raid-experience-20261010
+python scripts/preview/preview_profile_experience.py --output E:\DevCache\nikke-profile-experience-20261010
 ```
 
 - 突袭：13 个场景与 3 张基线对照，涵盖活动期、休赛期、部分数据、零伤害、无记录、长昵称、大整数、多页记录与缺失队伍。

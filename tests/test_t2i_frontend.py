@@ -12,7 +12,7 @@ import pytest
 from jinja2 import Environment
 
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
-from astrbot_plugin_nikke.scripts.t2i_preview_fixtures import get_cases
+from astrbot_plugin_nikke.scripts.shared.t2i_preview_fixtures import get_cases
 
 
 @pytest.mark.asyncio

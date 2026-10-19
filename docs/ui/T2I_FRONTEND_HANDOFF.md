@@ -77,9 +77,9 @@ T2IAssetResolver 只接受 Path / PIL，限制 12 MiB 输入、20M pixels，按�
 ```text
 python -m pytest -q
 node --test tests/extension.test.cjs
-python scripts/preview_t2i_ui.py --output-dir <preview>/t2i/campaign --fixture normal
-python scripts/preview_t2i_ui.py --output-dir <preview>/t2i/campaign --fixture hard
-python scripts/preview_t2i_frontend.py --page <page> --output-dir <preview>/t2i --fixture all
+python scripts/preview/preview_t2i_ui.py --output-dir <preview>/t2i/campaign --fixture normal
+python scripts/preview/preview_t2i_ui.py --output-dir <preview>/t2i/campaign --fixture hard
+python scripts/preview/preview_t2i_frontend.py --page <page> --output-dir <preview>/t2i --fixture all
 ```
 
 真实预览使用既有 Python 3.10 / AstrBot 环境，全量 pytest 使用既有 Python 3.13 环境。预览 callback 仍调用 `Star.html_render`，使用正式模板与 adapter，没有 demo-only HTML。原生服务曾返回 `no available server`、网络错误或下载超时；预览脚本验证下载图片并有限重试，预览预算为 180 秒，生产 30 秒不变。
@@ -91,7 +91,7 @@ python scripts/preview_t2i_frontend.py --page <page> --output-dir <preview>/t2i 
 - 命令及配置：`main.py`、`_conf_schema.json`、`docs/CONFIGURATION_ACCEPTANCE.md`；`calendar_service.py` 仅提取既有分组逻辑以供两种展示共同使用。
 - 展示：`t2i_assets.py`、`t2i_payloads.py`、`t2i_renderer.py`、`t2i_templates.py`、`templates/t2i/` 七页与共享 CSS/宏。
 - 资产接线：`asset_manager.py`、两个复用 Resolver、`assets/spine_manifest.json`、两份 `data/nikke/blabla-*` 公开目录与 `.gitignore` 精确例外。
-- 复现：`scripts/preview_t2i_ui.py`、`preview_t2i_frontend.py`、`t2i_preview_fixtures.py`、原有 Spine manifest 维护脚本。
+- 复现：`scripts/preview/preview_t2i_ui.py`、`preview_t2i_frontend.py`、`t2i_preview_fixtures.py`、原有 Spine manifest 维护脚本。
 - 测试：`tests/test_t2i_campaign.py`、`test_t2i_frontend.py`、`test_t2i_asset_integration.py`、三个资产准备测试、合成 fixture、配置键精确校验。
 - 证据：两套准备阶段 evidence；`T2I_ASSET_IMPORT_PROVENANCE.json` 记录 570 个逐字节一致的导入文件与 8 张复用 PNG；`T2I_DELIVERY_AUDIT.json` 提供完整改动路径与截图 hashes。
 
