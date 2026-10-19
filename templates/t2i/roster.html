@@ -45,6 +45,8 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
 .opt-tier { color: #4a626b; font-size: 20px; font-weight: 700; text-align: right; white-space: nowrap; }
 .empty { display: grid; min-height: 120px; place-items: center; border: 1px dashed #b8c6cb; border-radius: 16px; background: #fff; color: #697984; font-size: 24px; }
 .roster-footer { margin-top: 18px; padding: 14px 4px 0; border-top: 1px solid #d4dde1; color: #78858e; font-size: 17px; }
+.options-row.high .opt-value,.options-row.high .opt-tier{color:#7950b2}
+.options-row.max .opt-value,.options-row.max .opt-tier{color:#956000}
 </style>
 </head>
 <body>
@@ -83,7 +85,7 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
         <div class="options-head">【{{ row.options.label }}】<strong>{{ row.options.total }}</strong><small>阶</small>{% if not row.options.complete %} · 部分词条未识别{% endif %}</div>
         <div class="options-grid">
           {% for opt in row.options.rows %}
-          <div class="options-row"><span class="opt-label">【{{ opt.label }}】{% if opt.note %}<small class="opt-note">{{ opt.note }}</small>{% endif %}</span><strong class="opt-value">{{ opt.value }}</strong><span class="opt-tier">{{ opt.tier }}</span></div>
+          <div class="options-row {{ opt.semantic }}"><span class="opt-label">【{{ opt.label }}】{% if opt.note %}<small class="opt-note">{{ opt.note }}</small>{% endif %}</span><strong class="opt-value">{{ opt.value }}</strong><span class="opt-tier">{{ opt.tier }}</span></div>
           {% endfor %}
         </div>
         {% else %}
@@ -97,7 +99,7 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
   {% else %}
   <div class="empty">未获取到角色信息</div>
   {% endif %}
-  <footer class="roster-footer">来源 BlaBlaLink · 按战力、等级排序 · 最多展示 20 名 · 技能“—”表示未返回，“?”表示无法识别</footer>
+  <footer class="roster-footer">每名展示合并阶数前三类词条 · 紫色：平均≥12阶，金色：全部15阶 · 来源 BlaBlaLink · 按战力、等级排序 · 最多展示 20 名 · 技能“—”表示未返回，“?”表示无法识别</footer>
 </main>
 </body>
 </html>

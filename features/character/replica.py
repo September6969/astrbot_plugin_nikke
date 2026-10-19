@@ -102,7 +102,14 @@ def build_summary(data):
                 gain = rounded_gain(options, Decimal(data.base_ammo), Decimal("1"))
                 extra = f" (+{gain})"
         formatted = f"{value * 100:.2f}%" if unit == "percent" else f"{value:g}"
-        rows.append({"key": key, "label": label, "value": formatted + extra,
+        # 合并颜色按组成词条的平均阶数判断，未知阶数不参与高阶着色。
+        average_tier = group["tier_sum"] / len(options)
+        semantic = (
+            "max" if group["complete"] and average_tier == 15
+            else "high" if group["complete"] and average_tier >= 12
+            else "neutral"
+        )
+        rows.append({"semantic": semantic, "key": key, "label": label, "value": formatted + extra,
                      "tier": f"{group['tier_sum']}阶", "tier_sum": group["tier_sum"],
                      "complete": group["complete"], "note": note or ("已知部分" if not group["complete"] else "")})
     rows.sort(key=lambda row: (-row["tier_sum"], row["key"]))

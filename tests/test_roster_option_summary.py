@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""练度总览 top-3 装备词条恢复的回归测试。
+"""练度总览每名角色合并前三类词条的回归测试。
 
-覆盖：共享排序、稳定身份、最多 3 次详情、失败降级、详情不覆盖总表数值、
+覆盖：共享排序、稳定身份、最多 20 次详情、并发 3、失败降级、详情不覆盖总表数值、
 图片与文本复用同一 DTO、渲染失败不重复查询，以及“缺失详情不得当作无词条”
 与“前三名绝不向后补位”两条独立复核边界。
 """
@@ -182,8 +182,8 @@ def roster_entry(code: str, *, combat: int, lv: int = 200, **extra) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_roster_fetches_at_most_three_sorted_details():
-    codes = [f"51{i:02d}" for i in range(20)]
+async def test_roster_fetches_only_twenty_displayed_details():
+    codes = [f"51{i:02d}" for i in range(21)]
     characters = [
         roster_entry(code, combat=1000 - index) for index, code in enumerate(codes)
     ]
@@ -194,14 +194,14 @@ async def test_roster_fetches_at_most_three_sorted_details():
     data = await app.roster("10001", directory_for(codes))
 
     assert gateway.roster_calls == [True]
-    # 详情严格限定在正式排序的 top-3，且按顺序抓取。
-    assert gateway.detail_calls == codes[:3]
-    assert set(data.option_summaries) == set(codes[:3])
+    # 仅查询实际展示的前二十行，不请求第二十一名。
+    assert gateway.detail_calls == codes[:20]
+    assert set(data.option_summaries) == set(codes[:20])
     assert all(summary.status == "ok" for summary in data.option_summaries.values())
 
 
 @pytest.mark.asyncio
-async def test_roster_top3_follows_shared_sort_for_equal_combat_and_same_name():
+async def test_roster_follows_shared_sort_for_equal_combat_and_same_name():
     characters = [
         roster_entry("5101", combat=900, lv=200),
         roster_entry("5102", combat=900, lv=201),
@@ -220,12 +220,12 @@ async def test_roster_top3_follows_shared_sort_for_equal_combat_and_same_name():
     payload = RosterT2IPayloadBuilder().build(data)
 
     # 战力相同按等级降序：5102(201) > 5101(200) > 5103(199)。
-    assert gateway.detail_calls == ["5102", "5101", "5103"]
+    assert gateway.detail_calls == ["5102", "5101", "5103", "5104"]
     assert [row["name_code"] for row in payload["rows"][:3]] == ["5102", "5101", "5103"]
     assert [row["rank"] for row in payload["rows"][:3]] == [1, 2, 3]
-    # 展示的 top-3 词条码与详情抓取码完全一致，绝不错位。
+    # 同名角色仍按稳定标识展示，第四名失败状态也保留。
     assert all(row["options"] is not None for row in payload["rows"][:3])
-    assert payload["rows"][3]["options"] is None
+    assert payload["rows"][3]["options"]["status"] == "failed"
 
 
 @pytest.mark.asyncio
@@ -255,7 +255,7 @@ async def test_roster_top3_option_states_are_distinguishable():
         "5101": base_detail("5101"),
         "5102": no_equipment_detail("5102"),
         "5103": unknown_options_detail("5103"),
-        # 5104 不在 top-3，无需详情。
+        # 额外展示角色缺少测试详情时降级，不影响其他有效结果。
     }
     gateway = FakeGateway(characters, details, failures={"5105"})
     app = make_app(gateway)
@@ -398,8 +398,8 @@ def test_select_top_codes_dedupes_within_limit_without_backfill():
 
 
 @pytest.mark.asyncio
-async def test_roster_missing_identity_does_not_query_rank_four():
-    """展示 top-3 与详情抓取完全对应：缺标识的行不补位、不请求第 4 名。"""
+async def test_roster_missing_identity_preserves_other_displayed_characters():
+    """缺标识行不查询，其他展示角色仍应正常查询。"""
     characters = [
         {"lv": 200, "combat": 900},
         roster_entry("5102", combat=800),
@@ -412,10 +412,10 @@ async def test_roster_missing_identity_does_not_query_rank_four():
 
     data = await app.roster("10001", directory_for(["5102", "5103", "5104"]))
 
-    assert gateway.detail_calls == ["5102", "5103"]
-    assert "5104" not in gateway.detail_calls
+    assert gateway.detail_calls == ["5102", "5103", "5104"]
+    assert "" not in gateway.detail_calls
     assert len(gateway.detail_calls) <= 3
-    assert set(data.option_summaries) == {"5102", "5103"}
+    assert set(data.option_summaries) == {"5102", "5103", "5104"}
 
 
 @pytest.mark.asyncio
@@ -576,3 +576,48 @@ def test_option_summary_flags_incomplete_option_fields_for_equipped_slots():
     assert some["options_fields_present"] is False
     assert empty["equipment_present"] is True
     assert empty["options_fields_present"] is True
+
+
+@pytest.mark.asyncio
+async def test_every_displayed_character_has_three_merged_options_and_bounded_concurrency():
+    import asyncio
+    codes = [f"51{i:02d}" for i in range(20)]
+    class ConcurrentGateway(FakeGateway):
+        active = 0
+        peak = 0
+        async def get_character_detail(self, account, code):
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+            try:
+                await asyncio.sleep(0.001)
+                return await super().get_character_detail(account, code)
+            finally:
+                self.active -= 1
+    gateway = ConcurrentGateway(
+        [roster_entry(c, combat=1000-i) for i,c in enumerate(codes)],
+        {c: base_detail(c) for c in codes},
+    )
+    data = await make_app(gateway).roster("10001", directory_for(codes))
+    payload = RosterT2IPayloadBuilder().build(data)
+    assert gateway.peak == 3
+    for row in payload["rows"]:
+        assert row["options"] is not None
+        assert len(row["options"]["rows"]) == 3
+    assert len(data.option_summaries) == 20
+    text = CharacterCommandHandler._format_roster(data)
+    assert text.count("词条合计") == 20
+
+
+def test_merged_tier_color_uses_average_not_sum():
+    from types import SimpleNamespace
+    from astrbot_plugin_nikke.features.character.replica import build_summary
+    def summary(tiers):
+        options = [SimpleNamespace(tier=t, unit="percent", raw_value=100, value=0.01,
+                   effect_group_id="test",raw_type="attack",display_name="攻击") for t in tiers]
+        data = SimpleNamespace(equipment={"head":SimpleNamespace(equipped=True,options=options)},
+                               weapon_base_source=None)
+        return build_summary(data)["rows"][0]
+    assert summary([6,6,6])["semantic"] == "neutral"
+    assert summary([12,13,14])["semantic"] == "high"
+    assert summary([15,15])["semantic"] == "max"
+    assert summary([15,None])["semantic"] == "neutral"

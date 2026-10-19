@@ -191,7 +191,7 @@ class CharacterCommandHandler:
                 f" · 技能 {skill(item.get('skill1_lv'))}/{skill(item.get('skill2_lv'))}/{skill(item.get('ulti_skill_lv'))}"
                 f" · 突破 {number(item.get('grade'))} · 核心 {number(item.get('core'))}"
             )
-            if rank <= 3 and code:
+            if code:
                 lines.extend(
                     CharacterCommandHandler._format_roster_options(
                         summaries.get(code)
@@ -215,7 +215,7 @@ class CharacterCommandHandler:
                 else f"已知词条合计：{total}阶 · 部分词条未识别"
             )
             out = [head]
-            for row in rows:
+            for row in rows[:3]:
                 if not isinstance(row, Mapping):
                     continue
                 label = str(row.get("label", "") or "")

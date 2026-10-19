@@ -247,3 +247,7 @@ node --test tests/extension.test.cjs
 ## 许可证与来源
 
 本项目采用 [GPL-3.0-or-later](LICENSE)。部分 API 适配和算法基于 [ExiaProject/ExiaInvasion](https://github.com/ExiaProject/ExiaInvasion) 移植，详见 [NOTICE](NOTICE)。
+
+### 练度总览词条颜色
+
+总览为展示范围内每名妮姬列出合并阶数最高的三类装备词条，最多展示20名。紫色表示已识别组成词条平均达到12阶，金色表示全部为15阶；未知阶数不高亮。角色卡的单条词条使用12–14阶紫色、15阶金色。合并阶数不直接套用单条阈值。

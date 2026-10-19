@@ -144,8 +144,8 @@ def _summary(code: str, *, status: str = "ok", big: bool = False) -> RosterOptio
 def _auto_summaries(
     entries: list[dict[str, Any]], *, big: bool = False
 ) -> dict[str, RosterOptionSummary]:
-    """为共享排序的 top-3 生成 ok 词条摘要。"""
-    return {code: _summary(code, big=big) for code in select_top_codes(entries, 3)}
+    """为共享排序的展示角色 生成 ok 词条摘要。"""
+    return {code: _summary(code, big=big) for code in select_top_codes(entries, 20)}
 
 
 def _dto(

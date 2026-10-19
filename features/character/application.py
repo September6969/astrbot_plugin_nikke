@@ -86,7 +86,7 @@ class CharacterCardBuilderPort(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class RosterOptionSummary:
-    """单个 top-3 角色的装备词条摘要。
+    """单个展示角色的装备词条摘要。
 
     status 必须能区分“明确无词条”“详情未返回”“读取失败”和“字段未识别”，
     未知状态绝不能显示成 0 阶或“无词条”。
@@ -146,7 +146,7 @@ class CharacterApplication:
 
     PROFILE_CACHE_TTL_SECONDS = 300.0
     PROFILE_CACHE_LIMIT = 50
-    ROSTER_TOP_OPTION_LIMIT = 3
+    ROSTER_TOP_OPTION_LIMIT = 20
     ROSTER_DETAIL_CONCURRENCY = 3
 
     def __init__(
@@ -236,7 +236,7 @@ class CharacterApplication:
     async def roster(
         self, qq_id: str, directory: Sequence[Mapping[str, Any]]
     ) -> CharacterRosterData:
-        """读取练度列表，并为正式排序的 top-3 补齐装备词条摘要。"""
+        """读取练度列表，并为正式排序的展示角色补齐装备词条摘要。"""
         account = self._account(qq_id)
         characters = await self._gateway.get_roster(account, True)
         if not isinstance(characters, list):
@@ -273,7 +273,7 @@ class CharacterApplication:
         characters: Sequence[Mapping[str, Any]],
         directory: Sequence[Mapping[str, Any]],
     ) -> dict[str, RosterOptionSummary]:
-        """只抓取正式排序 top-3 的详情；并发有上限，失败不牵连其他角色。"""
+        """只抓取正式排序后展示角色的详情；并发有上限，失败不牵连其他角色。"""
         codes = select_top_codes(characters, self.ROSTER_TOP_OPTION_LIMIT)
         if not codes:
             return {}
@@ -363,7 +363,7 @@ class CharacterApplication:
         return RosterOptionSummary(
             name_code=code,
             status=status,
-            rows=rows,
+            rows=rows[:3],
             total=total,
             complete=complete,
             message={
