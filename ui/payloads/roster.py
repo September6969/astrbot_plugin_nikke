@@ -73,7 +73,7 @@ def _option_payload(summary: Any) -> dict[str, Any] | None:
     if not isinstance(status, str) or not status:
         return None
     rows = []
-    for row in getattr(summary, "rows", ()) or ():
+    for row in (getattr(summary, "rows", ()) or ())[:3]:
         if not isinstance(row, Mapping):
             continue
         label = str(row.get("label", "") or "")
@@ -85,6 +85,7 @@ def _option_payload(summary: Any) -> dict[str, Any] | None:
                 "label": label,
                 "value": value,
                 "tier": tier,
+                "semantic": row.get("semantic", "neutral"),
                 "note": note,
                 "lines": _option_row_lines(f"{label} {value} {tier} {note}"),
             }
@@ -181,7 +182,7 @@ def project_roster_rows(
             "top_three": rank <= 3,
             "options": (
                 _option_payload(summaries.get(code))
-                if rank <= 3 and code
+                if code
                 else None
             ),
             "_canonical": canonical,
