@@ -87,7 +87,43 @@ def test_compat_entry_preserves_parameters_exit_and_keyboard_interrupt(tmp_path)
             assert results[1].returncode == 7
 
 
-@pytest.mark.parametrize('name,group', [('architecture_metrics','audit'), ('mirror_blablalink_assets','assets'), ('spine_batch_validation','spine'), ('backup_nikke_data','operations'), ('preview_t2i_frontend','preview')])
+@pytest.mark.parametrize('module_name,search_root,package', [
+    ('inspect_spine_bundle', 'scripts', 'scripts'),
+    ('scripts.inspect_spine_bundle', '.', 'scripts'),
+    ('astrbot_plugin_nikke.scripts.inspect_spine_bundle', '..', 'astrbot_plugin_nikke.scripts'),
+])
+def test_legacy_import_from_other_directory(tmp_path, module_name, search_root, package):
+    atlas = tmp_path / 'sample.atlas'
+    atlas.write_text('texture.png\nsize: 8, 8\n', encoding='utf-8')
+    (tmp_path / 'texture.png').write_bytes(b'')
+    skeleton = tmp_path / 'sample.json'
+    skeleton.write_text('{"skeleton": {"spine": "4.2.1"}}', encoding='utf-8')
+    code = '''
+import importlib
+from pathlib import Path
+import json
+import sys
+sys.path.insert(0, sys.argv[1])
+module = importlib.import_module(sys.argv[2])
+implementation = importlib.import_module(sys.argv[3] + '.spine.inspect_spine_bundle')
+assert module is implementation
+assert module.inspect is implementation.inspect
+assert module._binary_spine_version is implementation._binary_spine_version
+print(json.dumps(module.inspect(Path(sys.argv[4]), Path(sys.argv[5]), '4.2')))
+'''
+    result = subprocess.run(
+        [sys.executable, '-c', code, str((PLUGIN_ROOT / search_root).resolve()),
+         module_name, package, str(atlas), str(skeleton)],
+        cwd=tmp_path, capture_output=True, text=True, encoding='utf-8', timeout=15,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report['status'] == 'VERSION_MATCH'
+    assert report['major_minor'] == '4.2'
+    assert report['missing_pages'] == 0
+
+
+@pytest.mark.parametrize('name,group', [('architecture_metrics','audit'), ('mirror_blablalink_assets','assets'), ('spine_batch_validation','spine'), ('backup_nikke_data','operations'), ('preview_t2i_frontend','preview'), ('inspect_spine_bundle','spine')])
 @pytest.mark.parametrize('argument', ['--help', '--no-such-argument'])
 def test_legacy_cli_matches_grouped_entry_from_other_directory(tmp_path, name, group, argument):
     results = []

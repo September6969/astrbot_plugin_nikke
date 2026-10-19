@@ -11,7 +11,7 @@ def dispatch(name: str, namespace: dict, target: str) -> None:
         path = Path(__file__).resolve().parents[1].joinpath(*target.split('.')).with_suffix('.py')
         runpy.run_path(str(path), run_name="__main__")
     else:
-        package = name.rpartition('.')[0]
+        package = name.rpartition('.')[0] or "scripts"
         module = importlib.import_module(package + '.' + target)
         sys.modules[name] = module
         namespace.update(vars(module))
