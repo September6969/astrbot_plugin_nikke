@@ -2881,6 +2881,53 @@
         ],
         "crop_padding": 64
       }
+    },
+    "c230": {
+      "anchor_kind": "eye_attachment",
+      "point": [
+        565.1978358283856,
+        203.6509413073598
+      ],
+      "extent": [
+        51.00411910059324,
+        24.862238885371085
+      ],
+      "image_size": [
+        944,
+        979
+      ],
+      "pixel_sha256": "25ad13abb568adbbf01decec83334a0a4dfcbc9a61dec23a6506472de7b938a8",
+      "attachments": [
+        "00_2/idle_eyehole_r",
+        "00_2/idle_eyehole_l",
+        "00_2/idle_eyeball_r",
+        "00_2/idle_eyeball_hl_r",
+        "00_2/idle_eyeball_l",
+        "00_2/idle_eyeball_hl_l"
+      ],
+      "core_axis_reason": "upper_torso_unavailable",
+      "provenance": {
+        "method": "official-spine-4.0.31-idle-eye-geometry",
+        "canvas": [
+          1024,
+          1024
+        ],
+        "crop": [
+          39,
+          23,
+          983,
+          1002
+        ],
+        "skeleton_sha256": "9b64c1e0037bf49beee9bdb8d51f873d34785cfb79cabeb2fdb76356751dfe31",
+        "atlas_sha256": "7f616884f85a32a81b59b99605b60b1923be34eb1921ab9ad7f93ba1a999efbd",
+        "pixel_reproduction": "server worker reproduced cached pixel hash exactly; bird eye attachments excluded"
+      },
+      "framing": {
+        "target": [
+          760,
+          650
+        ]
+      }
     }
   },
   "unavailable": {}

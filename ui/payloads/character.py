@@ -194,12 +194,19 @@ class CharacterT2IPayloadBuilder:
                 )
         replica = build_summary(data)
         layout = summary_layout(len(replica["rows"]))
+        # 外层毛玻璃与实际内容一起收缩，装备和技能仍保持原卡面坐标。
+        equipment_top = (layout.card_top if layout.visible else layout.gear_top) - 50.0
+        equipment_height = 2340.0 - equipment_top
+        gear_local_top = layout.gear_top - equipment_top
         summary_panel_style = (
-            f"top:{layout.local_top:.3f}px;height:{layout.height:.3f}px"
+            f"top:{layout.card_top - equipment_top:.3f}px;height:{layout.height:.3f}px"
             if layout.visible
             else ""
         )
         character_layout = {
+            "equipment_top": equipment_top,
+            "equipment_height": equipment_height,
+            "gear_local_top": gear_local_top,
             "summary_count": layout.count,
             "summary_height": layout.height,
             "summary_top": layout.card_top,
