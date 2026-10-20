@@ -29,6 +29,17 @@ html, body {
     radial-gradient(ellipse at 8% 70%, rgba(30, 61, 89, 0.22), transparent 52%),
     linear-gradient(180deg, #0b111a 0%, #111924 100%);
 }
+/* 活动宣传图铺满整页，模糊和遮罩保证正文对比度。 */
+.calendar-page::before {
+  content: "";
+  position: absolute;
+  inset: -36px;
+  background-image: var(--poster-image);
+  background-size: cover;
+  background-position: center;
+  filter: blur(24px) brightness(0.55) saturate(0.8);
+  pointer-events: none;
+}
 .page-header {
   position: absolute;
   top: 32px;
@@ -77,7 +88,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(120deg, #101a27 0%, #152337 52%, #0c141e 100%);
+  background: transparent;
 }
 .key-visual::after {
   content: "";
@@ -132,8 +143,9 @@ html, body {
   border-radius: 12px;
   background: rgba(15, 25, 38, 0.68);
 }
+/* 两侧直接透出整页模糊背景，避免单独底板形成黑边。 */
 .key-visual.is-portrait .poster-backdrop {
-  display: block;
+  display: none;
 }
 .content-area {
   position: absolute;
@@ -190,7 +202,7 @@ html, body {
   border: 1px solid rgba(177, 197, 222, 0.16);
   border-left: 6px solid #61b8df;
   border-radius: 16px;
-  background: linear-gradient(100deg, rgba(24, 39, 56, 0.96), rgba(19, 30, 44, 0.94));
+  background: linear-gradient(100deg, rgba(24, 39, 56, 0.82), rgba(19, 30, 44, 0.80));
 }
 .active-card.urgency-critical { border-left-color: #ef5b5b; }
 .active-card.urgency-urgent { border-left-color: #f28b4e; }
@@ -441,7 +453,7 @@ html, body {
   {% set health_text = '部分来源同步异常 · 保留已有数据' %}
   {% set health_class = 'health-label warn' %}
 {% endif %}
-<main class="calendar-page">
+<main class="calendar-page" style="--poster-image:{% if background_data_uri %}url('{{ background_data_uri }}'){% else %}none{% endif %};">
   <header class="page-header">
     <h1 class="page-title">妮姬日程</h1>
     <div class="page-range">

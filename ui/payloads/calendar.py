@@ -27,16 +27,8 @@ class CalendarT2IPayloadBuilder:
     5. 全局状态与页面状态分离 (NO ACTIVE OPERATIONS 仅在全局无活动时出现)；
     6. 仅保留基于 EXACT 起止时间的辅助 timeline progress_pct 字段。
 
-    高度预算与动态上限模型（Base-bounded + Source-extended）：
-    - CANVAS_W = 1600px（固定宽度）
-    - MIN_CANVAS_H = 900px（底线高度）
-    - FALLBACK_MAX_CANVAS_H = 1600px（基础最大高度：无KV或横版KV时基础上限均允许生长至 1600px）
-    - ABSOLUTE_MAX_CANVAS_H = 2400px（绝对安全上限）
-    - scaled_source_h = round(1600 * source_h / source_w)
-    - effective_max_canvas_h = min(max(FALLBACK_MAX_CANVAS_H, scaled_source_h), ABSOLUTE_MAX_CANVAS_H)
-      即：Calendar 默认允许增长至 1600px；当 KV 提供更多纵向空间时（如竖版图），上限随 KV 延长，最高 2400px；横版图绝不会将上限压至 900px。
-    - 页面固定区域: 顶栏 148px、KV 360px、内容顶部间距 22px、页脚 56px、底部 24px。
-    - 动态内容净预算: effective_max_canvas_h - 610px。
+    页面按内容增长，最大高度统一为 2400px，不再由活动图比例限制容量。
+    活动图通过整页模糊背景展示，原图宽高仅供素材布局诊断使用。
     """
 
     CANVAS_W = 1600
@@ -44,7 +36,7 @@ class CalendarT2IPayloadBuilder:
     MAX_INLINE_BACKGROUND_PIXELS = 20_000_000
     CANVAS_H = 900
     MIN_CANVAS_H = 900
-    FALLBACK_MAX_CANVAS_H = 1600
+    FALLBACK_MAX_CANVAS_H = 2400
     ABSOLUTE_MAX_CANVAS_H = 2400
     MAX_CANVAS_H = FALLBACK_MAX_CANVAS_H  # 向后兼容
 
@@ -264,10 +256,7 @@ class CalendarT2IPayloadBuilder:
             return cls.FALLBACK_MAX_CANVAS_H, source_w, source_h, None
 
         scaled_source_h = round(cls.CANVAS_W * source_h / source_w)
-        effective_max_h = min(
-            max(cls.FALLBACK_MAX_CANVAS_H, scaled_source_h),
-            cls.ABSOLUTE_MAX_CANVAS_H,
-        )
+        effective_max_h = cls.ABSOLUTE_MAX_CANVAS_H
         return effective_max_h, source_w, source_h, scaled_source_h
 
     def _encode_background(
@@ -671,12 +660,7 @@ class CalendarT2IPayloadBuilder:
         top_panel = pages[0]["panel"] if pages else {"width": self.PANEL_W, "height": self.MIN_PANEL_H}
         top_bg = pages[0]["background_data_uri"] if pages else None
 
-        if scaled_source_h is None or scaled_source_h <= self.FALLBACK_MAX_CANVAS_H:
-            height_policy = "base"
-        elif scaled_source_h < self.ABSOLUTE_MAX_CANVAS_H:
-            height_policy = "source_extended"
-        else:
-            height_policy = "absolute_capped"
+        height_policy = "content_bounded"
 
         layout_limits = {
             "min_canvas_height": self.MIN_CANVAS_H,
