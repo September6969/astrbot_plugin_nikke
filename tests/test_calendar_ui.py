@@ -68,7 +68,7 @@ class TestOperationsFeedVisualContract:
         cases = get_cases("calendar_schedule", tmp_path)
         normal = cases["normal"]
         assert normal["canvas"]["width"] == 1600
-        assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= normal["canvas"]["height"] <= 1600
+        assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= normal["canvas"]["height"] <= 2400
         assert len(normal["pages"]) == 1
         assert_page_fits_budget(normal, normal["pages"][0])
 
@@ -87,8 +87,8 @@ class TestOperationsFeedVisualContract:
         dyn = cases["dynamic-7-active-4-next"]
         assert dyn["canvas"]["width"] == 1600
         assert len(dyn["pages"] ) == 2
-        assert [len(page["active_items"]) for page in dyn["pages"]] == [5, 2]
-        assert [len(page["next_items"]) for page in dyn["pages"]] == [0, 4]
+        assert [len(page["active_items"]) for page in dyn["pages"]] == [7, 0]
+        assert [len(page["next_items"]) for page in dyn["pages"]] == [3, 1]
         for page in dyn["pages"]:
             assert_page_fits_budget(dyn, page)
 
@@ -131,6 +131,37 @@ class TestOperationsFeedVisualContract:
 
 class TestCalendarBrowserGeometry:
     """用真实 Chromium DOM 验证 Python 预算与 CSS 盒模型没有漂移。"""
+
+    @pytest.mark.asyncio
+    async def test_activity_art_is_blurred_across_whole_page(self, tmp_path):
+        """整页背景读取活动图；缺图时不产生错误图片地址。"""
+        playwright_api = pytest.importorskip("playwright.async_api")
+        cases = get_cases("calendar_schedule", tmp_path)
+        async with playwright_api.async_playwright() as playwright:
+            browser = await playwright.chromium.launch(headless=True)
+            try:
+                page = await browser.new_page()
+                for name in ("normal", "no-background"):
+                    case = cases[name]
+                    data = {**case, **case["pages"][0]}
+                    await page.set_content(render_html(data), wait_until="load")
+                    actual = await page.evaluate("""() => {
+                        const root = document.querySelector('.calendar-page');
+                        const style = getComputedStyle(root, '::before');
+                        const hero = getComputedStyle(document.querySelector('.key-visual'));
+                        return {heroBackground: hero.backgroundColor, heroImage: hero.backgroundImage, image: style.backgroundImage, filter: style.filter,
+                            height: parseFloat(style.height), pageHeight: root.clientHeight};
+                    }""")
+                    assert actual["heroBackground"] == "rgba(0, 0, 0, 0)"
+                    assert actual["heroImage"] == "none"
+                    if data["background_data_uri"]:
+                        assert data["background_data_uri"] in actual["image"]
+                        assert "blur(24px)" in actual["filter"]
+                        assert actual["height"] >= actual["pageHeight"]
+                    else:
+                        assert actual["image"] == "none"
+            finally:
+                await browser.close()
 
     @pytest.mark.asyncio
     async def test_medium_and_wide_titles_stay_inside_real_event_cards(self, tmp_path):
@@ -273,7 +304,7 @@ class TestCalendarBrowserGeometry:
         playwright_api = pytest.importorskip("playwright.async_api")
         cases = get_cases("calendar_schedule", tmp_path)
         case = cases["realistic-7-active-4-next"]
-        assert len(case["pages"]) == 3
+        assert len(case["pages"]) == 2
         assert sum(len(page["active_items"]) for page in case["pages"]) == 7
         assert sum(len(page["next_items"]) for page in case["pages"]) == 4
 
@@ -337,8 +368,8 @@ class TestPaginationBudgetAndOversize:
     def test_8_active_fits_on_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         eight = cases["8-active"]
-        assert [len(page["active_items"]) for page in eight["pages"]] == [5, 3]
-        assert len(eight["pages"]) == 2
+        assert [len(page["active_items"]) for page in eight["pages"]] == [8]
+        assert len(eight["pages"]) == 1
         assert sum(len(page["active_items"]) for page in eight["pages"]) == 8
         for page in eight["pages"]:
             assert_page_fits_budget(eight, page)
@@ -347,18 +378,18 @@ class TestPaginationBudgetAndOversize:
     def test_dynamic_7_active_4_next_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         case = cases["dynamic-7-active-4-next"]
-        assert [len(page["active_items"]) for page in case["pages"]] == [5, 2]
-        assert [len(page["next_items"]) for page in case["pages"]] == [0, 4]
+        assert [len(page["active_items"]) for page in case["pages"]] == [7, 0]
+        assert [len(page["next_items"]) for page in case["pages"]] == [3, 1]
         assert sum(len(page["active_items"]) for page in case["pages"]) == 7
         assert sum(len(page["next_items"]) for page in case["pages"]) == 4
         for page in case["pages"]:
             assert_page_fits_budget(case, page)
 
     # ── 中等规模活动优先单页 ────────────────────────────────────────
-    def test_10_active_fits_on_single_page(self, tmp_path):
+    def test_10_active_paginates_after_nine(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         ten = cases["dynamic-10-active"]
-        assert [len(page["active_items"]) for page in ten["pages"]] == [5, 5]
+        assert [len(page["active_items"]) for page in ten["pages"]] == [9, 1]
         assert sum(len(page["active_items"]) for page in ten["pages"]) == 10
         for page in ten["pages"]:
             assert_page_fits_budget(ten, page)
@@ -366,7 +397,7 @@ class TestPaginationBudgetAndOversize:
     def test_9_active_fits_on_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         nine = cases["9-active"]
-        assert [len(page["active_items"]) for page in nine["pages"]] == [5, 4]
+        assert [len(page["active_items"]) for page in nine["pages"]] == [9]
         assert sum(len(page["active_items"]) for page in nine["pages"]) == 9
         for page in nine["pages"]:
             assert_page_fits_budget(nine, page)
@@ -379,7 +410,7 @@ class TestPaginationBudgetAndOversize:
         assert sum(len(page["next_items"]) for page in twelve_six["pages"]) == 6
         assert len(twelve_six["pages"]) >= 1
         for page in twelve_six["pages"]:
-            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 1600
+            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
 
     def test_dynamic_20_active_fits_on_single_page(self, tmp_path):
         """20 Active 在无 KV 时按真实预算分页，但不得丢失或越过高度上限。"""
@@ -388,12 +419,12 @@ class TestPaginationBudgetAndOversize:
         assert sum(len(page["active_items"]) for page in twenty["pages"]) == 20
         assert len(twenty["pages"]) >= 1
         for page in twenty["pages"]:
-            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 1600
+            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
 
-    def test_16_active_fits_on_single_page(self, tmp_path):
+    def test_16_active_fits_on_two_pages(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         sixteen = cases["16-active"]
-        assert [len(page["active_items"]) for page in sixteen["pages"]] == [5, 5, 5, 1]
+        assert [len(page["active_items"]) for page in sixteen["pages"]] == [9, 7]
         assert sum(len(page["active_items"]) for page in sixteen["pages"]) == 16
         for page in sixteen["pages"]:
             assert_page_fits_budget(sixteen, page)
@@ -404,13 +435,13 @@ class TestPaginationBudgetAndOversize:
         seventeen = cases["17-active"]
         assert sum(len(page["active_items"]) for page in seventeen["pages"]) == 17
         for page in seventeen["pages"]:
-            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 1600
+            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
 
     def test_realistic_7_active_4_next_uses_production_mix(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         case = cases["realistic-7-active-4-next"]
         pages = case["pages"]
-        assert len(pages) == 3
+        assert len(pages) == 2
         active = [item for page in pages for item in page["active_items"]]
         upcoming = [item for page in pages for item in page["next_items"]]
         assert len(active) == 7 and len(upcoming) == 4
@@ -424,7 +455,7 @@ class TestPaginationBudgetAndOversize:
     def test_8_active_paged_single_page_compat(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         eight = cases["8-active-paged"]
-        assert [len(page["active_items"]) for page in eight["pages"]] == [5, 3]
+        assert [len(page["active_items"]) for page in eight["pages"]] == [8]
         assert sum(len(page["active_items"]) for page in eight["pages"]) == 8
         for page in eight["pages"]:
             assert_page_fits_budget(eight, page)
@@ -470,8 +501,9 @@ class TestPaginationBudgetAndOversize:
         eight = cases["8-active"]
         html = render_html({**eight, **eight["pages"][0]})
         assert "panel-footer" in html
-        assert "第 1 / 2 页" in html
-        assert "下一页：/妮姬 日程 14 2" in html
+        assert "第 1 / 1 页" in html
+        assert "下一页：" not in html
+        assert "查询：/妮姬 日程 14" in html
 
     def test_4_active_8_next_multi_page_partition(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
@@ -709,26 +741,26 @@ class TestBackgroundAndMultiPageRendering:
         assert result == "single_page.png"
 
 
-class TestSourceBoundedDynamicCanvasHeight:
-    """Base-bounded (1600) + Source-extended (最高2400) 动态画布高度与分页合约测试。"""
+class TestContentBoundedDynamicCanvasHeight:
+    """活动图比例不限制容量，使用 2400px 内容预算分页。"""
 
     def test_landscape_kv_uses_base_max_height(self):
-        """16:9 landscape (1920x1080) -> scaled 900, 但保持 base max == 1600 (绝不压缩至 900)."""
+        """横版图仍允许使用完整 2400px 内容预算。"""
         effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1920, 1080))
         assert scaled_h == 900
-        assert effective_max == 1600
+        assert effective_max == 2400
 
     def test_square_kv_uses_base_or_source_height(self):
-        """1600x1600 square -> scaled 1600, effective == 1600."""
+        """方图不限制内容高度，素材缩放诊断保持真实值。"""
         effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1600, 1600))
         assert scaled_h == 1600
-        assert effective_max == 1600
+        assert effective_max == 2400
 
     def test_portrait_1440_1920_extends_max(self):
-        """4:3-ish portrait (1440x1920) -> scaled 2133, effective_max == 2133 (成功扩展基础高度)."""
+        """竖图也使用统一预算，缩放诊断保持真实值。"""
         effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height((1440, 1920))
         assert scaled_h == 2133
-        assert effective_max == 2133
+        assert effective_max == 2400
 
     def test_portrait_1080_1920_hits_absolute_cap(self):
         """标准 9:16 KV (1080x1920) -> scaled ~2844, 命中 absolute cap == 2400."""
@@ -737,42 +769,42 @@ class TestSourceBoundedDynamicCanvasHeight:
         assert effective_max == 2400
 
     def test_no_kv_uses_base_max(self):
-        """no background -> effective_max == 1600 (FALLBACK_MAX_CANVAS_H)."""
+        """no background -> effective_max == 2400 (FALLBACK_MAX_CANVAS_H)."""
         effective_max, w, h, scaled_h = CalendarT2IPayloadBuilder._compute_effective_max_canvas_height(None)
-        assert effective_max == 1600
+        assert effective_max == 2400
         assert scaled_h is None
 
     def test_7_active_4_next_landscape_kv_fits_on_single_page(self, tmp_path):
         cases = get_cases("calendar_schedule", tmp_path)
         case = cases["landscape-kv-7-active-4-next"]
         assert len(case["pages"]) == 2
-        assert [len(page["active_items"]) for page in case["pages"]] == [5, 2]
-        assert [len(page["next_items"]) for page in case["pages"]] == [0, 4]
-        assert case["layout_limits"]["effective_max_canvas_height"] == 1600
-        assert case["layout_limits"]["height_policy"] == "base"
+        assert [len(page["active_items"]) for page in case["pages"]] == [7, 0]
+        assert [len(page["next_items"]) for page in case["pages"]] == [3, 1]
+        assert case["layout_limits"]["effective_max_canvas_height"] == 2400
+        assert case["layout_limits"]["height_policy"] == "content_bounded"
         for page in case["pages"]:
             assert_page_fits_budget(case, page)
 
     def test_20_active_landscape_kv_fits_on_single_page(self, tmp_path):
-        """20 Active + landscape KV 按基础 1600 预算完整保留。"""
+        """20 Active + landscape KV 按基础 2400 预算完整保留。"""
         cases = get_cases("calendar_schedule", tmp_path)
         c = cases["landscape-kv-20-active"]
         assert sum(len(page["active_items"]) for page in c["pages"]) == 20
         assert len(c["pages"]) >= 1
         for page in c["pages"]:
-            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 1600
-        assert c["layout_limits"]["effective_max_canvas_height"] == 1600
-        assert c["layout_limits"]["height_policy"] == "base"
+            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
+        assert c["layout_limits"]["effective_max_canvas_height"] == 2400
+        assert c["layout_limits"]["height_policy"] == "content_bounded"
 
-    def test_25_active_landscape_kv_paginates_at_1600_base_max(self, tmp_path):
-        """25 Active + landscape KV 超过 1600 基础预算时正常触发分页。"""
+    def test_25_active_landscape_kv_paginates_at_2400_base_max(self, tmp_path):
+        """25 Active + landscape KV 超过 2400 基础预算时正常触发分页。"""
         cases = get_cases("calendar_schedule", tmp_path)
         c = cases["landscape-kv-25-active"]
         assert len(c["pages"]) >= 2
         assert sum(len(page["active_items"]) for page in c["pages"]) == 25
-        assert c["layout_limits"]["effective_max_canvas_height"] == 1600
+        assert c["layout_limits"]["effective_max_canvas_height"] == 2400
         for page in c["pages"]:
-            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 1600
+            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
 
     def test_case_5_20_normal_active_portrait_kv_single_page(self, tmp_path):
         """Case 5: 20 normal Active + 9:16 KV 在源扩展高度内完整保留。"""
@@ -782,7 +814,7 @@ class TestSourceBoundedDynamicCanvasHeight:
         for page in c["pages"]:
             assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
         assert c["layout_limits"]["effective_max_canvas_height"] == 2400
-        assert c["layout_limits"]["height_policy"] == "absolute_capped"
+        assert c["layout_limits"]["height_policy"] == "content_bounded"
 
     def test_case_6_30_normal_active_portrait_kv_single_page(self, tmp_path):
         """Case 6: 30 normal Active + 9:16 KV 在源扩展高度内完整保留。"""
@@ -792,7 +824,7 @@ class TestSourceBoundedDynamicCanvasHeight:
         for page in c["pages"]:
             assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
         assert c["layout_limits"]["effective_max_canvas_height"] == 2400
-        assert c["layout_limits"]["height_policy"] == "absolute_capped"
+        assert c["layout_limits"]["height_policy"] == "content_bounded"
 
     def test_case_7_45_active_portrait_kv_overflow_paginates(self, tmp_path):
         """Case 7: 45 Active + 9:16 KV -> page_total >= 2, 每页 <= effective_max_canvas_h (2400)."""
@@ -814,16 +846,16 @@ class TestSourceBoundedDynamicCanvasHeight:
         for page in case["pages"]:
             assert_page_fits_budget(case, page)
 
-    def test_no_kv_overflow_paginates_at_1600(self, tmp_path):
-        """无背景图时使用 1600 fallback 上限分页，且不丢失 Active。"""
+    def test_no_kv_overflow_paginates_at_2400(self, tmp_path):
+        """无背景图时使用 2400 fallback 上限分页，且不丢失 Active。"""
         cases = get_cases("calendar_schedule", tmp_path)
         c = cases["no-kv-overflow"]
         assert len(c["pages"]) >= 2
         assert sum(len(page["active_items"]) for page in c["pages"]) == 25
-        assert c["layout_limits"]["effective_max_canvas_height"] == 1600
-        assert c["layout_limits"]["height_policy"] == "base"
+        assert c["layout_limits"]["effective_max_canvas_height"] == 2400
+        assert c["layout_limits"]["height_policy"] == "content_bounded"
         for page in c["pages"]:
-            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 1600
+            assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= page["canvas"]["height"] <= 2400
 
     def test_duck_typed_snapshot_builds_without_calling_bool_has_snapshot(self):
         """跨模块或鸭子类型 CalendarScheduleSnapshot 不会抛出 'bool' object is not callable."""
