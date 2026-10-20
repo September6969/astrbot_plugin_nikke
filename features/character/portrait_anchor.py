@@ -3,7 +3,8 @@ import hashlib
 import json
 
 ANCHOR_KEY = "nikke_portrait_anchor"
-ANCHOR_SCHEMA = 2
+# 主体选择口径升级，旧记录重新生成一次，避免复用误合并锚点。
+ANCHOR_SCHEMA = 3
 
 
 def read_anchor(image):

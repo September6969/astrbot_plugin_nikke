@@ -32,10 +32,48 @@ def _anchor_priority(slot, name, surface):
     """眼罩、眉毛和反光不能因名字含 eye 就成为眼睛锚点。"""
     lower = re.sub(r"[^a-z0-9]+", "_", (slot + "/" + name).lower())
     excluded = re.search(r"patch|mask|brow|borw|blow|lash|lahs|highlight|light|spark", lower)
-    excluded = excluded or re.search(r"(?:^|_)(?:lit|hi|hig|high|sky|cover)(?:_|\d|$)", lower)
-    if not excluded and re.search(r"(?:^|_)eye(?:s|ball|white|w|skin)?(?:_|\d|$)", lower):
+    excluded = excluded or re.search(r"(?:^|_)(?:lit|hi|hl|hig|high|sky|cover)(?:_|\d|$)", lower)
+    if not excluded and re.search(r"(?:^|_)eye(?:s|ball|hole|white|w|skin)?(?:_|\d|$)", lower):
         return 0
     return {"face_attachment": 1, "head_attachment": 2}.get(surface, -1)
+
+
+def _compact_eye_boxes(items):
+    """防止共享根骨或旧响应将相距过远的多个面孔合并。"""
+    boxes = [item[1] for item in items]
+    width = max(b[2] for b in boxes) - min(b[0] for b in boxes)
+    height = max(b[3] for b in boxes) - min(b[1] for b in boxes)
+    if width > 6 * max(b[2]-b[0] for b in boxes) or height > 3 * max(b[3]-b[1] for b in boxes):
+        return []
+    return boxes
+
+
+def _subject_boxes(candidates):
+    """同一父骨下的左右眼优先；多个主体无法消歧时停止合并。"""
+    priority = min(item[0] for item in candidates)
+    selected = [item for item in candidates if item[0] == priority]
+    if priority != 0:
+        return priority, [item[1] for item in selected]
+    groups = {}
+    for item in selected:
+        source = item[2]
+        # 没有骨架归属的旧响应仍兼容，但不与有归属的主体混合。
+        owner = next((value for value in (source.get("parent"), source.get("bone"))
+                      if isinstance(value, str) and value), "")
+        groups.setdefault(owner, []).append(item)
+    if len(groups) == 1:
+        return priority, _compact_eye_boxes(selected)
+    bilateral = []
+    for owner, items in groups.items():
+        sides = set()
+        for _, _, source in items:
+            name = str(source.get("slot", "")).lower()
+            sides.update(re.findall(r"(?:^|_)(left|right|l|r)(?=_|$)", name))
+        if owner and sides.intersection({"l", "left"}) and sides.intersection({"r", "right"}):
+            bilateral.append(items)
+    if len(bilateral) == 1:
+        return priority, _compact_eye_boxes(bilateral[0])
+    return priority, []
 
 
 def attach_anchor(image, geometry, crop):
@@ -56,13 +94,17 @@ def attach_anchor(image, geometry, crop):
             surface = _surface_kind(slot, name)
             priority = _anchor_priority(slot, name, surface)
             if priority >= 0:
-                candidates.append((priority, box))
+                candidates.append((priority, box, item))
             if surface:
                 surfaces.append({"name": lower, "kind": surface, "box": box})
             attachments.append({**item, "box": box, "point": [(box[0]+box[2])/2, (box[1]+box[3])/2], "surface": surface})
         if candidates:
-            priority = min(p for p, _ in candidates)
-            boxes = [b for p, b in candidates if p == priority]
+            priority, boxes = _subject_boxes(candidates)
+            if not boxes:
+                record["reason"] = "ambiguous_eye_subjects"
+                image.info.pop("spine_geometry", None)
+                image.info[ANCHOR_KEY] = json.dumps(record, ensure_ascii=False, allow_nan=False)
+                return image
             box = [min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)]
             point = [(box[0]+box[2])/2, (box[1]+box[3])/2]
             if 0 <= point[0] < image.width and 0 <= point[1] < image.height:

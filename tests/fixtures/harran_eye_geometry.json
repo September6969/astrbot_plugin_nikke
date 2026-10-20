@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "bones": [],
+  "attachments": [
+    {
+      "slot": "karas_eye",
+      "attachment": "00_1/karas_eye",
+      "bone": "karas_face",
+      "parent": "karas_nec",
+      "box": [
+        655.997442733418,
+        227.55045389873248,
+        660.2420980091971,
+        232.49913057129913
+      ]
+    },
+    {
+      "slot": "karas_eye_hl",
+      "attachment": "00_1/karas_eye_hl",
+      "bone": "karas_face",
+      "parent": "karas_nec",
+      "box": [
+        641.3328442366796,
+        227.31793699723767,
+        672.373447809912,
+        231.52438797406876
+      ]
+    },
+    {
+      "slot": "idle_eyehole_r",
+      "attachment": "00_2/idle_eyehole_r",
+      "bone": "bone3",
+      "parent": "bone2",
+      "box": [
+        578.6957762780889,
+        226.9269159145996,
+        603.008986082835,
+        239.08206075004534
+      ]
+    },
+    {
+      "slot": "idle_eyehole_l",
+      "attachment": "00_2/idle_eyehole_l",
+      "bone": "bone4",
+      "parent": "bone2",
+      "box": [
+        615.8048436042004,
+        214.21982186467426,
+        629.6998953786822,
+        228.51326411926414
+      ]
+    },
+    {
+      "slot": "idle_eyeball_r",
+      "attachment": "00_2/idle_eyeball_r",
+      "bone": "bone3",
+      "parent": "bone2",
+      "box": [
+        583.8530871078791,
+        226.18826429700346,
+        596.3782736586766,
+        238.34585703702442
+      ]
+    },
+    {
+      "slot": "idle_eyeball_hl_r",
+      "attachment": "00_2/idle_eyeball_hl_r",
+      "bone": "bone3",
+      "parent": "bone2",
+      "box": [
+        588.2725773974934,
+        230.97867339479058,
+        597.1157858550685,
+        235.03217427194863
+      ]
+    },
+    {
+      "slot": "idle_eyeball_l",
+      "attachment": "00_2/idle_eyeball_l",
+      "bone": "bone4",
+      "parent": "bone2",
+      "box": [
+        616.9119691607475,
+        214.93087489634263,
+        626.0709512072028,
+        228.14450177569313
+      ]
+    },
+    {
+      "slot": "idle_eyeball_hl_l",
+      "attachment": "00_2/idle_eyeball_hl_l",
+      "bone": "bone4",
+      "parent": "bone2",
+      "box": [
+        618.3831939129706,
+        220.77776157567848,
+        627.2266845892844,
+        225.2003014353893
+      ]
+    },
+    {
+      "slot": "idle_eyebrow_r",
+      "attachment": "00_2/idle_eyebrow_r",
+      "bone": "bone3",
+      "parent": "bone2",
+      "box": [
+        574.0052222603299,
+        216.6108842334885,
+        604.6069717627852,
+        225.085155962116
+      ]
+    },
+    {
+      "slot": "idle_eyebrow_l",
+      "attachment": "00_2/idle_eyebrow_l",
+      "bone": "bone4",
+      "parent": "bone2",
+      "box": [
+        613.1087222059643,
+        201.32787433484089,
+        633.6780036123331,
+        221.14591122550974
+      ]
+    }
+  ]
+}
