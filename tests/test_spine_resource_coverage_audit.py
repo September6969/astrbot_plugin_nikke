@@ -87,7 +87,9 @@ def test_c018_and_semantic_framing_regressions_are_in_audit() -> None:
     trusted = set(report["sets"]["trusted_semantic_core_axis_render_ids"])
     assert {"c401", "c581"} <= trusted
     assert summary["manifest_png_missing_or_invalid"] == 0
-    assert summary["valid_face_anchor_render_ids"] == summary["face_anchor_render_ids"]
+    # c230 绑定服务器缓存像素，不得误认成仓库内另一版本立绘的有效锚点。
+    assert set(report["sets"]["face_anchor_identity_invalid"]) == {"c230"}
+    assert summary["valid_face_anchor_render_ids"] == summary["face_anchor_render_ids"] - 1
 
 
 def test_current_coverage_categories_match_the_pinned_snapshot() -> None:
@@ -101,7 +103,7 @@ def test_current_coverage_categories_match_the_pinned_snapshot() -> None:
     assert summary["manifest_render_ids"] == 38
     assert summary["bundled_png_render_ids"] == 39
     assert summary["verified_manifest_png_render_ids"] == 38
-    assert summary["face_anchor_render_ids"] == 39
+    assert summary["face_anchor_render_ids"] == 40
     assert summary["trusted_semantic_core_axis_render_ids"] == 2
     assert summary["upstream_exists_manifest_missing"] == 340
     assert summary["manifest_without_current_character_consumer"] == 0
