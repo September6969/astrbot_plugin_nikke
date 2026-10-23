@@ -39,6 +39,7 @@ class AccountCommandHandler:
         runtime_health: Callable[[], RuntimeHealthDetails],
         render_manual_summary: Callable[[], Awaitable[CommandResult | str]],
         on_unbind: Callable[[str], None] | None = None,
+        session_handler=None,
     ) -> None:
         self._application = application
         self._public_base_url = public_base_url
@@ -46,6 +47,7 @@ class AccountCommandHandler:
         self._runtime_health = runtime_health
         self._render_manual_summary = render_manual_summary
         self._on_unbind = on_unbind
+        self._session_handler = session_handler
 
     async def handle(self, context: CommandContext) -> CommandResult:
         """按显式操作分派账号或管理员命令。"""
@@ -71,6 +73,8 @@ class AccountCommandHandler:
     async def _account(self, context: CommandContext) -> CommandResult:
         action = context.parameters.get("action", "").strip().casefold()
         value = context.parameters.get("value", "")
+        if action in {"续期", "自动续期"} and self._session_handler is not None:
+            return await self._session_handler(context)
         if action in {"", "状态", "status"}:
             return self._status(context)
         if action in {"绑定", "bind"}:

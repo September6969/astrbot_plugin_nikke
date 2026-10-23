@@ -18,7 +18,8 @@ def test_extension_announces_login_and_submission_statuses():
 
 def test_extension_uses_text_and_json_serialization_for_dynamic_session_data():
     script = (ROOT / "extension" / "popup.js").read_text(encoding="utf-8")
-    assert "JSON.stringify({ token, cookies, x_common_params: xCommonParams, user_agent: navigator.userAgent })" in script
+    assert "JSON.stringify({ token, cookies, x_common_params: xCommonParams, user_agent: navigator.userAgent," in script
+    assert "loginMatches ? { renewal_login_payload: capturedLogin } : {}" in script
     assert "textContent =" in script
     assert "innerHTML" not in script
     assert "url.password" in script

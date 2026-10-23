@@ -93,6 +93,24 @@
     },
     "default": 2
   },
+  "community_run_action_budget": {
+    "description": "单次社区浏览和点赞各自的动作上限",
+    "type": "int",
+    "hint": "仅是安全预算，不是官方任务目标。目标取官方数据；写后复核、补做共用额度。取值1–20。",
+    "default": 5
+  },
+  "community_cycle_action_budget": {
+    "description": "每账号官方周期内浏览和点赞各自的动作上限",
+    "type": "int",
+    "hint": "跨手动、自动、多绑定和重启累计；不超过官方任务目标。未决动作暂停该任务。取值1–50。",
+    "default": 10
+  },
+  "community_action_interval_seconds": {
+    "description": "社区动作间隔秒数",
+    "type": "int",
+    "hint": "取值2–60，默认5。官方未公开固定安全频率；遇到限流、登录或验证异常立即停止。",
+    "default": 5
+  },
   "spine_worker_path": {
     "description": "Spine 4.0 headless worker 路径",
     "type": "string",
@@ -135,9 +153,9 @@
     "default": ""
   },
   "enable_daily_actions": {
-    "description": "启用每日签到与领奖",
+    "description": "启用社区日常及实验性续期写操作",
     "type": "bool",
-    "hint": "启用社区签到与已达成的免费新手任务领奖；不会消费积分或代做社交任务。属于写操作，新增领奖尚待真实验收，默认关闭。",
+    "hint": "签到、免费领奖、浏览、点赞及实验性续期的总开关。浏览、点赞与续期还需本人分别授权，旧日常范围不变；不会消费积分、关注、评论或发帖，默认关闭。",
     "obvious_hint": true,
     "default": false
   },

@@ -246,6 +246,12 @@ class BindingWebService:
             )
         cookie = "; ".join(parts)
         try:
+            from ..blablalink.session_cookies import capture_material
+            session_material = capture_material(cookies, body.get("renewal_login_payload"))
+        except (ValueError, TypeError):
+            return web.json_response({"ok": False, "code": "INVALID_SESSION_MATERIAL",
+                                      "message": "会话属性或可选续期材料不完整，请重新登录绑定"}, status=400)
+        try:
             result = await self.client.validate_cookie(cookie)
             qq_id = self.store.consume_bind_session(
                 token,
@@ -258,6 +264,7 @@ class BindingWebService:
                 x_common_params,
                 user_agent,
                 success_status=BIND_SESSION_SUCCESS,
+                session_material=session_material,
             )
             if qq_id and hasattr(self.client, "invalidate_cache"):
                 self.client.invalidate_cache(qq_id)

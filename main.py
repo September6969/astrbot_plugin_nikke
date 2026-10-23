@@ -31,6 +31,7 @@ from .application.commands.character import CharacterCommandHandler
 from .application.commands.cdk import CdkCommandHandler
 from .application.commands.calendar import CalendarCommandHandler
 from .application.commands.daily import DailyCommandHandler
+from .application.commands.community_automation import CommunityAutomationHandler
 from .application.commands.guide import GuideCommandHandler
 from .application.commands.profile import ProfileCommandHandler
 from .application.commands.raid import RaidCommandHandler
@@ -77,6 +78,9 @@ class NikkePlugin(Star):
             html_render=lambda: getattr(self, "html_render", None),
             context=context,
         )
+        community_handler = CommunityAutomationHandler(
+            tasks=self.services.community_tasks, renewal=self.services.session_renewal,
+            store=self.services.store, config=self.config, send_notice=self.presentation.send_daily_notice)
         daily_handler = DailyCommandHandler(
             account_reader=self.services.store,
             store=self.services.store,
@@ -86,6 +90,7 @@ class NikkePlugin(Star):
             format_summary=self.presentation.format_daily_summary,
             send_summary=self.presentation.send_summary,
             send_notice=self.presentation.send_daily_notice,
+            extra_automation=community_handler,
         )
         self.runtime = AstrBotRuntimeAdapter(
             coordinator=self.services.runtime_coordinator,
@@ -114,6 +119,7 @@ class NikkePlugin(Star):
                 ),
                 render_manual_summary=daily_handler.render_manual_summary,
                 on_unbind=self.services.client.invalidate_cache,
+                session_handler=community_handler.handle_renewal,
             ),
             announcement=AnnouncementCommandHandler(
                 application=self.services.announcement_application,
@@ -203,8 +209,11 @@ class NikkePlugin(Star):
         command: str = "",
         arg1: str = "",
         arg2: str = "",
+        arg3: str = "",
     ):
         """保留历史统一命令注册并薄委托给命令路由器。"""
+        if command.casefold() in {"日常", "daily", "routine"} and arg1 == "任务" and arg3:
+            arg2 = f"{arg2} {arg3}"
         async for result in self.command_runtime.nikke(event, command, arg1, arg2):
             yield result
 
