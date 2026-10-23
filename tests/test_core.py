@@ -540,7 +540,9 @@ class ExtensionTests(unittest.TestCase):
         background = (root / "extension" / "background.js").read_text(encoding="utf-8")
         self.assertIn("x-common-params", background)
         self.assertIn("https://*.blablalink.com/*", background)
-        self.assertNotIn("requestBody", background)
+        self.assertIn('preference.keepRenewalMaterial !== true', background)
+        self.assertIn('urls: ["https://api.blablalink.com/api/user/Login"]', background)
+        self.assertNotIn('"password"', background)
 
         popup = (root / "extension" / "popup.js").read_text(encoding="utf-8")
         self.assertIn("buildFallbackContext", popup)

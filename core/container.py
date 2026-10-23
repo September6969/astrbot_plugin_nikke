@@ -46,7 +46,9 @@ from .providers.campaign import create_campaign_resources
 from .providers.cdk import create_cdk_service
 from .providers.character import create_character_resources
 from .providers.content import create_guide_application, create_tower_application
-from .providers.daily import create_daily_runner
+from .providers.daily import create_daily_runner, create_community_automation
+from ..features.daily.actions import CommunityTaskService
+from ..features.account.renewal import SessionRenewalService
 from .providers.feedback import create_feedback_manager
 from .providers.profile import create_profile_resources
 from .providers.raid import create_raid_resources
@@ -94,6 +96,8 @@ class ServiceContainer:
     web: BindingWebService
     daily_runner: DailyRunner
     tower_application: TowerApplication
+    community_tasks: CommunityTaskService
+    session_renewal: SessionRenewalService
 
 
 def create_container(
@@ -154,6 +158,7 @@ def create_container(
     tarot = create_tarot_service(plugin_dir, data_dir)
     web = create_binding_web_service(store, client, extension_zip, config)
     daily_runner = create_daily_runner(client=client, store=store, config=config)
+    community_tasks, session_renewal = create_community_automation(client=client, store=store, config=config, runner=daily_runner)
     guide_application = create_guide_application(plugin_dir)
     tower_application = create_tower_application(plugin_dir)
 
@@ -189,5 +194,7 @@ def create_container(
         guide_application=guide_application,
         web=web,
         daily_runner=daily_runner,
+        community_tasks=community_tasks,
+        session_renewal=session_renewal,
         tower_application=tower_application,
     )

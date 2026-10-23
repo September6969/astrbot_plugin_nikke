@@ -1,0 +1,40 @@
+{
+  "verified_date": "2026-10-22",
+  "reference_commit": "a2bc84566b19722eb6b6b9af6da88edd1fb27d23",
+  "sources": [
+    {
+      "url": "https://www.blablalink.com/assets/nikke/version/default/assets/index-aR_eg_5w.js",
+      "sha256": "e99a1279c4009340721e71f52d7b732052575d816361fb29bc366061961885db"
+    },
+    {
+      "url": "https://www.blablalink.com/assets/nikke/version/default/assets/v4-DaeRWrZK.js",
+      "sha256": "1c62cf5b6f63d2383bee6b444eddc98cb6d9b8da1ec4239befcc7baf7f8b69b5"
+    },
+    {
+      "url": "https://www.blablalink.com/assets/nikke/version/default/assets/refresh-tag-CgrTy1wd.js",
+      "sha256": "318b459786dbf0883d73cae99c37786dbac08faf19b246f91db043bbc71502a0"
+    },
+    {
+      "url": "https://www.blablalink.com/assets/nikke/version/default/assets/use-pc-nav-post-plate-highlight-BZKZUjPV.js",
+      "sha256": "554000d89b71e62c052872beec23fd0f7656b5e2f809171377942697923a2a98"
+    },
+    {
+      "url": "https://www.blablalink.com/assets/nikke/version/default/assets/tabevent-C0_Gxqfx.js",
+      "sha256": "eb4d2ae7d2ac0b372bc413cfe71b40f5f025abb1f0931c8aed6c421afa9e6001"
+    },
+    {
+      "url": "https://www.blablalink.com/assets/nikke/version/default/assets/stance-CPVmnCHD.js",
+      "sha256": "c03376244ad2b63f1538706f17f2b9cf8350a494f00b32fea54f24df336cf9e2"
+    }
+  ],
+  "anonymous_catalog": {
+    "url": "https://api.blablalink.com/api/lip/direct/lipass/Points/GetTaskListV2?get_top=false&intl_game_id=3",
+    "sha256": "876559c830a18f4b33ce03f2741b00f5016c77185791593ddd4dd9c6fd048548"
+  },
+  "limits": [
+    "No authenticated response capture",
+    "No live account writes",
+    "No demonstrated long-term expiry extension",
+    "Unknown reward settlement timing"
+  ]
+}

@@ -38,6 +38,7 @@ class BindingSessionStore(Protocol):
         user_agent: str = "",
         *,
         success_status: str,
+        session_material: dict[str, Any] | None = None,
     ) -> str:
         """在同一事务中消费会话并持久化账号凭据。"""
 

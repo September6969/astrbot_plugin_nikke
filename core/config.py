@@ -21,6 +21,9 @@ _NUMERIC_CONTRACTS = {
     "summary_hour": (8, 0, 23),
     "summary_minute": (30, 0, 59),
     "max_concurrency": (2, 1, 32),
+    "community_run_action_budget": (5, 1, 20),
+    "community_cycle_action_budget": (10, 1, 50),
+    "community_action_interval_seconds": (5, 2, 60),
     "spine_worker_timeout": (4, 1, 5),
 }
 

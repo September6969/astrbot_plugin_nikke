@@ -35,6 +35,9 @@ class DailyCommandStore(Protocol):
 class DailyStore(Protocol):
     """Daily runner 所需的最小账号、运行记录与结果端口。"""
 
+    def get_setting(self, key: str, default: Any = None) -> Any:
+        """读取本人自动范围及额外能力安全暂停状态。"""
+
     def get_run(self, run_key: str) -> Mapping[str, Any] | None:
         """读取一条签到运行记录。"""
 

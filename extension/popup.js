@@ -128,6 +128,17 @@ if (openLoginBtn) {
   });
 }
 
+const renewalChoice = document.getElementById("keepRenewalMaterial");
+if (renewalChoice) {
+  chrome.storage.local.get("keepRenewalMaterial").then(state => {
+    renewalChoice.checked = state.keepRenewalMaterial === true;
+  });
+  renewalChoice.addEventListener("change", async () => {
+    await chrome.storage.local.set({ keepRenewalMaterial: renewalChoice.checked });
+    await chrome.storage.local.remove("renewalLoginPayload");
+  });
+}
+
 const submitBtn = document.getElementById("submit");
 if (submitBtn) {
   submitBtn.addEventListener("click", async () => {
@@ -154,10 +165,15 @@ if (submitBtn) {
         throw new Error("尚未获取账号上下文。请确认已登录BlaBlaLink并刷新个人主页后重试。");
       }
 
+      const renewalState = await chrome.storage.local.get(["keepRenewalMaterial", "renewalLoginPayload"]);
+      const capturedLogin = renewalState.keepRenewalMaterial === true ? renewalState.renewalLoginPayload : undefined;
+      const loginMatches = capturedLogin && ["game_token", "game_uid", "game_openid"].every(
+        name => capturedLogin[name] === cookies.find(cookie => cookie.name === name)?.value);
       const response = await fetch(`${url.origin}/api/bind/cookies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, cookies, x_common_params: xCommonParams, user_agent: navigator.userAgent })
+        body: JSON.stringify({ token, cookies, x_common_params: xCommonParams, user_agent: navigator.userAgent,
+          ...(loginMatches ? { renewal_login_payload: capturedLogin } : {}) })
       });
       const result = await response.json();
       if (!response.ok || !result.ok) {
@@ -171,7 +187,7 @@ if (submitBtn) {
         throw new Error(errDesc);
       }
 
-      await chrome.storage.local.remove(["bindUrl", "xCommonParams"]);
+      await chrome.storage.local.remove(["bindUrl", "xCommonParams", "renewalLoginPayload", "keepRenewalMaterial"]);
       const nickname = result.data?.nickname || result.nickname || "";
       const successMsg = nickname ? `绑定成功：${nickname}\n现在可以关闭或卸载本扩展。` : "绑定成功。\n现在可以关闭或卸载本扩展。";
       setStatus(successMsg, "success");
