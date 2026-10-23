@@ -79,7 +79,7 @@ class CommunityTaskService:
             final = await self.gateway.progress(account)
             status = "completed" if all(tasks.get(k) and final.get(k) and final[k].completed and final[k].period == tasks[k].period for k in KINDS) else "incomplete"
             # 最终状态来自运行内已核验的逐项进度，不把接口接受冒充完成。
-            return OperationResult(status, "\n".join(lines))
+            return OperationResult(status, "\n".join(lines) + "\n最终只读核验：\n" + self._describe(final))
         except asyncio.CancelledError:
             raise
         except Exception:

@@ -208,6 +208,7 @@ class BindingWebService:
             )
         parts: list[str] = []
         required_names: set[str] = set()
+        accepted_cookies = []
         if isinstance(cookies, list):
             for item in cookies[:MAX_COOKIE_COUNT]:
                 name = str(item.get("name", ""))
@@ -221,6 +222,7 @@ class BindingWebService:
                 if sum(len(existing) + 2 for existing in parts) + len(part) > MAX_COOKIE_HEADER_LENGTH:
                     break
                 parts.append(part)
+                accepted_cookies.append({**item, "name": name, "value": value})
                 if name in ALLOWED_COOKIE_NAMES:
                     required_names.add(name)
         missing = sorted(ALLOWED_COOKIE_NAMES - required_names)
@@ -247,7 +249,7 @@ class BindingWebService:
         cookie = "; ".join(parts)
         try:
             from ..blablalink.session_cookies import capture_material
-            session_material = capture_material(cookies, body.get("renewal_login_payload"))
+            session_material = capture_material(accepted_cookies, body.get("renewal_login_payload"))
         except (ValueError, TypeError):
             return web.json_response({"ok": False, "code": "INVALID_SESSION_MATERIAL",
                                       "message": "会话属性或可选续期材料不完整，请重新登录绑定"}, status=400)

@@ -14,7 +14,7 @@ LOGIN_FIELDS = {"game_openid", "game_channelid", "game_token", "game_id", "game_
 REQUIRED_FIELDS = {"game_openid", "game_channelid", "game_token", "game_id", "game_expire_time", "game_uid"}
 COOKIE_FIELDS = {"name", "value", "domain", "path", "secure", "httpOnly", "sameSite",
                  "expirationDate", "session", "hostOnly", "raw_attributes"}
-NAME = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
+NAME = re.compile(r"^[!#$%&'*+.^_`|~0-9A-Za-z-]{1,128}$")
 
 
 def cookie_header(cookies, url, now):

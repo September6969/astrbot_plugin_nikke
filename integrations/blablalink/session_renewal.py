@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import httpx
+import time
 
 from .client import API_BASE
 from .http_transport import IsolatedCookies
@@ -10,9 +11,10 @@ from ...features.account.renewal_errors import RenewalFailure
 
 
 class SessionRenewalGateway:
-    def __init__(self, client, identity_gateway):
+    def __init__(self, client, identity_gateway, *, clock=time.time):
         self.client = client
         self.identity_gateway = identity_gateway
+        self.clock = clock
 
     async def identity(self, account):
         return await self.identity_gateway.identity(account)
@@ -43,14 +45,15 @@ class SessionRenewalGateway:
         if not headers:
             raise RenewalFailure("no_new_cookie", "官方没有返回新 Cookie，保留原凭证。")
         try:
-            material = apply_set_cookies(account["session_material"], headers, now)
+            received_at = self.clock()
+            material = apply_set_cookies(account["session_material"], headers, received_at)
         except (ValueError, TypeError, OverflowError) as exc:
             raise RenewalFailure("incomplete_cookie", "候选 Cookie 不完整或无有效会话更新，保留原凭证。") from exc
-        cookie = cookie_header(material["cookies"], API_BASE + "/api/user/CheckLogin", now)
+        cookie = cookie_header(material["cookies"], API_BASE + "/api/user/CheckLogin", received_at)
         if not cookie or "game_token=" not in cookie:
             raise ValueError("候选 Cookie 不适用于官方登录检查")
         for path in ("/api/ugc/proxy/standalonesite/User/GetUserInfoNew", "/api/game/proxy/Game/GetUserProfileBasicInfo"):
-            if cookie_header(material["cookies"], API_BASE + path, now) != cookie:
+            if cookie_header(material["cookies"], API_BASE + path, received_at) != cookie:
                 raise ValueError("候选 Cookie 作用域不能覆盖现有账号客户端，保留原凭证")
         return cookie, material
 

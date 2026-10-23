@@ -174,7 +174,7 @@ async def test_real_http_contract_validates_candidate_and_never_pollutes_global_
             return httpx.Response(200, json={"code": 0, "data": {"info": {"intl_openid": "synthetic-openid"}}})
         raise AssertionError(request.url.path)
     client = BlaBlaClient(transport=httpx.MockTransport(handle), account_reader=store)
-    gateway = SessionRenewalGateway(client, CommunityActionsGateway(client))
+    gateway = SessionRenewalGateway(client, CommunityActionsGateway(client), clock=lambda: NOW)
     service = SessionRenewalService(gateway=gateway, store=store, config={"enable_daily_actions": True},
         account_lock=DailyRunner(store=store)._account_lock, preflight=renewal_payload, clock=lambda: NOW)
     try:
@@ -193,10 +193,25 @@ async def test_http200_code_or_cookie_alone_is_not_renewal_success(tmp_path, bod
     store = NikkeStore(tmp_path)
     account = bind(store)
     client = BlaBlaClient(transport=httpx.MockTransport(lambda r: httpx.Response(200, json=body, headers=headers)))
-    gateway = SessionRenewalGateway(client, Mock())
+    gateway = SessionRenewalGateway(client, Mock(), clock=lambda: NOW)
     try:
         with pytest.raises((ValueError, RenewalFailure)): await gateway.request_candidate(account, NOW)
         assert store.get_account("one")["cookie"] == COOKIE
+    finally:
+        await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_max_age_starts_when_response_is_received_not_when_request_started(tmp_path):
+    account = bind(NikkeStore(tmp_path))
+    client = BlaBlaClient(transport=httpx.MockTransport(lambda r: httpx.Response(200,
+        json={"code": 0}, headers={"set-cookie": "game_token=synthetic-new; Domain=.blablalink.com; Path=/; Max-Age=3600; HttpOnly"})))
+    gateway = SessionRenewalGateway(client, Mock(), clock=lambda: NOW + 60)
+    try:
+        _, candidate = await gateway.request_candidate(account, NOW)
+        token = next(c for c in candidate["cookies"] if c["name"] == "game_token")
+        assert token["expirationDate"] == NOW + 60 + 3600
+        assert token["httpOnly"] is True
     finally:
         await client.aclose()
 
@@ -219,6 +234,16 @@ def test_cookie_attributes_session_deletion_and_scope_are_preserved():
 def test_binding_material_filters_password_and_is_optional():
     with pytest.raises(ValueError): capture_material(material()["cookies"], {"password": "never-save"})
     assert capture_material(material()["cookies"])["source"] == "cookies-only"
+
+
+def test_session_metadata_preserves_preexisting_rfc_cookie_names_and_scope():
+    cookies = material()["cookies"] + [{"name": "__Secure-session.id", "value": "synthetic-site-session",
+        "domain": ".blablalink.com", "path": "/", "secure": True, "hostOnly": False}]
+    captured = capture_material(cookies)
+    header = cookie_header(captured["cookies"], "https://api.blablalink.com/api/user/CheckLogin", NOW)
+    assert "__Secure-session.id=synthetic-site-session" in header
+    updated = apply_set_cookies(captured, ["game_token=new; Domain=.blablalink.com; Path=/"], NOW)
+    assert any(c["name"] == "__Secure-session.id" for c in updated["cookies"])
 
 
 def test_cache_invalidation_is_scoped_to_stable_game_identity():
