@@ -139,7 +139,9 @@ class CommunityTaskService:
         try:
             period = "community-utc:" + self.clock().astimezone(timezone.utc).date().isoformat()
             if not self._allowed(account, automatic) or task.period != period:
-                self.store.finish_run(key, "NOT_SENT", "提交前关闭授权；预算保留")
+                intent["request"] = "not_sent"
+                intent["reason"] = "提交前关闭授权或周期变化；预算保留"
+                self.store.finish_run(key, "NOT_SENT", json.dumps(intent))
                 return OperationResult("disabled", "授权已关闭，未提交"), None
             await self.gateway.dispatch(account, task.kind, post_id)
             intent["request"] = "accepted"

@@ -250,6 +250,45 @@ async def test_disable_or_rebind_while_queued_prevents_dispatch(env, mode):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["global", "preference"])
+async def test_reenable_after_disable_during_progress_preserves_records_and_budget(env, tmp_path, mode):
+    store, account, gateway, config, service = env
+    store.set_setting("community_actions:auto:one", binding_stamp(account))
+    original = gateway.progress
+
+    async def close_during_progress(a):
+        progress = await original(a)
+        # 模拟查询仍在等待上游响应时，用户关闭写操作授权。
+        if gateway.reads == 2:
+            if mode == "global":
+                config["enable_daily_actions"] = False
+            else:
+                store.set_setting("community_actions:auto:one", None)
+        return progress
+
+    gateway.progress = close_during_progress
+    assert (await service.execute(account, automatic=True)).status == "disabled"
+    assert not gateway.dispatched
+    record = store.list_runs(action="community_action")[0]
+    assert record["status"] == "NOT_SENT"
+
+    config["enable_daily_actions"] = True
+    store.set_setting("community_actions:auto:one", binding_stamp(account))
+    gateway.progress = original
+    # 重新打开数据库，确保恢复依赖持久记录且不会重置周期预算。
+    service.store = NikkeStore(tmp_path)
+    resumed = await service.execute(account, automatic=True)
+    assert resumed.status == "incomplete"
+    assert gateway.dispatched == [("browse", "2"), ("like", "1"), ("like", "2")]
+    detail = json.loads(service.store.get_run(record["run_key"])["detail"])
+    assert detail["target"] == 2 and detail["post_id"] == "1"
+    assert detail["request"] == "not_sent"
+    assert service.store.get_run(record["run_key"])["status"] == "NOT_SENT"
+    await service.execute(account, automatic=True)
+    assert len(gateway.dispatched) == 3
+
+
+@pytest.mark.asyncio
 async def test_old_auto_preference_does_not_authorize_new_writes(env):
     store, account, gateway, _, service = env
     store.set_auto_daily("one", True)
