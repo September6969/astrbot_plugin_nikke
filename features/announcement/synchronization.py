@@ -118,6 +118,9 @@ class AnnouncementSyncCoordinator:
                     counts["updated"] += 1
                 else:
                     counts[self.repository._last_update_outcome] += 1
+            # 全部无效不代表成功空响应，保留既有缓存和最近内容更新时间。
+            if records and counts["invalid"] == len(records):
+                raise ValueError(f"收到的 {len(records)} 条公告全部无效")
             self.repository.prune_cache(now=self.repository._now_utc())
             self.repository.last_updated_at = self.repository._now_utc().astimezone(CST).strftime("%Y-%m-%d %H:%M:%S")
             self.repository.last_sync_report = {

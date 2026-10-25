@@ -122,6 +122,27 @@ class CalendarT2IPayloadBuilder:
             cls.ACTIVE_CARD_HEIGHT_OVERHEAD + cls.ACTIVE_TITLE_LINE_H * line_count,
         )
 
+    @staticmethod
+    def activity_progress(start, end, current, start_precision: str, end_precision: str):
+        """精确时间按秒计算；日期级时间只给出明确标识的按日估算。"""
+        from ...features.calendar.canonical_models import CST
+
+        known = {"EXACT", "DATE_ONLY"}
+        if start is None or end is None or start_precision not in known or end_precision not in known:
+            return None, "unknown"
+        if start_precision == end_precision == "EXACT":
+            if end <= start or not start <= current <= end:
+                return None, "unknown"
+            return max(0.0, min(1.0, (current - start).total_seconds() / (end - start).total_seconds())), "exact"
+        start_day = start.astimezone(CST).date()
+        end_day = end.astimezone(CST).date()
+        today = current.astimezone(CST).date()
+        if end_day < start_day or not start_day <= today <= end_day:
+            return None, "unknown"
+        # 日期级结束日期包含当日，不把未知时分冒充精确时间。
+        duration_days = (end_day - start_day).days + 1
+        return (today - start_day).days / duration_days, "date"
+
     @classmethod
     def next_row_height(cls, item: dict) -> int:
         line_count = item.get("title_line_count")
@@ -143,7 +164,7 @@ class CalendarT2IPayloadBuilder:
         return (
             cls.SECTION_HEADER_H
             + cls.SECTION_HEADER_BOTTOM_GAP
-            + sum(cls.active_card_height(item) for item in items)
+            + len(items) * max(cls.active_card_height(item) for item in items)
             + max(0, len(items) - 1) * cls.ACTIVE_CARD_GAP
         )
 
@@ -155,7 +176,7 @@ class CalendarT2IPayloadBuilder:
         return (
             cls.SECTION_HEADER_H
             + cls.SECTION_HEADER_BOTTOM_GAP
-            + sum(cls.next_row_height(item) for item in items)
+            + len(items) * max(cls.next_row_height(item) for item in items)
             + max(0, len(items) - 1) * cls.NEXT_ROW_GAP
         )
 
@@ -376,6 +397,12 @@ class CalendarT2IPayloadBuilder:
                     rem_next[0]["is_oversize"] = True
                     p_next.append(rem_next.pop(0))
 
+            # 同页同类卡片按最长标题统一高度，预算和模板使用完全相同的盒高。
+            for rows, measure in ((p_active, self.active_card_height), (p_next, self.next_row_height)):
+                height = max((measure(item) for item in rows), default=0)
+                for item in rows:
+                    item["layout_height"] = height
+
             # 计算本页真实高度（以 max_canvas_h 为上限，按实际内容计算）
             actual_content_h = self.measure_page_content(
                 p_active,
@@ -539,19 +566,9 @@ class CalendarT2IPayloadBuilder:
 
             display_title = ev.title
 
-            # 进度计算：严格条件，禁止伪造
-            progress_pct: float | None = None
-            if (
-                ev.start_at is not None
-                and ev.end_at is not None
-                and start_prec == "EXACT"
-                and end_prec == "EXACT"
-                and ev.end_at > ev.start_at
-                and ev.start_at <= current <= ev.end_at
-            ):
-                span = (ev.end_at - ev.start_at).total_seconds()
-                elapsed = (current - ev.start_at).total_seconds()
-                progress_pct = max(0.0, min(1.0, elapsed / span))
+            progress_pct, progress_basis = self.activity_progress(
+                ev.start_at, ev.end_at, current, start_prec, end_prec
+            )
 
             card = {
                 "event_id": ev.event_id,
@@ -570,7 +587,8 @@ class CalendarT2IPayloadBuilder:
                 "title_line_count": title_line_count,
                 "start_precision": start_prec,
                 "end_precision": end_prec,
-                "progress_pct": progress_pct,          # None → 不显示进度条
+                "progress_pct": progress_pct,
+                "progress_basis": progress_basis,
             }
             card["layout_height"] = self.active_card_height(card)
             active_items.append(card)

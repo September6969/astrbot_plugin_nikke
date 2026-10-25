@@ -7,7 +7,7 @@ import logging
 
 import httpx
 
-from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
+from ...features.announcement.models import AnnouncementRecord
 
 logger = logging.getLogger("nikke.announcements")
 
