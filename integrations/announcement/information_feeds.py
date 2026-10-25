@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from typing import Any
 import httpx
-from astrbot_plugin_nikke.features.announcement.models import AnnouncementRecord
+from ...features.announcement.models import AnnouncementRecord
 
 BASE = "https://na-community.playerinfinite.com/api/gpts.information_feeds_svr.InformationFeedsSvr/"
 HOSTS = {"en": "nikke-en.com", "ja": "nikke-jp.com", "ko": "nikke-kr.com", "th": "nikke-sea.com", "de": "nikke-de.com", "fr": "nikke-fr.com"}

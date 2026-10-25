@@ -198,7 +198,7 @@ html, body {
   grid-template-columns: minmax(0, 1fr) 330px;
   align-items: center;
   gap: 24px;
-  padding: 10px 22px;
+  padding: 10px 22px 24px;
   border: 1px solid rgba(177, 197, 222, 0.16);
   border-left: 6px solid #61b8df;
   border-radius: 16px;
@@ -264,13 +264,24 @@ html, body {
 }
 .card-progress-wrap {
   position: absolute;
-  left: 22px;
-  right: 376px;
-  bottom: 0;
-  height: 4px;
+  left: -6px;
+  right: -1px;
+  bottom: -1px;
+  height: 6px;
   overflow: hidden;
-  border-radius: 0 0 0 10px;
+  border-radius: 0 0 16px 16px;
   background: rgba(160, 184, 208, 0.18);
+}
+.card-progress-wrap.is-pending {
+  border-top: 1px dashed rgba(160, 184, 208, 0.32);
+}
+.card-progress-note {
+  position: absolute;
+  right: 22px;
+  bottom: 9px;
+  color: #a9bad0;
+  font-size: 18px;
+  line-height: 20px;
 }
 .card-progress-fill {
   height: 100%;
@@ -504,11 +515,6 @@ html, body {
                 {% endif %}
               </div>
               <h3 class="card-title" title="{{ item.full_title }}">{{ item.title }}</h3>
-              {% if item.progress_pct is defined and item.progress_pct != None %}
-              <div class="card-progress-wrap">
-                <div class="card-progress-fill" style="width: {{ (item.progress_pct * 100) | round(1) }}%"></div>
-              </div>
-              {% endif %}
             </div>
             <aside class="card-side">
               {% if item.end_precision == 'UNKNOWN' %}
@@ -521,6 +527,15 @@ html, body {
               <span class="remaining-value">{{ item.remaining }}</span>
               {% endif %}
             </aside>
+            {% if item.progress_pct is defined and item.progress_pct != None %}
+            <div class="card-progress-wrap" role="progressbar" aria-label="活动已进行进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (item.progress_pct * 100) | round(1) }}">
+              <div class="card-progress-fill" style="width: {{ (item.progress_pct * 100) | round(1) }}%"></div>
+            </div>
+            {% if item.progress_basis|default('exact') == 'date' %}<span class="card-progress-note">按日估算</span>{% endif %}
+            {% else %}
+            <div class="card-progress-wrap is-pending" aria-label="活动进度待确认"></div>
+            <span class="card-progress-note">进度待确认</span>
+            {% endif %}
           </article>
           {% endfor %}
         </div>
