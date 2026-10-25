@@ -29,6 +29,8 @@
 - [Spine 探测合同](contracts/SPINE_SPIKE_CONTRACT.md)
 - [验收标准与阶段报告](acceptance/)
 - [需求与证据矩阵](operations/REQUIREMENT_EVIDENCE_MATRIX.md)
+- [社区浏览、点赞与实验性续期合同](operations/COMMUNITY_ACTIONS_AND_RENEWAL.md)
+- [社区额外能力交付与验证边界](operations/COMMUNITY_ACTIONS_DELIVERY.md)
 
 验收报告需结合记录日期、提交、环境和未验证项阅读。本地 Chromium 预览、AstrBot 原生接口、真实账号验收、部署及 CI 是不同的验证范围。
 

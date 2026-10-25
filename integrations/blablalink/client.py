@@ -232,6 +232,19 @@ class BlaBlaClient:
             if key[0][0] == target:
                 self._query_cache.pop(key, None)
 
+    def invalidate_account_cache(self, account: Mapping[str, Any]) -> None:
+        """续期后清除此社区身份所有绑定的短缓存，并取消相关未决查询。"""
+        identity = self._account_identity_key(account)
+        if identity is None or not identity[1]:
+            return
+        for key in set(self._query_cache) | set(self._query_tasks):
+            if key[0][1] != identity[1]:
+                continue
+            self._query_cache.pop(key, None)
+            task = self._query_tasks.get(key)
+            if task is not None and not task.done():
+                task.cancel()
+
     def _check_binding_validity(self, identity: tuple[str, str, str, str, str]) -> None:
         """校验当前绑定的最新状态，若已删除、凭据失效或代次变更则使缓存失效并拒绝返回旧数据。"""
         if self._account_reader is None or not identity or not identity[0]:

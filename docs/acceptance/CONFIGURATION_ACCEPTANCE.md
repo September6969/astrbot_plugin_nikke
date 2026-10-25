@@ -1,6 +1,6 @@
 # 配置合同与安全边界
 
-配置 schema 位于 `_conf_schema.json`。下表与 schema 的 20 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
+配置 schema 位于 `_conf_schema.json`。下表与 schema 的 23 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。2026-10-22 增加社区动作安全预算，未做真实账号或部署验收。
 
 | 配置键 | 默认值 | 作用与边界 |
 | --- | --- | --- |
@@ -21,7 +21,10 @@
 | `voice_dynamic_enabled` | `true` | 仅启用 `assets/voice_poke_map.json` 中有来源证据的官方动态语音；空映射或关闭时回退本地登记音频。 |
 | `custom_character_aliases` | 空字符串 | 用户自定义角色别名，支持JSON对象或多行“角色名=别名1,别名2”格式；与内置别名合并。 |
 | `max_concurrency` | `2` | 每日账号任务最大并发数；应按上游频控和部署容量调整。 |
-| `enable_daily_actions` | `false` | 社区签到/领奖写操作开关；未完成真实授权验收前保持关闭。 |
+| `community_run_action_budget` | `5` | 每次运行浏览、点赞各自的动作预算，1–20。目标由官方任务数据决定，核验补做共用预算。 |
+| `community_cycle_action_budget` | `10` | 同一社区账号、官方周期及动作类型的累计安全预算，1–50，不超过来源目标；不同绑定、区服、重启和重绑共享。 |
+| `community_action_interval_seconds` | `5` | 串行动作间隔，2–60秒；官方未公开固定安全限流值，遇到限流或验证异常停止。 |
+| `enable_daily_actions` | `false` | 签到、免费领奖、浏览、点赞与实验性续期总开关。旧日常范围不变，新能力需本人另行授权且默认关；未完成真实授权验收前保持关闭。 |
 | `enable_announcement_push` | `false` | 公告推送总开关；开启也不代表已完成真实消息发送验收。发送前持久化 `DISPATCH_INTENT`，未知结果进入 `UNKNOWN_AFTER_ACTION` 且不自动重发；公告调度当前按单实例使用，未提供外部共享租约时不支持多实例并行推送。 |
 | `enable_cdk_redemption` | `false` | 国际服 CDK 真实兑换开关；群聊会公开兑换码，必须由管理员明确开启。 |
 
@@ -30,6 +33,7 @@
 - 修改 `public_base_url` 后必须重启插件并重新安装对应绑定扩展；不能把默认站点 ZIP 当作任意自定义域名授权。
 - `data/nikke/nikke.sqlite3` 与 `data/nikke/secret.key` 必须一起备份；不能通过配置迁移替代离线备份。
 - 本文档只核对本地 schema 和代码默认值，不声称配置已在真实部署或账号上联调。
+- 浏览、点赞与实验性续期使用各自的本人授权，不是全局配置默认开启项；见[新能力合同](../operations/COMMUNITY_ACTIONS_AND_RENEWAL.md)。数据库兼容迁移到 schema 3，新增绑定代次及加密会话属性；升级前仍需一起备份数据库与密钥。
 
 ## 图片输出与旧配置
 

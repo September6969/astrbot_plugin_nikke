@@ -39,6 +39,7 @@ class DailyCommandHandler:
         format_summary: DailySummaryFormatter | None = None,
         clock: Callable[[], str] | None = None,
         send_notice: Callable[[str, str], Awaitable[Any]] | None = None,
+        extra_automation=None,
     ) -> None:
         self._account_reader = account_reader
         self._store = store
@@ -49,12 +50,15 @@ class DailyCommandHandler:
         self._send_summary = send_summary
         self._clock = clock or self._today
         self._send_notice = send_notice
+        self._extra_automation = extra_automation
         self._runner.on_automatic_result = self._notify_failure
 
     async def handle(self, context: CommandContext) -> CommandResult:
         """处理手动签到、只读状态与本地自动签到偏好。"""
         action = context.parameters.get("action", "").strip().casefold()
         community = context.parameters.get("scope") == "community"
+        if community and action == "任务" and self._extra_automation is not None:
+            return await self._extra_automation.handle_tasks(context)
         if community and context.is_private_chat and context.conversation_id:
             account = self._account(context.actor_id)
             if account:
@@ -90,6 +94,8 @@ class DailyCommandHandler:
         automatic: bool = False,
     ) -> list[DailyTaskResult]:
         """运行手动或自动批次，选择和持久化语义由 DailyRunner 统一负责。"""
+        if automatic and self._extra_automation is not None:
+            await self._extra_automation.run_automatic(stagger=stagger)
         return await self._runner.run_all_daily(
             day, stagger=stagger, automatic=automatic
         )

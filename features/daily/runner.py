@@ -16,6 +16,7 @@ from ..account.errors import CredentialExpiredError
 from .errors import UnknownAfterActionError
 from .community import CommunityDailyMixin
 from .models import DailyTaskResult, DailyTaskStatus
+from .action_models import account_scope
 from .ports import DailyGateway, DailyStore
 
 
@@ -335,6 +336,10 @@ class DailyRunner(CommunityDailyMixin):
                         return DailyTaskResult(str(account.get("nickname") or account["qq_id"]), DailyTaskStatus.PENDING, "自动日常已关闭或绑定已变化，未执行")
                     account = current
                 run_day = datetime.now(timezone.utc).strftime("%Y-%m-%d") if stagger else day
+                if automatic and account.get("game_openid") and self.store.get_setting(f"community_automation:halt:{account_scope(account)}:{run_day}", False):
+                    return DailyTaskResult(str(account.get("nickname") or account["qq_id"]), DailyTaskStatus.PENDING,
+                        "额外社区能力触发安全暂停，本轮不再提交其他自动写操作；请本人私聊查询。",
+                        ({"name": "额外能力安全暂停", "status": "pending", "detail": "需本人私聊处理"},))
                 identity = self.daily_identity(account)
                 preference = self.store.get_setting(f"daily_scope_v2:{account['qq_id']}", "")
                 try:

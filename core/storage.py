@@ -22,7 +22,7 @@ from astrbot_plugin_nikke.core.cookie_utils import parse_cookie
 
 
 SCHEMA_NAME = "nikke"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 class NikkeStore:
@@ -194,6 +194,11 @@ class NikkeStore:
         if "auto_daily_enabled" not in columns:
             # 旧账号默认关闭自动写操作，必须由账号所有者显式开启。
             conn.execute("ALTER TABLE accounts ADD COLUMN auto_daily_enabled INTEGER NOT NULL DEFAULT 0")
+        if "binding_generation" not in columns:
+            conn.execute("ALTER TABLE accounts ADD COLUMN binding_generation TEXT NOT NULL DEFAULT ''")
+            conn.execute("UPDATE accounts SET binding_generation=lower(hex(randomblob(16)))")
+        if "session_material_cipher" not in columns:
+            conn.execute("ALTER TABLE accounts ADD COLUMN session_material_cipher BLOB NOT NULL DEFAULT X''")
 
     def _apply_schema_migrations(self, conn: sqlite3.Connection) -> None:
         row = conn.execute(
@@ -279,6 +284,7 @@ class NikkeStore:
         user_agent: str = "",
         *,
         success_status: str,
+        session_material: dict[str, Any] | None = None,
     ) -> str:
         now = int(time.time())
         digest = self.token_hash(token)
@@ -315,6 +321,9 @@ class NikkeStore:
                 "UPDATE bind_sessions SET used_at=?, status=?, error='' WHERE token_hash=?",
                 (now, str(success_status), digest),
             )
+            material = self._cipher.encrypt(json.dumps(session_material or {}, ensure_ascii=False).encode("utf-8"))
+            conn.execute("UPDATE accounts SET binding_generation=?,session_material_cipher=? WHERE qq_id=?",
+                         (os.urandom(16).hex(), material, qq_id))
         return qq_id
 
     def get_account(self, qq_id: str, with_cookie: bool = True) -> dict[str, Any] | None:
@@ -323,6 +332,7 @@ class NikkeStore:
         if not row:
             return None
         account = dict(row)
+        account["binding_revision"] = hashlib.sha256(account["cookie_cipher"]).hexdigest()
         if with_cookie:
             # 密文每次重新绑定均变化，用不可逆指纹使短时查询缓存立即失效。
             account["binding_revision"] = hashlib.sha256(account["cookie_cipher"]).hexdigest()
@@ -332,11 +342,14 @@ class NikkeStore:
                 account["x_common_params"] = (
                     self._cipher.decrypt(encrypted_xcommon).decode("utf-8") if encrypted_xcommon else ""
                 )
+                material = account.pop("session_material_cipher", b"")
+                account["session_material"] = json.loads(self._cipher.decrypt(material).decode("utf-8")) if material else {}
             except InvalidToken as exc:
                 raise RuntimeError("账号凭证无法解密，请重新绑定") from exc
         else:
             account.pop("cookie_cipher", None)
             account.pop("xcommon_cipher", None)
+            account.pop("session_material_cipher", None)
         return account
 
     def list_accounts(
@@ -358,6 +371,7 @@ class NikkeStore:
             rows = [dict(r) for r in conn.execute(query).fetchall()]
         results: list[dict[str, Any]] = []
         for account in rows:
+            account["binding_revision"] = hashlib.sha256(account["cookie_cipher"]).hexdigest()
             if with_cookie:
                 try:
                     account["cookie"] = self._cipher.decrypt(
@@ -369,12 +383,15 @@ class NikkeStore:
                         if encrypted_xcommon
                         else ""
                     )
+                    material = account.pop("session_material_cipher", b"")
+                    account["session_material"] = json.loads(self._cipher.decrypt(material).decode("utf-8")) if material else {}
                 except InvalidToken:
                     # 凭证损坏的账号跳过，不中断整体列表。
                     continue
             else:
                 account.pop("cookie_cipher", None)
                 account.pop("xcommon_cipher", None)
+                account.pop("session_material_cipher", None)
             results.append(account)
         return results
 
@@ -430,6 +447,36 @@ class NikkeStore:
             return True
         except sqlite3.IntegrityError:
             return False
+
+    def reserve_run(self, scope: str, key: str, qq_id: str, action: str, *, limit: int,
+                    blocking_statuses: set[str], initial_status: str, detail: str = "") -> bool:
+        """同一事务检查作用域预算、未决记录及去重，再持久化调用方给定的意图。"""
+        if not key.startswith(scope + ":") or limit <= 0:
+            return False
+        with self._lock, self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            rows = conn.execute("SELECT run_key,status FROM action_runs WHERE substr(run_key,1,?)=?",
+                                (len(scope) + 1, scope + ":")).fetchall()
+            if len(rows) >= limit or any(r["status"] in blocking_statuses or r["run_key"] == key for r in rows):
+                return False
+            conn.execute("INSERT INTO action_runs(run_key,qq_id,action,status,detail,created_at) VALUES(?,?,?,?,?,?)",
+                         (key, str(qq_id), action, initial_status, detail[:500], int(time.time())))
+        return True
+
+    def replace_session(self, account, cookie: str, material: dict[str, Any]) -> bool:
+        """加密后以绑定代次及旧密文指纹做事务比较替换；失败保持原凭证。"""
+        encrypted = self._cipher.encrypt(cookie.encode("utf-8"))
+        encrypted_material = self._cipher.encrypt(json.dumps(material, ensure_ascii=False).encode("utf-8"))
+        with self._lock, self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            row = conn.execute("SELECT cookie_cipher,binding_generation FROM accounts WHERE qq_id=?",
+                               (str(account["qq_id"]),)).fetchone()
+            if (not row or row["binding_generation"] != account.get("binding_generation")
+                    or hashlib.sha256(row["cookie_cipher"]).hexdigest() != account.get("binding_revision")):
+                return False
+            conn.execute("UPDATE accounts SET cookie_cipher=?,session_material_cipher=?,cookie_valid=1,updated_at=? WHERE qq_id=?",
+                         (encrypted, encrypted_material, int(time.time()), str(account["qq_id"])))
+        return True
 
     def get_run(self, run_key: str) -> dict[str, Any] | None:
         with self._lock, self._connect() as conn:

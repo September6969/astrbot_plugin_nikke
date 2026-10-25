@@ -1,0 +1,31 @@
+{
+  "source": "official anonymous catalog, not account progress",
+  "tasks": [
+    {
+      "task_id": "72",
+      "task_type": 13,
+      "cyclical_type": 1,
+      "periodicity_type": 1,
+      "reward_infos": [
+        {
+          "need_completed_times": 5,
+          "completed_times": 0,
+          "is_completed": false
+        }
+      ]
+    },
+    {
+      "task_id": "73",
+      "task_type": 14,
+      "cyclical_type": 1,
+      "periodicity_type": 1,
+      "reward_infos": [
+        {
+          "need_completed_times": 5,
+          "completed_times": 0,
+          "is_completed": false
+        }
+      ]
+    }
+  ]
+}
