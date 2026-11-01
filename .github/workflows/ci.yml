@@ -37,6 +37,12 @@ jobs:
           python -m pip install --upgrade "pip==26.0.1"
           pip install -r requirements.txt pytest pytest-asyncio "astrbot==4.24.0" playwright
           python -m playwright install --with-deps chromium
+      - name: Warm Docker image layers before timed portrait verification
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: |
+          # 预载镜像层，避免把 Docker 首次解包计入生产 worker 的五秒预算。
+          docker run --rm --entrypoint /bin/true nikke-spine-worker:ci
+          docker run --rm --entrypoint /bin/true nikke-spine-worker:ci-4.1
       - name: Verify bundled, runtime-rendered, and cached portraits with official workers
         if: github.event_name == 'pull_request' || github.event_name == 'push'
         env:
