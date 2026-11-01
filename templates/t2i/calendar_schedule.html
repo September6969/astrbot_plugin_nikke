@@ -152,7 +152,7 @@ html, body {
   top: 530px;
   left: 72px;
   right: 72px;
-  bottom: 80px;
+  bottom: 156px;
   display: flex;
   flex-direction: column;
   overflow: visible;
@@ -195,7 +195,7 @@ html, body {
   min-height: 160px;
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   align-items: center;
   gap: 24px;
   padding: 10px 22px 24px;
@@ -235,7 +235,7 @@ html, body {
 .card-time {
   min-width: 0;
   color: #c0cedd;
-  font-size: 42px;
+  font-size: 34px;
   font-weight: 550;
   line-height: 52px;
   font-variant-numeric: tabular-nums;
@@ -309,8 +309,9 @@ html, body {
   line-height: 34px;
 }
 .remaining-value {
+  white-space: nowrap;
   color: #f5f8fc;
-  font-size: 44px;
+  font-size: 38px;
   font-weight: 800;
   line-height: 52px;
   font-variant-numeric: tabular-nums;
@@ -334,7 +335,7 @@ html, body {
   height: auto;
   min-height: 112px;
   display: grid;
-  grid-template-columns: 250px 160px minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 250px;
   align-items: center;
   column-gap: 18px;
   padding: 10px 18px;
@@ -345,9 +346,11 @@ html, body {
 .next-row.is-long {
   min-height: 136px;
 }
+.next-main { min-width: 0; }
+.next-meta { display: flex; align-items: center; gap: 24px; margin-bottom: 6px; }
 .next-time {
   color: #bac9da;
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 650;
   line-height: 48px;
   font-variant-numeric: tabular-nums;
@@ -369,8 +372,9 @@ html, body {
   overflow-wrap: anywhere;
 }
 .next-starts {
+  white-space: nowrap;
   color: #a9d5e7;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 42px;
   text-align: right;
@@ -406,7 +410,7 @@ html, body {
   left: 72px;
   right: 72px;
   bottom: 24px;
-  min-height: 56px;
+  height: 108px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -419,9 +423,11 @@ html, body {
 .footer-left {
   min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 18px;
-  white-space: nowrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-size: 24px;
+  line-height: 32px;
 }
 .health-label {
   flex: 0 0 auto;
@@ -435,9 +441,11 @@ html, body {
   color: #aebcd0;
 }
 .footer-command {
+  align-self: flex-end;
+  padding-bottom: 4px;
   flex: 0 0 auto;
   color: #d0dceb;
-  font-size: 28px;
+  font-size: 24px;
   text-align: right;
   white-space: nowrap;
 }
@@ -554,9 +562,11 @@ html, body {
         <div class="next-list">
           {% for item in p_next %}
           <article data-event-id="{{ item.event_id }}" class="next-row {{ 'is-long' if item.is_long_title else '' }} {{ 'is-oversize' if item.is_oversize else '' }}" style="min-height: {{ item.layout_height|default(112) }}px;">
-            <div class="next-time">{{ item.start_time_display }}</div>
-            <div class="next-category">{{ item.category }}</div>
+            <div class="next-main">
+            <div class="next-meta"><div class="next-time">{{ item.start_time_display }}</div>
+            <div class="next-category">{{ item.category }}</div></div>
             <h3 class="next-title" title="{{ item.full_title }}">{{ item.title }}</h3>
+            </div>
             <div class="next-starts">
               {% if item.start_precision == 'UNKNOWN' %}时间待确认
               {% elif item.start_precision == 'DATE_ONLY' %}{{ item.starts_in }}

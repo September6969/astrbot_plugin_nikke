@@ -123,8 +123,9 @@ class CharacterNotFound(ValueError):
 class CharacterAmbiguousMatch(ValueError):
     """查询匹配多个角色，不允许静默选择第一个结果。"""
 
-    def __init__(self, candidates: Sequence[str], *, too_many: bool = False) -> None:
+    def __init__(self, candidates: Sequence[str], *, too_many: bool = False, suggestions_only: bool = False) -> None:
         self.candidates = tuple(candidates)
+        self.suggestions_only = suggestions_only
         self.too_many = too_many
         super().__init__("角色名称匹配多个候选项")
 
@@ -402,6 +403,13 @@ class CharacterApplication:
     ) -> dict[str, Any]:
         matches = self._identity.find(directory, query)
         if not matches:
+            suggest = getattr(self._identity, "suggest", None)
+            suggestions = suggest(directory, query) if callable(suggest) else []
+            if suggestions:
+                raise CharacterAmbiguousMatch(
+                    tuple(self._identity.display_name(item) for item in suggestions),
+                    suggestions_only=True,
+                )
             raise CharacterNotFound("没有找到该妮姬")
         if len(matches) > 1:
             candidates = tuple(

@@ -43,6 +43,7 @@ def create_announcement_resources(
     calendar = CalendarService(
         data_dir / "calendar",
         announcement_service=service,
+        source_mode="blabla",
         **({"task_factory": task_factory} if task_factory is not None else {}),
         fetch_client=FetchClient(),
         visual_cache=CalendarVisualCache(data_dir / "calendar"),

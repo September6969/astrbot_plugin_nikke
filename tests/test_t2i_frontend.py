@@ -361,7 +361,7 @@ def test_calendar_operations_feed_presentation(tmp_path):
     cases = get_cases("calendar_schedule", tmp_path)
     normal = cases["normal"]
     assert normal["canvas"]["width"] == 1600
-    assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= normal["canvas"]["height"] <= 1600
+    assert CalendarT2IPayloadBuilder.MIN_CANVAS_H <= normal["canvas"]["height"] <= 1600 + (CalendarT2IPayloadBuilder.FOOTER_H - 56)
     assert "pages" in normal and len(normal["pages"]) == 1
     assert normal["global_has_active"]
     assert len(normal["active_items"]) == 2

@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import unicodedata
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -345,9 +347,47 @@ class CharacterDirectoryResolver:
         ]
         if exact:
             return exact
-        return [
+        matches = [
             item
             for item in items
             if any(term in value.casefold() for value in self._field_values(item)[1:] if value)
             or any(term in value.casefold() for value in _aliases(item.get("aliases")))
         ]
+
+        if matches:
+            return matches
+        # 格式归一化仅忽略标点、空白和大小写，不猜测角色身份。
+        normalized = self._search_text(query)
+        if not normalized or normalized.isdigit():
+            return []
+        return [item for item in items if any(
+            normalized in self._search_text(value)
+            for value in self._field_values(item)[1:] + _aliases(item.get("aliases")) if value
+        )]
+
+    @staticmethod
+    def _search_text(value: str) -> str:
+        return "".join(c for c in unicodedata.normalize("NFKC", value).casefold() if c.isalnum())
+
+    def suggest(self, directory, query, limit=5):
+        """仅提供相似名称候选，不能当作已确认匹配执行账号查询。"""
+        term = self._search_text(query)
+        if len(term) < 3 or term.isdigit():
+            return []
+        ranked = []
+        seen = set()
+        for raw in directory:
+            if not isinstance(raw, dict):
+                continue
+            item = self.enrich(raw)
+            code = str(item.get("name_code") or item.get("resource_id") or "")
+            if not code or code in seen:
+                continue
+            values = self._field_values(item)[1:] + _aliases(item.get("aliases"))
+            score = max((SequenceMatcher(None, term, self._search_text(v)).ratio() for v in values if v), default=0)
+            threshold = 0.72 if term.isascii() else (0.60 if len(term) >= 4 else 0.65)
+            if score >= threshold:
+                ranked.append((score, code, item))
+                seen.add(code)
+        ranked.sort(key=lambda row: (-row[0], row[1]))
+        return [row[2] for row in ranked[:limit]]

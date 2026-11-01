@@ -138,6 +138,8 @@ class CharacterCommandHandler:
             for index, candidate in enumerate(error.candidates, 1)
         )
         suffix = "\n候选过多，请继续补全名称。" if error.too_many else ""
+        if getattr(error, "suggestions_only", False):
+            return "没有精确匹配，是否要查询以下角色？请重新输入完整名称：\n\n" + candidates
         return "找到多个角色，请输入更完整的名称：\n\n" + candidates + suffix
 
     @staticmethod

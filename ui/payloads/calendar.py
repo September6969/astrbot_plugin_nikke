@@ -50,7 +50,7 @@ class CalendarT2IPayloadBuilder:
     HEADER_H = 116
     KEY_VISUAL_H = 360
     BODY_TOP_PADDING = 22
-    FOOTER_H = 56
+    FOOTER_H = 132
     BOTTOM_MARGIN = 24
     FIXED_LAYOUT_H = (
         HEADER_TOP_MARGIN + HEADER_H + KEY_VISUAL_H
@@ -81,7 +81,7 @@ class CalendarT2IPayloadBuilder:
 
     ACTIVE_TITLE_FONT_SIZE = 52
     ACTIVE_TITLE_CONTENT_W = (
-        CANVAS_W - 2 * PAGE_MARGIN - 44 - 7 - 330 - 24
+        CANVAS_W - 2 * PAGE_MARGIN - 44 - 7 - 360 - 24
     )  # 模板卡片宽度扣除内边距、边框、侧栏和列间距
     ACTIVE_TITLE_CHARS_PER_LINE = ACTIVE_TITLE_CONTENT_W // ACTIVE_TITLE_FONT_SIZE
     ACTIVE_TITLE_LINE_H = 64
@@ -89,11 +89,11 @@ class CalendarT2IPayloadBuilder:
 
     NEXT_TITLE_FONT_SIZE = 46
     NEXT_TITLE_CONTENT_W = (
-        CANVAS_W - 2 * PAGE_MARGIN - 36 - 2 - 250 - 160 - 300 - 54
+        CANVAS_W - 2 * PAGE_MARGIN - 36 - 2 - 250 - 18
     )  # 模板预告行宽度扣除固定列、边框、内边距和列间距
     NEXT_TITLE_CHARS_PER_LINE = NEXT_TITLE_CONTENT_W // NEXT_TITLE_FONT_SIZE
     NEXT_TITLE_LINE_H = 56
-    NEXT_ROW_HEIGHT_OVERHEAD = 24  # 上下内边距、边框与安全余量
+    NEXT_ROW_HEIGHT_OVERHEAD = 80  # 上下内边距、边框与安全余量
 
     EMPTY_STATE_H = 104
 
@@ -238,6 +238,12 @@ class CalendarT2IPayloadBuilder:
         for ev in upcoming_events:
             if ev.event_id not in candidate_ids:
                 candidate_ids.append(ev.event_id)
+        if getattr(service, "source_mode", "legacy") == "blabla":
+            for eid in candidate_ids:
+                path = vc.resolve_path(eid)
+                if path:
+                    return path
+            return None
         # 优先级 4：本地清单内已有任意 KV
         manifest = getattr(vc, "_manifest", {})
         if isinstance(manifest, dict):
