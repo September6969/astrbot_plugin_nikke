@@ -16,6 +16,8 @@ from ...features.character.models import CharacterCardAssets, CharacterCardData
 from .environment import AssetEnvironment
 from .icon_assets import IconAssetService
 from .spine_assets import CharacterAssetService
+from .skill_metadata import SkillMetadata
+from .resource_url import game_resource_url
 
 logger = logging.getLogger("nikke.asset_manager")
 
@@ -32,6 +34,7 @@ class CharacterCardPrefetcher:
         self.env = environment
         self.characters = characters
         self.icons = icons
+        self.skill_metadata = SkillMetadata(environment.cache_dir)
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="nikke_asset")
         self.slots = threading.BoundedSemaphore(self.MAX_PREFETCH_TASKS)
         self._closed = False
@@ -72,12 +75,22 @@ class CharacterCardPrefetcher:
         }
         from ...features.character.weapon_bases import resolve
 
-        for key, name in resolve(data.resource_id).get("skills", {}).items():
-            if key in ("skill1", "skill2", "burst") and re.fullmatch(r"[A-Za-z0-9_]+", name):
-                tasks["skill_" + key] = (
-                    lambda name=name: self.env.load_cached(f"skills/{name}.webp"),
-                    lambda: None,
-                )
+        # 三个槽位共享一次元数据更新；下载仍在有界素材线程池中执行。
+        def skill_icon(slot):
+            skills = self.skill_metadata.resolve(
+                data.resource_id, resolve(data.resource_id).get("skills", {}), remote=self.env.remote
+            )
+            name = skills.get(slot)
+            if not name:
+                return None
+            relative = f"skills/{name}.webp"
+            cached = self.env.load_cached(relative)
+            if cached is not None or not self.env.remote:
+                return cached
+            return self.env.load_path(relative, game_resource_url(f"icon/skill/char_skill/{name}.webp"))
+
+        for key in ("skill1", "skill2", "burst"):
+            tasks["skill_" + key] = (lambda key=key: skill_icon(key), lambda: None)
 
         results: dict[str, Image.Image | None] = {}
         future_map: dict[concurrent.futures.Future, str] = {}

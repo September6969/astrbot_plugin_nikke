@@ -141,7 +141,19 @@ class ScheduleService:
             OfficialAnnouncementScheduleAdapter(self.announcement_service),
         ]
 
+        self.source_mode = kwargs.get("source_mode", "legacy")
+        if self.source_mode == "blabla":
+            from ...integrations.calendar.blabla_source import BlablaCalendarAdapter
+            self.adapters = [BlablaCalendarAdapter()]
         self._load_cache()
+        if self.source_mode == "blabla":
+            # 停用源的旧快照不参与展示，也不以旧数据冒充新源成功。
+            self._source_datasets = {k:v for k,v in self._source_datasets.items() if k == "blabla"}
+            self._source_health = {k:v for k,v in self._source_health.items() if k == "blabla"}
+            self._base_events = self._merge_datasets()
+            self._sync_internal_stores(self._base_events)
+            self._has_snapshot = bool(self._source_datasets)
+            self._update_health_state()
 
     @property
     def data_quality(self) -> str:

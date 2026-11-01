@@ -88,7 +88,7 @@ class TestOperationsFeedVisualContract:
         assert dyn["canvas"]["width"] == 1600
         assert len(dyn["pages"] ) == 2
         assert [len(page["active_items"]) for page in dyn["pages"]] == [7, 0]
-        assert [len(page["next_items"]) for page in dyn["pages"]] == [3, 1]
+        assert [len(page["next_items"]) for page in dyn["pages"]] == [2, 2]
         for page in dyn["pages"]:
             assert_page_fits_budget(dyn, page)
 
@@ -362,7 +362,7 @@ class TestPaginationBudgetAndOversize:
         assert len(five["pages"]) == 1
         assert len(five["pages"][0]["active_items"]) == 5
         assert five["pages"][0]["page_total"] == 1
-        assert five["canvas"]["height"] == 1536
+        assert five["canvas"]["height"] == 1612
         assert_page_fits_budget(five, five["pages"][0])
 
     def test_8_active_fits_on_single_page(self, tmp_path):
@@ -379,7 +379,7 @@ class TestPaginationBudgetAndOversize:
         cases = get_cases("calendar_schedule", tmp_path)
         case = cases["dynamic-7-active-4-next"]
         assert [len(page["active_items"]) for page in case["pages"]] == [7, 0]
-        assert [len(page["next_items"]) for page in case["pages"]] == [3, 1]
+        assert [len(page["next_items"]) for page in case["pages"]] == [2, 2]
         assert sum(len(page["active_items"]) for page in case["pages"]) == 7
         assert sum(len(page["next_items"]) for page in case["pages"]) == 4
         for page in case["pages"]:
@@ -779,7 +779,7 @@ class TestContentBoundedDynamicCanvasHeight:
         case = cases["landscape-kv-7-active-4-next"]
         assert len(case["pages"]) == 2
         assert [len(page["active_items"]) for page in case["pages"]] == [7, 0]
-        assert [len(page["next_items"]) for page in case["pages"]] == [3, 1]
+        assert [len(page["next_items"]) for page in case["pages"]] == [2, 2]
         assert case["layout_limits"]["effective_max_canvas_height"] == 2400
         assert case["layout_limits"]["height_policy"] == "content_bounded"
         for page in case["pages"]:

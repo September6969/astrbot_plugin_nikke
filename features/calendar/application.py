@@ -177,7 +177,7 @@ class CalendarApplication:
             )
         announcement = getattr(self._calendar, "announcement_service", None)
         warning = ""
-        if announcement is not None:
+        if announcement is not None and getattr(self._calendar, "source_mode", "legacy") != "blabla":
             try:
                 ok, detail = await announcement.sync_from_source()
                 if not ok:
