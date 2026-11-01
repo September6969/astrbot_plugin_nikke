@@ -76,16 +76,18 @@ class CharacterCardPrefetcher:
         from ...features.character.weapon_bases import resolve
 
         # 三个槽位共享一次元数据更新；下载仍在有界素材线程池中执行。
+        # 显式短预算只读本地缓存，禁止超时返回后留下数秒网络任务。
+        allow_skill_network = self.env.remote and (timeout is None or timeout >= 5)
         def skill_icon(slot):
             skills = self.skill_metadata.resolve(
-                data.resource_id, resolve(data.resource_id).get("skills", {}), remote=self.env.remote
+                data.resource_id, resolve(data.resource_id).get("skills", {}), remote=allow_skill_network
             )
             name = skills.get(slot)
             if not name:
                 return None
             relative = f"skills/{name}.webp"
             cached = self.env.load_cached(relative)
-            if cached is not None or not self.env.remote:
+            if cached is not None or not allow_skill_network:
                 return cached
             return self.env.load_path(relative, game_resource_url(f"icon/skill/char_skill/{name}.webp"))
 
