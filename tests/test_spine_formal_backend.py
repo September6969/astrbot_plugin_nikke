@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+import httpx
 from PIL import Image, ImageDraw
 
 from astrbot_plugin_nikke.integrations.spine.prerenderer import (
@@ -178,7 +179,7 @@ class SpineFormalBackendTests(TestCase):
 
             def open_stream(_method, url, **_kwargs):
                 response = MagicMock()
-                path = url.split("/l2d/", 1)[1]
+                path = url.split("/l2d/", 1)[1].split("?", 1)[0]
                 path = path.split("/", 1)[1]
                 relative = "/".join(path.split("/")[1:]) if path.startswith("c020/") else path
                 name = relative.rsplit("/", 1)[-1]
@@ -197,6 +198,22 @@ class SpineFormalBackendTests(TestCase):
                 bundle = fetcher.fetch(urls, "multi", expected_blob_hashes=blob_hashes)
                 with self.assertRaisesRegex(SpineRenderError, "内容校验"):
                     fetcher.fetch(urls, "wrong-hash", expected_blob_hashes={urls["skel"]: "0" * 40})
+
+            def raw_unavailable(method, url, **kwargs):
+                if url.startswith("https://raw.githubusercontent.com/"):
+                    raise httpx.ConnectError("reset")
+                self.assertTrue(url.startswith("https://api.github.com/repos/Nikke-db/Nikke-db.github.io/contents/l2d/c020/"))
+                self.assertTrue(url.endswith("?ref=" + "a" * 40))
+                self.assertEqual(kwargs["headers"]["Accept"], "application/vnd.github.raw+json")
+                return open_stream(method, url, **kwargs)
+
+            with patch("astrbot_plugin_nikke.integrations.spine.prerenderer.httpx.stream", side_effect=raw_unavailable):
+                alternate = fetcher.fetch(urls, "contents-api", expected_blob_hashes=blob_hashes)
+                self.assertEqual(len(alternate.textures), 2)
+                with self.assertRaisesRegex(SpineRenderError, "内容校验"):
+                    fetcher.fetch(urls, "api-wrong-hash", expected_blob_hashes={urls["skel"]: "0" * 40})
+                with self.assertRaisesRegex(SpineRenderError, "下载失败"):
+                    fetcher.fetch(urls, "api-without-hash")
             self.assertEqual(len(bundle.textures), 2)
             with Image.open(bundle.textures[0]) as first, Image.open(bundle.textures[1]) as second:
                 self.assertNotEqual(first.convert("RGBA").getpixel((0, 0)), second.convert("RGBA").getpixel((0, 0)))

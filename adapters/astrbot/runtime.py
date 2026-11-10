@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 import zipfile
 from collections.abc import Awaitable, Callable
 from pathlib import Path
@@ -61,6 +62,7 @@ class AstrBotRuntimeAdapter:
             send_summary=send_summary,
             sync_announcements=self._sync_announcements,
             sync_calendar=self._sync_calendar,
+            sync_character_data=self._sync_character_data,
             dispatch_announcements=self._dispatch_announcements,
             dispatch_calendar=self._dispatch_calendar,
         )
@@ -163,22 +165,7 @@ class AstrBotRuntimeAdapter:
             logger.error(
                 "[NIKKE] 绑定服务启动失败: %s", safe_exception_message(exc)
             )
-        try:
-            directory = await self._services.client.get_directory()
-            self._on_directory_loaded(directory)
-            logger.info("[NIKKE] 已载入 %s 条妮姬目录", len(directory))
-        except Exception as exc:
-            logger.warning(
-                "[NIKKE] 妮姬目录载入失败: %s", safe_exception_message(exc)
-            )
-        await self._best_effort(
-            "L2D 索引预热跳过",
-            asyncio.to_thread(
-                self._services.asset_manager.nikke_db.get_l2d_index,
-                allow_remote=True,
-            ),
-            level="debug",
-        )
+        await self._sync_character_data()
         try:
             await self._services.character_application.preload_stat_resources()
             logger.info("[NIKKE] Exia/NIKKE 静态属性表已载入并缓存")
@@ -187,6 +174,32 @@ class AstrBotRuntimeAdapter:
                 "[NIKKE] 静态属性表预热失败，角色卡将保留 —：%s",
                 safe_exception_message(exc),
             )
+
+    async def _sync_character_data(self) -> None:
+        """名称从官方目录更新，GitHub 素材各自遵守缓存有效期。"""
+        db = self._services.asset_manager.nikke_db
+        await asyncio.gather(
+            self._sync_character_directory(),
+            self._best_effort(
+                "L2D 索引同步失败",
+                asyncio.to_thread(db.get_l2d_index, allow_remote=True),
+            ),
+            self._best_effort(
+                "L2D 文件树同步失败",
+                asyncio.to_thread(db.get_l2d_file_tree, allow_remote=True, deadline=time.monotonic() + 20),
+            ),
+        )
+
+    async def _sync_character_directory(self) -> None:
+        try:
+            directory = await self._services.client.get_directory()
+            if not directory:
+                raise ValueError("官方角色目录为空")
+            self._on_directory_loaded(directory)
+            logger.info("[NIKKE] 已载入 %s 条妮姬目录", len(directory))
+        except Exception as exc:
+            logger.warning("[NIKKE] 妮姬目录载入失败: %s", safe_exception_message(exc))
+
     async def _best_effort(
         self,
         message: str,

@@ -22,6 +22,7 @@ class RuntimeSchedulerTests(unittest.IsolatedAsyncioTestCase):
 
         coordinator = RuntimeCoordinator(task_factory=task_factory)
         events = []
+        epoch = 5000.0
         local_time = datetime(2026, 9, 23, 8, 10, tzinfo=timezone(timedelta(hours=8)))
 
         def action(name):
@@ -44,8 +45,10 @@ class RuntimeSchedulerTests(unittest.IsolatedAsyncioTestCase):
             sync_announcements=action("announcements"),
             sync_calendar=action("calendar"),
             dispatch_announcements=action("push"),
+            sync_character_data=action("character"),
+            character_interval=60,
             clock=lambda: local_time,
-            unix_time=lambda: 5000.0,
+            unix_time=lambda: epoch,
         )
 
         await scheduler.tick()
@@ -58,6 +61,11 @@ class RuntimeSchedulerTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(("daily", ("2026-09-23",), {"stagger": True, "automatic": True}), events)
         self.assertIn(("summary", ("2026-09-23",), {}), events)
         self.assertEqual(len(created), 5)
+        epoch += 60
+        await scheduler.tick()
+        await scheduler.tick()
+        await asyncio.sleep(0)
+        self.assertEqual([entry[0] for entry in events].count("character"), 1)
         await coordinator.close()
 
     async def test_invalid_persisted_schedule_fields_keep_safe_defaults(self):

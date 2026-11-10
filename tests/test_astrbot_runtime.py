@@ -33,7 +33,8 @@ class AstrBotRuntimeAdapterTests(unittest.IsolatedAsyncioTestCase):
             asset_manager=SimpleNamespace(
                 close=lambda: events.append("assets"),
                 nikke_db=SimpleNamespace(
-                    get_l2d_index=lambda **_kwargs: {"synthetic": True}
+                    get_l2d_index=Mock(return_value={"synthetic": True}),
+                    get_l2d_file_tree=Mock(return_value={"synthetic": True}),
                 ),
             ),
             voice_application=SimpleNamespace(
@@ -99,6 +100,8 @@ class AstrBotRuntimeAdapterTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.wait_for(initialized.wait(), timeout=2)
             await asyncio.sleep(0.02)
             self.assertTrue(services.extension_zip.exists())
+            services.asset_manager.nikke_db.get_l2d_index.assert_called_once_with(allow_remote=True)
+            services.asset_manager.nikke_db.get_l2d_file_tree.assert_called_once()
             self.assertEqual(
                 services.campaign_application.update_directory.call_args.args[0],
                 [{"name": "synthetic"}],
