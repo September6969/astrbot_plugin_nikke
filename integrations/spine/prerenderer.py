@@ -209,8 +209,10 @@ class SpineBundleFetcher:
         return f"{SpineBundleFetcher.CONTENTS_API}{parts[4]}?ref={parts[3]}"
 
     @classmethod
-    def _download_headers(cls, url: str) -> dict[str, str] | None:
-        return {"Accept": "application/vnd.github.raw+json"} if url.startswith(cls.CONTENTS_API) else None
+    def _download_options(cls, url: str) -> dict[str, dict[str, str]]:
+        if url.startswith(cls.CONTENTS_API):
+            return {"headers": {"Accept": "application/vnd.github.raw+json"}}
+        return {}
 
     @staticmethod
     def _atlas_texture_pages(atlas: Path) -> list[str]:
@@ -260,7 +262,7 @@ class SpineBundleFetcher:
             if deadline is not None:
                 return self._download_before_deadline(url, limit, deadline)
             content = bytearray()
-            with httpx.stream("GET", url, headers=self._download_headers(url), timeout=self.timeout_seconds, follow_redirects=False) as response:
+            with httpx.stream("GET", url, timeout=self.timeout_seconds, follow_redirects=False, **self._download_options(url)) as response:
                 response.raise_for_status()
                 for chunk in response.iter_bytes():
                     content.extend(chunk)
@@ -345,7 +347,7 @@ class SpineBundleFetcher:
         async def download() -> bytes:
             async with asyncio.timeout(remaining(deadline)):
                 async with httpx.AsyncClient(timeout=httpx.Timeout(remaining(deadline, self.timeout_seconds)), follow_redirects=False) as client:
-                    async with client.stream("GET", url, headers=self._download_headers(url)) as response:
+                    async with client.stream("GET", url, **self._download_options(url)) as response:
                         response.raise_for_status()
                         content = bytearray()
                         async for chunk in response.aiter_bytes():
