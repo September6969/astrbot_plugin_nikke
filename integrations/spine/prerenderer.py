@@ -101,6 +101,7 @@ class SpineBundleFetcher:
 
     ALLOWED_HOST = "raw.githubusercontent.com"
     ALLOWED_REPOSITORY_PATH = "/Nikke-db/Nikke-db.github.io/"
+    CONTENTS_API = "https://api.github.com/repos/Nikke-db/Nikke-db.github.io/contents/"
     MAX_SKELETON_BYTES = 16 * 1024 * 1024
     MAX_ATLAS_BYTES = 4 * 1024 * 1024
     MAX_TEXTURE_BYTES = 12 * 1024 * 1024
@@ -197,6 +198,23 @@ class SpineBundleFetcher:
             raise SpineRenderError("Spine bundle 上游内容校验失败")
 
     @staticmethod
+    def _contents_fallback(url: str, expected_hashes: Mapping[str, str] | None) -> str | None:
+        """备用下载沿用同一仓库、提交和文件哈希。"""
+        expected = expected_hashes.get(url) if expected_hashes is not None else None
+        if not isinstance(expected, str) or re.fullmatch(r"[0-9a-f]{40}", expected) is None:
+            return None
+        parts = urlparse(url).path.split("/", 4)
+        if len(parts) != 5 or re.fullmatch(r"[0-9a-f]{40}", parts[3]) is None or not parts[4].startswith("l2d/"):
+            return None
+        return f"{SpineBundleFetcher.CONTENTS_API}{parts[4]}?ref={parts[3]}"
+
+    @classmethod
+    def _download_options(cls, url: str) -> dict[str, dict[str, str]]:
+        if url.startswith(cls.CONTENTS_API):
+            return {"headers": {"Accept": "application/vnd.github.raw+json"}}
+        return {}
+
+    @staticmethod
     def _atlas_texture_pages(atlas: Path) -> list[str]:
         try:
             text = atlas.read_text(encoding="utf-8-sig")
@@ -238,9 +256,22 @@ class SpineBundleFetcher:
         deadline = from_budget(budget_seconds, deadline)
         targets: dict[str, Path] = {}
         total_bytes = 0
+        prefer_api = False
+
+        def download(url: str, limit: int) -> bytes:
+            if deadline is not None:
+                return self._download_before_deadline(url, limit, deadline)
+            content = bytearray()
+            with httpx.stream("GET", url, timeout=self.timeout_seconds, follow_redirects=False, **self._download_options(url)) as response:
+                response.raise_for_status()
+                for chunk in response.iter_bytes():
+                    content.extend(chunk)
+                    if len(content) > limit:
+                        raise SpineRenderError("Spine bundle 下载超过大小预算")
+            return bytes(content)
 
         def fetch_file(url: str, target: Path, limit: int) -> bytes:
-            nonlocal total_bytes
+            nonlocal total_bytes, prefer_api
             remaining(deadline)
             if self._valid_cached(target, limit):
                 cached_content = target.read_bytes()
@@ -253,21 +284,19 @@ class SpineBundleFetcher:
                     total_bytes += len(cached_content)
                     return cached_content
             target.parent.mkdir(parents=True, exist_ok=True)
-            response_content = bytearray()
+            limit = min(limit, self.MAX_TOTAL_BYTES - total_bytes)
+            alternate = self._contents_fallback(url, expected_blob_hashes)
+            first, second = (alternate, url) if prefer_api and alternate else (url, alternate)
             try:
-                if deadline is not None:
-                    response_content.extend(self._download_before_deadline(
-                        url, min(limit, self.MAX_TOTAL_BYTES - total_bytes), deadline))
-                else:
-                    with httpx.stream("GET", url, timeout=self.timeout_seconds, follow_redirects=False) as response:
-                        response.raise_for_status()
-                        for chunk in response.iter_bytes():
-                            response_content.extend(chunk)
-                            if len(response_content) > limit or total_bytes + len(response_content) > self.MAX_TOTAL_BYTES:
-                                raise SpineRenderError("Spine bundle 下载超过大小预算")
+                try:
+                    data = download(first, limit)
+                except (httpx.HTTPError, OSError):
+                    if second is None:
+                        raise
+                    data = download(second, limit)
+                    prefer_api = second == alternate
             except (httpx.HTTPError, OSError) as exc:
                 raise SpineRenderError(f"Spine bundle 下载失败: {type(exc).__name__}") from exc
-            data = bytes(response_content)
             self._verify_blob(url, data, expected_blob_hashes)
             remaining(deadline)
             temporary = target.with_name(f".{target.name}.{threading.get_ident()}.tmp")
@@ -318,7 +347,7 @@ class SpineBundleFetcher:
         async def download() -> bytes:
             async with asyncio.timeout(remaining(deadline)):
                 async with httpx.AsyncClient(timeout=httpx.Timeout(remaining(deadline, self.timeout_seconds)), follow_redirects=False) as client:
-                    async with client.stream("GET", url) as response:
+                    async with client.stream("GET", url, **self._download_options(url)) as response:
                         response.raise_for_status()
                         content = bytearray()
                         async for chunk in response.aiter_bytes():

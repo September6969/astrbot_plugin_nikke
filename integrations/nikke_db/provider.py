@@ -45,6 +45,7 @@ class SpineBundleSource:
 class NikkeDbProvider:
     L2D_CDN = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/l2d"
     INDEX_URL = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json"
+    INDEX_PAGES_URL = "https://nikke-db.github.io/js/json/l2d.json"
     GITHUB_API = "https://api.github.com/repos/Nikke-db/Nikke-db.github.io"
 
     INDEX_TTL = 12 * 3600  # 12 小时本地索引缓存
@@ -336,58 +337,54 @@ class NikkeDbProvider:
             return self._index
 
         index_file = self.cache_dir / "nikke-db" / "index" / "l2d.json"
-        if index_file.is_file():
-            try:
-                mtime = index_file.stat().st_mtime
-                if (time.time() - mtime) < self.INDEX_TTL:
-                    data = json.loads(index_file.read_text(encoding="utf-8"))
-                    if isinstance(data, list):
-                        self._index = {item.get("id"): item for item in data if isinstance(item, dict) and "id" in item}
-                        self._index_loaded_at = now
-                        return self._index
-                    if isinstance(data, dict):
-                        self._index = data
-                        self._index_loaded_at = now
-                        return self._index
-            except (OSError, ValueError):
-                pass
+        cached = {}
+        try:
+            age = max(0.0, time.time() - index_file.stat().st_mtime)
+            cached = self._parse_l2d_index(json.loads(index_file.read_text(encoding="utf-8")))
+            if cached and age < self.INDEX_TTL:
+                self._index = cached
+                self._index_loaded_at = now - age
+                return cached
+        except (OSError, ValueError):
+            pass
 
         if allow_remote and self.remote and not self.is_failed("index:l2d"):
             try:
                 with httpx.Client(timeout=5) as client:
-                    resp = client.get(self.INDEX_URL)
-                    resp.raise_for_status()
+                    try:
+                        resp = client.get(self.INDEX_URL)
+                        resp.raise_for_status()
+                    except httpx.HTTPError:
+                        resp = client.get(self.INDEX_PAGES_URL)
+                        resp.raise_for_status()
                     data = resp.json()
-                    index_file.parent.mkdir(parents=True, exist_ok=True)
-                    index_file.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-                    if isinstance(data, list):
-                        self._index = {item.get("id"): item for item in data if isinstance(item, dict) and "id" in item}
-                    elif isinstance(data, dict):
-                        self._index = data
-                    else:
-                        self._index = {}
-                    self._index_loaded_at = now
-                    return self._index
-            except (httpx.HTTPError, OSError, ValueError):
+                parsed = self._parse_l2d_index(data)
+                if not parsed:
+                    raise ValueError("Nikke-DB L2D 索引没有有效条目")
+                index_file.parent.mkdir(parents=True, exist_ok=True)
+                temporary = index_file.with_name(f".{index_file.name}.{threading.get_ident()}.tmp")
+                try:
+                    temporary.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+                    temporary.replace(index_file)
+                finally:
+                    temporary.unlink(missing_ok=True)
+                self._index = parsed
+                self._index_loaded_at = time.monotonic()
+                return parsed
+            except (httpx.HTTPError, OSError, ValueError) as exc:
+                logger.info("Nikke-DB L2D index unavailable: %s", type(exc).__name__)
                 self.mark_failed("index:l2d", 300)
 
-        if index_file.is_file():
-            try:
-                data = json.loads(index_file.read_text(encoding="utf-8"))
-                if isinstance(data, list):
-                    self._index = {item.get("id"): item for item in data if isinstance(item, dict) and "id" in item}
-                elif isinstance(data, dict):
-                    self._index = data
-                else:
-                    self._index = {}
-                self._index_loaded_at = now
-                return self._index
-            except (OSError, ValueError):
-                pass
+        # 过期数据可继续展示，读取旧数据不延长刷新期限。
+        return cached
 
-        self._index = {}
-        self._index_loaded_at = now
-        return self._index
+    @staticmethod
+    def _parse_l2d_index(data: object) -> dict[str, dict]:
+        if isinstance(data, list):
+            return {item["id"]: item for item in data if isinstance(item, dict) and isinstance(item.get("id"), str) and item["id"]}
+        if isinstance(data, dict):
+            return {key: item for key, item in data.items() if isinstance(key, str) and key and isinstance(item, dict)}
+        return {}
 
     def resolve_spine_version(
         self, character_id: str, *, allow_remote: bool = True
@@ -467,7 +464,7 @@ class NikkeDbProvider:
             fetched_at = raw_cache.get("fetched_at") if isinstance(raw_cache, dict) else None
             if cached is not None and isinstance(fetched_at, (int, float)) and now - fetched_at < self.L2D_TREE_TTL:
                 self._l2d_tree = cached
-                self._l2d_tree_loaded_at = now
+                self._l2d_tree_loaded_at = min(fetched_at, now)
                 return cached
         except (OSError, UnicodeError, ValueError):
             pass
@@ -544,11 +541,8 @@ class NikkeDbProvider:
                 logger.info("Nikke-DB L2D tree unavailable: %s", type(exc).__name__)
                 self.mark_failed("index:l2d-tree", 300)
 
-        if cached is not None:
-            self._l2d_tree = cached
-            self._l2d_tree_loaded_at = now
-            return cached
-        return None
+        # 保留旧树作为读取回退，失败退避结束后仍可刷新。
+        return cached
 
     def resolve_spine_bundle_source(
         self,

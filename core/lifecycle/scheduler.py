@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""统一编排 Daily、汇总、公告与日程的周期任务。"""
+"""统一编排 Daily、汇总、公告、日程与角色数据的周期任务。"""
 
 from __future__ import annotations
 
@@ -29,12 +29,14 @@ class RuntimeScheduler:
         sync_calendar: Callable[[], Awaitable[Any]],
         dispatch_announcements: Callable[[], Awaitable[Any]],
         dispatch_calendar: Callable[[], Awaitable[Any]] | None = None,
+        sync_character_data: Callable[[], Awaitable[Any]] | None = None,
         clock: Callable[[], datetime] | None = None,
         unix_time: Callable[[], float] = time.time,
         sleep: Callable[[float], Awaitable[Any]] = asyncio.sleep,
         poll_interval: float = 20.0,
         announcement_interval: float = 3600.0,
         calendar_interval: float = 300.0,
+        character_interval: float = 1800.0,
     ) -> None:
         self._coordinator = coordinator
         self._store = store
@@ -45,6 +47,7 @@ class RuntimeScheduler:
         self._sync_calendar = sync_calendar
         self._dispatch_announcements = dispatch_announcements
         self._dispatch_calendar = dispatch_calendar
+        self._sync_character_data = sync_character_data
         self._calendar_push_task = None
         self._clock = clock or (
             lambda: datetime.now(timezone(timedelta(hours=8)))
@@ -54,11 +57,14 @@ class RuntimeScheduler:
         self._poll_interval = poll_interval
         self._announcement_interval = announcement_interval
         self._calendar_interval = calendar_interval
+        self._character_interval = character_interval
         self._last_daily = ""
         self._daily_task = None
         self._last_summary = ""
         self._last_announcement_sync = 0.0
         self._last_calendar_sync = 0.0
+        self._last_character_sync = unix_time() if sync_character_data is not None else 0.0
+        self._character_sync_task: asyncio.Task | None = None
         self._announcement_push_task: asyncio.Task | None = None
 
     async def tick(self) -> None:
@@ -102,6 +108,13 @@ class RuntimeScheduler:
         if current_epoch - self._last_calendar_sync > self._calendar_interval:
             self._last_calendar_sync = current_epoch
             self._coordinator.create_task(self._sync_calendar())
+        if (
+            self._sync_character_data is not None
+            and current_epoch - self._last_character_sync >= self._character_interval
+            and (self._character_sync_task is None or self._character_sync_task.done())
+        ):
+            self._last_character_sync = current_epoch
+            self._character_sync_task = self._coordinator.create_task(self._sync_character_data())
         if self._dispatch_calendar is not None:
             task = self._calendar_push_task
             if task is None or task.done():

@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
+import os
 import tempfile
 import time
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+import httpx
 
 from astrbot_plugin_nikke.integrations.nikke_db.provider import NikkeDbProvider
 
@@ -245,4 +248,55 @@ class NikkeDbProviderTests(unittest.TestCase):
             self.assertIs(lock1, lock2)
             lock3 = provider.get_character_lock("c010")
             self.assertIsNot(lock1, lock3)
+
+    def test_offline_read_of_expired_index_does_not_prevent_remote_refresh(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td, remote=True)
+            path = Path(td) / "nikke-db" / "index" / "l2d.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps([{"id": "c019"}]), encoding="utf-8")
+            stale = time.time() - provider.INDEX_TTL - 1
+            os.utime(path, (stale, stale))
+            self.assertEqual(set(provider.get_l2d_index(allow_remote=False)), {"c019"})
+
+            with patch("astrbot_plugin_nikke.integrations.nikke_db.provider.httpx.Client") as factory:
+                response = factory.return_value.__enter__.return_value.get.return_value
+                response.json.return_value = [{"id": "c019"}, {"id": "c474"}]
+                self.assertEqual(set(provider.get_l2d_index()), {"c019", "c474"})
+
+    def test_index_uses_same_repository_pages_if_raw_connection_fails(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td, remote=True)
+            with patch("astrbot_plugin_nikke.integrations.nikke_db.provider.httpx.Client") as factory:
+                client = factory.return_value.__enter__.return_value
+                response = MagicMock()
+                response.json.return_value = [{"id": "c474"}]
+                client.get.side_effect = [httpx.ConnectError("reset"), response]
+                self.assertEqual(set(provider.get_l2d_index()), {"c474"})
+                self.assertEqual(client.get.call_args.args[0], "https://nikke-db.github.io/js/json/l2d.json")
+
+    def test_old_tree_stays_available_but_recovers_after_failed_refresh(self):
+        with tempfile.TemporaryDirectory() as td:
+            provider = NikkeDbProvider(td, td, remote=True)
+            path = Path(td) / "nikke-db" / "index" / "l2d-tree.json"
+            path.parent.mkdir(parents=True)
+            entries = [{"path": "l2d/c019", "sha": "a" * 40, "type": "tree"}]
+            path.write_text(json.dumps({
+                "commit_sha": "b" * 40, "tree_sha": "c" * 40, "entries": entries,
+                "fetched_at": time.time() - provider.L2D_TREE_TTL - 1,
+            }), encoding="utf-8")
+            self.assertEqual(provider.get_l2d_file_tree(allow_remote=False)["commit_sha"], "b" * 40)
+
+            with patch("astrbot_plugin_nikke.integrations.nikke_db.provider.httpx.Client") as factory:
+                client = factory.return_value.__enter__.return_value
+                client.get.return_value.json.return_value = {}
+                self.assertEqual(provider.get_l2d_file_tree()["commit_sha"], "b" * 40)
+                client.get.assert_called_once()
+                provider._failed.clear()
+                commit, tree = MagicMock(), MagicMock()
+                commit.json.return_value = {"sha": "d" * 40, "commit": {"tree": {"sha": "e" * 40}}}
+                tree.content = b"{}"
+                tree.json.return_value = {"truncated": False, "tree": entries}
+                client.get.side_effect = [commit, tree]
+                self.assertEqual(provider.get_l2d_file_tree()["commit_sha"], "d" * 40)
 
