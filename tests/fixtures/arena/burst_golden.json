@@ -1,0 +1,518 @@
+{
+  "kind": "mechanical_reference_not_battle_outcomes",
+  "source_commit": "60f8ac56b6c0660f702d74b89d36ade53ff6a8ca",
+  "cases": [
+    {
+      "ids": [
+        "scarlet",
+        "jackal",
+        "blanc",
+        "centi",
+        "trina"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          2,
+          "jackal"
+        ],
+        [
+          3,
+          "blanc"
+        ],
+        [
+          1,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "jackal",
+        "blanc",
+        "centi",
+        "trina",
+        "scarlet"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          1,
+          "jackal"
+        ],
+        [
+          2,
+          "blanc"
+        ],
+        [
+          5,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "blanc",
+        "centi",
+        "trina",
+        "scarlet",
+        "jackal"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          5,
+          "jackal"
+        ],
+        [
+          1,
+          "blanc"
+        ],
+        [
+          4,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "centi",
+        "trina",
+        "scarlet",
+        "jackal",
+        "blanc"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          4,
+          "jackal"
+        ],
+        [
+          1,
+          "centi"
+        ],
+        [
+          3,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "trina",
+        "scarlet",
+        "jackal",
+        "blanc",
+        "centi"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          3,
+          "jackal"
+        ],
+        [
+          1,
+          "trina"
+        ],
+        [
+          2,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "tia",
+        "jackal",
+        "scarlet",
+        "blanc",
+        "trina"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          1,
+          "tia"
+        ],
+        [
+          2,
+          "jackal"
+        ],
+        [
+          4,
+          "blanc"
+        ],
+        [
+          3,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "jackal",
+        "scarlet",
+        "blanc",
+        "trina",
+        "tia"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          1,
+          "jackal"
+        ],
+        [
+          3,
+          "blanc"
+        ],
+        [
+          2,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "scarlet",
+        "blanc",
+        "trina",
+        "tia",
+        "jackal"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          4,
+          "tia"
+        ],
+        [
+          5,
+          "jackal"
+        ],
+        [
+          2,
+          "blanc"
+        ],
+        [
+          1,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "blanc",
+        "trina",
+        "tia",
+        "jackal",
+        "scarlet"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          3,
+          "tia"
+        ],
+        [
+          4,
+          "jackal"
+        ],
+        [
+          1,
+          "blanc"
+        ],
+        [
+          5,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "trina",
+        "tia",
+        "jackal",
+        "scarlet",
+        "blanc"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          2,
+          "tia"
+        ],
+        [
+          3,
+          "jackal"
+        ],
+        [
+          1,
+          "trina"
+        ],
+        [
+          4,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "anis_star",
+        "jackal",
+        "scarlet",
+        "blanc",
+        "trina"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          1,
+          "anis_star"
+        ],
+        [
+          2,
+          "jackal"
+        ],
+        [
+          4,
+          "blanc"
+        ],
+        [
+          3,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "jackal",
+        "scarlet",
+        "blanc",
+        "trina",
+        "anis_star"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          1,
+          "jackal"
+        ],
+        [
+          3,
+          "blanc"
+        ],
+        [
+          2,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "scarlet",
+        "blanc",
+        "trina",
+        "anis_star",
+        "jackal"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          4,
+          "anis_star"
+        ],
+        [
+          5,
+          "jackal"
+        ],
+        [
+          2,
+          "blanc"
+        ],
+        [
+          1,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "blanc",
+        "trina",
+        "anis_star",
+        "jackal",
+        "scarlet"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          3,
+          "anis_star"
+        ],
+        [
+          4,
+          "jackal"
+        ],
+        [
+          1,
+          "blanc"
+        ],
+        [
+          5,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "trina",
+        "anis_star",
+        "jackal",
+        "scarlet",
+        "blanc"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          2,
+          "anis_star"
+        ],
+        [
+          3,
+          "jackal"
+        ],
+        [
+          1,
+          "trina"
+        ],
+        [
+          4,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "rapi_red_hood",
+        "centi",
+        "scarlet",
+        "blanc",
+        "trina"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          1,
+          "rapi_red_hood"
+        ],
+        [
+          2,
+          "centi"
+        ],
+        [
+          3,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "centi",
+        "scarlet",
+        "blanc",
+        "trina",
+        "rapi_red_hood"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          5,
+          "rapi_red_hood"
+        ],
+        [
+          1,
+          "centi"
+        ],
+        [
+          2,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "scarlet",
+        "blanc",
+        "trina",
+        "rapi_red_hood",
+        "centi"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          4,
+          "rapi_red_hood"
+        ],
+        [
+          2,
+          "blanc"
+        ],
+        [
+          1,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "blanc",
+        "trina",
+        "rapi_red_hood",
+        "centi",
+        "scarlet"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          3,
+          "rapi_red_hood"
+        ],
+        [
+          1,
+          "blanc"
+        ],
+        [
+          5,
+          "scarlet"
+        ]
+      ]
+    },
+    {
+      "ids": [
+        "trina",
+        "rapi_red_hood",
+        "centi",
+        "scarlet",
+        "blanc"
+      ],
+      "valid": true,
+      "steps": [
+        [
+          2,
+          "rapi_red_hood"
+        ],
+        [
+          1,
+          "trina"
+        ],
+        [
+          4,
+          "scarlet"
+        ]
+      ]
+    }
+  ]
+}

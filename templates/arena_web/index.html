@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>竞技场排阵</title>
+  <link rel="stylesheet" href="/arena/static/editor.css">
+  <script src="/arena/static/editor.js" defer></script>
+</head>
+<body>
+<main>
+  <header><h1>竞技场排阵</h1>
+    <p>按 P1–P5 填写对方阵容。</p></header>
+  <noscript>编辑器需要 JavaScript。你可以回 QQ 使用 /妮姬 竞技场 解队，并以斜线分隔五人。</noscript>
+  <p id="loading" role="status">正在加载角色目录…</p>
+  <fieldset id="editor" disabled>
+    <div class="workspace">
+      <section class="workspace-panel lineup" aria-label="对方阵容">
+        <div class="panel-head">
+          <label for="mode">对方阵容</label>
+          <select id="mode"><option value="single">单队 · 5 人</option><option value="three">三队 · 15 人</option></select>
+        </div>
+        <div id="team-tabs" class="team-tabs" role="group" aria-label="选择队伍"></div>
+        <div id="teams"></div>
+        <div class="actions">
+          <button id="swap" type="button" aria-pressed="false">换位</button>
+          <button id="remove-character" type="button">移除</button>
+          <button id="undo" type="button">撤销</button>
+          <button id="clear" type="button">清空</button>
+        </div>
+        <p id="validation" aria-live="polite"></p>
+      </section>
+      <section class="workspace-panel catalogue" aria-labelledby="picker-title">
+        <div class="panel-head">
+          <h2 id="picker-title" aria-live="polite">选择角色</h2>
+          <span id="choice-count"></span>
+        </div>
+        <div class="catalogue-tools">
+          <input id="search" type="search" aria-label="搜索角色" placeholder="搜索姓名或角色键" autocomplete="off">
+          <div id="burst-filters" class="filters" role="group" aria-label="爆裂阶段">
+            <button type="button" data-burst="all" aria-pressed="true">全部</button>
+            <button type="button" data-burst="1" aria-pressed="false">B1</button>
+            <button type="button" data-burst="2" aria-pressed="false">B2</button>
+            <button type="button" data-burst="3" aria-pressed="false">B3</button>
+          </div>
+        </div>
+        <div id="choices" class="portraits"></div>
+        <button id="more-choices" type="button" hidden>显示更多角色</button>
+      </section>
+    </div>
+    <details><summary>粘贴导入</summary>
+      <label for="paste">用 / 分隔角色。支持一行五人、一行十五人或三行五人。</label>
+      <textarea id="paste" rows="3" placeholder="红莲/豺狼/布兰儿/桑迪/特蕾娜"></textarea>
+      <button id="import" type="button">导入阵容</button>
+    </details>
+    <details id="candidate-editor" hidden>
+      <summary>加入我方候选</summary>
+      <p>每场可加入一队。用 / 按站位分隔五名角色，留空跳过。</p>
+      <div id="candidate-teams" class="candidate-teams">
+        <label>第 1 场<input type="text" autocomplete="off" maxlength="240"></label>
+        <label>第 2 场<input type="text" autocomplete="off" maxlength="240"></label>
+        <label>第 3 场<input type="text" autocomplete="off" maxlength="240"></label>
+      </div>
+      <button id="apply-candidates" type="button">保存我方候选</button>
+      <p id="candidate-feedback" role="status"></p>
+    </details>
+    <section class="settings">
+      <label for="roster-mode">我方可用角色</label>
+      <select id="roster-mode"><option value="owned">只用已确认持有角色</option>
+        <option value="manual">手动标记持有</option><option value="sandbox">全角色沙盒 · 未验证持有</option></select>
+      <details id="manual"><summary>选择手动持有角色</summary>
+        <label for="owned-search">搜索角色</label><input id="owned-search" type="search" autocomplete="off">
+        <p id="owned-count"></p><div id="owned-list"></div>
+      </details>
+      <div id="objective-field" hidden>
+        <label for="objective">三队目标</label>
+        <select id="objective"><option value="two">优先两队相对优势</option><option value="balanced">均衡</option><option value="speed">速度优先</option></select>
+      </div>
+    </section>
+  </fieldset>
+  <div class="submit-bar">
+    <button id="analyze" class="primary" type="button" aria-describedby="validation status" disabled>分析阵容</button>
+    <p id="status" role="status"></p>
+    <button id="retry-save" type="button" hidden>重试保存草稿</button>
+  </div>
+  <section id="result" hidden><h2>分析结果</h2><pre id="result-text"></pre>
+    <p>结果已保存。回 QQ 私聊发送 <strong>/妮姬 竞技场 结果</strong>。</p></section>
+  <footer><p>静态模型提供相对排序。技能、魔方、超频与特殊机制会影响实际对局。</p>
+    <details id="end-session"><summary>结束编辑会话</summary>
+      <p>结束后请回 QQ 获取新链接。已保存的结果仍可在 QQ 查看。</p>
+      <button id="revoke" type="button" disabled>确认结束会话</button>
+    </details>
+  </footer>
+</main>
+</body>
+</html>

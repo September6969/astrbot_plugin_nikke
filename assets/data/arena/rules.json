@@ -1,0 +1,4406 @@
+{
+  "schema_version": 1,
+  "source": "https://github.com/williamchong/nikke-arena-planner",
+  "commit": "c7948fb4b8778efde16320768a2159eb500e4216",
+  "fetched_at": "2026-11-17",
+  "license": "MIT",
+  "confidence": "reference",
+  "missing_fields": [
+    "cubes",
+    "overload",
+    "skill_levels",
+    "reentry_timing"
+  ],
+  "source_hashes": {
+    "planner-characters.json": "9330d650ab1d0124e1f601e1a6342df39fb0d8869439d39cf83cd22c56df9c04",
+    "planner-templates.json": "a031536f951ad1db678e3a5f8215d9bc155f543c2b4beef2bd06440a78976b63"
+  },
+  "mapping": {
+    "helm-treasure": "helm_treasure",
+    "snow-white-heavy-arms": "snow_white_heavy_arms",
+    "trina": "trina",
+    "anis": "anis",
+    "jackal": "jackal",
+    "centi": "centi",
+    "rumani": "rumani",
+    "emilia": "emilia",
+    "noah": "noah",
+    "pascal": "pascal",
+    "maiden-ice-rose": "maiden_ice_rose",
+    "drake-treasure": "drake_treasure",
+    "drake": "drake",
+    "viper": "viper",
+    "viper-treasure": "viper_treasure",
+    "maiden": "maiden",
+    "neon": "neon",
+    "noir": "noir",
+    "pepper": "pepper",
+    "sugar": "sugar",
+    "soda-twinkling-bunny": "soda_twinkling_bunny",
+    "laplace-treasure": "laplace_treasure",
+    "liberalio": "liberalio",
+    "mica-snow-buddy": "mica_snow_buddy",
+    "zwei": "zwei",
+    "nihilister": "nihilister",
+    "arcana": "arcana",
+    "a2": "a2",
+    "laplace": "laplace",
+    "rapunzel": "rapunzel",
+    "diesel-winter-sweets": "diesel_winter_sweets",
+    "grave": "grave",
+    "scarlet": "scarlet",
+    "anchor": "anchor",
+    "anchor-innocent-maid": "anchor_innocent_maid",
+    "anne-miracle-fairy": "anne_miracle_fairy",
+    "vesti": "vesti",
+    "bay": "bay",
+    "bay-treasure": "bay_treasure",
+    "biscuit": "biscuit",
+    "tia": "tia",
+    "quiry": "quiry",
+    "crust": "crust",
+    "mica": "mica",
+    "noise": "noise",
+    "power": "power",
+    "sora": "sora",
+    "ada": "ada",
+    "mana": "mana",
+    "anis-sparkling-summer": "anis_sparkling_summer",
+    "jill": "jill",
+    "scarlet-black-shadow": "scarlet_black_shadow",
+    "harran": "harran",
+    "raven": "raven",
+    "privaty-unkind-maid": "privaty_unkind_maid",
+    "guilty": "guilty",
+    "ether": "ether",
+    "poli": "poli",
+    "poli-treasure": "poli_treasure",
+    "leona": "leona",
+    "marciana": "marciana",
+    "mary": "mary",
+    "naga": "naga",
+    "neve": "neve",
+    "dorothy-serendipity": "dorothy_serendipity",
+    "isabel": "isabel",
+    "soline-frost-ticket": "soline_frost_ticket",
+    "brid-silent-track": "brid_silent_track",
+    "k": "k",
+    "quency": "quency",
+    "crow": "crow",
+    "soline": "soline",
+    "asuka": "asuka",
+    "snow-white": "snow_white",
+    "ade": "ade",
+    "rei-ayanami-tentative-name": "rei_tentative_name",
+    "mihara": "mihara",
+    "moran": "moran",
+    "phantom": "phantom",
+    "vesti-tactical-upgrade": "vesti_tactical_upgrade",
+    "himeno": "himeno",
+    "rouge": "rouge",
+    "eunhwa": "eunhwa",
+    "ludmilla": "ludmilla",
+    "quency-escape-queen": "quency_escape_queen",
+    "n102": "n102",
+    "belorta": "belorta",
+    "yan": "yan",
+    "yuni": "yuni",
+    "ein": "ein",
+    "d-killer-wife": "d_killer_wife",
+    "exia": "exia",
+    "exia-treasure": "exia_treasure",
+    "bready": "bready",
+    "dolla": "dolla",
+    "helm": "helm",
+    "cocoa": "cocoa",
+    "ram": "ram",
+    "maxwell": "maxwell",
+    "milk": "milk",
+    "milk-treasure": "milk_treasure",
+    "trony": "trony",
+    "sakura-bloom-in-summer": "sakura_bloom_in_summer",
+    "red-hood": "red_hood",
+    "rapunzel-pure-grace": "rapunzel_pure_grace",
+    "mari": "mari",
+    "eunhwa-tactical-upgrade": "eunhwa_tactical_upgrade",
+    "ade-agent-bunny": "ade_agent_bunny",
+    "milk-blooming-bunny": "milk_blooming_bunny",
+    "yulha": "yulha",
+    "admi": "admi",
+    "sakura": "sakura",
+    "mary-bay-goddess": "mary_bay_goddess",
+    "frima": "frima",
+    "frima-treasure": "frima_treasure",
+    "helm-aquamarine": "helm_aquamarine",
+    "2b": "2b",
+    "blanc": "blanc",
+    "brid": "brid",
+    "folkwang": "folkwang",
+    "guillotine-winter-slayer": "guillotine_winter_slayer",
+    "rapi": "rapi",
+    "rupee": "rupee",
+    "rupee-winter-shopper": "rupee_winter_shopper",
+    "rosanna-chic-ocean": "rosanna_chic_ocean",
+    "mori": "mori",
+    "privaty": "privaty",
+    "sin": "sin",
+    "dorothy": "dorothy",
+    "tove": "tove",
+    "tove-treasure": "tove_treasure",
+    "eve": "eve",
+    "julia": "julia",
+    "julia-treasure": "julia_treasure",
+    "miranda-treasure": "miranda_treasure",
+    "d": "d",
+    "epinel": "epinel",
+    "alice-wonderland-bunny": "alice_wonderland_bunny",
+    "clay": "clay",
+    "rei": "rei",
+    "liter": "liter",
+    "mast": "mast",
+    "makima": "makima",
+    "misato": "misato",
+    "miranda": "miranda",
+    "nero": "nero",
+    "novel": "novel",
+    "volume": "volume",
+    "signal": "signal",
+    "little-mermaid": "little_mermaid",
+    "sakura-suzuhara": "sakura_abnormal",
+    "nayuta": "nayuta",
+    "modernia": "modernia",
+    "alice": "alice",
+    "mihara-bonding-chain": "mihara_bonding_chain",
+    "cinderella": "cinderella",
+    "rosanna": "rosanna",
+    "ludmilla-winter-owner": "ludmilla_winter_owner",
+    "asuka-wille": "asuka_wille",
+    "aria": "aria",
+    "emma": "emma",
+    "diesel": "diesel",
+    "diesel-treasure": "diesel_treasure",
+    "flora": "flora",
+    "crown": "crown",
+    "guillotine": "guillotine",
+    "kilo": "kilo",
+    "rapi-red-hood": "rapi_red_hood",
+    "rem": "rem",
+    "rei-ayanami": "rei_abnormal",
+    "mast-romantic-maid": "mast_romantic_maid",
+    "neon-blue-ocean": "neon_blue_ocean",
+    "soda": "soda",
+    "elegg": "elegg",
+    "elegg-boom-and-shock": "elegg_boom_and_shock",
+    "emma-tactical-upgrade": "emma_tactical_upgrade",
+    "delta-ninja-thief": "delta_ninja_thief",
+    "snow-white-innocent-days": "snow_white_innocent_days",
+    "label": "label",
+    "velvet": "velvet",
+    "chisato": "chisato",
+    "takina": "takina",
+    "privaty-treasure": "privaty_treasure",
+    "zwei-treasure": "zwei_treasure",
+    "centi-treasure": "centi_treasure",
+    "moran-treasure": "moran_treasure",
+    "eh": "e_h",
+    "arcana-fortune-mate": "arcana_fortune_mate",
+    "snow-crane": "snow_crane",
+    "anis-star": "anis_star",
+    "neon-vision-eye": "neon_vision_eye",
+    "mint": "mint",
+    "prika": "prika",
+    "avistar": "avistar",
+    "ark-ranger-black": "ark_ranger_black",
+    "cinderella-crystal-wave": "cinderella_crystal_wave",
+    "marciana-marine-study": "marciana_marine_study",
+    "sugar-treasure": "sugar_treasure",
+    "phantom-treasure": "phantom_treasure",
+    "flora-treasure": "flora_treasure",
+    "rosanna-treasure": "rosanna_treasure",
+    "laplace-ultimate-hero": "laplace_ultimate_hero",
+    "maxwell-ordinary-mechanic": "maxwell_ordinary_mechanic",
+    "yukiko": "yukiko",
+    "drake-great-villain": "drake_great_villain"
+  },
+  "mapping_method": {
+    "helm-treasure": "resource_id",
+    "snow-white-heavy-arms": "resource_id",
+    "trina": "resource_id",
+    "anis": "resource_id",
+    "jackal": "resource_id",
+    "centi": "resource_id",
+    "rumani": "resource_id",
+    "emilia": "resource_id",
+    "noah": "resource_id",
+    "pascal": "resource_id",
+    "maiden-ice-rose": "resource_id",
+    "drake-treasure": "resource_id",
+    "drake": "resource_id",
+    "viper": "resource_id",
+    "viper-treasure": "resource_id",
+    "maiden": "resource_id",
+    "neon": "resource_id",
+    "noir": "resource_id",
+    "pepper": "resource_id",
+    "sugar": "resource_id",
+    "soda-twinkling-bunny": "resource_id",
+    "laplace-treasure": "resource_id",
+    "liberalio": "resource_id",
+    "mica-snow-buddy": "resource_id",
+    "zwei": "resource_id",
+    "nihilister": "resource_id",
+    "arcana": "resource_id",
+    "a2": "resource_id",
+    "laplace": "resource_id",
+    "rapunzel": "resource_id",
+    "diesel-winter-sweets": "resource_id",
+    "grave": "resource_id",
+    "scarlet": "resource_id",
+    "anchor": "resource_id",
+    "anchor-innocent-maid": "resource_id",
+    "anne-miracle-fairy": "resource_id",
+    "vesti": "resource_id",
+    "bay": "resource_id",
+    "bay-treasure": "resource_id",
+    "biscuit": "resource_id",
+    "tia": "resource_id",
+    "quiry": "resource_id",
+    "crust": "resource_id",
+    "mica": "resource_id",
+    "noise": "resource_id",
+    "power": "resource_id",
+    "sora": "resource_id",
+    "ada": "resource_id",
+    "mana": "resource_id",
+    "anis-sparkling-summer": "resource_id",
+    "jill": "resource_id",
+    "scarlet-black-shadow": "resource_id",
+    "harran": "resource_id",
+    "raven": "resource_id",
+    "privaty-unkind-maid": "resource_id",
+    "guilty": "resource_id",
+    "ether": "resource_id",
+    "poli": "resource_id",
+    "poli-treasure": "resource_id",
+    "leona": "resource_id",
+    "marciana": "resource_id",
+    "mary": "resource_id",
+    "naga": "resource_id",
+    "neve": "resource_id",
+    "dorothy-serendipity": "resource_id",
+    "isabel": "resource_id",
+    "soline-frost-ticket": "resource_id",
+    "brid-silent-track": "resource_id",
+    "k": "resource_id",
+    "quency": "resource_id",
+    "crow": "resource_id",
+    "soline": "resource_id",
+    "asuka": "resource_id",
+    "snow-white": "resource_id",
+    "ade": "resource_id",
+    "rei-ayanami-tentative-name": "resource_id",
+    "mihara": "resource_id",
+    "moran": "resource_id",
+    "phantom": "resource_id",
+    "vesti-tactical-upgrade": "resource_id",
+    "himeno": "resource_id",
+    "rouge": "resource_id",
+    "eunhwa": "resource_id",
+    "ludmilla": "resource_id",
+    "quency-escape-queen": "resource_id",
+    "n102": "resource_id",
+    "belorta": "resource_id",
+    "yan": "resource_id",
+    "yuni": "resource_id",
+    "ein": "resource_id",
+    "d-killer-wife": "resource_id",
+    "exia": "resource_id",
+    "exia-treasure": "resource_id",
+    "bready": "resource_id",
+    "dolla": "resource_id",
+    "helm": "resource_id",
+    "cocoa": "resource_id",
+    "ram": "resource_id",
+    "maxwell": "resource_id",
+    "milk": "resource_id",
+    "milk-treasure": "resource_id",
+    "trony": "resource_id",
+    "sakura-bloom-in-summer": "resource_id",
+    "red-hood": "resource_id",
+    "rapunzel-pure-grace": "resource_id",
+    "mari": "resource_id",
+    "eunhwa-tactical-upgrade": "resource_id",
+    "ade-agent-bunny": "resource_id",
+    "milk-blooming-bunny": "resource_id",
+    "yulha": "resource_id",
+    "admi": "resource_id",
+    "sakura": "resource_id",
+    "mary-bay-goddess": "resource_id",
+    "frima": "resource_id",
+    "frima-treasure": "resource_id",
+    "helm-aquamarine": "resource_id",
+    "2b": "resource_id",
+    "blanc": "resource_id",
+    "brid": "resource_id",
+    "folkwang": "resource_id",
+    "guillotine-winter-slayer": "resource_id",
+    "rapi": "resource_id",
+    "rupee": "resource_id",
+    "rupee-winter-shopper": "resource_id",
+    "rosanna-chic-ocean": "resource_id",
+    "mori": "resource_id",
+    "privaty": "resource_id",
+    "sin": "resource_id",
+    "dorothy": "resource_id",
+    "tove": "resource_id",
+    "tove-treasure": "resource_id",
+    "eve": "resource_id",
+    "julia": "resource_id",
+    "julia-treasure": "resource_id",
+    "miranda-treasure": "resource_id",
+    "d": "resource_id",
+    "epinel": "resource_id",
+    "alice-wonderland-bunny": "resource_id",
+    "clay": "resource_id",
+    "rei": "resource_id",
+    "liter": "resource_id",
+    "mast": "resource_id",
+    "makima": "resource_id",
+    "misato": "resource_id",
+    "miranda": "resource_id",
+    "nero": "resource_id",
+    "novel": "resource_id",
+    "volume": "resource_id",
+    "signal": "resource_id",
+    "little-mermaid": "resource_id",
+    "sakura-suzuhara": "resource_id",
+    "nayuta": "resource_id",
+    "modernia": "resource_id",
+    "alice": "resource_id",
+    "mihara-bonding-chain": "resource_id",
+    "cinderella": "resource_id",
+    "rosanna": "resource_id",
+    "ludmilla-winter-owner": "resource_id",
+    "asuka-wille": "resource_id",
+    "aria": "resource_id",
+    "emma": "resource_id",
+    "diesel": "resource_id",
+    "diesel-treasure": "resource_id",
+    "flora": "resource_id",
+    "crown": "resource_id",
+    "guillotine": "resource_id",
+    "kilo": "resource_id",
+    "rapi-red-hood": "resource_id",
+    "rem": "resource_id",
+    "rei-ayanami": "resource_id",
+    "mast-romantic-maid": "resource_id",
+    "neon-blue-ocean": "resource_id",
+    "soda": "resource_id",
+    "elegg": "resource_id",
+    "elegg-boom-and-shock": "resource_id",
+    "emma-tactical-upgrade": "resource_id",
+    "delta-ninja-thief": "resource_id",
+    "snow-white-innocent-days": "resource_id",
+    "label": "resource_id",
+    "velvet": "resource_id",
+    "chisato": "resource_id",
+    "takina": "resource_id",
+    "privaty-treasure": "resource_id",
+    "zwei-treasure": "resource_id",
+    "centi-treasure": "resource_id",
+    "moran-treasure": "resource_id",
+    "eh": "exact_english_name",
+    "arcana-fortune-mate": "exact_english_name",
+    "snow-crane": "exact_english_name",
+    "anis-star": "exact_english_name",
+    "neon-vision-eye": "exact_english_name",
+    "mint": "exact_english_name",
+    "prika": "exact_english_name",
+    "avistar": "exact_english_name",
+    "ark-ranger-black": "exact_english_name",
+    "cinderella-crystal-wave": "exact_english_name",
+    "marciana-marine-study": "exact_english_name",
+    "sugar-treasure": "resource_id",
+    "phantom-treasure": "resource_id",
+    "flora-treasure": "resource_id",
+    "rosanna-treasure": "resource_id",
+    "laplace-ultimate-hero": "exact_english_name",
+    "maxwell-ordinary-mechanic": "exact_english_name",
+    "yukiko": "exact_english_name",
+    "drake-great-villain": "exact_english_name"
+  },
+  "unmapped": [
+    "queen",
+    "guilty-mighty-bunny",
+    "sin-swift-bunny",
+    "belorta-pumpkin-witch",
+    "marian-queen",
+    "rapunzel-sanctuary",
+    "scarlet-goddeath"
+  ],
+  "variants": [
+    {
+      "key": "helm_treasure",
+      "base_key": "helm",
+      "name": "海伦 珍藏",
+      "name_code": "5066",
+      "burst": 3
+    },
+    {
+      "key": "drake_treasure",
+      "base_key": "drake",
+      "name": "德雷克 珍藏",
+      "name_code": "5024",
+      "burst": 3
+    },
+    {
+      "key": "viper_treasure",
+      "base_key": "viper",
+      "name": "毒蛇 珍藏",
+      "name_code": "1022",
+      "burst": 2
+    },
+    {
+      "key": "laplace_treasure",
+      "base_key": "laplace",
+      "name": "拉普拉斯 珍藏",
+      "name_code": "1010",
+      "burst": 3
+    },
+    {
+      "key": "bay_treasure",
+      "base_key": "bay",
+      "name": "贝伊 珍藏",
+      "name_code": "5111",
+      "burst": 2
+    },
+    {
+      "key": "poli_treasure",
+      "base_key": "poli",
+      "name": "波莉 珍藏",
+      "name_code": "5016",
+      "burst": 2
+    },
+    {
+      "key": "exia_treasure",
+      "base_key": "exia",
+      "name": "艾可希雅 珍藏",
+      "name_code": "5003",
+      "burst": 1
+    },
+    {
+      "key": "milk_treasure",
+      "base_key": "milk",
+      "name": "米尔克 珍藏",
+      "name_code": "5028",
+      "burst": 1
+    },
+    {
+      "key": "frima_treasure",
+      "base_key": "frima",
+      "name": "普琳玛 珍藏",
+      "name_code": "5010",
+      "burst": 1
+    },
+    {
+      "key": "tove_treasure",
+      "base_key": "tove",
+      "name": "托比 珍藏",
+      "name_code": "5081",
+      "burst": 1
+    },
+    {
+      "key": "julia_treasure",
+      "base_key": "julia",
+      "name": "尤莉亚 珍藏",
+      "name_code": "5014",
+      "burst": 3
+    },
+    {
+      "key": "miranda_treasure",
+      "base_key": "miranda",
+      "name": "米兰达 珍藏",
+      "name_code": "5017",
+      "burst": 1
+    },
+    {
+      "key": "diesel_treasure",
+      "base_key": "diesel",
+      "name": "迪塞尔 珍藏",
+      "name_code": "5020",
+      "burst": 2
+    },
+    {
+      "key": "privaty_treasure",
+      "base_key": "privaty",
+      "name": "普丽瓦蒂 珍藏",
+      "name_code": "5007",
+      "burst": 3
+    },
+    {
+      "key": "zwei_treasure",
+      "base_key": "zwei",
+      "name": "茨瓦伊 珍藏",
+      "name_code": "5088",
+      "burst": 1
+    },
+    {
+      "key": "centi_treasure",
+      "base_key": "centi",
+      "name": "桑迪 珍藏",
+      "name_code": "5021",
+      "burst": 2
+    },
+    {
+      "key": "moran_treasure",
+      "base_key": "moran",
+      "name": "牡丹 珍藏",
+      "name_code": "1021",
+      "burst": 1
+    },
+    {
+      "key": "sugar_treasure",
+      "base_key": "sugar",
+      "name": "舒格 珍藏",
+      "name_code": "5002",
+      "burst": 3
+    },
+    {
+      "key": "phantom_treasure",
+      "base_key": "phantom",
+      "name": "潘托姆 珍藏",
+      "name_code": "5122",
+      "burst": 3
+    },
+    {
+      "key": "flora_treasure",
+      "base_key": "flora",
+      "name": "芙罗拉 珍藏",
+      "name_code": "5126",
+      "burst": 2
+    },
+    {
+      "key": "rosanna_treasure",
+      "base_key": "rosanna",
+      "name": "罗珊娜 珍藏",
+      "name_code": "5045",
+      "burst": 1
+    }
+  ],
+  "names": {
+    "helm_treasure": {
+      "en": "Helm: Treasure",
+      "zh-TW": "海倫 珍藏",
+      "zh-CN": "海伦 珍藏",
+      "ja": "ヘルム：宝物"
+    },
+    "snow_white_heavy_arms": {
+      "en": "Snow White: Heavy Arms",
+      "zh-TW": "白雪公主:重型武裝",
+      "zh-CN": "白雪公主:重型武装",
+      "ja": "スノーホワイト：ヘビーアームズ"
+    },
+    "trina": {
+      "en": "Trina",
+      "zh-TW": "特蕾娜",
+      "zh-CN": "特蕾娜",
+      "ja": "トリナ"
+    },
+    "anis": {
+      "en": "Anis",
+      "zh-TW": "阿妮斯",
+      "zh-CN": "阿妮斯",
+      "ja": "アニス"
+    },
+    "jackal": {
+      "en": "Jackal",
+      "zh-TW": "豺狼",
+      "zh-CN": "豺狼",
+      "ja": "ジャッカル"
+    },
+    "centi": {
+      "en": "Centi",
+      "zh-TW": "桑迪",
+      "zh-CN": "桑迪",
+      "ja": "センチ"
+    },
+    "rumani": {
+      "en": "Rumani",
+      "zh-TW": "魯瑪妮",
+      "zh-CN": "鲁玛妮",
+      "ja": "ルマニ"
+    },
+    "emilia": {
+      "en": "Emilia",
+      "zh-TW": "愛蜜莉雅",
+      "zh-CN": "爱蜜莉雅",
+      "ja": "エミリア"
+    },
+    "noah": {
+      "en": "Noah",
+      "zh-TW": "諾雅",
+      "zh-CN": "诺雅",
+      "ja": "ノア"
+    },
+    "pascal": {
+      "en": "Pascal",
+      "zh-TW": "帕斯卡",
+      "zh-CN": "帕斯卡",
+      "ja": "パスカル"
+    },
+    "maiden_ice_rose": {
+      "en": "Maiden: Ice Rose",
+      "zh-TW": "梅登:冰玫瑰",
+      "zh-CN": "梅登:冰玫瑰",
+      "ja": "メイデン：アイスローズ"
+    },
+    "drake_treasure": {
+      "en": "Drake: Treasure",
+      "zh-TW": "德雷克 珍藏",
+      "zh-CN": "德雷克 珍藏",
+      "ja": "ドレイク：宝物"
+    },
+    "drake": {
+      "en": "Drake",
+      "zh-TW": "德雷克",
+      "zh-CN": "德雷克",
+      "ja": "ドレイク"
+    },
+    "viper": {
+      "en": "Viper",
+      "zh-TW": "毒蛇",
+      "zh-CN": "毒蛇",
+      "ja": "バイパー"
+    },
+    "viper_treasure": {
+      "en": "Viper: Treasure",
+      "zh-TW": "毒蛇 珍藏",
+      "zh-CN": "毒蛇 珍藏",
+      "ja": "バイパー：宝物"
+    },
+    "maiden": {
+      "en": "Maiden",
+      "zh-TW": "梅登",
+      "zh-CN": "梅登",
+      "ja": "メイデン"
+    },
+    "neon": {
+      "en": "Neon",
+      "zh-TW": "尼恩",
+      "zh-CN": "尼恩",
+      "ja": "ネオン"
+    },
+    "noir": {
+      "en": "Noir",
+      "zh-TW": "諾亞爾",
+      "zh-CN": "诺亚尔",
+      "ja": "ノワール"
+    },
+    "pepper": {
+      "en": "Pepper",
+      "zh-TW": "佩珀",
+      "zh-CN": "佩珀",
+      "ja": "ペッパー"
+    },
+    "sugar": {
+      "en": "Sugar",
+      "zh-TW": "舒格",
+      "zh-CN": "舒格",
+      "ja": "シュガー"
+    },
+    "soda_twinkling_bunny": {
+      "en": "Soda: Twinkling Bunny",
+      "zh-TW": "索達:閃亮兔女郎",
+      "zh-CN": "索达:闪亮兔女郎",
+      "ja": "ソーダ：トゥインクルバニー"
+    },
+    "laplace_treasure": {
+      "en": "Laplace: Treasure",
+      "zh-TW": "拉普拉斯 珍藏",
+      "zh-CN": "拉普拉斯 珍藏",
+      "ja": "ラプラス：宝物"
+    },
+    "liberalio": {
+      "en": "Liberalio",
+      "zh-TW": "莉貝雷利奧(水母)",
+      "zh-CN": "莉贝雷利奥(水母)",
+      "ja": "リバーレリオ"
+    },
+    "mica_snow_buddy": {
+      "en": "Mica: Snow Buddy",
+      "zh-TW": "米卡:雪地夥伴",
+      "zh-CN": "米卡:雪地伙伴",
+      "ja": "ミカ：スノーバディ"
+    },
+    "zwei": {
+      "en": "Zwei",
+      "zh-TW": "茨瓦伊",
+      "zh-CN": "茨瓦伊",
+      "ja": "ツバイ"
+    },
+    "nihilister": {
+      "en": "Nihilister",
+      "zh-TW": "尼希利斯塔",
+      "zh-CN": "尼希利斯塔",
+      "ja": "ニヒリスター"
+    },
+    "arcana": {
+      "en": "Arcana",
+      "zh-TW": "阿爾卡娜",
+      "zh-CN": "阿尔卡娜",
+      "ja": "アルカナ"
+    },
+    "a2": {
+      "en": "A2",
+      "zh-TW": "A2",
+      "zh-CN": "A2",
+      "ja": "A2"
+    },
+    "laplace": {
+      "en": "Laplace",
+      "zh-TW": "拉普拉斯",
+      "zh-CN": "拉普拉斯",
+      "ja": "ラプラス"
+    },
+    "rapunzel": {
+      "en": "Rapunzel",
+      "zh-TW": "長髮公主",
+      "zh-CN": "长发公主",
+      "ja": "ラプンツェル"
+    },
+    "diesel_winter_sweets": {
+      "en": "Diesel: Winter Sweets",
+      "zh-TW": "迪塞爾:冬日甜心",
+      "zh-CN": "迪塞尔:冬日甜心",
+      "ja": "ディーゼル：ウィンタースイーツ"
+    },
+    "grave": {
+      "en": "Grave",
+      "zh-TW": "格拉維",
+      "zh-CN": "格拉维",
+      "ja": "グレイブ"
+    },
+    "scarlet": {
+      "en": "Scarlet",
+      "zh-TW": "紅蓮",
+      "zh-CN": "红莲",
+      "ja": "紅蓮"
+    },
+    "anchor": {
+      "en": "Anchor",
+      "zh-TW": "安克",
+      "zh-CN": "安克",
+      "ja": "アンカー"
+    },
+    "anchor_innocent_maid": {
+      "en": "Anchor: Innocent Maid",
+      "zh-TW": "安克:天真的女僕",
+      "zh-CN": "安克:天真的女仆",
+      "ja": "アンカー：イノセントメイド"
+    },
+    "anne_miracle_fairy": {
+      "en": "Anne: Miracle Fairy",
+      "zh-TW": "安妮:奇蹟仙女",
+      "zh-CN": "安妮:奇迹仙女",
+      "ja": "エヌ：ミラクルフェアリー"
+    },
+    "vesti": {
+      "en": "Vesti",
+      "zh-TW": "貝斯蒂",
+      "zh-CN": "贝斯蒂",
+      "ja": "ベスティー"
+    },
+    "bay": {
+      "en": "Bay",
+      "zh-TW": "貝伊",
+      "zh-CN": "贝伊",
+      "ja": "ベイ"
+    },
+    "bay_treasure": {
+      "en": "Bay: Treasure",
+      "zh-TW": "貝伊 珍藏",
+      "zh-CN": "贝伊 珍藏",
+      "ja": "ベイ：宝物"
+    },
+    "biscuit": {
+      "en": "Biscuit",
+      "zh-TW": "餅乾",
+      "zh-CN": "饼干",
+      "ja": "ビスケット"
+    },
+    "tia": {
+      "en": "Tia",
+      "zh-TW": "蒂亞",
+      "zh-CN": "蒂亚",
+      "ja": "ティア"
+    },
+    "quiry": {
+      "en": "Quiry",
+      "zh-TW": "基裏",
+      "zh-CN": "基里",
+      "ja": "キリ"
+    },
+    "crust": {
+      "en": "Crust",
+      "zh-TW": "克拉斯特",
+      "zh-CN": "克拉斯特",
+      "ja": "クラスト"
+    },
+    "mica": {
+      "en": "Mica",
+      "zh-TW": "米卡",
+      "zh-CN": "米卡",
+      "ja": "ミカ"
+    },
+    "noise": {
+      "en": "Noise",
+      "zh-TW": "諾伊斯",
+      "zh-CN": "诺伊斯",
+      "ja": "ノイズ"
+    },
+    "power": {
+      "en": "Power",
+      "zh-TW": "帕瓦",
+      "zh-CN": "帕瓦",
+      "ja": "パワー"
+    },
+    "sora": {
+      "en": "Sora",
+      "zh-TW": "索拉",
+      "zh-CN": "索拉",
+      "ja": "ソラ"
+    },
+    "ada": {
+      "en": "Ada",
+      "zh-TW": "艾達·王",
+      "zh-CN": "艾达·王",
+      "ja": "エイダ・ウォン"
+    },
+    "mana": {
+      "en": "Mana",
+      "zh-TW": "瑪娜",
+      "zh-CN": "玛娜",
+      "ja": "マナ"
+    },
+    "anis_sparkling_summer": {
+      "en": "Anis: Sparkling Summer",
+      "zh-TW": "阿妮斯:閃耀夏日",
+      "zh-CN": "阿妮斯:闪耀夏日",
+      "ja": "アニス：スパークリングサマー"
+    },
+    "jill": {
+      "en": "Jill",
+      "zh-TW": "吉兒·華倫泰",
+      "zh-CN": "吉儿·华伦泰",
+      "ja": "ジル・バレンタイン"
+    },
+    "scarlet_black_shadow": {
+      "en": "Scarlet: Black Shadow",
+      "zh-TW": "紅蓮:暗影",
+      "zh-CN": "红莲:暗影",
+      "ja": "紅蓮：ブラックシャドウ"
+    },
+    "harran": {
+      "en": "Harran",
+      "zh-TW": "哈蘭",
+      "zh-CN": "哈兰",
+      "ja": "ハラン"
+    },
+    "raven": {
+      "en": "Raven",
+      "zh-TW": "渡鴉",
+      "zh-CN": "渡鸦",
+      "ja": "レイヴン"
+    },
+    "privaty_unkind_maid": {
+      "en": "Privaty: Unkind Maid",
+      "zh-TW": "普麗瓦蒂:不友善的女僕",
+      "zh-CN": "普丽瓦蒂:不友善的女仆",
+      "ja": "プリバティ：アンカインド・メイド"
+    },
+    "guilty": {
+      "en": "Guilty",
+      "zh-TW": "吉爾提",
+      "zh-CN": "吉尔提",
+      "ja": "ギルティ"
+    },
+    "ether": {
+      "en": "Ether",
+      "zh-TW": "艾瑟兒",
+      "zh-CN": "艾瑟儿",
+      "ja": "エーテル"
+    },
+    "poli": {
+      "en": "Poli",
+      "zh-TW": "波莉",
+      "zh-CN": "波莉",
+      "ja": "ポリ"
+    },
+    "poli_treasure": {
+      "en": "Poli: Treasure",
+      "zh-TW": "波莉 珍藏",
+      "zh-CN": "波莉 珍藏",
+      "ja": "ポリ：宝物"
+    },
+    "leona": {
+      "en": "Leona",
+      "zh-TW": "萊昂納",
+      "zh-CN": "莱昂纳",
+      "ja": "レオナ"
+    },
+    "marciana": {
+      "en": "Marciana",
+      "zh-TW": "瑪律恰那",
+      "zh-CN": "玛律恰那",
+      "ja": "マルチャーナ"
+    },
+    "mary": {
+      "en": "Mary",
+      "zh-TW": "梅里",
+      "zh-CN": "梅里",
+      "ja": "メアリー"
+    },
+    "naga": {
+      "en": "Naga",
+      "zh-TW": "娜嘉",
+      "zh-CN": "娜嘉",
+      "ja": "ナガ"
+    },
+    "neve": {
+      "en": "Neve",
+      "zh-TW": "尼夫",
+      "zh-CN": "尼夫",
+      "ja": "ネヴェ"
+    },
+    "dorothy_serendipity": {
+      "en": "Dorothy: Serendipity",
+      "zh-TW": "桃樂絲:機緣巧遇",
+      "zh-CN": "桃乐丝:机缘巧遇",
+      "ja": "ドロシー：セレンディピティ"
+    },
+    "isabel": {
+      "en": "Isabel",
+      "zh-TW": "伊莎貝爾",
+      "zh-CN": "伊莎贝尔",
+      "ja": "イサベル"
+    },
+    "soline_frost_ticket": {
+      "en": "Soline: Frost Ticket",
+      "zh-TW": "索林:霜雪車票",
+      "zh-CN": "索林:霜雪车票",
+      "ja": "ソリン：フロストチケット"
+    },
+    "brid_silent_track": {
+      "en": "Brid: Silent Track",
+      "zh-TW": "布麗德:靜默軌道",
+      "zh-CN": "布丽德:静默轨道",
+      "ja": "ブリッド：サイレントトラック"
+    },
+    "k": {
+      "en": "K",
+      "zh-TW": "K",
+      "zh-CN": "K",
+      "ja": "K"
+    },
+    "quency": {
+      "en": "Quency",
+      "zh-TW": "坎西",
+      "zh-CN": "坎西",
+      "ja": "クエンシー"
+    },
+    "crow": {
+      "en": "Crow",
+      "zh-TW": "克拉烏",
+      "zh-CN": "克拉乌",
+      "ja": "クロウ"
+    },
+    "soline": {
+      "en": "Soline",
+      "zh-TW": "索林",
+      "zh-CN": "索林",
+      "ja": "ソリン"
+    },
+    "asuka": {
+      "en": "Asuka",
+      "zh-TW": "明日香",
+      "zh-CN": "明日香",
+      "ja": "式波・アスカ・ラングレー"
+    },
+    "snow_white": {
+      "en": "Snow White",
+      "zh-TW": "白雪公主",
+      "zh-CN": "白雪公主",
+      "ja": "スノーホワイト"
+    },
+    "ade": {
+      "en": "Ade",
+      "zh-TW": "愛德",
+      "zh-CN": "爱德",
+      "ja": "エード"
+    },
+    "rei_tentative_name": {
+      "en": "Rei Ayanami (Tentative Name)",
+      "zh-TW": "零（二期）",
+      "zh-CN": "零（二期）",
+      "ja": "アヤナミレイ(仮称)"
+    },
+    "mihara": {
+      "en": "Mihara",
+      "zh-TW": "米哈拉",
+      "zh-CN": "米哈拉",
+      "ja": "ミハラ"
+    },
+    "moran": {
+      "en": "Moran",
+      "zh-TW": "牡丹",
+      "zh-CN": "牡丹",
+      "ja": "モラン"
+    },
+    "phantom": {
+      "en": "Phantom",
+      "zh-TW": "潘託姆",
+      "zh-CN": "潘托姆",
+      "ja": "ファントム"
+    },
+    "vesti_tactical_upgrade": {
+      "en": "Vesti: Tactical Upgrade",
+      "zh-TW": "貝斯蒂:戰術升級",
+      "zh-CN": "贝斯蒂:战术升级",
+      "ja": "ベスティー：タクティカル・アップ"
+    },
+    "himeno": {
+      "en": "Himeno",
+      "zh-TW": "姬野",
+      "zh-CN": "姬野",
+      "ja": "姫野"
+    },
+    "rouge": {
+      "en": "Rouge",
+      "zh-TW": "露姬",
+      "zh-CN": "露姬",
+      "ja": "ルージュ"
+    },
+    "eunhwa": {
+      "en": "Eunhwa",
+      "zh-TW": "銀華",
+      "zh-CN": "银华",
+      "ja": "ウンファ"
+    },
+    "ludmilla": {
+      "en": "Ludmilla",
+      "zh-TW": "魯德米拉",
+      "zh-CN": "鲁德米拉",
+      "ja": "ルドミラ"
+    },
+    "quency_escape_queen": {
+      "en": "Quency: Escape Queen",
+      "zh-TW": "坎西:逃生女王",
+      "zh-CN": "坎西:逃生女王",
+      "ja": "クエンシー：エスケープクイーン"
+    },
+    "n102": {
+      "en": "N102",
+      "zh-TW": "N102",
+      "zh-CN": "N102",
+      "ja": "N102"
+    },
+    "belorta": {
+      "en": "Belorta",
+      "zh-TW": "貝洛塔",
+      "zh-CN": "贝洛塔",
+      "ja": "Belorta"
+    },
+    "yan": {
+      "en": "Yan",
+      "zh-TW": "楊",
+      "zh-CN": "杨",
+      "ja": "ヤン"
+    },
+    "yuni": {
+      "en": "Yuni",
+      "zh-TW": "尤妮",
+      "zh-CN": "尤妮",
+      "ja": "ユニ"
+    },
+    "ein": {
+      "en": "Ein",
+      "zh-TW": "愛因",
+      "zh-CN": "爱因",
+      "ja": "アイン"
+    },
+    "d_killer_wife": {
+      "en": "D: Killer Wife",
+      "zh-TW": "D:殺手妻子",
+      "zh-CN": "D:杀手妻子",
+      "ja": "D：キラーワイフ"
+    },
+    "exia": {
+      "en": "Exia",
+      "zh-TW": "艾可希雅",
+      "zh-CN": "艾可希雅",
+      "ja": "エクシア"
+    },
+    "exia_treasure": {
+      "en": "Exia: Treasure",
+      "zh-TW": "艾可希雅 珍藏",
+      "zh-CN": "艾可希雅 珍藏",
+      "ja": "エクシア：宝物"
+    },
+    "bready": {
+      "en": "Bready",
+      "zh-TW": "布蕾德",
+      "zh-CN": "布蕾德",
+      "ja": "ブレッディ"
+    },
+    "dolla": {
+      "en": "Dolla",
+      "zh-TW": "朵拉",
+      "zh-CN": "朵拉",
+      "ja": "ドラー"
+    },
+    "helm": {
+      "en": "Helm",
+      "zh-TW": "海倫",
+      "zh-CN": "海伦",
+      "ja": "ヘルム"
+    },
+    "cocoa": {
+      "en": "Cocoa",
+      "zh-TW": "可可",
+      "zh-CN": "可可",
+      "ja": "ココア"
+    },
+    "ram": {
+      "en": "Ram",
+      "zh-TW": "拉姆",
+      "zh-CN": "拉姆",
+      "ja": "ラム"
+    },
+    "maxwell": {
+      "en": "Maxwell",
+      "zh-TW": "麥斯威爾",
+      "zh-CN": "麦斯威尔",
+      "ja": "マクスウェル"
+    },
+    "milk": {
+      "en": "Milk",
+      "zh-TW": "米爾克",
+      "zh-CN": "米尔克",
+      "ja": "ミルク"
+    },
+    "milk_treasure": {
+      "en": "Milk: Treasure",
+      "zh-TW": "米爾克 珍藏",
+      "zh-CN": "米尔克 珍藏",
+      "ja": "ミルク：宝物"
+    },
+    "trony": {
+      "en": "Trony",
+      "zh-TW": "特羅尼",
+      "zh-CN": "特罗尼",
+      "ja": "トロニー"
+    },
+    "sakura_bloom_in_summer": {
+      "en": "Sakura: Bloom in Summer",
+      "zh-TW": "櫻花:夏日綻放",
+      "zh-CN": "樱花:夏日绽放",
+      "ja": "サクラ：ブルーム・イン・サマー"
+    },
+    "red_hood": {
+      "en": "Red Hood",
+      "zh-TW": "小紅帽",
+      "zh-CN": "小红帽",
+      "ja": "レッドフード"
+    },
+    "rapunzel_pure_grace": {
+      "en": "Rapunzel: Pure Grace",
+      "zh-TW": "長髮公主:純潔恩典",
+      "zh-CN": "长发公主:纯洁恩典",
+      "ja": "ラプンツェル：ピュアグレイス"
+    },
+    "mari": {
+      "en": "Mari",
+      "zh-TW": "真理",
+      "zh-CN": "真理",
+      "ja": "真希波・マリ・イラストリアス"
+    },
+    "eunhwa_tactical_upgrade": {
+      "en": "Eunhwa: Tactical Upgrade",
+      "zh-TW": "銀華:戰術升級",
+      "zh-CN": "银华:战术升级",
+      "ja": "ウンファ：タクティカル・アップ"
+    },
+    "ade_agent_bunny": {
+      "en": "Ade: Agent Bunny",
+      "zh-TW": "愛德:特務兔女郎",
+      "zh-CN": "爱德:特务兔女郎",
+      "ja": "エード：エージェントバニー"
+    },
+    "milk_blooming_bunny": {
+      "en": "Milk: Blooming Bunny",
+      "zh-TW": "米爾克:花漾兔女郎",
+      "zh-CN": "米尔克:花漾兔女郎",
+      "ja": "ミルク：ブルーミングバニー"
+    },
+    "yulha": {
+      "en": "Yulha",
+      "zh-TW": "尤爾夏",
+      "zh-CN": "尤尔夏",
+      "ja": "ユルハ"
+    },
+    "admi": {
+      "en": "Admi",
+      "zh-TW": "艾德米",
+      "zh-CN": "艾德米",
+      "ja": "アドミ"
+    },
+    "sakura": {
+      "en": "Sakura",
+      "zh-TW": "櫻花",
+      "zh-CN": "樱花",
+      "ja": "サクラ"
+    },
+    "mary_bay_goddess": {
+      "en": "Mary: Bay Goddess",
+      "zh-TW": "梅里:海灣女神",
+      "zh-CN": "梅里:海湾女神",
+      "ja": "メアリー：ベイゴッデス"
+    },
+    "frima": {
+      "en": "Frima",
+      "zh-TW": "普琳瑪",
+      "zh-CN": "普琳玛",
+      "ja": "プリム"
+    },
+    "frima_treasure": {
+      "en": "Frima: Treasure",
+      "zh-TW": "普琳瑪 珍藏",
+      "zh-CN": "普琳玛 珍藏",
+      "ja": "プリム：宝物"
+    },
+    "helm_aquamarine": {
+      "en": "Helm: Aquamarine",
+      "zh-TW": "海倫:海藍寶石",
+      "zh-CN": "海伦:海蓝宝石",
+      "ja": "ヘルム：アクアマリン"
+    },
+    "2b": {
+      "en": "2B",
+      "zh-TW": "2B",
+      "zh-CN": "2B",
+      "ja": "2B"
+    },
+    "blanc": {
+      "en": "Blanc",
+      "zh-TW": "布蘭兒",
+      "zh-CN": "布兰儿",
+      "ja": "ブラン"
+    },
+    "brid": {
+      "en": "Brid",
+      "zh-TW": "布麗德",
+      "zh-CN": "布丽德",
+      "ja": "ブリッド"
+    },
+    "folkwang": {
+      "en": "Folkwang",
+      "zh-TW": "富克旺",
+      "zh-CN": "富克旺",
+      "ja": "フォルクヴァン"
+    },
+    "guillotine_winter_slayer": {
+      "en": "Guillotine: Winter Slayer",
+      "zh-TW": "吉蘿婷:寒冬殺手",
+      "zh-CN": "吉萝婷:寒冬杀手",
+      "ja": "ギロチン：ウィンタースレイヤー"
+    },
+    "rapi": {
+      "en": "Rapi",
+      "zh-TW": "拉毗",
+      "zh-CN": "拉毗",
+      "ja": "ラピ"
+    },
+    "rupee": {
+      "en": "Rupee",
+      "zh-TW": "露菲",
+      "zh-CN": "露菲",
+      "ja": "ルピー"
+    },
+    "rupee_winter_shopper": {
+      "en": "Rupee: Winter Shopper",
+      "zh-TW": "露菲:冬日購物狂",
+      "zh-CN": "露菲:冬日购物狂",
+      "ja": "ルピー：ウィンターショッパー"
+    },
+    "rosanna_chic_ocean": {
+      "en": "Rosanna: Chic Ocean",
+      "zh-TW": "羅珊娜:高雅海洋",
+      "zh-CN": "罗珊娜:高雅海洋",
+      "ja": "ロザンナ：シックオーシャン"
+    },
+    "mori": {
+      "en": "Mori",
+      "zh-TW": "莫莉",
+      "zh-CN": "莫莉",
+      "ja": "モリー"
+    },
+    "privaty": {
+      "en": "Privaty",
+      "zh-TW": "普麗瓦蒂",
+      "zh-CN": "普丽瓦蒂",
+      "ja": "プリバティ"
+    },
+    "sin": {
+      "en": "Sin",
+      "zh-TW": "森",
+      "zh-CN": "森",
+      "ja": "シン"
+    },
+    "dorothy": {
+      "en": "Dorothy",
+      "zh-TW": "桃樂絲",
+      "zh-CN": "桃乐丝",
+      "ja": "ドロシー"
+    },
+    "tove": {
+      "en": "Tove",
+      "zh-TW": "託比",
+      "zh-CN": "托比",
+      "ja": "トーブ"
+    },
+    "tove_treasure": {
+      "en": "Tove: Treasure",
+      "zh-TW": "託比 珍藏",
+      "zh-CN": "托比 珍藏",
+      "ja": "トーブ：宝物"
+    },
+    "eve": {
+      "en": "EVE",
+      "zh-TW": "伊芙",
+      "zh-CN": "伊芙",
+      "ja": "イヴ"
+    },
+    "julia": {
+      "en": "Julia",
+      "zh-TW": "尤莉亞",
+      "zh-CN": "尤莉亚",
+      "ja": "ジュリア"
+    },
+    "julia_treasure": {
+      "en": "Julia: Treasure",
+      "zh-TW": "尤莉亞 珍藏",
+      "zh-CN": "尤莉亚 珍藏",
+      "ja": "ジュリア：宝物"
+    },
+    "miranda_treasure": {
+      "en": "Miranda: Treasure",
+      "zh-TW": "米蘭達 珍藏",
+      "zh-CN": "米兰达 珍藏",
+      "ja": "ミランダ：宝物"
+    },
+    "d": {
+      "en": "D",
+      "zh-TW": "D",
+      "zh-CN": "D",
+      "ja": "D"
+    },
+    "epinel": {
+      "en": "Epinel",
+      "zh-TW": "艾菲涅爾",
+      "zh-CN": "艾菲涅尔",
+      "ja": "エピネル"
+    },
+    "alice_wonderland_bunny": {
+      "en": "Alice: Wonderland Bunny",
+      "zh-TW": "愛麗絲:仙境兔女郎",
+      "zh-CN": "爱丽丝:仙境兔女郎",
+      "ja": "アリス：ワンダーランドバニー"
+    },
+    "clay": {
+      "en": "Clay",
+      "zh-TW": "克雷伊",
+      "zh-CN": "克雷伊",
+      "ja": "クレイ"
+    },
+    "rei": {
+      "en": "Rei",
+      "zh-TW": "萊伊",
+      "zh-CN": "莱伊",
+      "ja": "ライ"
+    },
+    "liter": {
+      "en": "Liter",
+      "zh-TW": "麗塔",
+      "zh-CN": "丽塔",
+      "ja": "リター"
+    },
+    "mast": {
+      "en": "Mast",
+      "zh-TW": "馬斯特",
+      "zh-CN": "马斯特",
+      "ja": "マスト"
+    },
+    "makima": {
+      "en": "Makima",
+      "zh-TW": "瑪奇瑪",
+      "zh-CN": "玛奇玛",
+      "ja": "マキマ"
+    },
+    "misato": {
+      "en": "Misato",
+      "zh-TW": "美里",
+      "zh-CN": "美里",
+      "ja": "葛城ミサト"
+    },
+    "miranda": {
+      "en": "Miranda",
+      "zh-TW": "米蘭達",
+      "zh-CN": "米兰达",
+      "ja": "ミランダ"
+    },
+    "nero": {
+      "en": "Nero",
+      "zh-TW": "尼羅",
+      "zh-CN": "尼罗",
+      "ja": "ネロ"
+    },
+    "novel": {
+      "en": "Novel",
+      "zh-TW": "諾薇爾",
+      "zh-CN": "诺薇尔",
+      "ja": "ノベル"
+    },
+    "volume": {
+      "en": "Volume",
+      "zh-TW": "沃綸姆",
+      "zh-CN": "沃纶姆",
+      "ja": "ボリューム"
+    },
+    "signal": {
+      "en": "Signal",
+      "zh-TW": "西格娜",
+      "zh-CN": "西格娜",
+      "ja": "シグナル"
+    },
+    "little_mermaid": {
+      "en": "Little Mermaid",
+      "zh-TW": "小美人魚",
+      "zh-CN": "小美人鱼",
+      "ja": "リトルマーメイド"
+    },
+    "sakura_abnormal": {
+      "en": "Sakura Suzuhara",
+      "zh-TW": "櫻",
+      "zh-CN": "樱",
+      "ja": "鈴原サクラ"
+    },
+    "nayuta": {
+      "en": "Nayuta",
+      "zh-TW": "娜由塔",
+      "zh-CN": "娜由塔",
+      "ja": "ナユタ"
+    },
+    "modernia": {
+      "en": "Modernia",
+      "zh-TW": "神罰",
+      "zh-CN": "神罚",
+      "ja": "モダニア"
+    },
+    "alice": {
+      "en": "Alice",
+      "zh-TW": "愛麗絲",
+      "zh-CN": "爱丽丝",
+      "ja": "アリス"
+    },
+    "mihara_bonding_chain": {
+      "en": "Mihara: Bonding Chain",
+      "zh-TW": "米哈拉:靈魂鎖鏈",
+      "zh-CN": "米哈拉:灵魂锁链",
+      "ja": "ミハラ：ボンディングチェーン"
+    },
+    "cinderella": {
+      "en": "Cinderella",
+      "zh-TW": "灰姑娘",
+      "zh-CN": "灰姑娘",
+      "ja": "シンデレラ"
+    },
+    "rosanna": {
+      "en": "Rosanna",
+      "zh-TW": "羅珊娜",
+      "zh-CN": "罗珊娜",
+      "ja": "ロザンナ"
+    },
+    "ludmilla_winter_owner": {
+      "en": "Ludmilla: Winter Owner",
+      "zh-TW": "魯德米拉:冬日之主",
+      "zh-CN": "鲁德米拉:冬日之主",
+      "ja": "ルドミラ：ウィンターオーナー"
+    },
+    "asuka_wille": {
+      "en": "Asuka: WILLE",
+      "zh-TW": "明日香:WILLE",
+      "zh-CN": "明日香:WILLE",
+      "ja": "式波・アスカ・ラングレー：WILLE"
+    },
+    "aria": {
+      "en": "Aria",
+      "zh-TW": "阿莉亞",
+      "zh-CN": "阿莉亚",
+      "ja": "アリア"
+    },
+    "emma": {
+      "en": "Emma",
+      "zh-TW": "艾瑪",
+      "zh-CN": "艾玛",
+      "ja": "エマ"
+    },
+    "diesel": {
+      "en": "Diesel",
+      "zh-TW": "迪塞爾",
+      "zh-CN": "迪塞尔",
+      "ja": "ディーゼル"
+    },
+    "diesel_treasure": {
+      "en": "Diesel: Treasure",
+      "zh-TW": "迪塞爾 珍藏",
+      "zh-CN": "迪塞尔 珍藏",
+      "ja": "ディーゼル：宝物"
+    },
+    "flora": {
+      "en": "Flora",
+      "zh-TW": "芙蘿拉",
+      "zh-CN": "芙萝拉",
+      "ja": "フローラ"
+    },
+    "crown": {
+      "en": "Crown",
+      "zh-TW": "皇冠",
+      "zh-CN": "皇冠",
+      "ja": "クラウン"
+    },
+    "guillotine": {
+      "en": "Guillotine",
+      "zh-TW": "吉蘿婷",
+      "zh-CN": "吉萝婷",
+      "ja": "ギロチン"
+    },
+    "kilo": {
+      "en": "Kilo",
+      "zh-TW": "吉洛",
+      "zh-CN": "吉洛",
+      "ja": "キロ"
+    },
+    "rapi_red_hood": {
+      "en": "Rapi: Red Hood",
+      "zh-TW": "拉毗:小紅帽",
+      "zh-CN": "拉毗:小红帽",
+      "ja": "ラピ：レッドフード"
+    },
+    "rem": {
+      "en": "Rem",
+      "zh-TW": "雷姆",
+      "zh-CN": "雷姆",
+      "ja": "レム"
+    },
+    "rei_abnormal": {
+      "en": "Rei Ayanami",
+      "zh-TW": "零（一期）",
+      "zh-CN": "零（一期）",
+      "ja": "綾波レイ"
+    },
+    "mast_romantic_maid": {
+      "en": "Mast: Romantic Maid",
+      "zh-TW": "馬斯特:浪漫的女僕",
+      "zh-CN": "马斯特:浪漫的女仆",
+      "ja": "マスト：ロマンチックメイド"
+    },
+    "neon_blue_ocean": {
+      "en": "Neon: Blue Ocean",
+      "zh-TW": "尼恩:藍色海洋",
+      "zh-CN": "尼恩:蓝色海洋",
+      "ja": "ネオン：ブルーオーシャン"
+    },
+    "soda": {
+      "en": "Soda",
+      "zh-TW": "索達",
+      "zh-CN": "索达",
+      "ja": "ソーダ"
+    },
+    "elegg": {
+      "en": "Elegg",
+      "zh-TW": "伊萊格",
+      "zh-CN": "伊莱格",
+      "ja": "エレグ"
+    },
+    "elegg_boom_and_shock": {
+      "en": "Elegg: Boom and Shock",
+      "zh-TW": "伊萊格:BOOM與驚嚇",
+      "zh-CN": "伊莱格:BOOM与惊吓",
+      "ja": "エレグ：ブーム・アンド・ショック"
+    },
+    "emma_tactical_upgrade": {
+      "en": "Emma: Tactical Upgrade",
+      "zh-TW": "艾瑪:戰術升級",
+      "zh-CN": "艾玛:战术升级",
+      "ja": "エマ：タクティカル・アップ"
+    },
+    "delta_ninja_thief": {
+      "en": "Delta: Ninja Thief",
+      "zh-TW": "德爾塔:怪盜忍者",
+      "zh-CN": "德尔塔:怪盗忍者",
+      "ja": "デルタ：ニンジャシーフ"
+    },
+    "snow_white_innocent_days": {
+      "en": "Snow White: Innocent Days",
+      "zh-TW": "白雪公主:純真年代",
+      "zh-CN": "白雪公主:纯真年代",
+      "ja": "スノーホワイト：イノセントデイズ"
+    },
+    "label": {
+      "en": "Label",
+      "zh-TW": "蕾貝兒",
+      "zh-CN": "蕾贝儿",
+      "ja": "レーベル"
+    },
+    "velvet": {
+      "en": "Velvet",
+      "zh-TW": "薇爾維特",
+      "zh-CN": "薇尔维特",
+      "ja": "ベルベット"
+    },
+    "chisato": {
+      "en": "Chisato",
+      "zh-TW": "千束",
+      "zh-CN": "千束",
+      "ja": "錦木千束"
+    },
+    "takina": {
+      "en": "Takina",
+      "zh-TW": "瀧奈",
+      "zh-CN": "泷奈",
+      "ja": "井ノ上たきな"
+    },
+    "privaty_treasure": {
+      "en": "Privaty: Treasure",
+      "zh-TW": "普麗瓦蒂 珍藏",
+      "zh-CN": "普丽瓦蒂 珍藏",
+      "ja": "プリバティ：宝物"
+    },
+    "zwei_treasure": {
+      "en": "Zwei: Treasure",
+      "zh-TW": "茨瓦伊 珍藏",
+      "zh-CN": "茨瓦伊 珍藏",
+      "ja": "ツバイ：宝物"
+    },
+    "centi_treasure": {
+      "en": "Centi: Treasure",
+      "zh-TW": "桑迪 珍藏",
+      "zh-CN": "桑迪 珍藏",
+      "ja": "センチ：宝物"
+    },
+    "moran_treasure": {
+      "en": "Moran: Treasure",
+      "zh-TW": "牡丹 珍藏",
+      "zh-CN": "牡丹 珍藏",
+      "ja": "モラン：宝物"
+    },
+    "e_h": {
+      "en": "E.H.",
+      "zh-TW": "E.H.",
+      "zh-CN": "E.H.",
+      "ja": "E.H."
+    },
+    "arcana_fortune_mate": {
+      "en": "Arcana: Fortune Mate",
+      "zh-TW": "阿爾卡娜:命運伴侶",
+      "zh-CN": "阿尔卡娜:命运伴侣",
+      "ja": "アルカナ：フォーチュンメイト"
+    },
+    "snow_crane": {
+      "en": "Snow Crane",
+      "zh-TW": "白鶴",
+      "zh-CN": "白鹤",
+      "ja": "シラツル"
+    },
+    "anis_star": {
+      "en": "Anis: Star",
+      "zh-TW": "阿妮斯:超級巨星",
+      "zh-CN": "阿妮斯:超级巨星",
+      "ja": "アニス：スター"
+    },
+    "neon_vision_eye": {
+      "en": "Neon: Vision Eye",
+      "zh-TW": "尼恩:透視之眼",
+      "zh-CN": "尼恩:透视之眼",
+      "ja": "ネオン：ビジョン・アイ"
+    },
+    "mint": {
+      "en": "Mint",
+      "zh-TW": "敏特",
+      "zh-CN": "敏特",
+      "ja": "ミント"
+    },
+    "prika": {
+      "en": "Prika",
+      "zh-TW": "普莉卡",
+      "zh-CN": "普莉卡",
+      "ja": "プリカ"
+    },
+    "avistar": {
+      "en": "Avistar",
+      "zh-TW": "阿維斯塔",
+      "zh-CN": "阿维斯塔",
+      "ja": "アビスタ"
+    },
+    "ark_ranger_black": {
+      "en": "Ark Ranger Black",
+      "zh-TW": "方舟黑色遊俠",
+      "zh-CN": "方舟黑色游侠",
+      "ja": "アークレンジャー・ブラック"
+    },
+    "cinderella_crystal_wave": {
+      "en": "Cinderella: Crystal Wave",
+      "zh-TW": "灰姑娘:琉璃波光",
+      "zh-CN": "灰姑娘:琉璃波光",
+      "ja": "シンデレラ：クリスタルウェーブ"
+    },
+    "marciana_marine_study": {
+      "en": "Marciana: Marine Study",
+      "zh-TW": "瑪律恰那:海洋進修",
+      "zh-CN": "玛律恰那:海洋进修",
+      "ja": "マルチャーナ：マリンスタディ"
+    },
+    "sugar_treasure": {
+      "en": "Sugar: Treasure",
+      "zh-TW": "舒格 珍藏",
+      "zh-CN": "舒格 珍藏",
+      "ja": "シュガー：宝物"
+    },
+    "phantom_treasure": {
+      "en": "Phantom: Treasure",
+      "zh-TW": "潘託姆 珍藏",
+      "zh-CN": "潘托姆 珍藏",
+      "ja": "ファントム：宝物"
+    },
+    "flora_treasure": {
+      "en": "Flora: Treasure",
+      "zh-TW": "芙蘿拉 珍藏",
+      "zh-CN": "芙萝拉 珍藏",
+      "ja": "フローラ：宝物"
+    },
+    "rosanna_treasure": {
+      "en": "Rosanna: Treasure",
+      "zh-TW": "羅珊娜 珍藏",
+      "zh-CN": "罗珊娜 珍藏",
+      "ja": "ロザンナ：宝物"
+    },
+    "laplace_ultimate_hero": {
+      "en": "Laplace: Ultimate Hero",
+      "zh-TW": "拉普拉斯:究極英雄",
+      "zh-CN": "拉普拉斯:究极英雄",
+      "ja": "ラプラス：アルティメットヒーロー"
+    },
+    "maxwell_ordinary_mechanic": {
+      "en": "Maxwell: Ordinary Mechanic",
+      "zh-TW": "麥斯威爾:平凡技師",
+      "zh-CN": "麦斯威尔:平凡技师",
+      "ja": "マクスウェル：オーディナリーメカニック"
+    },
+    "yukiko": {
+      "en": "Yukiko",
+      "zh-TW": "雪子",
+      "zh-CN": "雪子",
+      "ja": "天城雪子"
+    },
+    "drake_great_villain": {
+      "en": "Drake: Great Villain",
+      "zh-TW": "德雷克:終極反派",
+      "zh-CN": "德雷克:终极反派",
+      "ja": "ドレイク：グレイトヴィラン"
+    }
+  },
+  "parameters": {
+    "helm_treasure": {
+      "2": 39.82,
+      "2.5": 39.82,
+      "3": 59.73,
+      "3.5": 59.73,
+      "4": 79.64,
+      "5": 99.55
+    },
+    "snow_white_heavy_arms": {
+      "2": 33.6,
+      "2.5": 61.6,
+      "3": 67.2,
+      "3.5": 92.4,
+      "4": 100.8,
+      "5": 123.2
+    },
+    "trina": {
+      "2": 28.8,
+      "2.5": 28.8,
+      "3": 43.2,
+      "3.5": 43.2,
+      "4": 57.6,
+      "5": 72.0
+    },
+    "anis": {
+      "2": 28.4,
+      "2.5": 28.4,
+      "3": 42.6,
+      "3.5": 42.6,
+      "4": 56.8,
+      "5": 71.0
+    },
+    "jackal": {
+      "2": 28.4,
+      "2.5": 28.4,
+      "3": 42.6,
+      "3.5": 42.6,
+      "4": 56.8,
+      "5": 71.0
+    },
+    "centi": {
+      "2": 27.6,
+      "2.5": 27.6,
+      "3": 41.4,
+      "3.5": 41.4,
+      "4": 55.2,
+      "5": 69.0
+    },
+    "rumani": {
+      "2": 26.0,
+      "2.5": 26.0,
+      "3": 39.0,
+      "3.5": 39.0,
+      "4": 52.0,
+      "5": 65.0
+    },
+    "emilia": {
+      "2": 25.2,
+      "2.5": 25.2,
+      "3": 37.8,
+      "3.5": 37.8,
+      "4": 50.4,
+      "5": 63.0
+    },
+    "noah": {
+      "2": 24.0,
+      "2.5": 24.0,
+      "3": 36.0,
+      "3.5": 36.0,
+      "4": 48.0,
+      "5": 60.0
+    },
+    "pascal": {
+      "2": 18.4,
+      "2.5": 23.0,
+      "3": 27.6,
+      "3.5": 27.6,
+      "4": 27.6,
+      "5": 32.2
+    },
+    "maiden_ice_rose": {
+      "2": 18.2,
+      "2.5": 18.2,
+      "3": 27.3,
+      "3.5": 27.3,
+      "4": 36.4,
+      "5": 45.5
+    },
+    "drake_treasure": {
+      "2": 18.0,
+      "2.5": 22.95,
+      "3": 27.45,
+      "3.5": 31.95,
+      "4": 36.45,
+      "5": 40.95
+    },
+    "drake": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "viper": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "viper_treasure": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "maiden": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "neon": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "noir": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "pepper": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "sugar": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "soda_twinkling_bunny": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "laplace_treasure": {
+      "2": 17.4,
+      "2.5": 17.4,
+      "3": 26.1,
+      "3.5": 26.1,
+      "4": 34.8,
+      "5": 43.5
+    },
+    "liberalio": {
+      "2": 16.8,
+      "2.5": 19.6,
+      "3": 33.6,
+      "3.5": 33.6,
+      "4": 44.8,
+      "5": 50.4
+    },
+    "mica_snow_buddy": {
+      "2": 15.2,
+      "2.5": 18.4,
+      "3": 22.8,
+      "3.5": 26.0,
+      "4": 30.4,
+      "5": 38.0
+    },
+    "zwei": {
+      "2": 14.0,
+      "2.5": 17.5,
+      "3": 21.0,
+      "3.5": 24.5,
+      "4": 28.0,
+      "5": 31.5
+    },
+    "nihilister": {
+      "2": 14.0,
+      "2.5": 14.0,
+      "3": 25.2,
+      "3.5": 25.2,
+      "4": 36.4,
+      "5": 47.6
+    },
+    "arcana": {
+      "2": 12.0,
+      "2.5": 12.0,
+      "3": 18.0,
+      "3.5": 18.0,
+      "4": 24.0,
+      "5": 24.0
+    },
+    "a2": {
+      "2": 11.7,
+      "2.5": 11.7,
+      "3": 23.4,
+      "3.5": 23.4,
+      "4": 23.4,
+      "5": 35.1
+    },
+    "laplace": {
+      "2": 11.6,
+      "2.5": 11.6,
+      "3": 17.4,
+      "3.5": 17.4,
+      "4": 23.2,
+      "5": 29.0
+    },
+    "rapunzel": {
+      "2": 11.6,
+      "2.5": 11.6,
+      "3": 17.4,
+      "3.5": 17.4,
+      "4": 23.2,
+      "5": 29.0
+    },
+    "diesel_winter_sweets": {
+      "2": 11.6,
+      "2.5": 11.6,
+      "3": 17.4,
+      "3.5": 17.4,
+      "4": 23.2,
+      "5": 29.0
+    },
+    "grave": {
+      "2": 11.25,
+      "2.5": 13.95,
+      "3": 17.1,
+      "3.5": 19.8,
+      "4": 22.5,
+      "5": 27.0
+    },
+    "scarlet": {
+      "2": 11.25,
+      "2.5": 13.95,
+      "3": 17.1,
+      "3.5": 19.8,
+      "4": 22.5,
+      "5": 27.0
+    },
+    "anchor": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "anchor_innocent_maid": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "anne_miracle_fairy": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "vesti": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "bay": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "bay_treasure": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "biscuit": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "tia": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "quiry": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "crust": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "mica": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "noise": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "power": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "sora": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "ada": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "mana": {
+      "2": 10.65,
+      "2.5": 13.206,
+      "3": 16.188,
+      "3.5": 18.744,
+      "4": 21.3,
+      "5": 25.56
+    },
+    "anis_sparkling_summer": {
+      "2": 10.0,
+      "2.5": 13.0,
+      "3": 13.0,
+      "3.5": 13.0,
+      "4": 15.5,
+      "5": 18.0
+    },
+    "jill": {
+      "2": 8.8,
+      "2.5": 12.1,
+      "3": 13.2,
+      "3.5": 14.3,
+      "4": 15.4,
+      "5": 17.6
+    },
+    "scarlet_black_shadow": {
+      "2": 8.75,
+      "2.5": 11.25,
+      "3": 13.75,
+      "3.5": 18.75,
+      "4": 21.25,
+      "5": 23.75
+    },
+    "harran": {
+      "2": 8.7,
+      "2.5": 8.7,
+      "3": 14.5,
+      "3.5": 14.5,
+      "4": 20.3,
+      "5": 26.1
+    },
+    "raven": {
+      "2": 8.4,
+      "2.5": 8.4,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 18.2,
+      "5": 21.7
+    },
+    "privaty_unkind_maid": {
+      "2": 8.4,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "guilty": {
+      "2": 8.0,
+      "2.5": 10.4,
+      "3": 12.8,
+      "3.5": 14.8,
+      "4": 16.8,
+      "5": 19.2
+    },
+    "ether": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "poli": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "poli_treasure": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "leona": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "marciana": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "mary": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "naga": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "neve": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "dorothy_serendipity": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "isabel": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "soline_frost_ticket": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "brid_silent_track": {
+      "2": 8.0,
+      "2.5": 10.2,
+      "3": 12.2,
+      "3.5": 14.2,
+      "4": 16.2,
+      "5": 18.2
+    },
+    "k": {
+      "2": 7.6,
+      "2.5": 9.2,
+      "3": 11.4,
+      "3.5": 13.0,
+      "4": 15.2,
+      "5": 19.0
+    },
+    "quency": {
+      "2": 7.6,
+      "2.5": 9.2,
+      "3": 11.4,
+      "3.5": 13.0,
+      "4": 15.2,
+      "5": 19.0
+    },
+    "crow": {
+      "2": 7.6,
+      "2.5": 9.2,
+      "3": 11.4,
+      "3.5": 13.0,
+      "4": 15.2,
+      "5": 19.0
+    },
+    "soline": {
+      "2": 7.6,
+      "2.5": 9.2,
+      "3": 11.4,
+      "3.5": 13.0,
+      "4": 15.2,
+      "5": 19.0
+    },
+    "asuka": {
+      "2": 7.5,
+      "2.5": 9.3,
+      "3": 11.4,
+      "3.5": 13.2,
+      "4": 15.0,
+      "5": 18.0
+    },
+    "snow_white": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.75,
+      "3.5": 11.25,
+      "4": 12.75,
+      "5": 15.5
+    },
+    "ade": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.5,
+      "3.5": 11.0,
+      "4": 12.5,
+      "5": 15.0
+    },
+    "rei_tentative_name": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.5,
+      "3.5": 11.0,
+      "4": 12.5,
+      "5": 15.0
+    },
+    "mihara": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.5,
+      "3.5": 11.0,
+      "4": 12.5,
+      "5": 15.0
+    },
+    "moran": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.5,
+      "3.5": 11.0,
+      "4": 12.5,
+      "5": 15.0
+    },
+    "phantom": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.5,
+      "3.5": 11.0,
+      "4": 12.5,
+      "5": 15.0
+    },
+    "vesti_tactical_upgrade": {
+      "2": 5.85,
+      "2.5": 17.55,
+      "3": 23.4,
+      "3.5": 23.4,
+      "4": 23.4,
+      "5": 29.25
+    },
+    "himeno": {
+      "2": 5.8,
+      "2.5": 5.8,
+      "3": 8.7,
+      "3.5": 8.7,
+      "4": 11.6,
+      "5": 14.5
+    },
+    "rouge": {
+      "2": 5.8,
+      "2.5": 5.8,
+      "3": 8.7,
+      "3.5": 8.7,
+      "4": 11.6,
+      "5": 14.5
+    },
+    "eunhwa": {
+      "2": 5.8,
+      "2.5": 5.8,
+      "3": 8.7,
+      "3.5": 8.7,
+      "4": 11.6,
+      "5": 14.5
+    },
+    "ludmilla": {
+      "2": 5.7,
+      "2.5": 6.9,
+      "3": 8.55,
+      "3.5": 9.75,
+      "4": 11.4,
+      "5": 14.25
+    },
+    "quency_escape_queen": {
+      "2": 5.624,
+      "2.5": 6.808,
+      "3": 8.436,
+      "3.5": 9.62,
+      "4": 11.248,
+      "5": 14.06
+    },
+    "n102": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 11.2,
+      "3.5": 11.2,
+      "4": 11.2,
+      "5": 16.8
+    },
+    "belorta": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 11.2,
+      "3.5": 11.2,
+      "4": 11.2,
+      "5": 16.8
+    },
+    "yan": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 11.2,
+      "3.5": 11.2,
+      "4": 11.2,
+      "5": 16.8
+    },
+    "yuni": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 11.2,
+      "3.5": 11.2,
+      "4": 11.2,
+      "5": 16.8
+    },
+    "ein": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 14.0,
+      "3.5": 14.0,
+      "4": 16.8,
+      "5": 19.6
+    },
+    "d_killer_wife": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "exia": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "exia_treasure": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "bready": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "dolla": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "helm": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "cocoa": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "ram": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "maxwell": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "milk": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "milk_treasure": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "trony": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "sakura_bloom_in_summer": {
+      "2": 5.6,
+      "2.5": 6.8,
+      "3": 8.4,
+      "3.5": 9.6,
+      "4": 11.0,
+      "5": 13.4
+    },
+    "red_hood": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "rapunzel_pure_grace": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "mari": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "eunhwa_tactical_upgrade": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "ade_agent_bunny": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "milk_blooming_bunny": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "yulha": {
+      "2": 5.5,
+      "2.5": 5.5,
+      "3": 8.25,
+      "3.5": 8.25,
+      "4": 11.0,
+      "5": 13.75
+    },
+    "admi": {
+      "2": 5.4,
+      "2.5": 5.4,
+      "3": 8.1,
+      "3.5": 8.1,
+      "4": 10.8,
+      "5": 13.5
+    },
+    "sakura": {
+      "2": 5.4,
+      "2.5": 5.4,
+      "3": 8.1,
+      "3.5": 8.1,
+      "4": 10.8,
+      "5": 13.5
+    },
+    "mary_bay_goddess": {
+      "2": 5.3,
+      "2.5": 5.3,
+      "3": 7.95,
+      "3.5": 7.95,
+      "4": 10.6,
+      "5": 13.25
+    },
+    "frima": {
+      "2": 5.3,
+      "2.5": 5.3,
+      "3": 7.95,
+      "3.5": 7.95,
+      "4": 10.6,
+      "5": 13.25
+    },
+    "frima_treasure": {
+      "2": 5.3,
+      "2.5": 5.3,
+      "3": 7.95,
+      "3.5": 7.95,
+      "4": 10.6,
+      "5": 13.25
+    },
+    "helm_aquamarine": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.8,
+      "3.5": 9.2,
+      "4": 10.4,
+      "5": 12.8
+    },
+    "2b": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.6
+    },
+    "blanc": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "brid": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "folkwang": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "guillotine_winter_slayer": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "rapi": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "rupee": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "rupee_winter_shopper": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "rosanna_chic_ocean": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "mori": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "privaty": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.2
+    },
+    "sin": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "dorothy": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "tove": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "tove_treasure": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "eve": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.8
+    },
+    "julia": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "julia_treasure": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "miranda_treasure": {
+      "2": 4.3,
+      "2.5": 5.1,
+      "3": 6.2,
+      "3.5": 7.0,
+      "4": 8.1,
+      "5": 10.0
+    },
+    "d": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "epinel": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "alice_wonderland_bunny": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "clay": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "rei": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "liter": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "mast": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "makima": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "misato": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "miranda": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "nero": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "novel": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "volume": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "signal": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "little_mermaid": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "sakura_abnormal": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "nayuta": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "modernia": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "alice": {
+      "2": 2.8,
+      "2.5": 2.8,
+      "3": 5.6,
+      "3.5": 5.6,
+      "4": 5.6,
+      "5": 8.4
+    },
+    "mihara_bonding_chain": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "cinderella": {
+      "2": 1.8,
+      "2.5": 2.25,
+      "3": 3.6,
+      "3.5": 4.05,
+      "4": 4.95,
+      "5": 6.3
+    },
+    "rosanna": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "ludmilla_winter_owner": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "asuka_wille": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "aria": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "emma": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "diesel": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "diesel_treasure": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "flora": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "crown": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "guillotine": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "kilo": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "rapi_red_hood": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "rem": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "rei_abnormal": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "mast_romantic_maid": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "neon_blue_ocean": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "soda": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "elegg": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "elegg_boom_and_shock": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "emma_tactical_upgrade": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "delta_ninja_thief": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "snow_white_innocent_days": {
+      "2": 1.25,
+      "2.5": 1.55,
+      "3": 1.95,
+      "3.5": 2.25,
+      "4": 2.55,
+      "5": 3.3
+    },
+    "label": {
+      "2": 8.52,
+      "2.5": 10.5648,
+      "3": 12.9504,
+      "3.5": 14.9952,
+      "4": 17.04,
+      "5": 20.04
+    },
+    "velvet": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "chisato": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "takina": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "privaty_treasure": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.2
+    },
+    "zwei_treasure": {
+      "2": 14.0,
+      "2.5": 17.5,
+      "3": 21.0,
+      "3.5": 24.5,
+      "4": 28.0,
+      "5": 31.5
+    },
+    "centi_treasure": {
+      "2": 27.6,
+      "2.5": 27.6,
+      "3": 41.4,
+      "3.5": 41.4,
+      "4": 55.2,
+      "5": 69.0
+    },
+    "moran_treasure": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.5,
+      "3.5": 11.0,
+      "4": 12.5,
+      "5": 15.0
+    },
+    "e_h": {
+      "2": 3.8,
+      "2.5": 4.7,
+      "3": 5.7,
+      "3.5": 6.5,
+      "4": 7.5,
+      "5": 9.3
+    },
+    "arcana_fortune_mate": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    },
+    "snow_crane": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "anis_star": {
+      "2": 35.616,
+      "2.5": 35.616,
+      "3": 53.424,
+      "3.5": 71.232,
+      "4": 71.232,
+      "5": 89.04
+    },
+    "neon_vision_eye": {
+      "2": 6.0,
+      "2.5": 6.0,
+      "3": 9.0,
+      "3.5": 12.0,
+      "4": 12.0,
+      "5": 15.0
+    },
+    "mint": {
+      "2": 11.2,
+      "2.5": 11.2,
+      "3": 16.8,
+      "3.5": 16.8,
+      "4": 22.4,
+      "5": 28.0
+    },
+    "prika": {
+      "2": 5.6,
+      "2.5": 5.6,
+      "3": 8.4,
+      "3.5": 8.4,
+      "4": 11.2,
+      "5": 14.0
+    },
+    "avistar": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "ark_ranger_black": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "cinderella_crystal_wave": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "marciana_marine_study": {
+      "2": 5.0,
+      "2.5": 6.2,
+      "3": 7.6,
+      "3.5": 8.8,
+      "4": 10.0,
+      "5": 12.0
+    },
+    "sugar_treasure": {
+      "2": 18.0,
+      "2.5": 22.5,
+      "3": 27.0,
+      "3.5": 31.5,
+      "4": 36.0,
+      "5": 40.5
+    },
+    "phantom_treasure": {
+      "2": 6.25,
+      "2.5": 7.75,
+      "3": 9.5,
+      "3.5": 11.0,
+      "4": 12.5,
+      "5": 15.0
+    },
+    "flora_treasure": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "rosanna_treasure": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "laplace_ultimate_hero": {
+      "2": 12.0,
+      "2.5": 18.0,
+      "3": 24.0,
+      "3.5": 30.2,
+      "4": 32.0,
+      "5": 32.0
+    },
+    "maxwell_ordinary_mechanic": {
+      "2": 19.9,
+      "2.5": 19.9,
+      "3": 29.85,
+      "3.5": 29.85,
+      "4": 39.8,
+      "5": 49.75
+    },
+    "yukiko": {
+      "2": 1.6,
+      "2.5": 2.5,
+      "3": 3.45,
+      "3.5": 4.35,
+      "4": 5.3,
+      "5": 7.35
+    },
+    "drake_great_villain": {
+      "2": 8.0,
+      "2.5": 10.0,
+      "3": 12.0,
+      "3.5": 14.0,
+      "4": 16.0,
+      "5": 18.0
+    }
+  },
+  "templates": [
+    {
+      "id": "moran-system-atk",
+      "archetype": "moran-system",
+      "required": [
+        "moran_treasure"
+      ],
+      "slots": [
+        [
+          "moran_treasure"
+        ],
+        [
+          "scarlet",
+          "snow_white_heavy_arms",
+          "maiden_ice_rose",
+          "scarlet_black_shadow",
+          "ada",
+          "harran",
+          "helm_treasure",
+          "liberalio",
+          "ein"
+        ],
+        [
+          "emilia",
+          "trina",
+          "blanc",
+          "crown",
+          "ada",
+          "neon_vision_eye"
+        ],
+        [
+          "jackal",
+          "noise",
+          "rapunzel",
+          "rosanna",
+          "rumani"
+        ],
+        [
+          "centi",
+          "trina",
+          "bay_treasure",
+          "nero",
+          "noah"
+        ]
+      ],
+      "reason": "牡丹进攻体系（参考模板，效果待实战确认）",
+      "priority": 30,
+      "counters": [
+        "scarlet-nuke"
+      ],
+      "countered_by": [
+        "tactical-trio",
+        "sg-burst"
+      ]
+    },
+    {
+      "id": "moran-system-def",
+      "archetype": "moran-system",
+      "required": [
+        "moran_treasure"
+      ],
+      "slots": [
+        [
+          "moran_treasure"
+        ],
+        [
+          "scarlet",
+          "snow_white_heavy_arms",
+          "maiden_ice_rose",
+          "scarlet_black_shadow",
+          "ada",
+          "helm_treasure",
+          "ein",
+          "liberalio"
+        ],
+        [
+          "emilia",
+          "blanc",
+          "trina",
+          "crown",
+          "ada"
+        ],
+        [
+          "rapunzel",
+          "noise",
+          "nero",
+          "rosanna",
+          "jackal"
+        ],
+        [
+          "bay_treasure",
+          "nero",
+          "centi",
+          "trina",
+          "noah"
+        ]
+      ],
+      "reason": "牡丹防守坚壁（参考模板，效果待实战确认）",
+      "priority": 30,
+      "counters": [
+        "scarlet-nuke",
+        "mermaid-disrupt"
+      ],
+      "countered_by": [
+        "rosanna-counter",
+        "tactical-trio",
+        "sg-burst"
+      ]
+    },
+    {
+      "id": "noah-biscuit-stall",
+      "archetype": "noah-stall",
+      "required": [
+        "noah",
+        "biscuit"
+      ],
+      "slots": [
+        [
+          "helm_treasure",
+          "snow_white_heavy_arms",
+          "alice",
+          "anis_sparkling_summer",
+          "cinderella",
+          "vesti_tactical_upgrade",
+          "rapi_red_hood",
+          "neon_vision_eye"
+        ],
+        [
+          "noah"
+        ],
+        [
+          "biscuit"
+        ],
+        [
+          "rapunzel",
+          "noise",
+          "bay_treasure",
+          "mast_romantic_maid",
+          "trina",
+          "anis_sparkling_summer",
+          "centi"
+        ],
+        [
+          "jackal",
+          "centi",
+          "rosanna",
+          "little_mermaid",
+          "anis_star",
+          "cinderella",
+          "moran_treasure",
+          "rapunzel",
+          "rumani"
+        ]
+      ],
+      "reason": "诺雅 + 饼干持久战（参考模板，效果待实战确认）",
+      "priority": 30,
+      "counters": [
+        "scarlet-nuke",
+        "blanc-indom"
+      ],
+      "countered_by": [
+        "rosanna-counter",
+        "tactical-trio"
+      ]
+    },
+    {
+      "id": "scarlet-jackal-nuke",
+      "archetype": "scarlet-nuke",
+      "required": [
+        "scarlet",
+        "jackal"
+      ],
+      "slots": [
+        [
+          "scarlet"
+        ],
+        [
+          "jackal"
+        ],
+        [
+          "blanc",
+          "trina",
+          "noah",
+          "emilia",
+          "crown",
+          "anchor_innocent_maid"
+        ],
+        [
+          "maiden_ice_rose",
+          "centi",
+          "trina",
+          "bay_treasure",
+          "anchor_innocent_maid",
+          "neon_vision_eye"
+        ],
+        [
+          "rosanna",
+          "centi",
+          "trina",
+          "noise",
+          "rapunzel",
+          "anis_star"
+        ]
+      ],
+      "reason": "红莲 + 豺狼核爆（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [
+        "mermaid-disrupt"
+      ],
+      "countered_by": [
+        "noah-stall",
+        "moran-system",
+        "blanc-indom",
+        "mermaid-disrupt",
+        "rosanna-counter",
+        "cat-team"
+      ]
+    },
+    {
+      "id": "blanc-scarlet-nuke",
+      "archetype": "blanc-indom",
+      "required": [
+        "blanc",
+        "scarlet",
+        "jackal"
+      ],
+      "slots": [
+        [
+          "blanc"
+        ],
+        [
+          "scarlet"
+        ],
+        [
+          "jackal"
+        ],
+        [
+          "centi",
+          "trina",
+          "maiden_ice_rose",
+          "noise"
+        ],
+        [
+          "trina",
+          "centi",
+          "bay_treasure",
+          "takina",
+          "red_hood",
+          "rosanna"
+        ]
+      ],
+      "reason": "布兰儿 + 红莲不屈核爆（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [
+        "mermaid-disrupt"
+      ],
+      "countered_by": [
+        "rosanna-counter",
+        "noah-stall",
+        "mermaid-disrupt"
+      ]
+    },
+    {
+      "id": "little-mermaid-disrupt",
+      "archetype": "mermaid-disrupt",
+      "required": [
+        "little_mermaid"
+      ],
+      "slots": [
+        [
+          "little_mermaid"
+        ],
+        [
+          "scarlet",
+          "maiden_ice_rose",
+          "scarlet_black_shadow",
+          "harran",
+          "ada",
+          "helm_treasure",
+          "liberalio",
+          "neon_vision_eye"
+        ],
+        [
+          "blanc",
+          "trina",
+          "emilia",
+          "crown"
+        ],
+        [
+          "jackal",
+          "centi",
+          "noise",
+          "rapunzel"
+        ],
+        [
+          "centi",
+          "trina",
+          "bay_treasure",
+          "takina"
+        ]
+      ],
+      "reason": "小美人鱼干扰（参考模板，效果待实战确认）",
+      "priority": 10,
+      "counters": [
+        "scarlet-nuke",
+        "blanc-indom"
+      ],
+      "countered_by": [
+        "moran-system",
+        "noah-stall",
+        "blanc-indom",
+        "scarlet-nuke"
+      ]
+    },
+    {
+      "id": "helm-treasure-carry",
+      "archetype": "helm-carry",
+      "required": [
+        "helm_treasure"
+      ],
+      "slots": [
+        [
+          "helm_treasure"
+        ],
+        [
+          "blanc",
+          "noah",
+          "emilia",
+          "crown"
+        ],
+        [
+          "trina",
+          "biscuit",
+          "takina",
+          "bay_treasure"
+        ],
+        [
+          "jackal",
+          "noise",
+          "rapunzel",
+          "rosanna"
+        ],
+        [
+          "centi",
+          "trina",
+          "bay_treasure",
+          "nero"
+        ]
+      ],
+      "reason": "海伦珍藏主C（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [],
+      "countered_by": [
+        "scarlet-nuke"
+      ]
+    },
+    {
+      "id": "rosanna-counter",
+      "archetype": "rosanna-counter",
+      "required": [
+        "rosanna"
+      ],
+      "slots": [
+        [
+          "rosanna"
+        ],
+        [
+          "scarlet",
+          "maiden_ice_rose",
+          "scarlet_black_shadow",
+          "harran",
+          "ada",
+          "helm_treasure"
+        ],
+        [
+          "blanc",
+          "trina",
+          "emilia",
+          "crown"
+        ],
+        [
+          "jackal",
+          "centi",
+          "noise",
+          "rapunzel"
+        ],
+        [
+          "centi",
+          "trina",
+          "bay_treasure",
+          "takina"
+        ]
+      ],
+      "reason": "罗珊娜驱散反制（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [
+        "blanc-indom",
+        "scarlet-nuke"
+      ],
+      "countered_by": [
+        "moran-system"
+      ]
+    },
+    {
+      "id": "nayuta-carry",
+      "archetype": "nayuta-carry",
+      "required": [
+        "nayuta"
+      ],
+      "slots": [
+        [
+          "nayuta"
+        ],
+        [
+          "helm_treasure",
+          "privaty_treasure",
+          "maiden_ice_rose",
+          "scarlet_black_shadow",
+          "ada",
+          "emilia",
+          "cinderella"
+        ],
+        [
+          "moran_treasure",
+          "red_hood",
+          "label",
+          "noah",
+          "blanc",
+          "noise",
+          "bay_treasure"
+        ],
+        [
+          "rumani",
+          "jackal",
+          "centi",
+          "rapunzel",
+          "little_mermaid",
+          "snow_white_heavy_arms",
+          "laplace_treasure",
+          "anis"
+        ],
+        [
+          "centi",
+          "trina",
+          "bay_treasure",
+          "nero",
+          "emilia",
+          "laplace_treasure"
+        ]
+      ],
+      "reason": "娜由塔主C（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [],
+      "countered_by": [
+        "scarlet-nuke"
+      ]
+    },
+    {
+      "id": "cinderella-carry",
+      "archetype": "cinderella-carry",
+      "required": [
+        "cinderella"
+      ],
+      "slots": [
+        [
+          "cinderella"
+        ],
+        [
+          "noah",
+          "blanc",
+          "noise",
+          "bay_treasure"
+        ],
+        [
+          "biscuit",
+          "rapunzel",
+          "takina",
+          "mast_romantic_maid"
+        ],
+        [
+          "jackal",
+          "centi",
+          "rosanna",
+          "little_mermaid"
+        ],
+        [
+          "centi",
+          "trina",
+          "bay_treasure",
+          "nero"
+        ]
+      ],
+      "reason": "灰姑娘主C（参考模板，效果待实战确认）",
+      "priority": 10,
+      "counters": [],
+      "countered_by": [
+        "scarlet-nuke"
+      ]
+    },
+    {
+      "id": "cat-team",
+      "archetype": "cat-team",
+      "required": [
+        "nero",
+        "moran_treasure"
+      ],
+      "slots": [
+        [
+          "nero"
+        ],
+        [
+          "moran_treasure"
+        ],
+        [
+          "helm_treasure",
+          "cinderella",
+          "scarlet",
+          "ada",
+          "nayuta"
+        ],
+        [
+          "rapunzel",
+          "noise",
+          "bay_treasure",
+          "biscuit"
+        ],
+        [
+          "centi",
+          "trina",
+          "jackal",
+          "rosanna"
+        ]
+      ],
+      "reason": "猫队 (尼罗 + 牡丹)（参考模板，效果待实战确认）",
+      "priority": 10,
+      "counters": [
+        "scarlet-nuke",
+        "blanc-indom"
+      ],
+      "countered_by": [
+        "tactical-trio"
+      ]
+    },
+    {
+      "id": "tactical-trio",
+      "archetype": "tactical-trio",
+      "required": [
+        "vesti_tactical_upgrade",
+        "eunhwa_tactical_upgrade",
+        "emma_tactical_upgrade"
+      ],
+      "slots": [
+        [
+          "vesti_tactical_upgrade"
+        ],
+        [
+          "eunhwa_tactical_upgrade"
+        ],
+        [
+          "emma_tactical_upgrade"
+        ],
+        [
+          "rosanna",
+          "jackal",
+          "centi",
+          "noise"
+        ],
+        [
+          "flora_treasure",
+          "mast",
+          "centi",
+          "trina",
+          "bay_treasure",
+          "blanc"
+        ]
+      ],
+      "reason": "战术升级三人组（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [
+        "moran-system",
+        "cat-team",
+        "noah-stall"
+      ],
+      "countered_by": [
+        "scarlet-nuke"
+      ]
+    },
+    {
+      "id": "sg-burst",
+      "archetype": "sg-burst",
+      "required": [
+        "rosanna"
+      ],
+      "slots": [
+        [
+          "rosanna"
+        ],
+        [
+          "blanc",
+          "noah",
+          "crown",
+          "noise"
+        ],
+        [
+          "drake_treasure",
+          "isabel",
+          "neve",
+          "drake",
+          "noir"
+        ],
+        [
+          "jackal",
+          "little_mermaid",
+          "ludmilla",
+          "centi"
+        ],
+        [
+          "centi",
+          "trina",
+          "bay_treasure",
+          "biscuit"
+        ]
+      ],
+      "reason": "霰弹爆裂（参考模板，效果待实战确认）",
+      "priority": 10,
+      "counters": [
+        "moran-system",
+        "cat-team"
+      ],
+      "countered_by": [
+        "noah-stall",
+        "blanc-indom"
+      ]
+    },
+    {
+      "id": "anis-star-neon",
+      "archetype": "anis-star-system",
+      "required": [
+        "anis_star",
+        "neon_vision_eye"
+      ],
+      "slots": [
+        [
+          "anis_star"
+        ],
+        [
+          "neon_vision_eye"
+        ],
+        [
+          "blanc",
+          "crown",
+          "trina",
+          "emilia",
+          "anchor_innocent_maid",
+          "mast_romantic_maid"
+        ],
+        [
+          "jackal",
+          "rapunzel",
+          "noise",
+          "avistar",
+          "anis_sparkling_summer"
+        ],
+        [
+          "centi",
+          "bay_treasure",
+          "biscuit",
+          "trina"
+        ]
+      ],
+      "reason": "阿妮斯：超级巨星 + 尼恩核爆（参考模板，效果待实战确认）",
+      "priority": 30,
+      "counters": [
+        "scarlet-nuke",
+        "blanc-indom"
+      ],
+      "countered_by": [
+        "mermaid-disrupt"
+      ]
+    },
+    {
+      "id": "privaty-stun",
+      "archetype": "privaty-stun",
+      "required": [
+        "privaty_treasure",
+        "maiden"
+      ],
+      "slots": [
+        [
+          "privaty_treasure"
+        ],
+        [
+          "maiden"
+        ],
+        [
+          "blanc",
+          "trina",
+          "crown",
+          "anchor_innocent_maid",
+          "mast_romantic_maid",
+          "naga"
+        ],
+        [
+          "jackal",
+          "rapunzel",
+          "noise",
+          "rouge",
+          "tia"
+        ],
+        [
+          "centi",
+          "bay_treasure",
+          "biscuit",
+          "trina"
+        ]
+      ],
+      "reason": "普丽瓦蒂 + 梅登晕眩锁（参考模板，效果待实战确认）",
+      "priority": 10,
+      "counters": [
+        "scarlet-nuke",
+        "blanc-indom"
+      ],
+      "countered_by": [
+        "noah-stall",
+        "moran-system"
+      ]
+    },
+    {
+      "id": "jackal-bay-share",
+      "archetype": "share-wall",
+      "required": [
+        "jackal",
+        "bay_treasure"
+      ],
+      "slots": [
+        [
+          "jackal"
+        ],
+        [
+          "bay_treasure"
+        ],
+        [
+          "helm_treasure",
+          "scarlet_black_shadow",
+          "liberalio",
+          "maiden_ice_rose",
+          "milk_blooming_bunny",
+          "ein"
+        ],
+        [
+          "mast_romantic_maid",
+          "anchor_innocent_maid",
+          "blanc",
+          "poli_treasure",
+          "trina"
+        ],
+        [
+          "centi",
+          "trina",
+          "noise",
+          "rapunzel"
+        ]
+      ],
+      "reason": "豺狼 + 贝伊伤害分摊（参考模板，效果待实战确认）",
+      "priority": 10,
+      "counters": [
+        "scarlet-nuke",
+        "blanc-indom"
+      ],
+      "countered_by": [
+        "noah-stall",
+        "mermaid-disrupt"
+      ]
+    },
+    {
+      "id": "soda-laplace-stun",
+      "archetype": "soda-laplace",
+      "required": [
+        "soda",
+        "laplace_ultimate_hero",
+        "centi_treasure"
+      ],
+      "slots": [
+        [
+          "soda"
+        ],
+        [
+          "laplace_ultimate_hero"
+        ],
+        [
+          "centi_treasure"
+        ],
+        [
+          "trina"
+        ],
+        [
+          "anis",
+          "helm_treasure",
+          "jackal",
+          "noise"
+        ]
+      ],
+      "reason": "索达 + 拉普拉斯：究极英雄 眩晕速攻（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [
+        "anis-star-system",
+        "sg-burst"
+      ],
+      "countered_by": [
+        "tactical-trio",
+        "noah-launcher"
+      ]
+    },
+    {
+      "id": "anis-star-indom",
+      "archetype": "anis-star-system",
+      "required": [
+        "anis_star",
+        "blanc",
+        "biscuit"
+      ],
+      "slots": [
+        [
+          "anis_star"
+        ],
+        [
+          "blanc"
+        ],
+        [
+          "biscuit"
+        ],
+        [
+          "privaty_treasure",
+          "anis_sparkling_summer",
+          "vesti_tactical_upgrade",
+          "neon_vision_eye",
+          "cinderella"
+        ],
+        [
+          "maiden_ice_rose",
+          "cinderella",
+          "mihara_bonding_chain",
+          "helm_treasure"
+        ]
+      ],
+      "reason": "阿妮斯：超级巨星 + 布兰儿 + 饼干 不屈（参考模板，效果待实战确认）",
+      "priority": 30,
+      "counters": [
+        "soda-laplace",
+        "tactical-trio"
+      ],
+      "countered_by": [
+        "noah-launcher"
+      ]
+    },
+    {
+      "id": "jackal-blanc-indom",
+      "archetype": "blanc-indom",
+      "required": [
+        "jackal",
+        "blanc"
+      ],
+      "slots": [
+        [
+          "jackal"
+        ],
+        [
+          "blanc"
+        ],
+        [
+          "vesti_tactical_upgrade",
+          "snow_white_heavy_arms"
+        ],
+        [
+          "ada",
+          "anis_star",
+          "maiden_ice_rose",
+          "centi"
+        ],
+        [
+          "maiden_ice_rose",
+          "neon_vision_eye",
+          "helm_treasure",
+          "drake_treasure",
+          "emilia",
+          "ada"
+        ]
+      ],
+      "reason": "豺狼 + 布兰儿 不屈（参考模板，效果待实战确认）",
+      "priority": 30,
+      "counters": [
+        "noah-stall"
+      ],
+      "countered_by": [
+        "tactical-trio",
+        "rosanna-counter"
+      ]
+    },
+    {
+      "id": "noah-launcher",
+      "archetype": "noah-launcher",
+      "required": [
+        "noah"
+      ],
+      "slots": [
+        [
+          "noah"
+        ],
+        [
+          "noise",
+          "rumani",
+          "jackal"
+        ],
+        [
+          "neon_vision_eye",
+          "liberalio"
+        ],
+        [
+          "liberalio",
+          "laplace_treasure",
+          "neon_vision_eye",
+          "centi"
+        ],
+        [
+          "centi",
+          "rumani",
+          "jackal",
+          "noise"
+        ]
+      ],
+      "reason": "诺雅火箭筒速攻（参考模板，效果待实战确认）",
+      "priority": 20,
+      "counters": [
+        "soda-laplace",
+        "anis-star-system"
+      ],
+      "countered_by": [
+        "blanc-indom",
+        "noah-stall"
+      ]
+    }
+  ]
+}

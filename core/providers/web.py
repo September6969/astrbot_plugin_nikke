@@ -27,4 +27,5 @@ def create_binding_web_service(
         extension_zip,
         str(config.get("binding_api_key", "")),
         public_base_url=public_base_url,
+        trusted_proxy_ip=str(config.get("web_trusted_proxy_ip") or "").strip(),
     )

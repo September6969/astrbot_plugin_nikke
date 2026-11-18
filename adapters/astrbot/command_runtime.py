@@ -8,6 +8,7 @@ from typing import Any
 from astrbot.api.event import AstrMessageEvent
 
 from ..._version import PLUGIN_VERSION
+from ...application.commands.help import help_detail, help_home
 from .collections import AstrBotAdapterCollection, PluginCommandHandlers
 
 
@@ -99,18 +100,7 @@ class NikkeCommandRuntime:
             if selected == "管理" and not include_admin:
                 return "管理指令仅对管理员显示。"
             return sections[selected] + "\n\n发送 /妮姬 帮助 查看主菜单。"
-        visible = [sections["账号"], sections["查询"], sections["日常"]]
-        if include_admin:
-            visible.append(sections["管理"])
-        return (
-            f"NIKKE 综合助手 {PLUGIN_VERSION}\n\n"
-            "六个入口：帮助｜账号｜我的｜查询｜签到｜兑换\n\n"
-            + "\n\n".join(visible)
-            + "\n\n分类帮助：/妮姬 帮助 账号|查询|日常"
-            + ("|管理" if include_admin else "")
-            + "\n安全提示：不要发送Cookie、密码或转发绑定链接。"
-            + "\n所有 /妮姬 命令均支持使用 #妮姬 触发。"
-        )
+        return help_home(PLUGIN_VERSION, include_admin=include_admin)
 
     async def _dispatch(self, event: AstrMessageEvent, handler: Any, **parameters: str):
         async for result in self._adapters.command.dispatch(
@@ -146,6 +136,19 @@ class NikkeCommandRuntime:
             arg2 = parts[3] if len(parts) > 3 else ""
         key = command.strip().casefold()
 
+        if key in {"竞技场", "arena"}:
+            if self._handlers.arena is None:
+                yield event.plain_result("竞技场功能当前未启用。")
+                return
+            # 原始消息仅在前缀和子命令一致时补全参数，避免框架截断带空格的角色名。
+            raw = normalize_nikke_prefix(str(getattr(event, "message_str", "") or ""))
+            parts = raw.split(maxsplit=3)
+            if (len(parts) == 4 and parts[0].casefold() in {"/妮姬", "/nikke", "妮姬", "nikke"}
+                    and parts[1].casefold() == key and parts[2] == arg1):
+                arg2 = parts[3]
+            async for result in self._dispatch(event, self._handlers.arena, action=arg1, value=arg2):
+                yield result
+            return
         if key in {"tower", "塔层"}:
             async for result in self._dispatch(
                 event, self._handlers.tower, tower=arg1, floor=arg2
@@ -163,7 +166,21 @@ class NikkeCommandRuntime:
                 yield result
             return
         if key in {"", "帮助", "help"}:
-            yield event.plain_result(self._help_text(arg1, self._is_admin(event)))
+            include_admin = self._is_admin(event)
+            arena_handler = self._handlers.arena
+            arena_enabled = bool(arena_handler and arena_handler.enabled)
+            if arg1.strip().casefold() in {"详解", "detail"}:
+                web_routes = getattr(arena_handler, "web_routes", None)
+                yield event.plain_result(help_detail(
+                    arg2, include_admin=include_admin, arena_enabled=arena_enabled,
+                    web_enabled=bool(web_routes and web_routes.active()),
+                    community_enabled=bool(getattr(self._handlers.daily, "_extra_automation", None)),
+                    renewal_enabled=bool(getattr(self._handlers.account, "_session_handler", None)),
+                ))
+            elif not arg1.strip():
+                yield event.plain_result(help_home(PLUGIN_VERSION, include_admin=include_admin, arena=arena_enabled))
+            else:
+                yield event.plain_result(self._help_text(arg1, include_admin))
             return
         if key in {"账号", "account"}:
             async for result in self._account(

@@ -25,6 +25,7 @@ from .adapters.astrbot.command_runtime import NikkeCommandRuntime, normalize_nik
 from .adapters.astrbot.runtime import AstrBotRuntimeAdapter
 from .adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
 from .application.commands.account import AccountCommandHandler
+from .application.commands.arena import ArenaCommandHandler
 from .application.commands.announcement import AnnouncementCommandHandler
 from .application.commands.campaign import CampaignCommandHandler
 from .application.commands.character import CharacterCommandHandler
@@ -175,6 +176,10 @@ class NikkePlugin(Star):
             ),
             tarot=TarotCommandHandler(self.services.tarot),
             tower=TowerCommandHandler(self.services.tower_application),
+            arena=ArenaCommandHandler(
+                self.services.arena_application, enabled=True, web_routes=self.services.arena_web,
+                render=self.presentation.try_t2i,
+            ) if self.services.arena_application is not None else None,
         )
         self._command_runtime = NikkeCommandRuntime(
             adapters=self.adapters,

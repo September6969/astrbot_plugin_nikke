@@ -577,14 +577,15 @@ class ProfileFixtureTests(unittest.TestCase):
 
 
 class HelpTests(unittest.TestCase):
-    def test_help_lists_six_chinese_entries_and_english_aliases(self):
+    def test_help_home_has_short_navigation_and_detail_entry(self):
         from astrbot_plugin_nikke.main import NikkePlugin
 
         text = NikkePlugin._help_text()
-        self.assertIn("六个入口：帮助｜账号｜我的｜查询｜签到｜兑换", text)
-        self.assertIn("/nikke bind", text)
-        self.assertIn("/nikke roster", text)
-        self.assertIn("/nikke cdk", text)
+        self.assertIn("/妮姬 日程", text)
+        self.assertIn("/妮姬 攻略", text)
+        self.assertIn("/妮姬 我的", text)
+        self.assertIn("/妮姬 帮助 详解 入门", text)
+        self.assertLess(len(text), 250)
         self.assertNotIn("/nikke export", text)
         self.assertNotIn("【管理员】", text)
 
