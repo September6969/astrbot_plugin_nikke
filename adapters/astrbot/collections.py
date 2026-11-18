@@ -6,6 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ...application.commands.account import AccountCommandHandler
+from ...application.commands.arena import ArenaCommandHandler
 from ...application.commands.announcement import AnnouncementCommandHandler
 from ...application.commands.cdk import CdkCommandHandler
 from ...application.commands.calendar import CalendarCommandHandler
@@ -37,6 +38,7 @@ class PluginCommandHandlers:
     raid: RaidCommandHandler | None = None
     tarot: TarotCommandHandler | None = None
     tower: TowerCommandHandler | None = None
+    arena: ArenaCommandHandler | None = None
 
 
 @dataclass

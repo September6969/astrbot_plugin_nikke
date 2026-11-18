@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'">
+<style>
+<!-- SHARED_CSS -->
+*{box-sizing:border-box}body{margin:0;width:1000px;padding:38px;background:var(--bg);color:var(--text);font-family:"Noto Sans CJK SC","Microsoft YaHei",sans-serif}
+h1{font-size:38px;margin:0 0 10px}h2{font-size:23px;margin:8px 0 12px}.source{color:var(--muted);font-size:17px}.match{margin-top:22px;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;break-inside:avoid}.lineup{display:flex;gap:10px}.member{width:20%;text-align:center;background:var(--bg);padding:10px 4px;border-radius:6px}.member img{display:block;width:64px;height:64px;object-fit:contain;margin:4px auto 2px}.name{font-size:17px;line-height:1.5;min-height:28px;overflow-wrap:anywhere}.pos{font-size:13px;color:var(--muted)}.details{font-size:18px;line-height:1.65;margin:12px 0 0}.risk{color:#e2c697}.footer{font-size:17px;line-height:1.6;margin-top:24px}
+</style></head><body><h1>{{ title }}</h1><p class="source">{{ source }} · {{ model_version }}</p>
+{% for match in matches %}<section class="match"><h2>{{ match.label }}</h2>
+{% set lineups = [('敌方',match.enemy),('我方',match.team)] if loop.first else [('我方',match.team)] %}{% for label, members in lineups %}<p>{{ label }} P1–P5</p><div class="lineup">{% for member in members %}<div class="member"><div class="pos">P{{ member.position }}</div>{% if member.portrait %}<img src="{{ member.portrait }}" alt="">{% endif %}<div class="name">{{ member.name }}</div></div>{% endfor %}</div>{% endfor %}
+<p class="details">爆裂轴 {{ match.chain }}<br>速度 {{ match.speed }}<br>{{ match.reasons|join('；') }}</p><p class="details risk">{{ match.warnings|join(' ') }}</p></section>{% endfor %}
+<div class="footer">{% for warning in warnings %}<div>{{ warning }}</div>{% endfor %}</div></body></html>

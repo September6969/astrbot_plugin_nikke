@@ -41,6 +41,9 @@ from ..features.tower.application import TowerApplication
 from ..features.voice.application import VoiceApplication
 from ..integrations.web.service import BindingWebService
 from .providers.account import create_account_application
+from .providers.arena import create_arena_application
+from ..features.arena.application import ArenaApplication
+from ..integrations.arena.web_routes import ArenaWebRoutes
 from .providers.announcement import create_announcement_resources
 from .providers.campaign import create_campaign_resources
 from .providers.cdk import create_cdk_service
@@ -98,6 +101,8 @@ class ServiceContainer:
     tower_application: TowerApplication
     community_tasks: CommunityTaskService
     session_renewal: SessionRenewalService
+    arena_application: ArenaApplication | None = None
+    arena_web: ArenaWebRoutes | None = None
 
 
 def create_container(
@@ -161,6 +166,21 @@ def create_container(
     community_tasks, session_renewal = create_community_automation(client=client, store=store, config=config, runner=daily_runner)
     guide_application = create_guide_application(plugin_dir)
     tower_application = create_tower_application(plugin_dir)
+    arena_application = None
+    arena_web = None
+    if config.get("enable_arena") is True:
+        arena_application = create_arena_application(
+            plugin_dir, account_reader=store, gateway=client, identity=character.identity,
+            history_path=data_dir / "arena-history.json" if config.get("arena_external_stats_enabled") is True else None,
+        )
+        arena_web = ArenaWebRoutes(
+            arena_application, origin=web.site_origin,
+            template_root=plugin_dir / "templates" / "arena_web",
+            enabled=lambda: config.get("enable_arena") is True and config.get("arena_web_enabled") is True,
+            assets=asset_manager,
+            listener_ready=lambda: bool(web.runner and web.runner.sites),
+        )
+        web.add_route_installer(arena_web.mount)
 
     return ServiceContainer(
         plugin_dir=plugin_dir,
@@ -169,6 +189,8 @@ def create_container(
         extension_zip=extension_zip,
         store=store,
         account_application=account_application,
+        arena_application=arena_application,
+        arena_web=arena_web,
         character_application=character.application,
         character_stat_resources=character.stat_resources,
         client=client,

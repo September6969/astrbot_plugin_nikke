@@ -1,8 +1,9 @@
 nikke.irises777.xyz {
     encode zstd gzip
     reverse_proxy astrbot:6210
+    log_skip /arena/open/*
 
-    # 绑定链接把一次性令牌放在 URL 路径中，示例默认不启用访问日志，避免令牌进入日志。
+    # 示例默认关闭访问日志。启用站点访问日志时仍须跳过竞技场链接路径。
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"

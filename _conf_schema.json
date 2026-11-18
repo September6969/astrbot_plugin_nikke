@@ -1,4 +1,20 @@
 {
+  "enable_arena": {
+    "description": "竞技场离线解队",
+    "type": "bool",
+    "hint": "启用文字分析与单独受控的编辑入口，使用静态模型及来源快照。",
+    "default": false
+  },
+  "arena_web_enabled": {
+    "description": "竞技场临时网页",
+    "type": "bool",
+    "default": false
+  },
+  "arena_external_stats_enabled": {
+    "description": "竞技场授权统计快照",
+    "type": "bool",
+    "default": false
+  },
   "public_base_url": {
     "description": "绑定服务公网地址",
     "type": "string",
@@ -16,6 +32,12 @@
     "type": "int",
     "hint": "容器内监听端口，公网访问应经过 HTTPS 反向代理。取值 1–65535，超出范围回退默认值 6210。",
     "default": 6210
+  },
+  "web_trusted_proxy_ip": {
+    "description": "可信 Caddy 代理 IP",
+    "type": "string",
+    "hint": "支持一个直接连接插件的 Caddy 容器 IP。只对该对端读取 X-Forwarded-For。留空按连接 IP 限流。",
+    "default": ""
   },
   "binding_api_key": {
     "description": "绑定服务接口密钥",

@@ -11,6 +11,7 @@ import secrets
 import stat
 import time
 from collections import defaultdict, deque
+from ipaddress import ip_address
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -65,27 +66,35 @@ class BindingWebService:
         extension_zip: Path,
         api_key: str = "",
         public_base_url: str = SITE_ORIGIN,
+        trusted_proxy_ip: str = "",
     ):
         parsed = urlsplit(public_base_url)
         if (parsed.scheme != "https" or not parsed.hostname or parsed.username
                 or parsed.password or parsed.path not in ("", "/") or parsed.query or parsed.fragment):
             raise ValueError("绑定服务公网地址必须是HTTPS站点地址，不能包含账号、路径或查询参数")
         self.site_origin = f"https://{parsed.netloc}"
+        self._trusted_proxy_ip = ip_address(trusted_proxy_ip) if trusted_proxy_ip else None
         self.store = store
         self.client = client
         self.extension_zip = extension_zip
         self.api_key = api_key
         self.runner: web.AppRunner | None = None
-        self._requests: dict[str, deque[float]] = defaultdict(deque)
+        self._requests: dict[tuple[str, str], deque[float]] = defaultdict(deque)
+        self._route_installers = []
+
+    def add_route_installer(self, installer) -> None:
+        """在共享站点启动前注册独立业务路由。"""
+        self._route_installers.append(installer)
 
     @web.middleware
     async def security_middleware(self, request: web.Request, handler):
-        host = request.remote or "unknown"
+        host = self._request_ip(request)
         now = time.monotonic()
-        queue = self._requests[host]
+        bucket, limit = request.get("web_rate_limit", ("default", 60))
+        queue = self._requests[(host, bucket)]
         while queue and now - queue[0] > 60:
             queue.popleft()
-        if len(queue) >= 60:
+        if len(queue) >= limit:
             return web.json_response({"ok": False, "error": "请求过于频繁"}, status=429)
         queue.append(now)
         origin = request.headers.get("Origin", "")
@@ -106,6 +115,19 @@ class BindingWebService:
         response.headers["Cache-Control"] = "no-store"
         return response
 
+    def _request_ip(self, request: web.Request) -> str:
+        peer = request.remote or "unknown"
+        if self._trusted_proxy_ip is not None:
+            try:
+                if ip_address(peer) == self._trusted_proxy_ip:
+                    # Caddy 添加的最后一个地址来自实际 TCP 对端。
+                    forwarded = request.headers.getall("X-Forwarded-For", [])
+                    if forwarded:
+                        return str(ip_address(forwarded[-1].rsplit(",", 1)[-1].strip()))
+            except ValueError:
+                pass
+        return peer
+
     def app(self) -> web.Application:
         app = web.Application(middlewares=[self.security_middleware], client_max_size=64 * 1024)
         app.add_routes(
@@ -119,6 +141,8 @@ class BindingWebService:
                 web.options("/{tail:.*}", self.options),
             ]
         )
+        for installer in self._route_installers:
+            installer(app)
         return app
 
     async def start(self, host: str, port: int) -> None:

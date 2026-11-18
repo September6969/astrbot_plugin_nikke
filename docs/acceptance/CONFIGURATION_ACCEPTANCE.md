@@ -1,12 +1,16 @@
 # 配置合同与安全边界
 
-配置 schema 位于 `_conf_schema.json`。下表与 schema 的 23 个键保持一致；默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。2026-10-22 增加社区动作安全预算，未做真实账号或部署验收。
+配置 schema 位于 `_conf_schema.json`。默认值由 AstrBot 配置层提供，插件代码只在缺失时使用相同回退值。
 
 | 配置键 | 默认值 | 作用与边界 |
 | --- | --- | --- |
 | `public_base_url` | `https://nikke.irises777.xyz` | 绑定公网 HTTPS 地址；必须是无账号、路径、查询参数的站点地址。 |
 | `web_host` | `0.0.0.0` | 容器内监听地址；不代表应将端口直接暴露到公网。 |
 | `web_port` | `6210` | 绑定服务容器端口；公网访问应经过 HTTPS 反向代理。 |
+| `web_trusted_proxy_ip` | 空字符串 | 只信任指定直连代理提供的 `X-Forwarded-For`。留空时按直连 IP 限流。 |
+| `enable_arena` | `false` | 开启竞技场文字分析和竞技场功能装配。 |
+| `arena_web_enabled` | `false` | 在竞技场开启时提供私聊的一次性网页编辑入口。 |
+| `arena_external_stats_enabled` | `false` | 在竞技场开启时读取运行数据目录中的授权历史快照。 |
 | `binding_api_key` | 空字符串 | 创建绑定会话的 Bearer 密钥；为空时禁用该接口，不应提交到 Git。 |
 | `allow_group_bind` | `false` | 是否允许群聊生成绑定链接；公开群开启会增加链接被抢用风险。 |
 | `daily_hour` | `8` | 北京时间每日任务小时。 |

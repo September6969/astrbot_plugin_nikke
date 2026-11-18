@@ -10,6 +10,7 @@ from astrbot_plugin_nikke.ui.payloads.raid_member import UnionMemberT2IPayloadBu
 from astrbot_plugin_nikke.ui.payloads.raid_overview import UnionOverviewT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.raid_records import UnionRecordsT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
+from astrbot_plugin_nikke.ui.payloads.arena import ArenaT2IPayloadBuilder
 
 
 class T2IRenderer:
@@ -41,6 +42,12 @@ class T2IRenderer:
         return result
 
     async def render_view(self, page, data, **kwargs):
+        if page in {"arena_matchup", "arena_three_teams"}:
+            async with asyncio.timeout(self.timeout):
+                pages = await asyncio.to_thread(ArenaT2IPayloadBuilder(self.assets).pages, data)
+                if len(pages) == 1:
+                    return await self.render_payload(page, pages[0])
+                return [await self.render_payload(page, payload) for payload in pages]
         if page == "character":
             # 只在线程中准备既有本地资产；原生 HTML 渲染仍为直接异步调用。
             assets = await asyncio.to_thread(self.payload_builder.assets.resolve_character_assets, data)
