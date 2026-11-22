@@ -2,25 +2,14 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping, Protocol
 
-from ..account.errors import CredentialExpiredError
-from .builder import previous_season_with_stats
 from .query import RaidQueryMixin
 from .models import RaidState, UnionRaidOverviewData
-from .participants import RaidRankingData, build_member_ranking, build_ranking
-
-
-_LOGGER = logging.getLogger(__name__)
 
 
 DISPLAY_TIMEZONE = timezone(timedelta(hours=8))
-
-
-class RaidMemberIdentityUnavailable(ValueError):
-    """当前账号没有可用于精确筛选的稳定联盟身份。"""
 
 
 class RaidAccountReader(Protocol):
@@ -31,16 +20,6 @@ class RaidAccountReader(Protocol):
 class RaidGateway(Protocol):
     async def get_union_raid_dashboard(self, account: Mapping[str, Any]) -> Mapping[str, Any]:
         """共享联盟身份返回 Boss、攻击数据及局部失败标记。"""
-
-    async def get_union_raid_overview(
-        self, account: Mapping[str, Any], *, attacks: bool = False
-    ) -> Mapping[str, Any]:
-        """读取联盟突袭概览；攻击记录通过显式参数选择。"""
-
-    async def get_union_raid_snapshot(
-        self, account: Mapping[str, Any]
-    ) -> Mapping[str, Any]:
-        """一次读取联盟身份与当前攻击响应。"""
 
     async def get_union_raid_season(
         self,
@@ -105,110 +84,3 @@ class RaidApplication(RaidQueryMixin):
         if current.tzinfo is None:
             current = current.replace(tzinfo=DISPLAY_TIMEZONE)
         return current.astimezone(DISPLAY_TIMEZONE)
-
-    async def overview(self, qq_id: str) -> UnionRaidOverviewData:
-        account = self._account(qq_id)
-        response = await self._gateway.get_union_raid_overview(account)
-        current = self._query_time()
-        data = self._builder.build(
-            guild_name=str(response["guild_name"]),
-            level_info_payload=response["level_info"],
-            fetched_at=current.strftime("%Y-%m-%d %H:%M"),
-            plugin_version=self._plugin_version,
-            now=current,
-        )
-        previous = data.previous_season
-        guild_id = response.get("guild_id")
-        if (
-            data.raid_state is RaidState.OFFSEASON
-            and previous is not None
-            and previous.season_id
-            and guild_id
-        ):
-            try:
-                historical = await self._gateway.get_union_raid_season(
-                    account,
-                    guild_id=str(guild_id),
-                    season_id=str(previous.season_id),
-                    levels=False,
-                )
-                data.previous_season = previous_season_with_stats(
-                    previous, historical.get("participate_data")
-                )
-            except CredentialExpiredError:
-                raise
-            except Exception as exc:
-                _LOGGER.warning("[NIKKE] 获取上一赛季突袭数据失败: %s", exc)
-        return data
-
-    async def ranking(self, qq_id: str) -> RaidRankingData:
-        account = self._account(qq_id)
-        snapshot = await self._gateway.get_union_raid_snapshot(account)
-        payload = snapshot["level_info"]
-        current = self._query_time()
-        historical = await self._previous_season_attacks(
-            account, payload, current, snapshot.get("guild_id")
-        )
-        if historical is not None:
-            season_id, payload = historical
-            data = build_ranking(payload)
-            season_number = int(season_id) % 1000000 if season_id.isdigit() else season_id
-            data.scope = f"第 {season_number} 季 · LAST_SEASON_RESPONSE"
-            return data
-        return build_ranking(payload)
-
-    async def member(self, qq_id: str) -> RaidRankingData:
-        account = self._account(qq_id)
-        member_openid = str(account.get("game_openid") or "").strip()
-        if not member_openid:
-            raise RaidMemberIdentityUnavailable(
-                "当前账号缺少稳定联盟身份，暂不能安全筛选个人记录。"
-            )
-
-        snapshot = await self._gateway.get_union_raid_snapshot(account)
-        payload = snapshot["level_info"]
-        current = self._query_time()
-        historical = await self._previous_season_attacks(
-            account, payload, current, snapshot.get("guild_id")
-        )
-        if historical is not None:
-            _, payload = historical
-        result = build_member_ranking(payload, member_openid)
-        if historical is not None:
-            result.scope = "LAST_SEASON_MEMBER"
-            result.season_id = historical[0]
-        return result
-
-    async def _previous_season_attacks(
-        self,
-        account: Mapping[str, Any],
-        payload: Mapping[str, Any],
-        now: datetime,
-        guild_id: Any,
-    ) -> tuple[str, Mapping[str, Any]] | None:
-        attacks = payload.get("participate_data")
-        if not isinstance(attacks, list) or attacks:
-            return None
-        if self._builder.resolve_response_state(payload, now=now) is not RaidState.OFFSEASON:
-            return None
-        season_id = self._builder.latest_completed_season_id(now=now)
-        if not season_id:
-            return None
-
-        if not guild_id:
-            return None
-        try:
-            historical = await self._gateway.get_union_raid_season(
-                account,
-                guild_id=str(guild_id),
-                season_id=season_id,
-                levels=False,
-            )
-            historical_attacks = historical.get("participate_data")
-            if isinstance(historical_attacks, list) and historical_attacks:
-                return season_id, historical
-        except CredentialExpiredError:
-            raise
-        except Exception as exc:
-            _LOGGER.warning("[NIKKE] 获取上一赛季突袭攻击记录失败: %s", exc)
-        return None

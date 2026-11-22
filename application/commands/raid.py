@@ -5,10 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 
-from ...features.raid.application import (
-    RaidApplication,
-    RaidMemberIdentityUnavailable,
-)
+from ...features.raid.application import RaidApplication
 from ...features.raid.models import UnionRaidOverviewData
 from ...features.raid.participants import RaidRankingData, format_ranking
 from ...features.account.errors import CredentialExpiredError
