@@ -20,12 +20,12 @@
 | PR-5 | `3ce2679`、`eae8106` | T2I 基础规范、移动端可读性、角色卡负载瘦身 | AUD-017/021/024 |
 | AUD-027 跟进 | `4bcca68` | 生产路由器构造时传入 config，帮助详解写操作主题开关在生产生效 | AUD-027 |
 | PR-6A | `b40def4`、`a7ec3a7`、`0623fe9`、`6c1c818`、`5e5d700` | 56 个重复图标去重与 `core/paths` 统一；删除未用 NotoSansHans OTF 并补许可；塔罗牌面高保真 JPEG（PSNR ≥ 40.2 dB）与逆位缓存无损；语音缺 ffmpeg/ffprobe 告警；删除 0 引用语音模块；资产审计门禁 | AUD-023（Decision 6=A；Spine 预渲染 PNG 未改动） |
-| PR-6B | `c95825f`、`b797ad8`、`085aff1`、`a8e6cc1`、`4337d05`、`4c8406e`、`e78a838`、`543e47a` | 删除 GameKee/官方公告日程源与 O(N²) 跨源合并；组合根注入日程源并清零最后一条跨层边；`schedule_events.json` 单副本；日程展示规则下沉 features；皮肤解析器合并；突袭旧路径、死币种表、主题死键清理；攻略索引缓存；缓存清理加固与 `prune_action_runs` | AUD-023（Decision 5=A） |
+| PR-6B | `c95825f`、`b797ad8`、`085aff1`、`a8e6cc1`、`4337d05`、`4c8406e`、`e78a838`、`543e47a`、`fe51741` | 删除 GameKee/官方公告日程源与 O(N²) 跨源合并；组合根注入日程源并清零最后一条跨层边；`schedule_events.json` 单副本；日程展示规则下沉 features；皮肤解析器合并；突袭旧路径、死币种表、主题死键清理；攻略索引缓存；缓存清理加固与 `prune_action_runs`；审查跟进：攻略缓存命中复核图片边界 | AUD-023（Decision 5=A） |
 | PR-6C | 本节所在提交链 | 删除 `NikkePlugin` 36 个生产 0 可达未注册方法与两个 `_help_text` 包装；`main.py` 阈值 700 → 300 并新增公开成员白名单门禁；删除 79 个非运维 `scripts/` 根兼容壳；`audit_assets` 改用 `CharacterVisualAssetResolver.resolve_costume` 并删除转发类；文档同步 | AUD-023/024 |
 
 ### 当前架构指标
 
-PR-6C 工作树（基于 `543e47a`）上 `python scripts/audit/architecture_metrics.py --check` 退出码 `0`：588 个 Python 源文件、268 个生产模块、1,779 条内部导入边、0 个导入循环、0 个门禁违规；`CROSS_LAYER_BASELINE_ALLOWLIST` 已清空（Phase 0 登记的 8 条跨层边全部转为硬门禁）。
+PR-6C 工作树（基于 `fe51741`）上 `python scripts/audit/architecture_metrics.py --check` 退出码 `0`：588 个 Python 源文件、268 个生产模块、1,779 条内部导入边、0 个导入循环、0 个门禁违规；`CROSS_LAYER_BASELINE_ALLOWLIST` 已清空（Phase 0 登记的 8 条跨层边全部转为硬门禁）。
 
 | 热点 | 当前行数 | 门槛 |
 |---|---:|---:|

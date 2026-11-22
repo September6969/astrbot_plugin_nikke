@@ -163,6 +163,25 @@ def test_main_plugin_public_members_match_allowlist() -> None:
     assert not _violations("main_public_member_allowlist")
 
 
+def test_main_public_member_allowlist_rejects_new_methods_and_class_aliases(tmp_path) -> None:
+    # PR-6C 审查跟进：门禁必须能失败——新增公开方法与类级别别名都要被拦下。
+    (tmp_path / "main.py").write_text(
+        "class NikkePlugin:\n"
+        "    status = None\n"
+        "    alias: object = None\n"
+        "    _private = None\n"
+        "    async def nikke(self): pass\n"
+        "    async def bind(self): pass\n"
+        "    async def terminate(self): pass\n",
+        encoding="utf-8",
+    )
+    flagged = {
+        item["symbol"] for item in collect_metrics(tmp_path)["gate_violations"]
+        if item["category"] == "main_public_member_allowlist"
+    }
+    assert flagged == {"status", "alias", "bind"}
+
+
 def test_feature_and_ui_dependency_directions() -> None:
     feature_violations = _violations("feature_dependency_direction")
     ui_violations = _violations("ui_dependency_direction")

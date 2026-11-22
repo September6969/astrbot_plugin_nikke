@@ -25,7 +25,7 @@
 
 - 版本号以 `_version.py` 的 `PLUGIN_VERSION` 为源，并必须与 `metadata.yaml` 一致。
 - 配置项以 `_conf_schema.json` 为合同，默认值和安全边界见 [配置合同](docs/CONFIGURATION_ACCEPTANCE.md)。
-- 必须通过 CI 的 Python 3.10/3.11/3.12 与 Node 检查；测试和合成预览不能替代真实账号、消息发送或部署证据。
+- 必须通过 CI 的 Python 3.12/3.13 测试矩阵、静态门禁（mypy 与架构指标）与 Node 检查；测试和合成预览不能替代真实账号、消息发送或部署证据。
 
 ## 2026-11-22 REFACTOR V2 系统性重构（PR-0 → PR-6C）
 

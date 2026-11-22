@@ -730,6 +730,16 @@ def collect_metrics(root: Path) -> dict[str, Any]:
                 if not isinstance(node, ast.ClassDef) or node.name != "NikkePlugin":
                     continue
                 for member in node.body:
+                    if isinstance(member, (ast.Assign, ast.AnnAssign)):
+                        # 类级别别名（如 `status = nikke`）同样会成为公开成员，必须纳入白名单门禁。
+                        alias_targets = member.targets if isinstance(member, ast.Assign) else [member.target]
+                        for target in alias_targets:
+                            if isinstance(target, ast.Name) and not target.id.startswith("_"):
+                                plugin_methods.append(
+                                    {"name": target.id, "line": member.lineno,
+                                     "logical_statements": 0, "complexity_hint": 0}
+                                )
+                        continue
                     if not isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef)):
                         continue
                     if member.name.startswith("_") or member.name in {"terminate", "close"}:
