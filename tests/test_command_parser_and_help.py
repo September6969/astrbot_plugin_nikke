@@ -205,3 +205,15 @@ def test_push_alias_points_to_account_category() -> None:
 def test_command_runtime_stays_well_below_size_gate() -> None:
     lines = (ROOT / "adapters" / "astrbot" / "command_runtime.py").read_text(encoding="utf-8").splitlines()
     assert len(lines) <= 330
+
+
+def test_every_runtime_construction_in_main_receives_config() -> None:
+    # 生产路径在 __init__ 中提前构造路由器；漏传 config 会让 AUD-027 的写开关显隐失效。
+    tree = ast.parse((ROOT / "main.py").read_text(encoding="utf-8"))
+    calls = [
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and getattr(node.func, "id", None) == "NikkeCommandRuntime"
+    ]
+    assert calls, "main.py 应构造 NikkeCommandRuntime"
+    for call in calls:
+        assert any(keyword.arg == "config" for keyword in call.keywords), ast.unparse(call)

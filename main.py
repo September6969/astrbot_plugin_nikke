@@ -182,6 +182,7 @@ class NikkePlugin(Star):
         self._command_runtime = NikkeCommandRuntime(
             adapters=self.adapters,
             handlers=self.handlers,
+            config=self.config,
         )
         self.runtime.start()
 
