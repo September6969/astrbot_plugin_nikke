@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Literal, Sequence
 
 from .models import CalendarActivity
-from .ports import CalendarFetchGateway, CalendarVisualPort
+from .ports import CalendarVisualPort
 from .canonical_models import (
     CanonicalEvent,
     Coverage,
@@ -22,8 +22,6 @@ from .canonical_models import (
 )
 from .schedule_adapters import (
     BaseScheduleAdapter,
-    GameKeeScheduleAdapter,
-    OfficialAnnouncementScheduleAdapter,
     ManualOverrideScheduleAdapter,
 )
 from .merge import (
@@ -48,8 +46,6 @@ class ScheduleService:
         data_dir: Path | str,
         *,
         visual_cache: CalendarVisualPort | None | Literal[False] = None,
-        fetch_client: CalendarFetchGateway | None = None,
-        announcement_service: Any = None,
         # 须大于 300s 调度周期，避免正常同步间隔就把数据判为 STALE；连续失败仍转 STALE。
         ttl_seconds: float = 900.0,
         **kwargs: Any,
@@ -69,8 +65,6 @@ class ScheduleService:
         self.cache_path = self.data_dir / "calendar_cache.json"  # 100% 兼容文件
         self.overrides_path = self.data_dir / "schedule_overrides.json"
 
-        self.fetch_client = fetch_client
-        self.announcement_service = announcement_service
         self.ttl_seconds = ttl_seconds
 
         # 视觉缓存
@@ -108,19 +102,11 @@ class ScheduleService:
         self.last_sync_report: dict[str, int] | None = None
         self.last_visual_sync: dict[str, int] | None = None
         self.quality_diagnostics: dict[str, Any] = {
-            "gamekee_rows": 0,
-            "gamekee_valid": 0,
-            "gamekee_malformed": 0,
-            "gamekee_duplicates": 0,
-            "with_visual": 0,
             "canonical_total": 0,
             "identity_matches": 0,
             "canonical_title_matches": 0,
             "identity_ambiguous": 0,
             "identity_distinct": 0,
-            "official_deadlines_seen": 0,
-            "official_deadlines_filtered": 0,
-            "official_deadlines_parsed": 0,
             "official_enriched_existing": 0,
             "official_created_new": 0,
             "relevance_core": 0,
@@ -134,13 +120,9 @@ class ScheduleService:
         self._refresh_task = None
         self._task_factory = kwargs.get("task_factory")
 
-        # 默认适配器链
+        # 默认适配器链：仅本地手动覆盖。GameKee/官方公告源已在 PR-6B 删除。
         self.manual_adapter = ManualOverrideScheduleAdapter(self.overrides_path)
-        self.adapters: list[BaseScheduleAdapter] = [
-            self.manual_adapter,
-            GameKeeScheduleAdapter(self.fetch_client),
-            OfficialAnnouncementScheduleAdapter(self.announcement_service),
-        ]
+        self.adapters: list[BaseScheduleAdapter] = [self.manual_adapter]
 
         self.source_mode = kwargs.get("source_mode", "legacy")
         if self.source_mode == "blabla":

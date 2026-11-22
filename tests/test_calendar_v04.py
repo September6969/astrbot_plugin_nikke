@@ -16,7 +16,6 @@ import httpx
 from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
 from astrbot_plugin_nikke.features.calendar.models import CalendarActivity, _aware_utc
 from astrbot_plugin_nikke.features.calendar.service import CalendarService
-from astrbot_plugin_nikke.features.calendar.gamekee_parser import _canonical_int
 from astrbot_plugin_nikke.core.storage import NikkeStore
 
 
@@ -130,18 +129,6 @@ class TestCalendarModels(IsolatedAsyncioTestCase):
         self.assertTrue(act.is_ended(after_now))
         self.assertEqual(act.remaining_display(after_now), "已结束")
 
-
-class TestCalendarSources(IsolatedAsyncioTestCase):
-    def test_canonical_int(self):
-        self.assertEqual(_canonical_int(123), 123)
-        self.assertEqual(_canonical_int("123"), 123)
-        self.assertEqual(_canonical_int(" 123 "), 123)
-        self.assertIsNone(_canonical_int(True))
-        self.assertIsNone(_canonical_int(False))
-        self.assertIsNone(_canonical_int(1.0))
-        self.assertIsNone(_canonical_int("1.0"))
-        self.assertIsNone(_canonical_int("abc"))
-        self.assertIsNone(_canonical_int(None))
 
 class TestCalendarService(IsolatedAsyncioTestCase):
     def setUp(self):

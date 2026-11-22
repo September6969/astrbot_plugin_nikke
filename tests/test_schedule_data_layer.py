@@ -14,6 +14,7 @@ import httpx
 
 from astrbot_plugin_nikke.features.calendar.canonical_models import (
     CanonicalEvent,
+    SourceRole,
     quality_badge,
     CST,
 )
@@ -27,9 +28,7 @@ from astrbot_plugin_nikke.integrations.blablalink.fetch_client import (
     _sanitize_url,
 )
 from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
-    GameKeeScheduleAdapter,
     ManualOverrideScheduleAdapter,
-    OfficialAnnouncementScheduleAdapter,
 )
 from astrbot_plugin_nikke.features.calendar.schedule_service import (
     ScheduleService,
@@ -257,6 +256,16 @@ class TestScheduleServiceDataLayer(IsolatedAsyncioTestCase):
             start_at=self.now,
             end_at=self.now + timedelta(days=5),
         )
+
+        # PR-6B G5-calendar-a1/b：默认链不再含必需的 GameKee 主源，显式注入一个
+        # 尚未成功的必需主源，继续校验“自定义列表不能证明主来源覆盖完整”。
+        class _PendingPrimary(ManualOverrideScheduleAdapter):
+            source_name = "primary"
+            source_role = SourceRole.PRIMARY
+            required_for_complete = True
+            contributes_to_freshness = True
+
+        self.service.adapters = [self.service.manual_adapter, _PendingPrimary()]
 
         # 1. 成功同步并保存 L2 快照
         ok, _ = await self.service.sync_from_source(fetcher=lambda: [event])

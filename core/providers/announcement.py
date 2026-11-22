@@ -14,7 +14,6 @@ from ...features.calendar.application import CalendarApplication
 from ...features.calendar.service import CalendarService
 from ...integrations.announcement.information_feeds import InformationFeedsSource
 from ...integrations.announcement.official_source import fetch_official_announcements
-from ...integrations.blablalink.fetch_client import FetchClient
 from ...integrations.calendar.visual_cache import CalendarVisualCache
 
 
@@ -42,10 +41,8 @@ def create_announcement_resources(
     delivery = AnnouncementDelivery(store)
     calendar = CalendarService(
         data_dir / "calendar",
-        announcement_service=service,
         source_mode="blabla",
         **({"task_factory": task_factory} if task_factory is not None else {}),
-        fetch_client=FetchClient(),
         visual_cache=CalendarVisualCache(data_dir / "calendar"),
     )
     from ...features.calendar.subscriptions import CalendarSubscriptions

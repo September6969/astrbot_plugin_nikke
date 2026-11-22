@@ -175,19 +175,8 @@ class CalendarApplication:
                 activity_count=0,
                 data_quality="SCHEDULE DATA UNAVAILABLE",
             )
-        announcement = getattr(self._calendar, "announcement_service", None)
-        warning = ""
-        if announcement is not None and getattr(self._calendar, "source_mode", "legacy") != "blabla":
-            try:
-                ok, detail = await announcement.sync_from_source()
-                if not ok:
-                    warning = "官方公告更新失败，保留旧公告"
-            except Exception:
-                warning = "官方公告更新失败，保留旧公告"
+        # 日程刷新只读取已装配的日程源，不联动公告同步（官方公告日程源已在 PR-6B 删除）。
         success, message = await self._calendar.refresh_schedule_data()
-        if warning:
-            message = warning if message == "ok" else f"{warning}；{message}"
-            self._calendar.last_sync_error = message
         return CalendarRefreshResult(
             success=success,
             message=message,

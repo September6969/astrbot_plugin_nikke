@@ -29,8 +29,11 @@ class CalendarService(ScheduleService):
         self.application = CalendarApplication(self, task_factory=self._task_factory)
 
     async def aclose(self) -> None:
-        if hasattr(self, "fetch_client") and hasattr(self.fetch_client, "aclose"):
-            await self.fetch_client.aclose()
+        """关闭持有长连接的已装配日程源；BlaBlaLink 源每次请求自建连接，无需关闭。"""
+        for adapter in list(self.adapters):
+            close = getattr(adapter, "aclose", None)
+            if callable(close):
+                await close()
 
 
 __all__ = ["CalendarService", "CAT_LABELS", "CST"]

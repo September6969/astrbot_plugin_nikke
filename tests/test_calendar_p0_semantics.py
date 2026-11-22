@@ -495,72 +495,6 @@ def test_same_title_different_scope_not_merged():
     assert e1.identity_key != e2.identity_key
 
 
-@pytest.mark.asyncio
-async def test_official_adapter_reads_real_announcement_deadlines():
-    """P0-1: Official 适配器真实消费 AnnouncementService.list_deadlines() / DeadlineParser，返回结构化时间。"""
-    from astrbot_plugin_nikke.features.announcement.service import GameDeadline
-    from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
-
-    mock_announcement = Mock()
-    dl1 = GameDeadline(
-        name="冠军竞技场开启",
-        start_at=NOW,
-        end_at=NOW + timedelta(days=7),
-        event_id="ann_champion_arena",
-        category="coop",
-        source_url="https://nikke-en.com/news/1",
-    )
-    mock_announcement.list_deadlines = Mock(return_value=[dl1])
-
-    adapter = OfficialAnnouncementScheduleAdapter(announcement_service=mock_announcement)
-    res = await adapter.fetch_result()
-
-    assert res.outcome == FetchOutcome.SUCCESS_DATA
-    assert len(res.events) == 1
-    ev = res.events[0]
-    assert ev.id == "official:ann_champion_arena"
-    assert ev.title == "冠军竞技场开启"
-    assert ev.start_at == NOW
-    assert ev.end_at == NOW + timedelta(days=7)
-    assert ev.start_precision == TimePrecision.EXACT.value
-    assert ev.end_precision == TimePrecision.EXACT.value
-    assert ev.confidence == 0.95
-    assert ev.primary_source == "official"
-
-
-@pytest.mark.asyncio
-async def test_official_timezone_utc9_conversion():
-    """P0-1: Official UTC+9 时间解析后统一转为 aware UTC，并在 CST 场景下输出精确对应时间。"""
-    from astrbot_plugin_nikke.features.announcement.service import GameDeadline
-    from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
-    from astrbot_plugin_nikke.features.calendar.canonical_models import CST
-
-    # 构造东九区时间：2026-09-20 18:00:00+09:00 -> UTC 为 2026-09-20 09:00:00+00:00 -> CST 为 2026-09-20 17:00:00+08:00
-    tz_utc9 = timezone(timedelta(hours=9))
-    t_start_utc9 = datetime(2026, 9, 20, 18, 0, 0, tzinfo=tz_utc9)
-    t_end_utc9 = datetime(2026, 9, 27, 23, 59, 59, tzinfo=tz_utc9)
-
-    mock_ann = Mock()
-    dl = GameDeadline(
-        name="联合作战公告",
-        start_at=t_start_utc9,
-        end_at=t_end_utc9,
-        event_id="ann_utc9_test",
-        category="event",
-    )
-    mock_ann.list_deadlines = Mock(return_value=[dl])
-
-    adapter = OfficialAnnouncementScheduleAdapter(announcement_service=mock_ann)
-    res = await adapter.fetch_result()
-    assert res.outcome == FetchOutcome.SUCCESS_DATA
-    ev = res.events[0]
-
-    assert ev.start_at.tzinfo == timezone.utc
-    assert ev.start_at == datetime(2026, 9, 20, 9, 0, 0, tzinfo=timezone.utc)
-    # CST 转换
-    assert ev.start_at.astimezone(CST).hour == 17
-    assert ev.start_at.astimezone(CST).minute == 0
-
 
 def test_official_confidence_field_arbitration():
     """P0-4: 官方置信度 0.95 成功覆写 GameKee 错误时间；0.75 低置信度不覆写 GameKee 权威时间。"""
@@ -1042,23 +976,18 @@ async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
 
 
 def test_source_roles_and_freshness_completeness_contract():
-    """验证各数据源的 SourceRole、contributes_to_freshness 与 required_for_complete 契约规范。"""
-    from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
-        GameKeeScheduleAdapter,
-        OfficialAnnouncementScheduleAdapter,
-        ManualOverrideScheduleAdapter,
-    )
+    """验证各数据源的 SourceRole、contributes_to_freshness 与 required_for_complete 契约规范。
+
+    PR-6B G5-calendar-a1/a2：GameKee/官方公告源已删除，改为校验生产 BlaBlaLink 主源与本地覆盖层。
+    """
+    from astrbot_plugin_nikke.features.calendar.schedule_adapters import ManualOverrideScheduleAdapter
     from astrbot_plugin_nikke.features.calendar.canonical_models import SourceRole
+    from astrbot_plugin_nikke.integrations.calendar.blabla_source import BlablaCalendarAdapter
 
-    gk = GameKeeScheduleAdapter()
-    assert gk.source_role == SourceRole.PRIMARY
-    assert gk.contributes_to_freshness is True
-    assert gk.required_for_complete is True
-
-    off = OfficialAnnouncementScheduleAdapter()
-    assert off.source_role == SourceRole.AUTHORITATIVE_SUPPLEMENT
-    assert off.contributes_to_freshness is False
-    assert off.required_for_complete is False
+    blabla = BlablaCalendarAdapter()
+    assert blabla.source_role == SourceRole.PRIMARY
+    assert blabla.contributes_to_freshness is True
+    assert blabla.required_for_complete is True
 
     man = ManualOverrideScheduleAdapter()
     assert man.source_role == SourceRole.LOCAL_OVERRIDE

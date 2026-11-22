@@ -944,41 +944,6 @@ def canonical_identity_match(left: Any, right: Any) -> IdentityMatch | None:
     )
 
 
-_DEADLINE_KEYWORDS = (
-    "时间",
-    "截止",
-    "结束",
-    "开始",
-    "开放",
-    "维护",
-    "deadline",
-    "until",
-    "ends",
-    "starts",
-    "opens",
-    "available after",
-)
-_DATE_PATTERNS = (
-    re.compile(r"\b20\d{2}[./-]\d{1,2}(?:[./-]\d{1,2})?\b"),
-    re.compile(r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}\b", re.I),
-    re.compile(r"\b\d{1,2}月\d{1,2}日\b"),
-    re.compile(r"\b\d{1,2}:\d{2}\b"),
-)
-
-
-def should_parse_deadlines(title: Any, body: Any) -> bool:
-    """官方公告截止日期的廉价前置过滤器。
-
-    没有时间关键词或日期/时间形态时，不启动正文解析器，避免每次刷新扫描
-    全部普通公告；过滤只影响解析开销，不会删除原始公告记录。
-    """
-
-    text = _fold(f"{title} {body}")
-    has_keyword = any(_contains_alias(text, keyword) for keyword in _DEADLINE_KEYWORDS)
-    has_date = any(pattern.search(text) for pattern in _DATE_PATTERNS)
-    return has_keyword and has_date
-
-
 def calendar_display_title(title: str) -> str:
     """仅翻译明确的玩法词和标题包装，保留活动专名与角色名。"""
     replacements = (

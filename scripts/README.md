@@ -66,7 +66,6 @@ python scripts/operations/backup_nikke_data.py --help
 | [operations/diagnose_readonly.py](operations/diagnose_readonly.py) | 一次性只读诊断：默认离线，显式 --live-readonly 才读取本机绑定账号。 | 账号只读，可能联网 |
 | [operations/update_nikke_db.sh](operations/update_nikke_db.sh) | 维护工具 | 可能联网，无账号操作；涉及本地运维 |
 | [operations/upgrade_preflight.py](operations/upgrade_preflight.py) | 执行 NIKKE 数据升级/回滚前的只读前置检查。 | 本地处理，无账号操作；涉及本地运维 |
-| [preview/generate_live_regression_calendar_evidence.py](preview/generate_live_regression_calendar_evidence.py) | 用当前公开源和已观察生产记录生成 Calendar 去重证据。 | 本地处理，无账号操作 |
 | [preview/generate_live_regression_character_evidence.py](preview/generate_live_regression_character_evidence.py) | 生成 c401/c581 生产锚点修复前后完整角色卡证据。 | 本地处理，无账号操作 |
 | [preview/preview_calendar_candidates.py](preview/preview_calendar_candidates.py) | 按固定时间和本地素材生成日程 UI 回归样例与截图。 | 本地处理，无账号操作 |
 | [preview/preview_calendar_experience.py](preview/preview_calendar_experience.py) | 通过生产模板生成固定日程样本的整图和手机预览。 | 本地处理，无账号操作 |

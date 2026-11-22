@@ -3,7 +3,6 @@ from types import SimpleNamespace
 import pytest
 from astrbot_plugin_nikke.features.announcement.deadlines import DeadlineParser
 from astrbot_plugin_nikke.features.calendar.content_quality import classify_category
-from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
 
 @pytest.mark.parametrize("title,expected", [
     ("14-Day Login Event – HAPPY DAYS", "login"),
@@ -45,15 +44,6 @@ def test_time_first_range_is_not_dropped():
     rows = DeadlineParser.parse_deadlines("Free Recruit", "05:00 October 8, 2026 ~ 04:59 October 28, 2026 (UTC+9)")
     assert len(rows) == 1
     assert rows[0].start_at.hour == 20
-
-@pytest.mark.asyncio
-async def test_official_sections_do_not_inherit_sibling_category_or_cancellation():
-    record = SimpleNamespace(title="Update", body=BODY, content_id="sample", category="event", source_url="")
-    service = SimpleNamespace(_records={"sample": record}, list_deadlines=lambda: [])
-    result = await OfficialAnnouncementScheduleAdapter(service).fetch_result()
-    assert len(result.events) == 6
-    assert [r.event_type for r in result.events[:5]] == ["story_event"] * 3 + ["login", "free_reward"]
-    assert all(not r.is_cancelled for r in result.events[:5])
 
 
 def test_free_login_gift_is_not_paid_recruit_or_costume():

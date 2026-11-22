@@ -10,10 +10,6 @@ from PIL import Image
 import pytest
 
 from astrbot_plugin_nikke.features.calendar.models import CalendarActivity
-from astrbot_plugin_nikke.features.calendar.gamekee_parser import (
-    MAX_IMAGE_CANDIDATES,
-    extract_image_urls as _extract_image_urls,
-)
 from astrbot_plugin_nikke.features.calendar.service import CalendarService
 from astrbot_plugin_nikke.integrations.calendar.visual_cache import CalendarVisualCache
 
@@ -29,15 +25,6 @@ def png():
     Image.new("RGB", (30, 40), "red").save(stream, "PNG")
     return stream.getvalue()
 
-
-def test_url_text_and_nested_json():
-    urls = ("https://example.test/a.png", "https://example.test/b.png")
-    assert _extract_image_urls(" ".join(urls)) == urls
-    assert _extract_image_urls(",".join(urls)) == urls
-    many_urls = [f"https://example.test/{i}" for i in range(20)]
-    assert len(_extract_image_urls(many_urls)) == MAX_IMAGE_CANDIDATES
-    assert len(_extract_image_urls(many_urls, limit=None)) == 20
-    assert _extract_image_urls(json.dumps([{"src": urls[0]}, {"nested": {"image": urls[1]}}])) == urls
 
 
 def test_visual_url_rejects_local_network_targets_and_credentials():

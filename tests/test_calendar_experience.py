@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent, FetchOutcome, ResponseMode
+from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent, FetchOutcome, ResponseMode, SourceRole
 from astrbot_plugin_nikke.features.calendar.schedule_adapters import BaseScheduleAdapter, FetchResult
 from astrbot_plugin_nikke.features.calendar.schedule_service import ScheduleService
 
@@ -18,6 +18,8 @@ def event(key, **kwargs):
 
 class Source(BaseScheduleAdapter):
     source_name = "gamekee"
+    # 显式声明主源角色，不依赖基类按源名推断（GameKee 源已在 PR-6B 删除）。
+    source_role = SourceRole.PRIMARY
     response_mode = ResponseMode.COMPLETE_SNAPSHOT
 
     def __init__(self, result):
@@ -81,33 +83,6 @@ async def test_refresh_coalesces_and_cancelled_waiter_does_not_cancel_shared_wor
     assert await second == (True, "ok")
     assert calls == 1
 
-
-@pytest.mark.asyncio
-async def test_gamekee_scan_requires_metadata_and_retains_partial_pages():
-    from unittest.mock import AsyncMock
-    from astrbot_plugin_nikke.features.calendar.source_scan import scan_gamekee
-    client = AsyncMock()
-    client.get_json.side_effect = [
-        {"code": 0, "data": [{"id": 1}], "meta": {"pagination": {"page_no": 1, "page_total": 2, "total": 2}}},
-        TimeoutError(),
-    ]
-    payload, completeness = await scan_gamekee(client, "url", {}, {"limit": 1})
-    assert payload["data"] == [{"id": 1}]
-    assert completeness == "PARTIAL"
-    client.get_json.side_effect = [{"code": 0, "data": []}]
-    assert (await scan_gamekee(client, "url", {}, {}))[1] == "UNKNOWN"
-
-
-@pytest.mark.asyncio
-async def test_gamekee_scan_complete_and_repeated_pages():
-    from unittest.mock import AsyncMock
-    from astrbot_plugin_nikke.features.calendar.source_scan import scan_gamekee
-    client = AsyncMock()
-    first = {"data": [{"id": 1}], "meta": {"pagination": {"page_no": 1, "page_total": 2, "total": 2}}}
-    client.get_json.side_effect = [first, {"data": [{"id": 2}], "meta": {"pagination": {"page_no": 2, "page_total": 2, "total": 2}}}]
-    assert (await scan_gamekee(client, "url", {}, {}))[1] == "COMPLETE"
-    client.get_json.side_effect = [first, first]
-    assert (await scan_gamekee(client, "url", {}, {}))[1] == "PARTIAL"
 
 
 def test_precision_and_pagination_share_canonical_dates(tmp_path):
@@ -188,18 +163,23 @@ def test_multiple_matching_cycles_are_not_arbitrarily_collapsed(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_explicit_refresh_links_announcement_and_coalesces(tmp_path):
-    from unittest.mock import AsyncMock
+async def test_explicit_refresh_coalesces_without_announcement_linkage(tmp_path):
+    # PR-6B G5-calendar-a2：官方公告日程源已删除，显式刷新只读日程源、不联动公告同步；
+    # 原 test_explicit_refresh_links_announcement_and_coalesces 改为校验合并与不联动。
     from astrbot_plugin_nikke.features.calendar.application import CalendarApplication
     service = ScheduleService(tmp_path)
     started, release = asyncio.Event(), asyncio.Event()
-    async def sync():
-        started.set()
-        await release.wait()
-        return False, "timeout"
-    service.announcement_service = type("Announcements", (), {})()
-    service.announcement_service.sync_from_source = AsyncMock(side_effect=sync)
-    service.adapters = [Source(FetchResult(FetchOutcome.SUCCESS_EMPTY))]
+    calls = 0
+
+    class SlowSource(Source):
+        async def fetch_result(self):
+            nonlocal calls
+            calls += 1
+            started.set()
+            await release.wait()
+            return self.result
+
+    service.adapters = [SlowSource(FetchResult(FetchOutcome.SUCCESS_EMPTY))]
     app = CalendarApplication(service, task_factory=asyncio.create_task)
     first = asyncio.create_task(app.refresh_schedule())
     await started.wait()
@@ -207,8 +187,9 @@ async def test_explicit_refresh_links_announcement_and_coalesces(tmp_path):
     await asyncio.sleep(0)
     release.set()
     results = await asyncio.gather(first, second)
-    service.announcement_service.sync_from_source.assert_awaited_once()
-    assert all("官方公告更新失败" in result.message for result in results)
+    assert calls == 1
+    assert not hasattr(service, "announcement_service")
+    assert all(result.success and result.message == "ok" for result in results)
     assert all(result.has_snapshot for result in results)
 
 
@@ -230,28 +211,12 @@ async def test_runtime_shutdown_cancels_shared_refresh(tmp_path):
     assert service._refresh_task.cancelled()
 
 
-@pytest.mark.asyncio
-async def test_official_failed_report_retains_lkg_and_original_confirmation(tmp_path):
-    from types import SimpleNamespace
-    from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
-    from astrbot_plugin_nikke.features.calendar.canonical_models import SourceHealth
-    service = ScheduleService(tmp_path)
-    old = event("official:old")
-    service._source_datasets["official"] = [old]
-    service._source_health["official"] = SourceHealth("official", last_success_at=NOW)
-    announcements = SimpleNamespace(list_deadlines=lambda: [], last_sync_report={"success": False}, last_updated_at="2026-10-11 08:00:00")
-    service.adapters = [Source(FetchResult(FetchOutcome.SUCCESS_EMPTY)), OfficialAnnouncementScheduleAdapter(announcements)]
-    await service.refresh_schedule_data()
-    assert service._source_datasets["official"] == [old]
-    assert service._source_health["official"].last_success_at == NOW
-    assert service._source_health["official"].consecutive_failures == 1
-    restarted = ScheduleService(tmp_path)
-    assert restarted._source_health["official"].consecutive_failures == 1
-
 
 def test_frozen_health_and_unknown_cache_coverage(tmp_path):
     from astrbot_plugin_nikke.features.calendar.canonical_models import SourceHealth
     service = ScheduleService(tmp_path)
+    # PR-6B G5-calendar-a1/b：默认适配器链不再含必需的 GameKee 源，显式注入必需主源。
+    service.adapters = [Source(FetchResult(FetchOutcome.SUCCESS_EMPTY))]
     service._source_datasets = {"gamekee": [event("one")]}
     service._events = {"one": event("one")}
     service._source_health["gamekee"] = SourceHealth.from_dict({"source": "gamekee"})
@@ -262,14 +227,15 @@ def test_frozen_health_and_unknown_cache_coverage(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_unknown_empty_result_marks_retained_records_and_keeps_scan_counts(tmp_path):
+async def test_unknown_empty_result_marks_retained_records(tmp_path):
+    # PR-6B G5-calendar-a1：GameKee 扫描计数诊断已随源删除，只保留“未知空结果标记旧记录”合同。
     service = ScheduleService(tmp_path)
     service._source_datasets["gamekee"] = [event("old")]
     service.adapters = [Source(FetchResult(FetchOutcome.SUCCESS_EMPTY, completeness="UNKNOWN",
         diagnostics={"gamekee_rows": 3, "gamekee_valid": 0, "gamekee_malformed": 3}))]
     await service.refresh_schedule_data()
     assert service._source_datasets["gamekee"][0].metadata["source_stale"]
-    assert service.quality_diagnostics["gamekee_malformed"] == 3
+    assert "gamekee_malformed" not in service.quality_diagnostics
 
 
 def test_unknown_start_is_not_silently_reported_as_no_activity(tmp_path):
@@ -286,24 +252,6 @@ def test_unknown_start_is_not_silently_reported_as_no_activity(tmp_path):
     assert page["unconfirmed_count"] == 1
     assert "另有 1 项时间待确认" in page["fallback_text"]
 
-
-@pytest.mark.asyncio
-async def test_official_existing_deadline_does_not_hide_other_announcement():
-    from types import SimpleNamespace
-    from astrbot_plugin_nikke.features.announcement.deadlines import DeadlineParser
-    from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
-    body = "活动时间：2026-10-10 10:00 至 2026-10-20 23:59 (UTC+8)"
-    known = DeadlineParser.parse_deadlines("已解析活动", body, "known")
-    assert known
-    records = {
-        key: SimpleNamespace(content_id=key, title=title, body=body, category="event", source_url="")
-        for key, title in [("known", "已解析活动"), ("missing", "此前漏掉活动")]
-    }
-    service = SimpleNamespace(list_deadlines=lambda: known, _records=records)
-    result = await OfficialAnnouncementScheduleAdapter(service).fetch_result()
-    assert {e.title for e in result.events} == {"已解析活动", "此前漏掉活动"}
-    assert len(result.events) == 2
-    assert len(known) == 1
 
 
 def test_snapshot_uses_original_calendar_layout(tmp_path):
@@ -350,19 +298,6 @@ Event duration: From the end of the October 8, 2026 maintenance to 23:59:59, Oct
     assert all(item.start_precision == "DATE_ONLY" for item in rows)
     assert all(item.start_at.astimezone(CST).hour == 0 for item in rows)
     assert all(item.end_at == datetime(2026, 10, 28, 14, 59, tzinfo=timezone.utc) for item in rows)
-
-
-@pytest.mark.asyncio
-async def test_official_reparse_replaces_only_known_announcement_records(tmp_path):
-    service = ScheduleService(tmp_path)
-    service._source_datasets["official"] = [event("official:changed_0"), event("official:other_0"), event("official:changed_other_0")]
-    source = Source(FetchResult(FetchOutcome.SUCCESS_DATA, [event("official:changed_range_new")],
-                               diagnostics={"reparsed_content_ids": ["changed"]}))
-    source.source_name = "official"
-    source.response_mode = ResponseMode.INCREMENTAL
-    service.adapters = [source]
-    await service.refresh_schedule_data()
-    assert {item.id for item in service._source_datasets["official"]} == {"official:changed_range_new", "official:other_0", "official:changed_other_0"}
 
 
 

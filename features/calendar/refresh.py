@@ -6,7 +6,6 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import re
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -78,46 +77,8 @@ class CalendarRefreshCoordinator:
                     response_mode=getattr(adapter, "response_mode", ResponseMode.COMPLETE_SNAPSHOT),
                 )
 
-            if src == "official":
-                report = getattr(getattr(adapter, "announcement_service", None), "last_sync_report", None)
-                if isinstance(report, dict) and report.get("success") is False:
-                    res = FetchResult(FetchOutcome.REQUEST_FAILED, source=src,
-                                      error_message="官方公告更新失败，保留旧日程")
-                elif isinstance(report, dict) and report.get("invalid", 0):
-                    res.completeness = "PARTIAL"
             health.last_outcome = res.outcome.value
             observed_at = res.observed_at
-            if src == "official":
-                origin = getattr(getattr(adapter, "announcement_service", None), "last_updated_at", None)
-                try:
-                    from .models import _aware_utc
-                    if isinstance(origin, str):
-                        # 公告仓库历史格式明确采用北京时间，按已有格式恢复时区。
-                        parsed = datetime.fromisoformat(origin)
-                        if parsed.tzinfo is None:
-                            from .canonical_models import CST
-                            parsed = parsed.replace(tzinfo=CST)
-                        observed_at = _aware_utc(parsed)
-                    else:
-                        observed_at = _aware_utc(origin) if origin else None
-                except (ValueError, TypeError):
-                    observed_at = None
-
-            if src == "gamekee":
-                scan = res.diagnostics or getattr(adapter, "last_scan", {}) or {}
-                for key in ("gamekee_rows", "gamekee_valid", "gamekee_malformed", "gamekee_duplicates"):
-                    scan_key = key.removeprefix("gamekee_")
-                    service.quality_diagnostics[key] = int(scan.get(key, scan.get(scan_key, 0)) or 0)
-                if "with_visual" in scan:
-                    service.quality_diagnostics["with_visual"] = int(scan.get("with_visual", 0) or 0)
-            elif src == "official":
-                for key in (
-                    "official_deadlines_seen",
-                    "official_deadlines_filtered",
-                    "official_deadlines_parsed",
-                ):
-                    if key in res.diagnostics:
-                        service.quality_diagnostics[key] = int(res.diagnostics.get(key, 0) or 0)
 
             contributes = getattr(adapter, "contributes_to_freshness", True)
 
@@ -128,13 +89,6 @@ class CalendarRefreshCoordinator:
                 else:
                     retained = {event.id: CanonicalEvent.from_dict(event.to_dict())
                                 for event in service._source_datasets.get(src, [])}
-                    # 仅替换本次成功重新解析的公告，其他增量来源记录继续保留。
-                    if src == "official":
-                        patterns = [re.compile(rf"official:{re.escape(str(cid))}_(?:[0-9]+|range_[a-f0-9]{{20}})")
-                                    for cid in res.diagnostics.get("reparsed_content_ids", []) if cid]
-                        if patterns:
-                            retained = {key: event for key, event in retained.items()
-                                        if not any(pattern.fullmatch(key) for pattern in patterns)}
                     if not complete:
                         for event in retained.values():
                             event.metadata["source_stale"] = True
@@ -202,10 +156,8 @@ class CalendarRefreshCoordinator:
         service._update_health_state()
 
         summary_keys = (
-            "gamekee_rows", "gamekee_valid", "gamekee_malformed", "gamekee_duplicates",
-            "with_visual", "canonical_total", "identity_matches", "canonical_title_matches", "identity_ambiguous",
-            "identity_distinct", "official_deadlines_seen", "official_deadlines_filtered",
-            "official_deadlines_parsed", "official_enriched_existing", "official_created_new",
+            "canonical_total", "identity_matches", "canonical_title_matches", "identity_ambiguous",
+            "identity_distinct", "official_enriched_existing", "official_created_new",
             "relevance_core", "relevance_supporting", "relevance_meta", "display_selected",
             "display_deprioritized",
         )
