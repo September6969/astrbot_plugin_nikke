@@ -30,9 +30,27 @@ class GuideApplication:
       同尺寸且在 mtime 精度内的重写是已知的残余窗口；
     - registry.json 缺失时不缓存（签名为 None），之后新增的索引会被立即读取；
     - 加载失败（ValueError/OSError）永不缓存，下次调用重新校验并继续失败关闭；
-    - 命中缓存时只复核本页返回条目的图片仍存在，缺失则重建一次，使被删除的图片
-      照旧失败关闭；图片原位替换（索引未变）不会重新校验尺寸与扩展名。
+    - 命中缓存时对本页返回的每张图片重新做与注册表相同的廉价校验（非符号链接、
+      仍在根目录内、扩展名、大小上限）；任一不通过则丢弃缓存完整重建一次，由注册表
+      校验失败关闭——缓存后被删除或被替换成越界符号链接的图片都不会被发送。
     """
+
+    _IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".webp"})
+    _MAX_IMAGE_BYTES = 12 * 1024 * 1024
+
+    def _image_still_valid(self, image: Path) -> bool:
+        """与 GuideRegistry 加载时相同的单文件边界，命中缓存时逐页复核。"""
+        try:
+            root = self.registry_root.resolve()
+            return (
+                not image.is_symlink()
+                and image.resolve().is_relative_to(root)
+                and image.is_file()
+                and image.suffix.lower() in self._IMAGE_SUFFIXES
+                and image.stat().st_size <= self._MAX_IMAGE_BYTES
+            )
+        except OSError:
+            return False
 
     def __init__(
         self,
@@ -81,8 +99,8 @@ class GuideApplication:
     def page(self, category: str, page_number: int = 1) -> GuidePage:
         registry = self._load_registry()
         entries = registry.page(category, page=page_number, size=self.page_size)
-        if any(not image.is_file() for entry in entries for image in entry.files):
-            # 缓存后图片被删除：完整重建一次，由注册表校验失败关闭。
+        if any(not self._image_still_valid(image) for entry in entries for image in entry.files):
+            # 缓存后图片被删除、越界或超限：完整重建一次，由注册表校验失败关闭。
             self.invalidate()
             registry = self._load_registry(force=True)
             entries = registry.page(category, page=page_number, size=self.page_size)

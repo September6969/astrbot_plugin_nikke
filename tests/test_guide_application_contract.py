@@ -139,3 +139,25 @@ def test_guide_failed_registry_load_is_never_cached(tmp_path: Path) -> None:
         with pytest.raises(ValueError):
             application.page("progression")
     assert len(calls) == 2
+
+
+@pytest.mark.parametrize("mutation", ["symlink_outside", "oversize"])
+def test_guide_image_replaced_after_caching_fails_closed(tmp_path: Path, mutation: str) -> None:
+    # PR-6B 审查跟进：命中缓存时必须复核单文件边界，越界符号链接或超限图片不得被返回。
+    root = tmp_path / "guides"
+    root.mkdir()
+    image = root / "guide.png"
+    image.write_bytes(b"fixture")
+    _write_registry(root, ["攻略-A"])
+    application = GuideApplication(root)
+    assert application.page("progression").entries
+    if mutation == "symlink_outside":
+        outside = tmp_path / "secret.png"
+        outside.write_bytes(b"outside")
+        image.unlink()
+        image.symlink_to(outside)
+    else:
+        with image.open("r+b") as handle:
+            handle.truncate(12 * 1024 * 1024 + 1)
+    with pytest.raises(ValueError):
+        application.page("progression")

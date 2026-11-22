@@ -234,6 +234,31 @@ async def test_ranking_page_does_not_fallback_for_non_offseason_response(tmp_pat
 
 
 @pytest.mark.asyncio
+async def test_ranking_page_does_not_fallback_for_empty_active_response(tmp_path):
+    # PR-6B 审查跟进：迁移自旧 ranking() 用例——赛季进行中但返回空记录时，
+    # 不得回退去请求上一赛季。
+    account_reader = RaidAccountReader()
+    gateway = RaidGateway(
+        raid_data={
+            "manager_info": {"id": "1000007", "season_end_date": "1970-01-01T00:10:00+00:00"},
+            "level_info": [],
+            "participate_data": [],
+        }
+    )
+    application = raid_application(
+        account_reader, gateway, offseason_builder(tmp_path),
+        lambda: datetime.fromtimestamp(200, timezone.utc),
+    )
+
+    ranking = await application.ranking_page("qq-123")
+
+    assert ranking.participants == []
+    assert ranking.scope == "CURRENT_RESPONSE"
+    assert gateway.dashboard_requests == [account_reader.account]
+    assert gateway.season_requests == []
+
+
+@pytest.mark.asyncio
 async def test_member_page_uses_exact_stable_openid_for_historical_response(tmp_path):
     account_reader = RaidAccountReader()
     gateway = RaidGateway(
