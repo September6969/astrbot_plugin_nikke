@@ -6,14 +6,14 @@ from pathlib import Path
 
 try:
     from ..t2i_assets import T2IAssetResolver
+    from ...features.calendar import feed_rules
 except (ImportError, ValueError):
     from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
+    from astrbot_plugin_nikke.features.calendar import feed_rules
 
-
-DISPLAY_CATEGORY_LABELS = {
-    "double_reward": "限时双倍",
-    "pass": "活动通行证",
-}
+# 分类展示名、时间显示、紧急度、进度与背景候选规则由 features/calendar/feed_rules.py
+# 统一拥有（PR-6B G5-calendar-d）；此处保留名称供既有调用方读取。
+DISPLAY_CATEGORY_LABELS = feed_rules.DISPLAY_CATEGORY_LABELS
 
 
 class CalendarT2IPayloadBuilder:
@@ -124,24 +124,8 @@ class CalendarT2IPayloadBuilder:
 
     @staticmethod
     def activity_progress(start, end, current, start_precision: str, end_precision: str):
-        """精确时间按秒计算；日期级时间只给出明确标识的按日估算。"""
-        from ...features.calendar.canonical_models import CST
-
-        known = {"EXACT", "DATE_ONLY"}
-        if start is None or end is None or start_precision not in known or end_precision not in known:
-            return None, "unknown"
-        if start_precision == end_precision == "EXACT":
-            if end <= start or not start <= current <= end:
-                return None, "unknown"
-            return max(0.0, min(1.0, (current - start).total_seconds() / (end - start).total_seconds())), "exact"
-        start_day = start.astimezone(CST).date()
-        end_day = end.astimezone(CST).date()
-        today = current.astimezone(CST).date()
-        if end_day < start_day or not start_day <= today <= end_day:
-            return None, "unknown"
-        # 日期级结束日期包含当日，不把未知时分冒充精确时间。
-        duration_days = (end_day - start_day).days + 1
-        return (today - start_day).days / duration_days, "date"
+        """精确时间按秒计算；日期级时间只给出明确标识的按日估算（规则见 feed_rules）。"""
+        return feed_rules.activity_progress(start, end, current, start_precision, end_precision)
 
     @classmethod
     def next_row_height(cls, item: dict) -> int:
@@ -220,38 +204,11 @@ class CalendarT2IPayloadBuilder:
     def _resolve_background_source(
         self, service, active_events, upcoming_events
     ) -> Path | None:
+        """非快照调用方的背景选择，与 CalendarApplication 共用当前日程规则。"""
         vc = getattr(service, "visual_cache", None)
         if not vc or not hasattr(vc, "resolve_path"):
             return None
-
-        candidate_ids = []
-        # 优先级 1：进行中主活动
-        main_categories = {"event", "story_event", "solo_raid", "union_raid"}
-        for ev in active_events:
-            if ev.category in main_categories:
-                candidate_ids.append(ev.event_id)
-        # 优先级 2：其余进行中活动
-        for ev in active_events:
-            if ev.event_id not in candidate_ids:
-                candidate_ids.append(ev.event_id)
-        # 优先级 3：预告活动
-        for ev in upcoming_events:
-            if ev.event_id not in candidate_ids:
-                candidate_ids.append(ev.event_id)
-        if getattr(service, "source_mode", "legacy") == "blabla":
-            for eid in candidate_ids:
-                path = vc.resolve_path(eid)
-                if path:
-                    return path
-            return None
-        # 优先级 4：本地清单内已有任意 KV
-        manifest = getattr(vc, "_manifest", {})
-        if isinstance(manifest, dict):
-            for eid in manifest:
-                if eid not in candidate_ids:
-                    candidate_ids.append(str(eid))
-
-        for eid in candidate_ids:
+        for eid in feed_rules.background_candidate_ids(active_events, upcoming_events):
             path = vc.resolve_path(eid)
             if path is not None and isinstance(path, Path) and path.is_file():
                 return path
@@ -312,12 +269,6 @@ class CalendarT2IPayloadBuilder:
             )
         except Exception:
             return None
-
-    def _resolve_background(
-        self, service, active_events, upcoming_events, canvas_height: int = 900
-    ) -> str | None:
-        source_path = self._resolve_background_source(service, active_events, upcoming_events)
-        return self._encode_background(source_path, canvas_height=canvas_height)
 
     def _cap_oversize(
         self,
@@ -497,7 +448,7 @@ class CalendarT2IPayloadBuilder:
                 resolve_next_ending,
             )
             from ...features.calendar.content_quality import sort_operations_display_events
-            from ...features.calendar.schedule_service import CAT_LABELS, CST
+            from ...features.calendar.canonical_models import CST
             from ...features.calendar.application import CalendarScheduleSnapshot
         except (ImportError, ValueError):
             from astrbot_plugin_nikke.features.calendar.models import _aware_utc, TimePrecision
@@ -510,7 +461,7 @@ class CalendarT2IPayloadBuilder:
                 resolve_next_ending,
             )
             from astrbot_plugin_nikke.features.calendar.content_quality import sort_operations_display_events
-            from astrbot_plugin_nikke.features.calendar.schedule_service import CAT_LABELS, CST
+            from astrbot_plugin_nikke.features.calendar.canonical_models import CST
             from astrbot_plugin_nikke.features.calendar.application import CalendarScheduleSnapshot
 
         # 1. 冻结 QueryContext
@@ -574,46 +525,12 @@ class CalendarT2IPayloadBuilder:
             is_long = title_line_count > 1
             is_oversize = len(ev.title) > 65
 
-            start_prec = ev.start_precision.value if hasattr(ev.start_precision, "value") else str(ev.start_precision)
-            end_prec = ev.end_precision.value if hasattr(ev.end_precision, "value") else str(ev.end_precision)
-
-            start_display = (
-                ev.start_at.astimezone(CST).strftime("%m.%d %H:%M")
-                if ev.start_at and start_prec == "EXACT"
-                else ev.start_at.astimezone(CST).strftime("%m.%d")
-                if ev.start_at and start_prec == "DATE_ONLY"
-                else "待确认"
-            )
-            end_display = (
-                ev.end_at.astimezone(CST).strftime("%m.%d %H:%M")
-                if ev.end_at and end_prec == "EXACT"
-                else ev.end_at.astimezone(CST).strftime("%m.%d")
-                if ev.end_at and end_prec == "DATE_ONLY"
-                else "待确认"
-            )
-            if ev.start_at and ev.end_at:
-                time_range = f"{start_display} → {end_display} · UTC+8"
-            elif ev.start_at:
-                time_range = f"{start_display} 起 · UTC+8"
-            elif ev.end_at:
-                time_range = f"{end_display} 截止 · UTC+8"
-            else:
-                time_range = "时间待确认 · UTC+8"
-
+            start_prec = feed_rules.precision_value(ev.start_precision)
+            end_prec = feed_rules.precision_value(ev.end_precision)
+            time_range = feed_rules.active_time_range(ev.start_at, ev.end_at, start_prec, end_prec)
             remaining_str = ev.remaining_display(current)
-
             # 紧急度：严格限制只有 EXACT precision 参与小时级紧迫度
-            urgency = "NORMAL"
-            if end_prec == "EXACT" and ev.end_at and ev.end_at > current:
-                diff_sec = (ev.end_at - current).total_seconds()
-                if diff_sec <= 3600:
-                    urgency = "CRITICAL"
-                elif diff_sec <= 21600:
-                    urgency = "URGENT"
-                elif diff_sec <= 86400:
-                    urgency = "CLOSING"
-            elif end_prec != "EXACT":
-                urgency = ""
+            urgency = feed_rules.active_urgency(ev.end_at, end_prec, current)
 
             display_title = ev.title
 
@@ -625,11 +542,11 @@ class CalendarT2IPayloadBuilder:
                 "event_id": ev.event_id,
                 "title": display_title,
                 "full_title": ev.title,
-                "category": DISPLAY_CATEGORY_LABELS.get(ev.category, CAT_LABELS.get(ev.category, "活动")),
+                "category": feed_rules.display_category_label(ev.category),
                 "category_code": ev.category,
                 "time_range": time_range,
-                "start": ev.start_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.start_at else "未知",
-                "end": ev.end_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.end_at else "未知",
+                "start": feed_rules.card_datetime_label(ev.start_at),
+                "end": feed_rules.card_datetime_label(ev.end_at),
                 "remaining": remaining_str,
                 "is_next_ending": (ev.event_id == next_ending_id),
                 "urgency": urgency,
@@ -652,35 +569,9 @@ class CalendarT2IPayloadBuilder:
             )
             is_long = title_line_count > 1
             is_oversize = len(ev.title) > 65
-            start_prec = ev.start_precision.value if hasattr(ev.start_precision, "value") else str(ev.start_precision)
-            end_prec = ev.end_precision.value if hasattr(ev.end_precision, "value") else str(ev.end_precision)
-
-            if ev.start_at and start_prec == "EXACT":
-                start_time_display = ev.start_at.astimezone(CST).strftime("%m.%d %H:%M")
-                diff = ev.start_at - current
-                days_diff = diff.days
-                hours_diff = diff.seconds // 3600
-                if days_diff >= 3:
-                    starts_in = f"{days_diff} 天后开始"
-                elif days_diff > 0:
-                    starts_in = f"{days_diff} 天 {hours_diff} 小时后开始"
-                elif hours_diff > 0:
-                    starts_in = f"{hours_diff} 小时后开始"
-                else:
-                    mins_diff = max(1, diff.seconds // 60)
-                    starts_in = f"{mins_diff} 分钟后开始"
-            elif ev.start_at and start_prec == "DATE_ONLY":
-                start_time_display = ev.start_at.astimezone(CST).strftime("%m.%d")
-                # 日期级开始日按北京时间理解；两侧都换算到 UTC+8 再取日期，
-                # 避免北京 08:00–23:59 之间 UTC 日期落后一天导致天数少算（AUD-024）。
-                diff_days = max(
-                    1,
-                    (ev.start_at.astimezone(CST).date() - current.astimezone(CST).date()).days,
-                )
-                starts_in = f"约 {diff_days} 天后（日期级）"
-            else:
-                start_time_display = "时间待定"
-                starts_in = "即将开始"
+            start_prec = feed_rules.precision_value(ev.start_precision)
+            end_prec = feed_rules.precision_value(ev.end_precision)
+            start_time_display, starts_in = feed_rules.upcoming_start(ev.start_at, start_prec, current)
 
             display_title = ev.title
 
@@ -688,7 +579,7 @@ class CalendarT2IPayloadBuilder:
                 "event_id": ev.event_id,
                 "title": display_title,
                 "full_title": ev.title,
-                "category": DISPLAY_CATEGORY_LABELS.get(ev.category, CAT_LABELS.get(ev.category, "活动")),
+                "category": feed_rules.display_category_label(ev.category),
                 "category_code": ev.category,
                 "start_time_display": start_time_display,
                 "starts_in": starts_in,
@@ -697,8 +588,8 @@ class CalendarT2IPayloadBuilder:
                 "is_long_title": is_long,
                 "is_oversize": is_oversize,
                 "title_line_count": title_line_count,
-                "start": ev.start_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.start_at else "未知",
-                "end": ev.end_at.astimezone(CST).strftime("%m/%d %H:%M") if ev.end_at else "未知",
+                "start": feed_rules.card_datetime_label(ev.start_at),
+                "end": feed_rules.card_datetime_label(ev.end_at),
                 "remaining": starts_in,
             }
             nrow["layout_height"] = self.next_row_height(nrow)
