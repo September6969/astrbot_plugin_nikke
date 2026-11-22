@@ -867,6 +867,25 @@ class BlaBlaClient:
             validator=lambda d: isinstance(d, dict) and "roster_item" in d and "detail" in d,
         )
 
+    def cached_character_details(self, account: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+        """只读返回本账号仍在有效期内的单角色详情短缓存，按 name_code 索引；绝不发起网络请求。"""
+        identity = self._account_identity_key(account)
+        if identity is None or self._closing or self._closed:
+            return {}
+        try:
+            self._check_binding_validity(identity)
+        except (ValueError, CredentialExpiredError):
+            return {}
+        now = time.monotonic()
+        details: dict[str, dict[str, Any]] = {}
+        for (owner, query_type, code), (expiry, data) in list(self._query_cache.items()):
+            if owner != identity or query_type != "detail" or expiry <= now:
+                continue
+            detail = data.get("detail") if isinstance(data, dict) else None
+            if isinstance(detail, dict):
+                details[str(code)] = deepcopy(detail)
+        return details
+
     async def get_directory(self) -> list[dict[str, Any]]:
         if self._closing or self._closed:
             raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")

@@ -73,6 +73,17 @@ class MatchupEvidence:
     provenance: Provenance
 
 
+# 珍藏形态持有来源的对外标签，三者不可混用。
+FAVORITE_OFFICIAL = "official_detail"
+FAVORITE_MANUAL = "manual"
+FAVORITE_INFERRED = "roster_inferred"
+FAVORITE_LABELS = {
+    FAVORITE_OFFICIAL: "官方详情确认",
+    FAVORITE_MANUAL: "手动标记",
+    FAVORITE_INFERRED: "基础名单推测",
+}
+
+
 @dataclass(frozen=True)
 class ArenaRosterSnapshot:
     keys: frozenset[str]
@@ -80,6 +91,19 @@ class ArenaRosterSnapshot:
     unmapped: int
     fetched_at: str
     missing_fields: tuple[str, ...]
+    # (珍藏变体键, 来源)，仅官方详情确认或手动标记的变体会进入 keys。
+    favorites: tuple[tuple[str, str], ...] = ()
+    # 基础名单持有本体、但珍藏状态无从确认的变体，只用于提示，绝不进入 keys。
+    favorite_unconfirmed: tuple[str, ...] = ()
+    # 官方详情显示未装备专属珍藏的变体，手动标记不能覆盖。
+    favorite_absent: tuple[str, ...] = ()
+    notes: tuple[str, ...] = ()
+
+    def favorite_source(self, key: str) -> str | None:
+        source = dict(self.favorites).get(key)
+        if source is None and self.status == "manual":
+            return FAVORITE_MANUAL
+        return source
 
 
 @dataclass(frozen=True)

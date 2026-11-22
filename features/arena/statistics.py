@@ -82,8 +82,9 @@ class SnapshotStatisticsProvider:
         mine_keys, enemy_keys = mine.keys, enemy.keys
         record = self._records.get((mine_keys, enemy_keys))
         scope_text = "5/5 同站位"
+        combinations = 1
         if not record or sum(record) == 0:
-            record, scope_text = self._similar_matchup(mine_keys, enemy_keys)
+            record, scope_text, combinations = self._similar_matchup(mine_keys, enemy_keys)
         if not record or not sum(record):
             return None
         wins, losses = record
@@ -93,6 +94,10 @@ class SnapshotStatisticsProvider:
         scope += "补丁未知" if patch == "unknown" else patch
         text = (f"历史 {scope_text}进攻对位，{wins} 胜 {losses} 负，样本 {wins + losses}；"
                 f"样本胜率的 95% 区间 {lower:.2f}–{upper:.2f}；{scope}。")
+        if scope_text != "5/5 同站位":
+            # 相似口径把差异位上不同角色的对局合并计数，不能读作本阵容的实测胜率。
+            text += (f"样本口径：合并 {combinations} 组差异位角色不同的攻守组合，"
+                     "不代表本阵容或本对手的实测胜率。")
         if self.status == "stale":
             text += "快照已超过 30 天。"
         text += "历史样本仅作参考，未用于当前排序。"
@@ -100,10 +105,10 @@ class SnapshotStatisticsProvider:
             self.metadata["source"], patch, "reference",
             ("current_patch_comparability",) if patch == "unknown" else ()))
 
-    def _similar_matchup(self, mine, enemy) -> tuple[tuple[int, int] | None, str]:
+    def _similar_matchup(self, mine, enemy) -> tuple[tuple[int, int] | None, str, int]:
         # 同时按攻守双方相同角色且同站位的数量分层，只汇总最高一层。
         tier = 2
-        wins = losses = 0
+        wins = losses = combinations = 0
         mine_differences: set[int] = set()
         enemy_differences: set[int] = set()
         for (attacker, defender), (row_wins, row_losses) in self._records.items():
@@ -120,15 +125,18 @@ class SnapshotStatisticsProvider:
                 continue
             if matched > tier:
                 tier = matched
-                wins = losses = 0
+                wins = losses = combinations = 0
                 mine_differences.clear()
                 enemy_differences.clear()
             wins += row_wins
             losses += row_losses
+            combinations += 1
             mine_differences.update(mine_changed)
             enemy_differences.update(enemy_changed)
         if tier < 3:
-            return None, ""
+            return None, "", 0
         mine_slots = "、".join(f"P{index}" for index in sorted(mine_differences)) or "无"
         enemy_slots = "、".join(f"P{index}" for index in sorted(enemy_differences)) or "无"
-        return (wins, losses), f"{tier}/5 相似（各方至少 {tier} 个同站位，差异位 我方 {mine_slots}、对方 {enemy_slots}）"
+        return ((wins, losses),
+                f"{tier}/5 相似（各方至少 {tier} 个同站位，差异位 我方 {mine_slots}、对方 {enemy_slots}）",
+                combinations)

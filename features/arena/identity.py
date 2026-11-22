@@ -3,6 +3,7 @@
 import json
 import re
 import unicodedata
+from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
@@ -19,6 +20,9 @@ class ArenaDirectory:
         self.by_code = {}
         self._extra_names: dict[str, set[str]] = {}
         self._search_names: dict[str, list[str]] = {}
+        # 本体键 → 珍藏变体键；专属珍藏品 tid → 珍藏变体键。
+        self.variant_of: dict[str, str] = {}
+        self.treasure_items: dict[str, str] = {}
         provenance = Provenance("assets/data/character_master.json", "baseline-ede461f",
                                 "reference", ("charge_parameters", "personal_configuration"))
         for raw in payload["characters"]:
@@ -76,6 +80,7 @@ class ArenaDirectory:
                            burst=variant["burst"], base_key=base.key,
                            reenter=variant["key"] == "viper_treasure")
             self.characters[char.key] = char
+            self.variant_of[base.key] = char.key
         for key, translations in rules["names"].items():
             self._search_names[key] = list(translations.values())
             for name in translations.values():
@@ -91,3 +96,39 @@ class ArenaDirectory:
                 names.extend(self.identity.enrich(row).get("aliases", ()))
                 break
         return list(dict.fromkeys(names))
+
+    def add_favorite_items(self, registry: Mapping[str, str]) -> None:
+        """登记已核验的专属珍藏品 tid；只接受资源名中明确标注角色 resource_id 的条目。"""
+        by_resource = {char.resource_id: key for key, char in self.characters.items()
+                       if char.base_key == key and key in self.variant_of}
+        for tid, resource in registry.items():
+            match = TREASURE_RESOURCE.fullmatch(str(resource))
+            base = by_resource.get(str(int(match.group(1)))) if match else None
+            if base and str(tid).isdigit():
+                self.treasure_items[str(tid)] = self.variant_of[base]
+
+    def split_favorite_marks(self, text: str) -> tuple[str, tuple[str, ...]]:
+        """拆出末尾「珍藏:海伦,牡丹」手动标记，返回阵容文本与珍藏变体键。"""
+        if not isinstance(text, str) or len(text) > 1000:
+            raise ValueError("阵容文本长度应在 1000 字以内。")
+        normalized = unicodedata.normalize("NFKC", text).strip()
+        match = FAVORITE_MARK.search(normalized)
+        if match is None:
+            return normalized, ()
+        names = [part.strip() for part in re.split(r"[/、,，]+", match.group("names")) if part.strip()]
+        if not names or len(names) > len(self.variant_of):
+            raise ValueError("珍藏标记格式：在阵容后追加「珍藏:海伦,牡丹」，列出已制作专属珍藏的角色。")
+        marks = []
+        for name in names:
+            char = self.resolve(name)
+            variant = char.key if char.key in self.variant_of.values() else self.variant_of.get(char.key)
+            if variant is None:
+                raise ValueError(f"{char.name} 没有已收录的珍藏形态。")
+            marks.append(variant)
+        return normalized[:match.start()].strip(), tuple(dict.fromkeys(marks))
+
+
+# 资源名形如 si_favoriteitem_c352_00，其中 c 后数字为角色 resource_id。
+TREASURE_RESOURCE = re.compile(r"si_favoriteitem_c(\d+)_\d+")
+# 末行「珍藏:…」或单独一行「珍藏 …」；「桑迪 珍藏」这类角色名不会命中。
+FAVORITE_MARK = re.compile(r"(?:(?:^|\s)珍藏\s*[:=]|(?:^|\n)珍藏[ \t]+)\s*(?P<names>[^\n]*?)\s*$")
