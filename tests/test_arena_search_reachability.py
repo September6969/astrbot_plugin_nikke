@@ -126,6 +126,13 @@ def test_sandbox_search_uses_full_budget_and_stays_deterministic_and_fast(arena)
     assert min(sizes[name] for name in ("nayuta-carry", "moran-system-atk", "noah-biscuit-stall")) > 120
 
 
+def test_search_within_budget_reports_no_truncation(arena):
+    arena.analyzer.templates = [template(arena, "soda-laplace-stun")]
+    result = arena.analyzer.analyze(arena.directory.parse_team(ENEMY))
+    assert result.recommendations and result.searched == 4 < 2048
+    assert not any("截断" in warning or "均衡抽样" in warning for warning in result.warnings)
+
+
 def test_owned_large_template_recommendations_vary_front_slots(arena):
     nayuta = template(arena, "nayuta-carry")
     owned = frozenset(arena.analyzer._base(key) for slot in nayuta["slots"] for key in slot)
@@ -183,6 +190,48 @@ def test_substitute_recommendations_follow_ranked_order_and_stay_labeled(arena):
                                             limit=300)
 
 
+def stage_pool(arena, stage, exclude, count):
+    variants = set(arena.directory.variant_of.values())
+    return sorted(key for key, char in arena.directory.characters.items()
+                  if char.burst == stage and char.base_key == key and key not in variants
+                  and key not in exclude)[:count]
+
+
+def test_substitutes_prefer_slot_stage_share_and_rank_parameterless_last(arena):
+    stage = arena.directory.characters["noah"].burst
+    other_stage = next(value for value in (1, 2, 3) if value != stage)
+    mates, (rare, popular) = stage_pool(arena, stage, {"noah"}, 4), stage_pool(arena, other_stage, set(), 2)
+    # P4 混合阶段：本阶段占 2/3，另一阶段占 1/3。
+    slot = ("noah", mates[0], rare)
+    known, weak, missing = mates[1:]
+    boosters = [{"id": f"boost-{index}", "required": [], "archetype": "x", "reason": "x",
+                 "slots": [(popular,), (), (), (), ()]} for index in range(3)]
+    arena.analyzer.templates = [{"id": "fixture", "required": [], "archetype": "x", "reason": "x",
+                                 "slots": [(), (), (), slot, ()]}, *boosters]
+    arena.analyzer.parameters[known] = {2.0: 30.0, 3.0: 40.0}
+    arena.analyzer.parameters[weak] = {2.0: 1.0, 3.0: 2.0}
+    arena.analyzer.parameters.pop(missing, None)
+    arena.analyzer.parameters[popular] = {2.0: 90.0, 3.0: 90.0}
+    ranked = arena.analyzer.substitutes(slot, {known, weak, missing, popular}, set())
+    # 槽内阶段占比优先于模板频次；同阶段同频次下缺充能参数者排在有参数者之后。
+    assert ranked == (known, weak, missing, popular)
+
+
+def test_single_choice_slot_base_never_doubles_as_substitute(arena):
+    enemy = arena.directory.parse_team(ENEMY)
+    stage = arena.directory.characters["noah"].burst
+    forced, *pool = stage_pool(arena, stage, {"noah", *enemy.keys}, SUBSTITUTE_LIMIT + 1)
+    fixture = {"id": "fixture", "required": [enemy.keys[0]], "archetype": "x", "reason": "x",
+               "slots": [(enemy.keys[0],), (forced,), (enemy.keys[2],), ("noah",), (enemy.keys[4],)]}
+    arena.analyzer.templates = [fixture]
+    allowed = {enemy.keys[0], forced, enemy.keys[2], enemy.keys[4], *pool}
+    snapshot = ArenaRosterSnapshot(frozenset(allowed), "available", 0, "", ())
+    slots = arena.analyzer._slots(fixture, allowed, snapshot)
+    # forced 只在 P2 单选槽出现，模板频次最高，却不得占用 P4 的替补名额。
+    assert slots is not None and slots[1] == (forced,)
+    assert forced not in slots[3] and set(slots[3]) == set(pool[:SUBSTITUTE_LIMIT])
+
+
 # ---- 珍藏可达性与来源标注 ----
 
 def test_treasure_registry_maps_every_variant_to_its_exclusive_item(arena):
@@ -237,6 +286,20 @@ async def test_cached_official_detail_makes_all_treasure_templates_reachable(are
     assert any("官方详情确认 21 名" in warning for warning in arena.analyzer.analyze(enemy, snapshot).warnings)
 
 
+def test_web_manual_roster_labels_ticked_treasure_as_manual(arena):
+    helm = template(arena, "helm-treasure-carry")
+    arena.analyzer.templates = [helm]
+    keys = frozenset(key for slot in helm["slots"] for key in slot)
+    # 网页手动持有范围构建的快照不带 favorites，只能靠 status=='manual' 标注来源。
+    snapshot = ArenaRosterSnapshot(keys, "manual", 0, "", ())
+    result = arena.analyzer.analyze(arena.directory.parse_team(ENEMY), snapshot)
+    item = result.recommendations[0]
+    assert "helm_treasure" in item.team.keys
+    assert "珍藏来源 手动标记：海伦 珍藏" in [evidence.text for evidence in item.evidence]
+    assert any(warning.startswith("珍藏为手动标记，尚未经官方详情确认") and "海伦 珍藏" in warning
+               for warning in item.warnings)
+
+
 @pytest.mark.asyncio
 async def test_other_favorite_item_is_absent_and_blocks_manual_mark(arena):
     helm = arena.directory.characters["helm"].name_code
@@ -247,6 +310,12 @@ async def test_other_favorite_item_is_absent_and_blocks_manual_mark(arena):
     assert dict(snapshot.favorites) == {"moran_treasure": "manual"}
     assert any("官方详情显示未装备" in note and "海伦" in note for note in snapshot.notes)
     assert any("本体不在已绑定角色名单内" in note and "普丽瓦蒂" in note for note in snapshot.notes)
+    handler = ArenaCommandHandler(arena, enabled=True)
+    reply = await handler.handle(CommandContext(actor_id="a", is_private_chat=True, parameters={
+        "action": "解队", "value": ENEMY + " 珍藏:海伦,牡丹,普丽瓦蒂"}))
+    text = reply.messages[0].text
+    assert "海伦 珍藏：官方详情显示未装备专属珍藏，手动标记未生效。" in text
+    assert "普丽瓦蒂 珍藏：本体不在已绑定角色名单内，手动标记未生效。" in text
 
 
 @pytest.mark.asyncio
@@ -267,6 +336,13 @@ async def test_failing_detail_cache_falls_back_to_inference_without_blocking(are
     (ENEMY + "\n珍藏 普丽瓦蒂", ("privaty_treasure",)),
     ("红莲/豺狼/布兰儿/特蕾娜/桑迪 珍藏", ()),
     ("红莲/豺狼/布兰儿/特蕾娜/桑迪 珍藏 珍藏:Helm", ("helm_treasure",)),
+    # 与队伍相同的分隔符直接接标记，不得把标记算作第六人或残留分隔符。
+    (ENEMY + "/珍藏:海伦", ("helm_treasure",)),
+    (ENEMY + "／珍藏:海伦", ("helm_treasure",)),
+    ("红莲、豺狼、布兰儿、桑迪、特蕾娜，珍藏：海伦", ("helm_treasure",)),
+    ("红莲、豺狼、布兰儿、桑迪、特蕾娜、珍藏:海伦,牡丹", ("helm_treasure", "moran_treasure")),
+    (ENEMY + "/ 珍藏:海伦", ("helm_treasure",)),
+    ("红莲/豺狼/布兰儿/特蕾娜/桑迪 珍藏/珍藏:海伦", ("helm_treasure",)),
 ])
 def test_favorite_mark_syntax_never_eats_treasure_names(arena, text, marks):
     team_text, parsed = arena.directory.split_favorite_marks(text)
@@ -299,6 +375,11 @@ async def test_private_manual_mark_reaches_template_and_is_labeled_everywhere(ar
     assert "建议 1 海伦 珍藏/" in marked
     assert "珍藏来源 手动标记：海伦 珍藏" in marked
     assert "珍藏形态 手动标记 1 名" in marked
+    # 已手动标记的角色不得同时出现在「基础名单推测…未参与推荐」中。
+    inferred = [line for line in marked.splitlines() if line.startswith("基础名单推测")]
+    assert inferred and "海伦" not in inferred[0] and "贝伊" in inferred[0]
+    separated = await solve(ENEMY + "/珍藏:海伦")
+    assert "建议 1 海伦 珍藏/" in separated and "珍藏形态 手动标记 1 名" in separated
     result = await arena.analyze(ENEMY + " 珍藏:海伦", actor_id="a", owned=True)
     assert all(any("手动标记" in warning for warning in item.warnings) for item in result.recommendations)
 
@@ -311,17 +392,33 @@ async def test_group_sandbox_ignores_marks_with_explicit_note(arena):
     assert "全角色沙盒" in reply.messages[0].text and "珍藏标记未使用" in reply.messages[0].text
 
 
+THREE_TEAMS = (ENEMY, "诺雅/饼干/爱丽丝/丽塔/普丽瓦蒂", "阿妮斯/拉毗/尼恩/露菲/哈兰")
+
+
 @pytest.mark.asyncio
-async def test_three_team_import_accepts_mark_line(arena):
+@pytest.mark.parametrize("value", [
+    "\n".join((*THREE_TEAMS, "珍藏:海伦,牡丹")),
+    "\n".join(THREE_TEAMS) + "/珍藏:海伦,牡丹",
+    "\n".join(THREE_TEAMS) + "，珍藏：海伦、牡丹",
+])
+async def test_three_team_import_accepts_mark_line(arena, value):
     owned = base_roster(arena)
     roster, _ = provider(arena, owned)
     arena.roster = roster
     handler = ArenaCommandHandler(arena, enabled=True)
-    value = "\n".join((ENEMY, "诺雅/饼干/爱丽丝/丽塔/普丽瓦蒂", "阿妮斯/拉毗/尼恩/露菲/哈兰", "珍藏:海伦,牡丹"))
     reply = await handler.handle(CommandContext(actor_id="a", is_private_chat=True,
                                                 parameters={"action": "三队导入", "value": value}))
     assert "第 3 场对位" in reply.messages[0].text
     assert "珍藏形态 手动标记 2 名" in reply.messages[0].text
+
+
+@pytest.mark.asyncio
+async def test_group_three_team_import_ignores_marks_with_explicit_note(arena):
+    handler = ArenaCommandHandler(arena, enabled=True)
+    value = "\n".join((*THREE_TEAMS, "珍藏:海伦,牡丹"))
+    reply = await handler.handle(CommandContext(actor_id="a", parameters={"action": "三队导入", "value": value}))
+    text = reply.messages[0].text
+    assert "第 3 场对位" in text and "公开沙盒已包含全部珍藏形态，珍藏标记未使用。" in text
 
 
 @pytest.mark.asyncio
@@ -336,6 +433,20 @@ async def test_my_command_separates_favorite_provenance(arena):
     assert "已映射 3 人" in text
     assert "珍藏形态 官方详情确认 1 名｜基础名单推测 1 名（未计入）" in text
     assert "珍藏:角色名" in text
+
+
+@pytest.mark.asyncio
+async def test_my_command_counts_officially_absent_treasure(arena):
+    details = exclusive_details(arena, ("helm_treasure",))
+    # 普丽瓦蒂官方详情装备的是通用收藏品（娃娃 tid），不算专属珍藏。
+    details[arena.directory.characters["privaty"].name_code] = {"favorite_item_tid": 100602,
+                                                                "favorite_item_lv": 15}
+    roster, _ = provider(arena, {"helm", "moran", "privaty"}, details)
+    arena.roster = roster
+    handler = ArenaCommandHandler(arena, enabled=True)
+    reply = await handler.handle(CommandContext(actor_id="a", is_private_chat=True,
+                                                parameters={"action": "我的"}))
+    assert "珍藏形态 官方详情确认 1 名｜官方详情未装备 1 名｜基础名单推测 1 名（未计入）" in reply.messages[0].text
 
 
 @pytest.mark.asyncio
@@ -360,9 +471,36 @@ async def test_client_exposes_only_cached_details_of_the_same_binding():
     cached["5066"]["favorite_item_tid"] = 0
     assert client.cached_character_details(account)["5066"]["favorite_item_tid"] == 200701
     assert client.cached_character_details(other) == {}
+    # 逐维度改变：任一绑定维度不同都不得读到他人详情（防退化为只比 QQ 或只比 openid）。
+    for changed in ({"game_openid": "openid-b"}, {"cookie": "game_token=b"}, {"binding_revision": "rev-2"},
+                    {"qq_id": "2"}):
+        assert client.cached_character_details({**account, **changed}) == {}, changed
+    assert client.cached_character_details(account) == {"5066": detail}
     for key, (_expiry, data) in list(client._query_cache.items()):
         client._query_cache[key] = (0.0, data)
     assert client.cached_character_details(account) == {}
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_client_cached_details_drop_stale_binding_and_clear_its_cache():
+    account = {"qq_id": "1", "area_id": "1", "game_openid": "openid-a", "cookie": "game_token=a"}
+    bindings = {"1": dict(account)}
+    client = BlaBlaClient(account_reader=SimpleNamespace(get_account=bindings.get))
+    detail = {"name_code": 5066, "favorite_item_tid": 200701, "favorite_item_lv": 2}
+
+    async def post(path, _cookie, _payload):
+        if "Details" in path:
+            return {"data": {"character_details": [detail], "state_effects": []}}
+        return {"data": {"characters": [{"name_code": 5066}]}}
+
+    client._post = AsyncMock(side_effect=post)
+    await client.get_character_detail(account, "5066")
+    assert client.cached_character_details(account) == {"5066": detail}
+    # 同一 QQ 已重新绑定（凭据代次变化）：调用方仍持旧账号字典时不得读到旧详情。
+    bindings["1"] = {**account, "cookie": "game_token=renewed"}
+    assert client.cached_character_details(account) == {}
+    assert not [key for key in client._query_cache if key[0][0] == "1"]
     await client.aclose()
 
 

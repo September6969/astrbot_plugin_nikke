@@ -125,10 +125,14 @@ class ArenaDirectory:
             if variant is None:
                 raise ValueError(f"{char.name} 没有已收录的珍藏形态。")
             marks.append(variant)
-        return normalized[:match.start()].strip(), tuple(dict.fromkeys(marks))
+        # 标记前可能残留与角色同款的分隔符（「特蕾娜/珍藏:」「特蕾娜/ 珍藏:」），一并剥除。
+        return TRAILING_SEPARATOR.sub("", normalized[:match.start()]), tuple(dict.fromkeys(marks))
 
 
 # 资源名形如 si_favoriteitem_c352_00，其中 c 后数字为角色 resource_id。
 TREASURE_RESOURCE = re.compile(r"si_favoriteitem_c(\d+)_\d+")
 # 末行「珍藏:…」或单独一行「珍藏 …」；「桑迪 珍藏」这类角色名不会命中。
-FAVORITE_MARK = re.compile(r"(?:(?:^|\s)珍藏\s*[:=]|(?:^|\n)珍藏[ \t]+)\s*(?P<names>[^\n]*?)\s*$")
+# 带冒号的标记也可直接跟在队伍分隔符后（「…/珍藏:海伦」「…，珍藏：海伦」），角色名后从不接冒号。
+FAVORITE_MARK = re.compile(
+    r"(?:(?:^|[\s/、,，])珍藏\s*[:=]|(?:^|\n)珍藏[ \t]+)\s*(?P<names>[^\n]*?)\s*$")
+TRAILING_SEPARATOR = re.compile(r"[\s/、,，]+$")
