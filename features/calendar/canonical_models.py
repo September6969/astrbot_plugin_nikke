@@ -545,10 +545,23 @@ class CanonicalEvent:
         if status == EventStatus.CANCELLED.value:
             return "已取消"
 
+        if status == EventStatus.UPCOMING.value and self.start_at:
+            # 未开始的活动显示距开始，而不是距结束。
+            start_cst = self.start_at.astimezone(CST)
+            if self.start_precision != TimePrecision.EXACT.value:
+                return f"{start_cst.strftime('%m.%d')} 开始"
+            until = int((self.start_at - current).total_seconds())
+            if until >= 86400:
+                return f"距开始 {until // 86400}天{(until % 86400) // 3600}小时"
+            if until >= 3600:
+                return f"距开始 {until // 3600}小时{(until % 3600) // 60}分"
+            return f"距开始 {max(1, until // 60)}分钟"
+
         if self.end_precision != TimePrecision.EXACT.value:
             # 粗粒度时间（DATE_ONLY / INFERRED），仅展示日期，不制造伪精度
             end_cst = self.end_at.astimezone(CST)
-            days_left = (self.end_at.date() - current.astimezone(CST).date()).days
+            # 两侧统一按北京时间取日期，避免 UTC 日期与北京日期相差一天。
+            days_left = (end_cst.date() - current.astimezone(CST).date()).days
             if days_left <= 0:
                 return f"{end_cst.strftime('%m.%d')} 截止 (今日截止)"
             return f"{end_cst.strftime('%m.%d')} 截止"

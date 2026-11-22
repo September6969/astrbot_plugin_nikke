@@ -436,9 +436,10 @@ class CalendarMergePolicy:
             else:
                 service.freshness = Freshness.EXPIRED.value
 
-        # 若所有可贡献新鲜度的主源均失败但存在本地快照，置为 STALE
+        # 若所有可贡献新鲜度的主源均失败但存在本地快照，FRESH 降为 STALE；
+        # 已 EXPIRED 的快照不得因“仍有本地数据”被反向提升为 STALE。
         active_freshness_adapters = [ad for ad in service.adapters if getattr(ad, "contributes_to_freshness", True)]
-        if active_freshness_adapters and all(
+        if service.freshness == Freshness.FRESH.value and active_freshness_adapters and all(
             service._source_health.get(ad.source_name) and service._source_health[ad.source_name].consecutive_failures > 0
             for ad in active_freshness_adapters
         ) and (service._events or service._source_datasets):

@@ -54,7 +54,6 @@ def create_announcement_resources(
     application = AnnouncementApplication(
         announcements=service,
         delivery=delivery,
-        deadline_selector=calendar_application.reminder_deadlines,
     )
     return AnnouncementResources(
         service, application, calendar, calendar_application

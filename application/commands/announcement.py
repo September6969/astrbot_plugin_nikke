@@ -62,7 +62,7 @@ class AnnouncementCommandHandler:
                 else " 全局推送开关当前关闭，不会自动发送。"
             )
             return self._text(
-                "已订阅当前会话；不补发已有公告，截止提醒为 24/6/1 小时。"
+                "已订阅当前会话的官方公告推送；不补发已有公告。活动截止提醒请由需要的成员使用 /妮姬 日程 订阅。"
                 + suffix
             )
         if operation == "unsupported":

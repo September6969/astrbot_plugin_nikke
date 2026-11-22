@@ -2,10 +2,13 @@
 import asyncio
 import hashlib
 import json
+import logging
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 
 from .ports import AnnouncementStateStore
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def aware(value):
@@ -37,6 +40,9 @@ class AnnouncementDelivery:
     CONFIRMED_SUCCESS = "CONFIRMED_SUCCESS"
     CONFIRMED_FAILURE = "CONFIRMED_FAILURE"
     UNKNOWN_AFTER_ACTION = "UNKNOWN_AFTER_ACTION"
+    # 未决（写前意图 / 结果未知）记录达到上限时停止新投递并告警，等待人工对账，
+    # 防止发送器持续返回不确定结果时状态无界增长或持续骚扰会话。
+    MAX_PENDING_INTENTS = 50
 
     def __init__(self, store: AnnouncementStateStore):
         self.store = store
@@ -181,6 +187,10 @@ class AnnouncementDelivery:
             }
         self.store.set_setting(self.SETTING, state)
 
+    def pending_count(self) -> int:
+        """未决投递数量（含 DISPATCH_INTENT 与 UNKNOWN_AFTER_ACTION），供健康监控使用。"""
+        return len(self._state()["dispatch_intents"])
+
     def unsubscribe(self, target):
         state = self._state()
         if target in state["targets"]:
@@ -261,6 +271,14 @@ class AnnouncementDelivery:
             current = aware(now or datetime.now(timezone.utc))
             unknown = self._recover_orphaned_intents(current)
             self.cleanup(now=current)
+            pending = self.pending_count()
+            if pending >= self.MAX_PENDING_INTENTS:
+                _LOGGER.warning(
+                    "[NIKKE] 未决投递已达 %d 条（上限 %d），暂停新投递，需按受控流程对账。",
+                    pending,
+                    self.MAX_PENDING_INTENTS,
+                )
+                return {"succeeded": 0, "failed": 0, "unknown": unknown, "blocked": pending}
             succeeded = failed = 0
             attempted = 0
             for push in self.plan(records, deadlines, now=current):

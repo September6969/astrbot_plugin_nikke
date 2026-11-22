@@ -50,7 +50,8 @@ class ScheduleService:
         visual_cache: CalendarVisualPort | None | Literal[False] = None,
         fetch_client: CalendarFetchGateway | None = None,
         announcement_service: Any = None,
-        ttl_seconds: float = 300.0,
+        # 须大于 300s 调度周期，避免正常同步间隔就把数据判为 STALE；连续失败仍转 STALE。
+        ttl_seconds: float = 900.0,
         **kwargs: Any,
     ) -> None:
         self.merge_policy = CalendarMergePolicy()
@@ -166,6 +167,10 @@ class ScheduleService:
 
     def has_snapshot(self) -> bool:
         return self._has_snapshot
+
+    def has_failed_sources(self) -> bool:
+        """是否有数据源处于连续失败中；仅单条记录解析警告（PARTIAL）不计入。"""
+        return any(health.consecutive_failures > 0 for health in self._source_health.values())
 
     @property
     def snapshot_diagnostics(self) -> dict[str, Any]:
