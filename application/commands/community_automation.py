@@ -2,11 +2,18 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from datetime import datetime, timezone
 import random
 
+from ...core.privacy import safe_exception_message
 from ...features.daily.action_models import AutomationStore, account_scope, binding_stamp
+from ...features.daily.runner import DailyRunner
 from .contracts import CommandResult, TextReply
+
+_LOGGER = logging.getLogger(__name__)
+_RECOVERY_USAGE = ("确认恢复只用于你已在官网核实过的未决浏览/点赞动作：确认后这些动作不会被补做或重放，"
+                   "所在周期仍保持暂停，从下一个周期起恢复。\n确认无误请私聊发送：/妮姬 日常 任务 确认恢复 确认")
 
 
 class CommunityAutomationHandler:
@@ -35,7 +42,19 @@ class CommunityAutomationHandler:
             return self._text((await self.tasks.execute(account)).detail)
         if len(parts) == 2 and parts[0] == "自动":
             return self._preference(account, "community_actions", parts[1], "浏览及点赞")
-        return self._text("用法：/妮姬 日常 任务 状态|执行|自动 开|关")
+        if parts and parts[0] == "确认恢复":
+            return self._recovery(account, context, confirmed=parts[1:] == ["确认"])
+        return self._text("用法：/妮姬 日常 任务 状态|执行|自动 开|关|确认恢复")
+
+    def _recovery(self, account, context, *, confirmed: bool):
+        """Decision 2A：仅账号本人在私聊中两步确认；记录操作人、时间与原 run_key。"""
+        rows = self.tasks.recovery_candidates(account)
+        if not rows:
+            return self._text("没有需要确认的未决浏览/点赞动作。")
+        if not confirmed:
+            listing = "\n".join(f"• {row['status']}（记录于 {row['created_at']}）" for row in rows[:10])
+            return self._text(f"待核实的未决动作 {len(rows)} 项：\n{listing}\n\n{_RECOVERY_USAGE}")
+        return self._text(self.tasks.acknowledge_unknown(account, operator=context.actor_id).detail)
 
     async def handle_renewal(self, context):
         if not context.is_private_chat:
@@ -82,7 +101,13 @@ class CommunityAutomationHandler:
                 day = self.clock().astimezone(timezone.utc).date().isoformat()
                 self.store.set_setting(f"community_automation:halt:{account_scope(account)}:{day}", True)
             if result.status not in {"completed", "validated", "not_due", "disabled", "frequency_limited"}:
-                await self._notify(account, capability, result)
+                try:
+                    await self._notify(account, capability, result)
+                except asyncio.CancelledError:
+                    raise
+                except Exception as exc:
+                    # 通知失败不阻断后续能力与其他账号；通知自身已按幂等键防重。
+                    _LOGGER.warning("[NIKKE] 社区自动任务异常通知失败：%s", safe_exception_message(exc))
             if stop:
                 return
 
@@ -97,10 +122,20 @@ class CommunityAutomationHandler:
     def _enabled(self, account, capability):
         return self.store.get_setting(f"{capability}:auto:{account['qq_id']}", None) == binding_stamp(account)
 
-    def _register_route(self, context, account):
-        if context.is_private_chat and context.conversation_id:
-            self.store.set_setting(f"community_automation:private:{context.actor_id}", {
-                **binding_stamp(account), "conversation": context.conversation_id})
+    def register_route(self, context, account):
+        """统一登记私聊异常通知路由：签到汇总与社区额外能力共用同一次登记。"""
+        if not (context.is_private_chat and context.conversation_id):
+            return
+        self.store.set_setting(f"daily_private:{context.actor_id}", {
+            "identity": DailyRunner.daily_identity(account), "conversation": context.conversation_id})
+        try:
+            stamp = binding_stamp(account)
+        except ValueError:
+            return
+        self.store.set_setting(f"community_automation:private:{context.actor_id}", {
+            **stamp, "conversation": context.conversation_id})
+
+    _register_route = register_route
 
     async def _notify(self, account, capability, result):
         route = self.store.get_setting(f"community_automation:private:{account['qq_id']}", {})
@@ -123,6 +158,9 @@ class CommunityAutomationHandler:
 
     def _saved(self, account, capability):
         previous = self.store.get_setting(f"{capability}:last:{account_scope(account)}", {})
+        if (isinstance(previous, dict) and previous.get("generation")
+                and previous["generation"] != binding_stamp(account)["generation"]):
+            previous = {}  # 来自旧绑定代次的结果不再作为当前告警展示
         enabled = "开" if self._enabled(account, capability) else "关"
         detail = f"\n独立自动开关：{enabled}" + ("\n最近执行：" + str(previous["detail"]) if isinstance(previous, dict) and previous.get("detail") else "")
         if capability == "session_renewal":

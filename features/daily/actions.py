@@ -6,11 +6,19 @@ from datetime import datetime, timezone
 import hashlib
 import json
 
-from .action_models import (ActionGateway, AccountLock, AutomationStore, KINDS, LABELS,
-                            OperationResult, account_scope, still_authorized, account_execution_lease)
+from .action_models import (ACKNOWLEDGED_UNKNOWN, LEASE_TIMEOUT_SECONDS, ActionGateway, AccountLock,
+                            AutomationStore, KINDS, LABELS, OperationResult, account_scope, binding_stamp,
+                            still_authorized, account_execution_lease, lease_key)
 
 
 UNRESOLVED = {"DISPATCH_INTENT", "DISPATCHED", "UNKNOWN_AFTER_ACTION"}
+# 所在周期内仍阻断新动作的状态：未决 + 已人工核实（只放行之后的新周期）。
+PERIOD_BLOCKING = UNRESOLVED | {ACKNOWLEDGED_UNKNOWN}
+# 确认未发送的记录保留去重与审计，但不占用周期预算。
+BUDGET_EXEMPT = frozenset({"NOT_SENT"})
+# 写前意图超过该秒数仍未推进，才视为进程中断遗留，可纳入人工核实。
+INTENT_STALE_AFTER_SECONDS = 120
+RECOVERY_AUDIT_LIMIT = 50
 
 
 class CommunityTaskService:
@@ -41,6 +49,7 @@ class CommunityTaskService:
                 result = await self._execute_locked(account, automatic)
             self.store.set_setting(f"community_actions:last:{account_scope(account)}", {
                 "status": result.status, "detail": result.detail,
+                "generation": binding_stamp(account)["generation"],
                 "checked_at": self.clock().astimezone(timezone.utc).isoformat()})
             return result
 
@@ -65,7 +74,7 @@ class CommunityTaskService:
                 if any(json.loads(row["detail"]).get("target") != task.target for row in rows):
                     lines.append(f"{LABELS[kind]}：周期内目标发生变化，已暂停并保留原预算")
                     continue
-                unresolved = self._unresolved(account, kind)
+                unresolved = self._unresolved(account, kind, task.period)
                 if unresolved:
                     # 不能用聚合进度把重启前动作归因到某篇帖子；本周期仅只读恢复。
                     lines.append(f"{LABELS[kind]}：{task.current}/{task.target}，存在未决动作，只查询不补做；跨周期也需先核实旧动作影响")
@@ -87,7 +96,7 @@ class CommunityTaskService:
 
     async def _run_task(self, account, task, candidates, automatic):
         scope = self._scope(account, task)
-        used = self._rows(scope)
+        used = [row for row in self._rows(scope) if row["status"] not in BUDGET_EXEMPT]
         limit = min(task.target, int(self.config.get("community_cycle_action_budget", 10)))
         run_limit = int(self.config.get("community_run_action_budget", 5))
         submitted = 0
@@ -134,7 +143,8 @@ class CommunityTaskService:
                   "request": "intent", "progress": "unverified"}
         # 账号锁之外仍使用事务预算，保护多绑定、多实例及重启后的同账号竞争。
         if not self.store.reserve_run(scope, key, str(account["qq_id"]), "community_action", limit=limit,
-                blocking_statuses=UNRESOLVED, initial_status="DISPATCH_INTENT", detail=json.dumps(intent)):
+                blocking_statuses=PERIOD_BLOCKING, initial_status="DISPATCH_INTENT", detail=json.dumps(intent),
+                budget_exempt_statuses=BUDGET_EXEMPT):
             return OperationResult("stopped", f"{LABELS[task.kind]}：已有记录、未决动作或周期预算不足，未提交"), None
         try:
             period = "community-utc:" + self.clock().astimezone(timezone.utc).date().isoformat()
@@ -192,17 +202,58 @@ class CommunityTaskService:
     def _rows(self, scope):
         return [r for r in self.store.list_runs(action="community_action") if r["run_key"].startswith(scope + ":")]
 
-    def _unresolved(self, account, kind):
+    def _unresolved(self, account, kind, period=None):
+        """未决动作跨周期阻断；已人工核实的记录只在其所在周期内继续阻断。"""
         prefix = f"community-actions:v1:{account_scope(account)}:"
+        current = f"{prefix}{period}:{kind}:" if period else None
         return [r for r in self.store.list_runs(action="community_action")
-                if r["run_key"].startswith(prefix) and f":{kind}:" in r["run_key"] and r["status"] in UNRESOLVED]
+                if r["run_key"].startswith(prefix) and f":{kind}:" in r["run_key"]
+                and (r["status"] in UNRESOLVED
+                     or (current and r["status"] == ACKNOWLEDGED_UNKNOWN and r["run_key"].startswith(current)))]
 
     def _pending_description(self, account):
         lines = [f"{LABELS[kind]}：存在未决动作，停止补做，需先核实旧动作影响。" for kind in KINDS if self._unresolved(account, kind)]
-        lease = self.store.get_run("community-account-lease:v1:" + account_scope(account)) or {}
+        if lines:
+            lines.append("在官网核实这些动作的实际结果后，可私聊发送 /妮姬 日常 任务 确认恢复 查看处理方式。")
+        lease = self.store.get_run(lease_key(account)) or {}
         if lease.get("status") == "LEASED":
-            lines.append("执行占用尚未释放：可能正在运行或进程异常退出，恢复前仅允许查询。")
+            minutes = LEASE_TIMEOUT_SECONDS // 60
+            lines.append(f"执行占用尚未释放：可能正在运行或进程异常退出；超过 {minutes} 分钟未释放会自动回收，期间仅允许查询。")
         return "\n" + "\n".join(lines) if lines else ""
+
+    def recovery_candidates(self, account):
+        """可人工核实的未决动作：结果未知，或写前意图已超过陈旧阈值（进程中断遗留）。"""
+        prefix = f"community-actions:v1:{account_scope(account)}:"
+        now = int(self.clock().timestamp())
+        return [r for r in self.store.list_runs(action="community_action")
+                if r["run_key"].startswith(prefix) and r["status"] in UNRESOLVED
+                and (r["status"] == "UNKNOWN_AFTER_ACTION"
+                     or now - int(r.get("created_at") or now) >= INTENT_STALE_AFTER_SECONDS)]
+
+    def acknowledge_unknown(self, account, *, operator: str) -> OperationResult:
+        """本人显式核实后解除未决阻断：只放行之后的新周期，绝不补跑或重放历史动作。"""
+        lease = self.store.get_run(lease_key(account)) or {}
+        if lease.get("status") == "LEASED":
+            return OperationResult("busy_or_interrupted", "同账号仍有执行占用，暂不能确认恢复；请稍后再试。")
+        rows = self.recovery_candidates(account)
+        if not rows:
+            return OperationResult("nothing", "没有需要确认的未决动作。")
+        at = self.clock().astimezone(timezone.utc).isoformat()
+        confirmed = []
+        for row in rows:
+            audit = {"acknowledged_by": str(operator), "acknowledged_at": at,
+                     "original_run_key": row["run_key"], "previous_status": row["status"],
+                     "replayed": False}
+            stale = None if row["status"] == "UNKNOWN_AFTER_ACTION" else INTENT_STALE_AFTER_SECONDS
+            if self.store.transition_run(row["run_key"], from_statuses={row["status"]}, to_status=ACKNOWLEDGED_UNKNOWN,
+                                         detail=json.dumps(audit, ensure_ascii=False), stale_after=stale):
+                confirmed.append(audit)
+        key = f"community_automation:recovery_audit:{account_scope(account)}"
+        history = self.store.get_setting(key, [])
+        history = (history if isinstance(history, list) else []) + confirmed
+        self.store.set_setting(key, history[-RECOVERY_AUDIT_LIMIT:])
+        return OperationResult("acknowledged", f"已确认 {len(confirmed)} 项未决动作并记录审计。"
+                               "这些动作不会被补做或重放；所在周期仍保持暂停，从下一个周期起恢复。")
 
     @staticmethod
     def _describe(tasks):

@@ -19,6 +19,21 @@ from .ports import SchedulerSettingsStore
 _LOGGER = logging.getLogger(__name__)
 _MAX_BACKOFF_SECONDS = 300.0
 _WARNING_INTERVAL_SECONDS = 600.0
+_CST = timezone(timedelta(hours=8))
+# 汇总补发窗口：前序日常耗时或重启都不应丢失汇总；超出窗口不再补发。
+SUMMARY_CATCHUP = timedelta(hours=6)
+SUMMARY_SENT_KEY = "daily_summary_sent:{day}"
+
+
+def community_due(community_day: str, hour: int, minute: int) -> datetime:
+    """社区日（UTC 日期，北京时间 08:00 起算）内配置的北京时间时刻。
+
+    北京时间 00:00–07:59 属于前一个社区日的末尾，因此落在社区日的次日日历上；
+    这样 daily_hour < 8 时不会在社区日开始（08:00）就提前约 22 小时触发。
+    """
+    day = datetime.strptime(community_day, "%Y-%m-%d")
+    due = datetime(day.year, day.month, day.day, hour, minute, tzinfo=_CST)
+    return due + timedelta(days=1) if hour < 8 else due
 
 
 class RuntimeScheduler:
@@ -79,7 +94,6 @@ class RuntimeScheduler:
         if self._coordinator.closing:
             return
         now = self._clock()
-        today = now.strftime("%Y-%m-%d")
         daily_hour, daily_minute = read_schedule_clock(
             self._store.get_setting,
             "daily",
@@ -92,21 +106,17 @@ class RuntimeScheduler:
             default_hour=self._config["summary_hour"],
             default_minute=self._config["summary_minute"],
         )
-        # 社区按 UTC 零点刷新；本地时刻仅决定何时运行，错过时刻允许当天补跑。
+        # 社区按 UTC 零点（北京时间 08:00）刷新；日常与汇总统一按同一社区日计算，
+        # 错过时刻允许当天补跑，汇总与结果使用同一日期键。
         community_day = now.astimezone(timezone.utc).strftime("%Y-%m-%d")
-        if ((now.hour, now.minute) >= (daily_hour, daily_minute)
+        if (now >= community_due(community_day, daily_hour, daily_minute)
             and self._last_daily != community_day
             and (self._daily_task is None or self._daily_task.done())):
             self._last_daily = community_day
             self._daily_task = self._coordinator.create_task(
                 self._run_daily(community_day, stagger=True, automatic=True)
             )
-        if (
-            (now.hour, now.minute) == (summary_hour, summary_minute)
-            and self._last_summary != today
-        ):
-            self._last_summary = today
-            self._coordinator.create_task(self._send_summary(today))
+        self._maybe_send_summary(now, community_day, summary_hour, summary_minute)
 
         current_epoch = self._unix_time()
         if current_epoch - self._last_announcement_sync > self._announcement_interval:
@@ -132,6 +142,24 @@ class RuntimeScheduler:
                 self._announcement_push_task = self._coordinator.create_task(
                     self._dispatch_announcements()
                 )
+
+    def _maybe_send_summary(self, now: datetime, community_day: str, hour: int, minute: int) -> None:
+        """到点后在补发窗口内发送一次；等待同日日常结束；数据库幂等键防止重启重发。"""
+        due = community_due(community_day, hour, minute)
+        if not due <= now < due + SUMMARY_CATCHUP or self._last_summary == community_day:
+            return
+        if self._daily_task is not None and not self._daily_task.done():
+            return
+        key = SUMMARY_SENT_KEY.format(day=community_day)
+        if self._store.get_setting(key, None):
+            self._last_summary = community_day
+            return
+        self._last_summary = community_day
+        setter = getattr(self._store, "set_setting", None)
+        if callable(setter):
+            # 先落标记再发送：宁可极端崩溃时少发一次，也不在同分钟重启时重复发送。
+            setter(key, {"sent_at": now.astimezone(timezone.utc).isoformat()})
+        self._coordinator.create_task(self._send_summary(community_day))
 
     async def run(self) -> None:
         """持续轮询；退出与取消由 RuntimeCoordinator 管理。

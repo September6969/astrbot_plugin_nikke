@@ -61,8 +61,12 @@ class DailyCommandHandler:
         if community and context.is_private_chat and context.conversation_id:
             account = self._account(context.actor_id)
             if account:
-                self._store.set_setting(f"daily_private:{context.actor_id}", {
-                    "identity": DailyRunner.daily_identity(account), "conversation": context.conversation_id})
+                register = getattr(self._extra_automation, "register_route", None)
+                if callable(register):
+                    register(context, account)
+                else:
+                    self._store.set_setting(f"daily_private:{context.actor_id}", {
+                        "identity": DailyRunner.daily_identity(account), "conversation": context.conversation_id})
         if action in {"状态", "status"}:
             return await self._community_status(context.actor_id) if community else await self._status(context.actor_id)
         if action in {"自动", "auto"}:

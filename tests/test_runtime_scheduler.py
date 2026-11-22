@@ -56,11 +56,17 @@ class RuntimeSchedulerTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(
             {entry[0] for entry in events},
-            {"daily", "summary", "announcements", "calendar", "push"},
+            {"daily", "announcements", "calendar", "push"},
         )
         self.assertIn(("daily", ("2026-09-23",), {"stagger": True, "automatic": True}), events)
+        self.assertEqual(len(created), 4)
+        # REFACTOR_PLAN_V2 AUD-013：汇总等同一社区日的日常结束后，在补发窗口内发送一次。
+        await scheduler.tick()
+        await asyncio.sleep(0)
         self.assertIn(("summary", ("2026-09-23",), {}), events)
-        self.assertEqual(len(created), 5)
+        await scheduler.tick()
+        await asyncio.sleep(0)
+        self.assertEqual([entry[0] for entry in events].count("summary"), 1)
         epoch += 60
         await scheduler.tick()
         await scheduler.tick()

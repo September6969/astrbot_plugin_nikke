@@ -522,15 +522,20 @@ class NikkeStore:
             return False
 
     def reserve_run(self, scope: str, key: str, qq_id: str, action: str, *, limit: int,
-                    blocking_statuses: set[str], initial_status: str, detail: str = "") -> bool:
-        """同一事务检查作用域预算、未决记录及去重，再持久化调用方给定的意图。"""
+                    blocking_statuses: set[str], initial_status: str, detail: str = "",
+                    budget_exempt_statuses: frozenset[str] | set[str] = frozenset()) -> bool:
+        """同一事务检查作用域预算、未决记录及去重，再持久化调用方给定的意图。
+
+        budget_exempt_statuses 中的记录（如确认未发送）仍参与去重，但不占用预算。
+        """
         if not key.startswith(scope + ":") or limit <= 0:
             return False
         with self._lock, self._connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             rows = conn.execute("SELECT run_key,status FROM action_runs WHERE substr(run_key,1,?)=?",
                                 (len(scope) + 1, scope + ":")).fetchall()
-            if len(rows) >= limit or any(r["status"] in blocking_statuses or r["run_key"] == key for r in rows):
+            used = sum(1 for r in rows if r["status"] not in budget_exempt_statuses)
+            if used >= limit or any(r["status"] in blocking_statuses or r["run_key"] == key for r in rows):
                 return False
             conn.execute("INSERT INTO action_runs(run_key,qq_id,action,status,detail,created_at) VALUES(?,?,?,?,?,?)",
                          (key, str(qq_id), action, initial_status, detail[:500], int(time.time())))
