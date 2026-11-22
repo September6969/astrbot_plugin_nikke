@@ -2,7 +2,6 @@
 import unittest
 from pathlib import Path
 
-from astrbot_plugin_nikke.features.character.costume_asset_resolver import CostumeAssetResolver
 from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver
 
 
@@ -72,10 +71,22 @@ class CostumeAssetResolverTests(unittest.TestCase):
 
 
 class OfflineAuditCompatTests(unittest.TestCase):
-    def test_audit_entry_delegates_to_merged_resolver(self):
-        # scripts/audit/audit_assets.py 仍按旧类名、旧映射路径构造；结果来自合并后的视觉 catalog。
-        mapping = Path(__file__).resolve().parents[1] / "assets" / "mappings" / "costume_assets.json"
-        legacy = CostumeAssetResolver(mapping)
+    def test_audit_entry_uses_merged_resolver_and_legacy_module_is_removed(self):
+        # PR-6C：scripts/audit/audit_assets.py 已直接改用 CharacterVisualAssetResolver.resolve_costume，
+        # 转发类 CostumeAssetResolver 及其模块已删除。
+        import importlib.util
+
+        root = Path(__file__).resolve().parents[1]
+        self.assertIsNone(
+            importlib.util.find_spec("astrbot_plugin_nikke.features.character.costume_asset_resolver")
+        )
+        source = (root / "scripts" / "audit" / "audit_assets.py").read_text(encoding="utf-8")
+        self.assertNotIn("CostumeAssetResolver", source)
+        self.assertIn("costume_resolver.resolve_costume(", source)
+        catalog = root / "assets" / "mappings" / "costume_visual_assets.json"
+        audit_resolver = CharacterVisualAssetResolver(catalog)
         merged = CharacterVisualAssetResolver()
-        self.assertEqual(legacy.total_costumes, merged.total_costumes)
-        self.assertEqual(legacy.resolve("90", "30016"), merged.resolve_costume("90", "30016"))
+        self.assertEqual(audit_resolver.total_costumes, merged.total_costumes)
+        self.assertEqual(
+            audit_resolver.resolve_costume("90", "30016"), merged.resolve_costume("90", "30016")
+        )

@@ -27,7 +27,7 @@ if str(base_dir) not in sys.path:
     sys.path.insert(0, str(base_dir))
 
 from astrbot_plugin_nikke.features.character.skill_icon_resolver import SkillIconResolver
-from astrbot_plugin_nikke.features.character.costume_asset_resolver import CostumeAssetResolver
+from astrbot_plugin_nikke.features.character.visual_resolver import CharacterVisualAssetResolver
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.core.assets.image_codec import AssetImageCodec
 from astrbot_plugin_nikke.core.paths import asset_data_file, icon_dirs
@@ -63,7 +63,8 @@ def run_asset_audit(base_dir: Path | str) -> dict:
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     skill_resolver = SkillIconResolver(assets_dir / "mappings" / "skill_icons.json")
-    costume_resolver = CostumeAssetResolver(assets_dir / "mappings" / "costume_assets.json")
+    # PR-6C：皮肤解析直接使用合并后的 CharacterVisualAssetResolver.resolve_costume（同一视觉 catalog）。
+    costume_resolver = CharacterVisualAssetResolver(assets_dir / "mappings" / "costume_visual_assets.json")
 
     # 1. 加载角色主数据
     master_file = asset_data_file("character_master.json", asset_dir=assets_dir)
@@ -124,7 +125,7 @@ def run_asset_audit(base_dir: Path | str) -> dict:
     for rid, c_info in costume_catalog.get("characters", {}).items():
         costumes_dict = c_info.get("costumes", {})
         for cid, c_data in costumes_dict.items():
-            res = costume_resolver.resolve(rid, cid)
+            res = costume_resolver.resolve_costume(rid, cid)
             if res.exact_match:
                 exact_costumes += 1
                 # 检查本地 si 头像或 spine 预渲染
