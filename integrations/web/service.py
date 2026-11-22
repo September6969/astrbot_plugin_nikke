@@ -159,10 +159,14 @@ class BindingWebService:
         return web.Response(status=204)
 
     def _storage_ready(self) -> bool:
-        """只检查本地存储文件是否存在，不读取密钥内容或数据库内容。"""
+        """数据库须为普通文件；密钥统一由 store.has_valid_key() 判定（兼容环境变量密钥）。"""
         database = getattr(self.store, "db_path", None)
-        secret_key = getattr(self.store, "key_path", None)
-        return all(_is_regular_file(path) for path in (database, secret_key))
+        if not _is_regular_file(database):
+            return False
+        has_valid_key = getattr(self.store, "has_valid_key", None)
+        if callable(has_valid_key):
+            return bool(has_valid_key())
+        return _is_regular_file(getattr(self.store, "key_path", None))
 
     async def health(self, _: web.Request) -> web.Response:
         ready = self._storage_ready()

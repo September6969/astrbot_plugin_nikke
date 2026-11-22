@@ -14,6 +14,9 @@ class BindingSessionStore(Protocol):
     db_path: Path
     key_path: Path
 
+    def has_valid_key(self) -> bool:
+        """加密密钥是否就绪（环境变量密钥或普通文件 secret.key）。"""
+
     def create_bind_session(
         self, token: str, qq_id: str, ttl: int = 600, *, status: str
     ) -> None:

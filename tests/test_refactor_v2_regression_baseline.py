@@ -101,7 +101,6 @@ def test_same_game_account_rebind_keeps_authorization(store: NikkeStore) -> None
     assert store.get_setting(f"daily_scope_v2:{qq_id}", "") == "community"
 
 
-@pytest.mark.xfail(strict=True, reason="AUD-002：换绑到不同游戏身份仍继承自动授权")
 def test_rebind_to_another_game_account_revokes_inherited_authorization(
     store: NikkeStore,
 ) -> None:
@@ -118,7 +117,6 @@ def test_rebind_to_another_game_account_revokes_inherited_authorization(
     assert store.get_run("community:uid-a:2026-11-22")["status"] == "UNKNOWN_AFTER_ACTION"
 
 
-@pytest.mark.xfail(strict=True, reason="AUD-014：后发失败覆盖已成功的绑定会话")
 def test_late_failure_does_not_overwrite_consumed_bind_session(store: NikkeStore) -> None:
     _bind(store, "token-a", uid="uid-a", openid="openid-a")
 
