@@ -536,7 +536,8 @@ class ExtensionTests(unittest.TestCase):
         manifest = json.loads((root / "extension" / "manifest.json").read_text(encoding="utf-8"))
         hosts = manifest["host_permissions"]
         self.assertNotIn("<all_urls>", hosts)
-        self.assertEqual(set(manifest["permissions"]), {"cookies", "tabs", "storage", "webRequest"})
+        # PR-2：tabs 收窄为 activeTab（仅用户打开弹窗时读取当前页地址）。
+        self.assertEqual(set(manifest["permissions"]), {"cookies", "activeTab", "storage", "webRequest"})
         background = (root / "extension" / "background.js").read_text(encoding="utf-8")
         self.assertIn("x-common-params", background)
         self.assertIn("https://*.blablalink.com/*", background)

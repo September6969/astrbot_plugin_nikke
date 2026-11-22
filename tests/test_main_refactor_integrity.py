@@ -97,7 +97,7 @@ class MainRefactorIntegrityTests(unittest.TestCase):
             if not isinstance(method, ast.AsyncFunctionDef):
                 continue
             decorator_text = ast.unparse(method.decorator_list)
-            if "filter.command" not in decorator_text and "filter.event_message_type" not in decorator_text:
+            if not any(name in decorator_text for name in ("filter.command", "filter.event_message_type", "filter.regex")):
                 continue
             registered.append(method.name)
             self.assertLessEqual(
@@ -111,13 +111,13 @@ class MainRefactorIntegrityTests(unittest.TestCase):
                     and isinstance(node.value, ast.Name)
                     and node.value.id == "self"
                     and node.attr == (
-                        "command_runtime" if method.name == "nikke" else "adapters"
+                        "command_runtime" if method.name in {"nikke", "nikke_hash_prefix"} else "adapters"
                     )
                     for node in ast.walk(method)
                 ),
                 method.name,
             )
-        self.assertEqual(registered, ["nikke", "on_nikke_poke"])
+        self.assertEqual(registered, ["nikke", "nikke_hash_prefix", "on_nikke_poke"])
         command_methods = {
             "nikke", "tarot_command", "nikke_help", "account", "bind", "unbind",
             "status", "me", "query", "voice_settings", "union_raid_ranking",

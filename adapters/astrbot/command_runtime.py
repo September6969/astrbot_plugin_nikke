@@ -3,23 +3,23 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 from astrbot.api.event import AstrMessageEvent
 
 from ..._version import PLUGIN_VERSION
-from ...application.commands.help import help_detail, help_home
+from ...application.commands.help import help_category, help_detail, help_home
 from .collections import AstrBotAdapterCollection, PluginCommandHandlers
+from .command_parser import normalize_nikke_prefix, parse_nikke_message
 
+__all__ = ["NikkeCommandRuntime", "normalize_nikke_prefix"]
 
-def normalize_nikke_prefix(text: str) -> str:
-    """将 #妮姬 / #nikke 统一预处理规范化为 /妮姬 / /nikke。"""
-    stripped = text.strip()
-    if stripped.startswith("#妮姬"):
-        return "/妮姬" + stripped[len("#妮姬"):]
-    if stripped.startswith("#nikke"):
-        return "/nikke" + stripped[len("#nikke"):]
-    return text
+_ANNOUNCEMENT_FILTERS = {
+    "语言": "locale", "language": "locale", "locale": "locale",
+    "分类": "category", "category": "category",
+    "搜索": "query", "search": "query",
+}
 
 
 class NikkeCommandRuntime:
@@ -30,9 +30,11 @@ class NikkeCommandRuntime:
         *,
         adapters: AstrBotAdapterCollection,
         handlers: PluginCommandHandlers,
+        config: Mapping[str, Any] | None = None,
     ) -> None:
         self._adapters = adapters
         self._handlers = handlers
+        self._config: Mapping[str, Any] = config if config is not None else {}
 
     @staticmethod
     def _is_admin(event: AstrMessageEvent) -> bool:
@@ -40,67 +42,7 @@ class NikkeCommandRuntime:
 
     @staticmethod
     def _help_text(category: str = "", include_admin: bool = False) -> str:
-        sections = {
-            "账号": (
-                "【账号】\n"
-                "/妮姬 账号 — 查看绑定状态\n"
-                "/妮姬 账号 绑定　(/nikke bind)\n"
-                "/妮姬 账号 解绑　(/nikke unbind)\n"
-                "/妮姬 账号 汇总 开|关　(/nikke push on|off)\n"
-                "/妮姬 账号 续期 [状态]；/妮姬 账号 自动续期 开|关 — 实验性，私聊使用"
-            ),
-            "查询": (
-                "【查询】\n"
-                "/妮姬 我的　(/nikke me)\n"
-                "/妮姬 查询 练度 [角色名]　(/nikke roster、/nikke character)\n"
-                "/妮姬 查询 资料 <角色名>　(/nikke info)\n"
-                "/妮姬 战役 <关卡>　(/nikke campaign [普通/困难] 46-40)\n"
-                "/妮姬 联盟突袭　(/nikke raid)\n"
-                "/妮姬 突袭 排名 [页码] — 贡献排名\n"
-                "/妮姬 突袭 我的 [页码] — 个人队伍记录\n"
-                "/妮姬 塔层 <塔名> <层数> — 静态资料\n"
-                "/妮姬 日程 [7|14|30] [页码]　(/nikke schedule [7|14|30] [页码])\n/妮姬 日程 订阅 协同,签到　（提前24小时@本人）\n/妮姬 日程 订阅状态｜取消订阅\n"
-                "/妮姬 公告　(/nikke news)\n"
-                "/妮姬 攻略 [分类]　(/nikke guide)\n"
-                "/妮姬 塔罗 [单抽|三张|今日|状态|帮助]　(/nikke tarot)"
-            ),
-            "日常": (
-                "【日常】\n"
-                "/妮姬 日常 — 社区签到及免费领奖；/妮姬 签到 — 仅签到\n"
-                "/妮姬 签到 状态 — 只查询、不提交\n"
-                "/妮姬 日常 自动 开|关 — 仅控制自己的社区签到及免费领奖\n"
-                "/妮姬 日常 任务 状态|执行|自动 开|关 — 浏览及点赞，独立授权，私聊使用\n"
-                "/妮姬 账号 续期 [状态]；/妮姬 账号 自动续期 开|关 — 实验性，默认关闭\n"
-                "/妮姬 兑换 <CDK>　(/nikke cdk)\n"
-                "/妮姬 兑换 批量 <CDK1> <CDK2>...\n"
-                "/妮姬 兑换 可用|历史\n"
-                "/妮姬 语音 [开|关|语言|角色|服装]　(/nikke voice)\n"
-                "注意：群聊发送兑换命令会公开兑换码。"
-            ),
-            "管理": (
-                "【管理员】\n"
-                "/妮姬 管理 设群\n"
-                "/妮姬 管理 任务时间 HH:MM\n"
-                "/妮姬 管理 汇总时间 HH:MM\n"
-                "/妮姬 管理 执行\n"
-                "/妮姬 管理 健康"
-            ),
-        }
-        aliases = {
-            "account": "账号", "bind": "账号",
-            "query": "查询", "roster": "查询", "info": "查询", "data": "查询",
-            "raid": "查询", "突袭": "查询", "campaign": "查询", "stage": "查询", "战役": "查询",
-            "schedule": "查询", "日程": "查询", "news": "查询", "公告": "查询",
-            "guide": "查询", "攻略": "查询", "tarot": "查询", "塔罗": "查询",
-            "daily": "日常", "routine": "日常", "日常": "日常", "push": "日常",
-            "admin": "管理",
-        }
-        selected = aliases.get(category.strip().lower(), category.strip())
-        if selected in sections:
-            if selected == "管理" and not include_admin:
-                return "管理指令仅对管理员显示。"
-            return sections[selected] + "\n\n发送 /妮姬 帮助 查看主菜单。"
-        return help_home(PLUGIN_VERSION, include_admin=include_admin)
+        return help_category(category, PLUGIN_VERSION, include_admin=include_admin)
 
     async def _dispatch(self, event: AstrMessageEvent, handler: Any, **parameters: str):
         async for result in self._adapters.command.dispatch(
@@ -134,18 +76,16 @@ class NikkeCommandRuntime:
             command = parts[1] if len(parts) > 1 else ""
             arg1 = parts[2] if len(parts) > 2 else ""
             arg2 = parts[3] if len(parts) > 3 else ""
+        # 宿主按空白切分且只绑定固定个数参数；原始消息可还原多词、换行与空格分隔的尾参。
+        parsed = parse_nikke_message(str(getattr(event, "message_str", "") or ""))
+        if parsed and parsed.command.casefold() == command.strip().casefold():
+            arg1, arg2 = parsed.arg1, parsed.tail
         key = command.strip().casefold()
 
         if key in {"竞技场", "arena"}:
             if self._handlers.arena is None:
                 yield event.plain_result("竞技场功能当前未启用。")
                 return
-            # 原始消息仅在前缀和子命令一致时补全参数，避免框架截断带空格的角色名。
-            raw = normalize_nikke_prefix(str(getattr(event, "message_str", "") or ""))
-            parts = raw.split(maxsplit=3)
-            if (len(parts) == 4 and parts[0].casefold() in {"/妮姬", "/nikke", "妮姬", "nikke"}
-                    and parts[1].casefold() == key and parts[2] == arg1):
-                arg2 = parts[3]
             async for result in self._dispatch(event, self._handlers.arena, action=arg1, value=arg2):
                 yield result
             return
@@ -174,13 +114,14 @@ class NikkeCommandRuntime:
                 yield event.plain_result(help_detail(
                     arg2, include_admin=include_admin, arena_enabled=arena_enabled,
                     web_enabled=bool(web_routes and web_routes.active()),
-                    community_enabled=bool(getattr(self._handlers.daily, "_extra_automation", None)),
-                    renewal_enabled=bool(getattr(self._handlers.account, "_session_handler", None)),
+                    community_enabled=self._writes_enabled() and bool(getattr(self._handlers.daily, "_extra_automation", None)),
+                    renewal_enabled=self._writes_enabled() and bool(getattr(self._handlers.account, "_session_handler", None)),
                 ))
             elif not arg1.strip():
                 yield event.plain_result(help_home(PLUGIN_VERSION, include_admin=include_admin, arena=arena_enabled))
             else:
-                yield event.plain_result(self._help_text(arg1, include_admin))
+                yield event.plain_result(help_category(
+                    arg1, PLUGIN_VERSION, include_admin=include_admin, arena=arena_enabled))
             return
         if key in {"账号", "account"}:
             async for result in self._account(
@@ -224,7 +165,7 @@ class NikkeCommandRuntime:
                     yield result
             return
         if key in {"公告", "news", "announcement"}:
-            async for result in self._announcement(event, arg1):
+            async for result in self._announcement(event, arg1, arg2):
                 yield result
             return
         if key in {"攻略", "guide", "guides"}:
@@ -317,11 +258,23 @@ class NikkeCommandRuntime:
         async for result in self._dispatch(event, self._handlers.cdk, **parameters):
             yield result
 
-    async def _announcement(self, event: AstrMessageEvent, action: str):
+    def _writes_enabled(self) -> bool:
+        """写操作总开关；关闭时帮助详解不展示依赖写操作的教学主题。"""
+        return bool(self._config.get("enable_daily_actions", False))
+
+    async def _announcement(self, event: AstrMessageEvent, action: str, value: str = ""):
+        key = action.strip().casefold()
+        parameters: dict[str, str]
         if action in {"订阅", "取消订阅"}:
             operation = "unsubscribe" if action == "取消订阅" else "subscribe"
             target = str(getattr(event, "unified_msg_origin", "") or "")
             parameters = {"operation": operation, "target": target}
+        elif key in _ANNOUNCEMENT_FILTERS:
+            parameters = {"operation": "view", _ANNOUNCEMENT_FILTERS[key]: value.strip()}
+        elif key in {"诊断", "diagnostic", "diagnostics"}:
+            parameters = {"operation": "diagnostic"}
+        elif key in {"深度刷新", "rescan", "deep_rescan"}:
+            parameters = {"operation": "deep_rescan", "locale": value.strip() or "en"}
         elif action:
             parameters = {"operation": "unsupported"}
         else:
@@ -345,30 +298,6 @@ class NikkeCommandRuntime:
                 self._handlers.character,
                 operation=operation,
                 name=arg1,
-            ):
-                yield result
-            return
-        if key == "campaign":
-            async for result in self._dispatch(
-                event, self._handlers.campaign, stage=arg1, mode=arg2
-            ):
-                yield result
-            return
-        if key == "raid":
-            async for result in self._dispatch(
-                event, self._handlers.raid, operation="overview"
-            ):
-                yield result
-            return
-        if key == "news":
-            async for result in self._dispatch(
-                event, self._handlers.announcement, operation="view"
-            ):
-                yield result
-            return
-        if key == "guide":
-            async for result in self._dispatch(
-                event, self._handlers.guide, category=arg1, page="1"
             ):
                 yield result
             return

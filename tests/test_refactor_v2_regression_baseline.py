@@ -203,14 +203,12 @@ _TAIL_ARGUMENT_CASES = (
         "cdk",
         {"operation": "batch", "codes": "CDK1 CDK2 CDK3"},
         id="AUD-008-space-batch-cdk",
-        marks=pytest.mark.xfail(strict=True, reason="AUD-008：空格批量 CDK 丢弃 CDK2+"),
     ),
     pytest.param(
         "/妮姬 查询 练度 Red Hood",
         "character",
         {"operation": "character", "name": "Red Hood"},
         id="AUD-008-multi-word-name",
-        marks=pytest.mark.xfail(strict=True, reason="AUD-008：多词角色名被截断"),
     ),
 )
 

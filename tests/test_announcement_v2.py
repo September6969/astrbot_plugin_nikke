@@ -262,18 +262,19 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         )
         event = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
 
-        # Simplified command: any extra argument yields simplification message
+        # Decision 4a=A：README 列出的筛选与诊断子命令经统一路由可用，且不联网、不推送
         locale_cmd_reply = [item async for item in plugin.nikke(event, "公告", "语言", "ja")]
-        self.assertIn("公告命令已简化", locale_cmd_reply[0])
+        self.assertIn("维护告知", locale_cmd_reply[0])
+        self.assertNotIn("Event Notice", locale_cmd_reply[0])
 
         category_cmd_reply = [item async for item in plugin.nikke(event, "公告", "分类", "活动")]
-        self.assertIn("公告命令已简化", category_cmd_reply[0])
+        self.assertIn("Event Notice", category_cmd_reply[0])
 
         query_cmd_reply = [item async for item in plugin.nikke(event, "公告", "搜索", "维护")]
-        self.assertIn("公告命令已简化", query_cmd_reply[0])
+        self.assertIn("维护告知", query_cmd_reply[0])
 
         diagnostic_cmd_reply = [item async for item in plugin.nikke(event, "公告", "诊断")]
-        self.assertIn("公告命令已简化", diagnostic_cmd_reply[0])
+        self.assertNotIn("公告命令已简化", diagnostic_cmd_reply[0])
 
         # Direct view filtering still functions without fetching or sending
         locale_reply = [item async for item in plugin.announcements_view(event, locale="ja")]
@@ -303,9 +304,10 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
             service.sync_from_source = AsyncMock(return_value=(True, "同步成功"))
             denied = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: False)
 
-            # Command routing returns simplification message
+            # 统一路由开放深度刷新，但仍只允许管理员执行
             denied_cmd_reply = [item async for item in plugin.nikke(denied, "公告", "深度刷新", "ja")]
-            self.assertIn("公告命令已简化", denied_cmd_reply[0])
+            self.assertIn("仅机器人管理员", denied_cmd_reply[0])
+            service.sync_from_source.assert_not_awaited()
 
             # Direct method tests permission
             denied_reply = [item async for item in plugin.announcement_deep_rescan(denied, "ja")]

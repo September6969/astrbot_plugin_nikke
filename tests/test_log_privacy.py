@@ -109,7 +109,9 @@ class LogPrivacyTests(unittest.TestCase):
         self.assertNotIn("12345", result[0])
         self.assertNotIn("openid-secret", result[0])
         self.assertNotIn("token-secret", result[0])
-        self.assertIn("RuntimeError:", result[0])
+        # 用户可见错误不再暴露 Python 异常类名（REFACTOR_PLAN_V2 AUD-009）。
+        self.assertNotIn("RuntimeError", result[0])
+        self.assertIn("突袭查询失败", result[0])
 
 
 if __name__ == "__main__":

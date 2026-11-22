@@ -74,18 +74,12 @@ CROSS_LAYER_FORBIDDEN_TARGETS: dict[str, frozenset[str]] = {
     "adapters": frozenset({"integrations", "main", "scripts", "tests"}),
 }
 # REFACTOR_PLAN_V2 Phase 0 登记的既有跨层边基线。只允许删除条目，不允许新增：
-# Phase 2 清零 application -> integrations.blablalink.client，
+# Phase 2 已清零 application -> integrations.blablalink.client（已转为硬门禁），
 # Phase 4C 清零 integrations.spine -> scripts.spine，
 # Phase 6B 清零 features.calendar -> integrations.calendar。
 # 条目对应的导入一旦消失，门禁会报 cross_layer_allowlist_stale，提醒同步收紧。
 CROSS_LAYER_BASELINE_ALLOWLIST: frozenset[tuple[str, str]] = frozenset(
     {
-        ("application.commands.campaign", "integrations.blablalink.client"),
-        ("application.commands.cdk", "integrations.blablalink.client"),
-        ("application.commands.character", "integrations.blablalink.client"),
-        ("application.commands.daily", "integrations.blablalink.client"),
-        ("application.commands.profile", "integrations.blablalink.client"),
-        ("application.commands.raid", "integrations.blablalink.client"),
         ("features.calendar.schedule_service", "integrations.calendar.blabla_source"),
         ("integrations.spine.prerenderer", "scripts.spine.inspect_spine_bundle"),
     }

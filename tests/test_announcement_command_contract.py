@@ -80,7 +80,10 @@ async def test_unsupported_announcement_action_uses_the_shared_prompt():
         CommandContext(parameters={"operation": "unsupported"})
     )
 
-    assert result.messages[0].text == "公告命令已简化，请使用：\n\n/妮姬 公告"
+    text = result.messages[0].text
+    assert text.startswith("用法：/妮姬 公告")
+    for subcommand in ("语言", "分类", "搜索", "诊断", "深度刷新"):
+        assert subcommand in text
 
 
 def test_announcement_runtime_routes_do_not_read_delivery_or_sync_state():

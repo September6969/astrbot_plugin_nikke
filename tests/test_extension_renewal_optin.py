@@ -12,10 +12,12 @@ def test_extension_request_observer_is_optin_and_exactly_scoped():
         pytest.skip("Node 不可用")
     script = r'''
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
-const listeners = [], state = {};
-const chrome = { storage: { local: {
-  get: async () => state, set: async value => Object.assign(state, value)
-}}, webRequest: {
+const listeners = [], state = {}, local = {};
+// 偏好在 local；临时续期材料只能写入 session。
+const chrome = { storage: {
+  local: { get: async () => local, set: async value => Object.assign(local, value), remove: async () => {} },
+  session: { get: async () => state, set: async value => Object.assign(state, value), remove: async () => {} },
+}, webRequest: {
   onBeforeSendHeaders: { addListener() {} },
   onBeforeRequest: { addListener: (...args) => listeners.push(args) }
 }};
@@ -28,7 +30,7 @@ vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), { chrome, TextDecod
   await observe(event);
   assert.equal(reads, 0);
   assert.equal(state.renewalLoginPayload, undefined);
-  state.keepRenewalMaterial = true;
+  local.keepRenewalMaterial = true;
   const payload = {game_token:'synthetic-token',game_openid:'synthetic-id',game_expire_time:1234567890,
     password:'never-store',unknown:'never-store',game_channelid:131};
   const bytes = new TextEncoder().encode(JSON.stringify(payload));
@@ -37,6 +39,7 @@ vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), { chrome, TextDecod
   assert.equal(state.renewalLoginPayload.unknown, undefined);
   assert.equal(state.renewalLoginPayload.game_expire_time, 1234567890);
   assert.equal(state.renewalLoginPayload.game_token, 'synthetic-token');
+  assert.equal(local.renewalLoginPayload, undefined);
 })().catch(error => { process.stderr.write(String(error)); process.exitCode = 1; });
 '''
     root = Path(__file__).resolve().parents[1]

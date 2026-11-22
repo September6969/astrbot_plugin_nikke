@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // 默认只观察账号上下文；用户额外选择后才保留官方 Login 的白名单字段。
+// 账号上下文与续期材料属于临时登录材料，只写入 chrome.storage.session（浏览器关闭即清除）。
+const temporaryStore = chrome.storage.session;
+// 清理旧版本写入 chrome.storage.local 的临时材料。
+chrome.storage.local.remove(["xCommonParams", "renewalLoginPayload", "bindUrl"]);
 chrome.webRequest.onBeforeSendHeaders.addListener(
   async (details) => {
     const headers = details.requestHeaders || [];
@@ -8,7 +12,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     try {
       const parsed = JSON.parse(common.value);
       if (parsed && typeof parsed === "object" && parsed.openid) {
-        await chrome.storage.local.set({ xCommonParams: common.value });
+        await temporaryStore.set({ xCommonParams: common.value });
       }
     } catch {
       // 非JSON或不完整请求头不保存，等待官网后续完整请求。
@@ -33,7 +37,7 @@ chrome.webRequest.onBeforeRequest.addListener(
         "game_uid", "game_user_name", "game_user_region", "game_adult_status"];
       const saved = Object.fromEntries(keys.filter(key => Object.hasOwn(payload, key)).map(key => [key, payload[key]]));
       if (!saved.game_token || !saved.game_openid || !Number.isInteger(saved.game_expire_time)) return;
-      await chrome.storage.local.set({ renewalLoginPayload: saved });
+      await temporaryStore.set({ renewalLoginPayload: saved });
     } catch {
       // 不完整或非预期请求体不保存，绝不记录原始内容。
     }

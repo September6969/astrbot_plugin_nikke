@@ -5,14 +5,14 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 
-from ...core.privacy import safe_exception_message
 from ...features.raid.application import (
     RaidApplication,
     RaidMemberIdentityUnavailable,
 )
 from ...features.raid.models import UnionRaidOverviewData
 from ...features.raid.participants import RaidRankingData, format_ranking
-from ...integrations.blablalink.client import BlaBlaError, CookieExpired
+from ...features.account.errors import CredentialExpiredError
+from .errors import CREDENTIAL_EXPIRED_TEXT, user_error_message
 from .contracts import (
     CommandContext,
     CommandFeedbackStarter,
@@ -45,7 +45,6 @@ class RaidCommandHandler:
         self._start_feedback = start_feedback
 
     async def handle(self, context: CommandContext) -> CommandResult:
-        from ...features.account.errors import CredentialExpiredError
         operation = context.parameters.get("operation", "overview").strip().casefold()
         if operation not in {"overview", "ranking", "member"}:
             return self._text("用法：/妮姬 突袭 [排名|我的] [页码]")
@@ -74,9 +73,9 @@ class RaidCommandHandler:
             return self._text(format_dashboard(data))
         except CredentialExpiredError:
             self._invalidate_cookie(context.actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except (BlaBlaError, ValueError, RuntimeError) as exc:
-            return self._text(f"突袭查询失败：{safe_exception_message(exc)}")
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
+        except (ValueError, RuntimeError) as exc:
+            return self._text(f"突袭查询失败：{user_error_message(exc)}")
         except Exception:
             return self._text("突袭查询暂不可用，请稍后重试。")
         finally:

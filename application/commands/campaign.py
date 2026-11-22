@@ -9,7 +9,8 @@ from typing import Protocol
 from ...core.privacy import safe_exception_message
 from ...features.campaign.application import CampaignApplication
 from ...features.campaign.models import ClearLineupStatus, StageClearRecord
-from ...integrations.blablalink.client import BlaBlaError, CookieExpired
+from ...features.account.errors import CredentialExpiredError
+from .errors import CREDENTIAL_EXPIRED_TEXT, user_error_message
 from .contracts import (
     CommandContext,
     CommandFeedbackStarter,
@@ -21,7 +22,7 @@ from .contracts import (
 
 _LOGGER = logging.getLogger(__name__)
 _USAGE = "用法：/妮姬 战役 [普通/困难] <关卡名>（例如：46-40、困难 35-36）"
-_COOKIE_EXPIRED = "登录状态已失效，请重新发送 /妮姬 账号 绑定。"
+_COOKIE_EXPIRED = CREDENTIAL_EXPIRED_TEXT
 
 
 def format_campaign(record: StageClearRecord) -> str:
@@ -87,17 +88,17 @@ class CampaignCommandHandler:
             except Exception:
                 return CommandResult((TextReply(format_campaign(record)),))
             return CommandResult((ImageReply(image_path),))
-        except CookieExpired:
+        except CredentialExpiredError:
             self._invalidate_cookie(context.actor_id)
             return CommandResult((TextReply(_COOKIE_EXPIRED),))
-        except (BlaBlaError, ValueError, RuntimeError) as exc:
+        except (ValueError, RuntimeError) as exc:
             return CommandResult(
-                (TextReply(f"战役查询失败：{safe_exception_message(exc)}"),)
+                (TextReply(f"战役查询失败：{user_error_message(exc)}"),)
             )
         except Exception as exc:
             _LOGGER.error("[NIKKE] 战役查询异常: %s", safe_exception_message(exc))
             return CommandResult(
-                (TextReply(f"战役查询异常：{safe_exception_message(exc)}"),)
+                (TextReply("战役查询异常，请稍后重试。"),)
             )
         finally:
             if feedback is not None:

@@ -21,6 +21,7 @@ from .adapters.astrbot.collections import AstrBotAdapterCollection, PluginComman
 from .adapters.astrbot.compatibility import require_supported_astrbot_version
 from .adapters.astrbot.command_adapter import AstrBotCommandAdapter
 from .adapters.astrbot.command_presentation import AstrBotCommandPresentation
+from .adapters.astrbot.command_parser import HASH_PREFIX_PATTERN, parse_nikke_message
 from .adapters.astrbot.command_runtime import NikkeCommandRuntime, normalize_nikke_prefix
 from .adapters.astrbot.runtime import AstrBotRuntimeAdapter
 from .adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
@@ -51,10 +52,7 @@ class NikkePlugin(Star):
         require_supported_astrbot_version()
         super().__init__(context)
         self.context = context
-        if hasattr(context, "astrbot_config") and isinstance(context.astrbot_config, dict):
-            wake_prefixes = context.astrbot_config.setdefault("wake_prefix", ["/"])
-            if isinstance(wake_prefixes, list) and "#" not in wake_prefixes:
-                wake_prefixes.append("#")
+        # 不修改宿主全局 wake_prefix；#妮姬 / #nikke 由插件级 regex 入口 nikke_hash_prefix 处理。
         self.config = normalize_runtime_config(config)
         self.plugin_dir = _PACKAGE_DIR
         self.data_dir = Path("data") / "nikke"
@@ -199,6 +197,7 @@ class NikkePlugin(Star):
             runtime = NikkeCommandRuntime(
                 adapters=self.adapters,
                 handlers=self.handlers,
+                config=getattr(self, "config", None),
             )
             self.__dict__["_command_runtime"] = runtime
         return runtime
@@ -216,10 +215,26 @@ class NikkePlugin(Star):
         arg2: str = "",
         arg3: str = "",
     ):
-        """保留历史统一命令注册并薄委托给命令路由器。"""
-        if command.casefold() in {"日常", "daily", "routine"} and arg1 == "任务" and arg3:
-            arg2 = f"{arg2} {arg3}"
+        """保留历史统一命令注册并薄委托给命令路由器。
+
+        路由器优先从 event.message_str 还原完整尾参；直接位置传参（如单测）时合并 arg3。
+        """
+        if arg3:
+            arg2 = f"{arg2} {arg3}".strip()
         async for result in self.command_runtime.nikke(event, command, arg1, arg2):
+            yield result
+
+    @filter.regex(HASH_PREFIX_PATTERN)
+    async def nikke_hash_prefix(self, event: AstrMessageEvent):
+        """未唤醒消息中的 #妮姬 / #nikke 入口；已唤醒消息交给 nikke 命令处理器，避免重复回复。"""
+        if getattr(event, "is_at_or_wake_command", False):
+            return
+        parsed = parse_nikke_message(str(getattr(event, "message_str", "") or ""))
+        if parsed is None:
+            return
+        async for result in self.command_runtime.nikke(
+            event, parsed.command, parsed.arg1, parsed.tail
+        ):
             yield result
 
     @filter.event_message_type(filter.EventMessageType.ALL)

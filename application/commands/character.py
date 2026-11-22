@@ -6,7 +6,6 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from typing import Any
 
-from ...core.privacy import safe_exception_message
 from ...features.character.application import (
     CharacterAmbiguousMatch,
     CharacterApplication,
@@ -20,7 +19,8 @@ from ...features.character.models import (
     CharacterCardRequest,
 )
 from ...features.character.roster_ranking import order_roster_entries
-from ...integrations.blablalink.client import BlaBlaError, CookieExpired
+from ...features.account.errors import CredentialExpiredError
+from .errors import CREDENTIAL_EXPIRED_TEXT, user_error_message
 from .contracts import (
     CommandContext,
     CommandFeedbackStarter,
@@ -74,11 +74,11 @@ class CharacterCommandHandler:
             if isinstance(path, str) and path.strip():
                 return CommandResult((ImageReply(path),))
             return self._text(self._format_roster(data))
-        except CookieExpired:
+        except CredentialExpiredError:
             self._invalidate_cookie(context.actor_id)
-            return self._text("登录状态已失效，请重新绑定。")
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception as exc:
-            return self._text(f"练度查询失败：{safe_exception_message(exc)}")
+            return self._text(f"练度查询失败：{user_error_message(exc)}")
 
     async def _character(self, context: CommandContext) -> CommandResult:
         query = context.parameters.get("name", "").strip()
@@ -108,13 +108,11 @@ class CharacterCommandHandler:
             return self._text("查询失败：没有找到该妮姬")
         except CharacterNotOwned as exc:
             return self._text(str(exc))
-        except CookieExpired:
+        except CredentialExpiredError:
             self._invalidate_cookie(context.actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
-        except (BlaBlaError, ValueError, RuntimeError) as exc:
-            return self._text(f"查询失败：{safe_exception_message(exc)}")
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception as exc:
-            return self._text(f"查询失败：{safe_exception_message(exc)}")
+            return self._text(f"查询失败：{user_error_message(exc)}")
         finally:
             if feedback is not None:
                 await feedback.cancel()

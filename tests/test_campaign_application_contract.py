@@ -192,6 +192,6 @@ async def test_expired_campaign_cookie_is_invalidated_and_reported() -> None:
     )
 
     assert result.messages == (
-        TextReply("登录状态已失效，请重新发送 /妮姬 账号 绑定。"),
+        TextReply("登录状态已失效，请私聊发送 /妮姬 账号 绑定 重新绑定。"),
     )
     assert invalidated == ["qq-123"]

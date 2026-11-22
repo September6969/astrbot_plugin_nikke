@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """渲染无需账号和网络的 QQ 帮助。"""
 
-from .catalog import ALIASES, TOPICS, Topic
+from .catalog import ALIASES, CATEGORY_ALIASES, CATEGORY_SECTIONS, TOPICS, Topic
 
 
 def detail(topic: str, *, include_admin: bool, arena: Topic | None = None,
@@ -21,6 +21,16 @@ def detail(topic: str, *, include_admin: bool, arena: Topic | None = None,
         return "\n".join(lines)
     index = "【功能详解】\n" + "｜".join(visible) + "\n\n例如 /妮姬 帮助 详解 日程"
     return f"没有这个可用的教学主题。\n\n{index}" if name else index
+
+
+def category(name: str, *, include_admin: bool) -> str | None:
+    """分类帮助；未知分类返回 None，由调用方回到主菜单。"""
+    selected = CATEGORY_ALIASES.get(name.strip().casefold(), name.strip())
+    if selected not in CATEGORY_SECTIONS:
+        return None
+    if selected == "管理" and not include_admin:
+        return "管理指令仅对管理员显示。"
+    return CATEGORY_SECTIONS[selected] + "\n\n发送 /妮姬 帮助 查看主菜单。"
 
 
 def home(version: str, *, include_admin: bool, arena: bool = False) -> str:

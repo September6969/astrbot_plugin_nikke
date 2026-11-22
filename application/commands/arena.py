@@ -1,5 +1,7 @@
 """竞技场命令与私聊角色库边界。"""
 
+import asyncio
+
 from ...features.arena.presentation import analysis_text, three_team_text
 from ...features.arena.models import ArenaThreeTeamPlan, MODEL_VERSION
 from ...features.arena.optimizer import ThreeTeamOptimizer
@@ -103,5 +105,6 @@ class ArenaCommandHandler:
                 available = await self.application.read_roster(context.actor_id)
                 if available.status not in {"available", "partial"}:
                     raise ValueError("请检查绑定后使用个人三队导入，或在网页手动选择角色范围。")
-            return ThreeTeamOptimizer(self.application.analyzer).solve(teams, available)
+            optimizer = ThreeTeamOptimizer(self.application.analyzer)
+            return await asyncio.to_thread(optimizer.solve, teams, available)
         return HELP

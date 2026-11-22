@@ -334,8 +334,11 @@ class ArenaWebRoutes:
             validate_three(teams)
             manual = tuple(ArenaTeam(tuple(directory.characters[key] for key in candidate)) if candidate else None
                            for candidate in draft.get("manual_candidates", ()))
-            return self.optimizer.solve(teams, available, objective=draft["objective"], manual_candidates=manual)
-        return self.application.analyzer.analyze(teams[0], available)
+            return await asyncio.to_thread(
+                self.optimizer.solve, teams, available,
+                objective=draft["objective"], manual_candidates=manual,
+            )
+        return await asyncio.to_thread(self.application.analyzer.analyze, teams[0], available)
 
     @staticmethod
     def result_payload(result):

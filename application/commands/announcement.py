@@ -34,6 +34,8 @@ class AnnouncementCommandHandler:
             except ValueError as exc:
                 text = f"公告查询参数无效：{exc}"
             return self._text(text)
+        if operation == "diagnostic":
+            return self._text(self._application.diagnostic_text())
         if operation == "deep_rescan":
             if not context.is_admin:
                 return self._text("仅机器人管理员可执行公告深度刷新。")
@@ -64,7 +66,10 @@ class AnnouncementCommandHandler:
                 + suffix
             )
         if operation == "unsupported":
-            return self._text("公告命令已简化，请使用：\n\n/妮姬 公告")
+            return self._text(
+                "用法：/妮姬 公告 [语言|分类|搜索 <值>]、/妮姬 公告 诊断；"
+                "管理员：/妮姬 公告 订阅|取消订阅|深度刷新 [语言]"
+            )
         return self._text("未知公告操作。")
 
     @staticmethod

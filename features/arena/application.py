@@ -29,4 +29,5 @@ class ArenaApplication:
             snapshot = await self.read_roster(actor_id)
             if snapshot.status not in {"available", "partial"}:
                 raise ValueError("个人角色库暂不可读取，请检查绑定。公开沙盒可用 /妮姬 竞技场 沙盒 <五人>。")
-        return self.analyzer.analyze(enemy, snapshot)
+        # 纯 CPU 搜索最长约 1s，移出事件循环避免阻塞其他指令。
+        return await asyncio.to_thread(self.analyzer.analyze, enemy, snapshot)

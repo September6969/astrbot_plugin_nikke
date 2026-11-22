@@ -169,9 +169,9 @@ def test_cross_layer_imports_stay_within_phase0_baseline() -> None:
 
 def test_cross_layer_baseline_only_shrinks() -> None:
     # Phase 0 基线上限为 8 条；后续阶段只能删除条目，不能借 allowlist 放行新边。
-    assert len(CROSS_LAYER_BASELINE_ALLOWLIST) <= 8
+    assert len(CROSS_LAYER_BASELINE_ALLOWLIST) <= 2
+    # Phase 2 起 application 层不再允许任何跨层例外。
     assert {source.split(".")[0] for source, _ in CROSS_LAYER_BASELINE_ALLOWLIST} <= {
-        "application",
         "features",
         "integrations",
     }
