@@ -30,12 +30,7 @@ from astrbot_plugin_nikke.integrations.blablalink.fetch_client import (
 from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
     ManualOverrideScheduleAdapter,
 )
-from astrbot_plugin_nikke.features.calendar.schedule_service import (
-    ScheduleService,
-    _is_same_event,
-    _merge_two_events,
-    _title_similarity,
-)
+from astrbot_plugin_nikke.features.calendar.schedule_service import ScheduleService
 
 
 class TestFetchClient(IsolatedAsyncioTestCase):
@@ -206,47 +201,6 @@ class TestScheduleServiceDataLayer(IsolatedAsyncioTestCase):
     def tearDown(self):
         self.tmp_dir.cleanup()
 
-    def test_multi_source_field_level_merge(self):
-        # 两个来自不同源的同一活动条目
-        gk_event = CanonicalEvent(
-            id="gamekee:100",
-            title="EVA 联动大型活动",
-            event_type="event",
-            start_at=self.now,
-            end_at=self.now + timedelta(days=7),
-            cycle_id="eva_2026",
-            banner_url="https://gamekee.com/eva_banner.png",
-            detail_url="https://gamekee.com/eva",
-            sources=["gamekee"],
-            primary_source="gamekee",
-            confidence=0.85,
-        )
-
-        official_event = CanonicalEvent(
-            id="official:notice_999",
-            title="【联动通知】新世纪福音战士合作活动正式开启",
-            event_type="event",
-            start_at=self.now + timedelta(minutes=5),  # 稍微校准
-            end_at=self.now + timedelta(days=7),
-            cycle_id="eva_2026",
-            banner_url="https://official.com/eva.png",
-            detail_url="https://official.com/notice_999",
-            sources=["official"],
-            primary_source="official",
-            confidence=0.95,
-        )
-
-        self.assertTrue(_is_same_event(gk_event, official_event))
-        merged = _merge_two_events(gk_event, official_event)
-
-        # 验证合并字段：
-        # 来源列表合并包含两者
-        self.assertIn("gamekee", merged.sources)
-        self.assertIn("official", merged.sources)
-        # 偏好 GameKee 易读中文标题
-        self.assertEqual(merged.title, "EVA 联动大型活动")
-        # 时间偏好官方
-        self.assertEqual(merged.start_at, official_event.start_at)
 
     async def test_l1_l2_cache_and_last_known_good(self):
         event = CanonicalEvent(

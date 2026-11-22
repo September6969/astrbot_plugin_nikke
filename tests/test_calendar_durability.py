@@ -117,32 +117,22 @@ async def test_schema_four_is_readable_and_upgraded_without_deleting_cache(tmp_p
 
 @pytest.mark.asyncio
 async def test_nonwinning_source_updates_are_durable(tmp_path):
+    # PR-6B G5-calendar-a3：跨源字段仲裁已删除；同 ID 冲突时按来源名排序后写入者覆盖。
+    # 继续校验“未进入有效视图的来源 LKG 更新同样会落盘”。
     service = ScheduleService(tmp_path)
     primary = Source("winner")
     secondary = Source("loser-A")
-    secondary.source_name = "official"
-    # 同一期次显式身份，使标题由 gamekee 胜出。
-    original = secondary.fetch_result
-    async def fetch():
-        result = await original()
-        result.events[0].cycle_id = "cycle"
-        return result
-    secondary.fetch_result = fetch
-    original_primary = primary.fetch_result
-    async def fetch_primary():
-        result = await original_primary()
-        result.events[0].cycle_id = "cycle"
-        return result
-    primary.fetch_result = fetch_primary
+    secondary.source_name = "archive"  # 排序先于 gamekee，同 ID 时不胜出
     service.adapters = [primary, secondary]
     await service.refresh_schedule_data()
+    assert service.list_canonical()[0].title == "winner"
     before = service.snapshot_state.active_source_revision
     secondary.title = "loser-B"
     await service.refresh_schedule_data()
     assert service.list_canonical()[0].title == "winner"
     assert service.snapshot_state.active_source_revision != before
     restarted = ScheduleService(tmp_path)
-    assert restarted._source_datasets["official"][0].title == "loser-B"
+    assert restarted._source_datasets["archive"][0].title == "loser-B"
 
 
 @pytest.mark.asyncio

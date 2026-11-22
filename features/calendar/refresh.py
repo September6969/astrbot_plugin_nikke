@@ -156,9 +156,7 @@ class CalendarRefreshCoordinator:
         service._update_health_state()
 
         summary_keys = (
-            "canonical_total", "identity_matches", "canonical_title_matches", "identity_ambiguous",
-            "identity_distinct", "official_enriched_existing", "official_created_new",
-            "relevance_core", "relevance_supporting", "relevance_meta", "display_selected",
+            "canonical_total", "relevance_core", "relevance_supporting", "relevance_meta", "display_selected",
             "display_deprioritized",
         )
         logger.info(

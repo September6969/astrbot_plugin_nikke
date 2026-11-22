@@ -132,19 +132,6 @@ async def test_command_sends_selected_page_and_build_failure_keeps_page_text(tmp
     assert "超出范围" in (await handler.handle(CommandContext(parameters={"page": "999"}))).messages[0].text
 
 
-def test_asymmetric_evidence_does_not_hide_authoritative_field():
-    from astrbot_plugin_nikke.features.calendar.canonical_models import FieldEvidence
-    from astrbot_plugin_nikke.features.calendar.merge import _merge_two_events
-    base = event("base", field_evidence={"end": [FieldEvidence(NOW + timedelta(days=2), "gamekee", confidence=.85).to_dict()]})
-    incoming = event("incoming", confidence=.99)
-    incoming.primary_source = "official"
-    incoming.sources = ["official"]
-    incoming.end_at = NOW + timedelta(days=3)
-    merged = _merge_two_events(base, incoming)
-    assert merged.end_at == incoming.end_at
-    repeated = _merge_two_events(merged, incoming)
-    assert len(repeated.field_evidence["end"]) == len(merged.field_evidence["end"])
-
 
 def test_multiple_matching_cycles_are_not_arbitrarily_collapsed(tmp_path):
     service = ScheduleService(tmp_path)
@@ -155,8 +142,8 @@ def test_multiple_matching_cycles_are_not_arbitrarily_collapsed(tmp_path):
     supplement.sources = ["official"]
     service._source_datasets = {"gamekee": [first, second], "official": [supplement]}
     original = service._merge_datasets()
+    # PR-6B G5-calendar-a3：按 ID 聚合不折叠同名不同 ID 的记录，且结果与来源顺序无关。
     assert len(original) == 3
-    assert service.quality_diagnostics["identity_ambiguous"] == 1
     service._source_datasets = {"official": [supplement], "gamekee": [second, first]}
     reordered = service._merge_datasets()
     assert {key: e.fingerprint for key, e in reordered.items()} == {key: e.fingerprint for key, e in original.items()}

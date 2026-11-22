@@ -24,15 +24,7 @@ from .schedule_adapters import (
     BaseScheduleAdapter,
     ManualOverrideScheduleAdapter,
 )
-from .merge import (
-    CalendarMergePolicy,
-    _ActivitiesDict,
-    _build_identity_key,
-    _is_same_event,
-    _is_same_identity,
-    _merge_two_events,
-    _title_similarity,
-)
+from .merge import CalendarMergePolicy, _ActivitiesDict
 from .snapshot_repository import CalendarSnapshotRepository
 from .snapshot_state import SnapshotState
 from dataclasses import asdict
@@ -103,12 +95,6 @@ class ScheduleService:
         self.last_visual_sync: dict[str, int] | None = None
         self.quality_diagnostics: dict[str, Any] = {
             "canonical_total": 0,
-            "identity_matches": 0,
-            "canonical_title_matches": 0,
-            "identity_ambiguous": 0,
-            "identity_distinct": 0,
-            "official_enriched_existing": 0,
-            "official_created_new": 0,
             "relevance_core": 0,
             "relevance_supporting": 0,
             "relevance_meta": 0,

@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""日程身份合并、字段仲裁、覆盖应用与来源健康策略。"""
+"""日程按 ID 聚合、覆盖应用与来源健康策略。"""
 
 from __future__ import annotations
 
-import hashlib
 from datetime import datetime, timezone
 from typing import Any, Sequence
 
@@ -11,25 +10,15 @@ from .models import CalendarActivity, _aware_utc
 from .snapshot_state import revision
 from .content_quality import (
     DisplayTier,
-    IdentityDecision,
     apply_display_relevance,
-    canonical_identity_match,
-    category_family,
     get_display_relevance,
-    score_identity,
-    title_similarity,
 )
 from .canonical_models import (
     CanonicalEvent,
     Coverage,
-    FieldEvidence,
     Freshness,
-    ManualOverride,
-    ResolvedField,
-    SourceHealth,
     SourceRole,
     TimePrecision,
-    resolve_field,
 )
 
 class _ActivitiesDict(dict):
@@ -63,175 +52,6 @@ class _ActivitiesDict(dict):
             self._service._events.clear()
             self._service._base_events.clear()
 
-
-def _title_similarity(a: str, b: str) -> float:
-    """旧 API 兼容包装；标题身份统一由 content_quality 计算。"""
-    return title_similarity(a, b)
-
-
-def _build_identity_key(ev: CanonicalEvent) -> str:
-    """构建事件跨源身份标识 (Identity)。
-
-    优先顺序：
-    1. Scope + EventType + Cycle/Season（针对突袭、协同等周期性活动）
-    2. Scope + Source + ID
-    """
-    scope = ev.server_scope or "GLOBAL"
-    if ev.cycle_id:
-        return f"{scope}:{ev.event_type}:{ev.cycle_id}"
-    return f"{scope}:{ev.primary_source or 'event'}:{ev.id}"
-
-
-def _is_same_identity(a: CanonicalEvent, b: CanonicalEvent) -> bool:
-    """兼容旧调用点；AMBIGUOUS 永不自动合并。"""
-    identity = score_identity(a, b)
-    if identity.decision == IdentityDecision.MATCH:
-        return True
-    return canonical_identity_match(a, b) is not None
-
-
-_is_same_event = _is_same_identity
-
-
-def _merge_two_events(
-    base: CanonicalEvent,
-    incoming: CanonicalEvent,
-    identity_match=None,
-) -> CanonicalEvent:
-    """字段级多源仲裁合并：
-    - title: resolve_field("title", ...) -> GameKee (地道中文) > Official > 其他
-    - banner_url / detail_url: resolve_field(...) -> GameKee > Official > 其他
-    - start / end: 分别独立调用 resolve_field("start", ...) 和 resolve_field("end", ...)
-      Official (置信度 >= 0.90) > GameKee > Official (< 0.90)
-    - cancellation: 取消证据高优先级
-    - event_type: Official (非通用 event) > GameKee > 其他
-    - 记录合并后的完整证据链
-    """
-    merged_evidence: dict[str, list[dict[str, Any]]] = {k: list(v) for k, v in base.field_evidence.items()}
-    for field_name, ev_list in incoming.field_evidence.items():
-        merged_evidence.setdefault(field_name, []).extend(ev_list)
-
-    def _collect_candidates(field_name: str, attr_name: str | None = None) -> list[Any]:
-        attr = attr_name or field_name
-        cands = list(merged_evidence.get(field_name, []))
-        for ev in (base, incoming):
-            if ev.field_evidence.get(field_name):
-                continue
-            val = getattr(ev, attr, None)
-            if val is not None and val != "":
-                src = ev.primary_source or (ev.sources[0] if ev.sources else "unknown")
-                prec = getattr(ev, f"{field_name}_precision", None) or getattr(ev, f"{attr}_precision", None)
-                cands.append(FieldEvidence(value=val, source=src,
-                    confidence=ev.confidence if ev.confidence is not None else 0.8,
-                    precision=prec, observed_at=ev.fetched_at).to_dict())
-        unique = []
-        signatures = []
-        for candidate in cands:
-            signature = {key: value for key, value in candidate.items() if key != "observed_at"}
-            if signature not in signatures:
-                signatures.append(signature)
-                unique.append(candidate)
-        cands = unique
-        merged_evidence[field_name] = cands
-        return cands
-
-    # 1. 标题仲裁
-    title_res = resolve_field("title", _collect_candidates("title"), default=incoming.title or base.title)
-    title = title_res.value or incoming.title or base.title
-
-    # 2. 宣传图与详情页仲裁
-    banner_res = resolve_field("banner_url", _collect_candidates("banner_url"), default=incoming.banner_url or base.banner_url)
-    banner = banner_res.value
-
-    detail_res = resolve_field("detail_url", _collect_candidates("detail_url"), default=incoming.detail_url or base.detail_url)
-    detail = detail_res.value
-
-    # 3. 起止时间独立仲裁 (严格杜绝单端覆写造成缺失)
-    start_res = resolve_field("start", _collect_candidates("start", "start_at"), default=base.start_at or incoming.start_at)
-    end_res = resolve_field("end", _collect_candidates("end", "end_at"), default=base.end_at or incoming.end_at)
-
-    start_at = start_res.value
-    end_at = end_res.value
-
-    # 精度决胜
-    if start_res.selected_evidence and start_res.selected_evidence.precision:
-        start_prec = start_res.selected_evidence.precision
-    else:
-        start_prec = incoming.start_precision if incoming.start_at == start_at else base.start_precision
-
-    if end_res.selected_evidence and end_res.selected_evidence.precision:
-        end_prec = end_res.selected_evidence.precision
-    else:
-        end_prec = incoming.end_precision if incoming.end_at == end_at else base.end_precision
-
-    # 4. 事件类型仲裁
-    type_res = resolve_field("event_type", _collect_candidates("event_type"), default=incoming.event_type or base.event_type)
-    event_type = type_res.value or incoming.event_type or base.event_type
-    identity_reasons = set(getattr(identity_match, "reasons", ()) or ())
-    if "canonical_title_exact_meta_reconciled" in identity_reasons:
-        base_family = category_family(base.event_type)
-        incoming_family = category_family(incoming.event_type)
-        if base_family == "meta" and incoming_family != "meta":
-            event_type = incoming.event_type
-        elif incoming_family == "meta" and base_family != "meta":
-            event_type = base.event_type
-
-    # 5. 取消状态与独立开始证据
-    cancel_res = resolve_field("cancellation", _collect_candidates("cancellation", "is_cancelled"), default=base.is_cancelled or incoming.is_cancelled)
-    is_cancelled = bool(cancel_res.value)
-    has_started = base.has_started_evidence or incoming.has_started_evidence
-
-    # 6. 区间合法性
-    is_valid = True
-    if start_at and end_at and end_at <= start_at:
-        is_valid = False
-
-    combined_sources = list(dict.fromkeys(base.sources + incoming.sources))
-    primary_source = "gamekee" if "gamekee" in combined_sources else ("official" if "official" in combined_sources else (base.primary_source or incoming.primary_source or "unknown"))
-    confidence = max(base.confidence or 0.0, incoming.confidence or 0.0)
-    event_id = base.id if base.primary_source == "gamekee" else (incoming.id if incoming.primary_source == "gamekee" else (base.id or incoming.id))
-
-    merged_metadata: dict[str, Any] = {}
-    for event in (base, incoming):
-        if not isinstance(event.metadata, dict):
-            continue
-        for key, value in event.metadata.items():
-            if key in ("visual_candidates", "image_urls"):
-                old_values = merged_metadata.setdefault(key, [])
-                if not isinstance(old_values, list):
-                    old_values = []
-                    merged_metadata[key] = old_values
-                if isinstance(value, (list, tuple)):
-                    for item in value:
-                        if item not in old_values:
-                            old_values.append(item)
-            elif value not in (None, "", [], {}):
-                merged_metadata[key] = value
-    merged_metadata.pop("display_relevance", None)
-
-    merged = CanonicalEvent(
-        id=event_id,
-        title=title,
-        event_type=event_type,
-        start_at=start_at,
-        end_at=end_at,
-        start_precision=start_prec,
-        end_precision=end_prec,
-        server_scope=base.server_scope or incoming.server_scope,
-        cycle_id=base.cycle_id or incoming.cycle_id,
-        banner_url=banner,
-        detail_url=detail,
-        sources=combined_sources,
-        primary_source=primary_source,
-        confidence=confidence,
-        is_cancelled=is_cancelled,
-        has_started_evidence=has_started,
-        is_valid_interval=is_valid,
-        field_evidence=merged_evidence,
-        metadata=merged_metadata,
-        version=max(base.version, incoming.version),
-    )
-    return merged
 
 class CalendarMergePolicy:
 
@@ -304,67 +124,20 @@ class CalendarMergePolicy:
 
     @staticmethod
     def _merge_datasets(service) -> dict[str, CanonicalEvent]:
-        """将各源独立的 LKG 数据集聚合并去重仲裁。"""
-        for key in (
-            "identity_matches",
-            "identity_ambiguous",
-            "identity_distinct",
-            "canonical_title_matches",
-            "official_enriched_existing",
-            "official_created_new",
-        ):
-            service.quality_diagnostics[key] = 0
-        all_events: list[CanonicalEvent] = []
-        for src, events in sorted(service._source_datasets.items()):
-            # 仲裁的版本和展示诊断不得回写到来源 LKG。
-            all_events.extend(CanonicalEvent.from_dict(event.to_dict()) for event in sorted(events, key=lambda item: item.id))
+        """将各源独立的 LKG 数据集按事件 ID 单遍聚合。
 
+        生产只装配 BlaBlaLink 单一远程源（ID 在源内唯一），因此不再做跨源模糊
+        身份去重与字段仲裁（PR-6B G5-calendar-a3，原实现为 O(N^2) 空转）。来源按
+        名称排序、源内按 ID 排序后依次写入；若未来装配多个源且 ID 冲突，后写入
+        的来源覆盖先写入的来源，需要时应另行设计合并策略。
+        """
         merged_list: list[CanonicalEvent] = []
-        for incoming in all_events:
-            matched_idx = -1
-            ambiguous_seen = False
-            matches = []
-            for idx, existing in enumerate(merged_list):
-                identity = score_identity(existing, incoming)
-                canonical_match = None
-                if identity.decision != IdentityDecision.MATCH:
-                    canonical_match = canonical_identity_match(existing, incoming)
-                    if canonical_match is not None:
-                        identity = canonical_match
-                if identity.decision == IdentityDecision.MATCH:
-                    matches.append((idx, identity, canonical_match))
-                elif identity.decision == IdentityDecision.AMBIGUOUS:
-                    ambiguous_seen = True
-            # 唯一的完整同名边界匹配，不应被其他仅时间接近的弱候选阻断。
-            exact_boundary_match = len(matches) == 1 and (
-                "official_gamekee_date_boundary_reconciled" in matches[0][1].reasons
+        for src, events in sorted(service._source_datasets.items()):
+            # 聚合的版本和展示诊断不得回写到来源 LKG。
+            merged_list.extend(
+                CanonicalEvent.from_dict(event.to_dict())
+                for event in sorted(events, key=lambda item: item.id)
             )
-            if len(matches) == 1 and (not ambiguous_seen or exact_boundary_match):
-                matched_idx, identity, canonical_match = matches[0]
-                service.quality_diagnostics["identity_matches"] += 1
-                if canonical_match is not None:
-                    service.quality_diagnostics["canonical_title_matches"] += 1
-                    incoming.metadata["identity_match"] = canonical_match.to_dict()
-                if "official" in incoming.sources:
-                    service.quality_diagnostics["official_enriched_existing"] += 1
-            elif matches:
-                ambiguous_seen = True
-
-            if matched_idx >= 0:
-                merged_list[matched_idx] = _merge_two_events(
-                    merged_list[matched_idx], incoming, identity_match=identity
-                )
-            else:
-                counter = "identity_ambiguous" if ambiguous_seen else "identity_distinct"
-                service.quality_diagnostics[counter] = service.quality_diagnostics.get(counter, 0) + 1
-                if ambiguous_seen and isinstance(incoming.metadata, dict):
-                    incoming.metadata["identity_match"] = {
-                        "decision": IdentityDecision.AMBIGUOUS.value,
-                        "reason": "candidate identity requires human/source evidence",
-                    }
-                merged_list.append(incoming)
-                if not ambiguous_seen and "official" in {str(item).casefold() for item in incoming.sources}:
-                    service.quality_diagnostics["official_created_new"] += 1
 
         base_dict: dict[str, CanonicalEvent] = {}
         for ev in merged_list:
