@@ -9,6 +9,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from PIL import Image
 
+from ..paths import icon_relative_candidates
 from .image_codec import AssetImageCodec
 
 
@@ -42,7 +43,8 @@ class AssetImageCache:
 
     @staticmethod
     def _relative_candidates(relative: str) -> list[str]:
-        raw = [relative]
+        # 图标：规范 icons/<kind>/ 优先，旧 <kind>/ 缓存布局其次（core.paths 统一定义）。
+        raw = list(icon_relative_candidates(relative))
         if relative.startswith("assets/blablalink/"):
             raw.append(relative[len("assets/blablalink/"):])
         # 旧清单路径仅作只读兼容，同时允许在新内置目录命中。
@@ -51,13 +53,6 @@ class AssetImageCache:
             raw.append(relative[len("data/nikke/blabla-assets/"):])
         if relative.startswith("assets/"):
             raw.append(relative[len("assets/"):])
-        if relative.startswith("icons/"):
-            raw.append(relative[len("icons/"):])
-        else:
-            for icon_sub in ("cube/", "favorite/", "currency/"):
-                if relative.startswith(icon_sub):
-                    raw.insert(0, f"icons/{relative}")
-                    break
         if relative.startswith("data/"):
             raw.append(relative[len("data/"):])
         else:

@@ -29,9 +29,27 @@ if str(base_dir) not in sys.path:
 from astrbot_plugin_nikke.features.character.skill_icon_resolver import SkillIconResolver
 from astrbot_plugin_nikke.features.character.costume_asset_resolver import CostumeAssetResolver
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
+from astrbot_plugin_nikke.core.assets.image_codec import AssetImageCodec
+from astrbot_plugin_nikke.core.paths import asset_data_file, icon_dirs
+from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegistry
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s")
 logger = logging.getLogger("audit_assets")
+
+
+def _bundled_icon(kind: str, key: str, roots: tuple[Path, ...]) -> Path | None:
+    """与运行时一致：缓存根优先，规范 icons/<kind>/ 优先于旧 <kind>/ 布局。"""
+    for root in roots:
+        for directory in icon_dirs(kind):
+            for suffix in (".png", ".webp"):
+                path = root / directory / f"{key}{suffix}"
+                if path.is_file():
+                    return path
+    return None
+
+
+def _valid_image(path: Path | None, entry: dict | None = None) -> bool:
+    return path is not None and AssetImageCodec.load_file(path, entry) is not None
 
 
 def run_asset_audit(base_dir: Path | str) -> dict:
@@ -47,7 +65,7 @@ def run_asset_audit(base_dir: Path | str) -> dict:
     costume_resolver = CostumeAssetResolver(assets_dir / "mappings" / "costume_assets.json")
 
     # 1. 加载角色主数据
-    master_file = assets_dir / "character_master.json"
+    master_file = asset_data_file("character_master.json", asset_dir=assets_dir)
     characters = []
     if master_file.is_file():
         m_data = json.loads(master_file.read_text(encoding="utf-8"))
@@ -77,6 +95,9 @@ def run_asset_audit(base_dir: Path | str) -> dict:
                     blabla_dir / rel_path,
                     cache_dir / f"skills/{icon_id}.png",
                     cache_dir / f"skills/{icon_id}.webp",
+                    # 运行时回退的扁平内置目录 assets/skills/<key>.webp。
+                    assets_dir / f"skills/{icon_id}.png",
+                    assets_dir / f"skills/{icon_id}.webp",
                 ]
                 if any(p.is_file() for p in cand_paths):
                     local_hit_skills += 1
@@ -130,13 +151,16 @@ def run_asset_audit(base_dir: Path | str) -> dict:
     local_hit_cubes = 0
     missing_cubes = []
 
+    icon_roots = (cache_dir, assets_dir)
     for cid, cube_data in cubes.items():
         icon = cube_data.get("icon")
         if icon:
             resolved_cubes += 1
-            cand = blabla_dir / "icon" / "equip" / f"{icon}.webp"
-            if cand.is_file() or (cache_dir / f"cube/{icon}.png").is_file():
+            # 本地图标按 tid 存放于 assets/icons/cube/<tid>.png（PR-6A G1-icons-j）。
+            if _valid_image(_bundled_icon("cube", str(cid), icon_roots)):
                 local_hit_cubes += 1
+            else:
+                missing_cubes.append({"cube_id": cid, "name": cube_data.get("name_cn"), "reason": "local_icon_missing"})
         else:
             missing_cubes.append({"cube_id": cid, "name": cube_data.get("name_cn")})
 
@@ -155,11 +179,24 @@ def run_asset_audit(base_dir: Path | str) -> dict:
         icon = fav_data.get("icon")
         if icon:
             resolved_favorites += 1
-            cand = blabla_dir / "icon" / "favoriteitem" / f"{icon}.webp"
-            if cand.is_file() or (cache_dir / f"favorite/{icon}.png").is_file():
+            if _valid_image(_bundled_icon("favorite", str(fid), icon_roots)):
                 local_hit_favorites += 1
+            else:
+                missing_favorites.append({"item_id": fid, "type": fav_data.get("item_type"), "reason": "local_icon_missing"})
         else:
             missing_favorites.append({"item_id": fid, "type": fav_data.get("item_type")})
+
+    # 5b. 审计 Profile 货币图标（文件存在且 SHA-256 与 registry 一致）
+    currency_definitions = [d for d in CurrencyRegistry.DEFINITIONS.values() if d.icon_key]
+    total_currency = len(currency_definitions)
+    local_hit_currency = 0
+    missing_currency = []
+    for definition in currency_definitions:
+        path = _bundled_icon("currency", str(definition.icon_key), icon_roots)
+        if _valid_image(path, {"sha256": definition.source_sha256}):
+            local_hit_currency += 1
+        else:
+            missing_currency.append({"type": definition.type, "icon_key": definition.icon_key})
 
     # 6. 审计 Phase 2 视觉资源 (costume_visual_assets & spine_metadata)
     visual_catalog_file = assets_dir / "mappings" / "costume_visual_assets.json"
@@ -374,12 +411,16 @@ def run_asset_audit(base_dir: Path | str) -> dict:
             "favorite_items_resolved": resolved_favorites,
             "favorite_items_local_hit": local_hit_favorites,
             "favorite_items_missing": len(missing_favorites),
+            "currency_icons_total": total_currency,
+            "currency_icons_local_hit": local_hit_currency,
+            "currency_icons_missing": len(missing_currency),
         },
         "missing": {
             "skills": missing_skills,
             "costumes": missing_costumes,
             "cubes": missing_cubes,
             "favorite_items": missing_favorites,
+            "currency_icons": missing_currency,
             "costume_fullbody": missing_costume_fb,
             "default_fullbody": missing_default_fb,
             "spine_bundles": missing_spine_bundles,
@@ -415,19 +456,34 @@ def run_asset_audit(base_dir: Path | str) -> dict:
     print("-" * 60)
     print(f"魔方总数 (Cubes):               {total_cubes}")
     print(f"  - 映射成功 (Resolved):        {resolved_cubes} / {total_cubes}")
+    print(f"  - 本地内置命中 (Local Hit):    {local_hit_cubes} / {total_cubes}")
     print(f"  - 缺失 (Missing):             {len(missing_cubes)}")
     print("-" * 60)
     print(f"珍藏品/收藏品总数 (Favorites):  {total_favorites}")
     print(f"  - 映射成功 (Resolved):        {resolved_favorites} / {total_favorites}")
+    print(f"  - 本地内置命中 (Local Hit):    {local_hit_favorites} / {total_favorites}")
     print(f"  - 缺失 (Missing):             {len(missing_favorites)}")
+    print("-" * 60)
+    print(f"货币图标 (Currency Icons):      {local_hit_currency} / {total_currency} (SHA-256 校验)")
     print("=" * 60)
     print(f"报告已保存至: {report_path.resolve()}\n")
 
     return audit_report
 
 
+def audit_gate_passed(report: dict) -> bool:
+    """Phase 6 门禁：内置魔方、收藏品与货币图标必须全部本地命中（离线不回退占位图）。"""
+    summary = report["summary"]
+    return (
+        summary["cubes_local_hit"] == summary["cubes_total"] > 0
+        and summary["favorite_items_local_hit"] == summary["favorite_items_total"] > 0
+        and summary["currency_icons_local_hit"] == summary["currency_icons_total"] > 0
+    )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NIKKE 资源层审计")
     parser.add_argument("--base-dir", type=str, default=str(base_dir), help="插件根目录")
     args = parser.parse_args()
-    run_asset_audit(args.base_dir)
+    report = run_asset_audit(args.base_dir)
+    raise SystemExit(0 if audit_gate_passed(report) else 1)

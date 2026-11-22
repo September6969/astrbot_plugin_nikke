@@ -11,6 +11,7 @@ from pathlib import Path
 from PIL import Image
 
 from ...core.privacy import safe_exception_message, sanitize_log_text
+from ..paths import icon_dirs
 from .environment import AssetEnvironment
 from .image_codec import AssetImageCodec
 from .resource_url import game_resource_url
@@ -127,7 +128,7 @@ class IconAssetService:
                 base_resolved = base.resolve()
             except OSError:
                 continue
-            for prefix_dir in ("icons/currency", "currency"):
+            for prefix_dir in icon_dirs("currency"):
                 for suffix in (".png", ".webp"):
                     try:
                         path = (base / prefix_dir / f"{key}{suffix}").resolve()

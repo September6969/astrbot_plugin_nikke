@@ -2,11 +2,11 @@
 
 素材按 `data/nikke/cache/`、本目录、远端、程序生成的占位图依次查找。缓存损坏会继续查找后续来源；远端失败会在五分钟后再试。Builder 和数据模型中不保存图片路径。
 
-本地覆盖使用透明 PNG，可按以下目录放置图片：
+本地覆盖使用透明 PNG，放在 `data/nikke/cache/` 下的以下相对路径（插件更新会整体替换插件目录，放在 `assets/` 内的覆盖会被清除，因此 `data/nikke/cache/` 是唯一能跨更新保留的覆盖位置）：
 
 - `portraits/<resource_id>.png`，也可用 `<name_code>.png` 覆盖特定角色。
 - `equipment/<equipment_id>.png`，`slots/head.png`、`torso.png`、`arm.png`、`leg.png`。
-- `favorite/<tid>.png`、`cube/<tid>.png`。
+- `favorite/<tid>.png`、`cube/<tid>.png`（缓存根下的 `icons/favorite/`、`icons/cube/` 同样有效）。内置图标只存放在 `assets/icons/{cube,favorite,currency}/`；旧顶层目录 `assets/{cube,favorite,currency}/` 是逐字节重复副本，已在 PR-6A 删除。
 - `element/fire.png`、`water.png`、`wind.png`、`electric.png`、`iron.png`。
 - `corporation/<小写企业名>.png`、`weapon/<小写武器名>.png`、`burst/<小写阶段名>.png`。
 

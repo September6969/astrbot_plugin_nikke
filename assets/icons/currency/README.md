@@ -1,13 +1,13 @@
 # Profile currency icons
 
-这些文件只用于 Profile v0.4 的本地静态图标路径，不在 QQ 热路径下载。
+这些文件只用于 Profile v0.4 的本地静态图标路径，不在 QQ 热路径下载。本目录（`assets/icons/currency/`）是唯一内置位置；PR-6A 已删除逐字节相同的旧顶层副本 `assets/currency/`。
 
 核验日期：2026-09-12。上游固定为 Nikke-db commit `a2358b72bd1335c30737e46482a99947f3788bc7`。
 
 | API type | 文件 | SHA-256 | 固定来源 |
 | --- | --- | --- | --- |
-| 1000 | `credit.png` | `85f242e863eab4a9f30391907843073c889f0fb7607fb530d12e7a15cc6a7035` | `images/credit.png` |
-| 2000 | `battledata.png` | `dbea9945e42a5e6904e1d26cb8c136fb5947269b72b9fb14344565134f390486` | `images/battledata.png` |
+| 1000 | `battledata.png` | `dbea9945e42a5e6904e1d26cb8c136fb5947269b72b9fb14344565134f390486` | `images/battledata.png` |
+| 2000 | `credit.png` | `85f242e863eab4a9f30391907843073c889f0fb7607fb530d12e7a15cc6a7035` | `images/credit.png` |
 | 3000 | `coredust.png` | `e0cf067c4b6443a736b8169568e858c99ee75340553974801ed35e6a8b931034` | `images/coredust.png` |
 | 99 | `gem.webp` | `f99ae40780266faa746ac7bd9be44b4fd53e50c0d054caee9f5010f6f59d0700` | 用户提供图标 + 同日 Profile 数量对照图 |
 | 5100 | `recruit_voucher.webp` | `330449dd8a7241af8195b200d7526144d6d8b6ffc83f81561e7eb542ce344f91` | 用户提供图标 + 同日 Profile 数量对照图 |

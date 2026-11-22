@@ -6,6 +6,26 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 ASSET_ROOT = PLUGIN_ROOT / "assets"
 OUTPUT_ROOT = PLUGIN_ROOT / "output"
 
+# 内置图标唯一位置为 assets/icons/<kind>/；旧的 <kind>/ 相对路径仅用于
+# data/nikke/cache 的历史缓存布局（下载器仍按 <kind>/<tid>.png 写入）。
+ICON_ROOT = "icons"
+ICON_KINDS = ("cube", "favorite", "currency")
+
+
+def icon_dirs(kind: str) -> tuple[str, str]:
+    """返回某类图标的相对目录：规范 icons/<kind> 在前，旧缓存布局 <kind> 在后。"""
+    return (f"{ICON_ROOT}/{kind}", kind)
+
+
+def icon_relative_candidates(relative: str) -> tuple[str, ...]:
+    """按优先级展开图标相对路径；任何 icons/<...> 都额外尝试去掉前缀的旧路径。"""
+    prefix = f"{ICON_ROOT}/"
+    if relative.startswith(prefix):
+        return (relative, relative[len(prefix):])
+    if any(relative.startswith(f"{kind}/") for kind in ICON_KINDS):
+        return (prefix + relative, relative)
+    return (relative,)
+
 
 def asset_data_file(filename: str, *, asset_dir: Path | None = None) -> Path:
     assets = Path(asset_dir) if asset_dir is not None else ASSET_ROOT
