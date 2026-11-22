@@ -64,6 +64,7 @@ python scripts/operations/backup_nikke_data.py --help
 | [operations/cleanup_cache.py](operations/cleanup_cache.py) | 安全清理 NIKKE 本地缓存；默认只生成清理计划，不删除文件。 | 本地处理，无账号操作；涉及本地运维 |
 | [operations/diagnose_character_details.py](operations/diagnose_character_details.py) | 从脱敏 CharacterDetails JSON 输出字段结构诊断，不输出原始账号值。 | 账号只读，可能联网 |
 | [operations/diagnose_readonly.py](operations/diagnose_readonly.py) | 一次性只读诊断：默认离线，显式 --live-readonly 才读取本机绑定账号。 | 账号只读，可能联网 |
+| [operations/prune_action_runs.py](operations/prune_action_runs.py) | 离线保留清理已完结的 action_runs 历史；默认只生成计划，绝不删除未决、人工核实、租约与永久幂等记录。 | 本地处理，无账号操作；涉及本地运维 |
 | [operations/update_nikke_db.sh](operations/update_nikke_db.sh) | 维护工具 | 可能联网，无账号操作；涉及本地运维 |
 | [operations/upgrade_preflight.py](operations/upgrade_preflight.py) | 执行 NIKKE 数据升级/回滚前的只读前置检查。 | 本地处理，无账号操作；涉及本地运维 |
 | [preview/generate_live_regression_character_evidence.py](preview/generate_live_regression_character_evidence.py) | 生成 c401/c581 生产锚点修复前后完整角色卡证据。 | 本地处理，无账号操作 |
