@@ -286,11 +286,18 @@ def test_concurrent_entrypoints_get_private_displays_and_clean_up(tmp_path: Path
 def test_timeout_through_entrypoint_leaves_no_orphan_xvfb(tmp_path: Path) -> None:
     entry = _entrypoint_with_fake_worker(tmp_path, "entrypoint-xvfb.sh")
     pid_file = tmp_path / "xvfb.pid"
+    temp_root = tmp_path / "tmp"
+    temp_root.mkdir()
     start = time.monotonic()
-    with pytest.raises(subprocess.TimeoutExpired):
+    with patch.dict(os.environ, {"TMPDIR": str(temp_root)}), pytest.raises(subprocess.TimeoutExpired):
         # 首次启动 Xvfb 可能较慢；超时预算足够其就绪后再触发查杀。
         worker_caller._run_worker([str(entry), str(pid_file), "sleep"], cwd=tmp_path, timeout=3.0)
     assert time.monotonic() - start < 6.0
+    # 先 SIGTERM 再 SIGKILL：entrypoint 的 trap 必须有机会删除自己的临时目录。
+    limit = time.monotonic() + 3
+    while list(temp_root.iterdir()) and time.monotonic() < limit:
+        time.sleep(0.05)
+    assert not list(temp_root.iterdir()), "超时回收必须给 entrypoint trap 清理临时目录的宽限"
     assert pid_file.is_file(), "fake worker 未启动，无法验证 Xvfb 回收"
     xvfb = int(pid_file.read_text(encoding="utf-8"))
     try:
@@ -321,3 +328,26 @@ def test_sigterm_to_entrypoint_runs_trap_cleanup(tmp_path: Path) -> None:
         if process.poll() is None:
             process.kill()
             process.wait()
+
+
+def test_orphan_atlas_copies_are_swept_but_fresh_ones_kept(tmp_path: Path) -> None:
+    atlas = tmp_path / "c010.atlas"
+    atlas.write_text("atlas", encoding="utf-8")
+    stale = tmp_path / "c010.atlas.utf8.AAAAAA"
+    fresh = tmp_path / "c010.atlas.utf8.BBBBBB"
+    other = tmp_path / "c011.atlas.utf8.CCCCCC"
+    for path in (stale, fresh, other):
+        path.write_text("copy", encoding="utf-8")
+    old = time.time() - 60
+    os.utime(stale, (old, old))
+    os.utime(other, (old, old))
+    assert worker_caller.sweep_orphan_atlas_copies(atlas, older_than=10) == 1
+    assert not stale.exists()
+    assert fresh.exists(), "仍可能被正在运行的 worker 使用的副本不得删除"
+    assert other.exists(), "只清理同一 atlas 的副本"
+
+
+def test_sync_script_uses_hardened_worker_runner() -> None:
+    source = (Path(__file__).resolve().parents[1] / "scripts" / "spine" / "sync_spine_assets.py").read_text(encoding="utf-8")
+    assert "run_spine_worker(command" in source
+    assert "os.environ.copy()" not in source

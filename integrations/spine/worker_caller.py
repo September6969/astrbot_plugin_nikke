@@ -11,6 +11,7 @@ import json
 import os
 import signal
 import subprocess
+import time
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -74,6 +75,25 @@ def _terminate_worker(process: subprocess.Popen[str]) -> None:
         process.wait(timeout=1.0)
     except subprocess.TimeoutExpired:
         pass
+
+
+# worker 被强杀时 C++ 析构不会执行，BOM 去除后的 atlas 临时副本会残留。任何 worker 存活
+# 都不会超过超时 + 回收宽限，因此更旧的副本必然是孤儿，可以安全清理。
+ATLAS_COPY_ORPHAN_MARGIN_SECONDS = 5.0
+
+
+def sweep_orphan_atlas_copies(atlas: Path, *, older_than: float) -> int:
+    """删除 `<atlas>.utf8.*` 中修改时间早于 older_than 秒的孤儿副本，返回删除数量。"""
+    cutoff = time.time() - older_than
+    removed = 0
+    for candidate in atlas.parent.glob(atlas.name + ".utf8.*"):
+        try:
+            if candidate.is_file() and not candidate.is_symlink() and candidate.stat().st_mtime < cutoff:
+                candidate.unlink()
+                removed += 1
+        except OSError:
+            continue
+    return removed
 
 
 def _run_worker(command: list[str], *, cwd: Path, timeout: float | None) -> subprocess.CompletedProcess[str]:
@@ -203,6 +223,7 @@ class SpineWorkerRuntime:
         ]
         if skin is not None:
             command.extend(("--skin", skin))
+        sweep_orphan_atlas_copies(atlas, older_than=self.config.timeout_seconds + ATLAS_COPY_ORPHAN_MARGIN_SECONDS)
 
         try:
             try:
@@ -249,6 +270,7 @@ class SpineWorkerRuntime:
             str(atlas),
             "--list-animations",
         ]
+        sweep_orphan_atlas_copies(atlas, older_than=self.config.timeout_seconds + ATLAS_COPY_ORPHAN_MARGIN_SECONDS)
         try:
             completed = _run_worker(command, cwd=self.config.bundle_root, timeout=self.config.timeout_seconds)
         except subprocess.TimeoutExpired as exc:

@@ -249,6 +249,31 @@ def test_failure_cooldown_is_locked_and_expired_entries_are_pruned(tmp_path: Pat
     assert downloader._cooling_down("icons/a.png") is False
     assert "icons/a.png" not in downloader.failed_until
 
+    # 锁合同：两个辅助方法都必须持有实例锁（GIL 下压测无法暴露缺锁）。
+    class RecordingLock:
+        def __init__(self) -> None:
+            self.inner = threading.Lock()
+            self.acquired = 0
+
+        def __enter__(self):
+            self.inner.acquire()
+            self.acquired += 1
+            return self
+
+        def __exit__(self, *exc):
+            self.inner.release()
+            return False
+
+    recorder = RecordingLock()
+    original_lock = downloader._lock
+    downloader._lock = recorder
+    downloader._mark_failed("icons/probe.png")
+    after_mark = recorder.acquired
+    downloader._cooling_down("icons/probe.png")
+    assert after_mark >= 1, "_mark_failed 必须持锁写入冷却表"
+    assert recorder.acquired > after_mark, "_cooling_down 必须持锁读取/清理冷却表"
+    downloader._lock = original_lock
+
     errors: list[BaseException] = []
 
     def hammer(index: int) -> None:
