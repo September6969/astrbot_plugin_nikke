@@ -45,7 +45,7 @@ def summarize(bundle):
         },
         "daily": {"status_read": isinstance(bundle.get("daily"), dict), "writes_performed": 0},
         "cdk": {"history_rows": len(bundle.get("cdk_history", [])) if isinstance(bundle.get("cdk_history"), list) else 0},
-        "voice": {"ffmpeg_found": shutil.which("ffmpeg") is not None, "actual_send": "NOT_RUN"},
+        "voice": {"ffmpeg_found": shutil.which("ffmpeg") is not None, "ffprobe_found": shutil.which("ffprobe") is not None, "actual_send": "NOT_RUN"},
     }
 
 

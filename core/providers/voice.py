@@ -53,6 +53,18 @@ def create_voice_application(
     ffmpeg = shutil.which("ffmpeg")
     ffprobe = shutil.which("ffprobe")
     encoder = VoiceEncoder(voice_cache_dir, ffmpeg, ffprobe) if ffmpeg and ffprobe else None
+    missing_tools = tuple(
+        name for name, path in (("ffmpeg", ffmpeg), ("ffprobe", ffprobe)) if not path
+    )
+    if missing_tools:
+        # 仅在组装时检测一次；安装后需重载插件。
+        logger.warning(
+            "[NIKKE] 未在 PATH 中找到 %s，官方动态语音已停用；%s安装后需重载插件。",
+            "/".join(missing_tools),
+            "本地登记音频中的 OGG 也无法转换，仅 WAV 可用（插件默认未附带本地音频）；"
+            if "ffmpeg" in missing_tools
+            else "仅能播放本地登记音频（插件默认未附带）；",
+        )
     pipeline = (
         VoicePipeline(provider, encoder, task_factory=task_factory)
         if encoder
@@ -69,4 +81,5 @@ def create_voice_application(
         encoder=encoder,
         dynamic_enabled=lambda: bool(config.get("voice_dynamic_enabled", True)),
         directory_provider=directory_provider,
+        missing_tools=missing_tools,
     )

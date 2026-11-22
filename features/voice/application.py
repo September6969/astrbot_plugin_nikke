@@ -49,6 +49,7 @@ class VoiceApplication:
         dynamic_enabled: bool | Callable[[], bool] = True,
         directory_provider: Callable[[], Iterable[dict[str, Any]]] | None = None,
         monotonic: Callable[[], float] = time.monotonic,
+        missing_tools: tuple[str, ...] = (),
     ) -> None:
         self._store = store
         self._character_resolver = character_resolver
@@ -61,6 +62,8 @@ class VoiceApplication:
         self._dynamic_enabled = dynamic_enabled
         self._directory_provider = directory_provider or (lambda: ())
         self._monotonic = monotonic
+        # 组装时未找到的外部工具（ffmpeg/ffprobe）；显式注入，不从 pipeline 是否为空推断。
+        self._missing_tools = tuple(missing_tools)
         self._poke_cooldowns: dict[tuple[str, str, str], float] = {}
         self._close_lock = asyncio.Lock()
         self._closing = False
@@ -140,10 +143,17 @@ class VoiceApplication:
 
         preference.save(self._store, key)
         skin_text = f" · {preference.skin}" if preference.skin != "default" else ""
-        return (
+        reply = (
             f"互动语音：{'开启' if preference.enabled else '关闭'} · "
             f"{preference.character}{skin_text} · {preference.locale}。"
         )
+        # 仅在“开”与无参数状态查询且偏好为开启时提示；偏好照常保存。
+        if preference.enabled and action_clean in {"开", ""} and self._missing_tools:
+            reply += (
+                f"\n提示：当前部署缺少 {'/'.join(self._missing_tools)}，官方动态语音不可用，"
+                "互动语音可能不会发出声音；请联系管理员安装后重载插件。"
+            )
+        return reply
 
     async def resolve_poke(self, context: VoicePokeContext) -> Path | None:
         """解析一个已适配戳一戳事件的本地或精确映射音源。"""

@@ -2,16 +2,16 @@
 
 ## 离线状态
 
-`READY_OFFLINE`：`/妮姬 戳一戳` 已按本地音频 → 有来源证据的官方动态资源 → 文本顺序接线。动态 pipeline 使用 single-flight、4 秒常规预算和不超过 5 秒的最大预算；超时的共享准备任务只继续填充缓存，不向迟到响应发送音频。
+`READY_OFFLINE`：QQ 戳一戳事件已按本地登记音频 → 有来源证据的官方动态资源接线；都不可用时不发送（无文本回退，`/妮姬 戳一戳` 文本指令已移除）。动态 pipeline 使用 single-flight、4 秒常规预算和不超过 5 秒的最大预算；超时的共享准备任务只继续填充缓存，不向迟到响应发送音频。
 
-`NEEDS_LIVE_EVIDENCE`：截至 2026-09-22，`assets/voice_poke_map.json` 为 schema v3、含 2106 条 source-annotated 映射；真实角色/服装到 `voice_map`/`speech_id` 的现场可用性、远端资源授权、OneBot/NapCat Record 播放和 QQ 送达尚未核验。
+`NEEDS_LIVE_EVIDENCE`：截至 2026-09-22，`assets/data/voice_poke_map.json` 为 schema v3、含 2106 条 source-annotated 映射；真实角色/服装到 `voice_map`/`speech_id` 的现场可用性、远端资源授权、OneBot/NapCat Record 播放和 QQ 送达尚未核验。
 
 ## 合同
 
 - `VoiceMapRegistry` 只接受完整的 `character + costume + locale` 精确键；不存在通配符、相邻 ID 推导、Alice 借用或默认服装回退。
 - 每条映射必须有 HTTPS `source`、`source_ref` 和 `checked_at`；资源 provider 仍会在线核对 `voice_map` 是否包含 `speech_id`。
 - `VoiceResourceProvider` 不携带 Cookie、token 或私有 header，使用官方资源路径、受限 HTTP、24 小时 SHA-256 manifest、路径/符号链接防护和并发上限。
-- `VoiceEncoder` 通过 ffprobe 校验源时长，使用 ffmpeg 输出 24kHz、单声道、16-bit PCM WAV；工具缺失时跳过动态路径并使用文本回退。
+- `VoiceEncoder` 通过 ffprobe 校验源时长，使用 ffmpeg 输出 24kHz、单声道、16-bit PCM WAV；工具缺失时跳过动态路径且不发送任何内容（无文本回退）；启动时记录一次 WARNING 点名缺失工具，`/妮姬 语音 开` 照常保存并提示。
 - `VoicePipeline.close()` 取消在途任务并关闭 provider/encoder；插件 terminate 会在素材管理器之前回收语音资源。
 
 ## 验证

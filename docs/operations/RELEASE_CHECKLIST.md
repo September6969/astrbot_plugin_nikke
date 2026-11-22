@@ -12,7 +12,7 @@
 - [x] Python 定向行为测试、完整 pytest、`python -m compileall -q .`、Node extension tests 和 `git diff --check` 已执行；CI 负责 Python 3.10–3.13、Node 与 Spine Docker 构建。
 - [x] 角色卡、Profile、Guide、Registry、Voice、Spine fallback 和既有模块的合成/fixture 证据均明确标注为离线证据。
 - [x] 四类资源 registry 只按精确 ID 和 manifest/hash 合同工作；未知或损坏输入使用中性 fallback，不猜测相邻资源。
-- [x] Voice 动态映射清单为空；没有把剧情语音、Alice 或默认服装冒充已确认 Poke 语音。
+- [x] Voice 动态映射清单（`assets/data/voice_poke_map.json`，schema v3、2106 条 source-annotated 映射）只含有来源证据的精确键；没有把剧情语音、Alice 或默认服装冒充已确认 Poke 语音。
 
 ## `BLOCKED` / `NEEDS_LIVE_EVIDENCE`
 

@@ -263,12 +263,12 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_text_poke_dialogue_is_completely_removed(self):
         """测试纯文本 /妮姬 戳一戳 指令与伪造台词已被彻底移除。"""
-        from astrbot_plugin_nikke.features.voice.feedback import VoiceResolver
+        import importlib.util
+
         event = self._event()
 
-        # 1. CHARACTER_LINES 已从 VoiceResolver 彻底删除
-        self.assertFalse(hasattr(VoiceResolver, "CHARACTER_LINES"))
-        self.assertFalse(hasattr(VoiceResolver, "resolve_poke_line"))
+        # 1. 带 CHARACTER_LINES 的 VoiceResolver 模块已整体删除（PR-6A G4-voice-b）
+        self.assertIsNone(importlib.util.find_spec("astrbot_plugin_nikke.features.voice.feedback"))
 
         # 2. poke 方法与 voice_resolver 实例在 plugin 中已不存在
         self.assertFalse(hasattr(self.plugin, "poke"))

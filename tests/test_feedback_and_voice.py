@@ -5,7 +5,6 @@ import unittest
 
 from astrbot_plugin_nikke.core.feedback import DelayedFeedbackManager
 from astrbot_plugin_nikke.core.lifecycle.coordinator import RuntimeCoordinator
-from astrbot_plugin_nikke.features.voice.feedback import VoiceResolver
 
 
 class DelayedFeedbackManagerTests(unittest.IsolatedAsyncioTestCase):
@@ -75,14 +74,6 @@ class DelayedFeedbackManagerTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(h2.cancelled)
         self.assertEqual(sent, [])
         await coordinator.close()
-
-
-class VoiceResolverTests(unittest.TestCase):
-    def test_voice_adapter_support_matrix(self):
-        self.assertTrue(VoiceResolver.is_voice_supported("aiocqhttp"))
-        self.assertTrue(VoiceResolver.is_voice_supported("onebot_v11"))
-        self.assertFalse(VoiceResolver.is_voice_supported("unverified_platform"))
-        self.assertFalse(VoiceResolver.is_voice_supported(""))
 
 
 if __name__ == "__main__":

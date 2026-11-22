@@ -165,7 +165,7 @@
   "voice_dynamic_enabled": {
     "description": "启用官方动态语音",
     "type": "bool",
-    "hint": "仅启用 voice_poke_map.json 中有来源证据的官方动态语音；空映射或关闭时使用本地登记音频。",
+    "hint": "仅启用 voice_poke_map.json 中有来源证据的官方动态语音，需要宿主安装 ffmpeg 与 ffprobe；关闭、映射缺失或工具缺失时只能使用本地登记音频（插件默认未附带，因此不发送；本地 OGG 仅需 ffmpeg）。",
     "default": true
   },
   "custom_character_aliases": {
