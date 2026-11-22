@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from PIL import Image
 
-from ...features.character.models import SpineBundle
+from ...features.character.models import SpineAssetRef
 
 
 @dataclass(slots=True)
@@ -24,7 +24,7 @@ class AssetResult:
     resolved_kind: str | None = None
     source: str | None = None
     logical_key: str | None = None
-    bundle: SpineBundle | None = None
+    bundle: SpineAssetRef | None = None
 
     @property
     def asset(self) -> object | None:

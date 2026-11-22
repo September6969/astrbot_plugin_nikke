@@ -32,7 +32,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from astrbot_plugin_nikke.integrations.spine.runtime import SpineBundle, SpineSkeletonParser
+from astrbot_plugin_nikke.integrations.spine.runtime import SpineRuntimeBundle, SpineSkeletonParser
 from astrbot_plugin_nikke.integrations.spine.renderer import SpineRenderer
 from astrbot_plugin_nikke.integrations.spine.semantic_mapper import SpineSemanticMapper
 from astrbot_plugin_nikke.integrations.spine.placement import compute_placement_meta
@@ -72,7 +72,7 @@ def run_benchmark(base_dir: Path | str) -> dict:
     if c470_skel.is_file():
         atlas_file = c470_skel.with_name("atlas.atlas")
         png_file = c470_skel.with_name("c470_00.png")
-        dummy_bundle = SpineBundle.from_files(c470_skel, atlas_file, [png_file], spine_version="4.1")
+        dummy_bundle = SpineRuntimeBundle.from_files(c470_skel, atlas_file, [png_file], spine_version="4.1")
 
     if dummy_bundle and dummy_bundle.skeleton:
         # Cold load

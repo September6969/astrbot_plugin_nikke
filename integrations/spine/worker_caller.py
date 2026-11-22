@@ -19,7 +19,7 @@ from typing import Any, Mapping
 
 from PIL import Image
 
-from .prerenderer import SpineBundle, SpineRenderError
+from .bundle import SpineBundle, SpineRenderError
 from .deadline import remaining
 
 

@@ -10,7 +10,6 @@ from typing import Any
 
 from PIL import Image
 
-from astrbot_plugin_nikke.features.character.costume_asset_resolver import CostumeAssetResolver
 from astrbot_plugin_nikke.features.character.lineup_portrait_resolver import LineupPortraitResolver
 from astrbot_plugin_nikke.features.character.master_resolver import CharacterMasterResolver
 from astrbot_plugin_nikke.features.character.models import CharacterCardAssets, CharacterCardData
@@ -89,7 +88,6 @@ class AssetManager:
         self.cubes_map = self.registry.mapping("cube")
         self.costumes_map = self.registry.mapping("costume")
         self.skill_resolver = SkillIconResolver(self.asset_dir / "mappings" / "skill_icons.json")
-        self.costume_resolver = CostumeAssetResolver(self.asset_dir / "mappings" / "costume_assets.json")
         self.visual_resolver = CharacterVisualAssetResolver(
             self.asset_dir / "mappings" / "costume_visual_assets.json",
             self.asset_dir / "mappings" / "spine_metadata.json",
@@ -119,7 +117,6 @@ class AssetManager:
             registry=self.registry,
             currency_registry=self.currency_registry,
             skill_resolver=self.skill_resolver,
-            costume_resolver=self.costume_resolver,
             visual_resolver=self.visual_resolver,
             lineup_resolver=self.lineup_resolver,
             boss_resolver=self.boss_resolver,

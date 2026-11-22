@@ -26,7 +26,7 @@ from .layout import (
     portrait_safe_rect,
     summary_layout,
 )
-from .face_guided_centering import robust_alpha_bounds
+from .alpha_bounds import robust_alpha_bounds
 from .ports import CharacterRenderIdentity
 
 
