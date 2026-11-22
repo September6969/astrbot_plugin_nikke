@@ -166,6 +166,7 @@ nikke.example.com {
 |---|---|---|
 | `public_base_url` | 仓库预设站点 | 自建时必须改为自己的 HTTPS 站点；不带路径或查询参数 |
 | `web_host` / `web_port` | `0.0.0.0` / `6210` | 绑定服务监听地址，经反向代理对外提供服务 |
+| `web_trusted_proxy_ip` | 空 | 可信反代（Caddy）IP 或 CIDR 网段，仅对其读取 `X-Forwarded-For` 分桶限流；不填时经反代的请求共用一个限流桶，非法值会被忽略并告警 |
 | `allow_group_bind` | `false` | 允许群内生成绑定链接，仅适合可信群 |
 | `enable_daily_actions` | `false` | 签到、免费领奖、浏览、点赞与实验性续期的写操作总开关 |
 | `enable_cdk_redemption` | `false` | 国际服 CDK 兑换开关 |
@@ -198,7 +199,7 @@ nikke.example.com {
 
 先确认 BlaBlaLink 官网个人页能看到 NIKKE 账号信息，再从自己的绑定站点重新安装扩展并创建新链接。扩展默认只读取目标网站实际使用的 Cookie 与必要请求头。只有本人额外勾选实验性续期材料时，才从官方 `/api/user/Login` 的请求体提取白名单登录字段；不读取账号密码，不保留其他请求体。绑定提交后清理扩展中的临时续期材料。
 
-维护者应检查域名、HTTPS、反向代理和容器网络。`https://站点域名/healthz` 仅在数据库和密钥同时存在时返回健康状态。不要为排障关闭证书校验，也不要要求用户发送 Cookie 或导出凭据。
+维护者应检查域名、HTTPS、反向代理和容器网络。`https://站点域名/healthz` 仅在数据库和密钥同时就绪时返回健康状态；使用 `NIKKE_ENCRYPTION_KEY` 环境变量密钥时不需要 `secret.key` 文件。不要为排障关闭证书校验，也不要要求用户发送 Cookie 或导出凭据。
 
 ### 日程没有提醒
 

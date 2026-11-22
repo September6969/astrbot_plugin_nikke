@@ -36,7 +36,7 @@
   "web_trusted_proxy_ip": {
     "description": "可信 Caddy 代理 IP",
     "type": "string",
-    "hint": "支持一个直接连接插件的 Caddy 容器 IP。只对该对端读取 X-Forwarded-For。留空按连接 IP 限流。",
+    "hint": "直接连接插件的 Caddy 容器 IP，或其所在 CIDR 网段（如 172.18.0.0/16，适用于容器 IP 会变化的部署）。只对该来源读取 X-Forwarded-For；不填写时所有经反代的请求共用一个限流桶（60 次/分钟），多人同时绑定可能触发 429。填写非法值会被忽略并记录告警，不影响启动。",
     "default": ""
   },
   "binding_api_key": {

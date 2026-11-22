@@ -127,25 +127,21 @@ class AstrBotRuntimeAdapter:
         )
 
     def _register_cleanup(self) -> None:
-        """按依赖创建顺序登记，协调器会以逆序执行。"""
-        self._coordinator.register_cleanup("web", self._services.web.stop)
-        self._coordinator.register_cleanup("assets", self._services.asset_manager.close)
-        self._coordinator.register_cleanup(
-            "voice", self._services.voice_application.close
-        )
+        """按依赖从底到顶登记；协调器逆序执行，因此最先停止对外入口 web、最后关闭 client。"""
+        client = getattr(self._services, "client", None)
+        if client and hasattr(client, "aclose"):
+            self._coordinator.register_cleanup("client", client.aclose)
+        calendar = getattr(self._services, "calendar", None)
+        if calendar and hasattr(calendar, "aclose"):
+            self._coordinator.register_cleanup("calendar", calendar.aclose)
         self._coordinator.register_cleanup(
             "feedback", self._services.feedback_manager.close
         )
-        calendar = getattr(self._services, "calendar", None)
-        if calendar and hasattr(calendar, "aclose"):
-            self._coordinator.register_cleanup(
-                "calendar", calendar.aclose
-            )
-        client = getattr(self._services, "client", None)
-        if client and hasattr(client, "aclose"):
-            self._coordinator.register_cleanup(
-                "client", client.aclose
-            )
+        self._coordinator.register_cleanup(
+            "voice", self._services.voice_application.close
+        )
+        self._coordinator.register_cleanup("assets", self._services.asset_manager.close)
+        self._coordinator.register_cleanup("web", self._services.web.stop)
 
     async def _initialize_services(self) -> None:
         await self._best_effort(

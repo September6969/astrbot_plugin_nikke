@@ -3,14 +3,19 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from typing import Any
+
+from ...core.privacy import safe_exception_message
 
 from ...features.cdk.models import CdkBatchResult
 from ...features.cdk.ports import CdkAccountReader, CdkCommandStore
 from ...features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
 from ...integrations.blablalink.client import CookieExpired
 from .contracts import CommandContext, CommandResult, TextReply
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class CdkCommandHandler:
@@ -119,7 +124,8 @@ class CdkCommandHandler:
             self._store.mark_cookie_invalid(context.actor_id)
             return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except Exception as exc:
-            return self._text(f"获取可用 CDK 失败：{exc}")
+            _LOGGER.warning("[NIKKE] 获取可用 CDK 失败：%s", safe_exception_message(exc))
+            return self._text("获取可用 CDK 失败，请稍后重试。")
 
     async def _history(self, context: CommandContext) -> CommandResult:
         account = self._account(context.actor_id)
@@ -147,7 +153,8 @@ class CdkCommandHandler:
             self._store.mark_cookie_invalid(context.actor_id)
             return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
         except Exception as exc:
-            return self._text(f"获取 CDK 兑换历史失败：{exc}")
+            _LOGGER.warning("[NIKKE] 获取 CDK 兑换历史失败：%s", safe_exception_message(exc))
+            return self._text("获取 CDK 兑换历史失败，请稍后重试。")
 
     def _account(self, actor_id: str) -> dict[str, Any] | None:
         account = self._account_reader.get_account(actor_id)

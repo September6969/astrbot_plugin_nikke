@@ -23,6 +23,7 @@ from test_command_routing_contract import Event, _plugin_with_recorders
 
 _JWT = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2VjcmV0LXNpZ25hdHVyZQ"
 _PRIVACY_CASES = (
+    pytest.param("GET /api/bind/status?x=1", (), id="short-route-names-kept"),
     pytest.param("Authorization: Bearer LEAKTOKEN1", ("LEAKTOKEN1",), id="authorization-header"),
     pytest.param("game_token=LEAKTOKEN2; game_uid=LEAKUID3", ("LEAKTOKEN2", "LEAKUID3"), id="known-cookie-pairs"),
     pytest.param('{"access_token": "LEAKTOKEN4"}', ("LEAKTOKEN4",), id="json-token"),
@@ -32,31 +33,26 @@ _PRIVACY_CASES = (
         "Cookie: game_channelid=LEAKCHANNEL7; game_adult_status=1; game_login_game=LEAKLOGIN8",
         ("LEAKCHANNEL7", "LEAKLOGIN8"),
         id="AUD-006-full-cookie-header",
-        marks=pytest.mark.xfail(strict=True, reason="AUD-006：Cookie 头只遮盖首对"),
     ),
     pytest.param(
-        "open https://nikke.example.com/bind/LEAKBIND9 now",
+        "open https://nikke.example.com/bind/LEAKBIND9xxxxxxxxxxxxxxxxxxxxxxxxxxxx now",
         ("LEAKBIND9",),
         id="AUD-006-bind-link-token",
-        marks=pytest.mark.xfail(strict=True, reason="AUD-006：绑定链接令牌未遮盖"),
     ),
     pytest.param(
-        "GET /arena/open/LEAKARENA10?x=1",
+        "GET /arena/open/LEAKARENA10xxxxxxxxxxxxxxxxxxxxxx?x=1",
         ("LEAKARENA10",),
         id="AUD-006-arena-link-token",
-        marks=pytest.mark.xfail(strict=True, reason="AUD-006：竞技场链接令牌未遮盖"),
     ),
     pytest.param(
         f"upstream said Bearer {_JWT}",
         (_JWT.split(".")[-1],),
         id="AUD-006-bare-bearer-jwt",
-        marks=pytest.mark.xfail(strict=True, reason="AUD-006：独立 Bearer/JWT 未遮盖"),
     ),
     pytest.param(
         'password="LEAK PART11"',
         ("PART11",),
         id="AUD-006-quoted-value-with-space",
-        marks=pytest.mark.xfail(strict=True, reason="AUD-006：带空格引号值只遮盖前半段"),
     ),
 )
 
@@ -154,7 +150,6 @@ async def _noop(*_args, **_kwargs):
 
 
 @pytest.mark.asyncio
-@pytest.mark.xfail(strict=True, reason="AUD-003：单次 SQLite 锁错误终止调度循环")
 async def test_scheduler_survives_transient_sqlite_lock() -> None:
     coordinator = _Coordinator()
     ticks = 0

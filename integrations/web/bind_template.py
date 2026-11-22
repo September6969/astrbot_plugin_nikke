@@ -418,7 +418,7 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
         </p>
         <div style="margin-top: 14px;">
           <a href="/download" class="btn btn-primary" download="nikke-bind-extension.zip">下载扩展 (ZIP)</a>
-          <a href="https://github.com/September6969/astrbot_plugin_nikke/releases" target="_blank" class="btn btn-secondary">GitHub Releases 备用下载</a>
+          <a href="https://github.com/September6969/astrbot_plugin_nikke/releases" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">GitHub Releases 备用下载</a>
         </div>
       </div>
 
@@ -472,7 +472,7 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
           <li>登录后，确认网页右侧已成功出现你的游戏角色资料。</li>
         </ol>
         <div style="margin-top: 14px;">
-          <a href="https://www.blablalink.com/" target="_blank" class="btn btn-primary">打开 BlaBlaLink 官网</a>
+          <a href="https://www.blablalink.com/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">打开 BlaBlaLink 官网</a>
         </div>
         <div class="callout-warn">
           <strong>重要：</strong>账号和密码只在 BlaBlaLink 官网填写！切勿将密码填入任何其他页面或发送给机器人。若浏览器中已经登录，可直接进入第 4 步。
@@ -662,16 +662,22 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
         fetch('/api/bind/status?token=' + encodeURIComponent(token))
           .then(function(res) {{ return res.json(); }})
           .then(function(data) {{
-            if (data.ok && (data.status === 'consumed' || data.status === 'bound')) {{
+            // 后端写入 'success'；'consumed' / 'bound' 为历史兼容值。
+            var done = data.status === 'success' || data.status === 'consumed' || data.status === 'bound';
+            if (data.ok && done) {{
               clearInterval(pollInterval);
               setSuccessUI(data.nickname, data.masked_qq);
             }} else if (data.expired) {{
               clearInterval(pollInterval);
               setExpiredUI();
+            }} else if (data.ok && data.status === 'failed') {{
+              // 校验失败不消费令牌：提示原因并继续等待扩展重新提交。
+              document.getElementById('statusText').textContent =
+                '● 验证失败：' + (data.error || '请重新登录 BlaBlaLink 后再次提交');
             }}
           }})
           .catch(function() {{}});
-      }}, 2500);
+      }}, 4000);
     }}
   </script>
 </body>

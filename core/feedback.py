@@ -92,6 +92,12 @@ class DelayedFeedbackManager:
             handle.finished = True
             handle.cancelled = True
             self._active_handles.discard(handle)
+        else:
+            # 任务若在首次调度前被取消，_runner 的 finally 不会执行；
+            # 完成回调保证任意结束路径都释放句柄。
+            handle.delayed_task.add_done_callback(
+                lambda _task: self._active_handles.discard(handle)
+            )
         return handle
 
     async def close(self) -> None:

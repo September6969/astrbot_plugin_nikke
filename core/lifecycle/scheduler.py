@@ -4,14 +4,21 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from collections.abc import Awaitable, Callable, Mapping
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from ..config import read_schedule_clock
+from ..privacy import safe_exception_message
 from .coordinator import RuntimeCoordinator
 from .ports import SchedulerSettingsStore
+
+
+_LOGGER = logging.getLogger(__name__)
+_MAX_BACKOFF_SECONDS = 300.0
+_WARNING_INTERVAL_SECONDS = 600.0
 
 
 class RuntimeScheduler:
@@ -127,7 +134,30 @@ class RuntimeScheduler:
                 )
 
     async def run(self) -> None:
-        """持续轮询；退出与取消由 RuntimeCoordinator 管理。"""
+        """持续轮询；退出与取消由 RuntimeCoordinator 管理。
+
+        单次 tick 失败（如 SQLite 锁超时）只退避重试并节流告警，不让调度循环
+        和宿主生命周期整体失败；只有取消信号向上传播。
+        """
+        failures = 0
+        last_warning = float("-inf")
         while not self._coordinator.closing:
-            await self.tick()
-            await self._sleep(self._poll_interval)
+            delay = self._poll_interval
+            try:
+                await self.tick()
+                failures = 0
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                failures += 1
+                delay = min(self._poll_interval * (2 ** min(failures, 8)), _MAX_BACKOFF_SECONDS)
+                now = self._unix_time()
+                if failures == 1 or now - last_warning >= _WARNING_INTERVAL_SECONDS:
+                    last_warning = now
+                    _LOGGER.warning(
+                        "[NIKKE] 调度检查失败（连续 %d 次），%.0f 秒后重试：%s",
+                        failures,
+                        delay,
+                        safe_exception_message(exc),
+                    )
+            await self._sleep(delay)
