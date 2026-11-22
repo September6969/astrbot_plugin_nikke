@@ -185,3 +185,25 @@ async def test_source_dataset_version_is_not_health_attempt_noise(tmp_path):
     restarted = ScheduleService(tmp_path)
     assert restarted._source_health["gamekee"].dataset_version == 2
     assert not restarted.snapshot_state.dirty
+
+
+@pytest.mark.asyncio
+async def test_schedule_events_written_once_and_legacy_copies_still_readable(tmp_path):
+    # PR-6B G5-calendar-c 步骤 1/2：schedule_events.json 只保存权威 source_datasets，
+    # 不再重复写 merged_snapshot/events；calendar_cache.json 兼容缓存仍写入（步骤 3 暂缓）。
+    service = ScheduleService(tmp_path)
+    service.adapters = [Source("A")]
+    await service.refresh_schedule_data()
+    payload = json.loads(service.events_path.read_text(encoding="utf-8"))
+    assert payload["schema"] == 5
+    assert "merged_snapshot" not in payload and "events" not in payload
+    assert [event["title"] for event in payload["source_datasets"]["gamekee"]] == ["A"]
+    assert json.loads(service.cache_path.read_text(encoding="utf-8"))["activities"][0]["title"] == "A"
+    assert ScheduleService(tmp_path).list_canonical()[0].title == "A"
+
+    # 旧版（schema<4）只有 events 副本的文件仍按迁移路径读取。
+    legacy = {"schema": 3, "events": payload["source_datasets"]["gamekee"]}
+    service.events_path.write_text(json.dumps(legacy), encoding="utf-8")
+    migrated = ScheduleService(tmp_path)
+    assert migrated.migrated_from_merged_snapshot
+    assert migrated.list_canonical()[0].title == "A"
