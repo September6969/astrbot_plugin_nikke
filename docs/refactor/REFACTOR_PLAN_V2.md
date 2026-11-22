@@ -4,6 +4,14 @@
 > **规划方案**：方案 B（渐进式系统重构）
 > **状态**：待项目所有者决策与批准（尚未进入代码实施）
 
+> **实施说明（PR-6C 补记，2026-11-22）**：本计划已按 PR-0 → PR-6C 实施，正文保留批准时的原文，不再改写；当前状态以 [FINAL_DELIVERY.md](FINAL_DELIVERY.md) 的「REFACTOR V2 交付记录」与代码为准。正文中已过期的数字：
+> - 数据库为 `SCHEMA_VERSION = 3`（自 `ab610f5` 起即为 3；红线 3 与 §4 写作 2 与代码不符，`V2_PHASE0_BASELINE.md` 已记录；V2 未改动 schema）。
+> - 热点余量：`main.py` 现 252 行、门槛已由 700 收紧为 300；`command_runtime.py` 现 314/400（PR-2 后为 318）。
+> - PR-6C 的遗留方法区间实为 `main.py:249-497`（PR-2 新增 `nikke_hash_prefix` 后下移），而非 229-478；「36 个」即 35 个未注册公开方法加 `_dispatch_account_command`，涉及约 22 个测试文件、52 个测试函数（另有 8 个 AST 守卫），而非「24 组」。
+> - 「8 条既有跨层边」已全部清零，`CROSS_LAYER_BASELINE_ALLOWLIST` 为空集。
+> - PR-6A 所述 `features/voice/feedback.py`「0 引用」不准确（有 2 个测试引用），已先改测试再删除。
+> - PR-6C 删除的 `scripts/` 根兼容壳为 79 个，保留运维入口 `backup_nikke_data`、`upgrade_preflight`、`cleanup_cache`、`diagnose_readonly` 与 `update_nikke_db.sh`。
+
 ---
 
 ## 1. 文档说明与审计基线

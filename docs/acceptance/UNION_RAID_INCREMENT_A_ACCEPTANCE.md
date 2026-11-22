@@ -1,5 +1,7 @@
 # Union Raid Increment A 验收记录
 
+> 历史记录（REFACTOR V2 `PR-6C` 标注）：文中 `NikkePlugin.<方法>` 调用链已被取代；这些未注册方法已删除，当前入口见 [ASTRBOT_COMMAND_ENTRY_MAP.md](../architecture/ASTRBOT_COMMAND_ENTRY_MAP.md)。
+
 ## 范围与基线
 
 - 起始 base：`origin/main@bada0b3aafcd7127d07ca40f554808b0433540f8`

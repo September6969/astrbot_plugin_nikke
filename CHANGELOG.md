@@ -27,6 +27,18 @@
 - 配置项以 `_conf_schema.json` 为合同，默认值和安全边界见 [配置合同](docs/CONFIGURATION_ACCEPTANCE.md)。
 - 必须通过 CI 的 Python 3.10/3.11/3.12 与 Node 检查；测试和合成预览不能替代真实账号、消息发送或部署证据。
 
+## 2026-11-22 REFACTOR V2 系统性重构（PR-0 → PR-6C）
+
+- 分支链 `refactor-v2/*`，基线 `ab610f5`（PR #128），尚待合并；合并前不代表已发布或已部署。逐 PR 提交、关闭的 AUD 项与四重核查清单见 [FINAL_DELIVERY.md](docs/refactor/FINAL_DELIVERY.md) 的「REFACTOR V2 交付记录」。
+- 安全与数据：同一 QQ 仅在换绑到不同游戏身份时重置自动授权；绑定会话竞态与密钥原子创建修复；绑定页轮询、可信反代 CIDR、输入校验与日志脱敏加固；`SCHEMA_VERSION` 保持 3，无需迁移。
+- 命令：统一尾参解析（多词角色名、空格/换行批量 CDK）；`#妮姬` / `#nikke` 改为插件级入口，不再修改宿主 `wake_prefix`；开放 `/妮姬 公告 语言|分类|搜索|诊断|深度刷新`；帮助首页、分类与详解共用单一数据源；全部既有 QQ 命令与 `/nikke` 平铺别名保持可用。
+- 日常：执行租约按进程代次与 10 分钟超时安全回收；`UNKNOWN_AFTER_ACTION` 仍绝不自动解锁或重放，新增私聊两步 `/妮姬 日常 任务 确认恢复 [确认]`（审计留痕，只放行之后的新周期）；日常与汇总按社区日（UTC）调度。
+- 日程与公告：月度/活动 Pass 精确分类、时间语义修正；管理员公告订阅只推官方公告，截止提醒归个人日程订阅；日程源只保留 BlaBlaLink（GameKee/官方公告日程源已删除），`schedule_events.json` 不再重复写入。
+- 角色、突袭、竞技场与 UI：练度批量详情只读探针（未实测前保持逐角色）、魔方/珍藏缺记录 fail-closed、白银积分券更名；竞技场均衡搜索与私聊珍藏来源区分；Spine worker 环境白名单与进程组回收；T2I 对比度、字号下限与角色卡负载瘦身。
+- 资产与运维：56 个重复图标去重；删除未用 NotoSansHans OTF 并补许可说明；塔罗牌面高保真 JPEG（逐张 PSNR ≥ 40.2 dB）；语音缺 ffmpeg/ffprobe 时告警提示；缓存清理加固并新增 `scripts/operations/prune_action_runs.py`。
+- 结构：架构门禁跨层边 allowlist 清零；`main.py` 删除 36 个生产不可达的未注册遗留方法（252 行，门槛 700 → 300，新增公开成员白名单门禁）；删除 79 个非运维 `scripts/` 根兼容壳，根目录只保留 `backup_nikke_data`、`upgrade_preflight`、`cleanup_cache`、`diagnose_readonly` 与 `update_nikke_db.sh`，其余请改用 `scripts/<分类>/<工具>`（映射见 `docs/architecture/repository_organization_moves.json`）。
+- 真实 QQ/NapCat 验收、远端 CI 与部署仍未执行。
+
 ## 2026-09-08 路线图收口补充
 
 - PR #52/#53：正式 Spine 编排、官方 Spine 4.1 headless worker Docker 构建、受限 RGBA adapter、严格版本匹配和静态 FB/占位回退进入 main；服务器实构建、合法 bundle、生产许可和 benchmark 仍待现场证据。
