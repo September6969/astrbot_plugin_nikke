@@ -30,7 +30,10 @@ async def test_render_contract(name):
     assert await renderer.render_campaign_history(record) == "output.png"
     template, payload = native.call_args.args
     assert json.loads(json.dumps(payload)) == payload
-    assert native.call_args.kwargs["options"] == T2IRenderer.OPTIONS
+    # AUD-017：战役卡显式声明 1600×900 画布，渲染选项需携带对应视口，不再落回渲染端默认视口。
+    assert native.call_args.kwargs["options"] == {
+        **T2IRenderer.OPTIONS, "viewport": {"width": 1600, "height": 900},
+    }
     for forbidden in ("{% include", "{% import", "file://", "<script", "https://", "http://", "|safe"):
         assert forbidden not in template
     html = Environment(autoescape=False).from_string(template).render(**payload)

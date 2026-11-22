@@ -1,10 +1,11 @@
 {% macro status_badge(text) %}<span class="badge state-{{ text|lower }}">{{ {'AVAILABLE':'已获取','PARTIAL':'部分数据','UNAVAILABLE':'暂不可用','UNKNOWN':'未知','EMPTY':'暂无记录'}.get(text, text) }}</span>{% endmacro %}
 {% macro section_header(title, detail='') %}<div class="section-header"><span>{{ title }}</span>{% if detail %}{{ status_badge(detail) }}{% endif %}</div>{% endmacro %}
-{% macro key_values(rows, class_name='') %}<div class="kv-grid {{ class_name }}">{% for row in rows %}<div class="kv" data-field="{{ row.label }}"><span>{{ row.label }}</span><strong>{{ row.value|replace('Unknown', '未知') }}</strong></div>{% endfor %}</div>{% endmacro %}
+{% macro key_values(rows, class_name='') %}<div class="kv-grid {{ class_name }}">{% for row in rows %}{% set shown = row.value|replace('Unknown', '未知') %}<div class="kv{% if class_name == 'identity-grid' and shown|length > {'区服': 9}.get(row.label, 12) %} is-long{% endif %}" data-field="{{ row.label }}"><span>{{ row.label }}</span><strong>{{ shown }}</strong></div>{% endfor %}</div>{% endmacro %}
 {% macro resource_grid(rows, class_name='') %}<div class="resource-grid {{ class_name }}">{% for row in rows %}<article class="resource-card" data-field="{{ row.label }}">{% if row.icon_data_uri %}<span class="resource-icon-slot"><img src="{{ row.icon_data_uri }}" alt=""></span>{% else %}<span class="resource-icon-slot" aria-hidden="true"></span>{% endif %}<span class="resource-copy"><span class="resource-label">{{ row.label }}{% if row.detail %}（{{ row.detail }}）{% endif %}</span><strong>{{ row.value|replace('Unknown', '未知') }}</strong></span></article>{% endfor %}</div>{% endmacro %}
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1080"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'"><style><!-- SHARED_CSS -->
 body {margin:0;background:#f3f6fa;}
-.profile {width:1080px;padding:34px 38px 30px;background:#f3f6fa;color:#243143;--muted:#657386;--line:#d5dee8;--text:#243143;--surface:#fff;--blue:#3b719d;}
+:root {--canvas-width:1080px;}
+.profile {width:1080px;padding:34px 38px 30px;background:#f3f6fa;color:#243143;--muted:#5f6d80;--line:#d5dee8;--text:#243143;--surface:#fff;--blue:#3b719d;}
 .profile header {margin-bottom:18px;}
 .profile-identity {padding:28px 30px 24px;background:linear-gradient(140deg,#fff 0%,#edf4fa 100%);border:1px solid #d6e1ec;border-radius:20px;}
 .profile .eyebrow {font-size:20px;font-weight:700;letter-spacing:2px;color:#456985;}
@@ -13,9 +14,11 @@ body {margin:0;background:#f3f6fa;}
 .identity-grid.kv-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
 .identity-grid .kv {display:flex;flex-direction:column;gap:4px;min-width:0;padding:14px 16px;background:#fff;border:1px solid #dce5ed;border-radius:14px;}
 .identity-grid .kv>span {color:var(--muted);font-size:22px;line-height:1.4;}
-.identity-grid .kv>strong {align-self:flex-start;margin-top:2px;color:#274f70;font-size:52px;line-height:1.15;text-align:left;white-space:nowrap;}
+.identity-grid .kv>strong {align-self:flex-start;max-width:100%;margin-top:2px;color:#274f70;font-size:52px;line-height:1.15;text-align:left;overflow-wrap:anywhere;}
 .identity-grid [data-field="区服"]>strong {font-size:28px;}
 .identity-grid [data-field="部队总战力"]>strong {font-size:42px;}
+/* 超长身份值（区服名称、异常大数）缩小并允许换行，始终留在自身卡片内。 */
+.identity-grid .kv.is-long>strong {font-size:26px;line-height:1.3;}
 .profile section {background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:0 0 14px;}
 .profile .today {background:#eaf2f9;color:#233b52;padding:24px 28px;border-color:#cfdeeb;--muted:#526579;--line:#cedbe8;}
 .today h2 {font-size:30px;letter-spacing:0;}
@@ -43,10 +46,9 @@ body {margin:0;background:#f3f6fa;}
 .storage-track span {display:block;height:100%;background:#527fad;}
 .storage.warning .storage-track span {background:#d69b36;}
 .storage.strong-warning .storage-track span {background:#bf6d6d;}
-.storage small {display:block;color:var(--muted);margin-top:8px;font-size:15px;}
 .profile footer {margin-top:18px;padding:14px 4px 0;border-top:1px solid var(--line);}
 .profile .footer-meta {font-size:18px;color:var(--muted);line-height:1.55;}
-</style></head><body><main class="profile"><header><div class="profile-identity"><div class="eyebrow">妮姬 · 个人资料</div><h1>{{ commander }}</h1>{{ key_values(identity, 'identity-grid') }}</div></header>
+</style></head><body><main class="profile theme-light"><header><div class="profile-identity"><div class="eyebrow">妮姬 · 个人资料</div><h1>{{ commander }}</h1>{{ key_values(identity, 'identity-grid') }}</div></header>
 <section class="today"><div class="today-head"><h2>今日进度</h2>{{ status_badge(today_state) }}</div><div class="storage {{ storage.semantic }}"><div class="storage-label"><span>保管箱容量</span><strong>{{ storage.value|replace('Unknown', '未知') }}</strong></div>{% if storage.bar is not none %}<div class="storage-track"><span style="width:{{ storage.bar }}%"></span></div>{% endif %}</div>{{ key_values(today) }}</section>
 <section>{{ section_header('模拟室', simulation_state) }}{{ key_values(simulation) }}</section>
 <section>{{ section_header('主线进度') }}{{ key_values(campaign) }}</section>

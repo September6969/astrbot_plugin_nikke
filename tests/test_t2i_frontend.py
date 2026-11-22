@@ -293,9 +293,13 @@ async def test_character_slots_theme_and_assets(tmp_path):
     await renderer.render_view("character", cases["dark"])
     other = native.call_args.args[1]
     assert semantic == [[row["semantic"] for row in gear["options"]] for gear in other["equipment"]]
-    assert other["theme"] != payload["theme"]
-    assert all(row["tier"] == "—" for row in payload["summary"])
-    assert payload.get("corporation_watermark", "").startswith("data:image/png;base64,")
+    # AUD-021：主题色、旧摘要、公司水印等字段从未被 character.html 渲染，
+    # 已从 payload 移除以减少每张卡的内联负载；这里改为断言它们不再出现。
+    for dead in ("theme", "summary", "corporation_watermark", "bg_gradient", "english", "rarity",
+                 "stats", "growth", "skills", "commander", "updated", "version", "font_noto"):
+        assert dead not in payload and dead not in other
+    assert payload["canvas"] == {"width": 1600, "height": 2400}
+    assert native.call_args.kwargs["options"]["viewport"] == {"width": 1600, "height": 2400}
     template, _ = native.call_args.args
     html = Environment(autoescape=False).from_string(template).render(**payload)
     assert 'class="corp-watermark"' not in html
@@ -405,8 +409,8 @@ async def test_character_card_visual_polish(tmp_path):
     cases = get_cases("character", tmp_path)
     await renderer.render_view("character", cases["c010"])
     template, payload = native.call_args.args
-    assert "bg_gradient" in payload
-    assert payload["bg_gradient"].startswith("radial-gradient(")
+    # AUD-021：bg_gradient 从未被模板引用（卡面背景由 .character 自身渐变绘制），已移出 payload。
+    assert "bg_gradient" not in payload
     html = Environment(autoescape=False).from_string(template).render(**payload)
     assert 'width:1600px;height:2400px' in html
     assert "backdrop-filter:blur(22px)" in html

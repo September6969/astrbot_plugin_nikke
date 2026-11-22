@@ -1,2 +1,28 @@
-:root { --bg: #111318; --panel: #1a1e25; --line: #343b46; --text: #f2f3f5; --muted: #a9b2c0; --accent: #a6bfd5; }
+/*
+ * T2I 基础设计令牌（所有页面共享）。
+ * - 只统一基础规范：语义色、最低可读字号、间距刻度；各页面仍保留自己的信息结构与卡片样式。
+ * - 默认是暗色语义值；浅底页面在根容器加 .theme-light（或在 :root 覆写）切换为亮色语义值。
+ * - 最低可读字号：整张图按宽度缩放到 432px 手机缩略图后，辅助文字不低于 7px。
+ *   页面在自身样式中覆写 :root 的 --canvas-width，辅助文字使用 var(--font-min) 作为字号下限。
+ * - 所有状态色在对应底色上满足 WCAG AA 4.5:1（见 tests/test_t2i_render_gate.py）。
+ */
+:root {
+  --canvas-width: 1080px;
+  --thumb-min-px: 7;
+  --font-min: calc(var(--canvas-width) * var(--thumb-min-px) / 432);
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
+  --bg: #111318; --panel: #1a1e25; --line: #343b46; --text: #f2f3f5; --muted: #a9b2c0; --accent: #a6bfd5;
+  --state-available: #a9c5bd; --state-available-line: #617f76;
+  --state-partial: #ddbd83; --state-partial-line: #9d8050;
+  --state-unavailable: #d5a7a7; --state-unavailable-line: #966767;
+  --state-rate-limited: #edcc87; --state-rate-limited-line: #967644;
+  --state-error: #e3a8a8; --state-error-line: #946363;
+}
+.theme-light {
+  --state-available: #46665b; --state-available-line: #92a89f;
+  --state-partial: #785522; --state-partial-line: #a3895c;
+  --state-unavailable: #864e4e; --state-unavailable-line: #b08e8e;
+  --state-rate-limited: #74561d; --state-rate-limited-line: #a3895c;
+  --state-error: #8a4848; --state-error-line: #b08e8e;
+}
 body { background: var(--bg); color: var(--text); font-family: "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; font-variant-numeric: tabular-nums; }

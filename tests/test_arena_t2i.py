@@ -52,7 +52,9 @@ async def test_long_result_pages_publish_together_or_fall_back(arena, fail_secon
         "红莲/豺狼/布兰儿/桑迪/特蕾娜", "诺雅/饼干/爱丽丝/丽塔/普丽瓦蒂",
         "阿妮斯/拉毗/尼恩/露菲/哈兰"))
     plan = ThreeTeamOptimizer(arena.analyzer).solve(teams)
-    historical = MatchupEvidence("statistic", "历史对位与站位差异说明" * 22,
+    # AUD-017：分页改用与模板逐项对齐的高度模型（无头像时阵容更矮），
+    # 原 22 倍说明在单页 2200px 预算内即可放下，故加长到确实需要分页的长度。
+    historical = MatchupEvidence("statistic", "历史对位与站位差异说明" * 40,
                                  arena.analyzer.provenance)
     plan = replace(plan, teams=tuple(replace(item, evidence=(*item.evidence, historical))
                                      for item in plan.teams))

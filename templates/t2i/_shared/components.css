@@ -7,7 +7,8 @@
 .portrait { position: relative; height: 220px; display: flex; justify-content: center; align-items: center; background: #222731; }
 .slot { position: absolute; left: 14px; top: 12px; color: var(--muted); font-size: 18px; }
 .portrait img { width: 100%; height: 100%; object-fit: contain; }
-.placeholder { width: 116px; height: 146px; color: #556171; }
+/* 占位剪影按头像框等比收缩，避免在矮头像框中溢出裁切。 */
+.placeholder { width: 116px; height: 146px; max-width: 100%; max-height: 100%; color: #556171; }
 .portrait-info { padding: 16px 18px 20px; }
 .level { color: var(--accent); font-size: 20px; }
 .character-name { height: 66px; margin-top: 7px; font-size: 21px; line-height: 1.5; overflow-wrap: anywhere; }
@@ -20,14 +21,11 @@
 .footer-meta > span { min-width: 0; overflow-wrap: anywhere; }
 .footer-meta .commander { max-width: 720px; overflow-wrap: anywhere; }
 
-.badge.state-available {color:#a9c5bd;border-color:#617f76;}
-.badge.state-partial {color:#ddbd83;border-color:#9d8050;}
-.badge.state-unavailable {color:#d5a7a7;border-color:#966767;}
-.badge.state-unknown {border-style:dashed;color:var(--muted);}
-.badge.state-empty {color:var(--muted);border-color:var(--line);}
-.profile .state-available,.schedule .state-available {color:#46665b;border-color:#92a89f;}
-.profile .state-partial,.schedule .state-partial {color:#785522;border-color:#a3895c;}
-.profile .state-unavailable,.schedule .state-unavailable {color:#864e4e;border-color:#b08e8e;}
-.profile .today .state-available {color:#a9c5bd;border-color:#617f76;}
-.profile .today .state-partial {color:#ddbd83;border-color:#9d8050;}
-.profile .today .state-unavailable {color:#d5a7a7;border-color:#966767;}
+/* 状态徽标只引用语义令牌；暗色/亮色取值由 tokens.css 的 :root / .theme-light 提供。 */
+.badge.state-available { color: var(--state-available); border-color: var(--state-available-line); }
+.badge.state-partial { color: var(--state-partial); border-color: var(--state-partial-line); }
+.badge.state-unavailable { color: var(--state-unavailable); border-color: var(--state-unavailable-line); }
+.badge.state-rate-limited { color: var(--state-rate-limited); border-color: var(--state-rate-limited-line); }
+.badge.state-error { color: var(--state-error); border-color: var(--state-error-line); }
+.badge.state-unknown { border-style: dashed; color: var(--muted); }
+.badge.state-empty { color: var(--muted); border-color: var(--line); }

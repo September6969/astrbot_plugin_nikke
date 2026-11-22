@@ -101,8 +101,10 @@ async def main():
             ("header-font-c", "header-font-c.png"),
             ("header-font-d", "header-font-d.png"),
         ):
-            t_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(rapi_card, rapi_assets)
-            t_payload["typo_set"] = font_mode
+            # 字体按排版档位内联，档位必须交给 builder 决定（D 档才会嵌入 SemiBold 字重）。
+            t_payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(
+                rapi_card, rapi_assets, typo_set=font_mode
+            )
             t_html = Environment().from_string(template_content).render(**t_payload)
             (out / f"rapi_{font_mode}.html").write_text(t_html, encoding="utf-8")
             await page.set_content(t_html, wait_until="load")

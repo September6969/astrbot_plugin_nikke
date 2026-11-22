@@ -155,6 +155,34 @@ def build_subsets(source_ttf: Path, out_dir: Path, weights: list[int], text: str
     return results
 
 
+COVERAGE_MANIFEST = "NotoSansSC-ReplicaSubset.codepoints.json"
+
+
+def write_coverage_manifest(out_dir: Path, font_paths: list[Path], fallback: Path | None = None) -> Path:
+    """记录子集与 Replica 回退字体的覆盖差集，供角色卡判断是否需要内联 Replica。
+
+    角色卡中文字体栈为 NikkeNotoSC → Replica → 系统字体；只有落在
+    ``fallback_only``（Replica 有、子集各字重都没有）中的字符才会真正用到 Replica。
+    """
+    from fontTools.ttLib import TTFont
+
+    covered: set[int] | None = None
+    for path in font_paths:
+        codepoints = set(TTFont(path).getBestCmap())
+        covered = codepoints if covered is None else covered & codepoints
+    fallback = fallback or out_dir / "ReplicaSans.otf"
+    fallback_codepoints = set(TTFont(fallback).getBestCmap())
+    manifest = {
+        "fonts": [path.name for path in font_paths],
+        "fallback": fallback.name,
+        "codepoints": sorted(covered or ()),
+        "fallback_only": sorted(fallback_codepoints - (covered or set())),
+    }
+    target = out_dir / COVERAGE_MANIFEST
+    target.write_text(json.dumps(manifest, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    return target
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -190,6 +218,8 @@ def main():
         print(f"Downloaded source TTF ({source_ttf.stat().st_size:,} bytes).")
 
     results = build_subsets(source_ttf, args.out_dir, weights, sorted_text)
+    manifest = write_coverage_manifest(args.out_dir, [info["path"] for info in results.values()])
+    print(f"Coverage manifest: {manifest.name}")
     print("\nSubset Generation Summary:")
     print(f"Unique Characters: {len(sorted_text)}")
     for weight, info in results.items():

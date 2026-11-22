@@ -10,12 +10,31 @@ from PIL import Image, ImageOps
 
 
 class T2IAssetResolver:
+    """线程安全的有界编码缓存；所有 Pillow 工作应在 ``asyncio.to_thread`` 中调用。"""
+
     def __init__(self, max_entries: int = 32, max_bytes: int = 8 * 1024 * 1024):
         self.max_entries = max(1, max_entries)
         self.max_bytes = max(1, max_bytes)
         self._cache: OrderedDict[tuple, str] = OrderedDict()
         self._bytes = 0
         self._lock = Lock()
+
+    def _lookup(self, key: tuple) -> str | None:
+        with self._lock:
+            uri = self._cache.get(key)
+            if uri is not None:
+                self._cache.move_to_end(key)
+            return uri
+
+    def _store(self, key: tuple, uri: str) -> None:
+        with self._lock:
+            if key in self._cache or len(uri) > self.max_bytes:
+                return
+            self._cache[key] = uri
+            self._bytes += len(uri)
+            while len(self._cache) > self.max_entries or self._bytes > self.max_bytes:
+                _, removed = self._cache.popitem(last=False)
+                self._bytes -= len(removed)
 
     def encode(
         self,
@@ -29,10 +48,19 @@ class T2IAssetResolver:
             return None
         if not (0 < size[0] <= 1600 and 0 < size[1] <= 2400):
             raise ValueError("无效的目标图片尺寸")
+        do_cover = cover_crop or crop_to_size or crop_16_9
+        options = (tuple(size), do_cover, "PNG")
         try:
             if isinstance(source, Path):
-                if source.stat().st_size > 12 * 1024 * 1024:
+                stat = source.stat()
+                if stat.st_size > 12 * 1024 * 1024:
                     return None
+                # 本地文件以路径、修改时间与字节数为缓存键：命中时既不解码，
+                # 也不对整张 RGBA 位图重复计算 SHA-256（AUD-021）。
+                key = ("path", str(source.resolve()), stat.st_mtime_ns, stat.st_size, *options)
+                cached = self._lookup(key)
+                if cached is not None:
+                    return cached
                 with Image.open(source) as opened:
                     if opened.width * opened.height > 20_000_000:
                         return None
@@ -40,16 +68,14 @@ class T2IAssetResolver:
             elif isinstance(source, Image.Image):
                 if source.width * source.height > 20_000_000:
                     return None
-                prepared = source.convert("RGBA")
+                # 已是 RGBA 时直接对源位图取摘要，避免为计算缓存键先复制一份完整缓冲区。
+                prepared = source if source.mode == "RGBA" else source.convert("RGBA")
+                key = ("pixels", hashlib.sha256(prepared.tobytes()).digest(), prepared.size, *options)
+                cached = self._lookup(key)
+                if cached is not None:
+                    return cached
             else:
                 return None
-
-            do_cover = cover_crop or crop_to_size or crop_16_9
-            key = (hashlib.sha256(prepared.tobytes()).digest(), prepared.size, size, do_cover, "PNG")
-            with self._lock:
-                if key in self._cache:
-                    self._cache.move_to_end(key)
-                    return self._cache[key]
 
             # 动态 cover 裁切：按目标尺寸的长宽比做中央裁切并缩放到目标尺寸
             if do_cover:
@@ -60,14 +86,7 @@ class T2IAssetResolver:
             output = io.BytesIO()
             prepared.save(output, format="PNG")
             uri = "data:image/png;base64," + base64.b64encode(output.getvalue()).decode("ascii")
-            with self._lock:
-                if key not in self._cache and len(uri) <= self.max_bytes:
-                    self._cache[key] = uri
-                    self._bytes += len(uri)
-                    while len(self._cache) > self.max_entries or self._bytes > self.max_bytes:
-                        _, removed = self._cache.popitem(last=False)
-                        self._bytes -= len(removed)
+            self._store(key, uri)
             return uri
         except (OSError, ValueError, Image.DecompressionBombError):
             return None
-

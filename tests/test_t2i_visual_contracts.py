@@ -54,22 +54,49 @@ def test_state_badges_preserve_explicit_state(state):
     assert '<img src=x' not in injected and 'state-neutral' in injected
 
 
-@pytest.mark.parametrize("selector,background", [
-    (".profile .state-available", "eeefed"),
-    (".profile .state-partial", "eeefed"),
-    (".profile .state-unavailable", "eeefed"),
-    (".profile .today .state-available", "222a33"),
-    (".profile .today .state-partial", "222a33"),
-    (".profile .today .state-unavailable", "222a33"),
-])
-def test_state_text_contrast_on_light_and_today(selector, background):
-    css = (ROOT / "templates/t2i/_shared/components.css").read_text(encoding="utf-8")
-    rule = next(body for selectors, body in re.findall(r"([^{}]+)\{([^{}]+)\}", css)
-                if selector in [s.strip() for s in selectors.split(",")])
-    color = re.search(r"(?:^|;)\s*color:#([0-9a-f]{6})", rule)[1]
-    def luminance(value):
-        channels = [int(value[i:i+2], 16) / 255 for i in (0, 2, 4)]
-        linear = [c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in channels]
-        return sum(c * weight for c, weight in zip(linear, (.2126, .7152, .0722)))
-    low, high = sorted((luminance(color), luminance(background)))
-    assert (high + .05) / (low + .05) >= 4.5
+def _luminance(value):
+    channels = [int(value[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    linear = [c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in channels]
+    return sum(c * weight for c, weight in zip(linear, (.2126, .7152, .0722)))
+
+
+def _contrast(foreground, background):
+    low, high = sorted((_luminance(foreground), _luminance(background)))
+    return (high + .05) / (low + .05)
+
+
+def _token_block(css, selector):
+    body = re.search(rf"(?:^|\n){re.escape(selector)}\s*\{{([^}}]+)\}}", css)[1]
+    return dict(re.findall(r"--([a-z0-9-]+):\s*#([0-9a-f]{6})", body))
+
+
+# AUD-017：旧用例假设 .today 为深色底（#222a33），而 profile.html 的 .today 实际是浅蓝底
+# （#eaf2f9），导致暗色徽标在真实底色上只有 1.59–1.87:1。现改为读取共享令牌与模板中的
+# 真实底色计算对比度；状态色均由 tokens.css 的 :root（暗色）/.theme-light（亮色）提供。
+@pytest.mark.parametrize("state", ["available", "partial", "unavailable", "rate-limited", "error"])
+def test_state_token_contrast_on_real_backgrounds(state):
+    tokens = (ROOT / "templates/t2i/_shared/tokens.css").read_text(encoding="utf-8")
+    dark, light = _token_block(tokens, ":root"), _token_block(tokens, ".theme-light")
+    profile = (ROOT / "templates/t2i/profile.html").read_text(encoding="utf-8")
+    today = re.search(r"\.profile \.today \{background:#([0-9a-f]{6})", profile)[1]
+    page = re.search(r"\.profile \{[^}]*background:#([0-9a-f]{6})", profile)[1]
+    surface = re.search(r"--surface:#([0-9a-f]{3,6})", profile)[1]
+    surface = "".join(ch * 2 for ch in surface) if len(surface) == 3 else surface
+    for background in (today, page, surface):
+        assert _contrast(light[f"state-{state}"], background) >= 4.5, (state, background)
+    for background in (dark["bg"], dark["panel"]):
+        assert _contrast(dark[f"state-{state}"], background) >= 4.5, (state, background)
+
+
+def test_profile_uses_light_state_tokens_without_dark_today_override():
+    components = (ROOT / "templates/t2i/_shared/components.css").read_text(encoding="utf-8")
+    profile = (ROOT / "templates/t2i/profile.html").read_text(encoding="utf-8")
+    raid = (ROOT / "templates/t2i/_shared/raid.css").read_text(encoding="utf-8")
+    assert '<main class="profile theme-light">' in profile
+    # 已删除：.profile .today .state-*（暗色值落在浅蓝底）与无对应元素的 .schedule .state-*。
+    assert ".today .state-" not in components + profile
+    assert ".schedule" not in components
+    assert all("var(--state-" in rule for rule in re.findall(r"\.badge\.state-(?:available|partial|unavailable|rate-limited|error)\s*\{[^}]+\}", components))
+    # raid.css 每个选择器只声明一次，不再出现同文件自覆写。
+    selectors = [selector.strip() for selector in re.findall(r"([^{}]+)\{[^{}]*\}", re.sub(r"/\*.*?\*/", "", raid, flags=re.S))]
+    assert len(selectors) == len(set(selectors))

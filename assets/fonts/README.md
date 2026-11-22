@@ -38,6 +38,13 @@
 python scripts/assets/build_replica_font_subset.py
 ```
 
+### 2.3 覆盖清单与按需内联
+脚本同时生成 `NotoSansSC-ReplicaSubset.codepoints.json`：记录 700/800 子集共同覆盖的码位（`codepoints`），
+以及 `ReplicaSans.otf` 有而子集没有的码位（`fallback_only`）。角色卡 payload 只内联当前排版档位
+（默认 `typo-set-b`）实际引用的字体：SemiBold 字重仅在 `header-font-d` 档位内联；`Replica` 只有当
+中文字体栈中的文字含 `fallback_only` 字符时才作为字形回退内联，否则浏览器根本不会用到它，渲染结果逐像素一致。
+重新生成子集后请一并提交该清单。
+
 ---
 
 ## 3. 字体真实渲染保证（Zero Faux-Bold）

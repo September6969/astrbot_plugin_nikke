@@ -319,6 +319,35 @@ class CalendarT2IPayloadBuilder:
         source_path = self._resolve_background_source(service, active_events, upcoming_events)
         return self._encode_background(source_path, canvas_height=canvas_height)
 
+    def _cap_oversize(
+        self,
+        item: dict,
+        *,
+        active: bool,
+        budget: int,
+        global_has_active: bool,
+        is_first_page: bool,
+    ) -> None:
+        """单项独占一页仍超出画布时，按页面预算收紧标题行数，模板以省略号兜底，绝不压到页脚。"""
+        def measure(candidate: dict) -> int:
+            return self.measure_page_content(
+                [candidate] if active else [],
+                [] if active else [candidate],
+                global_has_active=global_has_active,
+                is_first_page=is_first_page,
+            )
+
+        if measure(item) <= budget:
+            return
+        chars = self.ACTIVE_TITLE_CHARS_PER_LINE if active else self.NEXT_TITLE_CHARS_PER_LINE
+        lines = item.get("title_line_count")
+        if not isinstance(lines, int) or lines < 1:
+            lines = self.estimate_title_lines(str(item.get("full_title") or item.get("title") or ""), chars)
+        while lines > 1 and measure({**item, "title_line_count": lines}) > budget:
+            lines -= 1
+        item["title_line_count"] = lines
+        item["title_max_lines"] = lines
+
     def _paginate(
         self,
         active_items: list[dict],
@@ -369,8 +398,12 @@ class CalendarT2IPayloadBuilder:
                 )
                 if tentative_h > max_content_budget:
                     if not p_active:
-                        # 单项超页处理：独占当前页
+                        # 单项超页处理：独占当前页，并把标题行数收紧到页面预算内
                         candidate["is_oversize"] = True
+                        self._cap_oversize(
+                            candidate, active=True, budget=max_content_budget,
+                            global_has_active=global_has_active, is_first_page=is_p1,
+                        )
                         p_active.append(rem_active.pop(0))
                     break
                 p_active.append(rem_active.pop(0))
@@ -390,6 +423,10 @@ class CalendarT2IPayloadBuilder:
                 if tentative_h > max_content_budget:
                     if not p_active and not p_next:
                         candidate["is_oversize"] = True
+                        self._cap_oversize(
+                            candidate, active=False, budget=max_content_budget,
+                            global_has_active=global_has_active, is_first_page=is_p1,
+                        )
                         p_next.append(rem_next.pop(0))
                     break
                 p_next.append(rem_next.pop(0))
@@ -398,9 +435,17 @@ class CalendarT2IPayloadBuilder:
             if not p_active and not p_next:
                 if rem_active:
                     rem_active[0]["is_oversize"] = True
+                    self._cap_oversize(
+                        rem_active[0], active=True, budget=max_content_budget,
+                        global_has_active=global_has_active, is_first_page=is_p1,
+                    )
                     p_active.append(rem_active.pop(0))
                 elif rem_next:
                     rem_next[0]["is_oversize"] = True
+                    self._cap_oversize(
+                        rem_next[0], active=False, budget=max_content_budget,
+                        global_has_active=global_has_active, is_first_page=is_p1,
+                    )
                     p_next.append(rem_next.pop(0))
 
             # 同页同类卡片按最长标题统一高度，预算和模板使用完全相同的盒高。
@@ -626,7 +671,12 @@ class CalendarT2IPayloadBuilder:
                     starts_in = f"{mins_diff} 分钟后开始"
             elif ev.start_at and start_prec == "DATE_ONLY":
                 start_time_display = ev.start_at.astimezone(CST).strftime("%m.%d")
-                diff_days = max(1, (ev.start_at.date() - current.date()).days)
+                # 日期级开始日按北京时间理解；两侧都换算到 UTC+8 再取日期，
+                # 避免北京 08:00–23:59 之间 UTC 日期落后一天导致天数少算（AUD-024）。
+                diff_days = max(
+                    1,
+                    (ev.start_at.astimezone(CST).date() - current.astimezone(CST).date()).days,
+                )
                 starts_in = f"约 {diff_days} 天后（日期级）"
             else:
                 start_time_display = "时间待定"

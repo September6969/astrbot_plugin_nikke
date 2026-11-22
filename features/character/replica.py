@@ -149,6 +149,22 @@ def replica_font():
     return _load_font_data_uri("ReplicaSans.otf")
 
 
+@lru_cache(maxsize=1)
+def replica_fallback_codepoints() -> frozenset[int] | None:
+    """Replica 有而 NikkeNotoSC 子集（700/800）没有的码位；清单缺失或损坏时返回 None。
+
+    清单由 scripts/assets/build_replica_font_subset.py 与子集字体一同生成。
+    """
+    from astrbot_plugin_nikke.core.paths import builtin_file
+
+    path = builtin_file("fonts", "NotoSansSC-ReplicaSubset.codepoints.json")
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        return frozenset(int(value) for value in raw["fallback_only"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
 def barlow_font():
     return _load_font_data_uri("BarlowCondensed-Bold.ttf")
 
