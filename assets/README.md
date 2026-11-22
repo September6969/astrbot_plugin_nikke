@@ -16,4 +16,6 @@
 
 角色官方立绘不再登记为 FB 图片；角色卡只消费已核验的 L2D/Spine identity 和版本化透明 PNG 缓存。企业、武器和爆裂图标仍按各自来源合同读取；Spine 失败时只使用程序生成的中性占位图。
 
+塔罗牌面 `tarot/**/*.jpg`（78 张，1000×1500）自 PR-6A 起为基线 JPEG：quality 95、4:4:4 色度不降采样，由原无损 PNG 一次性转换（逐张 PSNR ≥ 40.2 dB，总体积 145.9 MB → 61.6 MB），路径登记在 `tarot/tarot_cards.json`。逆位牌在运行时按源模式精确旋转 180°，缓存为无损 PNG（`data/nikke/tarot/reversed_cache/`），牌面更新后旧指纹缓存会被清理。
+
 这些游戏美术属于 SHIFT UP 及相关权利方，不属于本项目 GPL 代码许可证。仓库提交了部分内置资源（如 `icons/`、`blablalink/`、`spine-rendered/`、`tarot/`、`guides/`），但不将运行时远端下载缓存纳入版本控制。派生自 Nikke-db 的文件、第三方字体与攻略图片的来源见仓库根目录 `NOTICE`。

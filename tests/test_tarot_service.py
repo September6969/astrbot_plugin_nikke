@@ -148,7 +148,9 @@ class TarotBackendTests(unittest.TestCase):
         image = Image.new("RGB", (2, 2), "black")
         image.putpixel((0, 0), (255, 0, 0))
         image.putpixel((1, 1), (0, 0, 255))
-        image.save(source)
+        # PR-6A G3-media-a：牌面路径改为 .jpg；此处显式写无损 PNG 内容，
+        # 以便逐像素断言旋转结果（PIL 按内容而非扩展名解码）。
+        image.save(source, format="PNG")
 
         service = TarotService(self.root, self.runtime)
         card = service.deck.card_by_key(major["key"])
@@ -160,6 +162,87 @@ class TarotBackendTests(unittest.TestCase):
         with Image.open(reversed_path) as rotated:
             self.assertEqual(rotated.convert("RGB").getpixel((1, 1)), (255, 0, 0))
             self.assertEqual(rotated.convert("RGB").getpixel((0, 0)), (0, 0, 255))
+
+
+    def test_reversed_cache_keeps_source_mode_and_prunes_stale_fingerprints(self) -> None:
+        """PR-6A G3-media-a-cache：RGB 源不升为 RGBA；缓存为无损 PNG；旧指纹被清理。"""
+        import os
+
+        data = json.loads((self.root / "assets" / "tarot" / "tarot_cards.json").read_text(encoding="utf-8"))
+        major = next(item for item in data["cards"] if item["arcana"] == "major")
+        source = self.root / major["image"]
+        source.parent.mkdir(parents=True, exist_ok=True)
+        Image.new("RGB", (16, 24), (10, 200, 30)).save(source, format="JPEG", quality=95, subsampling=0)
+
+        deck = TarotDeckRepository(self.root)
+        card = deck.card_by_key(major["key"])
+        assert card is not None
+        cache = self.runtime / "reversed_cache"
+        provider = TarotImageProvider(deck, cache)
+        unrelated = cache / "major_99_reversed_0123456789ab.png"
+        unrelated.write_bytes(b"other card")
+        first = provider.image_for(DrawnTarotCard(card, "reversed"))
+        assert first is not None
+        self.assertEqual(first.suffix, ".png")
+        with Image.open(first) as rotated, Image.open(source) as upright:
+            self.assertEqual(rotated.format, "PNG")
+            self.assertEqual(rotated.mode, "RGB")
+            expected = upright.convert("RGB").transpose(Image.Transpose.ROTATE_180)
+            self.assertEqual(rotated.tobytes(), expected.tobytes())
+
+        # 牌面被替换（mtime/size 变化）后生成新指纹，旧缓存被删除，其他牌不受影响。
+        Image.new("RGB", (16, 24), (200, 10, 30)).save(source, format="PNG")
+        os.utime(source, ns=(1, 1))
+        second = provider.image_for(DrawnTarotCard(card, "reversed"))
+        assert second is not None
+        self.assertNotEqual(first, second)
+        self.assertFalse(first.exists())
+        self.assertTrue(second.is_file())
+        self.assertTrue(unrelated.is_file())
+
+    def test_reversed_cache_preserves_alpha_sources(self) -> None:
+        data = json.loads((self.root / "assets" / "tarot" / "tarot_cards.json").read_text(encoding="utf-8"))
+        major = next(item for item in data["cards"] if item["arcana"] == "major")
+        source = self.root / major["image"]
+        source.parent.mkdir(parents=True, exist_ok=True)
+        image = Image.new("RGBA", (2, 2), (0, 0, 0, 0))
+        image.putpixel((0, 0), (255, 0, 0, 128))
+        image.save(source, format="PNG")
+        deck = TarotDeckRepository(self.root)
+        card = deck.card_by_key(major["key"])
+        assert card is not None
+        path = TarotImageProvider(deck, self.runtime / "cache").image_for(DrawnTarotCard(card, "reversed"))
+        assert path is not None
+        with Image.open(path) as rotated:
+            self.assertEqual(rotated.mode, "RGBA")
+            self.assertEqual(rotated.getpixel((1, 1)), (255, 0, 0, 128))
+
+
+class BundledTarotAssetTests(unittest.TestCase):
+    """PR-6A G3-media-a：直接检查仓库内置牌面（其他测试只复制 JSON）。"""
+
+    def test_bundled_deck_is_complete_jpeg_at_original_dimensions(self) -> None:
+        root = SOURCE_DATA.parents[2]
+        deck = TarotDeckRepository(root)
+        status = deck.status()
+        self.assertEqual(status.major_images_ready, 22)
+        self.assertEqual(status.minor_images_ready, 56)
+        self.assertTrue(status.minor_enabled)
+        self.assertEqual(len(deck.active_cards()), 78)
+        tarot_dir = root / "assets" / "tarot"
+        self.assertEqual(list(tarot_dir.rglob("*.png")), [], "旧 PNG 牌面不应与 JPEG 并存")
+        for card in deck.cards:
+            path = deck.resolve_image(card)
+            assert path is not None, card.key
+            self.assertEqual(path.suffix, ".jpg")
+            with Image.open(path) as image:
+                self.assertEqual(image.format, "JPEG")
+                self.assertEqual(image.size, (1000, 1500))
+                self.assertEqual(image.mode, "RGB")
+                # 基线（非渐进）JPEG，兼容 QQ/NapCat。
+                self.assertFalse(image.info.get("progressive") or image.info.get("progression"))
+                # 4:4:4 色度不降采样。
+                self.assertEqual(image.layer[0][1:3], (1, 1))
 
 
 class DummyTarotEvent:
