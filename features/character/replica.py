@@ -197,7 +197,3 @@ def _load_font_data_uri(filename: str = "ReplicaSans.otf"):
     }
     mime = mime_map.get(ext, "font/ttf")
     return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode("ascii")
-
-
-def _font_uri():
-    return replica_font()

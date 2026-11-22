@@ -23,17 +23,49 @@ class AssetsRefactorIntegrityTests(unittest.TestCase):
         """验证 assets/fonts/ 包含全套所需字体与许可证。"""
         self.assertTrue(self.fonts_dir.is_dir(), "fonts 目录必须存在")
 
-        expected_fonts = ["NotoSansHans-Medium.otf", "NotoSansHans-Regular.otf", "ReplicaSans.otf"]
+        # PR-6A G2-fonts-license-a：未被运行时使用的 NotoSansHans-*.otf 已删除。
+        expected_fonts = [
+            "ReplicaSans.otf",
+            "NotoSansSC-ReplicaSubset-700.woff2",
+            "NotoSansSC-ReplicaSubset-800.woff2",
+        ]
         for font_name in expected_fonts:
             root_font = self.fonts_dir / font_name
             self.assertTrue(root_font.is_file(), f"fonts/{font_name} 必须存在")
+        for removed in ("NotoSansHans-Medium.otf", "NotoSansHans-Regular.otf"):
+            self.assertFalse((self.fonts_dir / removed).exists(), f"fonts/{removed} 不应重新引入")
 
-        # 验证许可证完整保留
-        for lic in ["OFL-BarlowCondensed.txt", "OFL-NotoSansSC.txt", "OFL-Rajdhani.txt"]:
+        # 验证许可证完整保留（ReplicaSans.otf 为 Apache 2.0 修改版，G2-fonts-license-b）
+        for lic in ["OFL-BarlowCondensed.txt", "OFL-NotoSansSC.txt", "OFL-Rajdhani.txt", "LICENSE-Apache-2.0.txt"]:
             self.assertTrue((self.fonts_dir / lic).is_file(), f"许可证 {lic} 必须随分发保留")
+
+        # NOTICE 必须登记第三方字体、Nikke-db 归属与 Spine runtime，且引用的许可证文件存在。
+        notice = (self.root / "NOTICE").read_text(encoding="utf-8")
+        for token in ("Nikke-db", "a2358b72bd1335c30737e46482a99947f3788bc7", "Spine Runtimes License", "ReplicaSans.otf"):
+            self.assertIn(token, notice)
+        for lic in ("OFL-NotoSansSC.txt", "OFL-BarlowCondensed.txt", "OFL-Rajdhani.txt", "LICENSE-Apache-2.0.txt"):
+            self.assertIn(f"assets/fonts/{lic}", notice)
 
         # 根目录不再保存重复内置字体。
         self.assertFalse((self.root / "fonts").exists())
+
+    def test_evidence_fonts_prefer_bundled_cjk_before_latin_only(self):
+        """PR-6A：离线证据脚本字体候选中，所有支持中文的字体排在纯拉丁字体之前。"""
+        from PIL import ImageFont
+
+        from astrbot_plugin_nikke.scripts.shared.evidence_fonts import evidence_font_candidates, get_evidence_font
+
+        for bold in (False, True):
+            names = [path.name for path in evidence_font_candidates(bold=bold)]
+            self.assertTrue(names[0].startswith("NotoSansSC-ReplicaSubset-"))
+            self.assertEqual(names[1], "ReplicaSans.otf")
+            latin_first = min(names.index(n) for n in names if n.startswith(("BarlowCondensed", "arial", "DejaVu")))
+            cjk_last = max(names.index(n) for n in names if n in {"msyh.ttc", "simhei.ttf", "NotoSansCJK-Regular.ttc", "PingFang.ttc", "Arial Unicode.ttf"})
+            self.assertLess(cjk_last, latin_first)
+            font = get_evidence_font(24, bold=bold)
+            self.assertIsInstance(font, ImageFont.FreeTypeFont)
+            self.assertIn(Path(font.path).parent, {self.fonts_dir})
+            self.assertIsNotNone(font.getmask("拉毗：小红帽").getbbox())
 
     def test_assets_data_structure(self):
         """验证 assets/data/ 包含所有已规范化的数据清单，且已完成单一来源治理（根目录无重复）。"""

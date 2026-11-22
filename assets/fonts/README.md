@@ -1,6 +1,8 @@
 # NIKKE Character Card 字体资产规范与开源许可说明
 
-本目录包含 NIKKE 单角色练度卡（Character Card）渲染所需的离线字体资源。所有字体均为开源免费字体，遵循 SIL Open Font License (OFL) 1.1 许可。
+本目录包含 NIKKE 单角色练度卡（Character Card）渲染所需的离线字体资源。所有字体均为开源字体，按下表分别遵循 SIL Open Font License (OFL) 1.1 或 Apache License 2.0；汇总见仓库根目录 `NOTICE`。
+
+完整的 Noto Sans S Chinese OTF（`NotoSansHans-Regular.otf`、`NotoSansHans-Medium.otf`，共 16,754,584 字节）运行时从未加载，已在 PR-6A 删除；两个离线 Spine 证据脚本改用本目录已核验的字体（`scripts/shared/evidence_fonts.py`）。如需原文件可从 Git 历史恢复（blob `923f89c8…` / `ad071a40…`，见 `docs/architecture/repository_organization_moves.json`）。
 
 ---
 
@@ -14,7 +16,7 @@
 | `BarlowCondensed-SemiBold.ttf` | `NikkeBarlowCondensedSemiBold` | 600 (SemiBold) | TTF | 次级高密度窄体数字 | OFL 1.1 (`OFL-BarlowCondensed.txt`) |
 | `Rajdhani-Bold.ttf` | `NikkeRajdhani` | 700 (Bold) | TTF | 科技感标识、前缀、槽位英文小标 (`--font-tech-label`) | OFL 1.1 (`OFL-Rajdhani.txt`) |
 | `Rajdhani-SemiBold.ttf` | `NikkeRajdhaniSemiBold` | 600 (SemiBold) | TTF | 科技感次级标签与装备角标数值 | OFL 1.1 (`OFL-Rajdhani.txt`) |
-| `ReplicaSans.otf` | `Replica` | 400 - 900 | OTF | 备用中英文字体资产 | 内部资产 |
+| `ReplicaSans.otf` | `Replica` | 500 (Medium；`@font-face` 将 400-900 映射到这一字面) | OTF | 子集外字符的字形回退 | Apache 2.0 (`LICENSE-Apache-2.0.txt`)；修改版：由 Noto Sans S Chinese Medium 1.000 子集化（591 码位，字形轮廓未改），Copyright (c) 2014 Adobe Systems Incorporated；Noto is a trademark of Google Inc. |
 
 ---
 
@@ -62,3 +64,4 @@ font-synthesis: none;
 - **Noto Sans SC**: [Google Fonts - Noto Sans SC](https://fonts.google.com/specimen/Noto+Sans+SC) / [GitHub google/fonts](https://github.com/google/fonts/tree/main/ofl/notosanssc)
 - **Barlow Condensed**: [Barlow Project](https://github.com/jpt/barlow)
 - **Rajdhani**: [Indian Type Foundry - Rajdhani](https://github.com/itfoundry/rajdhani)
+- **Noto Sans S Chinese 1.000**（`ReplicaSans.otf` 的来源，Adobe 与 Google 的 Noto Sans CJK 早期版本）：上游下载地址待确认。

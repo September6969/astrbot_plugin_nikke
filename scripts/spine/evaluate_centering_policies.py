@@ -41,6 +41,7 @@ from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
 from astrbot_plugin_nikke.features.character.face_anchor import framing, metadata
 from astrbot_plugin_nikke.features.character.face_guided_centering import DEFAULT_CENTERING_CONFIG
+from astrbot_plugin_nikke.scripts.shared.evidence_fonts import get_evidence_font
 
 
 def compute_soft_cap(dx: float, knee: float, cap: float) -> float:
@@ -76,32 +77,9 @@ def get_font(size: int, *, bold: bool = False) -> ImageFont.ImageFont:
     """Portable font loader with project fonts and safe fallbacks.
 
     Failure to load a specific font will NEVER crash or affect policy calculations.
+    PR-6A: uses in-repo verified CJK fonts first (scripts/shared/evidence_fonts.py).
     """
-    candidate_paths = [
-        ROOT / "assets" / "fonts" / ("NotoSansHans-Medium.otf" if bold else "NotoSansHans-Regular.otf"),
-        ROOT / "assets" / "fonts" / "NotoSansHans-Medium.otf",
-        ROOT / "assets" / "fonts" / "NotoSansHans-Regular.otf",
-        ROOT / "assets" / "fonts" / ("BarlowCondensed-Bold.ttf" if bold else "BarlowCondensed-SemiBold.ttf"),
-    ]
-    system_fallbacks = [
-        Path("C:/Windows/Fonts/msyh.ttc"),
-        Path("C:/Windows/Fonts/simhei.ttf"),
-        Path("C:/Windows/Fonts/arial.ttf"),
-        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
-        Path("/System/Library/Fonts/PingFang.ttc"),
-        Path("/Library/Fonts/Arial Unicode.ttf"),
-    ]
-    for p in candidate_paths + system_fallbacks:
-        try:
-            if p.exists():
-                return ImageFont.truetype(str(p), size)
-        except Exception:
-            continue
-    try:
-        return ImageFont.load_default()
-    except Exception:
-        return None
+    return get_evidence_font(size, bold=bold)
 
 
 def get_deterministic_permutation(render_id: str) -> list[str]:

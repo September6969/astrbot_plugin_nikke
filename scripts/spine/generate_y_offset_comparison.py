@@ -33,25 +33,12 @@ from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.t2i_templates import T2ITemplateLoader
 from astrbot_plugin_nikke.tests.test_character_replica import example_card
 from astrbot_plugin_nikke.features.character.face_anchor import framing, FACE_Y_OFFSET_OVERRIDES
+from astrbot_plugin_nikke.scripts.shared.evidence_fonts import get_evidence_font
 
 
 def get_font(size: int, *, bold: bool = False):
-    candidate_paths = [
-        ROOT / "assets" / "fonts" / ("NotoSansHans-Medium.otf" if bold else "NotoSansHans-Regular.otf"),
-        ROOT / "assets" / "fonts" / ("BarlowCondensed-Bold.ttf" if bold else "BarlowCondensed-SemiBold.ttf"),
-    ]
-    system_fallbacks = [
-        Path("C:/Windows/Fonts/msyh.ttc"),
-        Path("C:/Windows/Fonts/simhei.ttf"),
-        Path("C:/Windows/Fonts/arial.ttf"),
-    ]
-    for p in candidate_paths + system_fallbacks:
-        try:
-            if p.exists():
-                return ImageFont.truetype(str(p), size)
-        except Exception:
-            continue
-    return ImageFont.load_default()
+    # PR-6A：NotoSansHans OTF 已删除，统一使用仓库内已核验 CJK 字体（scripts/shared/evidence_fonts.py）。
+    return get_evidence_font(size, bold=bold)
 
 
 async def main():

@@ -264,7 +264,7 @@ node --test tests/extension.test.cjs
 
 ## 许可证与来源
 
-本项目采用 [GPL-3.0-or-later](LICENSE)。部分 API 适配和算法基于 [ExiaProject/ExiaInvasion](https://github.com/ExiaProject/ExiaInvasion) 移植，详见 [NOTICE](NOTICE)。
+本项目采用 [GPL-3.0-or-later](LICENSE)。部分 API 适配和算法基于 [ExiaProject/ExiaInvasion](https://github.com/ExiaProject/ExiaInvasion) 移植，详见 [NOTICE](NOTICE)。NOTICE 同时列出第三方字体（OFL 1.1 / Apache 2.0）、Nikke-db 派生资源、Spine Runtime 与攻略图片的来源和归属。
 
 ### 练度总览词条颜色
 

@@ -79,6 +79,7 @@ python scripts/operations/backup_nikke_data.py --help
 | [preview/preview_roster.py](preview/preview_roster.py) | 用正式总表 DTO、T2I loader 与原 Pillow renderer 生成审查预览。 | 本地处理，无账号操作 |
 | [preview/preview_t2i_frontend.py](preview/preview_t2i_frontend.py) | 通过生产 renderer 与 AstrBot 原生接口输出各页合成预览。 | 可能联网，无账号操作 |
 | [preview/preview_t2i_ui.py](preview/preview_t2i_ui.py) | 用生产适配器和 AstrBot 原生接口生成合成数据预览，不启动插件服务。 | 可能联网，无账号操作 |
+| [shared/evidence_fonts.py](shared/evidence_fonts.py) | 离线证据图表头字体：优先仓库内已核验 CJK 字体，再回退系统字体。 | 本地处理，无账号操作 |
 | [shared/phase3_output_guard.py](shared/phase3_output_guard.py) | 为 Phase 3 维护工具约束外部输出路径，避免写入仓库或覆盖已有 evidence。 | 本地处理，无账号操作 |
 | [shared/raid_evidence.py](shared/raid_evidence.py) | 仅保留已知结构的突袭证据转换，不读取账号、不发起网络请求。 | 本地处理，无账号操作 |
 | [shared/t2i_preview_fixtures.py](shared/t2i_preview_fixtures.py) | 供预览和离线测试共用的合成 DTO；不包含真实账号资料。 | 本地处理，无账号操作 |

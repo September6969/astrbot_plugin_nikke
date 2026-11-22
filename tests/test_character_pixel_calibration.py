@@ -255,9 +255,11 @@ def test_character_font_audit_and_fallback():
     long_rendered = Environment().from_string(T2ITemplateLoader().load("character")).render(**long_payload)
     assert 'class="long"' in long_rendered
 
-    # Fallback resilience: when WOFF2 is missing, noto_font still resolves from OTF
+    # PR-6A G2-fonts-license-a：NotoSansHans OTF 已删除（运行时从未加载）。
+    # 改为覆盖 OTF MIME 分支（ReplicaSans）与缺失文件分支。
     from astrbot_plugin_nikke.features.character.replica import _load_font_data_uri
-    assert _load_font_data_uri("NotoSansHans-Medium.otf").startswith("data:font/otf;base64,")
+    assert _load_font_data_uri("ReplicaSans.otf").startswith("data:font/otf;base64,")
+    assert _load_font_data_uri("NotoSansHans-Medium.otf") is None
 
 
 import pytest
