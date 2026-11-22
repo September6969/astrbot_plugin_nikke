@@ -42,9 +42,11 @@ class-level `__getattr__` 默认视为过宽动态转发并失败。唯一保留
 | --- | --- |
 | `application.commands.{campaign,cdk,character,daily,profile,raid}` → `integrations.blablalink.client` | Phase 2（`PR-2`） |
 | `integrations.spine.prerenderer` → `scripts.spine.inspect_spine_bundle` | Phase 4（`PR-4C`，已清零：预检查迁入 `integrations.spine.bundle_inspection`，`scripts/spine/inspect_spine_bundle.py` 仅保留 CLI 薄入口；已转为硬门禁） |
-| `features.calendar.schedule_service` → `integrations.calendar.blabla_source` | Phase 6（`PR-6B`） |
+| `features.calendar.schedule_service` → `integrations.calendar.blabla_source` | Phase 6（`PR-6B`，已清零：`BlablaCalendarAdapter` 由组合根 `core/providers/announcement.py` 以 `adapters=` 注入，`source_mode` 已删除；已转为硬门禁） |
 
 某条边对应的导入被移除后，门禁会报 `cross_layer_allowlist_stale`，要求在同一 PR 中删掉该条目，使其变成硬门禁。
+
+**现状（PR-6B 起）**：Phase 0 的 8 条基线边已全部清零，`CROSS_LAYER_BASELINE_ALLOWLIST` 为空集；`tests/test_full_refactor_architecture.py::test_cross_layer_baseline_only_shrinks` 断言其 `== frozenset()`，任何新增跨层边都直接以 `cross_layer_import` 失败。
 
 ## 初始红灯
 

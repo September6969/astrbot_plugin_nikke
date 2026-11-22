@@ -1,6 +1,6 @@
 # BlaBlaLink 日程主源
 
-生产组装显式使用 source_mode=blabla，仅连接官网公开 GetCalendarDetail 接口，POST空对象，使用zh-TW语言。不使用账号Cookie。直接构造服务时默认只含本地手动覆盖层，供测试与诊断使用。
+生产组合根 `core/providers/announcement.py` 以 `adapters=(BlablaCalendarAdapter(),)` 注入唯一日程源（PR-6B 起已删除 `source_mode`），仅连接官网公开 GetCalendarDetail 接口，POST空对象，使用zh-TW语言。不使用账号Cookie。直接构造服务且未注入 `adapters` 时只含本地手动覆盖层，供测试与诊断使用；注入后未装配来源的旧快照在载入时被过滤。
 
 按事件类型筛选招募、剧情活动、签到、联盟/个人突袭、协同、月度/活动通行证、转盘。接口当前未返回的其他类型不从旧源补齐，也不宣称完整覆盖游戏内活动。竞技场、模拟室不展示。相同签到横幅和周期在不同栏目合并；不同招募身份、不同剧情名称保留。所有时间来自服务端秒级时间戳，不猜测Story1/Story2/Hard开放时间。
 

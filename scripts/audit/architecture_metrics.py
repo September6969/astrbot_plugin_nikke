@@ -77,13 +77,10 @@ CROSS_LAYER_FORBIDDEN_TARGETS: dict[str, frozenset[str]] = {
 # Phase 2 已清零 application -> integrations.blablalink.client（已转为硬门禁），
 # Phase 4C 已清零 integrations.spine -> scripts.spine（预检查迁入
 # integrations.spine.bundle_inspection，已转为硬门禁），
-# Phase 6B 清零 features.calendar -> integrations.calendar。
+# Phase 6B 已清零 features.calendar -> integrations.calendar（BlaBlaLink 日程源由
+# core/providers/announcement.py 注入，已转为硬门禁）。基线现已为空，任何跨层边都直接违规。
 # 条目对应的导入一旦消失，门禁会报 cross_layer_allowlist_stale，提醒同步收紧。
-CROSS_LAYER_BASELINE_ALLOWLIST: frozenset[tuple[str, str]] = frozenset(
-    {
-        ("features.calendar.schedule_service", "integrations.calendar.blabla_source"),
-    }
-)
+CROSS_LAYER_BASELINE_ALLOWLIST: frozenset[tuple[str, str]] = frozenset()
 
 
 def _module_name(root: Path, path: Path) -> str:
