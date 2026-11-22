@@ -36,7 +36,7 @@ CORE_CURRENCIES: list[tuple[int, str, str]] = [
     (3000, "芯尘", "core_dust"),
     (5100, "高级招募券", "advanced_ticket"),
     (5200, "普通招募券", "recruit_ticket"),
-    (11000, "躯体标签", "body_label"),
+    (11000, "白银积分券", "silver_mileage_ticket"),
     (12000, "联盟芯片", "union_chip"),
 ]
 

@@ -60,7 +60,7 @@ class CurrencyRegistry:
         ),
         5100: CurrencyDefinition(5100, "普通招募券", "recruit_voucher", _USER_REFERENCE, "330449dd8a7241af8195b200d7526144d6d8b6ffc83f81561e7eb542ce344f91"),
         5200: CurrencyDefinition(5200, "高级招募券", "advanced_recruit_voucher", _USER_REFERENCE, "3f67077cd4d65afbf489398e88f865092781d84ff1ebba2559837aab694198ba"),
-        11000: CurrencyDefinition(11000, "躯体标签", "body_label", _USER_REFERENCE, "e3c8e83a99501de71209309b4784db98b52c2636dbb3ced47987cfbfabd431dc"),
+        11000: CurrencyDefinition(11000, "白银积分券", "silver_mileage_ticket", _USER_REFERENCE, "e3c8e83a99501de71209309b4784db98b52c2636dbb3ced47987cfbfabd431dc"),
         12000: CurrencyDefinition(12000, "黄金积分券", "gold_mileage_ticket", _USER_REFERENCE, "2a91fdd916cb801d020fa506ddf77644858bedd7cd1f89ddb67a765decf395ff"),
     }
     _INTEGER = re.compile(r"^[0-9]+$", re.ASCII)

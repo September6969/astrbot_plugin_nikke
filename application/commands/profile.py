@@ -52,7 +52,7 @@ def format_profile(data: ProfileDashboardData) -> str:
     currencies = data.currencies
     for definition in CurrencyRegistry.DEFINITIONS.values():
         matches = [item for item in currencies or [] if item.type == definition.type]
-        label = "白银积分券" if definition.display_name == "躯体标签" else definition.display_name
+        label = definition.display_name
         if len(matches) > 1:
             amount = "多条记录"
         elif matches:

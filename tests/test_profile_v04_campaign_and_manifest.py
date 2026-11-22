@@ -78,7 +78,7 @@ class ProfileV04ContractTests(unittest.TestCase):
         self.assertEqual([item.compact_value for item in data.currencies[:4]], ["26M", "130M", "10.5K", "999"])
         self.assertEqual(
             [item.display_name for item in data.currencies],
-            ["珠宝", "战斗数据辑", "信用点", "芯尘", "普通招募券", "高级招募券", "躯体标签", "黄金积分券"],
+            ["珠宝", "战斗数据辑", "信用点", "芯尘", "普通招募券", "高级招募券", "白银积分券", "黄金积分券"],
         )
         self.assertEqual([item.count for item in data.memorial_summary], [2, 3, 15, 7])
         self.assertEqual([item.display_name for item in data.memorial_summary], ["手机", "通话记录", "数据资料", "BGM"])
