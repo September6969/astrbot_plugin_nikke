@@ -191,6 +191,8 @@ jobs:
           node-version: "22"
       - name: Run extension contract tests
         run: node --test tests/extension.test.cjs
+      - name: Run Spine helper module tests
+        run: node --test tests/*.test.mjs
 
   test:
     name: Test (Python ${{ matrix.python-version }}, AstrBot ${{ matrix.astrbot-specifier }})

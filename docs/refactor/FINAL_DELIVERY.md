@@ -64,17 +64,17 @@ PR-6C 工作树（基于 `fe51741`）上 `python scripts/audit/architecture_metr
 
 本地（Python 3.13、Node 22、AstrBot 4.24 测试桩）：
 
-- `python -m pytest`：`2214 passed, 8 skipped, 662 subtests passed`（按 Phase 0 约定排除依赖本机浏览器字体的 `test_character_pixel_calibration.py::test_browser_rendered_fonts_and_glyph_metrics` 与 `test_spine_batch_review.py::test_review_and_white_card_tools_run_as_repository_scripts`）。
+- `python -m pytest`：`2218 passed, 8 skipped, 662 subtests passed`（按 Phase 0 约定排除依赖本机浏览器字体的 `test_character_pixel_calibration.py::test_browser_rendered_fonts_and_glyph_metrics` 与 `test_spine_batch_review.py::test_review_and_white_card_tools_run_as_repository_scripts`）。
 - `mypy`（2.4.1，`mypy.ini`）：38 个源文件无错误。
 - `python scripts/audit/architecture_metrics.py --check`：退出码 `0`。
-- `node --test tests/extension.test.cjs`：6 passed；`node --test tests/*.test.mjs`：6 passed（CI 目前只运行前者）。
+- `node --test tests/extension.test.cjs`：6 passed；`node --test tests/*.test.mjs`：6 passed（PR-6C 起 CI 两者都运行）。
 - `python scripts/audit/audit_assets.py`：退出码 `0`，`asset_audit.json` 除 `generated_at` 外与改用合并解析器前逐字段一致。
 
 ### 外部门槛（V2）
 
 | Gate | 当前状态 | 未完成边界 |
 |---|---|---|
-| CI | `NOT_RUN`（本地） | 分支链尚未推送；以合并目标提交的远端 CI 为准 |
+| CI | `NOT_RUN`（远端） | 分支链已推送至 fork；以 upstream PR 与合并目标提交的远端 CI 为准 |
 | 真实验收 | `NOT_RUN` | REFACTOR_PLAN_V2 §5.1 第 8 项：真实 QQ/NapCat 下 `/妮姬`、`#妮姬`、绑定、日常任务确认恢复、竞技场解队/三队、手机 QQ 图片画质等需所有者授权验收 |
 | 部署 | `NOT_RUN` | 未部署；PR-6A 资产变更需在全新部署目录冷启动验收 |
 | 稳定观察 | `NOT_STARTED` | 部署后开始 |
