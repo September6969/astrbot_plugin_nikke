@@ -7,8 +7,11 @@ ANCHOR_KEY = "nikke_portrait_anchor"
 ANCHOR_SCHEMA = 3
 
 
-def read_anchor(image):
-    """拒绝损坏、陈旧或属于其他像素的锚点。"""
+def read_anchor(image, *, pixel_sha256: str | None = None):
+    """拒绝损坏、陈旧或属于其他像素的锚点。
+
+    调用方已计算同一图像的 RGBA SHA-256 时可传入，避免重复哈希整张大图。
+    """
     try:
         raw = getattr(image, "info", {}).get(ANCHOR_KEY)
         data = json.loads(raw) if isinstance(raw, str) else None
@@ -18,7 +21,8 @@ def read_anchor(image):
             return None
         if data.get("image_size") != list(image.size):
             return None
-        if data.get("pixel_sha256") != hashlib.sha256(image.convert("RGBA").tobytes()).hexdigest():
+        digest = pixel_sha256 or hashlib.sha256(image.convert("RGBA").tobytes()).hexdigest()
+        if data.get("pixel_sha256") != digest:
             return None
         return data
     except (TypeError, ValueError):

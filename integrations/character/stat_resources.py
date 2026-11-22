@@ -65,6 +65,8 @@ class CharacterStatResourceLoader:
     """公共静态表加载器；缓存内容不携带账号 Cookie、token 或私有 header。"""
 
     CACHE_SCHEMA_VERSION = 1
+    # 磁盘缓存超过该时长后尝试刷新；刷新失败时继续使用旧缓存（静态表变动很少）。
+    CACHE_TTL_SECONDS = 7 * 24 * 3600
 
     def __init__(
         self,
@@ -100,6 +102,16 @@ class CharacterStatResourceLoader:
         if not path.resolve().is_relative_to(self.cache_dir.resolve()):
             raise StatCalculationError("静态资源缓存路径越界")
         return path
+
+    def _cache_expired(self, spec: StaticResourceSpec) -> bool:
+        fetched_at = str(self._metadata.get(spec.key, {}).get("fetched_at") or "")
+        try:
+            fetched = datetime.fromisoformat(fetched_at)
+        except ValueError:
+            return True
+        if fetched.tzinfo is None:
+            return True
+        return (datetime.now(timezone.utc) - fetched).total_seconds() > self.CACHE_TTL_SECONDS
 
     def _read_cache(self, spec: StaticResourceSpec) -> Any | None:
         path = self._cache_path(spec.cache_name)
@@ -138,14 +150,18 @@ class CharacterStatResourceLoader:
         self._metadata[spec.key] = envelope
 
     def _load_spec(self, spec: StaticResourceSpec, *, refresh: bool = False) -> Any:
+        stale = None
         with self._lock:
             if not refresh and spec.key in self._payloads:
                 return self._payloads[spec.key]
             if not refresh:
                 cached = self._read_cache(spec)
-                if cached is not None:
+                if cached is not None and not self._cache_expired(spec):
                     self._payloads[spec.key] = cached
                     return cached
+                stale = cached
+        # 联网请求不持有锁，避免慢请求阻塞其他线程读取已缓存的静态表。
+        try:
             raw = self.fetcher(spec.url)
             try:
                 payload = json.loads(raw.decode("utf-8"))
@@ -153,6 +169,13 @@ class CharacterStatResourceLoader:
                 raise StatCalculationError(f"{spec.key} 静态资源不是有效 JSON") from exc
             if not isinstance(payload, (Mapping, list)):
                 raise StatCalculationError(f"{spec.key} 静态资源结构无效")
+        except Exception:
+            if stale is None:
+                raise
+            with self._lock:
+                self._payloads[spec.key] = stale
+            return stale
+        with self._lock:
             self._write_cache(spec, payload, hashlib.sha256(raw).hexdigest())
             self._payloads[spec.key] = payload
             return payload
@@ -247,17 +270,18 @@ class CharacterStatResourceLoader:
         )
 
     def tables_mapping(self) -> dict[str, Any]:
+        tables = self.tables()  # 只构造一次快照，避免逐字段重复复制 cube/favorite 字典
         return {
             "status": "VERIFIED_STATIC_RESOURCES",
-            "source_ref": self.tables().source_ref,
-            "checked_at": self.tables().checked_at,
-            "level_stats": self.tables().level_stats,
-            "research_table": self.tables().research_table,
-            "attractive_table": self.tables().attractive_table,
-            "equipment_table": self.tables().equipment_table,
-            "cube_catalog": self.tables().cube_catalog,
-            "cube_records": self.tables().cube_records,
-            "favorite_records": self.tables().favorite_records,
+            "source_ref": tables.source_ref,
+            "checked_at": tables.checked_at,
+            "level_stats": tables.level_stats,
+            "research_table": tables.research_table,
+            "attractive_table": tables.attractive_table,
+            "equipment_table": tables.equipment_table,
+            "cube_catalog": tables.cube_catalog,
+            "cube_records": tables.cube_records,
+            "favorite_records": tables.favorite_records,
             "verified": True,
         }
 

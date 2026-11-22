@@ -140,8 +140,9 @@ class CharacterStatCalculator:
 
     @classmethod
     def _indexed(cls, record: Mapping[str, Any] | None, key: str, index: int, label: str) -> int:
+        # 已装备（tid 非空）却缺少静态记录时 fail-closed，不能按 0 计算后仍标记为已核验。
         if not record:
-            return 0
+            raise StatCalculationError(f"{label} 静态记录缺失")
         values = record.get(key)
         if not isinstance(values, list) or not 0 <= index < len(values):
             raise StatCalculationError(f"{label} {key}[{index}] 缺失")

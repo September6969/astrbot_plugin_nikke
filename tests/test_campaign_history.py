@@ -171,7 +171,8 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
 
     def test_status_0_valid_lineup_and_combat_sum(self):
         raw_list = [
-            {"tid": 101, "lv": 400, "combat": 120000, "slot": 1},
+            # 真实战斗 TID（6 位）：1018xx -> 尼恩：透视之眼（name_code 5170）
+            {"tid": 101801, "lv": 400, "combat": 120000, "slot": 1},
             {"tid": 102, "lv": 400, "combat": 115000, "slot": 2},
             {"tid": 103, "lv": 400, "combat": 118000, "slot": 3},
             {"tid": 104, "lv": 400, "combat": 95000, "slot": 4},
@@ -181,8 +182,12 @@ class CampaignHistoryBuilderTests(unittest.TestCase):
         record = self.builder.build(self.stage, payload, commander_name="测试指挥官")
         self.assertEqual(record.status, ClearLineupStatus.AVAILABLE)
         self.assertEqual(len(record.members), 5)
-        self.assertEqual(record.members[0].name_cn, "爱丽丝")
-        self.assertEqual(record.members[0].resource_id, "c101")
+        # REFACTOR_PLAN_V2 AUD-019：战斗 TID 与目录 name_code 是不同编号空间，只经主数据解析
+        self.assertEqual(record.members[0].name_cn, "尼恩：透视之眼")
+        self.assertEqual(record.members[0].resource_id, "18")
+        self.assertEqual(record.members[0].name_code, 5170)
+        # 目录中碰巧 name_code=102 的条目不得被当作 tid=102 的角色
+        self.assertNotEqual(record.members[1].name_cn, "红莲")
         # 严格检查总战力等于各成员单体战力之和
         expected_combat = 120000 + 115000 + 118000 + 95000 + 102000
         self.assertEqual(record.total_combat, expected_combat)

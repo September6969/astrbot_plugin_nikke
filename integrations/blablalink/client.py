@@ -23,7 +23,7 @@ from ...core.lifecycle.coordinator import RuntimeCoordinator
 from ...features.account.errors import CredentialExpiredError
 from ...features.daily.errors import UnknownAfterActionError
 from .errors import BlaBlaError, CookieExpired
-from .http_transport import IsolatedAsyncClient, IsolatedCookies
+from .http_transport import IsolatedAsyncClient
 
 T = TypeVar("T")
 
@@ -88,6 +88,17 @@ class CdkRedemptionResult:
     is_unknown: bool = False
 
 
+def _require_area_id(value: Any) -> int:
+    """校验区服 ID；空值或非数字时给出可读错误，而不是让 int("") 抛出 ValueError 崩溃。"""
+    text = str(value if value is not None else "").strip()
+    if not text.isascii() or not text.isdigit():
+        raise ValueError("账号缺少有效区服信息，请重新绑定")
+    return int(text)
+
+
+MAX_CONCURRENT_REQUESTS = 6
+
+
 class BlaBlaClient:
     def __init__(
         self,
@@ -119,6 +130,8 @@ class BlaBlaClient:
         self._query_cache: dict[tuple[Any, ...], tuple[float, Any]] = {}
         self._query_tasks: dict[tuple[Any, ...], asyncio.Task[Any]] = {}
         self._query_waiters: dict[tuple[Any, ...], int] = {}
+        # 限制同一客户端对上游的并发请求数，避免练度等批量查询瞬时打满。
+        self._request_slots = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
 
     @property
     def closing(self) -> bool:
@@ -134,16 +147,12 @@ class BlaBlaClient:
         if self._client is None:
             async with self._client_lock:
                 if self._client is None and not (self._closing or self._closed):
-                    client = httpx.AsyncClient(
+                    # IsolatedAsyncClient 永不保存响应 Set-Cookie，保证请求级 Cookie 隔离。
+                    self._client = IsolatedAsyncClient(
                         timeout=self.timeout,
                         follow_redirects=False,
                         transport=self._transport,
                     )
-                    try:
-                        client._cookies = IsolatedCookies()
-                    except Exception:
-                        pass
-                    self._client = client
         if self._closing or self._closed or self._client is None:
             raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
         return self._client
@@ -154,16 +163,11 @@ class BlaBlaClient:
         if self._public_client is None:
             async with self._client_lock:
                 if self._public_client is None and not (self._closing or self._closed):
-                    client = httpx.AsyncClient(
+                    self._public_client = IsolatedAsyncClient(
                         timeout=self.timeout,
                         follow_redirects=True,
                         transport=self._transport,
                     )
-                    try:
-                        client._cookies = IsolatedCookies()
-                    except Exception:
-                        pass
-                    self._public_client = client
         if self._closing or self._closed or self._public_client is None:
             raise RuntimeError("BlaBlaClient 已关闭，禁止发起新请求")
         return self._public_client
@@ -205,9 +209,14 @@ class BlaBlaClient:
         await self.aclose()
 
     @staticmethod
-    def _account_identity_key(account: Mapping[str, Any]) -> tuple[str, str, str, str, str] | None:
-        """从账号字典提取经验证的稳定身份维度，缺失稳定标识时返回 None（不参与缓存）。"""
-        if account.get("cookie_valid") in (False, 0):
+    def _account_identity_key(
+        account: Mapping[str, Any], *, require_valid: bool = True
+    ) -> tuple[str, str, str, str, str] | None:
+        """从账号字典提取经验证的稳定身份维度，缺失稳定标识时返回 None（不参与缓存）。
+
+        require_valid=False 仅用于失效清理：已标记失效的账号也必须能清掉旧缓存。
+        """
+        if require_valid and account.get("cookie_valid") in (False, 0):
             return None
         openid = str(account.get("game_openid") or "").strip()
         uid = str(account.get("game_uid") or "").strip()
@@ -223,18 +232,19 @@ class BlaBlaClient:
         return (qq_id, openid, uid, area_id, binding_rev)
 
     def invalidate_cache(self, qq_id: str | None = None) -> None:
-        """使指定账号或全部账号的短时查询缓存失效。"""
-        if qq_id is None:
-            self._query_cache.clear()
-            return
-        target = str(qq_id)
-        for key in list(self._query_cache):
-            if key[0][0] == target:
-                self._query_cache.pop(key, None)
+        """使指定账号或全部账号的短时查询缓存失效，并取消其在途查询。"""
+        target = None if qq_id is None else str(qq_id)
+        for key in set(self._query_cache) | set(self._query_tasks):
+            if target is not None and key[0][0] != target:
+                continue
+            self._query_cache.pop(key, None)
+            task = self._query_tasks.get(key)
+            if task is not None and not task.done():
+                task.cancel()
 
     def invalidate_account_cache(self, account: Mapping[str, Any]) -> None:
         """续期后清除此社区身份所有绑定的短缓存，并取消相关未决查询。"""
-        identity = self._account_identity_key(account)
+        identity = self._account_identity_key(account, require_valid=False)
         if identity is None or not identity[1]:
             return
         for key in set(self._query_cache) | set(self._query_tasks):
@@ -260,6 +270,16 @@ class BlaBlaClient:
         if latest_ident != identity:
             self.invalidate_cache(identity[0])
             raise ValueError("账号绑定状态已变更，请重新查询")
+
+    def _fresh_cached(self, account: Mapping[str, Any], query_type: str, args_key: Any) -> Any:
+        """只读取未过期的已完成缓存（深拷贝）；不存在时返回 None，不发起请求。"""
+        identity = self._account_identity_key(account)
+        if identity is None:
+            return None
+        cached = self._query_cache.get((identity, query_type, args_key))
+        if cached is None or cached[0] <= time.monotonic():
+            return None
+        return deepcopy(cached[1])
 
     async def _execute_cached(
         self,
@@ -356,7 +376,8 @@ class BlaBlaClient:
         }
         client = await self._get_client()
         try:
-            response = await client.post(API_BASE + path, json=payload, headers=headers)
+            async with self._request_slots:
+                response = await client.post(API_BASE + path, json=payload, headers=headers)
             response.raise_for_status()
             data = response.json()
         except httpx.TimeoutException as exc:
@@ -470,7 +491,7 @@ class BlaBlaClient:
             basic = await self._post(
                 PROFILE,
                 cookie,
-                {"nikke_area_id": int(area_id), "intl_open_id": game_openid},
+                {"nikke_area_id": _require_area_id(area_id), "intl_open_id": game_openid},
             )
             nickname = str(basic.get("data", {}).get("basic_info", {}).get("nickname", "")) or role_name
         except BlaBlaError:
@@ -482,12 +503,12 @@ class BlaBlaClient:
         if not area_id:
             validated = await self.validate_cookie(account["cookie"])
             area_id = validated.area_id
-        payload = {"nikke_area_id": int(area_id)}
+        payload = {"nikke_area_id": _require_area_id(area_id)}
         if account.get("game_openid"):
             payload["intl_open_id"] = account["game_openid"]
         basic, outpost = await asyncio.gather(
             self._post(PROFILE, account["cookie"], payload),
-            self._post(OUTPOST, account["cookie"], {"nikke_area_id": int(area_id)}),
+            self._post(OUTPOST, account["cookie"], {"nikke_area_id": _require_area_id(area_id)}),
         )
         return {
             "basic": basic.get("data", {}).get("basic_info", {}),
@@ -499,17 +520,17 @@ class BlaBlaClient:
         if not area_id:
             validated = await self.validate_cookie(account["cookie"])
             area_id = validated.area_id
-        payload = {"nikke_area_id": int(area_id)}
+        payload = {"nikke_area_id": _require_area_id(area_id)}
         if account.get("game_openid"):
             payload["intl_open_id"] = account["game_openid"]
         roster_payload = {
             "intl_open_id": account.get("game_openid", ""),
-            "nikke_area_id": int(area_id),
+            "nikke_area_id": _require_area_id(area_id),
         }
-        daily_payload = {"nikke_area_id": int(area_id)}
+        daily_payload = {"nikke_area_id": _require_area_id(area_id)}
         basic_resp, outpost_resp, roster_resp, daily_resp = await asyncio.gather(
             self._post(PROFILE, account["cookie"], payload),
-            self._post(OUTPOST, account["cookie"], {"nikke_area_id": int(area_id)}),
+            self._post(OUTPOST, account["cookie"], {"nikke_area_id": _require_area_id(area_id)}),
             self._post(CHARACTERS, account["cookie"], roster_payload),
             self._post(DAILY_CONTENTS_PROGRESS, account["cookie"], daily_payload),
             return_exceptions=True,
@@ -591,7 +612,7 @@ class BlaBlaClient:
         response = await self._post(
             DAILY_CONTENTS_PROGRESS,
             account["cookie"],
-            {"nikke_area_id": int(area_id)},
+            {"nikke_area_id": _require_area_id(area_id)},
         )
         data = response.get("data") if isinstance(response, dict) else None
         progress = data.get("daily_progress") if isinstance(data, dict) else None
@@ -638,7 +659,7 @@ class BlaBlaClient:
 
         raid_payload = {
             "guild_id": str(guild_id),
-            "nikke_area_id": int(area_id),
+            "nikke_area_id": _require_area_id(area_id),
             "intl_open_id": openid,
         }
         return {"guild_id": guild_id, "guild_name": guild_name, "request": raid_payload}
@@ -689,7 +710,7 @@ class BlaBlaClient:
             "GetUnionRaidLevelDataOfGuildSeason" if levels else "GetUnionRaidDataOfGuildSeason"
         )
         response = await self._post(endpoint, account["cookie"], {
-            "area_id": int(account["area_id"]), "guild_id": str(guild_id), "season_id": str(season_id),
+            "area_id": _require_area_id(account.get("area_id")), "guild_id": str(guild_id), "season_id": str(season_id),
         })
         data = response.get("data")
         if not isinstance(data, dict):
@@ -701,7 +722,7 @@ class BlaBlaClient:
 
         async def _fetch():
             nonlocal details_complete
-            area_id = int(account["area_id"])
+            area_id = _require_area_id(account.get("area_id"))
             openid = account.get("game_openid", "")
             roster_resp = await self._post(
                 CHARACTERS,
@@ -802,7 +823,10 @@ class BlaBlaClient:
         code = str(name_code).strip()
 
         async def _fetch():
-            roster = await self.get_roster(account, include_details=False)
+            # 优先复用同一账号刚取得的完整名单缓存，避免每个详情都再拉一次名单。
+            roster = self._fresh_cached(account, "roster", True)
+            if not isinstance(roster, list):
+                roster = await self.get_roster(account, include_details=False)
             roster_item = next(
                 (item for item in roster if str(item.get("name_code", "")) == code),
                 None,
@@ -814,7 +838,7 @@ class BlaBlaClient:
                 account["cookie"],
                 {
                     "intl_open_id": account.get("game_openid", ""),
-                    "nikke_area_id": int(account["area_id"]),
+                    "nikke_area_id": _require_area_id(account.get("area_id")),
                     "name_codes": [code],
                 },
             )
@@ -1130,7 +1154,7 @@ class BlaBlaClient:
                 "POST",
                 MAIN_QUEST_CLEAR_LINEUP,
                 account,
-                payload={"stage_id": int(stage_id), "area_id": int(area_id)},
+                payload={"stage_id": int(stage_id), "area_id": _require_area_id(area_id)},
             )
             return res
         except BlaBlaError as exc:

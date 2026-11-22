@@ -4,6 +4,24 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+def utc_timestamp(text: str) -> float:
+    """官方赛季时间按 UTC 解析；无时区后缀时不得按服务器本地时区解释。"""
+    parsed = datetime.fromisoformat(text)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
+
+
+def previous_season_with_stats(previous: Any, attacks: Any) -> Any:
+    """用上一赛季出刀记录回填统计；记录格式异常时保持原摘要不变。"""
+    from dataclasses import replace
+    if previous is None or not isinstance(attacks, list):
+        return previous
+    rows = [item for item in attacks if isinstance(item, dict)]
+    total_damage = sum(int(item.get("total_damage", 0) or item.get("damage", 0) or 0) for item in rows)
+    return replace(previous, total_attacks=len(rows), total_damage=total_damage)
+
+
 from .models import (
     BossStatus,
     PreviousSeasonSummary,
@@ -83,14 +101,14 @@ class UnionRaidBuilder:
             end_ts = None
             if end_date_str:
                 try:
-                    end_ts = datetime.fromisoformat(end_date_str).timestamp()
+                    end_ts = utc_timestamp(end_date_str)
                 except ValueError:
                     pass
 
             calc_ts = None
             if calc_date_str:
                 try:
-                    calc_ts = datetime.fromisoformat(calc_date_str).timestamp()
+                    calc_ts = utc_timestamp(calc_date_str)
                 except ValueError:
                     pass
 

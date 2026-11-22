@@ -65,8 +65,16 @@ class CurrencyRegistry:
     }
     _INTEGER = re.compile(r"^[0-9]+$", re.ASCII)
 
+    MAX_ERRORS = 20
+
     def __init__(self) -> None:
         self.errors: list[str] = []
+
+    def _error(self, message: str) -> None:
+        """registry 为长生命周期单例：只保留最近若干条诊断，避免无界增长。"""
+        self.errors.append(message)
+        if len(self.errors) > self.MAX_ERRORS:
+            del self.errors[: len(self.errors) - self.MAX_ERRORS]
 
     @classmethod
     def _integer(cls, value: Any) -> int | None:
@@ -112,12 +120,12 @@ class CurrencyRegistry:
 
     def parse_item(self, value: Any) -> CurrencyItem | None:
         if not isinstance(value, dict):
-            self.errors.append("资源条目不是对象")
+            self._error("资源条目不是对象")
             return None
         type_value = self._integer(value.get("type"))
         amount = self._integer(value.get("value"))
         if type_value is None or amount is None:
-            self.errors.append("资源条目的 type/value 不是非负整数")
+            self._error("资源条目的 type/value 不是非负整数")
             return None
         definition = self.DEFINITIONS.get(type_value)
         if definition is None:
@@ -135,7 +143,7 @@ class CurrencyRegistry:
         if values is None:
             return None, False
         if not isinstance(values, list):
-            self.errors.append("currencies 不是数组")
+            self._error("currencies 不是数组")
             return None, True
         result: list[CurrencyItem] = []
         partial = False

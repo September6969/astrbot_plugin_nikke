@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping, Protocol
 
 from ..account.errors import CredentialExpiredError
+from .builder import previous_season_with_stats
 from .query import RaidQueryMixin
 from .models import RaidState, UnionRaidOverviewData
 from .participants import RaidRankingData, build_member_ranking, build_ranking
@@ -132,17 +132,9 @@ class RaidApplication(RaidQueryMixin):
                     season_id=str(previous.season_id),
                     levels=False,
                 )
-                attacks = historical.get("participate_data")
-                if isinstance(attacks, list):
-                    total_damage = sum(
-                        int(item.get("total_damage", 0) or item.get("damage", 0) or 0)
-                        for item in attacks
-                    )
-                    data.previous_season = replace(
-                        previous,
-                        total_attacks=len(attacks),
-                        total_damage=total_damage,
-                    )
+                data.previous_season = previous_season_with_stats(
+                    previous, historical.get("participate_data")
+                )
             except CredentialExpiredError:
                 raise
             except Exception as exc:

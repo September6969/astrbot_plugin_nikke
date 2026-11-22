@@ -63,6 +63,10 @@ class CharacterCommandHandler:
         return await self._roster(context)
 
     async def _roster(self, context: CommandContext) -> CommandResult:
+        # 练度总览需读取名单与 Top 20 词条详情，耗时较长时先给出延迟提示。
+        feedback = None
+        if self._start_feedback is not None:
+            feedback = self._start_feedback(context, "正在读取练度与词条详情，请稍候...")
         try:
             data = await self._application.roster(
                 context.actor_id, self._directory()
@@ -79,6 +83,9 @@ class CharacterCommandHandler:
             return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception as exc:
             return self._text(f"练度查询失败：{user_error_message(exc)}")
+        finally:
+            if feedback is not None:
+                await feedback.cancel()
 
     async def _character(self, context: CommandContext) -> CommandResult:
         query = context.parameters.get("name", "").strip()
@@ -243,6 +250,20 @@ class CharacterCommandHandler:
                 return f"{item:,}"
             return str(item)
 
+        def amount(item, unit):
+            # 与图片卡同一口径：percent 以小数存储，显示为百分比；不把单位名直接拼进文本。
+            if isinstance(item, (int, float)) and not isinstance(item, bool) and unit == "percent":
+                return f"{item * 100:.2f}%"
+            if isinstance(item, float):
+                return f"{item:g}"
+            return value(item) if unit in {"", "flat", "unknown", None} else f"{value(item)}{unit}"
+
+        def item_name(item, kind):
+            if item.display_name:
+                return item.display_name
+            tid = getattr(item, "tid", None)
+            return f"{kind} {tid}" if tid not in (None, "", 0, "0") else f"未识别的{kind}"
+
         name = data.name_cn or data.name_en or f"角色 {data.name_code}"
         lines = [
             f"妮姬练度 · {name}",
@@ -256,21 +277,21 @@ class CharacterCommandHandler:
             state = "已装备" if equipment.equipped else "未装备"
             level = f" Lv.{value(equipment.level)}" if equipment.level is not None else ""
             options = "、".join(
-                f"{option.display_name} {value(option.value)}{option.unit}"
+                f"{option.display_name} {amount(option.value, option.unit)}"
                 for option in equipment.options
             )
             lines.append(f"装备 {slot}：{state}{level}" + (f" · {options}" if options else ""))
         if data.favorite_item is not None:
             item = data.favorite_item
             lines.append(
-                f"收藏品：{item.display_name or '未知'} · 等级 {value(item.level)}"
+                f"收藏品：{item_name(item, '收藏品')} · 等级 {value(item.level)}"
             )
         if data.cube is not None:
-            lines.append(f"魔方：{data.cube.display_name or '未知'} · 等级 {value(data.cube.level)}")
+            lines.append(f"魔方：{item_name(data.cube, '魔方')} · 等级 {value(data.cube.level)}")
         if data.option_totals:
             lines.append("词条汇总：")
             lines.extend(
-                f"{item.display_name}：{value(item.value)}{item.unit}"
+                f"{item.display_name}：{amount(item.value, item.unit)}"
                 for item in data.option_totals
             )
         lines.extend(

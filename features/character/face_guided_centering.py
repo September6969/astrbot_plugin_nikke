@@ -25,6 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from array import array
 from typing import Protocol, Sequence
 
 
@@ -34,6 +35,20 @@ class AlphaPixels(Protocol):
     def __getitem__(self, point: tuple[int, int]) -> int: ...
 
 
+class ProjectionImage(Protocol):
+    """C 级投影计算使用的单通道浮点图。"""
+
+    def resize(self, size: tuple[int, int], resample: int) -> ProjectionImage: ...
+
+    def tobytes(self) -> bytes: ...
+
+
+class ThresholdMask(Protocol):
+    """阈值查表后的 0/1 掩码。"""
+
+    def convert(self, mode: str) -> ProjectionImage: ...
+
+
 class AlphaChannel(Protocol):
     """RGBA 图像的透明度通道。"""
 
@@ -41,6 +56,8 @@ class AlphaChannel(Protocol):
     def size(self) -> tuple[int, int]: ...
 
     def load(self) -> AlphaPixels: ...
+
+    def point(self, lut: Sequence[int]) -> ThresholdMask: ...
 
 
 class RasterImage(Protocol):
@@ -349,23 +366,26 @@ def center_after_face_anchor(
     )
 
 
+_BOX_RESAMPLE = 4  # PIL.Image.Resampling.BOX；features 层不直接导入 PIL
+
+
 def _alpha_histograms(portrait: RasterImage, threshold: int):
-    """生成阈值化透明度在横纵轴上的投影。"""
+    """生成阈值化透明度在横纵轴上的投影。
+
+    用 Pillow C 级运算代替逐像素 Python 双重循环（2k×2k 图约 4M 次迭代）：
+    阈值查表得到 0/1 掩码，转 F 模式后用 BOX 缩放到单行/单列得到精确均值，
+    乘以边长并取整即为与原逐像素计数完全一致的投影。
+    """
     alpha = portrait.convert("RGBA").getchannel("A")
     width, height = alpha.size
     pixels = alpha.load()
-    x_hist = [0] * width
-    y_hist = [0] * height
-    alpha_pixels = 0
-    for y in range(height):
-        row_count = 0
-        for x in range(width):
-            if pixels[x, y] >= threshold:
-                x_hist[x] += 1
-                row_count += 1
-        y_hist[y] = row_count
-        alpha_pixels += row_count
-    return pixels, width, height, x_hist, y_hist, alpha_pixels
+    mask = alpha.point([0] * threshold + [1] * (256 - threshold)).convert("F")
+    # F 模式像素为本机字节序 float32；array 解码兼容 Pillow 11–13（getdata 已弃用）。
+    rows = array("f", mask.resize((1, height), _BOX_RESAMPLE).tobytes())
+    columns = array("f", mask.resize((width, 1), _BOX_RESAMPLE).tobytes())
+    y_hist = [int(round(value * width)) for value in rows]
+    x_hist = [int(round(value * height)) for value in columns]
+    return pixels, width, height, x_hist, y_hist, sum(y_hist)
 
 
 def _robust_alpha_bounds_from_histograms(
