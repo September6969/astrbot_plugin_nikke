@@ -198,6 +198,18 @@ class AssetsRefactorIntegrityTests(unittest.TestCase):
             self.assertEqual(summary["currency_icons_local_hit"], summary["currency_icons_total"])
             self.assertTrue(audit_gate_passed(report))
 
+            # 缓存中放入损坏的覆盖文件：运行时会跳过它回退到内置图标，门禁也必须同样回退。
+            cube_id = next(p.stem for p in (self.assets_dir / "icons" / "cube").iterdir() if p.suffix == ".png")
+            bad_cube = base / "data" / "nikke" / "cache" / "icons" / "cube" / f"{cube_id}.png"
+            bad_cube.parent.mkdir(parents=True)
+            bad_cube.write_bytes(b"not an image")
+            bad_currency = base / "data" / "nikke" / "cache" / "icons" / "currency" / "gem.webp"
+            bad_currency.parent.mkdir(parents=True)
+            bad_currency.write_bytes(b"hash mismatch")
+            with contextlib.redirect_stdout(io.StringIO()):
+                overridden = run_asset_audit(base)
+            self.assertTrue(audit_gate_passed(overridden), overridden["summary"])
+
             # 仅保留数据与映射、去掉内置图标后，门禁必须失败。
             broken = base / "broken"
             (broken / "assets").mkdir(parents=True)

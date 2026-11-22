@@ -37,13 +37,14 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(
 logger = logging.getLogger("audit_assets")
 
 
-def _bundled_icon(kind: str, key: str, roots: tuple[Path, ...]) -> Path | None:
-    """与运行时一致：缓存根优先，规范 icons/<kind>/ 优先于旧 <kind>/ 布局。"""
+def _bundled_icon(kind: str, key: str, roots: tuple[Path, ...], entry: dict | None = None) -> Path | None:
+    """与运行时一致：缓存根优先，规范 icons/<kind>/ 优先于旧 <kind>/ 布局；
+    损坏或哈希不符的候选会被跳过并继续查找（运行时同样回退到下一个候选）。"""
     for root in roots:
         for directory in icon_dirs(kind):
             for suffix in (".png", ".webp"):
                 path = root / directory / f"{key}{suffix}"
-                if path.is_file():
+                if path.is_file() and _valid_image(path, entry):
                     return path
     return None
 
@@ -192,8 +193,9 @@ def run_asset_audit(base_dir: Path | str) -> dict:
     local_hit_currency = 0
     missing_currency = []
     for definition in currency_definitions:
-        path = _bundled_icon("currency", str(definition.icon_key), icon_roots)
-        if _valid_image(path, {"sha256": definition.source_sha256}):
+        entry = {"sha256": definition.source_sha256}
+        path = _bundled_icon("currency", str(definition.icon_key), icon_roots, entry)
+        if _valid_image(path, entry):
             local_hit_currency += 1
         else:
             missing_currency.append({"type": definition.type, "icon_key": definition.icon_key})
