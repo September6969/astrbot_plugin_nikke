@@ -41,7 +41,7 @@ class-level `__getattr__` 默认视为过宽动态转发并失败。唯一保留
 | 既有边 | 计划清零阶段 |
 | --- | --- |
 | `application.commands.{campaign,cdk,character,daily,profile,raid}` → `integrations.blablalink.client` | Phase 2（`PR-2`） |
-| `integrations.spine.prerenderer` → `scripts.spine.inspect_spine_bundle` | Phase 4（`PR-4C`） |
+| `integrations.spine.prerenderer` → `scripts.spine.inspect_spine_bundle` | Phase 4（`PR-4C`，已清零：预检查迁入 `integrations.spine.bundle_inspection`，`scripts/spine/inspect_spine_bundle.py` 仅保留 CLI 薄入口；已转为硬门禁） |
 | `features.calendar.schedule_service` → `integrations.calendar.blabla_source` | Phase 6（`PR-6B`） |
 
 某条边对应的导入被移除后，门禁会报 `cross_layer_allowlist_stale`，要求在同一 PR 中删掉该条目，使其变成硬门禁。

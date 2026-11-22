@@ -30,6 +30,7 @@ from urllib.parse import quote, unquote, urljoin, urlparse
 
 import httpx
 
+from . import bundle_inspection
 from .portrait_anchor import save_portrait
 from ...features.character.portrait_anchor import read_anchor
 
@@ -686,10 +687,8 @@ class SpinePreRenderer:
         expected_version: str | None = None,
     ) -> SpineEvidenceReport:
         """执行本地无运行时预检查，并明确返回尚未获得的证据层。"""
-        from ...scripts.spine.inspect_spine_bundle import inspect
-
         try:
-            result = inspect(Path(atlas), Path(skeleton), expected_version)
+            result = bundle_inspection.inspect(Path(atlas), Path(skeleton), expected_version)
         except (OSError, ValueError, TypeError, AttributeError) as exc:
             return SpineEvidenceReport(
                 status="INSPECTION_FAILED",
@@ -904,9 +903,7 @@ class SpinePreRenderer:
             bundle = bundle_paths if isinstance(bundle_paths, SpineBundle) else SpineBundle.from_mapping(bundle_paths)
             if not all(path.is_file() for path in bundle.all_files()):
                 raise SpineRenderError("Spine bundle 文件不完整")
-            from ...scripts.spine.inspect_spine_bundle import inspect
-
-            inspection = inspect(bundle.atlas, bundle.skeleton, expected_version)
+            inspection = bundle_inspection.inspect(bundle.atlas, bundle.skeleton, expected_version)
             # 二进制 skeleton 的版本无法由无 runtime 预检查确认；未知版本不能猜测
             # 4.1/4.2，只有明确得到 VERSION_MATCH 才允许调用实际 runtime。
             if inspection.get("status") != "VERSION_MATCH":

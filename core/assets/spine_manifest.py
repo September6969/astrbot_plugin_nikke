@@ -16,6 +16,10 @@ from .image_codec import AssetImageCodec
 
 logger = logging.getLogger("nikke.asset_manager")
 
+# render ID：默认/独立皮肤 cXXX 或 cXXX_YY，shared skin 追加 @skin。声明集合与条目
+# 集合必须使用同一模式，否则 @skin 条目永远不被视为已声明（AUD-020）。
+RENDER_ID_PATTERN = re.compile(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?")
+
 
 class SpineManifestStore:
     def __init__(
@@ -70,12 +74,12 @@ class SpineManifestStore:
             declared_ids = {
                 str(key).strip().lower()
                 for key in entries
-                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?", str(key).strip().lower())
+                if RENDER_ID_PATTERN.fullmatch(str(key).strip().lower())
             }
             valid_entries = {
                 str(key).strip().lower(): value
                 for key, value in entries.items()
-                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?", str(key).strip().lower())
+                if RENDER_ID_PATTERN.fullmatch(str(key).strip().lower())
                 and isinstance(value, dict)
             }
             if schema == 2 and "characters" in payload:

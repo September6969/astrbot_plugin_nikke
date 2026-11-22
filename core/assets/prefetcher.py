@@ -23,7 +23,10 @@ logger = logging.getLogger("nikke.asset_manager")
 
 
 class CharacterCardPrefetcher:
-    MAX_PREFETCH_TASKS = 16
+    # 单张角色卡提交 14 个素材任务（立绘、4 件装备、珍藏品、魔方、4 个属性图标与 3 个技能）。
+    # 旧上限 16 使两张卡并发时后到者 12 个任务直接降级；改为可容纳 3 张卡并发（AUD-021）。
+    TASKS_PER_CARD = 14
+    MAX_PREFETCH_TASKS = TASKS_PER_CARD * 3
 
     def __init__(
         self,

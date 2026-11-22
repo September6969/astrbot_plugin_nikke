@@ -113,20 +113,24 @@ def test_http_wait_uses_remaining_not_configured_maximum(tmp_path, phase):
 
 
 def test_official_adapter_deadline_kills_reaps_and_cleans_real_subprocess(tmp_path):
+    from astrbot_plugin_nikke.integrations.spine import worker_caller
+
     bundle = make_bundle(tmp_path)
     runtime = SpineWorkerRuntime(SpineWorkerConfig(tmp_path / "worker", tmp_path), version="4.1")
-    actual_run = subprocess.run
+    actual_run_worker = worker_caller._run_worker
     actual_popen = subprocess.Popen
     processes = []
-    def popen(*args, **kwargs):
-        process = actual_popen(*args, **kwargs)
+    # AUD-016：worker 不再经 subprocess.run，而是 _run_worker 直接 Popen 独立进程组；
+    # 在 Popen 边界把缺失的 worker 换成真实长睡眠进程，仍验证限时查杀、回收与清理。
+    def popen(command, *args, **kwargs):
+        process = actual_popen([sys.executable, "-c", "import time; time.sleep(10)"], *args, **kwargs)
         processes.append(process)
         return process
-    def run(command, **kwargs):
+    def run_worker(command, **kwargs):
         assert kwargs["timeout"] <= .04
-        return actual_run([sys.executable, "-c", "import time; time.sleep(10)"], **kwargs)
+        return actual_run_worker(command, **kwargs)
     start = time.monotonic()
-    with patch("subprocess.Popen", side_effect=popen), patch("subprocess.run", side_effect=run):
+    with patch("subprocess.Popen", side_effect=popen), patch.object(worker_caller, "_run_worker", side_effect=run_worker):
         with pytest.raises(SpineRenderError):
             runtime.render(bundle, animation="idle", deadline=time.monotonic() + .04)
     assert time.monotonic() - start < .5
@@ -143,21 +147,18 @@ def test_prefetch_fallback_eventually_releases_slot_and_worker_files(tmp_path):
     manager.environment.spine_budget_seconds = .06
     official = SpineWorkerRuntime(SpineWorkerConfig(tmp_path / "worker", tmp_path), version="4.1")
     manager.spine_renderer._runtimes["4.1"] = official
-    actual_run = subprocess.run
     actual_popen = subprocess.Popen
     processes = []
     entered = threading.Event()
-    def popen(*args, **kwargs):
-        process = actual_popen(*args, **kwargs)
+    # AUD-016：worker 直接 Popen 独立进程组；在 Popen 边界替换为真实长睡眠进程。
+    def popen(command, *args, **kwargs):
+        process = actual_popen([sys.executable, "-c", "import time; time.sleep(10)"], *args, **kwargs)
         processes.append(process)
         entered.set()
         return process
-    def run(command, **kwargs):
-        return actual_run([sys.executable, "-c", "import time; time.sleep(10)"], **kwargs)
     try:
         with ExitStack() as stack:
             stack.enter_context(patch("subprocess.Popen", side_effect=popen))
-            stack.enter_context(patch("subprocess.run", side_effect=run))
             for method in ("get_equipment_icon", "get_favorite_item_icon", "get_cube_icon", "get_element_icon", "get_corporation_icon", "get_weapon_icon", "get_burst_icon"):
                 stack.enter_context(patch.object(manager._icons, method, return_value=manager.fallback("slots")))
             assets = manager.resolve_character_assets(replace(build_card(), resource_id="20"), timeout=.06)

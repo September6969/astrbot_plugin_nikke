@@ -5,7 +5,8 @@
 1. connect/read 超时（默认 connect 3.0s, read 5.0s）；
 2. 基础并发限制（Semaphore=4）；
 3. 幂等 GET 请求单次重试（退避 0.5s）；
-4. Host 级别熔断器（连续 3 次失败熔断 10 分钟，支持 Half-Open 探活）；
+4. Host 级别熔断器（连续 3 次 5xx/超时/网络失败熔断 10 分钟，Half-Open 仅放行单个探针；
+   4xx 说明主机可达，不计入熔断）；
 5. 敏感参数脱敏与统一异常/状态码归类；
 6. 响应 JSON 安全解析与 Schema 异常封装。
 """
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import threading
 import time
 from typing import Any, Mapping
 from urllib.parse import urlparse
@@ -71,7 +73,11 @@ class FetchDecodeError(FetchError):
 
 
 class CircuitBreaker:
-    """单个 Host 的熔断状态追踪器。"""
+    """单个 Host 的熔断状态追踪器。
+
+    HALF_OPEN 期间只发放一个探针许可（AUD-020）：探针返回前其余请求继续视为熔断，
+    避免恢复窗口一到就把全部并发请求同时打向尚未恢复的主机。
+    """
 
     def __init__(
         self,
@@ -83,31 +89,52 @@ class CircuitBreaker:
         self.consecutive_failures: int = 0
         self.state: str = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
         self.tripped_at: float = 0.0
+        self._probe_in_flight = False
+        self._lock = threading.Lock()
+
+    @property
+    def probe_in_flight(self) -> bool:
+        return self._probe_in_flight
+
+    def try_acquire(self) -> str | None:
+        """申请请求许可：CLOSED 返回 ``"normal"``，HALF_OPEN 唯一探针返回 ``"probe"``，熔断中返回 None。"""
+        with self._lock:
+            if self.state == "CLOSED":
+                return "normal"
+            if self.state == "OPEN":
+                if time.monotonic() - self.tripped_at < self.recovery_seconds:
+                    return None
+                self.state = "HALF_OPEN"
+                self._probe_in_flight = False
+            if self._probe_in_flight:
+                return None
+            self._probe_in_flight = True
+            return "probe"
 
     def can_request(self) -> bool:
-        now = time.monotonic()
-        if self.state == "CLOSED":
-            return True
-        if self.state == "OPEN":
-            if now - self.tripped_at >= self.recovery_seconds:
-                self.state = "HALF_OPEN"
-                return True
-            return False
-        if self.state == "HALF_OPEN":
-            # 允许单次探活
-            return True
-        return True
+        """兼容旧接口；HALF_OPEN 下返回 True 即占用唯一探针，须以结果或 release_probe 归还。"""
+        return self.try_acquire() is not None
+
+    def release_probe(self) -> None:
+        """探针以不计入熔断的方式结束（如 JSON 解析错误或任务取消）时归还许可。"""
+        with self._lock:
+            self._probe_in_flight = False
 
     def record_success(self) -> None:
-        self.consecutive_failures = 0
-        self.state = "CLOSED"
-        self.tripped_at = 0.0
+        with self._lock:
+            self.consecutive_failures = 0
+            self.state = "CLOSED"
+            self.tripped_at = 0.0
+            self._probe_in_flight = False
 
     def record_failure(self) -> None:
-        self.consecutive_failures += 1
-        if self.consecutive_failures >= self.failure_threshold:
-            self.state = "OPEN"
-            self.tripped_at = time.monotonic()
+        with self._lock:
+            self.consecutive_failures += 1
+            # 探针失败立即重新熔断并重新计时。
+            if self.state == "HALF_OPEN" or self.consecutive_failures >= self.failure_threshold:
+                self.state = "OPEN"
+                self.tripped_at = time.monotonic()
+            self._probe_in_flight = False
 
 
 def _sanitize_url(url: str) -> str:
@@ -234,11 +261,31 @@ class FetchClient:
         safe_url = _sanitize_url(url)
 
         breaker = self._get_breaker(host)
-        if not breaker.can_request():
+        permit = breaker.try_acquire()
+        if permit is None:
             reset_at = breaker.tripped_at + breaker.recovery_seconds
             logger.warning("[NIKKE Fetch] 主机 %s 处于熔断保护期，阻断外部请求", host)
             raise CircuitBreakerOpenError(host, reset_at)
+        try:
+            return await self._get_json_attempts(
+                breaker, url, host=host, safe_url=safe_url, params=params, headers=headers, timeout=timeout
+            )
+        finally:
+            if permit == "probe":
+                # 成功/失败已归还探针；解析错误、取消等结束方式也不能永久占住唯一探针。
+                breaker.release_probe()
 
+    async def _get_json_attempts(
+        self,
+        breaker: CircuitBreaker,
+        url: str,
+        *,
+        host: str,
+        safe_url: str,
+        params: Mapping[str, Any] | None,
+        headers: Mapping[str, str] | None,
+        timeout: float | None,
+    ) -> Any:
         req_headers = {**self.default_headers, **(headers or {})}
         req_timeout = self.timeout if timeout is None else httpx.Timeout(timeout, connect=min(timeout, DEFAULT_CONNECT_TIMEOUT))
 
@@ -276,9 +323,13 @@ class FetchClient:
                     safe_exception_message(exc),
                 )
             except httpx.HTTPStatusError as exc:
-                # 4xx / 5xx 状态码通常不适合立即无脑重试
-                breaker.record_failure()
+                # 4xx / 5xx 状态码通常不适合立即无脑重试。只有 5xx 代表主机故障；
+                # 4xx 是请求本身被拒（主机可达），不得熔断整个主机（AUD-020）。
                 status = exc.response.status_code
+                if status >= 500:
+                    breaker.record_failure()
+                else:
+                    breaker.record_success()
                 logger.warning(
                     "[NIKKE Fetch] HTTP 状态码异常 (%s, status=%d): %s",
                     safe_url,
@@ -291,8 +342,7 @@ class FetchClient:
                     host=host,
                 ) from exc
             except (ValueError, TypeError) as exc:
-                # JSON 解析异常
-                breaker.record_failure()
+                # JSON 解析异常：主机已返回响应，不属于 5xx/超时/网络故障，不计入熔断。
                 logger.warning(
                     "[NIKKE Fetch] JSON 解析失败 (%s): %s",
                     safe_url,
@@ -303,7 +353,9 @@ class FetchClient:
                     host=host,
                 ) from exc
             except Exception as exc:
-                breaker.record_failure()
+                # 仅对端中途断开、代理故障这类网络层错误计入熔断；本地编程/参数错误不惩罚主机。
+                if isinstance(exc, (httpx.RemoteProtocolError, httpx.ProxyError)):
+                    breaker.record_failure()
                 logger.error(
                     "[NIKKE Fetch] 未知请求异常 (%s): %s",
                     safe_url,

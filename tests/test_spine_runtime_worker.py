@@ -16,6 +16,8 @@ from astrbot_plugin_nikke.integrations.spine.worker_caller import SpineWorkerCon
 
 
 class SpineWorkerRuntimeTests(TestCase):
+    # AUD-016：worker 改由 _run_worker 以独立进程组 Popen 执行（超时整组查杀），
+    # 这里打桩其进程边界而非已不再调用的 subprocess.run。
     def _bundle(self, root: Path) -> SpineBundle:
         skeleton = root / "c191.skel"
         atlas = root / "c191.atlas"
@@ -37,7 +39,7 @@ class SpineWorkerRuntimeTests(TestCase):
                 output.write_bytes((2).to_bytes(4, "little") + (1).to_bytes(4, "little") + bytes([1, 2, 3, 255] * 2))
                 return type("Completed", (), {"returncode": 0, "stdout": json.dumps({"status": "ok"})})()
 
-            with patch.object(worker_module.subprocess, "run", side_effect=run):
+            with patch.object(worker_module, "_run_worker", side_effect=run):
                 image = runtime.render(bundle, animation="idle", skin="default")
             self.assertEqual(image.mode, "RGBA")
             self.assertEqual(image.size, (2, 1))
@@ -63,7 +65,7 @@ class SpineWorkerRuntimeTests(TestCase):
                 output.write_bytes(b"bad")
                 return type("Completed", (), {"returncode": 0, "stdout": json.dumps({"status": "ok"})})()
 
-            with patch.object(worker_module.subprocess, "run", side_effect=run):
+            with patch.object(worker_module, "_run_worker", side_effect=run):
                 with self.assertRaises(SpineRenderError):
                     runtime.render(bundle, animation="idle")
 
@@ -75,6 +77,6 @@ class SpineWorkerRuntimeTests(TestCase):
 
             from subprocess import TimeoutExpired
 
-            with patch.object(worker_module.subprocess, "run", side_effect=TimeoutExpired("worker", 1)):
+            with patch.object(worker_module, "_run_worker", side_effect=TimeoutExpired("worker", 1)):
                 with self.assertRaisesRegex(SpineRenderError, "超时"):
                     runtime.render(bundle, animation="idle")

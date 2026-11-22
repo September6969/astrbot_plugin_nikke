@@ -16,7 +16,6 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote
-from contextlib import nullcontext
 
 import httpx
 import asyncio
@@ -47,6 +46,10 @@ class NikkeDbProvider:
     INDEX_URL = "https://raw.githubusercontent.com/Nikke-db/Nikke-db.github.io/main/js/json/l2d.json"
     INDEX_PAGES_URL = "https://nikke-db.github.io/js/json/l2d.json"
     GITHUB_API = "https://api.github.com/repos/Nikke-db/Nikke-db.github.io"
+    GITHUB_HEADERS = {
+        "User-Agent": "astrbot-plugin-nikke-spine-portrait",
+        "Accept": "application/vnd.github+json",
+    }
 
     INDEX_TTL = 12 * 3600  # 12 小时本地索引缓存
     L2D_TREE_TTL = 12 * 3600
@@ -471,69 +474,39 @@ class NikkeDbProvider:
 
         if allow_remote and self.remote and not self.is_failed("index:l2d-tree"):
             try:
-                headers = {
-                    "User-Agent": "astrbot-plugin-nikke-spine-portrait",
-                    "Accept": "application/vnd.github+json",
-                }
-                if deadline is not None:
-                    async def fetch_tree():
-                        async with asyncio.timeout(remaining(deadline)):
-                            async with httpx.AsyncClient(headers=headers, timeout=remaining(deadline, 8.0)) as async_client:
-                                commit = await async_client.get(f"{self.GITHUB_API}/commits/main")
-                                commit.raise_for_status()
-                                payload = commit.json()
-                                sha = payload.get("commit", {}).get("tree", {}).get("sha")
-                                if not self._valid_tree_sha(sha):
-                                    raise ValueError("GitHub commit 元数据无效")
-                                tree = await async_client.get(f"{self.GITHUB_API}/git/trees/{sha}?recursive=1", timeout=remaining(deadline, 8.0))
-                                return commit, tree
-                    commit_response, tree_response = asyncio.run(fetch_tree())
-                context = httpx.Client(timeout=8.0, headers=headers) if deadline is None else nullcontext()
-                with context as client:
-                    if deadline is None:
-                        commit_response = client.get(f"{self.GITHUB_API}/commits/main")
-                    commit_response.raise_for_status()
-                    commit_payload = commit_response.json()
-                    commit_sha = commit_payload.get("sha") if isinstance(commit_payload, dict) else None
-                    tree_info = commit_payload.get("commit", {}).get("tree", {}) if isinstance(commit_payload, dict) else {}
-                    tree_sha = tree_info.get("sha") if isinstance(tree_info, dict) else None
-                    if not self._valid_tree_sha(commit_sha) or not self._valid_tree_sha(tree_sha):
-                        raise ValueError("GitHub commit 元数据无效")
-
-                    if deadline is None:
-                        tree_response = client.get(f"{self.GITHUB_API}/git/trees/{tree_sha}?recursive=1")
-                    tree_response.raise_for_status()
-                    if len(tree_response.content) > 12 * 1024 * 1024:
-                        raise ValueError("GitHub L2D tree 响应超过大小限制")
-                    tree_payload = tree_response.json()
-                    if not isinstance(tree_payload, dict) or tree_payload.get("truncated") is not False:
-                        raise ValueError("GitHub L2D tree 不完整")
-                    raw_entries = tree_payload.get("tree")
-                    if not isinstance(raw_entries, list) or len(raw_entries) > 20000:
-                        raise ValueError("GitHub L2D tree 结构无效")
-                    candidate = self._validated_l2d_tree(
-                        {
-                            "commit_sha": commit_sha,
-                            "tree_sha": tree_sha,
-                            "entries": [row for row in raw_entries if isinstance(row, dict) and str(row.get("path", "")).startswith("l2d/")],
-                        }
-                    )
-                    if candidate is None:
-                        raise ValueError("GitHub L2D tree 缺少有效资源项")
-                    candidate["fetched_at"] = now
-                    remaining(deadline)
-                    cache_path.parent.mkdir(parents=True, exist_ok=True)
-                    temporary = cache_path.with_name(f".{cache_path.name}.{threading.get_ident()}.tmp")
-                    try:
-                        temporary.write_text(json.dumps(candidate, ensure_ascii=False, sort_keys=True), encoding="utf-8")
-                        temporary.replace(cache_path)
-                    finally:
-                        temporary.unlink(missing_ok=True)
-                    validated = self._validated_l2d_tree(candidate)
-                    if validated is not None:
-                        self._l2d_tree = validated
-                        self._l2d_tree_loaded_at = now
-                        return validated
+                commit_sha, tree_sha, tree_response = self._fetch_remote_l2d_tree(deadline)
+                tree_response.raise_for_status()
+                if len(tree_response.content) > 12 * 1024 * 1024:
+                    raise ValueError("GitHub L2D tree 响应超过大小限制")
+                tree_payload = tree_response.json()
+                if not isinstance(tree_payload, dict) or tree_payload.get("truncated") is not False:
+                    raise ValueError("GitHub L2D tree 不完整")
+                raw_entries = tree_payload.get("tree")
+                if not isinstance(raw_entries, list) or len(raw_entries) > 20000:
+                    raise ValueError("GitHub L2D tree 结构无效")
+                candidate = self._validated_l2d_tree(
+                    {
+                        "commit_sha": commit_sha,
+                        "tree_sha": tree_sha,
+                        "entries": [row for row in raw_entries if isinstance(row, dict) and str(row.get("path", "")).startswith("l2d/")],
+                    }
+                )
+                if candidate is None:
+                    raise ValueError("GitHub L2D tree 缺少有效资源项")
+                candidate["fetched_at"] = now
+                remaining(deadline)
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                temporary = cache_path.with_name(f".{cache_path.name}.{threading.get_ident()}.tmp")
+                try:
+                    temporary.write_text(json.dumps(candidate, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+                    temporary.replace(cache_path)
+                finally:
+                    temporary.unlink(missing_ok=True)
+                validated = self._validated_l2d_tree(candidate)
+                if validated is not None:
+                    self._l2d_tree = validated
+                    self._l2d_tree_loaded_at = now
+                    return validated
             except TimeoutError:
                 # 调用者预算不足不是 upstream 故障，不污染全局失败冷却。
                 raise
@@ -543,6 +516,39 @@ class NikkeDbProvider:
 
         # 保留旧树作为读取回退，失败退避结束后仍可刷新。
         return cached
+
+    @classmethod
+    def _commit_tree_identity(cls, response: httpx.Response) -> tuple[str, str]:
+        """commit 元数据只在此解析一次，同步与限时路径共用同一校验（AUD-020）。"""
+        response.raise_for_status()
+        payload = response.json()
+        commit_sha = payload.get("sha") if isinstance(payload, dict) else None
+        commit_info = payload.get("commit") if isinstance(payload, dict) else None
+        tree_info = commit_info.get("tree") if isinstance(commit_info, dict) else None
+        tree_sha = tree_info.get("sha") if isinstance(tree_info, dict) else None
+        if not cls._valid_tree_sha(commit_sha) or not cls._valid_tree_sha(tree_sha):
+            raise ValueError("GitHub commit 元数据无效")
+        return commit_sha, tree_sha
+
+    def _fetch_remote_l2d_tree(self, deadline: float | None) -> tuple[str, str, httpx.Response]:
+        """取 main 分支 commit 与对应递归 tree；有截止时间时网络读取受同一预算约束。"""
+        commit_url = f"{self.GITHUB_API}/commits/main"
+        if deadline is None:
+            with httpx.Client(timeout=8.0, headers=self.GITHUB_HEADERS) as client:
+                commit_sha, tree_sha = self._commit_tree_identity(client.get(commit_url))
+                return commit_sha, tree_sha, client.get(f"{self.GITHUB_API}/git/trees/{tree_sha}?recursive=1")
+
+        async def fetch_tree() -> tuple[str, str, httpx.Response]:
+            async with asyncio.timeout(remaining(deadline)):
+                async with httpx.AsyncClient(headers=self.GITHUB_HEADERS, timeout=remaining(deadline, 8.0)) as client:
+                    commit_sha, tree_sha = self._commit_tree_identity(await client.get(commit_url))
+                    tree = await client.get(
+                        f"{self.GITHUB_API}/git/trees/{tree_sha}?recursive=1",
+                        timeout=remaining(deadline, 8.0),
+                    )
+                    return commit_sha, tree_sha, tree
+
+        return asyncio.run(fetch_tree())
 
     def resolve_spine_bundle_source(
         self,
@@ -615,10 +621,15 @@ class NikkeDbProvider:
 
         urls = {"skel": raw_url(skeleton["path"]), "atlas": raw_url(atlas["path"])}
         blob_hashes = {urls["skel"]: skeleton["sha"], urls["atlas"]: atlas["sha"]}
+        # 纹理页相对 atlas 所在目录解析；skeleton/atlas 位于子目录时，requested_dir 下
+        # 其它目录的图片不在 parent 内，按 parent 长度切片会得到错位键（AUD-020）。
+        parent_prefix = parent + "/"
         for row in files:
             if row.get("type") != "blob" or Path(row["path"]).suffix.lower() not in {".png", ".webp"}:
                 continue
-            relative = row["path"][len(parent) + 1 :]
+            if not row["path"].startswith(parent_prefix):
+                continue
+            relative = row["path"][len(parent_prefix) :]
             image_url = raw_url(row["path"])
             urls[relative] = image_url
             blob_hashes[image_url] = row["sha"]

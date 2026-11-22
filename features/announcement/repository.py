@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -159,10 +161,17 @@ class AnnouncementRepository:
                 "last_sync_report": self.last_sync_report,
                 "delivery_log": sorted(self._delivery_log),
             }
-            tmp_file = self.cache_file.with_suffix(".tmp")
-            with open(tmp_file, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-            tmp_file.replace(self.cache_file)
+            # 每次写入使用唯一临时文件后原子替换，并发保存不会互相截断同一个 .tmp（AUD-020）。
+            descriptor, temporary_name = tempfile.mkstemp(
+                prefix=f".{self.cache_file.name}.", suffix=".tmp", dir=self.cache_file.parent
+            )
+            tmp_file = Path(temporary_name)
+            try:
+                with os.fdopen(descriptor, "w", encoding="utf-8") as f:
+                    json.dump(payload, f, ensure_ascii=False, indent=2)
+                tmp_file.replace(self.cache_file)
+            finally:
+                tmp_file.unlink(missing_ok=True)
         except Exception as exc:
             logger.error("保存公告本地缓存失败: %s", safe_exception_message(exc))
 
