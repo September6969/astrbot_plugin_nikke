@@ -215,7 +215,7 @@ class CalendarVisualCache:
         while True:
             request_url = current_url
             request_headers = dict(headers)
-            extensions = {}
+            extensions: dict[str, str] = {}
             if not await self._validate_remote_url(current_url):
                 if not self._safe_url(current_url):
                     raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
@@ -223,6 +223,8 @@ class CalendarVisualCache:
                 if address is None:
                     raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
                 host = urlparse(current_url).hostname
+                if not host:
+                    raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
                 request_url = str(httpx.URL(current_url).copy_with(host=address))
                 request_headers["host"] = host
                 extensions["sni_hostname"] = host

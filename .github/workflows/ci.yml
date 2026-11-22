@@ -160,6 +160,27 @@ jobs:
             .ci-spine-assets/c010_02/white-promise.png
           if-no-files-found: error
 
+  static-gates:
+    name: Static gates (architecture + mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade "pip==26.0.1"
+          pip install -r requirements.txt "astrbot==4.24.0" "mypy==2.4.1"
+      - name: Architecture gate (cross-layer baseline allowlist)
+        run: python scripts/audit/architecture_metrics.py --check > "$RUNNER_TEMP/architecture-metrics.json"
+      - name: Show architecture gate violations
+        if: failure()
+        run: python -c "import json,sys; m=json.load(open(sys.argv[1])); print(json.dumps(m['gate_violations'], ensure_ascii=False, indent=2))" "$RUNNER_TEMP/architecture-metrics.json"
+      - name: Type check (mypy.ini module baseline)
+        run: mypy
+
   extension:
     name: Extension (Node)
     runs-on: ubuntu-latest

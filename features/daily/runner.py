@@ -32,7 +32,7 @@ class DailyRunner(CommunityDailyMixin):
         self._client = client
         self._store = store
         self.config = config or {}
-        self._account_locks = {}
+        self._account_locks: dict[str, asyncio.Lock] = {}
         self.on_automatic_result = None
 
     @property

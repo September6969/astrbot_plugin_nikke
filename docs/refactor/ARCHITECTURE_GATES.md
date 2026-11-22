@@ -32,6 +32,20 @@ class-level `__getattr__` 默认视为过宽动态转发并失败。唯一保留
 
 所有 `adapters/` 静态拒绝直接导入 `integrations/`、SQL/network client 模块、`core.storage`、`core.container` 与 `core.providers`；直接创建共享 store/client/AssetManager/ClientSession 也失败。AstrBot event 转换可以引用 framework-free application handler、必要的结果 DTO/领域异常和 presentation renderer；用例流程必须留在 `application/commands/`。
 
+## 跨层依赖基线（REFACTOR_PLAN_V2 Phase 0）
+
+`CROSS_LAYER_FORBIDDEN_TARGETS` 规定分层方向 `adapters -> application -> features <- integrations`，生产代码不得依赖 `scripts/` 与 `tests/`。违反方向的内部导入边记为 `cross_layer_import`。
+
+`CROSS_LAYER_BASELINE_ALLOWLIST` 只登记 Phase 0 时已存在的 8 条边，并且只允许删减：
+
+| 既有边 | 计划清零阶段 |
+| --- | --- |
+| `application.commands.{campaign,cdk,character,daily,profile,raid}` → `integrations.blablalink.client` | Phase 2（`PR-2`） |
+| `integrations.spine.prerenderer` → `scripts.spine.inspect_spine_bundle` | Phase 4（`PR-4C`） |
+| `features.calendar.schedule_service` → `integrations.calendar.blabla_source` | Phase 6（`PR-6B`） |
+
+某条边对应的导入被移除后，门禁会报 `cross_layer_allowlist_stale`，要求在同一 PR 中删掉该条目，使其变成硬门禁。
+
 ## 初始红灯
 
 R01 在 R00 checkpoint 上首次运行 `tests/test_full_refactor_architecture.py`，记录失败门禁与指标。预期红灯必须对应实际旧结构；测试框架自检、指标计算、薄包装识别和对照格式测试必须通过。之后每张迁移卡只在其目标结构真实改变且消费者切换后才允许相应门禁转绿。

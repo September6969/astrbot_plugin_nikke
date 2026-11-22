@@ -61,6 +61,36 @@ ADAPTER_CORE_FORBIDDEN_PREFIXES = (
     "core.providers",
 )
 
+# 分层依赖方向：adapters -> application -> features <- integrations；
+# 生产代码不得依赖 scripts/ 与 tests/。键为源层，值为禁止导入的目标层。
+CROSS_LAYER_FORBIDDEN_TARGETS: dict[str, frozenset[str]] = {
+    "application": frozenset({"integrations", "adapters", "main", "scripts", "tests"}),
+    "features": frozenset(
+        {"integrations", "application", "adapters", "ui", "main", "scripts", "tests"}
+    ),
+    "integrations": frozenset({"application", "adapters", "ui", "main", "scripts", "tests"}),
+    "core": frozenset({"application", "adapters", "main", "scripts", "tests"}),
+    "ui": frozenset({"integrations", "application", "adapters", "main", "scripts", "tests"}),
+    "adapters": frozenset({"integrations", "main", "scripts", "tests"}),
+}
+# REFACTOR_PLAN_V2 Phase 0 登记的既有跨层边基线。只允许删除条目，不允许新增：
+# Phase 2 清零 application -> integrations.blablalink.client，
+# Phase 4C 清零 integrations.spine -> scripts.spine，
+# Phase 6B 清零 features.calendar -> integrations.calendar。
+# 条目对应的导入一旦消失，门禁会报 cross_layer_allowlist_stale，提醒同步收紧。
+CROSS_LAYER_BASELINE_ALLOWLIST: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("application.commands.campaign", "integrations.blablalink.client"),
+        ("application.commands.cdk", "integrations.blablalink.client"),
+        ("application.commands.character", "integrations.blablalink.client"),
+        ("application.commands.daily", "integrations.blablalink.client"),
+        ("application.commands.profile", "integrations.blablalink.client"),
+        ("application.commands.raid", "integrations.blablalink.client"),
+        ("features.calendar.schedule_service", "integrations.calendar.blabla_source"),
+        ("integrations.spine.prerenderer", "scripts.spine.inspect_spine_bundle"),
+    }
+)
+
 
 def _module_name(root: Path, path: Path) -> str:
     relative = path.relative_to(root).with_suffix("")
@@ -530,6 +560,28 @@ def _source_paths(root: Path) -> list[Path]:
     return sorted(paths)
 
 
+def cross_layer_edges(
+    edges: set[tuple[str, str]],
+    allowlist: frozenset[tuple[str, str]] = CROSS_LAYER_BASELINE_ALLOWLIST,
+) -> dict[str, list[dict[str, Any]]]:
+    """按分层规则分出跨层边：基线内、基线外（违规）与已失效的基线条目。"""
+    allowed: list[dict[str, Any]] = []
+    violations: list[dict[str, Any]] = []
+    for source, target in sorted(edges):
+        source_layer = source.split(".")[0]
+        target_layer = target.split(".")[0]
+        if target_layer not in CROSS_LAYER_FORBIDDEN_TARGETS.get(source_layer, frozenset()):
+            continue
+        record = {"from": source, "to": target}
+        (allowed if (source, target) in allowlist else violations).append(record)
+    stale = [
+        {"from": source, "to": target}
+        for source, target in sorted(allowlist)
+        if (source, target) not in edges
+    ]
+    return {"allowlisted": allowed, "violations": violations, "stale_allowlist": stale}
+
+
 def collect_metrics(root: Path) -> dict[str, Any]:
     root = root.resolve()
     paths = _source_paths(root)
@@ -839,6 +891,14 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         )
     for component in cycles:
         violations.append({"category": "import_cycle", "modules": component})
+    cross_layer = cross_layer_edges(internal_edges)
+    violations.extend(
+        {"category": "cross_layer_import", **record} for record in cross_layer["violations"]
+    )
+    violations.extend(
+        {"category": "cross_layer_allowlist_stale", **record}
+        for record in cross_layer["stale_allowlist"]
+    )
     for error in syntax_errors:
         violations.append({"category": "python_syntax_error", **error})
 
@@ -862,6 +922,7 @@ def collect_metrics(root: Path) -> dict[str, Any]:
             {"from": source, "to": target} for source, target in sorted(internal_edges)
         ],
         "import_cycles": cycles,
+        "cross_layer_edges": cross_layer,
         "public_imports": dict(sorted(public_import_inventory.items())),
         "container_definitions": root_owners,
         "resource_constructor_owners": resource_owner_map,

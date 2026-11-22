@@ -580,12 +580,12 @@ class CharacterApplication:
             if isinstance(res, CredentialExpiredError):
                 raise res
 
-        # 2. 详情读取或身份校验失败，向上抛出
-        if isinstance(detail_res, Exception):
+        # 2. 详情读取或身份校验失败，向上抛出（含 CancelledError 等 BaseException）
+        if isinstance(detail_res, BaseException):
             raise detail_res
 
         # 3. 研究资料意外异常
-        if isinstance(profile_res, Exception):
+        if isinstance(profile_res, BaseException):
             raise profile_res
 
         payload = detail_res

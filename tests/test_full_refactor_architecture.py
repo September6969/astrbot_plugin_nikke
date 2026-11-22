@@ -6,6 +6,7 @@ import ast
 from pathlib import Path
 
 from scripts.audit.architecture_metrics import (
+    CROSS_LAYER_BASELINE_ALLOWLIST,
     PLAN_THRESHOLDS,
     PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
     _adapter_infrastructure_imports,
@@ -14,6 +15,7 @@ from scripts.audit.architecture_metrics import (
     _command_runtime_responsibilities,
     classify_module_shape,
     collect_metrics,
+    cross_layer_edges,
     compare_metrics,
 )
 
@@ -155,6 +157,48 @@ def test_feature_and_ui_dependency_directions() -> None:
     ui_violations = _violations("ui_dependency_direction")
     assert not feature_violations, f"features 越过领域端口依赖边界：{feature_violations}"
     assert not ui_violations, f"ui 依赖存储或业务网络：{ui_violations}"
+
+
+def test_cross_layer_imports_stay_within_phase0_baseline() -> None:
+    assert not _violations("cross_layer_import"), METRICS["cross_layer_edges"]["violations"]
+    assert not _violations("cross_layer_allowlist_stale"), (
+        "跨层边已清零，请同步从 CROSS_LAYER_BASELINE_ALLOWLIST 删除："
+        f"{METRICS['cross_layer_edges']['stale_allowlist']}"
+    )
+
+
+def test_cross_layer_baseline_only_shrinks() -> None:
+    # Phase 0 基线上限为 8 条；后续阶段只能删除条目，不能借 allowlist 放行新边。
+    assert len(CROSS_LAYER_BASELINE_ALLOWLIST) <= 8
+    assert {source.split(".")[0] for source, _ in CROSS_LAYER_BASELINE_ALLOWLIST} <= {
+        "application",
+        "features",
+        "integrations",
+    }
+
+
+def test_cross_layer_gate_rejects_new_edges_and_reports_stale_entries() -> None:
+    allowlist = frozenset({("application.commands.cdk", "integrations.blablalink.client")})
+    edges = {
+        ("application.commands.raid", "integrations.blablalink.client"),
+        ("features.daily.runner", "integrations.blablalink.client"),
+        ("integrations.web.service", "scripts.operations.backup"),
+        ("core.storage", "tests.helpers"),
+        ("application.commands.raid", "features.raid.query"),
+        ("integrations.blablalink.client", "features.account.errors"),
+        ("adapters.astrbot.runtime", "application.commands.raid"),
+    }
+    result = cross_layer_edges(edges, allowlist)
+    assert result["allowlisted"] == []
+    assert result["violations"] == [
+        {"from": "application.commands.raid", "to": "integrations.blablalink.client"},
+        {"from": "core.storage", "to": "tests.helpers"},
+        {"from": "features.daily.runner", "to": "integrations.blablalink.client"},
+        {"from": "integrations.web.service", "to": "scripts.operations.backup"},
+    ]
+    assert result["stale_allowlist"] == [
+        {"from": "application.commands.cdk", "to": "integrations.blablalink.client"}
+    ]
 
 
 def test_shared_container_and_resource_owners_are_unique() -> None:
