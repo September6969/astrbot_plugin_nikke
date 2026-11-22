@@ -22,7 +22,7 @@ from typing import Any
 
 
 PLAN_THRESHOLDS = {
-    "main.py": 700,
+    "main.py": 300,
     "adapters/astrbot/command_runtime.py": 400,
     "core/asset_manager.py": 300,
     "ui/t2i_payloads.py": 100,
@@ -31,6 +31,11 @@ PLAN_THRESHOLDS = {
     "core/container.py": 350,
 }
 PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS = 20
+# PR-6C：NikkePlugin 外壳只保留 3 个宿主注册入口与延迟路由器属性；
+# 新增公开成员必须先补消费者证据并更新此白名单（terminate/close 为宿主生命周期，另行豁免）。
+MAIN_PUBLIC_MEMBER_ALLOWLIST = frozenset(
+    {"command_runtime", "nikke", "nikke_hash_prefix", "on_nikke_poke"}
+)
 
 RESOURCE_TYPES = ("NikkeStore", "BlaBlaClient", "AssetManager", "ClientSession")
 FEATURE_FORBIDDEN_ROOTS = {
@@ -811,6 +816,16 @@ def collect_metrics(root: Path) -> dict[str, Any]:
                     "line": method["line"],
                     "actual": method["logical_statements"],
                     "limit": PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
+                }
+            )
+    for method in plugin_methods:
+        if method["name"] not in MAIN_PUBLIC_MEMBER_ALLOWLIST:
+            violations.append(
+                {
+                    "category": "main_public_member_allowlist",
+                    "path": "main.py",
+                    "symbol": method["name"],
+                    "line": method["line"],
                 }
             )
     violations.extend(

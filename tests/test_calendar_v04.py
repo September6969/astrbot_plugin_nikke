@@ -349,7 +349,8 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         # 1. Invalid horizon
         main_inst = make_plugin_shell()
         inject_calendar_handler(main_inst)
-        results = [r async for r in main_inst.event_schedule(DummyEvent(), "99")]
+        # G8-main-legacy-e（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in main_inst.nikke(DummyEvent(), "日程", "99")]
         self.assertEqual(len(results), 1)
         self.assertIn("日程范围错误", results[0])
         self.assertIn("用法", results[0])
@@ -371,12 +372,12 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         inject_calendar_handler(main_inst)
 
         # Query 7 days
-        results = [r async for r in main_inst.event_schedule(DummyEvent(), "7")]
+        results = [r async for r in main_inst.nikke(DummyEvent(), "日程", "7")]
         self.assertIn("未来 7 天", results[0])
         self.assertIn("Active Test Event", results[0])
 
         # Query 30 days
-        results = [r async for r in main_inst.event_schedule(DummyEvent(), "30")]
+        results = [r async for r in main_inst.nikke(DummyEvent(), "日程", "30")]
         self.assertIn("未来 30 天", results[0])
         self.assertIn("Active Test Event", results[0])
 
@@ -386,7 +387,7 @@ class TestMainIntegration(IsolatedAsyncioTestCase):
         main_inst.services.calendar_application = cal_empty.application
         inject_calendar_handler(main_inst)
 
-        results = [r async for r in main_inst.event_schedule(DummyEvent(), "14")]
+        results = [r async for r in main_inst.nikke(DummyEvent(), "日程", "14")]
         self.assertIn("日程数据尚未就绪，正在后台同步，请稍后重试。", results[0])
 
     def test_calendar_application_selects_deadline_source_for_delivery(self):

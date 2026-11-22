@@ -101,7 +101,8 @@ class LogPrivacyTests(unittest.TestCase):
                 get_sender_id=lambda: "10001",
                 plain_result=lambda text: text,
             )
-            return [item async for item in plugin.union_raid(event)]
+            # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+            return [item async for item in plugin.nikke(event, "突袭")]
 
         result = asyncio.run(run())
 

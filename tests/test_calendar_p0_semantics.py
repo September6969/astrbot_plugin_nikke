@@ -846,7 +846,8 @@ async def test_event_schedule_without_snapshot_does_not_await_remote_sync():
     dummy_event = Mock()
     dummy_event.plain_result = lambda text: text
 
-    replies = [r async for r in plugin.event_schedule(dummy_event)]
+    # G8-main-legacy-e（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+    replies = [r async for r in plugin.nikke(dummy_event, "日程")]
     assert len(replies) == 1
     assert "日程数据尚未就绪，正在后台同步，请稍后重试。" in replies[0]
 

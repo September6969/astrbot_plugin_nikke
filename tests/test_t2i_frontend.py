@@ -122,12 +122,13 @@ async def test_text_command_fallback_retains_dto(page, tmp_path):
             application=plugin.services.profile_application,
             present=plugin.presentation.render_profile,
         )
-        command, args, request = plugin.me, (), plugin.services.profile_application.build_dashboard
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        command, args, request = plugin.nikke, ("我的",), plugin.services.profile_application.build_dashboard
     elif page == "union_overview":
         plugin.services.raid_application = Mock(dashboard=AsyncMock(return_value=data))
         plugin.services.store = Mock()
         inject_raid_handler(plugin)
-        command, args, request = plugin.union_raid, (), plugin.services.raid_application.dashboard
+        command, args, request = plugin.nikke, ("突袭",), plugin.services.raid_application.dashboard
     event = Mock(image_result=lambda path: path, plain_result=lambda text: text)
     results = [result async for result in command(event, *args)]
     if page == "union_overview":
@@ -170,7 +171,8 @@ async def test_calendar_command_fallback_same_snapshot(tmp_path):
         render_view=AsyncMock(side_effect=RuntimeError())
     )
     event = Mock(plain_result=lambda text: text)
-    results = [result async for result in plugin.event_schedule(event)]
+    # G8-main-legacy-e（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+    results = [result async for result in plugin.nikke(event, "日程")]
     assert "未来 14 天" in results[0]
     plugin.services.calendar.sync_from_source.assert_not_called()
     visual_cache.sync.assert_not_awaited()
@@ -215,8 +217,9 @@ async def test_union_command_failure_no_refetch(page, command):
         render_view=AsyncMock(side_effect=RuntimeError())
     )
     inject_raid_handler(plugin)
-    route = plugin.union_raid_ranking if command == "union_raid_ranking" else plugin.union_raid_my
-    results = [result async for result in route(Mock(plain_result=lambda text: text))]
+    subcommand = "排名" if command == "union_raid_ranking" else "我的"
+    # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+    results = [result async for result in plugin.nikke(Mock(plain_result=lambda text: text), "突袭", subcommand)]
     assert "当前响应" in results[0]
     getattr(plugin.services.raid_application, application_call).assert_awaited_once()
 

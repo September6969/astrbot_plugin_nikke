@@ -306,22 +306,36 @@ async def test_member_page_rejects_missing_stable_openid_before_fetching_attacks
 
 
 def test_main_raid_entrypoints_delegate_data_work_to_application():
+    # G8-main-legacy-d（PR-6C）：NikkePlugin.union_raid* 未注册方法已删除；
+    # 突袭入口改为守护 NikkeCommandRuntime.nikke / query 的突袭分支。
     repository_root = Path(__file__).resolve().parents[1]
-    tree = ast.parse(
-        (repository_root / "main.py").read_text(encoding="utf-8")
-    )
+    main_tree = ast.parse((repository_root / "main.py").read_text(encoding="utf-8"))
     plugin = next(
         node
-        for node in tree.body
+        for node in main_tree.body
         if isinstance(node, ast.ClassDef) and node.name == "NikkePlugin"
+    )
+    legacy = {"union_raid", "union_raid_ranking", "union_raid_my"}
+    assert not {
+        node.name
+        for node in plugin.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    } & legacy
+    tree = ast.parse(
+        (repository_root / "adapters" / "astrbot" / "command_runtime.py").read_text(encoding="utf-8")
+    )
+    runtime = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "NikkeCommandRuntime"
     )
     raid_methods = {
         node.name: node
-        for node in plugin.body
+        for node in runtime.body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and node.name in {"union_raid", "union_raid_ranking", "union_raid_my"}
+        and node.name in {"nikke", "query"}
     }
-    assert set(raid_methods) == {"union_raid", "union_raid_ranking", "union_raid_my"}
+    assert set(raid_methods) == {"nikke", "query"}
     forbidden_calls = {
         "get_union_raid_data",
         "get_union_raid_overview",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import inspect
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -223,7 +224,13 @@ class VoiceApplicationTests(IsolatedAsyncioTestCase):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         }
         self.assertNotIn("resolve_voice_character", methods)
-        self.assertIn("self.adapters.voice", methods["voice_settings"])
+        # G8-main-legacy-f（PR-6C）：voice_settings 平铺方法已删除，语音设置只经运行时 语音 分支。
+        self.assertNotIn("voice_settings", methods)
+        from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
+
+        self.assertIn(
+            "self._adapters.voice.voice_settings", inspect.getsource(NikkeCommandRuntime.nikke)
+        )
         self.assertIn("self.adapters.voice", methods["on_nikke_poke"])
         for forbidden in (
             "VoicePreference", "VoiceMapRegistry", "VoiceAudioCache",

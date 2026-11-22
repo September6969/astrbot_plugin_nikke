@@ -73,7 +73,7 @@ class MainRefactorIntegrityTests(unittest.TestCase):
     def test_main_is_a_thin_host_shell_with_registered_entry_map(self):
         source = (self.root / "main.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
-        self.assertLessEqual(len(source.splitlines()), 700)
+        self.assertLessEqual(len(source.splitlines()), 300)
 
         imported_modules = []
         for node in ast.walk(tree):
@@ -118,41 +118,38 @@ class MainRefactorIntegrityTests(unittest.TestCase):
                 method.name,
             )
         self.assertEqual(registered, ["nikke", "nikke_hash_prefix", "on_nikke_poke"])
-        command_methods = {
-            "nikke", "tarot_command", "nikke_help", "account", "bind", "unbind",
+        # G8-main-legacy-h（PR-6C）：36 个生产 0 可达的未注册平铺方法已删除；外壳只允许
+        # 3 个宿主注册入口、生命周期与装配成员，遗留名称不得回流。
+        legacy_methods = {
+            "tarot_command", "nikke_help", "account", "bind", "unbind",
             "status", "me", "query", "voice_settings", "union_raid_ranking",
             "union_raid_my", "union_raid", "roster", "progress", "character", "info",
             "daily", "claim", "cdk", "cdk_batch", "cdk_available", "cdk_history",
             "campaign", "event_schedule", "announcements_view",
             "announcement_deep_rescan", "announcement_subscription", "guide", "push",
             "admin", "group_set", "schedule", "summary", "run", "health",
+            "_dispatch_account_command", "_help_text",
         }
-        methods = {
-            method.name: method
-            for method in plugin.body
-            if isinstance(method, ast.AsyncFunctionDef)
+        members = {
+            node.name
+            for node in plugin.body
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         }
-        self.assertTrue(command_methods.issubset(methods))
-        for name in command_methods:
-            method = methods[name]
-            self.assertLessEqual(
-                sum(isinstance(node, ast.stmt) for node in ast.walk(method)), 20,
-                name,
-            )
-            self.assertTrue(
-                any(
-                    isinstance(node, ast.Attribute)
-                    and node.attr in {
-                        "command_runtime",
-                        "adapters",
-                        "_dispatch_account_command",
-                        "daily",
-                        "_help_text",
-                    }
-                    for node in ast.walk(method)
-                ),
-                name,
-            )
+        self.assertFalse(members & legacy_methods, sorted(members & legacy_methods))
+        self.assertEqual(
+            members,
+            {
+                "__init__", "_apply_directory", "command_runtime",
+                "nikke", "nikke_hash_prefix", "on_nikke_poke", "terminate", "close",
+            },
+        )
+        async_methods = {
+            node.name for node in plugin.body if isinstance(node, ast.AsyncFunctionDef)
+        }
+        self.assertEqual(
+            async_methods,
+            {"nikke", "nikke_hash_prefix", "on_nikke_poke", "terminate", "close"},
+        )
         entry_map = self.root / "docs/architecture/ASTRBOT_COMMAND_ENTRY_MAP.md"
         self.assertTrue(entry_map.is_file())
         mapping = entry_map.read_text(encoding="utf-8")

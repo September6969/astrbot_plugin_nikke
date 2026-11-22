@@ -173,6 +173,100 @@ async def test_all_legacy_flat_aliases_remain_routed() -> None:
             assert parameters[key] == value, (command, key, parameters)
 
 
+class NonAdminEvent(Event):
+    def is_admin(self) -> bool:
+        return False
+
+
+# G8-main-legacy-a/b（PR-6C）：NikkePlugin 的 36 个未注册平铺方法删除后，
+# 每个方法曾覆盖的 QQ 命令都必须仍经 3 个宿主注册入口与 NikkeCommandRuntime 可达。
+REMOVED_METHOD_ROUTES = (
+    ("tarot_command", "塔罗", "单抽", "", "tarot", {"action": "单抽", "value": ""}),
+    ("me", "我的", "", "", "profile", {}),
+    ("progress", "progress", "", "", "profile", {}),
+    ("query", "查询", "资料", "Rapi", "character", {"operation": "info", "name": "Rapi"}),
+    ("daily", "daily", "自动", "开", "daily", {"action": "自动", "value": "开", "scope": "community"}),
+    ("claim", "claim", "", "", "daily", {"action": "", "value": "", "scope": "community"}),
+    ("cdk", "cdk", "CODE-1", "", "cdk", {"operation": "single", "code": "CODE-1"}),
+    ("cdk_batch", "兑换", "批量", "CODE-1 CODE-2", "cdk", {"operation": "batch", "codes": "CODE-1 CODE-2"}),
+    ("cdk_available", "兑换", "可用", "", "cdk", {"operation": "available"}),
+    ("cdk_history", "兑换", "历史", "", "cdk", {"operation": "history"}),
+    ("campaign", "战役", "46-40", "困难", "campaign", {"stage": "46-40", "mode": "困难"}),
+    ("event_schedule", "日程", "30", "2", "calendar", {"horizon": "30", "page": "2"}),
+    ("announcements_view", "公告", "语言", "ja", "announcement", {"operation": "view", "locale": "ja"}),
+    ("announcements_view", "公告", "分类", "活动", "announcement", {"operation": "view", "category": "活动"}),
+    ("announcements_view", "公告", "搜索", "维护", "announcement", {"operation": "view", "query": "维护"}),
+    ("announcement_deep_rescan", "公告", "深度刷新", "ja", "announcement", {"operation": "deep_rescan", "locale": "ja"}),
+    ("announcement_subscription", "公告", "订阅", "", "announcement", {"operation": "subscribe", "target": "group:synthetic"}),
+    ("announcement_subscription", "公告", "取消订阅", "", "announcement", {"operation": "unsubscribe", "target": "group:synthetic"}),
+    ("guide", "攻略", "练度", "", "guide", {"category": "练度", "page": "1"}),
+    ("account", "account", "绑定", "", "account", {"operation": "account", "action": "绑定", "value": ""}),
+    ("bind", "bind", "", "", "account", {"operation": "bind"}),
+    ("unbind", "unbind", "", "", "account", {"operation": "unbind"}),
+    ("status", "status", "", "", "account", {"operation": "status"}),
+    ("push", "push", "off", "", "account", {"operation": "push", "state": "off"}),
+    ("admin", "admin", "健康", "", "account", {"operation": "admin", "action": "健康", "value": ""}),
+    ("group_set", "group", "", "", "account", {"operation": "group_set", "action": ""}),
+    ("schedule", "schedule", "08:00", "", "account", {"operation": "schedule", "value": "08:00"}),
+    ("summary", "summary", "21:30", "", "account", {"operation": "summary", "value": "21:30"}),
+    ("run", "run", "", "", "account", {"operation": "run"}),
+    ("health", "health", "", "", "account", {"operation": "health"}),
+    ("roster", "roster", "", "", "character", {"operation": "roster", "name": ""}),
+    ("character", "character", "Rapi", "", "character", {"operation": "character", "name": "Rapi"}),
+    ("info", "info", "Rapi", "", "character", {"operation": "info", "name": "Rapi"}),
+    ("union_raid", "union_raid", "", "", "raid", {"operation": "overview", "page": "1"}),
+    ("union_raid_ranking", "突袭", "排名", "", "raid", {"operation": "ranking", "page": "1"}),
+    ("union_raid_my", "突袭", "我的", "", "raid", {"operation": "member", "page": "1"}),
+)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "method,command,arg1,arg2,expected_handler,expected_parameters",
+    REMOVED_METHOD_ROUTES,
+    ids=[f"{row[0]}:{row[1]}:{row[2]}" for row in REMOVED_METHOD_ROUTES],
+)
+async def test_removed_plugin_methods_keep_qq_command_routes(
+    method, command, arg1, arg2, expected_handler, expected_parameters
+) -> None:
+    assert not hasattr(NikkePlugin, method)
+    plugin, recorders = _plugin_with_recorders()
+    assert await _route(plugin, command, arg1, arg2) == [("plain", expected_handler)]
+    parameters = dict(recorders[expected_handler].contexts[-1].parameters)
+    for key, value in expected_parameters.items():
+        assert parameters[key] == value, (command, key, parameters)
+
+
+@pytest.mark.asyncio
+async def test_removed_plugin_help_and_voice_methods_keep_qq_routes() -> None:
+    # G8-main-legacy-f（PR-6C）：nikke_help / voice_settings 删除后由运行时帮助与语音分支承接。
+    for name in ("nikke_help", "voice_settings", "_help_text"):
+        assert not hasattr(NikkePlugin, name)
+    plugin, _ = _plugin_with_recorders()
+    help_result = await _route(plugin, "帮助", "账号")
+    assert "【账号】" in help_result[0][1]
+    assert await _route(plugin, "语音", "服装", "默认") == [("plain", "voice:服装:默认")]
+
+
+@pytest.mark.asyncio
+async def test_schedule_clock_reaches_account_only_for_admin() -> None:
+    # G8-main-legacy-b 质询补充：管理员 `schedule HH:MM` → 账号任务时间；非管理员落到日程。
+    plugin, recorders = _plugin_with_recorders()
+    results = [item async for item in plugin.nikke(Event(), "schedule", "08:00")]
+    assert results == [("plain", "account")]
+    assert dict(recorders["account"].contexts[-1].parameters) == {
+        "operation": "schedule",
+        "value": "08:00",
+        "unified_msg_origin": "group:synthetic",
+    }
+
+    plugin, recorders = _plugin_with_recorders()
+    results = [item async for item in plugin.nikke(NonAdminEvent(), "schedule", "08:00")]
+    assert results == [("plain", "calendar")]
+    assert dict(recorders["calendar"].contexts[-1].parameters) == {"horizon": "08:00", "page": ""}
+    assert recorders["account"].contexts == []
+
+
 @pytest.mark.asyncio
 async def test_query_help_lists_the_supported_tarot_help_action() -> None:
     plugin, _ = _plugin_with_recorders()

@@ -126,7 +126,8 @@ async def test_handler_text_fallback_uses_same_dto_without_second_fetch(failure)
         plain_result=lambda text: text,
         get_sender_id=lambda: "qq-123",
     )
-    results = [result async for result in plugin.campaign(event, "46-40")]
+    # G8-main-legacy-e（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+    results = [result async for result in plugin.nikke(event, "战役", "46-40")]
     assert len(results) == 1
     assert "战役历史阵容" in results[0]
     assert "图片生成失败" in results[0]

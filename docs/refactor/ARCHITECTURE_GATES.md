@@ -24,7 +24,9 @@ python scripts/audit/architecture_metrics.py --check
 
 ## 硬阈值
 
-硬阈值由 `scripts/audit/architecture_metrics.py` 和对应架构测试共同锁定：`main.py` 700 行、`adapters/astrbot/command_runtime.py` 400 行、`core/asset_manager.py` 300 行、`ui/t2i_payloads.py` 100 行、Calendar `schedule_service.py` 450 行、Announcement `service.py` 450 行、`core/container.py` 350 行。插件业务方法最多 20 个 AST 逻辑语句；构造和关闭方法不计入该规则。
+硬阈值由 `scripts/audit/architecture_metrics.py` 和对应架构测试共同锁定：`main.py` 300 行（PR-6C 删除 36 个未注册遗留方法后由 700 收紧）、`adapters/astrbot/command_runtime.py` 400 行、`core/asset_manager.py` 300 行、`ui/t2i_payloads.py` 100 行、Calendar `schedule_service.py` 450 行、Announcement `service.py` 450 行、`core/container.py` 350 行。插件业务方法最多 20 个 AST 逻辑语句；构造和关闭方法不计入该规则。
+
+`NikkePlugin` 公开成员另有白名单门禁 `main_public_member_allowlist`（`MAIN_PUBLIC_MEMBER_ALLOWLIST`）：只允许 `command_runtime`、`nikke`、`nikke_hash_prefix`、`on_nikke_poke`；`terminate`/`close` 为宿主生命周期、私有成员（`__init__`、`_apply_directory`）不计入。新增公开成员前须补消费者证据并同步更新白名单与 `docs/architecture/ASTRBOT_COMMAND_ENTRY_MAP.md`。
 
 `command_runtime.py` 另有责任门禁：不得导入 `features`、`integrations`、`ui` 或 storage 实现，不得直接访问领域 application、client、store、AssetManager 或 renderer。feature DTO / domain exception 的宿主转换仍可留在专用 AstrBot adapter；command router 不承担 feature use-case orchestration。
 

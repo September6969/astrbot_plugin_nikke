@@ -61,7 +61,8 @@ class PushWiringTests(IsolatedAsyncioTestCase):
             fresh = AnnouncementRecord("fresh", "更新公告", "正文", later.isoformat())
             announcements.add_or_update(fresh)
             self.assertEqual([item.target for item in delivery.plan([fresh], now=later)], ["fake-session"])
-            await anext(plugin.announcement_subscription(event, "取消订阅"))
+            # G8-main-legacy-e（PR-6C）：遗留 announcement_subscription 已删除，改经统一路由。
+            await anext(plugin.nikke(event, "公告", "取消订阅"))
             self.assertEqual(delivery.plan([fresh], now=later), [])
 
     async def test_enabled_wiring_uses_injected_dispatch(self):

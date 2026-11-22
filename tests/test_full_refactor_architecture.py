@@ -7,6 +7,7 @@ from pathlib import Path
 
 from scripts.audit.architecture_metrics import (
     CROSS_LAYER_BASELINE_ALLOWLIST,
+    MAIN_PUBLIC_MEMBER_ALLOWLIST,
     PLAN_THRESHOLDS,
     PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
     _adapter_infrastructure_imports,
@@ -23,7 +24,8 @@ from scripts.audit.architecture_metrics import (
 ROOT = Path(__file__).resolve().parents[1]
 METRICS = collect_metrics(ROOT)
 EXPECTED_PLAN_THRESHOLDS = {
-    "main.py": 700,
+    # G8-main-legacy-h（PR-6C）：删除 36 个遗留方法后由 700 收紧到 300。
+    "main.py": 300,
     "adapters/astrbot/command_runtime.py": 400,
     "core/asset_manager.py": 300,
     "ui/t2i_payloads.py": 100,
@@ -150,6 +152,15 @@ def test_main_plugin_methods_are_thin_delegates() -> None:
     violations = _violations("main_command_size")
     assert not violations, f"main.py 中存在超过 20 个 AST 逻辑语句的方法：{violations}"
     assert not _violations("main_business_import"), METRICS["main_business_imports"]
+
+
+def test_main_plugin_public_members_match_allowlist() -> None:
+    # G8-main-legacy-h（PR-6C）：插件外壳公开成员白名单门禁，防止遗留平铺方法回流。
+    assert MAIN_PUBLIC_MEMBER_ALLOWLIST == {
+        "command_runtime", "nikke", "nikke_hash_prefix", "on_nikke_poke",
+    }
+    assert {item["name"] for item in METRICS["plugin_public_methods"]} == MAIN_PUBLIC_MEMBER_ALLOWLIST
+    assert not _violations("main_public_member_allowlist")
 
 
 def test_feature_and_ui_dependency_directions() -> None:

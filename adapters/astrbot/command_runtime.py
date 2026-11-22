@@ -40,10 +40,6 @@ class NikkeCommandRuntime:
     def _is_admin(event: AstrMessageEvent) -> bool:
         return bool(event.is_admin())
 
-    @staticmethod
-    def _help_text(category: str = "", include_admin: bool = False) -> str:
-        return help_category(category, PLUGIN_VERSION, include_admin=include_admin)
-
     async def _dispatch(self, event: AstrMessageEvent, handler: Any, **parameters: str):
         async for result in self._adapters.command.dispatch(
             event, handler, **parameters

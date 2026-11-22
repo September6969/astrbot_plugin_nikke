@@ -31,7 +31,8 @@ class CancellationTests(IsolatedAsyncioTestCase):
             inject_cdk_handler(plugin)
             event = SimpleNamespace(get_sender_id=lambda: "synthetic-user", plain_result=lambda x: x)
             async def consume():
-                return [result async for result in plugin.cdk(event, "FAKE-CODE")]
+                # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+                return [result async for result in plugin.nikke(event, "兑换", "FAKE-CODE")]
             task = asyncio.create_task(consume())
             await entered.wait()
             task.cancel()

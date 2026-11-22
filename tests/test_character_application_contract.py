@@ -262,16 +262,28 @@ async def test_profile_snapshot_cache_expires_at_five_minutes():
 
 
 def test_main_character_handlers_are_transport_adapters_only():
+    # G8-main-legacy-d（PR-6C）：NikkePlugin.roster/character/info 未注册方法已删除；
+    # 角色入口改为守护 NikkeCommandRuntime.query / _legacy 的传输适配边界。
     root = Path(__file__).resolve().parents[1]
-    source = (root / "main.py").read_text(encoding="utf-8")
-    module = ast.parse(source)
+    main_module = ast.parse((root / "main.py").read_text(encoding="utf-8"))
     plugin = next(
-        node for node in module.body
+        node for node in main_module.body
         if isinstance(node, ast.ClassDef) and node.name == "NikkePlugin"
+    )
+    assert not {
+        node.name
+        for node in plugin.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    } & {"roster", "character", "info"}
+    source = (root / "adapters" / "astrbot" / "command_runtime.py").read_text(encoding="utf-8")
+    module = ast.parse(source)
+    runtime = next(
+        node for node in module.body
+        if isinstance(node, ast.ClassDef) and node.name == "NikkeCommandRuntime"
     )
     methods = {
         node.name: node
-        for node in plugin.body
+        for node in runtime.body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
     forbidden = {
@@ -288,7 +300,7 @@ def test_main_character_handlers_are_transport_adapters_only():
         "get_character_portrait",
         "calculate_from_payload",
     }
-    for name in ("roster", "character", "info"):
+    for name in ("query", "_legacy"):
         identifiers = {
             node.id for node in ast.walk(methods[name]) if isinstance(node, ast.Name)
         }

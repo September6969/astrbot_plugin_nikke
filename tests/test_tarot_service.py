@@ -288,13 +288,14 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         inject_tarot_handler(plugin)
 
         # Help
-        results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "帮助")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in plugin.nikke(DummyTarotEvent(), "塔罗", "帮助")]
         self.assertEqual(len(results), 1)
         self.assertIn("【NIKKE 塔罗】", results[0][1])
         self.assertIn("单抽", results[0][1])
 
         # Status
-        results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "状态")]
+        results = [r async for r in plugin.nikke(DummyTarotEvent(), "塔罗", "状态")]
         self.assertEqual(len(results), 1)
         self.assertIn("【塔罗牌库状态】", results[0][1])
         self.assertIn("大阿尔卡那", results[0][1])
@@ -308,7 +309,8 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         plugin.services.tarot = TarotService(self.root, self.runtime)
         inject_tarot_handler(plugin)
 
-        results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "单抽")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in plugin.nikke(DummyTarotEvent(), "塔罗", "单抽")]
         # May have 0 or 1 image depending on whether asset exists on disk in temp dir,
         # but the last result must be plain text reading.
         self.assertTrue(len(results) >= 1)
@@ -325,7 +327,8 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         plugin.services.tarot = TarotService(self.root, self.runtime)
         inject_tarot_handler(plugin)
 
-        results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "三张")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in plugin.nikke(DummyTarotEvent(), "塔罗", "三张")]
         self.assertTrue(len(results) >= 1)
         text_result = results[-1]
         self.assertEqual(text_result[0], "plain")
@@ -344,8 +347,9 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         inject_tarot_handler(plugin)
 
         event = DummyTarotEvent("999888")
-        results1 = [r async for r in plugin.tarot_command(event, "今日")]
-        results2 = [r async for r in plugin.tarot_command(event, "今日")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results1 = [r async for r in plugin.nikke(event, "塔罗", "今日")]
+        results2 = [r async for r in plugin.nikke(event, "塔罗", "今日")]
         self.assertEqual(results1[-1][1], results2[-1][1])
         self.assertIn("【今日塔罗】", results1[-1][1])
 
@@ -358,7 +362,8 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         plugin.services.tarot = TarotService(self.root, self.runtime)
         inject_tarot_handler(plugin)
 
-        results = [r async for r in plugin.tarot_command(DummyTarotEvent("single-message"), "今日")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in plugin.nikke(DummyTarotEvent("single-message"), "塔罗", "今日")]
         self.assertEqual(sum(result[0] == "plain" for result in results), 1)
         self.assertEqual(results[-1][0], "plain")
 
@@ -371,7 +376,8 @@ class TestTarotCommandIntegration(unittest.IsolatedAsyncioTestCase):
         plugin.services.tarot = TarotService(self.root, self.runtime)
         inject_tarot_handler(plugin)
 
-        results = [r async for r in plugin.tarot_command(DummyTarotEvent(), "未知动作")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in plugin.nikke(DummyTarotEvent(), "塔罗", "未知动作")]
         self.assertEqual(len(results), 1)
         self.assertIn("用法：/妮姬 塔罗", results[0][1])
 

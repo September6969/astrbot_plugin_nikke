@@ -578,10 +578,12 @@ class ProfileFixtureTests(unittest.TestCase):
 
 
 class HelpTests(unittest.TestCase):
+    # G8-main-legacy-f（PR-6C）：NikkePlugin._help_text 包装已删除，直接调用帮助单一数据源。
     def test_help_home_has_short_navigation_and_detail_entry(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke._version import PLUGIN_VERSION
+        from astrbot_plugin_nikke.application.commands.help import help_category
 
-        text = NikkePlugin._help_text()
+        text = help_category("", PLUGIN_VERSION, include_admin=False)
         self.assertIn("/妮姬 日程", text)
         self.assertIn("/妮姬 攻略", text)
         self.assertIn("/妮姬 我的", text)
@@ -591,17 +593,21 @@ class HelpTests(unittest.TestCase):
         self.assertNotIn("【管理员】", text)
 
     def test_help_category_alias(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke._version import PLUGIN_VERSION
+        from astrbot_plugin_nikke.application.commands.help import help_category
 
-        text = NikkePlugin._help_text("account")
+        text = help_category("account", PLUGIN_VERSION, include_admin=False)
         self.assertIn("【账号】", text)
         self.assertNotIn("【管理员】", text)
 
     def test_admin_help_is_permission_scoped(self):
-        from astrbot_plugin_nikke.main import NikkePlugin
+        from astrbot_plugin_nikke._version import PLUGIN_VERSION
+        from astrbot_plugin_nikke.application.commands.help import help_category
 
-        self.assertEqual(NikkePlugin._help_text("管理"), "管理指令仅对管理员显示。")
-        self.assertIn("【管理员】", NikkePlugin._help_text("管理", True))
+        self.assertEqual(
+            help_category("管理", PLUGIN_VERSION, include_admin=False), "管理指令仅对管理员显示。"
+        )
+        self.assertIn("【管理员】", help_category("管理", PLUGIN_VERSION, include_admin=True))
 
     def test_removed_placeholders_are_not_registered(self):
         root = Path(__file__).resolve().parents[1]
@@ -851,7 +857,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             {"name_code": 2, "name_cn": "爱丽丝：仙境兔女郎", "name_en": "Alice: Wonderland Bunny"},
         ]
         inject_character_handler(plugin)
-        result = [item async for item in plugin.character(Event(), "丽丝")]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        result = [item async for item in plugin.nikke(Event(), "查询", "练度", "丽丝")]
         self.assertEqual(len(result), 1)
         self.assertIn("找到多个角色", result[0])
         self.assertIn("爱丽丝：仙境兔女郎", result[0])
@@ -877,7 +884,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
         inject_character_handler(plugin)
-        result = [item async for item in plugin.character(Event(), "爱丽丝")]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        result = [item async for item in plugin.nikke(Event(), "查询", "练度", "爱丽丝")]
         self.assertEqual(len(result), 1)
         self.assertIn("未持有", result[0])
         self.assertIn("爱丽丝", result[0])
@@ -937,8 +945,9 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin.services.client = Client()
         inject_cdk_handler(plugin)
         code = "SECRETCODE123"
-        first = [item async for item in plugin.cdk(Event(), code)]
-        second = [item async for item in plugin.cdk(Event(), code)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        first = [item async for item in plugin.nikke(Event(), "兑换", code)]
+        second = [item async for item in plugin.nikke(Event(), "兑换", code)]
         persisted = json.dumps(plugin.services.store.runs, ensure_ascii=False)
         self.assertEqual(plugin.services.client.calls, 1)
         self.assertIn("兑换成功", first[0])
@@ -971,7 +980,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
             {"name_code": 1, "name_cn": "爱丽丝", "name_en": "Alice"},
         ]
         inject_character_handler(plugin)
-        results = [item async for item in plugin.character(Event(), "爱丽丝")]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(Event(), "查询", "练度", "爱丽丝")]
         self.assertEqual(len(results), 1)
         self.assertIn("未持有", results[0])
         self.assertEqual(len(application.requests), 1)
@@ -1005,7 +1015,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin._directory = directory
         inject_character_handler(plugin)
 
-        result = [item async for item in plugin.roster(Event())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        result = [item async for item in plugin.nikke(Event(), "查询", "练度")]
 
         self.assertEqual(result, ["roster.png"])
         application.roster.assert_awaited_once_with("10001", tuple(directory))
@@ -1031,7 +1042,8 @@ class CommandRoutingTests(unittest.IsolatedAsyncioTestCase):
         plugin._directory = []
         inject_character_handler(plugin)
 
-        result = [item async for item in plugin.info(Event(), "丽丝")]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        result = [item async for item in plugin.nikke(Event(), "查询", "资料", "丽丝")]
 
         self.assertEqual(len(result), 1)
         self.assertIn("找到多个角色", result[0])

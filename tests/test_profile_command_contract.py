@@ -160,7 +160,8 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
         client = _FakeClient()
         plugin, store, builder, renderer, feedback = _plugin(account=None, client=client)
 
-        results = [item async for item in plugin.me(_FakeEvent())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(_FakeEvent(), "我的")]
 
         self.assertEqual(len(results), 1)
         self.assertEqual(
@@ -180,7 +181,8 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
             client=client,
         )
 
-        results = [item async for item in plugin.me(_FakeEvent())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(_FakeEvent(), "我的")]
 
         self.assertEqual(len(results), 1)
         self.assertIn("登录状态已失效", results[0]["text"])
@@ -196,7 +198,8 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
             client=client,
         )
 
-        results = [item async for item in plugin.me(_FakeEvent())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(_FakeEvent(), "我的")]
 
         self.assertEqual(len(results), 1)
         self.assertIn("查询失败", results[0]["text"])
@@ -218,7 +221,8 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
             return None
 
         plugin.presentation.try_t2i = failed_t2i
-        results = [item async for item in plugin.me(_FakeEvent())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(_FakeEvent(), "我的")]
 
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["kind"], "plain")
@@ -260,7 +264,8 @@ class ProfileCommandContractTests(unittest.IsolatedAsyncioTestCase):
         )
         plugin.presentation.try_t2i = AsyncMock(return_value=None)
 
-        results = [item async for item in plugin.me(_FakeEvent())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(_FakeEvent(), "我的")]
 
         assert len(results) == 1
         text = results[0]["text"]

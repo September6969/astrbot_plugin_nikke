@@ -87,7 +87,8 @@ def _plugin(*, account=None, application_response=None):
 
 def _run_me(plugin):
     async def consume():
-        return [item async for item in plugin.me(_Event())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        return [item async for item in plugin.nikke(_Event(), "我的")]
 
     return asyncio.run(consume())
 

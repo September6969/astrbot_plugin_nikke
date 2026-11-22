@@ -276,15 +276,7 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
         diagnostic_cmd_reply = [item async for item in plugin.nikke(event, "公告", "诊断")]
         self.assertNotIn("公告命令已简化", diagnostic_cmd_reply[0])
 
-        # Direct view filtering still functions without fetching or sending
-        locale_reply = [item async for item in plugin.announcements_view(event, locale="ja")]
-        category_reply = [item async for item in plugin.announcements_view(event, category="活动")]
-        query_reply = [item async for item in plugin.announcements_view(event, query="维护")]
-
-        self.assertIn("维护告知", locale_reply[0])
-        self.assertNotIn("Event Notice", locale_reply[0])
-        self.assertIn("Event Notice", category_reply[0])
-        self.assertIn("维护告知", query_reply[0])
+        # G8-main-legacy-e（PR-6C）：未注册的 announcements_view 直调断言与上方统一路由重复，已删除。
         service.sync_from_source.assert_not_awaited()
 
     async def test_deep_rescan_requires_admin_and_resubscribe_never_replays_baseline(self) -> None:
@@ -309,13 +301,9 @@ class AnnouncementV2QueryAndDeliveryTests(IsolatedAsyncioTestCase):
             self.assertIn("仅机器人管理员", denied_cmd_reply[0])
             service.sync_from_source.assert_not_awaited()
 
-            # Direct method tests permission
-            denied_reply = [item async for item in plugin.announcement_deep_rescan(denied, "ja")]
-            self.assertIn("仅机器人管理员", denied_reply[0])
-            service.sync_from_source.assert_not_awaited()
-
+            # G8-main-legacy-e（PR-6C）：遗留 announcement_deep_rescan 已删除，管理员路径改经统一路由。
             allowed = SimpleNamespace(plain_result=lambda text: text, is_admin=lambda: True)
-            allowed_reply = [item async for item in plugin.announcement_deep_rescan(allowed, "ja")]
+            allowed_reply = [item async for item in plugin.nikke(allowed, "公告", "深度刷新", "ja")]
             self.assertIn("公开只读", allowed_reply[0])
             service.sync_from_source.assert_awaited_once_with(locale="ja", deep=True)
 

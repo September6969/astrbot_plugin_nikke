@@ -8,7 +8,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+from astrbot_plugin_nikke._version import PLUGIN_VERSION
 from astrbot_plugin_nikke.adapters.astrbot.voice_adapter import AstrBotVoiceAdapter
+from astrbot_plugin_nikke.application.commands.help import help_home
 from astrbot_plugin_nikke.features.character.registries.costume import CostumeRegistry
 from astrbot_plugin_nikke.features.voice.application import VoiceApplication
 from astrbot_plugin_nikke.main import NikkePlugin
@@ -180,7 +182,8 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         event = self._event()
 
         # 切换到阿尔卡娜（简中）
-        results = [r async for r in self.plugin.voice_settings(event, "角色", "阿尔卡娜")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in self.plugin.nikke(event, "语音", "角色", "阿尔卡娜")]
         self.assertEqual(len(results), 1)
         self.assertIn("arcana", results[0])
 
@@ -190,13 +193,13 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(pref.spine_asset_id, "")
 
         # 切换到德雷克
-        results = [r async for r in self.plugin.voice_settings(event, "角色", "德雷克")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "角色", "德雷克")]
         self.assertIn("drake", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.character, "drake")
 
         # 未知角色拒绝
-        results = [r async for r in self.plugin.voice_settings(event, "角色", "火星妮姬")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "角色", "火星妮姬")]
         self.assertIn("未找到妮姬：火星妮姬", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.character, "drake")  # 保持原状
@@ -206,37 +209,38 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         event = self._event()
 
         # 先设为拉毗
-        [r async for r in self.plugin.voice_settings(event, "角色", "rapi")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        [r async for r in self.plugin.nikke(event, "语音", "角色", "rapi")]
 
         # 设为 Classic Vacation (10005)
-        results = [r async for r in self.plugin.voice_settings(event, "服装", "10005")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "服装", "10005")]
         self.assertIn("10005", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "10005")
         self.assertEqual(pref.spine_asset_id, "c010_03")
 
         # 恢复默认
-        results = [r async for r in self.plugin.voice_settings(event, "服装", "默认")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "服装", "默认")]
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "default")
         self.assertEqual(pref.spine_asset_id, "")
 
         # 切换角色到德雷克后，尝试选择拉毗的服装 10005 -> 拒绝
-        [r async for r in self.plugin.voice_settings(event, "角色", "drake")]
-        results = [r async for r in self.plugin.voice_settings(event, "服装", "10005")]
+        [r async for r in self.plugin.nikke(event, "语音", "角色", "drake")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "服装", "10005")]
         self.assertIn("不属于", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "default")
 
         # 德雷克选择自己的 80001 (Villain Racer) -> 成功
-        results = [r async for r in self.plugin.voice_settings(event, "服装", "80001")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "服装", "80001")]
         self.assertIn("80001", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.skin, "80001")
         self.assertEqual(pref.spine_asset_id, "c101_01")
 
         # 选择未核验服装 -> 拒绝
-        results = [r async for r in self.plugin.voice_settings(event, "服装", "999999")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "服装", "999999")]
         self.assertIn("未找到已核验服装", results[0])
 
     async def test_voice_settings_locale_clean_options(self):
@@ -244,19 +248,20 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         event = self._event()
 
         # 允许 ja
-        results = [r async for r in self.plugin.voice_settings(event, "语言", "ja")]
+        # G8-main-legacy-f（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in self.plugin.nikke(event, "语音", "语言", "ja")]
         self.assertIn("ja", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.locale, "ja")
 
         # 允许 en
-        results = [r async for r in self.plugin.voice_settings(event, "语言", "en")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "语言", "en")]
         self.assertIn("en", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.locale, "en")
 
         # 拒绝 zh-cn
-        results = [r async for r in self.plugin.voice_settings(event, "语言", "zh-cn")]
+        results = [r async for r in self.plugin.nikke(event, "语音", "语言", "zh-cn")]
         self.assertIn("用法：", results[0])
         pref = VoicePreference.load(self.plugin.services.store, "aiocqhttp:123456")
         self.assertEqual(pref.locale, "en")  # 保持不变
@@ -275,7 +280,8 @@ class VoicePluginSettingsMockTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(hasattr(self.plugin, "voice_resolver"))
 
         # 3. 帮助文本中不再包含戳一戳
-        help_text = self.plugin._help_text()
+        # G8-main-legacy-f（PR-6C）：_help_text 包装已删除，直接校验帮助单一数据源首页。
+        help_text = help_home(PLUGIN_VERSION, include_admin=False)
         self.assertNotIn("戳一戳", help_text)
         self.assertNotIn("poke", help_text.lower())
         self.assertNotIn("互动台词", help_text)
