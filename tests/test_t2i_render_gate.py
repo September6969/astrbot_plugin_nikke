@@ -343,7 +343,8 @@ async def test_renderer_builds_payloads_off_loop_and_reuses_builders(tmp_path, a
     renderer = T2IRenderer(AsyncMock(return_value="ok.png"), assets)
     main_thread = threading.current_thread()
     seen: dict[str, threading.Thread] = {}
-    for page in ("profile", "union_overview", "union_member"):
+    spied = ("profile", "union_overview", "union_member", "union_records", "roster")
+    for page in spied:
         builder = renderer._builder(page)
         original = builder.build
 
@@ -355,7 +356,15 @@ async def test_renderer_builds_payloads_off_loop_and_reuses_builders(tmp_path, a
     await renderer.render_view("profile", get_cases("profile", tmp_path)["full"])
     await renderer.render_view("union_overview", get_cases("union_overview", tmp_path)["normal"])
     await renderer.render_view("union_member", get_cases("union_member", tmp_path)["1-record"])
-    assert seen and all(thread is not main_thread for thread in seen.values())
+    await renderer.render_view("union_records", next(iter(get_cases("union_records", tmp_path).values())))
+    from astrbot_plugin_nikke.features.character.application import CharacterRosterData
+    await renderer.render_view("roster", CharacterRosterData(
+        commander_name="测试指挥官", characters=({"name_code": "3001", "lv": 200, "combat": 1_234_567},),
+        name_map={"3001": "拉毗"},
+    ))
+    # 每个线程化页面都必须实际经过缓存 builder 且不在事件循环线程上构建。
+    assert set(seen) == set(spied) == set(renderer._THREADED_BUILDERS)
+    assert all(thread is not main_thread for thread in seen.values())
     assert renderer._builder("profile") is renderer._builder("profile")
 
     character_threads = []
@@ -399,3 +408,33 @@ def test_asset_resolver_path_cache_hit_skips_decode_and_full_image_hash(tmp_path
     # 文件内容变化（修改时间/字节数不同）时不得复用旧编码。
     Image.new("RGBA", (800, 600), "blue").save(path)
     assert resolver.encode(path, (1600, 1200)) != uri
+
+
+def test_verified_portrait_skips_full_image_hash_on_cache_hit(monkeypatch):
+    import hashlib
+    from PIL import Image
+    from astrbot_plugin_nikke.core.assets.spine_manifest import VERIFIED_SOURCE_OBJECT, VERIFIED_SOURCE_SHA256
+    from astrbot_plugin_nikke.ui import t2i_assets
+
+    portrait = Image.new("RGBA", (64, 96), (10, 20, 30, 255))
+    portrait.info[VERIFIED_SOURCE_SHA256] = "a" * 64
+    portrait.info[VERIFIED_SOURCE_OBJECT] = id(portrait)
+    hashed: list[int] = []
+    original_sha256 = hashlib.sha256
+
+    def counting_sha256(data=b""):
+        hashed.append(len(data))
+        return original_sha256(data)
+
+    monkeypatch.setattr(t2i_assets.hashlib, "sha256", counting_sha256)
+    resolver = t2i_assets.T2IAssetResolver()
+    first = resolver.encode(portrait, (32, 48))
+    assert resolver.encode(portrait, (32, 48)) == first
+    assert hashed == [], "已校验来源的原图不得再做全图像素哈希（AUD-021）"
+
+    # 派生图片继承 info 但对象身份不同：必须回到像素摘要，不能复用原图缓存。
+    derived = portrait.copy()
+    derived.putpixel((0, 0), (255, 0, 0, 255))
+    assert derived.info.get(VERIFIED_SOURCE_SHA256) == "a" * 64
+    assert resolver.encode(derived, (32, 48)) != first, "派生图片必须按像素重新计算缓存键"
+    assert hashed, "派生图片应走像素摘要路径"

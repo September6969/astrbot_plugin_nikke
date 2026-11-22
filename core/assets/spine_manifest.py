@@ -21,6 +21,10 @@ logger = logging.getLogger("nikke.asset_manager")
 RENDER_ID_PATTERN = re.compile(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?")
 
 
+# T2I 资源缓存用于识别“已按文件 SHA-256 校验、未经修改的原图”的 info 键。
+VERIFIED_SOURCE_SHA256 = "nikke_verified_source_sha256"
+VERIFIED_SOURCE_OBJECT = "nikke_verified_source_object"
+
 class SpineManifestStore:
     def __init__(
         self,
@@ -187,4 +191,9 @@ class SpineManifestStore:
             return None
         if image is None:
             logger.warning("STATIC_SPINE_ASSET_INVALID: %s", char_id)
+            return image
+        # 文件字节已按清单 SHA-256 校验：记录来源摘要与对象身份，供 T2I 资源缓存直接复用，
+        # 不再对 15MB+ 的 RGBA 位图重复做全图哈希。派生图片会继承 info 但对象不同，不会误用。
+        image.info[VERIFIED_SOURCE_SHA256] = digest
+        image.info[VERIFIED_SOURCE_OBJECT] = id(image)
         return image

@@ -68,9 +68,22 @@ class T2IAssetResolver:
             elif isinstance(source, Image.Image):
                 if source.width * source.height > 20_000_000:
                     return None
-                # 已是 RGBA 时直接对源位图取摘要，避免为计算缓存键先复制一份完整缓冲区。
-                prepared = source if source.mode == "RGBA" else source.convert("RGBA")
-                key = ("pixels", hashlib.sha256(prepared.tobytes()).digest(), prepared.size, *options)
+                verified = source.info.get("nikke_verified_source_sha256")
+                if (
+                    isinstance(verified, str)
+                    and len(verified) == 64
+                    and source.info.get("nikke_verified_source_object") == id(source)
+                ):
+                    # 已按文件 SHA-256 校验的原图（同一对象，未派生）：以来源摘要为键，
+                    # 命中时跳过 15MB+ RGBA 全图哈希与 tobytes() 复制（AUD-021）。
+                    key = ("verified", verified, source.size, *options)
+                    cached = self._lookup(key)
+                    if cached is not None:
+                        return cached
+                    prepared = source if source.mode == "RGBA" else source.convert("RGBA")
+                else:
+                    prepared = source if source.mode == "RGBA" else source.convert("RGBA")
+                    key = ("pixels", hashlib.sha256(prepared.tobytes()).digest(), prepared.size, *options)
                 cached = self._lookup(key)
                 if cached is not None:
                     return cached
