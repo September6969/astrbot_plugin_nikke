@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {makeAttachmentCandidate} from '../scripts/spine_attachment_candidates.mjs';
+// G9-scripts-docs-a5（PR-6C）：根兼容壳已删除，直接导入分类实现。
+import {makeAttachmentCandidate} from '../scripts/spine/spine_attachment_candidates.mjs';
 
 test('attachment candidate exposes stable discovery fields and center point', () => {
   const candidate = makeAttachmentCandidate({

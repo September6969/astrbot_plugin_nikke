@@ -19,7 +19,7 @@
 
 ## Spine Face Anchor
 
-- 离线 `prepare_face_anchors.py` 调用 `extract_spine_face_anchor.mjs`：优先可见 eye attachment，其次 face、head attachment，最后 head bone；排除眉毛、睫毛及高光候选。
+- 离线 `scripts/spine/prepare_face_anchors.py` 调用 `scripts/spine/extract_spine_face_anchor.mjs`：优先可见 eye attachment，其次 face、head attachment，最后 head bone；排除眉毛、睫毛及高光候选。
 - 使用匹配骨架版本的 Spine Core、idle 动画第 0 帧，结合渲染边界、画布、裁切框与 padding 转换为最终 PNG 坐标。
 - metadata 按正式角色／皮肤资源 ID 保存锚点、范围、骨架／atlas／PNG 哈希、像素哈希、尺寸、动画与变换。同一皮肤支持多个已验证分辨率。
 - 运行时 `face_anchor.py` 只消费 metadata 和 PNG，校验身份、尺寸和像素哈希，不解析 Spine。缺失／不匹配时等比完整显示，不猜坐标、不使用默认皮肤锚点。
