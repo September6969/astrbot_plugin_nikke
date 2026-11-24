@@ -13,9 +13,9 @@ from pathlib import Path
 from PIL import Image, ImageFile
 
 try:
-    from .prerenderer import SpineBundle, SpineRenderError
+    from .bundle import SpineBundle, SpineRenderError
 except ImportError:  # 允许维护脚本直接以文件路径运行
-    from astrbot_plugin_nikke.integrations.spine.prerenderer import SpineBundle, SpineRenderError  # type: ignore[no-redef]
+    from astrbot_plugin_nikke.integrations.spine.bundle import SpineBundle, SpineRenderError  # type: ignore[no-redef]
 
 
 class LocalSpineResolveError(SpineRenderError):

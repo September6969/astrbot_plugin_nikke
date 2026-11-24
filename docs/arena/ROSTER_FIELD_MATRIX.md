@@ -9,6 +9,7 @@
 | lv、combat | 老测试包含部分样本 | unknown | 当前计算不读取 |
 | skill1_lv、skill2_lv、ulti_skill_lv | 完整详情模式额外请求后合并 | unknown | 轻量路径视为缺失 |
 | 珍藏品阶段 | 轻量名单合同没有保证 | unknown | 绑定持有不推断珍藏状态 |
+| favorite_item_tid（单角色详情） | 仅读取网关 30 秒短缓存内已有的详情，不额外请求 | 待生产验证 | 与 registry 专属珍藏品一致才标「官方详情确认」；不一致标为官方未装备；无详情只作「基础名单推测」提示 |
 | 魔方 | 轻量名单合同没有保证 | unknown | 输出缺失 |
 | 装备、超频及收藏品细项 | 单角色详情可提供部分数据 | unknown | 当前名单端口不调用 |
 | 原始 Cookie、X-Common-Params | 只供原账号网关使用 | 私密 | 不进入 Arena DTO 或网页 |

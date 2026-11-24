@@ -172,7 +172,8 @@ class RuntimeHealthTests(IsolatedAsyncioTestCase):
 
             with patch("astrbot_plugin_nikke.core.health.shutil.disk_usage") as disk_usage:
                 disk_usage.return_value = SimpleNamespace(free=2 * 1024**3, total=4 * 1024**3)
-                result = [item async for item in plugin.health(event)]
+                # G8-main-legacy-b（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+                result = [item async for item in plugin.nikke(event, "health")]
 
             self.assertEqual(len(result), 1)
             self.assertIn("状态：正常", result[0])

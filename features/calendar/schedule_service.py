@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Literal, Sequence
 
 from .models import CalendarActivity
-from .ports import CalendarFetchGateway, CalendarVisualPort
+from .ports import CalendarVisualPort
 from .canonical_models import (
     CanonicalEvent,
     Coverage,
@@ -22,19 +22,9 @@ from .canonical_models import (
 )
 from .schedule_adapters import (
     BaseScheduleAdapter,
-    GameKeeScheduleAdapter,
-    OfficialAnnouncementScheduleAdapter,
     ManualOverrideScheduleAdapter,
 )
-from .merge import (
-    CalendarMergePolicy,
-    _ActivitiesDict,
-    _build_identity_key,
-    _is_same_event,
-    _is_same_identity,
-    _merge_two_events,
-    _title_similarity,
-)
+from .merge import CalendarMergePolicy, _ActivitiesDict
 from .snapshot_repository import CalendarSnapshotRepository
 from .snapshot_state import SnapshotState
 from dataclasses import asdict
@@ -48,11 +38,12 @@ class ScheduleService:
         data_dir: Path | str,
         *,
         visual_cache: CalendarVisualPort | None | Literal[False] = None,
-        fetch_client: CalendarFetchGateway | None = None,
-        announcement_service: Any = None,
-        ttl_seconds: float = 300.0,
-        **kwargs: Any,
+        adapters: Sequence[BaseScheduleAdapter] | None = None,
+        # 须大于 300s 调度周期，避免正常同步间隔就把数据判为 STALE；连续失败仍转 STALE。
+        ttl_seconds: float = 900.0,
+        task_factory: Any = None,
     ) -> None:
+        """adapters 由组合根注入（生产为 BlaBlaLink 单源）；未注入时只含本地手动覆盖层。"""
         self.merge_policy = CalendarMergePolicy()
         self.snapshot_repository = CalendarSnapshotRepository()
         self.snapshot_state = SnapshotState()
@@ -68,8 +59,6 @@ class ScheduleService:
         self.cache_path = self.data_dir / "calendar_cache.json"  # 100% 兼容文件
         self.overrides_path = self.data_dir / "schedule_overrides.json"
 
-        self.fetch_client = fetch_client
-        self.announcement_service = announcement_service
         self.ttl_seconds = ttl_seconds
 
         # 视觉缓存
@@ -107,21 +96,7 @@ class ScheduleService:
         self.last_sync_report: dict[str, int] | None = None
         self.last_visual_sync: dict[str, int] | None = None
         self.quality_diagnostics: dict[str, Any] = {
-            "gamekee_rows": 0,
-            "gamekee_valid": 0,
-            "gamekee_malformed": 0,
-            "gamekee_duplicates": 0,
-            "with_visual": 0,
             "canonical_total": 0,
-            "identity_matches": 0,
-            "canonical_title_matches": 0,
-            "identity_ambiguous": 0,
-            "identity_distinct": 0,
-            "official_deadlines_seen": 0,
-            "official_deadlines_filtered": 0,
-            "official_deadlines_parsed": 0,
-            "official_enriched_existing": 0,
-            "official_created_new": 0,
             "relevance_core": 0,
             "relevance_supporting": 0,
             "relevance_meta": 0,
@@ -131,25 +106,21 @@ class ScheduleService:
 
         self._sync_lock = asyncio.Lock()
         self._refresh_task = None
-        self._task_factory = kwargs.get("task_factory")
+        self._task_factory = task_factory
 
-        # 默认适配器链
+        # 手动覆盖层始终加载；远程源由组合根注入（PR-6B 移除 source_mode 与
+        # features -> integrations 的惰性导入）。未注入时仅含本地手动覆盖。
         self.manual_adapter = ManualOverrideScheduleAdapter(self.overrides_path)
-        self.adapters: list[BaseScheduleAdapter] = [
-            self.manual_adapter,
-            GameKeeScheduleAdapter(self.fetch_client),
-            OfficialAnnouncementScheduleAdapter(self.announcement_service),
-        ]
-
-        self.source_mode = kwargs.get("source_mode", "legacy")
-        if self.source_mode == "blabla":
-            from ...integrations.calendar.blabla_source import BlablaCalendarAdapter
-            self.adapters = [BlablaCalendarAdapter()]
+        self.adapters: list[BaseScheduleAdapter] = (
+            list(adapters) if adapters is not None else [self.manual_adapter]
+        )
         self._load_cache()
-        if self.source_mode == "blabla":
-            # 停用源的旧快照不参与展示，也不以旧数据冒充新源成功。
-            self._source_datasets = {k:v for k,v in self._source_datasets.items() if k == "blabla"}
-            self._source_health = {k:v for k,v in self._source_health.items() if k == "blabla"}
+        if adapters is not None:
+            # 未装配来源（如已删除的 GameKee/官方公告）的旧快照不参与展示，
+            # 也不以旧数据冒充已装配来源成功。
+            configured = {adapter.source_name for adapter in self.adapters}
+            self._source_datasets = {k: v for k, v in self._source_datasets.items() if k in configured}
+            self._source_health = {k: v for k, v in self._source_health.items() if k in configured}
             self._base_events = self._merge_datasets()
             self._sync_internal_stores(self._base_events)
             self._has_snapshot = bool(self._source_datasets)
@@ -166,6 +137,10 @@ class ScheduleService:
 
     def has_snapshot(self) -> bool:
         return self._has_snapshot
+
+    def has_failed_sources(self) -> bool:
+        """是否有数据源处于连续失败中；仅单条记录解析警告（PARTIAL）不计入。"""
+        return any(health.consecutive_failures > 0 for health in self._source_health.values())
 
     @property
     def snapshot_diagnostics(self) -> dict[str, Any]:

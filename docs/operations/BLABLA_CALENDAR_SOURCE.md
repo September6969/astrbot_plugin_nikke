@@ -1,10 +1,10 @@
 # BlaBlaLink 日程主源
 
-生产组装显式使用 source_mode=blabla，仅连接官网公开 GetCalendarDetail 接口，POST空对象，使用zh-TW语言。不使用账号Cookie。直接构造服务的legacy模式仅保留给旧测试、诊断和回滚兼容。
+生产组合根 `core/providers/announcement.py` 以 `adapters=(BlablaCalendarAdapter(),)` 注入唯一日程源（PR-6B 起已删除 `source_mode`），仅连接官网公开 GetCalendarDetail 接口，POST空对象，使用zh-TW语言。不使用账号Cookie。直接构造服务且未注入 `adapters` 时只含本地手动覆盖层，供测试与诊断使用；注入后未装配来源的旧快照在载入时被过滤。
 
 按事件类型筛选招募、剧情活动、签到、联盟/个人突袭、协同、月度/活动通行证、转盘。接口当前未返回的其他类型不从旧源补齐，也不宣称完整覆盖游戏内活动。竞技场、模拟室不展示。相同签到横幅和周期在不同栏目合并；不同招募身份、不同剧情名称保留。所有时间来自服务端秒级时间戳，不猜测Story1/Story2/Hard开放时间。
 
-横幅使用官网schedule/banner路径；月度通行证使用icon/Logo/pass路径，经现有缓存下载校验。背景只从当前日程事件中选择，不回退到任意旧GameKee图片。旧公告和GameKee适配器保留但生产不启用，旧源快照不混入新源。
+横幅使用官网schedule/banner路径；月度通行证使用icon/Logo/pass路径，经现有缓存下载校验。背景只从当前与即将开始的日程事件中选择，不回退到视觉缓存清单中的任意旧图片（PR-6B 起生产快照路径与 T2I 构建器共用 `features/calendar/feed_rules.background_candidate_ids`）。旧公告和GameKee日程适配器已在 PR-6B（Decision 5 = A）删除，不再提供配置开关；如需恢复只能 `git revert` 对应提交。持久化的旧源快照仍可容错读取，但会被过滤，不混入新源。
 
 保留日程原命令和订阅。切源会更换事件ID；不会迁移旧提醒发送记录到不同身份的新事件，部署后需注意当天已发过的同活动可能再次满足提醒条件。没有调用上游订阅写接口，也没有主动群发。
 

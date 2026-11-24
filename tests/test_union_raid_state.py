@@ -136,10 +136,9 @@ class PrefixNormalizationAndCommandTests(unittest.IsolatedAsyncioTestCase):
         )
         event = SimpleNamespace(plain_result=lambda text: text)
 
-        for bad_arg in ("10", "5", "最新", "活动", "语言 ja", "分类 维护"):
+        for bad_arg in ("10", "5", "最新", "活动"):
             reply = [item async for item in plugin.nikke(event, "公告", bad_arg)]
-            self.assertIn("公告命令已简化，请使用：", reply[0])
-            self.assertIn("/妮姬 公告", reply[0])
+            self.assertIn("用法：/妮姬 公告", reply[0])
 
     async def test_hash_prefix_in_nikke_command(self):
         from astrbot_plugin_nikke.application.commands.contracts import (

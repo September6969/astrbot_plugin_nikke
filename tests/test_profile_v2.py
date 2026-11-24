@@ -210,7 +210,8 @@ class ProfileV2ClientTests(unittest.IsolatedAsyncioTestCase):
             present=plugin.presentation.render_profile,
         )
         plugin.services.feedback_manager = None
-        results = [item async for item in plugin.me(Event())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(Event(), "我的")]
         self.assertEqual(len(results), 1)
         self.assertIn("命令链合成账号", str(results[0]))
         self.assertEqual(calls.count(PROFILE), 1)

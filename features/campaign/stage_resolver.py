@@ -33,6 +33,7 @@ class CampaignStageResolver:
         self.mapping = mapping
         # 反向索引只从已验证的静态表构建；不使用章节编号公式推导 ID。
         self.by_id: dict[int, CampaignStage] = {}
+        ambiguous: set[int] = set()
         for mode, chapters in mapping.items():
             normalized_mode = self.normalize_mode(mode)
             if not isinstance(chapters, dict):
@@ -53,8 +54,12 @@ class CampaignStageResolver:
                     if not cleaned_name or numeric_id < 0:
                         continue
                     # 当前 verified 表中的 ID 唯一；重复值不静默覆盖，避免错误关卡名。
+                    # 一旦出现重复即永久标记为歧义，第三次出现也不能重新登记（奇数次重复覆盖）。
+                    if numeric_id in ambiguous:
+                        continue
                     if numeric_id in self.by_id:
                         del self.by_id[numeric_id]
+                        ambiguous.add(numeric_id)
                         continue
                     self.by_id[numeric_id] = CampaignStage(
                         mode=normalized_mode,

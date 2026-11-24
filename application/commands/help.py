@@ -1,11 +1,17 @@
 """为宿主路由提供静态帮助展示与发布门禁。"""
 
 from ...features.help.catalog import Topic
-from ...features.help.renderer import detail, home
+from ...features.help.renderer import category, detail, home
 
 
 def help_home(version: str, *, include_admin: bool, arena: bool = False) -> str:
     return home(version, include_admin=include_admin, arena=arena)
+
+
+def help_category(name: str, version: str, *, include_admin: bool, arena: bool = False) -> str:
+    return category(name, include_admin=include_admin) or home(
+        version, include_admin=include_admin, arena=arena
+    )
 
 
 def help_detail(topic: str, *, include_admin: bool, arena_enabled: bool, web_enabled: bool,

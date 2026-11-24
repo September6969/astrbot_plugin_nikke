@@ -110,7 +110,8 @@ class AstrBotRuntimeAdapterTests(unittest.IsolatedAsyncioTestCase):
             await runtime.close()
             await runtime.close()
 
-            self.assertEqual(events[-4:], ["feedback", "voice", "assets", "web"])
+            # AUD-011：先停止对外入口 web，再逆序关闭内部资源。
+            self.assertEqual(events[-4:], ["web", "assets", "voice", "feedback"])
             self.assertEqual(services.web.stop.await_count, 1)
             self.assertTrue(coordinator.closed)
             self.assertEqual(coordinator.active_task_count, 0)

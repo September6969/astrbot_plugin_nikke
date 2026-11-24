@@ -8,6 +8,7 @@
 {% set c_h = canvas.height if canvas is defined and canvas.height is defined else 900 %}
   <style>
 <!-- SHARED_CSS -->
+:root { --canvas-width: {{ c_w }}px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   width: {{ c_w }}px;
@@ -347,6 +348,14 @@ html, body {
   min-height: 136px;
 }
 .next-main { min-width: 0; }
+/* 超规格单项：payload 已按页面预算给出最多行数（title_max_lines），标题在卡片内以省略号收尾，
+   卡片高度与预算一致，不会越过 content-area 撞到页脚。未收紧的超长标题保持完整换行。 */
+.is-oversize .is-capped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--title-max-lines);
+  overflow: hidden;
+}
 .next-meta { display: flex; align-items: center; gap: 24px; margin-bottom: 6px; }
 .next-time {
   color: #bac9da;
@@ -481,8 +490,8 @@ html, body {
     </div>
   </header>
 
-  <section class="key-visual {% if not background_data_uri %}no-poster{% endif %} {% if is_portrait %}is-portrait{% else %}is-landscape{% endif %}"
-           style="--poster-image:{% if background_data_uri %}url('{{ background_data_uri }}'){% else %}none{% endif %};">
+  {# --poster-image 由 main 继承，不再重复内联第二份 base64 宣传图。 #}
+  <section class="key-visual {% if not background_data_uri %}no-poster{% endif %} {% if is_portrait %}is-portrait{% else %}is-landscape{% endif %}">
     <div class="poster-backdrop" aria-hidden="true"></div>
     <div class="poster-panel">
       <div class="poster-art" aria-hidden="true"></div>
@@ -522,7 +531,7 @@ html, body {
                 <span class="badge-ending">即将结束</span>
                 {% endif %}
               </div>
-              <h3 class="card-title" title="{{ item.full_title }}">{{ item.title }}</h3>
+              <h3 class="card-title{{ ' is-capped' if item.title_max_lines is defined else '' }}" title="{{ item.full_title }}"{% if item.title_max_lines is defined %} style="--title-max-lines: {{ item.title_max_lines }};"{% endif %}>{{ item.title }}</h3>
             </div>
             <aside class="card-side">
               {% if item.end_precision == 'UNKNOWN' %}
@@ -565,7 +574,7 @@ html, body {
             <div class="next-main">
             <div class="next-meta"><div class="next-time">{{ item.start_time_display }}</div>
             <div class="next-category">{{ item.category }}</div></div>
-            <h3 class="next-title" title="{{ item.full_title }}">{{ item.title }}</h3>
+            <h3 class="next-title{{ ' is-capped' if item.title_max_lines is defined else '' }}" title="{{ item.full_title }}"{% if item.title_max_lines is defined %} style="--title-max-lines: {{ item.title_max_lines }};"{% endif %}>{{ item.title }}</h3>
             </div>
             <div class="next-starts">
               {% if item.start_precision == 'UNKNOWN' %}时间待确认

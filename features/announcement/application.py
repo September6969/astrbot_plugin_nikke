@@ -42,11 +42,9 @@ class AnnouncementApplication:
         *,
         announcements: Any,
         delivery: Any,
-        deadline_selector: Callable[[list[Any]], list[Any]] | None = None,
     ) -> None:
         self._announcements = announcements
         self._delivery = delivery
-        self._deadline_selector = deadline_selector or (lambda deadlines: deadlines)
 
     async def sync_announcements(self) -> tuple[bool, str]:
         """同步公开公告源，供启动和定时刷新使用。"""
@@ -58,13 +56,15 @@ class AnnouncementApplication:
         *,
         now: datetime | None = None,
     ) -> AnnouncementDispatchResult:
-        """由应用唯一编排内容、提醒和持久化投递状态机。"""
+        """由应用唯一编排公告推送与持久化投递状态机。
+
+        Decision 4b：管理员公告订阅只推官方公告本身；活动截止提醒统一由个人
+        “/妮姬 日程 订阅”负责，避免同群双重截止提醒。
+        """
         records = self._announcements.list_announcements(limit=10000)
-        fallback_deadlines = self._announcements.list_active_deadlines()
-        deadlines = self._deadline_selector(fallback_deadlines)
         result = await self._delivery.dispatch(
             records,
-            deadlines,
+            (),
             sender,
             now=now,
         )

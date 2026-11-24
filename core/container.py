@@ -36,7 +36,7 @@ from ..features.profile.builder import ProfileBuilder
 from ..features.profile.application import ProfileApplication
 from ..features.raid.application import RaidApplication
 from ..features.raid.builder import UnionRaidBuilder
-from ..features.tarot.service import TarotDataError, TarotService
+from ..features.tarot.service import TarotService
 from ..features.tower.application import TowerApplication
 from ..features.voice.application import VoiceApplication
 from ..integrations.web.service import BindingWebService
@@ -118,7 +118,6 @@ def create_container(
     store = shared.store
     account_application = create_account_application(store)
     client = shared.client
-    user_aliases = (config or {}).get("custom_character_aliases")
     clock = lambda: datetime.now(timezone(timedelta(hours=8)))
     character = create_character_resources(
         plugin_dir,

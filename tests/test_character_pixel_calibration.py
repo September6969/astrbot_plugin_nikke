@@ -207,7 +207,9 @@ def test_character_font_audit_and_fallback():
     assert rajdhani_font().startswith("data:font/ttf;base64,")
     assert rajdhani_semibold_font().startswith("data:font/ttf;base64,")
 
-    # Payload building includes all font URIs
+    # Payload building embeds only the fonts referenced by the active typography profile.
+    # AUD-021：旧断言要求默认卡内联全部 7 份字体（含重复的 font_noto 与默认档位未引用的
+    # 两个 SemiBold 字重），每张卡约 0.8MB 冗余；现只内联当前档位实际引用的字体。
     import types
     card = example_card()
     dummy_assets = types.SimpleNamespace(
@@ -215,9 +217,12 @@ def test_character_font_audit_and_fallback():
         skills={}, favorite_item=None, cube=None
     )
     payload = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, dummy_assets)
-    for font_key in ("font_noto", "font_noto_700", "font_noto_800", "font_barlow", "font_barlow_sb", "font_rajdhani", "font_rajdhani_sb"):
+    assert payload["typo_set"] == "typo-set-b"
+    for font_key in ("font_noto_700", "font_noto_800", "font_barlow", "font_rajdhani"):
         assert font_key in payload
         assert payload[font_key].startswith("data:font/")
+    for font_key in ("font_noto", "font_barlow_sb", "font_rajdhani_sb"):
+        assert font_key not in payload
 
     # Rendered HTML audit
     rendered = Environment().from_string(T2ITemplateLoader().load("character")).render(**payload)
@@ -226,9 +231,18 @@ def test_character_font_audit_and_fallback():
     assert "font-weight:700" in rendered
     assert "font-weight:800" in rendered
     assert "@font-face{font-family:'NikkeBarlowCondensed'" in rendered
-    assert "@font-face{font-family:'NikkeBarlowCondensedSemiBold'" in rendered
+    assert "@font-face{font-family:'NikkeBarlowCondensedSemiBold'" not in rendered
     assert "@font-face{font-family:'NikkeRajdhani'" in rendered
-    assert "@font-face{font-family:'NikkeRajdhaniSemiBold'" in rendered
+    assert "@font-face{font-family:'NikkeRajdhaniSemiBold'" not in rendered
+
+    # 设计审查档位 D 仍能拿到它真正引用的 SemiBold 字重。
+    profile_d = CharacterT2IPayloadBuilder(T2IAssetResolver()).build(card, dummy_assets, typo_set="header-font-d")
+    assert profile_d["font_barlow_sb"].startswith("data:font/ttf;base64,")
+    assert profile_d["font_rajdhani_sb"].startswith("data:font/ttf;base64,")
+    rendered_d = Environment().from_string(T2ITemplateLoader().load("character")).render(**profile_d)
+    assert "@font-face{font-family:'NikkeBarlowCondensedSemiBold'" in rendered_d
+    assert "@font-face{font-family:'NikkeRajdhaniSemiBold'" in rendered_d
+    assert 'class="character header-font-d"' in rendered_d
     assert "--font-cn-title:'NikkeNotoSC'" in rendered
     assert "font-synthesis:none;" in rendered
     assert 'class="long"' not in rendered
@@ -241,9 +255,11 @@ def test_character_font_audit_and_fallback():
     long_rendered = Environment().from_string(T2ITemplateLoader().load("character")).render(**long_payload)
     assert 'class="long"' in long_rendered
 
-    # Fallback resilience: when WOFF2 is missing, noto_font still resolves from OTF
+    # PR-6A G2-fonts-license-a：NotoSansHans OTF 已删除（运行时从未加载）。
+    # 改为覆盖 OTF MIME 分支（ReplicaSans）与缺失文件分支。
     from astrbot_plugin_nikke.features.character.replica import _load_font_data_uri
-    assert _load_font_data_uri("NotoSansHans-Medium.otf").startswith("data:font/otf;base64,")
+    assert _load_font_data_uri("ReplicaSans.otf").startswith("data:font/otf;base64,")
+    assert _load_font_data_uri("NotoSansHans-Medium.otf") is None
 
 
 import pytest

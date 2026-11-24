@@ -4,7 +4,7 @@
 本服务完全继承自底层统一 ScheduleService，全面具备：
 1. Runtime Status Resolver 与精确时间语义；
 2. 每源 LKG 与部分故障容灾机制；
-3. 字段级证据、仲裁与手动覆盖层；
+3. 按事件 ID 的单遍聚合与手动覆盖层；
 4. 视觉缓存 (CalendarVisualCache) 与背景管理；
 5. 对旧版 v0.4 / v0.5 Calendar 测试与调用方 100% 向后兼容。
 """
@@ -29,8 +29,11 @@ class CalendarService(ScheduleService):
         self.application = CalendarApplication(self, task_factory=self._task_factory)
 
     async def aclose(self) -> None:
-        if hasattr(self, "fetch_client") and hasattr(self.fetch_client, "aclose"):
-            await self.fetch_client.aclose()
+        """关闭持有长连接的已装配日程源；BlaBlaLink 源每次请求自建连接，无需关闭。"""
+        for adapter in list(self.adapters):
+            close = getattr(adapter, "aclose", None)
+            if callable(close):
+                await close()
 
 
 __all__ = ["CalendarService", "CAT_LABELS", "CST"]

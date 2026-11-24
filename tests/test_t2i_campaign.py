@@ -30,7 +30,10 @@ async def test_render_contract(name):
     assert await renderer.render_campaign_history(record) == "output.png"
     template, payload = native.call_args.args
     assert json.loads(json.dumps(payload)) == payload
-    assert native.call_args.kwargs["options"] == T2IRenderer.OPTIONS
+    # AUD-017：战役卡显式声明 1600×900 画布，渲染选项需携带对应视口，不再落回渲染端默认视口。
+    assert native.call_args.kwargs["options"] == {
+        **T2IRenderer.OPTIONS, "viewport": {"width": 1600, "height": 900},
+    }
     for forbidden in ("{% include", "{% import", "file://", "<script", "https://", "http://", "|safe"):
         assert forbidden not in template
     html = Environment(autoescape=False).from_string(template).render(**payload)
@@ -123,7 +126,8 @@ async def test_handler_text_fallback_uses_same_dto_without_second_fetch(failure)
         plain_result=lambda text: text,
         get_sender_id=lambda: "qq-123",
     )
-    results = [result async for result in plugin.campaign(event, "46-40")]
+    # G8-main-legacy-e（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+    results = [result async for result in plugin.nikke(event, "战役", "46-40")]
     assert len(results) == 1
     assert "战役历史阵容" in results[0]
     assert "图片生成失败" in results[0]

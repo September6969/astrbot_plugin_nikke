@@ -38,7 +38,8 @@ class PersistenceTests(IsolatedAsyncioTestCase):
             def plain_result(self, text):
                 return text
 
-        output = [item async for item in plugin.cdk_batch(Event(), "SECRET-CODE")]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        output = [item async for item in plugin.nikke(Event(), "兑换", "批量", "SECRET-CODE")]
 
         plugin.services.cdk_service.redeem_batch.assert_awaited_once_with(
             {"qq_id": "synthetic-user", "game_uid": "synthetic-game"},

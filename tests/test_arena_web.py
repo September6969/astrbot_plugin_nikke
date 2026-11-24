@@ -514,3 +514,23 @@ async def test_trusted_proxy_keeps_client_rate_buckets_separate(trusted_peer, ot
             assert (await client.get("/rate-probe", headers={"X-Forwarded-For": "192.0.2.1"})).status == 200
         assert (await client.get("/rate-probe", headers={"X-Forwarded-For": "192.0.2.3, 192.0.2.1"})).status == 429
         assert (await client.get("/rate-probe", headers={"X-Forwarded-For": "192.0.2.2"})).status == other_status
+
+
+def test_arena_editor_frontend_enhancements_keep_csp_and_controls():
+    root = Path(__file__).resolve().parents[1] / "templates" / "arena_web"
+    markup = (root / "index.html").read_text(encoding="utf-8")
+    script = (root / "editor.js").read_text(encoding="utf-8")
+    styles = (root / "editor.css").read_text(encoding="utf-8")
+    for control_id in (
+        "search-clear",
+        "clear-team",
+        "import-feedback",
+        "owned-select-visible",
+        "owned-clear-visible",
+        "copy-result",
+        "copy-result-feedback",
+    ):
+        assert f'id="{control_id}"' in markup
+        assert control_id in script
+    assert "innerHTML" not in script
+    assert "swap-source" in styles and "portrait-used" in styles

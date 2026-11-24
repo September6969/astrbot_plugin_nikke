@@ -239,11 +239,17 @@ class CharacterApplication:
     ) -> CharacterRosterData:
         """读取练度列表，并为正式排序的展示角色补齐装备词条摘要。"""
         account = self._account(qq_id)
+        started = time.monotonic()
         characters = await self._gateway.get_roster(account, True)
         if not isinstance(characters, list):
             raise TypeError("角色列表响应必须是数组")
         option_summaries = await self._roster_option_summaries(
             account, characters, directory
+        )
+        # 基准记录：用于对比批量详情方案前后的耗时（请求数见 docs/refactor/V2_ROSTER_BATCH_VERIFICATION.md）。
+        _LOGGER.debug(
+            "[NIKKE] 练度总览：%d 名角色、%d 项词条详情，耗时 %.2fs",
+            len(characters), len(option_summaries), time.monotonic() - started,
         )
         return CharacterRosterData(
             commander_name=str(
@@ -580,12 +586,12 @@ class CharacterApplication:
             if isinstance(res, CredentialExpiredError):
                 raise res
 
-        # 2. 详情读取或身份校验失败，向上抛出
-        if isinstance(detail_res, Exception):
+        # 2. 详情读取或身份校验失败，向上抛出（含 CancelledError 等 BaseException）
+        if isinstance(detail_res, BaseException):
             raise detail_res
 
         # 3. 研究资料意外异常
-        if isinstance(profile_res, Exception):
+        if isinstance(profile_res, BaseException):
             raise profile_res
 
         payload = detail_res

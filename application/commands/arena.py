@@ -1,7 +1,14 @@
 """竞技场命令与私聊角色库边界。"""
 
+import asyncio
+from dataclasses import replace
+
+from ...features.arena.application import SANDBOX_MARK_NOTE
 from ...features.arena.presentation import analysis_text, three_team_text
-from ...features.arena.models import ArenaThreeTeamPlan, MODEL_VERSION
+from ...features.arena.models import (
+    FAVORITE_INFERRED, FAVORITE_LABELS, FAVORITE_OFFICIAL, MODEL_VERSION,
+    ArenaRosterSnapshot, ArenaThreeTeamPlan,
+)
 from ...features.arena.optimizer import ThreeTeamOptimizer
 from .contracts import CommandContext, CommandResult, TextReply, ImageReply
 
@@ -12,6 +19,7 @@ HELP = (
     "/妮姬 竞技场 我的\n"
     "/妮姬 竞技场 数据状态\n"
     "私聊解队按已确认持有过滤，群聊解队使用公开沙盒。\n"
+    "珍藏形态需官方详情确认；已制作但未确认时，私聊在五人后追加 珍藏:海伦,牡丹 手动标记。\n"
     "角色按 P1–P5，用 /、顿号或逗号分隔。"
 )
 
@@ -87,21 +95,45 @@ class ArenaCommandHandler:
                 return "请私聊发送 /妮姬 竞技场 我的，查看本人角色库状态。"
             snapshot = await self.application.read_roster(context.actor_id)
             hint = "\n请重新绑定后查询。" if snapshot.status == "expired" else ""
-            return (f"角色库状态 {snapshot.status}\n已映射 {len(snapshot.keys)} 人\n"
+            # 珍藏形态与本体是同一名角色，人数只按本体计。
+            people = len(snapshot.keys - {key for key, _source in snapshot.favorites})
+            return (f"角色库状态 {snapshot.status}\n已映射 {people} 人\n"
                     f"未映射 {snapshot.unmapped} 项\n读取时间 {snapshot.fetched_at}\n"
-                    "缺失 " + "、".join(snapshot.missing_fields) + hint)
+                    + favorite_summary(snapshot)
+                    + "缺失 " + "、".join(snapshot.missing_fields) + hint)
         if action in {"解队", "沙盒", "solve", "sandbox"}:
             owned = context.is_private_chat and action not in {"沙盒", "sandbox"}
             return await self.application.analyze(text, actor_id=context.actor_id, owned=owned)
         if action == "三队导入":
+            text, marks = self.application.directory.split_favorite_marks(text)
             lines = text.strip().splitlines()
             if len(lines) != 3:
                 raise ValueError("三队导入需要三行，每行用 / 分隔五人。")
             teams = tuple(self.application.directory.parse_team(line) for line in lines)
             available = None
             if context.is_private_chat:
-                available = await self.application.read_roster(context.actor_id)
+                available = await self.application.read_marked_roster(context.actor_id, marks)
                 if available.status not in {"available", "partial"}:
                     raise ValueError("请检查绑定后使用个人三队导入，或在网页手动选择角色范围。")
-            return ThreeTeamOptimizer(self.application.analyzer).solve(teams, available)
+            optimizer = ThreeTeamOptimizer(self.application.analyzer)
+            plan = await asyncio.to_thread(optimizer.solve, teams, available)
+            if marks and available is None:
+                plan = replace(plan, warnings=(*plan.warnings, SANDBOX_MARK_NOTE))
+            return plan
         return HELP
+
+
+def favorite_summary(snapshot: ArenaRosterSnapshot) -> str:
+    """按来源分开统计珍藏形态；基础名单推测只提示，不计入已映射人数。"""
+    if snapshot.status not in {"available", "partial"}:
+        return ""
+    official = sum(1 for _key, source in snapshot.favorites if source == FAVORITE_OFFICIAL)
+    parts = [f"{FAVORITE_LABELS[FAVORITE_OFFICIAL]} {official} 名"]
+    if snapshot.favorite_absent:
+        parts.append(f"官方详情未装备 {len(snapshot.favorite_absent)} 名")
+    if snapshot.favorite_unconfirmed:
+        parts.append(f"{FAVORITE_LABELS[FAVORITE_INFERRED]} {len(snapshot.favorite_unconfirmed)} 名（未计入）")
+    line = "珍藏形态 " + "｜".join(parts) + "\n"
+    if snapshot.favorite_unconfirmed:
+        line += "官方详情仅来自近期练度查询的短缓存；已制作的珍藏可在私聊解队末尾追加 珍藏:角色名 手动标记。\n"
+    return line

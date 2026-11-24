@@ -36,7 +36,7 @@
   "web_trusted_proxy_ip": {
     "description": "可信 Caddy 代理 IP",
     "type": "string",
-    "hint": "支持一个直接连接插件的 Caddy 容器 IP。只对该对端读取 X-Forwarded-For。留空按连接 IP 限流。",
+    "hint": "直接连接插件的 Caddy 容器 IP，或其所在 CIDR 网段（如 172.18.0.0/16，适用于容器 IP 会变化的部署）。只对该来源读取 X-Forwarded-For；不填写时所有经反代的请求共用一个限流桶（60 次/分钟），多人同时绑定可能触发 429。填写非法值会被忽略并记录告警，不影响启动。",
     "default": ""
   },
   "binding_api_key": {
@@ -165,7 +165,7 @@
   "voice_dynamic_enabled": {
     "description": "启用官方动态语音",
     "type": "bool",
-    "hint": "仅启用 voice_poke_map.json 中有来源证据的官方动态语音；空映射或关闭时使用本地登记音频。",
+    "hint": "仅启用 voice_poke_map.json 中有来源证据的官方动态语音，需要宿主安装 ffmpeg 与 ffprobe；关闭、映射缺失或工具缺失时只能使用本地登记音频（插件默认未附带，因此不发送；本地 OGG 仅需 ffmpeg）。",
     "default": true
   },
   "custom_character_aliases": {

@@ -1,0 +1,17 @@
+/* 竞技场单队解队与三队排阵共享样式；行高显式声明，供 ui/payloads/arena.py 的高度模型逐项对齐。 */
+:root{--canvas-width:1000px}
+*{box-sizing:border-box}
+body{margin:0;width:1000px;padding:38px;background:var(--bg);color:var(--text);font-family:"Noto Sans CJK SC","Microsoft YaHei",sans-serif;font-size:16px;line-height:1.5}
+h1{font-size:38px;line-height:1.5;margin:0 0 10px;overflow-wrap:anywhere}
+h2{font-size:23px;line-height:1.5;margin:8px 0 12px}
+.source{color:var(--muted);font-size:17px;line-height:1.5;overflow-wrap:anywhere}
+.match{margin-top:22px;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;break-inside:avoid}
+.side{font-size:18px;line-height:1.5}
+.lineup{display:flex;gap:10px}
+.member{width:20%;min-width:0;text-align:center;background:var(--bg);padding:10px 4px;border-radius:6px}
+.member img{display:block;width:64px;height:64px;object-fit:contain;margin:4px auto 2px}
+.name{font-size:17px;line-height:1.5;min-height:28px;overflow-wrap:anywhere}
+.pos{font-size:17px;line-height:1.4;color:var(--muted)}
+.details{font-size:18px;line-height:1.65;margin:12px 0 0;overflow-wrap:anywhere}
+.risk{color:var(--state-partial)}
+.footer{font-size:17px;line-height:1.6;margin-top:24px;overflow-wrap:anywhere}

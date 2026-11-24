@@ -243,3 +243,39 @@ def test_spine_cache_identity_covers_costume_runtime_and_animation() -> None:
             assert len(keys) == 5
         finally:
             manager.close()
+
+
+def test_icon_relative_candidates_keep_canonical_then_legacy_cache_order() -> None:
+    # PR-6A G1-icons-c：core.paths 统一图标相对路径后，候选顺序必须与旧实现逐项一致。
+    from astrbot_plugin_nikke.core.paths import ICON_KINDS, icon_dirs, icon_relative_candidates
+
+    assert ICON_KINDS == ("cube", "favorite", "currency")
+    assert icon_dirs("currency") == ("icons/currency", "currency")
+    assert icon_relative_candidates("cube/X.png") == ("icons/cube/X.png", "cube/X.png")
+    assert icon_relative_candidates("icons/sample.png") == ("icons/sample.png", "sample.png")
+    assert icon_relative_candidates("portraits/X.png") == ("portraits/X.png",)
+    assert icon_relative_candidates("cubes/X.png") == ("cubes/X.png",)
+    assert AssetImageCache._relative_candidates("cube/X.png") == [
+        "icons/cube/X.png",
+        "icons/cube/X.webp",
+        "cube/X.png",
+        "cube/X.webp",
+        "data/cube/X.png",
+        "data/cube/X.webp",
+    ]
+    assert AssetImageCache._relative_candidates("icons/cube/X.png") == [
+        "icons/cube/X.png",
+        "icons/cube/X.webp",
+        "cube/X.png",
+        "cube/X.webp",
+        "data/icons/cube/X.png",
+        "data/icons/cube/X.webp",
+    ]
+    assert AssetImageCache._relative_candidates("icons/retry.png") == [
+        "icons/retry.png",
+        "icons/retry.webp",
+        "retry.png",
+        "retry.webp",
+        "data/icons/retry.png",
+        "data/icons/retry.webp",
+    ]

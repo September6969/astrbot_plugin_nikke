@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+#include <unistd.h>
+
 namespace {
 
 // 同一帧的最终画布坐标随像素返回，避免另一次采样或裁切产生锚点偏移。
@@ -195,7 +197,18 @@ bool write_rgba(const std::string &path, int width, int height, const sf::Uint8 
 	return output.good();
 }
 
-bool normalize_atlas_bom(const std::string &path, std::string &temporary_path) {
+// 去 BOM 的 atlas 副本在任何返回路径（含 --list-animations 提前返回）都随作用域删除。
+struct TemporaryFile {
+	std::string path;
+	TemporaryFile() = default;
+	TemporaryFile(const TemporaryFile &) = delete;
+	TemporaryFile &operator=(const TemporaryFile &) = delete;
+	~TemporaryFile() {
+		if (!path.empty()) std::remove(path.c_str());
+	}
+};
+
+bool normalize_atlas_bom(const std::string &path, TemporaryFile &temporary) {
 	std::ifstream input(path, std::ios::binary);
 	if (!input) return false;
 	const std::string bytes((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
@@ -203,20 +216,21 @@ bool normalize_atlas_bom(const std::string &path, std::string &temporary_path) {
 		|| static_cast<unsigned char>(bytes[1]) != 0xBB || static_cast<unsigned char>(bytes[2]) != 0xBF) {
 		return true;
 	}
-	temporary_path = path + ".utf8";
-	std::ofstream output(temporary_path, std::ios::binary | std::ios::trunc);
-	if (!output) {
-		temporary_path.clear();
-		return false;
-	}
+	// 副本须与原 atlas 同目录才能按相对路径解析纹理页；mkstemp 原子创建唯一文件名，
+	// 并发 worker 处理同一 bundle 时不再争用固定的 .utf8 路径。
+	std::vector<char> name(path.begin(), path.end());
+	const std::string suffix = ".utf8.XXXXXX";
+	name.insert(name.end(), suffix.begin(), suffix.end());
+	name.push_back('\0');
+	const int descriptor = mkstemp(name.data());
+	if (descriptor < 0) return false;
+	close(descriptor);
+	temporary.path = name.data();
+	std::ofstream output(temporary.path, std::ios::binary | std::ios::trunc);
+	if (!output) return false;
 	output.write(bytes.data() + 3, static_cast<std::streamsize>(bytes.size() - 3));
-	if (!output.good()) {
-		output.close();
-		std::remove(temporary_path.c_str());
-		temporary_path.clear();
-		return false;
-	}
-	return true;
+	output.close();
+	return !output.fail();
 }
 
 int render(const Options &options) {
@@ -227,10 +241,10 @@ int render(const Options &options) {
 			std::cerr.flush();
 		}
 	};
-	std::string temporary_atlas;
+	TemporaryFile temporary_atlas;
 	phase("开始读取 atlas");
 	const bool atlas_ready = normalize_atlas_bom(options.atlas, temporary_atlas);
-	const std::string atlas_path = temporary_atlas.empty() ? options.atlas : temporary_atlas;
+	const std::string atlas_path = temporary_atlas.path.empty() ? options.atlas : temporary_atlas.path;
 	{
 		spine::SFMLTextureLoader texture_loader;
 		phase("开始解析 atlas 与纹理");
@@ -273,10 +287,11 @@ int render(const Options &options) {
 					std::cerr.flush();
 				}
 				if (options.list_animations) {
+					// 动画名来自 bundle，必须按 JSON 字符串转义引号、反斜杠与控制字符。
 					std::cout << "{\"status\":\"ok\",\"animations\":[";
 					for (size_t anim_index = 0; anim_index < skeleton_data->getAnimations().size(); ++anim_index) {
 						if (anim_index > 0) std::cout << ",";
-						std::cout << "\"" << skeleton_data->getAnimations()[anim_index]->getName().buffer() << "\"";
+						std::cout << json_string(skeleton_data->getAnimations()[anim_index]->getName().buffer());
 					}
 					std::cout << "]}\n";
 					return 0;
@@ -345,7 +360,6 @@ int render(const Options &options) {
 			}
 		}
 	}
-	if (!temporary_atlas.empty()) std::remove(temporary_atlas.c_str());
 	return result;
 }
 

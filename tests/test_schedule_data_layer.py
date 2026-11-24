@@ -14,6 +14,7 @@ import httpx
 
 from astrbot_plugin_nikke.features.calendar.canonical_models import (
     CanonicalEvent,
+    SourceRole,
     quality_badge,
     CST,
 )
@@ -27,16 +28,9 @@ from astrbot_plugin_nikke.integrations.blablalink.fetch_client import (
     _sanitize_url,
 )
 from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
-    GameKeeScheduleAdapter,
     ManualOverrideScheduleAdapter,
-    OfficialAnnouncementScheduleAdapter,
 )
-from astrbot_plugin_nikke.features.calendar.schedule_service import (
-    ScheduleService,
-    _is_same_event,
-    _merge_two_events,
-    _title_similarity,
-)
+from astrbot_plugin_nikke.features.calendar.schedule_service import ScheduleService
 
 
 class TestFetchClient(IsolatedAsyncioTestCase):
@@ -207,47 +201,6 @@ class TestScheduleServiceDataLayer(IsolatedAsyncioTestCase):
     def tearDown(self):
         self.tmp_dir.cleanup()
 
-    def test_multi_source_field_level_merge(self):
-        # 两个来自不同源的同一活动条目
-        gk_event = CanonicalEvent(
-            id="gamekee:100",
-            title="EVA 联动大型活动",
-            event_type="event",
-            start_at=self.now,
-            end_at=self.now + timedelta(days=7),
-            cycle_id="eva_2026",
-            banner_url="https://gamekee.com/eva_banner.png",
-            detail_url="https://gamekee.com/eva",
-            sources=["gamekee"],
-            primary_source="gamekee",
-            confidence=0.85,
-        )
-
-        official_event = CanonicalEvent(
-            id="official:notice_999",
-            title="【联动通知】新世纪福音战士合作活动正式开启",
-            event_type="event",
-            start_at=self.now + timedelta(minutes=5),  # 稍微校准
-            end_at=self.now + timedelta(days=7),
-            cycle_id="eva_2026",
-            banner_url="https://official.com/eva.png",
-            detail_url="https://official.com/notice_999",
-            sources=["official"],
-            primary_source="official",
-            confidence=0.95,
-        )
-
-        self.assertTrue(_is_same_event(gk_event, official_event))
-        merged = _merge_two_events(gk_event, official_event)
-
-        # 验证合并字段：
-        # 来源列表合并包含两者
-        self.assertIn("gamekee", merged.sources)
-        self.assertIn("official", merged.sources)
-        # 偏好 GameKee 易读中文标题
-        self.assertEqual(merged.title, "EVA 联动大型活动")
-        # 时间偏好官方
-        self.assertEqual(merged.start_at, official_event.start_at)
 
     async def test_l1_l2_cache_and_last_known_good(self):
         event = CanonicalEvent(
@@ -257,6 +210,16 @@ class TestScheduleServiceDataLayer(IsolatedAsyncioTestCase):
             start_at=self.now,
             end_at=self.now + timedelta(days=5),
         )
+
+        # PR-6B G5-calendar-a1/b：默认链不再含必需的 GameKee 主源，显式注入一个
+        # 尚未成功的必需主源，继续校验“自定义列表不能证明主来源覆盖完整”。
+        class _PendingPrimary(ManualOverrideScheduleAdapter):
+            source_name = "primary"
+            source_role = SourceRole.PRIMARY
+            required_for_complete = True
+            contributes_to_freshness = True
+
+        self.service.adapters = [self.service.manual_adapter, _PendingPrimary()]
 
         # 1. 成功同步并保存 L2 快照
         ok, _ = await self.service.sync_from_source(fetcher=lambda: [event])

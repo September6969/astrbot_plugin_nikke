@@ -8,6 +8,8 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
+from .storage import encryption_key_ready
+
 
 CACHE_DIRECTORY_NAMES = ("cache", "voice_cache", "announcements")
 DEFAULT_MIN_FREE_BYTES = 1024 * 1024 * 1024
@@ -121,7 +123,12 @@ def collect_runtime_health(
     database = root / "nikke.sqlite3"
     secret_key = root / "secret.key"
     database_present = data_dir_exists and database.is_file() and not database.is_symlink()
-    secret_key_present = data_dir_exists and secret_key.is_file() and not secret_key.is_symlink()
+    # 与 NikkeStore.has_valid_key() 同一判定：合法环境变量密钥或普通文件 secret.key。
+    secret_key_present = (
+        encryption_key_ready(secret_key)
+        if data_dir_exists or os.getenv("NIKKE_ENCRYPTION_KEY", "").strip()
+        else False
+    )
 
     cache_file_count = 0
     cache_bytes = 0

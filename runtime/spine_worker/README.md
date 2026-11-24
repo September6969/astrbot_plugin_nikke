@@ -12,6 +12,13 @@ worker 接受一个 `.skel` 或 `.json`、atlas、animation、可选 skin，以�
 Python 适配器负责路径边界、超时、输出大小、透明裁切和 PNG cache。SFML 通过最小
 Xvfb 上下文提供无桌面 RenderTexture，worker 不能访问账号上下文。
 
+进程边界：Python 适配器只向 worker 透传白名单环境变量（`PATH`、`HOME`、区域设置、
+X11/GL 与 Docker CLI 连接配置等），插件密钥与代理凭据不会下发；worker 在独立进程组
+中运行，超时先向整组发送 SIGTERM、短暂宽限后 SIGKILL，不留下孤儿 Xvfb。
+`entrypoint-xvfb*.sh` 每次调用都用 `Xvfb -displayfd` 动态分配私有 display，
+并以 `trap` 在正常退出、失败或收到终止信号时回收 worker、Xvfb 与临时目录；
+并发调用不再共享固定的 `:99`。
+
 ## 版本与许可
 
 构建默认锁定 Spine runtime commit `425ce416bb218b28caeec47b317aa57cd7140375`，

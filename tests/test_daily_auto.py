@@ -95,7 +95,8 @@ class DailyAutoCommandTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_preference_command_only_changes_local_setting(self):
         plugin = self._plugin(global_enabled=False)
-        results = [item async for item in plugin.daily(self.Event(), "自动", "开")]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in plugin.nikke(self.Event(), "日常", "自动", "开")]
         self.assertEqual(plugin.services.store.enabled, ("10001", True))
         self.assertIn("自动签到已开启", results[0])
         self.assertIn("暂不会提交", results[0])

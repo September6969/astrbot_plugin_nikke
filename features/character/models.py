@@ -137,8 +137,12 @@ class CharacterCardAssets:
 
 
 @dataclass(slots=True)
-class SpineBundle:
-    """Spine 骨骼动画组合型资源契约。"""
+class SpineAssetRef:
+    """视觉 catalog 中 Spine 资源的逻辑路径描述（非可渲染 bundle）。
+
+    PR-6B（G6-character-spine-c2）由 SpineBundle 更名，避免与
+    integrations.spine.bundle.SpineBundle（可供 runtime 消费的本地文件 bundle）混淆。
+    """
 
     skeleton: Path | str | None = None
     atlas: Path | str | None = None
@@ -146,23 +150,3 @@ class SpineBundle:
     format: str | None = None  # "json" or "skel"
     bone_names: list[str] | None = None
     slot_names: list[str] | None = None
-
-
-@dataclass(slots=True)
-class CharacterVisualAssets:
-    """角色视觉资产统一逻辑集合模型。"""
-
-    resource_id: str
-    character_id: str | None = None
-    costume_id: str | None = None
-
-    icon: str | None = None
-    portrait: str | None = None
-    fullbody: str | None = None
-
-    spine_skeleton: str | None = None
-    spine_atlas: str | None = None
-    spine_textures: list[str] | None = None
-
-
-

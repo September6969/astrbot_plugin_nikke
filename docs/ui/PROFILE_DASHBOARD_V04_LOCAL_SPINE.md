@@ -29,7 +29,7 @@ Daily builder 保留来源语义：
 
 ## Currency 与 Memorial mapping
 
-`CurrencyRegistry` 只登记已确认类型：99 珠宝、1000 战斗数据辑、2000 信用点、3000 芯尘、5100 普通招募券、5200 高级招募券、11000 躯体标签、12000 黄金积分券。`CurrencyItem` 同时保留整数 `value` 与 `compact_value`；compact formatter 使用项目已有 K/M/B 规则，底层数值不改写。未登记的 type 98 保留在底层审计数据，但按用户要求不放上卡面，不猜名称或图标。
+`CurrencyRegistry` 只登记已确认类型：99 珠宝、1000 战斗数据辑、2000 信用点、3000 芯尘、5100 普通招募券、5200 高级招募券、11000 白银积分券（原误记为躯体标签，2026-11-22 经所有者确认更正）、12000 黄金积分券。`CurrencyItem` 同时保留整数 `value` 与 `compact_value`；compact formatter 使用项目已有 K/M/B 规则，底层数值不改写。未登记的 type 98 保留在底层审计数据，但按用户要求不放上卡面，不猜名称或图标。
 
 Current live-verified currency mapping supersedes earlier draft mapping.
 
@@ -76,7 +76,7 @@ coverage 报告分别统计 character master、default、verified costume、uniq
 - 当前分支 `fix/live-runtime-v03` 的完整 Profile 图标代码提交为 `be7e2ce`；PR #79 保持 OPEN、非 Draft，未修改 main、未合并、未部署。
 - Profile v0.4 现代数据路径将 BASIC/CAMPAIGN、OUTPOST/ROSTER 并列，TODAY 使用紧凑多列，COLLECTION 为四格，RESOURCES 为 4×2，RECYCLE ROOM 为双列。合成 after 为 `1200×1619`，原图、50% 和 30% 预览已实际查看；12 个 warmup 后样本 median `126.2293 ms`、p95 `134.312 ms`。
 - `serv` 只读 shape 核验确认 `tower_daily_info_list` 元素字段为 `type`、`is_opened`、`remaining_count`；当前只统计开放条目，未发现可靠 total 时不生成 `0/3`。
-- `CurrencyRegistry` 的 8 项已知资源均有核验图标：信用点、战斗数据辑、芯尘来自 Nikke-db 固定提交；珠宝、两类招募券、躯体标签、黄金积分券来自用户提供图标及同日数量对照图。每项记录 SHA-256，AssetManager 的 `get_currency_icon()` 不联网、不读取未经 registry 证明的图标。
+- `CurrencyRegistry` 的 8 项已知资源均有核验图标：信用点、战斗数据辑、芯尘来自 Nikke-db 固定提交；珠宝、两类招募券、白银积分券、黄金积分券来自用户提供图标及同日数量对照图。每项记录 SHA-256，AssetManager 的 `get_currency_icon()` 不联网、不读取未经 registry 证明的图标。
 - `serv` 授权账号只读 Profile 已在隔离代码目录实渲染并脱敏查看：`1200×1715`，底层 9 项实际资源、4 项塔信息；卡面只放 8 项已知资源，图标缩放、透明边缘和文字避让正常。外部证据图为 `E:/DevCache/nikke-live-runtime-v03-artifacts/profile-v04/live-profile-v04-known-currency.png`，SHA-256 `ea09d416f57f2cef3c235833c3a3cc0969f01786c2e651ddd2491ce707037f30`，不提交仓库。
 - `serv` 隔离 Nikke-db 维护曾按两阶段 sparse 规则完成：source commit `a2358b72bd1335c30737e46482a99947f3788bc7`，200 个默认角色与 40 个历史 verified Costume 共 240 项，runtime 4.0/4.1 为 102/138；通过禁网 Docker worker 桥接后 240/240 渲染成功，失败、无效、缺失均为 0。这个 40/40 仅是历史 verified subset，不能表示全部官方 Costume coverage；全量官方分母由 `audit_costume_spine_coverage.py` 单独审计。该证据仍是隔离维护结果，不代表生产部署。
 - Campaign NORMAL→HARD 只读全量抓取已完成 3572/3572：NORMAL 1785、HARD 1787，最终 2699 `AVAILABLE`、873 `UNAVAILABLE`、0 retryable；71 个 raw TID 全部解析，响应未明确提供 costume_id。完整快照不进仓库。固定种子抽取 10+10 张离线卡均通过五槽、中文名、静态 Spine portrait 和战力求和检查，接触表已实际查看；该结果不代表真实 QQ 客户端送达。

@@ -68,8 +68,7 @@ class ProfileT2IPayloadBuilder:
                     icon = self.resolver.encode(self.assets.get_currency_icon(item.type), (56, 56))
                 except Exception:
                     pass
-            raw_label = item.display_name if item else definition.display_name
-            label = "白银积分券" if raw_label == "躯体标签" else raw_label
+            label = item.display_name if item else definition.display_name
             if len(matches) > 1:
                 val = "多条记录"
             elif item is not None:

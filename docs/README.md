@@ -19,6 +19,7 @@
 - [界面渲染与交接资料](ui/)
 - [前期调研](research/)
 - [PR #103 重构交付记录](refactor/FINAL_DELIVERY.md)
+- [系统性重构整改计划 V2](refactor/REFACTOR_PLAN_V2.md)与 [Phase 0 基线](refactor/V2_PHASE0_BASELINE.md)
 
 ## 当前接口合同与验收
 

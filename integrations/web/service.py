@@ -5,13 +5,14 @@ from __future__ import annotations
 
 import html
 import json
+import logging
 import os
 import re
 import secrets
 import stat
 import time
 from collections import defaultdict, deque
-from ipaddress import ip_address
+from ipaddress import IPv4Network, IPv6Network, ip_address, ip_network
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -36,6 +37,41 @@ MAX_COOKIE_COUNT = 100
 MAX_COOKIE_HEADER_LENGTH = 32 * 1024
 EXTENSION_ORIGIN_RE = re.compile(r"^(?:chrome-extension|extension)://[a-z0-9]{16,64}$")
 SITE_ORIGIN = "https://nikke.irises777.xyz"
+# Cookie 值禁止分隔符与换行，避免拼接 Cookie 头时注入额外字段。
+COOKIE_VALUE_FORBIDDEN_RE = re.compile(r"[;\r\n\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+# User-Agent 合法地包含 ';'（如 "Windows NT 10.0; Win64"），只禁止换行与控制字符。
+USER_AGENT_FORBIDDEN_RE = re.compile(r"[\r\n\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+RATE_WINDOW_SECONDS = 60.0
+RATE_BUCKET_LIMIT = 4096
+RATE_PRUNE_INTERVAL_SECONDS = 60.0
+_LOGGER = logging.getLogger(__name__)
+
+
+def _parse_trusted_proxy(value: str) -> IPv4Network | IPv6Network | None:
+    """容错解析可信反代：单个 IP 或 CIDR；非法值记告警并忽略，不让插件启动失败。"""
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return ip_network(text, strict=False)
+    except ValueError:
+        _LOGGER.warning("[NIKKE] web_trusted_proxy_ip 无效，已按未配置处理")
+        return None
+
+
+def _bad_request(code: str, message: str) -> web.Response:
+    return web.json_response(
+        {"ok": False, "code": code, "message": message, "error": message}, status=400
+    )
+
+
+async def _json_object(request: web.Request) -> dict | None:
+    """读取 JSON 对象请求体；非法 JSON 或非对象结构返回 None，由调用方回 400。"""
+    try:
+        body = await request.json(loads=json.loads)
+    except (ValueError, UnicodeDecodeError):
+        return None
+    return body if isinstance(body, dict) else None
 
 
 def _is_regular_file(path: object) -> bool:
@@ -73,13 +109,14 @@ class BindingWebService:
                 or parsed.password or parsed.path not in ("", "/") or parsed.query or parsed.fragment):
             raise ValueError("绑定服务公网地址必须是HTTPS站点地址，不能包含账号、路径或查询参数")
         self.site_origin = f"https://{parsed.netloc}"
-        self._trusted_proxy_ip = ip_address(trusted_proxy_ip) if trusted_proxy_ip else None
+        self._trusted_proxy = _parse_trusted_proxy(trusted_proxy_ip)
         self.store = store
         self.client = client
         self.extension_zip = extension_zip
         self.api_key = api_key
         self.runner: web.AppRunner | None = None
         self._requests: dict[tuple[str, str], deque[float]] = defaultdict(deque)
+        self._last_rate_prune = 0.0
         self._route_installers = []
 
     def add_route_installer(self, installer) -> None:
@@ -91,8 +128,9 @@ class BindingWebService:
         host = self._request_ip(request)
         now = time.monotonic()
         bucket, limit = request.get("web_rate_limit", ("default", 60))
+        self._prune_rate_buckets(now)
         queue = self._requests[(host, bucket)]
-        while queue and now - queue[0] > 60:
+        while queue and now - queue[0] > RATE_WINDOW_SECONDS:
             queue.popleft()
         if len(queue) >= limit:
             return web.json_response({"ok": False, "error": "请求过于频繁"}, status=429)
@@ -115,11 +153,26 @@ class BindingWebService:
         response.headers["Cache-Control"] = "no-store"
         return response
 
+    def _prune_rate_buckets(self, now: float) -> None:
+        """惰性淘汰过期限流桶并限制桶数量，避免大量来源 IP 让字典无界增长。"""
+        if (now - self._last_rate_prune < RATE_PRUNE_INTERVAL_SECONDS
+                and len(self._requests) < RATE_BUCKET_LIMIT):
+            return
+        self._last_rate_prune = now
+        for key in [key for key, queue in self._requests.items()
+                    if not queue or now - queue[-1] > RATE_WINDOW_SECONDS]:
+            del self._requests[key]
+        overflow = len(self._requests) - RATE_BUCKET_LIMIT + 1
+        if overflow > 0:
+            oldest = sorted(self._requests, key=lambda key: self._requests[key][-1])
+            for key in oldest[:overflow]:
+                del self._requests[key]
+
     def _request_ip(self, request: web.Request) -> str:
         peer = request.remote or "unknown"
-        if self._trusted_proxy_ip is not None:
+        if self._trusted_proxy is not None:
             try:
-                if ip_address(peer) == self._trusted_proxy_ip:
+                if ip_address(peer) in self._trusted_proxy:
                     # Caddy 添加的最后一个地址来自实际 TCP 对端。
                     forwarded = request.headers.getall("X-Forwarded-For", [])
                     if forwarded:
@@ -159,10 +212,14 @@ class BindingWebService:
         return web.Response(status=204)
 
     def _storage_ready(self) -> bool:
-        """只检查本地存储文件是否存在，不读取密钥内容或数据库内容。"""
+        """数据库须为普通文件；密钥统一由 store.has_valid_key() 判定（兼容环境变量密钥）。"""
         database = getattr(self.store, "db_path", None)
-        secret_key = getattr(self.store, "key_path", None)
-        return all(_is_regular_file(path) for path in (database, secret_key))
+        if not _is_regular_file(database):
+            return False
+        has_valid_key = getattr(self.store, "has_valid_key", None)
+        if callable(has_valid_key):
+            return bool(has_valid_key())
+        return _is_regular_file(getattr(self.store, "key_path", None))
 
     async def health(self, _: web.Request) -> web.Response:
         ready = self._storage_ready()
@@ -182,7 +239,9 @@ class BindingWebService:
         expected = f"Bearer {self.api_key}"
         if not self.api_key or not secrets.compare_digest(authorization, expected):
             return web.json_response({"ok": False, "error": "未授权"}, status=401)
-        body = await request.json(loads=json.loads)
+        body = await _json_object(request)
+        if body is None:
+            return _bad_request("INVALID_JSON", "请求体必须是 JSON 对象")
         qq_id = str(body.get("qq_id", "")).strip()
         if not qq_id.isdigit() or len(qq_id) > 20:
             return web.json_response({"ok": False, "error": "QQ号格式错误"}, status=400)
@@ -203,11 +262,15 @@ class BindingWebService:
         return web.Response(text=page, content_type="text/html")
 
     async def submit_cookies(self, request: web.Request) -> web.Response:
-        body = await request.json(loads=json.loads)
+        body = await _json_object(request)
+        if body is None:
+            return _bad_request("INVALID_JSON", "请求体必须是 JSON 对象")
         token = str(body.get("token", ""))
         cookies = body.get("cookies", [])
         x_common_params = str(body.get("x_common_params", ""))
         user_agent = str(body.get("user_agent", ""))[:512]
+        if USER_AGENT_FORBIDDEN_RE.search(user_agent):
+            return _bad_request("INVALID_USER_AGENT", "User-Agent 含有非法字符")
         if not TOKEN_RE.fullmatch(token):
             return web.json_response(
                 {"ok": False, "code": "TOKEN_INVALID", "message": "绑定令牌格式错误", "error": "绑定令牌格式错误"},
@@ -235,11 +298,15 @@ class BindingWebService:
         accepted_cookies = []
         if isinstance(cookies, list):
             for item in cookies[:MAX_COOKIE_COUNT]:
+                if not isinstance(item, dict):
+                    return _bad_request("INVALID_COOKIES", "Cookie 列表结构无效")
                 name = str(item.get("name", ""))
                 value = str(item.get("value", ""))
                 domain = str(item.get("domain", "")).lower().lstrip(".")
                 if domain != "blablalink.com" and not domain.endswith(".blablalink.com"):
                     continue
+                if COOKIE_VALUE_FORBIDDEN_RE.search(value):
+                    return _bad_request("INVALID_COOKIES", "Cookie 值含有非法字符")
                 if not COOKIE_NAME_RE.fullmatch(name) or len(value) > 4096:
                     continue
                 part = f"{name}={value}"

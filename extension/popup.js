@@ -5,6 +5,15 @@ const loginDot = document.getElementById("loginDot");
 const loginStatusText = document.getElementById("loginStatusText");
 const charPreview = document.getElementById("charPreview");
 
+// 绑定链接、账号上下文与续期材料是临时材料，只放 session 存储；用户偏好保留在 local。
+const temporaryStore = typeof chrome !== "undefined" ? chrome.storage?.session : undefined;
+const BLABLA_COOKIE_URL = "https://www.blablalink.com/";
+
+async function readBlablaCookies() {
+  // 登录检测与提交使用同一查询口径，避免两处结果不一致。
+  return chrome.cookies.getAll({ url: BLABLA_COOKIE_URL });
+}
+
 function setStatus(message, state) {
   if (statusBox) {
     statusBox.textContent = message;
@@ -12,8 +21,8 @@ function setStatus(message, state) {
   }
 }
 
-if (typeof chrome !== "undefined" && chrome.storage?.local) {
-  chrome.storage.local.get("bindUrl", ({ bindUrl }) => {
+if (temporaryStore) {
+  temporaryStore.get("bindUrl").then(({ bindUrl }) => {
     if (bindUrl && bindInput && !bindInput.value) {
       bindInput.value = bindUrl;
     }
@@ -43,7 +52,7 @@ if (typeof chrome !== "undefined" && chrome.tabs?.query) {
 async function checkLoginStatus() {
   if (typeof chrome === "undefined" || !chrome.cookies?.getAll) return;
   try {
-    const cookies = await chrome.cookies.getAll({ domain: "blablalink.com" });
+    const cookies = await readBlablaCookies();
     const required = ["game_token", "game_uid", "game_openid"];
     const names = new Set(cookies.map(c => c.name));
     const hasAll = required.every(name => names.has(name));
@@ -52,8 +61,8 @@ async function checkLoginStatus() {
       if (loginDot) loginDot.className = "indicator-dot online";
       if (loginStatusText) loginStatusText.textContent = "✓ 已检测到 BlaBlaLink 登录";
 
-      if (chrome.storage?.local) {
-        const stored = await chrome.storage.local.get("xCommonParams");
+      if (temporaryStore) {
+        const stored = await temporaryStore.get("xCommonParams");
         if (stored?.xCommonParams) {
           try {
             const parsed = JSON.parse(stored.xCommonParams);
@@ -113,8 +122,8 @@ if (openLoginBtn) {
       if (bindInput && bindInput.value.trim()) {
         try {
           parseBindUrl();
-          if (chrome.storage?.local) {
-            await chrome.storage.local.set({ bindUrl: bindInput.value.trim() });
+          if (temporaryStore) {
+            await temporaryStore.set({ bindUrl: bindInput.value.trim() });
           }
         } catch {}
       }
@@ -135,7 +144,7 @@ if (renewalChoice) {
   });
   renewalChoice.addEventListener("change", async () => {
     await chrome.storage.local.set({ keepRenewalMaterial: renewalChoice.checked });
-    await chrome.storage.local.remove("renewalLoginPayload");
+    await temporaryStore?.remove("renewalLoginPayload");
   });
 }
 
@@ -146,13 +155,13 @@ if (submitBtn) {
     setStatus("正在读取并验证登录状态…", "pending");
     try {
       const { url, token } = parseBindUrl();
-      const cookies = await chrome.cookies.getAll({ url: "https://www.blablalink.com/" });
+      const cookies = await readBlablaCookies();
       const required = ["game_token", "game_uid", "game_openid"];
       const names = new Set(cookies.map(cookie => cookie.name));
       const missing = required.filter(name => !names.has(name));
       if (missing.length) throw new Error(`尚未完成登录，缺少：${missing.join(", ")}`);
 
-      const stored = await chrome.storage.local.get("xCommonParams");
+      const stored = temporaryStore ? await temporaryStore.get("xCommonParams") : {};
       let cachedContext = "";
       try {
         const cached = JSON.parse(stored.xCommonParams || "null");
@@ -165,8 +174,9 @@ if (submitBtn) {
         throw new Error("尚未获取账号上下文。请确认已登录BlaBlaLink并刷新个人主页后重试。");
       }
 
-      const renewalState = await chrome.storage.local.get(["keepRenewalMaterial", "renewalLoginPayload"]);
-      const capturedLogin = renewalState.keepRenewalMaterial === true ? renewalState.renewalLoginPayload : undefined;
+      const preference = await chrome.storage.local.get("keepRenewalMaterial");
+      const renewalState = temporaryStore ? await temporaryStore.get("renewalLoginPayload") : {};
+      const capturedLogin = preference.keepRenewalMaterial === true ? renewalState.renewalLoginPayload : undefined;
       const loginMatches = capturedLogin && ["game_token", "game_uid", "game_openid"].every(
         name => capturedLogin[name] === cookies.find(cookie => cookie.name === name)?.value);
       const response = await fetch(`${url.origin}/api/bind/cookies`, {
@@ -187,6 +197,7 @@ if (submitBtn) {
         throw new Error(errDesc);
       }
 
+      await temporaryStore?.remove(["bindUrl", "xCommonParams", "renewalLoginPayload"]);
       await chrome.storage.local.remove(["bindUrl", "xCommonParams", "renewalLoginPayload", "keepRenewalMaterial"]);
       const nickname = result.data?.nickname || result.nickname || "";
       const successMsg = nickname ? `绑定成功：${nickname}\n现在可以关闭或卸载本扩展。` : "绑定成功。\n现在可以关闭或卸载本扩展。";

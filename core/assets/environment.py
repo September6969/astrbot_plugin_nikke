@@ -31,7 +31,6 @@ class AssetEnvironment:
     registry: Any
     currency_registry: Any
     skill_resolver: Any
-    costume_resolver: Any
     visual_resolver: Any
     lineup_resolver: Any
     boss_resolver: Any

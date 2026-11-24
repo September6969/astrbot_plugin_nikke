@@ -7,7 +7,6 @@ from collections.abc import Mapping
 import math
 from time import perf_counter
 from typing import Any
-import unicodedata
 
 from astrbot_plugin_nikke.features.character.roster_ranking import (
     order_roster_entries,
@@ -15,6 +14,7 @@ from astrbot_plugin_nikke.features.character.roster_ranking import (
 )
 
 from ..t2i_assets import T2IAssetResolver
+from .common import text_units
 
 
 def display_roster_number(value: Any, *, grouped: bool = False) -> str:
@@ -47,24 +47,49 @@ OPTION_SAFETY_PAD = 12
 OPTION_LINE_CAPACITY_UNITS = 46.0
 # 固定总表高度模型的全局安全余量，避免长名折行估计偏小时溢出。
 ROSTER_CANVAS_SAFETY = 16
-
-
-def _text_units(text: str) -> float:
-    """按中日韩显示宽度估算文本占用的全角等效宽度。"""
-    return sum(
-        0.42 if char.isspace() else
-        1.0 if unicodedata.east_asian_width(char) in {"W", "F"} else 0.55
-        for char in text
-    )
+# 单行几何：min-height 100；内边距 12×2 + 边框 1×2；名称 24px×1.22 ≈ 30px/行。
+ROW_MIN_HEIGHT = 100
+ROW_VERTICAL_CHROME = 26
+ROW_MARGIN_BOTTOM = 8
+NAME_LINE_HEIGHT = 30
+# 身份/头像注释：margin-top 5 + 26px 行高；字号 = 1200 宽画布的 --font-min（约 19.4px）。
+NOTE_MARGIN_TOP = 5
+NOTE_LINE_HEIGHT = 26
+NOTE_FONT_PX = 1200 * 7 / 432
+IDENTITY_COLUMN_PX = 251
+# 页面固定部分：上内边距 36 + 页眉 176 + 表头 46 + 页脚(18 外边距 + 14 内边距 + 1 边框 + 两行 29) + 下内边距 28。
+FOOTER_HEIGHT = 18 + 14 + 1 + 2 * 29
+ROSTER_FIXED_HEIGHT = 36 + 176 + 46 + FOOTER_HEIGHT + 28
+ROSTER_EMPTY_HEIGHT = 36 + 176 + 120 + FOOTER_HEIGHT + 28 + ROSTER_CANVAS_SAFETY
 
 
 def _roster_name_lines(name: str, show_code: bool) -> int:
     text = f"{name} #{'0000' if show_code else ''}" if show_code else name
-    return max(1, math.ceil(_text_units(text) / 9))
+    return max(1, math.ceil(text_units(text) / 9))
+
+
+def _note_height(note: str) -> int:
+    if not note:
+        return 0
+    lines = max(1, math.ceil(text_units(note) * NOTE_FONT_PX / IDENTITY_COLUMN_PX))
+    return NOTE_MARGIN_TOP + lines * NOTE_LINE_HEIGHT
+
+
+def roster_row_height(name: str, show_code: bool, note: str, options: Mapping[str, Any] | None) -> int:
+    """名称行、注释行与词条面板逐项累加；注释不再被 min-height 吞掉（AUD-017）。"""
+    height = max(
+        ROW_MIN_HEIGHT,
+        ROW_VERTICAL_CHROME
+        + _roster_name_lines(name, show_code) * NAME_LINE_HEIGHT
+        + _note_height(note),
+    )
+    if options is not None:
+        height += _option_panel_extra_height(options)
+    return height
 
 
 def _option_row_lines(text: str) -> int:
-    return max(1, math.ceil(_text_units(text) / OPTION_LINE_CAPACITY_UNITS))
+    return max(1, math.ceil(text_units(text) / OPTION_LINE_CAPACITY_UNITS))
 
 
 def _option_payload(summary: Any) -> dict[str, Any] | None:
@@ -187,14 +212,9 @@ def project_roster_rows(
             ),
             "_canonical": canonical,
         }
-        lines = _roster_name_lines(name, show_code)
-        row_height = max(
-            100,
-            24 + lines * 30 + (20 if canonical is None else 0),
+        row["row_height"] = roster_row_height(
+            name, show_code, row["identity_note"], row["options"]
         )
-        if row["options"] is not None:
-            row_height += _option_panel_extra_height(row["options"])
-        row["row_height"] = row_height
         rows.append(row)
 
     total_count = len(entries)
@@ -270,12 +290,16 @@ class RosterT2IPayloadBuilder:
                 | {"avatar_data_uri": avatar_data_uri, "avatar_note": avatar_note}
             )
             if avatar_note and record["_canonical"] is not None:
-                rows[-1]["row_height"] = max(rows[-1]["row_height"], 100 + 20)
+                rows[-1]["row_height"] = roster_row_height(
+                    record["name"], record["show_code"], avatar_note, record["options"]
+                )
 
         height = (
-            440
+            ROSTER_EMPTY_HEIGHT
             if not rows
-            else 360 + sum(row["row_height"] + 8 for row in rows) + ROSTER_CANVAS_SAFETY
+            else ROSTER_FIXED_HEIGHT
+            + sum(row["row_height"] + ROW_MARGIN_BOTTOM for row in rows)
+            + ROSTER_CANVAS_SAFETY
         )
         shown_count = len(rows)
         return {

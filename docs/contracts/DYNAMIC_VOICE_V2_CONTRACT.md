@@ -31,7 +31,7 @@
 
 ## 未知角色语义
 
-`VoiceResolver.resolve_character_key()` 只返回 `CHARACTER_LINES` 中已登记的角色。未知 ID 的 `resolve_poke_line()` 使用中性提示，不得出现 Alice 或其他角色的专属台词。默认不带角色参数仍保持 Alice 的历史默认行为。
+历史说明：早期的 `VoiceResolver.resolve_character_key()` / `CHARACTER_LINES` / `resolve_poke_line()` 文本台词路径已移除，`features/voice/feedback.py` 已在 PR-6A 删除。当前戳一戳没有文本回退：未知角色、资源缺失或 ffmpeg/ffprobe 不可用时不发送任何内容（见 `tests/test_voice_audio.py` 的纯音频合同测试）。
 
 ## 证据边界
 

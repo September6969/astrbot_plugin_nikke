@@ -6,7 +6,7 @@ from pathlib import Path
 from PIL import Image
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager, AssetResult
-from astrbot_plugin_nikke.features.character.models import SpineBundle
+from astrbot_plugin_nikke.features.character.models import SpineAssetRef
 
 
 class VisualAssetManagerTests(unittest.TestCase):
@@ -68,7 +68,7 @@ class VisualAssetManagerTests(unittest.TestCase):
                 res = mgr.get_character_asset(10, "10005", kind="spine")
                 self.assertTrue(res.exact_match)
                 self.assertIsNotNone(res.bundle)
-                self.assertIsInstance(res.bundle, SpineBundle)
+                self.assertIsInstance(res.bundle, SpineAssetRef)  # PR-6B G6-c2：更名自 SpineBundle
                 self.assertEqual(res.bundle.format, "skel")
                 self.assertIn("spine/c010_03/c010_02.png", res.bundle.textures)
 

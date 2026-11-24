@@ -77,6 +77,9 @@ class ThreeTeamOptimizer:
             warnings.append("已达到时间或候选预算，返回预算内最佳排阵。")
         if not best:
             warnings.append("预算内未找到十五人互斥的合法三队。")
+        if available is not None:
+            # 三场共用同一份名单，珍藏来源与推测提示只列一次。
+            warnings.extend(self.analyzer.favorite_warnings(available))
         best = tuple(self.analyzer.with_history(item, enemy) for item, enemy in zip(best, enemies))
         return ArenaThreeTeamPlan(analyses, tuple(best), OBJECTIVES[objective], searched,
                                   truncated, tuple(warnings))

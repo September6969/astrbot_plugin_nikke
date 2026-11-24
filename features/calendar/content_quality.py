@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Calendar 内容质量策略。
 
-这个模块只负责“内容是什么、展示时应排在什么位置、两个来源是否可能是
-同一个事件”这类纯函数策略。它不改变 CanonicalEvent 的运行时状态，也不
+这个模块只负责“内容是什么、展示时应排在什么位置”这类纯函数策略；
+跨来源身份评分与模糊去重已随停用的 GameKee/官方公告源在 PR-6B 删除。它不改变 CanonicalEvent 的运行时状态，也不
 发起网络请求，方便解析器、合并器和离线测试共同使用。
 """
 
@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from difflib import SequenceMatcher
 from enum import Enum
 import re
 import unicodedata
@@ -25,14 +24,6 @@ class DisplayTier(str, Enum):
     META = "META"
 
 
-class IdentityDecision(str, Enum):
-    """跨来源身份判断结果。"""
-
-    MATCH = "MATCH"
-    AMBIGUOUS = "AMBIGUOUS"
-    DISTINCT = "DISTINCT"
-
-
 @dataclass(frozen=True)
 class DisplayRelevance:
     """可解释的展示相关性结果。"""
@@ -45,22 +36,6 @@ class DisplayRelevance:
         return {
             "score": self.score,
             "tier": self.tier.value,
-            "reasons": list(self.reasons),
-        }
-
-
-@dataclass(frozen=True)
-class IdentityMatch:
-    """跨来源身份评分及解释。"""
-
-    score: int
-    decision: IdentityDecision
-    reasons: tuple[str, ...] = ()
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "score": self.score,
-            "decision": self.decision.value,
             "reasons": list(self.reasons),
         }
 
@@ -144,10 +119,6 @@ DISPLAY_GROUP_ORDER = {
     "limited_costume": 3,
     "meta": 4,
 }
-CANONICAL_TIME_TOLERANCE_SECONDS = 600
-CANONICAL_LONG_INTERVAL_SECONDS = 24 * 60 * 60
-CANONICAL_HIGH_OVERLAP_THRESHOLD = 0.98
-CANONICAL_HIGH_OVERLAP_BOUNDARY_SECONDS = 6 * 60 * 60
 _UPDATE_DESCRIPTION_ALIASES = (
     "版本更新",
     "客户端更新",
@@ -297,65 +268,6 @@ def classify_category(
     return best if scores[best] > 0 else "event"
 
 
-def normalize_title(value: Any) -> str:
-    """归一化跨来源标题，保留月份、Season、角色名和数字。
-
-    仅移除装饰性包装和公告语气，不把角色名、期数或季数当作噪声。
-    """
-
-    text = _fold(value)
-    text = re.sub(r"第\s*(\d+)\s*[期季]", r" season \1", text)
-    text = re.sub(r"[\[\]【】()（）<>《》{}]", " ", text)
-    aliases = (
-        ("coordinated operation", "coop"),
-        ("co op", "coop"),
-        ("solo raid", "solo_raid"),
-        ("union raid", "union_raid"),
-        ("special arena", "special_arena"),
-        ("special recruit", "recruit"),
-        ("特殊招募", "recruit"),
-        ("招募", "recruit"),
-        ("recruitment", "recruit"),
-        ("pick up", "recruit"),
-        ("pickup", "recruit"),
-        ("mission pass", "pass"),
-        ("full burst", "double_reward"),
-        ("fullburst", "double_reward"),
-        ("co-op", "coop"),
-        ("协同作战", "coop"),
-        ("单人突袭", "solo_raid"),
-        ("联盟突袭", "union_raid"),
-        ("特殊竞技场", "special_arena"),
-        ("任务通行证", "pass"),
-    )
-    for source, target in aliases:
-        text = text.replace(_fold(source), target)
-
-    # 公告型包装词不承担事件身份；Season、月份、角色名和数字保留。
-    decorative = {
-        "new",
-        "notice",
-        "announcement",
-        "opening",
-        "starts",
-        "start",
-        "ends",
-        "end",
-        "deadline",
-        "available",
-        "event",
-        "activity",
-        "活动",
-        "公告",
-        "开启",
-        "开始",
-        "截止",
-    }
-    tokens = [token for token in re.split(r"[^\w\u4e00-\u9fff]+", text) if token]
-    tokens = [token for token in tokens if token not in decorative]
-    return " ".join(tokens)
-
-
 def canonical_event_title(value: Any) -> str:
     """去除确定属于展示包装的标题前后缀，保留事件核心身份。"""
 
@@ -400,24 +312,6 @@ def canonical_event_title(value: Any) -> str:
     text = re.sub(r"\s+(?:event|activity)$", "", text)
     text = re.sub(r"[^\w\u4e00-\u9fff]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
-
-
-def interval_overlap_ratio(
-    left_start: datetime,
-    left_end: datetime,
-    right_start: datetime,
-    right_end: datetime,
-) -> float:
-    """返回交集占较短区间的比例；无效或不重叠区间返回 0。"""
-
-    left_duration = (left_end - left_start).total_seconds()
-    right_duration = (right_end - right_start).total_seconds()
-    if left_duration <= 0 or right_duration <= 0:
-        return 0.0
-    intersection = (min(left_end, right_end) - max(left_start, right_start)).total_seconds()
-    if intersection <= 0:
-        return 0.0
-    return intersection / min(left_duration, right_duration)
 
 
 def category_family(category: Any) -> str:
@@ -500,37 +394,6 @@ def sort_operations_display_events(events: Iterable[Any], status: str) -> list[A
     """按 Operations Feed 的分类族和时间契约稳定排序。"""
 
     return sorted(events, key=lambda event: operations_display_sort_key(event, status))
-
-
-def _explicit_identity_label(value: Any) -> str:
-    """提取标题中明确的角色/服装身份，用于阻止错误跨角色合并。"""
-
-    raw = unicodedata.normalize("NFKC", str(value or "")).casefold().strip()
-    raw = re.sub(r"^\s*(?:\[[^\]]*\]|【[^】]*】|\([^)]*\)|（[^）]*）)\s*", "", raw)
-    prefixes = ("special recruit", "limited costume", "costume gacha", "ssr", "特殊招募")
-    prefix_pattern = "|".join(re.escape(prefix) for prefix in prefixes)
-    match = re.match(
-        rf"^(?:{prefix_pattern})\s*[:：-]?\s*(.+?)(?=\s*[:：\-–—]|\s*$)",
-        raw,
-    )
-    if not match:
-        return ""
-    label = _fold(match.group(1))
-    return re.sub(r"\s+(?:announcement|notice|公告|event|activity)$", "", label).strip()
-
-
-def title_similarity(left: Any, right: Any) -> float:
-    """返回 0~1 的归一化标题相似度。"""
-
-    a = normalize_title(left)
-    b = normalize_title(right)
-    raw_left = _fold(left)
-    raw_right = _fold(right)
-    if not a or not b:
-        return 1.0 if raw_left and raw_left == raw_right else 0.0
-    if a == b or a in b or b in a:
-        return 1.0
-    return SequenceMatcher(None, a, b).ratio()
 
 
 def _event_value(event: Any, name: str, default: Any = None) -> Any:
@@ -683,300 +546,6 @@ def apply_display_relevance(event: Any) -> DisplayRelevance:
 
 def sort_display_events(events: Iterable[Any], status: str) -> list[Any]:
     return sorted(events, key=lambda event: RelevancePolicy.rank_key(event, status))
-
-
-def score_identity(left: Any, right: Any) -> IdentityMatch:
-    """为跨来源合并提供保守的 MATCH / AMBIGUOUS / DISTINCT 决策。"""
-
-    score = 0
-    reasons: list[str] = []
-    explicit_same_source = False
-    cycle_exact = False
-    detail_exact = False
-    exact_time_window = False
-    left_scope = str(getattr(left, "server_scope", "GLOBAL") or "GLOBAL")
-    right_scope = str(getattr(right, "server_scope", "GLOBAL") or "GLOBAL")
-    if left_scope != right_scope and "UNKNOWN" not in (left_scope, right_scope):
-        return IdentityMatch(-100, IdentityDecision.DISTINCT, ("scope_conflict:-100",))
-
-    left_cycle = str(getattr(left, "cycle_id", "") or "")
-    right_cycle = str(getattr(right, "cycle_id", "") or "")
-    if left_cycle and right_cycle:
-        if left_cycle == right_cycle:
-            score += 45
-            cycle_exact = True
-            reasons.append("cycle_exact:+45")
-        else:
-            return IdentityMatch(-100, IdentityDecision.DISTINCT, ("cycle_conflict:-100",))
-
-    left_sources = {str(item).casefold() for item in getattr(left, "sources", [])}
-    right_sources = {str(item).casefold() for item in getattr(right, "sources", [])}
-    left_primary = str(getattr(left, "primary_source", "") or "").casefold()
-    right_primary = str(getattr(right, "primary_source", "") or "").casefold()
-    if left_primary:
-        left_sources.add(left_primary)
-    if right_primary:
-        right_sources.add(right_primary)
-    if left_sources & right_sources and getattr(left, "id", None) and getattr(right, "id", None) and getattr(left, "id", None) != getattr(right, "id", None):
-        return IdentityMatch(-100, IdentityDecision.DISTINCT, ("same_source_id_conflict:-100",))
-    if getattr(left, "id", None) == getattr(right, "id", None) and left_sources & right_sources:
-        score += 100
-        explicit_same_source = True
-        reasons.append("explicit_same_source:+100")
-
-    # 同一篇更新公告可包含多个并行活动及阶段，不能把公告链接当成活动身份。
-    # 名称无法对齐时保留两条，宁可等待来源补证，也不能吞掉另一活动。
-    story_types = {str(getattr(item, "event_type", "")) for item in (left, right)}
-    if not explicit_same_source and "story_event" in story_types:
-        if canonical_event_title(getattr(left, "title", "")) != canonical_event_title(getattr(right, "title", "")):
-            return IdentityMatch(-100, IdentityDecision.DISTINCT, ("story_identity_conflict:-100",))
-
-    left_identity_label = _explicit_identity_label(getattr(left, "title", ""))
-    right_identity_label = _explicit_identity_label(getattr(right, "title", ""))
-    if (
-        not explicit_same_source
-        and left_identity_label
-        and right_identity_label
-        and left_identity_label != right_identity_label
-    ):
-        return IdentityMatch(
-            -100,
-            IdentityDecision.DISTINCT,
-            ("explicit_identity_conflict:-100", "strong_identity_gate:missing"),
-        )
-
-    left_detail = str(getattr(left, "detail_url", "") or "")
-    right_detail = str(getattr(right, "detail_url", "") or "")
-    if left_detail and right_detail and left_detail == right_detail:
-        score += 50
-        detail_exact = True
-        reasons.append("detail_reference:+50")
-
-    left_type = str(getattr(left, "event_type", "event") or "event")
-    right_type = str(getattr(right, "event_type", "event") or "event")
-    if left_type == right_type:
-        score += 20
-        reasons.append("category_exact:+20")
-    elif "event" in (left_type, right_type):
-        score += 10
-        reasons.append("category_generic:+10")
-    else:
-        score -= 50
-        reasons.append("category_conflict:-50")
-
-    title_score = title_similarity(getattr(left, "title", ""), getattr(right, "title", ""))
-    if title_score >= 0.85:
-        score += 35
-        reasons.append("title_similarity:+35")
-    elif title_score >= 0.65:
-        score += 25
-        reasons.append("title_similarity:+25")
-    elif title_score >= 0.45:
-        score += 10
-        reasons.append("title_similarity:+10")
-
-    start_left = getattr(left, "start_at", None)
-    start_right = getattr(right, "start_at", None)
-    if isinstance(start_left, datetime) and isinstance(start_right, datetime):
-        start_diff = abs((start_left - start_right).total_seconds())
-        if start_diff <= 600:
-            score += 25
-            reasons.append("start_within_10m:+25")
-        elif start_diff <= 7200:
-            score += 15
-            reasons.append("start_within_2h:+15")
-
-    end_left = getattr(left, "end_at", None)
-    end_right = getattr(right, "end_at", None)
-    if isinstance(end_left, datetime) and isinstance(end_right, datetime):
-        end_diff = abs((end_left - end_right).total_seconds())
-        if end_diff <= 600:
-            score += 25
-            reasons.append("end_within_10m:+25")
-        elif end_diff <= 7200:
-            score += 15
-            reasons.append("end_within_2h:+15")
-
-        # 只有标题本身不够相似且两个区间完全不重叠时，才认定时间不可能是同一事件。
-        if isinstance(start_left, datetime) and isinstance(start_right, datetime):
-            overlaps = max(start_left, start_right) < min(end_left, end_right)
-            if not overlaps and title_score < 0.85:
-                score -= 100
-                reasons.append("impossible_interval:-100")
-            elif start_diff <= 600 and end_diff <= 600:
-                # 两端都精确对齐时，足以抵消跨语言/官方公告标题改写造成的低相似度。
-                score += 10
-                exact_time_window = True
-                reasons.append("exact_time_window:+10")
-
-    # 仅靠“同类别 + 同时间 + 标题看起来相似”不能覆盖两个不同角色的同时活动。
-    # 自动合并必须拥有可解释的强身份证据：同源同 ID、同一周期、同一详情页，
-    # 或标题高度相似且类别与完整时间窗口同时对齐。否则最高只能是 AMBIGUOUS。
-    strong_title_time = title_score >= 0.85 and left_type == right_type and exact_time_window
-    strong_evidence = explicit_same_source or cycle_exact or detail_exact or strong_title_time
-    if strong_title_time:
-        reasons.append("strong_title_time")
-    if not strong_evidence:
-        reasons.append("strong_identity_gate:missing")
-
-    if strong_evidence and score >= 75:
-        decision = IdentityDecision.MATCH
-    elif strong_evidence and score >= 50:
-        # 周期/详情引用等强证据允许略低于标题时间窗的总分，但仍不能越过
-        # 前面的 scope/cycle/source ID 冲突早退保护。
-        decision = IdentityDecision.MATCH
-    elif score >= 50:
-        decision = IdentityDecision.AMBIGUOUS
-    else:
-        decision = IdentityDecision.DISTINCT
-    return IdentityMatch(score, decision, tuple(reasons))
-
-
-def canonical_identity_match(left: Any, right: Any) -> IdentityMatch | None:
-    """识别标题包装变化造成的同一事件，不放宽通用身份门槛。"""
-
-    left_scope = str(getattr(left, "server_scope", "GLOBAL") or "GLOBAL")
-    right_scope = str(getattr(right, "server_scope", "GLOBAL") or "GLOBAL")
-    if left_scope != right_scope and "UNKNOWN" not in (left_scope, right_scope):
-        return None
-
-    left_cycle = str(getattr(left, "cycle_id", "") or "")
-    right_cycle = str(getattr(right, "cycle_id", "") or "")
-    if left_cycle and right_cycle and left_cycle != right_cycle:
-        return None
-
-    left_sources = {str(item).casefold() for item in getattr(left, "sources", [])}
-    right_sources = {str(item).casefold() for item in getattr(right, "sources", [])}
-    left_primary = str(getattr(left, "primary_source", "") or "").casefold()
-    right_primary = str(getattr(right, "primary_source", "") or "").casefold()
-    if left_primary:
-        left_sources.add(left_primary)
-    if right_primary:
-        right_sources.add(right_primary)
-    if (
-        left_sources & right_sources
-        and getattr(left, "id", None)
-        and getattr(right, "id", None)
-        and getattr(left, "id", None) != getattr(right, "id", None)
-    ):
-        return None
-
-    left_title = canonical_event_title(getattr(left, "title", ""))
-    right_title = canonical_event_title(getattr(right, "title", ""))
-    if not left_title or left_title != right_title:
-        return None
-
-    left_family = category_family(_event_value(left, "event_type", "event"))
-    right_family = category_family(_event_value(right, "event_type", "event"))
-    business_families = {"activity", "recruit", "costume_gacha", "limited_costume"}
-    meta_reconciled = (
-        left_family == "meta" and right_family in business_families
-    ) or (
-        right_family == "meta" and left_family in business_families
-    )
-    if left_family == "unknown" or right_family == "unknown":
-        return None
-    if left_family != right_family and not meta_reconciled:
-        return None
-
-    start_left = getattr(left, "start_at", None)
-    start_right = getattr(right, "start_at", None)
-    end_left = getattr(left, "end_at", None)
-    end_right = getattr(right, "end_at", None)
-    if not all(isinstance(value, datetime) for value in (start_left, start_right, end_left, end_right)):
-        return None
-    start_diff = abs((start_left - start_right).total_seconds())
-    end_diff = abs((end_left - end_right).total_seconds())
-    exact_window = (
-        start_diff <= CANONICAL_TIME_TOLERANCE_SECONDS
-        and end_diff <= CANONICAL_TIME_TOLERANCE_SECONDS
-    )
-    left_duration = (end_left - start_left).total_seconds()
-    right_duration = (end_right - start_right).total_seconds()
-    overlap_ratio = interval_overlap_ratio(start_left, end_left, start_right, end_right)
-    high_overlap = (
-        min(left_duration, right_duration) >= CANONICAL_LONG_INTERVAL_SECONDS
-        and overlap_ratio >= CANONICAL_HIGH_OVERLAP_THRESHOLD
-        and max(start_diff, end_diff) <= CANONICAL_HIGH_OVERLAP_BOUNDARY_SECONDS
-    )
-    # 公告维护后开服只有日期精度，百科常把结束日记成零点。
-    # 仅同名、同类、同起点且明确来自官方与百科的一对记录允许字段仲裁；
-    # 不用相似标题或共同公告地址推断活动身份，阶段名称仍保留在核心名称中。
-    official_gamekee = (
-        (left_primary == "official" and right_primary == "gamekee")
-        or (left_primary == "gamekee" and right_primary == "official")
-    )
-    category_left = str(_event_value(left, "event_type", "event"))
-    category_right = str(_event_value(right, "event_type", "event"))
-    date_boundary_match = (
-        official_gamekee and category_left == category_right
-        and category_left in {"login", "pass", "story_event"}
-        and "DATE_ONLY" in {str(getattr(left, "start_precision", "")), str(getattr(right, "start_precision", ""))}
-        and start_diff <= CANONICAL_TIME_TOLERANCE_SECONDS
-        and end_diff <= 24 * 60 * 60 and overlap_ratio >= 0.90
-        and min(left_duration, right_duration) >= 7 * 24 * 60 * 60
-    )
-    if not exact_window and not high_overlap and not date_boundary_match:
-        return None
-
-    reasons = [
-        "canonical_title_exact:+100",
-        f"category_family:{left_family}",
-        "server_scope_compatible",
-    ]
-    if date_boundary_match:
-        reasons.append("official_gamekee_date_boundary_reconciled")
-    if high_overlap and not exact_window:
-        reasons.extend(
-            (
-                "canonical_title_exact_high_overlap",
-                f"interval_overlap_ratio:{overlap_ratio:.6f}",
-            )
-        )
-    else:
-        reasons.append("time_window_compatible")
-    if meta_reconciled:
-        reasons.append("canonical_title_exact_meta_reconciled")
-    return IdentityMatch(
-        100,
-        IdentityDecision.MATCH,
-        tuple(reasons),
-    )
-
-
-_DEADLINE_KEYWORDS = (
-    "时间",
-    "截止",
-    "结束",
-    "开始",
-    "开放",
-    "维护",
-    "deadline",
-    "until",
-    "ends",
-    "starts",
-    "opens",
-    "available after",
-)
-_DATE_PATTERNS = (
-    re.compile(r"\b20\d{2}[./-]\d{1,2}(?:[./-]\d{1,2})?\b"),
-    re.compile(r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}\b", re.I),
-    re.compile(r"\b\d{1,2}月\d{1,2}日\b"),
-    re.compile(r"\b\d{1,2}:\d{2}\b"),
-)
-
-
-def should_parse_deadlines(title: Any, body: Any) -> bool:
-    """官方公告截止日期的廉价前置过滤器。
-
-    没有时间关键词或日期/时间形态时，不启动正文解析器，避免每次刷新扫描
-    全部普通公告；过滤只影响解析开销，不会删除原始公告记录。
-    """
-
-    text = _fold(f"{title} {body}")
-    has_keyword = any(_contains_alias(text, keyword) for keyword in _DEADLINE_KEYWORDS)
-    has_date = any(pattern.search(text) for pattern in _DATE_PATTERNS)
-    return has_keyword and has_date
 
 
 def calendar_display_title(title: str) -> str:

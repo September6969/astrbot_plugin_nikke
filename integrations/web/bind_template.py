@@ -113,6 +113,29 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
       border-radius: 6px;
       font-size: 15px;
     }}
+    .status-actions {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+    .btn-status-refresh {{
+      background: rgba(255, 255, 255, 0.08);
+      color: #f2f3f5;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }}
+    .btn-status-refresh:hover:not(:disabled) {{
+      background: rgba(255, 255, 255, 0.16);
+    }}
+    .btn-status-refresh:focus-visible {{
+      outline: 3px solid #f4d38e;
+      outline-offset: 2px;
+    }}
     .notice-box {{
       background: #222731;
       border-left: 4px solid #e9b85a;
@@ -363,9 +386,12 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
       <span id="statusText" role="status" aria-live="polite" aria-atomic="true">
         {"● 链接有效" if initial_state == "VALID" else ("● 链接已过期（链接无效）" if initial_state == "EXPIRED" else ("● 此绑定链接已经使用（链接无效）" if initial_state == "USED" else "● 链接无效"))}
       </span>
-      <span id="timerBadge" class="timer-badge" {"style='display:none'" if initial_state != "VALID" else ""}>
-        剩余有效时间：<span id="countdown">{time_str}</span>
-      </span>
+      <div class="status-actions" {"style='display:none'" if initial_state != "VALID" else ""}>
+        <span id="timerBadge" class="timer-badge">
+          剩余有效时间：<span id="countdown">{time_str}</span>
+        </span>
+        <button id="refreshStatusBtn" type="button" class="btn-status-refresh" onclick="refreshBindStatusNow()">立即检查状态</button>
+      </div>
     </div>
 
     <!-- 成功视图 -->
@@ -418,7 +444,7 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
         </p>
         <div style="margin-top: 14px;">
           <a href="/download" class="btn btn-primary" download="nikke-bind-extension.zip">下载扩展 (ZIP)</a>
-          <a href="https://github.com/September6969/astrbot_plugin_nikke/releases" target="_blank" class="btn btn-secondary">GitHub Releases 备用下载</a>
+          <a href="https://github.com/September6969/astrbot_plugin_nikke/releases" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">GitHub Releases 备用下载</a>
         </div>
       </div>
 
@@ -472,7 +498,7 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
           <li>登录后，确认网页右侧已成功出现你的游戏角色资料。</li>
         </ol>
         <div style="margin-top: 14px;">
-          <a href="https://www.blablalink.com/" target="_blank" class="btn btn-primary">打开 BlaBlaLink 官网</a>
+          <a href="https://www.blablalink.com/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">打开 BlaBlaLink 官网</a>
         </div>
         <div class="callout-warn">
           <strong>重要：</strong>账号和密码只在 BlaBlaLink 官网填写！切勿将密码填入任何其他页面或发送给机器人。若浏览器中已经登录，可直接进入第 4 步。
@@ -492,7 +518,7 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
         </ol>
         <label class="sr-only" for="bindUrlBox">本次绑定链接</label>
         <div class="bind-url-row">
-          <input type="text" id="bindUrlBox" class="bind-url-input" value="{safe_base_url}/bind/{safe_token}" readonly aria-describedby="copyFeedback">
+          <input type="text" id="bindUrlBox" class="bind-url-input" value="{safe_base_url}/bind/{safe_token}" readonly aria-describedby="copyFeedback" onclick="this.select()">
           <button id="copyBindUrlButton" type="button" class="btn btn-copy" onclick="copyBindUrl()">复制链接</button>
         </div>
         <p id="copyFeedback" class="copy-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
@@ -624,9 +650,11 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
       var header = document.getElementById('statusHeader');
       var text = document.getElementById('statusText');
       var badge = document.getElementById('timerBadge');
+      var refreshBtn = document.getElementById('refreshStatusBtn');
       header.className = 'status-bar status-expired';
       text.textContent = '● 链接已过期';
       badge.style.display = 'none';
+      if (refreshBtn) refreshBtn.style.display = 'none';
 
       document.getElementById('viewTutorial').style.display = 'none';
       var invalidView = document.getElementById('viewInvalid');
@@ -639,9 +667,11 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
       var header = document.getElementById('statusHeader');
       var text = document.getElementById('statusText');
       var badge = document.getElementById('timerBadge');
+      var refreshBtn = document.getElementById('refreshStatusBtn');
       header.className = 'status-bar status-valid';
       text.textContent = '● 绑定成功';
       badge.style.display = 'none';
+      if (refreshBtn) refreshBtn.style.display = 'none';
 
       document.getElementById('viewTutorial').style.display = 'none';
       document.getElementById('viewInvalid').style.display = 'none';
@@ -652,26 +682,56 @@ def render_bind_page(token: str, session: dict[str, Any] | None, base_url: str) 
       succView.style.display = 'block';
     }}
 
+    function pollBindStatus() {{
+      if (currentState !== 'VALID') return Promise.resolve();
+      return fetch('/api/bind/status?token=' + encodeURIComponent(token))
+        .then(function(res) {{ return res.json(); }})
+        .then(function(data) {{
+          // 后端写入 'success'；'consumed' / 'bound' 为历史兼容值。
+          var done = data.status === 'success' || data.status === 'consumed' || data.status === 'bound';
+          if (data.ok && done) {{
+            clearInterval(pollInterval);
+            setSuccessUI(data.nickname, data.masked_qq);
+          }} else if (data.expired) {{
+            clearInterval(pollInterval);
+            setExpiredUI();
+          }} else if (data.ok && data.status === 'failed') {{
+            // 校验失败不消费令牌：高亮提示原因并继续等待扩展重新提交，无需重新生成链接。
+            document.getElementById('statusHeader').className = 'status-bar status-invalid';
+            document.getElementById('statusText').textContent =
+              '● 验证失败：' + (data.error || '请重新登录 BlaBlaLink 后在扩展内再次提交（无需刷新本页）');
+          }} else if (data.ok) {{
+            document.getElementById('statusHeader').className = 'status-bar status-valid';
+          }}
+        }})
+        .catch(function() {{}});
+    }}
+
+    function refreshBindStatusNow() {{
+      var btn = document.getElementById('refreshStatusBtn');
+      if (btn) btn.disabled = true;
+      pollBindStatus().finally(function() {{
+        if (btn && currentState === 'VALID') btn.disabled = false;
+      }});
+    }}
+
+    // 自动适配当前浏览器展示对应安装教程（Edge 与 Chrome 之外默认保留 Edge）
+    if (typeof navigator !== 'undefined' && navigator.userAgent) {{
+      if (/Chrome\\//.test(navigator.userAgent) && !/Edg\\//.test(navigator.userAgent)) {{
+        switchTab('chrome', false);
+      }}
+    }}
+
     // 轮询检查绑定状态
+    var pollInterval = null;
     if (currentState === 'VALID') {{
-      var pollInterval = setInterval(function() {{
+      pollInterval = setInterval(function() {{
         if (currentState !== 'VALID') {{
           clearInterval(pollInterval);
           return;
         }}
-        fetch('/api/bind/status?token=' + encodeURIComponent(token))
-          .then(function(res) {{ return res.json(); }})
-          .then(function(data) {{
-            if (data.ok && (data.status === 'consumed' || data.status === 'bound')) {{
-              clearInterval(pollInterval);
-              setSuccessUI(data.nickname, data.masked_qq);
-            }} else if (data.expired) {{
-              clearInterval(pollInterval);
-              setExpiredUI();
-            }}
-          }})
-          .catch(function() {{}});
-      }}, 2500);
+        pollBindStatus();
+      }}, 4000);
     }}
   </script>
 </body>

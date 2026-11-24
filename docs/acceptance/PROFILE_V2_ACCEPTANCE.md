@@ -1,5 +1,7 @@
 # Profile V2 验收记录
 
+> 历史记录（REFACTOR V2 `PR-6C` 标注）：文中 `NikkePlugin.<方法>` 调用链已被取代；这些未注册方法已删除，当前入口见 [ASTRBOT_COMMAND_ENTRY_MAP.md](../architecture/ASTRBOT_COMMAND_ENTRY_MAP.md)。
+
 ## 主题与目标命令
 
 - 用户能力：`/妮姬 我的`

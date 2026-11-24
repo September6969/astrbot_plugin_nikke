@@ -155,6 +155,45 @@ def build_subsets(source_ttf: Path, out_dir: Path, weights: list[int], text: str
     return results
 
 
+COVERAGE_MANIFEST = "NotoSansSC-ReplicaSubset.codepoints.json"
+
+
+RUNTIME_WEIGHTS = (700, 800)
+
+
+def write_coverage_manifest(out_dir: Path, font_paths: list[Path], fallback: Path | None = None) -> Path:
+    """记录子集与 Replica 回退字体的覆盖差集，供角色卡判断是否需要内联 Replica。
+
+    角色卡中文字体栈为 NikkeNotoSC → Replica → 系统字体；只有落在
+    ``fallback_only``（Replica 有、子集各字重都没有）中的字符才会真正用到 Replica。
+    """
+    from fontTools.ttLib import TTFont
+
+    # 覆盖集必须取运行时实际内联的全部字重（目标目录中的 700/800 两个子集），
+    # 不能只用本次重新生成的字重，否则旧字重缺字时会被误判为不需要 Replica。
+    runtime_paths = sorted({*font_paths, *(out_dir / f"NotoSansSC-ReplicaSubset-{w}.woff2" for w in RUNTIME_WEIGHTS)})
+    missing = [path.name for path in runtime_paths if not path.is_file()]
+    if missing:
+        raise SystemExit(f"缺少运行时子集字体，拒绝写入覆盖清单：{', '.join(missing)}")
+    font_paths = runtime_paths
+    covered: set[int] | None = None
+    for path in font_paths:
+        codepoints = set(TTFont(path).getBestCmap())
+        covered = codepoints if covered is None else covered & codepoints
+    # Replica 回退字体只随仓库发布在 assets/fonts，不随 --out-dir 变化。
+    fallback = fallback or ROOT / "assets" / "fonts" / "ReplicaSans.otf"
+    fallback_codepoints = set(TTFont(fallback).getBestCmap())
+    manifest = {
+        "fonts": [path.name for path in font_paths],
+        "fallback": fallback.name,
+        "codepoints": sorted(covered or ()),
+        "fallback_only": sorted(fallback_codepoints - (covered or set())),
+    }
+    target = out_dir / COVERAGE_MANIFEST
+    target.write_text(json.dumps(manifest, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    return target
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -190,6 +229,8 @@ def main():
         print(f"Downloaded source TTF ({source_ttf.stat().st_size:,} bytes).")
 
     results = build_subsets(source_ttf, args.out_dir, weights, sorted_text)
+    manifest = write_coverage_manifest(args.out_dir, [info["path"] for info in results.values()])
+    print(f"Coverage manifest: {manifest.name}")
     print("\nSubset Generation Summary:")
     print(f"Unique Characters: {len(sorted_text)}")
     for weight, info in results.items():

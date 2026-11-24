@@ -5,12 +5,14 @@ import asyncio
 import hashlib
 
 from ..account.errors import CredentialExpiredError
+from .action_models import execution_lock_key
 from .models import DailyTaskResult, DailyTaskStatus
 
 
 class CommunityDailyMixin:
     def _account_lock(self, account):
-        identity = self.daily_identity(account)
+        # 与数据库执行租约同一作用域（社区身份优先），签到、浏览点赞与续期在进程内串行。
+        identity = execution_lock_key(account) or "daily:" + self.daily_identity(account)
         return self._account_locks.setdefault(identity, asyncio.Lock())
 
     async def run_community_for_account(self, account, day):

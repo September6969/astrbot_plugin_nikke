@@ -15,5 +15,69 @@ CDK 接口路径和公开业务码曾与 Small-tailqwq/Nikke-CDK-Tool 的公开�
 参考项目地址：https://github.com/Small-tailqwq/Nikke-CDK-Tool
 参考项目许可证：MIT License
 
+第三方字体（assets/fonts/，不在本项目 GPL 代码许可范围内）
+
+- NotoSansSC-ReplicaSubset-700.woff2、NotoSansSC-ReplicaSubset-800.woff2：
+  本项目由 Noto Sans SC 可变字体实例化字重并子集化（修改版）。
+  Copyright 2014-2021 Adobe Systems Incorporated (http://www.adobe.com/),
+  with Reserved Font Name 'Source'; Copyright 2014-2021 Google Inc.
+  许可证：SIL Open Font License 1.1，见 assets/fonts/OFL-NotoSansSC.txt。
+- BarlowCondensed-Bold.ttf、BarlowCondensed-SemiBold.ttf：
+  Copyright 2017 The Barlow Project Authors。
+  许可证：SIL Open Font License 1.1，见 assets/fonts/OFL-BarlowCondensed.txt。
+- Rajdhani-Bold.ttf、Rajdhani-SemiBold.ttf：
+  Copyright 2014 The Rajdhani Project Authors。
+  许可证：SIL Open Font License 1.1，见 assets/fonts/OFL-Rajdhani.txt。
+- ReplicaSans.otf：本项目对 Noto Sans S Chinese Medium 1.000
+  （NotoSansHans-Medium.otf）所做的字形子集（修改版：仅保留 591 个码位，字形轮廓与
+  字宽未改；子集化时去掉了字体内的商标与许可证名称记录，字体内部名称仍沿用原名）。
+  Copyright (c) 2014 Adobe Systems Incorporated. All Rights Reserved.
+  许可证：Apache License 2.0，见 assets/fonts/LICENSE-Apache-2.0.txt。
+  Noto is a trademark of Google Inc. and may be registered in certain jurisdictions.
+  原字体上游下载地址：待确认。
+
+Nikke-db 资源来源与归属
+
+Nikke-db（https://github.com/Nikke-db/Nikke-db.github.io）是与本项目无隶属关系的
+社区项目；其仓库许可证：待确认。下列文件派生自或引用 Nikke-db，底层游戏美术与数据
+权利归 SHIFT UP 及相关权利方，不在本项目 GPL 代码许可范围内：
+
+- assets/spine-rendered/*.png：由 Nikke-db L2D 资源（skeleton、atlas、纹理）离线渲染
+  的透明 PNG；逐文件来源、校验方式与 SHA-256 见 assets/data/spine_manifest.json 与
+  docs/ui/PROFILE_DASHBOARD_V04_LOCAL_SPINE.md。并非每个文件都登记了单一来源提交，
+  不应理解为全部出自同一提交。
+- assets/icons/currency/credit.png、battledata.png、coredust.png：取自 Nikke-db
+  固定提交 a2358b72bd1335c30737e46482a99947f3788bc7 的 images/，见
+  assets/icons/currency/README.md。
+- 标识与布局元数据（不含美术）：assets/data/costumes.json 中的 asset_evidence、
+  assets/mappings/nikke_db_l2d_inventory.json（Nikke-db l2d.json 索引快照）、
+  nikke_db_fb_inventory.json、character_placement_meta.json、spine_metadata.json、
+  spine_bone_semantics.json、spine_bone_overrides.json。
+- 可选的运行时与维护下载（企业/武器图标、FB 图片、L2D 索引、Spine bundle）来自
+  raw.githubusercontent.com/Nikke-db/Nikke-db.github.io 与 nikke-db.github.io，
+  由 integrations/nikke_db/、integrations/spine/ 与
+  scripts/operations/update_nikke_db.sh 执行；下载缓存不纳入版本控制。
+  CI 手动任务另使用固定提交 6e6ee77ff76ec6f9003953fbcdb3768248cbda04（见
+  .github/workflows/ci.yml）。
+
+Spine Runtime
+
+runtime/spine_worker 在 Docker 构建时获取 EsotericSoftware/spine-runtimes
+（https://github.com/EsotericSoftware/spine-runtimes）：4.0 固定提交
+425ce416bb218b28caeec47b317aa57cd7140375（Dockerfile），4.1 固定提交
+77a5db0ec6d16331f5efbaa7662bba9355bd3424（Dockerfile.4.1），并下载 SFML 2.5.1，
+其库文件被复制进 worker 镜像。离线维护工具另使用官方 spine-core / spine-webgl
+（见 docs/ui/REPLICA_CALENDAR_V05_REPORT.md）。以上源码与二进制均不随本仓库分发；
+使用须遵守 Spine Runtimes License
+（https://esotericsoftware.com/spine-runtimes-license）与 Spine Editor License
+（https://esotericsoftware.com/spine-editor-license），SFML 适用其自身许可证，
+由部署者核实。仓库提交的是渲染结果（见上一节），不是 runtime 本身。
+
+攻略图片（assets/guides/）
+
+攻略长图按 assets/guides/source_manifest.json 记录的授权（"用户确认允许公开仓库收录
+及机器人发送"）收录，作者署名以该清单为准：屑芙蒂、迪恩deen33；另有一张为用户授权
+提供、原图未署名。本项目不对这些图片声明额外许可证。
+
 本项目与 SHIFT UP、Level Infinite、BlaBlaLink 或 NIKKE 官方没有隶属关系。
 游戏名称、图标和素材的相关权利归其各自权利人所有。

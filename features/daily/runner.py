@@ -20,6 +20,12 @@ from .action_models import account_scope
 from .ports import DailyGateway, DailyStore
 
 
+# 预检（尚未发送签到写请求）阶段的失败：允许重绑或限流解除后在同一天重试。
+PRECHECK_RETRYABLE = {"pending", "unavailable", "precheck_expired", "precheck_failed"}
+# 写前意图超过该秒数仍未推进才按中断遗留恢复；更新的意图视为仍在执行，不覆盖。
+DISPATCH_INTENT_STALE_AFTER = 120
+
+
 class DailyRunner(CommunityDailyMixin):
     """日常任务执行器，管理账号签到、并发控制、幂等与重试锁。"""
 
@@ -32,7 +38,7 @@ class DailyRunner(CommunityDailyMixin):
         self._client = client
         self._store = store
         self.config = config or {}
-        self._account_locks = {}
+        self._account_locks: dict[str, asyncio.Lock] = {}
         self.on_automatic_result = None
 
     @property
@@ -146,6 +152,12 @@ class DailyRunner(CommunityDailyMixin):
         ):
             existing = self.store.get_run(run_key)
             existing_status = str(existing.get("status", "")) if existing else ""
+            if existing_status == "DISPATCH_INTENT" and not self.store.transition_run(
+                run_key, from_statuses={"DISPATCH_INTENT"}, to_status="UNKNOWN_AFTER_ACTION",
+                detail="写前意图超时未推进，按未决结果只读核验", stale_after=DISPATCH_INTENT_STALE_AFTER,
+            ):
+                return DailyTaskResult(account_name, DailyTaskStatus.UNKNOWN_AFTER_ACTION,
+                                       "今日签到正在执行，请稍后查询；未重复提交")
             if existing_status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                 try:
                     result = await self.read_only_daily_recovery(account, account_name)
@@ -168,10 +180,10 @@ class DailyRunner(CommunityDailyMixin):
                     DailyTaskStatus.FAILED,
                     "今日签到已有失败记录，未自动重发",
                 )
-            if existing_status in {"pending", "unavailable"}:
+            if existing_status in PRECHECK_RETRYABLE:
                 if not self.store.transition_run(
                     run_key,
-                    from_statuses={"pending", "unavailable"},
+                    from_statuses=PRECHECK_RETRYABLE,
                     to_status="DISPATCH_INTENT",
                     refresh_created_at=True,
                 ):
@@ -196,10 +208,10 @@ class DailyRunner(CommunityDailyMixin):
             if not signin_owned:
                 existing_signin = self.store.get_run(signin_key) or {}
                 signin_status = str(existing_signin.get("status", ""))
-                if signin_status in {"pending", "unavailable"}:
+                if signin_status in PRECHECK_RETRYABLE:
                     signin_owned = self.store.transition_run(
                         signin_key,
-                        from_statuses={"pending", "unavailable"},
+                        from_statuses=PRECHECK_RETRYABLE,
                         to_status="DISPATCH_INTENT",
                         refresh_created_at=True,
                     )
@@ -217,6 +229,12 @@ class DailyRunner(CommunityDailyMixin):
                         DailyTaskStatus.ALREADY_DONE,
                         str(existing_signin.get("detail") or "登录有效；今日已经签到"),
                     )
+                elif signin_status == "DISPATCH_INTENT" and not self.store.transition_run(
+                    signin_key, from_statuses={"DISPATCH_INTENT"}, to_status="UNKNOWN_AFTER_ACTION",
+                    detail="写前意图超时未推进，按未决结果只读核验", stale_after=DISPATCH_INTENT_STALE_AFTER,
+                ):
+                    result = DailyTaskResult(account_name, DailyTaskStatus.UNKNOWN_AFTER_ACTION,
+                                             "签到正在执行，请稍后查询；未重复提交")
                 elif signin_status in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
                     try:
                         result = await self.read_only_daily_recovery(account, account_name)
@@ -246,6 +264,7 @@ class DailyRunner(CommunityDailyMixin):
                 if not signin_owned:
                     self.store.finish_run(run_key, result.run_status, result.detail)
                     return result
+        write_started = False
         try:
             await self.client.get_profile(account)
             status = await self.client.get_daily_signin(account)
@@ -261,6 +280,8 @@ class DailyRunner(CommunityDailyMixin):
                 )
             else:
                 try:
+                    # 从这里起才真正发送写请求：之后的失败锁定当日，防止重放。
+                    write_started = True
                     detail = "登录有效；" + await self.client.perform_daily_signin(account)
                     self.store.finish_run(signin_key, "success", detail)
                     signin_finished = True
@@ -299,16 +320,29 @@ class DailyRunner(CommunityDailyMixin):
             raise
         except CredentialExpiredError:
             self.store.mark_cookie_invalid(qq_id)
-            existing_signin = self.store.get_run(signin_key) or {}
-            if str(existing_signin.get("status", "")) in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
-                self.store.finish_run(signin_key, "expired", "登录状态已失效")
-                signin_finished = True
             result = DailyTaskResult(account_name, DailyTaskStatus.COOKIE_EXPIRED, "Cookie失效，请重新绑定")
+            if write_started:
+                existing_signin = self.store.get_run(signin_key) or {}
+                if str(existing_signin.get("status", "")) in {"running", "DISPATCH_INTENT", "unknown", "UNKNOWN_AFTER_ACTION"}:
+                    self.store.finish_run(signin_key, "expired", "登录状态已失效")
+                    signin_finished = True
+            else:
+                # 预检阶段失效：尚未提交签到，重新绑定后当天可补签。
+                return self._finish_precheck(run_key, signin_key, signin_owned, result, "precheck_expired")
         except Exception as exc:
             result = self.daily_error_result(account_name, "登录状态检查", exc)
+            if not write_started:
+                return self._finish_precheck(run_key, signin_key, signin_owned, result, "precheck_failed")
         if signin_owned and not signin_finished:
             self.store.finish_run(signin_key, result.run_status, result.detail)
         self.store.finish_run(run_key, result.run_status, result.detail)
+        return result
+
+    def _finish_precheck(self, run_key, signin_key, signin_owned, result, status):
+        """预检失败只记录可重试状态，不占用当日防重放锁。"""
+        if signin_owned:
+            self.store.finish_run(signin_key, status, result.detail)
+        self.store.finish_run(run_key, status, result.detail)
         return result
 
     async def run_all_daily(

@@ -418,7 +418,8 @@ class CharacterCardBuilder:
                 item.options.append(option)
                 if self.unknown_ol_inventory is not None:
                     for component in option.components or (option,):
-                        if component.unit == "unknown" and self.overload_tier_registry.resolve(option.option_id) is None:
+                        registry = self.overload_tier_registry
+                        if component.unit == "unknown" and (registry is None or registry.resolve(option.option_id) is None):
                             self.unknown_ol_inventory.observe(option.option_id, component.raw_type)
             equipment[slot] = item
         return equipment

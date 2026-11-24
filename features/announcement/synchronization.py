@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections import Counter
 import logging
 from typing import Any
@@ -41,6 +42,11 @@ class AnnouncementSyncCoordinator:
         self.repository = repository
         self._source_factory = source_factory
         self._official_fetcher = official_fetcher
+        # 单飞（AUD-020）：同一时刻只有一次同步改写仓储与缓存文件；参数相同的并发请求
+        # 复用排队期间完成的那次结果，不重复抓取上游。注入 fetcher 的调用总是独立执行。
+        self._sync_lock = asyncio.Lock()
+        self._sync_generation = 0
+        self._last_sync: tuple[tuple[str, bool], int, tuple[bool, str]] | None = None
 
     async def fetch_primary(self, *, locale: str = "en", deep: bool = False) -> list[AnnouncementRecord]:
         try:
@@ -76,6 +82,19 @@ class AnnouncementSyncCoordinator:
     ) -> tuple[bool, str]:
         """同步公开数据；深度扫描受限且不会触发任何投递。"""
         selected_locale = AnnouncementNormalizer.normalize_locale(locale)
+        key = None if fetcher is not None else (selected_locale, bool(deep))
+        arrived_at = self._sync_generation
+        async with self._sync_lock:
+            last = self._last_sync
+            if key is not None and last is not None and last[0] == key and last[1] > arrived_at:
+                # 等锁期间已有同参数同步完成，直接共享其结果。
+                return last[2]
+            result = await self._sync_locked(fetcher, selected_locale=selected_locale, deep=deep)
+            self._sync_generation += 1
+            self._last_sync = (key, self._sync_generation, result) if key is not None else None
+            return result
+
+    async def _sync_locked(self, fetcher: Any, *, selected_locale: str, deep: bool) -> tuple[bool, str]:
         try:
             source_name = "injected"
             scan = None
@@ -139,7 +158,11 @@ class AnnouncementSyncCoordinator:
             }
             self.repository.save_cache()
             scope = "深度重扫" if deep else "常规同步"
-            return True, f"{scope}成功：收到 {len(records)} 条，新增 {counts['new']} 条，更新 {counts['updated']} 条。"
+            message = f"{scope}成功：收到 {len(records)} 条，新增 {counts['new']} 条，更新 {counts['updated']} 条。"
+            failed_details = scan.get("failed_details") if isinstance(scan, dict) else None
+            if type(failed_details) is int and failed_details > 0:
+                message += f"另有 {failed_details} 条全文获取失败，下次同步重试。"
+            return True, message
         except Exception as exc:
             # 失败时覆盖旧的成功范围，避免诊断把过期报告冒充最近同步结果。
             self.repository.last_sync_report = {

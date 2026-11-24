@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {classifySurfaceSemantics} from '../scripts/spine_surface_semantics.mjs';
+// G9-scripts-docs-a5（PR-6C）：根兼容壳已删除，直接导入分类实现。
+import {classifySurfaceSemantics} from '../scripts/spine/spine_surface_semantics.mjs';
 
 test('face attachment keeps face semantics inside a head slot', () => {
   assert.deepEqual(

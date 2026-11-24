@@ -25,7 +25,8 @@
         <div class="actions">
           <button id="swap" type="button" aria-pressed="false">换位</button>
           <button id="remove-character" type="button">移除</button>
-          <button id="undo" type="button">撤销</button>
+          <button id="undo" type="button" title="撤销上一步 (Ctrl+Z)">撤销</button>
+          <button id="clear-team" type="button" hidden>清空本队</button>
           <button id="clear" type="button">清空</button>
         </div>
         <p id="validation" aria-live="polite"></p>
@@ -36,7 +37,10 @@
           <span id="choice-count"></span>
         </div>
         <div class="catalogue-tools">
-          <input id="search" type="search" aria-label="搜索角色" placeholder="搜索姓名或角色键" autocomplete="off">
+          <div class="search-box">
+            <input id="search" type="search" aria-label="搜索角色" placeholder="搜索姓名或别名（回车选首位）" autocomplete="off">
+            <button id="search-clear" type="button" class="clear-btn" aria-label="清除搜索" hidden>×</button>
+          </div>
           <div id="burst-filters" class="filters" role="group" aria-label="爆裂阶段">
             <button type="button" data-burst="all" aria-pressed="true">全部</button>
             <button type="button" data-burst="1" aria-pressed="false">B1</button>
@@ -48,10 +52,13 @@
         <button id="more-choices" type="button" hidden>显示更多角色</button>
       </section>
     </div>
-    <details><summary>粘贴导入</summary>
+    <details id="paste-details"><summary>粘贴导入</summary>
       <label for="paste">用 / 分隔角色。支持一行五人、一行十五人或三行五人。</label>
       <textarea id="paste" rows="3" placeholder="红莲/豺狼/布兰儿/桑迪/特蕾娜"></textarea>
-      <button id="import" type="button">导入阵容</button>
+      <div class="inline-actions">
+        <button id="import" type="button">导入阵容</button>
+        <p id="import-feedback" role="status" aria-live="polite"></p>
+      </div>
     </details>
     <details id="candidate-editor" hidden>
       <summary>加入我方候选</summary>
@@ -69,8 +76,15 @@
       <select id="roster-mode"><option value="owned">只用已确认持有角色</option>
         <option value="manual">手动标记持有</option><option value="sandbox">全角色沙盒 · 未验证持有</option></select>
       <details id="manual"><summary>选择手动持有角色</summary>
-        <label for="owned-search">搜索角色</label><input id="owned-search" type="search" autocomplete="off">
-        <p id="owned-count"></p><div id="owned-list"></div>
+        <label for="owned-search">搜索角色</label><input id="owned-search" type="search" placeholder="筛选要勾选的角色" autocomplete="off">
+        <div class="owned-toolbar">
+          <p id="owned-count"></p>
+          <div class="owned-batch-actions">
+            <button id="owned-select-visible" type="button">全选筛选</button>
+            <button id="owned-clear-visible" type="button">取消筛选</button>
+          </div>
+        </div>
+        <div id="owned-list"></div>
       </details>
       <div id="objective-field" hidden>
         <label for="objective">三队目标</label>
@@ -83,7 +97,15 @@
     <p id="status" role="status"></p>
     <button id="retry-save" type="button" hidden>重试保存草稿</button>
   </div>
-  <section id="result" hidden><h2>分析结果</h2><pre id="result-text"></pre>
+  <section id="result" hidden>
+    <div class="result-head">
+      <h2>分析结果</h2>
+      <div class="result-actions">
+        <button id="copy-result" type="button">复制结果</button>
+        <span id="copy-result-feedback" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+    <pre id="result-text"></pre>
     <p>结果已保存。回 QQ 私聊发送 <strong>/妮姬 竞技场 结果</strong>。</p></section>
   <footer><p>静态模型提供相对排序。技能、魔方、超频与特殊机制会影响实际对局。</p>
     <details id="end-session"><summary>结束编辑会话</summary>

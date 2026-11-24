@@ -1,10 +1,13 @@
 """官网 InformationFeeds 只读适配器，合同及采样来源见 docs/archive/evidence/overnight.md。"""
 import asyncio
+import logging
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from typing import Any
 import httpx
 from ...features.announcement.models import AnnouncementRecord
+
+logger = logging.getLogger("nikke.announcements")
 
 BASE = "https://na-community.playerinfinite.com/api/gpts.information_feeds_svr.InformationFeedsSvr/"
 HOSTS = {"en": "nikke-en.com", "ja": "nikke-jp.com", "ko": "nikke-kr.com", "th": "nikke-sea.com", "de": "nikke-de.com", "fr": "nikke-fr.com"}
@@ -131,12 +134,32 @@ class InformationFeedsSource:
                     source_url=f"https://{HOSTS[self.locale]}/newsdetail.html?content_id={identifier}",
                     locale=self.locale,
                 )
-            records = await asyncio.gather(*(detail(identifier) for identifier in items))
+            # 单条全文失败只丢弃该条，不能让 gather 的首个异常抛弃整批已取得的结果（AUD-020）。
+            outcomes = await asyncio.gather(*(detail(identifier) for identifier in items), return_exceptions=True)
+            records: list[AnnouncementRecord] = []
+            failures: list[Exception] = []
+            for outcome in outcomes:
+                if isinstance(outcome, Exception):
+                    failures.append(outcome)
+                elif isinstance(outcome, BaseException):
+                    # 取消与解释器中断必须继续传播，不能被当作单条失败吞掉。
+                    raise outcome
+                else:
+                    records.append(outcome)
+            if failures and not records:
+                # 全部失败不是“成功的空批次”，沿用原失败语义以保留缓存或触发回退。
+                raise failures[0]
+            if failures:
+                logger.warning(
+                    "InformationFeeds %d/%d 条公告全文获取失败，已保留其余结果: %s",
+                    len(failures), len(items), sorted({type(error).__name__ for error in failures}),
+                )
             self.last_scan = {
                 "pages_scanned": pages_scanned,
                 "requested_pages": self.max_pages,
                 "page_size": self.page_size,
                 "finished": finished,
                 "unique_records": len(records),
+                "failed_details": len(failures),
             }
             return records

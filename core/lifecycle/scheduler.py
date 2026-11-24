@@ -4,14 +4,36 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from collections.abc import Awaitable, Callable, Mapping
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from ..config import read_schedule_clock
+from ..privacy import safe_exception_message
 from .coordinator import RuntimeCoordinator
 from .ports import SchedulerSettingsStore
+
+
+_LOGGER = logging.getLogger(__name__)
+_MAX_BACKOFF_SECONDS = 300.0
+_WARNING_INTERVAL_SECONDS = 600.0
+_CST = timezone(timedelta(hours=8))
+# 汇总补发窗口：前序日常耗时或重启都不应丢失汇总；超出窗口不再补发。
+SUMMARY_CATCHUP = timedelta(hours=6)
+SUMMARY_SENT_KEY = "daily_summary_sent:{day}"
+
+
+def community_due(community_day: str, hour: int, minute: int) -> datetime:
+    """社区日（UTC 日期，北京时间 08:00 起算）内配置的北京时间时刻。
+
+    北京时间 00:00–07:59 属于前一个社区日的末尾，因此落在社区日的次日日历上；
+    这样 daily_hour < 8 时不会在社区日开始（08:00）就提前约 22 小时触发。
+    """
+    day = datetime.strptime(community_day, "%Y-%m-%d")
+    due = datetime(day.year, day.month, day.day, hour, minute, tzinfo=_CST)
+    return due + timedelta(days=1) if hour < 8 else due
 
 
 class RuntimeScheduler:
@@ -72,7 +94,6 @@ class RuntimeScheduler:
         if self._coordinator.closing:
             return
         now = self._clock()
-        today = now.strftime("%Y-%m-%d")
         daily_hour, daily_minute = read_schedule_clock(
             self._store.get_setting,
             "daily",
@@ -85,21 +106,17 @@ class RuntimeScheduler:
             default_hour=self._config["summary_hour"],
             default_minute=self._config["summary_minute"],
         )
-        # 社区按 UTC 零点刷新；本地时刻仅决定何时运行，错过时刻允许当天补跑。
+        # 社区按 UTC 零点（北京时间 08:00）刷新；日常与汇总统一按同一社区日计算，
+        # 错过时刻允许当天补跑，汇总与结果使用同一日期键。
         community_day = now.astimezone(timezone.utc).strftime("%Y-%m-%d")
-        if ((now.hour, now.minute) >= (daily_hour, daily_minute)
+        if (now >= community_due(community_day, daily_hour, daily_minute)
             and self._last_daily != community_day
             and (self._daily_task is None or self._daily_task.done())):
             self._last_daily = community_day
             self._daily_task = self._coordinator.create_task(
                 self._run_daily(community_day, stagger=True, automatic=True)
             )
-        if (
-            (now.hour, now.minute) == (summary_hour, summary_minute)
-            and self._last_summary != today
-        ):
-            self._last_summary = today
-            self._coordinator.create_task(self._send_summary(today))
+        self._maybe_send_summary(now, community_day, summary_hour, summary_minute)
 
         current_epoch = self._unix_time()
         if current_epoch - self._last_announcement_sync > self._announcement_interval:
@@ -126,8 +143,49 @@ class RuntimeScheduler:
                     self._dispatch_announcements()
                 )
 
+    def _maybe_send_summary(self, now: datetime, community_day: str, hour: int, minute: int) -> None:
+        """到点后在补发窗口内发送一次；等待同日日常结束；数据库幂等键防止重启重发。"""
+        due = community_due(community_day, hour, minute)
+        if not due <= now < due + SUMMARY_CATCHUP or self._last_summary == community_day:
+            return
+        if self._daily_task is not None and not self._daily_task.done():
+            return
+        key = SUMMARY_SENT_KEY.format(day=community_day)
+        if self._store.get_setting(key, None):
+            self._last_summary = community_day
+            return
+        self._last_summary = community_day
+        setter = getattr(self._store, "set_setting", None)
+        if callable(setter):
+            # 先落标记再发送：宁可极端崩溃时少发一次，也不在同分钟重启时重复发送。
+            setter(key, {"sent_at": now.astimezone(timezone.utc).isoformat()})
+        self._coordinator.create_task(self._send_summary(community_day))
+
     async def run(self) -> None:
-        """持续轮询；退出与取消由 RuntimeCoordinator 管理。"""
+        """持续轮询；退出与取消由 RuntimeCoordinator 管理。
+
+        单次 tick 失败（如 SQLite 锁超时）只退避重试并节流告警，不让调度循环
+        和宿主生命周期整体失败；只有取消信号向上传播。
+        """
+        failures = 0
+        last_warning = float("-inf")
         while not self._coordinator.closing:
-            await self.tick()
-            await self._sleep(self._poll_interval)
+            delay = self._poll_interval
+            try:
+                await self.tick()
+                failures = 0
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                failures += 1
+                delay = min(self._poll_interval * (2 ** min(failures, 8)), _MAX_BACKOFF_SECONDS)
+                now = self._unix_time()
+                if failures == 1 or now - last_warning >= _WARNING_INTERVAL_SECONDS:
+                    last_warning = now
+                    _LOGGER.warning(
+                        "[NIKKE] 调度检查失败（连续 %d 次），%.0f 秒后重试：%s",
+                        failures,
+                        delay,
+                        safe_exception_message(exc),
+                    )
+            await self._sleep(delay)

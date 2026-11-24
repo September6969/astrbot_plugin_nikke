@@ -250,7 +250,8 @@ class UnionRaidRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(results, ["突袭结果"])
 
         # 4. Via query: /妮姬 查询 突袭
-        results = [r async for r in plugin.query(event, "突袭")]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [r async for r in plugin.command_runtime.query(event, "突袭")]
         self.assertEqual(results, ["突袭结果"])
 
         self.assertEqual(calls, ["overview"] * 4)

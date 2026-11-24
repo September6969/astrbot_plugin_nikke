@@ -26,7 +26,7 @@ from .layout import (
     portrait_safe_rect,
     summary_layout,
 )
-from .face_guided_centering import robust_alpha_bounds
+from .alpha_bounds import robust_alpha_bounds
 from .ports import CharacterRenderIdentity
 
 
@@ -371,7 +371,7 @@ def framing(
         )
     if not isinstance(row, dict):
         from .portrait_anchor import read_anchor
-        attached = read_anchor(portrait)
+        attached = read_anchor(portrait, pixel_sha256=digest)
         if attached is not None and attached.get("status") == "ready":
             row = attached
     if not isinstance(row, dict):

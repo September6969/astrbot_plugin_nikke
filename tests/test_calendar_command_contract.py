@@ -215,9 +215,12 @@ async def test_calendar_page_out_of_range_returns_text_without_rendering():
 
 
 def test_main_calendar_route_does_not_read_schedule_service_or_model_fields():
+    # G8-main-legacy-e（PR-6C）：NikkePlugin.event_schedule 已删除，日程路由只在 NikkeCommandRuntime.nikke。
+    from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
     from astrbot_plugin_nikke.main import NikkePlugin
 
-    method = getattr(NikkePlugin, "event_schedule")
+    assert not hasattr(NikkePlugin, "event_schedule")
+    method = getattr(NikkeCommandRuntime, "nikke")
     tree = ast.parse(textwrap.dedent(inspect.getsource(method)))
     forbidden_names = {
         "has_snapshot",

@@ -56,19 +56,11 @@ class CampaignHistoryBuilder:
         master_resolver: CharacterMasterResolver | None = None,
     ):
         self._resolver = master_resolver or CharacterMasterResolver()
-        self._directory_by_tid: dict[int, dict] = {}
-        if directory:
-            self.update_directory(directory)
+        self._directory: list[dict] = list(directory or [])
 
     def update_directory(self, directory: list[dict]) -> None:
-        self._directory_by_tid.clear()
-        for item in directory:
-            nc = item.get("name_code")
-            if nc is not None:
-                try:
-                    self._directory_by_tid[int(nc)] = item
-                except (ValueError, TypeError):
-                    pass
+        """保留接口兼容；目录按 name_code 编号，不参与战斗 TID 解析。"""
+        self._directory = list(directory)
 
     def build(
         self,
@@ -210,25 +202,19 @@ class CampaignHistoryBuilder:
                 malformed = True
                 continue
 
-            info = self._directory_by_tid.get(tid)
-            if info:
-                name_cn = info.get("name_cn", f"NIKKE {tid}")
-                name_en = info.get("name_en", "")
-                res_val = info.get("resource_id")
-                resource_id = str(res_val) if res_val is not None else None
-                name_code = info.get("name_code")
+            # 通关阵容的 tid 是战斗角色 ID，与目录 name_code 不是同一编号空间；
+            # 只经主数据 resolve_battle_tid 解析，不能用 name_code 索引查找。
+            char = self._resolver.resolve_battle_tid(tid)
+            if char is not None:
+                name_cn = char.name_cn
+                name_en = char.name_en
+                resource_id = str(char.resource_id)
+                name_code = char.name_code
             else:
-                char = self._resolver.resolve_battle_tid(tid)
-                if char is not None:
-                    name_cn = char.name_cn
-                    name_en = char.name_en
-                    resource_id = str(char.resource_id)
-                    name_code = char.name_code
-                else:
-                    name_cn = f"NIKKE {tid}"
-                    name_en = ""
-                    resource_id = None
-                    name_code = None
+                name_cn = f"NIKKE {tid}"
+                name_en = ""
+                resource_id = None
+                name_code = None
 
             members.append(
                 StageClearMember(

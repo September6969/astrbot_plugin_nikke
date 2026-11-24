@@ -5,6 +5,16 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any
+import unicodedata
+
+
+def text_units(text: str) -> float:
+    """按中日韩显示宽度估算文本占用的全角等效宽度（1.0 = 一个汉字的字宽）。"""
+    return sum(
+        0.42 if char.isspace() else
+        1.0 if unicodedata.east_asian_width(char) in {"W", "F"} else 0.55
+        for char in text
+    )
 
 
 def display_number(value: Any) -> str:

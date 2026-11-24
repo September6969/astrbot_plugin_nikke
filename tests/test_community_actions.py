@@ -278,14 +278,19 @@ async def test_reenable_after_disable_during_progress_preserves_records_and_budg
     # 重新打开数据库，确保恢复依赖持久记录且不会重置周期预算。
     service.store = NikkeStore(tmp_path)
     resumed = await service.execute(account, automatic=True)
-    assert resumed.status == "incomplete"
-    assert gateway.dispatched == [("browse", "2"), ("like", "1"), ("like", "2")]
+    # REFACTOR_PLAN_V2 AUD-005：确认未发送（NOT_SENT）不再占用周期预算；
+    # 该帖子仍按去重键跳过，不会被重发。
+    assert resumed.status == "completed"
+    assert ("browse", "1") not in gateway.dispatched
+    assert gateway.dispatched.count(("browse", "2")) == 1
+    assert [item for item in gateway.dispatched if item[0] == "like"] == [("like", "1"), ("like", "2")]
     detail = json.loads(service.store.get_run(record["run_key"])["detail"])
     assert detail["target"] == 2 and detail["post_id"] == "1"
     assert detail["request"] == "not_sent"
     assert service.store.get_run(record["run_key"])["status"] == "NOT_SENT"
+    dispatched = len(gateway.dispatched)
     await service.execute(account, automatic=True)
-    assert len(gateway.dispatched) == 3
+    assert len(gateway.dispatched) == dispatched
 
 
 @pytest.mark.asyncio

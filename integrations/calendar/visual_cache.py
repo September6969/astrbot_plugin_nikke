@@ -30,6 +30,16 @@ class CalendarVisualCache:
     MAX_BYTES = 12 * 1024 * 1024
     MAX_PIXELS = 30_000_000
     MAX_REDIRECT_HOPS = 3
+    # 代理 fake-IP 环境下允许重查公网 DNS 的已知图片 CDN：GameKee 活动图与
+    # BlaBla 官方日程 banner（game_resource_url 生成的 sg-tools-cdn）（AUD-020）。
+    FAKE_DNS_HOSTS = frozenset({"cdnimg-v2.gamekee.com", "cdnimg.gamekee.com", "sg-tools-cdn.blablalink.com"})
+    FAKE_IP_NETWORK = ipaddress.ip_network("198.18.0.0/15")
+    BASE_REQUEST_HEADERS = {
+        "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "user-agent": "astrbot-plugin-nikke/calendar-visual",
+    }
+    # GameKee 防盗链所需的来源头只发给 GameKee 自身域名，不能泄漏给 BlaBla 等其它主机。
+    GAMEKEE_REQUEST_HEADERS = {"referer": "https://www.gamekee.com/nikke/", "game-alias": "nikke"}
 
     def __init__(
         self,
@@ -183,12 +193,11 @@ class CalendarVisualCache:
         """仅兼容已知图片 CDN 的代理虚拟地址，重查公网 DNS 并固定连接目标。"""
         parsed = urlparse(url)
         host = parsed.hostname or ""
-        if parsed.scheme != "https" or host not in {"cdnimg-v2.gamekee.com", "cdnimg.gamekee.com"}:
+        if parsed.scheme != "https" or host not in self.FAKE_DNS_HOSTS:
             return None
         records = await asyncio.to_thread(socket.getaddrinfo, host, 443, type=socket.SOCK_STREAM)
         addresses = {ipaddress.ip_address(item[4][0]) for item in records}
-        fake_net = ipaddress.ip_network("198.18.0.0/15")
-        if not addresses or not all(address in fake_net for address in addresses):
+        if not addresses or not all(address in self.FAKE_IP_NETWORK for address in addresses):
             return None
         if host in self._public_dns:
             return self._public_dns[host]
@@ -203,19 +212,22 @@ class CalendarVisualCache:
         self._public_dns[host] = str(resolved[0])
         return str(resolved[0])
 
+    @classmethod
+    def _request_headers(cls, url: str) -> dict[str, str]:
+        """按本跳目标主机生成请求头；重定向到其它主机时不会沿用 GameKee 来源头。"""
+        host = (urlparse(url).hostname or "").rstrip(".").casefold()
+        headers = dict(cls.BASE_REQUEST_HEADERS)
+        if host == "gamekee.com" or host.endswith(".gamekee.com"):
+            headers.update(cls.GAMEKEE_REQUEST_HEADERS)
+        return headers
+
     async def _download_image(self, client: httpx.AsyncClient, url: str) -> tuple[bytes, int, int]:
-        headers = {
-            "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-            "referer": "https://www.gamekee.com/nikke/",
-            "game-alias": "nikke",
-            "user-agent": "astrbot-plugin-nikke/calendar-visual",
-        }
         current_url = url
         redirect_hops = 0
         while True:
             request_url = current_url
-            request_headers = dict(headers)
-            extensions = {}
+            request_headers = self._request_headers(current_url)
+            extensions: dict[str, str] = {}
             if not await self._validate_remote_url(current_url):
                 if not self._safe_url(current_url):
                     raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
@@ -223,6 +235,8 @@ class CalendarVisualCache:
                 if address is None:
                     raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
                 host = urlparse(current_url).hostname
+                if not host:
+                    raise ValueError(f"活动视觉素材 URL 不允许访问: {current_url}")
                 request_url = str(httpx.URL(current_url).copy_with(host=address))
                 request_headers["host"] = host
                 extensions["sni_hostname"] = host

@@ -38,7 +38,9 @@
 
 ## 代码语义
 
-`audit_story_voice_mapping()` 生成 `StoryVoiceMappingAudit`：
+历史说明：下述审计辅助（`features/voice/scene_catalog.py` 的 `audit_story_voice_mapping()`）没有生产或脚本调用方，已在 PR-6A 删除，可从 Git 历史 `ab610f5` 恢复；结论仍然有效。
+
+`audit_story_voice_mapping()` 曾生成 `StoryVoiceMappingAudit`：
 
 - `scope=STORY_SCENE`；
 - 显式区分 `matched_ids`、`map_only_ids`、`detail_only_ids`、重复 map ID 和重复 detail ID；

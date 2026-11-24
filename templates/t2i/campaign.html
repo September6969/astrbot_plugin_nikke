@@ -1,29 +1,41 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1600">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
 <style><!-- SHARED_CSS -->
-.campaign .badge.state-rate-limited { color:#edcc87; border-color:#967644; }
-.campaign .badge.state-error { color:#e3a8a8; border-color:#946363; }
-.campaign { width: 1600px; height: 900px; padding: 32px 44px; display: grid; grid-template-rows: 122px 600px 42px 30px; gap: 12px; border-top: 4px solid var(--accent); }
+/* 1600×900 固定画布：行高逐项相加等于画布高度；辅助文字不低于 --font-min（432px 缩略图约 7px）。 */
+:root { --canvas-width: 1600px; }
+.campaign { width: 1600px; height: 900px; padding: 28px 44px 24px; display: grid; grid-template-rows: 128px 596px 48px 36px; gap: 12px; border-top: 4px solid var(--accent); overflow: hidden; }
 .campaign.hard { --accent: #d79a9b; }
 .campaign.unknown { --accent: #9ca6b3; }
+.campaign .eyebrow { font-size: var(--font-min); line-height: 1.3; }
 .campaign header { display: grid; grid-template-columns: 1fr auto; align-items: start; }
 .title-line { display: flex; align-items: center; gap: 24px; margin-top: 4px; }
-h1 { font-size: 82px; line-height: 1.12; letter-spacing: -3px; }
-.record-label { text-align: right; padding-top: 4px; font-size: 20px; line-height: 1.65; }
-.lineup { display: grid; grid-template-rows: 30px 1fr; gap: 12px; }
+h1 { font-size: 82px; line-height: 1.08; letter-spacing: -3px; }
+.record-label { text-align: right; padding-top: 4px; font-size: var(--font-min); line-height: 1.65; }
+.campaign .metric-label { font-size: var(--font-min); }
+.lineup { display: grid; grid-template-rows: 36px 1fr; gap: 10px; }
+.campaign .section-header { font-size: var(--font-min); line-height: 36px; }
 .cards { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:repeat(5,minmax(0,1fr)); gap:8px; min-height:0; }
 .campaign .lineup,.campaign .portrait-card { min-height:0; }
 .campaign .portrait-card { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:center; gap:18px; padding:4px 16px; }
 .campaign .portrait { grid-column:1; width:156px; height:96px; margin:0; background:transparent; }
 .campaign .portrait img { object-fit:cover; }
-.campaign .slot { left:4px; top:4px; font-size:16px; z-index:2; }
+.campaign .slot { left:4px; top:4px; z-index:2; padding:2px 8px; border-radius:4px; background:rgba(17,19,24,.78); color:var(--text); font-size:var(--font-min); line-height:1.1; }
 .campaign .portrait-info { grid-column:2; grid-row:1; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) 280px; grid-template-rows:auto auto; align-items:center; gap:0 18px; padding:0; }
 .campaign .level { grid-column:1; grid-row:1; font-size:40px; line-height:1.05; }
 .campaign .character-name { grid-column:1; grid-row:2; height:auto; margin:0; font-size:42px; line-height:1.12; }
 .campaign .character-name.long-name { font-size:38px; line-height:1.1; }
 .campaign .combat { grid-column:2; grid-row:1 / span 2; align-self:center; margin:0; text-align:right; font-size:42px; line-height:1.1; }
+/* 两行长名：等级移到右栏战力上方，名称独占两行，最多两行，不再被卡片裁切。 */
+.campaign .portrait-info.two-line .level { grid-column:2; grid-row:1; text-align:right; }
+.campaign .portrait-info.two-line .combat { grid-row:2; }
+.campaign .portrait-info.two-line .character-name { grid-row:1 / span 2; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
 .summary { border-top: 1px solid var(--line); padding-top: 0; display: flex; align-items: center; justify-content: space-between; }
-.summary-note { font-size: 20px; color: var(--muted); }
+.summary-note { font-size: var(--font-min); color: var(--muted); }
+.campaign .badge { font-size: var(--font-min); line-height: 1.3; padding: 4px 12px; }
+.campaign .badge.mode { font-size: 26px; line-height: normal; padding: 7px 12px; }
+.campaign .footer-meta { font-size: var(--font-min); line-height: 36px; white-space: nowrap; }
+.campaign .footer-meta .commander { overflow: hidden; text-overflow: ellipsis; }
+.campaign .empty-state p { font-size: var(--font-min); }
 </style></head><body><main class="campaign {{ 'hard' if mode == 'HARD' else 'normal' if mode == 'NORMAL' else 'unknown' }}">
 <header><div><div class="eyebrow muted">CAMPAIGN OPERATION · 战役通关记录</div><div class="title-line"><h1>{{ stage }}</h1>{{ mode_badge(mode_label) }}</div></div><div class="record-label">{{ metric('TOTAL CP / 队伍战力', total_combat) }}</div></header>
 {% if available %}<section class="lineup">{{ section_header('CLEAR LINEUP / 通关阵容', portrait_notice) }}<div class="cards">{% for member in members %}{{ portrait_card(member) }}{% endfor %}</div></section>

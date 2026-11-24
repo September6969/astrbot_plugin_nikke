@@ -35,30 +35,21 @@ class CharacterTheme:
     muted: str = "#919BAB"
 
 
+# 企业色只读取 accent；从未被读取的 primary/secondary 子键已在 PR-6B（G7-c 步骤 1）删除。
 CORPORATION_COLORS: dict[str, dict[str, str]] = {
     "elysion": {
-        "primary": "#F2C94C",
-        "secondary": "#F5DFA0",
         "accent": "#E0A82E",
     },
     "missilis": {
-        "primary": "#EB5757",
-        "secondary": "#F5A3A3",
         "accent": "#C93C3C",
     },
     "tetra": {
-        "primary": "#6FCF97",
-        "secondary": "#A8E0C0",
         "accent": "#47B074",
     },
     "pilgrim": {
-        "primary": "#9B51E0",
-        "secondary": "#C9A0E8",
         "accent": "#7A31C0",
     },
     "abnormal": {
-        "primary": "#828282",
-        "secondary": "#BDBDBD",
         "accent": "#5A5A5A",
     },
 }
@@ -73,8 +64,6 @@ ELEMENT_TINTS: dict[str, str] = {
 }
 
 _DEFAULT_CORP = {
-    "primary": "#91C8DC",
-    "secondary": "#D2E9F0",
     "accent": "#59AFCB",
 }
 
@@ -170,7 +159,7 @@ def _extract_portrait_palette(portrait: Any) -> tuple[str | None, str | None, st
     secondary_rgb = next((color for color in ranked[1:] if sum(abs(a - b) for a, b in zip(color, ranked[0])) >= 72), ranked[min(1, len(ranked) - 1)])
     dark_rgb = min(quantized, key=lambda color: sum(color))
 
-    h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+    _, _, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
     saturated = s > 0.22
     return dominant, _to_hex(*secondary_rgb), _to_hex(*dark_rgb), saturated
 
@@ -245,7 +234,7 @@ def character_theme(
         background = _mix(_parse(background), _parse("#120D18"), 0.62)
         background = _to_hex(*background)
     panel = _to_hex(*_mix(_parse(UI_COLORS["panel"]), _parse(background), 0.12))
-    text, muted = _choose_text_colors(background)
+    text, _ = _choose_text_colors(background)
 
     return CharacterTheme(
         primary=primary,

@@ -3,14 +3,20 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from typing import Any
+
+from ...core.privacy import safe_exception_message
 
 from ...features.cdk.models import CdkBatchResult
 from ...features.cdk.ports import CdkAccountReader, CdkCommandStore
 from ...features.cdk.service import CDK_PATTERN, CdkInputParser, CdkService
-from ...integrations.blablalink.client import CookieExpired
+from ...features.account.errors import CredentialExpiredError
 from .contracts import CommandContext, CommandResult, TextReply
+from .errors import CREDENTIAL_EXPIRED_TEXT, invalidate_credentials
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class CdkCommandHandler:
@@ -61,9 +67,9 @@ class CdkCommandHandler:
                 account, code, store=self._store, qq_id=context.actor_id
             )
             return self._text(f"兑换码 {masked}：{result.message}")
-        except CookieExpired:
-            self._store.mark_cookie_invalid(context.actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except CredentialExpiredError:
+            invalidate_credentials(context.actor_id, store=self._store, client=self._client)
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception:
             return self._text(f"兑换码 {masked}：请求失败，可稍后查询结果。")
 
@@ -82,9 +88,9 @@ class CdkCommandHandler:
             batch = await self._service.redeem_batch(
                 account, codes, store=self._store, qq_id=context.actor_id
             )
-        except CookieExpired:
-            self._store.mark_cookie_invalid(context.actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except CredentialExpiredError:
+            invalidate_credentials(context.actor_id, store=self._store, client=self._client)
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         return self._batch_result(batch, context.actor_id)
 
     async def _available(self, context: CommandContext) -> CommandResult:
@@ -115,11 +121,12 @@ class CdkCommandHandler:
                 exp_str = f" [截止: {expire}]" if expire else ""
                 lines.append(f"• {code}{extra}{exp_str}")
             return self._text("\n".join(lines))
-        except CookieExpired:
-            self._store.mark_cookie_invalid(context.actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except CredentialExpiredError:
+            invalidate_credentials(context.actor_id, store=self._store, client=self._client)
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception as exc:
-            return self._text(f"获取可用 CDK 失败：{exc}")
+            _LOGGER.warning("[NIKKE] 获取可用 CDK 失败：%s", safe_exception_message(exc))
+            return self._text("获取可用 CDK 失败，请稍后重试。")
 
     async def _history(self, context: CommandContext) -> CommandResult:
         account = self._account(context.actor_id)
@@ -143,11 +150,12 @@ class CdkCommandHandler:
                 time_suffix = f" [{redeemed_at}]" if redeemed_at else ""
                 lines.append(f"• {masked}: {status}{time_suffix}")
             return self._text("\n".join(lines))
-        except CookieExpired:
-            self._store.mark_cookie_invalid(context.actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except CredentialExpiredError:
+            invalidate_credentials(context.actor_id, store=self._store, client=self._client)
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception as exc:
-            return self._text(f"获取 CDK 兑换历史失败：{exc}")
+            _LOGGER.warning("[NIKKE] 获取 CDK 兑换历史失败：%s", safe_exception_message(exc))
+            return self._text("获取 CDK 兑换历史失败，请稍后重试。")
 
     def _account(self, actor_id: str) -> dict[str, Any] | None:
         account = self._account_reader.get_account(actor_id)
@@ -159,8 +167,8 @@ class CdkCommandHandler:
             icon = "✓" if result.success else ("?" if result.is_unknown else "✗")
             lines.append(f"{icon} {self.mask_code(result.code)}：{result.message}")
         if batch.stopped_by_cookie:
-            self._store.mark_cookie_invalid(actor_id)
-            lines.append("\n⚠️ 登录状态已失效，已中止剩余兑换。请重新绑定。")
+            invalidate_credentials(actor_id, store=self._store, client=self._client)
+            lines.append("\n⚠️ 已中止剩余兑换。" + CREDENTIAL_EXPIRED_TEXT)
         elif batch.stopped_by_rate_limit:
             lines.append("\n⚠️ 遇到官方频控限制，已中止剩余兑换，请稍后再试。")
         return self._text("\n".join(lines))

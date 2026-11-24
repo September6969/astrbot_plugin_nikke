@@ -9,16 +9,122 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import subprocess
+import time
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from PIL import Image
 
-from .prerenderer import SpineBundle, SpineRenderError
+from .bundle import SpineBundle, SpineRenderError
 from .deadline import remaining
+
+
+# worker 是部署方构建的外部进程，只透传运行所需的非敏感变量；插件密钥（如
+# NIKKE_ENCRYPTION_KEY）、代理凭据与宿主其余环境一律不下发（AUD-016）。
+WORKER_ENVIRONMENT_ALLOWLIST: frozenset[str] = frozenset(
+    {
+        # 进程启动、动态库与区域设置。
+        "PATH", "HOME", "LANG", "LANGUAGE", "LC_ALL", "LC_CTYPE", "TZ", "LD_LIBRARY_PATH",
+        "TMPDIR", "TMP", "TEMP",
+        # 宿主直接运行 SFML worker 时的 X11/GL 上下文。
+        "DISPLAY", "XAUTHORITY", "XDG_RUNTIME_DIR", "LIBGL_ALWAYS_SOFTWARE", "GALLIUM_DRIVER",
+        # 经 Docker CLI 桥接官方 worker 镜像时的连接配置。
+        "DOCKER_HOST", "DOCKER_CONTEXT", "DOCKER_CONFIG", "DOCKER_CERT_PATH", "DOCKER_TLS_VERIFY",
+        # Windows 进程启动所需的系统变量。
+        "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT",
+    }
+)
+WORKER_FIXED_ENVIRONMENT: dict[str, str] = {"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"}
+# 超时后先向整个进程组发 SIGTERM，让 entrypoint 的 trap 回收 Xvfb 与临时目录，再强杀残留。
+WORKER_TERMINATE_GRACE_SECONDS = 0.2
+
+
+def worker_environment(source: Mapping[str, str] | None = None) -> dict[str, str]:
+    """按白名单构造 worker 环境，并固定无桌面 SDL 驱动。"""
+    values = os.environ if source is None else source
+    environment = {key: value for key, value in values.items() if key in WORKER_ENVIRONMENT_ALLOWLIST}
+    environment.update(WORKER_FIXED_ENVIRONMENT)
+    return environment
+
+
+def _signal_process_group(process: subprocess.Popen[str], signum: int) -> None:
+    try:
+        os.killpg(process.pid, signum)
+    except OSError:  # 进程组已全部退出或无权限时无需再处理。
+        pass
+
+
+def _terminate_worker(process: subprocess.Popen[str]) -> None:
+    """结束 worker 及其整个进程组，避免 Xvfb 等孙进程成为孤儿。"""
+    if os.name == "posix":
+        _signal_process_group(process, signal.SIGTERM)
+        try:
+            process.wait(timeout=WORKER_TERMINATE_GRACE_SECONDS)
+        except subprocess.TimeoutExpired:
+            pass
+        _signal_process_group(process, signal.SIGKILL)
+    try:
+        process.kill()
+    except OSError:
+        pass
+    try:
+        process.wait(timeout=1.0)
+    except subprocess.TimeoutExpired:
+        pass
+
+
+# worker 被强杀时 C++ 析构不会执行，BOM 去除后的 atlas 临时副本会残留。任何 worker 存活
+# 都不会超过超时 + 回收宽限，因此更旧的副本必然是孤儿，可以安全清理。
+ATLAS_COPY_ORPHAN_MARGIN_SECONDS = 5.0
+
+
+def sweep_orphan_atlas_copies(atlas: Path, *, older_than: float) -> int:
+    """删除 `<atlas>.utf8.*` 中修改时间早于 older_than 秒的孤儿副本，返回删除数量。"""
+    cutoff = time.time() - older_than
+    removed = 0
+    for candidate in atlas.parent.glob(atlas.name + ".utf8.*"):
+        try:
+            if candidate.is_file() and not candidate.is_symlink() and candidate.stat().st_mtime < cutoff:
+                candidate.unlink()
+                removed += 1
+        except OSError:
+            continue
+    return removed
+
+
+def _run_worker(command: list[str], *, cwd: Path, timeout: float | None) -> subprocess.CompletedProcess[str]:
+    """在独立进程组运行 worker；超时或中断时整组回收后再抛出原异常。"""
+    group_options: dict[str, Any] = (
+        {"start_new_session": True}
+        if os.name == "posix"
+        else {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
+    )
+    try:
+        process = subprocess.Popen(
+            command,
+            cwd=str(cwd),
+            env=worker_environment(),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            **group_options,
+        )
+    except OSError as exc:
+        raise SpineRenderError("Spine worker 启动失败") from exc
+    with process:
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+        except BaseException:
+            _terminate_worker(process)
+            raise
+    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,21 +223,14 @@ class SpineWorkerRuntime:
         ]
         if skin is not None:
             command.extend(("--skin", skin))
+        sweep_orphan_atlas_copies(atlas, older_than=self.config.timeout_seconds + ATLAS_COPY_ORPHAN_MARGIN_SECONDS)
 
-        environment = os.environ.copy()
-        environment.update({"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"})
         try:
             try:
-                completed = subprocess.run(
+                completed = _run_worker(
                     command,
-                    cwd=str(self.config.bundle_root),
-                    env=environment,
-                    capture_output=True,
+                    cwd=self.config.bundle_root,
                     timeout=remaining(deadline, self.config.timeout_seconds),
-                    check=False,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
                 )
             except subprocess.TimeoutExpired as exc:
                 raise SpineRenderError("Spine worker 超时") from exc
@@ -171,20 +270,9 @@ class SpineWorkerRuntime:
             str(atlas),
             "--list-animations",
         ]
-        environment = os.environ.copy()
-        environment.update({"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"})
+        sweep_orphan_atlas_copies(atlas, older_than=self.config.timeout_seconds + ATLAS_COPY_ORPHAN_MARGIN_SECONDS)
         try:
-            completed = subprocess.run(
-                command,
-                cwd=str(self.config.bundle_root),
-                env=environment,
-                capture_output=True,
-                timeout=self.config.timeout_seconds,
-                check=False,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-            )
+            completed = _run_worker(command, cwd=self.config.bundle_root, timeout=self.config.timeout_seconds)
         except subprocess.TimeoutExpired as exc:
             raise SpineRenderError("Spine worker 超时") from exc
         if completed.returncode != 0:

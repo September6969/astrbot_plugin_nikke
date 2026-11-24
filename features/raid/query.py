@@ -6,6 +6,7 @@ import json
 import time
 
 from ..account.errors import CredentialExpiredError
+from .builder import previous_season_with_stats
 from .experience import analyze, paginate
 from .models import RaidState
 
@@ -119,6 +120,14 @@ class RaidQueryMixin:
             data.notices.append("Boss 进度暂不可用")
         if "level_info" in snapshot["errors"]:
             data.notices.append("Boss 进度暂不可用")
+        # 休赛期：与 overview 同口径，用已读取的上一赛季出刀记录回填统计。
+        attacks = snapshot.get("attacks")
+        if (snapshot.get("historical_season") and data.previous_season is not None
+                and str(data.previous_season.season_id) == str(snapshot["historical_season"])
+                and isinstance(attacks, dict)):
+            data.previous_season = previous_season_with_stats(
+                data.previous_season, attacks.get("participate_data")
+            )
         try:
             data.ranking = self._analysis(snapshot)
             member_id = str(account.get("game_openid") or "").strip()

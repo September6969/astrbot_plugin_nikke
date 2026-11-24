@@ -12,7 +12,6 @@ from unittest.mock import MagicMock, patch
 import httpx
 from PIL import Image
 
-from astrbot_plugin_nikke.core.assets.downloader import AssetDownloader
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.integrations.nikke_db.provider import SpineBundleSource
 
@@ -93,11 +92,15 @@ class AssetManagerTests(unittest.TestCase):
             finally:
                 manager.close()
 
-    def test_global_remote_download_limit_returns_fallback_without_cooldown(self):
-        """不同实例、不同键共用限额；压力降级不能被写成五分钟失败。"""
+    def test_remote_download_limit_returns_fallback_without_cooldown(self):
+        """同一下载器的不同键共用限额；压力降级不能被写成五分钟失败。
+
+        AUD-020：原用例断言“不同实例共用类级全局信号量”，正是需要移除的缺陷；
+        现改为同一实例内两个键共享槽位，实例隔离另见 test_pr4c_spine_sources。
+        """
         with tempfile.TemporaryDirectory() as td:
             first = AssetManager(Path(td) / "first", Path(td) / "assets", remote=True)
-            second = AssetManager(Path(td) / "second", Path(td) / "assets", remote=True)
+            second = first
             entered = threading.Event()
             release = threading.Event()
             payload = io.BytesIO()
@@ -115,7 +118,7 @@ class AssetManagerTests(unittest.TestCase):
                     return False
 
             try:
-                with patch.object(AssetDownloader, "_remote_download_slots", threading.BoundedSemaphore(1)):
+                with patch.object(first.downloader, "_remote_download_slots", threading.BoundedSemaphore(1)):
                     with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream", side_effect=lambda *_args, **_kwargs: BlockingStream()) as stream:
                         with ThreadPoolExecutor(max_workers=1) as executor:
                             future = executor.submit(first._load, "portraits", "first", "https://example.com/first")
@@ -132,7 +135,6 @@ class AssetManagerTests(unittest.TestCase):
             finally:
                 release.set()
                 first.close()
-                second.close()
 
     def test_cached_asset_bypasses_global_remote_download_limit(self):
         with tempfile.TemporaryDirectory() as td:
@@ -141,7 +143,8 @@ class AssetManagerTests(unittest.TestCase):
             Image.new("RGBA", (20, 20), "blue").save(cache / "portraits/cached.png")
             manager = AssetManager(cache, Path(td) / "assets", remote=True)
             try:
-                with patch.object(AssetDownloader, "_remote_download_slots", threading.BoundedSemaphore(1)) as slots:
+                # AUD-020：并发槽位改为下载器实例属性，按实例打桩。
+                with patch.object(manager.downloader, "_remote_download_slots", threading.BoundedSemaphore(1)) as slots:
                     self.assertTrue(slots.acquire(blocking=False))
                     try:
                         with patch("astrbot_plugin_nikke.core.assets.downloader.httpx.stream") as stream:
@@ -167,7 +170,8 @@ class AssetManagerTests(unittest.TestCase):
             success_context.__enter__.return_value = response
 
             try:
-                with patch.object(AssetDownloader, "_remote_download_slots", threading.BoundedSemaphore(1)):
+                # AUD-020：并发槽位改为下载器实例属性，按实例打桩。
+                with patch.object(manager.downloader, "_remote_download_slots", threading.BoundedSemaphore(1)):
                     with patch(
                         "astrbot_plugin_nikke.core.assets.downloader.httpx.stream",
                         side_effect=[httpx.ConnectError("offline"), httpx.ConnectError("offline"), success_context],

@@ -1,5 +1,7 @@
 # Post-Merge Phase 2 计划
 
+> 历史记录（REFACTOR V2 `PR-6C` 标注）：文中 `NikkePlugin.<方法>` 调用链已被取代；这些未注册方法已删除，当前入口见 [ASTRBOT_COMMAND_ENTRY_MAP.md](ASTRBOT_COMMAND_ENTRY_MAP.md)。
+
 > 本文是 2026-09-06 接手计划的仓库入口和快照，不是实现完成声明。远端合并、CI、工作区和当前能力以 [POST_MERGE_STATUS.md](../operations/POST_MERGE_STATUS.md) 为准。
 
 ## 目标与顺序

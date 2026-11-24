@@ -2,7 +2,7 @@
 """Spine/L2D 实时运行时数据结构、骨骼解析器与内存缓存。
 
 提供：
-1. SpineBundle：完整性校验、格式与版本识别；
+1. SpineRuntimeBundle：完整性校验、格式与版本识别（SpineRenderError 统一自 bundle.py）；
 2. RenderedCharacter：透明 RGBA、尺寸、alpha_bbox、骨骼定位点；
 3. SpineSkeletonParser：纯 Python 解析 Spine 4.0/4.1 二进制 (.skel) 与 JSON (.json) 骨骼；
 4. SpineMemoryCache：线程安全的运行时内存缓存。
@@ -26,14 +26,15 @@ from PIL import Image
 logger = logging.getLogger("nikke.spine.runtime")
 
 
-class SpineRenderError(RuntimeError):
-    """Spine 实时渲染或 Bundle 处理异常。"""
-
+from .bundle import SpineRenderError
 
 
 @dataclass(frozen=True, slots=True)
-class SpineBundle:
-    """标准 Spine Bundle 数据结构与完整性校验。"""
+class SpineRuntimeBundle:
+    """实时渲染器使用的带格式/版本元数据 Spine Bundle 与完整性校验。
+
+    与可供 runtime 消费的 integrations.spine.bundle.SpineBundle 区分（PR-6B G6-c2）。
+    """
 
     skeleton: Path | None
     atlas: Path | None
@@ -58,7 +59,7 @@ class SpineBundle:
         bone_names: Sequence[str] = (),
         slot_names: Sequence[str] = (),
         animation_names: Sequence[str] = (),
-    ) -> "SpineBundle":
+    ) -> "SpineRuntimeBundle":
         skel_p = Path(skeleton) if skeleton is not None else None
         atlas_p = Path(atlas) if atlas is not None else None
         tex_tuple = tuple(Path(t) for t in textures)
@@ -115,6 +116,10 @@ class SpineBundle:
 
     def is_valid(self) -> bool:
         return self.validate_integrity() == "complete"
+
+
+# 过渡别名：integrations/spine/renderer.py 仍按旧名导入（本 PR 不改 renderer）。
+SpineBundle = SpineRuntimeBundle
 
 
 @dataclass(slots=True)

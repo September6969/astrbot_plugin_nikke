@@ -13,7 +13,6 @@ from astrbot_plugin_nikke.features.profile.currency_registry import CurrencyRegi
 from ..character.registries.memorial import MemorialCategoryRegistry
 from ..tower.registry import TowerRegistry
 from .models import (
-    CurrencyItem,
     DailyTowerInfo,
     MemorialCountData,
     ProfileDashboardData,
@@ -28,98 +27,6 @@ _MAX_INTEGER_DIGITS = 12
 _PROFILE_DISPLAY_TZ = timezone(timedelta(hours=8))
 _MIN_PROFILE_TIMESTAMP = datetime(1970, 1, 1, tzinfo=timezone.utc)
 _MAX_PROFILE_TIMESTAMP = datetime(2100, 1, 1, tzinfo=timezone.utc)
-
-CORE_CURRENCIES: list[tuple[int, str, str]] = [
-    (99, "珠宝", "jewel"),
-    (1000, "信用点", "credit"),
-    (2000, "战斗数据辑", "battle_data"),
-    (3000, "芯尘", "core_dust"),
-    (5100, "高级招募券", "advanced_ticket"),
-    (5200, "普通招募券", "recruit_ticket"),
-    (11000, "躯体标签", "body_label"),
-    (12000, "联盟芯片", "union_chip"),
-]
-
-
-def format_compact_number(value: int | float | None) -> str:
-    """格式化紧凑数字，如 26M, 130M, 10.5K, <1000 整数。"""
-    if value is None:
-        return "—"
-    try:
-        val = int(value)
-    except (ValueError, TypeError):
-        return "—"
-    if val < 0:
-        return str(val)
-    if val >= 1_000_000:
-        m_val = val / 1_000_000.0
-        if val % 1_000_000 == 0:
-            return f"{int(m_val)}M"
-        return f"{m_val:.1f}M"
-    elif val >= 1_000:
-        k_val = val / 1_000.0
-        if val % 1_000 == 0:
-            return f"{int(k_val)}K"
-        return f"{k_val:.1f}K"
-    else:
-        return f"{val:,}"
-
-
-def _parse_storage_fullness(value: Any) -> float | None:
-    """解析保管箱容量比例（0.059 -> 5.9%）。"""
-    if value is None or isinstance(value, bool):
-        return None
-    try:
-        f_val = float(value)
-    except (ValueError, TypeError):
-        return None
-    if f_val < 0:
-        return None
-    if f_val <= 1.0:
-        return round(f_val * 100.0, 1)
-    return round(f_val, 1)
-
-
-def _parse_sim_room_record(best_record: Any) -> str | None:
-    """解析模拟室每日最佳记录（如 difficulty: 5, chapter: 3 -> 5-C）。"""
-    if not isinstance(best_record, dict):
-        return None
-    diff = _optional_int(best_record.get("difficulty"))
-    chap = _optional_int(best_record.get("chapter"))
-    if diff is None:
-        return None
-    if chap is not None:
-        letter = chr(64 + chap) if 1 <= chap <= 26 else str(chap)
-        return f"{diff}-{letter}"
-    return str(diff)
-
-
-def _parse_currencies(currencies_raw: Any) -> list[CurrencyItem] | None:
-    """解析 8 格核心资源。"""
-    if not isinstance(currencies_raw, list):
-        return None
-    val_map: dict[int, int] = {}
-    for item in currencies_raw:
-        if isinstance(item, dict):
-            c_type = _optional_int(item.get("type"))
-            c_val = _optional_int(item.get("value"))
-            if c_type is not None and c_val is not None:
-                val_map[c_type] = c_val
-    items: list[CurrencyItem] = []
-    for c_type, name, icon_key in CORE_CURRENCIES:
-        val = val_map.get(c_type, 0)
-        items.append(
-            CurrencyItem(
-                type=c_type,
-                value=val,
-                display_name=name,
-                icon_key=icon_key,
-                compact_value=format_compact_number(val),
-            )
-        )
-    return items
-
-
 
 def _optional_int(value: Any) -> int | None:
     """只接受整数或已确认的十进制整数字符串，不把浮点数截断。"""

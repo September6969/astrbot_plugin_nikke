@@ -80,10 +80,16 @@ async def test_unsupported_announcement_action_uses_the_shared_prompt():
         CommandContext(parameters={"operation": "unsupported"})
     )
 
-    assert result.messages[0].text == "公告命令已简化，请使用：\n\n/妮姬 公告"
+    text = result.messages[0].text
+    assert text.startswith("用法：/妮姬 公告")
+    for subcommand in ("语言", "分类", "搜索", "诊断", "深度刷新"):
+        assert subcommand in text
 
 
 def test_announcement_runtime_routes_do_not_read_delivery_or_sync_state():
+    # G8-main-legacy-e（PR-6C）：NikkePlugin 的公告平铺方法已删除，公告路由只在
+    # NikkeCommandRuntime._announcement，仍不得绕过 AnnouncementApplication。
+    from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
     from astrbot_plugin_nikke.main import NikkePlugin
 
     forbidden = {
@@ -102,7 +108,10 @@ def test_announcement_runtime_routes_do_not_read_delivery_or_sync_state():
     )
 
     for name in route_names:
-        method = getattr(NikkePlugin, name)
+        assert not hasattr(NikkePlugin, name)
+
+    for name in ("_announcement",):
+        method = getattr(NikkeCommandRuntime, name)
         tree = ast.parse(textwrap.dedent(inspect.getsource(method)))
         names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
         names.update(

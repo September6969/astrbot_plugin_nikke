@@ -37,6 +37,7 @@ from PIL import Image
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT.parent) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT.parent))
+from astrbot_plugin_nikke.integrations.spine.worker_caller import _run_worker as run_spine_worker
 from astrbot_plugin_nikke.integrations.spine.local_resolver import (
     LocalSpineBundle,
     LocalSpineBundleResolver,
@@ -317,20 +318,10 @@ def render_spine_portrait(
         "--width", "1024",
         "--height", "1024",
     ]
-    environment = os.environ.copy()
-    environment.update({"SDL_VIDEODRIVER": "dummy", "SDL_RENDER_DRIVER": "software"})
     try:
-        completed = subprocess.run(
-            command,
-            cwd=str(bundle_root),
-            env=environment,
-            capture_output=True,
-            timeout=30,
-            check=False,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
+        # 与生产 worker_caller 同一边界：白名单环境、独立进程组，超时整组 SIGTERM→SIGKILL，
+        # 让 entrypoint 的 trap 回收各自的 Xvfb 与临时目录，避免批量同步中累积孤儿进程。
+        completed = run_spine_worker(command, cwd=bundle_root, timeout=30)
         if completed.returncode != 0:
             raise RuntimeError("Spine worker 执行失败")
         raw = rgba_path.read_bytes()

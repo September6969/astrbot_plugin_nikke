@@ -3,7 +3,6 @@ from types import SimpleNamespace
 import pytest
 from astrbot_plugin_nikke.features.announcement.deadlines import DeadlineParser
 from astrbot_plugin_nikke.features.calendar.content_quality import classify_category
-from astrbot_plugin_nikke.features.calendar.schedule_adapters import OfficialAnnouncementScheduleAdapter
 
 @pytest.mark.parametrize("title,expected", [
     ("14-Day Login Event – HAPPY DAYS", "login"),
@@ -46,15 +45,6 @@ def test_time_first_range_is_not_dropped():
     assert len(rows) == 1
     assert rows[0].start_at.hour == 20
 
-@pytest.mark.asyncio
-async def test_official_sections_do_not_inherit_sibling_category_or_cancellation():
-    record = SimpleNamespace(title="Update", body=BODY, content_id="sample", category="event", source_url="")
-    service = SimpleNamespace(_records={"sample": record}, list_deadlines=lambda: [])
-    result = await OfficialAnnouncementScheduleAdapter(service).fetch_result()
-    assert len(result.events) == 6
-    assert [r.event_type for r in result.events[:5]] == ["story_event"] * 3 + ["login", "free_reward"]
-    assert all(not r.is_cancelled for r in result.events[:5])
-
 
 def test_free_login_gift_is_not_paid_recruit_or_costume():
     assert classify_category("Cinderella Special", description="Log in during the event to receive Cinderella's limited costume.") == "free_reward"
@@ -69,30 +59,6 @@ def test_two_overlapping_story_events_keep_separate_parents():
     assert all("TEST" in r.name for r in rows[:3])
     assert all("HALLOWEEN" in r.name for r in rows[3:])
 
-
-def test_different_story_stages_do_not_merge_across_sources():
-    from datetime import datetime, timezone
-    from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent
-    from astrbot_plugin_nikke.features.calendar.merge import _is_same_identity
-    def event(source, stage):
-        return CanonicalEvent(id=source, title="Story Event: LITTLE WITCH TRICK · " + stage,
-            event_type="story_event", sources=[source], primary_source=source,
-            start_at=datetime(2026, 10, 8, tzinfo=timezone.utc),
-            end_at=datetime(2026, 10, 28, tzinfo=timezone.utc), detail_url="https://example.com/update")
-    assert not _is_same_identity(event("official", "Story 1"), event("gamekee", "Story 2"))
-    assert _is_same_identity(event("official", "Story 1"), event("gamekee", "Story 1"))
-
-
-def test_two_different_story_names_never_merge_on_shared_update_url():
-    from datetime import datetime, timezone
-    from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent
-    from astrbot_plugin_nikke.features.calendar.merge import _is_same_identity
-    def event(source, name):
-        return CanonicalEvent(id=source, title=name, event_type="story_event",
-            sources=[source], primary_source=source,
-            start_at=datetime(2026, 10, 8, tzinfo=timezone.utc),
-            end_at=datetime(2026, 10, 28, tzinfo=timezone.utc), detail_url="https://example.com/update")
-    assert not _is_same_identity(event("official", "LITTLE WITCH TRICK"), event("gamekee", "MOST BEAUTIFUL MAID"))
 
 
 @pytest.mark.parametrize("title,category,visible", [
@@ -115,25 +81,6 @@ def test_localized_calendar_labels_preserve_proper_names_and_stages():
     assert calendar_display_title("October Mission Pass") == "10月 Pass"
     assert calendar_display_title("New Story Event: LITTLE WITCH TRICK · Story 2") == "支线活动 · LITTLE WITCH TRICK · Story 2"
 
-
-@pytest.mark.parametrize("local,official,category", [
-    ("【签到】DAILY TRICK（14日）", "14-Day Login Event - DAILY TRICK", "login"),
-    ("【活动PASS】OCCULTIST PASS（蕾贝尔）", "OCCULTIST PASS", "pass"),
-    ("【支线】LITTLE WITCH TRICK", "New Story Event: LITTLE WITCH TRICK", "story_event"),
-])
-def test_known_bilingual_wrappers_and_date_boundary(local, official, category):
-    from datetime import datetime, timezone, timedelta
-    from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent
-    from astrbot_plugin_nikke.features.calendar.content_quality import canonical_identity_match
-    start = datetime(2026,10,7,16,tzinfo=timezone.utc)
-    a = CanonicalEvent(id="gamekee:1", title=local, event_type=category, primary_source="gamekee", sources=["gamekee"], start_at=start, end_at=start+timedelta(days=20))
-    b = CanonicalEvent(id="official:1", title=official, event_type=category, primary_source="official", sources=["official"], start_at=start, start_precision="DATE_ONLY", end_at=start+timedelta(days=20,hours=23))
-    assert canonical_identity_match(a,b) is not None
-    b.title += " · Story 2"
-    assert canonical_identity_match(a,b) is None
-    b.title = official
-    b.end_at += timedelta(days=3)
-    assert canonical_identity_match(a,b) is None
 
 
 @pytest.mark.parametrize("title,category", [

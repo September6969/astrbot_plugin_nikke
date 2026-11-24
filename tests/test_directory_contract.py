@@ -43,7 +43,8 @@ class DirectoryContractTests(unittest.TestCase):
             async def get(self, url):
                 return Response(zh if url == NIKKE_DIRECTORY_ZH else en)
 
-        with patch("astrbot_plugin_nikke.integrations.blablalink.client.httpx.AsyncClient", return_value=Client()):
+        # PR-4A：公共客户端改由 IsolatedAsyncClient 构造（不保存响应 Set-Cookie）。
+        with patch("astrbot_plugin_nikke.integrations.blablalink.client.IsolatedAsyncClient", return_value=Client()):
             directory = asyncio.run(BlaBlaClient().get_directory())
 
         self.assertEqual(directory[0]["class"], "Supporter")

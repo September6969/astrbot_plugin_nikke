@@ -10,6 +10,40 @@ from ..announcement.delivery import AnnouncementDelivery, PlannedPush, aware
 from .content_quality import canonical_event_title, calendar_display_title
 
 
+_PARTIAL_WARNING_SUFFIX = "数据范围不完整，保留未验证的旧记录"
+_PASS_TYPES = {"SeasonPass": "monthly_pass", "EventPass": "event_pass"}
+_MONTHLY_PASS_RE = re.compile(
+    r"(?:月度|\d{1,2}月|january|february|march|april|may|june|july|august|september|october|november|december).*(?:pass|通行证)",
+    re.I,
+)
+
+
+def pass_category(event) -> str:
+    """优先按官方类型精确区分月度/活动通行证；无官方类型时才按标题推断。"""
+    metadata = event.metadata if isinstance(getattr(event, "metadata", None), dict) else {}
+    official = _PASS_TYPES.get(str(metadata.get("official_type") or ""))
+    if official:
+        return official
+    return "monthly_pass" if _MONTHLY_PASS_RE.search(event.title or "") else "event_pass"
+
+
+def sync_blocks_reminders(calendar) -> bool:
+    """来源真实失败或落盘失败时暂停提醒；仅单条记录解析警告不阻断全员提醒。"""
+    error = str(getattr(calendar, "last_sync_error", "") or "")
+    if not error:
+        return False
+    failed = getattr(calendar, "has_failed_sources", None)
+    if not callable(failed) or failed():
+        return True
+    parts = [part.strip() for part in error.split(";") if part.strip()]
+    return not all(part.endswith(_PARTIAL_WARNING_SUFFIX) for part in parts)
+
+
+def remaining_hours_text(remaining: timedelta) -> str:
+    """“剩余不足 N 小时”：N 为严格大于剩余时长的最小整点，不足 1 小时显示 1。"""
+    return f"剩余不足{int(remaining.total_seconds() // 3600) + 1}小时"
+
+
 class CalendarSubscriptions(AnnouncementDelivery):
     SETTING = "calendar_subscriptions_v1"
     TYPES = {
@@ -71,7 +105,7 @@ class CalendarSubscriptions(AnnouncementDelivery):
             return []
         context = self.calendar.freeze_query_context(current)
         # 数据过期或来源失败时暂停主动通知，避免拿旧截止时间催促用户。
-        if context.freshness != "FRESH" or self.calendar.last_sync_error:
+        if context.freshness != "FRESH" or sync_blocks_reminders(self.calendar):
             return []
         from .time_rules import CalendarTimeRules
         events = CalendarTimeRules.reminder_deadlines(context.events, current)
@@ -82,19 +116,16 @@ class CalendarSubscriptions(AnnouncementDelivery):
                 continue
             categories = set().union(*(self.TYPES.get(name, set()) for name in preference.get("categories", [])))
             for event in events:
-                event_type = event.event_type
-                if event_type == "pass":
-                    monthly = re.search(r"(?:\d{1,2}月|january|february|march|april|may|june|july|august|september|october|november|december).*pass", event.title, re.I)
-                    event_type = "monthly_pass" if monthly else "event_pass"
+                event_type = pass_category(event) if event.event_type == "pass" else event.event_type
                 if event_type not in categories or not timedelta(0) < event.end_at-current <= timedelta(hours=24):
                     continue
                 # 不把版本号或正文变动放入键；同一期活动改文案、改结束时间不会再@。
-                start_day = event.start_at.date().isoformat() if event.start_at else "unknown"
+                start_day = event.start_at.astimezone(timezone.utc).date().isoformat() if event.start_at else "unknown"
                 identity = json.dumps([event.server_scope, event.event_type, canonical_event_title(event.title), start_day], ensure_ascii=False)
                 entity = hashlib.sha256(identity.encode("utf-8")).hexdigest()
                 end = event.end_at.astimezone(timezone(timedelta(hours=8))).strftime("%m/%d %H:%M")
-                hours = max(1, int((event.end_at-current).total_seconds()/3600))
-                text = f"【日程即将结束】{calendar_display_title(event.title)}\n结束时间：{end}（北京时间），剩余不足{hours+1}小时。\n/妮姬 日程 查看详情；/妮姬 日程 取消订阅 停止提醒。"
+                text = (f"【日程即将结束】{calendar_display_title(event.title)}\n结束时间：{end}（北京时间），"
+                        f"{remaining_hours_text(event.end_at - current)}。\n/妮姬 日程 查看详情；/妮姬 日程 取消订阅 停止提醒。")
                 push = PlannedPush(target, entity, 1, "calendar_deadline", text, 24)
                 if push.key not in state["delivered"] and push.key not in state["dispatch_intents"]:
                     pushes.append(push)

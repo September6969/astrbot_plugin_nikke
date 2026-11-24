@@ -106,9 +106,11 @@ class AstrBotCommandPresentation:
         )
 
     def _renderer(self) -> T2IRenderer:
-        if self._t2i_renderer is None:
-            self._t2i_renderer = T2IRenderer(
-                html_render=self._html_render(),
-                assets=self._services.asset_manager,
-            )
-        return self._t2i_renderer
+        if self._t2i_renderer is not None:
+            return self._t2i_renderer
+        html_render = self._html_render()
+        renderer = T2IRenderer(html_render=html_render, assets=self._services.asset_manager)
+        # 宿主 html_render 尚未就绪时不缓存，避免永久固定为无渲染能力的实例。
+        if html_render is not None:
+            self._t2i_renderer = renderer
+        return renderer

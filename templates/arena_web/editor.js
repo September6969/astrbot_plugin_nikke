@@ -54,13 +54,20 @@ async function api(path, body) {
     clearTimeout(timeout);
   }
 }
+function setTone(element, tone) {
+  if (!element) return;
+  if (tone) element.dataset.tone = tone;
+  else delete element.dataset.tone;
+}
 function report(error) {
   if (error.status === 401) {
     ended = true;
     $("end-session").open = false;
     renderAnalysisButton();
   }
-  $(draft ? "status" : "loading").textContent = ended
+  const target = $(draft ? "status" : "loading");
+  setTone(target, "error");
+  target.textContent = ended
     ? "编辑会话已失效。请回 QQ 私聊发送 /妮姬 竞技场 三队 或 编辑，获取新链接。"
     : error.message;
 }
@@ -73,6 +80,7 @@ function flushDraft() {
   if (saveQueue || revisionConflict || ended) return;
   saveError = false;
   $("retry-save").hidden = true;
+  setTone($("status"), "");
   $("status").textContent = "正在保存草稿…";
   saveQueue = (async () => {
     while (savingDraft || pendingDraft) {
@@ -84,6 +92,7 @@ function flushDraft() {
       revision = result.revision;
       savingDraft = null;
     }
+    setTone($("status"), "ok");
     $("status").textContent = "草稿已保存";
   })().catch((error) => {
     saveError = true;
@@ -123,6 +132,7 @@ function render() {
   const repeated = new Set(bases).size !== bases.length;
   const complete = filled === draft.teams.length * 5;
   const issue = repeated ? "跨队存在重复角色，请更换。" : complete ? "阵容已填满。" : "请补齐空位。";
+  setTone($("validation"), repeated ? "error" : complete ? "ok" : "warn");
   $("validation").textContent = "已选 " + filled + "/" + (draft.teams.length * 5) + " · " + issue;
   validDraft = complete && !repeated;
   renderAnalysisButton();
@@ -149,8 +159,8 @@ function chooseSlot(teamIndex, position) {
       activeSlot = [teamIndex, position];
     });
   } else {
+    swapMode = swapMode && (previousTeam !== teamIndex || previousPosition !== position);
     activeSlot = [teamIndex, position];
-    swapMode = false;
     renderTeams();
     renderChoices();
   }
@@ -192,8 +202,9 @@ function renderTeams() {
     team.forEach((key, position) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = key ? "seat" : "seat empty";
-      button.setAttribute("aria-pressed", String(teamIndex === activeTeam && position === activePosition));
+      const isActive = teamIndex === activeTeam && position === activePosition;
+      button.className = (key ? "seat" : "seat empty") + (swapMode && isActive ? " swap-source" : "");
+      button.setAttribute("aria-pressed", String(isActive));
       const char = byKey.get(key);
       const label = document.createElement("span");
       label.className = "seat-label";
@@ -219,6 +230,7 @@ function renderTeams() {
   $("swap").setAttribute("aria-pressed", String(swapMode));
   $("swap").textContent = swapMode ? "取消换位" : "换位";
   $("remove-character").disabled = !hasCharacter;
+  $("clear-team").hidden = draft.teams.length < 3;
   $("picker-title").textContent = swapMode
     ? `${positionName(activeTeam, activePosition)} · 选择换位目标`
     : `${positionName(activeTeam, activePosition)} · 选择角色`;
@@ -237,8 +249,15 @@ function matches(char, query) {
 }
 function renderChoices() {
   const [teamIndex, position] = activeSlot;
-  const selected = new Set(draft.teams.flatMap((team, index) => team.filter((key, slot) =>
-    key && (index !== teamIndex || slot !== position))).map((key) => byKey.get(key)?.base_key || key));
+  $("search-clear").hidden = !$("search").value;
+  const takenAt = new Map();
+  draft.teams.forEach((team, index) => {
+    team.forEach((key, slot) => {
+      if (!key || (index === teamIndex && slot === position)) return;
+      const base = byKey.get(key)?.base_key || key;
+      takenAt.set(base, draft.teams.length === 3 ? `${index + 1}·P${slot + 1}` : `P${slot + 1}`);
+    });
+  });
   const matchesQuery = characters.filter((char) =>
     (burstFilter === "all" || !char.burst || String(char.burst) === burstFilter) && matches(char, $("search").value));
   $("choices").replaceChildren();
@@ -250,7 +269,8 @@ function renderChoices() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "portrait";
-    const taken = selected.has(char.base_key);
+    const seatTag = takenAt.get(char.base_key);
+    const taken = Boolean(seatTag);
     const burst = document.createElement("span");
     burst.className = "portrait-stage";
     burst.textContent = char.burst ? "B" + char.burst : "全阶段";
@@ -258,10 +278,16 @@ function renderChoices() {
     name.className = "portrait-name";
     name.textContent = char.name;
     button.append(burst);
+    if (seatTag) {
+      const used = document.createElement("span");
+      used.className = "portrait-used";
+      used.textContent = seatTag;
+      button.append(used);
+    }
     addPortrait(button, char);
     button.append(name);
-    button.title = char.name + (taken ? " · 已在阵容中" : "");
-    button.setAttribute("aria-label", `${button.title} · ${burst.textContent}`);
+    button.title = char.name + (taken ? ` · 已在 ${seatTag}` : "");
+    button.setAttribute("aria-label", `${char.name}${taken ? " · 已在阵容中" : ""} · ${burst.textContent}`);
     button.disabled = taken || swapMode;
     button.onclick = (event) => {
       change(() => {
@@ -281,10 +307,13 @@ function renderChoices() {
   $("more-choices").hidden = matchesQuery.length <= choiceLimit;
   if (!$("choices").children.length) $("choices").textContent = "未找到角色，请尝试完整姓名或角色键。";
 }
+function filteredOwnedCharacters() {
+  return characters.filter((char) => matches(char, $("owned-search").value));
+}
 function renderOwned() {
   $("owned-count").textContent = "已手动选择 " + draft.manual_owned.length + " 人";
   $("owned-list").replaceChildren();
-  for (const char of characters.filter((char) => matches(char, $("owned-search").value))) {
+  for (const char of filteredOwnedCharacters()) {
     const label = document.createElement("label");
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -302,6 +331,39 @@ $("search").oninput = () => {
   choiceLimit = PAGE_SIZE;
   renderChoices();
 };
+$("search").addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && $("search").value) {
+    event.preventDefault();
+    $("search").value = "";
+    choiceLimit = PAGE_SIZE;
+    renderChoices();
+  } else if (event.key === "Enter") {
+    const first = $("choices").querySelector("button:not(:disabled)");
+    if (first) {
+      event.preventDefault();
+      first.click();
+    }
+  }
+});
+$("search-clear").onclick = () => {
+  $("search").value = "";
+  choiceLimit = PAGE_SIZE;
+  renderChoices();
+  $("search").focus({preventScroll: true});
+};
+$("clear-team").onclick = () => change(() => {
+  draft.teams[visibleTeam] = emptyTeam();
+  activeSlot = [visibleTeam, 0];
+});
+$("owned-select-visible").onclick = () => change(() => {
+  const selected = new Set(draft.manual_owned);
+  for (const char of filteredOwnedCharacters()) selected.add(char.key);
+  draft.manual_owned = [...selected];
+});
+$("owned-clear-visible").onclick = () => change(() => {
+  const hiddenKeys = new Set(filteredOwnedCharacters().map((char) => char.key));
+  draft.manual_owned = draft.manual_owned.filter((key) => !hiddenKeys.has(key));
+});
 $("burst-filters").onclick = (event) => {
   if (!event.target.dataset.burst) return;
   burstFilter = event.target.dataset.burst;
@@ -373,8 +435,10 @@ $("apply-candidates").onclick = () => {
       if (candidates.some(Boolean)) draft.manual_candidates = candidates;
       else delete draft.manual_candidates;
     });
+    setTone($("candidate-feedback"), "ok");
     $("candidate-feedback").textContent = candidates.some(Boolean) ? "已加入候选范围。" : "已清除手动候选。";
   } catch (error) {
+    setTone($("candidate-feedback"), "error");
     $("candidate-feedback").textContent = error.message;
   }
 };
@@ -388,8 +452,38 @@ $("import").onclick = () => {
     if (![1, 3].includes(groups.length)) throw new Error("请输入五人、三行五人或一行十五人。");
     const teams = groups.map(parseTeam);
     change(() => {draft.teams = teams;});
-  } catch (error) {report(error);}
+    setTone($("import-feedback"), "ok");
+    $("import-feedback").textContent = `已导入 ${teams.length} 队（${teams.length * 5} 人）。`;
+  } catch (error) {
+    setTone($("import-feedback"), "error");
+    $("import-feedback").textContent = error.message;
+    report(error);
+  }
 };
+$("copy-result").onclick = async () => {
+  const text = $("result-text").textContent || "";
+  if (!text) return;
+  let copied = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    }
+  } catch (_) {
+    copied = false;
+  }
+  $("copy-result-feedback").textContent = copied ? "已复制结果" : "请长按或手动选中复制";
+};
+document.addEventListener("keydown", (event) => {
+  const tag = document.activeElement?.tagName;
+  if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z"
+      && !["INPUT", "TEXTAREA", "SELECT"].includes(tag || "")) {
+    if (!$("undo").disabled) {
+      event.preventDefault();
+      $("undo").click();
+    }
+  }
+});
 $("analyze").onclick = async () => {
   busy = true; render(); $("status").textContent = "正在分析…";
   try {
@@ -406,6 +500,7 @@ $("analyze").onclick = async () => {
     revision = result.revision;
     $("result-text").textContent = result.text;
     $("result").hidden = false;
+    setTone($("status"), "ok");
     $("status").textContent = "结果已保存，可回 QQ 查看。";
     $("result").scrollIntoView({behavior: "smooth", block: "start"});
   } catch (error) {
@@ -423,6 +518,7 @@ $("revoke").onclick = async () => {
     await api("revoke", {});
     ended = true;
     $("end-session").open = false;
+    setTone($("status"), "warn");
     $("status").textContent = "编辑会话已结束。请回 QQ 获取新链接。";
   } catch (error) {report(error);}
   finally {ending = false; renderAnalysisButton();}
@@ -441,6 +537,7 @@ async function start() {
       roster_mode: ownedAvailable ? "owned" : "sandbox", manual_owned: [], objective: "two",
     };
     $("loading").hidden = true;
+    setTone($("status"), ownedAvailable ? "ok" : "warn");
     $("status").textContent = ownedAvailable ? "角色库已读取。" : "角色库未验证，当前使用全角色沙盒。";
     render();
     showManualCandidates();

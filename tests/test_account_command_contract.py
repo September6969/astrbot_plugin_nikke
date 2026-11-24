@@ -6,6 +6,7 @@ from plugin_fixtures import make_plugin_shell
 
 import ast
 import inspect
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -249,25 +250,24 @@ class AccountCommandContractTests(IsolatedAsyncioTestCase):
 
 class MainAccountCommandDelegationTests(IsolatedAsyncioTestCase):
     async def test_legacy_command_methods_only_dispatch_to_account_handler(self) -> None:
+        # G8-main-legacy-b（PR-6C）：NikkePlugin 的未注册账号平铺方法已删除，
+        # 账号/管理命令只经 NikkeCommandRuntime 分派到账号命令 handler。
+        from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
         from astrbot_plugin_nikke.main import NikkePlugin
 
-        source = inspect.getsource(NikkePlugin)
-        tree = ast.parse(source)
-        methods = {
-            node.name: node
-            for node in ast.walk(tree)
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        }
-        expected = {
+        removed = {
             "account", "bind", "unbind", "status", "push", "admin",
             "group_set", "schedule", "summary", "run", "health",
+            "_dispatch_account_command",
         }
+        for name in removed:
+            self.assertFalse(hasattr(NikkePlugin, name), f"{name} 遗留入口不应回到插件外壳")
 
-        for name in expected:
-            method = methods[name]
-            attrs = [node.attr for node in ast.walk(method) if isinstance(node, ast.Attribute)]
-            self.assertNotIn("store", attrs, f"{name} 仍直接访问存储")
-            self.assertIn("_dispatch_account_command", attrs, f"{name} 未委派账号命令 handler")
+        for method in (NikkeCommandRuntime._account, NikkeCommandRuntime._legacy):
+            tree = ast.parse(textwrap.dedent(inspect.getsource(method)))
+            attrs = [node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)]
+            self.assertNotIn("store", attrs, f"{method.__name__} 仍直接访问存储")
+            self.assertIn("account" if method is NikkeCommandRuntime._account else "_account", attrs)
 
         plugin = make_plugin_shell()
         calls: list[dict[str, str]] = []
@@ -280,7 +280,7 @@ class MainAccountCommandDelegationTests(IsolatedAsyncioTestCase):
         plugin.adapters.command = Adapter()
         plugin.handlers.account = object()
         event = SimpleNamespace(unified_msg_origin="group:example")
-        result = [item async for item in plugin.account(event, "绑定", "")]
+        result = [item async for item in plugin.command_runtime.nikke(event, "账号", "绑定", "")]
 
         self.assertEqual(result, ["delegated"])
         self.assertEqual(
@@ -289,7 +289,6 @@ class MainAccountCommandDelegationTests(IsolatedAsyncioTestCase):
                 "operation": "account",
                 "action": "绑定",
                 "value": "",
-                "state": "",
                 "unified_msg_origin": "group:example",
             }],
         )

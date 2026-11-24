@@ -62,7 +62,7 @@
       "key": "major:00",
       "arcana": "major",
       "slug": "the_fool",
-      "image": "assets/tarot/major_arcana/00_the_fool.png"
+      "image": "assets/tarot/major_arcana/00_the_fool.jpg"
     },
     {
       "id": 1,
@@ -107,7 +107,7 @@
       "key": "major:01",
       "arcana": "major",
       "slug": "the_magician",
-      "image": "assets/tarot/major_arcana/01_the_magician.png"
+      "image": "assets/tarot/major_arcana/01_the_magician.jpg"
     },
     {
       "id": 2,
@@ -152,7 +152,7 @@
       "key": "major:02",
       "arcana": "major",
       "slug": "the_high_priestess",
-      "image": "assets/tarot/major_arcana/02_the_high_priestess.png"
+      "image": "assets/tarot/major_arcana/02_the_high_priestess.jpg"
     },
     {
       "id": 3,
@@ -197,7 +197,7 @@
       "key": "major:03",
       "arcana": "major",
       "slug": "the_empress",
-      "image": "assets/tarot/major_arcana/03_the_empress.png"
+      "image": "assets/tarot/major_arcana/03_the_empress.jpg"
     },
     {
       "id": 4,
@@ -242,7 +242,7 @@
       "key": "major:04",
       "arcana": "major",
       "slug": "the_emperor",
-      "image": "assets/tarot/major_arcana/04_the_emperor.png"
+      "image": "assets/tarot/major_arcana/04_the_emperor.jpg"
     },
     {
       "id": 5,
@@ -287,7 +287,7 @@
       "key": "major:05",
       "arcana": "major",
       "slug": "the_hierophant",
-      "image": "assets/tarot/major_arcana/05_the_hierophant.png"
+      "image": "assets/tarot/major_arcana/05_the_hierophant.jpg"
     },
     {
       "id": 6,
@@ -332,7 +332,7 @@
       "key": "major:06",
       "arcana": "major",
       "slug": "the_lovers",
-      "image": "assets/tarot/major_arcana/06_the_lovers.png"
+      "image": "assets/tarot/major_arcana/06_the_lovers.jpg"
     },
     {
       "id": 7,
@@ -377,7 +377,7 @@
       "key": "major:07",
       "arcana": "major",
       "slug": "the_chariot",
-      "image": "assets/tarot/major_arcana/07_the_chariot.png"
+      "image": "assets/tarot/major_arcana/07_the_chariot.jpg"
     },
     {
       "id": 8,
@@ -422,7 +422,7 @@
       "key": "major:08",
       "arcana": "major",
       "slug": "strength",
-      "image": "assets/tarot/major_arcana/08_strength.png"
+      "image": "assets/tarot/major_arcana/08_strength.jpg"
     },
     {
       "id": 9,
@@ -467,7 +467,7 @@
       "key": "major:09",
       "arcana": "major",
       "slug": "the_hermit",
-      "image": "assets/tarot/major_arcana/09_the_hermit.png"
+      "image": "assets/tarot/major_arcana/09_the_hermit.jpg"
     },
     {
       "id": 10,
@@ -512,7 +512,7 @@
       "key": "major:10",
       "arcana": "major",
       "slug": "wheel_of_fortune",
-      "image": "assets/tarot/major_arcana/10_wheel_of_fortune.png"
+      "image": "assets/tarot/major_arcana/10_wheel_of_fortune.jpg"
     },
     {
       "id": 11,
@@ -557,7 +557,7 @@
       "key": "major:11",
       "arcana": "major",
       "slug": "justice",
-      "image": "assets/tarot/major_arcana/11_justice.png"
+      "image": "assets/tarot/major_arcana/11_justice.jpg"
     },
     {
       "id": 12,
@@ -602,7 +602,7 @@
       "key": "major:12",
       "arcana": "major",
       "slug": "the_hanged_man",
-      "image": "assets/tarot/major_arcana/12_the_hanged_man.png"
+      "image": "assets/tarot/major_arcana/12_the_hanged_man.jpg"
     },
     {
       "id": 13,
@@ -647,7 +647,7 @@
       "key": "major:13",
       "arcana": "major",
       "slug": "death",
-      "image": "assets/tarot/major_arcana/13_death.png"
+      "image": "assets/tarot/major_arcana/13_death.jpg"
     },
     {
       "id": 14,
@@ -692,7 +692,7 @@
       "key": "major:14",
       "arcana": "major",
       "slug": "temperance",
-      "image": "assets/tarot/major_arcana/14_temperance.png"
+      "image": "assets/tarot/major_arcana/14_temperance.jpg"
     },
     {
       "id": 15,
@@ -737,7 +737,7 @@
       "key": "major:15",
       "arcana": "major",
       "slug": "the_devil",
-      "image": "assets/tarot/major_arcana/15_the_devil.png"
+      "image": "assets/tarot/major_arcana/15_the_devil.jpg"
     },
     {
       "id": 16,
@@ -782,7 +782,7 @@
       "key": "major:16",
       "arcana": "major",
       "slug": "the_tower",
-      "image": "assets/tarot/major_arcana/16_the_tower.png"
+      "image": "assets/tarot/major_arcana/16_the_tower.jpg"
     },
     {
       "id": 17,
@@ -827,7 +827,7 @@
       "key": "major:17",
       "arcana": "major",
       "slug": "the_star",
-      "image": "assets/tarot/major_arcana/17_the_star.png"
+      "image": "assets/tarot/major_arcana/17_the_star.jpg"
     },
     {
       "id": 18,
@@ -872,7 +872,7 @@
       "key": "major:18",
       "arcana": "major",
       "slug": "the_moon",
-      "image": "assets/tarot/major_arcana/18_the_moon.png"
+      "image": "assets/tarot/major_arcana/18_the_moon.jpg"
     },
     {
       "id": 19,
@@ -917,7 +917,7 @@
       "key": "major:19",
       "arcana": "major",
       "slug": "the_sun",
-      "image": "assets/tarot/major_arcana/19_the_sun.png"
+      "image": "assets/tarot/major_arcana/19_the_sun.jpg"
     },
     {
       "id": 20,
@@ -962,7 +962,7 @@
       "key": "major:20",
       "arcana": "major",
       "slug": "judgement",
-      "image": "assets/tarot/major_arcana/20_judgement.png"
+      "image": "assets/tarot/major_arcana/20_judgement.jpg"
     },
     {
       "id": 21,
@@ -1007,7 +1007,7 @@
       "key": "major:21",
       "arcana": "major",
       "slug": "the_world",
-      "image": "assets/tarot/major_arcana/21_the_world.png"
+      "image": "assets/tarot/major_arcana/21_the_world.jpg"
     },
     {
       "id": 1,
@@ -1019,7 +1019,7 @@
       "name_en": "ACE OF WANDS",
       "character": "Drake",
       "slug": "ace_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/ace_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/ace_of_wands.jpg",
       "upright": {
         "keywords": [
           "灵感",
@@ -1051,7 +1051,7 @@
       "name_en": "TWO OF WANDS",
       "character": "Drake",
       "slug": "02_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/two_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/two_of_wands.jpg",
       "upright": {
         "keywords": [
           "规划",
@@ -1083,7 +1083,7 @@
       "name_en": "THREE OF WANDS",
       "character": "Drake",
       "slug": "03_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/three_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/three_of_wands.jpg",
       "upright": {
         "keywords": [
           "扩展",
@@ -1115,7 +1115,7 @@
       "name_en": "FOUR OF WANDS",
       "character": "Drake",
       "slug": "04_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/four_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/four_of_wands.jpg",
       "upright": {
         "keywords": [
           "庆祝",
@@ -1147,7 +1147,7 @@
       "name_en": "FIVE OF WANDS",
       "character": "Drake",
       "slug": "05_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/five_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/five_of_wands.jpg",
       "upright": {
         "keywords": [
           "竞争",
@@ -1179,7 +1179,7 @@
       "name_en": "SIX OF WANDS",
       "character": "Drake",
       "slug": "06_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/six_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/six_of_wands.jpg",
       "upright": {
         "keywords": [
           "胜利",
@@ -1211,7 +1211,7 @@
       "name_en": "SEVEN OF WANDS",
       "character": "Drake",
       "slug": "07_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/seven_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/seven_of_wands.jpg",
       "upright": {
         "keywords": [
           "防守",
@@ -1243,7 +1243,7 @@
       "name_en": "EIGHT OF WANDS",
       "character": "Drake",
       "slug": "08_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/eight_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/eight_of_wands.jpg",
       "upright": {
         "keywords": [
           "速度",
@@ -1275,7 +1275,7 @@
       "name_en": "NINE OF WANDS",
       "character": "Drake",
       "slug": "09_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/nine_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/nine_of_wands.jpg",
       "upright": {
         "keywords": [
           "韧性",
@@ -1307,7 +1307,7 @@
       "name_en": "TEN OF WANDS",
       "character": "Drake",
       "slug": "10_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/ten_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/ten_of_wands.jpg",
       "upright": {
         "keywords": [
           "负担",
@@ -1339,7 +1339,7 @@
       "name_en": "PAGE OF WANDS",
       "character": "拉普拉斯",
       "slug": "page_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/page_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/page_of_wands.jpg",
       "upright": {
         "keywords": [
           "探索",
@@ -1371,7 +1371,7 @@
       "name_en": "KNIGHT OF WANDS",
       "character": "舒格",
       "slug": "knight_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/knight_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/knight_of_wands.jpg",
       "upright": {
         "keywords": [
           "行动",
@@ -1403,7 +1403,7 @@
       "name_en": "QUEEN OF WANDS",
       "character": "Volume",
       "slug": "queen_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/queen_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/queen_of_wands.jpg",
       "upright": {
         "keywords": [
           "自信",
@@ -1435,7 +1435,7 @@
       "name_en": "KING OF WANDS",
       "character": "Red Hood",
       "slug": "king_of_wands",
-      "image": "assets/tarot/minor_arcana/wands/king_of_wands.png",
+      "image": "assets/tarot/minor_arcana/wands/king_of_wands.jpg",
       "upright": {
         "keywords": [
           "领导",
@@ -1467,7 +1467,7 @@
       "name_en": "ACE OF CUPS",
       "character": "Mary",
       "slug": "ace_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/ace_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/ace_of_cups.jpg",
       "upright": {
         "keywords": [
           "爱",
@@ -1499,7 +1499,7 @@
       "name_en": "TWO OF CUPS",
       "character": "Mary",
       "slug": "02_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/two_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/two_of_cups.jpg",
       "upright": {
         "keywords": [
           "联结",
@@ -1531,7 +1531,7 @@
       "name_en": "THREE OF CUPS",
       "character": "Mary",
       "slug": "03_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/three_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/three_of_cups.jpg",
       "upright": {
         "keywords": [
           "友谊",
@@ -1563,7 +1563,7 @@
       "name_en": "FOUR OF CUPS",
       "character": "Mary",
       "slug": "04_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/four_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/four_of_cups.jpg",
       "upright": {
         "keywords": [
           "内省",
@@ -1595,7 +1595,7 @@
       "name_en": "FIVE OF CUPS",
       "character": "Mary",
       "slug": "05_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/five_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/five_of_cups.jpg",
       "upright": {
         "keywords": [
           "失落",
@@ -1627,7 +1627,7 @@
       "name_en": "SIX OF CUPS",
       "character": "Mary",
       "slug": "06_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/six_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/six_of_cups.jpg",
       "upright": {
         "keywords": [
           "回忆",
@@ -1659,7 +1659,7 @@
       "name_en": "SEVEN OF CUPS",
       "character": "Mary",
       "slug": "07_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/seven_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/seven_of_cups.jpg",
       "upright": {
         "keywords": [
           "选择",
@@ -1691,7 +1691,7 @@
       "name_en": "EIGHT OF CUPS",
       "character": "Mary",
       "slug": "08_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/eight_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/eight_of_cups.jpg",
       "upright": {
         "keywords": [
           "离开",
@@ -1723,7 +1723,7 @@
       "name_en": "NINE OF CUPS",
       "character": "Mary",
       "slug": "09_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/nine_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/nine_of_cups.jpg",
       "upright": {
         "keywords": [
           "满足",
@@ -1755,7 +1755,7 @@
       "name_en": "TEN OF CUPS",
       "character": "Mary",
       "slug": "10_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/ten_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/ten_of_cups.jpg",
       "upright": {
         "keywords": [
           "情感圆满",
@@ -1787,7 +1787,7 @@
       "name_en": "PAGE OF CUPS",
       "character": "N102 / 安妮",
       "slug": "page_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/page_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/page_of_cups.jpg",
       "upright": {
         "keywords": [
           "敏感",
@@ -1819,7 +1819,7 @@
       "name_en": "KNIGHT OF CUPS",
       "character": "布兰儿",
       "slug": "knight_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/knight_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/knight_of_cups.jpg",
       "upright": {
         "keywords": [
           "浪漫",
@@ -1851,7 +1851,7 @@
       "name_en": "QUEEN OF CUPS",
       "character": "艾玛",
       "slug": "queen_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/queen_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/queen_of_cups.jpg",
       "upright": {
         "keywords": [
           "共情",
@@ -1883,7 +1883,7 @@
       "name_en": "KING OF CUPS",
       "character": "露德米拉",
       "slug": "king_of_cups",
-      "image": "assets/tarot/minor_arcana/cups/king_of_cups.png",
+      "image": "assets/tarot/minor_arcana/cups/king_of_cups.jpg",
       "upright": {
         "keywords": [
           "情绪平衡",
@@ -1915,7 +1915,7 @@
       "name_en": "ACE OF SWORDS",
       "character": "Exia",
       "slug": "ace_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/ace_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/ace_of_swords.jpg",
       "upright": {
         "keywords": [
           "真相",
@@ -1947,7 +1947,7 @@
       "name_en": "TWO OF SWORDS",
       "character": "Exia",
       "slug": "02_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/two_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/two_of_swords.jpg",
       "upright": {
         "keywords": [
           "僵局",
@@ -1979,7 +1979,7 @@
       "name_en": "THREE OF SWORDS",
       "character": "Exia",
       "slug": "03_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/three_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/three_of_swords.jpg",
       "upright": {
         "keywords": [
           "心痛",
@@ -2011,7 +2011,7 @@
       "name_en": "FOUR OF SWORDS",
       "character": "Exia",
       "slug": "04_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/four_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/four_of_swords.jpg",
       "upright": {
         "keywords": [
           "休息",
@@ -2043,7 +2043,7 @@
       "name_en": "FIVE OF SWORDS",
       "character": "Exia",
       "slug": "05_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/five_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/five_of_swords.jpg",
       "upright": {
         "keywords": [
           "冲突",
@@ -2075,7 +2075,7 @@
       "name_en": "SIX OF SWORDS",
       "character": "Exia",
       "slug": "06_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/six_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/six_of_swords.jpg",
       "upright": {
         "keywords": [
           "过渡",
@@ -2107,7 +2107,7 @@
       "name_en": "SEVEN OF SWORDS",
       "character": "Exia",
       "slug": "07_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/seven_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/seven_of_swords.jpg",
       "upright": {
         "keywords": [
           "策略",
@@ -2139,7 +2139,7 @@
       "name_en": "EIGHT OF SWORDS",
       "character": "Exia",
       "slug": "08_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/eight_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/eight_of_swords.jpg",
       "upright": {
         "keywords": [
           "束缚",
@@ -2171,7 +2171,7 @@
       "name_en": "NINE OF SWORDS",
       "character": "Exia",
       "slug": "09_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/nine_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/nine_of_swords.jpg",
       "upright": {
         "keywords": [
           "焦虑",
@@ -2203,7 +2203,7 @@
       "name_en": "TEN OF SWORDS",
       "character": "Exia",
       "slug": "10_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/ten_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/ten_of_swords.jpg",
       "upright": {
         "keywords": [
           "痛苦终结",
@@ -2235,7 +2235,7 @@
       "name_en": "PAGE OF SWORDS",
       "character": "诺薇儿",
       "slug": "page_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/page_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/page_of_swords.jpg",
       "upright": {
         "keywords": [
           "求知",
@@ -2267,7 +2267,7 @@
       "name_en": "KNIGHT OF SWORDS",
       "character": "普丽瓦蒂",
       "slug": "knight_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/knight_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/knight_of_swords.jpg",
       "upright": {
         "keywords": [
           "果断",
@@ -2299,7 +2299,7 @@
       "name_en": "QUEEN OF SWORDS",
       "character": "Eunhwa",
       "slug": "queen_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/queen_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/queen_of_swords.jpg",
       "upright": {
         "keywords": [
           "独立",
@@ -2331,7 +2331,7 @@
       "name_en": "KING OF SWORDS",
       "character": "麦斯威尔",
       "slug": "king_of_swords",
-      "image": "assets/tarot/minor_arcana/swords/king_of_swords.png",
+      "image": "assets/tarot/minor_arcana/swords/king_of_swords.jpg",
       "upright": {
         "keywords": [
           "理性权威",
@@ -2363,7 +2363,7 @@
       "name_en": "ACE OF PENTACLES",
       "character": "Dolla",
       "slug": "ace_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/ace_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/ace_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "机会",
@@ -2395,7 +2395,7 @@
       "name_en": "TWO OF PENTACLES",
       "character": "Dolla",
       "slug": "02_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/two_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/two_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "平衡",
@@ -2427,7 +2427,7 @@
       "name_en": "THREE OF PENTACLES",
       "character": "Dolla",
       "slug": "03_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/three_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/three_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "合作",
@@ -2459,7 +2459,7 @@
       "name_en": "FOUR OF PENTACLES",
       "character": "Dolla",
       "slug": "04_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/four_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/four_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "安全",
@@ -2491,7 +2491,7 @@
       "name_en": "FIVE OF PENTACLES",
       "character": "Dolla",
       "slug": "05_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/five_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/five_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "匮乏",
@@ -2523,7 +2523,7 @@
       "name_en": "SIX OF PENTACLES",
       "character": "Dolla",
       "slug": "06_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/six_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/six_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "给予",
@@ -2555,7 +2555,7 @@
       "name_en": "SEVEN OF PENTACLES",
       "character": "Dolla",
       "slug": "07_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/seven_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/seven_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "耐心",
@@ -2587,7 +2587,7 @@
       "name_en": "EIGHT OF PENTACLES",
       "character": "Dolla",
       "slug": "08_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/eight_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/eight_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "勤奋",
@@ -2619,7 +2619,7 @@
       "name_en": "NINE OF PENTACLES",
       "character": "Dolla",
       "slug": "09_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/nine_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/nine_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "独立",
@@ -2651,7 +2651,7 @@
       "name_en": "TEN OF PENTACLES",
       "character": "Dolla",
       "slug": "10_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/ten_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/ten_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "长期稳定",
@@ -2683,7 +2683,7 @@
       "name_en": "PAGE OF PENTACLES",
       "character": "特罗尼",
       "slug": "page_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/page_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/page_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "学习",
@@ -2715,7 +2715,7 @@
       "name_en": "KNIGHT OF PENTACLES",
       "character": "Centi",
       "slug": "knight_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/knight_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/knight_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "可靠",
@@ -2747,7 +2747,7 @@
       "name_en": "QUEEN OF PENTACLES",
       "character": "卢菲",
       "slug": "queen_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/queen_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/queen_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "务实关怀",
@@ -2779,7 +2779,7 @@
       "name_en": "KING OF PENTACLES",
       "character": "丽塔",
       "slug": "king_of_pentacles",
-      "image": "assets/tarot/minor_arcana/pentacles/king_of_pentacles.png",
+      "image": "assets/tarot/minor_arcana/pentacles/king_of_pentacles.jpg",
       "upright": {
         "keywords": [
           "资源掌控",

@@ -5,7 +5,74 @@ from typing import Any
 
 from ..t2i_assets import T2IAssetResolver
 from ...features.character.ports import CharacterRenderIdentity
-from .common import display_number
+from .common import display_number, text_units
+
+CHARACTER_CANVAS = {"width": 1600, "height": 2400}
+DEFAULT_TYPO_SET = "typo-set-b"
+# 各排版档位实际引用的 @font-face（与 character.html 的 .character.* 字体变量同步）。
+# 只内联当前档位用到的字体；未引用的字重与重复的 font_noto 不再进入 payload（AUD-021）。
+TYPOGRAPHY_FONTS: dict[str, tuple[str, ...]] = {
+    "typo-set-b": ("noto", "replica", "barlow", "rajdhani"),
+    "header-font-b": ("noto", "replica", "barlow", "rajdhani"),
+    "typo-current": ("replica", "barlow", "rajdhani"),
+    "header-font-a": ("replica", "barlow", "rajdhani"),
+    "typo-set-c": ("noto", "replica", "rajdhani"),
+    "header-font-c": ("noto", "replica", "rajdhani"),
+    "header-font-d": ("noto", "replica", "barlow", "barlow_sb", "rajdhani", "rajdhani_sb"),
+}
+# 模板中固定渲染且走中文字体栈（--font-cn-* / --font-ui）的文案。
+TEMPLATE_TEXT = "词条合计已知词条合计阶✦未装备未获得效果【】"
+# 名称槽 630px；字号 67/56/41px，字距 -1.5px；4% 余量吸收字形差异。
+NAME_SLOT_PX = 630
+NAME_FIT_RATIO = 0.96
+
+
+def _name_fit(name: str) -> str:
+    """名称单行放得下用标准字号，略长改用中号单行，再长才两行（模板以省略号兜底）。"""
+    width = text_units(name)
+    budget = NAME_SLOT_PX * NAME_FIT_RATIO
+    if width * (67 - 1.5) <= budget:
+        return ""
+    if width * (56 - 1.5) <= budget:
+        return "mid"
+    return "long"
+
+
+def _combat_fit(text: str) -> str:
+    """战力槽 195px 宽：七位及以上逐级缩小字号，避免压到右侧星级（AUD-017）。"""
+    digits = text.replace(",", "")
+    if not digits.isdigit():
+        return "text"
+    return {7: "d7", 8: "d8"}.get(len(digits), "d9" if len(digits) >= 9 else "")
+
+
+def _cn_stack_texts(payload: dict[str, Any]) -> list[str]:
+    """收集模板中以中文字体栈渲染的文字；数字/科技字体元素不会回退到 Replica。"""
+    texts = [TEMPLATE_TEXT, payload["name"]]
+    if not payload.get("character_art_data_uri"):
+        texts.append("立绘暂不可用")
+    texts.extend(item["label"] for item in payload["identities"] if not item["icon"])
+    texts.extend(item["label"] for item in payload["skill_items"] if not item["icon"])
+    for row in payload["replica_summary"]["rows"]:
+        texts.extend((row["label"], row["note"]))
+    for gear in payload["equipment"]:
+        if not gear["icon"]:
+            texts.append(gear["label"])
+        texts.extend(row["short_name"] for row in gear["options"] if row["state"] != "EMPTY")
+    return texts
+
+
+def _needs_replica_fallback(texts) -> bool:
+    """中文字体栈为 NikkeNotoSC → Replica → 系统字体：只有子集缺字且 Replica 有该字时才会用到 Replica。
+
+    清单不可用时保守地内联 Replica，保证与历史渲染一致。
+    """
+    from ...features.character.replica import replica_fallback_codepoints
+
+    fallback_only = replica_fallback_codepoints()
+    if fallback_only is None:
+        return True
+    return any(ord(char) in fallback_only for text in texts for char in str(text))
 
 
 def _normalize_equipment_icon(source):
@@ -38,59 +105,25 @@ class CharacterT2IPayloadBuilder:
         self.resolver = resolver
         self.identity_resolver = identity_resolver
 
-    def build(self, data, card_assets):
-        from dataclasses import asdict
-
+    def build(self, data, card_assets, typo_set: str = DEFAULT_TYPO_SET):
         from ...features.character.models import EquipmentData, EquipmentOption
         from ...features.character.registries.static import StaticDataRegistry
         from ...features.character.replica import (
             SHORT_NAMES,
             VERSION,
             art_style,
-            barlow_font,
-            barlow_semibold_font,
             build_summary,
             cache_identity,
-            noto_font,
-            noto_font_700,
-            noto_font_800,
-            rajdhani_font,
-            rajdhani_semibold_font,
-            replica_font,
         )
         from ...features.character.layout import summary_layout
         from .character_labels import (
             CHARACTER_EQUIPMENT_SLOT_LABELS,
             format_equipment_option_value,
         )
-        from ...ui.theme import (
-            _extract_portrait_palette,
-            _parse,
-            character_theme,
-        )
 
+        if typo_set not in TYPOGRAPHY_FONTS:
+            raise ValueError("未知的角色卡排版档位")
         portrait = card_assets.portrait
-        theme = character_theme(data.corporation, data.element, portrait)
-        dominant, secondary, _, saturation = _extract_portrait_palette(portrait)
-        if dominant and saturation:
-            red, green, blue = _parse(dominant)
-            secondary_rgb = _parse(secondary) if secondary else _parse(theme.accent)
-            sr, sg, sb = secondary_rgb
-            background = (
-                f"radial-gradient(1100px 750px at 24% 42%, "
-                f"rgba({red},{green},{blue},0.18) 0%, "
-                f"rgba({sr},{sg},{sb},0.07) 45%, transparent 80%), "
-                f"linear-gradient(135deg, rgba({red},{green},{blue},0.08) 0%, "
-                f"{theme.background} 100%)"
-            )
-        else:
-            red, green, blue = _parse(theme.accent)
-            background = (
-                f"radial-gradient(1100px 750px at 24% 42%, "
-                f"rgba({red},{green},{blue},0.14) 0%, transparent 75%), "
-                f"linear-gradient(135deg, rgba({red},{green},{blue},0.06) 0%, "
-                f"{theme.background} 100%)"
-            )
 
         equipment: list[dict[str, Any]] = []
         for slot, label in CHARACTER_EQUIPMENT_SLOT_LABELS.items():
@@ -181,12 +214,6 @@ class CharacterT2IPayloadBuilder:
                 "icon": self.resolver.encode(image, (100, 100)),
             }
 
-        corporation_asset = getattr(card_assets, "corporation", None)
-        watermark = (
-            self.resolver.encode(corporation_asset, (260, 260))
-            if corporation_asset
-            else None
-        )
         for gear in equipment:
             for row in gear["options"]:
                 row["short_name"] = SHORT_NAMES.get(
@@ -216,32 +243,31 @@ class CharacterT2IPayloadBuilder:
             "safe_bottom": layout.safe_bottom,
         }
         skills_assets = getattr(card_assets, "skills", {}) or {}
-        return {
+        skill_items = [
+            {
+                "label": label,
+                "level": level,
+                "icon": self.resolver.encode(skills_assets.get(key), (110, 110)),
+            }
+            for key, label, level in (
+                ("skill1", "技能1", data.skill1_level),
+                ("skill2", "技能2", data.skill2_level),
+                ("burst", "爆裂", data.burst_skill_level),
+            )
+        ]
+        combat = display_number(data.combat)
+        name_fit = _name_fit(data.name_cn)
+        # 只保留模板实际渲染的字段；英文名、稀有度、主题色、水印、旧摘要、
+        # 属性/成长文案、页脚元数据等未渲染字段不再随每张卡传输（AUD-021）。
+        payload = {
+            "canvas": dict(CHARACTER_CANVAS),
+            "typo_set": typo_set,
             "replica_summary": replica,
             "template_version": VERSION,
             "cache_identity": cache_identity(data),
             "grade": data.grade,
             "core": data.core,
-            "skill_items": [
-                {
-                    "label": label,
-                    "level": level,
-                    "icon": self.resolver.encode(skills_assets.get(key), (110, 110)),
-                }
-                for key, label, level in (
-                    ("skill1", "技能1", data.skill1_level),
-                    ("skill2", "技能2", data.skill2_level),
-                    ("burst", "爆裂", data.burst_skill_level),
-                )
-            ],
-            "replica_font": replica_font(),
-            "font_noto": noto_font(),
-            "font_noto_700": noto_font_700(),
-            "font_noto_800": noto_font_800(),
-            "font_barlow": barlow_font(),
-            "font_barlow_sb": barlow_semibold_font(),
-            "font_rajdhani": rajdhani_font(),
-            "font_rajdhani_sb": rajdhani_semibold_font(),
+            "skill_items": skill_items,
             "art_style": art_style(
                 data,
                 portrait,
@@ -251,40 +277,52 @@ class CharacterT2IPayloadBuilder:
             "summary_panel_style": summary_panel_style,
             "character_layout": character_layout,
             "name": data.name_cn,
-            "english": data.name_en,
-            "long_name": len(data.name_cn) > 11,
-            "combat": display_number(data.combat),
+            "name_fit": name_fit,
+            "long_name": name_fit == "long",
+            "combat": combat,
+            "combat_fit": _combat_fit(combat),
             "level": str(data.level),
-            "rarity": data.rarity or "Unknown",
             "character_art_data_uri": self.resolver.encode(portrait, (1600, 2400)),
-            "theme": asdict(theme),
             "identities": identities,
-            "corporation_watermark": watermark,
-            "bg_gradient": background,
-            "summary": [
-                {
-                    "label": item.display_name,
-                    "value": format_equipment_option_value(item),
-                    "tier": "—",
-                }
-                for item in data.option_totals
-            ],
             "equipment": equipment,
-            "skills": f"{data.skill1_level} / {data.skill2_level} / {data.burst_skill_level}",
             "favorite": item_payload(
                 data.favorite_item, card_assets.favorite_item, kind="favorite"
             ),
             "cube": item_payload(data.cube, card_assets.cube, kind="cube"),
-            "stats": [
-                {"label": label, "value": display_number(value), "source": source}
-                for label, value, source in (
-                    ("HP", data.hp, data.hp_source),
-                    ("ATK", data.attack, data.attack_source),
-                    ("DEF", data.defense, data.defense_source),
-                )
-            ],
-            "growth": f"突破 {data.grade} 星 · 核心 +{data.core} 阶 · 好感 {display_number(data.bond_level)}",
-            "commander": data.commander_name,
-            "updated": data.fetched_at,
-            "version": data.plugin_version,
         }
+        payload.update(self._fonts(typo_set, payload))
+        return payload
+
+    @staticmethod
+    def _fonts(typo_set: str, payload: dict[str, Any]) -> dict[str, str]:
+        """按排版档位与实际文字内联字体：Replica 仅在子集缺字时作为回退嵌入。"""
+        from ...features.character.replica import (
+            barlow_font,
+            barlow_semibold_font,
+            noto_font_700,
+            noto_font_800,
+            rajdhani_font,
+            rajdhani_semibold_font,
+            replica_font,
+        )
+
+        families = TYPOGRAPHY_FONTS[typo_set]
+        fonts: dict[str, Any] = {}
+        if "noto" in families:
+            fonts["font_noto_700"] = noto_font_700()
+            fonts["font_noto_800"] = noto_font_800()
+        if "replica" in families:
+            primary = "noto" not in families or not (fonts["font_noto_700"] or fonts["font_noto_800"])
+            texts = _cn_stack_texts(payload)
+            if primary or _needs_replica_fallback(texts):
+                fonts["replica_font"] = replica_font()
+        loaders = {
+            "barlow": ("font_barlow", barlow_font),
+            "barlow_sb": ("font_barlow_sb", barlow_semibold_font),
+            "rajdhani": ("font_rajdhani", rajdhani_font),
+            "rajdhani_sb": ("font_rajdhani_sb", rajdhani_semibold_font),
+        }
+        for family, (key, loader) in loaders.items():
+            if family in families:
+                fonts[key] = loader()
+        return {key: value for key, value in fonts.items() if value}

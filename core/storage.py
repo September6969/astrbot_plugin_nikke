@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sqlite3
+import stat
 import threading
 import time
 from contextlib import contextmanager
@@ -22,7 +23,36 @@ from astrbot_plugin_nikke.core.cookie_utils import parse_cookie
 
 
 SCHEMA_NAME = "nikke"
+_KEY_CREATE_RETRIES = 20
+_KEY_CREATE_RETRY_DELAY = 0.05
 SCHEMA_VERSION = 3
+
+
+def _game_identity_changed(
+    old_uid: Any, old_openid: Any, new_uid: Any, new_openid: Any
+) -> bool:
+    """游戏身份 (game_uid, game_openid) 是否变化；旧记录缺 openid 时只比较 uid。"""
+    old_uid, new_uid = str(old_uid or "").strip(), str(new_uid or "").strip()
+    old_openid, new_openid = str(old_openid or "").strip(), str(new_openid or "").strip()
+    if old_uid != new_uid:
+        return True
+    return bool(old_openid and new_openid and old_openid != new_openid)
+
+
+def encryption_key_ready(key_path: Path) -> bool:
+    """只读判断密钥来源是否就绪，不创建文件，也不读取文件密钥内容。
+
+    设置了 NIKKE_ENCRYPTION_KEY 时以其合法性为准（此时不会生成 secret.key）；
+    否则要求 key_path 是普通文件（不跟随符号链接）。文件内容在 NikkeStore 启动时已校验。
+    """
+    env_key = os.getenv("NIKKE_ENCRYPTION_KEY", "").strip()
+    try:
+        if env_key:
+            NikkeStore.validate_fernet_key(env_key)
+            return True
+        return stat.S_ISREG(os.lstat(key_path).st_mode)
+    except (OSError, ValueError):
+        return False
 
 
 class NikkeStore:
@@ -76,12 +106,41 @@ class NikkeStore:
         if env_key:
             return self.validate_fernet_key(env_key)
         if self.key_path.exists():
-            key = self.key_path.read_bytes().strip()
-            return self.validate_fernet_key(key)
+            return self._read_existing_key()
         key = Fernet.generate_key()
-        self.key_path.write_bytes(key)
-        os.chmod(self.key_path, 0o600)
+        try:
+            # O_EXCL 原子创建并在创建瞬间即为 0600，避免 write+chmod 的权限窗口和并发覆写。
+            descriptor = os.open(
+                self.key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600
+            )
+        except FileExistsError:
+            return self._read_existing_key()
+        try:
+            view = memoryview(key)
+            while view:
+                written = os.write(descriptor, view)
+                view = view[written:]
+            os.fsync(descriptor)
+        except BaseException:
+            os.close(descriptor)
+            self.key_path.unlink(missing_ok=True)
+            raise
+        os.close(descriptor)
         return key
+
+    def _read_existing_key(self) -> bytes:
+        """读取已有密钥；并发创建者可能尚未写完，短暂等待非空内容。"""
+        key = b""
+        for _ in range(_KEY_CREATE_RETRIES):
+            key = self.key_path.read_bytes().strip()
+            if key:
+                break
+            time.sleep(_KEY_CREATE_RETRY_DELAY)
+        return self.validate_fernet_key(key)
+
+    def has_valid_key(self) -> bool:
+        """统一判断加密密钥是否就绪：合法的 NIKKE_ENCRYPTION_KEY 或普通文件 secret.key。"""
+        return encryption_key_ready(self.key_path)
 
     def _ensure_wal_mode(self, conn: sqlite3.Connection) -> None:
         """按实际数据库文件身份维护 WAL 模式。
@@ -267,7 +326,7 @@ class NikkeStore:
     def fail_bind_session(self, token: str, error: str, *, status: str) -> None:
         with self._lock, self._connect() as conn:
             conn.execute(
-                "UPDATE bind_sessions SET status=?, error=? WHERE token_hash=?",
+                "UPDATE bind_sessions SET status=?, error=? WHERE token_hash=? AND used_at IS NULL",
                 (str(status), error[:240], self.token_hash(token)),
             )
 
@@ -298,6 +357,9 @@ class NikkeStore:
             if not row or row["expires_at"] < now or row["used_at"] is not None:
                 raise ValueError("绑定链接无效、已使用或已过期")
             qq_id = str(row["qq_id"])
+            previous = conn.execute(
+                "SELECT game_uid, game_openid FROM accounts WHERE qq_id=?", (qq_id,)
+            ).fetchone()
             conn.execute(
                 """
                 INSERT INTO accounts(
@@ -317,6 +379,17 @@ class NikkeStore:
                 """,
                 (qq_id, encrypted, game_uid, game_openid, nickname, role_name, area_id, now, encrypted_xcommon, user_agent),
             )
+            if previous is not None and _game_identity_changed(
+                previous["game_uid"], previous["game_openid"], game_uid, game_openid
+            ):
+                # 换绑到不同游戏身份：撤销继承的自动授权；action_runs 历史及其
+                # 未决结果保护按游戏身份隔离，此处不触碰。
+                conn.execute(
+                    "UPDATE accounts SET auto_daily_enabled=0 WHERE qq_id=?", (qq_id,)
+                )
+                conn.execute(
+                    "DELETE FROM settings WHERE key=?", (f"daily_scope_v2:{qq_id}",)
+                )
             conn.execute(
                 "UPDATE bind_sessions SET used_at=?, status=?, error='' WHERE token_hash=?",
                 (now, str(success_status), digest),
@@ -449,15 +522,20 @@ class NikkeStore:
             return False
 
     def reserve_run(self, scope: str, key: str, qq_id: str, action: str, *, limit: int,
-                    blocking_statuses: set[str], initial_status: str, detail: str = "") -> bool:
-        """同一事务检查作用域预算、未决记录及去重，再持久化调用方给定的意图。"""
+                    blocking_statuses: set[str], initial_status: str, detail: str = "",
+                    budget_exempt_statuses: frozenset[str] | set[str] = frozenset()) -> bool:
+        """同一事务检查作用域预算、未决记录及去重，再持久化调用方给定的意图。
+
+        budget_exempt_statuses 中的记录（如确认未发送）仍参与去重，但不占用预算。
+        """
         if not key.startswith(scope + ":") or limit <= 0:
             return False
         with self._lock, self._connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             rows = conn.execute("SELECT run_key,status FROM action_runs WHERE substr(run_key,1,?)=?",
                                 (len(scope) + 1, scope + ":")).fetchall()
-            if len(rows) >= limit or any(r["status"] in blocking_statuses or r["run_key"] == key for r in rows):
+            used = sum(1 for r in rows if r["status"] not in budget_exempt_statuses)
+            if used >= limit or any(r["status"] in blocking_statuses or r["run_key"] == key for r in rows):
                 return False
             conn.execute("INSERT INTO action_runs(run_key,qq_id,action,status,detail,created_at) VALUES(?,?,?,?,?,?)",
                          (key, str(qq_id), action, initial_status, detail[:500], int(time.time())))

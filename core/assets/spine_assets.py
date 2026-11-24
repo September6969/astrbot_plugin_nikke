@@ -299,7 +299,7 @@ class CharacterAssetService:
         return self.env.visual_resolver.get_character_placement(resource_id, costume_id)
 
     def get_costume_portrait(self, resource_id, costume_id=None) -> AssetResult:
-        resolution = self.env.costume_resolver.resolve(resource_id, costume_id)
+        resolution = self.env.visual_resolver.resolve_costume(resource_id, costume_id)
         image = self.get_character_portrait("", resource_id, costume_id)
         return AssetResult(
             image=image, exact_match=resolution.exact_match, fallback_reason=resolution.fallback_reason,

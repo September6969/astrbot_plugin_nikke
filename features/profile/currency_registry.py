@@ -60,13 +60,21 @@ class CurrencyRegistry:
         ),
         5100: CurrencyDefinition(5100, "普通招募券", "recruit_voucher", _USER_REFERENCE, "330449dd8a7241af8195b200d7526144d6d8b6ffc83f81561e7eb542ce344f91"),
         5200: CurrencyDefinition(5200, "高级招募券", "advanced_recruit_voucher", _USER_REFERENCE, "3f67077cd4d65afbf489398e88f865092781d84ff1ebba2559837aab694198ba"),
-        11000: CurrencyDefinition(11000, "躯体标签", "body_label", _USER_REFERENCE, "e3c8e83a99501de71209309b4784db98b52c2636dbb3ced47987cfbfabd431dc"),
+        11000: CurrencyDefinition(11000, "白银积分券", "silver_mileage_ticket", _USER_REFERENCE, "e3c8e83a99501de71209309b4784db98b52c2636dbb3ced47987cfbfabd431dc"),
         12000: CurrencyDefinition(12000, "黄金积分券", "gold_mileage_ticket", _USER_REFERENCE, "2a91fdd916cb801d020fa506ddf77644858bedd7cd1f89ddb67a765decf395ff"),
     }
     _INTEGER = re.compile(r"^[0-9]+$", re.ASCII)
 
+    MAX_ERRORS = 20
+
     def __init__(self) -> None:
         self.errors: list[str] = []
+
+    def _error(self, message: str) -> None:
+        """registry 为长生命周期单例：只保留最近若干条诊断，避免无界增长。"""
+        self.errors.append(message)
+        if len(self.errors) > self.MAX_ERRORS:
+            del self.errors[: len(self.errors) - self.MAX_ERRORS]
 
     @classmethod
     def _integer(cls, value: Any) -> int | None:
@@ -112,12 +120,12 @@ class CurrencyRegistry:
 
     def parse_item(self, value: Any) -> CurrencyItem | None:
         if not isinstance(value, dict):
-            self.errors.append("资源条目不是对象")
+            self._error("资源条目不是对象")
             return None
         type_value = self._integer(value.get("type"))
         amount = self._integer(value.get("value"))
         if type_value is None or amount is None:
-            self.errors.append("资源条目的 type/value 不是非负整数")
+            self._error("资源条目的 type/value 不是非负整数")
             return None
         definition = self.DEFINITIONS.get(type_value)
         if definition is None:
@@ -135,7 +143,7 @@ class CurrencyRegistry:
         if values is None:
             return None, False
         if not isinstance(values, list):
-            self.errors.append("currencies 不是数组")
+            self._error("currencies 不是数组")
             return None, True
         result: list[CurrencyItem] = []
         partial = False

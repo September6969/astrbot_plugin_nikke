@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import inspect
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -43,6 +44,20 @@ class VoiceApplicationTests(IsolatedAsyncioTestCase):
         }
         dependencies.update(overrides)
         return VoiceApplication(**dependencies)
+
+    async def test_missing_tools_notice_only_on_enable_and_status_query(self):
+        # PR-6A G4-voice-a：显式注入缺失工具；偏好照常保存，只在“开”/状态查询附加提示。
+        app = self._application(missing_tools=("ffprobe",))
+        enabled = app.update_settings("aiocqhttp", "fake-user", "开")
+        self.assertTrue(enabled.startswith("互动语音：开启"))
+        self.assertIn("提示：当前部署缺少 ffprobe", enabled)
+        self.assertTrue(VoicePreference.load(self.store, "aiocqhttp:fake-user").enabled)
+        self.assertIn("提示", app.update_settings("aiocqhttp", "fake-user"))
+        self.assertNotIn("提示", app.update_settings("aiocqhttp", "fake-user", "语言", "en"))
+        disabled = app.update_settings("aiocqhttp", "fake-user", "关")
+        self.assertTrue(disabled.startswith("互动语音：关闭"))
+        self.assertNotIn("提示", disabled)
+        self.assertNotIn("提示", self._application().update_settings("aiocqhttp", "other-user", "开"))
 
     async def test_settings_resolve_character_and_costume_by_exact_owner(self):
         app = self._application()
@@ -209,7 +224,13 @@ class VoiceApplicationTests(IsolatedAsyncioTestCase):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         }
         self.assertNotIn("resolve_voice_character", methods)
-        self.assertIn("self.adapters.voice", methods["voice_settings"])
+        # G8-main-legacy-f（PR-6C）：voice_settings 平铺方法已删除，语音设置只经运行时 语音 分支。
+        self.assertNotIn("voice_settings", methods)
+        from astrbot_plugin_nikke.adapters.astrbot.command_runtime import NikkeCommandRuntime
+
+        self.assertIn(
+            "self._adapters.voice.voice_settings", inspect.getsource(NikkeCommandRuntime.nikke)
+        )
         self.assertIn("self.adapters.voice", methods["on_nikke_poke"])
         for forbidden in (
             "VoicePreference", "VoiceMapRegistry", "VoiceAudioCache",

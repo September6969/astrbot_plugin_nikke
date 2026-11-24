@@ -91,7 +91,7 @@ python scripts/preview/preview_t2i_frontend.py --page <page> --output-dir <previ
 - 命令及配置：`main.py`、`_conf_schema.json`、`docs/CONFIGURATION_ACCEPTANCE.md`；`calendar_service.py` 仅提取既有分组逻辑以供两种展示共同使用。
 - 展示：`t2i_assets.py`、`t2i_payloads.py`、`t2i_renderer.py`、`t2i_templates.py`、`templates/t2i/` 七页与共享 CSS/宏。
 - 资产接线：`asset_manager.py`、两个复用 Resolver、`assets/spine_manifest.json`、两份 `data/nikke/blabla-*` 公开目录与 `.gitignore` 精确例外。
-- 复现：`scripts/preview/preview_t2i_ui.py`、`preview_t2i_frontend.py`、`t2i_preview_fixtures.py`、原有 Spine manifest 维护脚本。
+- 复现：`scripts/preview/preview_t2i_ui.py`、`scripts/preview/preview_t2i_frontend.py`、`scripts/shared/t2i_preview_fixtures.py`、原有 Spine manifest 维护脚本（`scripts/spine/rebuild_spine_render_manifest.py`）。
 - 测试：`tests/test_t2i_campaign.py`、`test_t2i_frontend.py`、`test_t2i_asset_integration.py`、三个资产准备测试、合成 fixture、配置键精确校验。
 - 证据：两套准备阶段 evidence；`T2I_ASSET_IMPORT_PROVENANCE.json` 记录 570 个逐字节一致的导入文件与 8 张复用 PNG；`T2I_DELIVERY_AUDIT.json` 提供完整改动路径与截图 hashes。
 

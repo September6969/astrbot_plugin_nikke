@@ -300,7 +300,8 @@ class AnnouncementReviewRegressionTests(unittest.IsolatedAsyncioTestCase):
                 return text
 
         # 使用真实格式化服务，验证错误能穿过完整命令链到达用户。
-        for command in ("announcements_view",):
+        # G8-main-legacy-e（PR-6C）：遗留 announcements_view 已删除，改经 /妮姬 公告 统一路由。
+        for command in ("公告",):
             for error in (None, asyncio.TimeoutError(), RuntimeError("测试同步异常")):
                 with self.subTest(command=command, error=type(error).__name__):
                     plugin = make_plugin_shell()
@@ -318,7 +319,7 @@ class AnnouncementReviewRegressionTests(unittest.IsolatedAsyncioTestCase):
                             application=application,
                             push_enabled=lambda: False,
                         )
-                        replies = [reply async for reply in getattr(plugin, command)(Event())]
+                        replies = [reply async for reply in plugin.nikke(Event(), command)]
                     self.assertEqual(len(replies), 1)
                     expected = "官方源不可用" if error is None else "超时" if isinstance(error, asyncio.TimeoutError) else "测试同步异常"
                     self.assertIn(expected, replies[0])

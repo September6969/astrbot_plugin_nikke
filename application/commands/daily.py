@@ -14,10 +14,9 @@ from ...features.daily.models import DailyTaskResult, DailyTaskStatus
 from ...features.daily.presentation import format_daily_summary_text
 from ...features.daily.ports import DailyAccountReader, DailyCommandStore
 from ...features.daily.runner import DailyRunner
-from ...integrations.blablalink.client import CookieExpired
 from ...features.account.errors import CredentialExpiredError
-from ...core.privacy import safe_exception_message
 from .contracts import CommandContext, CommandReply, CommandResult, TextReply
+from .errors import CREDENTIAL_EXPIRED_TEXT, invalidate_credentials, user_error_message
 
 
 DailySummaryFormatter = Callable[..., Sequence[str] | str]
@@ -62,8 +61,12 @@ class DailyCommandHandler:
         if community and context.is_private_chat and context.conversation_id:
             account = self._account(context.actor_id)
             if account:
-                self._store.set_setting(f"daily_private:{context.actor_id}", {
-                    "identity": DailyRunner.daily_identity(account), "conversation": context.conversation_id})
+                register = getattr(self._extra_automation, "register_route", None)
+                if callable(register):
+                    register(context, account)
+                else:
+                    self._store.set_setting(f"daily_private:{context.actor_id}", {
+                        "identity": DailyRunner.daily_identity(account), "conversation": context.conversation_id})
         if action in {"状态", "status"}:
             return await self._community_status(context.actor_id) if community else await self._status(context.actor_id)
         if action in {"自动", "auto"}:
@@ -76,15 +79,18 @@ class DailyCommandHandler:
         try:
             account = self._account(context.actor_id)
         except Exception as exc:
-            return self._text(f"签到失败：{safe_exception_message(exc)}")
+            return self._text(f"签到失败：{user_error_message(exc)}")
         if account is None:
             return self._text("尚未绑定账号，请先私聊发送 /妮姬 账号 绑定")
         try:
             run = self._runner.run_community_for_account if community else self._runner.run_daily_for_account
             result = await run(account, self._clock())
             return self._text(f"{result.account_name}：{result.detail}")
+        except CredentialExpiredError:
+            self._invalidate(context.actor_id)
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception as exc:
-            return self._text(f"签到失败：{safe_exception_message(exc)}")
+            return self._text(f"签到失败：{user_error_message(exc)}")
 
     async def run_all_daily(
         self,
@@ -171,11 +177,14 @@ class DailyCommandHandler:
             else:
                 detail = "今日待签到"
             return self._text(detail)
-        except (CookieExpired, CredentialExpiredError):
-            self._store.mark_cookie_invalid(actor_id)
-            return self._text("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+        except CredentialExpiredError:
+            self._invalidate(actor_id)
+            return self._text(CREDENTIAL_EXPIRED_TEXT)
         except Exception as exc:
-            return self._text(f"查询失败：{safe_exception_message(exc)}")
+            return self._text(f"查询失败：{user_error_message(exc)}")
+
+    def _invalidate(self, actor_id: str) -> None:
+        invalidate_credentials(actor_id, store=self._store, client=self._client)
 
     async def _community_status(self, actor_id: str) -> CommandResult:
         try:
@@ -189,10 +198,10 @@ class DailyCommandHandler:
         try:
             status = await self._client.get_daily_signin(account)
             lines.append("签到：" + ("已签到" if status["completed"] else "待签到" if status["found"] else "未找到任务"))
-        except (CookieExpired, CredentialExpiredError):
+        except CredentialExpiredError:
             expired = True
-            self._store.mark_cookie_invalid(actor_id)
-            lines.append("登录状态已失效，请重新发送 /妮姬 账号 绑定。")
+            self._invalidate(actor_id)
+            lines.append(CREDENTIAL_EXPIRED_TEXT)
         except Exception:
             lines.append("签到：查询暂不可用，状态未知")
         if not expired:
@@ -202,9 +211,9 @@ class DailyCommandHandler:
                 lines.extend(f"{r['name']}：{labels[r['state']]}" for r in rewards)
                 if not rewards:
                     lines.append("免费任务奖励：本次未返回记录")
-            except (CookieExpired, CredentialExpiredError):
-                self._store.mark_cookie_invalid(actor_id)
-                lines.append("奖励：登录状态已失效，请重新绑定")
+            except CredentialExpiredError:
+                self._invalidate(actor_id)
+                lines.append("奖励：" + CREDENTIAL_EXPIRED_TEXT)
             except Exception:
                 lines.append("免费任务奖励：查询暂不可用，状态未知")
         identity = hashlib.sha256(DailyRunner.daily_identity(account).encode()).hexdigest()

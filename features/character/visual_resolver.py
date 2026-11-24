@@ -22,12 +22,24 @@ import logging
 from pathlib import Path
 from typing import Any
 
-try:
-    from .models import SpineBundle
-except ImportError:
-    from .models import SpineBundle
+from .models import SpineAssetRef
 
 logger = logging.getLogger("nikke.visual_resolver")
+
+
+@dataclass(slots=True)
+class CostumeResolution:
+    """皮肤与角色资源定位结果契约（原 CostumeAssetResolver 输出，PR-6B G6-b1 合并于此）。"""
+
+    resource_id: str | None
+    character_id: str | None
+    costume_id: str | None
+    costume_name: str | None
+    spine_asset_id: str | None
+    si_asset_key: str | None
+    exact_match: bool
+    fallback_reason: str | None  # None, "unknown_costume", "owner_mismatch", "unknown_character"
+    character_name: str = ""
 
 
 @dataclass(slots=True)
@@ -47,7 +59,7 @@ class VisualAssetResolution:
 
     logical_key: str | None = None
     asset_id: str | None = None
-    spine_bundle: SpineBundle | None = None
+    spine_bundle: SpineAssetRef | None = None
     is_default: bool = False
 
 
@@ -133,7 +145,77 @@ class CharacterVisualAssetResolver:
     def total_costumes(self) -> int:
         return len(self._all_costumes)
 
-    def _build_spine_bundle(self, spine_dict: dict | None, entry_key: str | None = None) -> SpineBundle | None:
+    @staticmethod
+    def _icon_asset_key(path: Any) -> str | None:
+        """视觉 catalog 的 icon 路径文件名主干即 si 资源键（例 si_c113_00_s）。"""
+        if not isinstance(path, str) or not path:
+            return None
+        return Path(path).stem
+
+    def resolve_costume(
+        self,
+        resource_id: str | int | None,
+        costume_id: str | int | None = None,
+        character_id: str | int | None = None,
+    ) -> CostumeResolution:
+        """按 resource_id 与 costume_id 精确解析皮肤 Spine/SI 资源键。
+
+        合并自已删除的 CostumeAssetResolver（PR-6B G6-character-spine-b1），保持其公开
+        语义：默认/重置皮肤 exact_match=True；未登记角色合成 cNNN/si_cNNN_00_s 并回显
+        调用方 character_id；未知皮肤与所有者不匹配返回角色默认 spine_asset_id，
+        fallback_reason 仍为旧词汇 unknown_costume / owner_mismatch / unknown_character。
+        """
+        rid_str = str(resource_id).strip() if (resource_id is not None and not isinstance(resource_id, bool)) else None
+        char_entry = self._characters.get(rid_str or "") if rid_str else None
+        synthetic = bool(rid_str and rid_str.isdigit())
+        default_assets = char_entry.get("default", {}) if char_entry else {}
+
+        default_spine = default_assets.get("spine_asset_id") if char_entry else (f"c{int(rid_str):03d}" if synthetic and rid_str else None)
+        default_si = self._icon_asset_key(default_assets.get("icon")) if char_entry else (f"si_c{int(rid_str):03d}_00_s" if synthetic and rid_str else None)
+        char_name = char_entry.get("name_cn") or char_entry.get("name_en") or "" if char_entry else ""
+        cid_resolved = str(char_entry.get("character_id", "")) if char_entry else (str(character_id) if character_id else None)
+
+        if costume_id is None or isinstance(costume_id, bool):
+            is_default = True
+            cid_str = None
+        else:
+            cid_str = str(costume_id).strip()
+            is_default = cid_str.lower() in self.RESET_TERMS
+
+        def result(**kwargs: Any) -> CostumeResolution:
+            values: dict[str, Any] = {
+                "resource_id": rid_str,
+                "character_id": cid_resolved,
+                "costume_id": cid_str,
+                "costume_name": None,
+                "spine_asset_id": default_spine,
+                "si_asset_key": default_si,
+                "exact_match": False,
+                "fallback_reason": None,
+                "character_name": char_name,
+            }
+            values.update(kwargs)
+            return CostumeResolution(**values)
+
+        if is_default:
+            return result(costume_id=None, costume_name="默认皮肤", exact_match=True)
+        if char_entry is None:
+            return result(fallback_reason="unknown_character")
+        costumes_map = char_entry.get("costumes", {})
+        if cid_str in costumes_map:
+            costume_info = costumes_map[cid_str]
+            return result(
+                costume_name=costume_info.get("costume_name"),
+                spine_asset_id=costume_info.get("spine_asset_id"),
+                si_asset_key=self._icon_asset_key(costume_info.get("icon")),
+                exact_match=True,
+            )
+        if cid_str in self._all_costumes:
+            _, other_info = self._all_costumes[cid_str]
+            return result(costume_name=other_info.get("costume_name"), fallback_reason="owner_mismatch")
+        return result(fallback_reason="unknown_costume")
+
+    def _build_spine_bundle(self, spine_dict: dict | None, entry_key: str | None = None) -> SpineAssetRef | None:
         if not spine_dict:
             return None
         skel = spine_dict.get("skeleton")
@@ -148,7 +230,7 @@ class CharacterVisualAssetResolver:
             bones = s_entry.get("bones")
             slots = s_entry.get("slots")
 
-        return SpineBundle(
+        return SpineAssetRef(
             skeleton=skel,
             atlas=atlas,
             textures=textures,

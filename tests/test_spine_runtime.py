@@ -9,7 +9,7 @@ from unittest import TestCase
 from PIL import Image
 
 from astrbot_plugin_nikke.integrations.spine.runtime import (
-    SpineBundle,
+    SpineRuntimeBundle as SpineBundle,
     SpineSkeletonParser,
     SpineMemoryCache,
     RenderedCharacter,
@@ -131,3 +131,18 @@ class SpineRuntimeTests(TestCase):
         self.assertGreater(len(parsed.bones), 300)
         self.assertIn("c_head", parsed.bone_name_map)
         self.assertIn("lower_boddy", parsed.bone_name_map)
+
+
+class SpineTypeUnificationTests(TestCase):
+    def test_render_error_and_bundle_have_single_definitions(self):
+        # PR-6B G6-character-spine-c1/c2：异常与可供 runtime 消费的 bundle 只在叶子模块定义一次。
+        from astrbot_plugin_nikke.integrations.spine import bundle, local_resolver, prerenderer, runtime, worker_caller
+        self.assertIs(runtime.SpineRenderError, bundle.SpineRenderError)
+        self.assertIs(prerenderer.SpineRenderError, bundle.SpineRenderError)
+        self.assertIs(worker_caller.SpineRenderError, bundle.SpineRenderError)
+        self.assertTrue(issubclass(local_resolver.LocalSpineResolveError, bundle.SpineRenderError))
+        self.assertIs(prerenderer.SpineBundle, bundle.SpineBundle)
+        self.assertIs(worker_caller.SpineBundle, bundle.SpineBundle)
+        # 实时渲染器的元数据 bundle 是独立类型，旧名仅作为 renderer 的过渡别名。
+        self.assertIs(runtime.SpineBundle, runtime.SpineRuntimeBundle)
+        self.assertIsNot(runtime.SpineRuntimeBundle, bundle.SpineBundle)

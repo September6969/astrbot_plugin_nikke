@@ -67,13 +67,17 @@ def test_partial_migration_keeps_per_file_fallback(tmp_path):
 
 
 def test_compat_entry_preserves_parameters_exit_and_keyboard_interrupt(tmp_path):
+    # G9-scripts-docs-a5（PR-6C）：非运维根兼容壳已删除，改以保留的运维壳 backup_nikke_data 为模板。
     scripts = tmp_path / 'scripts'
     (scripts / 'shared').mkdir(parents=True)
-    (scripts / 'spine').mkdir()
+    (scripts / 'operations').mkdir()
     (scripts / 'shared/compat.py').write_bytes((PLUGIN_ROOT / 'scripts/shared/compat.py').read_bytes())
-    shim = (PLUGIN_ROOT / 'scripts/spine_batch_validation.py').read_text(encoding='utf-8')
-    (scripts / 'cancel_probe.py').write_text(shim.replace('spine.spine_batch_validation', 'spine.cancel_probe'), encoding='utf-8')
-    target = scripts / 'spine/cancel_probe.py'
+    shim = (PLUGIN_ROOT / 'scripts/backup_nikke_data.py').read_text(encoding='utf-8')
+    assert '"operations.backup_nikke_data"' in shim
+    (scripts / 'cancel_probe.py').write_text(
+        shim.replace('"operations.backup_nikke_data"', '"operations.cancel_probe"'), encoding='utf-8'
+    )
+    target = scripts / 'operations/cancel_probe.py'
     target.write_text('import signal, sys\ntry:\n    print(repr(sys.argv[1:]), flush=True)\n    if "cancel" in sys.argv: signal.raise_signal(signal.SIGINT)\n    raise SystemExit(7)\nfinally:\n    print("finalized", flush=True)\n', encoding='utf-8')
     for args in [('with space', '中文'), ('cancel',)]:
         results = [subprocess.run([sys.executable, str(path), *args], cwd=tmp_path, capture_output=True, timeout=15)
@@ -88,42 +92,38 @@ def test_compat_entry_preserves_parameters_exit_and_keyboard_interrupt(tmp_path)
 
 
 @pytest.mark.parametrize('module_name,search_root,package', [
-    ('inspect_spine_bundle', 'scripts', 'scripts'),
-    ('scripts.inspect_spine_bundle', '.', 'scripts'),
-    ('astrbot_plugin_nikke.scripts.inspect_spine_bundle', '..', 'astrbot_plugin_nikke.scripts'),
+    ('backup_nikke_data', 'scripts', 'scripts'),
+    ('scripts.backup_nikke_data', '.', 'scripts'),
+    ('astrbot_plugin_nikke.scripts.backup_nikke_data', '..', 'astrbot_plugin_nikke.scripts'),
 ])
 def test_legacy_import_from_other_directory(tmp_path, module_name, search_root, package):
-    atlas = tmp_path / 'sample.atlas'
-    atlas.write_text('texture.png\nsize: 8, 8\n', encoding='utf-8')
-    (tmp_path / 'texture.png').write_bytes(b'')
-    skeleton = tmp_path / 'sample.json'
-    skeleton.write_text('{"skeleton": {"spine": "4.2.1"}}', encoding='utf-8')
+    # G9-scripts-docs-a5（PR-6C）：inspect_spine_bundle 根壳已删除，改用保留的运维根壳验证
+    # compat 导入别名；只导入并比较符号，不执行备份或恢复。
     code = '''
 import importlib
-from pathlib import Path
 import json
 import sys
 sys.path.insert(0, sys.argv[1])
 module = importlib.import_module(sys.argv[2])
-implementation = importlib.import_module(sys.argv[3] + '.spine.inspect_spine_bundle')
+implementation = importlib.import_module(sys.argv[3] + '.operations.backup_nikke_data')
 assert module is implementation
-assert module.inspect is implementation.inspect
-assert module._binary_spine_version is implementation._binary_spine_version
-print(json.dumps(module.inspect(Path(sys.argv[4]), Path(sys.argv[5]), '4.2')))
+assert module.create_backup is implementation.create_backup
+assert module.restore_backup is implementation.restore_backup
+assert module.main is implementation.main
+print(json.dumps({"module": implementation.__name__}))
 '''
     result = subprocess.run(
         [sys.executable, '-c', code, str((PLUGIN_ROOT / search_root).resolve()),
-         module_name, package, str(atlas), str(skeleton)],
+         module_name, package],
         cwd=tmp_path, capture_output=True, text=True, encoding='utf-8', timeout=15,
     )
     assert result.returncode == 0, result.stderr
-    report = json.loads(result.stdout)
-    assert report['status'] == 'VERSION_MATCH'
-    assert report['major_minor'] == '4.2'
-    assert report['missing_pages'] == 0
+    assert json.loads(result.stdout)['module'] == package + '.operations.backup_nikke_data'
+    assert not list(tmp_path.iterdir())
 
 
-@pytest.mark.parametrize('name,group', [('architecture_metrics','audit'), ('mirror_blablalink_assets','assets'), ('spine_batch_validation','spine'), ('backup_nikke_data','operations'), ('preview_t2i_frontend','preview'), ('inspect_spine_bundle','spine')])
+# G9-scripts-docs-a5（PR-6C）：只有运维入口保留根兼容壳。
+@pytest.mark.parametrize('name,group', [('backup_nikke_data','operations'), ('upgrade_preflight','operations'), ('cleanup_cache','operations'), ('diagnose_readonly','operations')])
 @pytest.mark.parametrize('argument', ['--help', '--no-such-argument'])
 def test_legacy_cli_matches_grouped_entry_from_other_directory(tmp_path, name, group, argument):
     results = []

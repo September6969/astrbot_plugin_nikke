@@ -28,7 +28,8 @@ class GuidePaginationTests(IsolatedAsyncioTestCase):
             root.mkdir(parents=True)
             (root / "unregistered.png").write_bytes(b"synthetic")
             event = SimpleNamespace(plain_result=lambda x: x, image_result=lambda x: self.fail("不得发送裸目录素材"))
-            result = [x async for x in plugin.guide(event, "练度")]
+            # G8-main-legacy-e（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+            result = [x async for x in plugin.nikke(event, "攻略", "练度")]
             self.assertIn("占位", result[0])
 
     async def test_command_second_page_and_invalid_page(self):
@@ -68,10 +69,11 @@ class GuidePaginationTests(IsolatedAsyncioTestCase):
             event = SimpleNamespace(plain_result=lambda x: "text:" + x, image_result=lambda x: "image:" + x)
             aliases = ["练度", "红球", "珍藏品", "充能", "洗词条", "PVP"]
             for alias in aliases:
-                output = [x async for x in plugin.guide(event, alias)]
+                # G8-main-legacy-e（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+                output = [x async for x in plugin.nikke(event, "攻略", alias)]
                 self.assertTrue(output[0].startswith("text:【"))
                 self.assertIn("第 1/1 页", output[0])
                 self.assertNotIn("翻页", output[0])
                 self.assertTrue(output[1].startswith("text:"))
-            red = [x async for x in plugin.guide(event, "红球")]
+            red = [x async for x in plugin.nikke(event, "攻略", "红球")]
             self.assertEqual(red[-1], "text:https://nikkeoutpost.netlify.app/")

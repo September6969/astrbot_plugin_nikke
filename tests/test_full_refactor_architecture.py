@@ -6,6 +6,8 @@ import ast
 from pathlib import Path
 
 from scripts.audit.architecture_metrics import (
+    CROSS_LAYER_BASELINE_ALLOWLIST,
+    MAIN_PUBLIC_MEMBER_ALLOWLIST,
     PLAN_THRESHOLDS,
     PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
     _adapter_infrastructure_imports,
@@ -14,6 +16,7 @@ from scripts.audit.architecture_metrics import (
     _command_runtime_responsibilities,
     classify_module_shape,
     collect_metrics,
+    cross_layer_edges,
     compare_metrics,
 )
 
@@ -21,7 +24,8 @@ from scripts.audit.architecture_metrics import (
 ROOT = Path(__file__).resolve().parents[1]
 METRICS = collect_metrics(ROOT)
 EXPECTED_PLAN_THRESHOLDS = {
-    "main.py": 700,
+    # G8-main-legacy-h（PR-6C）：删除 36 个遗留方法后由 700 收紧到 300。
+    "main.py": 300,
     "adapters/astrbot/command_runtime.py": 400,
     "core/asset_manager.py": 300,
     "ui/t2i_payloads.py": 100,
@@ -150,11 +154,79 @@ def test_main_plugin_methods_are_thin_delegates() -> None:
     assert not _violations("main_business_import"), METRICS["main_business_imports"]
 
 
+def test_main_plugin_public_members_match_allowlist() -> None:
+    # G8-main-legacy-h（PR-6C）：插件外壳公开成员白名单门禁，防止遗留平铺方法回流。
+    assert MAIN_PUBLIC_MEMBER_ALLOWLIST == {
+        "command_runtime", "nikke", "nikke_hash_prefix", "on_nikke_poke",
+    }
+    assert {item["name"] for item in METRICS["plugin_public_methods"]} == MAIN_PUBLIC_MEMBER_ALLOWLIST
+    assert not _violations("main_public_member_allowlist")
+
+
+def test_main_public_member_allowlist_rejects_new_methods_and_class_aliases(tmp_path) -> None:
+    # PR-6C 审查跟进：门禁必须能失败——新增公开方法与类级别别名都要被拦下。
+    (tmp_path / "main.py").write_text(
+        "class NikkePlugin:\n"
+        "    status = None\n"
+        "    alias: object = None\n"
+        "    _private = None\n"
+        "    async def nikke(self): pass\n"
+        "    async def bind(self): pass\n"
+        "    async def terminate(self): pass\n",
+        encoding="utf-8",
+    )
+    flagged = {
+        item["symbol"] for item in collect_metrics(tmp_path)["gate_violations"]
+        if item["category"] == "main_public_member_allowlist"
+    }
+    assert flagged == {"status", "alias", "bind"}
+
+
 def test_feature_and_ui_dependency_directions() -> None:
     feature_violations = _violations("feature_dependency_direction")
     ui_violations = _violations("ui_dependency_direction")
     assert not feature_violations, f"features 越过领域端口依赖边界：{feature_violations}"
     assert not ui_violations, f"ui 依赖存储或业务网络：{ui_violations}"
+
+
+def test_cross_layer_imports_stay_within_phase0_baseline() -> None:
+    assert not _violations("cross_layer_import"), METRICS["cross_layer_edges"]["violations"]
+    assert not _violations("cross_layer_allowlist_stale"), (
+        "跨层边已清零，请同步从 CROSS_LAYER_BASELINE_ALLOWLIST 删除："
+        f"{METRICS['cross_layer_edges']['stale_allowlist']}"
+    )
+
+
+def test_cross_layer_baseline_only_shrinks() -> None:
+    # Phase 0 登记的 8 条既有跨层边已全部清零：PR-6B（G5-calendar-b）以组合根注入
+    # 消除最后一条 features.calendar -> integrations.calendar，allowlist 必须保持为空，
+    # 所有跨层规则转为硬门禁。
+    assert CROSS_LAYER_BASELINE_ALLOWLIST == frozenset()
+    assert len(CROSS_LAYER_BASELINE_ALLOWLIST) == 0
+
+
+def test_cross_layer_gate_rejects_new_edges_and_reports_stale_entries() -> None:
+    allowlist = frozenset({("application.commands.cdk", "integrations.blablalink.client")})
+    edges = {
+        ("application.commands.raid", "integrations.blablalink.client"),
+        ("features.daily.runner", "integrations.blablalink.client"),
+        ("integrations.web.service", "scripts.operations.backup"),
+        ("core.storage", "tests.helpers"),
+        ("application.commands.raid", "features.raid.query"),
+        ("integrations.blablalink.client", "features.account.errors"),
+        ("adapters.astrbot.runtime", "application.commands.raid"),
+    }
+    result = cross_layer_edges(edges, allowlist)
+    assert result["allowlisted"] == []
+    assert result["violations"] == [
+        {"from": "application.commands.raid", "to": "integrations.blablalink.client"},
+        {"from": "core.storage", "to": "tests.helpers"},
+        {"from": "features.daily.runner", "to": "integrations.blablalink.client"},
+        {"from": "integrations.web.service", "to": "scripts.operations.backup"},
+    ]
+    assert result["stale_allowlist"] == [
+        {"from": "application.commands.cdk", "to": "integrations.blablalink.client"}
+    ]
 
 
 def test_shared_container_and_resource_owners_are_unique() -> None:

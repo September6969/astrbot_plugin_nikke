@@ -1,14 +1,13 @@
 import ast
+import asyncio
 import json
+from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 
-from astrbot_plugin_nikke.features.raid.application import (
-    RaidApplication,
-    RaidMemberIdentityUnavailable,
-)
+from astrbot_plugin_nikke.features.raid.application import RaidApplication
 from astrbot_plugin_nikke.features.raid.builder import UnionRaidBuilder
 from astrbot_plugin_nikke.features.raid.models import RaidResponseCoverage, RaidState
 
@@ -24,10 +23,10 @@ class RaidAccountReader:
 
 
 class RaidGateway:
-    def __init__(self, *, overview=None, raid_data=None, season_data=None):
-        self.overview_requests = []
-        self.raid_snapshot_requests = []
-        self.raid_data_requests = []
+    """dashboard/ranking_page/member_page 使用的统一 get_union_raid_dashboard 假网关。"""
+
+    def __init__(self, *, level_info=None, raid_data=None, season_data=None):
+        self.dashboard_requests = []
         self.season_requests = []
         self.raid_data = raid_data or {
             "manager_info": {"id": "1000007"},
@@ -35,51 +34,41 @@ class RaidGateway:
             "participate_data": [],
         }
         self.season_data = season_data or {"participate_data": []}
-        self.overview = overview
-
-    async def get_union_raid_overview(self, account, *, attacks=False):
-        self.overview_requests.append((account, attacks))
-        return self.overview or {
-            "guild_id": "guild-7",
-            "guild_name": "雪原",
-            "level_info": {
-                "manager_info": {
-                    "id": "1000007",
-                    "season_start_date": "2026-09-01T00:00:00+00:00",
-                    "season_end_date": "2026-09-22T10:30:00+00:00",
-                },
-                "level_info": [
-                    {
-                        "difficulty": 12,
-                        "level": 3,
-                        "boss_info": [
-                            {
-                                "boss_id": 17,
-                                "current_hp": 50,
-                                "max_hp": 100,
-                                "name_localvalues": {"zh-cn": "雪原守卫"},
-                            }
-                        ],
-                    }
-                ],
+        self.level_info = level_info or {
+            "manager_info": {
+                "id": "1000007",
+                "season_start_date": "2026-09-01T00:00:00+00:00",
+                "season_end_date": "2026-09-22T10:30:00+00:00",
             },
+            "level_info": [
+                {
+                    "difficulty": 12,
+                    "level": 3,
+                    "boss_info": [
+                        {
+                            "boss_id": 17,
+                            "current_hp": 50,
+                            "max_hp": 100,
+                            "name_localvalues": {"zh-cn": "雪原守卫"},
+                        }
+                    ],
+                }
+            ],
         }
 
-    async def get_union_raid_data(self, account):
-        self.raid_data_requests.append(account)
-        return self.raid_data
-
-    async def get_union_raid_snapshot(self, account):
-        self.raid_snapshot_requests.append(account)
+    async def get_union_raid_dashboard(self, account):
+        self.dashboard_requests.append(account)
         return {
             "guild_id": "guild-7",
             "guild_name": "雪原",
-            "level_info": self.raid_data,
+            "errors": [],
+            "level_info": deepcopy(self.level_info),
+            "attacks": deepcopy(self.raid_data),
         }
 
     async def get_union_raid_season(self, account, *, guild_id, season_id, levels=False):
         self.season_requests.append((account, guild_id, season_id, levels))
-        return self.season_data
+        return deepcopy(self.season_data)
 
 
 def attack(openid, damage):
@@ -121,8 +110,27 @@ def offseason_builder(tmp_path):
     return UnionRaidBuilder(manifest_path)
 
 
+OFFSEASON_LEVEL_INFO = {"manager_info": {"id": "0"}, "level_info": []}
+OFFSEASON_ATTACKS = {"manager_info": {"id": "0"}, "level_info": [], "participate_data": []}
+
+
+def raid_application(account_reader, gateway, builder, clock):
+    return RaidApplication(
+        account_reader=account_reader,
+        gateway=gateway,
+        builder=builder,
+        clock=clock,
+        plugin_version="test-version",
+        task_factory=asyncio.create_task,
+    )
+
+
+# PR-6B G7-misc-dead-a：旧 overview/ranking/member 方法已删除，以下合同测试迁移到
+# 生产路径 dashboard/ranking_page/member_page（统一 get_union_raid_dashboard 网关）。
+
+
 @pytest.mark.asyncio
-async def test_overview_uses_one_injected_clock_snapshot_for_state_and_display():
+async def test_dashboard_uses_one_injected_clock_snapshot_for_state_and_display():
     account_reader = RaidAccountReader()
     gateway = RaidGateway()
     clock_calls = []
@@ -132,52 +140,36 @@ async def test_overview_uses_one_injected_clock_snapshot_for_state_and_display()
         clock_calls.append(query_time)
         return query_time
 
-    application = RaidApplication(
-        account_reader=account_reader,
-        gateway=gateway,
-        builder=UnionRaidBuilder(),
-        clock=clock,
-        plugin_version="test-version",
-    )
+    application = raid_application(account_reader, gateway, UnionRaidBuilder(), clock)
 
-    overview = await application.overview("qq-123")
+    overview = await application.dashboard("qq-123")
 
-    assert account_reader.requested_ids == ["qq-123"]
-    assert gateway.overview_requests == [(account_reader.account, False)]
+    assert "qq-123" in account_reader.requested_ids
+    assert gateway.dashboard_requests == [account_reader.account]
+    assert gateway.season_requests == []
     assert clock_calls == [query_time]
     assert overview.raid_state is RaidState.ACTIVE
     assert overview.response_coverage is RaidResponseCoverage.CURRENT_RESPONSE
-    assert overview.fetched_at == "2026-09-22 18:00"
+    assert overview.fetched_at.startswith("2026-09-22 18:00")
     assert overview.plugin_version == "test-version"
 
 
 @pytest.mark.asyncio
-async def test_overview_uses_same_clock_for_offseason_state_and_history_totals(tmp_path):
+async def test_dashboard_uses_same_clock_for_offseason_state_and_history_totals(tmp_path):
     account_reader = RaidAccountReader()
     gateway = RaidGateway(
-        overview={
-            "guild_id": "guild-7",
-            "guild_name": "雪原",
-            "level_info": {"manager_info": {"id": "0"}, "level_info": []},
-        },
-        season_data={
-            "participate_data": [
-                {"total_damage": "7"},
-                {"damage": 12},
-            ]
-        },
+        level_info=OFFSEASON_LEVEL_INFO,
+        raid_data=OFFSEASON_ATTACKS,
+        season_data={"participate_data": [attack("a", 7), attack("b", 12)]},
     )
     query_time = datetime.fromtimestamp(200, timezone.utc)
     clock_calls = []
-    application = RaidApplication(
-        account_reader=account_reader,
-        gateway=gateway,
-        builder=offseason_builder(tmp_path),
-        clock=lambda: clock_calls.append(query_time) or query_time,
-        plugin_version="test-version",
+    application = raid_application(
+        account_reader, gateway, offseason_builder(tmp_path),
+        lambda: clock_calls.append(query_time) or query_time,
     )
 
-    overview = await application.overview("qq-123")
+    overview = await application.dashboard("qq-123")
 
     assert clock_calls == [query_time]
     assert overview.raid_state is RaidState.OFFSEASON
@@ -190,106 +182,88 @@ async def test_overview_uses_same_clock_for_offseason_state_and_history_totals(t
 
 
 @pytest.mark.asyncio
-async def test_ranking_uses_explicit_latest_season_only_for_empty_offseason_response(tmp_path):
+async def test_ranking_page_uses_explicit_latest_season_only_for_offseason_response(tmp_path):
     account_reader = RaidAccountReader()
     gateway = RaidGateway(
-        raid_data={
-            "manager_info": {"id": "0"},
-            "level_info": [],
-            "participate_data": [],
-        },
+        level_info=OFFSEASON_LEVEL_INFO,
+        raid_data=OFFSEASON_ATTACKS,
         season_data={"participate_data": [attack("member-1", 12)]},
     )
     query_time = datetime.fromtimestamp(200, timezone.utc)
     clock_calls = []
-    application = RaidApplication(
-        account_reader=account_reader,
-        gateway=gateway,
-        builder=offseason_builder(tmp_path),
-        clock=lambda: clock_calls.append(query_time) or query_time,
-        plugin_version="test-version",
+    application = raid_application(
+        account_reader, gateway, offseason_builder(tmp_path),
+        lambda: clock_calls.append(query_time) or query_time,
     )
 
-    ranking = await application.ranking("qq-123")
+    ranking = await application.ranking_page("qq-123")
 
-    assert gateway.raid_snapshot_requests == [account_reader.account]
-    assert gateway.raid_data_requests == []
-    assert gateway.overview_requests == []
+    assert gateway.dashboard_requests == [account_reader.account]
     assert gateway.season_requests == [
         (account_reader.account, "guild-7", "1234567", False)
     ]
     assert clock_calls == [query_time]
-    assert ranking.scope == "第 234567 季 · LAST_SEASON_RESPONSE"
+    assert ranking.scope == "LAST_SEASON"
+    assert ranking.season_id == "1234567"
     assert [(item.nickname, item.total_damage) for item in ranking.participants] == [
         ("member-member-1", 12)
     ]
 
 
 @pytest.mark.asyncio
-async def test_ranking_does_not_fallback_for_nonempty_or_non_offseason_response(tmp_path):
+async def test_ranking_page_does_not_fallback_for_non_offseason_response(tmp_path):
     account_reader = RaidAccountReader()
-    payload = {
-        "manager_info": {"id": "0"},
-        "level_info": [],
-        "participate_data": [attack("current", 5)],
-    }
-    gateway = RaidGateway(raid_data=payload)
-    application = RaidApplication(
-        account_reader=account_reader,
-        gateway=gateway,
-        builder=offseason_builder(tmp_path),
-        clock=lambda: datetime.fromtimestamp(200, timezone.utc),
-        plugin_version="test-version",
+    gateway = RaidGateway(
+        raid_data={
+            "manager_info": {"id": "1000007"},
+            "level_info": [],
+            "participate_data": [attack("current", 5)],
+        },
+    )
+    application = raid_application(
+        account_reader, gateway, UnionRaidBuilder(),
+        lambda: datetime(2026, 9, 22, 10, 0, tzinfo=timezone.utc),
     )
 
-    ranking = await application.ranking("qq-123")
+    ranking = await application.ranking_page("qq-123")
 
     assert [item.nickname for item in ranking.participants] == ["member-current"]
     assert ranking.scope == "CURRENT_RESPONSE"
-    assert gateway.raid_snapshot_requests == [account_reader.account]
-    assert gateway.overview_requests == []
+    assert gateway.dashboard_requests == [account_reader.account]
     assert gateway.season_requests == []
 
 
 @pytest.mark.asyncio
-async def test_ranking_does_not_fallback_for_empty_active_response(tmp_path):
+async def test_ranking_page_does_not_fallback_for_empty_active_response(tmp_path):
+    # PR-6B 审查跟进：迁移自旧 ranking() 用例——赛季进行中但返回空记录时，
+    # 不得回退去请求上一赛季。
     account_reader = RaidAccountReader()
     gateway = RaidGateway(
         raid_data={
-            "manager_info": {
-                "id": "1000007",
-                "season_end_date": "1970-01-01T00:10:00+00:00",
-            },
+            "manager_info": {"id": "1000007", "season_end_date": "1970-01-01T00:10:00+00:00"},
             "level_info": [],
             "participate_data": [],
         }
     )
-    application = RaidApplication(
-        account_reader=account_reader,
-        gateway=gateway,
-        builder=offseason_builder(tmp_path),
-        clock=lambda: datetime.fromtimestamp(200, timezone.utc),
-        plugin_version="test-version",
+    application = raid_application(
+        account_reader, gateway, offseason_builder(tmp_path),
+        lambda: datetime.fromtimestamp(200, timezone.utc),
     )
 
-    ranking = await application.ranking("qq-123")
+    ranking = await application.ranking_page("qq-123")
 
     assert ranking.participants == []
     assert ranking.scope == "CURRENT_RESPONSE"
-    assert gateway.raid_snapshot_requests == [account_reader.account]
-    assert gateway.overview_requests == []
+    assert gateway.dashboard_requests == [account_reader.account]
     assert gateway.season_requests == []
 
 
 @pytest.mark.asyncio
-async def test_member_uses_exact_stable_openid_for_historical_response(tmp_path):
+async def test_member_page_uses_exact_stable_openid_for_historical_response(tmp_path):
     account_reader = RaidAccountReader()
     gateway = RaidGateway(
-        raid_data={
-            "manager_info": {"id": "0"},
-            "level_info": [],
-            "participate_data": [],
-        },
+        level_info=OFFSEASON_LEVEL_INFO,
+        raid_data=OFFSEASON_ATTACKS,
         season_data={
             "participate_data": [
                 attack("stable-openid", 9),
@@ -297,15 +271,12 @@ async def test_member_uses_exact_stable_openid_for_historical_response(tmp_path)
             ]
         },
     )
-    application = RaidApplication(
-        account_reader=account_reader,
-        gateway=gateway,
-        builder=offseason_builder(tmp_path),
-        clock=lambda: datetime.fromtimestamp(200, timezone.utc),
-        plugin_version="test-version",
+    application = raid_application(
+        account_reader, gateway, offseason_builder(tmp_path),
+        lambda: datetime.fromtimestamp(200, timezone.utc),
     )
 
-    ranking = await application.member("qq-123")
+    ranking = await application.member_page("qq-123")
 
     assert ranking.scope == "LAST_SEASON_MEMBER"
     assert ranking.season_id == "1234567"
@@ -315,49 +286,56 @@ async def test_member_uses_exact_stable_openid_for_historical_response(tmp_path)
     assert gateway.season_requests == [
         (account_reader.account, "guild-7", "1234567", False)
     ]
-    assert gateway.raid_snapshot_requests == [account_reader.account]
-    assert gateway.overview_requests == []
+    assert gateway.dashboard_requests == [account_reader.account]
 
 
 @pytest.mark.asyncio
-async def test_member_rejects_missing_stable_openid_before_fetching_attacks():
+async def test_member_page_rejects_missing_stable_openid_before_fetching_attacks():
     account_reader = RaidAccountReader()
     account_reader.account = {"area_id": 81, "game_openid": "  "}
     gateway = RaidGateway()
-    application = RaidApplication(
-        account_reader=account_reader,
-        gateway=gateway,
-        builder=UnionRaidBuilder(),
-        clock=lambda: datetime.now(timezone.utc),
-        plugin_version="test-version",
+    application = raid_application(
+        account_reader, gateway, UnionRaidBuilder(), lambda: datetime.now(timezone.utc),
     )
 
-    with pytest.raises(RaidMemberIdentityUnavailable):
-        await application.member("qq-123")
+    with pytest.raises(ValueError, match="缺少稳定身份"):
+        await application.member_page("qq-123")
 
-    assert gateway.raid_snapshot_requests == []
-    assert gateway.raid_data_requests == []
-    assert gateway.overview_requests == []
+    assert gateway.dashboard_requests == []
     assert gateway.season_requests == []
 
 
 def test_main_raid_entrypoints_delegate_data_work_to_application():
+    # G8-main-legacy-d（PR-6C）：NikkePlugin.union_raid* 未注册方法已删除；
+    # 突袭入口改为守护 NikkeCommandRuntime.nikke / query 的突袭分支。
     repository_root = Path(__file__).resolve().parents[1]
-    tree = ast.parse(
-        (repository_root / "main.py").read_text(encoding="utf-8")
-    )
+    main_tree = ast.parse((repository_root / "main.py").read_text(encoding="utf-8"))
     plugin = next(
         node
-        for node in tree.body
+        for node in main_tree.body
         if isinstance(node, ast.ClassDef) and node.name == "NikkePlugin"
+    )
+    legacy = {"union_raid", "union_raid_ranking", "union_raid_my"}
+    assert not {
+        node.name
+        for node in plugin.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    } & legacy
+    tree = ast.parse(
+        (repository_root / "adapters" / "astrbot" / "command_runtime.py").read_text(encoding="utf-8")
+    )
+    runtime = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "NikkeCommandRuntime"
     )
     raid_methods = {
         node.name: node
-        for node in plugin.body
+        for node in runtime.body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and node.name in {"union_raid", "union_raid_ranking", "union_raid_my"}
+        and node.name in {"nikke", "query"}
     }
-    assert set(raid_methods) == {"union_raid", "union_raid_ranking", "union_raid_my"}
+    assert set(raid_methods) == {"nikke", "query"}
     forbidden_calls = {
         "get_union_raid_data",
         "get_union_raid_overview",

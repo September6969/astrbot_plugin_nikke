@@ -12,6 +12,7 @@ from typing import Any, Callable, Protocol
 from .canonical_models import (
     QueryContext,
 )
+from .feed_rules import background_candidate_ids
 from .time_rules import CalendarTimeRules
 
 
@@ -44,9 +45,6 @@ class CalendarQueryService(Protocol):
         context: QueryContext | None = None,
     ) -> str:
         """用给定查询上下文生成文本回退。"""
-
-    def cached_visual_event_ids(self) -> tuple[str, ...]:
-        """返回本地已有活动宣传图的事件键。"""
 
     def resolve_visual_path(self, event_id: str) -> Path | None:
         """读取本地活动宣传图，不执行网络请求。"""
@@ -175,19 +173,8 @@ class CalendarApplication:
                 activity_count=0,
                 data_quality="SCHEDULE DATA UNAVAILABLE",
             )
-        announcement = getattr(self._calendar, "announcement_service", None)
-        warning = ""
-        if announcement is not None and getattr(self._calendar, "source_mode", "legacy") != "blabla":
-            try:
-                ok, detail = await announcement.sync_from_source()
-                if not ok:
-                    warning = "官方公告更新失败，保留旧公告"
-            except Exception:
-                warning = "官方公告更新失败，保留旧公告"
+        # 日程刷新只读取已装配的日程源，不联动公告同步（官方公告日程源已在 PR-6B 删除）。
         success, message = await self._calendar.refresh_schedule_data()
-        if warning:
-            message = warning if message == "ok" else f"{warning}；{message}"
-            self._calendar.last_sync_error = message
         return CalendarRefreshResult(
             success=success,
             message=message,
@@ -212,31 +199,15 @@ class CalendarApplication:
     def _resolve_background_path(
         self, context: QueryContext, horizon_days: int
     ) -> Path | None:
-        """按 Operations Feed 优先级选取已缓存背景，不触发缓存同步。"""
+        """按 Operations Feed 优先级选取当前日程事件的已缓存背景，不触发缓存同步。"""
         if self._calendar is None:
             return None
         groups = CalendarTimeRules.classify_events(
             context.events, context.now, horizon_days
         )
-        active = groups.active_including_soon
-        upcoming = groups.upcoming
-
-        candidate_ids: list[str] = []
-        primary_categories = {"event", "story_event", "solo_raid", "union_raid"}
-        for event in active:
-            if event.category in primary_categories:
-                candidate_ids.append(event.event_id)
-        for event in active:
-            if event.event_id not in candidate_ids:
-                candidate_ids.append(event.event_id)
-        for event in upcoming:
-            if event.event_id not in candidate_ids:
-                candidate_ids.append(event.event_id)
-        cached_ids = getattr(self._calendar, "cached_visual_event_ids", None)
-        if callable(cached_ids):
-            for event_id in cached_ids():
-                if event_id not in candidate_ids:
-                    candidate_ids.append(str(event_id))
+        # 只从当前与即将开始的日程事件中选择（文档规则，PR-6B G5-calendar-e）；
+        # 不再回退到视觉缓存清单中的任意旧事件图片。
+        candidate_ids = background_candidate_ids(groups.active_including_soon, groups.upcoming)
 
         for event_id in candidate_ids:
             path = self._calendar.resolve_visual_path(event_id)

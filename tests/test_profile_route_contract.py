@@ -87,7 +87,8 @@ def _plugin(*, account=None, application_response=None):
 
 def _run_me(plugin):
     async def consume():
-        return [item async for item in plugin.me(_Event())]
+        # G8-main-legacy-d（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        return [item async for item in plugin.nikke(_Event(), "我的")]
 
     return asyncio.run(consume())
 
@@ -134,7 +135,7 @@ def test_cookie_invalidation_has_one_owner_at_command_boundary():
 
     result = _run_me(plugin)
 
-    assert result == [("plain", "登录状态已失效，请重新发送 /妮姬 账号 绑定。")]
+    assert result == [("plain", "登录状态已失效，请私聊发送 /妮姬 账号 绑定 重新绑定。")]
     assert len(plugin.services.profile_application.calls) == 1
     assert plugin.services.store.invalidated == ["route-user"]
 

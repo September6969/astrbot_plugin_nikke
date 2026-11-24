@@ -1,6 +1,6 @@
 # 开发工具
 
-实现按用途分类；根 `scripts/<文件名>` 保留薄兼容入口。仓库内调用和当前文档采用分类后的路径。Python 入口在同一进程转发，Shell 使用 `exec`，不复制实现。直接从其他工作目录执行时仍由脚本自身位置定位插件资源，显式参数路径保持原有含义。
+实现按用途分类。根 `scripts/` 只为运维入口 `backup_nikke_data.py`、`upgrade_preflight.py`、`cleanup_cache.py`、`diagnose_readonly.py` 与 `update_nikke_db.sh` 保留薄兼容入口（四个 Python 入口同时支持 `python -m astrbot_plugin_nikke.scripts.<名称>`）；其余 79 个旧根路径兼容壳已于 REFACTOR V2 `PR-6C` 删除，旧路径到分类路径的对应关系见 [repository_organization_moves.json](../docs/architecture/repository_organization_moves.json)。仓库内调用和当前文档采用分类后的路径。保留的 Python 入口经 `shared/compat.py` 在同一进程转发，Shell 使用 `exec`，不复制实现。直接从其他工作目录执行时仍由脚本自身位置定位插件资源，显式参数路径保持原有含义。
 
 | 分类 | 用途 | 输入 | 默认输出 |
 | --- | --- | --- | --- |
@@ -9,6 +9,7 @@
 | `preview/` | 页面预览与离线回放 | 合成 DTO、脱敏夹具、指定资源 | 显式输出目录，或 `output/` |
 | `audit/` | 架构、资源、性能与只读检查 | 源码、内置资源、固定快照 | 标准输出、`output/` 或显式路径 |
 | `operations/` | 备份、升级、维护、只读采样 | 显式宿主数据或账号配置 | 显式路径或工具帮助所列宿主路径 |
+| `arena/` | 竞技场 Planner 快照转换与授权统计历史同步 | 锁定来源快照、显式赛事参数 | 显式输出路径（见 [docs/arena/README.md](../docs/arena/README.md)） |
 | `shared/` | 多工具复用的样本和辅助模块 | 调用者传入 | 返回值或调用者指定路径 |
 
 ## 主要入口
@@ -32,6 +33,8 @@ python scripts/operations/backup_nikke_data.py --help
 
 | 实现入口 | 用途 | 网络或账号 |
 | --- | --- | --- |
+| [arena/build_snapshot.py](arena/build_snapshot.py) | 将锁定的 MIT Planner 快照转换为插件规范角色键。 | 本地处理，无账号操作 |
+| [arena/sync_history.py](arena/sync_history.py) | 离线读取指定赛事的授权统计并原子保存脱敏快照；由维护者手动触发。 | 可能联网，无账号操作；涉及本地运维 |
 | [assets/build_character_visual_catalog.py](assets/build_character_visual_catalog.py) | 自动构建角色与皮肤全量视觉资源 Catalog (costume_visual_assets.json)。 | 本地处理，无账号操作 |
 | [assets/build_costume_catalog.py](assets/build_costume_catalog.py) | 自动构建角色服装映射 assets/mappings/costume_assets.json。 | 本地处理，无账号操作 |
 | [assets/build_item_catalogs.py](assets/build_item_catalogs.py) | 自动构建魔方与珍藏品/收藏品映射 assets/mappings/cube_icons.json 和 favorite_item_icons.json。 | 本地处理，无账号操作 |
@@ -64,9 +67,10 @@ python scripts/operations/backup_nikke_data.py --help
 | [operations/cleanup_cache.py](operations/cleanup_cache.py) | 安全清理 NIKKE 本地缓存；默认只生成清理计划，不删除文件。 | 本地处理，无账号操作；涉及本地运维 |
 | [operations/diagnose_character_details.py](operations/diagnose_character_details.py) | 从脱敏 CharacterDetails JSON 输出字段结构诊断，不输出原始账号值。 | 账号只读，可能联网 |
 | [operations/diagnose_readonly.py](operations/diagnose_readonly.py) | 一次性只读诊断：默认离线，显式 --live-readonly 才读取本机绑定账号。 | 账号只读，可能联网 |
+| [operations/prune_action_runs.py](operations/prune_action_runs.py) | 离线保留清理已完结的 action_runs 历史；默认只生成计划，绝不删除未决、人工核实、租约与永久幂等记录。 | 本地处理，无账号操作；涉及本地运维 |
+| [operations/verify_character_details_batch.py](operations/verify_character_details_batch.py) | PR-4A 前置验证：比较批量与单角色 GetUserCharacterDetails；默认离线，显式 --live-readonly 才只读请求。 | 账号只读，可能联网 |
 | [operations/update_nikke_db.sh](operations/update_nikke_db.sh) | 维护工具 | 可能联网，无账号操作；涉及本地运维 |
 | [operations/upgrade_preflight.py](operations/upgrade_preflight.py) | 执行 NIKKE 数据升级/回滚前的只读前置检查。 | 本地处理，无账号操作；涉及本地运维 |
-| [preview/generate_live_regression_calendar_evidence.py](preview/generate_live_regression_calendar_evidence.py) | 用当前公开源和已观察生产记录生成 Calendar 去重证据。 | 本地处理，无账号操作 |
 | [preview/generate_live_regression_character_evidence.py](preview/generate_live_regression_character_evidence.py) | 生成 c401/c581 生产锚点修复前后完整角色卡证据。 | 本地处理，无账号操作 |
 | [preview/preview_calendar_candidates.py](preview/preview_calendar_candidates.py) | 按固定时间和本地素材生成日程 UI 回归样例与截图。 | 本地处理，无账号操作 |
 | [preview/preview_calendar_experience.py](preview/preview_calendar_experience.py) | 通过生产模板生成固定日程样本的整图和手机预览。 | 本地处理，无账号操作 |
@@ -79,6 +83,8 @@ python scripts/operations/backup_nikke_data.py --help
 | [preview/preview_roster.py](preview/preview_roster.py) | 用正式总表 DTO、T2I loader 与原 Pillow renderer 生成审查预览。 | 本地处理，无账号操作 |
 | [preview/preview_t2i_frontend.py](preview/preview_t2i_frontend.py) | 通过生产 renderer 与 AstrBot 原生接口输出各页合成预览。 | 可能联网，无账号操作 |
 | [preview/preview_t2i_ui.py](preview/preview_t2i_ui.py) | 用生产适配器和 AstrBot 原生接口生成合成数据预览，不启动插件服务。 | 可能联网，无账号操作 |
+| [shared/compat.py](shared/compat.py) | 保留的运维根入口的唯一转发实现：同进程执行分类实现，导入时别名到分类模块。 | 本地处理，无账号操作 |
+| [shared/evidence_fonts.py](shared/evidence_fonts.py) | 离线证据图表头字体：优先仓库内已核验 CJK 字体，再回退系统字体。 | 本地处理，无账号操作 |
 | [shared/phase3_output_guard.py](shared/phase3_output_guard.py) | 为 Phase 3 维护工具约束外部输出路径，避免写入仓库或覆盖已有 evidence。 | 本地处理，无账号操作 |
 | [shared/raid_evidence.py](shared/raid_evidence.py) | 仅保留已知结构的突袭证据转换，不读取账号、不发起网络请求。 | 本地处理，无账号操作 |
 | [shared/t2i_preview_fixtures.py](shared/t2i_preview_fixtures.py) | 供预览和离线测试共用的合成 DTO；不包含真实账号资料。 | 本地处理，无账号操作 |

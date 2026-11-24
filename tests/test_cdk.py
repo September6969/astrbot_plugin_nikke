@@ -345,13 +345,14 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         inject_cdk_handler(plugin)
 
         # 第一次触发限流
-        results1 = [item async for item in plugin.cdk(Event(), "RATELIMIT_CODE")]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results1 = [item async for item in plugin.nikke(Event(), "兑换", "RATELIMIT_CODE")]
         self.assertEqual(len(results1), 1)
         run_key = list(plugin.services.store.runs.keys())[0]
         self.assertEqual(plugin.services.store.runs[run_key]["status"], "failed")
 
         # 第二次由于状态是 failed（在 retryable 集合中），应该能够重新触发重试而非直接返回已处理
-        results2 = [item async for item in plugin.cdk(Event(), "RATELIMIT_CODE")]
+        results2 = [item async for item in plugin.nikke(Event(), "兑换", "RATELIMIT_CODE")]
         self.assertEqual(len(results2), 1)
         # 1次直接调用 + 2次通过 plugin 调用 = 3次
         self.assertEqual(client.redeem_cdk.call_count, 3)
@@ -408,7 +409,8 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
         inject_cdk_handler(plugin)
 
         # 账号 A 兑换
-        [item async for item in plugin.cdk(Event(), "TESTCODE123")]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        [item async for item in plugin.nikke(Event(), "兑换", "TESTCODE123")]
         keys_a = list(plugin.services.store.runs.keys())
         self.assertEqual(len(keys_a), 1)
         self.assertTrue(keys_a[0].startswith("cdk:game:"))
@@ -416,7 +418,7 @@ class CdkClientUnpackingTests(unittest.IsolatedAsyncioTestCase):
 
         # 换绑为账号 B
         plugin.services.store.current_uid = "uid_B"
-        [item async for item in plugin.cdk(Event(), "TESTCODE123")]
+        [item async for item in plugin.nikke(Event(), "兑换", "TESTCODE123")]
         keys_b = list(plugin.services.store.runs.keys())
         self.assertEqual(len(keys_b), 2)
         self.assertTrue(keys_b[1].startswith("cdk:game:"))
@@ -453,7 +455,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
         self.client.get_cdk_redemption.return_value = [
             {"cdk": "TESTAVAILABLE", "status": 0}
         ]
-        results = [item async for item in self.plugin.cdk_available(self.event)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in self.plugin.nikke(self.event, "兑换", "可用")]
         self.assertEqual(len(results), 1)
         text = results[0]
         self.assertIn("TESTAVAILABLE", text)
@@ -464,7 +467,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
             {"cdk": "AVAILABLE1", "status": 0},
             {"cdk": "USED1", "status": 1},
         ]
-        results = [item async for item in self.plugin.cdk_available(self.event)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in self.plugin.nikke(self.event, "兑换", "可用")]
         self.assertEqual(len(results), 1)
         text = results[0]
         self.assertIn("AVAILABLE1", text)
@@ -475,7 +479,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
             {"cdk": "AVAILABLE_STRING", "status": "0"},
             {"cdk": "USED_STRING", "status": "1"},
         ]
-        results = [item async for item in self.plugin.cdk_available(self.event)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in self.plugin.nikke(self.event, "兑换", "可用")]
         self.assertEqual(len(results), 1)
         text = results[0]
         self.assertIn("AVAILABLE_STRING", text)
@@ -486,7 +491,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
         items += [{"cdk": f"VALID_{i}", "status": 0} for i in range(18)]
         self.client.get_cdk_redemption.return_value = items
 
-        results = [item async for item in self.plugin.cdk_available(self.event)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in self.plugin.nikke(self.event, "兑换", "可用")]
         self.assertEqual(len(results), 1)
         text = results[0]
         for i in range(15):
@@ -498,7 +504,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
         self.client.get_cdk_redemption_history.return_value = [
             {"cdk": "HISTORYCODE", "status": 1}
         ]
-        results = [item async for item in self.plugin.cdk_history(self.event)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in self.plugin.nikke(self.event, "兑换", "历史")]
         self.assertEqual(len(results), 1)
         text = results[0]
         expected_mask = CdkCommandHandler.mask_code("HISTORYCODE")
@@ -514,7 +521,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
             {"title": "LEGACY_TITLE", "status": 0},
             {"cdk": "NONE_STATUS", "status": None},
         ]
-        results_avail = [item async for item in self.plugin.cdk_available(self.event)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results_avail = [item async for item in self.plugin.nikke(self.event, "兑换", "可用")]
         self.assertEqual(len(results_avail), 1)
         text_avail = results_avail[0]
         self.assertIn("LEGACY_KEY", text_avail)
@@ -526,7 +534,7 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
             {"cdkey": "HISTKEY123", "status": "已兑换"},
             {"code": "HISTCODE456", "status": "已兑换"},
         ]
-        results_hist = [item async for item in self.plugin.cdk_history(self.event)]
+        results_hist = [item async for item in self.plugin.nikke(self.event, "兑换", "历史")]
         self.assertEqual(len(results_hist), 1)
         text_hist = results_hist[0]
         self.assertIn(CdkCommandHandler.mask_code("HISTKEY123"), text_hist)
@@ -536,7 +544,8 @@ class CdkCommandHandlerTests(unittest.IsolatedAsyncioTestCase):
         self.client.get_cdk_redemption.return_value = [
             {"cdk": "USED_ALL", "status": 1}
         ]
-        results = [item async for item in self.plugin.cdk_available(self.event)]
+        # G8-main-legacy-c（PR-6C）：遗留未注册平铺方法已删除，改经 /妮姬 统一路由。
+        results = [item async for item in self.plugin.nikke(self.event, "兑换", "可用")]
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0], "官方暂无可查询的可用 CDK 列表。")
 

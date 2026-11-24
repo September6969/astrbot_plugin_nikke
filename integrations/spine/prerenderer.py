@@ -30,6 +30,8 @@ from urllib.parse import quote, unquote, urljoin, urlparse
 
 import httpx
 
+from . import bundle_inspection
+from .bundle import SpineBundle, SpineRenderError
 from .portrait_anchor import save_portrait
 from ...features.character.portrait_anchor import read_anchor
 
@@ -42,42 +44,6 @@ logger = logging.getLogger("nikke.spine")
 
 
 SPINE_VERSION_UNKNOWN = "SPINE_VERSION_UNKNOWN"
-
-
-class SpineRenderError(RuntimeError):
-    """Spine bundle 或 runtime 渲染失败。"""
-
-
-@dataclass(frozen=True, slots=True)
-class SpineBundle:
-    """一个可供 runtime 消费的完整 Spine bundle。"""
-
-    skeleton: Path
-    atlas: Path
-    textures: tuple[Path, ...]
-
-    @classmethod
-    def from_mapping(cls, paths: Mapping[str, object]) -> "SpineBundle":
-        skeleton_value = paths.get("skel") or paths.get("skeleton")
-        atlas_value = paths.get("atlas")
-        texture_value = paths.get("png") or paths.get("texture") or paths.get("textures")
-        textures: tuple[Path, ...]
-        if not isinstance(skeleton_value, (str, Path)) or not isinstance(atlas_value, (str, Path)):
-            raise SpineRenderError("Spine bundle 缺少 skeleton 或 atlas")
-        if isinstance(texture_value, (str, Path)):
-            textures = (Path(texture_value),)
-        elif isinstance(texture_value, Sequence) and not isinstance(texture_value, (str, bytes, bytearray)):
-            if not all(isinstance(item, (str, Path)) for item in texture_value):
-                raise SpineRenderError("Spine bundle 纹理页路径类型无效")
-            textures = tuple(Path(item) for item in texture_value)
-        else:
-            textures = ()
-        if not textures:
-            raise SpineRenderError("Spine bundle 缺少纹理页")
-        return cls(Path(skeleton_value), Path(atlas_value), textures)
-
-    def all_files(self) -> tuple[Path, ...]:
-        return (self.skeleton, self.atlas, *self.textures)
 
 
 class SpineRuntimeBackend(Protocol):
@@ -686,10 +652,8 @@ class SpinePreRenderer:
         expected_version: str | None = None,
     ) -> SpineEvidenceReport:
         """执行本地无运行时预检查，并明确返回尚未获得的证据层。"""
-        from ...scripts.spine.inspect_spine_bundle import inspect
-
         try:
-            result = inspect(Path(atlas), Path(skeleton), expected_version)
+            result = bundle_inspection.inspect(Path(atlas), Path(skeleton), expected_version)
         except (OSError, ValueError, TypeError, AttributeError) as exc:
             return SpineEvidenceReport(
                 status="INSPECTION_FAILED",
@@ -904,9 +868,7 @@ class SpinePreRenderer:
             bundle = bundle_paths if isinstance(bundle_paths, SpineBundle) else SpineBundle.from_mapping(bundle_paths)
             if not all(path.is_file() for path in bundle.all_files()):
                 raise SpineRenderError("Spine bundle 文件不完整")
-            from ...scripts.spine.inspect_spine_bundle import inspect
-
-            inspection = inspect(bundle.atlas, bundle.skeleton, expected_version)
+            inspection = bundle_inspection.inspect(bundle.atlas, bundle.skeleton, expected_version)
             # 二进制 skeleton 的版本无法由无 runtime 预检查确认；未知版本不能猜测
             # 4.1/4.2，只有明确得到 VERSION_MATCH 才允许调用实际 runtime。
             if inspection.get("status") != "VERSION_MATCH":

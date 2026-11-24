@@ -1,5 +1,90 @@
 # 整仓结构重构交付记录
 
+## REFACTOR V2 交付记录（PR-0 → PR-6C）
+
+状态快照：2026-11-22，分支链 `refactor-v2/*`，基线 `origin/main` @ `ab610f5`（PR #128）。计划与红线见 [REFACTOR_PLAN_V2.md](REFACTOR_PLAN_V2.md)，Phase 0 基线见 [V2_PHASE0_BASELINE.md](V2_PHASE0_BASELINE.md)。本节是当前状态的权威记录；其后“PR #103”各节为 2026-09-24 的历史快照，其中的数字与合同仅作历史证据，与本节冲突时以本节和代码为准。
+
+### PR 清单与关闭项
+
+| PR | 提交 | 范围 | 关闭项 |
+|---|---|---|---|
+| PR-0 | `e61361b` | 分层方向规则与 8 条既有跨层边只减不增 allowlist；CI static-gates（架构门禁 + mypy 2.4.1）；回归矩阵 | 基线 |
+| PR-1A | `b2e0a01` | 换绑仅在游戏身份变化时重置自动授权；绑定会话失败不覆盖成功；密钥原子创建；`/healthz` 环境变量密钥判定 | AUD-002/007/014（Decision 1=A） |
+| PR-1B | `d75f80a` | 绑定页轮询、可信反代 CIDR、输入校验、脱敏、调度退避、停服顺序 | AUD-001/003/004/006/011/014/018/025 |
+| PR-2 | `d48b6bc` | `command_parser` 统一尾参解析；`@filter.regex` 插件级 `#妮姬` 入口，不再改宿主 `wake_prefix`；凭据失效统一处理；帮助单一数据源；公告子命令开放；6 条 application → blablalink.client 跨层边清零 | AUD-008/009/015/018/022/026/027（Decision 3=A、4a=A） |
+| PR-3A | `c57eee1` | 日程订阅分类、时间语义；管理员公告订阅只推官方公告；`AnnouncementDelivery` 未决投递上限 50 | AUD-012/022/024（Decision 4b=A） |
+| PR-3B | `51713f0` | 执行租约进程代次 + 10 分钟保守超时；`UNKNOWN_AFTER_ACTION` 绝不自动解锁，新增私聊两步 `/妮姬 日常 任务 确认恢复 [确认]`（审计留痕、只放行后续周期）；社区日（UTC）调度 | AUD-005/013（Decision 2=A） |
+| PR-4A | `9cd2740`、`2fd1494`、`31efe74` | 练度批量详情只读探针（未实测前保持逐角色）；角色/突袭/战役/资料核心修复；type 11000 统一为白银积分券 | AUD-010/019/021 |
+| PR-4B | `2eb6ef3`、`781823f` | 竞技场均衡搜索、热度替补与私聊珍藏可达性 | AUD-015 |
+| PR-4C | `61ed1a0`、`8ef450d` | Spine worker 环境白名单与进程组回收；预检查迁入 `integrations/spine/bundle_inspection.py`，清零 spine → scripts 跨层边；Nikke-DB 与外部数据源加固 | AUD-016/020 |
+| PR-5 | `3ce2679`、`eae8106` | T2I 基础规范、移动端可读性、角色卡负载瘦身 | AUD-017/021/024 |
+| AUD-027 跟进 | `4bcca68` | 生产路由器构造时传入 config，帮助详解写操作主题开关在生产生效 | AUD-027 |
+| PR-6A | `b40def4`、`a7ec3a7`、`0623fe9`、`6c1c818`、`5e5d700` | 56 个重复图标去重与 `core/paths` 统一；删除未用 NotoSansHans OTF 并补许可；塔罗牌面高保真 JPEG（PSNR ≥ 40.2 dB）与逆位缓存无损；语音缺 ffmpeg/ffprobe 告警；删除 0 引用语音模块；资产审计门禁 | AUD-023（Decision 6=A；Spine 预渲染 PNG 未改动） |
+| PR-6B | `c95825f`、`b797ad8`、`085aff1`、`a8e6cc1`、`4337d05`、`4c8406e`、`e78a838`、`543e47a`、`fe51741` | 删除 GameKee/官方公告日程源与 O(N²) 跨源合并；组合根注入日程源并清零最后一条跨层边；`schedule_events.json` 单副本；日程展示规则下沉 features；皮肤解析器合并；突袭旧路径、死币种表、主题死键清理；攻略索引缓存；缓存清理加固与 `prune_action_runs`；审查跟进：攻略缓存命中复核图片边界 | AUD-023（Decision 5=A） |
+| PR-6C | 本节所在提交链 | 删除 `NikkePlugin` 36 个生产 0 可达未注册方法与两个 `_help_text` 包装；`main.py` 阈值 700 → 300 并新增公开成员白名单门禁；删除 79 个非运维 `scripts/` 根兼容壳；`audit_assets` 改用 `CharacterVisualAssetResolver.resolve_costume` 并删除转发类；文档同步 | AUD-023/024 |
+
+### 当前架构指标
+
+PR-6C 工作树（基于 `fe51741`）上 `python scripts/audit/architecture_metrics.py --check` 退出码 `0`：588 个 Python 源文件、268 个生产模块、1,779 条内部导入边、0 个导入循环、0 个门禁违规；`CROSS_LAYER_BASELINE_ALLOWLIST` 已清空（Phase 0 登记的 8 条跨层边全部转为硬门禁）。
+
+| 热点 | 当前行数 | 门槛 |
+|---|---:|---:|
+| `main.py` | 252 | 300（PR-6C 由 700 收紧） |
+| `adapters/astrbot/command_runtime.py` | 314 | 400 |
+| `core/asset_manager.py` | 275 | 300 |
+| `features/calendar/schedule_service.py` | 238 | 450 |
+| `features/announcement/service.py` | 165 | 450 |
+| `core/container.py` | 221 | 350 |
+
+合并后的 clean HEAD 应重跑同一命令并以其输出为准。
+
+### 当前状态更正（覆盖下方历史节的过期说法）
+
+- 数据库 `SCHEMA_VERSION = 3`（`core/storage.py`；自 `ab610f5` 起，V2 未改动 schema），表面仍为 `accounts`、`settings`、`action_runs`、`bind_sessions`、`schema_meta`；`nikke.sqlite3` 与 `secret.key` 成对备份合同不变。
+- `NikkePlugin` 只有 3 个宿主注册入口：`nikke`（`@filter.command`，别名 `nikke`/`#妮姬`/`#nikke`）、`nikke_hash_prefix`（`@filter.regex`，未唤醒的 `#妮姬`/`#nikke`）、`on_nikke_poke`（全消息事件 → `AstrBotVoiceAdapter.on_poke`）。尾参解析在 `adapters/astrbot/command_parser.py`；`NikkeCommandRuntime` 只做别名路由与结果适配。完整分支表见 [ASTRBOT_COMMAND_ENTRY_MAP.md](../architecture/ASTRBOT_COMMAND_ENTRY_MAP.md)。
+- 帮助经 `application/commands/help.py` 读取 `features/help` 单一数据源（首页、分类、详解）。
+- 所有图片页统一 T2I；`ui_renderer` 旧值被忽略（`core/config.py`），不再存在 T2I/Pillow 选择。
+- Daily：执行租约（进程代次 + 10 分钟超时，可安全回收）与动作结果状态 `UNKNOWN_AFTER_ACTION`（绝不超时解锁或重放）严格区分；人工核实后的私聊确认恢复只放行之后的新周期。日常与汇总按社区日（UTC）计算。
+- Announcement：管理员公告订阅只推官方公告，活动截止提醒归个人日程订阅；未决投递上限 50，达到上限暂停新投递且不自动重放。
+- 日程源只装配 BlaBlaLink（保留源适配抽象）；GameKee/官方公告日程源已删除，只能通过 git 历史恢复。
+- CI 固定 `mypy==2.4.1`；`mypy.ini` 覆盖 38 个源文件。
+
+### PR-6C 删除清单与四重核查
+
+| 删除项 | 静态引用 | 动态调用 | 外部运维脚本 | 回退用途 |
+|---|---|---|---|---|
+| `NikkePlugin` 35 个未注册公开方法（`tarot_command` … `union_raid_my`）与 `_dispatch_account_command` | 生产 0；测试已迁至 `/妮姬` 统一路由，`test_command_routing_contract.py::test_removed_plugin_methods_keep_qq_command_routes` 逐项锁定原 QQ 命令 | 无 `getattr`/字符串路由；无 `__getattr__`；AstrBot 只绑定注册 handler，名称查找仅 `initialize`/`__del__`/`terminate` | `scripts/`、CI、`deploy/`、`extension/` 无引用 | 无；历史平铺别名由 `NikkeCommandRuntime.nikke` / `_legacy` 承担 |
+| `NikkePlugin._help_text`、`NikkeCommandRuntime._help_text` | 生产唯一调用者是已删的 `nikke_help`；测试改调 `application.commands.help.help_category` | 无 | 无 | 无 |
+| 79 个 `scripts/` 根兼容壳（62 个零引用、10 个仅归档/历史证据引用、7 个仅测试锁定且测试已改指分类路径） | 生产 0；内部调用、CI 均用分类路径 | 无 importlib/runpy/subprocess 按根名调用 | 归档与 `docs/ui/T2I_*_AUDIT.json` 历史记录保持不改；映射见 `repository_organization_moves.json` | 仅保留运维入口 `backup_nikke_data`、`upgrade_preflight`、`cleanup_cache`、`diagnose_readonly`、`update_nikke_db.sh` 与 `scripts/shared/compat.py` |
+| `features/character/costume_asset_resolver.py`（`CostumeAssetResolver` 转发类） | 唯一调用者 `scripts/audit/audit_assets.py` 已改用 `CharacterVisualAssetResolver.resolve_costume`，审计输出前后一致 | 无 | 无 | 无 |
+
+同时保留（易被误删）：`__init__`、`_apply_directory`（目录加载回调）、`command_runtime` 延迟属性（测试夹具依赖）、`terminate`（AstrBot 按类 `__dict__` 调用）、`close`。
+
+### 验证（PR-6C 提交前）
+
+本地（Python 3.13、Node 22、AstrBot 4.24 测试桩）：
+
+- `python -m pytest`：`2218 passed, 8 skipped, 662 subtests passed`（按 Phase 0 约定排除依赖本机浏览器字体的 `test_character_pixel_calibration.py::test_browser_rendered_fonts_and_glyph_metrics` 与 `test_spine_batch_review.py::test_review_and_white_card_tools_run_as_repository_scripts`）。
+- `mypy`（2.4.1，`mypy.ini`）：38 个源文件无错误。
+- `python scripts/audit/architecture_metrics.py --check`：退出码 `0`。
+- `node --test tests/extension.test.cjs`：6 passed；`node --test tests/*.test.mjs`：6 passed（PR-6C 起 CI 两者都运行）。
+- `python scripts/audit/audit_assets.py`：退出码 `0`，`asset_audit.json` 除 `generated_at` 外与改用合并解析器前逐字段一致。
+
+### 外部门槛（V2）
+
+| Gate | 当前状态 | 未完成边界 |
+|---|---|---|
+| CI | `NOT_RUN`（远端） | 分支链已推送至 fork；以 upstream PR 与合并目标提交的远端 CI 为准 |
+| 真实验收 | `NOT_RUN` | REFACTOR_PLAN_V2 §5.1 第 8 项：真实 QQ/NapCat 下 `/妮姬`、`#妮姬`、绑定、日常任务确认恢复、竞技场解队/三队、手机 QQ 图片画质等需所有者授权验收 |
+| 部署 | `NOT_RUN` | 未部署；PR-6A 资产变更需在全新部署目录冷启动验收 |
+| 稳定观察 | `NOT_STARTED` | 部署后开始 |
+
+---
+
+## 历史：PR #103 交付记录（2026-09-24）
+
+> 以下内容为 PR #103 历史快照，指标、版本号与调用链均为当时状态，当前状态见上方 V2 交付记录。
+
 状态快照：2026-09-24。本记录收口 PR #103 的命令架构、兼容边界、单角色旧卡退役和 R24 交付证据。最终 HEAD 的准确 SHA、逐文件 manifest hash、架构 snapshot 和 CI run id 由同一外部 run ledger 记录，并须与 `git rev-parse HEAD` 相符；使用动态 ledger 引用避免文档自身制造循环 HEAD 声明。只有该 clean HEAD 的 manifest、架构 snapshot、final audit 与远端 CI 全部复验后，才签发 `FULL_REFACTOR_LOCAL_COMPLETE`。该标记不代表真实账号验收、部署或稳定观察完成。
 
 ## 范围与兼容性
@@ -65,7 +150,7 @@ python scripts/audit/architecture_metrics.py --check --output (Join-Path $runDir
 | announcement | runtime → `AnnouncementCommandHandler` → `AnnouncementApplication` → announcement feature | command adapter；推送状态由 announcement delivery owner 管理 |
 | voice | `NikkePlugin.on_nikke_poke` → `AstrBotVoiceAdapter` → `VoiceApplication` | adapter 转成 AstrBot Record/Message |
 
-`NikkeCommandRuntime` 只做中文/英文/`#妮姬` 前缀解析、旧平铺别名和 handler 路由。T2I/Pillow 选择、fallback 与 AstrBot context 专属发送收敛在 `AstrBotCommandPresentation`；Character、Raid、Campaign 的 use-case 编排与 CookieExpired 映射位于各自 command handler。`core/container.py` 仍是唯一 `ServiceContainer`/`create_container` composition root；插件只一次性装配 handlers/presenters。插件级后台任务仍经 `RuntimeCoordinator` 登记、取消、等待和清理。
+`NikkeCommandRuntime` 只做中文/英文/`#妮姬` 前缀解析、旧平铺别名和 handler 路由（PR #103 时状态；V2 起尾参解析在 `command_parser.py`，`#妮姬` 另有插件级 regex 入口，渲染统一 T2I）。T2I/Pillow 选择、fallback 与 AstrBot context 专属发送收敛在 `AstrBotCommandPresentation`；Character、Raid、Campaign 的 use-case 编排与 CookieExpired 映射位于各自 command handler。`core/container.py` 仍是唯一 `ServiceContainer`/`create_container` composition root；插件只一次性装配 handlers/presenters。插件级后台任务仍经 `RuntimeCoordinator` 登记、取消、等待和清理。
 
 ### 兼容与依赖
 
@@ -75,7 +160,7 @@ python scripts/audit/architecture_metrics.py --check --output (Join-Path $runDir
 - Daily 保持稳定游戏身份与旧 QQ 范围保护，`UNKNOWN_AFTER_ACTION` / cancelled write 不重放，自动偏好和真实签到默认关闭，手动/自动结果缓存范围分离。
 - CDK 保持稳定 account key、哈希持久键、发送前 `DISPATCH_INTENT`、未知结果禁止重发、同账号互斥和默认关闭；明文码不写入持久化或日志。
 - Announcement 保持 sender 前持久化 intent、孤立 intent 恢复为 `UNKNOWN_AFTER_ACTION` 且不自动重放、确认失败才允许延迟重试、默认关闭且必须订阅；单进程执行假设继续明确。
-- DB schema 未改变，`SCHEMA_VERSION=2` 与 `accounts`、`settings`、`action_runs`、`bind_sessions`、`schema_meta` 兼容面保持；迁移、Fernet key 与数据库/密钥配对合同由现有 storage 回归覆盖。
+- DB schema 未改变，`SCHEMA_VERSION=2`（PR #103 时的记录；当前代码为 `SCHEMA_VERSION = 3`，见上方 V2 当前状态更正）与 `accounts`、`settings`、`action_runs`、`bind_sessions`、`schema_meta` 兼容面保持；迁移、Fernet key 与数据库/密钥配对合同由现有 storage 回归覆盖。
 - 插件级 background task 仍统一交给 `RuntimeCoordinator`，关闭顺序为停止新任务、取消并等待任务、按逆序清理资源。AssetManager 仍是 facade/shared resource owner，下载、缓存、Spine manifest 与 c018 framing 合同未回退。
 - 未开启真实写操作；未使用真实账号，未发送 QQ 消息，未运行签到或 CDK 兑换，未部署。
 
@@ -83,8 +168,8 @@ python scripts/audit/architecture_metrics.py --check --output (Join-Path $runDir
 
 - 旧 `ui/renderers/character.py`、`CharacterCardRenderer`、1800×1000 Pillow 单角色卡和 `scripts/preview_character_cards.py` 已删除；容器/provider 不再构造 `character_renderer`。
 - 单角色练度卡唯一生产路径为 `CharacterApplication → CharacterCardData → resolve_character_assets() → CharacterT2IPayloadBuilder → templates/t2i/character.html → AstrBot html_render`，尺寸 1600×2400，使用白色竖版 replica、Spine portrait、Face Anchor / Core Axis、安全构图与现有装备/词条区域。
-- `_conf_schema.json` 不再公开 `character_card_layout`。升级时旧 `classic` 或 `replica` 值由 `normalize_runtime_config()` 安全丢弃；单角色卡始终走当前白色 T2I 路径，即使全局 `ui_renderer=pillow`。
-- T2I 渲染失败时返回明确的“角色卡渲染失败，请稍后重试。”，不调用旧 Pillow renderer、不再查询 `CharacterDetails`。roster、资料、profile、raid、campaign 等其他页面仍保留各自 renderer 和现有全局设置语义。
+- `_conf_schema.json` 不再公开 `character_card_layout`。升级时旧 `classic` 或 `replica` 值由 `normalize_runtime_config()` 安全丢弃；单角色卡始终走当前白色 T2I 路径，即使全局 `ui_renderer=pillow`（当前 `ui_renderer` 已被忽略、所有图片页统一 T2I）。
+- T2I 渲染失败时返回明确的“角色卡渲染失败，请稍后重试。”，不调用旧 Pillow renderer、不再查询 `CharacterDetails`。roster、资料、profile、raid、campaign 等其他页面当时仍保留各自 renderer 和全局设置语义（现已统一 T2I）。
 - 退役 gate 检查旧 renderer 文件/符号、`character_card_layout` 决策分支、`classic` 字面量和公开 schema；回归测试锁定配置迁移、成功模板、失败无旧 renderer 调用与 domain query 单次。
 - 旧 acceptance 文档、视觉审计和图片仅作为历史证据；它们不再定义当前卡面验收，c018/c401/c581 的 Spine、manifest、portrait framing 与 Face Anchor 合同继续独立验证。
 

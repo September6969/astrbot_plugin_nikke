@@ -16,6 +16,14 @@ from .image_codec import AssetImageCodec
 
 logger = logging.getLogger("nikke.asset_manager")
 
+# render ID：默认/独立皮肤 cXXX 或 cXXX_YY，shared skin 追加 @skin。声明集合与条目
+# 集合必须使用同一模式，否则 @skin 条目永远不被视为已声明（AUD-020）。
+RENDER_ID_PATTERN = re.compile(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?")
+
+
+# T2I 资源缓存用于识别“已按文件 SHA-256 校验、未经修改的原图”的 info 键。
+VERIFIED_SOURCE_SHA256 = "nikke_verified_source_sha256"
+VERIFIED_SOURCE_OBJECT = "nikke_verified_source_object"
 
 class SpineManifestStore:
     def __init__(
@@ -70,12 +78,12 @@ class SpineManifestStore:
             declared_ids = {
                 str(key).strip().lower()
                 for key in entries
-                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?", str(key).strip().lower())
+                if RENDER_ID_PATTERN.fullmatch(str(key).strip().lower())
             }
             valid_entries = {
                 str(key).strip().lower(): value
                 for key, value in entries.items()
-                if re.fullmatch(r"c[0-9]+(?:_[0-9]+)?(?:@[a-z0-9][a-z0-9_-]*)?", str(key).strip().lower())
+                if RENDER_ID_PATTERN.fullmatch(str(key).strip().lower())
                 and isinstance(value, dict)
             }
             if schema == 2 and "characters" in payload:
@@ -183,4 +191,9 @@ class SpineManifestStore:
             return None
         if image is None:
             logger.warning("STATIC_SPINE_ASSET_INVALID: %s", char_id)
+            return image
+        # 文件字节已按清单 SHA-256 校验：记录来源摘要与对象身份，供 T2I 资源缓存直接复用，
+        # 不再对 15MB+ 的 RGBA 位图重复做全图哈希。派生图片会继承 info 但对象不同，不会误用。
+        image.info[VERIFIED_SOURCE_SHA256] = digest
+        image.info[VERIFIED_SOURCE_OBJECT] = id(image)
         return image

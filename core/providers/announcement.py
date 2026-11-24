@@ -14,7 +14,7 @@ from ...features.calendar.application import CalendarApplication
 from ...features.calendar.service import CalendarService
 from ...integrations.announcement.information_feeds import InformationFeedsSource
 from ...integrations.announcement.official_source import fetch_official_announcements
-from ...integrations.blablalink.fetch_client import FetchClient
+from ...integrations.calendar.blabla_source import BlablaCalendarAdapter
 from ...integrations.calendar.visual_cache import CalendarVisualCache
 
 
@@ -40,12 +40,11 @@ def create_announcement_resources(
         official_fetcher=fetch_official_announcements,
     )
     delivery = AnnouncementDelivery(store)
+    # 组合根注入 BlaBlaLink 单一日程源；features.calendar 不再反向导入 integrations。
     calendar = CalendarService(
         data_dir / "calendar",
-        announcement_service=service,
-        source_mode="blabla",
-        **({"task_factory": task_factory} if task_factory is not None else {}),
-        fetch_client=FetchClient(),
+        adapters=(BlablaCalendarAdapter(),),
+        task_factory=task_factory,
         visual_cache=CalendarVisualCache(data_dir / "calendar"),
     )
     from ...features.calendar.subscriptions import CalendarSubscriptions
@@ -54,7 +53,6 @@ def create_announcement_resources(
     application = AnnouncementApplication(
         announcements=service,
         delivery=delivery,
-        deadline_selector=calendar_application.reminder_deadlines,
     )
     return AnnouncementResources(
         service, application, calendar, calendar_application

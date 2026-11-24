@@ -157,12 +157,12 @@ class CalendarSnapshotRepository:
                 "source_revision": state.active_source_revision,
                 "content_updated_at": service.content_updated_at.isoformat() if service.content_updated_at else None,
                 "fingerprint": service._last_batch_hash,
+                # schema>=4 只读取 source_datasets；PR-6B（G5-calendar-c 步骤 1/2）不再
+                # 重复写入与其等价的 merged_snapshot/events 副本，旧文件仍可迁移读取。
                 "source_datasets": {
                     src: [ev.to_dict() for ev in ev_list]
                     for src, ev_list in service._source_datasets.items()
                 },
-                "merged_snapshot": [ev.to_dict() for ev in service._events.values()],
-                "events": [ev.to_dict() for ev in service._events.values()],
             }
             CalendarSnapshotRepository._atomic_write(service.events_path, events_payload)
 
@@ -179,7 +179,7 @@ class CalendarSnapshotRepository:
         }
         CalendarSnapshotRepository._atomic_write(service.health_path, health_payload)
 
-        # 2. schedule_events.json 与 calendar_cache.json
+        # 兼容缓存 calendar_cache.json 仍在内容变化时最后写入（G5-calendar-c 步骤 3 暂缓）。
         if write_events:
             legacy_payload = {
                 "schema": 2,

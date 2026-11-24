@@ -35,9 +35,23 @@ def test_bad_contract_fails_closed(payload):
     with pytest.raises(ValueError):BlablaCalendarAdapter.parse(payload)
 
 def test_only_blabla_no_legacy_data(tmp_path):
-    service=CalendarService(tmp_path,source_mode="blabla")
+    # PR-6B G5-calendar-b：source_mode 改为组合根注入适配器。
+    service=CalendarService(tmp_path,adapters=[BlablaCalendarAdapter()])
     assert [a.source_name for a in service.adapters]==["blabla"]
     assert service.list_canonical()==[]
+
+
+def test_production_provider_injects_only_blabla_adapter(tmp_path):
+    # PR-6B G5-calendar-a0/b：生产组合根只装配 BlaBlaLink，不再构造 FetchClient 或联动公告源。
+    from types import SimpleNamespace
+    from astrbot_plugin_nikke.core.providers.announcement import create_announcement_resources
+    resources=create_announcement_resources(tmp_path,store=SimpleNamespace())
+    calendar=resources.calendar
+    assert [a.source_name for a in calendar.adapters]==["blabla"]
+    assert isinstance(calendar.adapters[0],BlablaCalendarAdapter)
+    assert not hasattr(calendar,"fetch_client")
+    assert not hasattr(calendar,"announcement_service")
+    assert not hasattr(calendar,"source_mode")
 
 @pytest.mark.asyncio
 async def test_public_request_no_credentials():
@@ -57,7 +71,7 @@ def test_disabled_sources_are_removed_from_persisted_snapshot(tmp_path):
     old=CalendarService(tmp_path)
     old._source_datasets={"gamekee":[CanonicalEvent(id="old",title="旧事件",event_type="story_event",start_at=now,end_at=now+timedelta(days=1),sources=["gamekee"],primary_source="gamekee")]}
     old._sync_internal_stores(old._merge_datasets());old._has_snapshot=True;old._save_cache(force_events=True)
-    new=CalendarService(tmp_path,source_mode="blabla")
+    new=CalendarService(tmp_path,adapters=[BlablaCalendarAdapter()])
     assert new.list_canonical()==[]
     assert "gamekee" not in new._source_datasets
     assert not new.has_snapshot()
@@ -68,8 +82,9 @@ async def test_manual_refresh_never_calls_disabled_announcement_source(tmp_path)
     from unittest.mock import AsyncMock
     from types import SimpleNamespace
     announcement=SimpleNamespace(sync_from_source=AsyncMock())
-    service=CalendarService(tmp_path,source_mode="blabla",announcement_service=announcement)
-    service.adapters=[BlablaCalendarAdapter(transport=httpx.MockTransport(lambda request:httpx.Response(200,json=sample())))]
+    # PR-6B G5-calendar-a2/b：日程服务不再接受 announcement_service；显式刷新只读注入的日程源。
+    service=CalendarService(tmp_path,adapters=[BlablaCalendarAdapter(transport=httpx.MockTransport(lambda request:httpx.Response(200,json=sample())))])
+    service.announcement_service=announcement
     result=await service.application.refresh_schedule()
     assert result.success
     announcement.sync_from_source.assert_not_called()

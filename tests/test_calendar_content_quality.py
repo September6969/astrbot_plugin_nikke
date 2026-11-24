@@ -4,64 +4,21 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-import json
-import time
-from types import SimpleNamespace
 
 from astrbot_plugin_nikke.features.calendar.canonical_models import CanonicalEvent
 from astrbot_plugin_nikke.features.calendar.content_quality import (
     DisplayTier,
-    IdentityDecision,
-    canonical_identity_match,
     classify_explicit_title,
     classify_category,
     canonical_event_title,
     get_display_relevance,
-    normalize_title,
     score_display_relevance,
-    score_identity,
-    should_parse_deadlines,
-)
-from astrbot_plugin_nikke.features.calendar.gamekee_parser import (
-    MAX_IMAGE_CANDIDATES,
-    ParseFailure,
-    extract_image_urls,
-    normalize_http_url,
-    parse_gamekee_row,
 )
 from astrbot_plugin_nikke.features.calendar.schedule_service import ScheduleService
-from astrbot_plugin_nikke.features.calendar.schedule_adapters import (
-    FetchOutcome,
-    GameKeeScheduleAdapter,
-    OfficialAnnouncementScheduleAdapter,
-)
 
 
 UTC = timezone.utc
 START = datetime(2026, 9, 20, 12, 0, tzinfo=UTC)
-
-
-def _row(row_id: int = 1, **overrides):
-    row = {
-        "id": row_id,
-        "title": "Coordinated Operation",
-        "begin_at": int(START.timestamp()),
-        "end_at": int((START + timedelta(days=2)).timestamp()),
-        "big_picture": "https://cdn.example/cover.png",
-        "picture": "https://cdn.example/fallback.png",
-        "image_list": json.dumps([
-            {"src": "https://cdn.example/detail-1.png"},
-            {"src": "javascript:alert(1)"},
-            {"src": "https://cdn.example/detail-1.png"},
-        ]),
-        "description": "Coordinated Operation details",
-        "tag": "coop",
-        "activity_kind_name": "co-op",
-        "importance": 3,
-        "link_url": "https://www.gamekee.com/nikke/activity/1",
-    }
-    row.update(overrides)
-    return row
 
 
 def _event(event_id: str, title: str, category: str = "event", **kwargs) -> CanonicalEvent:
@@ -78,41 +35,6 @@ def _event(event_id: str, title: str, category: str = "event", **kwargs) -> Cano
         **kwargs,
     )
 
-
-def test_shared_parser_preserves_fields_and_visual_priority():
-    parsed = parse_gamekee_row(_row())
-
-    assert not isinstance(parsed, ParseFailure)
-    assert parsed.source_id == "1"
-    assert parsed.category == "coop"
-    assert parsed.description == "Coordinated Operation details"
-    assert parsed.importance == 3
-    assert parsed.visual_candidates == (
-        "https://cdn.example/cover.png",
-        "https://cdn.example/detail-1.png",
-        "https://cdn.example/fallback.png",
-    )
-    assert parsed.key_visual_url == parsed.visual_candidates[0]
-    assert parsed.raw_metadata["id"] == 1
-
-
-def test_shared_parser_failure_buckets_and_schema_drift_semantics():
-    assert parse_gamekee_row({"title": "x", "begin_at": 1, "end_at": 2}).reason == "missing_id"
-    assert parse_gamekee_row(_row(title="")).reason == "missing_title"
-    assert parse_gamekee_row(_row(begin_at="not-a-time")).reason == "invalid_timestamp"
-    assert parse_gamekee_row(_row(end_at=int(START.timestamp()))).reason == "invalid_interval"
-    assert parse_gamekee_row([]).reason == "type"
-
-
-def test_url_normalizer_and_bounded_recursive_image_scan():
-    assert normalize_http_url("javascript:alert(1)") == ""
-    assert normalize_http_url("data:image/png;base64,abc") == ""
-    assert normalize_http_url("/nikke/a.png") == "https://www.gamekee.com/nikke/a.png"
-    assert normalize_http_url("https://user:pass@example/a.png") == ""
-
-    urls = extract_image_urls([{"src": f"https://cdn.example/{i}.png"} for i in range(30)])
-    assert len(urls) == MAX_IMAGE_CANDIDATES
-    assert urls[0].endswith("/0.png")
 
 
 def test_category_aliases_and_description_guard():
@@ -139,14 +61,6 @@ def test_explicit_title_taxonomy_wins_over_wrong_supporting_fields():
     assert classify_category("SSR Guilty: Mighty Bunny", tag="coop") == "recruit"
     assert classify_category("[限时通关] Trail Marker", tag="coop") == "limited_stage"
 
-
-def test_title_normalization_keeps_season_and_numbers():
-    normalized = normalize_title("[NEW] 单人突袭 第10期 Deadline")
-    assert "solo_raid" in normalized
-    assert "season" in normalized
-    assert "10" in normalized
-    assert "new" not in normalized
-    assert "deadline" not in normalized
 
 
 def test_canonical_event_title_removes_packaging_without_erasing_identity():
@@ -175,50 +89,6 @@ def test_canonical_event_title_keeps_bracketed_wrapper_variants_equal():
     )
 
 
-def test_canonical_identity_matches_packaging_variants_without_relaxing_gate():
-    left = _event(
-        "gk:7828",
-        "[活动PASS] LET'S DRINK PASS",
-        "pass",
-        detail_url="https://www.gamekee.com/nikke/721020.html",
-    )
-    right = _event(
-        "official:pass",
-        "LET'S DRINK PASS",
-        "event",
-        primary_source="official",
-        sources=["official"],
-        detail_url="https://official.example/lets-drink-pass",
-    )
-
-    assert score_identity(left, right).decision != IdentityDecision.MATCH
-    result = canonical_identity_match(left, right)
-    assert result is not None
-    assert result.decision == IdentityDecision.MATCH
-    assert "canonical_title_exact:+100" in result.reasons
-
-
-def test_explicit_identity_conflict_blocks_same_window_detail_reuse():
-    alice = _event(
-        "gk:alice",
-        "SSR Anne: Miracle Fairy",
-        "recruit",
-        detail_url="https://example.test/shared-detail",
-    )
-    mica = _event(
-        "official:mica",
-        "SSR Mica: Snow Buddy",
-        "recruit",
-        primary_source="official",
-        sources=["official"],
-        detail_url="https://example.test/shared-detail",
-    )
-
-    result = score_identity(alice, mica)
-
-    assert result.decision == IdentityDecision.DISTINCT
-    assert "explicit_identity_conflict:-100" in result.reasons
-
 
 def test_relevance_tiers_and_relative_ordering():
     core = _event("gk:core", "Solo Raid Season 10", "solo_raid")
@@ -238,111 +108,6 @@ def test_relevance_tiers_and_relative_ordering():
     assert "descriptive_package:-20" in meta_rel.reasons
 
 
-def test_identity_match_ambiguous_and_distinct():
-    left = _event("gk:1", "协同作战", "coop")
-    right = _event(
-        "official:1",
-        "Coordinated Operation Notice",
-        "coop",
-        primary_source="official",
-        sources=["official"],
-        start_at=START + timedelta(minutes=5),
-        end_at=START + timedelta(days=2),
-    )
-    assert score_identity(left, right).decision == IdentityDecision.MATCH
-
-    ambiguous_left = _event("gk:2", "活动", "event", start_at=None, end_at=None)
-    ambiguous_right = _event("official:2", "活动", "event", start_at=None, end_at=None, primary_source="official", sources=["official"])
-    assert score_identity(ambiguous_left, ambiguous_right).decision == IdentityDecision.AMBIGUOUS
-
-    distinct_left = _event("gk:3", "Solo Raid Season 9", "solo_raid", cycle_id="season_9")
-    distinct_right = _event("official:3", "Solo Raid Season 10", "solo_raid", cycle_id="season_10", primary_source="official", sources=["official"])
-    assert score_identity(distinct_left, distinct_right).decision == IdentityDecision.DISTINCT
-
-
-def test_identity_gate_keeps_different_named_same_window_events_distinct():
-    alice = _event(
-        "gk:alice",
-        "Special Recruit Alice",
-        "recruit",
-        start_at=START,
-        end_at=START + timedelta(days=2),
-    )
-    rapi = _event(
-        "official:rapi",
-        "Special Recruit Rapi",
-        "recruit",
-        primary_source="official",
-        sources=["official"],
-        start_at=START,
-        end_at=START + timedelta(days=2),
-    )
-
-    result = score_identity(alice, rapi)
-
-    assert result.decision != IdentityDecision.MATCH
-    assert "strong_identity_gate:missing" in result.reasons
-
-
-def test_identity_gate_accepts_similar_bilingual_title_with_exact_window():
-    left = _event(
-        "gk:alice",
-        "Special Recruit Alice",
-        "recruit",
-        start_at=START,
-        end_at=START + timedelta(days=2),
-    )
-    right = _event(
-        "official:alice",
-        "特殊招募 Alice 公告",
-        "recruit",
-        primary_source="official",
-        sources=["official"],
-        start_at=START + timedelta(minutes=5),
-        end_at=START + timedelta(days=2),
-    )
-
-    result = score_identity(left, right)
-
-    assert result.decision == IdentityDecision.MATCH
-    assert "strong_title_time" in result.reasons
-
-
-def test_identity_gate_accepts_exact_cycle_even_when_titles_are_rewritten():
-    left = _event("gk:season-9", "Solo Raid Season 9", "solo_raid", cycle_id="season_9")
-    right = _event(
-        "official:season-9",
-        "Season 9 battle notice",
-        "solo_raid",
-        cycle_id="season_9",
-        primary_source="official",
-        sources=["official"],
-    )
-
-    result = score_identity(left, right)
-
-    assert result.decision == IdentityDecision.MATCH
-    assert "cycle_exact:+45" in result.reasons
-
-
-def test_identity_gate_accepts_exact_detail_reference():
-    left = _event("gk:1", "Alice recruit", "recruit", detail_url="https://example.test/activity/1")
-    right = _event(
-        "official:1",
-        "Character notice",
-        "event",
-        detail_url="https://example.test/activity/1",
-        primary_source="official",
-        sources=["official"],
-        start_at=None,
-        end_at=None,
-    )
-
-    result = score_identity(left, right)
-
-    assert result.decision == IdentityDecision.MATCH
-    assert "detail_reference:+50" in result.reasons
-
 
 def test_merge_datasets_does_not_reduce_simultaneous_different_events(tmp_path):
     service = ScheduleService(tmp_path, visual_cache=False)
@@ -361,205 +126,10 @@ def test_merge_datasets_does_not_reduce_simultaneous_different_events(tmp_path):
 
     merged = service._merge_datasets()
 
+    # PR-6B G5-calendar-a3：按事件 ID 单遍聚合，不同 ID 的同时段活动绝不合并；
+    # 跨源身份计数诊断已随模糊去重删除。
     assert len(merged) == 2
-    assert service.quality_diagnostics["identity_matches"] == 0
 
-
-def test_merge_datasets_uses_canonical_title_evidence_for_packaging_variants(tmp_path):
-    service = ScheduleService(tmp_path, visual_cache=False)
-    left = _event(
-        "gk:7828",
-        "[活动PASS] LET'S DRINK PASS",
-        "pass",
-        detail_url="https://www.gamekee.com/nikke/721020.html",
-    )
-    right = _event(
-        "official:pass",
-        "LET'S DRINK PASS",
-        "event",
-        primary_source="official",
-        sources=["official"],
-        detail_url="https://official.example/lets-drink-pass",
-    )
-    service._source_datasets = {"gamekee": [left], "official": [right]}
-
-    merged = service._merge_datasets()
-
-    assert len(merged) == 1
-    assert service.quality_diagnostics["identity_matches"] == 1
-    assert service.quality_diagnostics["canonical_title_matches"] == 1
-
-
-def test_merge_datasets_reconciles_exact_business_title_with_meta_category(tmp_path):
-    service = ScheduleService(tmp_path, visual_cache=False)
-    business = _event(
-        "gk:lets-drink-pass",
-        "【活动PASS】LET'S DRINK PASS",
-        "pass",
-        detail_url="https://www.gamekee.com/nikke/721020.html",
-    )
-    package = _event(
-        "official:lets-drink-pass",
-        "LET'S DRINK PASS",
-        "package",
-        primary_source="official",
-        sources=["official"],
-        detail_url="https://official.example/lets-drink-pass",
-    )
-    service._source_datasets = {"gamekee": [business], "official": [package]}
-
-    merged = list(service._merge_datasets().values())
-
-    assert len(merged) == 1
-    assert merged[0].event_type == "pass"
-    reasons = merged[0].metadata["identity_match"]["reasons"]
-    assert "canonical_title_exact_meta_reconciled" in reasons
-
-
-def test_merge_datasets_accepts_exact_title_long_interval_high_overlap(tmp_path):
-    service = ScheduleService(tmp_path, visual_cache=False)
-    utc8 = timezone(timedelta(hours=8))
-    gamekee = _event(
-        "gk:trail-marker",
-        "Trail Marker Event",
-        "limited_stage",
-        start_at=datetime(2026, 8, 13, 3, 0, tzinfo=utc8),
-        end_at=datetime(2026, 10, 8, 3, 59, tzinfo=utc8),
-    )
-    official = _event(
-        "official:trail-marker",
-        "【限时通关】Trail Marker",
-        "limited_stage",
-        primary_source="official",
-        sources=["official"],
-        start_at=datetime(2026, 8, 13, 0, 0, tzinfo=utc8),
-        end_at=datetime(2026, 10, 8, 4, 59, tzinfo=utc8),
-    )
-    service._source_datasets = {"gamekee": [gamekee], "official": [official]}
-
-    merged = list(service._merge_datasets().values())
-
-    assert len(merged) == 1
-    reasons = merged[0].metadata["identity_match"]["reasons"]
-    assert "canonical_title_exact_high_overlap" in reasons
-
-
-def test_schedule_service_deduplicates_live_regression_pairs_before_pagination(tmp_path):
-    utc8 = timezone(timedelta(hours=8))
-    service = ScheduleService(tmp_path, visual_cache=False)
-    service._source_datasets = {
-        "gamekee": [
-            _event("gk:drink", "【活动PASS】LET'S DRINK PASS", "pass"),
-            _event(
-                "gk:trail",
-                "Trail Marker Event",
-                "limited_stage",
-                start_at=datetime(2026, 8, 13, 3, 0, tzinfo=utc8),
-                end_at=datetime(2026, 10, 8, 3, 59, tzinfo=utc8),
-            ),
-        ],
-        "official": [
-            _event(
-                "official:drink",
-                "LET'S DRINK PASS",
-                "package",
-                primary_source="official",
-                sources=["official"],
-            ),
-            _event(
-                "official:trail",
-                "【限时通关】Trail Marker",
-                "limited_stage",
-                primary_source="official",
-                sources=["official"],
-                start_at=datetime(2026, 8, 13, 0, 0, tzinfo=utc8),
-                end_at=datetime(2026, 10, 8, 4, 59, tzinfo=utc8),
-            ),
-        ],
-    }
-
-    canonical = list(service._merge_datasets().values())
-    titles = [canonical_event_title(event.title) for event in canonical]
-
-    assert titles.count("let s drink pass") == 1
-    assert titles.count("trail marker") == 1
-    assert next(event for event in canonical if canonical_event_title(event.title) == "let s drink pass").event_type == "pass"
-    assert service.quality_diagnostics["identity_matches"] == 2
-
-
-def test_canonical_title_high_overlap_does_not_merge_distinct_periods_or_short_events():
-    first_period = _event(
-        "gk:trail-marker-aug",
-        "Trail Marker",
-        "limited_stage",
-        start_at=datetime(2026, 8, 13, tzinfo=UTC),
-        end_at=datetime(2026, 10, 8, tzinfo=UTC),
-    )
-    later_period = _event(
-        "official:trail-marker-nov",
-        "【限时通关】Trail Marker",
-        "limited_stage",
-        primary_source="official",
-        sources=["official"],
-        start_at=datetime(2026, 11, 1, tzinfo=UTC),
-        end_at=datetime(2027, 1, 1, tzinfo=UTC),
-    )
-    short_left = _event(
-        "gk:short",
-        "Trail Marker",
-        "limited_stage",
-        start_at=START,
-        end_at=START + timedelta(hours=2),
-    )
-    short_right = _event(
-        "official:short",
-        "Trail Marker Event",
-        "limited_stage",
-        primary_source="official",
-        sources=["official"],
-        start_at=START + timedelta(minutes=90),
-        end_at=START + timedelta(hours=3, minutes=30),
-    )
-
-    assert canonical_identity_match(first_period, later_period) is None
-    assert canonical_identity_match(short_left, short_right) is None
-
-
-def test_canonical_meta_reconciliation_preserves_specific_business_categories(tmp_path):
-    cases = (
-        ("Mission Pass Foo", "pass", "package"),
-        ("Trail Marker", "limited_stage", "announcement"),
-        ("Alice", "recruit", "package"),
-    )
-    for index, (title, business_type, meta_type) in enumerate(cases):
-        service = ScheduleService(tmp_path / str(index), visual_cache=False)
-        business = _event(f"gk:{index}", title, business_type)
-        meta = _event(
-            f"official:{index}",
-            title,
-            meta_type,
-            primary_source="official",
-            sources=["official"],
-        )
-        service._source_datasets = {"gamekee": [business], "official": [meta]}
-
-        merged = list(service._merge_datasets().values())
-
-        assert len(merged) == 1
-        assert merged[0].event_type == business_type
-
-
-def test_canonical_exact_title_does_not_reconcile_different_business_families():
-    recruit = _event("gk:alice", "Alice", "recruit")
-    costume = _event(
-        "official:alice-costume",
-        "Alice",
-        "limited_costume",
-        primary_source="official",
-        sources=["official"],
-    )
-
-    assert canonical_identity_match(recruit, costume) is None
 
 
 def test_canonical_dataset_is_lossless_while_feed_can_deprioritize_meta(tmp_path):
@@ -594,84 +164,3 @@ def test_canonical_dataset_is_lossless_while_feed_can_deprioritize_meta(tmp_path
     assert feed[0].display_tier == DisplayTier.CORE.value
 
 
-def test_official_deadline_prefilter_requires_keyword_and_date():
-    assert should_parse_deadlines("版本维护公告", "2026.09.20 10:00 ~ 12:00")
-    assert should_parse_deadlines("Mission Pass", "Ends September 30 at 18:00")
-    assert not should_parse_deadlines("Trail Marker Event", "Rewards are available now")
-    assert not should_parse_deadlines("Trail Marker Event", "2026.09.20 rewards")
-
-
-def test_999_rows_parse_with_bounded_work():
-    rows = [_row(index + 1, title=f"Trail Marker Event {index}") for index in range(999)]
-    started = time.perf_counter()
-    parsed = [parse_gamekee_row(row) for row in rows]
-    elapsed = time.perf_counter() - started
-    assert all(not isinstance(item, ParseFailure) for item in parsed)
-    assert elapsed < 5.0
-
-
-def test_gamekee_adapter_consumes_shared_parser_without_losing_metadata():
-    class FakeClient:
-        async def get_json(self, *_args, **_kwargs):
-            return {"code": 0, "data": [_row()]}
-
-    import asyncio
-
-    result = asyncio.run(GameKeeScheduleAdapter(FakeClient()).fetch_result())
-    assert result.outcome == FetchOutcome.SUCCESS_DATA
-    assert result.diagnostics["gamekee_valid"] == 1
-    event = result.events[0]
-    assert event.metadata["description"] == "Coordinated Operation details"
-    assert event.metadata["visual_candidates"]
-    assert event.to_calendar_activity().display_score > 0
-
-
-def test_gamekee_adapter_all_invalid_rows_is_parse_failed():
-    class FakeClient:
-        async def get_json(self, *_args, **_kwargs):
-            return {"code": 0, "data": [{"id": 1}, {"title": "missing id"}]}
-
-    import asyncio
-
-    result = asyncio.run(GameKeeScheduleAdapter(FakeClient()).fetch_result())
-    assert result.outcome == FetchOutcome.PARSE_FAILED
-    assert result.diagnostics["gamekee_valid"] == 0
-    reasons = result.diagnostics["malformed_reasons"]
-    assert reasons["missing_title"] == 1
-    assert reasons["missing_id"] == 1
-
-
-def test_official_adapter_skips_irrelevant_records_before_deadline_parser(monkeypatch):
-    calls: list[str] = []
-
-    def fake_parse(title, body, content_id, category):
-        calls.append(content_id)
-        return []
-
-    from astrbot_plugin_nikke.features.announcement.service import DeadlineParser
-
-    monkeypatch.setattr(DeadlineParser, "parse_deadlines", staticmethod(fake_parse))
-    service = SimpleNamespace(
-        _records={
-            "relevant": SimpleNamespace(
-                title="版本维护公告",
-                body="2026.09.20 10:00 ~ 12:00",
-                content_id="relevant",
-                category="maintenance",
-            ),
-            "irrelevant": SimpleNamespace(
-                title="Trail Marker Event",
-                body="Rewards are available now",
-                content_id="irrelevant",
-                category="event",
-            ),
-        }
-    )
-
-    import asyncio
-
-    result = asyncio.run(OfficialAnnouncementScheduleAdapter(service).fetch_result())
-    assert result.outcome == FetchOutcome.SUCCESS_EMPTY
-    assert calls == ["relevant"]
-    assert result.diagnostics["official_deadlines_seen"] == 2
-    assert result.diagnostics["official_deadlines_filtered"] == 1

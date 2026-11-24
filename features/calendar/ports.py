@@ -1,27 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Calendar 用例依赖的外部读取与视觉缓存端口。"""
+"""Calendar 用例依赖的视觉缓存端口。"""
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Protocol
 
 from .models import CalendarActivity
-
-
-class CalendarFetchGateway(Protocol):
-    """读取公开日程接口 JSON 的传输端口。"""
-
-    async def get_json(
-        self,
-        url: str,
-        *,
-        headers: Mapping[str, str] | None = None,
-        params: Mapping[str, Any] | None = None,
-    ) -> Any:
-        """执行只读 GET 并返回 JSON 响应。"""
 
 
 class CalendarVisualPort(Protocol):

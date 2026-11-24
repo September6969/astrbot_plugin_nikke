@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=1200, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
 <style>
 <!-- SHARED_CSS -->
-* { box-sizing: border-box; }
+/* 高度模型见 ui/payloads/roster.py：行高、注释行与页脚的尺寸必须与此处保持一致。 */
+:root { --canvas-width: 1200px; }
 html, body { margin: 0; width: 1200px; background: #eef1f4; color: #202a33; }
 body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
 .roster { width: 1200px; height: {{ canvas.height }}px; padding: 36px 40px 28px; background: #eef1f4; }
@@ -14,8 +16,9 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
 .roster-title { margin: 10px 0 0; color: #202a33; font-size: 48px; line-height: 1.15; font-weight: 800; }
 .roster-commander { margin-top: 12px; color: #65727e; font-size: 24px; }
 .roster-count { max-width: 330px; padding: 12px 18px; border-radius: 14px; background: #ffffff; color: #4b626e; font-size: 22px; font-weight: 700; text-align: right; }
-.roster-grid { display: grid; grid-template-columns: 60px 70px minmax(220px, 1fr) 84px 190px 220px 165px; align-items: center; column-gap: 8px; }
-.roster-labels { min-height: 46px; padding: 0 10px 8px; color: #6f7d87; font-size: 28px; line-height: 1; font-weight: 700; }
+.roster-grid { display: grid; grid-template-columns: 60px 72px minmax(220px, 1fr) 84px 190px 220px 165px; align-items: center; column-gap: 8px; }
+/* 表头左右留白 = 行内边距 14px + 边框 1px，使每个标签与下方数据列逐列对齐。 */
+.roster-labels { min-height: 46px; padding: 0 15px 8px; color: #6f7d87; font-size: 28px; line-height: 1; font-weight: 700; }
 .roster-labels span { white-space: nowrap; }
 .roster-row { min-height: 100px; margin-bottom: 8px; padding: 12px 14px; border: 1px solid #e1e7eb; border-radius: 16px; background: #fff; }
 .roster-row.top-three { border-color: #9fcbd0; background: linear-gradient(90deg, #f4fbfb, #ffffff 46%); }
@@ -25,26 +28,26 @@ body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
 .avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .identity { min-width: 0; }
 .name { color: #25313b; font-size: 24px; line-height: 1.22; font-weight: 750; overflow-wrap: anywhere; }
-.identity-note { margin-top: 5px; color: #849099; font-size: 15px; }
+.identity-note { margin-top: 5px; color: #5f6f7a; font-size: var(--font-min); line-height: 26px; word-break: keep-all; overflow-wrap: anywhere; }
 .metric { min-width: 0; color: #36434d; font-size: 20px; line-height: 1.25; font-weight: 650; text-align: center; overflow-wrap: anywhere; }
 .combat { color: #1d5865; font-size: 23px; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .skills { color: #53626c; font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .progress { color: #56666e; font-size: 28px; line-height: 1.15; }
 .progress span { display: block; }
 .roster-options { grid-column: 1 / -1; margin-top: 14px; padding: 12px; border: 1px solid #cfe0e3; border-radius: 12px; background: #f6fbfb; }
-.options-head { color: #287f8d; font-size: 20px; line-height: 30px; font-weight: 750; }
+.options-head { color: #26798a; font-size: 20px; line-height: 30px; font-weight: 750; }
 .options-head strong { font-size: 24px; font-variant-numeric: tabular-nums; }
-.options-head small { margin-left: 2px; font-size: 16px; }
+.options-head small { margin-left: 2px; font-size: var(--font-min); }
 .options-message { color: #5c6c74; }
 .options-grid { margin-top: 6px; }
 .options-row { display: grid; grid-template-columns: minmax(300px, 1fr) 230px 110px; align-items: baseline; column-gap: 10px; min-height: 30px; margin-bottom: 6px; padding: 0 12px; border: 1px solid #e4edef; border-radius: 8px; background: #fff; line-height: 30px; }
 .options-row:last-child { margin-bottom: 0; }
 .opt-label { color: #36434d; font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
-.opt-note { margin-left: 4px; color: #8a949b; font-size: 15px; font-weight: 600; }
+.opt-note { margin-left: 4px; color: #66737c; font-size: var(--font-min); font-weight: 600; }
 .opt-value { color: #1d5865; font-size: 21px; font-weight: 750; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .opt-tier { color: #4a626b; font-size: 20px; font-weight: 700; text-align: right; white-space: nowrap; }
 .empty { display: grid; min-height: 120px; place-items: center; border: 1px dashed #b8c6cb; border-radius: 16px; background: #fff; color: #697984; font-size: 24px; }
-.roster-footer { margin-top: 18px; padding: 14px 4px 0; border-top: 1px solid #d4dde1; color: #78858e; font-size: 17px; }
+.roster-footer { margin-top: 18px; padding: 14px 4px 0; border-top: 1px solid #d4dde1; color: #5f6f7a; font-size: 20px; line-height: 29px; }
 .options-row.high,.options-row.high .opt-value,.options-row.high .opt-tier{color:#0077cc}
 .options-row.max{background:#000;border-color:#000;color:#58b9ff}
 .options-row.max .opt-value,.options-row.max .opt-tier,.options-row.max .opt-note{color:#58b9ff}

@@ -22,7 +22,7 @@ from typing import Any
 
 
 PLAN_THRESHOLDS = {
-    "main.py": 700,
+    "main.py": 300,
     "adapters/astrbot/command_runtime.py": 400,
     "core/asset_manager.py": 300,
     "ui/t2i_payloads.py": 100,
@@ -31,6 +31,11 @@ PLAN_THRESHOLDS = {
     "core/container.py": 350,
 }
 PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS = 20
+# PR-6C：NikkePlugin 外壳只保留 3 个宿主注册入口与延迟路由器属性；
+# 新增公开成员必须先补消费者证据并更新此白名单（terminate/close 为宿主生命周期，另行豁免）。
+MAIN_PUBLIC_MEMBER_ALLOWLIST = frozenset(
+    {"command_runtime", "nikke", "nikke_hash_prefix", "on_nikke_poke"}
+)
 
 RESOURCE_TYPES = ("NikkeStore", "BlaBlaClient", "AssetManager", "ClientSession")
 FEATURE_FORBIDDEN_ROOTS = {
@@ -60,6 +65,27 @@ ADAPTER_CORE_FORBIDDEN_PREFIXES = (
     "core.container",
     "core.providers",
 )
+
+# 分层依赖方向：adapters -> application -> features <- integrations；
+# 生产代码不得依赖 scripts/ 与 tests/。键为源层，值为禁止导入的目标层。
+CROSS_LAYER_FORBIDDEN_TARGETS: dict[str, frozenset[str]] = {
+    "application": frozenset({"integrations", "adapters", "main", "scripts", "tests"}),
+    "features": frozenset(
+        {"integrations", "application", "adapters", "ui", "main", "scripts", "tests"}
+    ),
+    "integrations": frozenset({"application", "adapters", "ui", "main", "scripts", "tests"}),
+    "core": frozenset({"application", "adapters", "main", "scripts", "tests"}),
+    "ui": frozenset({"integrations", "application", "adapters", "main", "scripts", "tests"}),
+    "adapters": frozenset({"integrations", "main", "scripts", "tests"}),
+}
+# REFACTOR_PLAN_V2 Phase 0 登记的既有跨层边基线。只允许删除条目，不允许新增：
+# Phase 2 已清零 application -> integrations.blablalink.client（已转为硬门禁），
+# Phase 4C 已清零 integrations.spine -> scripts.spine（预检查迁入
+# integrations.spine.bundle_inspection，已转为硬门禁），
+# Phase 6B 已清零 features.calendar -> integrations.calendar（BlaBlaLink 日程源由
+# core/providers/announcement.py 注入，已转为硬门禁）。基线现已为空，任何跨层边都直接违规。
+# 条目对应的导入一旦消失，门禁会报 cross_layer_allowlist_stale，提醒同步收紧。
+CROSS_LAYER_BASELINE_ALLOWLIST: frozenset[tuple[str, str]] = frozenset()
 
 
 def _module_name(root: Path, path: Path) -> str:
@@ -530,6 +556,28 @@ def _source_paths(root: Path) -> list[Path]:
     return sorted(paths)
 
 
+def cross_layer_edges(
+    edges: set[tuple[str, str]],
+    allowlist: frozenset[tuple[str, str]] = CROSS_LAYER_BASELINE_ALLOWLIST,
+) -> dict[str, list[dict[str, Any]]]:
+    """按分层规则分出跨层边：基线内、基线外（违规）与已失效的基线条目。"""
+    allowed: list[dict[str, Any]] = []
+    violations: list[dict[str, Any]] = []
+    for source, target in sorted(edges):
+        source_layer = source.split(".")[0]
+        target_layer = target.split(".")[0]
+        if target_layer not in CROSS_LAYER_FORBIDDEN_TARGETS.get(source_layer, frozenset()):
+            continue
+        record = {"from": source, "to": target}
+        (allowed if (source, target) in allowlist else violations).append(record)
+    stale = [
+        {"from": source, "to": target}
+        for source, target in sorted(allowlist)
+        if (source, target) not in edges
+    ]
+    return {"allowlisted": allowed, "violations": violations, "stale_allowlist": stale}
+
+
 def collect_metrics(root: Path) -> dict[str, Any]:
     root = root.resolve()
     paths = _source_paths(root)
@@ -682,6 +730,16 @@ def collect_metrics(root: Path) -> dict[str, Any]:
                 if not isinstance(node, ast.ClassDef) or node.name != "NikkePlugin":
                     continue
                 for member in node.body:
+                    if isinstance(member, (ast.Assign, ast.AnnAssign)):
+                        # 类级别别名（如 `status = nikke`）同样会成为公开成员，必须纳入白名单门禁。
+                        alias_targets = member.targets if isinstance(member, ast.Assign) else [member.target]
+                        for target in alias_targets:
+                            if isinstance(target, ast.Name) and not target.id.startswith("_"):
+                                plugin_methods.append(
+                                    {"name": target.id, "line": member.lineno,
+                                     "logical_statements": 0, "complexity_hint": 0}
+                                )
+                        continue
                     if not isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef)):
                         continue
                     if member.name.startswith("_") or member.name in {"terminate", "close"}:
@@ -770,6 +828,16 @@ def collect_metrics(root: Path) -> dict[str, Any]:
                     "limit": PUBLIC_METHOD_MAX_LOGICAL_STATEMENTS,
                 }
             )
+    for method in plugin_methods:
+        if method["name"] not in MAIN_PUBLIC_MEMBER_ALLOWLIST:
+            violations.append(
+                {
+                    "category": "main_public_member_allowlist",
+                    "path": "main.py",
+                    "symbol": method["name"],
+                    "line": method["line"],
+                }
+            )
     violations.extend(
         {"category": "feature_dependency_direction", **record}
         for record in feature_dependency_violations
@@ -839,6 +907,14 @@ def collect_metrics(root: Path) -> dict[str, Any]:
         )
     for component in cycles:
         violations.append({"category": "import_cycle", "modules": component})
+    cross_layer = cross_layer_edges(internal_edges)
+    violations.extend(
+        {"category": "cross_layer_import", **record} for record in cross_layer["violations"]
+    )
+    violations.extend(
+        {"category": "cross_layer_allowlist_stale", **record}
+        for record in cross_layer["stale_allowlist"]
+    )
     for error in syntax_errors:
         violations.append({"category": "python_syntax_error", **error})
 
@@ -862,6 +938,7 @@ def collect_metrics(root: Path) -> dict[str, Any]:
             {"from": source, "to": target} for source, target in sorted(internal_edges)
         ],
         "import_cycles": cycles,
+        "cross_layer_edges": cross_layer,
         "public_imports": dict(sorted(public_import_inventory.items())),
         "container_definitions": root_owners,
         "resource_constructor_owners": resource_owner_map,

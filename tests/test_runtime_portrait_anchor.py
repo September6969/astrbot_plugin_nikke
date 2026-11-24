@@ -85,7 +85,8 @@ def test_legacy_local_cache_backfills_once_then_survives_restart(tmp_path):
     runtime = Runtime()
     cache = tmp_path / "cache"
     renderer = SpinePreRenderer(cache, runtime=runtime)
-    with patch("astrbot_plugin_nikke.scripts.spine.inspect_spine_bundle.inspect", return_value={"status": "VERSION_MATCH", "missing_pages": 0}):
+    # AUD-016：预检查实现已迁入 integrations.spine.bundle_inspection。
+    with patch("astrbot_plugin_nikke.integrations.spine.bundle_inspection.inspect", return_value={"status": "VERSION_MATCH", "missing_pages": 0}):
         assert read_anchor(renderer.render_local_portrait("c851", local))
         output = next(renderer.prerender_dir.glob("*.png"))
         # 模拟旧图仍在但没有随附锚点。
@@ -126,8 +127,9 @@ def test_worker_report_is_consumed_in_render_pipeline(tmp_path):
 
     runtime = SpineWorkerRuntime(SpineWorkerConfig(tmp_path / "worker", tmp_path), version="4.1")
     renderer = SpinePreRenderer(tmp_path / "cache", runtime=runtime)
-    with patch("astrbot_plugin_nikke.integrations.spine.worker_caller.subprocess.run", side_effect=run), patch(
-        "astrbot_plugin_nikke.scripts.spine.inspect_spine_bundle.inspect", return_value={"status": "VERSION_MATCH", "missing_pages": 0}
+    # AUD-016：worker 进程边界改为 _run_worker（独立进程组），预检查迁入 integrations。
+    with patch("astrbot_plugin_nikke.integrations.spine.worker_caller._run_worker", side_effect=run), patch(
+        "astrbot_plugin_nikke.integrations.spine.bundle_inspection.inspect", return_value={"status": "VERSION_MATCH", "missing_pages": 0}
     ):
         result = renderer.render_full_body(SpineBundle(skeleton, atlas, (texture,)), "4.1")
     assert read_anchor(result)["core_axis"]["torso_source"] == "generic:chest"

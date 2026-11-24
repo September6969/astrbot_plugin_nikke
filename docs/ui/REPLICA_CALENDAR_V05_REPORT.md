@@ -19,7 +19,7 @@
 
 ## Spine Face Anchor
 
-- 离线 `prepare_face_anchors.py` 调用 `extract_spine_face_anchor.mjs`：优先可见 eye attachment，其次 face、head attachment，最后 head bone；排除眉毛、睫毛及高光候选。
+- 离线 `scripts/spine/prepare_face_anchors.py` 调用 `scripts/spine/extract_spine_face_anchor.mjs`：优先可见 eye attachment，其次 face、head attachment，最后 head bone；排除眉毛、睫毛及高光候选。
 - 使用匹配骨架版本的 Spine Core、idle 动画第 0 帧，结合渲染边界、画布、裁切框与 padding 转换为最终 PNG 坐标。
 - metadata 按正式角色／皮肤资源 ID 保存锚点、范围、骨架／atlas／PNG 哈希、像素哈希、尺寸、动画与变换。同一皮肤支持多个已验证分辨率。
 - 运行时 `face_anchor.py` 只消费 metadata 和 PNG，校验身份、尺寸和像素哈希，不解析 Spine。缺失／不匹配时等比完整显示，不猜坐标、不使用默认皮肤锚点。
@@ -61,4 +61,4 @@ python scripts/preview/preview_replica.py --manifest output/high-resolution/spin
 
 当前交付可运行复刻版本，**没有宣称像素级一比一通过**。案例数码字体、研究等级徽章、装备角标与收藏品星级外观仍有差异；idle 第 0 帧与案例动画帧可能不同。现有 8 份锚点不是全角色／全皮肤覆盖。QQ 送达和远端 AstrBot 渲染尚未现场验收。
 
-字体 ReplicaSans.otf 来自仓库 NotoSansHans-Medium.otf 子集，保留字体内部许可信息；原字体保持不变。技能与立绘使用公开游戏资源，没有将案例截图作为模板背景。
+字体 ReplicaSans.otf 来自仓库 NotoSansHans-Medium.otf 子集，仅保留版权名称记录（name ID 0），许可证与商标记录在子集化时被去掉，现由 assets/fonts/README.md 与 NOTICE 说明（Apache 2.0）；原 NotoSansHans-*.otf 运行时未使用，已在 PR-6A 删除。技能与立绘使用公开游戏资源，没有将案例截图作为模板背景。

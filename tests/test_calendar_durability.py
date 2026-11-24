@@ -117,32 +117,22 @@ async def test_schema_four_is_readable_and_upgraded_without_deleting_cache(tmp_p
 
 @pytest.mark.asyncio
 async def test_nonwinning_source_updates_are_durable(tmp_path):
+    # PR-6B G5-calendar-a3：跨源字段仲裁已删除；同 ID 冲突时按来源名排序后写入者覆盖。
+    # 继续校验“未进入有效视图的来源 LKG 更新同样会落盘”。
     service = ScheduleService(tmp_path)
     primary = Source("winner")
     secondary = Source("loser-A")
-    secondary.source_name = "official"
-    # 同一期次显式身份，使标题由 gamekee 胜出。
-    original = secondary.fetch_result
-    async def fetch():
-        result = await original()
-        result.events[0].cycle_id = "cycle"
-        return result
-    secondary.fetch_result = fetch
-    original_primary = primary.fetch_result
-    async def fetch_primary():
-        result = await original_primary()
-        result.events[0].cycle_id = "cycle"
-        return result
-    primary.fetch_result = fetch_primary
+    secondary.source_name = "archive"  # 排序先于 gamekee，同 ID 时不胜出
     service.adapters = [primary, secondary]
     await service.refresh_schedule_data()
+    assert service.list_canonical()[0].title == "winner"
     before = service.snapshot_state.active_source_revision
     secondary.title = "loser-B"
     await service.refresh_schedule_data()
     assert service.list_canonical()[0].title == "winner"
     assert service.snapshot_state.active_source_revision != before
     restarted = ScheduleService(tmp_path)
-    assert restarted._source_datasets["official"][0].title == "loser-B"
+    assert restarted._source_datasets["archive"][0].title == "loser-B"
 
 
 @pytest.mark.asyncio
@@ -195,3 +185,25 @@ async def test_source_dataset_version_is_not_health_attempt_noise(tmp_path):
     restarted = ScheduleService(tmp_path)
     assert restarted._source_health["gamekee"].dataset_version == 2
     assert not restarted.snapshot_state.dirty
+
+
+@pytest.mark.asyncio
+async def test_schedule_events_written_once_and_legacy_copies_still_readable(tmp_path):
+    # PR-6B G5-calendar-c 步骤 1/2：schedule_events.json 只保存权威 source_datasets，
+    # 不再重复写 merged_snapshot/events；calendar_cache.json 兼容缓存仍写入（步骤 3 暂缓）。
+    service = ScheduleService(tmp_path)
+    service.adapters = [Source("A")]
+    await service.refresh_schedule_data()
+    payload = json.loads(service.events_path.read_text(encoding="utf-8"))
+    assert payload["schema"] == 5
+    assert "merged_snapshot" not in payload and "events" not in payload
+    assert [event["title"] for event in payload["source_datasets"]["gamekee"]] == ["A"]
+    assert json.loads(service.cache_path.read_text(encoding="utf-8"))["activities"][0]["title"] == "A"
+    assert ScheduleService(tmp_path).list_canonical()[0].title == "A"
+
+    # 旧版（schema<4）只有 events 副本的文件仍按迁移路径读取。
+    legacy = {"schema": 3, "events": payload["source_datasets"]["gamekee"]}
+    service.events_path.write_text(json.dumps(legacy), encoding="utf-8")
+    migrated = ScheduleService(tmp_path)
+    assert migrated.migrated_from_merged_snapshot
+    assert migrated.list_canonical()[0].title == "A"
