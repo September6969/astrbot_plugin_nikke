@@ -289,11 +289,12 @@ class NikkeCommandRuntime:
             return
         if key in {"roster", "character", "info"}:
             operation = "roster" if key == "roster" else key
+            name = " ".join(part for part in (arg1.strip(), arg2.strip()) if part)
             async for result in self._dispatch(
                 event,
                 self._handlers.character,
                 operation=operation,
-                name=arg1,
+                name=name,
             ):
                 yield result
             return

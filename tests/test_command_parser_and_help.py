@@ -83,6 +83,10 @@ class _RawEvent(Event):
     [
         ("妮姬 查询 资料 Snow White", ("查询", "资料", "Snow", "White"), "character",
          {"operation": "info", "name": "Snow White"}),
+        ("/nikke character Red Hood", ("character", "Red", "Hood"), "character",
+         {"operation": "character", "name": "Red Hood"}),
+        ("#nikke info Snow White", ("info", "Snow", "White"), "character",
+         {"operation": "info", "name": "Snow White"}),
         ("妮姬 日程 订阅 协同, 签到", ("日程", "订阅", "协同,", "签到"), "calendar",
          {"horizon": "订阅", "page": "协同, 签到"}),
         ("妮姬 日常 任务 自动 开", ("日常", "任务", "自动", "开"), "daily",

@@ -97,7 +97,10 @@ class TestBindTutorialPage(IsolatedAsyncioTestCase):
         self.assertIn("event.key === 'End'", page)
         self.assertIn("document.execCommand('copy') === true", page)
         self.assertIn("复制失败，请选中绑定链接", page)
+        self.assertIn('id="refreshStatusBtn"', page)
+        self.assertIn("switchTab('chrome', false)", page)
         self.assertNotIn("alert(", page)
+        self.assertNotIn("innerHTML", page)
 
     def test_bind_token_and_base_url_are_safe_in_html_and_javascript_contexts(self):
         token = '</script><img src=x onerror=alert(1)>"&'

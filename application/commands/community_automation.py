@@ -164,9 +164,15 @@ class CommunityAutomationHandler:
         enabled = "开" if self._enabled(account, capability) else "关"
         detail = f"\n独立自动开关：{enabled}" + ("\n最近执行：" + str(previous["detail"]) if isinstance(previous, dict) and previous.get("detail") else "")
         if capability == "session_renewal":
-            prefix = "session-renewal:v1:" + account_scope(account) + ":"
-            pending = [r for r in self.store.list_runs(action="session_renewal")
-                       if r["run_key"].startswith(prefix) and r["status"] in {"DISPATCH_INTENT", "UNKNOWN_AFTER_ACTION"}]
+            scope = account_scope(account)
+            revision = str(account.get("binding_revision") or "").strip()
+            if revision:
+                run = self.store.get_run(f"session-renewal:v1:{scope}:{revision}")
+                pending = [run] if run and run["status"] in {"DISPATCH_INTENT", "UNKNOWN_AFTER_ACTION"} else []
+            else:
+                prefix = f"session-renewal:v1:{scope}:"
+                pending = [r for r in self.store.list_runs(action="session_renewal")
+                           if r["run_key"].startswith(prefix) and r["status"] in {"DISPATCH_INTENT", "UNKNOWN_AFTER_ACTION"}]
             if pending:
                 detail += "\n存在未决续期尝试，此凭证不自动重试；请核实或重新登录绑定。"
         return detail

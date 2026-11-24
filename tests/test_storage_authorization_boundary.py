@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import stat
 import threading
 from pathlib import Path
@@ -94,6 +95,7 @@ def test_failure_still_recorded_for_unconsumed_session(tmp_path) -> None:
 
 # ------------------------------------------------------------------ AUD-007
 
+@pytest.mark.skipif(os.name == "nt", reason="Windows does not enforce POSIX 0o600 mode bits on os.open")
 def test_key_file_is_created_atomically_with_owner_only_permissions(tmp_path) -> None:
     store = NikkeStore(tmp_path)
     mode = stat.S_IMODE(store.key_path.stat().st_mode)

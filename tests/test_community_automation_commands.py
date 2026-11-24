@@ -158,6 +158,12 @@ async def test_interrupted_renewal_is_visible_without_reexecuting(env):
     assert "未决续期" in result.messages[0].text
     renewal.execute.assert_not_awaited()
 
+    rebound = bind(store)
+    assert rebound["binding_revision"] != account["binding_revision"]
+    rebound_status = await handler.handle_renewal(context("状态", action="续期"))
+    assert "未决续期" not in rebound_status.messages[0].text
+    assert store.get_run(key)["status"] == "DISPATCH_INTENT"
+
 
 @pytest.mark.asyncio
 async def test_notification_failure_cannot_remove_automatic_risk_halt(env):
