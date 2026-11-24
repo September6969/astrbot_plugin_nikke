@@ -43,6 +43,7 @@ def create_shiftypad_resources(
         fetcher=fetcher,
         site_origin=site_origin,
         clock=clock,
+        enabled=lambda: config.get("enable_shiftypad_readonly") is True,
     )
     return ShiftypadResources(resolver=resolver, fetcher=fetcher, readonly=readonly, web=web)
 

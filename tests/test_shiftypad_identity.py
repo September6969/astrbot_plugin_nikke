@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import base64
+from urllib.parse import quote
 
 import pytest
 
@@ -80,7 +81,9 @@ def test_official_public_link_openid_and_encoded_uid_are_supported() -> None:
     assert from_openid.server == "jp"
 
     assert parse_public_reference(OPENID).openid == OPENID
-    assert official_share_url(OPENID).endswith("uid=" + encode_shiftypad_uid(OPENID))
+    share_url = official_share_url(OPENID)
+    assert share_url.endswith("uid=" + quote(encode_shiftypad_uid(OPENID), safe=""))
+    assert parse_public_reference(share_url).openid == OPENID
 
 
 def test_public_link_rejects_untrusted_hosts_urls_and_numeric_uid() -> None:

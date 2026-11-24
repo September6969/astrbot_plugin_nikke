@@ -39,6 +39,8 @@ _BOOLEAN_CONTRACTS = {
     "enable_daily_actions": False,
     "enable_announcement_push": False,
     "enable_cdk_redemption": False,
+    "enable_shiftypad_readonly": False,
+    "enable_public_share_api": False,
 }
 _STRING_CONTRACTS = {
     "public_base_url": "https://nikke.irises777.xyz",

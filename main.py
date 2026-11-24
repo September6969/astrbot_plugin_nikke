@@ -116,6 +116,12 @@ class NikkePlugin(Star):
                 self.services.toolbox.roster_growth.clear(actor_id)
                 self.services.toolbox.manual_profiles.clear(actor_id)
 
+        growth_gen = (
+            self.services.toolbox.growth_generation
+            if self.services.toolbox is not None
+            else None
+        )
+
         self.handlers = PluginCommandHandlers(
             account=AccountCommandHandler(
                 application=self.services.account_application,
@@ -168,6 +174,7 @@ class NikkePlugin(Star):
                     if self.services.toolbox is not None
                     else None
                 ),
+                growth_generation=growth_gen,
             ),
             daily=daily_handler,
             guide=GuideCommandHandler(self.services.guide_application),
@@ -182,6 +189,7 @@ class NikkePlugin(Star):
                     if self.services.toolbox is not None
                     else None
                 ),
+                growth_generation=growth_gen,
             ),
             raid=RaidCommandHandler(
                 application=self.services.raid_application,

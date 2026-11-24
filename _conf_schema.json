@@ -193,5 +193,18 @@
     "hint": "群聊命令会公开兑换码，必须由管理员明确开启。",
     "obvious_hint": true,
     "default": false
+  },
+  "enable_shiftypad_readonly": {
+    "description": "启用 ShiftyPad 公开档案只读导入网页",
+    "type": "bool",
+    "hint": "提供短时网页会话与官方公开链接只读导入；需配置 public_base_url 与 HTTPS 反代，默认关闭。",
+    "default": false
+  },
+  "enable_public_share_api": {
+    "description": "启用第三方公开分享资料查询",
+    "type": "bool",
+    "hint": "开启后允许在用户二次确认后将输入的公开分享 ID 发送至第三方 nikke-api.pages.dev（不发送 QQ 号或绑定 Cookie），默认关闭。",
+    "obvious_hint": true,
+    "default": false
   }
 }

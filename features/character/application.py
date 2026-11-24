@@ -106,6 +106,7 @@ class CharacterRosterData:
     characters: tuple[Mapping[str, Any], ...]
     name_map: Mapping[str, str]
     option_summaries: Mapping[str, RosterOptionSummary] = field(default_factory=dict)
+    account_identity: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -251,6 +252,15 @@ class CharacterApplication:
             "[NIKKE] 练度总览：%d 名角色、%d 项词条详情，耗时 %.2fs",
             len(characters), len(option_summaries), time.monotonic() - started,
         )
+        ident = canonical_account_identity(account)
+        account_identity = (
+            f"{ident.platform}:{ident.area_id}:{ident.game_uid}"
+            if ident is not None
+            else ":".join(
+                str(account.get(key) or "").strip()
+                for key in ("platform", "area_id", "game_uid")
+            ).strip(":")
+        )
         return CharacterRosterData(
             commander_name=str(
                 account.get("nickname") or account.get("role_name") or "指挥官"
@@ -258,6 +268,7 @@ class CharacterApplication:
             characters=tuple(characters),
             name_map=self.name_map(directory),
             option_summaries=option_summaries,
+            account_identity=account_identity,
         )
 
     @staticmethod

@@ -1,8 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """ShiftyPad 只读导入的短时网页入口。
 
-复用现有 aiohttp 站点与安全中间件；不建立独立站点、不使用 Cookie 登录态。
-机器人私聊生成一次性短时 token，网页只能操作 token 对应的机器人用户。
+安全模型与竞技场编辑页一致：
+- ``/shiftypad/open/{token}`` 仅展示同源兑换引导页，GET 不检查也不消费令牌；
+- ``POST /shiftypad/api/claim`` 校验 Origin 后一次性兑换令牌并签发 ``__Secure-nikke_shiftypad`` Cookie 与 CSRF 密钥；
+- 编辑页面与所有状态/读写 API 仅认同源 Cookie + CSRF 头，HTML/URL/JS 中不包含令牌；
+- 受 ``enable_shiftypad_readonly`` 开关控制，未开启时所有接口 fail-closed 返回 404 并清理临时会话。
 """
 
 from __future__ import annotations
@@ -13,8 +16,11 @@ import json
 import re
 import secrets
 import time
-from datetime import datetime, timezone
-from typing import Any, Mapping
+from collections.abc import Callable, Mapping
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+from urllib.parse import parse_qs
 
 from aiohttp import web
 
@@ -26,12 +32,33 @@ from ...features.shiftypad.models import (
 )
 from ...features.shiftypad.storage import ShiftypadReadOnlyStore
 
-SESSIONS_KEY = "shiftypad_web_sessions_v1"
+LINKS_KEY = "shiftypad_web_links_v2"
+SESSIONS_KEY = "shiftypad_web_sessions_v2"
+COOKIE = "__Secure-nikke_shiftypad"
+CSRF_HEADER = "X-Shiftypad-CSRF"
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{32,128}$")
-SESSION_TTL = 600
+_SESSION_REQ_KEY: web.RequestKey[tuple[str, dict[str, Any], dict[str, dict[str, Any]]]] = (
+    web.RequestKey("shiftypad_session", tuple)
+)
+LINK_TTL = 600
+SESSION_TTL = 3600
+IDLE_TTL = 1800
 PREVIEW_TTL = 300
 MAX_SESSIONS = 200
 MAX_BODY = 16 * 1024
+SESSION_RATE_LIMIT = 30
+SESSION_RATE_WINDOW = 60
+_DEFAULT_TEMPLATE_ROOT = Path(__file__).resolve().parents[2] / "templates" / "shiftypad_web"
+_SECURITY_HEADERS = {
+    "Cache-Control": "no-store",
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff",
+    "Content-Security-Policy": (
+        "default-src 'none'; script-src 'self'; style-src 'self'; "
+        "img-src 'self' data:; connect-src 'self'; "
+        "base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    ),
+}
 
 
 def _json_error(code: str, message: str, status: int = 400, **extra: Any) -> web.Response:
@@ -45,6 +72,8 @@ def _token_hash(token: str) -> str:
 
 
 class ShiftypadWebService:
+    """ShiftyPad 同源会话制只读导入网页服务。"""
+
     def __init__(
         self,
         *,
@@ -55,6 +84,9 @@ class ShiftypadWebService:
         site_origin: str,
         clock=None,
         session_ttl: int = SESSION_TTL,
+        link_ttl: int = LINK_TTL,
+        enabled: Callable[[], bool] | bool = True,
+        template_root: Path | None = None,
     ) -> None:
         self._store = store
         self._readonly = readonly
@@ -62,63 +94,201 @@ class ShiftypadWebService:
         self._fetcher = fetcher
         self.site_origin = str(site_origin).rstrip("/")
         self._clock = clock or (lambda: time.time())
-        self._session_ttl = session_ttl
+        self._session_ttl = max(1, int(session_ttl))
+        self._link_ttl = max(1, int(link_ttl))
+        self._enabled = enabled
+        self._template_root = Path(template_root) if template_root else _DEFAULT_TEMPLATE_ROOT
 
     def _now(self) -> int:
         value = self._clock()
         return int(value.timestamp()) if isinstance(value, datetime) else int(value)
 
-    def _sessions(self) -> dict[str, dict[str, Any]]:
-        raw = self._store.get_setting(SESSIONS_KEY, {})
+    def active(self) -> bool:
+        """检查功能是否开启；关闭时立即清理挂起入口与临时会话。"""
+        enabled = self._enabled() if callable(self._enabled) else bool(self._enabled)
+        if not enabled:
+            if self._store.get_setting(LINKS_KEY, None):
+                self._store.set_setting(LINKS_KEY, {})
+            if self._store.get_setting(SESSIONS_KEY, None):
+                self._store.set_setting(SESSIONS_KEY, {})
+            return False
+        return True
+
+    def _clean_map(self, key: str, *, idle_check: bool = False) -> dict[str, dict[str, Any]]:
+        raw = self._store.get_setting(key, {})
         if not isinstance(raw, dict):
             return {}
         now = self._now()
-        cleaned = {
-            key: value
-            for key, value in raw.items()
-            if isinstance(value, dict) and int(value.get("expires_at", 0)) > now
-        }
+        cleaned: dict[str, dict[str, Any]] = {}
+        for item_key, value in raw.items():
+            if not isinstance(value, dict):
+                continue
+            if int(value.get("expires_at", 0)) <= now:
+                continue
+            if idle_check:
+                accessed = int(value.get("accessed_at", value.get("created_at", 0)))
+                if now - accessed >= IDLE_TTL:
+                    continue
+            cleaned[str(item_key)] = value
         if len(cleaned) > MAX_SESSIONS:
             ordered = sorted(cleaned.items(), key=lambda item: item[1].get("created_at", 0))
             cleaned = dict(ordered[-MAX_SESSIONS:])
         return cleaned
 
+    def _links(self) -> dict[str, dict[str, Any]]:
+        return self._clean_map(LINKS_KEY, idle_check=False)
+
+    def _save_links(self, links: Mapping[str, Any]) -> None:
+        self._store.set_setting(LINKS_KEY, dict(links))
+
+    def _sessions(self) -> dict[str, dict[str, Any]]:
+        return self._clean_map(SESSIONS_KEY, idle_check=True)
+
     def _save_sessions(self, sessions: Mapping[str, Any]) -> None:
         self._store.set_setting(SESSIONS_KEY, dict(sessions))
 
     def create_link(self, actor_id: str) -> str:
+        if not self.active():
+            raise ValueError("ShiftyPad 只读导入未启用，请由管理员开启 enable_shiftypad_readonly。")
         actor = str(actor_id or "").strip()
         if not actor:
             raise ValueError("缺少机器人用户标识")
-        token = secrets.token_urlsafe(32)
         now = self._now()
-        sessions = self._sessions()
-        sessions[_token_hash(token)] = {
+        # 同一用户重新申请时，撤销尚未兑换的旧入口链接。
+        links = {
+            key: value
+            for key, value in self._links().items()
+            if value.get("actor_id") != actor
+        }
+        if len(links) >= MAX_SESSIONS:
+            raise ValueError("ShiftyPad 入口已满，请稍后重试。")
+        token = secrets.token_urlsafe(32)
+        links[_token_hash(token)] = {
             "actor_id": actor,
             "created_at": now,
-            "expires_at": now + self._session_ttl,
-            "preview": None,
+            "expires_at": now + self._link_ttl,
         }
-        self._save_sessions(sessions)
-        return f"{self.site_origin}/shiftypad/{token}"
+        self._save_links(links)
+        return f"{self.site_origin}/shiftypad/open/{token}"
 
-    def _session(self, token: str) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-        if not TOKEN_RE.fullmatch(str(token or "")):
-            return None, {}
+    def _cookie_session(
+        self, request: web.Request, *, touch: bool = True
+    ) -> tuple[str, dict[str, Any], dict[str, dict[str, Any]]]:
+        cookie = str(request.cookies.get(COOKIE, "") or "")
+        if not TOKEN_RE.fullmatch(cookie):
+            raise web.HTTPUnauthorized(reason="请回私聊获取新的 ShiftyPad 导入链接")
         sessions = self._sessions()
-        record = sessions.get(_token_hash(token))
-        return (record, sessions) if isinstance(record, dict) else (None, sessions)
+        digest = _token_hash(cookie)
+        record = sessions.get(digest)
+        if not isinstance(record, dict):
+            raise web.HTTPUnauthorized(reason="网页会话已过期，请回私聊重新获取")
+        if touch:
+            record["accessed_at"] = self._now()
+            sessions[digest] = record
+            self._save_sessions(sessions)
+        return digest, record, sessions
 
-    def state(self, token: str) -> dict[str, Any]:
-        record, _ = self._session(token)
-        if record is None:
-            return {"ok": False, "code": "EXPIRED", "status": "expired",
-                    "message": "网页入口已过期，请回私聊重新发送 /妮姬 我的妮姬 导入"}
-        actor = str(record.get("actor_id") or "")
+    async def _read_limited_body(self, request: web.Request) -> bytes:
+        chunks: list[bytes] = []
+        total = 0
+        async for chunk in request.content.iter_chunked(4096):
+            total += len(chunk)
+            if total > MAX_BODY:
+                raise web.HTTPRequestEntityTooLarge(reason="请求体超过 16KB 限制")
+            chunks.append(chunk)
+        return b"".join(chunks)
+
+    async def _read_json(self, request: web.Request) -> tuple[dict[str, Any] | None, web.Response | None]:
+        raw = await self._read_limited_body(request)
+        if request.content_type != "application/json":
+            return None, _json_error("INVALID_CONTENT_TYPE", "需要 application/json 请求")
+        try:
+            parsed = json.loads(raw.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return None, _json_error("INVALID_JSON", "请求格式无效")
+        if not isinstance(parsed, dict):
+            return None, _json_error("INVALID_JSON", "请求必须是对象")
+        return parsed, None
+
+    @web.middleware
+    async def security(self, request: web.Request, handler):
+        if not request.path.startswith("/shiftypad/"):
+            return await handler(request)
+        response: web.Response
+        try:
+            if not self.active():
+                return self._apply_headers(
+                    _json_error("DISABLED", "ShiftyPad 只读导入当前未启用。", 404)
+                )
+            if request.method not in {"GET", "HEAD"}:
+                if request.headers.get("Origin") != self.site_origin:
+                    return self._apply_headers(
+                        _json_error("FORBIDDEN_ORIGIN", "来源校验失败", 403)
+                    )
+                if request.content_length is not None and request.content_length > MAX_BODY:
+                    return self._apply_headers(
+                        _json_error("PAYLOAD_TOO_LARGE", "请求体超过大小限制", 413)
+                    )
+                if request.path != "/shiftypad/api/claim":
+                    digest, session, sessions = self._cookie_session(request, touch=True)
+                    csrf_header = str(request.headers.get(CSRF_HEADER, "") or "")
+                    csrf_expected = str(session.get("csrf") or "")
+                    if not csrf_expected or not secrets.compare_digest(csrf_header, csrf_expected):
+                        return self._apply_headers(
+                            _json_error("FORBIDDEN_CSRF", "CSRF 校验失败", 403)
+                        )
+                    request[_SESSION_REQ_KEY] = (digest, session, sessions)
+            elif request.path.startswith("/shiftypad/api/"):
+                digest, session, sessions = self._cookie_session(request, touch=True)
+                request[_SESSION_REQ_KEY] = (digest, session, sessions)
+
+            if request.path.startswith("/shiftypad/api/") and request.path != "/shiftypad/api/claim":
+                digest, session, sessions = request[_SESSION_REQ_KEY]
+                now = self._now()
+                recent = [
+                    ts
+                    for ts in (session.get("requests") or [])
+                    if isinstance(ts, (int, float)) and now - ts < SESSION_RATE_WINDOW
+                ]
+                if len(recent) >= SESSION_RATE_LIMIT:
+                    return self._apply_headers(
+                        _json_error("RATE_LIMITED", "会话请求过于频繁", 429)
+                    )
+                recent.append(now)
+                session["requests"] = recent
+                sessions[digest] = session
+                self._save_sessions(sessions)
+
+            response = await handler(request)
+        except web.HTTPRequestEntityTooLarge as exc:
+            response = _json_error("PAYLOAD_TOO_LARGE", exc.reason or "请求体过大", 413)
+        except web.HTTPUnauthorized as exc:
+            response = _json_error("EXPIRED", exc.reason or "网页会话已过期", 401)
+        except web.HTTPForbidden as exc:
+            response = _json_error("FORBIDDEN", exc.reason or "权限校验失败", 403)
+        except web.HTTPNotFound as exc:
+            response = _json_error("NOT_FOUND", exc.reason or "资源不存在", 404)
+        except web.HTTPException as exc:
+            if exc.status in {302, 303}:
+                response = exc
+            else:
+                response = _json_error("HTTP_ERROR", exc.reason or "请求失败", exc.status)
+        except ValueError as exc:
+            response = _json_error("BAD_REQUEST", str(exc), 400)
+        return self._apply_headers(response)
+
+    @staticmethod
+    def _apply_headers(response: web.Response) -> web.Response:
+        response.headers.update(_SECURITY_HEADERS)
+        return response
+
+    def state_for_session(self, session: Mapping[str, Any]) -> dict[str, Any]:
+        actor = str(session.get("actor_id") or "")
         readonly = self._readonly.status(actor)
-        remaining = max(0, int(record.get("expires_at", 0)) - self._now())
+        remaining = max(0, int(session.get("expires_at", 0)) - self._now())
         return {
             "ok": True,
+            "csrf": str(session.get("csrf") or ""),
             "status": readonly["status"],
             "binding": readonly.get("binding"),
             "last_error": readonly.get("last_error", ""),
@@ -132,25 +302,111 @@ class ShiftypadWebService:
             "fallback_url": "https://www.blablalink.com/shiftyspad/home",
         }
 
-    def _require_session(self, data: Mapping[str, Any]) -> tuple[dict[str, Any] | None, dict[str, Any], web.Response | None]:
-        token = str(data.get("token") or "")
-        record, sessions = self._session(token)
-        if record is None:
-            return None, sessions, _json_error(
-                "EXPIRED", "网页入口已过期，请回私聊重新获取", 410
+    async def open_page(self, request: web.Request) -> web.Response:
+        token = str(request.match_info.get("token") or "")
+        if not TOKEN_RE.fullmatch(token):
+            raise web.HTTPNotFound()
+        # GET 不检查持有人、不消费令牌，也不返回任何绑定资料；只提供同源 POST 兑换表单。
+        safe_token = html.escape(token, quote=True)
+        markup = (
+            "<!doctype html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\">"
+            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            "<link rel=\"stylesheet\" href=\"/shiftypad/static/editor.css\">"
+            "<script src=\"/shiftypad/static/claim.js\" defer></script>"
+            "<title>进入 ShiftyPad 只读导入</title></head><body><main>"
+            "<h1>ShiftyPad 只读导入</h1>"
+            "<p>点击后兑换本次一次性入口，进入自己的短时只读导入会话（不登录、不写入游戏账号）。</p>"
+            "<form id=\"claim\" method=\"post\" action=\"/shiftypad/api/claim\">"
+            f"<input type=\"hidden\" name=\"token\" value=\"{safe_token}\">"
+            "<button type=\"submit\">进入只读导入</button></form>"
+            "<p id=\"claim-status\" role=\"status\"></p>"
+            "<noscript>请启用 JavaScript，或回私聊重新获取入口。</noscript>"
+            "<p class=\"note\">链接仅一次性有效；已用过或过期请回私聊重新发送 "
+            "<code>/妮姬 我的妮姬 导入</code>。</p>"
+            "</main></body></html>"
+        )
+        return web.Response(text=markup, content_type="text/html")
+
+    async def claim(self, request: web.Request) -> web.Response:
+        if request.content_type != "application/x-www-form-urlencoded":
+            return _json_error("INVALID_CONTENT_TYPE", "请从引导页面进入只读导入。", 400)
+        raw = await self._read_limited_body(request)
+        try:
+            parsed = parse_qs(raw.decode("utf-8"), keep_blank_values=True, strict_parsing=False)
+        except UnicodeDecodeError:
+            return _json_error("INVALID_FORM", "无效的表单编码。", 400)
+        if set(parsed) != {"token"} or len(parsed["token"]) != 1:
+            return _json_error("INVALID_TOKEN", "无效的导入链接。", 400)
+        token = parsed["token"][0]
+        if not TOKEN_RE.fullmatch(token):
+            return _json_error("INVALID_TOKEN", "无效的导入链接。", 400)
+        links = self._links()
+        digest = _token_hash(token)
+        link = links.pop(digest, None)
+        if not isinstance(link, dict):
+            return _json_error(
+                "EXPIRED",
+                "入口已过期或已使用，请回私聊重新发送 /妮姬 我的妮姬 导入",
+                410,
             )
-        return record, sessions, None
+        self._save_links(links)
+        sessions = self._sessions()
+        if len(sessions) >= MAX_SESSIONS:
+            return _json_error("CAPACITY", "临时会话已满，请稍后重试。", 503)
+        cookie = secrets.token_urlsafe(32)
+        csrf = secrets.token_urlsafe(32)
+        now = self._now()
+        sessions[_token_hash(cookie)] = {
+            "actor_id": str(link.get("actor_id") or ""),
+            "csrf": csrf,
+            "created_at": now,
+            "accessed_at": now,
+            "expires_at": now + self._session_ttl,
+            "preview": None,
+            "requests": [],
+        }
+        self._save_sessions(sessions)
+        response = (
+            web.json_response({"ok": True, "redirect": "/shiftypad/edit"})
+            if request.headers.get("Accept") == "application/json"
+            else web.Response(status=303, headers={"Location": "/shiftypad/edit"})
+        )
+        response.set_cookie(
+            COOKIE,
+            cookie,
+            path="/shiftypad",
+            secure=True,
+            httponly=True,
+            samesite="Lax",
+            max_age=self._session_ttl,
+        )
+        return response
+
+    async def edit_page(self, request: web.Request) -> web.Response:
+        self._cookie_session(request, touch=True)
+        return web.Response(
+            text=(self._template_root / "index.html").read_text(encoding="utf-8"),
+            content_type="text/html",
+        )
+
+    async def static_file(self, request: web.Request) -> web.Response:
+        name = str(request.match_info.get("name") or "")
+        if name not in {"claim.js", "editor.js", "editor.css"}:
+            raise web.HTTPNotFound()
+        return web.Response(
+            text=(self._template_root / name).read_text(encoding="utf-8"),
+            content_type="text/javascript" if name.endswith(".js") else "text/css",
+        )
+
+    async def state_route(self, request: web.Request) -> web.Response:
+        _, session, _ = request[_SESSION_REQ_KEY]
+        return web.json_response(self.state_for_session(session))
 
     async def preview(self, request: web.Request) -> web.Response:
-        try:
-            data = await request.json(loads=json.loads)
-        except (ValueError, UnicodeDecodeError):
-            return _json_error("INVALID_JSON", "请求格式无效")
-        if not isinstance(data, Mapping):
-            return _json_error("INVALID_JSON", "请求必须是对象")
-        record, sessions, error = self._require_session(data)
-        if error is not None:
-            return error
+        digest, session, sessions = request[_SESSION_REQ_KEY]
+        data, err = await self._read_json(request)
+        if err is not None or data is None:
+            return err  # type: ignore[return-value]
         if data.get("confirmed_public") is not True:
             return _json_error("PUBLIC_CONFIRM_REQUIRED", "请先确认该档案已对所有人公开并获得本人授权")
         uid = str(data.get("uid") or "").strip()
@@ -185,12 +441,12 @@ class ShiftypadWebService:
             "source": profile.identity.source,
             "source_url": profile.identity.source_url,
         }
-        record["preview"] = {
+        session["preview"] = {
             "id": preview_id,
             "profile": stored_profile,
             "expires_at": self._now() + PREVIEW_TTL,
         }
-        sessions[_token_hash(str(data.get("token")))] = record
+        sessions[digest] = session
         self._save_sessions(sessions)
         payload = profile.to_dict(include_identity=False)
         payload["identity"] = {
@@ -215,16 +471,11 @@ class ShiftypadWebService:
         return web.json_response(payload)
 
     async def bind(self, request: web.Request) -> web.Response:
-        try:
-            data = await request.json(loads=json.loads)
-        except (ValueError, UnicodeDecodeError):
-            return _json_error("INVALID_JSON", "请求格式无效")
-        if not isinstance(data, Mapping):
-            return _json_error("INVALID_JSON", "请求必须是对象")
-        record, sessions, error = self._require_session(data)
-        if error is not None:
-            return error
-        preview = record.get("preview")
+        digest, session, sessions = request[_SESSION_REQ_KEY]
+        data, err = await self._read_json(request)
+        if err is not None or data is None:
+            return err  # type: ignore[return-value]
+        preview = session.get("preview")
         if not isinstance(preview, Mapping) or int(preview.get("expires_at", 0)) < self._now():
             return _json_error("PREVIEW_EXPIRED", "预览已过期，请重新检查资料")
         if str(data.get("preview_id") or "") != str(preview.get("id") or ""):
@@ -233,24 +484,20 @@ class ShiftypadWebService:
             profile = ShiftypadProfile.from_dict(preview.get("profile") or {})
         except (TypeError, ValueError):
             return _json_error("INVALID_PREVIEW", "预览数据损坏，请重新检查")
-        binding = self._readonly.bind(str(record.get("actor_id") or ""), profile)
-        record["preview"] = None
-        sessions[_token_hash(str(data.get("token")))] = record
+        binding = self._readonly.bind(str(session.get("actor_id") or ""), profile)
+        session["preview"] = None
+        sessions[digest] = session
         self._save_sessions(sessions)
         return web.json_response({"ok": True, "status": binding.public_dict()})
 
     async def sync(self, request: web.Request) -> web.Response:
-        try:
-            data = await request.json(loads=json.loads)
-        except (ValueError, UnicodeDecodeError):
-            return _json_error("INVALID_JSON", "请求格式无效")
-        if not isinstance(data, Mapping):
-            return _json_error("INVALID_JSON", "请求必须是对象")
-        record, _, error = self._require_session(data)
-        if error is not None:
-            return error
-        outcome = await self._readonly.sync(str(record.get("actor_id") or ""), self._fetcher)
-        state = self._readonly.status(str(record.get("actor_id") or ""))
+        _, session, _ = request[_SESSION_REQ_KEY]
+        _, err = await self._read_json(request)
+        if err is not None:
+            return err
+        actor = str(session.get("actor_id") or "")
+        outcome = await self._readonly.sync(actor, self._fetcher)
+        state = self._readonly.status(actor)
         if not outcome.ok:
             return web.json_response(
                 {
@@ -273,141 +520,47 @@ class ShiftypadWebService:
         )
 
     async def unbind(self, request: web.Request) -> web.Response:
-        try:
-            data = await request.json(loads=json.loads)
-        except (ValueError, UnicodeDecodeError):
-            return _json_error("INVALID_JSON", "请求格式无效")
-        if not isinstance(data, Mapping):
-            return _json_error("INVALID_JSON", "请求必须是对象")
-        record, _, error = self._require_session(data)
-        if error is not None:
-            return error
-        self._readonly.unbind(str(record.get("actor_id") or ""))
+        _, session, _ = request[_SESSION_REQ_KEY]
+        _, err = await self._read_json(request)
+        if err is not None:
+            return err
+        self._readonly.unbind(str(session.get("actor_id") or ""))
         return web.json_response({"ok": True, "status": "unbound"})
 
-    async def page(self, request: web.Request) -> web.Response:
-        token = str(request.match_info.get("token") or "")
-        record, _ = self._session(token)
-        if record is None:
-            return web.Response(
-                text=render_expired_page(),
-                content_type="text/html",
-                status=410,
-            )
-        return web.Response(
-            text=render_page(token),
-            content_type="text/html",
-            headers={"Cache-Control": "no-store"},
-        )
+    async def revoke(self, request: web.Request) -> web.Response:
+        digest, _, sessions = request[_SESSION_REQ_KEY]
+        _, err = await self._read_json(request)
+        if err is not None:
+            return err
+        sessions.pop(digest, None)
+        self._save_sessions(sessions)
+        response = web.json_response({"ok": True})
+        response.del_cookie(COOKIE, path="/shiftypad")
+        return response
 
     def mount(self, app: web.Application) -> None:
-        app.router.add_get("/shiftypad/{token}", self.page)
-        app.router.add_get("/api/shiftypad/state", self.state_route)
-        app.router.add_post("/api/shiftypad/preview", self.preview)
-        app.router.add_post("/api/shiftypad/bind", self.bind)
-        app.router.add_post("/api/shiftypad/sync", self.sync)
-        app.router.add_post("/api/shiftypad/unbind", self.unbind)
-
-    async def state_route(self, request: web.Request) -> web.Response:
-        return web.json_response(self.state(str(request.query.get("token") or "")))
-
-
-def render_page(token: str) -> str:
-    safe_token = html.escape(token, quote=True)
-    token_json = json.dumps(token, ensure_ascii=True).replace("<", "\\u003c")
-    return f"""<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'">
-<title>NIKKE · ShiftyPad 只读导入</title>
-<style>
-*{{box-sizing:border-box}}body{{margin:0;padding:18px;background:#111318;color:#f2f3f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.55}}
-main{{max-width:620px;margin:0 auto;background:#1a1e25;border:1px solid #343b46;border-top:4px solid #e9b85a;border-radius:12px;padding:22px 18px}}
-h1{{font-size:22px;margin:0 0 6px}}p{{color:#b9c0cc;font-size:14px}}.badge{{display:inline-block;padding:2px 8px;border-radius:6px;background:#26303d;color:#e9b85a;font-size:12px}}
-label{{display:block;margin:14px 0 4px;font-size:13px;color:#d8dde5}}input,select{{width:100%;padding:11px 12px;border-radius:8px;border:1px solid #3a4350;background:#11151c;color:#fff;font-size:15px}}
-button{{margin-top:12px;padding:11px 14px;border:0;border-radius:8px;background:#e9b85a;color:#20170a;font-weight:700;font-size:15px;cursor:pointer}}button.secondary{{background:#2a3340;color:#d8dde5}}button.danger{{background:#4a2528;color:#ffd6d8}}button:disabled{{opacity:.5}}
-.row{{display:flex;gap:8px;flex-wrap:wrap}}.row button{{flex:1;min-width:120px}}.note{{font-size:12px;color:#98a2b1}}.warn{{border:1px solid #6b5424;background:#2a2417;border-radius:8px;padding:10px 12px;font-size:13px;color:#f0d9a7}}
-.card{{margin-top:14px;border:1px solid #343d4b;border-radius:10px;padding:12px;background:#141922}}.muted{{color:#98a2b1;font-size:13px}}.ok{{color:#8ee6a8}}.err{{color:#ff9da4}}a{{color:#f0c570}}
-</style></head><body><main>
-<h1>ShiftyPad 只读导入</h1>
-<p><span class="badge">只读</span> 不登录、不写入游戏账号；仅导入你本人确认公开的档案。</p>
-<div id="msg" class="muted">正在读取入口状态…</div>
-<div id="bound" class="card" hidden></div>
-<div id="form-wrap">
-  <div class="warn">数字 UID 与 ShiftyPad 的长 OpenID 不是同一种 ID。仅填数字 UID 时，只有运营者已导入可信映射才能继续；否则请粘贴本人官方 ShiftyPad 公开链接。<br>本流程不验证账号所有权，只保存明确标注的公开只读快照，不授予登录或私有权限。</div>
-  <label for="uid">游戏 UID（数字，仅本人标注）</label>
-  <input id="uid" inputmode="numeric" autocomplete="off" placeholder="例如 123456789">
-  <label for="server">区服</label>
-  <select id="server"><option value="">请选择</option><option value="global">国际服</option><option value="jp">日服</option><option value="kr">韩服</option><option value="na">北美服</option><option value="sea">东南亚服</option><option value="cn">国服</option></select>
-  <label for="public_ref">官方 ShiftyPad 公开链接或 OpenID（推荐）</label>
-  <input id="public_ref" autocomplete="off" placeholder="https://www.blablalink.com/shiftyspad/... 或 12345-1234567890">
-  <label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px"><input id="confirm" type="checkbox" style="width:auto;margin-top:4px"> <span>我确认该档案已对所有人公开，且我是本人或已获本人授权进行只读导入。</span></label>
-  <button id="preview">检查资料</button>
-  <div id="preview-box" class="card" hidden></div>
-</div>
-<p class="note">入口 10 分钟内有效；过期请回私聊重新发送 <code>/妮姬 我的妮姬 导入</code>。原有账号登录/扩展绑定不受影响。</p>
-</main>
-<script>
-const TOKEN={token_json};
-const $=id=>document.getElementById(id);
-const msg=(text,cls='')=>{{$('msg').textContent=text;$('msg').className='muted '+cls}};
-const text=(el,value)=>{{el.textContent=value==null?'未知':String(value)}};
-async function api(path,body){{
-  const r=await fetch(path,{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify(Object.assign({{token:TOKEN}},body||{{}}))}});
-  let data={{}};try{{data=await r.json()}}catch(e){{data={{ok:false,message:'响应格式错误'}}}}
-  if(!r.ok||data.ok===false){{const e=new Error(data.message||('HTTP '+r.status));e.data=data;throw e}}
-  return data;
-}}
-function showBinding(b){{
-  const box=$('bound');box.hidden=false;box.textContent='';
-  const title=document.createElement('div');title.className='ok';title.textContent='只读快照：'+(b.nickname||'未知');box.appendChild(title);
-  const lines=[['等级',b.level],['队伍总战力',b.team_combat],['角色数',b.nikke_count],['同步器',b.synchro_level],['普通主线',b.normal_stage],['困难主线',b.hard_stage],['同步时间',b.last_sync_at]];
-  lines.forEach(([k,v])=>{{const p=document.createElement('div');p.className='muted';p.textContent=k+'：'+(v==null||v===''?'未知':v);box.appendChild(p)}});
-  if(b.stale){{const p=document.createElement('div');p.className='err';p.textContent='公开状态或上游异常，当前为旧快照';box.appendChild(p)}}
-  const row=document.createElement('div');row.className='row';
-  const sync=document.createElement('button');sync.textContent='同步最新公开资料';sync.onclick=doSync;
-  const un=document.createElement('button');un.className='danger';un.textContent='解绑只读资料';un.onclick=doUnbind;
-  row.append(sync,un);box.appendChild(row);
-}}
-async function load(){{
-  try{{
-    const r=await fetch('/api/shiftypad/state?token='+encodeURIComponent(TOKEN));
-    const s=await r.json();
-    if(!s.ok){{msg(s.message||'入口不可用','err');$('form-wrap').hidden=true;return}}
-    if(s.status==='ready'||s.status==='stale'){{msg('已建立只读绑定','ok');showBinding(s.binding||{{}});$('form-wrap').hidden=true;return}}
-    msg('尚未绑定。填写下方资料并检查公开档案。');
-  }}catch(e){{msg('入口读取失败：'+e.message,'err')}}
-}}
-async function doPreview(){{
-  if(!$('confirm').checked){{msg('请先勾选公开与授权确认','err');return}}
-  const btn=$('preview');btn.disabled=true;msg('正在检查公开档案…');
-  try{{
-    const d=await api('/api/shiftypad/preview',{{uid:$('uid').value.trim(),server:$('server').value,public_ref:$('public_ref').value.trim(),confirmed_public:true}});
-    const box=$('preview-box');box.hidden=false;box.textContent='';
-    const title=document.createElement('div');title.className='ok';title.textContent='公开预览：'+(d.nickname||'未知');box.appendChild(title);
-    [['等级',d.level],['队伍总战力',d.team_combat],['角色数',d.nikke_count],['同步器',d.synchro_level],['身份来源',d.identity&&d.identity.source]].forEach(([k,v])=>{{const p=document.createElement('div');p.className='muted';p.textContent=k+'：'+(v==null||v===''?'未知':v);box.appendChild(p)}});
-    (d.warnings||[]).forEach(w=>{{const p=document.createElement('div');p.className='warn';p.textContent=w;box.appendChild(p)}});
-    const b=document.createElement('button');b.textContent='确认绑定只读资料';b.onclick=()=>doBind(d.preview_id);box.appendChild(b);
-    $('preview').hidden=true;msg('检查完成，请确认预览后绑定。','ok');
-  }}catch(e){{msg(e.message,'err');if(e.data&&e.data.fallback_url){{const a=document.createElement('a');a.href=e.data.fallback_url;a.target='_blank';a.rel='noopener';a.textContent='打开官方 ShiftyPad';msg(e.message+' ','err');$('msg').appendChild(a)}}}}finally{{btn.disabled=false}}
-}}
-async function doBind(id){{
-  try{{const d=await api('/api/shiftypad/bind',{{preview_id:id}});showBinding(d.status||{{}});$('form-wrap').hidden=true;msg('已建立只读绑定','ok')}}catch(e){{msg(e.message,'err')}}
-}}
-async function doSync(){{
-  msg('正在同步公开资料…');
-  try{{const d=await api('/api/shiftypad/sync');showBinding(d.binding||{{}});msg(d.message||'同步完成',d.changed?'ok':'')}}catch(e){{msg(e.message,'err');if(e.data&&e.data.binding)showBinding(e.data.binding)}}
-}}
-async function doUnbind(){{
-  if(!confirm('确认解绑只读资料？不会影响原账号登录绑定。'))return;
-  try{{await api('/api/shiftypad/unbind');$('bound').hidden=true;$('form-wrap').hidden=false;$('preview').hidden=false;$('preview-box').hidden=true;msg('已解绑只读资料')}}catch(e){{msg(e.message,'err')}}
-}}
-$('preview').onclick=doPreview;load();
-</script></body></html>"""
+        app.middlewares.insert(0, self.security)
+        app.add_routes(
+            [
+                web.get("/shiftypad/open/{token}", self.open_page),
+                web.post("/shiftypad/api/claim", self.claim),
+                web.get("/shiftypad/edit", self.edit_page),
+                web.get("/shiftypad/static/{name}", self.static_file),
+                web.get("/shiftypad/api/state", self.state_route),
+                web.post("/shiftypad/api/preview", self.preview),
+                web.post("/shiftypad/api/bind", self.bind),
+                web.post("/shiftypad/api/sync", self.sync),
+                web.post("/shiftypad/api/unbind", self.unbind),
+                web.post("/shiftypad/api/revoke", self.revoke),
+            ]
+        )
 
 
-def render_expired_page() -> str:
-    return """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>入口已过期</title></head><body style="background:#111318;color:#f2f3f5;font-family:sans-serif;padding:24px"><h1>入口已过期</h1><p>请回到机器人私聊，重新发送 <code>/妮姬 我的妮姬 导入</code> 获取新的短时入口。</p></body></html>"""
-
-
-__all__ = ["SESSIONS_KEY", "ShiftypadWebService", "render_expired_page", "render_page"]
+__all__ = [
+    "COOKIE",
+    "CSRF_HEADER",
+    "LINKS_KEY",
+    "MAX_BODY",
+    "SESSIONS_KEY",
+    "ShiftypadWebService",
+]

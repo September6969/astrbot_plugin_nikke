@@ -92,23 +92,44 @@ async def test_fetch_maps_public_statuses_and_never_sends_credentials() -> None:
 
 
 @pytest.mark.asyncio
-async def test_share_command_is_separate_from_uid_and_bound_profile() -> None:
+async def test_share_command_is_separate_from_uid_and_requires_opt_in_and_confirm() -> None:
     store = MemoryStore()
     services = toolbox_services(store)
+    calls: list[str] = []
 
-    async def lookup(_value):
+    async def lookup(value):
+        calls.append(value)
         return ShareProfile(
             nickname="公开昵称", level=333, team_combat=355847, nikke_count=111,
             synchro_level=248, normal_stage="40-35 STAGE", hard_stage="19-14 STAGE",
         )
 
-    services.share_lookup = lookup
     plugin = make_plugin_shell()
     plugin.config = {}
-    plugin.handlers.toolbox = ToolboxCommandHandler(services)
 
-    results = [item async for item in plugin.nikke(Event(), "我的妮姬", "分享", "AbCd_123-xyz")]
+    # 1. 默认关闭时 fail-closed，绝不触发外发请求。
+    services.public_share_enabled = False
+    services.share_lookup = None
+    plugin.handlers.toolbox = ToolboxCommandHandler(services)
+    disabled_res = [item async for item in plugin.nikke(Event(), "我的妮姬", "分享", "AbCd_123-xyz")]
+    assert "默认关闭" in disabled_res[0][1]
+    assert "enable_public_share_api" in disabled_res[0][1]
+    assert calls == []
+
+    # 2. 开启开关但未带“确认”时，只披露第三方传输范围，不发送请求。
+    services.public_share_enabled = True
+    services.share_lookup = lookup
+    disclosure_res = [item async for item in plugin.nikke(Event(), "我的妮姬", "分享", "AbCd_123-xyz")]
+    disclosure_text = disclosure_res[0][1]
+    assert "nikke-api.pages.dev" in disclosure_text
+    assert "仅发送你输入的公开分享 ID" in disclosure_text
+    assert "确认" in disclosure_text
+    assert calls == []
+
+    # 3. 用户明确“确认”后，执行只读查询。
+    results = [item async for item in plugin.nikke(Event(), "我的妮姬", "分享", "AbCd_123-xyz 确认")]
     text = results[0][1]
+    assert calls == ["AbCd_123-xyz"]
     assert "【公开分享资料】公开昵称" in text
     assert "不是本站 UID 接口" in text
     assert "同步器：248" in text

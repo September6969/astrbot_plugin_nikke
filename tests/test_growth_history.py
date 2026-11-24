@@ -208,3 +208,62 @@ def test_roster_snapshot_is_per_user_and_rejects_empty_lists() -> None:
     roster.record("user-a", [{"name_code": 1, "lv": 1}])
     assert roster.latest("user-a") is not None
     assert roster.latest("user-b") is None
+
+
+def test_identity_isolation_clear_all_and_generation_race_protection() -> None:
+    store = MemoryStore()
+    now = datetime(2026, 9, 21, 10, 0, tzinfo=timezone.utc)
+    hist = GrowthHistory(store, clock=lambda: now)
+    roster = RosterGrowthHistory(store, clock=lambda: now)
+
+    id1 = "global:81:111111"
+    id2 = "jp:82:222222"
+    hist.record("user-a", {"commander_level": 100}, now=now - timedelta(days=10), identity=id1)
+    hist.record("user-a", {"commander_level": 120}, now=now, identity=id1)
+    hist.record("user-a", {"commander_level": 250}, now=now, identity=id2)
+    roster.record("user-a", [{"name_code": 1001, "lv": 200}], now=now, identity=id1)
+
+    assert [p.fields["commander_level"] for p in hist.points("user-a", identity=id1)] == [100, 120]
+    assert [p.fields["commander_level"] for p in hist.points("user-a", identity=id2)] == [250]
+    assert [p.fields["commander_level"] for p in hist.query_range("user-a", days=3, identity=id1)] == [120]
+
+    # 模拟清空前启动的并发拉取：先读代数，再清空，最后旧拉取回写不得落盘。
+    stale_gen = hist.generation("user-a")
+    hist.clear("user-a")
+    roster.clear("user-a")
+    assert hist.points("user-a", identity=id1) == ()
+    assert hist.points("user-a", identity=id2) == ()
+    assert roster.latest("user-a", identity=id1) is None
+
+    stale = hist.record(
+        "user-a", {"commander_level": 111}, now=now, identity=id1, expected_generation=stale_gen
+    )
+    stale_roster = roster.record(
+        "user-a", [{"name_code": 1001, "lv": 205}], now=now, identity=id1, expected_generation=stale_gen
+    )
+    assert stale.recorded is False
+    assert stale_roster.recorded is False
+    assert hist.points("user-a", identity=id1) == ()
+    assert roster.latest("user-a", identity=id1) is None
+
+
+def test_roster_preserves_none_vs_zero_and_same_day_changes() -> None:
+    store = MemoryStore()
+    roster = RosterGrowthHistory(store, clock=lambda: datetime(2026, 9, 21, tzinfo=timezone.utc))
+    d1 = datetime(2026, 9, 20, 1, 0, tzinfo=timezone.utc)
+    d2_am = datetime(2026, 9, 21, 1, 0, tzinfo=timezone.utc)
+    d2_pm = datetime(2026, 9, 21, 5, 0, tzinfo=timezone.utc)
+
+    roster.record("user-a", [{"name_code": 1001, "lv": None, "grade": 0, "combat": None}], now=d1)
+    first = roster.latest("user-a")
+    assert first.characters[0].level is None
+    assert first.characters[0].grade == 0
+    assert first.characters[0].combat is None
+
+    # d1 lv=None -> d2 lv=200 不应凭空伪造从 0 到 200 的变化；突破 0 -> 1 应记录。
+    up = roster.record("user-a", [{"name_code": 1001, "lv": 200, "grade": 1}], now=d2_am)
+    assert [(c.field, c.before, c.after) for c in up.changes] == [("grade", 0, 1)]
+
+    # 同天再次读取名单无新变化时，保留当天已记录的变化摘要。
+    repeat = roster.record("user-a", [{"name_code": 1001, "lv": 200, "grade": 1}], now=d2_pm)
+    assert [(c.field, c.before, c.after) for c in repeat.changes] == [("grade", 0, 1)]

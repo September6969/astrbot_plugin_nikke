@@ -104,16 +104,41 @@ class ShiftypadCommandHandler(ToolboxDomainHandler):
         ]
         if status.get("last_error"):
             lines.append("最近错误：" + str(status["last_error"]))
+        web = getattr(self.services, "shiftypad_web", None)
+        if web is not None and callable(getattr(web, "active", None)) and not web.active():
+            lines.append("注：管理员当前未开启 enable_shiftypad_readonly，暂不可打开网页同步；如需重新同步请联系管理员开启。")
         lines.append("解绑或同步请使用同一个短时网页入口；不会影响原账号登录绑定。")
         return "\n".join(lines)
 
     async def _share_lookup(self, value: str) -> str:
+        enabled = getattr(self.services, "public_share_enabled", None)
         lookup = getattr(self.services, "share_lookup", None)
-        if lookup is None:
-            return "公开分享资料入口尚未装配。"
-        if not value.strip():
-            return "用法：/妮姬 我的妮姬 分享 <BlablaLink 公开分享 ID>（不是 UID，不要粘贴完整 URL）"
-        profile = await lookup(value.strip())
+        if enabled is False or lookup is None:
+            return (
+                "第三方公开分享资料查询默认关闭。\n"
+                "原因：该功能会将输入的分享 ID 发送至第三方服务 nikke-api.pages.dev 只读转发（并非 Shift Up 或 BlaBlaLink 官方接口）。\n"
+                "如需开启，请管理员在插件配置中启用 enable_public_share_api。"
+            )
+        tokens = [part for part in value.strip().split() if part]
+        if not tokens:
+            return (
+                "用法：/妮姬 我的妮姬 分享 <BlablaLink 公开分享 ID> 确认\n"
+                "说明：仅发送你输入的公开分享 ID 至第三方 nikke-api.pages.dev（不发送 QQ 号、Cookie 或绑定凭据）；不是 UID，不要粘贴完整 URL。"
+            )
+        confirmed = False
+        if len(tokens) >= 2 and tokens[-1].casefold() in {"确认", "confirm", "--confirm"}:
+            confirmed = True
+            share_id = tokens[0]
+        else:
+            share_id = tokens[0]
+        if not confirmed:
+            return (
+                "即将向第三方公开转发服务 https://nikke-api.pages.dev 发送请求：\n"
+                "· 传输范围：仅发送你输入的公开分享 ID（不会发送你的 QQ 号、Cookie 或本地绑定凭据）\n"
+                "· 性质说明：该接口并非官方服务，分享 ID 也不代表账号归属\n"
+                f"如确认传输并查询，请发送：/妮姬 我的妮姬 分享 {share_id} 确认"
+            )
+        profile = await lookup(share_id)
         def shown(item: Any) -> str:
             return "未知" if item is None else str(item)
         return "\n".join(

@@ -16,12 +16,14 @@ import asyncio
 import json
 import os
 import re
+import signal
 import subprocess
 import sys
 import tempfile
+import weakref
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Mapping, Sequence
 from urllib.parse import urlparse
 
 ENGINE_REPO = "Jgaram/nikke-calc"
@@ -29,6 +31,26 @@ PINNED_COMMIT = "67835ca3033a95482749ea2db35a8ee2a0856a92"
 ENGINE_SOURCE_URL = f"https://github.com/{ENGINE_REPO}/tree/{PINNED_COMMIT}"
 ENGINE_PAGE_URL = "https://nikkehub.com/zh-tw/about"
 LICENSE = "MIT"
+MAX_OUTPUT_BYTES = 256 * 1024
+DEFAULT_BATCH_TIMEOUT = 180.0
+_COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
+_ENV_ALLOWLIST = (
+    "PATH",
+    "SYSTEMROOT",
+    "WINDIR",
+    "COMSPEC",
+    "PATHEXT",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "HOME",
+    "USERPROFILE",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "SSL_CERT_FILE",
+    "SSL_CERT_DIR",
+)
 ELEMENT_CODES = {
     "燃烧": "작열", "风压": "풍압", "铁甲": "철갑", "电击": "전격", "水冷": "수냉",
     "Fire": "작열", "Wind": "풍압", "Iron": "철갑", "Electric": "전격", "Water": "수냉",
@@ -61,7 +83,93 @@ class EngineEstimate:
 
     @property
     def version_ok(self) -> bool:
-        return self.commit == PINNED_COMMIT and self.dirty is not True
+        return self.commit == PINNED_COMMIT and self.dirty is False
+
+
+def _minimal_env() -> dict[str, str]:
+    """只向外部引擎传递最小运行环境变量，剥离插件密钥与凭据。"""
+    env = {
+        key: value
+        for key in _ENV_ALLOWLIST
+        if (value := os.environ.get(key)) is not None
+    }
+    env.update(
+        {
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+            "PYTHONNOUSERSITE": "1",
+        }
+    )
+    return env
+
+
+def _terminate_process_tree(proc: subprocess.Popen[Any]) -> None:
+    """终止引擎子进程及同一进程组下的派生进程。"""
+    if proc.poll() is not None:
+        return
+    try:
+        if os.name == "nt":
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                env=_minimal_env(),
+                timeout=3.0,
+                check=False,
+            )
+        else:
+            os.killpg(proc.pid, signal.SIGKILL)
+    except OSError:
+        pass
+    if proc.poll() is None:
+        try:
+            proc.kill()
+        except OSError:
+            pass
+    try:
+        proc.wait(timeout=3.0)
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+
+
+def _inspect_git_repo(engine_path: Path) -> tuple[bool, str, bool | None, str]:
+    """当目录为独立 Git 检出时，核验真实 commit 与干净状态。"""
+    if not (engine_path / ".git").exists():
+        return False, "", None, ""
+    env = _minimal_env()
+    try:
+        head = subprocess.run(
+            ["git", "-C", str(engine_path), "rev-parse", "HEAD"],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+            timeout=5.0,
+            check=False,
+        )
+        status = subprocess.run(
+            ["git", "-C", str(engine_path), "status", "--porcelain"],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+            timeout=5.0,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return True, "", None, f"无法核验 nikke-calc Git 版本（{type(exc).__name__}）"
+    if head.returncode != 0 or status.returncode != 0:
+        return True, "", None, "无法核验 nikke-calc Git 仓库状态"
+    commit = head.stdout.strip().casefold()
+    if not _COMMIT_RE.fullmatch(commit):
+        return True, "", None, "nikke-calc Git HEAD 不是合法 40 位 SHA"
+    dirty = bool(status.stdout.strip())
+    return True, commit, dirty, ""
 
 
 def load_name_mapping(path: str | Path) -> dict[str, str]:
@@ -107,17 +215,38 @@ class SoloRaidDamageEngine:
         *,
         python: str | None = None,
         timeout: float = 90.0,
+        batch_timeout: float | None = None,
         concurrency: int = 2,
         mapping_error: str = "",
         work_dir: str | Path | None = None,
+        allow_unverified: bool = False,
+        require_git: bool = False,
     ) -> None:
         self.engine_path = Path(engine_path)
         self.mapping = dict(mapping)
         self.python = python or sys.executable
-        self.timeout = timeout
+        self.timeout = float(timeout)
+        self.batch_timeout = (
+            float(batch_timeout)
+            if batch_timeout is not None
+            else min(DEFAULT_BATCH_TIMEOUT, max(self.timeout, self.timeout * 2.0))
+        )
         self.concurrency = max(1, min(int(concurrency), 5))
         self.mapping_error = mapping_error
         self.work_dir = Path(work_dir) if work_dir else self.engine_path.parent / ".nikke-calc-runs"
+        self.allow_unverified = bool(allow_unverified)
+        self.require_git = bool(require_git)
+        self._semaphores: weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, asyncio.Semaphore] = (
+            weakref.WeakKeyDictionary()
+        )
+
+    def _semaphore(self) -> asyncio.Semaphore:
+        loop = asyncio.get_running_loop()
+        sem = self._semaphores.get(loop)
+        if sem is None:
+            sem = asyncio.Semaphore(self.concurrency)
+            self._semaphores[loop] = sem
+        return sem
 
     @property
     def available(self) -> bool:
@@ -162,8 +291,9 @@ class SoloRaidDamageEngine:
         except EngineNameMappingError as exc:
             return EngineTeamEstimate(index, None, str(exc))
         self.work_dir.mkdir(parents=True, exist_ok=True)
-        env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
+        env = _minimal_env()
         stdout_path = stderr_path = None
+        proc: subprocess.Popen[Any] | None = None
         try:
             with tempfile.NamedTemporaryFile(
                 "w+", dir=self.work_dir, suffix=".out.json", delete=False, encoding="utf-8"
@@ -171,7 +301,12 @@ class SoloRaidDamageEngine:
                 "w+", dir=self.work_dir, suffix=".err.log", delete=False, encoding="utf-8"
             ) as stderr_file:
                 stdout_path, stderr_path = Path(stdout_file.name), Path(stderr_file.name)
-                completed = subprocess.run(
+                popen_kwargs: dict[str, Any] = {}
+                if os.name == "nt":
+                    popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+                else:
+                    popen_kwargs["start_new_session"] = True
+                proc = subprocess.Popen(
                     [
                         self.python, "-m", "runner.sim", "--request",
                         json.dumps(request, ensure_ascii=False), "--json",
@@ -181,20 +316,26 @@ class SoloRaidDamageEngine:
                     stdin=subprocess.DEVNULL,
                     stdout=stdout_file,
                     stderr=stderr_file,
-                    timeout=self.timeout,
-                    check=False,
+                    **popen_kwargs,
                 )
+                returncode = proc.wait(timeout=self.timeout)
+            if stdout_path.stat().st_size > MAX_OUTPUT_BYTES:
+                return EngineTeamEstimate(index, None, "引擎输出超过大小上限")
             text = stdout_path.read_text(encoding="utf-8", errors="replace").strip()
-            if completed.returncode != 0:
-                detail = _engine_error(text) or stderr_path.read_text(
-                    encoding="utf-8", errors="replace"
-                ).strip()[:200]
+            if returncode != 0:
+                with stderr_path.open("rb") as handle:
+                    err_raw = handle.read(MAX_OUTPUT_BYTES)
+                detail = _engine_error(text) or err_raw.decode("utf-8", errors="replace").strip()[:200]
                 return EngineTeamEstimate(index, None, detail or "引擎返回非零状态")
         except subprocess.TimeoutExpired:
+            if proc is not None:
+                _terminate_process_tree(proc)
             return EngineTeamEstimate(index, None, "引擎计算超时")
         except OSError as exc:
             return EngineTeamEstimate(index, None, f"引擎无法启动（{type(exc).__name__}）")
         finally:
+            if proc is not None and proc.poll() is None:
+                _terminate_process_tree(proc)
             for path in (stdout_path, stderr_path):
                 if path is not None:
                     path.unlink(missing_ok=True)
@@ -208,7 +349,9 @@ class SoloRaidDamageEngine:
         if isinstance(damage, bool) or not isinstance(damage, int) or damage < 0:
             return EngineTeamEstimate(index, None, "引擎结果缺少有效 total_damage")
         evaluator = payload.get("evaluator") if isinstance(payload.get("evaluator"), Mapping) else {}
-        commit = str(evaluator.get("commit") or "")
+        commit = str(evaluator.get("commit") or "").strip().casefold()
+        if not _COMMIT_RE.fullmatch(commit):
+            commit = ""
         dirty = evaluator.get("dirty") if isinstance(evaluator.get("dirty"), bool) else None
         return EngineTeamEstimate(index, damage, "", commit, dirty)
 
@@ -219,27 +362,78 @@ class SoloRaidDamageEngine:
         """逐队估算；任一步失败都明确记录，不把未知当成 0 或猜测值。"""
         if not self.available:
             return EngineEstimate(False, reason=self.reason())
-        semaphore = asyncio.Semaphore(self.concurrency)
+
+        has_git, git_commit, git_dirty, git_err = await asyncio.to_thread(
+            _inspect_git_repo, self.engine_path
+        )
+        if self.require_git and not has_git:
+            return EngineEstimate(
+                False,
+                reason="外部 nikke-calc 缺少独立 Git 仓库，无法核验固定基线版本。",
+            )
+        if has_git:
+            if git_err:
+                return EngineEstimate(False, commit=git_commit, dirty=git_dirty, reason=git_err)
+            if not self.allow_unverified and (git_commit != PINNED_COMMIT or git_dirty is not False):
+                return EngineEstimate(
+                    False,
+                    commit=git_commit,
+                    dirty=git_dirty,
+                    reason=(
+                        f"外部 nikke-calc 版本校验失败（commit={git_commit[:10] or '未知'}, "
+                        f"dirty={git_dirty}，要求 {PINNED_COMMIT[:10]} 且工作区干净）。"
+                    ),
+                )
+
+        semaphore = self._semaphore()
 
         async def limited(team: Any) -> EngineTeamEstimate:
             async with semaphore:
                 return await self._run_team(team, boss_element)
 
-        results = tuple(await asyncio.gather(*(limited(team) for team in teams)))
-        commits = {item.commit for item in results if item.commit}
-        commit = next(iter(commits)) if len(commits) == 1 else ("" if commits else PINNED_COMMIT)
-        dirty_values = [item.dirty for item in results if item.dirty is not None]
-        dirty = True if any(dirty_values) else (False if dirty_values else None)
-        label = f"nikke-calc {(commit or PINNED_COMMIT)[:10]}（{LICENSE}，外部本地引擎）"
+        try:
+            results = tuple(
+                await asyncio.wait_for(
+                    asyncio.gather(*(limited(team) for team in teams)),
+                    timeout=self.batch_timeout,
+                )
+            )
+        except asyncio.TimeoutError:
+            return EngineEstimate(
+                False,
+                commit=git_commit if has_git else "",
+                dirty=git_dirty if has_git else None,
+                reason="外部 nikke-calc 批次计算超时，已中止本轮估算。",
+            )
+
         successes = [item for item in results if item.damage is not None]
-        total = sum(item.damage for item in successes) if len(successes) == len(results) and results else None
+        if has_git:
+            commit = git_commit
+            dirty = git_dirty
+            reported_commits = {item.commit for item in successes if item.commit}
+            if reported_commits and reported_commits != {git_commit}:
+                commit = ""
+        else:
+            commits = {item.commit for item in results if item.commit}
+            commit = next(iter(commits)) if len(commits) == 1 else ""
+            dirty_values = [item.dirty for item in results if item.dirty is not None]
+            if any(value is True for value in dirty_values):
+                dirty = True
+            elif len(results) > 0 and len(dirty_values) == len(results) and all(v is False for v in dirty_values):
+                dirty = False
+            else:
+                dirty = None
+
+        verified = commit == PINNED_COMMIT and dirty is False
+        label = f"nikke-calc {commit[:10] if commit else '未核验'}（{LICENSE}，外部本地引擎）"
+        total = sum(item.damage for item in successes if item.damage is not None) if len(successes) == len(results) and results else None
         errors = [f"第 {item.index} 队：{item.error}" for item in results if item.error]
         pinned = f"{ENGINE_REPO}@{PINNED_COMMIT}"
-        actual = f"{ENGINE_REPO}@{commit}" if commit else pinned
-        version_note = "" if commit == PINNED_COMMIT and dirty is not True else "（引擎版本与固定基线不一致，未验证）"
+        actual = f"{ENGINE_REPO}@{commit}" if commit else f"{ENGINE_REPO}@unverified"
+        version_note = "" if verified else "（引擎版本与固定基线未完成核验或存在未提交改动）"
         note = (
             f"由外部 {actual}（{LICENSE}）{version_note}计算；"
-            "使用引擎默认敌人与已知赛季属性，未提供赛季 43 防御/HP，因此不是官方伤害数值。"
+            f"使用引擎默认敌人与已知赛季属性（基准 {pinned}），未提供官方防御/HP 精确参数，因此不是官方伤害数值。"
         )
         if errors:
             note += " 部分队伍无法估伤：" + "；".join(errors)

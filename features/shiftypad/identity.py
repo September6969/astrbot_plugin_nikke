@@ -20,7 +20,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 from .models import (
     SERVER_ALIASES,
@@ -60,11 +60,11 @@ def encode_shiftypad_uid(openid: str) -> str:
     value = str(openid or "").strip()
     if not OPENID_RE.fullmatch(value):
         raise ShiftypadInputError("ShiftyPad OpenID 格式不符")
-    return base64.b64encode(unquote(value).encode("utf-8")).decode("ascii")
+    return base64.b64encode(value.encode("utf-8")).decode("ascii")
 
 
 def official_share_url(openid: str) -> str:
-    return f"{OFFICIAL_FALLBACK}?uid={encode_shiftypad_uid(openid)}"
+    return f"{OFFICIAL_FALLBACK}?uid={quote(encode_shiftypad_uid(openid), safe='')}"
 
 
 def _decode_uid_param(value: str) -> str:

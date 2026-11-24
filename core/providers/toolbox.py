@@ -24,7 +24,12 @@ from ...features.calendar.application import CalendarApplication
 from ...features.character.identity import CharacterDirectoryResolver
 from ...features.counsel.bank import CounselBank
 from ...features.favorite_grid.grid import FavoriteRanking
-from ...features.growth.history import GrowthHistory, RosterGrowthHistory
+from ...features.growth.history import (
+    GrowthHistory,
+    RosterGrowthHistory,
+    growth_identity_key,
+    snapshot_from_dashboard,
+)
 from ...features.identity.public_profile import ManualProfileStore
 from ...features.overload_advice.advisor import (
     CharacterTargets,
@@ -76,18 +81,54 @@ class ToolboxServices:
     overload_default_counts: Mapping[str, int] | None = None
     shiftypad_web: Any | None = None
     shiftypad_readonly: Any | None = None
+    public_share_enabled: bool = False
 
-    def record_roster(self, actor_id: str, rows: Any) -> Any:
-        """角色名单成功读取后写入角色成长快照。"""
-        return self.roster_growth.record(actor_id, rows)
+    def growth_generation(self, actor_id: str) -> int:
+        """读取清空代数快照，防止清零后并发旧请求回写。"""
+        return self.growth.generation(actor_id)
 
-    def record_growth(self, context: Any, dashboard: Any) -> Any:
-        """成功账号同步后写入成长快照；失败由调用方降级为提示。"""
-        from ...features.growth.history import snapshot_from_dashboard
+    def _growth_identity(self, actor_id: str, account: Any = None, identity: str = "") -> str:
+        if identity:
+            return str(identity).strip()
+        if account is not None:
+            return growth_identity_key(account)
+        if self.account_reader is not None and hasattr(self.account_reader, "get_account"):
+            return growth_identity_key(self.account_reader.get_account(actor_id))
+        return ""
 
+    def record_roster(
+        self,
+        actor_id: str,
+        rows: Any,
+        *,
+        account: Mapping[str, Any] | None = None,
+        identity: str = "",
+        expected_generation: int | None = None,
+    ) -> Any:
+        """角色名单成功读取后按游戏身份隔离写入角色成长快照。"""
+        return self.roster_growth.record(
+            actor_id,
+            rows,
+            identity=self._growth_identity(actor_id, account=account, identity=identity),
+            expected_generation=expected_generation,
+        )
+
+    def record_growth(
+        self,
+        context: Any,
+        dashboard: Any,
+        *,
+        account: Mapping[str, Any] | None = None,
+        identity: str = "",
+        expected_generation: int | None = None,
+    ) -> Any:
+        """成功账号同步后按游戏身份隔离写入成长快照；失败由调用方降级为提示。"""
+        actor_id = str(getattr(context, "actor_id", "") or "")
         return self.growth.record(
-            str(getattr(context, "actor_id", "") or ""),
+            actor_id,
             snapshot_from_dashboard(dashboard),
+            identity=self._growth_identity(actor_id, account=account, identity=identity),
+            expected_generation=expected_generation,
         )
 
 
@@ -243,6 +284,7 @@ def create_toolbox_services(
     if not isinstance(damage_model, Mapping):
         damage_model = None
     rows = _character_rows(plugin_dir)
+    public_share_enabled = config.get("enable_public_share_api") is True
     return ToolboxServices(
         calendar=calendar,
         feeds=feeds,
@@ -259,7 +301,8 @@ def create_toolbox_services(
         solo_plans=SoloRaidPlanStore(store, clock=clock),
         solo_damage_model=damage_model,
         solo_engine=solo_engine,
-        share_lookup=fetch_public_share,
+        share_lookup=fetch_public_share if public_share_enabled else None,
+        public_share_enabled=public_share_enabled,
         roster_loader=roster_loader,
         profile_loader=profile_loader,
         account_reader=account_reader,

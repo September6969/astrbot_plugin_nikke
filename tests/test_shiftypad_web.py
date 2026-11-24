@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""ShiftyPad 短时网页：成功、公开确认、过期、跨用户与隐私边界（aiohttp 本地）。"""
+"""ShiftyPad 同源会话网页：引导兑换、Cookie+CSRF+Origin、禁用开关与隐私边界（aiohttp 本地）。"""
 
 from __future__ import annotations
 
@@ -20,9 +20,14 @@ from astrbot_plugin_nikke.features.shiftypad.models import (
     ShiftypadUpstreamError,
 )
 from astrbot_plugin_nikke.features.shiftypad.storage import ShiftypadReadOnlyStore
-from astrbot_plugin_nikke.integrations.web.shiftypad_service import ShiftypadWebService
+from astrbot_plugin_nikke.integrations.web.shiftypad_service import (
+    COOKIE,
+    CSRF_HEADER,
+    ShiftypadWebService,
+)
 
 OPENID = "12345-1234567890"
+ORIGIN = "https://example.test"
 
 
 class MemoryStore:
@@ -83,17 +88,20 @@ class FakeFetcher:
         return self.value
 
 
-async def build(clock):
+async def build(clock, *, enabled_box=None, session_ttl: int = 3600):
     store = MemoryStore()
     readonly = ShiftypadReadOnlyStore(store, clock=lambda: datetime.now(timezone.utc))
     fetcher = FakeFetcher()
+    flag = enabled_box if enabled_box is not None else [True]
     service = ShiftypadWebService(
         store=store,
         readonly=readonly,
         resolver=mapping(),
         fetcher=fetcher,
-        site_origin="https://example.test",
+        site_origin=ORIGIN,
         clock=clock,
+        session_ttl=session_ttl,
+        enabled=lambda: flag[0],
     )
     app = web.Application()
     service.mount(app)
@@ -106,42 +114,85 @@ def token_from(link: str) -> str:
     return link.rsplit("/", 1)[-1]
 
 
+async def claim_headers(client: TestClient, token: str) -> dict[str, str]:
+    claimed = await client.post(
+        "/shiftypad/api/claim",
+        data={"token": token},
+        headers={"Origin": ORIGIN},
+        allow_redirects=False,
+    )
+    assert claimed.status == 303
+    assert claimed.headers["Location"] == "/shiftypad/edit"
+    morsel = claimed.cookies[COOKIE]
+    assert morsel["secure"] and morsel["httponly"] and morsel["samesite"] == "Lax"
+    cookie = morsel.value
+    state = await client.get("/shiftypad/api/state", headers={"Cookie": f"{COOKIE}={cookie}"})
+    assert state.status == 200
+    body = await state.json()
+    return {
+        "Cookie": f"{COOKIE}={cookie}",
+        "Origin": ORIGIN,
+        CSRF_HEADER: body["csrf"],
+    }
+
+
 @pytest.mark.asyncio
-async def test_page_preview_bind_sync_and_unbind_flow() -> None:
+async def test_open_claim_preview_bind_sync_unbind_and_csp() -> None:
     clock = [1000.0]
     client, service, _, fetcher, _ = await build(lambda: clock[0])
     try:
         link = service.create_link("user-a")
+        assert link.startswith(f"{ORIGIN}/shiftypad/open/")
         token = token_from(link)
-        page = await client.get(f"/shiftypad/{token}")
-        assert page.status == 200
-        assert "ShiftyPad 只读导入" in await page.text()
 
-        state = await client.get("/api/shiftypad/state", params={"token": token})
+        # GET /shiftypad/open/{token} 不消费令牌、禁止被嵌入、无 unsafe-inline。
+        open_resp = await client.get(f"/shiftypad/open/{token}")
+        assert open_resp.status == 200
+        csp = open_resp.headers["Content-Security-Policy"]
+        assert "frame-ancestors 'none'" in csp
+        assert "unsafe-inline" not in csp
+        assert open_resp.headers["Referrer-Policy"] == "no-referrer"
+
+        headers = await claim_headers(client, token)
+        # 一次性令牌不能二次兑换。
+        replay = await client.post(
+            "/shiftypad/api/claim",
+            data={"token": token},
+            headers={"Origin": ORIGIN},
+        )
+        assert replay.status == 410
+
+        edit_page = await client.get("/shiftypad/edit", headers={"Cookie": headers["Cookie"]})
+        assert edit_page.status == 200
+        edit_html = await edit_page.text()
+        assert "ShiftyPad 只读导入" in edit_html
+        assert token not in edit_html
+
+        state = await client.get("/shiftypad/api/state", headers={"Cookie": headers["Cookie"]})
         body = await state.json()
         assert body["ok"] and body["status"] == "unbound"
         assert body["uid_standalone_supported"] is False
 
-        # 未确认公开/授权时拒绝预览。
         no_confirm = await client.post(
-            "/api/shiftypad/preview",
-            json={"token": token, "uid": "123456789", "server": "na", "confirmed_public": False},
+            "/shiftypad/api/preview",
+            headers=headers,
+            json={"uid": "123456789", "server": "na", "confirmed_public": False},
         )
         assert no_confirm.status == 400
         assert (await no_confirm.json())["code"] == "PUBLIC_CONFIRM_REQUIRED"
 
-        # 只有数字 UID 且无可信映射时明确 unresolved，不猜接口。
         uid_only = await client.post(
-            "/api/shiftypad/preview",
-            json={"token": token, "uid": "999999999", "server": "jp", "confirmed_public": True},
+            "/shiftypad/api/preview",
+            headers=headers,
+            json={"uid": "999999999", "server": "jp", "confirmed_public": True},
         )
         assert uid_only.status == 400
         assert (await uid_only.json())["code"] == "UID_UNRESOLVED"
 
         preview = await client.post(
-            "/api/shiftypad/preview",
+            "/shiftypad/api/preview",
+            headers=headers,
             json={
-                "token": token,
                 "uid": "123456789",
                 "server": "na",
                 "public_ref": official_share_url(OPENID),
@@ -152,77 +203,98 @@ async def test_page_preview_bind_sync_and_unbind_flow() -> None:
         preview_body = await preview.json()
         assert preview_body["nickname"] == "公开昵称"
         assert "openid" not in preview_body.get("identity", {})
-        assert preview_body["preview_id"]
 
         bound = await client.post(
-            "/api/shiftypad/bind",
-            json={"token": token, "preview_id": preview_body["preview_id"]},
+            "/shiftypad/api/bind",
+            headers=headers,
+            json={"preview_id": preview_body["preview_id"]},
         )
         assert bound.status == 200
         assert (await bound.json())["status"]["nickname"] == "公开昵称"
-        bound_state = await client.get("/api/shiftypad/state", params={"token": token})
-        bound_state_text = await bound_state.text()
-        assert OPENID not in bound_state_text
-        assert (await bound_state.json())["uid_mapping_available"] is True
+        bound_state = await client.get("/shiftypad/api/state", headers={"Cookie": headers["Cookie"]})
+        assert OPENID not in await bound_state.text()
 
         fetcher.value = profile("新昵称", 301)
-        synced = await client.post("/api/shiftypad/sync", json={"token": token})
+        synced = await client.post("/shiftypad/api/sync", headers=headers, json={})
         assert synced.status == 200
-        synced_body = await synced.json()
-        assert synced_body["changed"] is True
-        assert synced_body["binding"]["level"] == 301
+        assert (await synced.json())["binding"]["level"] == 301
 
         fetcher.error = ShiftypadPrivateError("公开开关已关闭")
-        stale = await client.post("/api/shiftypad/sync", json={"token": token})
+        stale = await client.post("/shiftypad/api/sync", headers=headers, json={})
         assert stale.status == 409
-        stale_body = await stale.json()
-        assert stale_body["code"] == "PRIVATE"
-        assert stale_body["binding"]["nickname"] == "新昵称"
+        assert (await stale.json())["code"] == "PRIVATE"
 
-        unbound = await client.post("/api/shiftypad/unbind", json={"token": token})
+        # stale 状态依然允许重试恢复。
+        fetcher.error = None
+        fetcher.value = profile("恢复昵称", 302)
+        recovered = await client.post("/shiftypad/api/sync", headers=headers, json={})
+        assert recovered.status == 200
+        assert (await recovered.json())["status"] == "ready"
+
+        unbound = await client.post("/shiftypad/api/unbind", headers=headers, json={})
         assert unbound.status == 200
-        final_state = await client.get("/api/shiftypad/state", params={"token": token})
+        final_state = await client.get("/shiftypad/api/state", headers={"Cookie": headers["Cookie"]})
         assert (await final_state.json())["status"] == "unbound"
     finally:
         await client.close()
 
 
 @pytest.mark.asyncio
-async def test_expiry_cross_user_and_invalid_tokens() -> None:
+async def test_security_boundaries_origin_csrf_body_limit_and_disable_switch() -> None:
     clock = [1000.0]
-    client, service, _, _, _ = await build(lambda: clock[0])
+    enabled = [True]
+    client, service, _, _, _ = await build(lambda: clock[0], enabled_box=enabled, session_ttl=600)
     try:
+        assert (await client.get("/shiftypad/edit")).status == 401
         token_a = token_from(service.create_link("user-a"))
         token_b = token_from(service.create_link("user-b"))
-        assert (await client.get(f"/shiftypad/{'x' * 32}")).status == 410
+        headers_a = await claim_headers(client, token_a)
+        headers_b = await claim_headers(client, token_b)
 
-        # user-b 的入口看不到 user-a 的绑定；两个入口只按 token 所属用户操作。
-        preview = await client.post(
-            "/api/shiftypad/preview",
-            json={
-                "token": token_a, "uid": "123456789", "server": "na",
-                "public_ref": official_share_url(OPENID), "confirmed_public": True,
-            },
+        # Origin 与 CSRF 防护。
+        bad_origin = await client.post(
+            "/shiftypad/api/unbind",
+            headers={"Cookie": headers_a["Cookie"], "Origin": "https://evil.example", CSRF_HEADER: headers_a[CSRF_HEADER]},
+            json={},
         )
-        assert preview.status == 200
-        preview_id = (await preview.json())["preview_id"]
-        assert (await client.post(
-            "/api/shiftypad/bind", json={"token": token_a, "preview_id": preview_id}
-        )).status == 200
-        state_b = await client.get("/api/shiftypad/state", params={"token": token_b})
-        assert (await state_b.json())["status"] == "unbound"
+        assert bad_origin.status == 403
+        assert (await bad_origin.json())["code"] == "FORBIDDEN_ORIGIN"
 
+        bad_csrf = await client.post(
+            "/shiftypad/api/unbind",
+            headers={"Cookie": headers_a["Cookie"], "Origin": ORIGIN, CSRF_HEADER: "wrong"},
+            json={},
+        )
+        assert bad_csrf.status == 403
+        assert (await bad_csrf.json())["code"] == "FORBIDDEN_CSRF"
+
+        # 超过 16KB 的请求体必须被 413 拦截。
+        oversized = await client.post(
+            "/shiftypad/api/preview",
+            headers=headers_a,
+            json={"confirmed_public": True, "public_ref": "a" * (20 * 1024)},
+        )
+        assert oversized.status == 413
+
+        # B 用户看不到 A 的绑定。
+        ok_p = await client.post(
+            "/shiftypad/api/preview",
+            headers=headers_a,
+            json={"uid": "123456789", "server": "na", "public_ref": official_share_url(OPENID), "confirmed_public": True},
+        )
+        pid = (await ok_p.json())["preview_id"]
+        assert (await client.post("/shiftypad/api/bind", headers=headers_a, json={"preview_id": pid})).status == 200
+        assert (await (await client.get("/shiftypad/api/state", headers={"Cookie": headers_b["Cookie"]})).json())["status"] == "unbound"
+
+        # 会话过期后不可用。
         clock[0] += 601
-        expired = await client.get("/api/shiftypad/state", params={"token": token_a})
-        assert (await expired.json())["status"] == "expired"
-        expired_page = await client.get(f"/shiftypad/{token_a}")
-        assert expired_page.status == 410
+        assert (await client.get("/shiftypad/api/state", headers={"Cookie": headers_a["Cookie"]})).status == 401
 
-        invalid = await client.post(
-            "/api/shiftypad/preview",
-            json={"token": "short", "confirmed_public": True},
-        )
-        assert invalid.status == 410
+        # 关闭配置开关后 fail-closed。
+        enabled[0] = False
+        with pytest.raises(ValueError, match="enable_shiftypad_readonly"):
+            service.create_link("user-c")
+        assert (await client.get("/shiftypad/api/state", headers={"Cookie": headers_b["Cookie"]})).status == 404
     finally:
         await client.close()
 
@@ -232,29 +304,25 @@ async def test_upstream_failure_and_preview_mismatch_are_explicit() -> None:
     clock = [1000.0]
     client, service, _, fetcher, _ = await build(lambda: clock[0])
     try:
-        token = token_from(service.create_link("user-a"))
+        headers = await claim_headers(client, token_from(service.create_link("user-a")))
         fetcher.error = ShiftypadUpstreamError("上游 503")
         failed = await client.post(
-            "/api/shiftypad/preview",
-            json={
-                "token": token, "uid": "", "server": "",
-                "public_ref": official_share_url(OPENID), "confirmed_public": True,
-            },
+            "/shiftypad/api/preview",
+            headers=headers,
+            json={"uid": "", "server": "", "public_ref": official_share_url(OPENID), "confirmed_public": True},
         )
         assert failed.status == 502
         assert (await failed.json())["code"] == "UPSTREAM"
 
         fetcher.error = None
         ok = await client.post(
-            "/api/shiftypad/preview",
-            json={
-                "token": token, "uid": "", "server": "",
-                "public_ref": official_share_url(OPENID), "confirmed_public": True,
-            },
+            "/shiftypad/api/preview",
+            headers=headers,
+            json={"uid": "", "server": "", "public_ref": official_share_url(OPENID), "confirmed_public": True},
         )
         body = await ok.json()
         mismatch = await client.post(
-            "/api/shiftypad/bind", json={"token": token, "preview_id": "wrong"}
+            "/shiftypad/api/bind", headers=headers, json={"preview_id": "wrong"}
         )
         assert mismatch.status == 400
         assert (await mismatch.json())["code"] == "PREVIEW_MISMATCH"

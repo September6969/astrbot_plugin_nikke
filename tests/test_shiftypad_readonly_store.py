@@ -99,6 +99,7 @@ async def test_private_or_upstream_failure_preserves_previous_snapshot_and_marks
     assert private.ok is False
     assert private.error_code == "PRIVATE"
     assert readonly.status("user-a")["status"] == "stale"
+    assert readonly.status("user-a")["can_sync"] is True
     assert reading(readonly, "user-a").profile.nickname == "公开昵称"
 
     upstream = await readonly.sync(
@@ -106,6 +107,7 @@ async def test_private_or_upstream_failure_preserves_previous_snapshot_and_marks
     )
     assert upstream.ok is False
     assert upstream.error_code == "UPSTREAM"
+    assert readonly.status("user-a")["can_sync"] is True
     assert reading(readonly, "user-a").profile.nickname == "公开昵称"
 
 
@@ -132,3 +134,30 @@ async def test_sync_without_binding_and_roster_snapshot() -> None:
     readonly.bind("user-a", make_profile())
     assert readonly.roster_snapshot("user-a") == ()
     assert readonly.status("user-a")["status"] == "ready"
+    assert readonly.status("user-a")["can_sync"] is True
+
+
+def test_rebind_different_openid_resets_bound_at_and_sync_count() -> None:
+    ticks = iter([
+        datetime(2026, 11, 23, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 11, 24, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 11, 25, 0, 0, tzinfo=timezone.utc),
+    ])
+    readonly = ShiftypadReadOnlyStore(MemoryStore(), clock=lambda: next(ticks))
+    first = readonly.bind("user-a", make_profile("A1"))
+    same = readonly.bind("user-a", make_profile("A2"))
+    assert same.bound_at == first.bound_at
+    assert same.sync_count == 2
+
+    other_identity = ShiftypadIdentity(
+        openid="99999-9999999999", uid="999999999", server="jp", area_id="82",
+        source="public_reference", source_url="https://example.invalid/other",
+    )
+    other = ShiftypadProfile(
+        identity=other_identity, nickname="B", level=100, team_combat=1000,
+        nikke_count=1, synchro_level=100, visibility="public", characters=(),
+        fetched_at="2026-11-25T00:00:00+00:00",
+    )
+    rebound = readonly.bind("user-a", other)
+    assert rebound.bound_at != first.bound_at
+    assert rebound.sync_count == 1

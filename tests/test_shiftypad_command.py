@@ -23,7 +23,7 @@ class FakeWeb:
 
     def create_link(self, actor_id: str) -> str:
         self.actors.append(actor_id)
-        return f"https://example.test/shiftypad/{'a' * 40}"
+        return f"https://example.test/shiftypad/open/{'a' * 40}"
 
 
 class FakeReadonly:

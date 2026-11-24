@@ -1,5 +1,6 @@
 """Profile 命令用例；账号读取、数据构建与图片展示各走一个注入端口。"""
 
+import inspect
 import logging
 from collections.abc import Awaitable, Callable, Mapping
 from typing import Any, Protocol
@@ -88,6 +89,7 @@ class ProfileCommandHandler:
         invalidate_cookie: Callable[[str], None] | None = None,
         start_feedback: CommandFeedbackStarter | None = None,
         record_history: HistoryRecorder | None = None,
+        growth_generation: Callable[[str], int] | None = None,
     ) -> None:
         self._account_reader = account_reader
         self._application = application
@@ -95,6 +97,18 @@ class ProfileCommandHandler:
         self._invalidate_cookie = invalidate_cookie or (lambda _actor_id: None)
         self._start_feedback = start_feedback
         self._record_history = record_history
+        self._growth_generation = growth_generation
+
+    @staticmethod
+    def _supports_kwarg(fn: Any, name: str) -> bool:
+        try:
+            params = inspect.signature(fn).parameters.values()
+        except (TypeError, ValueError):
+            return False
+        return any(
+            p.kind == inspect.Parameter.VAR_KEYWORD or p.name == name
+            for p in params
+        )
 
     async def handle(self, context: CommandContext) -> CommandResult:
         """读取绑定账号、构建 dashboard 并产生既有图片回复。"""
@@ -112,10 +126,20 @@ class ProfileCommandHandler:
                     )
                 )
 
+            generation = (
+                self._growth_generation(context.actor_id)
+                if self._growth_generation is not None
+                else None
+            )
             dashboard = await self._application.build_dashboard(account)
             if self._record_history is not None:
                 try:
-                    self._record_history(context, dashboard)
+                    kwargs: dict[str, Any] = {}
+                    if self._supports_kwarg(self._record_history, "account"):
+                        kwargs["account"] = account
+                    if self._supports_kwarg(self._record_history, "expected_generation"):
+                        kwargs["expected_generation"] = generation
+                    self._record_history(context, dashboard, **kwargs)
                 except Exception as exc:
                     # 历史记录失败不能影响资料主流程；也不写入半成品快照。
                     logger.warning("[NIKKE] 养成历史记录跳过：%s", type(exc).__name__)

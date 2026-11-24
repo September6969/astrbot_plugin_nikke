@@ -65,14 +65,18 @@ class ShiftypadReadOnlyStore:
             raise ValueError("只读绑定缺少公开 OpenID")
         now = self._now().isoformat()
         existing = self.get(actor_id)
+        same_identity = (
+            existing is not None
+            and existing.profile.identity.openid == profile.identity.openid
+        )
         binding = ReadonlyBinding(
             actor_id=str(actor_id),
             profile=profile,
-            bound_at=existing.bound_at if existing else now,
+            bound_at=existing.bound_at if same_identity else now,
             last_sync_at=now,
             last_error="",
             stale=False,
-            sync_count=(existing.sync_count + 1) if existing else 1,
+            sync_count=(existing.sync_count + 1) if same_identity else 1,
         )
         self._store.set_setting(self._key(actor_id), binding.to_dict())
         return binding
@@ -113,7 +117,7 @@ class ShiftypadReadOnlyStore:
             return {"status": "unbound", "can_sync": False}
         return {
             "status": "stale" if binding.stale else "ready",
-            "can_sync": not binding.stale,
+            "can_sync": True,
             "binding": binding.public_dict(),
             "last_error": binding.last_error,
         }

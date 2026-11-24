@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NIKKE · ShiftyPad 只读导入</title>
+  <link rel="stylesheet" href="/shiftypad/static/editor.css">
+  <script src="/shiftypad/static/editor.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>ShiftyPad 只读导入</h1>
+  <p><span class="badge">只读</span> 不登录、不写入游戏账号；仅导入你本人确认公开的档案。</p>
+  <noscript>本页面需要启用 JavaScript。</noscript>
+  <div id="msg" class="muted">正在读取会话状态…</div>
+  <div id="bound" class="card" hidden></div>
+  <div id="form-wrap">
+    <div class="warn">数字 UID 与 ShiftyPad 的长 OpenID 不是同一种 ID。仅填数字 UID 时，只有运营者已导入可信映射才能继续；否则请粘贴本人官方 ShiftyPad 公开链接。<br>本流程不验证账号所有权，只保存明确标注的公开只读快照，不授予登录或私有权限。</div>
+    <label for="uid">游戏 UID（数字，仅本人标注）</label>
+    <input id="uid" inputmode="numeric" autocomplete="off" placeholder="例如 123456789">
+    <label for="server">区服</label>
+    <select id="server">
+      <option value="">请选择</option>
+      <option value="global">国际服</option>
+      <option value="jp">日服</option>
+      <option value="kr">韩服</option>
+      <option value="na">北美服</option>
+      <option value="sea">东南亚服</option>
+      <option value="cn">国服</option>
+    </select>
+    <label for="public_ref">官方 ShiftyPad 公开链接或 OpenID（推荐）</label>
+    <input id="public_ref" autocomplete="off" placeholder="https://www.blablalink.com/shiftyspad/... 或 12345-1234567890">
+    <label class="check">
+      <input id="confirm" type="checkbox">
+      <span>我确认该档案已对所有人公开，且我是本人或已获本人授权进行只读导入。</span>
+    </label>
+    <button id="preview" type="button">检查资料</button>
+    <div id="preview-box" class="card" hidden></div>
+  </div>
+  <p class="note">链接兑换仅一次性有效；若会话过期，请回私聊重新发送 <code>/妮姬 我的妮姬 导入</code>。原有账号登录/扩展绑定不受影响。</p>
+</main>
+</body>
+</html>

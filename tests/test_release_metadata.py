@@ -49,6 +49,8 @@ class ReleaseMetadataTests(unittest.TestCase):
             "enable_daily_actions": ("bool", False),
             "enable_announcement_push": ("bool", False),
             "enable_cdk_redemption": ("bool", False),
+            "enable_shiftypad_readonly": ("bool", False),
+            "enable_public_share_api": ("bool", False),
         }
 
         self.assertEqual(set(schema), set(expected))

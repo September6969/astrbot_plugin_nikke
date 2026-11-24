@@ -140,3 +140,65 @@ def test_real_engine_name_mapping_uses_stable_resource_and_name_codes() -> None:
     assert len(mapping) > 800
     # 明确不存在的角色不会被按译名猜出。
     assert "not-a-real-nikke" not in mapping
+
+
+@pytest.mark.asyncio
+async def test_engine_never_forges_pinned_commit_strips_secrets_and_verifies_git(tmp_path: Path, monkeypatch) -> None:
+    import shutil
+    import subprocess
+    from astrbot_plugin_nikke.integrations.nikke_calc.engine import MAX_OUTPUT_BYTES
+
+    # 1. 无 evaluator commit 时不得静默回退到 PINNED_COMMIT，且 version_ok 必须为 False。
+    no_eval = tmp_path / "no_eval"
+    shutil.copytree(ENGINE_PATH, no_eval)
+    (no_eval / "runner" / "sim.py").write_text(
+        "import json, os\n"
+        "assert 'NIKKE_TEST_SECRET' not in os.environ\n"
+        "print(json.dumps({'schema_version': 2, 'total_damage': 12345}))\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("NIKKE_TEST_SECRET", "top-secret-token")
+    plan = build_five_teams(members())
+    unverified_eng = SoloRaidDamageEngine(no_eval, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs")
+    res = await unverified_eng.estimate(plan.teams)
+    assert res.available is True
+    assert res.commit == ""
+    assert res.dirty is None
+    assert res.version_ok is False
+    assert PINNED_COMMIT[:10] not in res.label
+
+    # 2. 独立 Git 检出：非固定 commit 或 dirty 工作区必须拒绝（fail-closed）。
+    git_repo = tmp_path / "git_engine"
+    shutil.copytree(ENGINE_PATH, git_repo)
+    subprocess.run(["git", "-C", str(git_repo), "init"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(git_repo), "config", "user.email", "test@example.invalid"], check=True)
+    subprocess.run(["git", "-C", str(git_repo), "config", "user.name", "Tester"], check=True)
+    subprocess.run(["git", "-C", str(git_repo), "add", "."], check=True)
+    subprocess.run(["git", "-C", str(git_repo), "commit", "-m", "init"], check=True, capture_output=True)
+
+    git_eng = SoloRaidDamageEngine(git_repo, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs2")
+    rejected = await git_eng.estimate(plan.teams)
+    assert rejected.available is False
+    assert rejected.version_ok is False
+    assert "版本校验失败" in rejected.reason
+
+    # 允许不核验模式运行，但 version_ok 仍为 False，且不会被自报 commit 欺骗。
+    untrusted_eng = SoloRaidDamageEngine(
+        git_repo, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs3", allow_unverified=True
+    )
+    untrusted_res = await untrusted_eng.estimate(plan.teams)
+    assert untrusted_res.available is True
+    assert untrusted_res.commit != PINNED_COMMIT
+    assert untrusted_res.version_ok is False
+
+    # 3. 超过 MAX_OUTPUT_BYTES 的引擎输出必须被拒绝。
+    huge = tmp_path / "huge"
+    shutil.copytree(ENGINE_PATH, huge)
+    (huge / "runner" / "sim.py").write_text(
+        f"import sys\nsys.stdout.write('x' * ({MAX_OUTPUT_BYTES} + 100))\n",
+        encoding="utf-8",
+    )
+    huge_eng = SoloRaidDamageEngine(huge, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs4")
+    huge_res = await huge_eng.estimate(plan.teams[:1])
+    assert huge_res.total is None
+    assert "大小上限" in huge_res.teams[0].error
