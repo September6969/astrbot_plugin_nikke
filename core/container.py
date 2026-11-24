@@ -187,9 +187,6 @@ def create_container(
         site_origin=web.site_origin,
         config=config or {},
         clock=clock,
-        card_loader=lambda actor_id, query: character.application.character_card(
-            actor_id, query, directory_provider()
-        ),
     )
     web.add_route_installer(shiftypad.web.mount)
     toolbox = replace(
