@@ -174,7 +174,13 @@ def test_counsel_bank_defaults_to_unbundled_missing_and_imports_partial_index(tm
     real = CounselBank.from_file(imported)
     assert real.available is True
     result = real.search("艾德米", "猫咪")
+    assert result.match_kind == "exact"
     assert result.matches
     text = render_counsel_search(result, real)
+    assert "精确匹配" in text
     assert "来源答案序号：1" in text
     assert "不代表游戏内按钮位置" in text
+
+    partial = real.search("艾德")
+    assert partial.match_kind == "partial"
+    assert "模糊命中" in render_counsel_search(partial, real)

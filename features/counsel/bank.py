@@ -84,6 +84,7 @@ class CounselSearch:
     ambiguous_nikke: tuple[str, ...] = ()
     available: bool = True
     reason: str = ""
+    match_kind: str = "exact"
 
     @property
     def ambiguous(self) -> bool:
@@ -228,8 +229,10 @@ class CounselBank:
             raise CounselBankError("请提供妮姬名称或别名")
         # 先按名称/别名精确匹配；无精确命中时再退化为子串匹配，但必须唯一。
         exact = [entry for entry in self.entries if query in {_norm(entry.nikke), *(_norm(alias) for alias in entry.aliases)}]
+        match_kind = "exact"
         pool = exact
         if not pool:
+            match_kind = "partial"
             partial = [
                 entry for entry in self.entries
                 if query in _norm(entry.nikke) or any(query in _norm(alias) for alias in entry.aliases)
@@ -240,10 +243,11 @@ class CounselBank:
                     nikke=nikke,
                     keyword=keyword,
                     ambiguous_nikke=tuple(sorted(names)),
+                    match_kind="ambiguous",
                 )
             pool = partial
         if not pool:
-            return CounselSearch(nikke=nikke, keyword=keyword, matches=())
+            return CounselSearch(nikke=nikke, keyword=keyword, matches=(), match_kind="none")
 
         tokens = [token for token in re.split(r"[\s,，、/]+", _norm(keyword)) if token]
         scored: list[tuple[int, str, CounselEntry]] = []
@@ -260,11 +264,12 @@ class CounselBank:
             nikke=nikke,
             keyword=keyword,
             matches=tuple(CounselMatch(entry) for _, _, entry in scored[:limit]),
+            match_kind=match_kind,
         )
 
 
 def render_counsel_search(result: CounselSearch, bank: CounselBank) -> str:
-    """渲染检索结果；缺口与歧义分别说明。"""
+    """渲染检索结果；缺口、匹配方式与歧义分别说明。"""
     if not result.available:
         return "【咨询答案】\n题库缺失：" + result.reason + "\n本功能不会用假题代替真实题库。"
     title = f"【咨询答案】{result.nikke}"
@@ -277,7 +282,12 @@ def render_counsel_search(result: CounselSearch, bank: CounselBank) -> str:
     if not result.matches:
         lines.append("题库中未找到匹配条目；覆盖范围：" + (bank.checked_at or "未标注核验日期"))
         lines.append("来源：" + (bank.source_url or "未提供"))
+        lines.append("说明：未收录条目不自动推测答案。")
         return "\n".join(lines)
+    if result.match_kind == "partial":
+        lines.append(f"匹配方式：名称子串模糊命中（{result.matches[0].entry.nikke}；如非目标角色请改用完整名称）")
+    else:
+        lines.append(f"匹配方式：名称/别名精确匹配（{result.matches[0].entry.nikke}）")
     for match in result.matches:
         entry = match.entry
         answer = entry.answer()

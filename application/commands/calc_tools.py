@@ -253,14 +253,28 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
         return tuple(owned_items), note
 
     async def _overload(self, context: CommandContext, action: str, value: str) -> CommandResult | str:
-        return self._overload_advice(action, value, simulate_attempts=None)
+        return await self._overload_advice(context, action, value, simulate_attempts=None)
 
     async def _overload_sim(self, context: CommandContext, action: str, value: str) -> CommandResult | str:
-        return self._overload_advice(action, value, simulate_attempts=100)
+        return await self._overload_advice(context, action, value, simulate_attempts=100)
 
-    def _overload_advice(self, action: str, value: str, *, simulate_attempts: int | None):
-        targets, counts, flex, source_label = self._overload_targets(action)
-        options = self._parse_overload_spec(value)
+    async def _overload_advice(
+        self, context: CommandContext, action: str, value: str, *, simulate_attempts: int | None
+    ):
+        targets, counts, flex, source_label, char_query = self._overload_targets(action)
+        source_prefix = ""
+        spec = value.strip()
+        if spec in {"账号", "account"} or spec.startswith(("账号:", "账号：", "account:")):
+            target_char = (
+                re.sub(r"^(?:账号|account)[:：]\s*", "", spec, count=1).strip()
+                or char_query
+            )
+            if not target_char:
+                raise OverloadAdviceError("使用账号模式对比时请指定角色名，例如：/妮姬 洗词条 推荐:拉毗 账号")
+            options, resolved_name = await self._load_bound_overload_options(context.actor_id, target_char)
+            source_prefix = f"词条来源：已绑定账号角色实际超限词条（{resolved_name}，只读对比）。\n"
+        else:
+            options = self._parse_overload_spec(value)
         advice = advise(
             options,
             targets,
@@ -270,10 +284,39 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
         )
         if simulate_attempts is not None:
             simulation = simulate(
-                options, advice.targets, attempts=simulate_attempts, seed=0
+                options, advice.targets, attempts=simulate_attempts
             )
             advice = replace(advice, simulation=simulation)
-        return render_advice(advice)
+        return source_prefix + render_advice(advice)
+
+    async def _load_bound_overload_options(self, actor_id: str, query: str):
+        loader = getattr(self.services, "card_loader", None)
+        if loader is None:
+            raise OverloadAdviceError("当前未装配账号角色详情读取能力，请改用手工词条格式。")
+        card = await loader(actor_id, query)
+        records = []
+        equipment = getattr(card, "equipment", None) or {}
+        for slot in ("head", "torso", "arm", "leg"):
+            piece = equipment.get(slot) if isinstance(equipment, Mapping) else None
+            if piece is None or not getattr(piece, "equipped", False):
+                continue
+            for position, option in enumerate(getattr(piece, "options", ()) or (), 1):
+                if position > 3:
+                    break
+                tier = getattr(option, "tier", None)
+                records.append(
+                    {
+                        "slot": slot,
+                        "position": position,
+                        "label": str(getattr(option, "display_name", "") or ""),
+                        "tier": tier if isinstance(tier, int) and 1 <= tier <= 15 else 1,
+                        "locked": bool(getattr(option, "locked", False)),
+                    }
+                )
+        if not records:
+            raise OverloadAdviceError("该角色当前未检测到可解析的超限装备词条；请先确认已洗出 T10 词条或改用手工输入。")
+        name = str(getattr(card, "name_cn", "") or getattr(card, "name_en", "") or query)
+        return parse_options(records), name
 
     def _overload_targets(self, action: str):
         text = action.strip()
@@ -295,6 +338,7 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                     dict(selected.counts),
                     selected.flex_count,
                     source,
+                    character,
                 )
             mapping = getattr(self.services, "overload_recommendations", {}) or {}
             default_targets = mapping.get("__default__")
@@ -304,13 +348,14 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                     dict(getattr(self.services, "overload_default_counts", {}) or {}),
                     0,
                     "导入默认目标（非角色专属）",
+                    character,
                 )
             label = getattr(self.services, "overload_recommendation_label", "")
             hint = f"（已加载：{label}）" if label else ""
             raise OverloadAdviceError(
                 f"缺少角色“{character}”的可靠推荐表{hint}；请手工提供目标词条。"
             )
-        return parse_targets(text), {}, 0, ""
+        return parse_targets(text), {}, 0, "", ""
 
     def _character_overload_targets(self, query: str):
         characters = getattr(self.services, "overload_character_targets", {}) or {}

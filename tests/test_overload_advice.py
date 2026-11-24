@@ -129,3 +129,30 @@ def test_known_labels_are_the_verified_registry_labels() -> None:
     assert "攻击力增加" in KNOWN_LABELS
     assert "优越代码伤害增加" in KNOWN_LABELS
     assert len(KNOWN_LABELS) == 9
+
+
+def test_tier_warnings_four_piece_counts_module_costs_and_os_randomness() -> None:
+    opts = parse_options(
+        (
+            {"slot": "head", "position": 1, "label": "攻击力增加", "tier": 3, "locked": True},
+            {"slot": "head", "position": 2, "label": "防御力增加", "tier": 4},
+            {"slot": "torso", "position": 1, "label": "攻击力增加", "tier": 11},
+        )
+    )
+    result = advise(
+        opts,
+        ("攻击力增加", "优越代码伤害增加"),
+        target_counts={"攻击力增加": 4, "优越代码伤害增加": 4},
+    )
+    assert dict(result.matched_counts) == {"攻击力增加": 2, "优越代码伤害增加": 0}
+    assert any("仅 3/15 阶" in w for w in result.lock_warnings)
+    assert any("消耗 2 个定制模块" in w for w in result.lock_warnings)
+    rendered = render_advice(result)
+    assert "当前四件套命中汇总：攻击力增加 2/4 条" in rendered
+
+    sim = simulate(opts, ("攻击力增加",), attempts=10)
+    assert sim.seed is None
+    assert "系统随机" in sim.assumption
+    assert sim.modules_spent >= 1
+    with_sim = render_advice(advise(opts, ("攻击力增加",)))
+    assert "锁定与模块提醒" in with_sim

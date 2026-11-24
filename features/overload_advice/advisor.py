@@ -89,7 +89,8 @@ class SimulationResult:
     final: tuple[OverloadOption, ...]
     failures: int
     assumption: str
-    seed: int
+    seed: int | None
+    modules_spent: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,7 +98,9 @@ class Advice:
     options: tuple[OptionAdvice, ...]
     targets: tuple[str, ...]
     target_counts: tuple[tuple[str, int], ...] = ()
+    matched_counts: tuple[tuple[str, int], ...] = ()
     flex_count: int = 0
+    lock_warnings: tuple[str, ...] = ()
     recommendation_source: str = ""
     probability: str | None = None
     probability_note: str = PROBABILITY_NOTE
@@ -205,12 +208,25 @@ def advise(
 ) -> Advice:
     """给出保留 / 锁定 / 重洗建议；无可靠概率表时不显示概率。"""
     normalized_targets = tuple(dict.fromkeys(normalize_label(item) for item in targets))
+    slot_groups: dict[str, list[OverloadOption]] = {}
+    for option in options:
+        slot_groups.setdefault(option.slot, []).append(option)
+
     advices: list[OptionAdvice] = []
+    lock_warnings: list[str] = []
+    matched_map: dict[str, int] = {label: 0 for label in normalized_targets}
+
     for option in options:
         if option.label in normalized_targets:
+            matched_map[option.label] = matched_map.get(option.label, 0) + 1
             action = "保留"
             lock = True
             reasons = ("命中目标词条", f"{option.tier} 阶")
+            if option.tier <= 5:
+                reasons = reasons + ("阶级偏低（≤5/15 阶），锁定会增加后续洗词条模块消耗，非毕业可暂缓锁定",)
+                lock_warnings.append(
+                    f"{option.slot_label} #{option.position} {option.label} 仅 {option.tier}/15 阶，建议评估后再锁"
+                )
         elif option.tier >= _MAX_TIER:
             action = "重洗"
             lock = False
@@ -222,6 +238,16 @@ def advise(
         if option.locked and action == "重洗":
             reasons = reasons + ("当前已锁定；如需重洗请先解锁",)
         advices.append(OptionAdvice(option=option, action=action, lock=lock, reasons=reasons))
+
+    for slot, items in slot_groups.items():
+        slot_label = SLOTS[slot]
+        explicit_locked = sum(1 for item in items if item.locked)
+        has_reroll = any(item.label not in normalized_targets and not item.locked for item in items)
+        if explicit_locked >= len(POSITIONS) and any(item.label not in normalized_targets for item in items):
+            lock_warnings.append(f"{slot_label} 已锁定全部 3 条词条，需先解锁后才可重洗")
+        elif explicit_locked > 0 and has_reroll:
+            cost = 1 + explicit_locked
+            lock_warnings.append(f"{slot_label} 当前已锁 {explicit_locked} 条，每次重洗将消耗 {cost} 个定制模块")
 
     normalized_counts: list[tuple[str, int]] = []
     for raw_label, raw_count in (target_counts or {}).items():
@@ -238,7 +264,9 @@ def advise(
         options=tuple(advices),
         targets=normalized_targets,
         target_counts=tuple(normalized_counts),
+        matched_counts=tuple((label, matched_map[label]) for label in normalized_targets),
         flex_count=flex_count,
+        lock_warnings=tuple(dict.fromkeys(lock_warnings)),
         recommendation_source=recommendation_label,
         probability=probability,
         probability_note=note,
@@ -276,26 +304,26 @@ def simulate(
     targets: Sequence[str],
     *,
     attempts: int = 100,
-    seed: int = 0,
+    seed: int | None = None,
     distribution: Mapping[str, float] | None = None,
 ) -> SimulationResult:
-    """可复现的配置化模拟：锁定词条永不改变。
+    """配置化洗词条模拟：锁定词条永不改变，未锁同部位词条随重洗一起刷新并累计定制模块消耗。
 
-    每次尝试按仓位顺序重洗第一条未命中目标且未锁定的词条；命中后停止。
-    distribution 缺省时对已核验标签均匀取值，并明确记录为假设。
+    生产环境默认使用 ``seed=None``（系统随机），仅离线复现测试传入确定性整数种子。
     """
     if isinstance(attempts, bool) or not isinstance(attempts, int) or not 1 <= attempts <= 10_000:
         raise OverloadAdviceError("模拟次数必须是 1–10000 的整数")
-    if isinstance(seed, bool) or not isinstance(seed, int):
+    if seed is not None and (isinstance(seed, bool) or not isinstance(seed, int)):
         raise OverloadAdviceError("随机种子必须是整数")
     normalized_targets = set(normalize_label(item) for item in targets)
     if not normalized_targets:
         raise OverloadAdviceError("模拟需要目标词条")
 
+    rand_note = "随机来源：系统随机（非固定种子）" if seed is None else f"随机来源：固定复现种子 {seed}"
     if distribution is None:
         labels = list(KNOWN_LABELS)
         weights = [1.0] * len(labels)
-        assumption = "配置化假设：已核验词条等概率；非官方概率。"
+        assumption = f"配置化假设：已核验词条等概率；{rand_note}；非官方概率。"
     else:
         if not isinstance(distribution, Mapping):
             raise OverloadAdviceError("分布必须是词条到权重的映射")
@@ -311,15 +339,16 @@ def simulate(
             weights.append(float(raw_weight))
         if not labels:
             raise OverloadAdviceError("分布不能为空")
-        assumption = "配置化假设：按调用方提供的分布重洗；非官方概率。"
+        assumption = f"配置化假设：按调用方提供的分布重洗；{rand_note}；非官方概率。"
 
     def satisfied(values: Sequence[OverloadOption]) -> bool:
-        # 锁定词条无法改变，因此判定目标是否达成时必须排除它。
         return all(option.label in normalized_targets or option.locked for option in values)
 
-    rng = random.Random(seed)
+    rng: random.Random = random.Random(seed) if seed is not None else random.SystemRandom()
     current = list(options)
     failures = 0
+    modules_spent = 0
+    slot_order = tuple(dict.fromkeys(option.slot for option in current))
     for attempt in range(1, attempts + 1):
         if satisfied(current):
             return SimulationResult(
@@ -329,14 +358,28 @@ def simulate(
                 failures=failures,
                 assumption=assumption,
                 seed=seed,
+                modules_spent=modules_spent,
             )
+        target_slot = None
+        for slot in slot_order:
+            slot_items = [o for o in current if o.slot == slot]
+            if any((not o.locked) and (o.label not in normalized_targets) for o in slot_items):
+                target_slot = slot
+                break
+        if target_slot is None:
+            continue
+        locked_in_slot = sum(1 for o in current if o.slot == target_slot and o.locked)
+        modules_spent += 1 + locked_in_slot
+        slot_hit = True
         for index, option in enumerate(current):
-            if option.locked or option.label in normalized_targets:
+            if option.slot != target_slot or option.locked:
                 continue
             drawn = rng.choices(labels, weights=weights, k=1)[0]
             current[index] = replace(option, label=drawn)
-            failures += 0 if drawn in normalized_targets else 1
-            break
+            if drawn not in normalized_targets:
+                slot_hit = False
+        if not slot_hit:
+            failures += 1
     return SimulationResult(
         attempts=attempts,
         success=satisfied(current),
@@ -344,6 +387,7 @@ def simulate(
         failures=failures,
         assumption=assumption,
         seed=seed,
+        modules_spent=modules_spent,
     )
 
 
@@ -489,6 +533,17 @@ def render_advice(advice: Advice) -> str:
         if advice.flex_count:
             counts += f"、灵活 {advice.flex_count}（未指定类别）"
         lines.append("目标数量：" + counts + "（按公开推荐行数，不表示优先级）")
+    if advice.matched_counts:
+        target_map = dict(advice.target_counts)
+        progress = "、".join(
+            f"{label} {held}/{target_map[label]} 条"
+            if label in target_map
+            else f"{label} {held} 条"
+            for label, held in advice.matched_counts
+        )
+        lines.append("当前四件套命中汇总：" + progress)
+    if advice.lock_warnings:
+        lines.extend(f"锁定与模块提醒：{warning}" for warning in advice.lock_warnings)
     locked = [item for item in advice.options if item.option.locked]
     if locked:
         lines.append("已锁定：" + "、".join(f"{item.option.slot_label}{item.option.position}" for item in locked))
@@ -509,8 +564,9 @@ def render_advice(advice: Advice) -> str:
     if advice.simulation is not None:
         sim = advice.simulation
         state = "达成" if sim.success else "未达成"
+        seed_text = f"（种子 {sim.seed}）" if sim.seed is not None else "（系统随机）"
         lines.append(
-            f"模拟：{sim.attempts} 次重洗后{state}（种子 {sim.seed}）；未成功次数 {sim.failures}"
+            f"模拟：{sim.attempts} 次重洗后{state}{seed_text}；未成功次数 {sim.failures} · 消耗定制模块约 {sim.modules_spent} 个"
         )
         lines.append(sim.assumption)
     return "\n".join(lines)

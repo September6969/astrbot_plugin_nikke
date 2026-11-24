@@ -124,14 +124,43 @@ class SyncCostTable:
         rows = {row.level: row for row in self.rows}
         missing = [level for level in range(current + 1, target + 1) if level not in rows]
         if missing:
+            covered = (
+                f"（当前成本表仅覆盖 Lv.{self.rows[0].level - 1}→{self.rows[-1].level}）"
+                if self.rows
+                else ""
+            )
             raise SyncCostTableError(
                 "成本表未覆盖等级：" + "、".join(str(level) for level in missing[:5])
                 + (" 等" if len(missing) > 5 else "")
+                + covered
+                + "；可改用手工成本模式：/妮姬 同步器 计算 手工 ..."
             )
         return {
             resource: sum(getattr(rows[level], resource) for level in range(current + 1, target + 1))
             for resource in RESOURCES
         }
+
+    def gainable_levels(
+        self, current: int, inventory: Mapping[str, int]
+    ) -> tuple[int, int, dict[str, int]]:
+        """计算以当前库存可立即连续升到的等级与剩余库存。"""
+        current = _require_level(current, "current")
+        rows = {row.level: row for row in self.rows}
+        remaining = {
+            resource: max(0, int(inventory.get(resource, 0)))
+            for resource in RESOURCES
+        }
+        gained = 0
+        level = current
+        while (nxt := level + 1) in rows:
+            row = rows[nxt]
+            if any(remaining[res] < getattr(row, res) for res in RESOURCES):
+                break
+            for res in RESOURCES:
+                remaining[res] -= getattr(row, res)
+            level = nxt
+            gained += 1
+        return gained, level, remaining
 
 
 def _require_text(value: Any, field: str) -> str:

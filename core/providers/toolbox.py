@@ -82,6 +82,7 @@ class ToolboxServices:
     shiftypad_web: Any | None = None
     shiftypad_readonly: Any | None = None
     public_share_enabled: bool = False
+    card_loader: Callable[[str, str], Any] | None = None
 
     def growth_generation(self, actor_id: str) -> int:
         """读取清空代数快照，防止清零后并发旧请求回写。"""
@@ -240,6 +241,7 @@ def create_toolbox_services(
     profile_loader: Callable[[Mapping[str, Any]], Any] | None,
     config: Mapping[str, Any],
     clock: Callable[[], Any] | None = None,
+    card_loader: Callable[[str, str], Any] | None = None,
 ) -> ToolboxServices:
     """装配十个工具的依赖；不联网、不读取账号凭据。"""
     video_source = YouTubeAtomSource()
@@ -303,6 +305,7 @@ def create_toolbox_services(
         solo_engine=solo_engine,
         share_lookup=fetch_public_share if public_share_enabled else None,
         public_share_enabled=public_share_enabled,
+        card_loader=card_loader,
         roster_loader=roster_loader,
         profile_loader=profile_loader,
         account_reader=account_reader,

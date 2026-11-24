@@ -265,7 +265,25 @@ async def test_counsel_sync_wishlist_and_overload_routes() -> None:
     assert "重洗" in advice
     simulation = await route(plugin, "洗词条模拟", "攻击力增加", "头部,1,防御力增加,4")
     assert "模拟：" in simulation
-    assert "配置化假设" in simulation
+    assert "系统随机" in simulation
+    assert "定制模块" in simulation
+
+    # 支持读取已绑定账号角色的实际装备词条进行只读对比。
+    async def fake_card_loader(_actor, _query):
+        return SimpleNamespace(
+            name_cn="拉毗",
+            equipment={
+                "head": SimpleNamespace(
+                    equipped=True,
+                    options=(SimpleNamespace(display_name="防御力增加", tier=6, locked=False),),
+                )
+            },
+        )
+
+    plugin.handlers.toolbox._domain_handlers["calc_tools"].services.card_loader = fake_card_loader
+    bound_advice = await route(plugin, "洗词条", "攻击力增加", "账号:拉毗")
+    assert "已绑定账号角色实际超限词条（拉毗" in bound_advice
+    assert "防御力增加（6 阶）" in bound_advice
 
 
 @pytest.mark.asyncio

@@ -57,6 +57,8 @@ class SyncLevelPlan:
     table: SyncCostTable | None
     note: str = ""
     cost_source: str = ""
+    gainable_levels: int | None = None
+    reachable_level: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -190,6 +192,10 @@ def calculate_sync_plan(
 
     base = _as_date(today, timezone_offset_hours)
     eta = base + timedelta(days=overall) if overall is not None else None
+    gained: int | None = None
+    reachable_level: int | None = None
+    if cost_table is not None:
+        gained, reachable_level, _ = cost_table.gainable_levels(current_level, stocks)
     return SyncLevelPlan(
         current=current_level,
         target=target_level,
@@ -201,6 +207,8 @@ def calculate_sync_plan(
         table=cost_table,
         note=note,
         cost_source=cost_source,
+        gainable_levels=gained,
+        reachable_level=reachable_level,
     )
 
 
@@ -236,6 +244,10 @@ def render_sync_plan(plan: SyncLevelPlan) -> str:
             f"日产量 {item.production:g} · 缺口 {item.missing:,} · {days}（{item.status}）"
         )
     lines.append("")
+    if plan.reachable_level is not None and plan.gainable_levels is not None:
+        lines.append(
+            f"现有库存可立即升至：Lv.{plan.reachable_level}（+{plan.gainable_levels} 级）"
+        )
     if plan.overall_days is None:
         lines.append("预计日期：无法估算（" + "、".join(plan.bottlenecks) + " 零产量且有缺口）")
     else:

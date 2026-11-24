@@ -231,3 +231,47 @@ def test_imported_sync_table_loads_and_computes_cross_tier(tmp_path) -> None:
     assert table.cost_between(200, 201) == {"core_dust": 10_000, "credits": 1_694_200, "battle_data": 20_944_600}
     cross = table.cost_between(200, 351)
     assert cross["core_dust"] == 150 * 10_000 + 11_000
+
+    # 库存可立即升两级时应准确给出 reachable_level；超出成本表范围给出手工模式提示。
+    plan = calculate_sync_plan(
+        current=200,
+        target=205,
+        inventory={"core_dust": 25_000, "credits": 4_000_000, "battle_data": 50_000_000},
+        production={"core_dust": 1_000, "credits": 1_000_000, "battle_data": 1_000_000},
+        table=table,
+        today=date(2026, 11, 24),
+    )
+    assert plan.gainable_levels == 2
+    assert plan.reachable_level == 202
+    assert "现有库存可立即升至：Lv.202（+2 级）" in render_sync_plan(plan)
+
+    with pytest.raises(SyncLevelInputError, match="手工成本模式"):
+        calculate_sync_plan(
+            current=200, target=400, inventory={}, production={}, table=table
+        )
+
+
+def test_updater_payload_round_trips_into_sync_calculator(tmp_path) -> None:
+    from astrbot_plugin_nikke.features.sync.public_source import (
+        build_sync_payload,
+        parse_sync_ranges,
+        write_sync_payload,
+    )
+
+    rows = parse_sync_ranges(
+        "let n=[{from:201,to:203,credit:1000,battleData:200,coreDust:500}];e.s(["
+    )
+    payload = build_sync_payload(rows, checked_at="2026-11-24")
+    out = tmp_path / "sync.json"
+    assert write_sync_payload(out, payload) is True
+    loaded = SyncCostTable.from_file(out)
+    plan = calculate_sync_plan(
+        current=200, target=203,
+        inventory={"core_dust": 600, "credits": 1200, "battle_data": 300},
+        production={"core_dust": 500, "credits": 1000, "battle_data": 200},
+        table=loaded,
+        today=date(2026, 11, 24),
+    )
+    assert plan.gainable_levels == 1
+    assert plan.reachable_level == 201
+    assert plan.overall_days == 2
