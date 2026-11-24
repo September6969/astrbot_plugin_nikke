@@ -163,14 +163,14 @@ async def test_unavailable_source_skips_delivery_and_is_reported() -> None:
     status = subs.command(key, "状态", "")
     assert "视频来源：暂不可用" in status
     # 订阅状态仍然保留，恢复来源后可继续使用。
-    assert "已订阅：视频" in status
+    assert "已订阅（个人订阅）：视频" in status
 
 
 def test_kind_parsing_and_partial_unsubscribe() -> None:
     _, _, subs = build(news=[item("news", "n1")], schedule=[item("schedule", "s1")])
     key = target("user-a")
     assert "已订阅" in subs.command(key, "订阅", "新闻,日程")
-    assert "已订阅：新闻、日程" in subs.command(key, "状态", "")
+    assert "已订阅（个人订阅）：新闻、日程" in subs.command(key, "状态", "")
     with pytest.raises(ValueError, match="未知订阅类型"):
         subs.command(key, "订阅", "直播")
 
