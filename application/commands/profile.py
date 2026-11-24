@@ -1,5 +1,6 @@
 """Profile 命令用例；账号读取、数据构建与图片展示各走一个注入端口。"""
 
+import logging
 from collections.abc import Awaitable, Callable, Mapping
 from typing import Any, Protocol
 
@@ -25,6 +26,8 @@ class ProfileAccountReader(Protocol):
 
 
 ProfilePresenter = Callable[[ProfileDashboardData], Awaitable[str]]
+HistoryRecorder = Callable[[CommandContext, ProfileDashboardData], Any]
+logger = logging.getLogger(__name__)
 
 
 def format_profile(data: ProfileDashboardData) -> str:
@@ -84,12 +87,14 @@ class ProfileCommandHandler:
         present: ProfilePresenter,
         invalidate_cookie: Callable[[str], None] | None = None,
         start_feedback: CommandFeedbackStarter | None = None,
+        record_history: HistoryRecorder | None = None,
     ) -> None:
         self._account_reader = account_reader
         self._application = application
         self._present = present
         self._invalidate_cookie = invalidate_cookie or (lambda _actor_id: None)
         self._start_feedback = start_feedback
+        self._record_history = record_history
 
     async def handle(self, context: CommandContext) -> CommandResult:
         """读取绑定账号、构建 dashboard 并产生既有图片回复。"""
@@ -108,6 +113,12 @@ class ProfileCommandHandler:
                 )
 
             dashboard = await self._application.build_dashboard(account)
+            if self._record_history is not None:
+                try:
+                    self._record_history(context, dashboard)
+                except Exception as exc:
+                    # 历史记录失败不能影响资料主流程；也不写入半成品快照。
+                    logger.warning("[NIKKE] 养成历史记录跳过：%s", type(exc).__name__)
             try:
                 image_path = await self._present(dashboard)
                 if not image_path:

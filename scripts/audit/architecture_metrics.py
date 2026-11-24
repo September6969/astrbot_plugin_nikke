@@ -48,7 +48,7 @@ FEATURE_FORBIDDEN_ROOTS = {
     "requests",
 }
 UI_FORBIDDEN_ROOTS = {"sqlite3", "httpx", "aiohttp", "requests"}
-EXCLUDED_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules", "build", "dist"}
+EXCLUDED_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules", "build", "dist", "output"}
 CLASS_GETATTR_ALLOWLIST = {
     ("features/announcement/service.py", "AnnouncementService", "_COMPAT_STATE")
 }

@@ -5,12 +5,14 @@ from threading import Lock
 PAGES = frozenset({
     "campaign", "calendar_schedule", "union_overview", "union_records", "union_member",
     "profile", "character", "roster", "arena_matchup", "arena_three_teams",
+    "solo_raid", "favorite_grid",
 })
 SHARED_CSS = ("reset.css", "tokens.css", "components.css", "utilities.css")
 # 页面族共享的样式片段：占位符 -> 片段文件。
 FRAGMENTS = {
     "union_": ("<!-- RAID_CSS -->", "raid.css"),
     "arena_": ("<!-- ARENA_CSS -->", "arena.css"),
+    "solo_raid": ("<!-- RAID_CSS -->", "raid.css"),
 }
 
 

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1080">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'">
+<style>
+<!-- SHARED_CSS -->
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+.cell { position: relative; background: #1c212b; border: 2px solid #343c4c; border-radius: 10px; overflow: hidden; aspect-ratio: 1 / 1; }
+.cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cell .placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 92px; color: #e8edf5; }
+.cell .name { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px; background: rgba(10, 13, 18, 0.72); font-size: 20px; }
+.cell .pos { position: absolute; top: 8px; right: 10px; font-size: 16px; color: #c8d2e0; background: rgba(10, 13, 18, 0.6); padding: 2px 8px; border-radius: 6px; }
+</style></head><body>
+<h1>{{ title }}</h1>
+<div class="grid">{% for cell in cells %}<div class="cell">{% if cell.portrait %}<img src="{{ cell.portrait }}" alt="">{% else %}<div class="placeholder">{{ cell.name[:1] }}</div>{% endif %}<div class="pos">P{{ cell.index }}</div><div class="name">{{ cell.name }}</div></div>{% endfor %}</div>
+</body></html>

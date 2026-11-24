@@ -17,6 +17,7 @@ from ...application.commands.guide import GuideCommandHandler
 from ...application.commands.profile import ProfileCommandHandler
 from ...application.commands.raid import RaidCommandHandler
 from ...application.commands.tarot import TarotCommandHandler
+from ...application.commands.toolbox import ToolboxCommandHandler
 from ...application.commands.tower import TowerCommandHandler
 from .command_adapter import AstrBotCommandAdapter
 from .voice_adapter import AstrBotVoiceAdapter
@@ -39,6 +40,13 @@ class PluginCommandHandlers:
     tarot: TarotCommandHandler | None = None
     tower: TowerCommandHandler | None = None
     arena: ArenaCommandHandler | None = None
+    toolbox: ToolboxCommandHandler | None = None
+    info_feeds: object | None = None
+    calc_tools: object | None = None
+    solo_raid: object | None = None
+    shiftypad: object | None = None
+    growth: object | None = None
+    favorite_grid: object | None = None
 
 
 @dataclass

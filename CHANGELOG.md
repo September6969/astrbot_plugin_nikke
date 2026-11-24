@@ -2,6 +2,12 @@
 
 本文件记录当前仓库基线的可核对变更。未合并的 Draft PR 不计入当前版本，也不代表已发布或已部署。
 
+## 未发布（Phase 1A：数据合规与功能基线整合）
+
+- 默认仅随仓库保留基于 MIT 开源 `Jgaram/nikke-calc@67835ca` 生成的角色名称映射 `assets/data/solo_raid_engine_names.json`；无开源许可的第三方网站题库、同步器成本表、超限推荐与抓取赛季默认不随仓库分发，保留严格导入与缺口降级。
+- 完成十项新增工具代码与 PR #142 八类帮助导航基线整合，并按业务领域拆分为独立 Handler（`info_feeds`、`calc_tools`、`solo_raid`、`shiftypad`、`growth`、`favorite_grid`）。
+- 同步器计算支持外部导入成本表或手工三项累计成本；官方视频订阅读取官网频道 Atom 标题与链接；ShiftyPad 与公开分享 ID 保留只读骨架（后续 PR-1B/1C 完成安全加固与业务完善）。
+
 ## 0.2.0（当前 main 基线）
 
 - 全量支持 200 名可玩妮姬的语音角色设定与查询，支持简繁中文、英文、代码与 resource_id 解析。

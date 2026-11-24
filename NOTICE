@@ -79,5 +79,28 @@ runtime/spine_worker 在 Docker 构建时获取 EsotericSoftware/spine-runtimes
 及机器人发送"）收录，作者署名以该清单为准：屑芙蒂、迪恩deen33；另有一张为用户授权
 提供、原图未署名。本项目不对这些图片声明额外许可证。
 
+单人突袭伤害估算（可选，外部引擎）
+
+integrations/nikke_calc 只调用外部本地检出的 Jgaram/nikke-calc
+（https://github.com/Jgaram/nikke-calc）固定提交
+67835ca3033a95482749ea2db35a8ee2a0856a92（2026-11-02，MIT）。
+assets/data/solo_raid_engine_names.json 仅基于该 MIT 引擎名称标识与本仓角色主表
+交集生成；本仓库不分发该引擎源码、游戏数据、角色文字或图片，引擎由部署者自行获取。
+引擎代码适用 MIT（见 integrations/nikke_calc/LICENSE-nikke-calc.txt），
+游戏数据权利归 SHIFT UP / Level Infinite。
+
+无开源许可第三方网站数据说明
+
+咨询题库、第三方同步器成本表、第三方超限推荐及单人突袭抓取赛季等无明确开源授权的
+网站数据默认不随仓库分发，需由运营者自行导入带来源与授权说明的数据文件；缺失时
+相关功能明确展示缺口或保持禁用状态。
+
+公开分享 ID 资料（可选）
+
+integrations/nikke_api 调用公开项目 leegunwoooo/nikke-api
+（https://github.com/leegunwoooo/nikke-api）的 /api/user/<blablaid> 路由，
+只用于用户主动提供的 BlablaLink 公开分享 ID；它不是本站 UID 接口。该项目的游戏数据
+权利归 SHIFT UP / Level Infinite，本项目不复制其数据或图片。
+
 本项目与 SHIFT UP、Level Infinite、BlaBlaLink 或 NIKKE 官方没有隶属关系。
 游戏名称、图标和素材的相关权利归其各自权利人所有。

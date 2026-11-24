@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from typing import Any
 
@@ -32,6 +33,8 @@ from .contracts import (
 
 RosterPresenter = Callable[[CharacterRosterData], Awaitable[str | None]]
 CardPresenter = Callable[[CharacterCardData], Awaitable[str | None]]
+RosterHistoryRecorder = Callable[[str, Sequence[Mapping[str, Any]]], Any]
+logger = logging.getLogger(__name__)
 
 
 class CharacterCommandHandler:
@@ -46,6 +49,7 @@ class CharacterCommandHandler:
         render_card: CardPresenter,
         invalidate_cookie: Callable[[str], None],
         start_feedback: CommandFeedbackStarter | None = None,
+        record_roster: RosterHistoryRecorder | None = None,
     ) -> None:
         self._application = application
         self._directory = directory
@@ -53,6 +57,7 @@ class CharacterCommandHandler:
         self._render_card = render_card
         self._invalidate_cookie = invalidate_cookie
         self._start_feedback = start_feedback
+        self._record_roster = record_roster
 
     async def handle(self, context: CommandContext) -> CommandResult:
         operation = context.parameters.get("operation", "roster").strip().casefold()
@@ -71,6 +76,12 @@ class CharacterCommandHandler:
             data = await self._application.roster(
                 context.actor_id, self._directory()
             )
+            if self._record_roster is not None:
+                try:
+                    self._record_roster(context.actor_id, data.characters)
+                except Exception as exc:
+                    # 角色快照失败不影响本次练度展示。
+                    logger.warning("[NIKKE] 角色成长快照跳过：%s", type(exc).__name__)
             try:
                 path = await self._render_roster(data)
             except Exception:

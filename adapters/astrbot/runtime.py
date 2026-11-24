@@ -65,6 +65,7 @@ class AstrBotRuntimeAdapter:
             sync_character_data=self._sync_character_data,
             dispatch_announcements=self._dispatch_announcements,
             dispatch_calendar=self._dispatch_calendar,
+            dispatch_feeds=self._dispatch_feeds,
         )
 
     @property
@@ -238,6 +239,25 @@ class AstrBotRuntimeAdapter:
             return True
 
         await self._services.announcement_application.dispatch_pushes(sender)
+
+    async def _dispatch_feeds(self) -> None:
+        """只向订阅者本人发送新闻/视频/日程；群内仅 @ 本人。"""
+        if self.closing:
+            return
+        toolbox = getattr(self._services, "toolbox", None)
+        feeds = getattr(toolbox, "feeds", None) if toolbox is not None else None
+        if feeds is None:
+            return
+
+        async def sender(target, actor, private, text):
+            parts = [] if private else [At(qq=actor)]
+            parts.append(Plain(text))
+            result = await asyncio.wait_for(
+                self._context.send_message(target, MessageChain(parts)), timeout=10
+            )
+            return False if result is False else True
+
+        await feeds.dispatch_due(sender)
 
     async def _dispatch_calendar(self) -> None:
         """只向显式订阅的本人发送截止提醒，不使用全体艾特。"""
