@@ -61,7 +61,9 @@ class SoloRaidPayloadBuilder:
             "teams": teams,
             "damage": plan.damage_total,
             "damage_text": (
-                NO_DAMAGE_NOTE if plan.damage_total is None else f"配置化估算 {plan.damage_total:,}"
+                NO_DAMAGE_NOTE
+                if plan.damage_total is None
+                else f"{plan.damage_model_label or '配置化估算'} {plan.damage_total:,}"
             ),
             "issues": list(plan.issues),
             "canvas": {"width": CANVAS_WIDTH, "height": 260 + 300 * max(1, len(teams))},

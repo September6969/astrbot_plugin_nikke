@@ -202,3 +202,27 @@ async def test_engine_never_forges_pinned_commit_strips_secrets_and_verifies_git
     huge_res = await huge_eng.estimate(plan.teams[:1])
     assert huge_res.total is None
     assert "大小上限" in huge_res.teams[0].error
+
+
+@pytest.mark.asyncio
+async def test_engine_resolves_resource_id_and_electronic_element() -> None:
+    from astrbot_plugin_nikke.features.solo_raid.builder import Team
+
+    eng = SoloRaidDamageEngine(
+        ENGINE_PATH,
+        {"10": "L1-1", "11": "L1-2", "12": "L1-3", "13": "L1-4", "14": "L1-5"},
+        python=sys.executable,
+        timeout=10,
+        work_dir=Path("output") / ".engine-runs",
+    )
+    team = Team(
+        index=1,
+        members=tuple(
+            Member(f"uncoded-{i}", f"未译名{i}", "Step1", resource_id=str(10 + i))
+            for i in range(5)
+        ),
+        chain_ok=True,
+    )
+    req = eng._request(team, "Electronic")
+    assert req["squad"] == ["L1-1", "L1-2", "L1-3", "L1-4", "L1-5"]
+    assert req["enemy"] == {"code": "전격"}

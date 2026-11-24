@@ -183,7 +183,11 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
 
     async def _wishlist_owned(self, context: CommandContext, value: str):
         if value.strip():
-            return parse_owned(value), "角色来源：手工输入。"
+            return parse_owned(
+                value,
+                rows=self.services.wishlist_rows,
+                resolver=getattr(self.services, "grid_resolver", None),
+            ), "角色来源：手工输入。"
 
         account = self._account(context)
         if account is not None:

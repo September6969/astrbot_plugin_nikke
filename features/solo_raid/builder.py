@@ -12,6 +12,13 @@ TEAM_COUNT = 5
 TEAM_SIZE = 5
 BURST_ORDER = {"Step1": 1, "Step2": 2, "Step3": 3, "AllStep": 0}
 BURST_LABELS = {"Step1": "B1", "Step2": "B2", "Step3": "B3", "AllStep": "全阶"}
+_ELEMENT_ALIASES = {
+    "fire": "fire", "燃烧": "fire", "火": "fire", "灼热": "fire",
+    "wind": "wind", "风压": "wind", "风": "wind",
+    "iron": "iron", "铁甲": "iron", "铁": "iron",
+    "electric": "electric", "electronic": "electric", "电击": "electric", "电": "electric",
+    "water": "water", "水冷": "water", "水": "water",
+}
 NO_DAMAGE_NOTE = "缺少可靠伤害公式：不估算伤害（未使用猜测系数）。"
 ESTIMATE_NOTE = "配置化估算：由运营者提供的系数计算，非官方伤害公式。"
 
@@ -164,10 +171,16 @@ def check_burst_chain(members: Sequence[Member]) -> tuple[bool, tuple[str, ...]]
     return (not missing, tuple(f"缺少 {label}" for label in missing))
 
 
+def _canonical_element(value: Any) -> str:
+    key = str(value or "").strip().casefold()
+    return _ELEMENT_ALIASES.get(key, key)
+
+
 def _boss_weakness_element(season: Season | None) -> str:
     if season is None or not season.bosses:
         return ""
-    return str(season.bosses[0].element or "").strip().casefold()
+    boss = season.bosses[0]
+    return _canonical_element(boss.weakness) or _canonical_element(boss.element)
 
 
 def build_five_teams(
@@ -186,7 +199,7 @@ def build_five_teams(
     weakness = _boss_weakness_element(season)
 
     def elemental_priority(member: Member) -> int:
-        return 0 if weakness and member.element.casefold() == weakness else 1
+        return 0 if weakness and _canonical_element(member.element) == weakness else 1
 
     buckets: dict[str, list[Member]] = {"Step1": [], "Step2": [], "Step3": [], "AllStep": []}
     for member in pool:

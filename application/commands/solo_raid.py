@@ -102,7 +102,8 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
         if saved.damage_total is None:
             lines.append("伤害：缺少可靠伤害公式，未估算。")
         else:
-            lines.append(f"配置化估算：{saved.damage_total:,}")
+            label = saved.damage_model_label or "配置化估算"
+            lines.append(f"{label}：{saved.damage_total:,}")
         lines.append("该方案仅你自己可见。")
         return "\n".join(lines)
 
@@ -124,7 +125,8 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
         if team.issues:
             lines.append("问题：" + "；".join(team.issues))
         if team.damage is not None:
-            lines.append(f"配置化估算：{team.damage:,}")
+            label = saved.damage_model_label or "配置化估算"
+            lines.append(f"{label}：{team.damage:,}")
         lines.append("该方案仅你自己可见。")
         return "\n".join(lines)
 
@@ -161,7 +163,7 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
             return plan
         result = await engine.estimate(
             plan.teams,
-            boss_element=str(getattr(boss, "element", "") or ""),
+            boss_element=str(getattr(boss, "weakness", "") or getattr(boss, "element", "") or ""),
         )
         if not result.available:
             return plan if plan.damage_total is not None else replace(plan, estimate_note=result.reason)

@@ -53,7 +53,7 @@ _ENV_ALLOWLIST = (
 )
 ELEMENT_CODES = {
     "燃烧": "작열", "风压": "풍압", "铁甲": "철갑", "电击": "전격", "水冷": "수냉",
-    "Fire": "작열", "Wind": "풍압", "Iron": "철갑", "Electric": "전격", "Water": "수냉",
+    "Fire": "작열", "Wind": "풍압", "Iron": "철갑", "Electric": "전격", "Electronic": "전격", "Water": "수냉",
 }
 
 
@@ -262,7 +262,11 @@ class SoloRaidDamageEngine:
         return "引擎可用"
 
     def _engine_name(self, member: Any) -> str | None:
-        for key in (str(getattr(member, "name_code", "") or ""), str(getattr(member, "name", "") or "")):
+        for key in (
+            str(getattr(member, "name_code", "") or "").strip(),
+            str(getattr(member, "resource_id", "") or "").strip(),
+            str(getattr(member, "name", "") or "").strip(),
+        ):
             if key and key in self.mapping:
                 return self.mapping[key]
         return None

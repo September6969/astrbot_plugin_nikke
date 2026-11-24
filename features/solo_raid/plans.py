@@ -28,6 +28,7 @@ class SavedPlan:
     teams: tuple[Team, ...]
     damage_total: int | None
     saved_at: str
+    damage_model_label: str = ""
 
 
 class SoloRaidPlanStore:
@@ -75,6 +76,7 @@ class SoloRaidPlanStore:
                 for team in plan.teams
             ],
             "damage_total": plan.damage_total,
+            "damage_model_label": plan.damage_model_label,
             "saved_at": saved_at,
         }
         self._store.set_setting(self._key(actor_id), payload)
@@ -85,6 +87,7 @@ class SoloRaidPlanStore:
             teams=plan.teams,
             damage_total=plan.damage_total,
             saved_at=saved_at,
+            damage_model_label=plan.damage_model_label,
         )
 
     def load(self, actor_id: str) -> SavedPlan | None:
@@ -127,7 +130,8 @@ class SoloRaidPlanStore:
             season_name=str(raw.get("season_name") or ""),
             teams=tuple(teams),
             damage_total=raw.get("damage_total") if isinstance(raw.get("damage_total"), int) else None,
-            saved_at=str(raw.get("saved_at") or "") ,
+            saved_at=str(raw.get("saved_at") or ""),
+            damage_model_label=str(raw.get("damage_model_label") or ""),
         )
 
     def team(self, actor_id: str, index: int) -> Team | None:

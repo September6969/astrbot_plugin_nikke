@@ -221,3 +221,46 @@ def test_imported_season_43_and_historical_index_status(tmp_path) -> None:
     after = season_status(season, datetime(2026, 11, 18, 20, 0, tzinfo=timezone.utc))
     assert "进行中" in before
     assert "已结束" in after and "2026-11-19 04:59" in after
+
+
+def test_boss_weakness_prioritizes_advantageous_element_and_preserves_engine_label() -> None:
+    from dataclasses import replace as dc_replace
+
+    season = SeasonCatalog.from_payload(
+        {
+            "schema_version": 1,
+            "seasons": [
+                {
+                    "id": "43",
+                    "name": "赛季 43",
+                    "source_url": SOURCE,
+                    "checked_at": "2026-09-21",
+                    "bosses": [
+                        {"id": "b43", "name": "Boss", "weakness": "燃烧", "element": "风压"}
+                    ],
+                }
+            ],
+        }
+    ).latest()
+    pool = (
+        Member("1", "B1主", "Step1"),
+        Member("2", "B2主", "Step2"),
+        Member("3", "B3风压", "Step3", element="Wind"),
+        Member("4", "B3燃烧", "Step3", element="Fire"),
+    )
+    plan = build_five_teams(pool, season=season)
+    assert plan.teams[0].members[2].name == "B3燃烧"
+
+    labeled = dc_replace(
+        plan,
+        damage_total=999999,
+        damage_model_label="nikke-calc 67835ca303（MIT）",
+    )
+    payload = SoloRaidPayloadBuilder().build(labeled, boss=season.bosses[0])
+    assert "nikke-calc 67835ca303（MIT）" in payload["damage_text"]
+    assert "配置化估算" not in payload["damage_text"]
+
+    store = MemoryStore()
+    plans = SoloRaidPlanStore(store, clock=lambda: datetime(2026, 9, 21, tzinfo=timezone.utc))
+    plans.save("user-a", labeled)
+    assert plans.load("user-a").damage_model_label == "nikke-calc 67835ca303（MIT）"
