@@ -3,9 +3,7 @@
 
 from __future__ import annotations
 
-import asyncio
-import base64
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from typing import Any
 
 from astrbot.api import logger
@@ -18,7 +16,6 @@ from ...ui.payloads.calendar import CalendarT2IPayloadBuilder
 from ...ui.payloads.favorite_grid import FavoriteGridPayloadBuilder
 from ...ui.payloads.solo_raid import SoloRaidPayloadBuilder
 from ...ui.renderers import T2IRenderer
-from ...ui.renderers.favorite_grid_png import write_grid_png
 
 
 class AstrBotCommandPresentation:
@@ -67,40 +64,13 @@ class AstrBotCommandPresentation:
         return await self.try_t2i("character", card)
 
     async def render_favorite_grid(self, cells: Any) -> str | None:
-        """优先 T2I；失败时用本地 Pillow 合成 3x3 PNG，保证仍有图片。"""
+        """统一使用 T2I 渲染九宫格；失败时返回 None 由命令层按同一列表输出文字回退。"""
         payload = FavoriteGridPayloadBuilder(self._services.asset_manager).build(cells)
-        rendered = await self.try_t2i("favorite_grid", payload)
-        if rendered:
-            return rendered
-        portraits: dict[str, bytes] = {}
-        for row in payload["cells"]:
-            decoded = self._decode_data_uri(row.get("portrait"))
-            if decoded and row.get("name_code"):
-                portraits[str(row["name_code"])] = decoded
-        try:
-            return await asyncio.to_thread(
-                write_grid_png,
-                self._services.data_dir / "favorite-grid",
-                payload["cells"],
-                portraits=portraits,
-            )
-        except Exception as exc:
-            logger.warning("[NIKKE] 九宫格本地渲染失败: %s", type(exc).__name__)
-            return None
+        return await self.try_t2i("favorite_grid", payload)
 
     async def render_solo_raid(self, plan: Any, boss: Any = None) -> str | None:
         payload = SoloRaidPayloadBuilder(self._services.asset_manager).build(plan, boss=boss)
         return await self.try_t2i("solo_raid", payload)
-
-    @staticmethod
-    def _decode_data_uri(value: Any) -> bytes | None:
-        text = str(value or "")
-        if not text.startswith("data:") or "," not in text:
-            return None
-        try:
-            return base64.b64decode(text.split(",", 1)[1])
-        except (ValueError, TypeError):
-            return None
 
     async def render_campaign_record(self, record: Any) -> str | None:
         try:

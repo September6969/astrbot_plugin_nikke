@@ -239,7 +239,9 @@ async def test_news_subscription_route_is_personal_and_explicit() -> None:
     plugin, _ = plugin_with_toolbox()
     assert "尚未开通订阅" in await route(plugin, "新闻", "状态")
     assert "已订阅" in await route(plugin, "新闻", "订阅", "新闻")
-    assert "已订阅：新闻" in await route(plugin, "新闻", "状态")
+    status_text = await route(plugin, "新闻", "状态")
+    assert "已订阅（个人订阅）：新闻" in status_text
+    assert "enable_announcement_push" in status_text
     assert "已取消" in await route(plugin, "新闻", "取消订阅")
 
 

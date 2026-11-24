@@ -134,7 +134,12 @@ def test_type_filter_limits_output_and_rejects_unknown_group() -> None:
     )
     only_skin = build_board(events, now, groups=("皮肤",))
     assert [item.group for item in only_skin.items] == ["皮肤"]
-    assert only_skin.unclassified == 1
+    assert only_skin.unclassified == 0
+
+    with_maint = (*events, event("maint", "维护", "maintenance", now, now + timedelta(hours=2)))
+    only_skin_with_maint = build_board(with_maint, now, groups=("皮肤",))
+    assert [item.group for item in only_skin_with_maint.items] == ["皮肤"]
+    assert only_skin_with_maint.unclassified == 1
 
     try:
         build_board(events, now, groups=("不存在",))

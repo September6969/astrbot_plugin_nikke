@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""九宫格本地 PNG 渲染（29）。
+"""九宫格本地 PNG 渲染（29，已弃用生产回退路径）。
 
-T2I 不可用时用 Pillow 直接合成 3x3 图片：有本地立绘就用立绘，没有就使用按身份
-稳定推导的占位色块与文字，保证同一输入始终得到同一版面。
+生产命令现已统一收束至 T2I（``templates/t2i/favorite_grid.html`` +
+``ui/payloads/favorite_grid.py``）→ 文本回退；本模块仅保留用于兼容历史离线测试。
 """
 
 from __future__ import annotations

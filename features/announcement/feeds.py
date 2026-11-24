@@ -273,7 +273,6 @@ class FeedSubscriptions(AnnouncementDelivery):
             merged = list(dict.fromkeys([*current, *selected]))
         else:
             merged = list(selected)
-        state = self._state()
         state["targets"][target] = {
             "enabled": True,
             "kinds": merged,
@@ -287,7 +286,12 @@ class FeedSubscriptions(AnnouncementDelivery):
             "reminder_hours": [24],
         }
         self.store.set_setting(self.SETTING, state)
-        return "已订阅（当前会话仅通知你本人）：" + "、".join(KINDS[kind] for kind in merged) + "\n" + _HELP
+        return (
+            "已订阅（当前会话仅通知你本人；负责新公告/视频/新上线日程提醒）："
+            + "、".join(KINDS[kind] for kind in merged)
+            + "\n提示：若需要活动结束前 24 小时截止提醒，请使用 /妮姬 日程 订阅。\n"
+            + _HELP
+        )
 
     def _unsubscribe(self, target: str, kinds: Iterable[str]) -> str:
         state = self._state()
@@ -314,7 +318,12 @@ class FeedSubscriptions(AnnouncementDelivery):
             return "你在当前会话尚未开通订阅。\n" + _HELP
         kinds = "、".join(KINDS[kind] for kind in preference.get("kinds", []))
         delivered = sum(1 for record in self._state()["delivered"].values() if record.get("target") == target)
-        lines = [f"已订阅：{kinds}", f"已投递记录：{delivered} 条", "取消：/妮姬 新闻 取消订阅 [类型]"]
+        lines = [
+            f"已订阅（个人订阅）：{kinds}",
+            f"已投递记录：{delivered} 条",
+            "说明：新闻/视频/新日程推送仅针对本人；活动结束前 24h 提醒见 /妮姬 日程 订阅；全群公告广播受管理员 enable_announcement_push 控制。",
+            "取消：/妮姬 新闻 取消订阅 [类型]",
+        ]
         for kind, reason in self.catalog.last_unavailable.items():
             if kind in preference.get("kinds", []):
                 lines.append(f"{KINDS[kind]}来源：暂不可用（{reason}）")

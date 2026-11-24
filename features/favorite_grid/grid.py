@@ -114,10 +114,11 @@ class FavoriteRankingStorePort(Protocol):
 
 
 class FavoriteRanking:
-    """按用户覆盖保存九宫格投票，并聚合为公开人气榜。"""
+    """按用户覆盖保存九宫格投票，并维护单键聚合缓存消除榜单查询 N+1 读放大。"""
 
     KEY_PREFIX = "favorite_grid_v1:"
     INDEX_KEY = "favorite_grid_v1:index"
+    COUNTS_KEY = "favorite_grid_v1:counts"
 
     def __init__(self, store: FavoriteRankingStorePort, *, clock=None) -> None:
         self._store = store
@@ -135,6 +136,31 @@ class FavoriteRanking:
             return []
         return [str(item) for item in raw if isinstance(item, str) and item.strip()]
 
+    def _load_counts(self) -> dict[str, dict[str, Any]]:
+        raw = self._store.get_setting(self.COUNTS_KEY, None)
+        if isinstance(raw, Mapping):
+            totals = raw.get("totals")
+            if isinstance(totals, Mapping):
+                cleaned: dict[str, dict[str, Any]] = {}
+                for code, entry in totals.items():
+                    if not isinstance(entry, Mapping):
+                        continue
+                    votes = entry.get("votes", 0)
+                    if isinstance(votes, int) and not isinstance(votes, bool) and votes > 0:
+                        cleaned[str(code)] = {"name": str(entry.get("name") or code), "votes": votes}
+                return cleaned
+        # 旧数据首次迁移：扫描现有索引一次并持久化聚合视图，后续均为 O(1) 读取。
+        counts: dict[str, dict[str, Any]] = {}
+        for actor in self._voters():
+            for cell in self.my_vote(actor):
+                entry = counts.setdefault(cell.name_code, {"name": cell.name, "votes": 0})
+                entry["votes"] += 1
+        self._save_counts(counts)
+        return counts
+
+    def _save_counts(self, counts: Mapping[str, Mapping[str, Any]]) -> None:
+        self._store.set_setting(self.COUNTS_KEY, {"totals": dict(counts)})
+
     def vote(self, actor_id: str, cells: Iterable[GridCell]) -> tuple[GridCell, ...]:
         """保存或覆盖该用户的九票；同一角色在同一用户内只计一次。"""
         items = tuple(cells)
@@ -146,6 +172,21 @@ class FavoriteRanking:
         current = self._clock()
         if not isinstance(current, datetime) or current.tzinfo is None:
             raise FavoriteGridError("投票时间必须包含明确时区")
+
+        previous = self.my_vote(actor_id)
+        counts = self._load_counts()
+        for prev in previous:
+            entry = counts.get(prev.name_code)
+            if entry is None:
+                continue
+            entry["votes"] -= 1
+            if entry["votes"] <= 0:
+                counts.pop(prev.name_code, None)
+        for cell in items:
+            entry = counts.setdefault(cell.name_code, {"name": cell.name, "votes": 0})
+            entry["name"] = cell.name
+            entry["votes"] += 1
+
         payload = {
             "cells": [cell.to_dict() for cell in items],
             "updated_at": current.astimezone(timezone.utc).isoformat(),
@@ -159,6 +200,7 @@ class FavoriteRanking:
         if str(actor_id) not in voters:
             voters.append(str(actor_id))
             self._store.set_setting(self.INDEX_KEY, voters)
+        self._save_counts(counts)
         return items
 
     def my_vote(self, actor_id: str) -> tuple[GridCell, ...]:
@@ -188,17 +230,10 @@ class FavoriteRanking:
         return tuple(result)
 
     def ranking(self, *, limit: int = 10) -> tuple[RankEntry, ...]:
-        """聚合所有用户的最新投票；每名用户对同一角色只贡献 1 票。"""
+        """读取单键聚合榜单，避免按全部投票者数量发起 N+1 次存储读取。"""
         if not 1 <= limit <= 50:
             raise FavoriteGridError("榜单数量上限必须在 1–50")
-        counts: dict[str, dict[str, Any]] = {}
-        for actor in self._voters():
-            for cell in self.my_vote(actor):
-                entry = counts.setdefault(
-                    cell.name_code,
-                    {"name": cell.name, "votes": 0},
-                )
-                entry["votes"] += 1
+        counts = self._load_counts()
         ordered = sorted(
             counts.items(),
             key=lambda pair: (-pair[1]["votes"], pair[0]),
@@ -209,9 +244,19 @@ class FavoriteRanking:
         )
 
     def clear(self, actor_id: str) -> None:
+        previous = self.my_vote(actor_id)
+        counts = self._load_counts()
+        for prev in previous:
+            entry = counts.get(prev.name_code)
+            if entry is None:
+                continue
+            entry["votes"] -= 1
+            if entry["votes"] <= 0:
+                counts.pop(prev.name_code, None)
         self._store.set_setting(self._key(actor_id), None)
         voters = [item for item in self._voters() if item != str(actor_id)]
         self._store.set_setting(self.INDEX_KEY, voters)
+        self._save_counts(counts)
 
 
 def render_ranking(entries: tuple[RankEntry, ...], *, limit: int = 10) -> str:

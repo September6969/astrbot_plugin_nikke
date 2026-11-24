@@ -220,8 +220,10 @@ def build_board(
     unclassified = 0
     for event in events:
         group = group_of(event)
-        if group is None or group not in selected:
+        if group is None:
             unclassified += 1
+            continue
+        if group not in selected:
             continue
         status = status_text(event, current)
         up_rate, up_missing = up_rate_of(event)

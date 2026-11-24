@@ -197,3 +197,60 @@ def test_write_grid_png_reuses_identical_content(tmp_path=None) -> None:
     assert first == second
     with Image.open(first) as image:
         assert image.size == (1080, 1080)
+
+
+def test_ranking_uses_single_key_read_without_n_plus_one_scans() -> None:
+    class CountingStore(MemoryStore):
+        def __init__(self) -> None:
+            super().__init__()
+            self.reads = 0
+
+        def get_setting(self, key, default=None):
+            self.reads += 1
+            return super().get_setting(key, default)
+
+    store = CountingStore()
+    clock = lambda: datetime(2026, 9, 21, tzinfo=timezone.utc)
+    ranking = FavoriteRanking(store, clock=clock)
+    base = [
+        resolve_nine(
+            "测试1号,测试2号,测试3号,测试4号,测试5号,测试6号,测试7号,测试8号,测试9号",
+            ROWS,
+            resolver(),
+        ),
+        resolve_nine(
+            "测试10号,测试2号,测试3号,测试4号,测试5号,测试6号,测试7号,测试8号,测试9号",
+            ROWS,
+            resolver(),
+        ),
+    ]
+    for i in range(5):
+        ranking.vote(f"user-{i}", base[i % 2])
+    store.reads = 0
+    top = ranking.ranking(limit=10)
+    assert top[0].name == "测试2号" and top[0].votes == 5
+    # 榜单读取只需一次 COUNTS_KEY 读取，禁止按 5 个投票用户发 N+1 次请求。
+    assert store.reads == 1
+
+
+@pytest.mark.asyncio
+async def test_favorite_grid_uses_unified_t2i_without_pillow_fallback(tmp_path) -> None:
+    from types import SimpleNamespace
+    from astrbot_plugin_nikke.adapters.astrbot.command_presentation import AstrBotCommandPresentation
+
+    cells = resolve_nine(
+        "测试1号,测试2号,测试3号,测试4号,测试5号,测试6号,测试7号,测试8号,测试9号",
+        ROWS,
+        resolver(),
+    )
+
+    async def failing_html_render(*_args, **_kwargs):
+        raise RuntimeError("t2i unavailable")
+
+    presentation = AstrBotCommandPresentation(
+        services=SimpleNamespace(asset_manager=None, data_dir=tmp_path),
+        html_render=lambda: failing_html_render,
+        context=SimpleNamespace(),
+    )
+    # 失败时返回 None（由命令层回退文本），不再切到 Pillow 本地生图。
+    assert await presentation.render_favorite_grid(cells) is None
