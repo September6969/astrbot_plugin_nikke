@@ -28,7 +28,7 @@
 | `塔层` | `tower` | `TowerCommandHandler`，参数 `tower` / `floor` |
 | `语音` | `voice`；`开`、`关`、`语言`、`角色`、`服装` | `AstrBotVoiceAdapter.voice_settings` |
 | `塔罗` | `tarot`；`单抽`、`三张`、`今日`、`状态`、`帮助` | `TarotCommandHandler`，参数 `action` / `value` |
-| 空、`帮助` | `help`；`帮助 <分类>`；`帮助 详解\|detail [主题]` | `help_home` / `help_category` / `help_detail`（`application/commands/help.py` → `features/help` 单一数据源）；管理员可见管理区；依赖写操作的详解主题受 `enable_daily_actions` 控制 |
+| 空、`帮助` | `help`；`帮助 <分类>`；`帮助 详解\|detail [主题]` | `help_home` / `help_category` / `help_detail`（`application/commands/help.py` → `features/help` 单一数据源）；管理员可见管理区；分类与详解共同遵循竞技场、网页及额外写操作能力门禁 |
 | `账号` | `account`；`绑定`、`解绑`、`汇总 开\|关`、`续期`、`自动续期` | `AccountCommandHandler` 的 `account` operation |
 | `我的` | `me`、`progress` | `ProfileCommandHandler` |
 | `查询` | `query` | `NikkeCommandRuntime.query` 二级分派（见下） |

@@ -105,19 +105,23 @@ class NikkeCommandRuntime:
             include_admin = self._is_admin(event)
             arena_handler = self._handlers.arena
             arena_enabled = bool(arena_handler and arena_handler.enabled)
+            web_routes = getattr(arena_handler, "web_routes", None)
+            community_enabled = self._writes_enabled() and bool(getattr(self._handlers.daily, "_extra_automation", None))
+            renewal_enabled = self._writes_enabled() and bool(getattr(self._handlers.account, "_session_handler", None))
             if arg1.strip().casefold() in {"详解", "detail"}:
-                web_routes = getattr(arena_handler, "web_routes", None)
                 yield event.plain_result(help_detail(
                     arg2, include_admin=include_admin, arena_enabled=arena_enabled,
                     web_enabled=bool(web_routes and web_routes.active()),
-                    community_enabled=self._writes_enabled() and bool(getattr(self._handlers.daily, "_extra_automation", None)),
-                    renewal_enabled=self._writes_enabled() and bool(getattr(self._handlers.account, "_session_handler", None)),
+                    community_enabled=community_enabled,
+                    renewal_enabled=renewal_enabled,
                 ))
             elif not arg1.strip():
                 yield event.plain_result(help_home(PLUGIN_VERSION, include_admin=include_admin, arena=arena_enabled))
             else:
                 yield event.plain_result(help_category(
-                    arg1, PLUGIN_VERSION, include_admin=include_admin, arena=arena_enabled))
+                    arg1, PLUGIN_VERSION, include_admin=include_admin, arena=arena_enabled,
+                    web_enabled=bool(web_routes and web_routes.active()),
+                    community_enabled=community_enabled, renewal_enabled=renewal_enabled))
             return
         if key in {"账号", "account"}:
             async for result in self._account(
