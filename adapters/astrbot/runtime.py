@@ -8,12 +8,12 @@ import json
 import logging
 import time
 import zipfile
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any
 
 from astrbot.api.event import MessageChain
-from astrbot.api.message_components import Plain, At
+from astrbot.api.message_components import At, Image, Plain
 
 from ..._version import PLUGIN_VERSION
 from ...application.commands.account import RuntimeHealthDetails
@@ -145,7 +145,43 @@ class AstrBotRuntimeAdapter:
         solo_engine = getattr(getattr(self._services, "toolbox", None), "solo_engine", None)
         if solo_engine and hasattr(solo_engine, "aclose"):
             self._coordinator.register_cleanup("solo_engine", solo_engine.aclose)
+        portal = getattr(self._services, "portal", None)
+        if portal is not None:
+            self._coordinator.register_cleanup("portal_sessions", portal.sessions.clear)
         self._coordinator.register_cleanup("web", self._services.web.stop)
+
+    def attach_portal_bridge(self, presentation: Any) -> None:
+        """向双入口 Web 服务注入宿主 T2I 渲染与 QQ 消息发送能力。"""
+        portal = getattr(self._services, "portal", None)
+        if portal is None:
+            return
+        portal.bridge.attach(
+            send_to_qq=self._send_portal_message,
+            render_t2i=presentation.try_t2i,
+            build_calendar_payload=presentation.calendar_payload_builder.build,
+            render_favorite_grid=presentation.render_favorite_grid,
+            render_solo_raid=presentation.render_solo_raid,
+        )
+
+    async def _send_portal_message(
+        self, target: str, text: str, image_paths: Sequence[str] = ()
+    ) -> str:
+        """从双入口网页回推 QQ 会话消息；超时或状态不确定返回 unknown 防止自动重发。"""
+        if self.closing or not target:
+            return "failed"
+        components: list[Any] = [Image.fromFileSystem(path) for path in image_paths if path]
+        if text:
+            components.append(Plain(text))
+        if not components:
+            return "failed"
+        try:
+            res = await asyncio.wait_for(
+                self._context.send_message(target, MessageChain(components)),
+                timeout=12.0,
+            )
+            return "unknown" if res is False else "sent"
+        except (asyncio.TimeoutError, TimeoutError):
+            return "unknown"
 
     async def _initialize_services(self) -> None:
         await self._best_effort(

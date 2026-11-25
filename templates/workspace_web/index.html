@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NIKKE 个人指挥官工作台</title>
+  <link rel="stylesheet" href="/workspace/static/workspace.css">
+  <script src="/workspace/static/workspace.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <span class="badge">NIKKE · 个人指挥官工作台</span>
+      <h1>Commander Workbench</h1>
+      <p id="session-meta" class="subtitle">正在初始化安全会话（按需懒加载，不主动访问上游）…</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/hall">前往公共功能大厅</a>
+      <button id="btn-revoke" class="btn" type="button">结束本次会话</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="binding" role="tab" aria-selected="true">绑定与档案</button>
+    <button class="tab" data-tab="roster" role="tab" aria-selected="false">角色练度</button>
+    <button class="tab" data-tab="solo-raid" role="tab" aria-selected="false">单人突袭五队</button>
+    <button class="tab" data-tab="arena" role="tab" aria-selected="false">竞技场协同</button>
+    <button class="tab" data-tab="tools" role="tab" aria-selected="false">养成助手</button>
+    <button class="tab" data-tab="settings" role="tab" aria-selected="false">个人设置与目录</button>
+  </nav>
+
+  <main class="container">
+    <section id="tab-binding" class="tab-panel active">
+      <div class="card">
+        <div class="panel-head">
+          <h2>账号绑定状态 & 自助绑定</h2>
+          <button id="btn-start-bind" class="btn primary">生成 / 刷新 10 分钟绑定链接</button>
+        </div>
+        <div id="bind-summary" class="status-box">等待初始化…</div>
+        <div id="bind-flow" class="subcard" hidden>
+          <p>打开一次有效安全绑定页：<a id="bind-link" href="#" target="_blank" rel="noopener">前往绑定页</a> ｜ <a id="bind-ext" href="/download">下载浏览器扩展</a></p>
+          <p id="bind-poll-status" class="muted">等待浏览器完成绑定…</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="panel-head">
+          <h2>个人进度与成长变化（按需拉取）</h2>
+          <div class="actions">
+            <button id="btn-load-profile" class="btn primary">读取我的进度</button>
+            <button id="btn-share-profile" class="btn accent" disabled>脱敏分享至 QQ</button>
+          </div>
+        </div>
+        <pre id="profile-output" class="pre-box">尚未请求上游数据，点击「读取我的进度」按需拉取。</pre>
+      </div>
+    </section>
+
+    <section id="tab-roster" class="tab-panel">
+      <div class="card">
+        <div class="panel-head">
+          <h2>个人角色库（按需拉取）</h2>
+          <button id="btn-load-roster" class="btn primary">加载已持有妮姬</button>
+        </div>
+        <div id="roster-count" class="muted"></div>
+        <div id="roster-list" class="list-box"></div>
+      </div>
+      <div class="card">
+        <h2>单卡详情 & 超限词条读取</h2>
+        <div class="inline-form">
+          <input id="char-card-q" type="text" placeholder="角色名（如 红莲）">
+          <button id="btn-load-card" class="btn primary">查询单卡</button>
+        </div>
+        <pre id="card-output" class="pre-box"></pre>
+      </div>
+    </section>
+
+    <section id="tab-solo-raid" class="tab-panel">
+      <div class="card">
+        <div class="panel-head">
+          <h2>单人突袭五队编组 & 估伤</h2>
+          <div class="actions">
+            <button id="btn-sr-account" class="btn primary">使用账号角色池编五队</button>
+            <button id="btn-sr-share" class="btn accent" disabled>脱敏分享五队至 QQ</button>
+          </div>
+        </div>
+        <div class="inline-form mb-sm">
+          <input id="sr-manual-pool" type="text" class="flex-grow" placeholder="或手工池（例：丽塔:B1,桑迪:B2,红莲:B3,...）">
+          <label class="chk"><input id="sr-save-plan" type="checkbox">同时保存方案</label>
+          <button id="btn-sr-manual" class="btn">按手工池编组</button>
+        </div>
+        <div id="sr-trust-badge" class="muted"></div>
+        <pre id="sr-output" class="pre-box">点击上方按钮编排五队…</pre>
+      </div>
+    </section>
+
+    <section id="tab-arena" class="tab-panel">
+      <div class="card">
+        <div class="panel-head">
+          <h2>竞技场解队 & 独立三队编辑器</h2>
+          <div class="actions">
+            <button id="btn-arena-single-web" class="btn">打开单队编辑器</button>
+            <button id="btn-arena-three-web" class="btn primary">打开三队编辑器</button>
+          </div>
+        </div>
+        <p id="arena-web-link" class="muted"></p>
+        <div class="inline-form">
+          <input id="arena-lineup" type="text" class="flex-grow" placeholder="输入对方 5 人，如 红莲/豺狼/布兰儿/桑迪/特蕾娜">
+          <button id="btn-arena-analyze" class="btn primary">快速文字解队</button>
+          <button id="btn-arena-share" class="btn accent" disabled>分享结论至 QQ</button>
+        </div>
+        <pre id="arena-output" class="pre-box"></pre>
+      </div>
+    </section>
+
+    <section id="tab-tools" class="tab-panel">
+      <div class="card">
+        <h2>个性化愿望单 & 同步器估算</h2>
+        <div class="inline-form mb-sm">
+          <select id="ws-wl-strategy">
+            <option value="balanced">均衡</option>
+            <option value="collection">收集</option>
+            <option value="investment">养成</option>
+          </select>
+          <input id="ws-wl-owned" type="text" placeholder="留空自动读取已绑定角色库，或填 拉毗:2">
+          <button id="btn-ws-wishlist" class="btn primary">生成愿望单</button>
+        </div>
+        <pre id="ws-wl-output" class="pre-box"></pre>
+      </div>
+      <div class="card">
+        <h2>同步器升级估算（支持自动读取账号等级）</h2>
+        <div class="inline-form">
+          <input id="ws-sync-tgt" type="number" value="220" placeholder="目标等级">
+          <input id="ws-sync-dust" type="number" value="400" placeholder="芯尘日产">
+          <input id="ws-sync-cred" type="number" value="1000" placeholder="信用点日产">
+          <input id="ws-sync-data" type="number" value="100" placeholder="战斗数据日产">
+          <button id="btn-ws-sync" class="btn primary">按账号等级计算</button>
+        </div>
+        <pre id="ws-sync-output" class="pre-box"></pre>
+      </div>
+    </section>
+
+    <section id="tab-settings" class="tab-panel">
+      <div class="card">
+        <h2>个人偏好与隐私管理</h2>
+        <div class="actions">
+          <button id="btn-toggle-push-on" class="btn">开启每日汇总</button>
+          <button id="btn-toggle-push-off" class="btn">关闭每日汇总</button>
+          <button id="btn-clear-growth" class="btn warn">清空养成历史快照</button>
+        </div>
+        <pre id="settings-output" class="pre-box"></pre>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="share-dialog" class="dialog">
+    <h3>确认分享至 QQ 会话</h3>
+    <p id="share-target-line" class="muted"></p>
+    <p id="share-redaction-line" class="muted"></p>
+    <pre id="share-preview-box" class="pre-box"></pre>
+    <div class="actions">
+      <button id="btn-share-cancel" class="btn" type="button">取消</button>
+      <button id="btn-share-confirm" class="btn primary" type="button">确认发送</button>
+    </div>
+    <p id="share-confirm-status" class="muted"></p>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>

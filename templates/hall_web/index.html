@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NIKKE 公共功能大厅</title>
+  <link rel="stylesheet" href="/hall/static/hall.css">
+  <script src="/hall/static/hall.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="badge">NIKKE · 公共功能大厅</span>
+      <h1>功能导航与公开工具台</h1>
+      <p class="subtitle">无需登录，绝不读取个人账号与练度。涉及绑定或个人数据请回到 QQ 发送 <code>/妮姬 工作台</code>。</p>
+    </div>
+    <div id="group-ctx-banner" class="ctx-banner muted">匿名浏览模式（从 QQ 群发送 <code>/妮姬 大厅</code> 打开可启用群聊反馈）</div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="公共大厅栏目">
+    <button class="tab active" data-tab="overview" role="tab" aria-selected="true">功能目录与口令</button>
+    <button class="tab" data-tab="calendar" role="tab" aria-selected="false">日程与卡池</button>
+    <button class="tab" data-tab="tarot" role="tab" aria-selected="false">塔罗占卜</button>
+    <button class="tab" data-tab="guides" role="tab" aria-selected="false">攻略与塔层</button>
+    <button class="tab" data-tab="announcements" role="tab" aria-selected="false">官方公告</button>
+    <button class="tab" data-tab="tools" role="tab" aria-selected="false">公开养成工具</button>
+  </nav>
+
+  <main class="container">
+    <section id="tab-overview" class="tab-panel active">
+      <div class="panel-head">
+        <h2>全量功能目录</h2>
+        <div class="filters">
+          <input id="catalog-search" type="search" placeholder="搜索功能名、说明或口令…" autocomplete="off">
+          <select id="catalog-entry-filter">
+            <option value="all">全部公开项</option>
+            <option value="hall">大厅直接可用</option>
+            <option value="both">大厅 / QQ 通用</option>
+          </select>
+        </div>
+      </div>
+      <div id="catalog-list" class="card-grid">正在加载目录…</div>
+    </section>
+
+    <section id="tab-calendar" class="tab-panel">
+      <div class="card">
+        <div class="panel-head">
+          <h2>近期活动日程</h2>
+          <div class="actions">
+            <select id="calendar-horizon">
+              <option value="7">未来 7 天</option>
+              <option value="14" selected>未来 14 天</option>
+              <option value="30">未来 30 天</option>
+            </select>
+            <button id="btn-load-calendar" class="btn">刷新日程</button>
+            <button id="btn-push-calendar" class="btn primary" hidden>推送日程到当前群聊</button>
+          </div>
+        </div>
+        <div id="calendar-feedback-status" class="status-line"></div>
+        <div id="calendar-items" class="list-box">点击刷新读取本地冻结日程快照。</div>
+      </div>
+      <div class="card">
+        <div class="panel-head">
+          <h2>卡池 / 活动 / 皮肤 / 突袭分类板</h2>
+          <div class="actions">
+            <select id="gacha-group">
+              <option value="">全部分类</option>
+              <option value="卡池">卡池</option>
+              <option value="活动">活动</option>
+              <option value="皮肤">皮肤</option>
+              <option value="突袭">突袭</option>
+            </select>
+            <button id="btn-load-gacha" class="btn">查看分类板</button>
+          </div>
+        </div>
+        <pre id="gacha-output" class="pre-box">点击查看分类板…</pre>
+      </div>
+    </section>
+
+    <section id="tab-tarot" class="tab-panel">
+      <div class="card">
+        <div class="panel-head">
+          <h2>NIKKE 随机塔罗占卜</h2>
+          <div class="actions">
+            <button id="btn-tarot-single" class="btn primary">单抽一张</button>
+            <button id="btn-tarot-three" class="btn">三张牌阵（现状/阻碍/建议）</button>
+            <button id="btn-push-tarot" class="btn accent" hidden disabled>发送本次占卜到当前群聊</button>
+          </div>
+        </div>
+        <div id="tarot-feedback-status" class="status-line"></div>
+        <div id="tarot-cards" class="tarot-grid"></div>
+        <pre id="tarot-output" class="pre-box">点击上方按钮抽取塔罗牌…</pre>
+      </div>
+    </section>
+
+    <section id="tab-guides" class="tab-panel">
+      <div class="card">
+        <h2>常用一图流攻略</h2>
+        <div id="guide-categories" class="pill-row"></div>
+        <div id="guide-output" class="list-box">选择分类查看已登记的攻略与链接。</div>
+      </div>
+      <div class="card">
+        <h2>无限之塔 / 企业塔速查</h2>
+        <div class="inline-form">
+          <input id="tower-name" type="text" value="无限塔" placeholder="无限塔 / 极乐净土 / 米西利斯 / 泰特拉 / 朝圣者">
+          <input id="tower-floor" type="text" value="100" placeholder="楼层">
+          <button id="btn-tower-query" class="btn primary">查询楼层</button>
+        </div>
+        <pre id="tower-output" class="pre-box"></pre>
+      </div>
+    </section>
+
+    <section id="tab-announcements" class="tab-panel">
+      <div class="card">
+        <div class="panel-head">
+          <h2>官方公告检索</h2>
+          <div class="inline-form">
+            <input id="ann-locale" type="text" class="w-compact" placeholder="语言 (如 en / zh-TW)">
+            <input id="ann-query" type="text" placeholder="关键词">
+            <button id="btn-load-ann" class="btn primary">检索</button>
+          </div>
+        </div>
+        <pre id="ann-output" class="pre-box">点击检索读取当前已缓存的官方公告…</pre>
+      </div>
+      <div class="card">
+        <div class="panel-head">
+          <h2>本命人气榜 Top 10</h2>
+          <button id="btn-load-ranking" class="btn">刷新榜单</button>
+        </div>
+        <pre id="ranking-output" class="pre-box"></pre>
+      </div>
+    </section>
+
+    <section id="tab-tools" class="tab-panel">
+      <div class="card">
+        <h2>公开角色资料速查</h2>
+        <div class="inline-form">
+          <input id="char-query" type="text" placeholder="角色名或别名（如 红莲 / Rapi）">
+          <button id="btn-char-query" class="btn primary">查询资料</button>
+        </div>
+        <div id="char-output" class="list-box"></div>
+      </div>
+
+      <div class="card">
+        <h2>咨询答案检索</h2>
+        <div class="inline-form">
+          <input id="counsel-char" type="text" placeholder="角色名（如 拉毗）">
+          <input id="counsel-kw" type="text" placeholder="问题关键词（可选）">
+          <button id="btn-counsel" class="btn primary">检索</button>
+        </div>
+        <pre id="counsel-output" class="pre-box"></pre>
+      </div>
+
+      <div class="card">
+        <h2>同步器等级计算（公开手动参数）</h2>
+        <div class="grid-inputs">
+          <label>当前等级<input id="sync-cur" type="number" value="200"></label>
+          <label>目标等级<input id="sync-tgt" type="number" value="210"></label>
+          <label>芯尘库存<input id="sync-inv-dust" type="number" value="0"></label>
+          <label>信用点库存<input id="sync-inv-cred" type="number" value="0"></label>
+          <label>战斗数据库存<input id="sync-inv-data" type="number" value="0"></label>
+          <label>芯尘日产<input id="sync-prod-dust" type="number" value="400"></label>
+          <label>信用点日产<input id="sync-prod-cred" type="number" value="1000"></label>
+          <label>战斗数据日产<input id="sync-prod-data" type="number" value="100"></label>
+        </div>
+        <button id="btn-sync-calc" class="btn primary">估算升级天数</button>
+        <pre id="sync-output" class="pre-box"></pre>
+      </div>
+
+      <div class="card">
+        <h2>愿望单建议 & 超限洗词条模拟</h2>
+        <div class="inline-form">
+          <select id="wl-strategy">
+            <option value="balanced">均衡</option>
+            <option value="collection">收集</option>
+            <option value="investment">养成</option>
+          </select>
+          <input id="wl-owned" type="text" placeholder="已持有角色:星级，如 拉毗:2,迪塞尔:0">
+          <button id="btn-wishlist" class="btn primary">生成愿望单</button>
+        </div>
+        <pre id="wl-output" class="pre-box"></pre>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>

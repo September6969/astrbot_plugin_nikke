@@ -14,6 +14,7 @@ from ...application.commands.campaign import CampaignCommandHandler
 from ...application.commands.character import CharacterCommandHandler
 from ...application.commands.daily import DailyCommandHandler
 from ...application.commands.guide import GuideCommandHandler
+from ...application.commands.portal import PortalCommandHandler
 from ...application.commands.profile import ProfileCommandHandler
 from ...application.commands.raid import RaidCommandHandler
 from ...application.commands.tarot import TarotCommandHandler
@@ -41,6 +42,7 @@ class PluginCommandHandlers:
     tower: TowerCommandHandler | None = None
     arena: ArenaCommandHandler | None = None
     toolbox: ToolboxCommandHandler | None = None
+    portal: PortalCommandHandler | None = None
     info_feeds: object | None = None
     calc_tools: object | None = None
     solo_raid: object | None = None

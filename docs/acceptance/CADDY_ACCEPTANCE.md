@@ -3,7 +3,7 @@
 ## 安全合同
 
 - `deploy/Caddyfile` 只作为 Caddy 示例配置，不代表已在任何真实主机部署。
-- `/bind/{token}` 使用一次性绑定令牌；示例默认不启用 HTTP access log，避免 URL 路径令牌进入反代日志。
+- `/bind/*`、`/arena/open/*`、`/shiftypad/*`、`/api/shiftypad/*`、`/hall/open/*` 与 `/workspace/open/*` 涉及一次性令牌或短时引导上下文；`deploy/Caddyfile` 同时默认不启用 HTTP access log 并显式配置 `log_skip`，确保令牌与授权头不会写入反代日志。
 - 反代目标是容器网络内的 `astrbot:6210`，宿主机不应发布 6210。
 - 示例保留 HTTPS、HSTS、`nosniff`、禁止 iframe、无 referrer 和隐藏 Server 标头。
 - `deploy/docker-compose.caddy.yml` 只发布 80/443（含 HTTP/3 UDP 443），Caddyfile 以只读方式挂载；Caddy 与 AstrBot 使用外部 `nikke-bot` 网络。
