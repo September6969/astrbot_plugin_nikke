@@ -19,11 +19,14 @@ from PIL import Image
 
 from astrbot_plugin_nikke.core.asset_manager import AssetManager
 from astrbot_plugin_nikke.features.character.application import CharacterRosterData
+from astrbot_plugin_nikke.features.solo_raid.builder import Member, build_five_teams
 from astrbot_plugin_nikke.scripts.shared.t2i_preview_fixtures import get_cases
 from astrbot_plugin_nikke.ui.payloads.arena import ArenaT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.calendar import CalendarT2IPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.campaign import name_layout
+from astrbot_plugin_nikke.ui.payloads.favorite_grid import FavoriteGridPayloadBuilder
 from astrbot_plugin_nikke.ui.payloads.roster import RosterT2IPayloadBuilder, roster_row_height
+from astrbot_plugin_nikke.ui.payloads.solo_raid import SoloRaidPayloadBuilder
 from astrbot_plugin_nikke.ui.renderers.t2i import T2IRenderer
 from astrbot_plugin_nikke.ui.t2i_assets import T2IAssetResolver
 from astrbot_plugin_nikke.ui.t2i_templates import PAGES, T2ITemplateLoader
@@ -93,6 +96,12 @@ async def test_every_page_payload_carries_canvas_and_renderer_sets_viewport(tmp_
         "roster": CharacterRosterData("测试", ({"name_code": "3001", "lv": 200, "combat": 10},), {"3001": "拉毗"}),
         "arena_matchup": analysis,
         "arena_three_teams": plan,
+        "favorite_grid": FavoriteGridPayloadBuilder(assets).build(
+            [{"name": "拉毗", "name_code": "3001", "burst": "Step1", "element": "Fire"}] * 9
+        ),
+        "solo_raid": SoloRaidPayloadBuilder(assets).build(
+            build_five_teams((Member("3001", "拉毗", "Step1"),))
+        ),
     }
     seen = set()
     for page, data in inputs.items():

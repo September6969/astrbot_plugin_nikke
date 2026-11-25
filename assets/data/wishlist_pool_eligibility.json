@@ -1,0 +1,862 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-24",
+  "source_note": "基于《胜利女神：NIKKE》普通招募愿望单规则人工核验与保守 fail-closed 标注：仅明确可入常规/朝圣-超限愿望单的角色标为 admitted；联动、限定、解放/周年赠送与近期未独立核验角色不默认入推荐。",
+  "entries": {
+    "1007": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "D（常规企业普通招募池）"
+    },
+    "1010": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "拉普拉斯（常规企业普通招募池）"
+    },
+    "1012": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "樱花（常规企业普通招募池）"
+    },
+    "1019": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "玛娜（常规企业普通招募池）"
+    },
+    "1020": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "豺狼（常规企业普通招募池）"
+    },
+    "1021": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "牡丹（常规企业普通招募池）"
+    },
+    "1022": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "毒蛇（常规企业普通招募池）"
+    },
+    "3004": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "鲁玛妮（常规企业普通招募池）"
+    },
+    "5001": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "麦斯威尔（常规企业普通招募池）"
+    },
+    "5002": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "舒格（常规企业普通招募池）"
+    },
+    "5003": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "艾可希雅（常规企业普通招募池）"
+    },
+    "5004": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "爱丽丝（常规企业普通招募池）"
+    },
+    "5005": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "艾玛（常规企业普通招募池）"
+    },
+    "5006": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "尤妮（常规企业普通招募池）"
+    },
+    "5007": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "普丽瓦蒂（常规企业普通招募池）"
+    },
+    "5008": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "布兰儿（常规企业普通招募池）"
+    },
+    "5009": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "诺亚尔（常规企业普通招募池）"
+    },
+    "5010": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "普琳玛（常规企业普通招募池）"
+    },
+    "5011": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "丽塔（常规企业普通招募池）"
+    },
+    "5012": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "白雪公主（朝圣者独立 5 席）"
+    },
+    "5013": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "伊莎贝尔（朝圣者独立 5 席）"
+    },
+    "5014": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "尤莉亚（常规企业普通招募池）"
+    },
+    "5015": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "西格娜（常规企业普通招募池）"
+    },
+    "5016": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "波莉（常规企业普通招募池）"
+    },
+    "5017": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "米兰达（常规企业普通招募池）"
+    },
+    "5018": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "布丽德（常规企业普通招募池）"
+    },
+    "5019": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "索林（常规企业普通招募池）"
+    },
+    "5020": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "迪塞尔（常规企业普通招募池）"
+    },
+    "5021": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "桑迪（常规企业普通招募池）"
+    },
+    "5022": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "贝斯蒂（常规企业普通招募池）"
+    },
+    "5023": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "银华（常规企业普通招募池）"
+    },
+    "5024": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "德雷克（常规企业普通招募池）"
+    },
+    "5025": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "克拉乌（常规企业普通招募池）"
+    },
+    "5026": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "梅里（常规企业普通招募池）"
+    },
+    "5027": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "佩珀（常规企业普通招募池）"
+    },
+    "5028": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "米尔克（常规企业普通招募池）"
+    },
+    "5029": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "尤尔夏（常规企业普通招募池）"
+    },
+    "5030": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "艾德米（常规企业普通招募池）"
+    },
+    "5031": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "吉萝婷（常规企业普通招募池）"
+    },
+    "5032": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "梅登（常规企业普通招募池）"
+    },
+    "5033": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "鲁德米拉（常规企业普通招募池）"
+    },
+    "5034": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "露菲（常规企业普通招募池）"
+    },
+    "5035": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "杨（常规企业普通招募池）"
+    },
+    "5036": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "朵拉（常规企业普通招募池）"
+    },
+    "5037": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "诺薇儿（常规企业普通招募池）"
+    },
+    "5038": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "艾菲涅尔（常规企业普通招募池）"
+    },
+    "5039": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "富克旺（常规企业普通招募池）"
+    },
+    "5040": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "长发公主（朝圣者独立 5 席）"
+    },
+    "5041": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "红莲（朝圣者独立 5 席）"
+    },
+    "5042": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "哈兰（朝圣者独立 5 席）"
+    },
+    "5043": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "诺雅（朝圣者独立 5 席）"
+    },
+    "5044": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "神罚（朝圣者独立 5 席）"
+    },
+    "5045": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "罗珊娜（常规企业普通招募池）"
+    },
+    "5046": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "爱德（常规企业普通招募池）"
+    },
+    "5048": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "玛律恰那（常规企业普通招募池）"
+    },
+    "5049": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "露姬（常规企业普通招募池）"
+    },
+    "5050": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "可可（常规企业普通招募池）"
+    },
+    "5051": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "索达（常规企业普通招募池）"
+    },
+    "5053": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "吉洛（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5054": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "饼干（常规企业普通招募池）"
+    },
+    "5055": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "吉尔提（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5056": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "尼希利斯塔（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5059": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "森（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5061": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "桃乐丝（朝圣者独立 5 席）"
+    },
+    "5064": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "梅里：海湾女神（季节/期间限定，不入普池）"
+    },
+    "5065": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "皇冠（朝圣者独立 5 席）"
+    },
+    "5066": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "海伦（常规企业普通招募池）"
+    },
+    "5068": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "尼罗（常规企业普通招募池）"
+    },
+    "5069": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "莱伊（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5070": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "阿莉亚（常规企业普通招募池）"
+    },
+    "5071": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "尼恩：蓝色海洋（季节/期间限定，不入普池）"
+    },
+    "5074": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "诺伊斯（常规企业普通招募池）"
+    },
+    "5075": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "沃纶姆（常规企业普通招募池）"
+    },
+    "5077": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "爱因（常规企业普通招募池）"
+    },
+    "5078": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "坎西（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5079": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "马斯特（常规企业普通招募池）"
+    },
+    "5081": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "托比（常规企业普通招募池）"
+    },
+    "5082": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "基里（常规企业普通招募池）"
+    },
+    "5085": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "安妮：奇迹仙女（季节/期间限定，不入普池）"
+    },
+    "5087": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "露菲：冬日购物狂（季节/期间限定，不入普池）"
+    },
+    "5088": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "茨瓦伊（常规企业普通招募池）"
+    },
+    "5089": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "真纪真（ABNORMAL 联动不入普池）"
+    },
+    "5090": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "帕瓦（ABNORMAL 联动不入普池）"
+    },
+    "5092": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "莱昂纳（常规企业普通招募池）"
+    },
+    "5094": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "2B（ABNORMAL 联动不入普池）"
+    },
+    "5095": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "A2（ABNORMAL 联动不入普池）"
+    },
+    "5097": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "阿妮斯：闪耀夏日（季节/期间限定，不入普池）"
+    },
+    "5098": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "海伦：海蓝宝石（季节/期间限定，不入普池）"
+    },
+    "5099": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "娜嘉（常规企业普通招募池）"
+    },
+    "5100": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "蒂亚（常规企业普通招募池）"
+    },
+    "5101": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "小红帽（朝圣者独立 5 席）"
+    },
+    "5102": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "白雪公主：纯真年代（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5103": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "鲁德米拉：冬日之主（季节/期间限定，不入普池）"
+    },
+    "5104": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "米卡：雪地伙伴（季节/期间限定，不入普池）"
+    },
+    "5105": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "红莲：暗影（朝圣者独立 5 席）"
+    },
+    "5106": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "普丽瓦蒂：不友善的女仆（常规企业普通招募池）"
+    },
+    "5107": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "伊莱格（常规企业普通招募池）"
+    },
+    "5108": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "雷姆（ABNORMAL 联动不入普池）"
+    },
+    "5109": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "爱蜜莉雅（ABNORMAL 联动不入普池）"
+    },
+    "5110": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "D：杀手妻子（常规企业普通招募池）"
+    },
+    "5111": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "贝伊（常规企业普通招募池）"
+    },
+    "5112": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "特罗尼（常规企业普通招募池）"
+    },
+    "5113": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "索达：闪亮兔女郎（常规企业普通招募池）"
+    },
+    "5114": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "爱丽丝：仙境兔女郎（常规企业普通招募池）"
+    },
+    "5115": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "克雷伊（常规企业普通招募池）"
+    },
+    "5116": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "罗珊娜：高雅海洋（季节/期间限定，不入普池）"
+    },
+    "5117": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "樱花：夏日绽放（季节/期间限定，不入普池）"
+    },
+    "5118": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "明日香（ABNORMAL 联动不入普池）"
+    },
+    "5119": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "零（ABNORMAL 联动不入普池）"
+    },
+    "5120": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "真理（ABNORMAL 联动不入普池）"
+    },
+    "5121": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "坎西：逃生女王（常规企业普通招募池）"
+    },
+    "5122": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "潘托姆（常规企业普通招募池）"
+    },
+    "5123": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "长发公主：纯洁恩典（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5124": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "灰姑娘（朝圣者独立 5 席）"
+    },
+    "5125": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "格拉维（朝圣者独立 5 席）"
+    },
+    "5126": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "芙罗拉（常规企业普通招募池）"
+    },
+    "5127": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "梅登：冰玫瑰（季节/期间限定，不入普池）"
+    },
+    "5128": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "吉萝婷：寒冬杀手（季节/期间限定，不入普池）"
+    },
+    "5129": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "拉毗：小红帽（超限 Over-Spec 占朝圣/超限独立 5 席）"
+    },
+    "5130": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "马斯特：浪漫的女仆（常规企业普通招募池）"
+    },
+    "5131": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "安克：天真的女仆（常规企业普通招募池）"
+    },
+    "5132": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "零（暂称）（ABNORMAL 联动不入普池）"
+    },
+    "5133": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "明日香：WILLE（ABNORMAL 联动不入普池）"
+    },
+    "5134": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "特蕾娜（常规企业普通招募池）"
+    },
+    "5135": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "布蕾德（常规企业普通招募池）"
+    },
+    "5136": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "克劳斯特（常规企业普通招募池）"
+    },
+    "5137": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "小美人鱼（朝圣者独立 5 席）"
+    },
+    "5138": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "米哈拉：羁绊锁链（超限 Over-Spec 占朝圣/超限独立 5 席）"
+    },
+    "5139": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "莫莉（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5140": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "阿尔卡娜（常规企业普通招募池）"
+    },
+    "5141": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "K（常规企业普通招募池）"
+    },
+    "5142": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "伊芙（ABNORMAL 联动不入普池）"
+    },
+    "5143": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "蕾雯（ABNORMAL 联动不入普池）"
+    },
+    "5144": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "索拉（常规企业普通招募池）"
+    },
+    "5145": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "桃乐丝：机缘巧遇（季节/期间限定，不入普池）"
+    },
+    "5146": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "伊莱格：BOOM与惊吓（季节/期间限定，不入普池）"
+    },
+    "5147": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "艾玛：战术升级（常规企业普通招募池）"
+    },
+    "5148": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "贝斯蒂：战术升级（常规企业普通招募池）"
+    },
+    "5149": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "银华：战术升级（常规企业普通招募池）"
+    },
+    "5150": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "米尔克：花漾兔女郎（常规企业普通招募池）"
+    },
+    "5151": {
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "爱德：特务兔女郎（常规企业普通招募池）"
+    },
+    "5152": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "艾达（ABNORMAL 联动不入普池）"
+    },
+    "5153": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "吉儿（ABNORMAL 联动不入普池）"
+    },
+    "5154": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "德尔塔：怪盗忍者（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5155": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "娜由塔（朝圣者独立 5 席）"
+    },
+    "5156": {
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "莉贝雷利奥（朝圣者独立 5 席）"
+    },
+    "5157": {
+      "pool_status": "free_welfare",
+      "wishlist_group": "NONE",
+      "note": "钟鸣（解放/周年免费赠送 SSR，不入普池招募）"
+    },
+    "5158": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "索林：霜雪车票（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5159": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "迪塞尔：冬日甜心（季节/期间限定，不入普池）"
+    },
+    "5160": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "布丽德：静默轨道（季节/期间限定，不入普池）"
+    },
+    "5161": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "白雪公主：重型武装（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5162": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "蕾贝儿（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5163": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "薇尔维特（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5164": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "千束（ABNORMAL 联动不入普池）"
+    },
+    "5165": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "泷奈（ABNORMAL 联动不入普池）"
+    },
+    "5166": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "E.H.（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5167": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "阿尔卡娜：命运伴侣（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5168": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "白鹤（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5169": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "阿妮斯：超级巨星（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5170": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "尼恩：透视之眼（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5171": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "阿维斯塔（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5172": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "敏特（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5173": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "普莉卡（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5174": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "方舟黑色游侠（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5175": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "灰姑娘：琉璃波光（季节/期间限定，不入普池）"
+    },
+    "5176": {
+      "pool_status": "limited",
+      "wishlist_group": "NONE",
+      "note": "玛律恰那：海洋进修（季节/期间限定，不入普池）"
+    },
+    "5177": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "拉普拉斯：究极英雄（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5178": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "麦斯威尔：平凡技师（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    },
+    "5179": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "QUEEN（真）（ABNORMAL 联动不入普池）"
+    },
+    "5180": {
+      "pool_status": "collab",
+      "wishlist_group": "NONE",
+      "note": "雪子（ABNORMAL 联动不入普池）"
+    },
+    "5181": {
+      "pool_status": "unknown",
+      "wishlist_group": "NONE",
+      "note": "德雷克：终极反派（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+    }
+  }
+}

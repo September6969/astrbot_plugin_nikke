@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=1000">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'">
+<style>
+<!-- SHARED_CSS -->
+<!-- RAID_CSS -->
+.solo-team { margin-top: 18px; }
+.solo-members { display: flex; gap: 10px; flex-wrap: wrap; }
+.solo-member { width: 170px; border: 1px solid #2a2f3a; border-radius: 8px; padding: 8px; }
+.solo-member img { width: 96px; height: 96px; object-fit: cover; border-radius: 6px; }
+.solo-placeholder { width: 96px; height: 96px; border-radius: 6px; background: #232833; color: #9aa4b2; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+</style></head><body>
+<h1>{{ title }}</h1>
+<p class="source">赛季：{{ season }}{% if boss %} · 首领：{{ boss.name }} · 弱点：{{ boss.weakness }}{% if boss.element %}（{{ boss.element }}）{% endif %}{% endif %}</p>
+{% for team in teams %}<section class="solo-team"><h2>第 {{ team.index }} 队{% if not team.chain_ok %} · 爆裂链缺口{% endif %}{% if team.damage is not none %} · 估算 {{ team.damage }}{% endif %}</h2>
+<div class="solo-members">{% for member in team.members %}<div class="solo-member">{% if member.portrait %}<img src="{{ member.portrait }}" alt="">{% else %}<div class="solo-placeholder">{{ member.name }}</div>{% endif %}<div class="name">{{ member.name }}</div><div class="pos">{{ member.burst_label }}{% if member.element %} · {{ member.element }}{% endif %}</div></div>{% endfor %}</div>
+{% if team.issues %}<p class="details risk">{{ team.issues|join('；') }}</p>{% endif %}</section>{% endfor %}
+<p class="details">{{ damage_text }}</p>
+{% if issues %}<div class="footer">{% for issue in issues %}<div>{{ issue }}</div>{% endfor %}</div>{% endif %}
+</body></html>

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import inspect
+import logging
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from typing import Any
 
@@ -32,6 +34,8 @@ from .contracts import (
 
 RosterPresenter = Callable[[CharacterRosterData], Awaitable[str | None]]
 CardPresenter = Callable[[CharacterCardData], Awaitable[str | None]]
+RosterHistoryRecorder = Callable[[str, Sequence[Mapping[str, Any]]], Any]
+logger = logging.getLogger(__name__)
 
 
 class CharacterCommandHandler:
@@ -46,6 +50,8 @@ class CharacterCommandHandler:
         render_card: CardPresenter,
         invalidate_cookie: Callable[[str], None],
         start_feedback: CommandFeedbackStarter | None = None,
+        record_roster: RosterHistoryRecorder | None = None,
+        growth_generation: Callable[[str], int] | None = None,
     ) -> None:
         self._application = application
         self._directory = directory
@@ -53,6 +59,19 @@ class CharacterCommandHandler:
         self._render_card = render_card
         self._invalidate_cookie = invalidate_cookie
         self._start_feedback = start_feedback
+        self._record_roster = record_roster
+        self._growth_generation = growth_generation
+
+    @staticmethod
+    def _supports_kwarg(fn: Any, name: str) -> bool:
+        try:
+            params = inspect.signature(fn).parameters.values()
+        except (TypeError, ValueError):
+            return False
+        return any(
+            p.kind == inspect.Parameter.VAR_KEYWORD or p.name == name
+            for p in params
+        )
 
     async def handle(self, context: CommandContext) -> CommandResult:
         operation = context.parameters.get("operation", "roster").strip().casefold()
@@ -68,9 +87,25 @@ class CharacterCommandHandler:
         if self._start_feedback is not None:
             feedback = self._start_feedback(context, "正在读取练度与词条详情，请稍候...")
         try:
+            generation = (
+                self._growth_generation(context.actor_id)
+                if self._growth_generation is not None
+                else None
+            )
             data = await self._application.roster(
                 context.actor_id, self._directory()
             )
+            if self._record_roster is not None:
+                try:
+                    kwargs: dict[str, Any] = {}
+                    if self._supports_kwarg(self._record_roster, "identity"):
+                        kwargs["identity"] = data.account_identity
+                    if self._supports_kwarg(self._record_roster, "expected_generation"):
+                        kwargs["expected_generation"] = generation
+                    self._record_roster(context.actor_id, data.characters, **kwargs)
+                except Exception as exc:
+                    # 角色快照失败不影响本次练度展示。
+                    logger.warning("[NIKKE] 角色成长快照跳过：%s", type(exc).__name__)
             try:
                 path = await self._render_roster(data)
             except Exception:

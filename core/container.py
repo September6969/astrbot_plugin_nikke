@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
@@ -56,7 +56,9 @@ from .providers.feedback import create_feedback_manager
 from .providers.profile import create_profile_resources
 from .providers.raid import create_raid_resources
 from .providers.shared import create_shared_resources
+from .providers.shiftypad import create_shiftypad_resources
 from .providers.tarot import create_tarot_service
+from .providers.toolbox import ToolboxServices, create_toolbox_services
 from .providers.voice import create_voice_application
 from .providers.web import create_binding_web_service
 from .lifecycle.coordinator import RuntimeCoordinator
@@ -103,6 +105,9 @@ class ServiceContainer:
     session_renewal: SessionRenewalService
     arena_application: ArenaApplication | None = None
     arena_web: ArenaWebRoutes | None = None
+    toolbox: ToolboxServices | None = None
+    shiftypad_web: Any | None = None
+    shiftypad_readonly: Any | None = None
 
 
 def create_container(
@@ -159,8 +164,38 @@ def create_container(
     )
 
     announcements = create_announcement_resources(data_dir, store=store, task_factory=runtime_coordinator.create_task)
+    toolbox = create_toolbox_services(
+        plugin_dir=plugin_dir,
+        data_dir=data_dir,
+        store=store,
+        calendar=announcements.calendar_application,
+        announcements=announcements.service,
+        account_reader=store,
+        roster_loader=lambda account: client.get_roster(account, include_details=False),
+        profile_loader=client.get_profile,
+        config=config or {},
+        clock=clock,
+        card_loader=lambda actor_id, query: character.application.character_card(
+            actor_id,
+            query,
+            directory_provider() if directory_provider is not None else (),
+        ),
+    )
     tarot = create_tarot_service(plugin_dir, data_dir)
     web = create_binding_web_service(store, client, extension_zip, config)
+    shiftypad = create_shiftypad_resources(
+        data_dir=data_dir,
+        store=store,
+        site_origin=web.site_origin,
+        config=config or {},
+        clock=clock,
+    )
+    web.add_route_installer(shiftypad.web.mount)
+    toolbox = replace(
+        toolbox,
+        shiftypad_web=shiftypad.web,
+        shiftypad_readonly=shiftypad.readonly,
+    )
     daily_runner = create_daily_runner(client=client, store=store, config=config)
     community_tasks, session_renewal = create_community_automation(client=client, store=store, config=config, runner=daily_runner)
     guide_application = create_guide_application(plugin_dir)
@@ -190,6 +225,9 @@ def create_container(
         account_application=account_application,
         arena_application=arena_application,
         arena_web=arena_web,
+        toolbox=toolbox,
+        shiftypad_web=shiftypad.web,
+        shiftypad_readonly=shiftypad.readonly,
         character_application=character.application,
         character_stat_resources=character.stat_resources,
         client=client,

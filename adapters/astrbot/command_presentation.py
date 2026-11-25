@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from typing import Any
 
 from astrbot.api import logger
@@ -13,6 +13,8 @@ from astrbot.api.message_components import Image, Plain
 from ...application.commands.contracts import CommandReply, ImageReply, TextReply
 from ...features.daily.presentation import format_daily_summary_text
 from ...ui.payloads.calendar import CalendarT2IPayloadBuilder
+from ...ui.payloads.favorite_grid import FavoriteGridPayloadBuilder
+from ...ui.payloads.solo_raid import SoloRaidPayloadBuilder
 from ...ui.renderers import T2IRenderer
 
 
@@ -60,6 +62,15 @@ class AstrBotCommandPresentation:
 
     async def render_character_card(self, card: Any) -> str | None:
         return await self.try_t2i("character", card)
+
+    async def render_favorite_grid(self, cells: Any) -> str | None:
+        """统一使用 T2I 渲染九宫格；失败时返回 None 由命令层按同一列表输出文字回退。"""
+        payload = FavoriteGridPayloadBuilder(self._services.asset_manager).build(cells)
+        return await self.try_t2i("favorite_grid", payload)
+
+    async def render_solo_raid(self, plan: Any, boss: Any = None) -> str | None:
+        payload = SoloRaidPayloadBuilder(self._services.asset_manager).build(plan, boss=boss)
+        return await self.try_t2i("solo_raid", payload)
 
     async def render_campaign_record(self, record: Any) -> str | None:
         try:

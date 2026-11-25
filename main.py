@@ -38,6 +38,7 @@ from .application.commands.guide import GuideCommandHandler
 from .application.commands.profile import ProfileCommandHandler
 from .application.commands.raid import RaidCommandHandler
 from .application.commands.tarot import TarotCommandHandler
+from .application.commands.toolbox import build_toolbox_handlers
 from .application.commands.tower import TowerCommandHandler
 from .core.config import normalize_runtime_config
 from .core.container import create_container
@@ -108,6 +109,19 @@ class NikkePlugin(Star):
             self.services.store.mark_cookie_invalid(actor_id)
             self.services.client.invalidate_cache(actor_id)
 
+        def _on_unbind(actor_id: str) -> None:
+            self.services.client.invalidate_cache(actor_id)
+            if self.services.toolbox is not None:
+                self.services.toolbox.growth.clear(actor_id)
+                self.services.toolbox.roster_growth.clear(actor_id)
+                self.services.toolbox.manual_profiles.clear(actor_id)
+
+        growth_gen = (
+            self.services.toolbox.growth_generation
+            if self.services.toolbox is not None
+            else None
+        )
+
         self.handlers = PluginCommandHandlers(
             account=AccountCommandHandler(
                 application=self.services.account_application,
@@ -117,7 +131,7 @@ class NikkePlugin(Star):
                     len(self._directory)
                 ),
                 render_manual_summary=daily_handler.render_manual_summary,
-                on_unbind=self.services.client.invalidate_cache,
+                on_unbind=_on_unbind,
                 session_handler=community_handler.handle_renewal,
             ),
             announcement=AnnouncementCommandHandler(
@@ -155,6 +169,12 @@ class NikkePlugin(Star):
                 render_card=self.presentation.render_character_card,
                 invalidate_cookie=_invalidate_cookie,
                 start_feedback=self.runtime.start_delayed_feedback,
+                record_roster=(
+                    self.services.toolbox.record_roster
+                    if self.services.toolbox is not None
+                    else None
+                ),
+                growth_generation=growth_gen,
             ),
             daily=daily_handler,
             guide=GuideCommandHandler(self.services.guide_application),
@@ -164,6 +184,12 @@ class NikkePlugin(Star):
                 present=self.presentation.render_profile,
                 invalidate_cookie=_invalidate_cookie,
                 start_feedback=self.runtime.start_delayed_feedback,
+                record_history=(
+                    self.services.toolbox.record_growth
+                    if self.services.toolbox is not None
+                    else None
+                ),
+                growth_generation=growth_gen,
             ),
             raid=RaidCommandHandler(
                 application=self.services.raid_application,
@@ -174,6 +200,11 @@ class NikkePlugin(Star):
             ),
             tarot=TarotCommandHandler(self.services.tarot),
             tower=TowerCommandHandler(self.services.tower_application),
+            **build_toolbox_handlers(
+                self.services.toolbox,
+                render_grid=self.presentation.render_favorite_grid,
+                render_solo=self.presentation.render_solo_raid,
+            ),
             arena=ArenaCommandHandler(
                 self.services.arena_application, enabled=True, web_routes=self.services.arena_web,
                 render=self.presentation.try_t2i,

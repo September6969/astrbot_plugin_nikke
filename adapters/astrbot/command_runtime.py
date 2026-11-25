@@ -12,6 +12,7 @@ from ..._version import PLUGIN_VERSION
 from ...application.commands.help import help_category, help_detail, help_home
 from .collections import AstrBotAdapterCollection, PluginCommandHandlers
 from .command_parser import normalize_nikke_prefix, parse_nikke_message
+from .toolbox_routes import is_calendar_board_group, toolbox_feature, toolbox_handler_attr
 
 __all__ = ["NikkeCommandRuntime", "normalize_nikke_prefix"]
 
@@ -124,9 +125,7 @@ class NikkeCommandRuntime:
                     community_enabled=community_enabled, renewal_enabled=renewal_enabled))
             return
         if key in {"账号", "account"}:
-            async for result in self._account(
-                event, "account", action=arg1, value=arg2
-            ):
+            async for result in self._account(event, "account", action=arg1, value=arg2):
                 yield result
             return
         if key in {"我的", "me", "progress"}:
@@ -138,10 +137,8 @@ class NikkeCommandRuntime:
                 yield result
             return
         if key in {"签到", "daily", "claim", "日常", "routine"}:
-            async for result in self._dispatch(
-                event, self._handlers.daily, action=arg1, value=arg2,
-                scope="signin" if key == "签到" else "community"
-            ):
+            scope = "signin" if key == "签到" else "community"
+            async for result in self._dispatch(event, self._handlers.daily, action=arg1, value=arg2, scope=scope):
                 yield result
             return
         if key in {"兑换", "cdk"}:
@@ -149,19 +146,19 @@ class NikkeCommandRuntime:
                 yield result
             return
         if key in {"战役", "campaign", "关卡", "stage"}:
-            async for result in self._dispatch(
-                event, self._handlers.campaign, stage=arg1, mode=arg2
-            ):
+            async for result in self._dispatch(event, self._handlers.campaign, stage=arg1, mode=arg2):
                 yield result
             return
         if key in {"日程", "schedule"}:
+            if is_calendar_board_group(arg1):
+                async for result in self._dispatch_tool(event, "gacha", arg1, ""):
+                    yield result
+                return
             if key == "schedule" and ":" in arg1 and self._is_admin(event):
                 async for result in self._account(event, "schedule", value=arg1):
                     yield result
             else:
-                async for result in self._dispatch(
-                    event, self._handlers.calendar, horizon=arg1, page=arg2
-                ):
+                async for result in self._dispatch(event, self._handlers.calendar, horizon=arg1, page=arg2):
                     yield result
             return
         if key in {"公告", "news", "announcement"}:
@@ -169,28 +166,25 @@ class NikkeCommandRuntime:
                 yield result
             return
         if key in {"攻略", "guide", "guides"}:
-            async for result in self._dispatch(
-                event, self._handlers.guide, category=arg1, page=arg2 or "1"
-            ):
+            async for result in self._dispatch(event, self._handlers.guide, category=arg1, page=arg2 or "1"):
                 yield result
             return
         if key in {"突袭", "联盟突袭", "raid", "union_raid"}:
             operation = "ranking" if arg1 in {"排名", "ranking"} else (
                 "member" if arg1 in {"我的", "my"} else ("overview" if not arg1 else "invalid")
             )
-            async for result in self._dispatch(
-                event, self._handlers.raid, operation=operation, page=arg2 or "1"
-            ):
+            async for result in self._dispatch(event, self._handlers.raid, operation=operation, page=arg2 or "1"):
+                yield result
+            return
+        selected_tool = toolbox_feature(key)
+        if selected_tool is not None:
+            async for result in self._dispatch_tool(event, selected_tool, arg1, arg2):
                 yield result
             return
         if key in {"管理", "admin"}:
+            umo = str(getattr(event, "unified_msg_origin", "") or "")
             async for result in self._dispatch(
-                event,
-                self._handlers.account,
-                operation="admin",
-                action=arg1,
-                value=arg2,
-                unified_msg_origin=str(getattr(event, "unified_msg_origin", "") or ""),
+                event, self._handlers.account, operation="admin", action=arg1, value=arg2, unified_msg_origin=umo
             ):
                 yield result
             return
@@ -261,6 +255,19 @@ class NikkeCommandRuntime:
     def _writes_enabled(self) -> bool:
         """写操作总开关；关闭时帮助详解不展示依赖写操作的教学主题。"""
         return bool(self._config.get("enable_daily_actions", False))
+
+    async def _dispatch_tool(
+        self, event: AstrMessageEvent, feature: str, action: str, value: str
+    ):
+        attr = toolbox_handler_attr(feature)
+        handler = (getattr(self._handlers, attr, None) if attr else None) or self._handlers.toolbox
+        if handler is None:
+            yield event.plain_result("本地工具功能尚未就绪。")
+            return
+        async for result in self._dispatch(
+            event, handler, feature=feature, action=action, value=value
+        ):
+            yield result
 
     async def _announcement(self, event: AstrMessageEvent, action: str, value: str = ""):
         key = action.strip().casefold()

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width={{ canvas.width }}">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'">
+<style>
+<!-- SHARED_CSS -->
+:root { --canvas-width: {{ canvas.width }}px; }
+body { width: {{ canvas.width }}px; height: {{ canvas.height }}px; overflow: hidden; }
+.sheet { width: {{ canvas.width }}px; height: {{ canvas.height }}px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; background: radial-gradient(circle at top right, rgba(166,191,213,0.08), transparent 46%), var(--bg); }
+.hdr { height: 44px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.hdr h1 { font-size: 28px; font-weight: 800; letter-spacing: 1px; line-height: 1.2; }
+.hdr .sub { font-size: max(18px, var(--font-min)); color: var(--muted); }
+.grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 12px; }
+.cell { position: relative; min-width: 0; min-height: 0; background: var(--panel); border: 2px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.cell img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+.cell .placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 84px; font-weight: 800; color: var(--muted); background: #1d232e; }
+.cell .pos { position: absolute; top: 8px; right: 10px; font-size: max(18px, var(--font-min)); font-weight: 700; color: var(--text); background: rgba(10, 13, 18, 0.78); padding: 2px 9px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12); }
+.cell .name { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px; background: linear-gradient(transparent, rgba(10, 13, 18, 0.92) 28%); font-size: max(19px, var(--font-min)); font-weight: 600; line-height: 1.25; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style></head><body>
+<div class="sheet">
+  <header class="hdr"><h1>{{ title }}</h1><span class="sub">3×3 · 共 {{ cells|length }} 格</span></header>
+  <main class="grid">{% for cell in cells %}<div class="cell">{% if cell.portrait %}<img src="{{ cell.portrait }}" alt="">{% else %}<div class="placeholder">{{ cell.name[:1] }}</div>{% endif %}<div class="pos">P{{ cell.index }}</div><div class="name">{{ cell.name }}</div></div>{% endfor %}</main>
+</div>
+</body></html>

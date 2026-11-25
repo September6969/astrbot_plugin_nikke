@@ -20,6 +20,7 @@
 - [前期调研](research/)
 - [PR #103 重构交付记录](refactor/FINAL_DELIVERY.md)
 - [系统性重构整改计划 V2](refactor/REFACTOR_PLAN_V2.md)与 [Phase 0 基线](refactor/V2_PHASE0_BASELINE.md)
+- [全量功能盘点](refactor/FEATURE_INVENTORY.md)、[业务缺口与合规报告](refactor/FEATURE_GAP_REPORT.md)与 [Phase 1–7 实施计划](refactor/IMPLEMENTATION_PLAN.md)
 
 ## 当前接口合同与验收
 

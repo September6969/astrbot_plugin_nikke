@@ -86,6 +86,9 @@ class T2IRenderer:
                 if len(pages) == 1:
                     return await self.render_payload(page, pages[0])
                 return [await self.render_payload(page, payload) for payload in pages]
+        if page in {"solo_raid", "favorite_grid"}:
+            # 这两个页面由命令层先用 ui.payloads 构建只读 payload，再交给 T2I。
+            return await self.render_payload(page, data)
         if page == "character":
             self._builder("character")  # 在事件循环线程内完成懒加载，避免工作线程并发创建。
             payload = await asyncio.to_thread(self._character_payload, data)

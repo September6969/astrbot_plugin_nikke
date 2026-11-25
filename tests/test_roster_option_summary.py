@@ -621,3 +621,29 @@ def test_merged_tier_color_uses_average_not_sum():
     assert summary([12,13,14])["semantic"] == "high"
     assert summary([15,15])["semantic"] == "max"
     assert summary([15,None])["semantic"] == "neutral"
+
+
+@pytest.mark.asyncio
+async def test_roster_detail_rate_limit_retries_once_and_preserves_credential_fail_fast(monkeypatch):
+    monkeypatch.setattr(CharacterApplication, "ROSTER_DETAIL_RETRY_DELAY", 0.0)
+    calls = {"5101": 0, "5102": 0}
+
+    class RateLimitedGateway(FakeGateway):
+        async def get_character_detail(self, account, code):
+            calls[code] = calls.get(code, 0) + 1
+            if code == "5101" and calls[code] == 1:
+                raise RuntimeError("BlaBlaError: request too frequently")
+            if code == "5102":
+                raise RuntimeError("BlaBlaError: request too frequently")
+            return await super().get_character_detail(account, code)
+
+    characters = [roster_entry("5101", combat=900), roster_entry("5102", combat=800)]
+    details = {"5101": base_detail("5101"), "5102": base_detail("5102")}
+    data = await make_app(RateLimitedGateway(characters, details)).roster(
+        "10001", directory_for(["5101", "5102"])
+    )
+
+    assert calls["5101"] == 2
+    assert calls["5102"] == 2
+    assert data.option_summaries["5101"].status == "ok"
+    assert data.option_summaries["5102"].status == "failed"

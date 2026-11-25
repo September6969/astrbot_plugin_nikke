@@ -31,6 +31,8 @@
 | `enable_daily_actions` | `false` | 签到、免费领奖、浏览、点赞与实验性续期总开关。旧日常范围不变，新能力需本人另行授权且默认关；未完成真实授权验收前保持关闭。 |
 | `enable_announcement_push` | `false` | 公告推送总开关；开启也不代表已完成真实消息发送验收。发送前持久化 `DISPATCH_INTENT`，未知结果进入 `UNKNOWN_AFTER_ACTION` 且不自动重发；公告调度当前按单实例使用，未提供外部共享租约时不支持多实例并行推送。 |
 | `enable_cdk_redemption` | `false` | 国际服 CDK 真实兑换开关；群聊会公开兑换码，必须由管理员明确开启。 |
+| `enable_shiftypad_readonly` | `false` | ShiftyPad 公开档案只读导入网页总开关；开启时提供同源 Cookie + CSRF 短时网页入口，默认关闭。 |
+| `enable_public_share_api` | `false` | 第三方公开分享资料（`nikke-api.pages.dev`）只读转发总开关；开启后仍需命令端向用户披露第三方传输范围并由用户确认，默认关闭。 |
 
 ## 迁移与发布边界
 

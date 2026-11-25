@@ -106,6 +106,7 @@ class CharacterRosterData:
     characters: tuple[Mapping[str, Any], ...]
     name_map: Mapping[str, str]
     option_summaries: Mapping[str, RosterOptionSummary] = field(default_factory=dict)
+    account_identity: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,6 +150,7 @@ class CharacterApplication:
     PROFILE_CACHE_LIMIT = 50
     ROSTER_TOP_OPTION_LIMIT = 20
     ROSTER_DETAIL_CONCURRENCY = 3
+    ROSTER_DETAIL_RETRY_DELAY = 0.8
 
     def __init__(
         self,
@@ -251,6 +253,15 @@ class CharacterApplication:
             "[NIKKE] 练度总览：%d 名角色、%d 项词条详情，耗时 %.2fs",
             len(characters), len(option_summaries), time.monotonic() - started,
         )
+        ident = canonical_account_identity(account)
+        account_identity = (
+            f"{ident.platform}:{ident.area_id}:{ident.game_uid}"
+            if ident is not None
+            else ":".join(
+                str(account.get(key) or "").strip()
+                for key in ("platform", "area_id", "game_uid")
+            ).strip(":")
+        )
         return CharacterRosterData(
             commander_name=str(
                 account.get("nickname") or account.get("role_name") or "指挥官"
@@ -258,6 +269,7 @@ class CharacterApplication:
             characters=tuple(characters),
             name_map=self.name_map(directory),
             option_summaries=option_summaries,
+            account_identity=account_identity,
         )
 
     @staticmethod
@@ -305,21 +317,28 @@ class CharacterApplication:
     ) -> RosterOptionSummary:
         """单个角色的词条详情；凭据失效优先抛出，其他失败降级为可展示状态。"""
         async with semaphore:
-            try:
-                payload = await self._gateway.get_character_detail(account, code)
-            except CredentialExpiredError:
-                raise
-            except Exception as exc:
-                _LOGGER.warning(
-                    "[NIKKE] 练度总览词条详情读取失败：%s",
-                    safe_exception_message(exc),
-                )
-                return RosterOptionSummary(
-                    name_code=code,
-                    status="failed",
-                    complete=False,
-                    message="详情读取失败",
-                )
+            for attempt in range(2):
+                try:
+                    payload = await self._gateway.get_character_detail(account, code)
+                    break
+                except CredentialExpiredError:
+                    raise
+                except Exception as exc:
+                    msg = safe_exception_message(exc)
+                    is_rate_limit = "frequently" in msg.casefold() or "rate" in msg.casefold() or "429" in msg or "1300015" in msg
+                    if attempt == 0 and is_rate_limit:
+                        await asyncio.sleep(self.ROSTER_DETAIL_RETRY_DELAY)
+                        continue
+                    _LOGGER.warning(
+                        "[NIKKE] 练度总览词条详情读取失败：%s",
+                        msg,
+                    )
+                    return RosterOptionSummary(
+                        name_code=code,
+                        status="failed",
+                        complete=False,
+                        message="详情读取失败",
+                    )
         if not isinstance(payload, Mapping) or not isinstance(
             payload.get("detail"), Mapping
         ):
