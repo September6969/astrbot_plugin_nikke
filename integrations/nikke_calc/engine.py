@@ -243,6 +243,45 @@ def _win32_pid_alive(pid: int) -> bool:
         kernel32.CloseHandle(handle)
 
 
+def _posix_pgid_has_live_processes(pgid: int) -> tuple[bool, bool, str]:
+    """探测 POSIX 进程组是否仍有非僵尸/非死亡态进程；返回 (alive, permission_ok, err)。"""
+    try:
+        os.killpg(pgid, 0)
+    except ProcessLookupError:
+        return False, True, ""
+    except PermissionError as exc:
+        return True, False, f"无权探测进程组 {pgid}（{type(exc).__name__}）"
+    except OSError as exc:
+        return True, False, f"进程组状态确认失败（{type(exc).__name__}）"
+
+    proc_root = Path("/proc")
+    if not proc_root.is_dir():
+        return True, True, ""
+    target = str(pgid)
+    found_any_non_zombie = False
+    try:
+        for entry in proc_root.iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                raw = (entry / "stat").read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            rparen = raw.rfind(")")
+            if rparen < 0:
+                continue
+            parts = raw[rparen + 2 :].split()
+            if len(parts) < 3:
+                continue
+            state, pgrp = parts[0], parts[2]
+            if pgrp == target and state not in {"Z", "X", "x"}:
+                found_any_non_zombie = True
+                break
+    except OSError:
+        return True, True, ""
+    return found_any_non_zombie, True, ""
+
+
 def _kill_managed_tree_sync(
     pid: int,
     pgid: int,
@@ -292,16 +331,15 @@ def _kill_managed_tree_sync(
             return False, f"PID {pid} 在 taskkill 后仍存活"
         return True, ""
 
-    # POSIX: 使用独立进程组 pgid 清理整棵进程树（先 SIGTERM，超时后 SIGKILL）。
+    # POSIX: 使用独立进程组 pgid 清理整棵进程树（先 SIGTERM，超时后 SIGKILL，并过滤容器中 PID 1 未回收的 Z 态僵尸）。
     target_pgid = pgid if pgid > 0 else pid
     if target_pgid <= 0:
         return True, ""
-    try:
-        os.killpg(target_pgid, 0)
-    except ProcessLookupError:
+    alive, perm_ok, err = _posix_pgid_has_live_processes(target_pgid)
+    if not perm_ok:
+        return False, err
+    if not alive:
         return True, ""
-    except PermissionError as exc:
-        return False, f"无权探测进程组 {target_pgid}（{type(exc).__name__}）"
 
     sigterm_deadline = min(deadline, time.monotonic() + min(0.4, max(0.1, timeout * 0.25)))
     try:
@@ -312,12 +350,11 @@ def _kill_managed_tree_sync(
         return False, f"SIGTERM 发送失败（{type(exc).__name__}）"
 
     while time.monotonic() < sigterm_deadline:
-        try:
-            os.killpg(target_pgid, 0)
-        except ProcessLookupError:
-            return True, ""
-        except OSError:
+        alive, perm_ok, err = _posix_pgid_has_live_processes(target_pgid)
+        if not perm_ok:
             break
+        if not alive:
+            return True, ""
         time.sleep(0.025)
 
     try:
@@ -328,14 +365,31 @@ def _kill_managed_tree_sync(
         return False, f"SIGKILL 发送失败（{type(exc).__name__}）"
 
     while time.monotonic() < deadline:
-        try:
-            os.killpg(target_pgid, 0)
-        except ProcessLookupError:
+        alive, perm_ok, err = _posix_pgid_has_live_processes(target_pgid)
+        if not perm_ok:
+            return False, err
+        if not alive:
             return True, ""
-        except OSError as exc:
-            return False, f"进程组状态确认失败（{type(exc).__name__}）"
         time.sleep(0.025)
     return False, f"进程组 {target_pgid} 在 {timeout:.2f}s 内未全部退出"
+
+
+async def _wait_direct_exit(proc: asyncio.subprocess.Process) -> int:
+    """在 Python 3.12 POSIX 派生进程继承管道时，不因未关闭的管道阻塞直属子进程退出判定。"""
+    wait_task = asyncio.ensure_future(proc.wait())
+    try:
+        while not wait_task.done():
+            if proc.returncode is not None:
+                wait_task.cancel()
+                await asyncio.gather(wait_task, return_exceptions=True)
+                return int(proc.returncode)
+            await asyncio.sleep(0.02)
+        return int(await wait_task)
+    except asyncio.CancelledError:
+        if not wait_task.done():
+            wait_task.cancel()
+            await asyncio.gather(wait_task, return_exceptions=True)
+        raise
 
 
 async def _run_uninterruptible(coro_factory: Callable[[], Any]) -> Any:
@@ -551,7 +605,7 @@ class SoloRaidDamageEngine:
                 with contextlib.suppress(ProcessLookupError, OSError):
                     managed.proc.kill()
             try:
-                await asyncio.wait_for(managed.proc.wait(), timeout=1.0)
+                await asyncio.wait_for(_wait_direct_exit(managed.proc), timeout=1.0)
             except (asyncio.TimeoutError, OSError) as exc:
                 extra = f"父进程回收失败（{type(exc).__name__}）"
                 managed.cleanup_error = f"{managed.cleanup_error}; {extra}".strip("; ")
@@ -686,7 +740,7 @@ class SoloRaidDamageEngine:
             stderr_task = asyncio.ensure_future(
                 _read_stream_bounded(proc.stderr, MAX_OUTPUT_BYTES, "stderr", stderr_buf)
             )
-            wait_task = asyncio.ensure_future(proc.wait())
+            wait_task = asyncio.ensure_future(_wait_direct_exit(proc))
 
             # 同时监听直接父进程退出与受限流读取，防止继承管道的后代进程阻塞等待。
             async def _collect_with_descendant_guard() -> tuple[bytes, bytes, int, bool]:

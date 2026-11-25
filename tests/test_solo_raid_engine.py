@@ -58,6 +58,17 @@ def _os_pid_alive(pid: int) -> bool:
         return True
     except OSError:
         return False
+    stat_path = Path(f"/proc/{pid}/stat")
+    if stat_path.is_file():
+        try:
+            raw = stat_path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return False
+        rparen = raw.rfind(")")
+        if rparen >= 0:
+            after = raw[rparen + 2 :].split()
+            if after and after[0] in {"Z", "X", "x"}:
+                return False
     return True
 
 
