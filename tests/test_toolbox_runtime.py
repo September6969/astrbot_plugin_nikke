@@ -53,14 +53,18 @@ class UnavailableVideoSource:
         return self.cached_items
 
 
-def feed_item(title: str = "合成新闻", entity_id: str = "n1") -> FeedItem:
+def feed_item(
+    title: str = "合成新闻",
+    entity_id: str = "n1",
+    published_at: str = "2026-09-20T00:00:00+00:00",
+) -> FeedItem:
     return FeedItem(
         kind="news",
         entity_id=entity_id,
         version=2,
         title=title,
         url="https://example.invalid/news/1",
-        published_at="2026-09-20T00:00:00+00:00",
+        published_at=published_at,
     )
 
 
@@ -86,7 +90,7 @@ async def test_runtime_feed_dispatch_mentions_only_subscriber_and_skips_without_
 
     target = FeedSubscriptions.target_key("group:1", "user-a", False)
     feeds.command(target, "订阅", "新闻")
-    news._items.append(feed_item("第二条新闻", entity_id="n2"))
+    news._items.append(feed_item("第二条新闻", entity_id="n2", published_at="2026-09-21T01:00:00+00:00"))
     await runtime._dispatch_feeds()
 
     runtime._context.send_message.assert_awaited_once()
