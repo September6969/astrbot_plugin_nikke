@@ -51,7 +51,7 @@ from ...integrations.nikke_api.share_profile import fetch_public_share
 from ...integrations.nikke_calc.engine import (
     EngineNameMappingError,
     SoloRaidDamageEngine,
-    load_name_mapping,
+    load_name_mapping_with_meta,
 )
 
 
@@ -284,6 +284,7 @@ def create_toolbox_services(
         or data_dir / "nikke-calc"
     ).strip()
     mapping: dict[str, str] = {}
+    mapping_commit = ""
     mapping_error = ""
     mapping_path = data_dir / "solo-raid-engine-names.json"
     if not mapping_path.is_file():
@@ -291,14 +292,17 @@ def create_toolbox_services(
         mapping_path = bundled if bundled.is_file() else mapping_path
     if mapping_path.is_file():
         try:
-            mapping = load_name_mapping(mapping_path)
+            mapping, mapping_commit = load_name_mapping_with_meta(mapping_path)
         except EngineNameMappingError as exc:
             mapping_error = str(exc)
     solo_engine = SoloRaidDamageEngine(
         Path(engine_path),
         mapping,
         mapping_error=mapping_error,
+        mapping_commit=mapping_commit,
         work_dir=data_dir / "nikke-calc-runs",
+        require_git=True,
+        allow_unverified=config.get("solo_raid_engine_allow_unverified") is True,
     )
     damage_model = config.get("solo_raid_damage_model")
     if isinstance(damage_model, str):

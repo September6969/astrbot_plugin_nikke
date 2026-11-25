@@ -1,23 +1,74 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""22 外部 MIT 估伤引擎：JSON 合同、版本出处、缺映射与失败边界（合成引擎桩）。"""
+"""22 外部 MIT 估伤引擎：JSON 合同、Git 版本可信度、进程树生命周期与故障注入（合成+真实子进程）。"""
 
 from __future__ import annotations
 
+import asyncio
+import ctypes
+import json
+import os
+import shutil
+import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path
 
 import pytest
 
-from astrbot_plugin_nikke.features.solo_raid.builder import Member, build_five_teams
+from astrbot_plugin_nikke.features.solo_raid.builder import Member, Team, build_five_teams
 from astrbot_plugin_nikke.integrations.nikke_calc.engine import (
     ENGINE_REPO,
+    MAX_OUTPUT_BYTES,
     PINNED_COMMIT,
+    VERSION_TRUST_GIT_PINNED,
+    VERSION_TRUST_MISMATCH_OR_DIRTY,
+    VERSION_TRUST_SELF_REPORTED,
+    VERSION_TRUST_UNVERIFIED,
     EngineNameMappingError,
     SoloRaidDamageEngine,
     load_name_mapping,
+    load_name_mapping_with_meta,
 )
 
 ENGINE_PATH = Path(__file__).resolve().parent / "fixtures" / "fake_nikke_calc"
+
+
+def _os_pid_alive(pid: int) -> bool:
+    """直接询问操作系统 PID 是否仍处于存活态。"""
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        handle = kernel32.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return False
+        try:
+            code = ctypes.c_uint32(0)
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return False
+            return int(code.value) == 259  # STILL_ACTIVE
+        finally:
+            kernel32.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
+async def _wait_pids_dead(pids: list[int], limit: float = 5.0) -> list[int]:
+    deadline = time.monotonic() + limit
+    while time.monotonic() < deadline:
+        alive = [pid for pid in pids if _os_pid_alive(pid)]
+        if not alive:
+            return []
+        await asyncio.sleep(0.05)
+    return [pid for pid in pids if _os_pid_alive(pid)]
 
 
 def members() -> tuple[Member, ...]:
@@ -45,8 +96,27 @@ def engine(**kwargs) -> SoloRaidDamageEngine:
     )
 
 
+def engine_with_mapping(values: dict[str, str]) -> SoloRaidDamageEngine:
+    return SoloRaidDamageEngine(
+        ENGINE_PATH,
+        values,
+        python=sys.executable,
+        timeout=30,
+        work_dir=Path("output") / ".engine-runs",
+    )
+
+
+def _init_git_repo(repo_dir: Path) -> None:
+    subprocess.run(["git", "-C", str(repo_dir), "init"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo_dir), "config", "user.email", "test@example.invalid"], check=True)
+    subprocess.run(["git", "-C", str(repo_dir), "config", "user.name", "Tester"], check=True)
+    subprocess.run(["git", "-C", str(repo_dir), "add", "."], check=True)
+    subprocess.run(["git", "-C", str(repo_dir), "commit", "-m", "init"], check=True, capture_output=True)
+
+
 @pytest.mark.asyncio
-async def test_engine_returns_per_team_and_total_with_pinned_version() -> None:
+async def test_engine_returns_per_team_and_total_with_self_reported_distinction() -> None:
+    """无 .git 目录时，自报固定 SHA 也绝对不能被视为可信固定基线（P2-01）。"""
     plan = build_five_teams(members())
     result = await engine().estimate(plan.teams, boss_element="风压")
 
@@ -56,8 +126,10 @@ async def test_engine_returns_per_team_and_total_with_pinned_version() -> None:
     assert all(item.damage is not None and item.damage > 0 for item in result.teams)
     assert result.commit == PINNED_COMMIT
     assert result.dirty is False
-    assert result.version_ok is True
-    assert "MIT" in result.label
+    assert result.version_trust == VERSION_TRUST_SELF_REPORTED
+    assert result.version_ok is False
+    assert "自报" in result.label
+    assert "不适合可信基线对比" in result.note
     assert ENGINE_REPO in result.note and PINNED_COMMIT in result.note
     assert "不是官方伤害数值" in result.note
 
@@ -94,20 +166,10 @@ async def test_partial_team_failure_keeps_total_unknown_and_reports_reason() -> 
     assert result.total is None
     assert any("缺少引擎官方名映射" in item.error for item in result.teams)
     assert "部分队伍无法估伤" in result.note
-    assert first_team_code  # 说明失败按队报告，未伪造 0
+    assert first_team_code
 
 
-def engine_with_mapping(values: dict[str, str]) -> SoloRaidDamageEngine:
-    return SoloRaidDamageEngine(
-        ENGINE_PATH, values, python=sys.executable, timeout=30,
-        work_dir=Path("output") / ".engine-runs",
-    )
-
-
-def test_name_mapping_requires_mit_engine_provenance(tmp_path=None) -> None:
-    import json
-    import tempfile
-
+def test_name_mapping_requires_mit_engine_provenance() -> None:
     payload = {
         "schema_version": 1,
         "engine_repo": ENGINE_REPO,
@@ -119,36 +181,34 @@ def test_name_mapping_requires_mit_engine_provenance(tmp_path=None) -> None:
         json.dump(payload, handle, ensure_ascii=False)
         path = Path(handle.name)
     try:
+        loaded, commit = load_name_mapping_with_meta(path)
+        assert loaded == {"L1": "L1"}
+        assert commit == PINNED_COMMIT
         assert load_name_mapping(path) == {"L1": "L1"}
         payload["engine_commit"] = "short"
-        handle = Path(handle.name)
-        handle.write_text(json.dumps(payload), encoding="utf-8")
+        path.write_text(json.dumps(payload), encoding="utf-8")
         with pytest.raises(EngineNameMappingError, match="40 位"):
-            load_name_mapping(handle)
+            load_name_mapping(path)
     finally:
         path.unlink(missing_ok=True)
 
 
 def test_real_engine_name_mapping_uses_stable_resource_and_name_codes() -> None:
-    from pathlib import Path
-
     path = Path(__file__).resolve().parents[1] / "assets" / "data" / "solo_raid_engine_names.json"
-    mapping = load_name_mapping(path)
-    assert mapping["10"] == "라피"
-    assert mapping["3001"] == "라피"
-    assert mapping["Rapi"] == "라피"
-    assert len(mapping) > 800
-    # 明确不存在的角色不会被按译名猜出。
-    assert "not-a-real-nikke" not in mapping
+    loaded, commit = load_name_mapping_with_meta(path)
+    assert commit == PINNED_COMMIT
+    assert loaded["10"] == "라피"
+    assert loaded["3001"] == "라피"
+    assert loaded["Rapi"] == "라피"
+    assert len(loaded) > 800
+    assert "not-a-real-nikke" not in loaded
 
 
 @pytest.mark.asyncio
-async def test_engine_never_forges_pinned_commit_strips_secrets_and_verifies_git(tmp_path: Path, monkeypatch) -> None:
-    import shutil
-    import subprocess
-    from astrbot_plugin_nikke.integrations.nikke_calc.engine import MAX_OUTPUT_BYTES
+async def test_engine_version_trust_states_git_mismatch_dirty_and_mapping_commit(tmp_path: Path, monkeypatch) -> None:
+    plan = build_five_teams(members())
 
-    # 1. 无 evaluator commit 时不得静默回退到 PINNED_COMMIT，且 version_ok 必须为 False。
+    # 1. 无 evaluator commit 时为 unverified。
     no_eval = tmp_path / "no_eval"
     shutil.copytree(ENGINE_PATH, no_eval)
     (no_eval / "runner" / "sim.py").write_text(
@@ -158,56 +218,257 @@ async def test_engine_never_forges_pinned_commit_strips_secrets_and_verifies_git
         encoding="utf-8",
     )
     monkeypatch.setenv("NIKKE_TEST_SECRET", "top-secret-token")
-    plan = build_five_teams(members())
-    unverified_eng = SoloRaidDamageEngine(no_eval, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs")
-    res = await unverified_eng.estimate(plan.teams)
+    res = await SoloRaidDamageEngine(no_eval, mapping(), python=sys.executable, timeout=10).estimate(plan.teams[:1])
     assert res.available is True
-    assert res.commit == ""
-    assert res.dirty is None
+    assert res.version_trust == VERSION_TRUST_UNVERIFIED
     assert res.version_ok is False
     assert PINNED_COMMIT[:10] not in res.label
 
-    # 2. 独立 Git 检出：非固定 commit 或 dirty 工作区必须拒绝（fail-closed）。
+    # 2. require_git=True 且无 .git 时直接拒绝。
+    req_git_eng = SoloRaidDamageEngine(no_eval, mapping(), python=sys.executable, timeout=10, require_git=True)
+    req_res = await req_git_eng.estimate(plan.teams[:1])
+    assert req_res.available is False
+    assert req_res.version_ok is False
+    assert "缺少独立 Git 仓库" in req_res.reason
+
+    # 3. 独立 .git 非固定 commit 或 dirty 工作区：默认拒绝；allow_unverified 时标为 mismatch_or_dirty。
     git_repo = tmp_path / "git_engine"
     shutil.copytree(ENGINE_PATH, git_repo)
-    subprocess.run(["git", "-C", str(git_repo), "init"], check=True, capture_output=True)
-    subprocess.run(["git", "-C", str(git_repo), "config", "user.email", "test@example.invalid"], check=True)
-    subprocess.run(["git", "-C", str(git_repo), "config", "user.name", "Tester"], check=True)
-    subprocess.run(["git", "-C", str(git_repo), "add", "."], check=True)
-    subprocess.run(["git", "-C", str(git_repo), "commit", "-m", "init"], check=True, capture_output=True)
-
-    git_eng = SoloRaidDamageEngine(git_repo, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs2")
-    rejected = await git_eng.estimate(plan.teams)
+    _init_git_repo(git_repo)
+    rejected = await SoloRaidDamageEngine(git_repo, mapping(), python=sys.executable, timeout=10, require_git=True).estimate(plan.teams[:1])
     assert rejected.available is False
+    assert rejected.version_trust == VERSION_TRUST_MISMATCH_OR_DIRTY
     assert rejected.version_ok is False
     assert "版本校验失败" in rejected.reason
 
-    # 允许不核验模式运行，但 version_ok 仍为 False，且不会被自报 commit 欺骗。
-    untrusted_eng = SoloRaidDamageEngine(
-        git_repo, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs3", allow_unverified=True
-    )
-    untrusted_res = await untrusted_eng.estimate(plan.teams)
+    untrusted_res = await SoloRaidDamageEngine(
+        git_repo, mapping(), python=sys.executable, timeout=10, allow_unverified=True, require_git=True
+    ).estimate(plan.teams[:1])
     assert untrusted_res.available is True
-    assert untrusted_res.commit != PINNED_COMMIT
+    assert untrusted_res.version_trust == VERSION_TRUST_MISMATCH_OR_DIRTY
     assert untrusted_res.version_ok is False
+    assert "不适合可信基线对比" in untrusted_res.note
 
-    # 3. 超过 MAX_OUTPUT_BYTES 的引擎输出必须被拒绝。
-    huge = tmp_path / "huge"
-    shutil.copytree(ENGINE_PATH, huge)
-    (huge / "runner" / "sim.py").write_text(
-        f"import sys\nsys.stdout.write('x' * ({MAX_OUTPUT_BYTES} + 100))\n",
+    # 4. Git HEAD == PINNED_COMMIT & clean，但 mapping_commit 不一致时必须拒绝（mismatch_or_dirty）。
+    actual_head = subprocess.run(
+        ["git", "-C", str(git_repo), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
+    ).stdout.strip().casefold()
+    mismatch_res = await SoloRaidDamageEngine(
+        git_repo,
+        mapping(),
+        python=sys.executable,
+        timeout=10,
+        require_git=True,
+        mapping_commit="0" * 40,
+        allow_unverified=True,
+    ).estimate(plan.teams[:1])
+    assert mismatch_res.commit == actual_head
+    assert mismatch_res.version_trust == VERSION_TRUST_MISMATCH_OR_DIRTY
+    assert mismatch_res.version_ok is False
+
+
+@pytest.mark.asyncio
+async def test_engine_process_tree_descendants_pipe_inheritance_timeouts_cancel_aclose_and_failures(tmp_path: Path) -> None:
+    """P1-01 全套真实子进程验证：以真实 OS PID 证明无孤儿进程与资源泄漏。"""
+    plan = build_five_teams(members())
+
+    def _make_sim(name: str, code: str) -> Path:
+        d = tmp_path / name
+        shutil.copytree(ENGINE_PATH, d)
+        (d / "runner" / "sim.py").write_text(code, encoding="utf-8")
+        return d
+
+    # 1 + 2: 父进程正常退出（returncode=0），但派生子进程仍存活且继承 stdout/stderr 管道！
+    pipe_pids = tmp_path / "pipe_pids.txt"
+    pipe_child_script = tmp_path / "pipe_child.py"
+    pipe_child_script.write_text(
+        f"import os, pathlib, time\n"
+        f"pathlib.Path({str(pipe_pids)!r}).write_text(str(os.getpid()), encoding='utf-8')\n"
+        f"time.sleep(30)\n",
         encoding="utf-8",
     )
-    huge_eng = SoloRaidDamageEngine(huge, mapping(), python=sys.executable, timeout=10, work_dir=tmp_path / "runs4")
-    huge_res = await huge_eng.estimate(plan.teams[:1])
-    assert huge_res.total is None
-    assert "大小上限" in huge_res.teams[0].error
+    pipe_dir = _make_sim(
+        "parent_exit_pipe_child",
+        f"import json, subprocess, sys\n"
+        f"subprocess.Popen([sys.executable, {str(pipe_child_script)!r}])\n"
+        f"print(json.dumps({{'schema_version': 2, 'total_damage': 4321}}))\n"
+        f"sys.stdout.flush()\n",
+    )
+    t0 = time.monotonic()
+    res_pipe = await SoloRaidDamageEngine(
+        pipe_dir, mapping(), python=sys.executable, timeout=10.0, pipe_drain_timeout=0.15
+    ).estimate(plan.teams[:1])
+    elapsed = time.monotonic() - t0
+    assert elapsed < 4.0, f"继承 stdout/stderr 的派生进程阻塞了等待：{elapsed:.2f}s"
+    assert res_pipe.available is True
+    assert res_pipe.total == 4321
+    assert pipe_pids.exists()
+    descendant_pid = int(pipe_pids.read_text(encoding="utf-8").strip())
+    assert await _wait_pids_dead([descendant_pid]) == []
+
+    # 3: 三级派生进程树（parent -> child -> grandchild），且孙进程脱离 stdio 继续驻留。
+    tree_pids = tmp_path / "tree_pids.log"
+    grand_script = tmp_path / "tree_grand.py"
+    grand_script.write_text(
+        f"import os, pathlib, time\n"
+        f"pathlib.Path({str(tree_pids)!r}).open('a', encoding='utf-8').write(f'grand={{os.getpid()}}\\n')\n"
+        f"time.sleep(30)\n",
+        encoding="utf-8",
+    )
+    child_script = tmp_path / "tree_child.py"
+    child_script.write_text(
+        f"import os, pathlib, subprocess, sys, time\n"
+        f"pathlib.Path({str(tree_pids)!r}).open('a', encoding='utf-8').write(f'child={{os.getpid()}}\\n')\n"
+        f"subprocess.Popen([sys.executable, {str(grand_script)!r}], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n"
+        f"time.sleep(30)\n",
+        encoding="utf-8",
+    )
+    tree_dir = _make_sim(
+        "three_level_tree",
+        f"import json, os, pathlib, subprocess, sys, time\n"
+        f"pathlib.Path({str(tree_pids)!r}).write_text(f'parent={{os.getpid()}}\\n', encoding='utf-8')\n"
+        f"subprocess.Popen([sys.executable, {str(child_script)!r}], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n"
+        f"time.sleep(0.4)\n"
+        f"print(json.dumps({{'schema_version': 2, 'total_damage': 8888}}))\n",
+    )
+    res_tree = await SoloRaidDamageEngine(tree_dir, mapping(), python=sys.executable, timeout=10.0).estimate(plan.teams[:1])
+    assert res_tree.total == 8888
+    raw_lines = tree_pids.read_text(encoding="utf-8").splitlines()
+    observed_pids = [int(line.split("=", 1)[1]) for line in raw_lines if "=" in line]
+    assert len(observed_pids) == 3, f"未观测到三级进程树: {raw_lines}"
+    assert await _wait_pids_dead(observed_pids) == []
+
+    # 4: 批次超时（带派生子进程）。
+    batch_pids = tmp_path / "batch_pids.log"
+    batch_child = tmp_path / "batch_child.py"
+    batch_child.write_text(
+        f"import os, pathlib, time\n"
+        f"pathlib.Path({str(batch_pids)!r}).open('a', encoding='utf-8').write(f'{{os.getpid()}}\\n')\n"
+        f"time.sleep(30)\n",
+        encoding="utf-8",
+    )
+    batch_dir = _make_sim(
+        "batch_timeout_tree",
+        f"import os, pathlib, subprocess, sys, time\n"
+        f"pathlib.Path({str(batch_pids)!r}).open('a', encoding='utf-8').write(f'{{os.getpid()}}\\n')\n"
+        f"subprocess.Popen([sys.executable, {str(batch_child)!r}], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n"
+        f"time.sleep(30)\n",
+    )
+    batch_eng = SoloRaidDamageEngine(batch_dir, mapping(), python=sys.executable, timeout=10.0, batch_timeout=0.45, concurrency=2)
+    res_batch = await batch_eng.estimate(plan.teams[:2])
+    assert res_batch.available is False and "批次计算超时" in res_batch.reason
+    b_pids = [int(x) for x in batch_pids.read_text(encoding="utf-8").splitlines() if x.strip()]
+    assert len(b_pids) >= 2
+    assert await _wait_pids_dead(b_pids) == []
+
+    # 5: 单队超时（其余队伍正常完成）。
+    single_pids = tmp_path / "single_pid.txt"
+    single_dir = _make_sim(
+        "single_timeout",
+        f"import json, os, pathlib, sys, time\n"
+        f"req = json.loads(sys.argv[sys.argv.index('--request') + 1])\n"
+        f"if req['squad'][0] == 'L1-1':\n"
+        f"    pathlib.Path({str(single_pids)!r}).write_text(str(os.getpid()), encoding='utf-8')\n"
+        f"    time.sleep(30)\n"
+        f"print(json.dumps({{'schema_version': 2, 'total_damage': 1111}}))\n",
+    )
+    res_single = await SoloRaidDamageEngine(single_dir, mapping(), python=sys.executable, timeout=0.35, batch_timeout=5.0, concurrency=2).estimate(plan.teams[:2])
+    assert res_single.available is True
+    assert res_single.total is None
+    assert "引擎计算超时" in res_single.teams[0].error
+    assert res_single.teams[1].damage == 1111
+    s_pid = int(single_pids.read_text(encoding="utf-8").strip())
+    assert await _wait_pids_dead([s_pid]) == []
+
+    # 6: 连续多次取消任务，仍必须等旧进程树彻底死亡才允许下一队进入信号量。
+    cancel_log = tmp_path / "cancel_order.log"
+    p1_started = tmp_path / "p1_started.txt"
+    cancel_dir = _make_sim(
+        "repeated_cancel",
+        f"import json, os, pathlib, sys, time\n"
+        f"req = json.loads(sys.argv[sys.argv.index('--request') + 1])\n"
+        f"if req['squad'][0] == 'L1-1':\n"
+        f"    pathlib.Path({str(p1_started)!r}).write_text(str(os.getpid()), encoding='utf-8')\n"
+        f"    time.sleep(30)\n"
+        f"pathlib.Path({str(cancel_log)!r}).write_text('p2_ran', encoding='utf-8')\n"
+        f"print(json.dumps({{'schema_version': 2, 'total_damage': 2222}}))\n",
+    )
+    seq_eng = SoloRaidDamageEngine(cancel_dir, mapping(), python=sys.executable, timeout=10.0, concurrency=1)
+    t1 = asyncio.create_task(seq_eng.estimate(plan.teams[:1]))
+    deadline = time.monotonic() + 3.0
+    while not p1_started.exists() and time.monotonic() < deadline:
+        await asyncio.sleep(0.02)
+    assert p1_started.exists()
+    p1_pid = int(p1_started.read_text(encoding="utf-8").strip())
+    t2 = asyncio.create_task(seq_eng.estimate(plan.teams[1:2]))
+    await asyncio.sleep(0.05)
+    assert not cancel_log.exists()
+    # 连续两次取消 t1。
+    t1.cancel()
+    await asyncio.sleep(0.01)
+    t1.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await t1
+    assert await _wait_pids_dead([p1_pid]) == []
+    assert (await t2).total == 2222
+
+    # 7: aclose() 与进程创建并发竞态。
+    race_pids = tmp_path / "race_pids.txt"
+    race_dir = _make_sim(
+        "aclose_race",
+        f"import json, os, pathlib, time\n"
+        f"pathlib.Path({str(race_pids)!r}).open('a', encoding='utf-8').write(f'{{os.getpid()}}\\n')\n"
+        f"time.sleep(30)\n",
+    )
+    race_eng = SoloRaidDamageEngine(race_dir, mapping(), python=sys.executable, timeout=10.0, concurrency=2)
+    t_race = asyncio.create_task(race_eng.estimate(plan.teams[:2]))
+    await asyncio.sleep(0.02)
+    await race_eng.aclose()
+    res_race = await t_race
+    assert res_race.total is None
+    if race_pids.exists():
+        r_pids = [int(x) for x in race_pids.read_text(encoding="utf-8").splitlines() if x.strip()]
+        assert await _wait_pids_dead(r_pids) == []
+    refused = await race_eng.estimate(plan.teams[:1])
+    assert refused.available is False and "已关闭" in refused.reason
+
+    # 8: stdout / stderr 超过 MAX_OUTPUT_BYTES 立即终止进程并释放资源。
+    for stream in ("stdout", "stderr"):
+        flood_pid_file = tmp_path / f"flood_{stream}.pid"
+        flood_dir = _make_sim(
+            f"flood_{stream}",
+            f"import os, pathlib, sys\n"
+            f"pathlib.Path({str(flood_pid_file)!r}).write_text(str(os.getpid()), encoding='utf-8')\n"
+            f"chunk = 'x' * 8192\n"
+            f"while True:\n"
+            f"    sys.{stream}.write(chunk)\n"
+            f"    sys.{stream}.flush()\n",
+        )
+        res_flood = await SoloRaidDamageEngine(flood_dir, mapping(), python=sys.executable, timeout=20.0).estimate(plan.teams[:1])
+        assert res_flood.total is None and "大小上限" in res_flood.teams[0].error
+        f_pid = int(flood_pid_file.read_text(encoding="utf-8").strip())
+        assert await _wait_pids_dead([f_pid]) == []
+
+    # 9: 清理失败时必须有明确可观察状态（cleanup_failures + team/note 错误），禁止静默成功。
+    from astrbot_plugin_nikke.integrations.nikke_calc.engine import _kill_managed_tree_sync
+
+    def failing_killer(pid, pgid, job_handle, timeout):
+        _kill_managed_tree_sync(pid, pgid, job_handle, timeout)
+        return False, f"模拟进程组 {pgid} 清理拒绝访问"
+
+    fail_eng = SoloRaidDamageEngine(
+        ENGINE_PATH, mapping(), python=sys.executable, timeout=10.0, _tree_killer=failing_killer
+    )
+    res_fail = await fail_eng.estimate(plan.teams[:1])
+    assert res_fail.cleanup_failures
+    assert "模拟进程组" in res_fail.cleanup_failures[0]
+    assert res_fail.total is None
+    assert "进程树清理异常" in res_fail.teams[0].error
+    assert fail_eng.cleanup_failures
 
 
 @pytest.mark.asyncio
 async def test_engine_resolves_resource_id_and_electronic_element() -> None:
-    from astrbot_plugin_nikke.features.solo_raid.builder import Team
-
     eng = SoloRaidDamageEngine(
         ENGINE_PATH,
         {"10": "L1-1", "11": "L1-2", "12": "L1-3", "13": "L1-4", "14": "L1-5"},
@@ -226,200 +487,3 @@ async def test_engine_resolves_resource_id_and_electronic_element() -> None:
     req = eng._request(team, "Electronic")
     assert req["squad"] == ["L1-1", "L1-2", "L1-3", "L1-4", "L1-5"]
     assert req["enemy"] == {"code": "전격"}
-
-
-@pytest.mark.asyncio
-async def test_engine_real_subprocess_timeout_cancellation_streams_json_and_aclose(tmp_path: Path) -> None:
-    import asyncio
-    import os
-    import shutil
-    import time
-    from astrbot_plugin_nikke.integrations.nikke_calc.engine import MAX_OUTPUT_BYTES
-
-    def _pid_alive(pid: int) -> bool:
-        if os.name == "nt":
-            import ctypes
-
-            kernel32 = ctypes.windll.kernel32
-            handle = kernel32.OpenProcess(0x1000, False, pid)
-            if not handle:
-                return False
-            try:
-                exit_code = ctypes.c_ulong()
-                if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
-                    return False
-                return exit_code.value == 259  # STILL_ACTIVE
-            finally:
-                kernel32.CloseHandle(handle)
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            return False
-        except PermissionError:
-            return True
-        except OSError:
-            return False
-        return True
-
-    async def _wait_dead(pid: int, limit: float = 4.0) -> bool:
-        deadline = time.monotonic() + limit
-        while time.monotonic() < deadline:
-            if not _pid_alive(pid):
-                return True
-            await asyncio.sleep(0.05)
-        return not _pid_alive(pid)
-
-    plan = build_five_teams(members())
-
-    # 1. 批次超时必须强杀真实子进程，不留孤儿进程。
-    slow_dir = tmp_path / "slow_timeout"
-    shutil.copytree(ENGINE_PATH, slow_dir)
-    pid_file = tmp_path / "slow.pid"
-    (slow_dir / "runner" / "sim.py").write_text(
-        f"import os, pathlib, time\n"
-        f"pathlib.Path({str(pid_file)!r}).write_text(str(os.getpid()), encoding='utf-8')\n"
-        f"time.sleep(30)\n",
-        encoding="utf-8",
-    )
-    slow_eng = SoloRaidDamageEngine(
-        slow_dir, mapping(), python=sys.executable, timeout=10.0, batch_timeout=0.35, concurrency=2
-    )
-    res_timeout = await slow_eng.estimate(plan.teams[:2])
-    assert res_timeout.available is False
-    assert "批次计算超时" in res_timeout.reason
-    assert slow_eng.active_process_count == 0
-    if pid_file.exists():
-        pid = int(pid_file.read_text(encoding="utf-8"))
-        assert await _wait_dead(pid), f"超时子进程 {pid} 未被终止"
-
-    # 2. 取消任务时必须先终止并等待回收旧子进程，才允许释放并发槽位给后续任务。
-    order_dir = tmp_path / "cancel_order"
-    shutil.copytree(ENGINE_PATH, order_dir)
-    trace_file = tmp_path / "trace.log"
-    p1_started = tmp_path / "p1.started"
-    (order_dir / "runner" / "sim.py").write_text(
-        f"import os, pathlib, sys, time, json\n"
-        f"req = json.loads(sys.argv[sys.argv.index('--request') + 1])\n"
-        f"first = req['squad'][0]\n"
-        f"log = pathlib.Path({str(trace_file)!r})\n"
-        f"if first == 'L1-1':\n"
-        f"    pathlib.Path({str(p1_started)!r}).write_text(str(os.getpid()), encoding='utf-8')\n"
-        f"    try:\n"
-        f"        while True: time.sleep(0.05)\n"
-        f"    finally:\n"
-        f"        with log.open('a', encoding='utf-8') as f: f.write('p1_end\\n')\n"
-        f"else:\n"
-        f"    with log.open('a', encoding='utf-8') as f: f.write('p2_start\\n')\n"
-        f"    print(json.dumps({{'schema_version': 2, 'total_damage': 555}}))\n",
-        encoding="utf-8",
-    )
-    seq_eng = SoloRaidDamageEngine(order_dir, mapping(), python=sys.executable, timeout=5.0, concurrency=1)
-    t1 = asyncio.create_task(seq_eng.estimate(plan.teams[:1]))
-    deadline = time.monotonic() + 3.0
-    while not p1_started.exists() and time.monotonic() < deadline:
-        await asyncio.sleep(0.02)
-    assert p1_started.exists()
-    p1_pid = int(p1_started.read_text(encoding="utf-8"))
-    t2 = asyncio.create_task(seq_eng.estimate(plan.teams[1:2]))
-    await asyncio.sleep(0.05)
-    assert not t2.done()
-    t1.cancel()
-    with pytest.raises(asyncio.CancelledError):
-        await t1
-    assert await _wait_dead(p1_pid), "取消后进程仍存活"
-    r2 = await t2
-    assert r2.available is True
-    assert r2.total == 555
-
-    # 3. 真实并发计数受 concurrency 限制。
-    conc_dir = tmp_path / "conc"
-    shutil.copytree(ENGINE_PATH, conc_dir)
-    events_dir = tmp_path / "conc_events"
-    events_dir.mkdir()
-    (conc_dir / "runner" / "sim.py").write_text(
-        f"import json, os, pathlib, time\n"
-        f"d = pathlib.Path({str(events_dir)!r})\n"
-        f"p = d / f'{{os.getpid()}}.lock'\n"
-        f"p.write_text('1', encoding='utf-8')\n"
-        f"max_file = d / f'obs_{{os.getpid()}}.txt'\n"
-        f"active = len(list(d.glob('*.lock')))\n"
-        f"time.sleep(0.15)\n"
-        f"active2 = len(list(d.glob('*.lock')))\n"
-        f"max_file.write_text(str(max(active, active2)), encoding='utf-8')\n"
-        f"p.unlink(missing_ok=True)\n"
-        f"print(json.dumps({{'schema_version': 2, 'total_damage': 777}}))\n",
-        encoding="utf-8",
-    )
-    conc_eng = SoloRaidDamageEngine(conc_dir, mapping(), python=sys.executable, timeout=10.0, concurrency=2)
-    conc_res = await conc_eng.estimate(plan.teams[:4])
-    assert conc_res.available is True and conc_res.total == 777 * 4
-    observed = [int(f.read_text(encoding="utf-8")) for f in events_dir.glob("obs_*.txt")]
-    assert observed and max(observed) <= 2
-
-    # 4. 运行期流式截断：无限写 stdout 或 stderr 的进程立即被终止并降级。
-    for stream in ("stdout", "stderr"):
-        flood_dir = tmp_path / f"flood_{stream}"
-        shutil.copytree(ENGINE_PATH, flood_dir)
-        (flood_dir / "runner" / "sim.py").write_text(
-            f"import sys\nchunk = 'x' * 8192\nwhile True:\n    sys.{stream}.write(chunk)\n    sys.{stream}.flush()\n",
-            encoding="utf-8",
-        )
-        flood_eng = SoloRaidDamageEngine(flood_dir, mapping(), python=sys.executable, timeout=30.0)
-        flood_res = await flood_eng.estimate(plan.teams[:1])
-        assert flood_res.total is None
-        assert "大小上限" in flood_res.teams[0].error
-        assert flood_eng.active_process_count == 0
-
-    # 5. 非对象 JSON 与损坏 JSON 安全降级；dirty=True 时标签不得宣称可信固定基线。
-    bad_dir = tmp_path / "bad_json"
-    shutil.copytree(ENGINE_PATH, bad_dir)
-    for bad_out, expected in (
-        ("[1, 2, 3]", "不是 JSON 对象"),
-        ('"plain-string"', "不是 JSON 对象"),
-        ("null", "不是 JSON 对象"),
-        ("{bad json", "不是 JSON"),
-    ):
-        (bad_dir / "runner" / "sim.py").write_text(f"print({bad_out!r})\n", encoding="utf-8")
-        bad_eng = SoloRaidDamageEngine(bad_dir, mapping(), python=sys.executable, timeout=5.0)
-        bad_res = await bad_eng.estimate(plan.teams[:1])
-        assert bad_res.total is None
-        assert expected in bad_res.teams[0].error
-
-    dirty_dir = tmp_path / "dirty_eval"
-    shutil.copytree(ENGINE_PATH, dirty_dir)
-    (dirty_dir / "runner" / "sim.py").write_text(
-        f"import json\n"
-        f"print(json.dumps({{'schema_version': 2, 'total_damage': 1234, "
-        f"'evaluator': {{'commit': {PINNED_COMMIT!r}, 'dirty': True}}}}))\n",
-        encoding="utf-8",
-    )
-    dirty_eng = SoloRaidDamageEngine(dirty_dir, mapping(), python=sys.executable, timeout=5.0)
-    dirty_res = await dirty_eng.estimate(plan.teams[:1])
-    assert dirty_res.version_ok is False
-    assert "未核验" in dirty_res.label
-    assert PINNED_COMMIT[:10] not in dirty_res.label
-
-    # 6. aclose() 立即清理正在运行中的外部子进程并拒绝后续估伤。
-    close_dir = tmp_path / "aclose_proc"
-    shutil.copytree(ENGINE_PATH, close_dir)
-    c_pid_file = tmp_path / "close.pid"
-    (close_dir / "runner" / "sim.py").write_text(
-        f"import os, pathlib, time\n"
-        f"pathlib.Path({str(c_pid_file)!r}).write_text(str(os.getpid()), encoding='utf-8')\n"
-        f"time.sleep(30)\n",
-        encoding="utf-8",
-    )
-    close_eng = SoloRaidDamageEngine(close_dir, mapping(), python=sys.executable, timeout=30.0)
-    bg = asyncio.create_task(close_eng.estimate(plan.teams[:1]))
-    deadline = time.monotonic() + 3.0
-    while not c_pid_file.exists() and time.monotonic() < deadline:
-        await asyncio.sleep(0.02)
-    assert c_pid_file.exists()
-    c_pid = int(c_pid_file.read_text(encoding="utf-8"))
-    await close_eng.aclose()
-    res_closed = await bg
-    assert await _wait_dead(c_pid)
-    assert close_eng.active_process_count == 0
-    assert res_closed.total is None
-    refused = await close_eng.estimate(plan.teams[:1])
-    assert refused.available is False and "已关闭" in refused.reason

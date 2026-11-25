@@ -334,3 +334,137 @@ async def test_resubscribe_during_source_outage_preserves_baseline_and_prevents_
     broadcast = AnnouncementDelivery(store)
     assert broadcast.SETTING != subs.SETTING
     assert store.get_setting(broadcast.SETTING, {}) == {}
+
+
+@pytest.mark.asyncio
+async def test_per_kind_initialization_outage_history_backlog_restart_and_isolation() -> None:
+    """P1-02 全场景：首次故障、追订故障、部分故障、恢复海量历史防洪炸、重启恢复、并发与跨渠道隔离。"""
+    import asyncio
+    from astrbot_plugin_nikke.features.announcement.feeds import (
+        KIND_STATE_INITIALIZED,
+        KIND_STATE_UNAVAILABLE,
+        KIND_STATE_UNINITIALIZED,
+        FeedCatalog,
+        FeedItem,
+        FeedSubscriptions,
+        FeedUnavailable,
+    )
+    from astrbot_plugin_nikke.features.calendar.subscriptions import CalendarSubscriptions
+
+    t0 = datetime(2026, 9, 21, 0, 0, tzinfo=timezone.utc)
+    t1 = datetime(2026, 9, 21, 2, 0, tzinfo=timezone.utc)
+    t2 = datetime(2026, 9, 21, 4, 0, tzinfo=timezone.utc)
+
+    class ControllableSource:
+        def __init__(self, kind: str, rows: list[FeedItem], fail: bool = False) -> None:
+            self.kind = kind
+            self.rows = list(rows)
+            self.fail = fail
+
+        def items(self, *, now):
+            if self.fail:
+                raise FeedUnavailable(f"{self.kind} 维护中")
+            return tuple(self.rows)
+
+    def make_item(kind: str, eid: str, *, version: int = 1, published: datetime = t0) -> FeedItem:
+        return FeedItem(
+            kind=kind,
+            entity_id=eid,
+            version=version,
+            title=f"{kind}-{eid}",
+            url=f"https://example.invalid/{kind}/{eid}",
+            published_at=published.isoformat(),
+        )
+
+    store, _ = build()[0], None
+    news_src = ControllableSource("news", [], fail=True)
+    sched_src = ControllableSource("schedule", [], fail=True)
+    video_src = ControllableSource("video", [make_item("video", "v-init")], fail=False)
+
+    def make_subs(current_now: datetime) -> FeedSubscriptions:
+        cat = FeedCatalog({"news": news_src, "schedule": sched_src, "video": video_src})
+        return FeedSubscriptions(store, cat, clock=lambda: current_now)
+
+    user_a = target("user-a", conversation="group:1", private=False)
+    user_b = target("user-b", conversation="group:2", private=True)
+
+    # 1 + 3: 首次订阅即发生部分故障（video 正常，news 故障），应分别标 initialized 与 uninitialized。
+    subs0 = make_subs(t0)
+    resp = subs0.command(user_a, "订阅", "新闻,视频")
+    assert "恢复后首次同步时自动建立基线" in resp
+    rec_a = store.get_setting(subs0.SETTING, {})["targets"][user_a]
+    assert rec_a["kind_states"]["video"] == KIND_STATE_INITIALIZED
+    assert rec_a["kind_states"]["news"] == KIND_STATE_UNINITIALIZED
+    assert "尚未初始化基线" in subs0.command(user_a, "状态", "")
+
+    # 2: 已订阅用户追加“日程”时日程源故障，不影响 video 已初始化基线。
+    subs0.command(user_a, "订阅", "日程")
+    rec_a = store.get_setting(subs0.SETTING, {})["targets"][user_a]
+    assert rec_a["kind_states"]["schedule"] == KIND_STATE_UNINITIALIZED
+    assert rec_a["baseline"]["video:v-init"] == 1
+
+    # 4: 来源首次恢复返回大量历史条目（20 条历史新闻 + 20 条历史日程），绝不轰炸历史！
+    news_src.fail = False
+    news_src.rows = [make_item("news", f"hist-{i}", published=t0) for i in range(20)]
+    sched_src.fail = False
+    sched_src.rows = [make_item("schedule", f"s-hist-{i}", published=t1) for i in range(20)]
+    sent: list[tuple[str, str, bool, str]] = []
+
+    async def collector(conv, actor, priv, text):
+        sent.append((conv, actor, priv, text))
+        return True
+
+    res_init = await make_subs(t1).dispatch_due(collector, now=t1)
+    assert res_init["succeeded"] == 0
+    assert sent == []
+    rec_a = store.get_setting(subs0.SETTING, {})["targets"][user_a]
+    assert rec_a["kind_states"]["news"] == KIND_STATE_INITIALIZED
+    assert rec_a["kind_states"]["schedule"] == KIND_STATE_INITIALIZED
+    assert len([k for k in rec_a["baseline"] if k.startswith("news:")]) == 20
+    assert len([k for k in rec_a["baseline"] if k.startswith("schedule:")]) == 20
+
+    # 5 + 6: 故障期间标记 initialized_unavailable，进程重启（新建 FeedSubscriptions）并新增 1 条内容，并发不重复推送！
+    news_src.fail = True
+    assert (await make_subs(t1).dispatch_due(collector, now=t1))["succeeded"] == 0
+    assert store.get_setting(subs0.SETTING, {})["targets"][user_a]["kind_states"]["news"] == KIND_STATE_UNAVAILABLE
+
+    news_src.fail = False
+    news_src.rows.append(make_item("news", "fresh-after-outage", published=t2))
+
+    async def slow_send(conv, actor, priv, text):
+        await asyncio.sleep(0.02)
+        sent.append((conv, actor, priv, text))
+        return True
+
+    r_pair = await asyncio.gather(
+        make_subs(t2).dispatch_due(slow_send, now=t2),
+        make_subs(t2).dispatch_due(slow_send, now=t2),
+    )
+    assert sum(r["succeeded"] for r in r_pair) == 1
+    assert len(sent) == 1
+    assert "fresh-after-outage" in sent[0][3]
+    assert user_b not in str(sent)
+
+    # 7: 取消单类订阅后再重新订阅与发送竞态保护。
+    subs_after = make_subs(t2)
+    subs_after.command(user_a, "取消订阅", "新闻")
+    assert "新闻" not in store.get_setting(subs0.SETTING, {})["targets"][user_a]["kinds"]
+    # 重新订阅已存在的旧历史新闻，不重推旧条。
+    news_src.rows.append(make_item("news", "hist-recheck", published=t2))
+    subs_after.command(user_a, "订阅", "新闻")
+    sent.clear()
+    assert (await subs_after.dispatch_due(collector, now=t2))["succeeded"] == 0
+
+    # 8: 旧版无 kind_states 记录向后兼容 + CalendarSubscriptions 设置键相互隔离。
+    legacy_key = target("legacy-user", conversation="group:9", private=False)
+    state = store.get_setting(subs0.SETTING, {})
+    state["targets"][legacy_key] = {
+        "enabled": True,
+        "kinds": ["news"],
+        "subscribed_at": t0.isoformat(),
+        "baseline": {"news:hist-0": 1},
+    }
+    store.set_setting(subs0.SETTING, state)
+    subs_after.command(legacy_key, "状态", "")
+    cal_subs = CalendarSubscriptions(store, None)
+    assert cal_subs.SETTING != subs0.SETTING
