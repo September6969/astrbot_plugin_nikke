@@ -63,7 +63,7 @@
         item.example_command.toLowerCase().includes(q)
       );
     });
-    container.innerHTML = "";
+    container.replaceChildren();
     if (!filtered.length) {
       container.textContent = "没有匹配的功能条目。";
       return;
@@ -126,6 +126,10 @@
       el("btn-push-calendar").hidden = false;
       el("btn-push-tarot").hidden = false;
     }
+    if (data.flags?.counsel_available) {
+      const counselCard = el("card-counsel");
+      if (counselCard) counselCard.hidden = false;
+    }
     renderCatalog();
   }
 
@@ -139,7 +143,7 @@
         box.textContent = data.fallback_text || "日程快照暂未就绪。";
         return;
       }
-      box.innerHTML = "";
+      box.replaceChildren();
       const items = data.items || [];
       if (!items.length) {
         const pre = document.createElement("pre");
@@ -176,7 +180,7 @@
       });
       state.lastTarot = data;
       const grid = el("tarot-cards");
-      grid.innerHTML = "";
+      grid.replaceChildren();
       for (const card of data.cards || []) {
         const wrap = document.createElement("div");
         wrap.className = `tarot-card ${card.orientation === "reversed" ? "reversed" : ""}`;
@@ -264,7 +268,7 @@
       }
     }
     const out = el("guide-output");
-    out.innerHTML = "";
+    out.replaceChildren();
     if (!category) return;
     if (!(data.entries || []).length) {
       out.textContent = "该分类暂无已登记攻略条目。";
@@ -322,7 +326,7 @@
       const q = el("char-query").value;
       const d = await apiFetch(`/hall/api/character?q=${encodeURIComponent(q)}`);
       const out = el("char-output");
-      out.innerHTML = "";
+      out.replaceChildren();
       if (!(d.matches || []).length) {
         out.textContent = "未找到匹配角色。";
         return;
@@ -342,6 +346,101 @@
       });
       el("counsel-output").textContent = d.text;
     });
+    el("btn-ol-rec")?.addEventListener("click", async () => {
+      try {
+        const d = await apiFetch("/hall/api/tools/overload-recommend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ character: el("ol-char-q").value }),
+        });
+        el("ol-rec-output").textContent = d.text;
+      } catch (err) {
+        el("ol-rec-output").textContent = err.message;
+      }
+    });
+    function collectHallCases() {
+      const cases = { core_dust: {}, credits: {}, battle_data: {} };
+      document.querySelectorAll(".hall-case-inp").forEach((inp) => {
+        const res = inp.dataset.res;
+        const hr = inp.dataset.hr;
+        if (cases[res] && hr) {
+          cases[res][hr] = Number(inp.value || 0);
+        }
+      });
+      return cases;
+    }
+
+    function renderHallSyncVisual(plan) {
+      const visual = el("sync-visual");
+      const kpi = el("sync-kpi");
+      const cards = el("sync-cards");
+      if (!visual || !kpi || !cards || !plan) return;
+      visual.hidden = false;
+      const kpiItems = [
+        {
+          label: "预计达成日期",
+          val: plan.eta || "无法估算",
+          sub: plan.overall_days === null ? "存在零产量瓶颈" : `约需 ${plan.overall_days} 天`,
+        },
+        {
+          label: "主要资源瓶颈",
+          val: (plan.bottlenecks && plan.bottlenecks.length) ? plan.bottlenecks.join(" / ") : "无",
+          sub: plan.outpost_level ? `前哨 Lv.${plan.outpost_level}` : "",
+        },
+        {
+          label: "当前库存立即升级",
+          val: plan.reachable_level ? `Lv.${plan.reachable_level} (+${plan.gainable_levels})` : "-",
+          sub: "含直存与箱子",
+        },
+      ];
+      kpi.replaceChildren(...kpiItems.map((item) => {
+        const box = document.createElement("div");
+        box.className = "kpi-card";
+        const lb = document.createElement("div");
+        lb.className = "kpi-label";
+        lb.textContent = item.label;
+        const val = document.createElement("div");
+        val.className = "kpi-val";
+        val.textContent = item.val;
+        const sub = document.createElement("div");
+        sub.className = "kpi-sub";
+        sub.textContent = item.sub;
+        box.append(lb, val, sub);
+        return box;
+      }));
+      cards.replaceChildren(...(plan.resources || []).map((r) => {
+        const card = document.createElement("div");
+        card.className = "res-card";
+        const head = document.createElement("div");
+        head.className = "res-head";
+        const strong = document.createElement("strong");
+        strong.textContent = r.label;
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = r.days === null ? "无法估算" : `${r.days} 天`;
+        head.append(strong, tag);
+
+        const pct = r.required > 0 ? Math.min(100, Math.round((r.stock / r.required) * 100)) : 100;
+        const bar = document.createElement("progress");
+        bar.className = "res-progress";
+        bar.max = 100;
+        bar.value = pct;
+
+        const meta = document.createElement("div");
+        meta.className = "res-meta";
+        for (const text of [
+          `需要 ${Number(r.required).toLocaleString()} ｜ 库存 ${Number(r.stock).toLocaleString()}`,
+          `缺口 ${Number(r.missing).toLocaleString()} ｜ 日产 ${Math.round(Number(r.production || 0)).toLocaleString()}`,
+        ]) {
+          const line = document.createElement("div");
+          line.textContent = text;
+          meta.append(line);
+        }
+        card.append(head, bar, meta);
+        return card;
+      }));
+    }
+
     el("btn-sync-calc")?.addEventListener("click", async () => {
       try {
         const d = await apiFetch("/hall/api/tools/sync", {
@@ -350,18 +449,22 @@
           body: JSON.stringify({
             current: el("sync-cur").value,
             target: el("sync-tgt").value,
+            outpost_level: el("sync-outpost").value,
+            wipeout_count: el("sync-wipeout").value,
             inventory: {
               core_dust: el("sync-inv-dust").value,
               credits: el("sync-inv-cred").value,
               battle_data: el("sync-inv-data").value,
             },
-            production: {
-              core_dust: el("sync-prod-dust").value,
-              credits: el("sync-prod-cred").value,
-              battle_data: el("sync-prod-data").value,
+            cases: collectHallCases(),
+            extra_daily: {
+              core_dust: el("sync-extra-dust").value,
+              credits: el("sync-extra-cred").value,
+              battle_data: el("sync-extra-data").value,
             },
           }),
         });
+        renderHallSyncVisual(d.plan);
         el("sync-output").textContent = d.text;
       } catch (err) {
         el("sync-output").textContent = err.message;

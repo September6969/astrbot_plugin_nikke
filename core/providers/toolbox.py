@@ -38,9 +38,11 @@ from ...features.overload_advice.advisor import (
     load_default_line_counts,
     load_recommendations,
 )
+from ...features.solo_raid.auto_sync import resolve_live_season_catalog
 from ...features.solo_raid.plans import SoloRaidPlanStore
 from ...features.solo_raid.seasons import SeasonCatalog
 from ...features.sync.cost_table import SyncCostTable, SyncCostTableError
+from ...features.sync.outpost import OutpostRateTable
 from ...features.wishlist.advisor import (
     PoolEligibilityEntry,
     WishlistError,
@@ -84,11 +86,17 @@ class ToolboxServices:
     grid_ranking: FavoriteRanking
     overload_character_targets: Mapping[str, CharacterTargets] | None = None
     overload_default_counts: Mapping[str, int] | None = None
+    outpost_table: OutpostRateTable | None = None
     shiftypad_web: Any | None = None
     shiftypad_readonly: Any | None = None
     public_share_enabled: bool = False
     card_loader: Callable[[str, str], Any] | None = None
     wishlist_eligibility: Mapping[str, PoolEligibilityEntry] = field(default_factory=dict)
+    announcements: Any | None = None
+
+    def live_solo_catalog(self) -> SeasonCatalog:
+        """返回结合官方缓存公告自动同步后的单人突袭赛季目录。"""
+        return resolve_live_season_catalog(self.solo_catalog, self.announcements, self.calendar)
 
     def growth_generation(self, actor_id: str) -> int:
         """读取清空代数快照，防止清零后并发旧请求回写。"""
@@ -197,13 +205,35 @@ def _sync_table(
         path = Path(raw)
     else:
         imported = data_dir / "sync-level-costs.json"
-        path = imported if imported.is_file() else plugin_dir / "assets" / "data" / "sync-level-costs.json"
+        if imported.is_file():
+            path = imported
+        else:
+            bundled = plugin_dir / "assets" / "data" / "sync_level_costs.json"
+            legacy_bundled = plugin_dir / "assets" / "data" / "sync-level-costs.json"
+            path = bundled if bundled.is_file() else legacy_bundled
     if not path.is_file():
         return None, "未配置同步器等级成本表（缺少可靠成本数据，不猜测等级消耗）。"
     try:
         return SyncCostTable.from_file(path), ""
     except SyncCostTableError as exc:
         return None, f"同步器成本表无效：{exc}"
+
+
+def _outpost_table(
+    config: Mapping[str, Any], data_dir: Path, plugin_dir: Path
+) -> OutpostRateTable | None:
+    raw = str(config.get("outpost_rates_path") or "").strip()
+    if raw:
+        path = Path(raw)
+    else:
+        imported = data_dir / "outpost-rates.json"
+        path = imported if imported.is_file() else plugin_dir / "assets" / "data" / "outpost_rates.json"
+    if not path.is_file():
+        return None
+    try:
+        return OutpostRateTable.from_file(path)
+    except SyncCostTableError:
+        return None
 
 
 def _counsel_bank(config: Mapping[str, Any], data_dir: Path, plugin_dir: Path) -> CounselBank:
@@ -277,6 +307,7 @@ def create_toolbox_services(
     )
     feeds = FeedSubscriptions(store, catalog, clock=clock)
     table, table_error = _sync_table(config, data_dir, plugin_dir)
+    outpost = _outpost_table(config, data_dir, plugin_dir)
     recommendations, recommendation_label, character_targets, default_counts = _recommendations(config, data_dir, plugin_dir)
     engine_path = str(
         config.get("solo_raid_engine_path")
@@ -320,9 +351,11 @@ def create_toolbox_services(
         counsel=_counsel_bank(config, data_dir, plugin_dir),
         sync_table=table,
         sync_table_error=table_error,
+        outpost_table=outpost,
         wishlist_rows=rows,
         wishlist_exclusions=_exclusions(data_dir / "wishlist-exclusions.json"),
         wishlist_eligibility=_wishlist_eligibility(data_dir, plugin_dir),
+        announcements=announcements,
         overload_recommendations=recommendations,
         overload_recommendation_label=recommendation_label,
         overload_character_targets=character_targets,

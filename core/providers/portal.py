@@ -64,6 +64,7 @@ def create_portal_resources(
         "enable_daily_actions": config.get("enable_daily_actions") is True,
         "enable_cdk_redemption": config.get("enable_cdk_redemption") is True,
         "enable_announcement_push": config.get("enable_announcement_push") is True,
+        "counsel_available": bool(getattr(getattr(toolbox, "counsel", None), "available", False)),
     }
     hall = HallWebService(
         site_origin=site_origin,

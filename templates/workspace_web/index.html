@@ -83,8 +83,17 @@
             <button id="btn-sr-share" class="btn accent" disabled>脱敏分享五队至 QQ</button>
           </div>
         </div>
+        <div id="sr-season-banner" class="status-box mb-sm">进入本页自动加载赛季首领、属性弱点与机制提示…</div>
         <div class="inline-form mb-sm">
           <input id="sr-manual-pool" type="text" class="flex-grow" placeholder="或手工池（例：丽塔:B1,桑迪:B2,红莲:B3,...）">
+          <select id="sr-boss-element" aria-label="Boss 弱点属性">
+            <option value="">Boss 弱点（随已导入赛季/无）</option>
+            <option value="Fire">弱点：燃烧 (Fire)</option>
+            <option value="Water">弱点：水冷 (Water)</option>
+            <option value="Wind">弱点：风压 (Wind)</option>
+            <option value="Iron">弱点：铁甲 (Iron)</option>
+            <option value="Electric">弱点：电击 (Electric)</option>
+          </select>
           <label class="chk"><input id="sr-save-plan" type="checkbox">同时保存方案</label>
           <button id="btn-sr-manual" class="btn">按手工池编组</button>
         </div>
@@ -114,7 +123,133 @@
 
     <section id="tab-tools" class="tab-panel">
       <div class="card">
-        <h2>个性化愿望单 & 同步器估算</h2>
+        <div class="panel-head">
+          <h2>同步器等级与前哨资源计算器</h2>
+          <div class="actions">
+            <button id="btn-ws-sync-autofill" class="btn accent" type="button">从绑定账号自动填充</button>
+            <button id="btn-ws-sync" class="btn primary" type="button">计算升级规划</button>
+            <button id="btn-ws-sync-share" class="btn" type="button" disabled>脱敏分享至 QQ</button>
+          </div>
+        </div>
+        <p id="ws-sync-status" class="status-box">支持点击上方「从绑定账号自动填充」读取同步器等级、背包直存与前哨等级（按需请求，不主动拉取）。</p>
+
+        <div class="sync-grid mb-sm">
+          <label class="field">当前等级<input id="ws-sync-cur" type="number" min="1" max="1999" value="200"></label>
+          <label class="field">目标等级<input id="ws-sync-tgt" type="number" min="2" max="2000" value="220"></label>
+          <label class="field">前哨基地等级<input id="ws-sync-outpost" type="number" min="1" max="2000" value="200"></label>
+          <label class="field">每日歼灭次数<input id="ws-sync-wipeout" type="number" min="0" max="20" value="1"></label>
+        </div>
+
+        <div class="inline-form mb-sm">
+          <span class="muted">快捷目标：</span>
+          <button class="btn btn-sm sync-quick-tgt" data-delta="10" type="button">+10 级</button>
+          <button class="btn btn-sm sync-quick-tgt" data-delta="25" type="button">+25 级</button>
+          <button class="btn btn-sm sync-quick-tgt" data-target="400" type="button">Lv.400</button>
+          <button class="btn btn-sm sync-quick-tgt" data-target="500" type="button">Lv.500</button>
+          <button class="btn btn-sm sync-quick-tgt" data-target="600" type="button">Lv.600</button>
+        </div>
+
+        <div class="sync-grid mb-sm">
+          <label class="field">芯尘直接库存<input id="ws-sync-inv-dust" type="number" min="0" value="0"></label>
+          <label class="field">信用点直接库存<input id="ws-sync-inv-cred" type="number" min="0" value="0"></label>
+          <label class="field">战斗数据直接库存<input id="ws-sync-inv-data" type="number" min="0" value="0"></label>
+        </div>
+
+        <details class="subcard mb-sm" open>
+          <summary>背包资源箱（1H / 2H / 4H / 8H / 12H / 24H，按当前前哨每小时产量自动折算）</summary>
+          <div class="case-table-wrap">
+            <table class="case-table">
+              <thead>
+                <tr>
+                  <th>资源</th>
+                  <th>1H 箱</th>
+                  <th>2H 箱</th>
+                  <th>4H 箱</th>
+                  <th>8H 箱</th>
+                  <th>12H 箱</th>
+                  <th>24H 箱</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>芯尘</td>
+                  <td><input class="case-inp" data-res="core_dust" data-hr="1h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="core_dust" data-hr="2h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="core_dust" data-hr="4h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="core_dust" data-hr="8h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="core_dust" data-hr="12h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="core_dust" data-hr="24h" type="number" min="0" value="0"></td>
+                </tr>
+                <tr>
+                  <td>信用点</td>
+                  <td><input class="case-inp" data-res="credits" data-hr="1h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="credits" data-hr="2h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="credits" data-hr="4h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="credits" data-hr="8h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="credits" data-hr="12h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="credits" data-hr="24h" type="number" min="0" value="0"></td>
+                </tr>
+                <tr>
+                  <td>战斗数据</td>
+                  <td><input class="case-inp" data-res="battle_data" data-hr="1h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="battle_data" data-hr="2h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="battle_data" data-hr="4h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="battle_data" data-hr="8h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="battle_data" data-hr="12h" type="number" min="0" value="0"></td>
+                  <td><input class="case-inp" data-res="battle_data" data-hr="24h" type="number" min="0" value="0"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <details class="subcard mb-sm">
+          <summary>战术学院加成、额外日收益与前哨小时产量覆盖</summary>
+          <div class="sync-grid mb-sm">
+            <label class="field">额外日产芯尘<input id="ws-sync-extra-dust" type="number" min="0" value="0"></label>
+            <label class="field">额外日产信用点<input id="ws-sync-extra-cred" type="number" min="0" value="0"></label>
+            <label class="field">额外日产战斗数据<input id="ws-sync-extra-data" type="number" min="0" value="0"></label>
+          </div>
+          <div class="sync-grid mb-sm">
+            <label class="field">芯尘学院加成(%)<input id="ws-sync-boost-dust" type="number" min="0" max="300" value="45"></label>
+            <label class="field">信用点学院加成(%)<input id="ws-sync-boost-cred" type="number" min="0" max="300" value="60"></label>
+            <label class="field">战斗数据学院加成(%)<input id="ws-sync-boost-data" type="number" min="0" max="300" value="45"></label>
+          </div>
+          <div class="sync-grid">
+            <label class="field">覆盖芯尘/小时（留空自动）<input id="ws-sync-hr-dust" type="number" min="0" step="0.01" placeholder="自动"></label>
+            <label class="field">覆盖信用点/小时（留空自动）<input id="ws-sync-hr-cred" type="number" min="0" step="0.01" placeholder="自动"></label>
+            <label class="field">覆盖战斗数据/小时（留空自动）<input id="ws-sync-hr-data" type="number" min="0" step="0.01" placeholder="自动"></label>
+          </div>
+        </details>
+
+        <div id="ws-sync-visual" class="sync-visual" hidden>
+          <div id="ws-sync-kpi" class="kpi-grid"></div>
+          <div id="ws-sync-cards" class="res-grid"></div>
+        </div>
+        <pre id="ws-sync-output" class="pre-box">填写参数或点击「从绑定账号自动填充」，再点击「计算升级规划」。</pre>
+      </div>
+
+      <div class="card">
+        <h2>超限洗词条对比（读取账号 T10 装备）</h2>
+        <div class="inline-form mb-sm">
+          <input id="ws-ol-char" type="text" placeholder="已绑定角色名（如 红莲 / 小红帽）">
+          <select id="ws-ol-preset">
+            <option value="auto" selected>自动匹配角色专属推荐（未收录回退通用输出）</option>
+            <option value="通用输出">通用输出（优越+攻击+装弹）</option>
+            <option value="蓄力">蓄力/狙击（优越+攻击+蓄速+蓄伤）</option>
+            <option value="机枪">机枪/弹匣（优越+攻击+装弹）</option>
+            <option value="暴击">暴击流派（优越+攻击+暴击+爆伤）</option>
+            <option value="辅助">通用辅助（攻击+装弹+优越）</option>
+          </select>
+          <input id="ws-ol-targets" type="text" class="flex-grow" placeholder="可选自定义目标词条，逗号分隔（留空用上方预设）">
+          <button id="btn-ws-overload" class="btn primary" type="button">对比当前装备</button>
+          <button id="btn-ws-overload-sim" class="btn" type="button">含 100 次模拟</button>
+        </div>
+        <pre id="ws-ol-output" class="pre-box"></pre>
+      </div>
+
+      <div class="card">
+        <h2>个性化愿望单推荐</h2>
         <div class="inline-form mb-sm">
           <select id="ws-wl-strategy">
             <option value="balanced">均衡</option>
@@ -125,17 +260,6 @@
           <button id="btn-ws-wishlist" class="btn primary">生成愿望单</button>
         </div>
         <pre id="ws-wl-output" class="pre-box"></pre>
-      </div>
-      <div class="card">
-        <h2>同步器升级估算（支持自动读取账号等级）</h2>
-        <div class="inline-form">
-          <input id="ws-sync-tgt" type="number" value="220" placeholder="目标等级">
-          <input id="ws-sync-dust" type="number" value="400" placeholder="芯尘日产">
-          <input id="ws-sync-cred" type="number" value="1000" placeholder="信用点日产">
-          <input id="ws-sync-data" type="number" value="100" placeholder="战斗数据日产">
-          <button id="btn-ws-sync" class="btn primary">按账号等级计算</button>
-        </div>
-        <pre id="ws-sync-output" class="pre-box"></pre>
       </div>
     </section>
 

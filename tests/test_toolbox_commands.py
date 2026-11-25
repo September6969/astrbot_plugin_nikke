@@ -260,6 +260,25 @@ async def test_counsel_sync_wishlist_and_overload_routes() -> None:
     account_sync = await route(plugin, "同步器", "计算", "账号 201 100 100 10")
     assert "当前等级来自已绑定账号只读资料" in account_sync
 
+    # 简化命令：/妮姬 同步器、/妮姬 同步器 计算 201、/妮姬 同步器 可升、双等级查消耗
+    from pathlib import Path
+    from astrbot_plugin_nikke.features.sync.outpost import OutpostRateTable
+
+    calc_handler = plugin.handlers.toolbox._domain_handlers["calc_tools"]
+    calc_handler.services.outpost_table = OutpostRateTable.from_file(
+        Path(__file__).resolve().parents[1] / "assets" / "data" / "outpost_rates.json"
+    )
+    overview = await route(plugin, "同步器")
+    assert "当前同步器等级：Lv.199" in overview
+    assert "前哨基地等级：Lv.120" in overview
+    auto_plan = await route(plugin, "同步器", "计算", "201")
+    assert "来自已绑定账号只读资料" in auto_plan
+    assert "全部到齐：" in auto_plan
+    gainable = await route(plugin, "同步器", "可升")
+    assert "【同步器即时可升】当前 Lv.199" in gainable
+    cost_range = await route(plugin, "同步器", "计算", "199 201")
+    assert "【同步器区间消耗】Lv.199 → Lv.201" in cost_range
+
     wishlist = await route(plugin, "愿望单", "均衡", "测试1号:2")
     assert "愿望单推荐" in wishlist
     assert "覆盖限制" in wishlist
@@ -288,6 +307,23 @@ async def test_counsel_sync_wishlist_and_overload_routes() -> None:
     bound_advice = await route(plugin, "洗词条", "攻击力增加", "账号:拉毗")
     assert "已绑定账号角色实际超限词条（拉毗" in bound_advice
     assert "防御力增加（6 阶）" in bound_advice
+
+    preset_advice = await route(plugin, "洗词条", "预设:输出", "账号:拉毗")
+    assert "内置通用定位预设" in preset_advice
+    assert "优越代码伤害增加" in preset_advice
+
+    # 简化命令：/妮姬 洗词条 爱丽丝 直接命中专属推荐库
+    from astrbot_plugin_nikke.features.overload_advice.advisor import load_character_targets
+    from pathlib import Path
+    ol_path = Path(__file__).resolve().parents[1] / "assets" / "data" / "overload_recommendations.json"
+    calc_handler.services.overload_character_targets = load_character_targets(ol_path)
+    calc_handler.services.grid_rows = calc_handler.services.grid_rows + (
+        {"name_code": "5004", "character_key": "alice", "name_zh_cn": "爱丽丝", "name_en": "Alice"},
+    )
+    calc_handler.services.account_reader = SimpleNamespace(get_account=lambda _q: None)
+    alice_rec = await route(plugin, "洗词条", "爱丽丝")
+    assert "【超限词条推荐】爱丽丝" in alice_rec
+    assert "蓄力速度增加" in alice_rec
 
 
 @pytest.mark.asyncio

@@ -6,6 +6,7 @@
     lastProfileText: "",
     lastSoloText: "",
     lastArenaText: "",
+    lastSyncText: "",
     shareTargetAvailable: false,
     confirmToken: "",
     bindToken: "",
@@ -39,6 +40,35 @@
     return data;
   }
 
+  let soloContextLoaded = false;
+
+  async function loadSoloRaidContext() {
+    const banner = el("sr-season-banner");
+    if (!banner) return;
+    try {
+      const d = await apiFetch("/workspace/api/solo-raid/context");
+      soloContextLoaded = true;
+      if (d.latest) {
+        const b = d.latest.bosses && d.latest.bosses[0];
+        const parts = [`${d.latest.name}（${d.latest.status || "核验赛季"}）`];
+        if (b) {
+          parts.push(`首领：${b.name} | 弱点：${b.weakness}`);
+          if (b.element) parts.push(`属性：${b.element}`);
+          if (b.mechanics) parts.push(b.mechanics);
+          if (b.weakness_code && el("sr-boss-element") && !el("sr-boss-element").value) {
+            el("sr-boss-element").value = b.weakness_code;
+          }
+        }
+        if (d.latest.note) parts.push(d.latest.note);
+        banner.textContent = parts.join(" ｜ ");
+      } else {
+        banner.textContent = "暂无已同步赛季，可在下方手动选择 Boss 弱点属性估算伤害。";
+      }
+    } catch (err) {
+      banner.textContent = err.message;
+    }
+  }
+
   function switchTab(tabId) {
     document.querySelectorAll(".tab").forEach((b) => {
       const active = b.dataset.tab === tabId;
@@ -48,6 +78,9 @@
     document.querySelectorAll(".tab-panel").forEach((p) => {
       p.classList.toggle("active", p.id === `tab-${tabId}`);
     });
+    if (tabId === "solo-raid" && !soloContextLoaded) {
+      loadSoloRaidContext();
+    }
   }
 
   function renderBindSummary(b) {
@@ -134,7 +167,7 @@
       try {
         const d = await apiFetch("/workspace/api/roster/load", { method: "POST" });
         el("roster-count").textContent = `共 ${d.count} 名角色`;
-        list.innerHTML = "";
+        list.replaceChildren();
         for (const c of d.characters.slice(0, 60)) {
           const row = document.createElement("div");
           row.className = "list-row";
@@ -174,6 +207,7 @@
           body: JSON.stringify({
             source,
             members: el("sr-manual-pool").value,
+            boss_element: el("sr-boss-element")?.value || "",
             save: el("sr-save-plan").checked,
           }),
         });
@@ -241,26 +275,218 @@
       }
     });
 
+    function collectCases() {
+      const cases = { core_dust: {}, credits: {}, battle_data: {} };
+      document.querySelectorAll(".case-inp").forEach((inp) => {
+        const res = inp.dataset.res;
+        const hr = inp.dataset.hr;
+        if (cases[res] && hr) {
+          cases[res][hr] = Number(inp.value || 0);
+        }
+      });
+      return cases;
+    }
+
+    function renderSyncVisual(plan) {
+      const visual = el("ws-sync-visual");
+      const kpi = el("ws-sync-kpi");
+      const cards = el("ws-sync-cards");
+      if (!visual || !kpi || !cards || !plan) return;
+      visual.hidden = false;
+
+      const kpiItems = [
+        {
+          label: "预计达成日期",
+          val: plan.eta || "无法估算",
+          sub: plan.overall_days === null ? "存在零产量瓶颈" : `约需 ${plan.overall_days} 天（${plan.current} → ${plan.target}）`,
+        },
+        {
+          label: "主要资源瓶颈",
+          val: (plan.bottlenecks && plan.bottlenecks.length) ? plan.bottlenecks.join(" / ") : "无",
+          sub: plan.outpost_level ? `前哨 Lv.${plan.outpost_level} · 每日歼灭 ${plan.wipeout_count ?? 1} 次` : "手动日产量模式",
+        },
+        {
+          label: "当前库存立即升级",
+          val: plan.reachable_level ? `Lv.${plan.reachable_level} (+${plan.gainable_levels})` : "-",
+          sub: (plan.gainable_without_cases !== null && plan.gainable_without_cases !== plan.gainable_levels)
+            ? `不含箱子 Lv.${plan.reachable_without_cases} (+${plan.gainable_without_cases})`
+            : "已含背包资源箱统计",
+        },
+        {
+          label: "再升 1 级还差",
+          val: plan.next_level_missing
+            ? `芯尘 ${Number(plan.next_level_missing.core_dust || 0).toLocaleString()}`
+            : "—",
+          sub: plan.next_level_missing
+            ? `信用点 ${Number(plan.next_level_missing.credits || 0).toLocaleString()} / 数据 ${Number(plan.next_level_missing.battle_data || 0).toLocaleString()}`
+            : "",
+        },
+      ];
+      kpi.replaceChildren(...kpiItems.map((item) => {
+        const box = document.createElement("div");
+        box.className = "kpi-card";
+        const lb = document.createElement("div");
+        lb.className = "kpi-label";
+        lb.textContent = item.label;
+        const val = document.createElement("div");
+        val.className = "kpi-val";
+        val.textContent = item.val;
+        const sub = document.createElement("div");
+        sub.className = "kpi-sub";
+        sub.textContent = item.sub;
+        box.append(lb, val, sub);
+        return box;
+      }));
+
+      cards.replaceChildren(...(plan.resources || []).map((r) => {
+        const card = document.createElement("div");
+        card.className = "res-card";
+        const head = document.createElement("div");
+        head.className = "res-head";
+        const strong = document.createElement("strong");
+        strong.textContent = r.label;
+        const status = document.createElement("span");
+        status.className = "tag";
+        status.textContent = r.days === null ? "无法估算" : `${r.days} 天 · ${r.status}`;
+        head.append(strong, status);
+
+        const pct = r.required > 0 ? Math.min(100, Math.round((r.stock / r.required) * 100)) : 100;
+        const bar = document.createElement("progress");
+        bar.className = "res-progress";
+        bar.max = 100;
+        bar.value = pct;
+
+        const meta = document.createElement("div");
+        meta.className = "res-meta";
+        const direct = plan.direct_inventory ? Number(plan.direct_inventory[r.resource] || 0) : r.stock;
+        const cYield = plan.case_yields ? Number(plan.case_yields[r.resource] || 0) : 0;
+        const lines = [
+          `需要：${Number(r.required).toLocaleString()} (${pct}%)`,
+          cYield > 0
+            ? `总库存：${Number(r.stock).toLocaleString()}（直存 ${direct.toLocaleString()} + 箱子 ${cYield.toLocaleString()}）`
+            : `库存：${Number(r.stock).toLocaleString()}`,
+          `缺口：${Number(r.missing).toLocaleString()} ｜ 日产：${Math.round(Number(r.production || 0)).toLocaleString()}`,
+        ];
+        for (const text of lines) {
+          const line = document.createElement("div");
+          line.textContent = text;
+          meta.append(line);
+        }
+        card.append(head, bar, meta);
+        return card;
+      }));
+    }
+
+    document.querySelectorAll(".sync-quick-tgt").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const cur = Number(el("ws-sync-cur")?.value || 200);
+        const target = btn.dataset.target ? Number(btn.dataset.target) : cur + Number(btn.dataset.delta || 10);
+        if (el("ws-sync-tgt")) {
+          el("ws-sync-tgt").value = String(Math.max(cur + 1, target));
+        }
+      });
+    });
+
+    el("btn-ws-sync-autofill")?.addEventListener("click", async () => {
+      const box = el("ws-sync-status");
+      box.textContent = "正在读取绑定账号同步器、库存与前哨资料…";
+      try {
+        const d = await apiFetch("/workspace/api/sync/context", { method: "POST" });
+        if (!d.bound) {
+          box.textContent = d.message || "尚未绑定账号，可直接在下方手工填写参数计算。";
+          return;
+        }
+        if (d.synchro_level) el("ws-sync-cur").value = String(d.synchro_level);
+        if (d.suggested_target) el("ws-sync-tgt").value = String(d.suggested_target);
+        if (d.outpost_level) el("ws-sync-outpost").value = String(d.outpost_level);
+        if (d.inventory) {
+          el("ws-sync-inv-dust").value = String(d.inventory.core_dust ?? 0);
+          el("ws-sync-inv-cred").value = String(d.inventory.credits ?? 0);
+          el("ws-sync-inv-data").value = String(d.inventory.battle_data ?? 0);
+        }
+        if (d.academy_boosts) {
+          el("ws-sync-boost-dust").value = String(d.academy_boosts.core_dust ?? 45);
+          el("ws-sync-boost-cred").value = String(d.academy_boosts.credits ?? 60);
+          el("ws-sync-boost-data").value = String(d.academy_boosts.battle_data ?? 45);
+        }
+        const parts = [
+          `已自动填充：同步器 Lv.${d.synchro_level ?? "?"}`,
+          `前哨 Lv.${d.outpost_level ?? "?"}`,
+          d.academy_note || "",
+          d.rate_note || "",
+        ].filter(Boolean);
+        box.textContent = parts.join(" ｜ ");
+        showToast("已填充绑定账号数据");
+      } catch (err) {
+        box.textContent = err.message;
+      }
+    });
+
     el("btn-ws-sync")?.addEventListener("click", async () => {
       try {
+        const hrDust = el("ws-sync-hr-dust")?.value;
+        const hrCred = el("ws-sync-hr-cred")?.value;
+        const hrData = el("ws-sync-hr-data")?.value;
         const d = await apiFetch("/workspace/api/tools/sync", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            use_account: true,
+            current: el("ws-sync-cur").value,
             target: el("ws-sync-tgt").value,
-            production: {
-              core_dust: el("ws-sync-dust").value,
-              credits: el("ws-sync-cred").value,
-              battle_data: el("ws-sync-data").value,
+            outpost_level: el("ws-sync-outpost").value,
+            wipeout_count: el("ws-sync-wipeout").value,
+            academy_boosts: {
+              core_dust: el("ws-sync-boost-dust").value,
+              credits: el("ws-sync-boost-cred").value,
+              battle_data: el("ws-sync-boost-data").value,
+            },
+            hourly_override: {
+              core_dust: hrDust === "" ? null : hrDust,
+              credits: hrCred === "" ? null : hrCred,
+              battle_data: hrData === "" ? null : hrData,
+            },
+            inventory: {
+              core_dust: el("ws-sync-inv-dust").value,
+              credits: el("ws-sync-inv-cred").value,
+              battle_data: el("ws-sync-inv-data").value,
+            },
+            cases: collectCases(),
+            extra_daily: {
+              core_dust: el("ws-sync-extra-dust").value,
+              credits: el("ws-sync-extra-cred").value,
+              battle_data: el("ws-sync-extra-data").value,
             },
           }),
         });
+        renderSyncVisual(d.plan);
+        state.lastSyncText = d.text;
         el("ws-sync-output").textContent = d.text;
+        el("btn-ws-sync-share").disabled = !state.shareTargetAvailable;
       } catch (err) {
         el("ws-sync-output").textContent = err.message;
       }
     });
+
+    async function runOverloadCompare(simulateFlag) {
+      el("ws-ol-output").textContent = "正在读取角色装备并分析…";
+      try {
+        const d = await apiFetch("/workspace/api/tools/overload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            character_query: el("ws-ol-char").value,
+            preset: el("ws-ol-preset").value,
+            targets: el("ws-ol-targets").value,
+            simulate: simulateFlag,
+          }),
+        });
+        el("ws-ol-output").textContent = d.text;
+      } catch (err) {
+        el("ws-ol-output").textContent = err.message;
+      }
+    }
+    el("btn-ws-overload")?.addEventListener("click", () => runOverloadCompare(false));
+    el("btn-ws-overload-sim")?.addEventListener("click", () => runOverloadCompare(true));
 
     el("btn-toggle-push-on")?.addEventListener("click", async () => {
       const d = await apiFetch("/workspace/api/settings", {
@@ -290,6 +516,7 @@
     el("btn-share-profile")?.addEventListener("click", () => openSharePreview("profile", state.lastProfileText));
     el("btn-sr-share")?.addEventListener("click", () => openSharePreview("solo_raid", state.lastSoloText));
     el("btn-arena-share")?.addEventListener("click", () => openSharePreview("arena", state.lastArenaText));
+    el("btn-ws-sync-share")?.addEventListener("click", () => openSharePreview("sync", state.lastSyncText));
     el("btn-share-cancel")?.addEventListener("click", () => el("share-dialog").close());
     el("btn-share-confirm")?.addEventListener("click", async () => {
       const status = el("share-confirm-status");

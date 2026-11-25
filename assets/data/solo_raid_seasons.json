@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "status": "PUBLIC_VERIFIED",
+  "note": "S36–S40 数据来自 MIT 许可项目 leegunwoooo/nikke-calculator (enikk-raid-2026-09-18.json)；S41–S43 来自官方公告与公开核验记录；新赛季可通过官方公告自动增量同步。",
+  "seasons": [
+    {
+      "id": "36",
+      "name": "赛季 36",
+      "source_url": "https://github.com/leegunwoooo/nikke-calculator/blob/HEAD/docs/research/enikk-raid-2026-09-18.json",
+      "checked_at": "2026-11-25",
+      "ends_at": "",
+      "bosses": [
+        {
+          "id": "solo-36-egovista",
+          "name": "Egovista",
+          "weakness": "电击",
+          "element": "水冷",
+          "mechanics": "弱点为电击属性，建议主力输出携带电击代码角色破盾。"
+        }
+      ]
+    },
+    {
+      "id": "37",
+      "name": "赛季 37",
+      "source_url": "https://github.com/leegunwoooo/nikke-calculator/blob/HEAD/docs/research/enikk-raid-2026-09-18.json",
+      "checked_at": "2026-11-25",
+      "ends_at": "",
+      "bosses": [
+        {
+          "id": "solo-37-ultra",
+          "name": "Ultra",
+          "weakness": "水冷",
+          "element": "燃烧",
+          "mechanics": "弱点为水冷属性，需携带护盾/掩体回复或及时破核心部位。"
+        }
+      ]
+    },
+    {
+      "id": "38",
+      "name": "赛季 38",
+      "source_url": "https://github.com/leegunwoooo/nikke-calculator/blob/HEAD/docs/research/enikk-raid-2026-09-18.json",
+      "checked_at": "2026-11-25",
+      "ends_at": "2026-07-10T04:59:59+09:00",
+      "bosses": [
+        {
+          "id": "solo-38-annihilio",
+          "name": "Annihilio",
+          "weakness": "风压",
+          "element": "铁甲",
+          "mechanics": "弱点为风压属性，优先风压主C处理阻止机制红圈。"
+        }
+      ]
+    },
+    {
+      "id": "39",
+      "name": "赛季 39",
+      "source_url": "https://github.com/leegunwoooo/nikke-calculator/blob/HEAD/docs/research/enikk-raid-2026-09-18.json",
+      "checked_at": "2026-11-25",
+      "ends_at": "",
+      "bosses": [
+        {
+          "id": "solo-39-island-eater",
+          "name": "Island Eater",
+          "weakness": "铁甲",
+          "element": "电击",
+          "mechanics": "弱点为铁甲属性，留意属性克制红圈打断高伤技能。"
+        }
+      ]
+    },
+    {
+      "id": "40",
+      "name": "赛季 40",
+      "source_url": "https://github.com/leegunwoooo/nikke-calculator/blob/HEAD/docs/research/enikk-raid-2026-09-18.json",
+      "checked_at": "2026-11-25",
+      "ends_at": "",
+      "bosses": [
+        {
+          "id": "solo-40-luxurious-spider",
+          "name": "Luxurious Spider",
+          "weakness": "燃烧",
+          "element": "风压",
+          "mechanics": "弱点为燃烧属性，需处理元素护盾与关键部件摧毁。"
+        }
+      ]
+    },
+    {
+      "id": "41",
+      "name": "赛季 41",
+      "source_url": "https://www.blablalink.com/?plate_type=official",
+      "checked_at": "2026-11-25",
+      "ends_at": "2026-10-01T04:59:59+09:00",
+      "note": "官方 9 月 17 日更新公告（2026-09-24 12:00 UTC+9 开启）",
+      "bosses": [
+        {
+          "id": "solo-41-liberalio-body",
+          "name": "Liberalio Body",
+          "weakness": "水冷",
+          "element": "燃烧",
+          "mechanics": "弱点为水冷属性，优先水冷输出队破盾与高伤部件击破。"
+        }
+      ]
+    },
+    {
+      "id": "42",
+      "name": "赛季 42",
+      "source_url": "https://www.blablalink.com/?plate_type=official",
+      "checked_at": "2026-11-25",
+      "ends_at": "2026-10-22T04:59:59+09:00",
+      "note": "官方 10 月 8 日更新公告（2026-10-15 12:00 UTC+9 开启）",
+      "bosses": [
+        {
+          "id": "solo-42-altruia",
+          "name": "Altruia",
+          "weakness": "电击",
+          "element": "水冷",
+          "mechanics": "弱点为电击属性，建议保留高倍率电击队伍处理元素机制。"
+        }
+      ]
+    },
+    {
+      "id": "43",
+      "name": "赛季 43",
+      "source_url": "https://www.blablalink.com/?plate_type=official",
+      "checked_at": "2026-11-25",
+      "ends_at": "2026-11-19T04:59:59+09:00",
+      "note": "官方 10 月 29 日更新公告（2026-11-12 12:00 UTC+9 开启）",
+      "bosses": [
+        {
+          "id": "solo-43-goddess-of-victory",
+          "name": "Goddess of Victory",
+          "weakness": "燃烧",
+          "element": "风压",
+          "mechanics": "弱点为燃烧属性，多段属性护盾与阻止部位需高火伤或高hit覆盖。"
+        }
+      ]
+    }
+  ]
+}

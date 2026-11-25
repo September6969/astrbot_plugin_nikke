@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-11-24",
+  "checked_at": "2026-11-25",
   "source_note": "基于《胜利女神：NIKKE》普通招募愿望单规则人工核验与保守 fail-closed 标注：仅明确可入常规/朝圣-超限愿望单的角色标为 admitted；联动、限定、解放/周年赠送与近期未独立核验角色不默认入推荐。",
   "entries": {
     "1007": {
@@ -719,9 +719,9 @@
       "note": "吉儿（ABNORMAL 联动不入普池）"
     },
     "5154": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "德尔塔：怪盗忍者（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "德尔塔：怪盗忍者（常规企业普通招募池，2025-10 实装）"
     },
     "5155": {
       "pool_status": "pilgrim_overspec",
@@ -739,9 +739,9 @@
       "note": "钟鸣（解放/周年免费赠送 SSR，不入普池招募）"
     },
     "5158": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "索林：霜雪车票（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "索林：霜雪车票（常规企业普通招募池，2025-11 实装）"
     },
     "5159": {
       "pool_status": "limited",
@@ -754,19 +754,19 @@
       "note": "布丽德：静默轨道（季节/期间限定，不入普池）"
     },
     "5161": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "白雪公主：重型武装（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "白雪公主：重型武装（朝圣者独立 5 席，2026-01 实装）"
     },
     "5162": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "蕾贝儿（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "蕾贝儿（常规企业普通招募池，2026-01 实装）"
     },
     "5163": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "薇尔维特（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "薇尔维特（常规企业普通招募池，2026-01 实装）"
     },
     "5164": {
       "pool_status": "collab",
@@ -779,49 +779,49 @@
       "note": "泷奈（ABNORMAL 联动不入普池）"
     },
     "5166": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "E.H.（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "E.H.（常规企业普通招募池，2026-03 实装）"
     },
     "5167": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "阿尔卡娜：命运伴侣（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "ELYSION",
+      "note": "阿尔卡娜：命运伴侣（常规企业普通招募池，2026-03 实装）"
     },
     "5168": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "白鹤（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "白鹤（常规企业普通招募池，2026-04 实装）"
     },
     "5169": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "阿妮斯：超级巨星（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "阿妮斯：超级巨星（超标准 Over-Spec，归入朝圣者独立 5 席）"
     },
     "5170": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "尼恩：透视之眼（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "pilgrim_overspec",
+      "wishlist_group": "PILGRIM",
+      "note": "尼恩：透视之眼（超标准 Over-Spec，归入朝圣者独立 5 席）"
     },
     "5171": {
-      "pool_status": "unknown",
+      "pool_status": "free_welfare",
       "wishlist_group": "NONE",
-      "note": "阿维斯塔（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "note": "阿维斯塔（周年庆免费赠送 SSR，不入普池招募）"
     },
     "5172": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "敏特（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "敏特（常规企业普通招募池，2026-05 实装）"
     },
     "5173": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "普莉卡（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "普莉卡（常规企业普通招募池，2026-05 实装）"
     },
     "5174": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "方舟黑色游侠（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "TETRA",
+      "note": "方舟黑色游侠（常规企业普通招募池，2026-06 实装）"
     },
     "5175": {
       "pool_status": "limited",
@@ -834,14 +834,14 @@
       "note": "玛律恰那：海洋进修（季节/期间限定，不入普池）"
     },
     "5177": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "拉普拉斯：究极英雄（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "拉普拉斯：究极英雄（常规企业普通招募池，2026-07 实装）"
     },
     "5178": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "麦斯威尔：平凡技师（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "麦斯威尔：平凡技师（常规企业普通招募池，2026-07 实装）"
     },
     "5179": {
       "pool_status": "collab",
@@ -854,9 +854,9 @@
       "note": "雪子（ABNORMAL 联动不入普池）"
     },
     "5181": {
-      "pool_status": "unknown",
-      "wishlist_group": "NONE",
-      "note": "德雷克：终极反派（近期实装/变体角色，未经实时版本核验前 fail-closed 不入推荐）"
+      "pool_status": "ordinary_recruit",
+      "wishlist_group": "MISSILIS",
+      "note": "德雷克：终极反派（常规企业普通招募池，2026-09 实装）"
     }
   }
 }

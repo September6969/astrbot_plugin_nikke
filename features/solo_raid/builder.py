@@ -315,6 +315,8 @@ def render_plan(plan: FiveTeamPlan, *, boss: Boss | None = None) -> str:
     lines = [f"【单人突袭 · 五队】{plan.season_name}"]
     if boss is not None:
         lines.append(f"首领：{boss.name} · 弱点：{boss.weakness}" + (f" · 属性：{boss.element}" if boss.element else ""))
+        if getattr(boss, "mechanics", ""):
+            lines.append("机制提示：" + boss.mechanics)
     lines.append(f"爆裂链：{'全部通过' if plan.chain_ok else '存在缺口（见下）'}")
     for team in plan.teams:
         members = " / ".join(

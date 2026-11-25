@@ -33,13 +33,19 @@ async def route(plugin, command: str, arg1: str = "", arg2: str = "") -> str:
 
 
 def test_unlicensed_third_party_banks_are_not_bundled_and_degrade_safely() -> None:
+    from astrbot_plugin_nikke.features.catalog import public_catalog_payload
+
     for rel in (
         "assets/data/counsel_bank.json",
         "assets/data/sync-level-costs.json",
-        "assets/data/overload_recommendations.json",
-        "assets/data/solo_raid_seasons.json",
     ):
-        assert not (ROOT / rel).exists(), f"不应默认随仓分发无开源许可资产：{rel}"
+        assert not (ROOT / rel).exists(), f"不应默认随仓分发无开源许可或旧命名资产：{rel}"
+
+    # 同步器(WTFPL+交叉核验)、前哨(Lv.1-800)、超限(MIT 200角色)与突袭赛季(MIT+公告 S36-43)均已合法入仓。
+    assert (ROOT / "assets" / "data" / "sync_level_costs.json").is_file()
+    assert (ROOT / "assets" / "data" / "outpost_rates.json").is_file()
+    assert (ROOT / "assets" / "data" / "overload_recommendations.json").is_file()
+    assert (ROOT / "assets" / "data" / "solo_raid_seasons.json").is_file()
 
     services = create_toolbox_services(
         plugin_dir=ROOT,
@@ -53,10 +59,17 @@ def test_unlicensed_third_party_banks_are_not_bundled_and_degrade_safely() -> No
         config={},
     )
     assert services.counsel.available is False
-    assert services.sync_table is None
-    assert services.sync_table_error
-    assert services.overload_recommendations == {}
-    assert services.solo_catalog.available is False
+    # 咨询题库未导入时，公共目录默认隐藏 counsel.search 入口
+    public_ids = {f["id"] for f in public_catalog_payload({"counsel_available": False})["features"]}
+    assert "counsel.search" not in public_ids
+
+    assert isinstance(services.sync_table, SyncCostTable)
+    assert services.sync_table.levels[0] == 2 and services.sync_table.levels[-1] == 1400
+    assert services.sync_table_error == ""
+    assert services.outpost_table is not None and services.outpost_table.max_level == 800
+    assert len(services.overload_character_targets or {}) == 200
+    assert services.solo_catalog.available is True
+    assert services.solo_catalog.latest().season_id == "43"
 
 
 def test_mit_derived_engine_name_mapping_loads_cleanly() -> None:

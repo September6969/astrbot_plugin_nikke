@@ -30,11 +30,12 @@ from ...features.overload_advice.advisor import (
     parse_options,
     parse_targets,
     render_advice,
+    render_character_recommendation,
     simulate,
 )
 from ...features.sync.calculator import (
     SyncLevelInputError,
-    calculate_sync_plan,
+    plan_sync_from_inputs,
     render_sync_plan,
 )
 from ...features.tarot.models import DrawnTarotCard, TarotReading
@@ -140,6 +141,7 @@ class HallWebService:
                 web.post("/hall/api/tools/sync", self.api_sync),
                 web.post("/hall/api/tools/wishlist", self.api_wishlist),
                 web.post("/hall/api/tools/overload-sim", self.api_overload_sim),
+                web.post("/hall/api/tools/overload-recommend", self.api_overload_recommend),
                 web.post("/hall/api/feedback/calendar", self.feedback_calendar),
                 web.post("/hall/api/feedback/tarot", self.feedback_tarot),
             ]
@@ -557,21 +559,34 @@ class HallWebService:
             return err
         assert body is not None
         table = getattr(self.toolbox, "sync_table", None) if self.toolbox else None
+        outpost_table = getattr(self.toolbox, "outpost_table", None) if self.toolbox else None
         manual_costs = body.get("manual_costs")
         try:
-            plan = calculate_sync_plan(
+            plan, outpost_meta = plan_sync_from_inputs(
                 current=body.get("current", ""),
                 target=body.get("target", ""),
-                inventory=body.get("inventory") or {},
-                production=body.get("production") or {},
-                table=table if not manual_costs else None,
+                inventory=body.get("inventory") if isinstance(body.get("inventory"), Mapping) else {},
+                production=body.get("production") if isinstance(body.get("production"), Mapping) else None,
+                outpost_level=body.get("outpost_level"),
+                academy_boosts=body.get("academy_boosts") if isinstance(body.get("academy_boosts"), Mapping) else None,
+                hourly_override=body.get("hourly_override") if isinstance(body.get("hourly_override"), Mapping) else None,
+                cases=body.get("cases") if isinstance(body.get("cases"), Mapping) else None,
+                wipeout_count=body.get("wipeout_count", 1),
+                extra_daily=body.get("extra_daily") if isinstance(body.get("extra_daily"), Mapping) else None,
                 manual_costs=manual_costs if isinstance(manual_costs, Mapping) else None,
+                table=table,
+                outpost_table=outpost_table,
                 today=self._clock().date(),
             )
         except SyncLevelInputError as exc:
             return portal_error("INVALID_SYNC_INPUT", str(exc), status=400)
         return web.json_response(
-            {"ok": True, "plan": plan.to_dict(), "text": render_sync_plan(plan)}
+            {
+                "ok": True,
+                "plan": plan.to_dict(),
+                "outpost": outpost_meta,
+                "text": render_sync_plan(plan),
+            }
         )
 
     async def api_wishlist(self, request: web.Request) -> web.Response:
@@ -619,6 +634,58 @@ class HallWebService:
         except (OverloadAdviceError, ValueError, TypeError) as exc:
             return portal_error("INVALID_OVERLOAD_INPUT", str(exc), status=400)
         return web.json_response({"ok": True, "text": render_advice(result)})
+
+    async def api_overload_recommend(self, request: web.Request) -> web.Response:
+        body, err = await read_json_object(request)
+        if err is not None:
+            return err
+        assert body is not None
+        query = str(body.get("character", "") or "").strip()
+        if not query:
+            return portal_error("MISSING_CHARACTER", "请填写妮姬名称或别名", status=400)
+        characters = (getattr(self.toolbox, "overload_character_targets", None) or {}) if self.toolbox else {}
+        rows = getattr(self.toolbox, "grid_rows", ()) if self.toolbox else ()
+        resolver = self.grid_resolver or (getattr(self.toolbox, "grid_resolver", None) if self.toolbox else None)
+        q = query.casefold()
+        matched = None
+        matched_name = query
+        for key, spec in characters.items():
+            if key.casefold() == q:
+                matched = spec
+                break
+        if matched is None:
+            for row in rows:
+                if not isinstance(row, Mapping):
+                    continue
+                key = str(row.get("character_key") or row.get("name_code") or "")
+                if key not in characters:
+                    continue
+                for col in ("name_cn", "name_zh_cn", "name_zh_tw", "name_en", "name", "name_code"):
+                    val = row.get(col)
+                    if isinstance(val, (str, int)) and str(val).casefold().strip() == q:
+                        matched = characters[key]
+                        matched_name = str(row.get("name_zh_cn") or row.get("name_cn") or query)
+                        break
+                if matched is not None:
+                    break
+        if matched is None and resolver is not None and rows:
+            for row in resolver.find(rows, query)[:5]:
+                key = str(row.get("character_key") or row.get("name_code") or "")
+                if key in characters:
+                    matched = characters[key]
+                    matched_name = resolver.display_name(row)
+                    break
+        if matched is None:
+            return portal_error("CHARACTER_NOT_FOUND", f"未收录角色「{query}」的专属推荐", status=404)
+        return web.json_response(
+            {
+                "ok": True,
+                "character": matched_name,
+                "targets": list(matched.targets),
+                "avoid": list(matched.avoid),
+                "text": render_character_recommendation(matched_name, matched),
+            }
+        )
 
     # ------------------------------------------------------------------ 群聊反馈（日程 & 随机塔罗 E2E）
 

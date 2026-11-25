@@ -182,4 +182,25 @@ def test_pool_eligibility_fail_closed_excludes_limited_welfare_new_collab_and_un
     assert "5071" not in admitted_codes  # 泳装尼恩 limited 排除
     assert "5055" not in admitted_codes  # 解放吉尔提 free_welfare 排除
     assert "5129" in [c.name_code for c in real_res.candidates] or real_elig["5129"].wishlist_group == "PILGRIM"
+    # 核验全部 171 名 SSR 均已完成准入分类（0 个遗留 unknown）
+    assert all(real_elig[c].pool_status != "unknown" for c in master_ssrs)
+    assert real_elig["5169"].pool_status == "pilgrim_overspec"
+    assert real_elig["5171"].pool_status == "free_welfare"
+
+    # 可持续更新脚本 reconcile_wishlist 能识别新限定/超标准并保守拦截无记录新卡
+    import sys
+    sys.path.insert(0, str(root / "scripts" / "operations"))
+    from update_wishlist_eligibility import reconcile_wishlist
+
+    updated, changes = reconcile_wishlist(
+        [{"name_code": 9991, "name_zh_cn": "新超标准", "rare": "SSR", "corporation": "ELYSION"},
+         {"name_code": 9992, "name_zh_cn": "未公布新卡", "rare": "SSR", "corporation": "TETRA"}],
+        {"entries": {}},
+        {"events": [{"names": ["신규오버"], "limited": False, "collab": False, "tags": ["오버스펙"]}]},
+        {"9991": "신규오버"},
+        checked_at="2026-11-25",
+    )
+    assert updated["entries"]["9991"]["pool_status"] == "pilgrim_overspec"
+    assert updated["entries"]["9992"]["pool_status"] == "unknown"
+    assert len(changes) == 2
 

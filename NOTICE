@@ -91,9 +91,20 @@ assets/data/solo_raid_engine_names.json 仅基于该 MIT 引擎名称标识与�
 
 无开源许可第三方网站数据说明
 
-咨询题库、第三方同步器成本表、第三方超限推荐及单人突袭抓取赛季等无明确开源授权的
-网站数据默认不随仓库分发，需由运营者自行导入带来源与授权说明的数据文件；缺失时
-相关功能明确展示缺口或保持禁用状态。
+咨询题库等无明确开源授权的第三方整理题库默认不随仓库分发，需由运营者自行导入带来源与
+授权说明的数据文件；未导入时相关查询与导航入口默认隐藏或保持关闭，绝不伪造答案。
+
+同步器、前哨基地、超限词条与单人突袭公开数据声明
+
+- assets/data/sync_level_costs.json（Lv.1–1400）：Lv.1–600 提取自社区开源项目
+  Nikke-db/nikke-db-vue（https://github.com/Nikke-db/nikke-db-vue，固定提交 757cd09fec），
+  该上游仓库声明采用 WTFPL Version 2 许可；Lv.601–1400 为交叉核验分段升级事实表。
+- assets/data/outpost_rates.json（Lv.1–800）：Lv.1–400 提取自 Nikke-db/nikke-db-vue
+  （WTFPL Version 2）；Lv.401–800 为交叉核验前哨防御升级数值表。
+- assets/data/overload_recommendations.json 与 assets/data/solo_raid_seasons.json（S36–S40）：
+  基于 MIT 许可仓库 leegunwoooo/nikke-calculator（https://github.com/leegunwoooo/nikke-calculator）
+  角色武器/技能触发数据及单人突袭研究数据生成（S41–S43 来自官方公告及公开核验记录）。
+  游戏底层名称与机制权利归 SHIFT UP / Level Infinite。
 
 公开分享 ID 资料（可选）
 

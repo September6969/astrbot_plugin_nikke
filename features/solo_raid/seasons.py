@@ -25,6 +25,7 @@ class Boss:
     name: str
     weakness: str
     element: str = ""
+    mechanics: str = ""
 
 
 CST = timezone(timedelta(hours=8))
@@ -108,6 +109,7 @@ class SeasonCatalog:
                         name=_text(boss.get("name"), f"seasons[{index}].bosses[{position}].name"),
                         weakness=_text(boss.get("weakness"), f"seasons[{index}].bosses[{position}].weakness"),
                         element=str(boss.get("element") or "").strip(),
+                        mechanics=str(boss.get("mechanics") or "").strip(),
                     )
                 )
             ends_at = _optional_aware(item.get("ends_at"), f"seasons[{index}].ends_at")

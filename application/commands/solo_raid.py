@@ -40,7 +40,8 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
         self, context: CommandContext, action: str, value: str
     ) -> CommandResult | str:
         key = action.strip().casefold()
-        catalog = self.services.solo_catalog
+        live_fn = getattr(self.services, "live_solo_catalog", None)
+        catalog = live_fn() if callable(live_fn) else self.services.solo_catalog
         if key in {"", "帮助", "help"}:
             status = (
                 "已导入赛季：" + "、".join(season.name for season in catalog.seasons)
@@ -83,6 +84,8 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
                 f"· {boss.name} · 弱点 {boss.weakness}"
                 + (f" · 属性 {boss.element}" if boss.element else "")
             )
+            if getattr(boss, "mechanics", ""):
+                lines.append("  机制：" + boss.mechanics)
         if season.ends_at:
             lines.append("说明：这是最近可核对的公开赛季；已结束时不会显示为进行中。")
         if season.note:

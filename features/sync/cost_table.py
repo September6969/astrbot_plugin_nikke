@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """同步器等级成本表（12）。
 
-仓库没有可再分发的可靠等级成本表，因此本模块只提供**严格校验的导入格式**：
-运营者或用户必须显式提供带来源、核验日期和连续等级覆盖的成本表，否则计算入口
-会返回“缺少可靠成本表”，绝不内置或猜测每一级的消耗。
+默认支持仓库随附的开源基准成本表（WTFPL-2.0，Nikke-db/nikke-db-vue），
+同时保留运营者离线导入带来源与核验日期覆盖表的严格校验逻辑。
 """
 
 from __future__ import annotations
@@ -139,6 +138,15 @@ class SyncCostTable:
             resource: sum(getattr(rows[level], resource) for level in range(current + 1, target + 1))
             for resource in RESOURCES
         }
+
+    def next_level_cost(self, level: int) -> dict[str, int] | None:
+        """返回从 level 升到 level + 1 的单级消耗；超出覆盖范围返回 None。"""
+        lvl = _require_level(level, "level")
+        nxt = lvl + 1
+        row = next((item for item in self.rows if item.level == nxt), None)
+        if row is None:
+            return None
+        return {res: getattr(row, res) for res in RESOURCES}
 
     def gainable_levels(
         self, current: int, inventory: Mapping[str, int]

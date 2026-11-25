@@ -201,8 +201,26 @@ def test_imported_sync_table_loads_and_computes_cross_tier(tmp_path) -> None:
     from pathlib import Path
     from astrbot_plugin_nikke.features.sync.cost_table import SyncCostTable
 
-    bundled = Path(__file__).resolve().parents[1] / "assets" / "data" / "sync-level-costs.json"
-    assert not bundled.exists()
+    bundled = Path(__file__).resolve().parents[1] / "assets" / "data" / "sync_level_costs.json"
+    assert bundled.is_file()
+    bundled_table = SyncCostTable.from_file(bundled)
+    assert bundled_table.levels[0] == 2 and bundled_table.levels[-1] == 1400
+    # Lv.200→201 为单级 10,000 芯尘；Lv.574→600 共 26 级；Lv.1001→1002 为 22,000 芯尘
+    assert bundled_table.cost_between(200, 201) == {
+        "core_dust": 10_000,
+        "credits": 1_694_200,
+        "battle_data": 20_944_600,
+    }
+    assert bundled_table.cost_between(574, 600) == {
+        "core_dust": 26 * 15_000,
+        "credits": 26 * 9_003_629,
+        "battle_data": 26 * 78_347_935,
+    }
+    assert bundled_table.cost_between(1001, 1002) == {
+        "core_dust": 22_000,
+        "credits": 12_985_017,
+        "battle_data": 119_584_414,
+    }
 
     levels = [
         {
@@ -275,3 +293,85 @@ def test_updater_payload_round_trips_into_sync_calculator(tmp_path) -> None:
     assert plan.gainable_levels == 1
     assert plan.reachable_level == 201
     assert plan.overall_days == 2
+
+
+def test_bundled_outpost_rates_cases_academy_and_extrapolation() -> None:
+    from pathlib import Path
+    from astrbot_plugin_nikke.features.sync.calculator import plan_sync_from_inputs
+    from astrbot_plugin_nikke.features.sync.outpost import (
+        OutpostRateTable,
+        extract_account_sync_context,
+        infer_academy_boosts,
+    )
+
+    root = Path(__file__).resolve().parents[1] / "assets" / "data"
+    cost_table = SyncCostTable.from_file(root / "sync_level_costs.json")
+    outpost_table = OutpostRateTable.from_file(root / "outpost_rates.json")
+
+    # Lv.400 满学院加成精确校验：9046 * 1 / 10000 * 60 * 1.45 = 78.70 芯尘/小时
+    r400 = outpost_table.hourly_rates(400)
+    assert r400.estimated_above_400 is False
+    assert r400.hourly["core_dust"] == pytest.approx(78.70, abs=0.02)
+    assert r400.hourly["credits"] == pytest.approx(51027.75, abs=0.2)
+
+    # Lv.651 已在交叉核验扩展表（1–800）内精确查表，不再线性外推；Lv.850 才标注外推
+    boosts, academy_note = infer_academy_boosts(13000, 13003)
+    assert boosts == {"credits": 60.0, "battle_data": 45.0, "core_dust": 45.0}
+    assert "满级加成" in academy_note
+    partial_boosts, partial_note = infer_academy_boosts(9000, 9002)
+    assert partial_boosts == {"credits": 60.0, "battle_data": 45.0, "core_dust": 25.0}
+    assert "课程 9002" in partial_note
+    r533 = outpost_table.hourly_rates(533)
+    assert r533.hourly["core_dust"] == pytest.approx(102.22, abs=0.05)
+    r651 = outpost_table.hourly_rates(651, academy_boosts=boosts, academy_note=academy_note)
+    assert r651.estimated_above_400 is False
+    assert r651.hourly["core_dust"] == pytest.approx(113.21, abs=0.05)
+    r850 = outpost_table.hourly_rates(850)
+    assert r850.estimated_above_400 is True
+
+    # 真实账号 profile 自动提取与背包资源箱 + 歼灭 + 额外日产端到端计算
+    profile = {
+        "basic": {
+            "currencies": [
+                {"type": 3000, "value": "8746"},
+                {"type": 2000, "value": "8648063"},
+                {"type": 1000, "value": "48966309"},
+            ]
+        },
+        "outpost": {
+            "synchro_level": 574,
+            "outpost_battle_level": 651,
+            "tactic_academy_class": 13000,
+            "tactic_academy_lesson": 13003,
+        },
+    }
+    ctx = extract_account_sync_context(profile, outpost_table, cost_table)
+    assert ctx.synchro_level == 574
+    assert ctx.outpost_level == 651
+    assert ctx.inventory["core_dust"] == 8746
+    assert ctx.gainable_levels == 0
+    assert ctx.next_level_missing["core_dust"] == 15_000 - 8746
+
+    plan, outpost_meta = plan_sync_from_inputs(
+        current=574,
+        target=580,
+        inventory=ctx.inventory,
+        outpost_level=651,
+        academy_class=13000,
+        cases={
+            "core_dust": {"24h": 5, "1h": 10},
+            "credits": {"24h": 2},
+            "battle_data": {"24h": 5},
+        },
+        wipeout_count=1,
+        extra_daily={"core_dust": 500},
+        table=cost_table,
+        outpost_table=outpost_table,
+        today=date(2026, 11, 25),
+    )
+    assert outpost_meta is not None
+    assert outpost_meta["case_hours"]["core_dust"] == 130
+    assert plan.case_yields["core_dust"] > 10_000
+    assert plan.gainable_levels >= 1
+    assert plan.gainable_without_cases == 0
+    assert "箱子" in render_sync_plan(plan)

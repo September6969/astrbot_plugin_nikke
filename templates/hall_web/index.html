@@ -141,7 +141,7 @@
         <div id="char-output" class="list-box"></div>
       </div>
 
-      <div class="card">
+      <div id="card-counsel" class="card" hidden>
         <h2>咨询答案检索</h2>
         <div class="inline-form">
           <input id="counsel-char" type="text" placeholder="角色名（如 拉毗）">
@@ -152,18 +152,74 @@
       </div>
 
       <div class="card">
-        <h2>同步器等级计算（公开手动参数）</h2>
-        <div class="grid-inputs">
-          <label>当前等级<input id="sync-cur" type="number" value="200"></label>
-          <label>目标等级<input id="sync-tgt" type="number" value="210"></label>
-          <label>芯尘库存<input id="sync-inv-dust" type="number" value="0"></label>
-          <label>信用点库存<input id="sync-inv-cred" type="number" value="0"></label>
-          <label>战斗数据库存<input id="sync-inv-data" type="number" value="0"></label>
-          <label>芯尘日产<input id="sync-prod-dust" type="number" value="400"></label>
-          <label>信用点日产<input id="sync-prod-cred" type="number" value="1000"></label>
-          <label>战斗数据日产<input id="sync-prod-data" type="number" value="100"></label>
+        <h2>超限角色词条推荐速查</h2>
+        <div class="inline-form">
+          <input id="ol-char-q" type="text" placeholder="角色名或别名（如 爱丽丝 / 小红帽 / 普丽瓦蒂）">
+          <button id="btn-ol-rec" class="btn primary" type="button">查询推荐词条</button>
         </div>
-        <button id="btn-sync-calc" class="btn primary">估算升级天数</button>
+        <pre id="ol-rec-output" class="pre-box"></pre>
+      </div>
+
+      <div class="card">
+        <h2>同步器等级计算（公开前哨与库存计算器）</h2>
+        <div class="grid-inputs">
+          <label>当前等级<input id="sync-cur" type="number" min="1" max="1999" value="200"></label>
+          <label>目标等级<input id="sync-tgt" type="number" min="2" max="2000" value="220"></label>
+          <label>前哨基地等级<input id="sync-outpost" type="number" min="1" max="2000" value="200"></label>
+          <label>每日歼灭次数<input id="sync-wipeout" type="number" min="0" max="20" value="1"></label>
+          <label>芯尘库存<input id="sync-inv-dust" type="number" min="0" value="0"></label>
+          <label>信用点库存<input id="sync-inv-cred" type="number" min="0" value="0"></label>
+          <label>战斗数据库存<input id="sync-inv-data" type="number" min="0" value="0"></label>
+        </div>
+        <details class="subcard mb-sm">
+          <summary>可选：背包资源箱（1H–24H）与额外日收益</summary>
+          <div class="case-table-wrap">
+            <table class="case-table">
+              <thead>
+                <tr><th>资源</th><th>1H</th><th>2H</th><th>4H</th><th>8H</th><th>12H</th><th>24H</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>芯尘</td>
+                  <td><input class="hall-case-inp" data-res="core_dust" data-hr="1h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="core_dust" data-hr="2h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="core_dust" data-hr="4h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="core_dust" data-hr="8h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="core_dust" data-hr="12h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="core_dust" data-hr="24h" type="number" min="0" value="0"></td>
+                </tr>
+                <tr>
+                  <td>信用点</td>
+                  <td><input class="hall-case-inp" data-res="credits" data-hr="1h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="credits" data-hr="2h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="credits" data-hr="4h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="credits" data-hr="8h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="credits" data-hr="12h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="credits" data-hr="24h" type="number" min="0" value="0"></td>
+                </tr>
+                <tr>
+                  <td>战斗数据</td>
+                  <td><input class="hall-case-inp" data-res="battle_data" data-hr="1h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="battle_data" data-hr="2h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="battle_data" data-hr="4h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="battle_data" data-hr="8h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="battle_data" data-hr="12h" type="number" min="0" value="0"></td>
+                  <td><input class="hall-case-inp" data-res="battle_data" data-hr="24h" type="number" min="0" value="0"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="grid-inputs mt-sm">
+            <label>额外日产芯尘<input id="sync-extra-dust" type="number" min="0" value="0"></label>
+            <label>额外日产信用点<input id="sync-extra-cred" type="number" min="0" value="0"></label>
+            <label>额外日产战斗数据<input id="sync-extra-data" type="number" min="0" value="0"></label>
+          </div>
+        </details>
+        <button id="btn-sync-calc" class="btn primary">估算升级天数与瓶颈</button>
+        <div id="sync-visual" class="sync-visual" hidden>
+          <div id="sync-kpi" class="kpi-grid"></div>
+          <div id="sync-cards" class="res-grid"></div>
+        </div>
         <pre id="sync-output" class="pre-box"></pre>
       </div>
 

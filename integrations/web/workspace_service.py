@@ -36,6 +36,9 @@ from ...features.overload_advice.advisor import (
     parse_options,
     parse_targets,
     render_advice,
+    render_character_recommendation,
+    resolve_preset_targets,
+    simulate,
 )
 from ...features.solo_raid.builder import (
     build_five_teams,
@@ -43,11 +46,13 @@ from ...features.solo_raid.builder import (
     parse_members,
     render_plan,
 )
+from ...features.solo_raid.seasons import season_status
 from ...features.sync.calculator import (
     SyncLevelInputError,
-    calculate_sync_plan,
+    plan_sync_from_inputs,
     render_sync_plan,
 )
+from ...features.sync.outpost import extract_account_sync_context
 from ...features.web_portal import (
     PortalSessionStore,
     WorkspaceSession,
@@ -158,6 +163,7 @@ class WorkspaceWebService:
                 web.get("/workspace/api/solo-raid/context", self.solo_raid_context),
                 web.post("/workspace/api/solo-raid/build", self.solo_raid_build),
                 web.post("/workspace/api/tools/wishlist", self.tool_wishlist),
+                web.post("/workspace/api/sync/context", self.sync_context),
                 web.post("/workspace/api/tools/sync", self.tool_sync),
                 web.post("/workspace/api/tools/overload", self.tool_overload),
                 web.get("/workspace/api/settings", self.get_settings),
@@ -562,20 +568,32 @@ class WorkspaceWebService:
 
     async def solo_raid_context(self, request: web.Request) -> web.Response:
         session = self._require_session(request)
-        catalog = getattr(self.toolbox, "solo_catalog", None) if self.toolbox else None
+        live_fn = getattr(self.toolbox, "live_solo_catalog", None) if self.toolbox else None
+        catalog = live_fn() if callable(live_fn) else (getattr(self.toolbox, "solo_catalog", None) if self.toolbox else None)
+        elem_norm = {"燃烧": "Fire", "fire": "Fire", "水冷": "Water", "water": "Water", "风压": "Wind", "wind": "Wind", "铁甲": "Iron", "iron": "Iron", "电击": "Electric", "electric": "Electric", "electronic": "Electric"}
         seasons = []
         if catalog is not None and catalog.available:
+            now = self._clock()
             for s in catalog.seasons:
                 seasons.append(
                     {
                         "id": s.season_id,
                         "name": s.name,
+                        "status": season_status(s, now),
+                        "note": s.note,
                         "bosses": [
-                            {"name": b.name, "weakness": b.weakness, "element": b.element}
+                            {
+                                "name": b.name,
+                                "weakness": b.weakness,
+                                "weakness_code": elem_norm.get(str(b.weakness or "").casefold(), ""),
+                                "element": b.element,
+                                "mechanics": getattr(b, "mechanics", ""),
+                            }
                             for b in s.bosses
                         ],
                     }
                 )
+        latest = seasons[-1] if seasons else None
         saved = None
         if self.toolbox is not None:
             plan = self.toolbox.solo_plans.load(session.actor_id)
@@ -599,6 +617,7 @@ class WorkspaceWebService:
             {
                 "ok": True,
                 "seasons": seasons,
+                "latest": latest,
                 "saved_plan": saved,
                 "engine_configured": engine is not None,
             }
@@ -616,11 +635,9 @@ class WorkspaceWebService:
         source = str(body.get("source", "account")).strip()
         manual_pool = str(body.get("members", "")).strip()
         save_plan = bool(body.get("save", False))
-        season = (
-            self.toolbox.solo_catalog.latest()
-            if self.toolbox.solo_catalog.available
-            else None
-        )
+        live_fn = getattr(self.toolbox, "live_solo_catalog", None)
+        catalog = live_fn() if callable(live_fn) else self.toolbox.solo_catalog
+        season = catalog.latest() if catalog.available else None
         boss = season.bosses[0] if season and season.bosses else None
 
         if source == "manual" or manual_pool:
@@ -660,10 +677,11 @@ class WorkspaceWebService:
         version_trust = "unavailable"
         version_ok = False
         engine = getattr(self.toolbox, "solo_engine", None)
+        chosen_element = str(body.get("boss_element") or "").strip()
         if engine is not None:
             est = await engine.estimate(
                 plan.teams,
-                boss_element=str(
+                boss_element=chosen_element or str(
                     getattr(boss, "weakness", "") or getattr(boss, "element", "") or ""
                 ),
             )
@@ -743,6 +761,47 @@ class WorkspaceWebService:
             return portal_error("INVALID_WISHLIST", str(exc), status=400)
         return web.json_response({"ok": True, "text": source_note + "\n" + render_wishlist(res)})
 
+    async def sync_context(self, request: web.Request) -> web.Response:
+        session = self._require_session(request)
+        account = self.store.get_account(session.actor_id, with_cookie=True)
+        if not account or self.toolbox is None or self.toolbox.profile_loader is None:
+            return web.json_response(
+                {
+                    "ok": True,
+                    "bound": False,
+                    "message": "尚未绑定账号，可直接在下方手工填写同步器与前哨参数。",
+                }
+            )
+        profile = await self.toolbox.profile_loader(account)
+        table = getattr(self.toolbox, "sync_table", None)
+        outpost_table = getattr(self.toolbox, "outpost_table", None)
+        ctx = extract_account_sync_context(profile, outpost_table, table)
+        suggested = ((ctx.synchro_level // 10) + 1) * 10 if ctx.synchro_level else 220
+        if ctx.synchro_level and suggested <= ctx.synchro_level:
+            suggested = ctx.synchro_level + 10
+        return web.json_response(
+            {
+                "ok": True,
+                "bound": True,
+                "synchro_level": ctx.synchro_level,
+                "outpost_level": ctx.outpost_level,
+                "academy_class": ctx.academy_class,
+                "academy_lesson": ctx.academy_lesson,
+                "academy_boosts": ctx.academy_boosts,
+                "academy_note": ctx.academy_note,
+                "inventory": ctx.inventory,
+                "hourly_rates": ctx.outpost_rates.hourly if ctx.outpost_rates else None,
+                "base_daily_rates": ctx.outpost_rates.base_daily if ctx.outpost_rates else None,
+                "estimated_above_400": ctx.outpost_rates.estimated_above_400 if ctx.outpost_rates else False,
+                "rate_note": ctx.outpost_rates.rate_note if ctx.outpost_rates else "",
+                "gainable_levels": ctx.gainable_levels,
+                "reachable_level": ctx.reachable_level,
+                "next_level_cost": ctx.next_level_cost,
+                "next_level_missing": ctx.next_level_missing,
+                "suggested_target": suggested,
+            }
+        )
+
     async def tool_sync(self, request: web.Request) -> web.Response:
         session = self._require_session(request)
         body, err = await read_json_object(request)
@@ -750,40 +809,193 @@ class WorkspaceWebService:
             return err
         assert body is not None
         table = getattr(self.toolbox, "sync_table", None) if self.toolbox else None
+        outpost_table = getattr(self.toolbox, "outpost_table", None) if self.toolbox else None
         current = body.get("current", "")
-        inventory = body.get("inventory") or {}
+        inventory = body.get("inventory")
+        outpost_level = body.get("outpost_level")
+        academy_boosts = body.get("academy_boosts")
+        academy_class = body.get("academy_class")
         if body.get("use_account"):
             account = self.store.get_account(session.actor_id, with_cookie=True)
             if not account or self.toolbox is None or self.toolbox.profile_loader is None:
                 return portal_error("NOT_BOUND", "尚未绑定账号", status=400)
             profile = await self.toolbox.profile_loader(account)
-            outpost = profile.get("outpost") if isinstance(profile, Mapping) else {}
-            current = (outpost or {}).get("synchro_level") or current
+            ctx = extract_account_sync_context(profile, outpost_table, table)
+            if current in (None, "") and ctx.synchro_level is not None:
+                current = ctx.synchro_level
+            if not inventory:
+                inventory = ctx.inventory
+            if outpost_level in (None, "") and ctx.outpost_level is not None:
+                outpost_level = ctx.outpost_level
+            if academy_boosts is None and academy_class in (None, ""):
+                academy_class = ctx.academy_class
         try:
-            plan = calculate_sync_plan(
+            plan, outpost_meta = plan_sync_from_inputs(
                 current=current,
                 target=body.get("target", ""),
-                inventory=inventory,
-                production=body.get("production") or {},
+                inventory=inventory if isinstance(inventory, Mapping) else {},
+                production=body.get("production") if isinstance(body.get("production"), Mapping) else None,
+                outpost_level=outpost_level,
+                academy_boosts=academy_boosts if isinstance(academy_boosts, Mapping) else None,
+                academy_class=academy_class,
+                hourly_override=body.get("hourly_override") if isinstance(body.get("hourly_override"), Mapping) else None,
+                cases=body.get("cases") if isinstance(body.get("cases"), Mapping) else None,
+                wipeout_count=body.get("wipeout_count", 1),
+                extra_daily=body.get("extra_daily") if isinstance(body.get("extra_daily"), Mapping) else None,
+                manual_costs=body.get("manual_costs") if isinstance(body.get("manual_costs"), Mapping) else None,
                 table=table,
+                outpost_table=outpost_table,
                 today=self._clock().date(),
             )
         except SyncLevelInputError as exc:
             return portal_error("INVALID_SYNC_INPUT", str(exc), status=400)
-        return web.json_response({"ok": True, "text": render_sync_plan(plan)})
+        return web.json_response(
+            {
+                "ok": True,
+                "plan": plan.to_dict(),
+                "outpost": outpost_meta,
+                "text": render_sync_plan(plan),
+            }
+        )
+
+    def _match_character_overload(self, query: str):
+        characters = (getattr(self.toolbox, "overload_character_targets", None) or {}) if self.toolbox else {}
+        if not characters or not query:
+            return None
+        q = query.casefold().strip()
+        for key, val in characters.items():
+            if key.casefold() == q:
+                return val
+        rows = getattr(self.toolbox, "grid_rows", ()) or ()
+        for row in rows:
+            if not isinstance(row, Mapping):
+                continue
+            key = str(row.get("character_key") or row.get("name_code") or "")
+            if key not in characters:
+                continue
+            for col in ("name_cn", "name_zh_cn", "name_zh_tw", "name_en", "name", "name_code"):
+                v = row.get(col)
+                if isinstance(v, (str, int)) and str(v).casefold().strip() == q:
+                    return characters[key]
+        resolver = getattr(self.toolbox, "grid_resolver", None)
+        if resolver is not None and rows:
+            for row in resolver.find(rows, query)[:5]:
+                key = str(row.get("character_key") or row.get("name_code") or "")
+                if key in characters:
+                    return characters[key]
+        return None
 
     async def tool_overload(self, request: web.Request) -> web.Response:
+        session = self._require_session(request)
         body, err = await read_json_object(request)
         if err is not None:
             return err
         assert body is not None
         try:
-            targets = parse_targets(str(body.get("targets", "")))
-            options = parse_options(body.get("options") or [])
-            res = advise(options, targets)
+            preset = str(body.get("preset", "") or "").strip()
+            raw_targets = body.get("targets", "")
+            character_query = str(body.get("character_query", "") or "").strip()
+            rec_label = ""
+            target_counts: dict[str, int] = {}
+            flex_count = 0
+            avoid_targets: tuple[str, ...] = ()
+            character_note = ""
+            matched_spec = None
+            if isinstance(raw_targets, list) and raw_targets:
+                targets = parse_targets(raw_targets)
+            elif isinstance(raw_targets, str) and raw_targets.strip():
+                targets = parse_targets(raw_targets)
+            elif preset in {"", "auto"} and character_query:
+                matched_spec = self._match_character_overload(character_query)
+                if matched_spec is not None:
+                    targets = tuple(matched_spec.targets)
+                    target_counts = dict(matched_spec.counts)
+                    flex_count = matched_spec.flex_count
+                    avoid_targets = tuple(matched_spec.avoid)
+                    character_note = matched_spec.note
+                    rec_label = f"角色专属推荐 · {matched_spec.source_url} · 核验 {matched_spec.checked_at}"
+                else:
+                    targets, rec_label = resolve_preset_targets("通用输出")
+            elif preset and preset != "auto":
+                targets, rec_label = resolve_preset_targets(preset)
+            else:
+                targets, rec_label = resolve_preset_targets("通用输出")
+
+            source_prefix = ""
+            resolved_name = ""
+            if character_query:
+                card = None
+                loader = getattr(self.toolbox, "card_loader", None) if self.toolbox else None
+                if loader is not None:
+                    card = await loader(session.actor_id, character_query)
+                elif self.character_application is not None:
+                    directory = (
+                        tuple(self._directory_provider())
+                        if self._directory_provider is not None
+                        else ()
+                    )
+                    card = await self.character_application.character_card(
+                        session.actor_id, character_query, directory
+                    )
+                records = []
+                if card is not None:
+                    equipment = getattr(card, "equipment", None) or {}
+                    for slot in ("head", "torso", "arm", "leg"):
+                        piece = equipment.get(slot) if isinstance(equipment, Mapping) else None
+                        if piece is None or not getattr(piece, "equipped", False):
+                            continue
+                        for position, option in enumerate(getattr(piece, "options", ()) or (), 1):
+                            if position > 3:
+                                break
+                            tier = getattr(option, "tier", None)
+                            records.append(
+                                {
+                                    "slot": slot,
+                                    "position": position,
+                                    "label": str(getattr(option, "display_name", "") or ""),
+                                    "tier": tier if isinstance(tier, int) and 1 <= tier <= 15 else 1,
+                                    "locked": bool(getattr(option, "locked", False)),
+                                }
+                            )
+                if not records:
+                    if matched_spec is not None:
+                        return web.json_response(
+                            {
+                                "ok": True,
+                                "character": character_query,
+                                "text": render_character_recommendation(character_query, matched_spec)
+                                + "\n\n（当前角色未检测到已穿戴的 T10 超限词条，仅展示专属推荐配装。）",
+                            }
+                        )
+                    raise OverloadAdviceError("该角色当前未检测到可解析的 T10 超限词条，请在工作台改用手工词条测试。")
+                resolved_name = str(getattr(card, "name_cn", "") or getattr(card, "name_en", "") or character_query)
+                options = parse_options(records)
+                source_prefix = f"词条来源：已绑定账号角色实际超限词条（{resolved_name}，只读对比）。\n"
+            else:
+                options = parse_options(body.get("options") or [])
+
+            res = advise(
+                options,
+                targets,
+                recommendation_label=rec_label,
+                target_counts=target_counts,
+                flex_count=flex_count,
+                avoid_targets=avoid_targets,
+                character_note=character_note,
+            )
+            if body.get("simulate"):
+                attempts = int(body.get("attempts", 100) or 100)
+                attempts = max(1, min(attempts, 500))
+                res = replace(res, simulation=simulate(options, res.targets, attempts=attempts))
         except (OverloadAdviceError, ValueError, TypeError) as exc:
             return portal_error("INVALID_OVERLOAD_INPUT", str(exc), status=400)
-        return web.json_response({"ok": True, "text": render_advice(res)})
+        return web.json_response(
+            {
+                "ok": True,
+                "character": resolved_name,
+                "text": source_prefix + render_advice(res),
+            }
+        )
 
     async def get_settings(self, request: web.Request) -> web.Response:
         session = self._require_session(request)

@@ -75,8 +75,45 @@ class _FakeRosterToolbox:
         self.wishlist_rows = ()
         self.wishlist_exclusions = ()
         self.wishlist_eligibility = {}
-        self.sync_table = None
+        root = Path(__file__).resolve().parents[1] / "assets" / "data"
+        from astrbot_plugin_nikke.features.sync.cost_table import SyncCostTable
+        from astrbot_plugin_nikke.features.sync.outpost import OutpostRateTable
+        from astrbot_plugin_nikke.features.overload_advice.advisor import load_character_targets
+
+        self.sync_table = SyncCostTable.from_file(root / "sync_level_costs.json")
+        self.outpost_table = OutpostRateTable.from_file(root / "outpost_rates.json")
+        self.overload_character_targets = load_character_targets(root / "overload_recommendations.json")
         self.feeds = SimpleNamespace(command=lambda *_args: "订阅状态：无")
+
+    @staticmethod
+    async def profile_loader(_account):
+        return {
+            "basic": {
+                "currencies": [
+                    {"type": 3000, "value": "8746"},
+                    {"type": 2000, "value": "8648063"},
+                    {"type": 1000, "value": "48966309"},
+                ]
+            },
+            "outpost": {
+                "synchro_level": 574,
+                "outpost_battle_level": 651,
+                "tactic_academy_class": 13000,
+                "tactic_academy_lesson": 13003,
+            },
+        }
+
+    @staticmethod
+    async def card_loader(_actor_id, query):
+        return SimpleNamespace(
+            name_cn=query or "红莲",
+            equipment={
+                "head": SimpleNamespace(
+                    equipped=True,
+                    options=(SimpleNamespace(display_name="防御力增加", tier=6, locked=False),),
+                )
+            },
+        )
 
     async def roster_loader(self, _account):
         self.calls += 1
@@ -203,6 +240,92 @@ async def test_workspace_lazy_bootstrap_self_bind_and_five_team_build(tmp_path: 
         )
         assert arena_resp.status == 200
         assert "/arena/open/fake_1008611_three" in (await arena_resp.json())["url"]
+
+        # 同步器账号上下文懒加载 + 资源箱/前哨计算 + 超限预设对比 + 单人突袭手选弱点
+        sync_ctx = await client.post(
+            "/workspace/api/sync/context",
+            cookies={WORKSPACE_COOKIE: cookie},
+            headers={"Origin": SITE_ORIGIN, WORKSPACE_CSRF_HEADER: csrf},
+        )
+        assert sync_ctx.status == 200
+        ctx_json = await sync_ctx.json()
+        assert ctx_json["bound"] is True
+        assert ctx_json["synchro_level"] == 574
+        assert ctx_json["outpost_level"] == 651
+        assert ctx_json["estimated_above_400"] is False
+
+        sync_calc = await client.post(
+            "/workspace/api/tools/sync",
+            json={
+                "current": 574,
+                "target": 580,
+                "outpost_level": 651,
+                "wipeout_count": 1,
+                "inventory": ctx_json["inventory"],
+                "cases": {
+                    "core_dust": {"24h": 5},
+                    "credits": {"24h": 2},
+                    "battle_data": {"24h": 5},
+                },
+                "extra_daily": {"core_dust": 500},
+            },
+            cookies={WORKSPACE_COOKIE: cookie},
+            headers={"Origin": SITE_ORIGIN, WORKSPACE_CSRF_HEADER: csrf},
+        )
+        assert sync_calc.status == 200
+        sync_json = await sync_calc.json()
+        assert sync_json["plan"]["outpost_level"] == 651
+        assert sync_json["plan"]["case_yields"]["core_dust"] > 0
+        assert sync_json["plan"]["gainable_levels"] >= 1
+
+        ol_resp = await client.post(
+            "/workspace/api/tools/overload",
+            json={"character_query": "红莲", "preset": "通用输出", "simulate": True},
+            cookies={WORKSPACE_COOKIE: cookie},
+            headers={"Origin": SITE_ORIGIN, WORKSPACE_CSRF_HEADER: csrf},
+        )
+        assert ol_resp.status == 200
+        ol_json = await ol_resp.json()
+        assert "内置通用定位预设" in ol_json["text"]
+        assert "防御力增加" in ol_json["text"]
+
+        ol_auto = await client.post(
+            "/workspace/api/tools/overload",
+            json={"character_query": "alice", "preset": "auto", "simulate": False},
+            cookies={WORKSPACE_COOKIE: cookie},
+            headers={"Origin": SITE_ORIGIN, WORKSPACE_CSRF_HEADER: csrf},
+        )
+        assert ol_auto.status == 200
+        assert "角色专属推荐" in (await ol_auto.json())["text"]
+
+        sr_ctx = await (
+            await client.get("/workspace/api/solo-raid/context", cookies={WORKSPACE_COOKIE: cookie})
+        ).json()
+        assert sr_ctx["latest"]["bosses"][0]["weakness"] == "Fire"
+
+        # 全部 30 项功能目录的 web_tab 与实际页面完全对齐，无悬空标签页
+        import re as _re
+        from astrbot_plugin_nikke.features.catalog.registry import FEATURES
+        root = Path(__file__).resolve().parents[1] / "templates"
+        hall_tabs = set(_re.findall(r'id="tab-([a-z0-9_-]+)"', (root / "hall_web" / "index.html").read_text(encoding="utf-8")))
+        ws_tabs = set(_re.findall(r'id="tab-([a-z0-9_-]+)"', (root / "workspace_web" / "index.html").read_text(encoding="utf-8")))
+        for f in FEATURES:
+            if f.entry_mode in ("hall", "both") and not f.requires_binding:
+                assert f.web_tab in hall_tabs, f.id
+            if f.entry_mode in ("workspace", "both"):
+                assert f.web_tab in ws_tabs, f.id
+
+        # 模板无内联 style 与动态 innerHTML
+        root = Path(__file__).resolve().parents[1] / "templates"
+        for asset in (
+            root / "workspace_web" / "index.html",
+            root / "workspace_web" / "workspace.js",
+            root / "hall_web" / "index.html",
+            root / "hall_web" / "hall.js",
+        ):
+            content = asset.read_text(encoding="utf-8")
+            assert "style=" not in content
+            assert ".innerHTML" not in content
 
         # 安全校验：错误 Origin 或缺少 CSRF 必须被拒绝
         bad_origin = await client.post(

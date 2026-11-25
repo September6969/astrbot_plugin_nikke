@@ -74,7 +74,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         entry_mode="workspace",
         requires_binding=False,
         supports_group_feedback=True,
-        web_tab="overview",
+        web_tab="binding",
         aliases=("工作台", "workspace", "workbench"),
     ),
     # ---- 账号与个人 ----
@@ -110,7 +110,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         entry_mode="workspace",
         requires_binding=True,
         supports_group_feedback=True,
-        web_tab="profile",
+        web_tab="binding",
         aliases=("我的", "me"),
     ),
     FeatureEntry(
@@ -120,7 +120,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         summary="说明数字 UID 与 OpenID 的安全边界；管理未绑定情况下的个人手工档案。",
         qq_commands=("/妮姬 uid <数字UID>", "/妮姬 我的妮姬 资料", "/妮姬 我的妮姬 手工 <昵称>,<等级>"),
         example_command="/妮姬 我的妮姬 资料",
-        entry_mode="both",
+        entry_mode="workspace",
         web_tab="settings",
         aliases=("uid", "我的妮姬"),
     ),
@@ -133,7 +133,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         example_command="/妮姬 养成历史",
         entry_mode="workspace",
         requires_binding=True,
-        web_tab="profile",
+        web_tab="binding",
         aliases=("养成历史", "growth"),
     ),
     # ---- 养成与静态工具 ----
@@ -168,6 +168,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         qq_commands=("/妮姬 咨询 <角色名> [关键词]",),
         example_command="/妮姬 咨询 拉毗 作战",
         entry_mode="hall",
+        feature_flag="counsel_available",
         web_tab="tools",
         aliases=("咨询", "counsel"),
     ),
@@ -175,9 +176,9 @@ FEATURES: tuple[FeatureEntry, ...] = (
         id="sync.calculator",
         name="同步器升级计算",
         category="养成",
-        summary="结合当前等级、目标等级、资源库存与日产量估算所需天数与资源瓶颈；支持绑定账号自动读取库存。",
-        qq_commands=("/妮姬 同步器 状态", "/妮姬 同步器 计算 <当前> <目标> <三库存> <三日产>"),
-        example_command="/妮姬 同步器 计算 手工 200 210 0 0 0 400 1000 100 3000 4500 1200",
+        summary="自动读取绑定账号同步器等级、直接库存与前哨产量，结合背包资源箱、每日歼灭与额外日产估算到达日期与瓶颈。",
+        qq_commands=("/妮姬 同步器", "/妮姬 同步器 计算 600", "/妮姬 同步器 可升"),
+        example_command="/妮姬 同步器 计算 600",
         entry_mode="both",
         web_tab="tools",
         aliases=("同步器", "sync"),
@@ -197,9 +198,9 @@ FEATURES: tuple[FeatureEntry, ...] = (
         id="overload.advisor",
         name="超限洗词条建议与模拟",
         category="养成",
-        summary="依据目标词条与 1–15 阶官方数值表评估保留/锁定策略、模拟洗炼并对比已绑定角色当前装备。",
-        qq_commands=("/妮姬 洗词条 <目标词条> <部位,阶,词条,...>", "/妮姬 洗词条模拟 <目标词条> <部位,...>"),
-        example_command="/妮姬 洗词条 攻击力增加,暴击伤害增加 头部,1,攻击力增加,15,锁",
+        summary="内置全角色超限词条推荐与避坑标注；支持直接查推荐、模拟洗炼，以及绑定后对比角色 T10 实际装备。",
+        qq_commands=("/妮姬 洗词条 <角色名>", "/妮姬 洗词条 推荐:<角色名> 账号"),
+        example_command="/妮姬 洗词条 爱丽丝",
         entry_mode="both",
         web_tab="tools",
         aliases=("洗词条", "overload"),
@@ -212,7 +213,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         summary="基于蓄力曲线与静态模板进行单队文字解队或临时网页三队编排优化。",
         qq_commands=("/妮姬 竞技场 解队 <五人>", "/妮姬 竞技场 编辑", "/妮姬 竞技场 三队"),
         example_command="/妮姬 竞技场 解队 红莲/豺狼/布兰儿/桑迪/特蕾娜",
-        entry_mode="both",
+        entry_mode="workspace",
         feature_flag="enable_arena",
         supports_group_feedback=True,
         web_tab="arena",
@@ -226,21 +227,20 @@ FEATURES: tuple[FeatureEntry, ...] = (
         summary="查看当前联盟突袭 Boss 总览、全盟贡献排行与个人出刀记录。",
         qq_commands=("/妮姬 联盟突袭", "/妮姬 突袭 排名 [页码]", "/妮姬 突袭 我的 [页码]"),
         example_command="/妮姬 联盟突袭",
-        entry_mode="workspace",
+        entry_mode="qq_only",
         requires_binding=True,
-        web_tab="profile",
         aliases=("突袭", "联盟突袭", "raid"),
     ),
     FeatureEntry(
         id="solo_raid.planner",
         name="单人突袭五队与估伤",
         category="突袭",
-        summary="自动或手动编排五队并校验完整爆裂链，集成固定基准 nikke-calc@67835ca 输出可核验伤害估算。",
+        summary="自动同步赛季与 Boss 弱点，编排五队并校验完整爆裂链，集成固定基准 nikke-calc@67835ca 输出伤害估算。",
         qq_commands=("/妮姬 单人突袭 赛季", "/妮姬 单人突袭 编组 账号", "/妮姬 单人突袭 我的"),
         example_command="/妮姬 单人突袭 编组 账号",
         entry_mode="workspace",
         supports_group_feedback=True,
-        web_tab="solo_raid",
+        web_tab="solo-raid",
         aliases=("单人突袭", "soloraid"),
     ),
     # ---- 攻略 ----
@@ -251,9 +251,8 @@ FEATURES: tuple[FeatureEntry, ...] = (
         summary="按关卡号（如 46-40、困难）查询本账号所在服务器历史低战通关阵容。",
         qq_commands=("/妮姬 战役 <关卡> [困难]",),
         example_command="/妮姬 战役 46-40",
-        entry_mode="workspace",
+        entry_mode="qq_only",
         requires_binding=True,
-        web_tab="profile",
         aliases=("战役", "campaign"),
     ),
     FeatureEntry(
@@ -330,7 +329,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         summary="独立选择订阅新闻、官方视频更新或日程；工作台与 QQ 均可管理状态。",
         qq_commands=("/妮姬 新闻", "/妮姬 新闻 订阅 新闻,视频,日程", "/妮姬 新闻 状态"),
         example_command="/妮姬 新闻 状态",
-        entry_mode="both",
+        entry_mode="workspace",
         web_tab="settings",
         aliases=("新闻订阅", "feeds"),
     ),
@@ -387,12 +386,12 @@ FEATURES: tuple[FeatureEntry, ...] = (
         id="favorite_grid.board",
         name="本命九宫格与人气榜",
         category="互动",
-        summary="按顺序选择 9 名妮姬生成统一 T2I 3x3 图片并参与本命人气榜投票。",
+        summary="按顺序选择 9 名妮姬生成统一 T2I 3x3 图片，并在公开大厅查看本命人气榜。",
         qq_commands=("/妮姬 九宫格 <9名妮姬>", "/妮姬 本命榜"),
         example_command="/妮姬 本命榜",
-        entry_mode="both",
+        entry_mode="hall",
         supports_group_feedback=True,
-        web_tab="favorite_grid",
+        web_tab="announcements",
         aliases=("九宫格", "本命榜", "grid"),
     ),
     FeatureEntry(
@@ -402,8 +401,7 @@ FEATURES: tuple[FeatureEntry, ...] = (
         summary="配置个人戳一戳角色、服装与语音语言偏好。",
         qq_commands=("/妮姬 语音", "/妮姬 语音 开|关", "/妮姬 语音 角色 <角色名>", "/妮姬 语音 语言 <ja|en|ko>"),
         example_command="/妮姬 语音",
-        entry_mode="both",
-        web_tab="settings",
+        entry_mode="qq_only",
         aliases=("语音", "voice"),
     ),
     # ---- 管理 ----
@@ -487,14 +485,17 @@ def _serialize_entry(entry: FeatureEntry, *, enabled: bool) -> dict[str, Any]:
 
 
 def public_catalog_payload(flags: Mapping[str, bool] | None = None) -> dict[str, Any]:
-    """生成公共功能大厅专用目录：不包含任何个人数据或需要个人绑定的私密入口。"""
+    """生成公共功能大厅专用目录：不包含需要绑定或未导入数据源（如未导入咨询库）的入口。"""
     items = []
     for entry in FEATURES:
         if entry.admin_only or entry.requires_binding:
             continue
         if entry.entry_mode not in {"hall", "both"}:
             continue
-        items.append(_serialize_entry(entry, enabled=_is_enabled(entry, flags)))
+        enabled = _is_enabled(entry, flags)
+        if entry.feature_flag == "counsel_available" and not enabled:
+            continue
+        items.append(_serialize_entry(entry, enabled=enabled))
     return {
         "surface": "hall",
         "categories": [
@@ -514,7 +515,10 @@ def workspace_catalog_payload(
     for entry in FEATURES:
         if entry.admin_only and not include_admin:
             continue
-        items.append(_serialize_entry(entry, enabled=_is_enabled(entry, flags)))
+        enabled = _is_enabled(entry, flags)
+        if entry.feature_flag == "counsel_available" and not enabled:
+            continue
+        items.append(_serialize_entry(entry, enabled=enabled))
     return {
         "surface": "workspace",
         "categories": [

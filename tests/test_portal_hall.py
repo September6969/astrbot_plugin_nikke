@@ -13,6 +13,9 @@ from aiohttp.test_utils import TestClient, TestServer
 
 from astrbot_plugin_nikke.features.calendar.canonical_models import QueryContext
 from astrbot_plugin_nikke.features.calendar.application import CalendarScheduleSnapshot
+from astrbot_plugin_nikke.features.overload_advice.advisor import load_character_targets
+from astrbot_plugin_nikke.features.sync.cost_table import SyncCostTable
+from astrbot_plugin_nikke.features.sync.outpost import OutpostRateTable
 from astrbot_plugin_nikke.features.tarot.service import TarotService
 from astrbot_plugin_nikke.features.web_portal import PortalSessionStore
 from astrbot_plugin_nikke.integrations.web.hall_service import (
@@ -102,6 +105,15 @@ def _make_hall_service(tmp_path: Path, *, send_fn=None, render_fn=None):
     plugin_root = tmp_path / "plugin"
     _seed_tarot_deck(plugin_root)
     tarot_svc = TarotService(plugin_root, tmp_path / "tarot", deck_mode="major")
+    data_root = Path(__file__).resolve().parents[1] / "assets" / "data"
+    from types import SimpleNamespace
+    toolbox = SimpleNamespace(
+        sync_table=SyncCostTable.from_file(data_root / "sync_level_costs.json"),
+        outpost_table=OutpostRateTable.from_file(data_root / "outpost_rates.json"),
+        overload_character_targets=load_character_targets(data_root / "overload_recommendations.json"),
+        grid_rows=({"name_code": "5004", "character_key": "alice", "name_zh_cn": "爱丽丝", "name_en": "Alice"},),
+        grid_resolver=None,
+    )
     hall = HallWebService(
         site_origin=SITE_ORIGIN,
         sessions=sessions,
@@ -109,6 +121,7 @@ def _make_hall_service(tmp_path: Path, *, send_fn=None, render_fn=None):
         feature_flags={"enable_arena": True},
         calendar=_FakeCalendarApp(),
         tarot=tarot_svc,
+        toolbox=toolbox,
     )
     app = web.Application()
     hall.mount(app)
@@ -133,12 +146,34 @@ async def test_hall_public_access_has_zero_personal_data_and_strict_csp(tmp_path
         assert payload["group_context"]["active"] is False
         assert "binding" not in payload
         assert all(not f["requires_binding"] for f in payload["catalog"]["features"])
+        # 无咨询题库时，大厅目录与卡片均默认隐藏咨询入口
+        assert all(f["id"] != "counsel.search" for f in payload["catalog"]["features"])
+        assert 'id="card-counsel" class="card" hidden' in await resp.text()
+
+        ol_rec = await client.post(
+            "/hall/api/tools/overload-recommend",
+            json={"character": "爱丽丝"},
+            headers={"Origin": SITE_ORIGIN},
+        )
+        assert ol_rec.status == 200
+        assert "【超限词条推荐】爱丽丝" in (await ol_rec.json())["text"]
 
         cal = await client.get("/hall/api/calendar?horizon=14")
         assert cal.status == 200
         cal_data = await cal.json()
         assert cal_data["available"] is True
         assert cal_data["items"][0]["title"] == "周年限定卡池"
+
+        # 公开同步器计算器应能直接使用内置成本表与前哨产量估算（无需绑定账号）
+        sync = await client.post(
+            "/hall/api/tools/sync",
+            json={"current": 200, "target": 210, "outpost_level": 200, "wipeout_count": 1},
+            headers={"Origin": SITE_ORIGIN},
+        )
+        assert sync.status == 200
+        sync_data = await sync.json()
+        assert sync_data["plan"]["outpost_level"] == 200
+        assert sync_data["plan"]["required"]["core_dust"] == 100_000
 
 
 @pytest.mark.asyncio

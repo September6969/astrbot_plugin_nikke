@@ -156,3 +156,33 @@ def test_tier_warnings_four_piece_counts_module_costs_and_os_randomness() -> Non
     assert sim.modules_spent >= 1
     with_sim = render_advice(advise(opts, ("攻击力增加",)))
     assert "锁定与模块提醒" in with_sim
+
+
+def test_avoid_targets_and_character_recommendation_helper() -> None:
+    from pathlib import Path
+    from astrbot_plugin_nikke.features.overload_advice.advisor import (
+        load_character_targets,
+        render_character_recommendation,
+    )
+
+    bundled = Path(__file__).resolve().parents[1] / "assets" / "data" / "overload_recommendations.json"
+    targets_map = load_character_targets(bundled)
+    assert len(targets_map) == 200
+
+    # 普丽瓦蒂（末弹）含避坑词条 最大装弹数增加；爱丽丝（蓄速）含蓄力速度增加
+    privaty = targets_map["privaty"]
+    assert "最大装弹数增加" in privaty.avoid
+    alice = targets_map["alice"]
+    assert "蓄力速度增加" in alice.targets
+
+    bad_opts = parse_options(
+        ({"slot": "head", "position": 1, "label": "最大装弹数增加", "tier": 12, "locked": True},)
+    )
+    advice = advise(bad_opts, privaty.targets, avoid_targets=privaty.avoid, character_note=privaty.note)
+    assert advice.options[0].action == "重洗"
+    assert advice.options[0].lock is False
+    assert any("避免" in r for r in advice.options[0].reasons)
+
+    card_text = render_character_recommendation("爱丽丝", alice)
+    assert "【超限词条推荐】爱丽丝" in card_text
+    assert "蓄力速度增加" in card_text

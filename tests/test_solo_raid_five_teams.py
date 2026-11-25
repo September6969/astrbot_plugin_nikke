@@ -180,10 +180,33 @@ def test_parse_members_rejects_duplicates_and_keeps_burst_tokens() -> None:
 def test_imported_season_43_and_historical_index_status(tmp_path) -> None:
     import json
     from pathlib import Path
+    from types import SimpleNamespace
+    from astrbot_plugin_nikke.features.solo_raid.auto_sync import resolve_live_season_catalog
 
     bundled = Path(__file__).resolve().parents[1] / "assets" / "data" / "solo_raid_seasons.json"
-    assert not bundled.exists()
-    assert SeasonCatalog.from_file(bundled).available is False
+    assert bundled.is_file()
+    bundled_cat = SeasonCatalog.from_file(bundled)
+    assert bundled_cat.available is True
+    assert bundled_cat.latest().season_id == "43"
+    assert bundled_cat.latest().bosses[0].weakness == "燃烧"
+
+    # 运行时公告自动同步新赛季（如 Season 44）与 Raid Rush 停赛提示
+    fake_ann = SimpleNamespace(
+        cache=SimpleNamespace(
+            records=[
+                SimpleNamespace(
+                    title="Update on December 10",
+                    summary_raw="Solo Raid Season 44 - Mirror Container will be available from December 15, 2026, 12:00:00 (UTC+9)! Also Raid Rush period: Solo Raid and Union Raid will not be available during this period.",
+                    url="https://nikke-en.com/newsdetail.html?content_id=demo44",
+                    published_at="2026-12-08T08:00:00+00:00",
+                )
+            ]
+        )
+    )
+    synced = resolve_live_season_catalog(bundled_cat, fake_ann)
+    assert synced.latest().season_id == "44"
+    assert synced.latest().bosses[0].name == "Mirror Container"
+    assert "Raid Rush" in synced.latest().note
 
     season_file = tmp_path / "solo-raid-seasons.json"
     season_file.write_text(
