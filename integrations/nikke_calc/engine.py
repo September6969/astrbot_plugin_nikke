@@ -474,28 +474,23 @@ class SoloRaidDamageEngine:
             async with semaphore:
                 return await self._run_team_subprocess(team, boss_element)
 
-        tasks = [asyncio.create_task(limited(team)) for team in teams]
-        if not tasks:
+        if not teams:
             results: tuple[EngineTeamEstimate, ...] = ()
         else:
+            batch_tasks: list[asyncio.Task[EngineTeamEstimate]] = []
             try:
-                _, pending = await asyncio.wait(tasks, timeout=self.batch_timeout)
-                if pending:
-                    for task in pending:
-                        task.cancel()
-                    await asyncio.gather(*pending, return_exceptions=True)
-                    return EngineEstimate(
-                        False,
-                        commit=git_commit if has_git else "",
-                        dirty=git_dirty if has_git else None,
-                        reason="外部 nikke-calc 批次计算超时，已中止本轮估算。",
-                    )
-                results = tuple(task.result() for task in tasks)
-            except asyncio.CancelledError:
-                for task in tasks:
-                    task.cancel()
-                await asyncio.gather(*tasks, return_exceptions=True)
-                raise
+                # TaskGroup + timeout 会在超时或取消退出时阻塞等待所有子任务（含信号量内的进程树强杀）彻底结束。
+                async with asyncio.timeout(self.batch_timeout):
+                    async with asyncio.TaskGroup() as tg:
+                        batch_tasks = [tg.create_task(limited(team)) for team in teams]
+                results = tuple(task.result() for task in batch_tasks)
+            except TimeoutError:
+                return EngineEstimate(
+                    False,
+                    commit=git_commit if has_git else "",
+                    dirty=git_dirty if has_git else None,
+                    reason="外部 nikke-calc 批次计算超时，已中止本轮估算。",
+                )
 
         successes = [item for item in results if item.damage is not None]
         if has_git:

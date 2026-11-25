@@ -176,7 +176,9 @@ def create_container(
         config=config or {},
         clock=clock,
         card_loader=lambda actor_id, query: character.application.character_card(
-            actor_id, query, directory_provider()
+            actor_id,
+            query,
+            directory_provider() if directory_provider is not None else (),
         ),
     )
     tarot = create_tarot_service(plugin_dir, data_dir)
