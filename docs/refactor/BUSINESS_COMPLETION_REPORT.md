@@ -1,84 +1,66 @@
 # BUSINESS_COMPLETION_REPORT.md — Phase 2 最终集成候选复审与关门报告
 
-> **基线与集成候选分支（2026-11-24）**
+> **基线与集成候选分支（2026-11-25）**
 > - 上游 `origin/main`：`71e664f41d8a8b370887c10580069edb8f99e42a`（PR #141 & #142 已合并）
-> - 最终代码集成候选分支：**`integration/phase2-candidate`**（PR **#150** → `--base main`：https://github.com/September6969/astrbot_plugin_nikke/pull/150 ）
->   - 已验证核心代码与 CI 全绿提交 SHA：**`164d3b62798e44542ca7b552958d791855881a97`**（`164d3b6`，在 `b44813a` 上补齐 `mypy` 与 `TaskGroup` 生命周期修复）；后续文档同步提交仅更新 `docs/refactor/*.md` 并将再次触发完整 CI。
-> - 既有栈式 PR（#144–#149）与本地备份 worktree `E:/_codex_work/nikkehub-ds`（`9968a50`）均完整保留未破坏。
+> - 最终集成候选分支：**`integration/phase2-candidate`**（PR **#150** → `--base main`：https://github.com/September6969/astrbot_plugin_nikke/pull/150 ）
+>   - 已验证核心逻辑、独立复审整改与实机缺陷修复提交 SHA：**`e7497462585c1ccf2eface1b628944dd76b799ab`**（`e749746`，前序：`164d3b6` → `65ba5f0` 独立复审 P1/P2 → `2fff002` Linux Python 3.12 POSIX 修复 → `e749746` 实机 SoloRaid 补全与详情重试）；本轮关门文档提交随后同步并触发最终全量 CI。
+> - 真实服务器隔离只读验收记录见 [REAL_ACCOUNT_ACCEPTANCE.md](../acceptance/REAL_ACCOUNT_ACCEPTANCE.md)。
+> - 既有栈式 PR（#144–#149）与本地备份 worktree `9968a50` 均完整保留未破坏。
 
 ---
 
 ## 一、证据分层原则
 
-本报告严格区分三类证据边界，拒绝把代码实现或 Mock 测试表述为真实线上完整可用：
-1. **代码已实现 & 静态门禁通过**：源码边界、`architecture_metrics --check`、`mypy`、`CodeQL` 与 `compileall` 零报错。
-2. **自动化完整验证（Linux CI + Playwright + Spine 官方 Worker + 本机实机子进程）**：GitHub Actions 完整检出环境与本机真实外部仓库试跑结果。
-3. **真实环境 / 外部条件受阻或待宿主机验收（`DEGRADED` / `BLOCKED` / Live Pending）**：依赖本人授权账号凭据、合法中文题库、真实 `nikke-calc` 运行机或 QQ 群主动推送的现场边界。
+本报告严格区分四类证据边界，拒绝将离线 Mock 或静态检查充当线上完整验收：
+1. **代码实现与静态门禁**：源码架构约束（`scripts/audit/architecture_metrics.py --check`）、`mypy`、CodeQL 与 `compileall` 零报错。
+2. **Linux CI 全矩阵自动验收**：Ubuntu 完整资源目录 + Playwright Chromium + Docker Spine 4.0/4.1 Worker，Python 3.12 / 3.13 × AstrBot `==4.24.0` / `>=4.24,<5` 全矩阵通过。
+3. **部署服务器隔离只读验收（`ssh serv` + 真实有效账号 `***9910` + 生产 `nikke-t2i` + 真实 `nikke-calc@67835ca`）**：在不干扰生产库、不发 QQ 消息、不执行实号写操作前提下验证全链路只读指令、14 张真实 T2I 截图、冷热 HTTP/缓存指标与进程树/生命周期回收（详见 [REAL_ACCOUNT_ACCEPTANCE.md](../acceptance/REAL_ACCOUNT_ACCEPTANCE.md)）。
+4. **受控降级 / 阻断 / 未线上触发边界（`DEGRADED` / `BLOCKED` / `NOT_TESTED`）**：`acct.shiftypad`、`tool.counsel`、可选外部导表与高风险写操作（签到/日常/CDK/续期）及 QQ 群真实发送按要求保持默认阻断/关闭或由 Mock 覆盖。
 
 ---
 
-## 二、Phase 2 Follow-up 核心整改与代码/测试证据
+## 二、Phase 2 独立复审、Follow-up 与实机整改汇总
 
-| Follow-up 议题 | 关键代码落点 | 整改要点 | 测试与实测证据 |
+| 议题编号 | 关键代码落点 | 整改要点 | 测试与实机证据 |
 |---|---|---|---|
-| **1. 独立集成候选验证完整 CI** | PR #150 (`integration/phase2-candidate` @ `164d3b6`) | 直接基于 `main` 汇总 PR #144–#149 与本轮 Follow-up，不提前合并含已知 XSS 的 PR #144 | 12 项自动 GitHub Actions CI **全绿**（见第三节），Python/Linux 全量 `2402 passed, 4 skipped, 666 subtests passed` |
-| **2. 外部估伤引擎子进程生命周期与关闭清理** | [engine.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/integrations/nikke_calc/engine.py), [runtime.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/adapters/astrbot/runtime.py#L144-L148) | 改为原生 `asyncio.create_subprocess_exec` + `asyncio.TaskGroup` + `asyncio.timeout`；信号量包裹子进程树强杀（`taskkill /F /T` / `os.killpg`）与 `wait()` 后才释放；运行期间 `_read_stream_bounded` 实时限制 `stdout`/`stderr` 字节上限；拦截非对象 JSON 与异常字段；`dirty`/未核验结果强制标 `未核验版本（非可信固定基线）`；接入 `RuntimeCoordinator.register_cleanup("solo_engine", solo_engine.aclose)` | [test_solo_raid_engine.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/tests/test_solo_raid_engine.py#L230-L415) 真实子进程注入全过；[test_background_lifecycle.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/tests/test_background_lifecycle.py) 全过；实克隆 `Jgaram/nikke-calc@67835ca` 跑出真实数值 `2001618539`（`version_ok=True`, `aclose` 后 `active_process_count=0`） |
-| **3. ShiftyPad 安全边界与日志核查** | [Caddyfile](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/deploy/Caddyfile#L4-L7), [shiftypad_service.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/integrations/web/shiftypad_service.py#L310-L316), [index.html](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/templates/shiftypad_web/index.html#L4-L6) | 补充 `log_skip /shiftypad/*` 与 `log_skip /api/shiftypad/*`；确认 `BindingWebService.start` 配置 `access_log=None`；HTML 补充 `<meta name="referrer" content="no-referrer">` 配合 `Referrer-Policy: no-referrer`；环境无授权 ShiftyPad 测试账号，继续维持 **BLOCKED** 与 `enable_shiftypad_readonly=false` | [test_deployment_config.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/tests/test_deployment_config.py) 与 [test_shiftypad_web.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/tests/test_shiftypad_web.py#L334-L398) 验证真实 `AppRunner(access_log=None)` 零 token/cookie 日志泄漏 |
-| **4. 愿望单普通招募准入表（Fail-Closed）** | [wishlist_pool_eligibility.json](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/assets/data/wishlist_pool_eligibility.json), [advisor.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/features/wishlist/advisor.py), [toolbox.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/core/providers/toolbox.py), [calc_tools.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/application/commands/calc_tools.py#L172-L184) | 覆盖全部 171 名 `character_master.json` SSR（89 普池 + 18 朝圣/超限 + 19 联动 + 18 限定 + 10 免费/解放 + 17 未独立核验 `unknown`）；严格 `fail-closed` 拒绝 `limited`/`collab`/`new_not_yet_ordinary`/`free_welfare`/`unknown`，并将 Over-Spec 并入 `PILGRIM` 独立 5 席；保留 SSR-only 160 墙 | [test_wishlist_advisor.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/tests/test_wishlist_advisor.py#L131-L185) 覆盖全部准入状态与真实全表校验 |
-| **5. 订阅基线保护与死字段清理** | [feeds.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/features/announcement/feeds.py#L260-L304) | 重订阅/追订或单源短暂故障期间保留既有 `baseline` 条目，避免来源恢复后重复推送历史内容；移除无效落盘字段 `reminder_hours`；与 `CalendarSubscriptions`（24h 截止提醒）和 `AnnouncementDelivery`（管理员全群广播）共用幂等投递状态机与 `_dispatch_lock` | [test_announcement_feeds.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/tests/test_announcement_feeds.py#L263-L334) 验证故障期重订阅、恢复去重、并发 `dispatch_due` 与跨渠道隔离 |
-| **6. 外部数据契约、校验工具与降级分层** | [validate_external_data.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/scripts/operations/validate_external_data.py), [EXTERNAL_DATA_IMPORT.md](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/docs/acceptance/EXTERNAL_DATA_IMPORT.md) | 统一 5 类外部数据导入 Schema CLI 校验器；清晰区分 `READY` / `DEGRADED` / `BLOCKED`，无许可数据集绝不恢复也绝不用假数据填充 | [test_external_data_validator.py](file:///C:/Users/September/.gemini/antigravity/worktrees/Nikke_Plugin/plugin_audit_refactor_plan/tests/test_external_data_validator.py) 与 CLI 实跑 `exit 0` |
-| **7. P0/P1 前序闭环汇总（PR #144–#149）** | `core/container.py`, `features/growth/history.py`, `features/solo_raid/*`, `features/overload_advice/*`, `features/sync/*`, `features/favorite_grid/*` | 修复 `container.py:179` 可选 `directory_provider` 空值调用、养成历史 `(actor, canonical_game_identity)` 隔离 + `clear_generation`、突袭弱点 `boss.weakness`、本命九宫格 1080×1080 非裁切 T2I + `COUNTS_KEY` O(1) 排行 | Headless Edge `1080×1080` 九宫格截图视觉通过 + Linux CI 全量验证通过 |
+| **P1-01 外部估伤引擎进程树生命周期与跨平台清理** | [integrations/nikke_calc/engine.py](../../integrations/nikke_calc/engine.py), [adapters/astrbot/runtime.py](../../adapters/astrbot/runtime.py#L144-L148) | 将进程树生命周期与直属子进程 `returncode` 解耦：Windows 引入 `CreateJobObjectW`（`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`）+ `TerminateJobObject` + `QueryInformationJobObject` 校验及 `taskkill` 兜底；POSIX 采用 `start_new_session=True` + `os.killpg` + `_posix_pgid_has_live_processes`（读取 `/proc/<pid>/stat` 过滤容器 PID 1 未回收 `Z`/`X`/`x` 僵尸），并通过 `_wait_direct_exit` 消除 Python 3.12 `proc.wait()` 在派生子进程继承 `stdout`/`stderr` 时的阻塞；父退后残存管道先限短预算 `pipe_drain_timeout` 再强杀；清理以 `_run_uninterruptible` 包裹在 `async with semaphore:` 内；`aclose()` 先等待 `_spawning == 0` 再回收，清理异常上浮至 `cleanup_failures` | [tests/test_solo_raid_engine.py](../../tests/test_solo_raid_engine.py) 覆盖 9 组真实 OS PID 故障场景（在 `serv` Python 3.12.14 上 **8 passed in 2.53s**，Linux CI 3.12/3.13 全过） |
+| **P1-02 订阅基线按类型状态机保护** | [features/announcement/feeds.py](../../features/announcement/feeds.py) | 拆分 `uninitialized` / `initialized` / `initialized_unavailable` 三态与 `kind_subscribed_at`，保证“新闻/视频/日程”单一来源长期不可用后首次恢复时先建基线不倒灌历史（>14 天归档亦不补推），并兼容缺 `kind_states` 的旧持久化记录；投递前复核 `enabled` 与在订 `kinds` | [tests/test_announcement_feeds.py](../../tests/test_announcement_feeds.py) 8 场景单测全过；`serv` 上 YouTube `ConnectError` 时实测安全建基线提示、`mock_sent=0` |
+| **P2-01 外部引擎版本固定基线 4 态可信度** | [integrations/nikke_calc/engine.py](../../integrations/nikke_calc/engine.py), [core/providers/toolbox.py](../../core/providers/toolbox.py) | 引入 `git_verified_pinned` / `self_reported_unverified` / `unverified` / `mismatch_or_dirty` 四态；生产默认 `require_git=True`，联动核验 `solo_raid_engine_names.json` 声明 `engine_commit` 与实际 `git rev-parse HEAD` / clean 状态 | [tests/test_solo_raid_engine.py](../../tests/test_solo_raid_engine.py) 4 态全测；`serv` 克隆 `67835ca` 标示为 `Git 核验固定基线` |
+| **实机验收 Bug 修复：已绑定名单目录补全 & 详情限流重试** | [application/commands/solo_raid.py](../../application/commands/solo_raid.py), [features/character/application.py](../../features/character/application.py) | 修复绑定账号拉取 `GetUserCharacters` 缺 `burst`/`element`/`name_zh_cn` 导致 `1007(?)` 且不触发 `nikke-calc` 的问题；为 `GetUserCharacterDetails` Top-20 并发突发的 `request too frequently` 增加 `1` 次退避重试 | [tests/test_toolbox_commands.py](../../tests/test_toolbox_commands.py) 与 [tests/test_roster_option_summary.py](../../tests/test_roster_option_summary.py) 新增回归测试全过；`serv` 实号计算 **`1,813,859,815`** 并出图 |
+| **P2-02 文档路径与能力数一致性修正** | [CAPABILITY_MATRIX.md](./CAPABILITY_MATRIX.md), [DATA_SOURCE_REGISTRY.md](./DATA_SOURCE_REGISTRY.md), [REAL_ACCOUNT_ACCEPTANCE.md](../acceptance/REAL_ACCOUNT_ACCEPTANCE.md) | 修正能力总表数量描述为 `30 项`，明确区分代码就绪 / CI / 实机验收状态，清除全部本机工作树绝对路径链接并替换为仓库相对路径，同步最新提交 SHA | 全仓 `docs/` 零本机绝对链接残留 |
+| **前序 ShiftyPad / 愿望单 / 校验器闭环** | [deploy/Caddyfile](../../deploy/Caddyfile), [wishlist_pool_eligibility.json](../../assets/data/wishlist_pool_eligibility.json), [validate_external_data.py](../../scripts/operations/validate_external_data.py) | `log_skip /shiftypad/*` & `/api/shiftypad/*`、`access_log=None`、`no-referrer`、171 SSR 准入 `fail-closed` 表及 5 类导入 Schema CLI 校验 | [tests/test_shiftypad_web.py](../../tests/test_shiftypad_web.py), [tests/test_wishlist_advisor.py](../../tests/test_wishlist_advisor.py), [tests/test_external_data_validator.py](../../tests/test_external_data_validator.py) 全过 |
 
 ---
 
-## 三、完整自动化 CI 与实机验证结果（PR #150 @ `164d3b6`）
+## 三、完整自动化 CI 与实机验收摘要
 
-### 3.1 GitHub Actions CI 全量检查实录
+### 3.1 PR #150 GitHub Actions CI 状态（代码提交 `2fff002` 与 `e749746` 已验证，最终文档提交将继续同步全绿）
+- `Test (Python 3.12, AstrBot ==4.24.0)`：**PASS**
+- `Test (Python 3.12, AstrBot >=4.24,<5)`：**PASS**
+- `Test (Python 3.13, AstrBot ==4.24.0)`：**PASS**
+- `Test (Python 3.13, AstrBot >=4.24,<5)`：**PASS**
+- `Static gates (architecture + mypy)`：**PASS**
+- `Spine 4.0 headless worker build`：**PASS**
+- `Extension (Node)`：**PASS**
+- `CodeQL` + `Analyze (actions / c-cpp / javascript-typescript / python)`：**PASS**
+- *Spine Phase 3A candidate dry-run (manual only)*：*skipping*（仅 `workflow_dispatch` 手动任务）
 
-| CI 检查项 | 状态 | 耗时 | 覆盖说明与精确观测输出 |
-|---|---|---|---|
-| **Test (Python 3.12, AstrBot ==4.24.0)** | **PASS** | 6m50s | `2402 passed, 4 skipped, 1 warning, 666 subtests passed`（Ubuntu 完整资源目录 + Chromium Playwright） |
-| **Test (Python 3.12, AstrBot >=4.24,<5)** | **PASS** | 7m17s | 完整兼容性矩阵全部通过 |
-| **Test (Python 3.13, AstrBot ==4.24.0)** | **PASS** | 8m21s | `2402 passed, 4 skipped, 1 warning, 666 subtests passed` |
-| **Test (Python 3.13, AstrBot >=4.24,<5)** | **PASS** | 8m43s | 完整兼容性矩阵全部通过 |
-| **Static gates (architecture + mypy)** | **PASS** | 1m23s | `architecture_metrics.py --check` (`gate_violations: []`) + `mypy` 38 个受控模块 0 报错 |
-| **Spine 4.0 headless worker build** | **PASS** | 3m27s | 构建 Spine 4.0 & 4.1 Docker Worker 并实跑 `tests/test_runtime_character_portrait_official.py` 全过 |
-| **Extension (Node)** | **PASS** | 18s | `tests/extension.test.cjs` + `tests/*.test.mjs` 全部通过 |
-| **CodeQL** | **PASS** | 2s | PR #144 原 Reflected XSS 告警已彻底消除 |
-| **Analyze (actions / c-cpp / javascript-typescript / python)** | **PASS** | 47s–1m10s | 4 项静态代码安全扫描全部通过 |
-| *Spine Phase 3A candidate dry-run (manual only)* | *skipping* | 0s | 仅 `workflow_dispatch` 手动触发的批处理预演任务（正常跳过） |
-
-**关于之前本机 153 项 Windows sparse-checkout 失败与 CI 4 项 Skipped 的严格说明**：
-- 此前在本机 Windows 稀疏检出工作树出现的 153 项失败（缺失 `assets/blablalink`/`fonts`/`tarot`/`icons`/`mappings`、Windows `WinError 1314` `symlink` 权限、`WinError 5` 并发 `os.replace` 锁及本地缺少 Playwright Chromium）已在 Linux 完整检出 CI 中**全部通过**（含 Playwright 浏览器测试与完整资源目录校验）。
-- Linux CI 中 `pytest` 报告的 **4 项 `SKIPPED`**：
-  1. `test_runtime_character_portrait_official.py::test_bundled_and_runtime_portraits_render_current_white_card`（依赖 Docker Spine 镜像，在 `Spine 4.0 headless worker build` job 中已实跑通过）；
-  2. `test_solo_raid_real_engine.py::test_real_engine_through_solo_raid_command`（CI runner 未预先克隆外部 `nikke-calc`，已在开发机克隆 `67835ca` 独立实机跑通）；
-  3–4. `test_t2i_presentation_refinements.py::test_character_ol_density_classes` 与 `test_character_ol_summary_preserves_all_entries`（仓库既有条件跳过项）。
-
-### 3.2 本机真实外部环境 & 重点复测记录
-- **真实 `Jgaram/nikke-calc@67835ca` 运行**：独立检出 commit `67835ca3033a95482749ea2db35a8ee2a0856a92`（干净工作区），构造 5 人合法爆裂链队伍（丽塔/桑迪/尼恩：透视之眼/拉普拉斯/德雷克）经 `SoloRaidDamageEngine.estimate(..., require_git=True)` 实测返回 `available=True`, `version_ok=True`, `label="nikke-calc 67835ca303（MIT，外部本地引擎）"`, `total=2001618539`, 并在 `await engine.aclose()` 后确认 `active_process_count == 0`。
-- **Follow-up 重点套件本地复测（最新修改后）**：`73 passed, 5 subtests passed`（`test_solo_raid_engine.py`, `test_solo_raid_five_teams.py`, `test_deployment_config.py`, `test_shiftypad_web.py`, `test_shiftypad_shared_readonly.py`, `test_wishlist_advisor.py`, `test_announcement_feeds.py`, `test_calendar_subscriptions.py`, `test_external_data_validator.py`, `test_toolbox_commands.py`, `test_toolbox_runtime.py`, `test_main_refactor_integrity.py`）；随后在修复 `TaskGroup` 与 `container.py` 后加跑 `test_background_lifecycle.py` + `test_solo_raid_engine.py` + `test_main_refactor_integrity.py`（`19 passed`, `arch_exit=0`）。
+### 3.2 服务器隔离只读与 T2I 视觉验收结论
+- 在 `ssh serv` 隔离容器运行中完成 `***9910`（186 名妮姬）全套只读命令验收、**14 张真实 `nikke-t2i` 卡片像素与视觉检查**、真实 `nikke-calc@67835ca` 5 队计算（`1,813,859,815`）、`RuntimeCoordinator` 逆序清理（`survivors=[]`、`lingering_nikke_calc_procs=[]`、`sqlite_integrity="ok"`）及故障注入。完整逐项实据载于 [REAL_ACCOUNT_ACCEPTANCE.md](../acceptance/REAL_ACCOUNT_ACCEPTANCE.md)。
 
 ---
 
-## 四、外部阻塞与待宿主机现场验收边界
+## 四、外部阻塞与运维前提
 
-1. **`acct.shiftypad`（状态：`BLOCKED`）**：当前环境缺少授权 ShiftyPad 测试账号凭据，无法安全实测 `api.blablalink.com/.../User/GetUserProfile` 匿名字段与限流边界；继续保持 `enable_shiftypad_readonly=false` 默认关闭。
-2. **`tool.counsel`（状态：`BLOCKED`）**：未找到可合法再分发的中文咨询题库；已提供严格 Schema（须带 `license` / `source_url` / `checked_at`）与校验器 `validate_external_data.py counsel_bank`，缺失时安全阻断不猜答案。
-3. **线上实号与 QQ 宿主联动项（需部署环境实测）**：BlaBlaLink 实号绑定/练度批量查询/写操作（`AUD-010`、签到/CDK `UNKNOWN_AFTER_ACTION` 两步恢复确认）、`nikke-api.pages.dev` 线上连通性、携带真实立绘的 `favorite_grid` T2I 端到端发送，以及 QQ 群真实定时 `@` 主动推送与宿主机 AstrBot 重启清理。
+1. **`acct.shiftypad`（`BLOCKED`）**：缺少授权 ShiftyPad 测试凭据；启用前除配置开关外还须确认宿主机 Caddy 同步 [`deploy/Caddyfile`](../../deploy/Caddyfile) 的 `log_skip /shiftypad/*` 规则。
+2. **`tool.counsel`（`BLOCKED`）**：未发现合法可再分发中文咨询题库；维持显式缺口提示与导入器 `license` 校验。
+3. **可选外部导表与实号写开关（`DEGRADED` / `NOT_TESTED`）**：`sync_level_cost_table_path`、`solo_raid_season_path`、`overload_recommendations_path` 缺省时均按合法降级模式运行；`enable_daily_actions`、`enable_cdk_redemption`、`enable_announcement_push`、`enable_public_share_api`、`arena_web_enabled` 保持默认关闭。
 
 ---
 
-## 五、建议合并顺序与回滚方案
+## 五、合并顺序与回滚方案（本阶段停止门禁）
 
-### 5.1 建议合并顺序
-- **禁止直接先合并 PR #144 到 `main`**（PR #144 在合入 PR #145 前包含已知 CodeQL Reflected XSS，违反“禁止让已知安全缺陷进入主干”的要求）。
-- **推荐路径（Clean Single Merge）**：
-  1. 人工审阅并批准 **PR #150（`integration/phase2-candidate`）**；
-  2. 待最新文档提交触发的 PR #150 CI 再次全绿后，以 **Squash & Merge** 或 **Merge Commit** 合入 `main`；
-  3. 同步关闭已被 PR #150 超集包含的栈式中间 PR（`#144`–`#149`），或在需要保留分拆提交历史时将栈式 PR 逐一改为本地集成验证后原子合并。
-- **本阶段停止声明**：按“先业务，后交互”原则，本次不直接合并 `main`，亦不启动 Phase 3–7（`/hall`、`/workspace` 网页开发），等待您的 Phase 2 Gate 审阅结论。
-
-### 5.2 回滚方案
-1. **单提交回滚**：若合入 `main` 后发现异常，使用 `git revert -m 1 <merge_sha>`（Merge Commit）或 `git revert <squash_sha>` 一键退回 `origin/main` `71e664f`。
-2. **运行时功能热熔断（无需改代码）**：全部高风险写开关与实验接口默认 `false`（`enable_shiftypad_readonly=false`、`enable_public_share_api=false`、`enable_daily_actions=false`、`enable_cdk_redemption=false`、`enable_announcement_push=false`、`enable_arena=false`、`arena_web_enabled=false`、`allow_group_bind=false`），部署侧可通过配置开关立即隔离任意受影响功能。
+- **禁止直接先合并 PR #144 到 `main`**（含早期 CodeQL XSS 缺陷）。
+- **推荐合入方式**：由人工审阅并批准 **PR #150（`integration/phase2-candidate`）**，在最终 HEAD SHA 全部 12 项 CI 确认通过后以 **Squash & Merge** 或 **Merge Commit** 合入 `main`，并关闭被覆盖的中间栈式 PR（`#144`–`#149`）。
+- **本阶段停止声明**：按“先业务，后交互”门禁要求，本次**不合并 `main`**，**不开启 Phase 3–7（`/hall`、`/workspace`）开发**。
+- **回滚方案**：若合入 `main` 后出现回归，执行 `git revert -m 1 <merge_sha>`（或 `git revert <squash_sha>`）一键回退至 `origin/main` `71e664f`；运行期亦可通过保留的布尔配置开关即刻热熔断高风险模块。
