@@ -121,7 +121,10 @@ class _ManagedProcess:
     pgid: int
     job_handle: int | None = None
     cleaned: bool = False
+    cleanup_failed: bool = False
     cleanup_error: str = ""
+    cleanup_task: asyncio.Task[str] | None = None
+    held_semaphore: asyncio.Semaphore | None = None
 
 
 def _minimal_env() -> dict[str, str]:
@@ -552,6 +555,7 @@ class SoloRaidDamageEngine:
             weakref.WeakKeyDictionary()
         )
         self._active_handles: set[_ManagedProcess] = set()
+        self._leaked_handles: set[_ManagedProcess] = set()
         self._cleanup_failures: list[str] = []
         self._spawning = 0
         self._spawning_idle: weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, asyncio.Event] = (
@@ -582,13 +586,16 @@ class SoloRaidDamageEngine:
         return sum(1 for item in self._active_handles if not item.cleaned)
 
     @property
+    def leaked_process_count(self) -> int:
+        return sum(1 for item in self._leaked_handles if not item.cleaned)
+
+    @property
     def cleanup_failures(self) -> tuple[str, ...]:
         return tuple(self._cleanup_failures)
 
-    async def _cleanup_managed(self, managed: _ManagedProcess) -> str:
-        """无论直接父进程是否已退出，均强制终止整棵进程树并关闭管道/句柄。"""
-        if managed.cleaned:
-            return managed.cleanup_error
+    async def _do_cleanup_managed(self, managed: _ManagedProcess) -> str:
+        """执行一次真实进程树强杀与父进程回收；失败时保留句柄与并发槽占用以便后续追踪重杀。"""
+        err_msg = ""
         try:
             ok, err = await asyncio.to_thread(
                 self._tree_killer,
@@ -599,8 +606,7 @@ class SoloRaidDamageEngine:
             )
             managed.job_handle = None
             if not ok:
-                managed.cleanup_error = err or f"PID {managed.pid} 进程树清理未确认成功"
-                self._cleanup_failures.append(managed.cleanup_error)
+                err_msg = err or f"PID {managed.pid} 进程树清理未确认成功"
             if managed.proc.returncode is None:
                 with contextlib.suppress(ProcessLookupError, OSError):
                     managed.proc.kill()
@@ -608,19 +614,50 @@ class SoloRaidDamageEngine:
                 await asyncio.wait_for(_wait_direct_exit(managed.proc), timeout=1.0)
             except (asyncio.TimeoutError, OSError) as exc:
                 extra = f"父进程回收失败（{type(exc).__name__}）"
-                managed.cleanup_error = f"{managed.cleanup_error}; {extra}".strip("; ")
-                if not ok:
-                    self._cleanup_failures[-1] = managed.cleanup_error
-                else:
-                    self._cleanup_failures.append(managed.cleanup_error)
+                err_msg = f"{err_msg}; {extra}".strip("; ")
             transport = getattr(managed.proc, "_transport", None)
             if transport is not None:
                 with contextlib.suppress(Exception):
                     transport.close()
         finally:
-            managed.cleaned = True
-            self._active_handles.discard(managed)
+            managed.cleanup_task = None
+            if not err_msg:
+                managed.cleaned = True
+                managed.cleanup_failed = False
+                managed.cleanup_error = ""
+                self._active_handles.discard(managed)
+                self._leaked_handles.discard(managed)
+                if managed.held_semaphore is not None:
+                    managed.held_semaphore.release()
+                    managed.held_semaphore = None
+            else:
+                managed.cleaned = False
+                managed.cleanup_failed = True
+                managed.cleanup_error = err_msg
+                self._leaked_handles.add(managed)
+                self._cleanup_failures.append(err_msg)
         return managed.cleanup_error
+
+    async def _cleanup_managed(self, managed: _ManagedProcess) -> str:
+        """真正并发幂等地回收进程树：aclose() 与 finally 并发进入时共享同一清理任务。"""
+        if managed.cleaned:
+            return managed.cleanup_error
+        task = managed.cleanup_task
+        if task is None:
+            task = asyncio.ensure_future(self._do_cleanup_managed(managed))
+            managed.cleanup_task = task
+        cancelled = False
+        while not task.done():
+            try:
+                await asyncio.shield(task)
+            except asyncio.CancelledError:
+                cancelled = True
+        try:
+            result = task.result()
+        finally:
+            if cancelled:
+                raise asyncio.CancelledError
+        return result
 
     async def aclose(self) -> None:
         """插件关闭或清理阶段先阻断新创建、等待在途 spawn 注册完成，再强杀全部活动进程树。"""
@@ -674,7 +711,14 @@ class SoloRaidDamageEngine:
             request["enemy"] = {"code": code}
         return request
 
-    async def _run_team_subprocess(self, team: Any, boss_element: str) -> EngineTeamEstimate:
+    async def _run_team_subprocess(
+        self,
+        team: Any,
+        boss_element: str,
+        *,
+        _semaphore: asyncio.Semaphore | None = None,
+        _slot_claim: list[bool] | None = None,
+    ) -> EngineTeamEstimate:
         """运行单队子进程；信号量在其外层持有直到整棵进程树与读取任务完全回收。"""
         index = int(getattr(team, "index", 0) or 0)
         if self._closed:
@@ -699,13 +743,19 @@ class SoloRaidDamageEngine:
         stdout_task: asyncio.Task[bytes] | None = None
         stderr_task: asyncio.Task[bytes] | None = None
         wait_task: asyncio.Task[int] | None = None
+        collector_task: asyncio.Task[Any] | None = None
         cleanup_err = ""
+        early_error: str | None = None
+        stdout_bytes = b""
+        stderr_bytes = b""
+        returncode = -1
         try:
             self._spawning += 1
             self._spawn_idle_event().clear()
             try:
                 if self._closed:
-                    return EngineTeamEstimate(index, None, "引擎已关闭")
+                    early_error = "引擎已关闭"
+                    return EngineTeamEstimate(index, None, early_error)
                 proc = await asyncio.create_subprocess_exec(
                     self.python,
                     "-m",
@@ -729,81 +779,98 @@ class SoloRaidDamageEngine:
                     self._spawn_idle_event().set()
 
             if self._closed:
-                cleanup_err = await _run_uninterruptible(lambda: self._cleanup_managed(managed))
-                return EngineTeamEstimate(index, None, "引擎已关闭", cleanup_error=cleanup_err)
-
-            stdout_buf = bytearray()
-            stderr_buf = bytearray()
-            stdout_task = asyncio.ensure_future(
-                _read_stream_bounded(proc.stdout, MAX_OUTPUT_BYTES, "stdout", stdout_buf)
-            )
-            stderr_task = asyncio.ensure_future(
-                _read_stream_bounded(proc.stderr, MAX_OUTPUT_BYTES, "stderr", stderr_buf)
-            )
-            wait_task = asyncio.ensure_future(_wait_direct_exit(proc))
-
-            # 同时监听直接父进程退出与受限流读取，防止继承管道的后代进程阻塞等待。
-            async def _collect_with_descendant_guard() -> tuple[bytes, bytes, int, bool]:
-                readers_done_before_kill = True
-                returncode = await wait_task
-                pending_readers = [t for t in (stdout_task, stderr_task) if not t.done()]
-                if pending_readers:
-                    _, still_open = await asyncio.wait(
-                        pending_readers, timeout=self.pipe_drain_timeout
-                    )
-                    if still_open:
-                        readers_done_before_kill = False
-                        # 存在继承了 stdout/stderr 的残留派生进程：立即强杀进程树，再短等管道 EOF。
-                        await _run_uninterruptible(lambda: self._cleanup_managed(managed))
-                        _, still_stuck = await asyncio.wait(still_open, timeout=0.2)
-                        for t in still_stuck:
-                            t.cancel()
-                        if still_stuck:
-                            await asyncio.gather(*still_stuck, return_exceptions=True)
-                for t in (stdout_task, stderr_task):
-                    if not t.done():
-                        t.cancel()
-                        await asyncio.gather(t, return_exceptions=True)
-                out_bytes = bytes(stdout_buf) if stdout_task.cancelled() else stdout_task.result()
-                err_bytes = bytes(stderr_buf) if stderr_task.cancelled() else stderr_task.result()
-                return out_bytes, err_bytes, returncode, readers_done_before_kill
-
-            # 若任一 reader 先于 proc.wait() 抛出异常（如输出超限），立刻感知而不是等到超时。
-            async def _drive() -> tuple[bytes, bytes, int, bool]:
-                collector = asyncio.ensure_future(_collect_with_descendant_guard())
-                done, _ = await asyncio.wait(
-                    [collector, stdout_task, stderr_task],
-                    return_when=asyncio.FIRST_EXCEPTION,
+                early_error = "引擎已关闭"
+            else:
+                stdout_buf = bytearray()
+                stderr_buf = bytearray()
+                stdout_task = asyncio.ensure_future(
+                    _read_stream_bounded(proc.stdout, MAX_OUTPUT_BYTES, "stdout", stdout_buf)
                 )
-                for t in done:
-                    if t is not collector and not t.cancelled() and t.exception() is not None:
-                        collector.cancel()
-                        await asyncio.gather(collector, return_exceptions=True)
-                        raise t.exception()  # type: ignore[misc]
-                return await collector
+                stderr_task = asyncio.ensure_future(
+                    _read_stream_bounded(proc.stderr, MAX_OUTPUT_BYTES, "stderr", stderr_buf)
+                )
+                wait_task = asyncio.ensure_future(_wait_direct_exit(proc))
 
-            stdout_bytes, stderr_bytes, returncode, _ = await asyncio.wait_for(
-                _drive(), timeout=self.timeout
-            )
+                # 同时监听直接父进程退出与受限流读取，防止继承管道的后代进程阻塞等待。
+                async def _collect_with_descendant_guard() -> tuple[bytes, bytes, int, bool]:
+                    readers_done_before_kill = True
+                    returncode_inner = await wait_task
+                    pending_readers = [t for t in (stdout_task, stderr_task) if not t.done()]
+                    if pending_readers:
+                        _, still_open = await asyncio.wait(
+                            pending_readers, timeout=self.pipe_drain_timeout
+                        )
+                        if still_open:
+                            readers_done_before_kill = False
+                            # 存在继承了 stdout/stderr 的残留派生进程：立即强杀进程树，再短等管道 EOF。
+                            await _run_uninterruptible(lambda: self._cleanup_managed(managed))
+                            _, still_stuck = await asyncio.wait(still_open, timeout=0.2)
+                            for t in still_stuck:
+                                t.cancel()
+                            if still_stuck:
+                                await asyncio.gather(*still_stuck, return_exceptions=True)
+                    for t in (stdout_task, stderr_task):
+                        if not t.done():
+                            t.cancel()
+                            await asyncio.gather(t, return_exceptions=True)
+                    out_bytes = bytes(stdout_buf) if stdout_task.cancelled() else stdout_task.result()
+                    err_bytes = bytes(stderr_buf) if stderr_task.cancelled() else stderr_task.result()
+                    return out_bytes, err_bytes, returncode_inner, readers_done_before_kill
+
+                # 若任一 reader 先于 proc.wait() 抛出异常（如输出超限），立刻感知而不是等到超时。
+                async def _drive() -> tuple[bytes, bytes, int, bool]:
+                    nonlocal collector_task
+                    collector_task = asyncio.ensure_future(_collect_with_descendant_guard())
+                    try:
+                        done, _ = await asyncio.wait(
+                            [collector_task, stdout_task, stderr_task],
+                            return_when=asyncio.FIRST_EXCEPTION,
+                        )
+                        for t in done:
+                            if t is not collector_task and not t.cancelled() and t.exception() is not None:
+                                collector_task.cancel()
+                                await asyncio.gather(collector_task, return_exceptions=True)
+                                raise t.exception()  # type: ignore[misc]
+                        return await collector_task
+                    finally:
+                        if collector_task is not None and not collector_task.done():
+                            collector_task.cancel()
+                            await asyncio.gather(collector_task, return_exceptions=True)
+
+                stdout_bytes, stderr_bytes, returncode, _ = await asyncio.wait_for(
+                    _drive(), timeout=self.timeout
+                )
         except _OutputLimitExceeded:
-            return EngineTeamEstimate(index, None, "引擎输出超过大小上限")
+            early_error = "引擎输出超过大小上限"
         except asyncio.TimeoutError:
-            return EngineTeamEstimate(index, None, "引擎计算超时")
+            early_error = "引擎计算超时"
         except OSError as exc:
-            return EngineTeamEstimate(index, None, f"引擎无法启动（{type(exc).__name__}）")
+            early_error = f"引擎无法启动（{type(exc).__name__}）"
         finally:
             async def _final_reap() -> str:
-                pending_inner = [t for t in (wait_task, stdout_task, stderr_task) if t is not None and not t.done()]
+                pending_inner = [
+                    t
+                    for t in (collector_task, wait_task, stdout_task, stderr_task)
+                    if t is not None and not t.done()
+                ]
                 for t in pending_inner:
                     t.cancel()
                 err = ""
                 if managed is not None:
                     err = await self._cleanup_managed(managed)
+                    if not managed.cleaned and _semaphore is not None and _slot_claim is not None:
+                        # 清理失败时保留并发槽位占用，直到后续重试（如 aclose()）真正清理成功后释放。
+                        managed.held_semaphore = _semaphore
+                        _slot_claim[0] = True
                 if pending_inner:
                     await asyncio.gather(*pending_inner, return_exceptions=True)
                 return err
 
             cleanup_err = await _run_uninterruptible(_final_reap)
+
+        if early_error is not None:
+            msg = early_error if not cleanup_err else f"{early_error}；进程树清理异常：{cleanup_err}"
+            return EngineTeamEstimate(index, None, msg, cleanup_error=cleanup_err)
 
         text = stdout_bytes.decode("utf-8", errors="replace").strip()
         if returncode != 0:
@@ -894,9 +961,16 @@ class SoloRaidDamageEngine:
         semaphore = self._semaphore()
 
         async def limited(team: Any) -> EngineTeamEstimate:
-            # 信号量必须持续到 _run_team_subprocess 的 finally（含进程树强杀与验证）全部完成。
-            async with semaphore:
-                return await self._run_team_subprocess(team, boss_element)
+            # 信号量必须持续到进程树彻底清理确认成功后才释放；清理失败时由 leaked handle 持有槽位。
+            await semaphore.acquire()
+            slot_claim = [False]
+            try:
+                return await self._run_team_subprocess(
+                    team, boss_element, _semaphore=semaphore, _slot_claim=slot_claim
+                )
+            finally:
+                if not slot_claim[0]:
+                    semaphore.release()
 
         if not teams:
             results: tuple[EngineTeamEstimate, ...] = ()

@@ -496,13 +496,15 @@ class FeedSubscriptions(AnnouncementDelivery):
                     state_dirty = True
 
                 archive_floor = current - timedelta(days=_HISTORY_RECOVERY_DAYS)
+                kind_sub_at = aware(kind_sub_map.get(kind) or default_sub)
+                effective_floor = max(archive_floor, kind_sub_at)
                 for item in items_by_kind.get(kind, ()):
                     key = f"{item.kind}:{item.entity_id}"
                     known = baseline.get(key)
                     if known is not None and item.version <= known:
                         continue
-                    if known is None and aware(item.published_at) < archive_floor:
-                        # 超过 14 天恢复窗的老旧归档重新滚入时不补推；等价保护新闻/视频/日程。
+                    if known is None and aware(item.published_at) < effective_floor:
+                        # 订阅前发布的近期内容或超过 14 天恢复窗的老旧归档进入快照时不补推；等价保护新闻/视频/日程。
                         continue
                     push = PlannedPush(
                         target=target,

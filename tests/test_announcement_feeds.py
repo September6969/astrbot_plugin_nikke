@@ -47,14 +47,20 @@ class FakeVideoSource:
         return self.cached_items
 
 
-def item(kind: str, entity_id: str, version: int = 1, title: str = "合成条目") -> FeedItem:
+def item(
+    kind: str,
+    entity_id: str,
+    version: int = 1,
+    title: str = "合成条目",
+    published_at: str = "2026-09-20T00:00:00+00:00",
+) -> FeedItem:
     return FeedItem(
         kind=kind,
         entity_id=entity_id,
         version=version,
         title=title,
         url=f"https://example.invalid/{kind}/{entity_id}",
-        published_at="2026-09-20T00:00:00+00:00",
+        published_at=published_at,
     )
 
 
@@ -107,7 +113,7 @@ async def test_cross_poll_dedupe_and_baseline_at_subscribe() -> None:
     await subs.dispatch_due(sender, now=now)
     assert sender.calls == [], "订阅前的旧新闻不能补推"
 
-    news.append(item("news", "n2", title="新新闻"))
+    news.append(item("news", "n2", title="新新闻", published_at="2026-09-21T00:10:00+00:00"))
     await subs.dispatch_due(sender, now=now)
     assert len(sender.calls) == 1
     assert sender.calls[0][1] == "user-a"
@@ -128,8 +134,8 @@ async def test_subscription_kinds_are_isolated_between_users() -> None:
     subs.command(target("user-a", "group:1"), "订阅", "新闻")
     subs.command(target("user-b", "group:2", private=True), "订阅", "日程")
     # 重新写入基线后追加新条目，模拟两条新内容。
-    catalog._catalogs["news"]._items.append(item("news", "n2", title="新闻二"))
-    catalog._catalogs["schedule"]._items.append(item("schedule", "s2", title="活动二"))
+    catalog._catalogs["news"]._items.append(item("news", "n2", title="新闻二", published_at="2026-09-21T00:10:00+00:00"))
+    catalog._catalogs["schedule"]._items.append(item("schedule", "s2", title="活动二", published_at="2026-09-21T00:10:00+00:00"))
 
     sender = Sender()
     await subs.dispatch_due(sender, now=datetime(2026, 9, 21, tzinfo=timezone.utc))
@@ -310,7 +316,10 @@ async def test_resubscribe_during_source_outage_preserves_baseline_and_prevents_
 
     # 3. 来源恢复且仅新增 n-new，旧条目 n-old 不应被重新推送；并发 dispatch_due 只发一次。
     news_cat.fail = False
-    news_cat.rows = [item("news", "n-old", version=1), item("news", "n-new", version=1)]
+    news_cat.rows = [
+        item("news", "n-old", version=1),
+        item("news", "n-new", version=1, published_at="2026-09-21T00:30:00+00:00"),
+    ]
 
     async def slow_sender(conversation, actor, private, text):
         await asyncio.sleep(0.02)
@@ -468,3 +477,62 @@ async def test_per_kind_initialization_outage_history_backlog_restart_and_isolat
     subs_after.command(legacy_key, "状态", "")
     cal_subs = CalendarSubscriptions(store, None)
     assert cal_subs.SETTING != subs0.SETTING
+
+
+@pytest.mark.asyncio
+async def test_subscription_time_boundary_blocks_pre_subscribe_items_within_14_days() -> None:
+    """订阅前发布、订阅后才进入快照的近期内容（即使在 14 天恢复窗内）也不得误推送。"""
+    t0 = datetime(2026, 9, 21, 10, 0, tzinfo=timezone.utc)
+    t1 = datetime(2026, 9, 21, 12, 0, tzinfo=timezone.utc)
+    t2 = datetime(2026, 9, 21, 13, 0, tzinfo=timezone.utc)
+
+    news = [item("news", "n-init", published_at="2026-09-21T08:00:00+00:00")]
+    videos = [item("video", "v-init", published_at="2026-09-21T08:00:00+00:00")]
+    store = MemoryStore()
+    cat = FeedCatalog({"news": StaticCatalog(news), "video": VideoCatalog(FakeVideoSource(videos))})
+    key = target("user-time-guard")
+
+    # t0 = 10:00 先订阅新闻；t1 = 12:00 再追订视频。
+    FeedSubscriptions(store, cat, clock=lambda: t0).command(key, "订阅", "新闻")
+    FeedSubscriptions(store, cat, clock=lambda: t1).command(key, "订阅", "视频")
+
+    # t2 = 13:00 快照新混入三类未见条目（均在 14 天窗口内）：
+    # 1. pre-news: 09:00（早于新闻订阅 10:00） -> 必须拦截
+    # 2. mid-both: 11:00（晚于新闻 10:00、早于视频 12:00） -> 仅新闻可发、视频必须拦截
+    # 3. post-video: 12:30（晚于视频 12:00） -> 允许推送
+    news.append(item("news", "pre-news", title="订阅前旧闻迟到入库", published_at="2026-09-21T09:00:00+00:00"))
+    news.append(item("news", "mid-news", title="新闻订阅后新条", published_at="2026-09-21T11:00:00+00:00"))
+    videos_post = [
+        item("video", "v-init", published_at="2026-09-21T08:00:00+00:00"),
+        item("video", "mid-video", title="视频订阅前发布", published_at="2026-09-21T11:00:00+00:00"),
+        item("video", "post-video", title="视频订阅后发布", published_at="2026-09-21T12:30:00+00:00"),
+    ]
+    cat2 = FeedCatalog({"news": StaticCatalog(news), "video": VideoCatalog(FakeVideoSource(videos_post))})
+
+    sender = Sender()
+    await FeedSubscriptions(store, cat2, clock=lambda: t2).dispatch_due(sender, now=t2)
+    texts = [call[3] for call in sender.calls]
+    assert len(texts) == 2
+    assert any("新闻订阅后新条" in text for text in texts)
+    assert any("视频订阅后发布" in text for text in texts)
+    assert not any("订阅前旧闻迟到入库" in text for text in texts)
+    assert not any("视频订阅前发布" in text for text in texts)
+
+    # 旧记录缺省 kind_subscribed_at 时回退 default_sub (subscribed_at=t1=12:00) 同样阻断订阅前发布内容。
+    legacy_key = target("legacy-time-user")
+    state = store.get_setting(FeedSubscriptions.SETTING, {})
+    state["targets"][legacy_key] = {
+        "enabled": True,
+        "kinds": ["news"],
+        "subscribed_at": t1.isoformat(),
+        "baseline": {},
+    }
+    store.set_setting(FeedSubscriptions.SETTING, state)
+    news.append(item("news", "legacy-blocked", title="旧版回退拦截", published_at="2026-09-21T11:30:00+00:00"))
+    news.append(item("news", "legacy-allowed", title="旧版放行新条", published_at="2026-09-21T12:15:00+00:00"))
+    sender.calls.clear()
+    await FeedSubscriptions(store, cat2, clock=lambda: t2).dispatch_due(sender, now=t2)
+    legacy_texts = [call[3] for call in sender.calls if call[1] == "legacy-time-user"]
+    assert len(legacy_texts) == 1
+    assert "旧版放行新条" in legacy_texts[0]
+    assert "旧版回退拦截" not in legacy_texts[0]

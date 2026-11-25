@@ -498,3 +498,111 @@ async def test_engine_resolves_resource_id_and_electronic_element() -> None:
     req = eng._request(team, "Electronic")
     assert req["squad"] == ["L1-1", "L1-2", "L1-3", "L1-4", "L1-5"]
     assert req["enemy"] == {"code": "전격"}
+
+
+@pytest.mark.asyncio
+async def test_engine_cleanup_idempotency_early_returns_collector_and_slot_hold(tmp_path: Path) -> None:
+    """收尾回归：并发清理幂等、提前返回不丢 cleanup_error、collector 回收与失败不放行并发槽位。"""
+    plan = build_five_teams(members())
+
+    def _make_sim(name: str, code: str) -> Path:
+        d = tmp_path / name
+        shutil.copytree(ENGINE_PATH, d)
+        (d / "runner" / "sim.py").write_text(code, encoding="utf-8")
+        return d
+
+    # 1: TimeoutError 提前返回必须保留 cleanup_error，且并发 aclose() 与 finally 只执行一次强杀。
+    slow_dir = _make_sim(
+        "timeout_and_concurrent_cleanup",
+        "import time\ntime.sleep(30)\n",
+    )
+    killer_calls = {"count": 0, "allow_ok": False}
+
+    def slow_killer(pid: int, pgid: int, job_handle: int | None, timeout: float) -> tuple[bool, str]:
+        from astrbot_plugin_nikke.integrations.nikke_calc.engine import _kill_managed_tree_sync
+
+        killer_calls["count"] += 1
+        time.sleep(0.08)
+        _kill_managed_tree_sync(pid, pgid, job_handle, timeout)
+        if not killer_calls["allow_ok"]:
+            return False, f"PID {pid} 暂时拒绝清理"
+        return True, ""
+
+    eng_timeout = SoloRaidDamageEngine(
+        slow_dir,
+        mapping(),
+        python=sys.executable,
+        timeout=0.2,
+        batch_timeout=5.0,
+        concurrency=1,
+        _tree_killer=slow_killer,
+    )
+    res_timeout = await eng_timeout.estimate(plan.teams[:1])
+    assert res_timeout.teams[0].error
+    assert "引擎计算超时" in res_timeout.teams[0].error
+    assert "暂时拒绝清理" in res_timeout.teams[0].cleanup_error
+    assert "暂时拒绝清理" in res_timeout.teams[0].error
+    assert res_timeout.cleanup_failures
+    # 清理失败时不得悄悄清零追踪句柄，且并发槽位仍被占用直到重试成功。
+    assert eng_timeout.active_process_count == 1
+    assert eng_timeout.leaked_process_count == 1
+    assert eng_timeout._semaphore().locked() is True
+    # 恢复可清理条件并显式 aclose() 重试，应当回收追踪状态并释放并发槽位。
+    killer_calls["allow_ok"] = True
+    await eng_timeout.aclose()
+    assert eng_timeout.active_process_count == 0
+    assert eng_timeout.leaked_process_count == 0
+    assert eng_timeout._semaphore().locked() is False
+
+    # 2: OutputLimitExceeded 提前返回同样必须保留 cleanup_error。
+    flood_dir = _make_sim(
+        "flood_cleanup_err",
+        "import sys\nchunk = 'y' * 8192\nwhile True:\n    sys.stdout.write(chunk)\n    sys.stdout.flush()\n",
+    )
+    eng_flood = SoloRaidDamageEngine(
+        flood_dir,
+        mapping(),
+        python=sys.executable,
+        timeout=10.0,
+        _tree_killer=lambda pid, pgid, jh, to: (_kill_managed_tree_sync(pid, pgid, jh, to), "输出超限后清理失败")[1]
+        and (False, "输出超限后清理失败"),
+    )
+    # Use clean helper preserving real kill before returning failure
+    from astrbot_plugin_nikke.integrations.nikke_calc.engine import _kill_managed_tree_sync
+
+    def flood_fail_killer(pid: int, pgid: int, job_handle: int | None, timeout: float) -> tuple[bool, str]:
+        _kill_managed_tree_sync(pid, pgid, job_handle, timeout)
+        return False, "输出超限后清理失败"
+
+    eng_flood._tree_killer = flood_fail_killer
+    res_flood = await eng_flood.estimate(plan.teams[:1])
+    assert "引擎输出超过大小上限" in res_flood.teams[0].error
+    assert "输出超限后清理失败" in res_flood.teams[0].cleanup_error
+    assert "输出超限后清理失败" in res_flood.teams[0].error
+
+    # 3: 同一 _ManagedProcess 被 aclose() 与任务 finally 并发调用 _cleanup_managed 时必须共享清理任务。
+    conc_calls = {"count": 0}
+
+    def slow_ok_killer(pid: int, pgid: int, job_handle: int | None, timeout: float) -> tuple[bool, str]:
+        conc_calls["count"] += 1
+        time.sleep(0.12)
+        return _kill_managed_tree_sync(pid, pgid, job_handle, timeout)
+
+    eng_conc = SoloRaidDamageEngine(
+        slow_dir, mapping(), python=sys.executable, timeout=10.0, concurrency=1, _tree_killer=slow_ok_killer
+    )
+    task = asyncio.create_task(eng_conc.estimate(plan.teams[:1]))
+    deadline = time.monotonic() + 3.0
+    while eng_conc.active_process_count == 0 and time.monotonic() < deadline:
+        await asyncio.sleep(0.01)
+    assert eng_conc.active_process_count == 1
+    handle = next(iter(eng_conc._active_handles))
+    r_close, r_direct = await asyncio.gather(
+        eng_conc.aclose(),
+        eng_conc._cleanup_managed(handle),
+    )
+    await task
+    assert r_direct == ""
+    assert conc_calls["count"] == 1
+    assert eng_conc.active_process_count == 0
+    assert eng_conc.leaked_process_count == 0
