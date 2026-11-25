@@ -390,6 +390,14 @@ def diff_points(before: GrowthPoint | None, after: GrowthPoint | None) -> tuple[
     return tuple(changes)
 
 
+def _fmt_growth_value(val: Any) -> str:
+    if val is None:
+        return "—"
+    if isinstance(val, int) and not isinstance(val, bool):
+        return f"{val:,}"
+    return str(val)
+
+
 def render_growth_history(
     points: tuple[GrowthPoint, ...],
     changes: tuple[GrowthChange, ...],
@@ -397,50 +405,47 @@ def render_growth_history(
     upstream_error: str = "",
     roster: RosterSnapshot | None = None,
 ) -> str:
-    """渲染养成历史；空数据与上游失败分别说明。"""
-    lines = ["【养成历史】"]
+    """渲染养成历史；清晰展示最近记录与数值变化。"""
+    lines = ["【养成成长记录】"]
     if upstream_error:
-        lines.append(f"本次同步失败：{upstream_error}")
-        lines.append("未写入新快照；以下仅展示此前成功记录。")
+        lines.append(f"本次没能同步最新数据（{upstream_error}），先看之前的记录：")
     if not points:
-        lines.append("暂无成长快照（账户）。成功同步账号资料后会自动记录；空数据不会生成占位记录。")
+        lines.append("还没有成长记录，先发送一次 /妮姬 我的 查看资料后就会自动开始记录。")
         if roster is None:
             return "\n".join(lines)
     else:
         latest = points[-1]
-        lines.append(
-            f"最近快照：{latest.day}（采样 {latest.samples} 次） · 字段 {len(latest.fields)} 项"
-        )
+        lines.append(f"最近记录：{latest.day}")
         for key, label in FIELD_LABELS.items():
             value = latest.fields.get(key)
             if value is None:
                 continue
-            lines.append(f"· {label}：{value}")
+            lines.append(f"• {label}：{_fmt_growth_value(value)}")
     if changes:
         lines.append("")
         lines.append("较上次变化：")
         for change in changes:
             delta = change.delta
-            suffix = f"（{delta:+d}）" if delta not in (None, 0) else ""
+            suffix = f"（{delta:+,}）" if delta not in (None, 0) else ""
             lines.append(
-                f"· {change.label}：{change.before if change.before is not None else '—'}"
-                f" → {change.after if change.after is not None else '—'}{suffix}"
+                f"• {change.label}：{_fmt_growth_value(change.before)}"
+                f" → {_fmt_growth_value(change.after)}{suffix}"
             )
     elif len(points) >= 2:
-        lines.append("较上次无关键字段变化。")
+        lines.append("较上次没有明显变化。")
     if roster is not None:
         lines.append("")
-        lines.append(f"角色快照：{len(roster.characters)} 名（{roster.day}）")
+        lines.append(f"角色练度记录：共 {len(roster.characters)} 名（{roster.day}）")
         if roster.changes:
             for change in roster.changes[:10]:
                 if change.field == "new":
-                    lines.append(f"· 新增 {change.name}")
+                    lines.append(f"• 新入手 {change.name}")
                 else:
                     label = "等级" if change.field == "level" else "突破"
-                    lines.append(f"· {change.name} {label}：{change.before} → {change.after}")
+                    lines.append(f"• {change.name} {label}：{change.before} → {change.after}")
         else:
-            lines.append("较上次角色快照无等级/突破变化。")
-    lines.append(f"共保存 {len(points)} 条快照（最多 {MAX_ENTRIES} 条，保留 {MAX_AGE_DAYS} 天）。")
+            lines.append("角色等级和星级较上次没有变化。")
+    lines.append(f"\n共保留 {len(points)} 条记录（最多存 {MAX_ENTRIES} 条 / {MAX_AGE_DAYS} 天）。")
     return "\n".join(lines)
 
 

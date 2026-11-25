@@ -113,7 +113,7 @@ async def test_share_command_is_separate_from_uid_and_requires_opt_in_and_confir
     plugin.handlers.toolbox = ToolboxCommandHandler(services)
     disabled_res = [item async for item in plugin.nikke(Event(), "我的妮姬", "分享", "AbCd_123-xyz")]
     assert "默认关闭" in disabled_res[0][1]
-    assert "enable_public_share_api" in disabled_res[0][1]
+    assert "nikke-api.pages.dev" in disabled_res[0][1]
     assert calls == []
 
     # 2. 开启开关但未带“确认”时，只披露第三方传输范围，不发送请求。
@@ -122,7 +122,7 @@ async def test_share_command_is_separate_from_uid_and_requires_opt_in_and_confir
     disclosure_res = [item async for item in plugin.nikke(Event(), "我的妮姬", "分享", "AbCd_123-xyz")]
     disclosure_text = disclosure_res[0][1]
     assert "nikke-api.pages.dev" in disclosure_text
-    assert "仅发送你输入的公开分享 ID" in disclosure_text
+    assert "只会发送你输入的公开分享 ID" in disclosure_text
     assert "确认" in disclosure_text
     assert calls == []
 
@@ -136,7 +136,8 @@ async def test_share_command_is_separate_from_uid_and_requires_opt_in_and_confir
 
     # UID 命令仍保持受限；分享入口不复用也不改变该边界。
     uid_text = await _uid(plugin)
-    assert "与你当前绑定的账号一致" in uid_text
+    assert "和你当前绑定的账号一致" in uid_text
+    assert "不代表账号归属" in uid_text
 
 
 async def _uid(plugin: NikkePlugin) -> str:

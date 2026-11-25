@@ -65,8 +65,8 @@ async def test_link_is_private_only_and_targets_current_actor() -> None:
     text = await route(plugin, PrivateEvent(), "我的妮姬", "导入")
     assert "10 分钟内有效" in text
     assert "https://example.test/shiftypad/" in text
-    assert "只读" in text
-    assert "数字 UID 不能直接查询所有账号" in text
+    assert "只读取公开页信息" in text
+    assert "不会影响你原有的账号绑定" in text
     assert web.actors == ["synthetic-user"]
 
     group_text = await route(plugin, Event(), "我的妮姬", "导入")
@@ -78,10 +78,10 @@ async def test_link_is_private_only_and_targets_current_actor() -> None:
 async def test_readonly_status_distinguishes_unbound_and_stale() -> None:
     plugin, _ = plugin_with_shiftypad(False)
     text = await route(plugin, Event(), "我的妮姬", "只读")
-    assert "尚未建立" in text
+    assert "还没有导入过" in text
 
     plugin, _ = plugin_with_shiftypad(True)
     text = await route(plugin, Event(), "我的妮姬", "只读")
     assert "公开昵称" in text
-    assert "stale" in text
+    assert "已过期" in text
     assert "公开开关已关闭" in text

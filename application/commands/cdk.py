@@ -52,15 +52,15 @@ class CdkCommandHandler:
 
     async def _single(self, context: CommandContext) -> CommandResult:
         if not bool(self._config.get("enable_cdk_redemption", False)):
-            return self._text("CDK真实兑换当前由管理员关闭。")
+            return self._text("管理员暂未开启 CDK 兑换功能，你仍可用 /妮姬 兑换 可用 或 历史 查询。")
         code = context.parameters.get("code", "").strip()
         if not CDK_PATTERN.fullmatch(code):
-            return self._text("兑换码格式无效：仅支持4至64位字母、数字、下划线或连字符。")
+            return self._text("兑换码格式不太对，请确认是 4–64 位字母或数字。")
         account = self._account(context.actor_id)
         if account is None:
             return self._unbound()
         if not CdkService.canonical_account_key(account):
-            return self._text("账号缺少稳定游戏身份，未执行兑换。")
+            return self._text("当前账号信息不完整，请先私聊重新绑定后再试。")
         masked = self.mask_code(code)
         try:
             result = await self._service.redeem_single(
@@ -75,15 +75,15 @@ class CdkCommandHandler:
 
     async def _batch(self, context: CommandContext) -> CommandResult:
         if not bool(self._config.get("enable_cdk_redemption", False)):
-            return self._text("CDK真实兑换当前由管理员关闭。")
+            return self._text("管理员暂未开启 CDK 兑换功能，你仍可用 /妮姬 兑换 可用 或 历史 查询。")
         codes = CdkInputParser.parse(context.parameters.get("codes", ""), max_items=10)
         if not codes:
-            return self._text("未检测到有效的兑换码。支持空格/换行/逗号分隔，单次最多10个。")
+            return self._text("没有识别到有效的兑换码，多个码可用空格、逗号或换行隔开（一次最多 10 个）。")
         account = self._account(context.actor_id)
         if account is None:
             return self._unbound()
         if not CdkService.canonical_account_key(account):
-            return self._text("账号缺少稳定游戏身份，未执行兑换。")
+            return self._text("当前账号信息不完整，请先私聊重新绑定后再试。")
         try:
             batch = await self._service.redeem_batch(
                 account, codes, store=self._store, qq_id=context.actor_id

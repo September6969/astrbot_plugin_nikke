@@ -36,8 +36,7 @@ def history(store=None) -> GrowthHistory:
 def test_empty_history_is_explicit_and_does_not_fabricate_points() -> None:
     service = history()
     text = render_growth_history(service.points("user-a"), service.changes("user-a"))
-    assert "暂无成长快照" in text
-    assert "不会生成占位记录" in text
+    assert "还没有成长记录" in text
     assert service.points("user-a") == ()
 
 
@@ -99,8 +98,8 @@ def test_upstream_failure_renders_previous_records_without_new_write() -> None:
     text = render_growth_history(
         service.points("user-a"), service.changes("user-a"), upstream_error="网络超时"
     )
-    assert "本次同步失败：网络超时" in text
-    assert "未写入新快照" in text
+    assert "本次没能同步最新数据（网络超时）" in text
+    assert "先看之前的记录" in text
     assert store.values == before
 
 
@@ -192,8 +191,8 @@ def test_roster_snapshot_keeps_latest_and_reports_character_changes() -> None:
     text = render_growth_history(
         GrowthHistory(MemoryStore()).points("user-a"), (), roster=roster.latest("user-a")
     )
-    assert "角色快照：2 名" in text
-    assert "新增" in text
+    assert "角色练度记录：共 2 名" in text
+    assert "新入手" in text
 
     roster.clear("user-a")
     assert roster.latest("user-a") is None

@@ -69,7 +69,7 @@ async def test_auto_preference_only_changes_local_setting(daily_handler):
     )
     assert store.auto_daily == [("qq-1", True)]
     runner.run_daily_for_account.assert_not_awaited()
-    assert "暂不会提交" in result.messages[0].text
+    assert "暂不会自动提交" in result.messages[0].text
 
 
 @pytest.mark.asyncio

@@ -43,21 +43,15 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
         live_fn = getattr(self.services, "live_solo_catalog", None)
         catalog = live_fn() if callable(live_fn) else self.services.solo_catalog
         if key in {"", "帮助", "help"}:
-            status = (
-                "已导入赛季：" + "、".join(season.name for season in catalog.seasons)
-                if catalog.available
-                else catalog.reason
-            )
+            latest_name = catalog.latest().name if catalog.available and catalog.latest() else "暂未获取"
             return (
-                "【单人突袭五队】\n"
-                f"{status}\n"
-                "/妮姬 单人突袭 赛季 — 查看赛季首领与弱点\n"
-                "/妮姬 单人突袭 编组 <角色:B1,...> — 手工池编组\n"
-                "/妮姬 单人突袭 编组 账号 — 使用登录角色池；无登录时回退本人 fresh 的 ShiftyPad 只读快照\n"
-                "/妮姬 单人突袭 阵容图 <角色,...> — 生成五队图片\n"
-                "/妮姬 单人突袭 编组 — 无参数时同样先登录、再 fresh ShiftyPad 只读快照\n"
-                "/妮姬 单人突袭 保存 <角色,...> — 保存方案（仅本人可见）\n"
-                "/妮姬 单人突袭 我的 — 回查本人已保存方案；队 <1-5> 查看单队"
+                "【单人突袭五队助手】\n"
+                f"当前赛季：{latest_name}\n"
+                "• /妮姬 单人突袭 赛季 — 查看当前赛季首领弱点与机制\n"
+                "• /妮姬 单人突袭 编组 — 按你绑定的角色库自动配五队\n"
+                "• /妮姬 单人突袭 编组 角色1:B1,... — 手动指定角色池配队\n"
+                "• /妮姬 单人突袭 阵容图 — 生成五队阵容图\n"
+                "• /妮姬 单人突袭 保存 / 我的 / 队 <1-5> — 保存或查看我的五队"
             )
         if key in {"赛季", "season"}:
             return self._season_summary(catalog)
@@ -71,25 +65,23 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
 
     def _season_summary(self, catalog: Any) -> str:
         if not catalog.available:
-            return "赛季数据缺失：" + catalog.reason
+            return "暂时没有查到单人突袭赛季信息，请稍后再试。"
         season = catalog.latest()
         status = season_status(season, self._clock())
         lines = [
             f"【单人突袭赛季】{season.name}",
-            f"状态：{status}",
-            f"来源：{season.source_url} · 核验 {season.checked_at}",
+            f"当前状态：{status}",
         ]
         for boss in season.bosses:
             lines.append(
-                f"· {boss.name} · 弱点 {boss.weakness}"
+                f"• 首领：{boss.name}（弱点 {boss.weakness}"
                 + (f" · 属性 {boss.element}" if boss.element else "")
+                + "）"
             )
             if getattr(boss, "mechanics", ""):
-                lines.append("  机制：" + boss.mechanics)
-        if season.ends_at:
-            lines.append("说明：这是最近可核对的公开赛季；已结束时不会显示为进行中。")
+                lines.append("  机制提示：" + boss.mechanics)
         if season.note:
-            lines.append("注：" + season.note)
+            lines.append("💡 " + season.note)
         return "\n".join(lines)
 
     def _saved_overview(self, actor_id: str) -> str:
@@ -103,11 +95,10 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
             ) or "（空）"
             lines.append(f"第 {team.index} 队：{members}")
         if saved.damage_total is None:
-            lines.append("伤害：缺少可靠伤害公式，未估算。")
+            lines.append("暂未启用伤害估算，仅保存了配队。")
         else:
-            label = saved.damage_model_label or "配置化估算"
+            label = saved.damage_model_label or "预估伤害"
             lines.append(f"{label}：{saved.damage_total:,}")
-        lines.append("该方案仅你自己可见。")
         return "\n".join(lines)
 
     def _saved_team(self, actor_id: str, value: str) -> str:
@@ -122,15 +113,14 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
         if team is None:
             return f"未找到第 {index} 队。"
         members = " / ".join(
-            f"{member.name}（{BURST_LABELS.get(member.burst, '?')}）" for member in team.members
+            f"{member.name}({BURST_LABELS.get(member.burst, '?')})" for member in team.members
         ) or "（空）"
         lines = [f"【单人突袭 · 第 {team.index} 队】{saved.season_name}", members]
         if team.issues:
-            lines.append("问题：" + "；".join(team.issues))
+            lines.append("⚠ " + "；".join(team.issues))
         if team.damage is not None:
-            label = saved.damage_model_label or "配置化估算"
+            label = saved.damage_model_label or "预估伤害"
             lines.append(f"{label}：{team.damage:,}")
-        lines.append("该方案仅你自己可见。")
         return "\n".join(lines)
 
     async def _build_or_save(
@@ -204,7 +194,7 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
     async def _solo_members(self, context: CommandContext, value: str):
         token = value.strip()
         if token and token not in {"账号", "绑定", "my"}:
-            return parse_members(token), "角色来源：手工输入角色池。"
+            return parse_members(token), "（按你输入的角色名单编组）"
 
         directory = self._character_directory()
         account = self._account(context)
@@ -216,23 +206,21 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
             enriched_rows = self._enrich_rows_with_directory(rows, directory) if rows else []
             members = members_from_roster(enriched_rows) if enriched_rows else ()
             if members:
-                return members, "角色来源：已绑定登录账号角色库。"
+                return members, "（已自动按你绑定账号的角色库编组）"
 
         binding = self._fresh_readonly_binding(context)
         if binding is None:
             raise ValueError(
-                "未找到可用登录角色库，也没有 fresh 的 ShiftyPad 只读绑定；"
-                "请使用手工角色池或在私聊先 /妮姬 我的妮姬 导入。"
+                "还没有绑定账号，暂无法自动配队。\n"
+                "请私聊发送 /妮姬 账号 绑定，或直接输入角色名单：/妮姬 单人突袭 编组 红莲:B3,丽塔:B1,..."
             )
         characters = binding.profile.characters
         if not characters:
             raise ValueError(
-                "ShiftyPad 只读快照没有角色字段（明确缺口，未用角色数量替代角色池）。"
+                "同步到的档案里暂时没有具体角色名单，请重新同步，或手动输入角色列表编组。"
             )
         directory = self._character_directory()
         members_list: list[Member] = []
-        missing_burst = 0
-        missing_element = 0
         for character in characters:
             code = str(character.name_code or "").strip()
             if not code:
@@ -240,10 +228,6 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
             row = directory.get(code, {})
             burst = str(row.get("burst") or "")
             element = str(row.get("element") or "")
-            if not burst:
-                missing_burst += 1
-            if not element:
-                missing_element += 1
             members_list.append(
                 Member(
                     name_code=code,
@@ -259,17 +243,8 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
                 )
             )
         if not members_list:
-            raise ValueError("ShiftyPad 只读快照没有可用角色标识，无法编组。")
-        note = (
-            f"角色来源：ShiftyPad 只读快照（{len(members_list)} 名，"
-            f"{binding.last_sync_at}）。"
-        )
-        if missing_burst or missing_element:
-            note += (
-                f" 缺少角色目录字段：爆裂 {missing_burst} 名、元素 {missing_element} 名；"
-                "未猜测，爆裂链/克制会显示缺口。"
-            )
-        return tuple(members_list), note
+            raise ValueError("同步的档案里暂无可用角色，无法编组。")
+        return tuple(members_list), f"（按你近期同步的角色档案编组，共 {len(members_list)} 名）"
 
 
 __all__ = ["SoloRaidCommandHandler", "SoloRenderer"]

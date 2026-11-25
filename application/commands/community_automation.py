@@ -113,11 +113,11 @@ class CommunityAutomationHandler:
 
     def _preference(self, account, capability, value, label):
         if value not in {"开", "关"}:
-            return self._text("请使用 开 或 关；两项新能力默认关闭，旧日常授权不会自动扩大范围。")
+            return self._text("请回复 开 或 关。")
         enabled = value == "开"
         self.store.set_setting(f"{capability}:auto:{account['qq_id']}", binding_stamp(account) if enabled else None)
-        suffix = "全局写操作关闭，当前不会提交。" if not self.config.get("enable_daily_actions", False) else "成功静默，需处理时仅私聊一次。"
-        return self._text(f"{label}自动执行已{'开启' if enabled else '关闭'}。{suffix}")
+        suffix = "（管理员暂未开启日常执行开关，设置已保存但暂不会提交）" if not self.config.get("enable_daily_actions", False) else "到点自动运行，平时安静不打扰，需要处理时再私聊通知。"
+        return self._text(f"{label}自动执行已{'开启' if enabled else '关闭'}，{suffix}")
 
     def _enabled(self, account, capability):
         return self.store.get_setting(f"{capability}:auto:{account['qq_id']}", None) == binding_stamp(account)

@@ -913,7 +913,7 @@ class WorkspaceWebService:
                     flex_count = matched_spec.flex_count
                     avoid_targets = tuple(matched_spec.avoid)
                     character_note = matched_spec.note
-                    rec_label = f"角色专属推荐 · {matched_spec.source_url} · 核验 {matched_spec.checked_at}"
+                    rec_label = "角色专属推荐"
                 else:
                     targets, rec_label = resolve_preset_targets("通用输出")
             elif preset and preset != "auto":
@@ -970,7 +970,7 @@ class WorkspaceWebService:
                     raise OverloadAdviceError("该角色当前未检测到可解析的 T10 超限词条，请在工作台改用手工词条测试。")
                 resolved_name = str(getattr(card, "name_cn", "") or getattr(card, "name_en", "") or character_query)
                 options = parse_options(records)
-                source_prefix = f"词条来源：已绑定账号角色实际超限词条（{resolved_name}，只读对比）。\n"
+                source_prefix = f"【{resolved_name} · 当前 T10 词条诊断】\n"
             else:
                 options = parse_options(body.get("options") or [])
 

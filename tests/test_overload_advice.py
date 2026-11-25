@@ -37,7 +37,9 @@ def test_advice_keeps_targets_and_marks_lock_choices() -> None:
     assert by_key[("head", 2)].action == "重洗"
     assert by_key[("head", 2)].lock is False
     assert advice.probability is None
-    assert "官方未提供可核验的洗词条概率" in render_advice(advice)
+    rendered = render_advice(advice)
+    assert "官方未公布洗词条概率" in rendered
+    assert "https://github.com/" not in rendered
 
 
 def test_full_tier_non_target_still_needs_reroll_for_target() -> None:
@@ -49,7 +51,7 @@ def test_full_tier_non_target_still_needs_reroll_for_target() -> None:
     only_max = parse_options(({"slot": "arm", "position": 1, "label": "防御力增加", "tier": 15},))
     result = advise(only_max, ("攻击力增加",))
     assert result.options[0].action == "重洗"
-    assert "满级但非目标词条" in result.options[0].reasons[0]
+    assert "非推荐词条" in result.options[0].reasons[0]
 
 
 def test_probability_only_shown_with_verifiable_table() -> None:
@@ -105,7 +107,8 @@ def test_locked_options_never_reroll_and_simulation_is_reproducible() -> None:
     # 非目标锁定词条不应阻止模拟达到“其余可洗词条均命中目标”。
     assert first.success is True
     assert first.attempts < 200
-    assert "配置化假设" in first.assumption
+    assert "非官方概率" in first.assumption
+    assert "7" in first.assumption
 
     not_locked = parse_options(
         ({"slot": "head", "position": 1, "label": "防御力增加", "tier": 5},)
@@ -145,17 +148,17 @@ def test_tier_warnings_four_piece_counts_module_costs_and_os_randomness() -> Non
         target_counts={"攻击力增加": 4, "优越代码伤害增加": 4},
     )
     assert dict(result.matched_counts) == {"攻击力增加": 2, "优越代码伤害增加": 0}
-    assert any("仅 3/15 阶" in w for w in result.lock_warnings)
-    assert any("消耗 2 个定制模块" in w for w in result.lock_warnings)
+    assert any("只有 3/15 阶" in w for w in result.lock_warnings)
+    assert any("花 2 个定制模块" in w for w in result.lock_warnings)
     rendered = render_advice(result)
-    assert "当前四件套命中汇总：攻击力增加 2/4 条" in rendered
+    assert "当前已命中：攻击力增加 2/4" in rendered
 
     sim = simulate(opts, ("攻击力增加",), attempts=10)
     assert sim.seed is None
-    assert "系统随机" in sim.assumption
+    assert "非官方概率" in sim.assumption
     assert sim.modules_spent >= 1
     with_sim = render_advice(advise(opts, ("攻击力增加",)))
-    assert "锁定与模块提醒" in with_sim
+    assert "每次重洗要花" in with_sim
 
 
 def test_avoid_targets_and_character_recommendation_helper() -> None:
@@ -181,8 +184,9 @@ def test_avoid_targets_and_character_recommendation_helper() -> None:
     advice = advise(bad_opts, privaty.targets, avoid_targets=privaty.avoid, character_note=privaty.note)
     assert advice.options[0].action == "重洗"
     assert advice.options[0].lock is False
-    assert any("避免" in r for r in advice.options[0].reasons)
+    assert any("不建议留此词条" in r for r in advice.options[0].reasons)
 
     card_text = render_character_recommendation("爱丽丝", alice)
     assert "【超限词条推荐】爱丽丝" in card_text
     assert "蓄力速度增加" in card_text
+    assert "https://github.com/" not in card_text

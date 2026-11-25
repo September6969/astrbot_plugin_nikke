@@ -74,7 +74,7 @@ class DailyCommandHandler:
         if action:
             return self._text("用法：/妮姬 签到 [状态] 或 /妮姬 日常 自动 开|关")
         if not bool(self._config.get("enable_daily_actions", False)):
-            return self._text("签到写操作当前由管理员关闭；可使用 /妮姬 签到 状态 只读查询。")
+            return self._text("管理员暂未开启自动/手动签到功能，你可以发 /妮姬 签到 状态 查看今日进度。")
 
         try:
             account = self._account(context.actor_id)
@@ -157,11 +157,11 @@ class DailyCommandHandler:
         self._store.set_setting(f"daily_scope_v2:{actor_id}",
             DailyRunner.daily_identity(account) if enabled and community else "")
         global_state = (
-            "全局签到写操作当前关闭；设置已保存，暂不会提交。"
+            "（当前管理员未开启签到执行开关，设置已记住但暂不会自动提交）"
             if not bool(self._config.get("enable_daily_actions", False))
-            else "定时任务独立执行；成功静默，仅异常私聊。"
+            else "到点会自动执行，平时安静不打扰，只在异常时私聊提醒。"
         )
-        return self._text(("范围：社区签到及已达成的免费奖励。请私聊使用日常命令登记异常通知会话。" if community else "范围：仅签到。") + f"自动签到已{'开启' if enabled else '关闭'}。{global_state}")
+        return self._text(("范围：社区签到及可领免费奖励（异常时仅私聊通知你）。" if community else "范围：仅社区签到。") + f"自动执行已{'开启' if enabled else '关闭'}，{global_state}")
 
     async def _status(self, actor_id: str) -> CommandResult:
         try:

@@ -19,8 +19,8 @@ _ELEMENT_ALIASES = {
     "electric": "electric", "electronic": "electric", "电击": "electric", "电": "electric",
     "water": "water", "水冷": "water", "水": "water",
 }
-NO_DAMAGE_NOTE = "缺少可靠伤害公式：不估算伤害（未使用猜测系数）。"
-ESTIMATE_NOTE = "配置化估算：由运营者提供的系数计算，非官方伤害公式。"
+NO_DAMAGE_NOTE = "暂未启用伤害估算，当前仅展示五队阵容与爆裂链。"
+ESTIMATE_NOTE = "（伤害为模型参考估算，实际以游戏内出刀为准）"
 
 
 class SoloRaidError(ValueError):
@@ -311,34 +311,33 @@ def build_five_teams(
 
 
 def render_plan(plan: FiveTeamPlan, *, boss: Boss | None = None) -> str:
-    """渲染五队方案；伤害无法估算时给出明确说明。"""
-    lines = [f"【单人突袭 · 五队】{plan.season_name}"]
+    """渲染五队方案；清晰展示首领机制、五队阵容与伤害参考。"""
+    lines = [f"【单人突袭 · 五队推荐】{plan.season_name}"]
     if boss is not None:
-        lines.append(f"首领：{boss.name} · 弱点：{boss.weakness}" + (f" · 属性：{boss.element}" if boss.element else ""))
+        lines.append(f"首领：{boss.name}（弱点：{boss.weakness}" + (f" · 属性：{boss.element}" if boss.element else "") + "）")
         if getattr(boss, "mechanics", ""):
             lines.append("机制提示：" + boss.mechanics)
-    lines.append(f"爆裂链：{'全部通过' if plan.chain_ok else '存在缺口（见下）'}")
+    lines.append(f"爆裂链检查：{'全部完整' if plan.chain_ok else '部分队伍有缺位（见下方提示）'}")
+    lines.append("")
     for team in plan.teams:
         members = " / ".join(
-            f"{member.name}（{BURST_LABELS.get(member.burst, '?')}）" for member in team.members
+            f"{member.name}({BURST_LABELS.get(member.burst, '?')})" for member in team.members
         ) or "（空）"
         suffix = ""
         if team.damage is not None:
-            suffix = f" · 估算 {team.damage:,}"
+            suffix = f" · 预估 {team.damage:,}"
         lines.append(f"第 {team.index} 队：{members}{suffix}")
         if team.issues:
-            lines.append("  问题：" + "；".join(team.issues))
+            lines.append("  ⚠ " + "；".join(team.issues))
+    lines.append("")
     if plan.damage_total is None:
-        lines.append("伤害：" + (plan.estimate_note or NO_DAMAGE_NOTE))
+        lines.append("说明：" + (plan.estimate_note or NO_DAMAGE_NOTE))
     else:
-        lines.append(f"伤害：{plan.damage_total:,}（{plan.damage_model_label}）")
+        lines.append(f"五队总预估：{plan.damage_total:,}（{plan.damage_model_label}）")
         if plan.estimate_note:
             lines.append(plan.estimate_note)
     if plan.unused:
-        lines.append("未上场：" + "、".join(member.name for member in plan.unused))
-    if plan.issues:
-        lines.append("")
-        lines.extend(f"· {issue}" for issue in plan.issues)
+        lines.append("替补未上场：" + "、".join(member.name for member in plan.unused))
     return "\n".join(lines)
 
 

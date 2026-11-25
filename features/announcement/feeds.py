@@ -40,11 +40,10 @@ VALID_KIND_STATES = frozenset(
 _HISTORY_RECOVERY_DAYS = 14
 
 _HELP = (
-    "三类订阅互相独立：新闻、视频、日程。\n"
-    "开通：/妮姬 新闻 订阅 新闻,日程\n"
-    "查看：/妮姬 新闻 状态\n"
-    "取消：/妮姬 新闻 取消订阅 [新闻|视频|日程]\n"
-    "群内只 @ 订阅者本人；不同会话与用户互不影响。"
+    "可以分别订阅官方新闻、视频和新作活动日程，群里只 @ 你自己。\n"
+    "• 开通：/妮姬 新闻 订阅 新闻,日程\n"
+    "• 查看：/妮姬 新闻 状态\n"
+    "• 取消：/妮姬 新闻 取消订阅 [新闻|视频|日程]"
 )
 
 
@@ -373,15 +372,16 @@ class FeedSubscriptions(AnnouncementDelivery):
         }
         self.store.set_setting(self.SETTING, state)
         msg = (
-            "已订阅（当前会话仅通知你本人；负责新公告/视频/新上线日程提醒）："
+            "已为你开启订阅："
             + "、".join(KINDS[kind] for kind in merged)
+            + "（有更新时会在当前会话通知你）"
         )
         if pending_init_labels:
             msg += (
-                f"\n提示：{'、'.join(pending_init_labels)} 来源当前暂不可用，"
-                "将在恢复后首次同步时自动建立基线（不重推历史消息）。"
+                f"\n提示：{'、'.join(pending_init_labels)} 暂时连不上官方接口，"
+                "恢复后会自动从当时起同步最新内容，不会把旧消息全发一遍。"
             )
-        msg += "\n提示：若需要活动结束前 24 小时截止提醒，请使用 /妮姬 日程 订阅。\n" + _HELP
+        msg += "\n💡 如需活动结束前 24 小时到期提醒，可用 /妮姬 日程 订阅。"
         return msg
 
     def _unsubscribe(self, target: str, kinds: Iterable[str]) -> str:
@@ -416,19 +416,16 @@ class FeedSubscriptions(AnnouncementDelivery):
         kind_states = _normalize_kind_states(preference, active_kinds)
         delivered = sum(1 for record in state["delivered"].values() if record.get("target") == target)
         lines = [
-            f"已订阅（个人订阅）：{kinds_text}",
-            f"已投递记录：{delivered} 条",
-            "说明：新闻/视频/新日程推送仅针对本人；活动结束前 24h 提醒见 /妮姬 日程 订阅；全群公告广播受管理员 enable_announcement_push 控制。",
-            "取消：/妮姬 新闻 取消订阅 [类型]",
+            f"已订阅更新通知：{'、'.join(KINDS[kind] for kind in active_kinds)}（已推送 {delivered} 条）",
+            "💡 活动到期前 24 小时提醒请用 /妮姬 日程 订阅；取消请发 /妮姬 新闻 取消订阅 [类型]。",
         ]
         for kind in active_kinds:
             k_state = kind_states.get(kind)
             reason = self.catalog.last_unavailable.get(kind, "")
             if k_state == KIND_STATE_UNINITIALIZED:
-                suffix = f"；{reason}" if reason else ""
-                lines.append(f"{KINDS[kind]}来源：暂不可用（尚未初始化基线，恢复后首次同步将建立基线而不推送历史{suffix}）")
+                lines.append(f"{KINDS[kind]}暂未获取到最新列表，恢复后只通知之后的新内容。")
             elif reason or k_state == KIND_STATE_UNAVAILABLE:
-                lines.append(f"{KINDS[kind]}来源：暂不可用（{reason or '已建立基线，等待恢复'}）")
+                lines.append(f"{KINDS[kind]}目前暂不可用，稍后恢复后会继续推送更新。")
         return "\n".join(lines)
 
     def plan(self, records=(), deadlines=(), *, now=None) -> list[PlannedPush]:

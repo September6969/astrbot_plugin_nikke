@@ -31,11 +31,11 @@ BURST_ORDER = {"Step1": 1, "Step2": 2, "Step3": 3, "AllStep": 0}
 BURST_LABELS = {"Step1": "B1", "Step2": "B2", "Step3": "B3", "AllStep": "全阶"}
 MANUFACTURER_SLOTS = 5
 MANUFACTURER_LABELS: dict[str, str] = {
-    "ELYSION": "极乐净土 (Elysion · 至多 5 席)",
-    "MISSILIS": "米西利斯 (Missilis · 至多 5 席)",
-    "TETRA": "泰特拉 (Tetra · 至多 5 席)",
-    "PILGRIM": "朝圣者 / 超限 (Pilgrim · 独立 5 席)",
-    "UNSPECIFIED": "未标注企业（建议补充企业元数据）",
+    "ELYSION": "极乐净土",
+    "MISSILIS": "米西利斯",
+    "TETRA": "泰特拉",
+    "PILGRIM": "朝圣者 / 超限",
+    "UNSPECIFIED": "其他企业",
 }
 MANUFACTURER_ORDER: dict[str, int] = {
     "ELYSION": 0,
@@ -61,8 +61,7 @@ VALID_WISHLIST_GROUPS = frozenset({"ELYSION", "MISSILIS", "TETRA", "PILGRIM", "N
 # 通过 160 级壁垒需要 5 名 3 星 SSR；SR/R 与未验证条目不计入 160 壁垒进度。
 WALL_REQUIRED = 5
 POOL_COVERAGE_NOTE = (
-    "严格执行 fail-closed 普通招募准入表：仅纳入已核验可入普通招募池的常规企业 SSR 与朝圣者/超限（Over-Spec 共用 Pilgrim 5 席）；"
-    "已自动排除 SR/R、联动（ABNORMAL）、期间限定、免费/解放角色、未入普池新角色及未知准入状态角色。"
+    "仅推荐可进普通招募池的 SSR（含朝圣者/超限），已自动排除限定、联动、免费/解放及 SR/R 角色。"
 )
 
 
@@ -471,54 +470,52 @@ def recommend(
         is_owned = character is not None
         limit_break = character.limit_break if character else 0
         score = 40
-        reasons: list[str] = [f"SSR · {BURST_LABELS.get(burst, burst)}"]
+        reasons: list[str] = []
 
         if corp == "PILGRIM":
-            reasons.append("朝圣者/超限独立池（单抽概率更低，适合长期占位）")
+            reasons.append("朝圣/超限抽中率低，建议常驻占格")
 
         if not wall_reached:
             if selected == "collection":
                 if not is_owned and burst in {"Step1", "Step2"}:
                     score += 12
-                    reasons.append("160 壁垒未破：补 B1/B2 功能位")
+                    reasons.append("补 B1/B2 功能位")
             elif selected == "balanced":
                 if is_owned and 1 <= limit_break < 3:
                     score += 42 if limit_break == 2 else 30
-                    reasons.append(f"160 壁垒未破：{limit_break} 星 SSR 补到 3 星优先")
+                    reasons.append(f"破 160 优先：{limit_break} 星补到 3 星")
                 elif not is_owned and burst in {"Step1", "Step2"}:
                     score += 10
-                    reasons.append("160 壁垒未破：补 B1/B2 功能位")
+                    reasons.append("补 B1/B2 功能位")
             else:
                 if is_owned and limit_break < 3:
                     score += 44 if limit_break == 2 else (36 if limit_break == 1 else 28)
-                    reasons.append("160 壁垒未破：集中提升既有 SSR 星级")
+                    reasons.append("破 160 优先：冲既有 SSR 3 星")
                 elif not is_owned and burst in {"Step1", "Step2"}:
                     score += 8
-                    reasons.append("补足 B1/B2 以支撑养成队")
-        else:
-            reasons.append("已通过 160 壁垒：" + wall_progress)
+                    reasons.append("补 B1/B2 功能位")
 
         if not is_owned:
             score += 25 if selected in {"collection", "balanced"} else 6
-            reasons.append("尚未拥有（扩充图鉴/战力库）")
+            reasons.append("尚未拥有")
         else:
-            reasons.append(f"已拥有（{limit_break} 星）" if limit_break else "已拥有（0 星）")
+            reasons.append(f"已有 {limit_break} 星" if limit_break else "已有 0 星")
             if selected == "investment" and limit_break < 3:
                 score += 16
-                reasons.append("可继续突破提升等级上限")
+                reasons.append("可继续升星提上限")
             if limit_break >= 3:
                 score -= 18
-                reasons.append("已 3 星达标，愿望单替补优先级降低")
+                reasons.append("已满 3 星，后续可换下")
 
         if burst == "Step1" and "B1" in missing_roles:
             score += 15
-            reasons.append("缺少 B1，补位提升编队完整度")
+            reasons.append("缺 B1 位可补")
         elif burst == "Step2" and "B2" in missing_roles:
             score += 15
-            reasons.append("缺少 B2，补位提升编队完整度")
+            reasons.append("缺 B2 位可补")
         elif burst == "Step3" and "B3" in missing_roles:
             score += 10
-            reasons.append("缺少 B3 输出位")
+            reasons.append("缺 B3 输出可补")
 
         scored.append(
             Candidate(
@@ -566,38 +563,26 @@ def recommend(
 
 
 def render_wishlist(result: WishlistResult) -> str:
-    """渲染愿望单；包含策略、纯 SSR 160 壁垒进度、分企业 5 席与准入过滤统计。"""
+    """渲染清晰易读的普通招募愿望单推荐。"""
     lines = [
-        f"【愿望单推荐 · {result.strategy_label}】（仅限普通招募 SSR）",
-        f"160 壁垒：{'已通过' if result.wall_reached else '未通过'}（{result.wall_progress}，仅统计 3 星 SSR）",
+        f"【普通招募愿望单 · {result.strategy_label}方案】",
+        f"160 突破进度：{'已破壁！' if result.wall_reached else '未突破'}（{result.wall_progress}）",
     ]
     if result.missing_roles:
-        lines.append("缺少定位：" + "、".join(result.missing_roles))
+        lines.append("当前缺位：" + "、".join(result.missing_roles))
     if result.exclusions:
-        lines.append("未能匹配的已拥有角色：" + "、".join(dict.fromkeys(result.exclusions)))
-    filter_parts: list[str] = []
-    if result.non_ssr_excluded_count:
-        filter_parts.append(f"非 SSR {result.non_ssr_excluded_count} 名")
-    if result.abnormal_excluded_count:
-        filter_parts.append(f"ABNORMAL 异界/联动 {result.abnormal_excluded_count} 名")
-    if result.limited_excluded_count:
-        filter_parts.append(f"限定/未入普池 {result.limited_excluded_count} 名")
-    if result.welfare_excluded_count:
-        filter_parts.append(f"免费/解放 {result.welfare_excluded_count} 名")
-    if result.unknown_excluded_count:
-        filter_parts.append(f"准入未知（默认拒绝）{result.unknown_excluded_count} 名")
-    if filter_parts:
-        lines.append("规则过滤：" + "、".join(filter_parts) + "。")
+        lines.append("未识别角色：" + "、".join(dict.fromkeys(result.exclusions)))
     if not result.candidates:
-        lines.append("没有已核验可入普通招募的 SSR 候选；请检查 wishlist_pool_eligibility.json 或排除表。")
+        lines.append("暂无可推荐的常驻 SSR 候选，请检查排除条件或角色名单。")
     for group, candidates in result.groups().items():
-        lines.extend(("", f"【{group} · {len(candidates)}/{MANUFACTURER_SLOTS} 席】"))
+        lines.extend(("", f"【{group}（{len(candidates)}/{MANUFACTURER_SLOTS}）】"))
         for candidate in candidates:
+            reason_text = "；".join(candidate.reasons) if candidate.reasons else ""
             lines.append(
-                f"· {candidate.name}（{candidate.rarity} · {BURST_LABELS.get(candidate.burst, '?')} · {candidate.element} · 评分 {candidate.score}）"
+                f"• {candidate.name}（{BURST_LABELS.get(candidate.burst, '?')} · {candidate.element}）"
+                + (f" — {reason_text}" if reason_text else "")
             )
-            lines.append("  理由：" + "；".join(candidate.reasons))
-    lines.extend(("", "覆盖限制：" + result.coverage_note))
+    lines.extend(("", "💡 " + result.coverage_note))
     return "\n".join(lines)
 
 

@@ -158,16 +158,16 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
 
         if tokens and tokens[0] == "账号":
             if len(tokens) != 5:
-                return "账号手动日产模式需要：/妮姬 同步器 计算 账号 <目标> <芯尘日产> <信用点日产> <战斗数据日产>；也可直接 /妮姬 同步器 计算 <目标> 自动估算前哨产量。"
+                return "用法：/妮姬 同步器 计算 账号 <目标> <芯尘日产> <信用点日产> <战斗数据日产>；或者直接 /妮姬 同步器 计算 <目标> 自动算前哨产量。"
             account = self._account(context)
             if account is None:
-                return "尚未绑定账号；请使用手工模式或在私聊先绑定。"
+                return "尚未绑定账号，请私聊发送 /妮姬 账号 绑定，或直接输入当前与目标等级查询消耗。"
             profile = await self._load_profile(account)
             basic = profile.get("basic") if isinstance(profile, Mapping) else None
             outpost = profile.get("outpost") if isinstance(profile, Mapping) else None
             level = outpost.get("synchro_level") if isinstance(outpost, Mapping) else None
             if not isinstance(level, int) or isinstance(level, bool):
-                return "上游未返回同步器等级（缺失），无法以账号模式计算。"
+                return "暂时没读到你的同步器等级，请稍后再试，或手动输入当前与目标等级查询。"
             inventory = self._currencies(basic)
             _, target, *production = tokens
             try:
@@ -181,7 +181,7 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                 )
             except SyncLevelInputError as exc:
                 return str(exc)
-            return "当前等级来自已绑定账号只读资料。\n" + render_sync_plan(plan)
+            return render_sync_plan(plan)
 
         if len(tokens) != 8:
             return (
@@ -204,19 +204,16 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
         return render_sync_plan(plan)
 
     def _sync_usage_text(self, table: Any) -> str:
-        state = (
-            f"成本表：{table.label}（核验 {table.checked_at}）"
-            if table is not None
-            else self.services.sync_table_error
-        )
+        if table is None:
+            return self.services.sync_table_error or "同步器等级表暂未加载。"
         return (
             "【同步器等级计算】\n"
-            f"{state}\n"
-            "常用指令（绑定后自动读取等级、库存与前哨产量）：\n"
-            "· /妮姬 同步器 — 查看当前同步器等级、前哨产量与可升等级\n"
-            "· /妮姬 同步器 计算 600 — 自动估算升至目标等级的日期与瓶颈\n"
-            "· /妮姬 同步器 可升 — 查看直接库存立即能升多少级\n"
-            "未绑定/备用：/妮姬 同步器 计算 <当前> <目标> ｜ /妮姬 大厅（公开手动计算器）"
+            "绑定账号后会自动读取你的等级、库存和前哨产量：\n"
+            "• /妮姬 同步器 — 看当前等级、日产和立即能升几级\n"
+            "• /妮姬 同步器 计算 600 — 算算到目标等级还要几天、卡在哪\n"
+            "• /妮姬 同步器 可升 — 看直接库存现在能连续升几级\n"
+            "• /妮姬 同步器 计算 <当前> <目标> — 只查区间升级总消耗\n\n"
+            "💡 想把背包资源箱（1H–24H）和额外收益也算进去，请发 /妮姬 工作台。"
         )
 
     async def _sync_calc_account_target(
@@ -228,17 +225,17 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
         today: Any,
     ) -> str:
         if table is None:
-            return self.services.sync_table_error or "未配置同步器等级成本表。"
+            return self.services.sync_table_error or "同步器等级表暂未加载。"
         account = self._account(context)
         if account is None:
             return (
-                "尚未绑定账号，无法自动读取同步器等级与库存。\n"
-                "可私聊 /妮姬 账号 绑定，或使用：/妮姬 同步器 计算 <当前等级> <目标等级> 查询所需消耗，或前往 /妮姬 大厅。"
+                "你还没有绑定账号，暂时无法自动读取等级和库存。\n"
+                "可以私聊发送 /妮姬 账号 绑定，或者发 /妮姬 同步器 计算 <当前等级> <目标等级> 查升级消耗。"
             )
         profile = await self._load_profile(account)
         ctx = extract_account_sync_context(profile, outpost_table, table)
         if ctx.synchro_level is None:
-            return "上游未返回同步器等级（缺失），无法以账号模式计算。"
+            return "暂时没读到你的同步器等级，请稍后再试，或发 /妮姬 同步器 计算 <当前> <目标> 查询消耗。"
         try:
             if ctx.outpost_rates is not None:
                 plan, _ = plan_sync_from_inputs(
@@ -252,7 +249,7 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                     outpost_table=outpost_table,
                     today=today,
                 )
-                prefix = "当前等级、库存与前哨产量来自已绑定账号只读资料（按每日免费歼灭1次估算，含资源箱完整版见 /妮姬 工作台）。\n"
+                suffix = "\n\n💡 以上未计入背包资源箱，含箱子折算的完整版请发 /妮姬 工作台。"
             else:
                 plan = calculate_sync_plan(
                     current=ctx.synchro_level,
@@ -262,10 +259,10 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                     table=table,
                     today=today,
                 )
-                prefix = "当前等级与库存来自已绑定账号只读资料（未读取到前哨产量表，按 0 日产估算）。\n"
+                suffix = "\n\n💡 暂未读取到前哨等级，日产暂按 0 计算；完整设置请用 /妮姬 工作台。"
         except SyncLevelInputError as exc:
             return str(exc)
-        return prefix + render_sync_plan(plan)
+        return render_sync_plan(plan) + suffix
 
     @staticmethod
     def _currencies(basic: Any) -> dict[str, int]:
@@ -290,7 +287,7 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                 value,
                 rows=self.services.wishlist_rows,
                 resolver=getattr(self.services, "grid_resolver", None),
-            ), "角色来源：手工输入。"
+            ), "（按你输入的已有角色生成）"
 
         account = self._account(context)
         if account is not None:
@@ -312,20 +309,18 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                     if isinstance(row, Mapping) and row.get("name_code") not in (None, "")
                 )
                 if owned:
-                    return owned, "角色来源：已绑定登录账号角色库。"
+                    return owned, "（已自动按你绑定账号的突破进度生成）"
 
         binding = self._fresh_readonly_binding(context)
         if binding is None:
             raise ValueError(
-                "未找到可用登录角色库，也没有 fresh 的 ShiftyPad 只读绑定；"
-                "请手工输入角色池（例如 /妮姬 愿望单 均衡 拉毗:2,迪塞尔:0）"
-                "或先私聊 /妮姬 我的妮姬 导入。"
+                "还没绑定账号，暂时读不到你的已有角色。\n"
+                "可以手动输入已有角色和星级（例如：/妮姬 愿望单 均衡 拉毗:2,迪塞尔:0），或私聊 /妮姬 账号 绑定。"
             )
         characters = binding.profile.characters
         if not characters:
             raise ValueError(
-                "ShiftyPad 只读快照没有角色字段（明确缺口，未用角色数量替代角色池）。"
-                "请重新同步公开档案，或手工输入角色池。"
+                "同步到的档案里暂时没有具体角色列表，请重新同步，或手动输入已有角色生成愿望单。"
             )
         directory = self._character_directory()
         owned_items: list[OwnedCharacter] = []
@@ -346,13 +341,10 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                 )
             )
         if not owned_items:
-            raise ValueError("ShiftyPad 只读快照没有可用角色标识，无法生成愿望单。")
-        note = (
-            f"角色来源：ShiftyPad 只读快照（{len(owned_items)} 名，"
-            f"{binding.last_sync_at}）。"
-        )
+            raise ValueError("同步的档案里暂无可用角色，无法生成愿望单。")
+        note = f"（按近期同步的角色档案生成，共 {len(owned_items)} 名）"
         if missing_grade:
-            note += f" {missing_grade} 名缺乏突破字段，按 0 参与推荐（未验证）。"
+            note += f" 其中 {missing_grade} 名未返回突破星级，暂按 0 星计算。"
         return tuple(owned_items), note
 
     async def _overload(self, context: CommandContext, action: str, value: str) -> CommandResult | str:
@@ -376,7 +368,7 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                         advice = advise(
                             options,
                             tuple(selected.targets),
-                            recommendation_label=f"内置角色专属推荐 · {selected.source_url} · 核验 {selected.checked_at}",
+                            recommendation_label=f"{action.strip()} 专属推荐",
                             target_counts=dict(selected.counts),
                             flex_count=selected.flex_count,
                             avoid_targets=selected.avoid,
@@ -384,7 +376,7 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                         )
                         if simulate_attempts is not None:
                             advice = replace(advice, simulation=simulate(options, advice.targets, attempts=simulate_attempts))
-                        return f"词条来源：已绑定账号角色实际超限词条（{resolved_name}，只读对比）。\n" + render_advice(advice)
+                        return f"【{resolved_name} · 当前 T10 词条诊断】\n" + render_advice(advice)
                     except OverloadAdviceError:
                         pass
                 return render_character_recommendation(action.strip(), selected)
@@ -398,9 +390,9 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                 or char_query
             )
             if not target_char:
-                raise OverloadAdviceError("使用账号模式对比时请指定角色名，例如：/妮姬 洗词条 推荐:拉毗 账号")
+                raise OverloadAdviceError("使用账号对比时请写明角色名，例如：/妮姬 洗词条 推荐:爱丽丝 账号")
             options, resolved_name = await self._load_bound_overload_options(context.actor_id, target_char)
-            source_prefix = f"词条来源：已绑定账号角色实际超限词条（{resolved_name}，只读对比）。\n"
+            source_prefix = f"【{resolved_name} · 当前 T10 词条诊断】\n"
         else:
             options = self._parse_overload_spec(value)
         advice = advise(
@@ -464,14 +456,11 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
             character = re.sub(r"^推荐[:：]\s*", "", text, count=1).strip()
             selected = self._character_overload_targets(character)
             if selected is not None:
-                source = (
-                    f"导入角色推荐 · {selected.source_url} · 核验 {selected.checked_at}"
-                )
                 return (
                     tuple(selected.targets),
                     dict(selected.counts),
                     selected.flex_count,
-                    source,
+                    f"{character} 专属推荐",
                     character,
                     tuple(selected.avoid),
                     selected.note,
@@ -483,15 +472,13 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
                     tuple(default_targets),
                     dict(getattr(self.services, "overload_default_counts", {}) or {}),
                     0,
-                    "导入默认目标（非角色专属）",
+                    "默认输出参考（非该角色专属）",
                     character,
                     (),
                     "",
                 )
-            label = getattr(self.services, "overload_recommendation_label", "")
-            hint = f"（已加载：{label}）" if label else ""
             raise OverloadAdviceError(
-                f"缺少角色“{character}”的可靠推荐表{hint}；请手工提供目标词条。"
+                f"暂时没找到「{character}」的专属词条推荐；可以直接发 /妮姬 洗词条 预设:输出，或自己填目标词条。"
             )
         return parse_targets(text), {}, 0, "", "", (), ""
 

@@ -78,10 +78,8 @@ def test_alias_and_keyword_search_returns_option_and_source() -> None:
     assert result.matches[0].source == SOURCE
 
     text = render_counsel_search(result, bank())
-    assert "【推荐】" in text
+    assert "推荐" in text
     assert "稳扎稳打" in text
-    assert SOURCE in text
-    assert "题库覆盖：3 条" in text
 
 
 def test_keyword_narrows_multiple_entries_for_same_nikke() -> None:
@@ -98,7 +96,7 @@ def test_ambiguous_nikke_names_are_distinguished() -> None:
     result = bank().search("毗")
     assert result.ambiguous
     assert result.ambiguous_nikke == ("拉毗", "拉毗：红莲")
-    assert "请改用完整名称或别名" in render_counsel_search(result, bank())
+    assert "请用完整名称试试" in render_counsel_search(result, bank())
 
 
 def test_missing_bank_is_explicit_and_never_fabricates_questions() -> None:
@@ -108,8 +106,8 @@ def test_missing_bank_is_explicit_and_never_fabricates_questions() -> None:
     result = missing.search("拉毗", "作战")
     assert result.available is False
     text = render_counsel_search(result, missing)
-    assert "题库缺失" in text
-    assert "不会用假题代替真实题库" in text
+    assert "尚未导入咨询题库" in text
+    assert "https://" not in text
 
 
 def test_invalid_bank_payloads_are_rejected() -> None:
@@ -177,10 +175,9 @@ def test_counsel_bank_defaults_to_unbundled_missing_and_imports_partial_index(tm
     assert result.match_kind == "exact"
     assert result.matches
     text = render_counsel_search(result, real)
-    assert "精确匹配" in text
-    assert "来源答案序号：1" in text
-    assert "不代表游戏内按钮位置" in text
+    assert "轻轻抚摸" in text
+    assert "游戏内按钮顺序可能不同" in text
 
     partial = real.search("艾德")
     assert partial.match_kind == "partial"
-    assert "模糊命中" in render_counsel_search(partial, real)
+    assert "艾德米" in render_counsel_search(partial, real)

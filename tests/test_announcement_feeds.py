@@ -167,16 +167,16 @@ async def test_unavailable_source_skips_delivery_and_is_reported() -> None:
     assert sender.calls == []
 
     status = subs.command(key, "状态", "")
-    assert "视频来源：暂不可用" in status
+    assert "视频暂未获取到最新列表" in status
     # 订阅状态仍然保留，恢复来源后可继续使用。
-    assert "已订阅（个人订阅）：视频" in status
+    assert "已订阅更新通知：视频" in status
 
 
 def test_kind_parsing_and_partial_unsubscribe() -> None:
     _, _, subs = build(news=[item("news", "n1")], schedule=[item("schedule", "s1")])
     key = target("user-a")
-    assert "已订阅" in subs.command(key, "订阅", "新闻,日程")
-    assert "已订阅（个人订阅）：新闻、日程" in subs.command(key, "状态", "")
+    assert "已为你开启订阅" in subs.command(key, "订阅", "新闻,日程")
+    assert "已订阅更新通知：新闻、日程" in subs.command(key, "状态", "")
     with pytest.raises(ValueError, match="未知订阅类型"):
         subs.command(key, "订阅", "直播")
 
@@ -400,11 +400,11 @@ async def test_per_kind_initialization_outage_history_backlog_restart_and_isolat
     # 1 + 3: 首次订阅即发生部分故障（video 正常，news 故障），应分别标 initialized 与 uninitialized。
     subs0 = make_subs(t0)
     resp = subs0.command(user_a, "订阅", "新闻,视频")
-    assert "恢复后首次同步时自动建立基线" in resp
+    assert "不会把旧消息全发一遍" in resp
     rec_a = store.get_setting(subs0.SETTING, {})["targets"][user_a]
     assert rec_a["kind_states"]["video"] == KIND_STATE_INITIALIZED
     assert rec_a["kind_states"]["news"] == KIND_STATE_UNINITIALIZED
-    assert "尚未初始化基线" in subs0.command(user_a, "状态", "")
+    assert "暂未获取到最新列表" in subs0.command(user_a, "状态", "")
 
     # 2: 已订阅用户追加“日程”时日程源故障，不影响 video 已初始化基线。
     subs0.command(user_a, "订阅", "日程")

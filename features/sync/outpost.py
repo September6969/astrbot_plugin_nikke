@@ -140,7 +140,7 @@ def infer_academy_boosts(
     if (raw_class is None or raw_class <= 0) and (raw_lesson is None or raw_lesson <= 0):
         return (
             dict(ACADEMY_MAX_BOOSTS),
-            "战术学院字段缺失，按满级加成估算（信用点+60% / 战斗数据+45% / 芯尘+45%，可手动调整）",
+            "默认按战术学院满级计算，如有差异可在工作台调整",
         )
     class_num = (
         (raw_class // 1000 if raw_class >= 1000 else raw_class)
@@ -157,7 +157,7 @@ def infer_academy_boosts(
     if class_num >= 10 or effective_lesson >= 9003:
         return (
             dict(ACADEMY_MAX_BOOSTS),
-            f"战术学院已满级加成（Class {class_num}，信用点+60% / 战斗数据+45% / 芯尘+45%）",
+            "战术学院满级加成",
         )
 
     boosts = {res: 0.0 for res in RESOURCES}
@@ -166,7 +166,7 @@ def infer_academy_boosts(
             boosts[resource] += delta
     return (
         boosts,
-        f"战术学院 Class {class_num} / 课程 {effective_lesson} 精确加成（信用点+{boosts['credits']:g}% / 战斗数据+{boosts['battle_data']:g}% / 芯尘+{boosts['core_dust']:g}%）",
+        f"战术学院 {class_num} 班加成（信用+{round(boosts['credits'])}%/数据+{round(boosts['battle_data'])}%/芯尘+{round(boosts['core_dust'])}%）",
     )
 
 
@@ -322,22 +322,18 @@ class OutpostRateTable:
         base_daily = {res: round(hourly[res] * 24.0, 2) for res in RESOURCES}
         notes: list[str] = []
         if overridden:
-            notes.append("包含用户自定义小时产量覆盖")
+            notes.append("已使用你自定义的小时产量")
         elif extrapolated:
             notes.append(
-                f"前哨 Lv.{lvl} 超过内置表上限 Lv.{self.max_level}，按末尾曲线线性外推（误差约 ±5%，可在工作台手动覆盖小时产量）"
+                f"前哨超过 Lv.{self.max_level}，当前按趋势估算产量，可在工作台微调"
             )
-        elif lvl > 400:
-            notes.append(f"基于前哨 Lv.{lvl} 交叉核验扩展表精确查表（非外推，含 Lv.533 跃升节点）")
-        else:
-            notes.append(f"基于前哨 Lv.{lvl} WTFPL 开源基准表精确计算")
 
         return OutpostRateResult(
             outpost_level=lvl,
             hourly=hourly,
             base_daily=base_daily,
             academy_boosts=boosts,
-            academy_note=academy_note or "战术学院满级加成（可手动调整）",
+            academy_note=academy_note or "战术学院满级加成",
             estimated_above_400=extrapolated and not overridden,
             rate_note="；".join(notes),
         )

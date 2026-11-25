@@ -47,12 +47,14 @@ def test_cross_tier_costs_are_summed_and_bottleneck_sets_date() -> None:
     by_name = {item.resource: item for item in plan.resources}
     assert by_name["core_dust"].days == 8  # ceil(3000 / 400)
     assert by_name["credits"].days == 2    # 缺口 1500 / 1000
-    assert by_name["credits"].status == "需要积累"
+    assert by_name["credits"].status == "需积累"
     assert by_name["battle_data"].days == 12  # ceil(1200 / 100)
     assert plan.overall_days == 12
     assert plan.eta == date(2026, 10, 3)
     assert plan.bottlenecks == ("战斗数据",)
-    assert "瓶颈：战斗数据" in render_sync_plan(plan)
+    rendered = render_sync_plan(plan)
+    assert "卡点资源：战斗数据" in rendered
+    assert "https://github.com/" not in rendered
 
 
 def test_sufficient_stock_returns_same_day_and_no_bottleneck() -> None:
@@ -66,8 +68,9 @@ def test_sufficient_stock_returns_same_day_and_no_bottleneck() -> None:
     )
     assert plan.overall_days == 0
     assert plan.eta == date(2026, 9, 21)
-    assert plan.bottlenecks == ("芯尘", "信用点", "战斗数据")
+    assert plan.bottlenecks == ()
     assert all(item.days == 0 for item in plan.resources)
+    assert "现在就能直接升" in render_sync_plan(plan)
 
 
 def test_zero_production_with_deficit_cannot_be_estimated() -> None:
@@ -83,8 +86,8 @@ def test_zero_production_with_deficit_cannot_be_estimated() -> None:
     assert plan.eta is None
     assert plan.bottlenecks == ("芯尘",)
     text = render_sync_plan(plan)
-    assert "无法估算" in text
-    assert "零产量" in text
+    assert "暂无法估算" in text
+    assert "未填日产" in text
 
 
 def test_plan_requires_contiguous_cost_cover() -> None:
@@ -99,7 +102,7 @@ def test_plan_requires_contiguous_cost_cover() -> None:
 
 
 def test_missing_cost_table_is_explicit_instead_of_guessed() -> None:
-    with pytest.raises(SyncLevelInputError, match="缺少可靠等级成本表"):
+    with pytest.raises(SyncLevelInputError, match="手工模式"):
         calculate_sync_plan(
             current=100,
             target=120,
@@ -176,7 +179,7 @@ def test_manual_cumulative_costs_work_without_a_table() -> None:
     assert plan.eta == date(2026, 10, 3)
     assert plan.table is None
     text = render_sync_plan(plan)
-    assert "用户手工输入" in text
+    assert "手工填写" in text
     assert "https://" not in text  # 用户输入不要求来源 URL
     assert "核验" not in text
     assert "无法估算" not in text
@@ -261,7 +264,7 @@ def test_imported_sync_table_loads_and_computes_cross_tier(tmp_path) -> None:
     )
     assert plan.gainable_levels == 2
     assert plan.reachable_level == 202
-    assert "现有库存可立即升至：Lv.202（+2 级）" in render_sync_plan(plan)
+    assert "当前库存可立即升至：Lv.202（+2 级）" in render_sync_plan(plan)
 
     with pytest.raises(SyncLevelInputError, match="手工成本模式"):
         calculate_sync_plan(
@@ -320,7 +323,8 @@ def test_bundled_outpost_rates_cases_academy_and_extrapolation() -> None:
     assert "满级加成" in academy_note
     partial_boosts, partial_note = infer_academy_boosts(9000, 9002)
     assert partial_boosts == {"credits": 60.0, "battle_data": 45.0, "core_dust": 25.0}
-    assert "课程 9002" in partial_note
+    assert "9 班" in partial_note
+    assert "芯尘+25%" in partial_note
     r533 = outpost_table.hourly_rates(533)
     assert r533.hourly["core_dust"] == pytest.approx(102.22, abs=0.05)
     r651 = outpost_table.hourly_rates(651, academy_boosts=boosts, academy_note=academy_note)
@@ -374,4 +378,10 @@ def test_bundled_outpost_rates_cases_academy_and_extrapolation() -> None:
     assert plan.case_yields["core_dust"] > 10_000
     assert plan.gainable_levels >= 1
     assert plan.gainable_without_cases == 0
-    assert "箱子" in render_sync_plan(plan)
+    rendered_580 = render_sync_plan(plan)
+    assert "箱子" in rendered_580
+    # 回归防呆：大数字日产必须千分位展示，绝不输出科学计数法或原始 GitHub 链接或审计词
+    assert "e+" not in rendered_580 and "E+" not in rendered_580
+    assert "https://github.com/" not in rendered_580
+    assert "交叉核验" not in rendered_580
+    assert "只读资料" not in rendered_580

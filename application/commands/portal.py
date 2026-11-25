@@ -64,26 +64,26 @@ class PortalCommandHandler:
                 )
                 return (
                     "【NIKKE 公共功能大厅】\n"
-                    f"带当前群聊反馈入口（可将日程 / 塔罗结果推送回本群，15 分钟内点击有效）：\n{group_url}\n\n"
-                    f"匿名公共大厅（仅浏览，不连群）：{public_url}\n"
-                    "需要管理个人绑定、练度或五队编组，请私聊机器人发送 /妮姬 工作台。"
+                    f"点击下方链接可直接打开，也能把日程、塔罗抽牌结果推回本群（15 分钟内有效）：\n{group_url}\n\n"
+                    f"如果只是自己随便看看，也可以用公开直达链接：{public_url}\n"
+                    "想绑定账号或查个人练度、五队配队，请私聊我发送 /妮姬 工作台。"
                 )
             except ValueError:
                 pass
         return (
             "【NIKKE 公共功能大厅】\n"
-            f"无需登录即可查看全部功能、复制口令、查日程卡池或抽塔罗：\n{public_url}\n"
-            "需要管理个人账号或五队编组，请发送 /妮姬 工作台。"
+            f"不用登录就能看日程、卡池、公告攻略、算同步器或抽塔罗：\n{public_url}\n"
+            "想看个人账号数据或配队，请发送 /妮姬 工作台。"
         )
 
     def _workspace_reply(self, context: CommandContext) -> str:
         if not context.is_private_chat and not self._allow_group_workspace:
             return (
-                "个人指挥官工作台包含绑定状态与账号分析入口。\n"
-                "为保护你的链接不被群友误点，请私聊机器人发送：/妮姬 工作台"
+                "个人工作台里有你的账号绑定和私人练度数据。\n"
+                "为防链接被群友点开，请私聊我发送 /妮姬 工作台 获取专属入口。"
             )
         if self._links is None:
-            return "个人指挥官工作台尚未完成装配，请稍后重试。"
+            return "个人工作台暂时不可用，请稍后再试。"
         try:
             url = self._links.create_workspace_url(
                 context.actor_id,
@@ -98,9 +98,8 @@ class PortalCommandHandler:
             return str(exc)
         return (
             "【NIKKE 个人指挥官工作台】\n"
-            "请点击以下一次性安全链接进入（15 分钟内首次进入有效，页面采用按需懒加载）：\n"
-            f"{url}\n"
-            "仅限个人使用，切勿转发他人。"
+            "请点下面的链接进入工作台（15 分钟内有效，仅限本人使用，切勿转发）：\n"
+            f"{url}"
         )
 
     def _mention_reply(self, context: CommandContext) -> str:
@@ -110,13 +109,13 @@ class PortalCommandHandler:
             else f"{self._base}/hall"
         )
         group_tip = (
-            "｜发送 /妮姬 大厅 可带本群反馈入口"
+            "（群内发 /妮姬 大厅 可一键把结果推回本群）"
             if not context.is_private_chat
             else ""
         )
         return (
-            "你好，指挥官！NIKKE 综合助手已收束为双网页入口 + QQ 命令：\n"
-            f"1. 公共功能大厅（无需登录）：{public_url}{group_tip}\n"
-            "2. 个人指挥官工作台：私聊发送 /妮姬 工作台\n"
-            "3. 常用指令：/妮姬 帮助｜/妮姬 日程｜/妮姬 塔罗｜/妮姬 我的"
+            "你好，指挥官！需要我做什么？\n"
+            f"• 公共大厅（免登录查日程/工具/塔罗）：{public_url}{group_tip}\n"
+            "• 个人工作台：私聊我发送 /妮姬 工作台\n"
+            "• 常用命令：/妮姬 帮助 ｜ /妮姬 日程 ｜ /妮姬 我的 ｜ /妮姬 同步器"
         )

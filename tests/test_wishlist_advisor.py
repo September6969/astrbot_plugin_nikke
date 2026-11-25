@@ -48,13 +48,13 @@ def test_only_ssr_admitted_and_sr_does_not_count_toward_160_wall() -> None:
 
     # 未破 160 墙的 2 星 SSR（丽塔）在 balanced 策略获得最高分。
     assert result.candidates[0].name == "丽塔"
-    assert any("2 星 SSR 补到 3 星" in reason for reason in result.candidates[0].reasons)
+    assert any("2 星补到 3 星" in reason for reason in result.candidates[0].reasons)
 
     text = render_wishlist(result)
-    assert "【愿望单推荐 · 均衡】（仅限普通招募 SSR）" in text
-    assert "仅统计 3 星 SSR" in text
-    assert "ABNORMAL 异界/联动 1 名" in text
-    assert "覆盖限制" in text
+    assert "【普通招募愿望单 · 均衡方案】" in text
+    assert "4/5 名 3 星 SSR" in text
+    assert "排除限定、联动" in text
+    assert "fail-closed" not in text
 
 
 def test_five_ssr_breaks_160_wall_and_three_strategies_differ() -> None:
@@ -68,7 +68,7 @@ def test_five_ssr_breaks_160_wall_and_three_strategies_differ() -> None:
 
     # 收集策略优先未拥有的 SSR，已 3 星 SSR 降权。
     assert not collection.candidates[0].owned
-    assert any("已通过 160 壁垒" in reason for reason in collection.candidates[0].reasons)
+    assert "已破壁" in render_wishlist(collection)
 
     # 养成策略把仍可突破的 2 星拉毗排在已 3 星角色之前。
     investment_scores = {candidate.name: candidate.score for candidate in investment.candidates}
@@ -166,9 +166,8 @@ def test_pool_eligibility_fail_closed_excludes_limited_welfare_new_collab_and_un
     assert res.welfare_excluded_count == 1
     assert res.unknown_excluded_count == 2  # #6 unknown + #7 未登记
     text = render_wishlist(res)
-    assert "限定/未入普池 2 名" in text
-    assert "免费/解放 1 名" in text
-    assert "准入未知（默认拒绝）2 名" in text
+    assert "普通招募愿望单" in text
+    assert "仅推荐可进普通招募池的 SSR" in text
 
     # 3. 仓库自带 wishlist_pool_eligibility.json 覆盖全部 character_master SSR 且真实运行无异常。
     root = Path(__file__).resolve().parents[1]

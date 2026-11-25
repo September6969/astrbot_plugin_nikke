@@ -109,19 +109,19 @@ class VoiceApplication:
             if not value_clean:
                 available = self._costume_registry.get_costumes_for_resource(resource_id)
                 if available:
-                    lines = [f"当前角色 {preference.character} 可用已核验服装："]
+                    lines = [f"{preference.character} 可切换的服装："]
                     lines.extend(
-                        f"- {costume.costume_id}：{costume.costume_name} ({costume.spine_asset_id})"
+                        f"• {costume.costume_id}：{costume.costume_name}"
                         for costume in available
                     )
-                    lines.append("用法：/妮姬 语音 服装 <默认|服装ID|服装名>")
+                    lines.append("切换方式：/妮姬 语音 服装 <默认|服装ID|服装名>")
                     return "\n".join(lines)
                 return (
-                    f"当前角色 {preference.character} 暂无可切换的已核验服装。\n"
-                    "用法：/妮姬 语音 服装 默认"
+                    f"{preference.character} 暂无可切换的服装。\n"
+                    "发送 /妮姬 语音 服装 默认 可切回默认造型。"
                 )
             if resource_id is None:
-                return "当前角色身份未核验，无法切换服装。"
+                return "暂不支持为该角色切换服装。"
 
             result = self._costume_registry.resolve(
                 value_clean,

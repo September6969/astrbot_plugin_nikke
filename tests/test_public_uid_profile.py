@@ -34,15 +34,15 @@ def test_public_uid_lookup_is_limited_and_never_grants_private_access() -> None:
     assert result.own_uid_match is False
     assert result.message == PUBLIC_UID_REASON
     text = render_public_uid(result)
-    assert "公开 UID 查询：不可用（上游缺失）" in text
-    assert "不能证明账号归属" in text
+    assert "没有提供按 UID" in text
+    assert "不代表账号归属" in text
 
     own = lookup_public_uid("123456789", own_uid="123456789")
     assert own.status == "OWN_BOUND_UID"
     # 即使命中自己的 UID，也不会因此扩大权限或返回他人数据。
     assert own.private_access is False
     assert "不会因为 UID" not in own.message
-    assert "不构成所有权证明" in own.message
+    assert "不代表账号归属" in own.message
 
 
 def test_uid_validation_and_manual_profile_parsing() -> None:

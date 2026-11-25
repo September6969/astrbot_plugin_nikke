@@ -286,8 +286,9 @@ async def test_workspace_lazy_bootstrap_self_bind_and_five_team_build(tmp_path: 
         )
         assert ol_resp.status == 200
         ol_json = await ol_resp.json()
-        assert "内置通用定位预设" in ol_json["text"]
+        assert "通用定位参考" in ol_json["text"]
         assert "防御力增加" in ol_json["text"]
+        assert "只读对比" not in ol_json["text"]
 
         ol_auto = await client.post(
             "/workspace/api/tools/overload",
@@ -458,7 +459,7 @@ async def test_portal_qq_commands_and_pure_mention_detection() -> None:
     ws_group = await handler.handle(
         CommandContext("aiocqhttp", "u1", False, False, "group:123456", {"mode": "workspace"})
     )
-    assert "私聊机器人" in ws_group.messages[0].text
+    assert "请私聊我" in ws_group.messages[0].text
     assert "/workspace/open/" not in ws_group.messages[0].text
 
     # 私聊 /妮姬 工作台 返回一次性工作台链接

@@ -269,42 +269,32 @@ class CounselBank:
 
 
 def render_counsel_search(result: CounselSearch, bank: CounselBank) -> str:
-    """渲染检索结果；缺口、匹配方式与歧义分别说明。"""
+    """渲染检索结果，清晰直观。"""
     if not result.available:
-        return "【咨询答案】\n题库缺失：" + result.reason + "\n本功能不会用假题代替真实题库。"
+        return "【咨询答案】\n当前尚未导入咨询题库，暂时无法查询。"
     title = f"【咨询答案】{result.nikke}"
     if result.keyword:
-        title += f" · 关键词：{result.keyword}"
+        title += f" · {result.keyword}"
     lines = [title]
     if result.ambiguous:
-        lines.append("名称匹配到多名妮姬，请改用完整名称或别名：" + "、".join(result.ambiguous_nikke))
+        lines.append("找到多个相似角色，请用完整名称试试：" + "、".join(result.ambiguous_nikke))
         return "\n".join(lines)
     if not result.matches:
-        lines.append("题库中未找到匹配条目；覆盖范围：" + (bank.checked_at or "未标注核验日期"))
-        lines.append("来源：" + (bank.source_url or "未提供"))
-        lines.append("说明：未收录条目不自动推测答案。")
+        lines.append("题库里暂时没有找到这道题。")
         return "\n".join(lines)
     if result.match_kind == "partial":
-        lines.append(f"匹配方式：名称子串模糊命中（{result.matches[0].entry.nikke}；如非目标角色请改用完整名称）")
-    else:
-        lines.append(f"匹配方式：名称/别名精确匹配（{result.matches[0].entry.nikke}）")
+        lines.append(f"（按「{result.matches[0].entry.nikke}」匹配结果）")
     for match in result.matches:
         entry = match.entry
         answer = entry.answer()
         lines.append("")
-        prefix = f"第 {entry.question_no} 问 · " if entry.question_no else ""
-        lines.append(f"· {prefix}{entry.question}")
+        prefix = f"Q{entry.question_no} · " if entry.question_no else "• "
+        lines.append(f"{prefix}{entry.question}")
         for option in entry.options:
-            marker = "【推荐】" if answer is not None and option.option_id == answer.option_id else ""
-            detail = f"：{option.detail}" if option.detail else ""
+            marker = " ✅推荐" if answer is not None and option.option_id == answer.option_id else ""
+            detail = f"（{option.detail}）" if option.detail else ""
             lines.append(f"  {option.option_id}. {option.label}{marker}{detail}")
-        lines.append(
-            f"  来源答案序号：{entry.answer_index}"
-            "（网站索引顺序，不代表游戏内按钮位置） · "
-            f"来源：{entry.source_url} · 题库版本 v{entry.version}"
-        )
-    lines.append("")
-    lines.append(f"题库覆盖：{len(bank.entries)} 条 · 核验 {bank.checked_at or '未标注'} · 许可：{bank.license_note or '未标注'}")
+    lines.append("\n💡 建议直接对照选项文字选择，游戏内按钮顺序可能不同。")
     return "\n".join(lines)
 
 

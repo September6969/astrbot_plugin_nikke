@@ -14,11 +14,10 @@ from datetime import datetime, timezone
 from typing import Any, Mapping, Protocol
 
 UID_DISCLAIMER = (
-    "UID 不能证明账号归属，也不会解锁私有权限；本功能不返回任何其他用户的私人数据。"
+    "UID 仅用于核对，无法查询其他人的私人资料，也不代表账号归属。"
 )
 PUBLIC_UID_REASON = (
-    "上游未提供受支持的公开 UID 资料接口，无法按 UID 查询公开资料。"
-    "已绑定用户可继续使用 /妮姬 我的 与 /妮姬 查询 练度 查看自己的数据。"
+    "官方没有提供按 UID 直接查玩家资料的接口。已绑定的指挥官请用 /妮姬 我的 或 /妮姬 查询 练度 查看自己的数据。"
 )
 _UID = re.compile(r"^[0-9]{6,12}$")
 
@@ -49,8 +48,7 @@ def lookup_public_uid(uid: Any, *, own_uid: str | None = None) -> PublicUidResul
             uid=text,
             status="OWN_BOUND_UID",
             message=(
-                "该 UID 与你当前绑定的账号一致；资料仍只通过已绑定链路读取，"
-                "UID 本身不构成所有权证明。"
+                "这个 UID 和你当前绑定的账号一致，请用 /妮姬 我的 查看个人资料（UID 本身不代表账号归属）。"
             ),
             own_uid_match=True,
         )
@@ -60,10 +58,9 @@ def lookup_public_uid(uid: Any, *, own_uid: str | None = None) -> PublicUidResul
 def render_public_uid(result: PublicUidResult) -> str:
     return "\n".join(
         (
-            f"【公开 UID 查询】{result.uid}",
+            f"【UID 说明】{result.uid}",
             result.message,
             result.disclaimer,
-            "公开 UID 查询：不可用（上游缺失）。",
         )
     )
 

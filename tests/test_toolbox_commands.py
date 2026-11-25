@@ -227,7 +227,7 @@ async def test_calendar_board_route_groups_and_missing_probability() -> None:
     plugin, _ = plugin_with_toolbox()
     text = await route(plugin, "卡池")
     assert "【卡池】" in text and "【皮肤】" in text
-    assert "UP 概率：官方日程未提供可靠概率字段（缺失，未推断）" in text
+    assert "具体概率以游戏内为准" in text
     assert "北京时间" in text
 
     only_skin = await route(plugin, "卡池", "皮肤")
@@ -240,10 +240,9 @@ async def test_calendar_board_route_groups_and_missing_probability() -> None:
 async def test_news_subscription_route_is_personal_and_explicit() -> None:
     plugin, _ = plugin_with_toolbox()
     assert "尚未开通订阅" in await route(plugin, "新闻", "状态")
-    assert "已订阅" in await route(plugin, "新闻", "订阅", "新闻")
+    assert "已为你开启订阅" in await route(plugin, "新闻", "订阅", "新闻")
     status_text = await route(plugin, "新闻", "状态")
-    assert "已订阅（个人订阅）：新闻" in status_text
-    assert "enable_announcement_push" in status_text
+    assert "已订阅更新通知：新闻" in status_text
     assert "已取消" in await route(plugin, "新闻", "取消订阅")
 
 
@@ -251,14 +250,14 @@ async def test_news_subscription_route_is_personal_and_explicit() -> None:
 async def test_counsel_sync_wishlist_and_overload_routes() -> None:
     plugin, _ = plugin_with_toolbox()
     counsel = await route(plugin, "咨询", "一号", "作战")
-    assert "【咨询答案】" in counsel and "稳扎稳打" in counsel and "【推荐】" in counsel
+    assert "【咨询答案】" in counsel and "稳扎稳打" in counsel and "推荐" in counsel
 
     sync = await route(plugin, "同步器", "计算", "199 201 0 0 0 100 100 10")
-    assert "同步器等级" in sync
-    assert "瓶颈" in sync
+    assert "【同步器规划】" in sync
+    assert "卡点资源" in sync
 
     account_sync = await route(plugin, "同步器", "计算", "账号 201 100 100 10")
-    assert "当前等级来自已绑定账号只读资料" in account_sync
+    assert "Lv.199 → Lv.201" in account_sync
 
     # 简化命令：/妮姬 同步器、/妮姬 同步器 计算 201、/妮姬 同步器 可升、双等级查消耗
     from pathlib import Path
@@ -269,29 +268,29 @@ async def test_counsel_sync_wishlist_and_overload_routes() -> None:
         Path(__file__).resolve().parents[1] / "assets" / "data" / "outpost_rates.json"
     )
     overview = await route(plugin, "同步器")
-    assert "当前同步器等级：Lv.199" in overview
-    assert "前哨基地等级：Lv.120" in overview
+    assert "【同步器概览】当前 Lv.199" in overview
+    assert "前哨基地：Lv.120" in overview
     auto_plan = await route(plugin, "同步器", "计算", "201")
-    assert "来自已绑定账号只读资料" in auto_plan
-    assert "全部到齐：" in auto_plan
+    assert "预计耗时：" in auto_plan
+    assert "https://github.com/" not in auto_plan
     gainable = await route(plugin, "同步器", "可升")
     assert "【同步器即时可升】当前 Lv.199" in gainable
     cost_range = await route(plugin, "同步器", "计算", "199 201")
-    assert "【同步器区间消耗】Lv.199 → Lv.201" in cost_range
+    assert "【同步器升级消耗】Lv.199 → Lv.201" in cost_range
 
     wishlist = await route(plugin, "愿望单", "均衡", "测试1号:2")
-    assert "愿望单推荐" in wishlist
-    assert "覆盖限制" in wishlist
+    assert "普通招募愿望单" in wishlist
+    assert "排除限定" in wishlist
 
     advice = await route(plugin, "洗词条", "攻击力增加", "头部,1,防御力增加,4")
-    assert "【超限洗词条助手】" in advice
+    assert "【超限洗词条建议】" in advice
     assert "重洗" in advice
     simulation = await route(plugin, "洗词条模拟", "攻击力增加", "头部,1,防御力增加,4")
-    assert "模拟：" in simulation
-    assert "系统随机" in simulation
+    assert "模拟洗炼：" in simulation
+    assert "非官方概率" in simulation
     assert "定制模块" in simulation
 
-    # 支持读取已绑定账号角色的实际装备词条进行只读对比。
+    # 支持读取已绑定账号角色的实际装备词条进行对比。
     async def fake_card_loader(_actor, _query):
         return SimpleNamespace(
             name_cn="拉毗",
@@ -305,11 +304,11 @@ async def test_counsel_sync_wishlist_and_overload_routes() -> None:
 
     plugin.handlers.toolbox._domain_handlers["calc_tools"].services.card_loader = fake_card_loader
     bound_advice = await route(plugin, "洗词条", "攻击力增加", "账号:拉毗")
-    assert "已绑定账号角色实际超限词条（拉毗" in bound_advice
+    assert "【拉毗 · 当前 T10 词条诊断】" in bound_advice
     assert "防御力增加（6 阶）" in bound_advice
 
     preset_advice = await route(plugin, "洗词条", "预设:输出", "账号:拉毗")
-    assert "内置通用定位预设" in preset_advice
+    assert "通用定位参考" in preset_advice
     assert "优越代码伤害增加" in preset_advice
 
     # 简化命令：/妮姬 洗词条 爱丽丝 直接命中专属推荐库
@@ -335,25 +334,24 @@ async def test_solo_raid_uid_growth_and_grid_routes() -> None:
     names = "测试1号:B1,测试2号:B2,测试3号:B3,测试4号:B3,测试5号:B3,测试6号:B1,测试7号:B2,测试8号:B3,测试9号:B3"
     plan_text = await route(plugin, "单人突袭", "编组", names)
     assert "第 1 队" in plan_text
-    assert "缺少可靠伤害公式" in plan_text
+    assert "暂未启用伤害估算" in plan_text
     saved = await route(plugin, "单人突袭", "保存", names)
     assert "仅你本人可见" in saved
     mine = await route(plugin, "单人突袭", "我的")
     assert "已保存方案" in mine
     one_team = await route(plugin, "单人突袭", "队", "1")
     assert "第 1 队" in one_team
-    assert "仅你自己可见" in one_team
 
     uid_text = await route(plugin, "uid", "123456789")
     assert "OWN_BOUND_UID" not in uid_text
-    assert "与你当前绑定的账号一致" in uid_text
-    assert "公开 UID 查询：不可用" in uid_text
+    assert "和你当前绑定的账号一致" in uid_text
+    assert "不代表账号归属" in uid_text
 
     empty_growth = await route(plugin, "养成历史")
-    assert "暂无成长快照" in empty_growth
+    assert "还没有成长记录" in empty_growth
     saved_manual = await route(plugin, "我的妮姬", "手工", "手工昵称,120,备注")
-    assert "已保存本人手工资料" in saved_manual
-    assert "未验证" in saved_manual
+    assert "已记下你的个人档案" in saved_manual
+    assert "仅自己可见" in saved_manual
     assert "手工昵称" in await route(plugin, "我的妮姬", "手工状态")
 
     grid = await route(
@@ -396,10 +394,10 @@ async def test_manual_sync_costs_work_without_operator_table() -> None:
         plugin, "同步器", "计算",
         "手工 199 201 0 0 0 100 100 10 3000 4500 1200",
     )
-    assert "同步器等级" in manual
-    assert "成本来源：用户手工输入（未验证；仅用于本次计算）" in manual
+    assert "【同步器规划】" in manual
+    assert "手工填写" in manual
     assert "预计" in manual
-    assert "瓶颈" in manual
+    assert "卡点资源" in manual
 
 
 @pytest.mark.asyncio
@@ -443,7 +441,7 @@ async def test_imported_season_43_is_displayed_as_ended_with_boss_and_lineup() -
     assert "弱点 燃烧" in season_text and "属性 风压" in season_text
     assert "已结束" in season_text
     assert "2026-11-19 04:59" in season_text
-    assert "不会显示为进行中" in season_text
+    assert "https://github.com/" not in season_text
 
     names = (
         "测试1号:B1,测试2号:B2,测试3号:B3,测试4号:B3,测试5号:B3,"
@@ -451,7 +449,7 @@ async def test_imported_season_43_is_displayed_as_ended_with_boss_and_lineup() -
     )
     lineup = await route(plugin, "单人突袭", "编组", names)
     assert "Goddess of Victory" in lineup
-    assert "缺少可靠伤害公式" in lineup
+    assert "暂未启用伤害估算" in lineup
 
 
 @pytest.mark.asyncio
@@ -478,7 +476,7 @@ async def test_solo_raid_command_uses_local_mit_engine_when_configured() -> None
     plugin.handlers.toolbox = ToolboxCommandHandler(services)
 
     text = await route(plugin, "单人突袭", "编组", pool)
-    assert "伤害：" in text
+    assert "五队总预估：" in text
     assert "nikke-calc" in text
     assert "MIT" in text
     assert "不是官方伤害数值" in text
@@ -528,9 +526,9 @@ async def test_solo_raid_bound_roster_without_burst_is_enriched_from_directory()
     plugin.handlers.toolbox = ToolboxCommandHandler(services)
 
     text = await route(plugin, "单人突袭", "编组", "账号")
-    assert "角色来源：已绑定登录账号角色库。" in text
+    assert "绑定账号的角色库编组" in text
     assert "妮姬1" in text
-    assert "爆裂链：全部通过" in text
+    assert "爆裂链检查：全部完整" in text
     assert "nikke-calc" in text
     assert "（?）" not in text
 

@@ -88,10 +88,10 @@ class AnnouncementQuery:
                     filters.append(f"分类={selected_category}")
                 if selected_query:
                     filters.append("关键词")
-                return f"没有匹配的缓存公告（{'、'.join(filters) or '当前筛选'}）。"
+                return f"没有找到符合条件的公告（{'、'.join(filters) or '当前筛选'}）。"
             if fallback_error:
-                return f"暂时无法获取官方公告：{fallback_error}。当前没有可用缓存，请稍后重试。"
-            return "功能尚未就绪，正在同步官方数据，请稍候。"
+                return f"暂时拉不到官方公告：{fallback_error}，请稍后再试。"
+            return "正在同步官方公告数据，稍等一会再试试吧。"
         lines = ["【NIKKE 官方最新公告】"]
         filters = []
         if selected_locale:

@@ -121,7 +121,7 @@ def test_damage_estimate_is_optional_and_labeled() -> None:
     plan = build_five_teams(roster())
     assert plan.damage_total is None
     text = render_plan(plan)
-    assert "无法估算" in text or "不估算伤害" in text
+    assert "暂未启用伤害估算" in text
     assert "官方" not in text
 
     modeled = build_five_teams(
@@ -130,7 +130,7 @@ def test_damage_estimate_is_optional_and_labeled() -> None:
     )
     assert modeled.damage_total == 5 * (1000 * 5 + 500)
     assert "合成估算" in render_plan(modeled)
-    assert "配置化估算" in modeled.estimate_note
+    assert "参考估算" in modeled.estimate_note
 
     with pytest.raises(SoloRaidError, match="非负整数"):
         build_five_teams(roster(), damage_model={"per_member": -1})
@@ -166,7 +166,7 @@ def test_lineup_payload_and_template_keep_five_teams_with_placeholders() -> None
     assert markup.count("第 ") == 5
     assert "合成首领" in markup
     assert "solo-placeholder" in markup
-    assert "无法估伤" in markup or "不估算伤害" in markup
+    assert "暂未启用伤害估算" in markup
     assert payload["canvas"]["width"] == 1000
 
 

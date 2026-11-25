@@ -44,7 +44,7 @@ LABEL_ALIASES: dict[str, str] = {
     "防禦力增加": "防御力增加",
 }
 KNOWN_LABELS = tuple(dict.fromkeys(LABEL_ALIASES.values()))
-PROBABILITY_NOTE = "官方未提供可核验的洗词条概率表，因此不显示概率。"
+PROBABILITY_NOTE = "官方未公布洗词条概率，以上仅作洗炼方向参考。"
 MIT_COMMUNITY_OPTION_WEIGHTS: dict[str, float] = {
     "优越代码伤害增加": 10.0,
     "攻击力增加": 10.0,
@@ -84,7 +84,7 @@ def resolve_preset_targets(preset: str) -> tuple[tuple[str, ...], str]:
             + "（可用：通用输出 / 蓄力 / 机枪 / 辅助 / 暴击）"
         )
     targets, desc = BUILTIN_OVERLOAD_PRESETS[key]
-    return targets, f"内置通用定位预设 · {desc}（非角色专属推荐表，请结合角色机制微调）"
+    return targets, f"通用定位参考：{desc}（可按角色机制微调）"
 
 
 class OverloadAdviceError(ValueError):
@@ -265,29 +265,29 @@ def advise(
         if option.label in normalized_avoid:
             action = "重洗"
             lock = False
-            reasons = ("该角色机制建议避免此词条（可能稀释技能触发或负收益）", f"{option.tier} 阶")
+            reasons = ("该角色机制不建议留此词条", f"{option.tier} 阶")
             if option.locked:
-                lock_warnings.append(f"{option.slot_label} #{option.position} 含建议避免词条「{option.label}」，请解锁后重洗")
+                lock_warnings.append(f"{option.slot_label} 第 {option.position} 条「{option.label}」不适合该角色，记得先解锁再洗")
         elif option.label in normalized_targets:
             matched_map[option.label] = matched_map.get(option.label, 0) + 1
             action = "保留"
             lock = True
-            reasons = ("命中目标词条", f"{option.tier} 阶")
+            reasons = ("推荐留用", f"{option.tier} 阶")
             if option.tier <= 5:
-                reasons = reasons + ("阶级偏低（≤5/15 阶），锁定会增加后续洗词条模块消耗，非毕业可暂缓锁定",)
+                reasons = reasons + ("阶级偏低（≤5 阶），建议先不锁以省模块",)
                 lock_warnings.append(
-                    f"{option.slot_label} #{option.position} {option.label} 仅 {option.tier}/15 阶，建议评估后再锁"
+                    f"{option.slot_label} 第 {option.position} 条 {option.label} 只有 {option.tier}/15 阶，建议先不急着锁"
                 )
         elif option.tier >= _MAX_TIER:
             action = "重洗"
             lock = False
-            reasons = ("满级但非目标词条，追求目标仍需重洗",)
+            reasons = ("已满阶但非推荐词条，要追毕业可重洗",)
         else:
             action = "重洗"
             lock = False
-            reasons = (f"{option.tier} 阶未达目标",)
+            reasons = (f"{option.tier} 阶 · 非推荐词条",)
         if option.locked and action == "重洗":
-            reasons = reasons + ("当前已锁定；如需重洗请先解锁",)
+            reasons = reasons + ("目前锁着，重洗前需先解锁",)
         advices.append(OptionAdvice(option=option, action=action, lock=lock, reasons=reasons))
 
     for slot, items in slot_groups.items():
@@ -295,10 +295,10 @@ def advise(
         explicit_locked = sum(1 for item in items if item.locked)
         has_reroll = any(item.label not in normalized_targets and not item.locked for item in items)
         if explicit_locked >= len(POSITIONS) and any(item.label not in normalized_targets for item in items):
-            lock_warnings.append(f"{slot_label} 已锁定全部 3 条词条，需先解锁后才可重洗")
+            lock_warnings.append(f"{slot_label} 3 条全锁了，要重洗得先解锁")
         elif explicit_locked > 0 and has_reroll:
             cost = 1 + explicit_locked
-            lock_warnings.append(f"{slot_label} 当前已锁 {explicit_locked} 条，每次重洗将消耗 {cost} 个定制模块")
+            lock_warnings.append(f"{slot_label} 已锁 {explicit_locked} 条，每次重洗要花 {cost} 个定制模块")
 
     normalized_counts: list[tuple[str, int]] = []
     for raw_label, raw_count in (target_counts or {}).items():
@@ -372,11 +372,11 @@ def simulate(
     if not normalized_targets:
         raise OverloadAdviceError("模拟需要目标词条")
 
-    rand_note = "随机来源：系统随机（非固定种子）" if seed is None else f"随机来源：固定复现种子 {seed}"
+    rand_note = "" if seed is None else f"（固定种子 {seed}）"
     if distribution is None:
         labels = list(KNOWN_LABELS)
         weights = [MIT_COMMUNITY_OPTION_WEIGHTS.get(lbl, 10.0) for lbl in labels]
-        assumption = f"配置化假设：MIT nikke-calculator 公开权重模型（10%/12%，非官方公布概率）；{rand_note}。"
+        assumption = f"💡 模拟权重参考社区公开模型，非官方概率，仅供参考{rand_note}。"
     else:
         if not isinstance(distribution, Mapping):
             raise OverloadAdviceError("分布必须是词条到权重的映射")
@@ -392,7 +392,7 @@ def simulate(
             weights.append(float(raw_weight))
         if not labels:
             raise OverloadAdviceError("分布不能为空")
-        assumption = f"配置化假设：按调用方提供的分布重洗；{rand_note}；非官方概率。"
+        assumption = f"💡 按自定义权重模拟，非官方概率，仅供参考{rand_note}。"
 
     def satisfied(values: Sequence[OverloadOption]) -> bool:
         return all(option.label in normalized_targets or option.locked for option in values)
@@ -585,53 +585,53 @@ def load_recommendations(path: str | Path) -> dict[str, tuple[str, ...]]:
 
 
 def render_advice(advice: Advice) -> str:
-    """渲染建议文本；概率缺失时明确说明。"""
-    lines = ["【超限洗词条助手】目标：" + "、".join(advice.targets)]
+    """渲染清晰的洗词条建议文本。"""
+    lines = ["【超限洗词条建议】目标：" + "、".join(advice.targets)]
     if advice.recommendation_source:
-        lines.append("推荐来源：" + advice.recommendation_source)
+        lines.append(f"参考方案：{advice.recommendation_source}")
     if advice.character_note:
-        lines.append("机制提示：" + advice.character_note)
+        lines.append(f"角色说明：{advice.character_note}")
     if advice.avoid_targets:
-        lines.append("建议避免：" + "、".join(advice.avoid_targets))
+        lines.append("⚠ 尽量避开：" + "、".join(advice.avoid_targets))
     if advice.target_counts:
-        counts = "、".join(f"{label} {count}" for label, count in advice.target_counts)
+        counts = "、".join(f"{label} ×{count}" for label, count in advice.target_counts)
         if advice.flex_count:
-            counts += f"、灵活 {advice.flex_count}（未指定类别）"
-        lines.append("目标数量：" + counts + "（按公开推荐行数，不表示优先级）")
+            counts += f"、自选 ×{advice.flex_count}"
+        lines.append("毕业推荐数量：" + counts)
     if advice.matched_counts:
         target_map = dict(advice.target_counts)
         progress = "、".join(
-            f"{label} {held}/{target_map[label]} 条"
+            f"{label} {held}/{target_map[label]}"
             if label in target_map
-            else f"{label} {held} 条"
+            else f"{label} {held}条"
             for label, held in advice.matched_counts
         )
-        lines.append("当前四件套命中汇总：" + progress)
+        lines.append("当前已命中：" + progress)
     if advice.lock_warnings:
-        lines.extend(f"锁定与模块提醒：{warning}" for warning in advice.lock_warnings)
-    locked = [item for item in advice.options if item.option.locked]
-    if locked:
-        lines.append("已锁定：" + "、".join(f"{item.option.slot_label}{item.option.position}" for item in locked))
+        lines.extend(f"⚠ {warning}" for warning in advice.lock_warnings)
+    lines.append("")
     for item in advice.options:
         option = item.option
         action = item.action
         if option.locked and action == "重洗":
-            action = "重洗（已锁定，需先解锁）"
+            action = "重洗（需先解锁）"
+        lock_hint = "（建议锁）" if item.lock and not option.locked else ("（已锁）" if option.locked and item.action == "保留" else "")
         lines.append(
-            f"· {option.slot_label} #{option.position} {option.label}（{option.tier} 阶）"
-            f" → {action}" + (" · 建议锁定" if item.lock and not option.locked else "")
+            f"• {option.slot_label} #{option.position}：{option.label}（{option.tier} 阶）"
+            f" → {action}{lock_hint}"
         )
-        lines.append("  理由：" + "；".join(item.reasons))
+        if item.reasons:
+            lines.append("  " + "；".join(item.reasons))
+    lines.append("")
     if advice.probability:
-        lines.append("概率：" + advice.probability)
+        lines.append("参考概率：" + advice.probability)
     else:
-        lines.append("概率：" + advice.probability_note)
+        lines.append(advice.probability_note)
     if advice.simulation is not None:
         sim = advice.simulation
-        state = "达成" if sim.success else "未达成"
-        seed_text = f"（种子 {sim.seed}）" if sim.seed is not None else "（系统随机）"
+        state = "达成目标" if sim.success else "未全员达成"
         lines.append(
-            f"模拟：{sim.attempts} 次重洗后{state}{seed_text}；未成功次数 {sim.failures} · 消耗定制模块约 {sim.modules_spent} 个"
+            f"模拟洗炼：{sim.attempts} 次尝试后{state}（失败 {sim.failures} 次，消耗约 {sim.modules_spent} 个定制模块）"
         )
         lines.append(sim.assumption)
     return "\n".join(lines)
@@ -639,20 +639,17 @@ def render_advice(advice: Advice) -> str:
 
 def render_character_recommendation(character_name: str, selected: CharacterTargets) -> str:
     """无现成 T10 词条输入时，输出角色专属超限词条推荐与避坑指南。"""
-    lines = [
-        f"【超限词条推荐】{character_name}",
-        f"数据来源：{selected.source_url}（核验 {selected.checked_at}）",
-    ]
+    lines = [f"【超限词条推荐】{character_name}"]
     counts = "、".join(f"{label} ×{count}" for label, count in selected.counts)
     if selected.flex_count:
-        counts += f"、自选/灵活 ×{selected.flex_count}"
-    lines.append("推荐四件套词条目标：" + (counts or "、".join(selected.targets)))
+        counts += f"、自选 ×{selected.flex_count}"
+    lines.append("推荐词条：" + (counts or "、".join(selected.targets)))
     if selected.avoid:
-        lines.append("⚠ 建议避免词条：" + "、".join(selected.avoid))
+        lines.append("⚠ 尽量避开：" + "、".join(selected.avoid))
     if selected.note:
-        lines.append("机制说明：" + selected.note)
+        lines.append("说明：" + selected.note)
     lines.append("")
-    lines.append(f"提示：绑定账号后发送 /妮姬 洗词条 推荐:{character_name} 账号 即可直接对比实装装备。")
+    lines.append(f"💡 绑定账号后发送 /妮姬 洗词条 {character_name}，会自动对比你身上已洗好的 T10 词条。")
     return "\n".join(lines)
 
 

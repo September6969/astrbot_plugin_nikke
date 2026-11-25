@@ -154,7 +154,7 @@ class AccountCommandContractTests(IsolatedAsyncioTestCase):
 
         result = await self.handler.handle(context(operation="status", actor_id="qq-owner"))
 
-        self.assertIn("已绑定：妮姬昵称", result.messages[0].text)
+        self.assertIn("已绑定指挥官：妮姬昵称", result.messages[0].text)
         self.assertIn("每日汇总：开启", result.messages[0].text)
         self.assertIn(("get_account", "qq-owner", False), self.store.writes)
 

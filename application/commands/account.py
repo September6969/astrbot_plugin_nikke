@@ -169,13 +169,12 @@ class AccountCommandHandler:
     def _status(self, context: CommandContext) -> CommandResult:
         account = self._application.account_status(context.actor_id)
         if not account:
-            return self._text("未绑定，请私聊发送 /妮姬 账号 绑定。")
-        state = "有效" if account["cookie_valid"] else "已失效，请重新绑定"
+            return self._text("你还没有绑定账号，请私聊我发送 /妮姬 账号 绑定。")
+        state = "正常" if account["cookie_valid"] else "已过期，需要重新绑定"
         return self._text(
-            f"已绑定：{account['nickname'] or account['role_name'] or '未命名指挥官'}\n"
-            f"区服ID：{account['area_id'] or '待识别'}\nCookie：{state}\n"
-            f"每日汇总：{'开启' if account['push_enabled'] else '关闭'}\n"
-            f"自动签到：{'开启' if account.get('auto_daily_enabled') else '关闭'}"
+            f"已绑定指挥官：{account['nickname'] or account['role_name'] or '未命名'}\n"
+            f"区服：{account['area_id'] or '待识别'} · 登录状态：{state}\n"
+            f"每日汇总：{'开启' if account['push_enabled'] else '关闭'} · 自动签到：{'开启' if account.get('auto_daily_enabled') else '关闭'}"
         )
 
     def _push(self, context: CommandContext, state: str) -> CommandResult:

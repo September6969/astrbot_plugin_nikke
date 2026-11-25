@@ -180,19 +180,18 @@ def calculate_sync_plan(
             resource: _amount(manual_costs.get(resource), f"{RESOURCE_LABELS[resource]}累计成本")
             for resource in RESOURCES
         }
-        cost_source = "用户手工输入（未验证；仅用于本次计算）"
+        cost_source = "手工填写的升级消耗"
         cost_table = None
     else:
         if table is None:
             raise SyncLevelInputError(
-                "缺少可靠等级成本表：请导入带来源与核验日期的成本表，"
-                "或使用 /妮姬 同步器 计算 手工 输入三项累计成本"
+                "暂未加载同步器等级表，可改用手工模式计算。"
             )
         try:
             required = table.cost_between(current_level, target_level)
         except SyncCostTableError as exc:
             raise SyncLevelInputError(str(exc)) from exc
-        cost_source = f"{table.label} · 核验 {table.checked_at}"
+        cost_source = table.label
         cost_table = table
 
     stocks = {resource: _opt_amount(inventory, resource, f"{RESOURCE_LABELS[resource]}库存") for resource in RESOURCES}
@@ -206,13 +205,13 @@ def calculate_sync_plan(
         missing = max(0, need - stock)
         if missing == 0:
             days: int | None = 0
-            status = "库存足够"
+            status = "已足够"
         elif rate <= 0:
             days = None
-            status = "零产量，无法达到"
+            status = "未填日产"
         else:
             days = int(math.ceil(missing / rate))
-            status = "需要积累"
+            status = "需积累"
         plans.append(
             ResourcePlan(
                 resource=resource,
@@ -230,10 +229,10 @@ def calculate_sync_plan(
     if any(item.days is None for item in plans):
         overall: int | None = None
         bottlenecks = tuple(item.label for item in plans if item.days is None)
-        note = "存在零产量资源且有缺口，无法给出到达日期；请补充该资源的日产量或库存。"
+        note = "有缺口资源未设置日产量，暂时无法估算到达日期。"
     else:
         overall = max(reachable, default=0)
-        bottlenecks = tuple(item.label for item in plans if item.days == overall)
+        bottlenecks = tuple(item.label for item in plans if item.days == overall) if overall > 0 else ()
         note = ""
 
     base = _as_date(today, timezone_offset_hours)
@@ -393,44 +392,29 @@ def _as_date(value: date | datetime | None, offset_hours: int) -> date:
 
 
 def _format_num(value: float | int) -> str:
+    """格式化数量/日产量：大数一律千分位整数，绝不输出科学计数法。"""
     if isinstance(value, int):
         return f"{value:,}"
-    if value.is_integer():
-        return f"{int(value):,}"
+    if not math.isfinite(value):
+        return "0"
+    if abs(value) >= 1000 or value.is_integer():
+        return f"{int(round(value)):,}"
     return f"{value:,.1f}"
 
 
 def render_sync_plan(plan: SyncLevelPlan) -> str:
-    """渲染同步器计划文本，保留来源、前哨/资源箱信息与缺失说明。"""
-    lines = [f"【同步器等级】{plan.current} → {plan.target}"]
-    if plan.table is not None:
-        lines.extend(
-            (
-                f"成本表：{plan.table.label} · 核验 {plan.table.checked_at} · {plan.table.source_url}",
-                f"覆盖范围：{plan.table.scope}",
-            )
-        )
+    """渲染清晰易读的同步器升级规划文本（结论前置、无科学计数法与审计术语）。"""
+    lines = [f"【同步器规划】Lv.{plan.current} → Lv.{plan.target}"]
+    if plan.overall_days is None:
+        lines.append(f"预计耗时：暂无法估算（{'、'.join(plan.bottlenecks)} 未填日产）")
+    elif plan.overall_days == 0:
+        lines.append("预计耗时：资源已够，现在就能直接升！")
     else:
-        lines.append("成本来源：" + (plan.cost_source or "用户手工输入（未验证）"))
-    if plan.outpost_level is not None:
-        wipe = f" + 每日歼灭 {plan.wipeout_count} 次" if plan.wipeout_count is not None else ""
-        lines.append(f"前哨产出：前哨 Lv.{plan.outpost_level}（24H{wipe}）")
-    if plan.rate_note:
-        lines.append(f"产量说明：{plan.rate_note}")
-    lines.append("")
-    for item in plan.resources:
-        days = "无法估算" if item.days is None else f"{item.days} 天"
-        stock_detail = f"库存 {item.stock:,}"
-        if plan.case_yields and plan.direct_inventory is not None:
-            c_val = plan.case_yields.get(item.resource, 0)
-            d_val = plan.direct_inventory.get(item.resource, 0)
-            if c_val > 0:
-                stock_detail = f"总库存 {item.stock:,}（直存 {d_val:,} + 箱子 {c_val:,}）"
-        lines.append(
-            f"{item.label}：需要 {item.required:,} · {stock_detail} · "
-            f"日产量 {item.production:g} · 缺口 {item.missing:,} · {days}（{item.status}）"
-        )
-    lines.append("")
+        eta_text = plan.eta.isoformat() if plan.eta else ""
+        lines.append(f"预计耗时：约 {plan.overall_days} 天（预计 {eta_text} 达成）")
+        if plan.bottlenecks:
+            lines.append("卡点资源：" + "、".join(plan.bottlenecks))
+
     if plan.reachable_level is not None and plan.gainable_levels is not None:
         extra = ""
         if (
@@ -438,32 +422,55 @@ def render_sync_plan(plan: SyncLevelPlan) -> str:
             and plan.reachable_without_cases is not None
             and plan.gainable_without_cases != plan.gainable_levels
         ):
-            extra = f"（不含箱子 Lv.{plan.reachable_without_cases}，+{plan.gainable_without_cases} 级）"
+            extra = f"（不开箱子可到 Lv.{plan.reachable_without_cases}）"
         lines.append(
-            f"现有库存可立即升至：Lv.{plan.reachable_level}（+{plan.gainable_levels} 级）{extra}"
+            f"当前库存可立即升至：Lv.{plan.reachable_level}（+{plan.gainable_levels} 级）{extra}"
         )
-    if plan.overall_days is None:
-        lines.append("预计日期：无法估算（" + "、".join(plan.bottlenecks) + " 零产量且有缺口）")
+
+    if plan.table is None:
+        lines.append("（按手工填写的升级消耗计算）")
+    if plan.rate_note:
+        lines.append(f"说明：{plan.rate_note}")
+
+    lines.append("")
+    if plan.outpost_level is not None:
+        wipe = f" · 含每日 {plan.wipeout_count} 次歼灭" if plan.wipeout_count is not None else ""
+        lines.append(f"资源明细（前哨 Lv.{plan.outpost_level}{wipe}）：")
     else:
-        lines.append(f"全部到齐：{plan.overall_days} 天（预计 {plan.eta.isoformat()}，北京时间）")
-        lines.append("瓶颈：" + ("、".join(plan.bottlenecks) or "无"))
+        lines.append("资源明细：")
+
+    for item in plan.resources:
+        stock_detail = f"现有 {item.stock:,}"
+        if plan.case_yields and plan.direct_inventory is not None:
+            c_val = plan.case_yields.get(item.resource, 0)
+            d_val = plan.direct_inventory.get(item.resource, 0)
+            if c_val > 0:
+                stock_detail = f"现有 {item.stock:,}（直存 {d_val:,} + 箱子 {c_val:,}）"
+        if item.missing == 0:
+            lines.append(f"• {item.label}：需 {item.required:,}｜{stock_detail}（已足够）")
+        elif item.days is None:
+            lines.append(f"• {item.label}：需 {item.required:,}｜{stock_detail}｜还差 {item.missing:,}（未填日产）")
+        else:
+            lines.append(
+                f"• {item.label}：需 {item.required:,}｜{stock_detail}｜"
+                f"还差 {item.missing:,}｜日产 {_format_num(item.production)}（约 {item.days} 天）"
+            )
+
     if plan.note:
-        lines.append(plan.note)
+        lines.extend(("", plan.note))
     return "\n".join(lines)
 
 
 def render_sync_overview(ctx: AccountSyncContext, table: SyncCostTable | None) -> str:
-    """渲染 `/妮姬 同步器` 账号自动读取总览。"""
+    """渲染 `/妮姬 同步器` 账号概览。"""
     if ctx.synchro_level is None:
-        return "上游未返回同步器等级（缺失）。可改用 /妮姬 同步器 计算 手工输入。"
-    lines = [
-        f"当前同步器等级：Lv.{ctx.synchro_level}（来自已绑定账号只读资料）",
-    ]
+        return "暂时没读到你的同步器等级，请稍后再试，或发送 /妮姬 同步器 计算 <当前> <目标> 手动查看消耗。"
+    lines = [f"【同步器概览】当前 Lv.{ctx.synchro_level}"]
     if ctx.outpost_level is not None:
-        lines.append(f"前哨基地等级：Lv.{ctx.outpost_level} · {ctx.academy_note}")
+        lines.append(f"前哨基地：Lv.{ctx.outpost_level}（{ctx.academy_note}）")
     lines.append(
-        "直接库存："
-        + " / ".join(f"{RESOURCE_LABELS[r]} {ctx.inventory.get(r, 0):,}" for r in RESOURCES)
+        "当前直存："
+        + "｜".join(f"{RESOURCE_LABELS[r]} {ctx.inventory.get(r, 0):,}" for r in RESOURCES)
     )
     if ctx.outpost_rates is not None:
         daily = {
@@ -471,17 +478,18 @@ def render_sync_overview(ctx: AccountSyncContext, table: SyncCostTable | None) -
             for r in RESOURCES
         }
         lines.append(
-            "估算日产（24H + 每日免费歼灭1次）："
-            + " / ".join(f"{RESOURCE_LABELS[r]} {_format_num(round(daily[r]))}" for r in RESOURCES)
+            "预估日产："
+            + "｜".join(f"{RESOURCE_LABELS[r]} {_format_num(round(daily[r]))}" for r in RESOURCES)
+            + "（含每日 1 次免费歼灭）"
         )
-        if ctx.outpost_rates.estimated_above_400:
-            lines.append(f"注：{ctx.outpost_rates.rate_note}")
+        if ctx.outpost_rates.estimated_above_400 and ctx.outpost_rates.rate_note:
+            lines.append(f"说明：{ctx.outpost_rates.rate_note}")
     if table is not None and ctx.gainable_levels is not None and ctx.reachable_level is not None:
-        lines.append(f"直接库存可升：+{ctx.gainable_levels} 级（可达 Lv.{ctx.reachable_level}）")
+        lines.append(f"现在就能升：+{ctx.gainable_levels} 级（可升到 Lv.{ctx.reachable_level}）")
         if ctx.next_level_cost is not None:
             lines.append(
-                f"升至 Lv.{ctx.synchro_level + 1} 单级需："
-                + " / ".join(f"{RESOURCE_LABELS[r]} {ctx.next_level_cost[r]:,}" for r in RESOURCES)
+                f"升至 Lv.{ctx.synchro_level + 1} 还需："
+                + "｜".join(f"{RESOURCE_LABELS[r]} {ctx.next_level_cost[r]:,}" for r in RESOURCES)
             )
     suggested = ((ctx.synchro_level // 10) + 1) * 10
     if suggested <= ctx.synchro_level:
@@ -489,8 +497,8 @@ def render_sync_overview(ctx: AccountSyncContext, table: SyncCostTable | None) -
     lines.extend(
         (
             "",
-            f"常用指令：/妮姬 同步器 计算 {suggested} ｜ /妮姬 同步器 可升",
-            "含背包资源箱与自定义日收益的完整版请用 /妮姬 工作台。",
+            f"试试发送：/妮姬 同步器 计算 {suggested} ｜ /妮姬 同步器 可升",
+            "💡 想算背包资源箱或调整每日歼灭次数，请用 /妮姬 工作台。",
         )
     )
     return "\n".join(lines)
@@ -499,20 +507,20 @@ def render_sync_overview(ctx: AccountSyncContext, table: SyncCostTable | None) -
 def render_gainable_report(ctx: AccountSyncContext, table: SyncCostTable) -> str:
     """渲染 `/妮姬 同步器 可升` 即时可升级分析报告。"""
     if ctx.synchro_level is None:
-        return "上游未返回同步器等级（缺失），无法计算当前可升等级。"
+        return "暂时没读到你的同步器等级，暂时无法计算当前可升几级。"
     gained = ctx.gainable_levels or 0
     reachable = ctx.reachable_level or ctx.synchro_level
     remaining = ctx.remaining_inventory or ctx.inventory
     lines = [
-        f"【同步器即时可升】当前 Lv.{ctx.synchro_level}（来自已绑定账号只读资料）",
-        "直接库存："
-        + " / ".join(f"{RESOURCE_LABELS[r]} {ctx.inventory.get(r, 0):,}" for r in RESOURCES),
-        f"直接库存可立即连续升级：+{gained} 级（可升至 Lv.{reachable}）",
+        f"【同步器即时可升】当前 Lv.{ctx.synchro_level}",
+        "当前直存："
+        + "｜".join(f"{RESOURCE_LABELS[r]} {ctx.inventory.get(r, 0):,}" for r in RESOURCES),
+        f"立即能升：+{gained} 级（可升到 Lv.{reachable}）",
     ]
     if gained > 0:
         lines.append(
-            "升级后剩余："
-            + " / ".join(f"{RESOURCE_LABELS[r]} {remaining.get(r, 0):,}" for r in RESOURCES)
+            "升完还剩："
+            + "｜".join(f"{RESOURCE_LABELS[r]} {remaining.get(r, 0):,}" for r in RESOURCES)
         )
     nxt_cost = table.next_level_cost(reachable)
     if nxt_cost is not None:
@@ -521,10 +529,10 @@ def render_gainable_report(ctx: AccountSyncContext, table: SyncCostTable) -> str
             for r in RESOURCES
         }
         lines.append(
-            f"再升 1 级（Lv.{reachable} → {reachable + 1}）还差："
-            + " / ".join(f"{RESOURCE_LABELS[r]} {shortfall[r]:,}" for r in RESOURCES)
+            f"再往后升 1 级（Lv.{reachable} → {reachable + 1}）还差："
+            + "｜".join(f"{RESOURCE_LABELS[r]} {shortfall[r]:,}" for r in RESOURCES)
         )
-    lines.append("注：以上仅统计直接库存；如需计入背包资源箱（1H–24H）请使用 /妮姬 工作台。")
+    lines.append("💡 以上只算了直接库存；想把背包资源箱也算上，请发 /妮姬 工作台。")
     return "\n".join(lines)
 
 
@@ -536,21 +544,19 @@ def render_cost_lookup(
 ) -> str:
     """渲染双等级区间查询结果（`/妮姬 同步器 计算 <当前> <目标>`）。"""
     required = table.cost_between(current, target)
-    lines = [
-        f"【同步器区间消耗】Lv.{current} → Lv.{target}",
-        f"成本表：{table.label} · 核验 {table.checked_at}",
-        "",
-    ]
+    lines = [f"【同步器升级消耗】Lv.{current} → Lv.{target}", ""]
     for res in RESOURCES:
         need = required[res]
         if inventory is not None:
             stock = int(inventory.get(res, 0) or 0)
             missing = max(0, need - stock)
-            lines.append(f"{RESOURCE_LABELS[res]}：需要 {need:,} · 直接库存 {stock:,} · 缺口 {missing:,}")
+            if missing == 0:
+                lines.append(f"• {RESOURCE_LABELS[res]}：需 {need:,}｜现有 {stock:,}（已足够）")
+            else:
+                lines.append(f"• {RESOURCE_LABELS[res]}：需 {need:,}｜现有 {stock:,}｜还差 {missing:,}")
         else:
-            lines.append(f"{RESOURCE_LABELS[res]}：需要 {need:,}")
-    lines.append("")
-    lines.append("提示：绑定账号后可直接 /妮姬 同步器 计算 <目标等级> 自动带上前哨产量估算日期；未绑定可前往 /妮姬 大厅 使用公开计算器。")
+            lines.append(f"• {RESOURCE_LABELS[res]}：需 {need:,}")
+    lines.extend(("", "💡 绑定账号后直接发 /妮姬 同步器 计算 <目标等级>，就会自动帮你算还要几天。"))
     return "\n".join(lines)
 
 

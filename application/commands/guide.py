@@ -44,12 +44,11 @@ class GuideCommandHandler:
                         "【NIKKE 常用攻略一图流】\n\n"
                         "支持查看以下分类攻略图：\n"
                         "• /妮姬 攻略 练度 — 角色培养与技能升级一图流\n"
-                        "• /妮姬 攻略 红球 — 同步器等级与红球消耗一览表\n"
+                        "• /妮姬 攻略 红球 — 同步器等级与芯尘消耗一览表\n"
                         "• /妮姬 攻略 珍藏品 — 珍藏品养成与材料汇总\n"
-                        "• /妮姬 攻略 充能 — 竞技场爆裂充能速查表\n\n"
-                        "• /妮姬 攻略 洗词条 — Overload 词条教学\n"
-                        "• /妮姬 攻略 PVP — 竞技场配队参考\n\n"
-                        "仅发送 registry 中已登记的授权素材或白名单 HTTPS 链接。"
+                        "• /妮姬 攻略 充能 — 竞技场爆裂充能速查表\n"
+                        "• /妮姬 攻略 洗词条 — 超限词条洗炼教学\n"
+                        "• /妮姬 攻略 PVP — 竞技场配队参考"
                     ),
                 )
             )
@@ -87,5 +86,5 @@ class GuideCommandHandler:
         if page_number > 1 or page_result.total_entries:
             return CommandResult((TextReply("该攻略页不存在。"),))
         return CommandResult(
-            (TextReply(f"暂未收录【{category}】攻略图，当前保留占位，等待后续登记素材。"),)
+            (TextReply(f"暂时还没有收录【{category}】的攻略图。"),)
         )

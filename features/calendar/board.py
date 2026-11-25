@@ -268,15 +268,13 @@ def build_board(
 
 
 def render_board(board: Board) -> str:
-    """渲染分类日历文本；UP 概率缺失时给出明确说明。"""
+    """渲染分类日历文本；清晰展示进行状态与剩余时间。"""
     lines = [
-        "【NIKKE 日程 · 卡池与活动日历】",
-        f"当前时间：{board.now.strftime('%Y-%m-%d %H:%M')}（北京时间 UTC+8）",
+        "【NIKKE 活动与卡池日历】",
+        f"当前时间：{board.now.strftime('%Y-%m-%d %H:%M')}（北京时间）",
     ]
-    if board.up_rate_missing:
-        lines.append("UP 概率：官方日程未提供可靠概率字段（缺失，未推断）。")
     if not board.items:
-        lines.append("当前快照在所选类型下没有记录；不代表游戏内没有活动。")
+        lines.append("当前所选分类下暂无近期安排。")
         return "\n".join(lines)
     for group in board.groups:
         rows = board.by_group(group)
@@ -284,19 +282,14 @@ def render_board(board: Board) -> str:
             continue
         lines.extend(("", f"【{group}】"))
         for item in rows:
-            lines.append(f"· {item.title}")
+            lines.append(f"• {item.title}")
+            rate_suffix = f" · 概率 {item.up_rate}" if item.up_rate else ""
             lines.append(
-                f"  {item.status} · {item.start_display} → {item.end_display}"
-                f"（北京时间） · {item.countdown}"
+                f"  {item.status}｜{item.start_display} → {item.end_display}"
+                f"｜{item.countdown}{rate_suffix}"
             )
-            detail = f"  来源：{item.source}"
-            if item.up_rate:
-                detail += f" · UP 概率：{item.up_rate}"
-            elif item.up_rate_missing:
-                detail += " · UP 概率：上游未提供（缺失）"
-            lines.append(detail)
-    if board.unclassified:
-        lines.extend(("", f"另有 {board.unclassified} 条记录不属于卡池/活动/皮肤/突袭，未在此视图展示。"))
+    if board.up_rate_missing:
+        lines.extend(("", "💡 官方日程不含卡池概率数据，具体概率以游戏内为准。"))
     return "\n".join(lines)
 
 
