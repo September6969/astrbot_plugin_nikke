@@ -68,6 +68,8 @@ def grid_rows() -> tuple[dict, ...]:
             "name_zh_tw": f"測試{index}號",
             "name_en": f"Test Unit {index}",
             "rare": "SSR",
+            "corporation": "ELYSION",
+            "pool_status": "ordinary_recruit",
             "burst": ("Step1", "Step2", "Step3")[index % 3],
             "element": "Fire",
         }

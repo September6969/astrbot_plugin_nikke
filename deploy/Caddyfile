@@ -2,8 +2,10 @@ nikke.irises777.xyz {
     encode zstd gzip
     reverse_proxy astrbot:6210
     log_skip /arena/open/*
+    log_skip /shiftypad/*
+    log_skip /api/shiftypad/*
 
-    # 示例默认关闭访问日志。启用站点访问日志时仍须跳过竞技场链接路径。
+    # 示例默认关闭访问日志。启用站点访问日志时仍须跳过竞技场与 ShiftyPad 临时令牌路径。
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"

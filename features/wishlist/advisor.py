@@ -2,17 +2,19 @@
 """愿望单推荐（16）。
 
 按《胜利女神：NIKKE》普通招募愿望单规则实现：
-- 仅限 SSR 入选愿望单（自动排除 SR、R 以及不进普通池的 ABNORMAL 联动/异界角色）；
-- 按三大常规企业（极乐净土 / 米西利斯 / 泰特拉）与朝圣者/超限独立池分 4 组、每组最多 5 席；
-- 160 级壁垒仅统计已拥有且达到 3 星突破（LB3）的 SSR 角色；
-- 手工角色池支持接入 CharacterDirectoryResolver 解析简繁英别名；
-- 元数据仍缺少官方实时“已入普池”布尔字段时，保留显式排除表过滤与池位覆盖说明。
+- 仅限已明确核验可进入普通招募愿望单的 SSR 入选（fail-closed：未知准入状态不得默认加入）；
+- 自动排除 SR、R、ABNORMAL 联动（collab）、限定（limited）、尚未进普池的新角色（new_not_yet_ordinary）与免费/解放角色（free_welfare）；
+- 按三大常规企业（极乐净土 / 米西利斯 / 泰特拉）与朝圣者/超限独立池（Over-Spec 并入 Pilgrim 组）分 4 组、每组最多 5 席；
+- 160 级壁垒统计已拥有且达到 3 星突破（LB3）的 SSR 角色；
+- 手工角色池支持接入 CharacterDirectoryResolver 解析简繁英别名。
 """
 
 from __future__ import annotations
 
+import json
 import unicodedata
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 STRATEGIES: dict[str, str] = {
@@ -42,17 +44,89 @@ MANUFACTURER_ORDER: dict[str, int] = {
     "PILGRIM": 3,
     "UNSPECIFIED": 4,
 }
+POOL_STATUSES = frozenset(
+    {
+        "ordinary_recruit",
+        "pilgrim_overspec",
+        "limited",
+        "collab",
+        "new_not_yet_ordinary",
+        "free_welfare",
+        "unknown",
+    }
+)
+ADMITTED_POOL_STATUSES = frozenset({"ordinary_recruit", "pilgrim_overspec"})
+STANDARD_GROUPS = frozenset({"ELYSION", "MISSILIS", "TETRA"})
+VALID_WISHLIST_GROUPS = frozenset({"ELYSION", "MISSILIS", "TETRA", "PILGRIM", "NONE", ""})
 # 通过 160 级壁垒需要 5 名 3 星 SSR；SR/R 与未验证条目不计入 160 壁垒进度。
 WALL_REQUIRED = 5
 POOL_COVERAGE_NOTE = (
-    "已按普通招募愿望单规则仅纳入 SSR 并自动排除 SR/R 与 ABNORMAL（异界/联动）；"
-    "三大常规企业与朝圣者/超限独立栏位各自至多推荐 5 席。"
-    "由于静态角色目录不含官方“当前已进入普池”实时字段，限定/当期未入普池角色仍需依赖排除表与游戏内招募清单确认。"
+    "严格执行 fail-closed 普通招募准入表：仅纳入已核验可入普通招募池的常规企业 SSR 与朝圣者/超限（Over-Spec 共用 Pilgrim 5 席）；"
+    "已自动排除 SR/R、联动（ABNORMAL）、期间限定、免费/解放角色、未入普池新角色及未知准入状态角色。"
 )
 
 
 class WishlistError(ValueError):
-    """策略或角色输入不合法。"""
+    """策略、角色输入或准入表不合法。"""
+
+
+@dataclass(frozen=True, slots=True)
+class PoolEligibilityEntry:
+    name_code: str
+    pool_status: str
+    wishlist_group: str = ""
+    note: str = ""
+
+
+def parse_pool_eligibility(payload: Mapping[str, Any]) -> dict[str, PoolEligibilityEntry]:
+    """解析并严格校验愿望单卡池准入表（schema_version=1）。"""
+    if not isinstance(payload, Mapping) or payload.get("schema_version") != 1:
+        raise WishlistError("愿望单准入表 schema_version 必须为 1")
+    checked_at = str(payload.get("checked_at") or "").strip()
+    if not checked_at:
+        raise WishlistError("愿望单准入表缺少 checked_at")
+    raw_entries = payload.get("entries")
+    if not isinstance(raw_entries, (Mapping, list)) or not raw_entries:
+        raise WishlistError("愿望单准入表 entries 必须是非空对象或列表")
+
+    parsed: dict[str, PoolEligibilityEntry] = {}
+    items = (
+        [(str(k), v) for k, v in raw_entries.items()]
+        if isinstance(raw_entries, Mapping)
+        else [(str(row.get("name_code") or ""), row) for row in raw_entries if isinstance(row, Mapping)]
+    )
+    for code, entry in items:
+        key = str(code).strip()
+        if not key or not isinstance(entry, Mapping):
+            raise WishlistError("愿望单准入表条目缺少有效的 name_code")
+        status = str(entry.get("pool_status") or "").strip().casefold()
+        if status not in POOL_STATUSES:
+            raise WishlistError(f"愿望单准入表包含未知 pool_status：{status}（code={key}）")
+        group = str(entry.get("wishlist_group") or "").strip().upper()
+        if group not in VALID_WISHLIST_GROUPS:
+            raise WishlistError(f"愿望单准入表包含无效 wishlist_group：{group}（code={key}）")
+        note = str(entry.get("note") or "").strip()
+        parsed[key] = PoolEligibilityEntry(
+            name_code=key,
+            pool_status=status,
+            wishlist_group=group,
+            note=note,
+        )
+    if not parsed:
+        raise WishlistError("愿望单准入表为空")
+    return parsed
+
+
+def load_pool_eligibility(path: str | Path) -> dict[str, PoolEligibilityEntry]:
+    """从 JSON 文件读取并校验愿望单卡池准入表。"""
+    target = Path(path)
+    if not target.is_file():
+        raise WishlistError(f"未找到愿望单准入表：{target.name}")
+    try:
+        payload = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise WishlistError(f"愿望单准入表无法解析：{target.name}") from exc
+    return parse_pool_eligibility(payload)
 
 
 def normalize_strategy(value: Any) -> str:
@@ -118,6 +192,34 @@ def _code_sort_key(code: str) -> tuple[int, int, str]:
     return (0, int(code), "") if code.isdigit() else (1, 0, code)
 
 
+def _resolve_pool_status(
+    code: str,
+    row: Mapping[str, Any],
+    eligibility: Mapping[str, PoolEligibilityEntry | str | Mapping[str, Any]] | None,
+) -> tuple[str, str]:
+    """解析卡池准入状态与所属愿望单栏位；缺失或无法识别一律返回 unknown（fail-closed）。"""
+    entry = eligibility.get(code) if eligibility is not None else None
+    if isinstance(entry, PoolEligibilityEntry):
+        return entry.pool_status, entry.wishlist_group
+    if isinstance(entry, str):
+        status = entry.strip().casefold()
+        return (status if status in POOL_STATUSES else "unknown"), ""
+    if isinstance(entry, Mapping):
+        status = str(entry.get("pool_status") or "").strip().casefold()
+        group = str(entry.get("wishlist_group") or "").strip().upper()
+        return (status if status in POOL_STATUSES else "unknown"), (
+            group if group in VALID_WISHLIST_GROUPS else ""
+        )
+    if eligibility is not None:
+        return "unknown", ""
+
+    inline_status = str(row.get("pool_status") or "").strip().casefold()
+    inline_group = str(row.get("wishlist_group") or "").strip().upper()
+    return (inline_status if inline_status in POOL_STATUSES else "unknown"), (
+        inline_group if inline_group in VALID_WISHLIST_GROUPS else ""
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class OwnedCharacter:
     name_code: str
@@ -139,6 +241,7 @@ class Candidate:
     score: int
     reasons: tuple[str, ...]
     corporation: str = "UNSPECIFIED"
+    pool_status: str = "unknown"
 
     @property
     def group(self) -> str:
@@ -157,6 +260,9 @@ class WishlistResult:
     coverage_note: str = POOL_COVERAGE_NOTE
     abnormal_excluded_count: int = 0
     non_ssr_excluded_count: int = 0
+    limited_excluded_count: int = 0
+    welfare_excluded_count: int = 0
+    unknown_excluded_count: int = 0
 
     def groups(self) -> dict[str, tuple[Candidate, ...]]:
         """按愿望单企业/朝圣分组返回候选，保持组内与组间确定性顺序。"""
@@ -253,8 +359,9 @@ def recommend(
     *,
     exclusions: Iterable[str] = (),
     limit: int = 20,
+    eligibility: Mapping[str, PoolEligibilityEntry | str | Mapping[str, Any]] | None = None,
 ) -> WishlistResult:
-    """按 NIKKE 普通招募愿望单规则（纯 SSR、排除 ABNORMAL、企业 5 席）给出推荐。"""
+    """按 NIKKE 普通招募愿望单规则（fail-closed 准入、纯 SSR、企业 5 席）给出推荐。"""
     selected = normalize_strategy(strategy)
     if not 1 <= limit <= 30:
         raise WishlistError("候选数量上限必须在 1–30")
@@ -298,7 +405,7 @@ def recommend(
     resolved: list[tuple[OwnedCharacter, Mapping[str, Any]]] = [
         (char, by_code[code]) for code, char in owned_by_code.items()
     ]
-    # 160 壁垒仅计入 3 星（LB3）SSR，SR/R 角色最高 2 星上限，绝不计入破壁。
+    # 160 壁垒仅计入 3 星（LB3）SSR；SR/R 最高 2 星绝不计入破壁。
     three_star_ssr = sum(
         1 for char, row in resolved if _rarity(row) == "SSR" and char.limit_break >= 3
     )
@@ -315,6 +422,9 @@ def recommend(
     excluded = {_norm(item) for item in exclusions if str(item).strip()}
     abnormal_excluded = 0
     non_ssr_excluded = 0
+    limited_excluded = 0
+    welfare_excluded = 0
+    unknown_excluded = 0
     scored: list[Candidate] = []
 
     for row in rows:
@@ -330,10 +440,29 @@ def recommend(
         if rarity != "SSR":
             non_ssr_excluded += 1
             continue
-        corp = _corporation(row)
-        if corp == "ABNORMAL":
+        raw_corp = _corporation(row)
+        pool_status, wishlist_group = _resolve_pool_status(code, row, eligibility)
+        if raw_corp == "ABNORMAL" or pool_status == "collab":
             abnormal_excluded += 1
             continue
+        if pool_status in {"limited", "new_not_yet_ordinary"}:
+            limited_excluded += 1
+            continue
+        if pool_status == "free_welfare":
+            welfare_excluded += 1
+            continue
+        if pool_status not in ADMITTED_POOL_STATUSES:
+            unknown_excluded += 1
+            continue
+
+        if pool_status == "pilgrim_overspec" or wishlist_group == "PILGRIM":
+            corp = "PILGRIM"
+        else:
+            corp = wishlist_group if wishlist_group in STANDARD_GROUPS else raw_corp
+            if corp not in STANDARD_GROUPS:
+                unknown_excluded += 1
+                continue
+
         burst = _burst(row)
         if not burst:
             continue
@@ -403,6 +532,7 @@ def recommend(
                 score=score,
                 reasons=tuple(reasons),
                 corporation=corp,
+                pool_status=pool_status,
             )
         )
 
@@ -429,26 +559,37 @@ def recommend(
         exclusions=tuple(unmatched_owned),
         abnormal_excluded_count=abnormal_excluded,
         non_ssr_excluded_count=non_ssr_excluded,
+        limited_excluded_count=limited_excluded,
+        welfare_excluded_count=welfare_excluded,
+        unknown_excluded_count=unknown_excluded,
     )
 
 
 def render_wishlist(result: WishlistResult) -> str:
-    """渲染愿望单；包含策略、纯 SSR 160 壁垒进度、分企业 5 席与覆盖限制。"""
+    """渲染愿望单；包含策略、纯 SSR 160 壁垒进度、分企业 5 席与准入过滤统计。"""
     lines = [
-        f"【愿望单推荐 · {result.strategy_label}】（仅限 SSR）",
+        f"【愿望单推荐 · {result.strategy_label}】（仅限普通招募 SSR）",
         f"160 壁垒：{'已通过' if result.wall_reached else '未通过'}（{result.wall_progress}，仅统计 3 星 SSR）",
     ]
     if result.missing_roles:
         lines.append("缺少定位：" + "、".join(result.missing_roles))
     if result.exclusions:
         lines.append("未能匹配的已拥有角色：" + "、".join(dict.fromkeys(result.exclusions)))
-    if result.non_ssr_excluded_count or result.abnormal_excluded_count:
-        lines.append(
-            f"规则过滤：已自动排除非 SSR {result.non_ssr_excluded_count} 名、"
-            f"ABNORMAL 异界/联动 {result.abnormal_excluded_count} 名。"
-        )
+    filter_parts: list[str] = []
+    if result.non_ssr_excluded_count:
+        filter_parts.append(f"非 SSR {result.non_ssr_excluded_count} 名")
+    if result.abnormal_excluded_count:
+        filter_parts.append(f"ABNORMAL 异界/联动 {result.abnormal_excluded_count} 名")
+    if result.limited_excluded_count:
+        filter_parts.append(f"限定/未入普池 {result.limited_excluded_count} 名")
+    if result.welfare_excluded_count:
+        filter_parts.append(f"免费/解放 {result.welfare_excluded_count} 名")
+    if result.unknown_excluded_count:
+        filter_parts.append(f"准入未知（默认拒绝）{result.unknown_excluded_count} 名")
+    if filter_parts:
+        lines.append("规则过滤：" + "、".join(filter_parts) + "。")
     if not result.candidates:
-        lines.append("没有可用 SSR 候选；请补充角色池或检查排除表。")
+        lines.append("没有已核验可入普通招募的 SSR 候选；请检查 wishlist_pool_eligibility.json 或排除表。")
     for group, candidates in result.groups().items():
         lines.extend(("", f"【{group} · {len(candidates)}/{MANUFACTURER_SLOTS} 席】"))
         for candidate in candidates:
@@ -461,6 +602,7 @@ def render_wishlist(result: WishlistResult) -> str:
 
 
 __all__ = [
+    "ADMITTED_POOL_STATUSES",
     "BURST_LABELS",
     "Candidate",
     "MANUFACTURER_LABELS",
@@ -468,12 +610,16 @@ __all__ = [
     "MANUFACTURER_SLOTS",
     "OwnedCharacter",
     "POOL_COVERAGE_NOTE",
+    "POOL_STATUSES",
+    "PoolEligibilityEntry",
     "STRATEGIES",
     "WALL_REQUIRED",
     "WishlistError",
     "WishlistResult",
+    "load_pool_eligibility",
     "normalize_strategy",
     "parse_owned",
+    "parse_pool_eligibility",
     "recommend",
     "render_wishlist",
 ]

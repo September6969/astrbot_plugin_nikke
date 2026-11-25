@@ -88,7 +88,7 @@ class FakeFetcher:
         return self.value
 
 
-async def build(clock, *, enabled_box=None, session_ttl: int = 3600):
+async def build(clock, *, enabled_box=None, session_ttl: int = 3600, access_log=object()):
     store = MemoryStore()
     readonly = ShiftypadReadOnlyStore(store, clock=lambda: datetime.now(timezone.utc))
     fetcher = FakeFetcher()
@@ -105,7 +105,8 @@ async def build(clock, *, enabled_box=None, session_ttl: int = 3600):
     )
     app = web.Application()
     service.mount(app)
-    client = TestClient(TestServer(app))
+    server_kwargs = {} if type(access_log) is object else {"access_log": access_log}
+    client = TestClient(TestServer(app, **server_kwargs))
     await client.start_server()
     return client, service, store, fetcher, readonly
 
@@ -329,3 +330,78 @@ async def test_upstream_failure_and_preview_mismatch_are_explicit() -> None:
         assert body["preview_id"] != "wrong"
     finally:
         await client.close()
+
+
+@pytest.mark.asyncio
+async def test_shiftypad_referrer_policy_and_zero_token_leakage_in_logs(caplog) -> None:
+    import logging
+    from types import SimpleNamespace
+    from aiohttp import ClientSession
+    from astrbot_plugin_nikke.integrations.web.service import BindingWebService
+
+    # 使用与生产 BindingWebService.start 一致的 web.AppRunner(..., access_log=None) 启动真实服务。
+    store = MemoryStore()
+    readonly = ShiftypadReadOnlyStore(store, clock=lambda: datetime.now(timezone.utc))
+    service = ShiftypadWebService(
+        store=store,
+        readonly=readonly,
+        resolver=mapping(),
+        fetcher=FakeFetcher(),
+        site_origin=ORIGIN,
+        clock=lambda: 1000.0,
+        session_ttl=3600,
+        enabled=lambda: True,
+    )
+    web_service = BindingWebService(store, SimpleNamespace(), mapping_path := None, public_base_url=ORIGIN)  # type: ignore[arg-type]
+    assert mapping_path is None
+    web_service.add_route_installer(service.mount)
+    runner = web.AppRunner(web_service.app(), access_log=None)
+    await runner.setup()
+    site = web.TCPSite(runner, "127.0.0.1", 0)
+    await site.start()
+    port = site._server.sockets[0].getsockname()[1]  # type: ignore[union-attr]
+    base_url = f"http://127.0.0.1:{port}"
+    try:
+        link = service.create_link("user-a")
+        token = token_from(link)
+        with caplog.at_level(logging.DEBUG):
+            async with ClientSession() as session:
+                async with session.get(f"{base_url}/shiftypad/open/{token}") as open_resp:
+                    assert open_resp.status == 200
+                    assert open_resp.headers["Referrer-Policy"] == "no-referrer"
+                    assert '<meta name="referrer" content="no-referrer">' in await open_resp.text()
+
+                async with session.post(
+                    f"{base_url}/shiftypad/api/claim",
+                    data={"token": token},
+                    headers={"Origin": ORIGIN},
+                    allow_redirects=False,
+                ) as claim_resp:
+                    assert claim_resp.status == 303
+                    assert claim_resp.headers["Referrer-Policy"] == "no-referrer"
+                    cookie_val = claim_resp.cookies[COOKIE].value
+
+                cookie_header = {"Cookie": f"{COOKIE}={cookie_val}"}
+                async with session.get(f"{base_url}/shiftypad/edit", headers=cookie_header) as edit_resp:
+                    assert edit_resp.status == 200
+                    assert edit_resp.headers["Referrer-Policy"] == "no-referrer"
+                    assert '<meta name="referrer" content="no-referrer">' in await edit_resp.text()
+
+                async with session.get(f"{base_url}/shiftypad/static/editor.js") as static_resp:
+                    assert static_resp.status == 200
+                    assert static_resp.headers["Referrer-Policy"] == "no-referrer"
+
+                async with session.post(
+                    f"{base_url}/shiftypad/api/claim",
+                    data={"token": token},
+                    headers={"Origin": ORIGIN},
+                ) as bad_resp:
+                    assert bad_resp.status == 410
+                    assert token not in await bad_resp.text()
+
+        for record in caplog.records:
+            rendered = record.getMessage()
+            assert token not in rendered
+            assert cookie_val not in rendered
+    finally:
+        await runner.cleanup()

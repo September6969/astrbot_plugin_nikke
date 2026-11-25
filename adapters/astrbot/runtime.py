@@ -142,6 +142,9 @@ class AstrBotRuntimeAdapter:
             "voice", self._services.voice_application.close
         )
         self._coordinator.register_cleanup("assets", self._services.asset_manager.close)
+        solo_engine = getattr(getattr(self._services, "toolbox", None), "solo_engine", None)
+        if solo_engine and hasattr(solo_engine, "aclose"):
+            self._coordinator.register_cleanup("solo_engine", solo_engine.aclose)
         self._coordinator.register_cleanup("web", self._services.web.stop)
 
     async def _initialize_services(self) -> None:

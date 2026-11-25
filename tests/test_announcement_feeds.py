@@ -259,3 +259,78 @@ def test_schedule_catalog_uses_calendar_application_snapshot_and_maps_identity()
     fallback = ScheduleCatalog(CalendarApplication(IdentityCalendar())).items(now=now)
     assert fallback[0].entity_id == "GLOBAL:union_raid:season-1"
     assert fallback[0].url == "https://example.invalid/raid"
+
+
+@pytest.mark.asyncio
+async def test_resubscribe_during_source_outage_preserves_baseline_and_prevents_flood() -> None:
+    """回归：重复订阅时上游失败不得用空结果覆盖既有 baseline；并发调用不重复发送。"""
+    import asyncio
+    from astrbot_plugin_nikke.features.announcement.feeds import (
+        FeedCatalog,
+        FeedSubscriptions,
+        FeedUnavailable,
+    )
+
+    store, _ = (
+        build()[0],
+        None,
+    )
+
+    class ToggleNewsCatalog:
+        def __init__(self) -> None:
+            self.fail = False
+            self.rows = [item("news", "n-old", version=1)]
+
+        def items(self, *, now):
+            if self.fail:
+                raise FeedUnavailable("临时超时")
+            return tuple(self.rows)
+
+    class StaticScheduleCatalog:
+        def items(self, *, now):
+            return (item("schedule", "s-1", version=1),)
+
+    news_cat = ToggleNewsCatalog()
+    catalog = FeedCatalog({"news": news_cat, "schedule": StaticScheduleCatalog()})
+    subs = FeedSubscriptions(store, catalog, clock=lambda: datetime(2026, 9, 21, tzinfo=timezone.utc))
+    key = target("user-a")
+
+    # 1. 首次订阅建立基线，且不落盘死字段 reminder_hours。
+    subs.command(key, "订阅", "新闻")
+    saved = store.get_setting(subs.SETTING, {})["targets"][key]
+    assert "reminder_hours" not in saved
+    assert saved["baseline"] == {"news:n-old": 1}
+
+    # 2. 新闻源短暂故障期间追订“日程”，不得清空已有 news:n-old 基线。
+    news_cat.fail = True
+    subs.command(key, "订阅", "日程")
+    saved_during_outage = store.get_setting(subs.SETTING, {})["targets"][key]
+    assert saved_during_outage["baseline"]["news:n-old"] == 1
+    assert saved_during_outage["baseline"]["schedule:s-1"] == 1
+
+    # 3. 来源恢复且仅新增 n-new，旧条目 n-old 不应被重新推送；并发 dispatch_due 只发一次。
+    news_cat.fail = False
+    news_cat.rows = [item("news", "n-old", version=1), item("news", "n-new", version=1)]
+
+    async def slow_sender(conversation, actor, private, text):
+        await asyncio.sleep(0.02)
+        sent.append((conversation, actor, private, text))
+        return True
+
+    sent: list[tuple[str, str, bool, str]] = []
+    results = await asyncio.gather(
+        subs.dispatch_due(slow_sender, now=datetime(2026, 9, 21, 1, tzinfo=timezone.utc)),
+        subs.dispatch_due(slow_sender, now=datetime(2026, 9, 21, 1, tzinfo=timezone.utc)),
+    )
+    assert sum(r["succeeded"] for r in results) == 1
+    assert len(sent) == 1
+    assert "https://example.invalid/news/n-new" in sent[0][3]
+    assert "n-old" not in sent[0][3]
+    assert "n-old" not in sent[0][3]
+
+    # 4. 与 AnnouncementDelivery 使用各自独立的 SETTING，互不干扰或重复串台。
+    from astrbot_plugin_nikke.features.announcement.delivery import AnnouncementDelivery
+
+    broadcast = AnnouncementDelivery(store)
+    assert broadcast.SETTING != subs.SETTING
+    assert store.get_setting(broadcast.SETTING, {}) == {}

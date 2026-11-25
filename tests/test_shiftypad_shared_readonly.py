@@ -29,18 +29,21 @@ def directory_rows() -> tuple[dict, ...]:
         rows.append({
             "name_code": 9000 + index, "resource_id": 700 + index,
             "name_zh_cn": f"一号{index}", "name_zh_tw": f"一號{index}",
-            "rare": "SSR", "burst": "Step1", "element": "Fire",
+            "rare": "SSR", "corporation": "ELYSION", "pool_status": "ordinary_recruit",
+            "burst": "Step1", "element": "Fire",
         })
         rows.append({
             "name_code": 9100 + index, "resource_id": 800 + index,
             "name_zh_cn": f"二号{index}", "name_zh_tw": f"二號{index}",
-            "rare": "SSR", "burst": "Step2", "element": "Wind",
+            "rare": "SSR", "corporation": "MISSILIS", "pool_status": "ordinary_recruit",
+            "burst": "Step2", "element": "Wind",
         })
     for index in range(1, 16):
         rows.append({
             "name_code": 9200 + index, "resource_id": 900 + index,
             "name_zh_cn": f"三号{index}", "name_zh_tw": f"三號{index}",
-            "rare": "SSR", "burst": "Step3", "element": "Iron",
+            "rare": "SSR", "corporation": "TETRA", "pool_status": "ordinary_recruit",
+            "burst": "Step3", "element": "Iron",
         })
     return tuple(rows)
 

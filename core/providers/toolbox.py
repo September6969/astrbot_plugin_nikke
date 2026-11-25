@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -41,6 +41,11 @@ from ...features.overload_advice.advisor import (
 from ...features.solo_raid.plans import SoloRaidPlanStore
 from ...features.solo_raid.seasons import SeasonCatalog
 from ...features.sync.cost_table import SyncCostTable, SyncCostTableError
+from ...features.wishlist.advisor import (
+    PoolEligibilityEntry,
+    WishlistError,
+    load_pool_eligibility,
+)
 from ...integrations.announcement.youtube_atom import YouTubeAtomSource
 from ...integrations.nikke_api.share_profile import fetch_public_share
 from ...integrations.nikke_calc.engine import (
@@ -83,6 +88,7 @@ class ToolboxServices:
     shiftypad_readonly: Any | None = None
     public_share_enabled: bool = False
     card_loader: Callable[[str, str], Any] | None = None
+    wishlist_eligibility: Mapping[str, PoolEligibilityEntry] = field(default_factory=dict)
 
     def growth_generation(self, actor_id: str) -> int:
         """读取清空代数快照，防止清零后并发旧请求回写。"""
@@ -164,6 +170,23 @@ def _exclusions(path: Path) -> tuple[str, ...]:
     if not isinstance(payload, list):
         return ()
     return tuple(str(item).strip() for item in payload if isinstance(item, (str, int)) and str(item).strip())
+
+
+def _wishlist_eligibility(data_dir: Path, plugin_dir: Path) -> dict[str, PoolEligibilityEntry]:
+    result: dict[str, PoolEligibilityEntry] = {}
+    bundled = plugin_dir / "assets" / "data" / "wishlist_pool_eligibility.json"
+    if bundled.is_file():
+        try:
+            result.update(load_pool_eligibility(bundled))
+        except WishlistError:
+            return {}
+    override = data_dir / "wishlist-pool-eligibility.json"
+    if override.is_file():
+        try:
+            result.update(load_pool_eligibility(override))
+        except WishlistError:
+            pass
+    return result
 
 
 def _sync_table(
@@ -295,6 +318,7 @@ def create_toolbox_services(
         sync_table_error=table_error,
         wishlist_rows=rows,
         wishlist_exclusions=_exclusions(data_dir / "wishlist-exclusions.json"),
+        wishlist_eligibility=_wishlist_eligibility(data_dir, plugin_dir),
         overload_recommendations=recommendations,
         overload_recommendation_label=recommendation_label,
         overload_character_targets=character_targets,

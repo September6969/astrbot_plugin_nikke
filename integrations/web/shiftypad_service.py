@@ -311,6 +311,7 @@ class ShiftypadWebService:
         markup = (
             "<!doctype html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\">"
             "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            "<meta name=\"referrer\" content=\"no-referrer\">"
             "<link rel=\"stylesheet\" href=\"/shiftypad/static/editor.css\">"
             "<script src=\"/shiftypad/static/claim.js\" defer></script>"
             "<title>进入 ShiftyPad 只读导入</title></head><body><main>"

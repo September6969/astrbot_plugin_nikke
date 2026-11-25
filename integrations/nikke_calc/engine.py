@@ -13,13 +13,13 @@ NikkeHub 在 https://nikkehub.com/zh-tw/about 说明其单人突袭估伤使用�
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import os
 import re
 import signal
 import subprocess
 import sys
-import tempfile
 import weakref
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,6 +59,10 @@ ELEMENT_CODES = {
 
 class EngineNameMappingError(ValueError):
     """角色名称映射文件不符合合同。"""
+
+
+class _OutputLimitExceeded(RuntimeError):
+    """外部引擎流输出超过允许上限。"""
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,14 +107,14 @@ def _minimal_env() -> dict[str, str]:
     return env
 
 
-def _terminate_process_tree(proc: subprocess.Popen[Any]) -> None:
-    """终止引擎子进程及同一进程组下的派生进程。"""
-    if proc.poll() is not None:
+def _kill_process_tree_sync(pid: int) -> None:
+    """按进程组/进程树强制终止孤儿外部进程。"""
+    if pid <= 0:
         return
     try:
         if os.name == "nt":
             subprocess.run(
-                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                ["taskkill", "/F", "/T", "/PID", str(pid)],
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -119,18 +123,44 @@ def _terminate_process_tree(proc: subprocess.Popen[Any]) -> None:
                 check=False,
             )
         else:
-            os.killpg(proc.pid, signal.SIGKILL)
-    except OSError:
+            os.killpg(pid, signal.SIGKILL)
+    except (OSError, subprocess.SubprocessError):
         pass
-    if proc.poll() is None:
+
+
+async def _terminate_async_process_tree(proc: asyncio.subprocess.Process) -> None:
+    """不可打断地终止并回收外部子进程及其派生进程树。"""
+    if proc.returncode is None:
         try:
-            proc.kill()
-        except OSError:
+            await asyncio.to_thread(_kill_process_tree_sync, proc.pid)
+        except Exception:
             pass
-    try:
-        proc.wait(timeout=3.0)
-    except (subprocess.TimeoutExpired, OSError):
-        pass
+        if proc.returncode is None:
+            with contextlib.suppress(ProcessLookupError, OSError):
+                proc.kill()
+        with contextlib.suppress(asyncio.TimeoutError, OSError):
+            await asyncio.wait_for(proc.wait(), timeout=3.0)
+
+
+async def _read_stream_bounded(
+    stream: asyncio.StreamReader | None,
+    limit: int,
+    stream_name: str,
+) -> bytes:
+    """运行期间流式读取并强制限制字节上限，超限立刻中止读取。"""
+    if stream is None:
+        return b""
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await stream.read(min(65536, limit + 1))
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > limit:
+            raise _OutputLimitExceeded(f"{stream_name} 超过 {limit} 字节上限")
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 def _inspect_git_repo(engine_path: Path) -> tuple[bool, str, bool | None, str]:
@@ -206,7 +236,7 @@ def load_name_mapping(path: str | Path) -> dict[str, str]:
 
 
 class SoloRaidDamageEngine:
-    """以子进程调用外部引擎；不复制、不修改引擎代码。"""
+    """以原生异步子进程调用外部引擎，并严格绑定信号量与进程树回收生命周期。"""
 
     def __init__(
         self,
@@ -239,6 +269,8 @@ class SoloRaidDamageEngine:
         self._semaphores: weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, asyncio.Semaphore] = (
             weakref.WeakKeyDictionary()
         )
+        self._active_procs: set[asyncio.subprocess.Process] = set()
+        self._closed = False
 
     def _semaphore(self) -> asyncio.Semaphore:
         loop = asyncio.get_running_loop()
@@ -249,10 +281,27 @@ class SoloRaidDamageEngine:
         return sem
 
     @property
+    def active_process_count(self) -> int:
+        return sum(1 for proc in self._active_procs if proc.returncode is None)
+
+    async def aclose(self) -> None:
+        """插件关闭或清理阶段终止并回收全部仍在运行的外部估伤子进程。"""
+        self._closed = True
+        procs = list(self._active_procs)
+        if procs:
+            await asyncio.gather(
+                *(_terminate_async_process_tree(proc) for proc in procs),
+                return_exceptions=True,
+            )
+        self._active_procs.difference_update(proc for proc in procs if proc.returncode is not None)
+
+    @property
     def available(self) -> bool:
         return self.engine_path.is_dir() and (self.engine_path / "runner" / "sim.py").is_file() and bool(self.mapping)
 
     def reason(self) -> str:
+        if self._closed:
+            return "外部 nikke-calc 引擎已关闭"
         if not self.engine_path.is_dir():
             return f"未找到本地 nikke-calc 引擎目录：{self.engine_path}"
         if not (self.engine_path / "runner" / "sim.py").is_file():
@@ -284,8 +333,11 @@ class SoloRaidDamageEngine:
             request["enemy"] = {"code": code}
         return request
 
-    def _run_team_sync(self, team: Any, boss_element: str) -> EngineTeamEstimate:
+    async def _run_team_subprocess(self, team: Any, boss_element: str) -> EngineTeamEstimate:
+        """运行单队子进程；必须在信号量持有期外层包覆本方法以便强杀完成后再释放并发槽位。"""
         index = int(getattr(team, "index", 0) or 0)
+        if self._closed:
+            return EngineTeamEstimate(index, None, "引擎已关闭")
         if len(getattr(team, "members", ())) != 5:
             return EngineTeamEstimate(index, None, "队伍不足五人，未调用引擎")
         if not getattr(team, "chain_ok", False):
@@ -294,61 +346,88 @@ class SoloRaidDamageEngine:
             request = self._request(team, boss_element)
         except EngineNameMappingError as exc:
             return EngineTeamEstimate(index, None, str(exc))
-        self.work_dir.mkdir(parents=True, exist_ok=True)
+
         env = _minimal_env()
-        stdout_path = stderr_path = None
-        proc: subprocess.Popen[Any] | None = None
+        popen_kwargs: dict[str, Any] = {}
+        if os.name == "nt":
+            popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+        else:
+            popen_kwargs["start_new_session"] = True
+
+        proc: asyncio.subprocess.Process | None = None
         try:
-            with tempfile.NamedTemporaryFile(
-                "w+", dir=self.work_dir, suffix=".out.json", delete=False, encoding="utf-8"
-            ) as stdout_file, tempfile.NamedTemporaryFile(
-                "w+", dir=self.work_dir, suffix=".err.log", delete=False, encoding="utf-8"
-            ) as stderr_file:
-                stdout_path, stderr_path = Path(stdout_file.name), Path(stderr_file.name)
-                popen_kwargs: dict[str, Any] = {}
-                if os.name == "nt":
-                    popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
-                else:
-                    popen_kwargs["start_new_session"] = True
-                proc = subprocess.Popen(
-                    [
-                        self.python, "-m", "runner.sim", "--request",
-                        json.dumps(request, ensure_ascii=False), "--json",
-                    ],
-                    cwd=str(self.engine_path),
-                    env=env,
-                    stdin=subprocess.DEVNULL,
-                    stdout=stdout_file,
-                    stderr=stderr_file,
-                    **popen_kwargs,
+            proc = await asyncio.create_subprocess_exec(
+                self.python,
+                "-m",
+                "runner.sim",
+                "--request",
+                json.dumps(request, ensure_ascii=False),
+                "--json",
+                cwd=str(self.engine_path),
+                env=env,
+                stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                **popen_kwargs,
+            )
+            self._active_procs.add(proc)
+            if self._closed:
+                await asyncio.shield(_terminate_async_process_tree(proc))
+                return EngineTeamEstimate(index, None, "引擎已关闭")
+
+            async def _collect() -> tuple[bytes, bytes, int]:
+                out_bytes, err_bytes = await asyncio.gather(
+                    _read_stream_bounded(proc.stdout, MAX_OUTPUT_BYTES, "stdout"),
+                    _read_stream_bounded(proc.stderr, MAX_OUTPUT_BYTES, "stderr"),
                 )
-                returncode = proc.wait(timeout=self.timeout)
-            if stdout_path.stat().st_size > MAX_OUTPUT_BYTES:
-                return EngineTeamEstimate(index, None, "引擎输出超过大小上限")
-            text = stdout_path.read_text(encoding="utf-8", errors="replace").strip()
-            if returncode != 0:
-                with stderr_path.open("rb") as handle:
-                    err_raw = handle.read(MAX_OUTPUT_BYTES)
-                detail = _engine_error(text) or err_raw.decode("utf-8", errors="replace").strip()[:200]
-                return EngineTeamEstimate(index, None, detail or "引擎返回非零状态")
-        except subprocess.TimeoutExpired:
+                rc = await proc.wait()
+                return out_bytes, err_bytes, rc
+
+            stdout_bytes, stderr_bytes, returncode = await asyncio.wait_for(
+                _collect(), timeout=self.timeout
+            )
+        except _OutputLimitExceeded:
             if proc is not None:
-                _terminate_process_tree(proc)
+                await asyncio.shield(_terminate_async_process_tree(proc))
+            return EngineTeamEstimate(index, None, "引擎输出超过大小上限")
+        except asyncio.TimeoutError:
+            if proc is not None:
+                await asyncio.shield(_terminate_async_process_tree(proc))
             return EngineTeamEstimate(index, None, "引擎计算超时")
+        except asyncio.CancelledError:
+            if proc is not None:
+                await asyncio.shield(_terminate_async_process_tree(proc))
+            raise
         except OSError as exc:
             return EngineTeamEstimate(index, None, f"引擎无法启动（{type(exc).__name__}）")
         finally:
-            if proc is not None and proc.poll() is None:
-                _terminate_process_tree(proc)
-            for path in (stdout_path, stderr_path):
-                if path is not None:
-                    path.unlink(missing_ok=True)
-        try:
-            payload = json.loads(text.splitlines()[-1])
-        except (ValueError, IndexError):
+            if proc is not None:
+                if proc.returncode is None:
+                    await asyncio.shield(_terminate_async_process_tree(proc))
+                transport = getattr(proc, "_transport", None)
+                if transport is not None:
+                    with contextlib.suppress(Exception):
+                        transport.close()
+                self._active_procs.discard(proc)
+
+        text = stdout_bytes.decode("utf-8", errors="replace").strip()
+        if returncode != 0:
+            detail = _engine_error(text) or stderr_bytes.decode("utf-8", errors="replace").strip()[:200]
+            return EngineTeamEstimate(index, None, detail or "引擎返回非零状态")
+        lines = [line for line in text.splitlines() if line.strip()]
+        if not lines:
             return EngineTeamEstimate(index, None, "引擎输出不是 JSON")
-        if isinstance(payload.get("error"), Mapping):
-            return EngineTeamEstimate(index, None, str(payload["error"].get("message") or "引擎输入错误"))
+        try:
+            payload = json.loads(lines[-1])
+        except ValueError:
+            return EngineTeamEstimate(index, None, "引擎输出不是 JSON")
+        if not isinstance(payload, Mapping):
+            return EngineTeamEstimate(index, None, "引擎输出不是 JSON 对象")
+        error_obj = payload.get("error")
+        if isinstance(error_obj, Mapping):
+            return EngineTeamEstimate(index, None, str(error_obj.get("message") or "引擎输入错误"))
+        if error_obj not in (None, "", False):
+            return EngineTeamEstimate(index, None, "引擎返回异常错误字段")
         damage = payload.get("total_damage")
         if isinstance(damage, bool) or not isinstance(damage, int) or damage < 0:
             return EngineTeamEstimate(index, None, "引擎结果缺少有效 total_damage")
@@ -359,11 +438,10 @@ class SoloRaidDamageEngine:
         dirty = evaluator.get("dirty") if isinstance(evaluator.get("dirty"), bool) else None
         return EngineTeamEstimate(index, damage, "", commit, dirty)
 
-    async def _run_team(self, team: Any, boss_element: str) -> EngineTeamEstimate:
-        return await asyncio.to_thread(self._run_team_sync, team, boss_element)
-
     async def estimate(self, teams: Sequence[Any], *, boss_element: str = "") -> EngineEstimate:
         """逐队估算；任一步失败都明确记录，不把未知当成 0 或猜测值。"""
+        if self._closed:
+            return EngineEstimate(False, reason="外部 nikke-calc 引擎已关闭")
         if not self.available:
             return EngineEstimate(False, reason=self.reason())
 
@@ -392,23 +470,32 @@ class SoloRaidDamageEngine:
         semaphore = self._semaphore()
 
         async def limited(team: Any) -> EngineTeamEstimate:
+            # 信号量必须持续到 _run_team_subprocess 的 finally（含进程树强杀与 wait）全部完成。
             async with semaphore:
-                return await self._run_team(team, boss_element)
+                return await self._run_team_subprocess(team, boss_element)
 
-        try:
-            results = tuple(
-                await asyncio.wait_for(
-                    asyncio.gather(*(limited(team) for team in teams)),
-                    timeout=self.batch_timeout,
-                )
-            )
-        except asyncio.TimeoutError:
-            return EngineEstimate(
-                False,
-                commit=git_commit if has_git else "",
-                dirty=git_dirty if has_git else None,
-                reason="外部 nikke-calc 批次计算超时，已中止本轮估算。",
-            )
+        tasks = [asyncio.create_task(limited(team)) for team in teams]
+        if not tasks:
+            results: tuple[EngineTeamEstimate, ...] = ()
+        else:
+            try:
+                _, pending = await asyncio.wait(tasks, timeout=self.batch_timeout)
+                if pending:
+                    for task in pending:
+                        task.cancel()
+                    await asyncio.gather(*pending, return_exceptions=True)
+                    return EngineEstimate(
+                        False,
+                        commit=git_commit if has_git else "",
+                        dirty=git_dirty if has_git else None,
+                        reason="外部 nikke-calc 批次计算超时，已中止本轮估算。",
+                    )
+                results = tuple(task.result() for task in tasks)
+            except asyncio.CancelledError:
+                for task in tasks:
+                    task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
+                raise
 
         successes = [item for item in results if item.damage is not None]
         if has_git:
@@ -429,12 +516,16 @@ class SoloRaidDamageEngine:
                 dirty = None
 
         verified = commit == PINNED_COMMIT and dirty is False
-        label = f"nikke-calc {commit[:10] if commit else '未核验'}（{LICENSE}，外部本地引擎）"
+        label = (
+            f"nikke-calc {commit[:10]}（{LICENSE}，外部本地引擎）"
+            if verified
+            else f"nikke-calc 未核验版本（{LICENSE}，非可信固定基线）"
+        )
         total = sum(item.damage for item in successes if item.damage is not None) if len(successes) == len(results) and results else None
         errors = [f"第 {item.index} 队：{item.error}" for item in results if item.error]
         pinned = f"{ENGINE_REPO}@{PINNED_COMMIT}"
         actual = f"{ENGINE_REPO}@{commit}" if commit else f"{ENGINE_REPO}@unverified"
-        version_note = "" if verified else "（引擎版本与固定基线未完成核验或存在未提交改动）"
+        version_note = "" if verified else "（版本与固定基线未完成核验或存在未提交改动，结果不可作为可信基线对比）"
         note = (
             f"由外部 {actual}（{LICENSE}）{version_note}计算；"
             f"使用引擎默认敌人与已知赛季属性（基准 {pinned}），未提供官方防御/HP 精确参数，因此不是官方伤害数值。"
@@ -453,11 +544,16 @@ class SoloRaidDamageEngine:
 
 
 def _engine_error(text: str) -> str:
-    try:
-        payload = json.loads(text.splitlines()[-1])
-    except (ValueError, IndexError):
+    lines = [line for line in text.splitlines() if line.strip()]
+    if not lines:
         return ""
-    error = payload.get("error") if isinstance(payload, Mapping) else None
+    try:
+        payload = json.loads(lines[-1])
+    except ValueError:
+        return ""
+    if not isinstance(payload, Mapping):
+        return ""
+    error = payload.get("error")
     if isinstance(error, Mapping):
         return str(error.get("message") or error.get("type") or "")
     return ""
@@ -471,6 +567,7 @@ __all__ = [
     "EngineNameMappingError",
     "EngineTeamEstimate",
     "LICENSE",
+    "MAX_OUTPUT_BYTES",
     "PINNED_COMMIT",
     "SoloRaidDamageEngine",
     "load_name_mapping",

@@ -13,6 +13,9 @@ class DeploymentConfigTests(unittest.TestCase):
         caddyfile = (ROOT / "deploy" / "Caddyfile").read_text(encoding="utf-8")
 
         self.assertIn("reverse_proxy astrbot:6210", caddyfile)
+        self.assertIn("log_skip /arena/open/*", caddyfile)
+        self.assertIn("log_skip /shiftypad/*", caddyfile)
+        self.assertIn("log_skip /api/shiftypad/*", caddyfile)
         self.assertNotRegex(caddyfile, r"(?m)^\s*log\s*\{")
         for header in (
             'Strict-Transport-Security "max-age=31536000; includeSubDomains"',

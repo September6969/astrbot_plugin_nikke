@@ -262,10 +262,17 @@ class FeedSubscriptions(AnnouncementDelivery):
         now = self._clock()
         if not isinstance(now, datetime) or now.tzinfo is None:
             raise ValueError("订阅时钟必须包含明确时区")
+        items_ok = True
         try:
             items = self.catalog.items(now=now)
         except Exception:
             items = ()
+            items_ok = False
+        unavailable_kinds = (
+            set(getattr(self.catalog, "last_unavailable", {}).keys())
+            if items_ok
+            else set(KINDS)
+        )
         state = self._state()
         existing = state["targets"].get(target, {})
         if existing.get("enabled"):
@@ -273,17 +280,27 @@ class FeedSubscriptions(AnnouncementDelivery):
             merged = list(dict.fromkeys([*current, *selected]))
         else:
             merged = list(selected)
+        prev_baseline = (
+            existing.get("baseline")
+            if isinstance(existing.get("baseline"), Mapping)
+            else {}
+        )
+        next_baseline: dict[str, int] = {}
+        # 重订阅或单源短暂故障时保留既有 baseline，防止来源恢复后误把历史条目全量重推。
+        for key, ver in prev_baseline.items():
+            kind_prefix = str(key).split(":", 1)[0]
+            if kind_prefix in merged and isinstance(ver, int) and not isinstance(ver, bool):
+                next_baseline[str(key)] = ver
+        for item in items:
+            if item.kind in merged and item.kind not in unavailable_kinds:
+                item_key = f"{item.kind}:{item.entity_id}"
+                if item.version > next_baseline.get(item_key, 0):
+                    next_baseline[item_key] = item.version
         state["targets"][target] = {
             "enabled": True,
             "kinds": merged,
-            "subscribed_at": now.astimezone(timezone.utc).isoformat(),
-            # 订阅时的现有条目作为基线，避免把历史新闻一次性推给新订阅者。
-            "baseline": {
-                f"{item.kind}:{item.entity_id}": item.version
-                for item in items
-                if item.kind in merged
-            },
-            "reminder_hours": [24],
+            "subscribed_at": existing.get("subscribed_at") or now.astimezone(timezone.utc).isoformat(),
+            "baseline": next_baseline,
         }
         self.store.set_setting(self.SETTING, state)
         return (

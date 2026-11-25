@@ -177,6 +177,7 @@ class CalcToolsCommandHandler(ToolboxDomainHandler):
             owned,
             strategy,
             exclusions=self.services.wishlist_exclusions,
+            eligibility=getattr(self.services, "wishlist_eligibility", None),
         )
         text = render_wishlist(result)
         return (source_note + "\n" + text) if source_note else text
