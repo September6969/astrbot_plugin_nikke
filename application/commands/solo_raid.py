@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import replace
 from datetime import datetime
 from typing import Any
@@ -179,18 +179,39 @@ class SoloRaidCommandHandler(ToolboxDomainHandler):
             estimate_note=result.note,
         )
 
+    @staticmethod
+    def _enrich_rows_with_directory(
+        rows: list[Mapping[str, Any]], directory: Mapping[str, Mapping[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """用内置角色目录补齐账号名单缺失的中文名、爆裂阶段、属性与 resource_id。"""
+        enriched: list[dict[str, Any]] = []
+        for row in rows:
+            if not isinstance(row, Mapping):
+                continue
+            code = str(row.get("name_code") or row.get("character_key") or "").strip()
+            meta = directory.get(code, {}) if code else {}
+            merged = dict(row)
+            for field in ("burst", "element", "name_zh_cn", "name_zh_tw", "name_cn", "resource_id"):
+                current = merged.get(field)
+                if (current is None or str(current).strip() == "") and meta.get(field) not in (None, ""):
+                    merged[field] = meta[field]
+            enriched.append(merged)
+        return enriched
+
     async def _solo_members(self, context: CommandContext, value: str):
         token = value.strip()
         if token and token not in {"账号", "绑定", "my"}:
             return parse_members(token), "角色来源：手工输入角色池。"
 
+        directory = self._character_directory()
         account = self._account(context)
         if account is not None:
             try:
                 rows = await self._load_roster(account)
             except Exception:
                 rows = []
-            members = members_from_roster(rows) if rows else ()
+            enriched_rows = self._enrich_rows_with_directory(rows, directory) if rows else []
+            members = members_from_roster(enriched_rows) if enriched_rows else ()
             if members:
                 return members, "角色来源：已绑定登录账号角色库。"
 

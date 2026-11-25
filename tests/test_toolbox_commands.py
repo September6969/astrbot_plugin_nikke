@@ -447,3 +447,57 @@ async def test_solo_raid_command_uses_local_mit_engine_when_configured() -> None
     assert "MIT" in text
     assert "不是官方伤害数值" in text
     assert "无法估伤" not in text
+
+
+@pytest.mark.asyncio
+async def test_solo_raid_bound_roster_without_burst_is_enriched_from_directory() -> None:
+    """真实 GetUserCharacters 只含 name_code，不自带 burst/element/中文名；编组必须从目录补全。"""
+    from pathlib import Path
+
+    store = MemoryStore()
+
+    raw_roster = [
+        {"name_code": f"C{i:02d}", "combat": 1000 - i}
+        for i in range(1, 26)
+    ]
+    grid_rows = tuple(
+        {
+            "name_code": f"C{i:02d}",
+            "name_zh_cn": f"妮姬{i}",
+            "burst": "Step1" if i <= 5 else ("Step2" if i <= 10 else "Step3"),
+            "element": "Fire",
+            "resource_id": f"{100 + i}",
+        }
+        for i in range(1, 26)
+    )
+
+    services = toolbox_services(store)
+    services.account_reader = SimpleNamespace(
+        get_account=lambda q: {"qq_id": str(q), "game_uid": "88", "area_id": "81"}
+    )
+    services.grid_rows = grid_rows
+    services.roster_loader = lambda _acct: _awaitable(raw_roster)
+
+    engine_path = Path(__file__).resolve().parent / "fixtures" / "fake_nikke_calc"
+    mapping = {f"C{i:02d}": f"R{i}" for i in range(1, 26)}
+    services.solo_engine = SoloRaidDamageEngine(
+        engine_path,
+        mapping,
+        python=sys.executable,
+        timeout=30,
+        work_dir=Path("output") / ".engine-runs",
+    )
+    plugin = make_plugin_shell()
+    plugin.config = {}
+    plugin.handlers.toolbox = ToolboxCommandHandler(services)
+
+    text = await route(plugin, "单人突袭", "编组", "账号")
+    assert "角色来源：已绑定登录账号角色库。" in text
+    assert "妮姬1" in text
+    assert "爆裂链：全部通过" in text
+    assert "nikke-calc" in text
+    assert "（?）" not in text
+
+
+async def _awaitable(value: Any) -> Any:
+    return value
