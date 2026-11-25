@@ -204,6 +204,39 @@ async def test_workspace_lazy_bootstrap_self_bind_and_five_team_build(tmp_path: 
         assert arena_resp.status == 200
         assert "/arena/open/fake_1008611_three" in (await arena_resp.json())["url"]
 
+        # 安全校验：错误 Origin 或缺少 CSRF 必须被拒绝
+        bad_origin = await client.post(
+            "/workspace/api/profile/load",
+            cookies={WORKSPACE_COOKIE: cookie},
+            headers={"Origin": "https://evil.example", WORKSPACE_CSRF_HEADER: csrf},
+        )
+        assert bad_origin.status == 403
+        bad_csrf = await client.post(
+            "/workspace/api/profile/load",
+            cookies={WORKSPACE_COOKIE: cookie},
+            headers={"Origin": SITE_ORIGIN, WORKSPACE_CSRF_HEADER: "invalid-csrf"},
+        )
+        assert bad_csrf.status == 403
+
+        # 账号隔离：用户 B 的工作台会话不可读取用户 A 的 bind_status 或 solo_plans
+        token_b = ws.create_link("2009999").rsplit("/", 1)[-1]
+        claim_b = await client.post(
+            "/workspace/api/claim",
+            data={"token": token_b},
+            headers={"Origin": SITE_ORIGIN, "Accept": "application/json"},
+        )
+        assert claim_b.status == 200
+        cookie_b = claim_b.cookies[WORKSPACE_COOKIE].value
+        boot_b = await (await client.get("/workspace/api/bootstrap", cookies={WORKSPACE_COOKIE: cookie_b})).json()
+        assert boot_b["binding"]["bound"] is False
+        cross_bind = await client.get(
+            f"/workspace/api/bind/status?token={bind_data['token']}",
+            cookies={WORKSPACE_COOKIE: cookie_b},
+        )
+        assert cross_bind.status == 404
+        sr_ctx_b = await (await client.get("/workspace/api/solo-raid/context", cookies={WORKSPACE_COOKIE: cookie_b})).json()
+        assert sr_ctx_b["saved_plan"] is None
+
 
 @pytest.mark.asyncio
 async def test_workspace_share_preview_redacts_pii_and_blocks_unknown_retry(tmp_path: Path) -> None:

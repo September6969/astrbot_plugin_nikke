@@ -16,6 +16,9 @@ class DeploymentConfigTests(unittest.TestCase):
         self.assertIn("log_skip /arena/open/*", caddyfile)
         self.assertIn("log_skip /shiftypad/*", caddyfile)
         self.assertIn("log_skip /api/shiftypad/*", caddyfile)
+        self.assertIn("log_skip /bind/*", caddyfile)
+        self.assertIn("log_skip /hall/open/*", caddyfile)
+        self.assertIn("log_skip /workspace/open/*", caddyfile)
         self.assertNotRegex(caddyfile, r"(?m)^\s*log\s*\{")
         for header in (
             'Strict-Transport-Security "max-age=31536000; includeSubDomains"',
