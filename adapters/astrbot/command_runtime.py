@@ -42,20 +42,13 @@ class NikkeCommandRuntime:
         return bool(event.is_admin())
 
     async def _dispatch(self, event: AstrMessageEvent, handler: Any, **parameters: str):
-        async for result in self._adapters.command.dispatch(
-            event, handler, **parameters
-        ):
+        async for result in self._adapters.command.dispatch(event, handler, **parameters):
             yield result
 
-    async def _account(
-        self, event: AstrMessageEvent, operation: str, **parameters: str
-    ):
+    async def _account(self, event: AstrMessageEvent, operation: str, **parameters: str):
         async for result in self._dispatch(
-            event,
-            self._handlers.account,
-            operation=operation,
-            unified_msg_origin=str(getattr(event, "unified_msg_origin", "") or ""),
-            **parameters,
+            event, self._handlers.account, operation=operation,
+            unified_msg_origin=str(getattr(event, "unified_msg_origin", "") or ""), **parameters,
         ):
             yield result
 
@@ -87,9 +80,7 @@ class NikkeCommandRuntime:
                 yield result
             return
         if key in {"tower", "塔层"}:
-            async for result in self._dispatch(
-                event, self._handlers.tower, tower=arg1, floor=arg2
-            ):
+            async for result in self._dispatch(event, self._handlers.tower, tower=arg1, floor=arg2):
                 yield result
             return
         if key in {"voice", "语音"}:
@@ -97,9 +88,12 @@ class NikkeCommandRuntime:
                 yield result
             return
         if key in {"tarot", "塔罗"}:
-            async for result in self._dispatch(
-                event, self._handlers.tarot, action=arg1, value=arg2
-            ):
+            async for result in self._dispatch(event, self._handlers.tarot, action=arg1, value=arg2):
+                yield result
+            return
+        portal_mode = "hall" if key in {"大厅", "hall"} else ("workspace" if key in {"工作台", "workspace", "workbench"} else "")
+        if portal_mode and self._handlers.portal is not None:
+            async for result in self._dispatch(event, self._handlers.portal, mode=portal_mode):
                 yield result
             return
         if key in {"", "帮助", "help"}:

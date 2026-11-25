@@ -59,3 +59,40 @@ class AstrBotCommandAdapter:
                 yield event.image_result(message.path_or_url)
             else:
                 raise TypeError(f"不支持的命令结果消息类型：{type(message).__name__}")
+
+    @staticmethod
+    def is_pure_bot_mention(event: AstrMessageEvent) -> bool:
+        """识别无正文的纯 @机器人 消息；有正文或属于 notice 事件时返回 False。"""
+        message_obj = getattr(event, "message_obj", None)
+        raw_msg = getattr(message_obj, "raw_message", None)
+        if isinstance(raw_msg, dict) and raw_msg.get("post_type") == "notice":
+            return False
+        text = str(getattr(event, "message_str", "") or "").strip()
+        if text:
+            return False
+        if bool(getattr(event, "is_at_or_wake_command", False)):
+            return True
+        segments = getattr(message_obj, "message", None) or ()
+        self_id = str(getattr(message_obj, "self_id", "") or "")
+        saw_self_at = False
+        for seg in segments:
+            seg_type = getattr(seg, "type", "")
+            if str(seg_type).lower().endswith("plain") or hasattr(seg, "text"):
+                if str(getattr(seg, "text", "") or "").strip():
+                    return False
+            qq = str(getattr(seg, "qq", "") or "")
+            if qq and (not self_id or qq == self_id):
+                saw_self_at = True
+        return saw_self_at
+
+    async def dispatch_pure_mention(
+        self,
+        event: AstrMessageEvent,
+        handler: CommandHandler | None,
+        *,
+        closing: bool = False,
+    ) -> AsyncIterator[Any]:
+        if closing or handler is None or not self.is_pure_bot_mention(event):
+            return
+        async for result in self.dispatch(event, handler, mode="mention"):
+            yield result

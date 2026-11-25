@@ -4,6 +4,9 @@ nikke.irises777.xyz {
     log_skip /arena/open/*
     log_skip /shiftypad/*
     log_skip /api/shiftypad/*
+    log_skip /bind/*
+    log_skip /hall/open/*
+    log_skip /workspace/open/*
 
     # 示例默认关闭访问日志。启用站点访问日志时仍须跳过竞技场与 ShiftyPad 临时令牌路径。
 

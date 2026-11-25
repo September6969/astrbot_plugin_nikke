@@ -58,6 +58,6 @@ def home(version: str, *, include_admin: bool, arena: bool = False) -> str:
     lines = [f"NIKKE 综合助手 {version}", "", "发送 /妮姬 帮助 分类名 查看命令："]
     lines.extend(f"{item.name} — {item.summary}" for item in CATEGORIES
                  if (item.name != "管理" or include_admin) and (item.name != "竞技场" or arena))
-    lines.extend(("", "快捷：/妮姬 日程｜/妮姬 攻略｜/妮姬 我的",
+    lines.extend(("", "快捷：/妮姬 大厅｜/妮姬 工作台｜/妮姬 日程",
                   "新手：/妮姬 帮助 详解 入门"))
     return "\n".join(lines)

@@ -53,6 +53,7 @@ from .providers.daily import create_daily_runner, create_community_automation
 from ..features.daily.actions import CommunityTaskService
 from ..features.account.renewal import SessionRenewalService
 from .providers.feedback import create_feedback_manager
+from .providers.portal import PortalResources, create_portal_resources
 from .providers.profile import create_profile_resources
 from .providers.raid import create_raid_resources
 from .providers.shared import create_shared_resources
@@ -108,6 +109,7 @@ class ServiceContainer:
     toolbox: ToolboxServices | None = None
     shiftypad_web: Any | None = None
     shiftypad_readonly: Any | None = None
+    portal: PortalResources | None = None
 
 
 def create_container(
@@ -216,6 +218,28 @@ def create_container(
         )
         web.add_route_installer(arena_web.mount)
 
+    portal = create_portal_resources(
+        site_origin=web.site_origin,
+        store=store,
+        config=config or {},
+        calendar=announcements.calendar_application,
+        announcements=announcements.application,
+        guide=guide_application,
+        tower=tower_application,
+        tarot=tarot,
+        toolbox=toolbox,
+        profile_application=profile.application,
+        character_application=character.application,
+        arena_application=arena_application,
+        arena_web=arena_web,
+        voice_application=voice_application,
+        grid_resolver=character.identity,
+        directory_provider=directory_provider,
+        clock=clock,
+    )
+    web.add_route_installer(portal.hall.mount)
+    web.add_route_installer(portal.workspace.mount)
+
     return ServiceContainer(
         plugin_dir=plugin_dir,
         data_dir=data_dir,
@@ -228,6 +252,7 @@ def create_container(
         toolbox=toolbox,
         shiftypad_web=shiftypad.web,
         shiftypad_readonly=shiftypad.readonly,
+        portal=portal,
         character_application=character.application,
         character_stat_resources=character.stat_resources,
         client=client,

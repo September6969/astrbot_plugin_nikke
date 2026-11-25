@@ -35,6 +35,7 @@ from .application.commands.calendar import CalendarCommandHandler
 from .application.commands.daily import DailyCommandHandler
 from .application.commands.community_automation import CommunityAutomationHandler
 from .application.commands.guide import GuideCommandHandler
+from .application.commands.portal import PortalCommandHandler
 from .application.commands.profile import ProfileCommandHandler
 from .application.commands.raid import RaidCommandHandler
 from .application.commands.tarot import TarotCommandHandler
@@ -209,12 +210,18 @@ class NikkePlugin(Star):
                 self.services.arena_application, enabled=True, web_routes=self.services.arena_web,
                 render=self.presentation.try_t2i,
             ) if self.services.arena_application is not None else None,
+            portal=PortalCommandHandler(
+                portal_links=self.services.portal,
+                public_base_url=self.public_base_url,
+                allow_group_workspace=bool(self.config.get("allow_group_bind", False)),
+            ),
         )
         self._command_runtime = NikkeCommandRuntime(
             adapters=self.adapters,
             handlers=self.handlers,
             config=self.config,
         )
+        self.runtime.attach_portal_bridge(self.presentation)
         self.runtime.start()
 
     def _apply_directory(self, directory: list[dict[str, Any]]) -> None:
@@ -267,10 +274,12 @@ class NikkePlugin(Star):
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_nikke_poke(self, event: AstrMessageEvent):
-        """保留全消息事件注册并委托给语音事件适配器。"""
-        async for result in self.adapters.voice.on_poke(
-            event,
-            closing=getattr(getattr(self, "runtime", None), "closing", False),
+        """保留全消息事件注册，委托语音戳一戳与纯 @机器人 入口。"""
+        closing = getattr(getattr(self, "runtime", None), "closing", False)
+        async for result in self.adapters.voice.on_poke(event, closing=closing):
+            yield result
+        async for result in self.adapters.command.dispatch_pure_mention(
+            event, self.handlers.portal, closing=closing
         ):
             yield result
 
